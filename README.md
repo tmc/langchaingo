@@ -14,6 +14,8 @@ This is the Go language implementation of LangChain.
 
 ## 🎉 Examples
 
+See [./examples](./examples) for example usage.
+
 ```go
 import (
 	"github.com/tmc/langchaingo/llms/openai"
