@@ -28,19 +28,18 @@ func (o *LLM) Call(prompt string) (string, error) {
 	if len(r) == 0 {
 		return "", ErrEmptyResponse
 	}
-	return r[0], nil
+	return r[0].Text, nil
 }
 
-func (o *LLM) Generate(prompts []string) ([]string, error) {
-	// TODO(tmc): support multiple prompts
+func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
 	result, err := o.client.CreateCompletion(context.TODO(), &openaiclient.CompletionRequest{
 		Prompt: prompts[0],
 	})
 	if err != nil {
 		return nil, err
 	}
-	return []string{
-		result.Text,
+	return []*llms.Generation{
+		{Text: result.Text},
 	}, nil
 }
 
