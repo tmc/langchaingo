@@ -35,7 +35,7 @@ func (o *LLM) Call(prompt string) (string, error) {
 
 func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
 	result, err := o.client.RunInference(context.TODO(), &huggingfaceclient.InferenceRequest{
-		RepoID: "gpt2",
+		RepoID: "google/flan-t5-xl",
 		Prompt: prompts[0],
 		Task:   huggingfaceclient.InferenceTaskTextGeneration,
 	})

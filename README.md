@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	completion, err := llm.Call("What would be a good company name a company that makes colorful socks?")
+	completion, err := llm.Call("What would be a good company name for a company that makes colorful socks?")
 	if err != nil {
 		log.Fatal(err)
 	}

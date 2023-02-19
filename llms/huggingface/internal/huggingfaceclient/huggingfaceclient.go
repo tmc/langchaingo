@@ -36,7 +36,7 @@ type InferenceResponse struct {
 
 func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
 	resp, err := c.runInference(ctx, &inferencePayload{
-		Model:  "gpt2",
+		Model:  request.RepoID,
 		Inputs: request.Prompt,
 	})
 	if err != nil {
@@ -46,8 +46,8 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		return nil, ErrEmptyResponse
 	}
 	text := resp[0].Text
-	// Strip the prompt from the response:
-	text = text[len(request.Prompt)+1:]
+	// TODO: Add response cleaning based on Model.
+	// e.g., for gpt2, text = text[len(request.Prompt)+1:]
 	return &InferenceResponse{
 		Text: text,
 	}, nil
