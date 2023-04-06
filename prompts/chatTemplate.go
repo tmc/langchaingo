@@ -8,11 +8,7 @@ import (
 )
 
 /*
-The Message struct does the work of BaseMessageStringPromptTemplate and all sub classes in the typeScript version.
-
-On the naming choice
- - Template is removed from the name because the struct does not implement the Template interface.
- - Prompt is removed from the name to remove redundancy when accessing from other packages (prompts.MessagePrompt)
+The Message struct has the responsibilities of BaseMessageStringPromptTemplate and all sub classes in the typeScript version.
 */
 
 type Message struct {

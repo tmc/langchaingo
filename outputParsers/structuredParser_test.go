@@ -8,7 +8,7 @@ import (
 )
 
 func TestStructuredOutputParserFromNameAndDescription(t *testing.T) {
-	parser := outputParsers.NewStructuredOutputParserFromNameAndDescription(map[string]string{"url": "A link to the resource"})
+	parser := outputParsers.NewStructuredFromNameAndDescription(map[string]string{"url": "A link to the resource"})
 
 	instruction := parser.GetFormatInstructions()
 	expectedInstruction := "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"url\": string // A link to the resource\n}\n```"

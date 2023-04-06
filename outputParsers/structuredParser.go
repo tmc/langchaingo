@@ -12,7 +12,7 @@ type StructuredOutputParser struct {
 	schema string
 }
 
-func NewStructuredOutputParserFromNameAndDescription(schemaValues map[string]string) StructuredOutputParser {
+func NewStructuredFromNameAndDescription(schemaValues map[string]string) StructuredOutputParser {
 	s := StructuredOutputParser{
 		schema: "",
 	}
