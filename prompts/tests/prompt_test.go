@@ -73,9 +73,8 @@ var basicPromptTests = []basicPromptTest{
 }
 
 func TestCreatingAndUsingPromptTemplates(t *testing.T) {
-	for i, test := range basicPromptTests {
-		t.Logf("Running test %v", i+1)
-		template, err := prompts.NewTemplate(test.template, test.inputVariables)
+	for _, test := range basicPromptTests {
+		template, err := prompts.NewPromptTemplate(test.template, test.inputVariables)
 		if err != nil {
 			if !test.expectsError {
 				t.Errorf("Unexpected error %s", err.Error())
@@ -102,7 +101,7 @@ func TestCreatingAndUsingPromptTemplates(t *testing.T) {
 type promptWithOptionsTest struct {
 	template          string
 	inputVariables    []string
-	options           []prompts.Option
+	options           []prompts.PromptTemplateOption
 	optionDescription string
 	inputValues       map[string]any
 	expectedFormatted string
@@ -114,7 +113,7 @@ var promptWithOptionsTests = []promptWithOptionsTest{
 		template:          "foo {var}",
 		inputVariables:    []string{"var"},
 		inputValues:       map[string]any{"var": "value"},
-		options:           []prompts.Option{prompts.WithTemplateFormat("foo")},
+		options:           []prompts.PromptTemplateOption{prompts.WithTemplateFormatPrompt("foo")},
 		optionDescription: `WithTemplateFormat("foo")`,
 		expectedFormatted: "",
 		expectsError:      true,
@@ -124,7 +123,7 @@ var promptWithOptionsTests = []promptWithOptionsTest{
 		template:          "{par} foo {var}",
 		inputVariables:    []string{"var"},
 		inputValues:       map[string]any{"var": "value"},
-		options:           []prompts.Option{prompts.WithPartialVariables(map[string]string{"par": "bar"})},
+		options:           []prompts.PromptTemplateOption{prompts.WithPartialVariablesPrompt(map[string]any{"par": "bar"})},
 		optionDescription: `WithPartialVariables(map[string]any{"par": "bar"})`,
 		expectedFormatted: "bar foo value",
 		expectsError:      false,
@@ -134,7 +133,7 @@ var promptWithOptionsTests = []promptWithOptionsTest{
 		template:          "{par} foo {var}",
 		inputVariables:    []string{"var"},
 		inputValues:       map[string]any{"var": "value", "par": "foo"},
-		options:           []prompts.Option{prompts.WithPartialVariables(map[string]string{"par": "bar"})},
+		options:           []prompts.PromptTemplateOption{prompts.WithPartialVariablesPrompt(map[string]any{"par": "bar"})},
 		optionDescription: `WithPartialVariables(map[string]any{"par": "bar"})`,
 		expectedFormatted: "foo foo value",
 		expectsError:      false,
@@ -142,9 +141,8 @@ var promptWithOptionsTests = []promptWithOptionsTest{
 }
 
 func TestCreatingAndUsingPromptTemplatesWithOptions(t *testing.T) {
-	for i, test := range promptWithOptionsTests {
-		t.Logf("Running test %v", i+1)
-		template, err := prompts.NewTemplate(test.template, test.inputVariables, test.options...)
+	for _, test := range promptWithOptionsTests {
+		template, err := prompts.NewPromptTemplate(test.template, test.inputVariables, test.options...)
 		if err != nil {
 			if !test.expectsError {
 				t.Errorf("Unexpected error %s", err.Error())

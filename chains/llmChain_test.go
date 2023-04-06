@@ -14,7 +14,7 @@ func TestLLMChain(t *testing.T) {
 		t.Errorf("Unexpected error creating openAI model: %e", err)
 	}
 
-	prompt, err := prompts.NewTemplate("What is the capital of {country}", []string{"country"})
+	prompt, err := prompts.NewPromptTemplate("What is the capital of {country}", []string{"country"})
 	if err != nil {
 		t.Errorf("Unexpected error creating prompt template: %e", err)
 	}

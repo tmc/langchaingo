@@ -1,46 +1,22 @@
 package memory
 
-type ChatMessage interface {
-	getType() string
-	getText() string
-}
-
-type AiChatMessage struct {
-	Text string
-}
-
-func (m AiChatMessage) getType() string { return "ai" }
-func (m AiChatMessage) getText() string { return m.Text }
-
-type HumanChatMessage struct {
-	Text string
-}
-
-func (m HumanChatMessage) getType() string { return "ai" }
-func (m HumanChatMessage) getText() string { return m.Text }
-
-type SystemChatMessage struct {
-	Text string
-}
-
-func (m SystemChatMessage) getType() string { return "system" }
-func (m SystemChatMessage) getText() string { return m.Text }
+import "github.com/tmc/langchaingo/schema"
 
 type ChatMessageHistory struct {
-	messages []ChatMessage
+	messages []schema.ChatMessage
 }
 
-func (h *ChatMessageHistory) GetMessages() []ChatMessage { return h.messages }
+func (h *ChatMessageHistory) GetMessages() []schema.ChatMessage { return h.messages }
 func (h *ChatMessageHistory) AddAiMessage(text string) {
-	h.messages = append(h.messages, AiChatMessage{Text: text})
+	h.messages = append(h.messages, schema.AiChatMessage{Text: text})
 }
 func (h *ChatMessageHistory) AddUserMessage(text string) {
-	h.messages = append(h.messages, HumanChatMessage{Text: text})
+	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
 }
 
 func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory {
 	h := &ChatMessageHistory{
-		messages: make([]ChatMessage, 0),
+		messages: make([]schema.ChatMessage, 0),
 	}
 
 	for _, option := range options {
@@ -53,7 +29,7 @@ func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory 
 type NewChatMessageOption func(m *ChatMessageHistory)
 
 // Option for NewChatMessageHistory adding previous messages to the history
-func WithPreviousMessages(previousMessages []ChatMessage) NewChatMessageOption {
+func WithPreviousMessages(previousMessages []schema.ChatMessage) NewChatMessageOption {
 	return func(m *ChatMessageHistory) {
 		m.messages = append(m.messages, previousMessages...)
 	}

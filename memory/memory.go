@@ -3,6 +3,8 @@ package memory
 import (
 	"fmt"
 	"strings"
+
+	"github.com/tmc/langchaingo/schema"
 )
 
 type Memory interface {
@@ -32,7 +34,7 @@ func getInputValue(inputValues InputValues, inputKey string) (string, error) {
 		return "", fmt.Errorf(`input values %v have 0 keys `, inputValues)
 	}
 
-	return "", fmt.Errorf(`input values %v have multiple keys. Specify input key when creating the memory or remove keys`, inputValues)
+	return "", fmt.Errorf(`input values %v have multiple keys. Specify input key when creating the buffer memory or remove keys`, inputValues)
 }
 
 func getInputValueReturnToString(inputValue interface{}, inputValues InputValues, inputKey string) (string, error) {
@@ -44,26 +46,35 @@ func getInputValueReturnToString(inputValue interface{}, inputValues InputValues
 	}
 }
 
-func getBufferString(messages []ChatMessage, humanPrefix, aiPrefix string) string {
+func getBufferString(messages []schema.ChatMessage, humanPrefix, aiPrefix string) string {
 	stringMessages := make([]string, 0)
 
 	for i := 0; i < len(messages); i++ {
 		role := ""
 
 		switch message := messages[i].(type) {
-		case AiChatMessage:
+		case schema.AiChatMessage:
 			role = aiPrefix
 			break
-		case HumanChatMessage:
+		case schema.HumanChatMessage:
 			role = humanPrefix
 			break
 		default:
-			role = message.getType()
+			role = message.GetType()
 
 		}
 
-		stringMessages = append(stringMessages, fmt.Sprintf("%s: %s", role, messages[i].getText()))
+		stringMessages = append(stringMessages, fmt.Sprintf("%s: %s", role, messages[i].GetText()))
 	}
 
 	return strings.Join(stringMessages[:], "\n")
+}
+
+type EmptyMemory struct{}
+
+func (m EmptyMemory) LoadMemoryVariables(InputValues) (InputValues, error) { return InputValues{}, nil }
+func (m EmptyMemory) SaveContext(InputValues, InputValues) error           { return nil }
+
+func NewEmptyMemory() EmptyMemory {
+	return EmptyMemory{}
 }

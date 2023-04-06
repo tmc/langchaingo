@@ -8,20 +8,20 @@ import (
 )
 
 type LLMChain struct {
-	prompt       prompts.PromptTemplate
+	prompt       prompts.Template
 	llm          llms.LLM
 	OutputKey    string
 	Memory       memory.Memory
 	OutputParser outputParsers.OutputParser
 }
 
-func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
 		OutputKey:    "text",
 		OutputParser: outputParsers.NewEmptyOutputParser(),
-		Memory:       memory.NewBufferMemory(),
+		Memory:       memory.NewEmptyMemory(),
 	}
 
 	return chain

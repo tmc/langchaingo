@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/memory"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func TestBufferMemory(t *testing.T) {
@@ -45,7 +46,7 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 		t.Errorf("Unexpected error: %e", err)
 	}
 
-	expected1 := memory.InputValues{"history": []memory.ChatMessage{}}
+	expected1 := memory.InputValues{"history": []schema.ChatMessage{}}
 
 	if !reflect.DeepEqual(result1, expected1) {
 		t.Errorf("Empty buffer memory with return messages true loaded memory variables not equal expected. Got: %v, Wanted: %v", result1, expected1)
@@ -62,9 +63,9 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 	}
 
 	expectedChatHistory := memory.NewChatMessageHistory(
-		memory.WithPreviousMessages([]memory.ChatMessage{
-			memory.HumanChatMessage{Text: "bar"},
-			memory.AiChatMessage{"foo"},
+		memory.WithPreviousMessages([]schema.ChatMessage{
+			schema.HumanChatMessage{Text: "bar"},
+			schema.AiChatMessage{Text: "foo"},
 		}),
 	)
 
@@ -78,9 +79,9 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	m := memory.NewBufferMemory()
 	m.ChatHistory = memory.NewChatMessageHistory(
-		memory.WithPreviousMessages([]memory.ChatMessage{
-			memory.HumanChatMessage{Text: "bar"},
-			memory.AiChatMessage{"foo"},
+		memory.WithPreviousMessages([]schema.ChatMessage{
+			schema.HumanChatMessage{Text: "bar"},
+			schema.AiChatMessage{Text: "foo"},
 		}),
 	)
 	result, err := m.LoadMemoryVariables(memory.InputValues{})
