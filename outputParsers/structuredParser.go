@@ -10,16 +10,19 @@ import (
 
 type StructuredOutputParser struct {
 	schema string
+	fields []string
 }
 
 func NewStructuredFromNameAndDescription(schemaValues map[string]string) StructuredOutputParser {
 	s := StructuredOutputParser{
 		schema: "",
+		fields: make([]string, 0),
 	}
 
 	keyValueJSONString := ""
 	for name, description := range schemaValues {
 		keyValueJSONString += fmt.Sprintf("\t\"%s\": string // %s\n", name, description)
+		s.fields = append(s.fields, name)
 	}
 
 	s.schema = "{\n" + keyValueJSONString + "}\n"
@@ -48,6 +51,17 @@ func (p StructuredOutputParser) Parse(text string) (any, error) {
 	err := json.Unmarshal([]byte(jsonString), &parsed)
 	if err != nil {
 		return parsed, OutputParserException{Reason: fmt.Sprintf("Failed to parse. Text: %s. Error: %e", text, err)}
+	}
+
+	missingFields := make([]string, 0)
+	for _, field := range p.fields {
+		if _, exists := parsed[field]; !exists {
+			missingFields = append(missingFields, field)
+		}
+	}
+
+	if len(missingFields) > 0 {
+		return parsed, OutputParserException{Reason: fmt.Sprintf("The following fields are missing from the output: %v", missingFields)}
 	}
 
 	return parsed, nil
