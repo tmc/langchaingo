@@ -38,5 +38,5 @@ func (l TextLoader) LoadAndSplit(splitter textSplitters.TextSplitter) ([]schema.
 		return []schema.Document{}, err
 	}
 
-	return splitter.SplitDocuments(docs)
+	return textSplitters.SplitDocuments(splitter, docs)
 }
