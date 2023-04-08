@@ -43,6 +43,22 @@ func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
 	}, nil
 }
 
+func (o *LLM) CreateEmbedding(input []string) ([]float64, error) {
+	embeddings, err := o.client.CreateEmbedding(context.TODO(), &openaiclient.EmbeddingRequest{
+		Input: input,
+	})
+
+	if len(embeddings) == 0 {
+		return []float64{}, ErrEmptyResponse
+	}
+
+	if err != nil {
+		return []float64{}, err
+	}
+
+	return embeddings[0], nil
+}
+
 func New() (*LLM, error) {
 	token := os.Getenv(tokenEnvVarName)
 	if token == "" {
