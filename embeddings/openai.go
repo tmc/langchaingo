@@ -27,7 +27,7 @@ func NewOpenAI() (OpenAI, error) {
 }
 
 func (e OpenAI) EmbedDocuments(texts []string) ([][]float64, error) {
-	subPrompts := make([][]string, 0)
+	removedNewLines := make([]string, 0)
 
 	for i := 0; i < len(texts); i++ {
 		curText := texts[i]
@@ -35,17 +35,19 @@ func (e OpenAI) EmbedDocuments(texts []string) ([][]float64, error) {
 			curText = strings.ReplaceAll(curText, "\n", " ")
 		}
 
-		subPrompts = append(subPrompts, chunkArray(texts, e.BatchSize)...)
+		removedNewLines = append(removedNewLines, curText)
 	}
+
+	subPrompts := chunkArray(removedNewLines, e.BatchSize)
 
 	embeddings := make([][]float64, 0)
 	for i := 0; i < len(subPrompts); i++ {
-		curEmbedding, err := e.client.CreateEmbedding(subPrompts[i])
+		curEmbeddings, err := e.client.CreateEmbedding(subPrompts[i])
 		if err != nil {
 			return [][]float64{}, err
 		}
 
-		embeddings = append(embeddings, curEmbedding)
+		embeddings = append(embeddings, curEmbeddings...)
 	}
 
 	return embeddings, nil
@@ -56,7 +58,12 @@ func (e OpenAI) EmbedQuery(text string) ([]float64, error) {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
-	return e.client.CreateEmbedding([]string{text})
+	embeddings, err := e.client.CreateEmbedding([]string{text})
+	if err != nil {
+		return []float64{}, err
+	}
+
+	return embeddings[0], nil
 }
 
 func chunkArray[T any](arr []T, chunkSize int) [][]T {
