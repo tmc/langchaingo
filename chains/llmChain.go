@@ -31,10 +31,6 @@ func (c LLMChain) GetMemory() memory.Memory {
 	return c.Memory
 }
 
-func (c LLMChain) GetChainType() string {
-	return "llm_chain"
-}
-
 func (c LLMChain) Call(values ChainValues) (ChainValues, error) {
 	//TODO: stop
 

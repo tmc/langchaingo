@@ -1,6 +1,7 @@
 package chains_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/tmc/langchaingo/chains"
@@ -12,11 +13,13 @@ func TestLLMChain(t *testing.T) {
 	model, err := openai.New()
 	if err != nil {
 		t.Errorf("Unexpected error creating openAI model: %e", err)
+		return
 	}
 
 	prompt, err := prompts.NewPromptTemplate("What is the capital of {country}", []string{"country"})
 	if err != nil {
 		t.Errorf("Unexpected error creating prompt template: %e", err)
+		return
 	}
 
 	chain := chains.NewLLMChain(model, prompt)
@@ -24,12 +27,19 @@ func TestLLMChain(t *testing.T) {
 	resultChainValue, err := chains.Call(chain, map[string]any{"country": "France"})
 	if err != nil {
 		t.Errorf("Unexpected error calling llm chain: %e", err)
+		return
 	}
 
-	result, ok := resultChainValue["text"]
+	resultAny, ok := resultChainValue["text"]
 	if !ok {
 		t.Error("No value in chain value text field")
+		return
 	}
 
-	t.Logf("Expected result Paris. Result gotten %s", result)
+	result, ok := resultAny.(string)
+	result = strings.TrimSpace(result)
+
+	if result != "Paris." {
+		t.Errorf("Expected to get Paris. Got %s", result)
+	}
 }

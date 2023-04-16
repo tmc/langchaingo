@@ -83,8 +83,6 @@ type whoamiResponse struct {
 }
 
 func (c Client) whoami() (string, error) {
-	fmt.Println("encioremtnen, ", c.environment)
-
 	req, err := http.NewRequestWithContext(c.context, "GET", fmt.Sprintf("https://controller.%s.pinecone.io/actions/whoami", c.environment), nil)
 	if err != nil {
 		return "", err

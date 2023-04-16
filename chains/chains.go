@@ -5,8 +5,7 @@ import "github.com/tmc/langchaingo/memory"
 type ChainValues map[string]any
 
 type Chain interface {
-	Call(ChainValues) (ChainValues, error) //
-	GetChainType() string
+	Call(ChainValues) (ChainValues, error)
 	GetMemory() memory.Memory
 }
 

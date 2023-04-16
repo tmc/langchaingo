@@ -1,6 +1,8 @@
 package textSplitters
 
-import "strings"
+import (
+	"strings"
+)
 
 type RecursiveCharactersSplitter struct {
 	Separators   []string
@@ -40,13 +42,15 @@ func (s RecursiveCharactersSplitter) SplitText(text string) ([]string, error) {
 	goodSplits := make([]string, 0)
 
 	for _, split := range splits {
+
 		if len(split) < s.ChunkSize {
 			goodSplits = append(goodSplits, split)
 			continue
 		}
 
 		if len(goodSplits) > 0 {
-			mergedText := MergeSplits(splits, separator, s.ChunkSize, s.ChunkOverlap)
+			mergedText := MergeSplits(goodSplits, separator, s.ChunkSize, s.ChunkOverlap)
+
 			finalChunks = append(finalChunks, mergedText...)
 			goodSplits = make([]string, 0)
 		}

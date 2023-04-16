@@ -1,4 +1,4 @@
-package vectorStores
+package pinecone
 
 import (
 	"context"
@@ -24,7 +24,7 @@ type Pinecone struct {
 }
 
 // Environment for project is found in the pinecone console. Index name must not be larger then 45 characters.
-func NewPinecone(embeddings embeddings.Embeddings, environment, indexName, nameSpace string) (Pinecone, error) {
+func NewPinecone(embeddings embeddings.Embeddings, environment, indexName, nameSpace string, dimensions int) (Pinecone, error) {
 	token := os.Getenv(pineconeEnvVrName)
 	if token == "" {
 		return Pinecone{}, ErrMissingToken
@@ -34,6 +34,7 @@ func NewPinecone(embeddings embeddings.Embeddings, environment, indexName, nameS
 		pineconeClient.WithApiKey(token),
 		pineconeClient.WithEnvironment(environment),
 		pineconeClient.WithIndexName(indexName),
+		pineconeClient.WithDimensions(dimensions),
 	)
 
 	return Pinecone{
@@ -115,4 +116,20 @@ func (p Pinecone) SimilaritySearch(query string, numDocuments int) ([]schema.Doc
 	}
 
 	return resultDocuments, nil
+}
+
+func (p Pinecone) ToRetriever(numDocs int) PineconeRetriever {
+	return PineconeRetriever{
+		p:       p,
+		numDocs: numDocs,
+	}
+}
+
+type PineconeRetriever struct {
+	p       Pinecone
+	numDocs int
+}
+
+func (r PineconeRetriever) GetRelevantDocuments(query string) ([]schema.Document, error) {
+	return r.p.SimilaritySearch(query, r.numDocs)
 }
