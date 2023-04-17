@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/documentLoaders"
 	"github.com/tmc/langchaingo/embeddings"
@@ -21,6 +22,12 @@ var dimensions = 1536
 var numDocsInReq = 5
 
 func main() {
+	// load .env with joho/godotenv
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
 	// We start with splitting the input text file into smaller documents
 	splitter := textSplitters.NewRecursiveCharactersSplitter()
 	docs, err := documentLoaders.NewTextLoaderFromFile(textFile).LoadAndSplit(splitter)
@@ -41,7 +48,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	p.AddDocuments(docs, []string{})
+	err = p.AddDocuments(docs, []string{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	llm, err := openai.New()
 	if err != nil {

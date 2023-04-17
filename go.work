@@ -4,3 +4,4 @@ use ./
 use examples/basic-llm-example
 use examples/structured-output-parser-example
 use examples/llm-chain-example
+use examples/QA-example
