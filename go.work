@@ -3,3 +3,4 @@ go 1.20
 use ./
 use examples/basic-llm-example
 use examples/structured-output-parser-example
+use examples/llm-chain-example

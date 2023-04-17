@@ -4,12 +4,19 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
 
 func main() {
+	// load .env with joho/godotenv
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
 	// We can construct an LLMChain from a PromptTemplate and an LLM.
 	model, err := openai.New()
 	if err != nil {
