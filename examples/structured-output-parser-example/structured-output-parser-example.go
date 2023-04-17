@@ -9,7 +9,7 @@ import (
 	"github.com/tmc/langchaingo/prompts"
 )
 
-//The structured output parser can be used when you want to return multiple fields.
+// The structured output parser can be used when you want to return multiple fields.
 
 func main() {
 	// With a `StructuredOutputParser` we can define a schema for the output.
