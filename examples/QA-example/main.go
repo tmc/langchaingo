@@ -36,12 +36,12 @@ func main() {
 
 	// We also need to create a vector database to store these embeddings for queries. Here is how it's done using pinecone
 	// Because pinecone takes time to initialize indexes, this should be an index that already exists
-	p, err := pinecone.NewPinecone(embedding, pineconeEnv, indexName, textFile, dimensions)
+	p, err := pinecone.NewPinecone(embedding, pineconeEnv, indexName, dimensions)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	p.AddDocuments(docs, []string{})
+	p.AddDocuments(docs, []string{}, textFile)
 
 	llm, err := openai.New()
 	if err != nil {
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	// Now we can create a RetrievalQAChain using the pinecone index and a llm
-	chain := chains.NewRetrievalQAChainFromLLM(llm, p.ToRetriever(numDocsInReq))
+	chain := chains.NewRetrievalQAChainFromLLM(llm, p.ToRetriever(numDocsInReq, textFile))
 
 	for {
 		fmt.Print("Enter query: ")
