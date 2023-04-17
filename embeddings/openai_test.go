@@ -9,7 +9,7 @@ import (
 func TestOpenaiEmbeddings(t *testing.T) {
 	e, err := embeddings.NewOpenAI()
 	if err != nil {
-		t.Errorf("Unexpected error creating openai embeddings struct: %e", err)
+		t.Errorf("Unexpected error creating openai embeddingsVar struct: %e", err)
 	}
 
 	_, err = e.EmbedQuery("Hello world!")
@@ -17,12 +17,12 @@ func TestOpenaiEmbeddings(t *testing.T) {
 		t.Errorf("Unexpected error embed query: %e", err)
 	}
 
-	embeddings, err := e.EmbedDocuments([]string{"Hello world", "The world is ending", "bye bye"})
+	embeddingsVar, err := e.EmbedDocuments([]string{"Hello world", "The world is ending", "bye bye"})
 	if err != nil {
 		t.Errorf("Unexpected error embed document: %e", err)
 	}
 
-	if len(embeddings) != 3 {
-		t.Errorf("Unexpected number of embeddings. Got: %v. Expect 3", len(embeddings))
+	if len(embeddingsVar) != 3 {
+		t.Errorf("Unexpected number of embeddingsVar. Got: %v. Expect 3", len(embeddingsVar))
 	}
 }
