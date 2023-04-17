@@ -11,6 +11,9 @@ import (
 func main() {
 	// load .env with joho/godotenv
 	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
 
 	llm, err := openai.New()
 	if err != nil {
