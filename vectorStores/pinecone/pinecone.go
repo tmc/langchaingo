@@ -19,12 +19,11 @@ var ErrMissingToken = errors.New("missing the Pinecone API key, set it in the PI
 type Pinecone struct {
 	client     pineconeClient.Client
 	embeddings embeddings.Embeddings
-	nameSpace  string
 	textKey    string
 }
 
 // Environment for project is found in the pinecone console. Index name must not be larger then 45 characters.
-func NewPinecone(embeddings embeddings.Embeddings, environment, indexName, nameSpace string, dimensions int) (Pinecone, error) {
+func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string, dimensions int) (Pinecone, error) {
 	token := os.Getenv(pineconeEnvVrName)
 	if token == "" {
 		return Pinecone{}, ErrMissingToken
@@ -40,13 +39,12 @@ func NewPinecone(embeddings embeddings.Embeddings, environment, indexName, nameS
 	return Pinecone{
 		client:     p,
 		embeddings: embeddings,
-		nameSpace:  nameSpace,
 		textKey:    "text",
 	}, err
 }
 
 // If the length of the documentIds slice is 0 uuids will be used as ids.
-func (p Pinecone) AddDocuments(documents []schema.Document, documentIds []string) error {
+func (p Pinecone) AddDocuments(documents []schema.Document, documentIds []string, nameSpace string) error {
 	if len(documentIds) == 0 {
 		for i := 0; i < len(documents); i++ {
 			documentIds = append(documentIds, uuid.New().String())
@@ -83,16 +81,16 @@ func (p Pinecone) AddDocuments(documents []schema.Document, documentIds []string
 		})
 	}
 
-	return p.client.Upsert(context.Background(), vectors, p.nameSpace)
+	return p.client.Upsert(context.Background(), vectors, nameSpace)
 }
 
-func (p Pinecone) SimilaritySearch(query string, numDocuments int) ([]schema.Document, error) {
+func (p Pinecone) SimilaritySearch(query string, numDocuments int, nameSpace string) ([]schema.Document, error) {
 	vector, err := p.embeddings.EmbedQuery(query)
 	if err != nil {
 		return []schema.Document{}, err
 	}
 
-	queryResponse, err := p.client.Query(context.Background(), vector, numDocuments, p.nameSpace)
+	queryResponse, err := p.client.Query(context.Background(), vector, numDocuments, nameSpace)
 	if err != nil {
 		return []schema.Document{}, err
 	}
@@ -118,7 +116,7 @@ func (p Pinecone) SimilaritySearch(query string, numDocuments int) ([]schema.Doc
 	return resultDocuments, nil
 }
 
-func (p Pinecone) ToRetriever(numDocs int) PineconeRetriever {
+func (p Pinecone) ToRetriever(numDocs int, nameSpace string) PineconeRetriever {
 	return PineconeRetriever{
 		p:       p,
 		numDocs: numDocs,
@@ -126,10 +124,11 @@ func (p Pinecone) ToRetriever(numDocs int) PineconeRetriever {
 }
 
 type PineconeRetriever struct {
-	p       Pinecone
-	numDocs int
+	p         Pinecone
+	numDocs   int
+	nameSpace string
 }
 
 func (r PineconeRetriever) GetRelevantDocuments(query string) ([]schema.Document, error) {
-	return r.p.SimilaritySearch(query, r.numDocs)
+	return r.p.SimilaritySearch(query, r.numDocs, r.nameSpace)
 }
