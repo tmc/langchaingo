@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/tmc/langchaingo/llms"
@@ -41,6 +42,26 @@ func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
 	return []*llms.Generation{
 		{Text: result.Text},
 	}, nil
+}
+
+func (o *LLM) CreateEmbedding(inputTexts []string) ([][]float64, error) {
+	embeddings, err := o.client.CreateEmbedding(context.TODO(), &openaiclient.EmbeddingRequest{
+		Input: inputTexts,
+	})
+
+	if len(embeddings) == 0 {
+		return [][]float64{}, ErrEmptyResponse
+	}
+
+	if err != nil {
+		return [][]float64{}, err
+	}
+
+	if len(inputTexts) != len(embeddings) {
+		return embeddings, fmt.Errorf("Number of input texts does not match number of vectors gotten")
+	}
+
+	return embeddings, nil
 }
 
 func New() (*LLM, error) {
