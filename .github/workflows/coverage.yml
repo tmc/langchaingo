@@ -47,8 +47,8 @@ jobs:
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name 'GitHub Action'
           git add README.md
           git commit -m "chore: Updated coverage badge."
 
