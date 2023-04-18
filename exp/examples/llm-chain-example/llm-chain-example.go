@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	chainA := chains.NewLLMChain(model, prompt)
+	chainA := chains.NewLLMChain(model, prompt, nil)
 
 	// We call chains using the chain.Call function, not the Call method
 	resA, err := chains.Call(chainA, map[string]any{"product": "fake food"})
