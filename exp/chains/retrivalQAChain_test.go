@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"os"
 	"testing"
 
 	"github.com/tmc/langchaingo/exp/schema"
@@ -17,6 +18,9 @@ func (r testRetriever) GetRelevantDocuments(query string) ([]schema.Document, er
 }
 
 func TestRetrievalQAChain(t *testing.T) {
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 	r := testRetriever{}
 	llm, err := openai.New()
 	if err != nil {

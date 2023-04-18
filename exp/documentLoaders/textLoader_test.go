@@ -6,11 +6,11 @@ import (
 )
 
 func TestTextLoader(t *testing.T) {
-	loader := NewTextLoaderFromFile("./test.txt")
+	loader := NewTextLoaderFromFile("./testdata/test.txt")
 
 	docs, err := loader.Load()
 	if err != nil {
-		t.Errorf("Unexpected error loading from text file: %e", err)
+		t.Fatal(err)
 	}
 
 	if len(docs) != 1 {
@@ -23,7 +23,7 @@ func TestTextLoader(t *testing.T) {
 	}
 
 	expectedMetadata := map[string]any{
-		"source": "./test.txt",
+		"source": "./testdata/test.txt",
 	}
 
 	if !reflect.DeepEqual(docs[0].Metadata, expectedMetadata) {
