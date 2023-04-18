@@ -16,6 +16,10 @@ type Agent struct {
 	Prompt prompts.PromptTemplate
 }
 
+type AgentInterface interface {
+	Run(input string) string
+}
+
 func FromLlmAndTools(llm llms.LLM, chain chains.Chain, tools []tools.Tool, prompt prompts.PromptTemplate) Agent {
 	return Agent{
 		llm,
@@ -59,8 +63,4 @@ func GetFinalAnswer(text string) string {
 	text = text[startIndex:]
 	trimmed := strings.Join(strings.Fields(text), " ")
 	return trimmed
-}
-
-type AgentInterface interface {
-	Run(input string) string
 }
