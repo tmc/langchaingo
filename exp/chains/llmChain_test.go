@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -9,24 +10,24 @@ import (
 )
 
 func TestLLMChain(t *testing.T) {
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 	model, err := openai.New()
 	if err != nil {
-		t.Errorf("Unexpected error creating openAI model: %e", err)
-		return
+		t.Fatal(err)
 	}
 
 	prompt, err := prompts.NewPromptTemplate("What is the capital of {country}", []string{"country"})
 	if err != nil {
-		t.Errorf("Unexpected error creating prompt template: %e", err)
-		return
+		t.Fatal(err)
 	}
 
 	chain := NewLLMChain(model, prompt)
 
 	resultChainValue, err := Call(chain, map[string]any{"country": "France"})
 	if err != nil {
-		t.Errorf("Unexpected error calling llm chain: %e", err)
-		return
+		t.Fatal(err)
 	}
 
 	resultAny, ok := resultChainValue["text"]

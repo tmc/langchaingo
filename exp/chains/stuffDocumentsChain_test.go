@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"os"
 	"testing"
 
 	"github.com/tmc/langchaingo/exp/prompts"
@@ -9,6 +10,9 @@ import (
 )
 
 func TestStuffDocumentsChain(t *testing.T) {
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 	model, err := openai.New()
 	if err != nil {
 		t.Errorf("Unexpected error %s", err)
