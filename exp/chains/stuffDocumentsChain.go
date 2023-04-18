@@ -60,10 +60,11 @@ var DefaultQAPrompt, _ = prompts.NewPromptTemplate(
 )
 
 // TODO: add conditional after chat model is added
+//TODO: add stopwords to function param is needed
 var QAPromptSelector = prompts.NewConditionalPromptSelector(DefaultQAPrompt, []prompts.Conditional{})
 
 func loadQAStuffChain(llm llms.LLM) StuffDocumentsChain {
 	prompt := QAPromptSelector.GetPrompt(llm)
-	llmChain := NewLLMChain(llm, prompt)
+	llmChain := NewLLMChain(llm, prompt, nil)
 	return NewStuffDocumentsChain(llmChain)
 }
