@@ -1,14 +1,12 @@
-package documentLoaders_test
+package documentLoaders
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/documentLoaders"
 )
 
 func TestTextLoader(t *testing.T) {
-	loader := documentLoaders.NewTextLoaderFromFile("./test.txt")
+	loader := NewTextLoaderFromFile("./test.txt")
 
 	docs, err := loader.Load()
 	if err != nil {

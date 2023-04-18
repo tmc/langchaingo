@@ -1,13 +1,11 @@
-package embeddings_test
+package embeddings
 
 import (
 	"testing"
-
-	"github.com/tmc/langchaingo/embeddings"
 )
 
 func TestOpenaiEmbeddings(t *testing.T) {
-	e, err := embeddings.NewOpenAI()
+	e, err := NewOpenAI()
 	if err != nil {
 		t.Errorf("Unexpected error creating openai embeddings struct: %e", err)
 	}
