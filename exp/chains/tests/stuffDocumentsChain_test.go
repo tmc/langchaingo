@@ -25,7 +25,7 @@ func TestStuffDocumentsChain(t *testing.T) {
 		return
 	}
 
-	llmChain := chains.NewLLMChain(model, prompt)
+	llmChain := chains.NewLLMChain(model, prompt, nil)
 	chain := chains.NewStuffDocumentsChain(llmChain)
 
 	docs := []schema.Document{

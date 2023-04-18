@@ -22,7 +22,7 @@ func TestLLMChain(t *testing.T) {
 		return
 	}
 
-	chain := chains.NewLLMChain(model, prompt)
+	chain := chains.NewLLMChain(model, prompt, nil)
 
 	resultChainValue, err := chains.Call(chain, map[string]any{"country": "France"})
 	if err != nil {
