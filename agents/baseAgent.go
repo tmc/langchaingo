@@ -5,27 +5,24 @@ import (
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
 )
 
 type Agent struct {
-	Llm    llms.LLM
-	Chain  chains.Chain
-	Tools  []tools.Tool
-	Prompt prompts.PromptTemplate
+	Llm   llms.LLM
+	Chain chains.Chain
+	Tools []tools.Tool
 }
 
 type AgentInterface interface {
 	Run(input string) string
 }
 
-func FromLlmAndTools(llm llms.LLM, chain chains.Chain, tools []tools.Tool, prompt prompts.PromptTemplate) Agent {
+func FromLlmAndTools(llm llms.LLM, chain chains.Chain, tools []tools.Tool) Agent {
 	return Agent{
 		llm,
 		chain,
 		tools,
-		prompt,
 	}
 }
 
