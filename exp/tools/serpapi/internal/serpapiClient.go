@@ -12,9 +12,11 @@ import (
 )
 
 var ErrMissingToken = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
+var NoGoodResult = "No good search result found"
 
 type SerpapiClient struct {
-	params url.Values
+	apiKey  string
+	baseURL string
 }
 
 func New() (*SerpapiClient, error) {
@@ -23,23 +25,23 @@ func New() (*SerpapiClient, error) {
 		return nil, ErrMissingToken
 	}
 
-	params := url.Values{}
-	params.Add("google_domain", "google.com")
-	params.Add("gl", "us")
-	params.Add("hl", "en")
-	params.Add("api_key", apiKey)
 	return &SerpapiClient{
-			params: params,
+			apiKey:  apiKey,
+			baseURL: "https://serpapi.com/search",
 		},
 		nil
 }
 
 func (s *SerpapiClient) Search(query string) (string, error) {
-	baseURL := "https://serpapi.com/search"
+	var params url.Values
 	query = strings.ReplaceAll(query, " ", "+")
-	s.params.Set("q", query)
+	params.Set("q", query)
+	params.Add("google_domain", "google.com")
+	params.Add("gl", "us")
+	params.Add("hl", "en")
+	params.Add("api_key", s.apiKey)
 
-	reqURL := fmt.Sprintf("%s?%s", baseURL, s.params.Encode())
+	reqURL := fmt.Sprintf("%s?%s", s.baseURL, params.Encode())
 	resp, err := http.Get(reqURL)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
@@ -104,5 +106,5 @@ func processResponse(res map[string]interface{}) (string, error) {
 		}
 	}
 
-	return "No good search result found", nil
+	return NoGoodResult, nil
 }
