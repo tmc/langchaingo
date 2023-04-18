@@ -5,11 +5,11 @@ import "github.com/tmc/langchaingo/exp/memory"
 type ChainValues map[string]any
 
 type Chain interface {
-	Call(ChainValues) (ChainValues, error)
+	Call(cv ChainValues, stop []string) (ChainValues, error)
 	GetMemory() memory.Memory
 }
 
-func Call(c Chain, inputValues map[string]any) (ChainValues, error) {
+func Call(c Chain, inputValues map[string]any, stop []string) (ChainValues, error) {
 	fullValues := make(ChainValues, 0)
 
 	for key, value := range inputValues {
@@ -25,7 +25,7 @@ func Call(c Chain, inputValues map[string]any) (ChainValues, error) {
 		fullValues[key] = value
 	}
 
-	outputValues, err := c.Call(fullValues)
+	outputValues, err := c.Call(fullValues, stop)
 	if err != nil {
 		return ChainValues{}, err
 	}

@@ -25,7 +25,7 @@ func NewStuffDocumentsChain(llmChain LLMChain) StuffDocumentsChain {
 	}
 }
 
-func (c StuffDocumentsChain) Call(values ChainValues) (ChainValues, error) {
+func (c StuffDocumentsChain) Call(values ChainValues, stop []string) (ChainValues, error) {
 	docsAny, ok := values[c.InputKey]
 	if !ok {
 		return ChainValues{}, fmt.Errorf("Document key %s not found", c.InputKey)
@@ -47,7 +47,7 @@ func (c StuffDocumentsChain) Call(values ChainValues) (ChainValues, error) {
 	}
 
 	inputValues[c.DocumentVariableName] = text
-	return Call(c.llmChain, inputValues)
+	return Call(c.llmChain, inputValues, stop)
 }
 
 func (c StuffDocumentsChain) GetMemory() memory.Memory {
