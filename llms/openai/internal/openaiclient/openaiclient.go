@@ -21,8 +21,9 @@ func New(token string) (*Client, error) {
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Prompt    string `json:"prompt"`
-	MaxTokens int    `json:"max_tokens"`
+	Prompt    string   `json:"prompt"`
+	MaxTokens int      `json:"max_tokens"`
+	Stop      []string `json:"stop,omitempty"`
 }
 
 // Completion is a completion.
@@ -36,6 +37,7 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 		Model:     defaultModel,
 		Prompt:    r.Prompt,
 		MaxTokens: r.MaxTokens,
+		Stop:      r.Stop,
 	})
 	if err != nil {
 		return nil, err
