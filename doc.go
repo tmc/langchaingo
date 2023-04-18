@@ -1,2 +1,2 @@
-// Package langchaingo supports the Go Programming language.
+// Package langchaingo implements the Go language version of the langchain project.
 package langchaingo
