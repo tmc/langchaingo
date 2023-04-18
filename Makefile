@@ -18,14 +18,15 @@ tools:
 	go get github.com/matm/gocov-html
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 	go get github.com/gordonklaus/ineffassign
-	go get honnef.co/go/tools/cmd/staticcheck
 	go get github.com/client9/misspell/cmd/misspell
 
-test:  test_ineffassign    \
-       test_misspell       \
-       test_govet          \
-       test_gotest_race    \
-       test_gotest_cover
+test: test_golint         \
+      test_ineffassign    \
+      test_misspell       \
+      test_govet          \
+      test_gosec          \
+      test_gotest_race    \
+      test_gotest_cover
 
 fmt:
 	go fmt ./...
@@ -39,6 +40,11 @@ coverage:
 	    open $(CURDIR)/coverage.html; \
 	  fi; \
 	fi
+
+test_golint:
+	@echo "test: golint"
+	@golint *.go || (echo "golint failed"; exit 1)
+	@echo "test: ok"
 
 test_ineffassign:
 	@echo "test: ineffassign"
