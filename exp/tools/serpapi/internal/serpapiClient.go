@@ -62,7 +62,6 @@ func (s *SerpapiClient) Search(query string) (string, error) {
 	}
 
 	return processResponse(result)
-
 }
 
 func processResponse(res map[string]interface{}) (string, error) {
@@ -80,7 +79,6 @@ func processResponse(res map[string]interface{}) (string, error) {
 			return answer, nil
 		}
 		if snippet, ok := answerBox["snippet"].(string); ok {
-
 			return snippet, nil
 		}
 		if snippetHighlightedWords, ok := answerBox["snippet_highlighted_words"].([]interface{}); ok && len(snippetHighlightedWords) > 0 {
