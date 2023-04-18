@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 
 	"github.com/tmc/langchaingo/llms/openai"
@@ -12,6 +13,12 @@ import (
 // The structured output parser can be used when you want to return multiple fields.
 
 func main() {
+	// load .env with joho/godotenv
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Error loading .env file")
+	}
+
 	// With a `StructuredOutputParser` we can define a schema for the output.
 	parser := outputParsers.NewStructuredFromNameAndDescription(map[string]string{
 		"answer": "answer to the user's question",
