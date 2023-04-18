@@ -1,18 +1,16 @@
-package documentLoaders_test
+package documentLoaders
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/documentLoaders"
 )
 
 func TestTextLoader(t *testing.T) {
-	loader := documentLoaders.NewTextLoaderFromFile("./test.txt")
+	loader := NewTextLoaderFromFile("./testdata/test.txt")
 
 	docs, err := loader.Load()
 	if err != nil {
-		t.Errorf("Unexpected error loading from text file: %e", err)
+		t.Fatal(err)
 	}
 
 	if len(docs) != 1 {
@@ -25,7 +23,7 @@ func TestTextLoader(t *testing.T) {
 	}
 
 	expectedMetadata := map[string]any{
-		"source": "./test.txt",
+		"source": "./testdata/test.txt",
 	}
 
 	if !reflect.DeepEqual(docs[0].Metadata, expectedMetadata) {
