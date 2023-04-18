@@ -3,8 +3,8 @@ package llms
 
 // LLM is a langchaingo Large Language Model.
 type LLM interface {
-	Call(prompt string) (string, error)
-	Generate(prompts []string) ([]*Generation, error)
+	Call(prompt string, stop []string) (string, error)
+	Generate(prompts []string, stop []string) ([]*Generation, error)
 }
 
 // Generation is a single generation from a langchaingo LLM.
