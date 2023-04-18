@@ -3,6 +3,7 @@ package tools
 
 // Tool is a tool for the llm agent to interact with diferent application.
 type Tool struct {
-	Name string
-	run  func(string) string
+	Name        string
+	Description string
+	run         func(string) string
 }
