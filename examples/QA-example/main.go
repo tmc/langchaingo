@@ -41,7 +41,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	p.AddDocuments(docs, []string{}, textFile)
+	err = p.AddDocuments(docs, []string{}, textFile)
+	if err != nil {
+		return
+	}
 
 	llm, err := openai.New()
 	if err != nil {

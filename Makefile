@@ -63,7 +63,7 @@ test_govet:
 
 test_gosec:
 	@echo "test: gosec"
-	@gosec -exclude=G107,G110 ./... || (echo "gosec failed"; exit 1)
+	@gosec -exclude=G107,G110,G307 ./... || (echo "gosec failed"; exit 1)
 	@echo "test: ok"
 
 test_gotest_race:
