@@ -115,6 +115,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/tmc/la
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
 - You may want to **include screenshots and animated GIFs** which help you demonstrate the steps or point out the part which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux. <!-- this should only be included if the project has a GUI -->
 - **Explain why this enhancement would be useful** to most langchaingo users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
+- We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
@@ -147,6 +148,7 @@ Commit the changes once you are happy with them. Don't forget to self-review to 
 #### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
+- **We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.**
 - Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
 - Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
 - Enable the checkbox to [allow maintainer edits](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork) so the branch can be updated for a merge.
