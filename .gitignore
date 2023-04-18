@@ -1,0 +1,5 @@
+coverage.txt
+go.work
+go.sum
+.idea
+vendor/
