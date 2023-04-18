@@ -62,7 +62,7 @@ func main() {
 
 		result, err := chains.Call(chain, map[string]any{
 			"query": input,
-		})
+		}, nil)
 		if err != nil {
 			log.Fatal(err.Error())
 		}

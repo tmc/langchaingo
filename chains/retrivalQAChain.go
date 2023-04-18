@@ -27,7 +27,7 @@ func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) Retrie
 	}
 }
 
-func (c RetrievalQAChain) Call(values ChainValues) (ChainValues, error) {
+func (c RetrievalQAChain) Call(values ChainValues, stop []string) (ChainValues, error) {
 	queryAny, ok := values[c.InputKey]
 	if !ok {
 		return map[string]any{}, fmt.Errorf("Input key %s not found", c.InputKey)
@@ -48,7 +48,7 @@ func (c RetrievalQAChain) Call(values ChainValues) (ChainValues, error) {
 		"input_documents": docs,
 	}
 
-	result, err := Call(c.combineDocumentChain, inputs)
+	result, err := Call(c.combineDocumentChain, inputs, nil)
 	if err != nil {
 		return map[string]any{}, err
 	}

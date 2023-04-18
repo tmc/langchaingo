@@ -24,7 +24,7 @@ func TestLLMChain(t *testing.T) {
 
 	chain := chains.NewLLMChain(model, prompt)
 
-	resultChainValue, err := chains.Call(chain, map[string]any{"country": "France"})
+	resultChainValue, err := chains.Call(chain, map[string]any{"country": "France"}, nil)
 	if err != nil {
 		t.Errorf("Unexpected error calling llm chain: %e", err)
 		return

@@ -29,7 +29,7 @@ func TestRetrievalQAChain(t *testing.T) {
 
 	_, err = chains.Call(chain, map[string]any{
 		"query": "foz?",
-	})
+	}, nil)
 	if err != nil {
 		t.Errorf("Unexpected error %s", err.Error())
 		return

@@ -37,7 +37,7 @@ func TestStuffDocumentsChain(t *testing.T) {
 		"input_documents": docs,
 	}
 
-	_, err = chains.Call(chain, inputValues)
+	_, err = chains.Call(chain, inputValues, nil)
 	if err != nil {
 		t.Errorf("Unexpected error %s", err.Error())
 		return
