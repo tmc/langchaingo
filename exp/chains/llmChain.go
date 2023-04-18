@@ -13,15 +13,17 @@ type LLMChain struct {
 	OutputKey    string
 	Memory       memory.Memory
 	OutputParser outputParsers.OutputParser
+	StopWords    []string
 }
 
-func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.Template, stopWords []string) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
 		OutputKey:    "text",
 		OutputParser: outputParsers.NewEmptyOutputParser(),
 		Memory:       memory.NewEmptyMemory(),
+		StopWords:    stopWords,
 	}
 
 	return chain
