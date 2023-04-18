@@ -4,7 +4,7 @@ sync: ## Sync all go.mod files
 
 .PHONY: add-go-work-files
 add-go-work-files: ## Add go work files to all examples
-	find . -name go.mod -execdir sh -c 'go work init && go work use . && go work use ../..' \;
+	find . -name go.mod -execdir sh -c 'go work init && go work use . && go work use ../../..' \;
 
 .PHONY: rm-go-work-files
 rm-go-work-files: ## Add go work files to all examples
