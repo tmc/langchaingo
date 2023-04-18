@@ -1,6 +1,7 @@
 # 🦜️🔗 LangChain Go
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/tmc/langchaingo)
+[![Coverage](https://img.shields.io/badge/Coverage-0-red)](https://github.com/tmc/langchaingo/actions/workflows/coverage.yml)
 
 ⚡ Building applications with LLMs through composability ⚡
 
