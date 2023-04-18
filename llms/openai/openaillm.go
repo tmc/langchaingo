@@ -10,7 +10,8 @@ import (
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
-var tokenEnvVarName = os.Getenv("OPENAI_API_KEY")
+// #nosec G101
+const tokenEnvVarName = "OPENAI_API_KEY"
 
 var ErrEmptyResponse = errors.New("no response")
 var ErrMissingToken = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
