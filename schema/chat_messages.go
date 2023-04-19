@@ -25,13 +25,6 @@ type ChatMessage interface {
 	GetType() ChatMessageType
 }
 
-// BaseChatMessage is the base struct for all chat messages.
-type BaseChatMessage struct {
-	Text string
-}
-
-func (m BaseChatMessage) GetText() string { return m.Text }
-
 // statically assert that the types implement the interface:
 var (
 	_ ChatMessage = AIChatMessage{}
@@ -42,32 +35,36 @@ var (
 
 // AIChatMessage is a message sent by an AI.
 type AIChatMessage struct {
-	BaseChatMessage
+	Text string
 }
 
 func (m AIChatMessage) GetType() ChatMessageType { return ChatMessageTypeAI }
+func (m AIChatMessage) GetText() string          { return m.Text }
 
 // HumanChatMessage is a message sent by a human.
 type HumanChatMessage struct {
-	BaseChatMessage
+	Text string
 }
 
 func (m HumanChatMessage) GetType() ChatMessageType { return ChatMessageTypeHuman }
+func (m HumanChatMessage) GetText() string          { return m.Text }
 
 // SystemChatMessage is a chat message representing information that should be instructions to the AI system.
 type SystemChatMessage struct {
-	BaseChatMessage
+	Text string
 }
 
 func (m SystemChatMessage) GetType() ChatMessageType { return ChatMessageTypeSystem }
+func (m SystemChatMessage) GetText() string          { return m.Text }
 
 // GenericChatMessage is a chat message with an arbitrary speaker.
 type GenericChatMessage struct {
-	BaseChatMessage
+	Text string
 	Role string
 }
 
 func (m GenericChatMessage) GetType() ChatMessageType { return ChatMessageTypeGeneric }
+func (m GenericChatMessage) GetText() string          { return m.Text }
 
 // ChatGeneration is the output of a single chat generation.
 type ChatGeneration struct {
