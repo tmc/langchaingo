@@ -1,11 +1,10 @@
-package textSplitters_test
+package textSplitters
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textSplitters"
+	"github.com/tmc/langchaingo/exp/schema"
 )
 
 type test struct {
@@ -24,8 +23,8 @@ var tests = []test{
 		expectedDocs: []schema.Document{
 			{
 				PageContent: "Hi.\nI'm Harrison.",
-				Metadata: map[string]any{"loc": textSplitters.LOCMetadata{
-					Lines: textSplitters.LineData{
+				Metadata: map[string]any{"loc": LOCMetadata{
+					Lines: LineData{
 						From: 1,
 						To:   2,
 					},
@@ -33,8 +32,8 @@ var tests = []test{
 			},
 			{
 				PageContent: "How?\na\nb",
-				Metadata: map[string]any{"loc": textSplitters.LOCMetadata{
-					Lines: textSplitters.LineData{
+				Metadata: map[string]any{"loc": LOCMetadata{
+					Lines: LineData{
 						From: 4,
 						To:   6,
 					},
@@ -50,8 +49,8 @@ var tests = []test{
 		expectedDocs: []schema.Document{
 			{
 				PageContent: "Hi.\nI'm Harrison.",
-				Metadata: map[string]any{"loc": textSplitters.LOCMetadata{
-					Lines: textSplitters.LineData{
+				Metadata: map[string]any{"loc": LOCMetadata{
+					Lines: LineData{
 						From: 1,
 						To:   2,
 					},
@@ -59,8 +58,8 @@ var tests = []test{
 			},
 			{
 				PageContent: "How?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb",
-				Metadata: map[string]any{"loc": textSplitters.LOCMetadata{
-					Lines: textSplitters.LineData{
+				Metadata: map[string]any{"loc": LOCMetadata{
+					Lines: LineData{
 						From: 4,
 						To:   11,
 					},
@@ -71,13 +70,13 @@ var tests = []test{
 }
 
 func TestRecursiveCharacterSplitter(t *testing.T) {
-	splitter := textSplitters.NewRecursiveCharactersSplitter()
+	splitter := NewRecursiveCharactersSplitter()
 
 	for _, test := range tests {
 		splitter.ChunkOverlap = test.chunkOverlap
 		splitter.ChunkSize = test.chunkSize
 
-		docs, err := textSplitters.CreateDocuments(splitter, []string{test.text}, []map[string]any{})
+		docs, err := CreateDocuments(splitter, []string{test.text}, []map[string]any{})
 		if err != nil {
 			t.Errorf("Unexpected error creating documents with recursive character splitter: %s ", err.Error())
 		}

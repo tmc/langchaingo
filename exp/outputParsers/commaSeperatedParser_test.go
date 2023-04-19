@@ -1,10 +1,8 @@
-package outputParsers_test
+package outputParsers
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/outputParsers"
 )
 
 type testCase struct {
@@ -28,7 +26,7 @@ var tests = []testCase{
 }
 
 func TestCommaSeparatedListOutputParser(t *testing.T) {
-	parser := outputParsers.NewCommaSeparatedList()
+	parser := NewCommaSeparatedList()
 
 	for _, test := range tests {
 		output, err := parser.Parse(test.input)
