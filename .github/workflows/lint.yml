@@ -1,4 +1,4 @@
-name: golangci-lint
+name: Lint
 on:
   push:
     tags:
@@ -12,6 +12,29 @@ permissions:
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
   # pull-requests: read
 jobs:
+  # TODO: Should be removed after golangci-lint integrated with vuln
+  vulnerability:
+    name: Vulnerabilities Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.20.0"
+          cache: true
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Scan vulnerability
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
   golangci:
     name: lint
     runs-on: ubuntu-latest
