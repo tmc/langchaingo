@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -44,20 +45,20 @@ func (s *SerpapiClient) Search(query string) (string, error) {
 	reqURL := fmt.Sprintf("%s?%s", s.baseURL, params.Encode())
 	resp, err := http.Get(reqURL)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Printf("Error: %s\n", err)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Printf("Error: %s\n", err)
 		return "", err
 	}
 	var result map[string]interface{}
 	err = json.Unmarshal([]byte(body), &result)
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		log.Printf("Error: %s\n", err)
 		return "", err
 	}
 
