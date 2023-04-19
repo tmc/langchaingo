@@ -25,7 +25,7 @@ func TestLLMChain(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	resultChainValue, err := Call(chain, map[string]any{"country": "France"})
+	resultChainValue, err := Call(chain, map[string]any{"country": "France", "stop": []string{"\nObservation", "\n\tObservation"}})
 	if err != nil {
 		t.Fatal(err)
 	}
