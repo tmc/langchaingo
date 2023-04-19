@@ -1,11 +1,11 @@
-package chains_test
+package chains
 
 import (
+	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type testRetriever struct{}
@@ -18,6 +18,9 @@ func (r testRetriever) GetRelevantDocuments(query string) ([]schema.Document, er
 }
 
 func TestRetrievalQAChain(t *testing.T) {
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 	r := testRetriever{}
 	llm, err := openai.New()
 	if err != nil {
@@ -25,9 +28,9 @@ func TestRetrievalQAChain(t *testing.T) {
 		return
 	}
 
-	chain := chains.NewRetrievalQAChainFromLLM(llm, r)
+	chain := NewRetrievalQAChainFromLLM(llm, r)
 
-	_, err = chains.Call(chain, map[string]any{
+	_, err = Call(chain, map[string]any{
 		"query": "foz?",
 	})
 	if err != nil {

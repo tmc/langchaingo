@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/tmc/langchaingo/vectorStores/pinecone/internal/pineconeClient"
+	"github.com/tmc/langchaingo/exp/vectorStores/pinecone/internal/pineconeClient"
 )
 
 func getEnvironmentAndApiKey(t *testing.T) (string, string) {

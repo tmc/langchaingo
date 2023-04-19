@@ -4,7 +4,7 @@
 
 .PHONY: test
 test:
-	go run test ./...
+	go test ./...
 
 .PHONY: lint
 lint:
