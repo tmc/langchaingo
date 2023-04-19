@@ -1,12 +1,11 @@
-package chains_test
+package chains
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
 )
 
 func TestLLMChain(t *testing.T) {
@@ -22,9 +21,9 @@ func TestLLMChain(t *testing.T) {
 		return
 	}
 
-	chain := chains.NewLLMChain(model, prompt, nil)
+	chain := NewLLMChain(model, prompt)
 
-	resultChainValue, err := chains.Call(chain, map[string]any{"country": "France"})
+	resultChainValue, err := Call(chain, map[string]any{"country": "France"})
 	if err != nil {
 		t.Errorf("Unexpected error calling llm chain: %e", err)
 		return

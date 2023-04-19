@@ -1,46 +1,45 @@
-package prompts_test
+package prompts
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/exp/schema"
 )
 
 func TestChatTemplate(t *testing.T) {
-	systemPrompt, err := prompts.NewPromptTemplate("Here's some context: {context}", []string{"context"})
+	systemPrompt, err := NewPromptTemplate("Here's some context: {context}", []string{"context"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	userPrompt, err := prompts.NewPromptTemplate("Hello AI. Give me a long response. {question}", []string{"question"})
+	userPrompt, err := NewPromptTemplate("Hello AI. Give me a long response. {question}", []string{"question"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	aiPrompt, err := prompts.NewPromptTemplate("Very good question. My answer to {question} is {answer}", []string{"answer", "question"})
+	aiPrompt, err := NewPromptTemplate("Very good question. My answer to {question} is {answer}", []string{"answer", "question"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
 
-	messages := []prompts.Message{
-		prompts.NewSystemMessage(systemPrompt),
-		prompts.NewHumanMessage(userPrompt),
-		prompts.NewAiMessage(aiPrompt),
+	messages := []Message{
+		NewSystemMessage(systemPrompt),
+		NewHumanMessage(userPrompt),
+		NewAiMessage(aiPrompt),
 	}
 
-	_, err = prompts.NewChatTemplate(messages, []string{"answer", "context"})
+	_, err = NewChatTemplate(messages, []string{"answer", "context"})
 	if err == nil {
 		t.Errorf("Expected error creating chat template with too few variables")
 	}
 
-	_, err = prompts.NewChatTemplate(messages, []string{"answer", "context", "question", "foo"})
+	_, err = NewChatTemplate(messages, []string{"answer", "context", "question", "foo"})
 	if err == nil {
 		t.Errorf("Expected error creating chat template with too many variables")
 	}
 
-	chatTemplate, err := prompts.NewChatTemplate(messages, []string{"answer", "context", "question"})
+	chatTemplate, err := NewChatTemplate(messages, []string{"answer", "context", "question"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}

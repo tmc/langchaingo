@@ -1,11 +1,10 @@
-package chains_test
+package chains
 
 import (
 	"testing"
 
-	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type testRetriever struct{}
@@ -25,9 +24,9 @@ func TestRetrievalQAChain(t *testing.T) {
 		return
 	}
 
-	chain := chains.NewRetrievalQAChainFromLLM(llm, r)
+	chain := NewRetrievalQAChainFromLLM(llm, r)
 
-	_, err = chains.Call(chain, map[string]any{
+	_, err = Call(chain, map[string]any{
 		"query": "foz?",
 	})
 	if err != nil {

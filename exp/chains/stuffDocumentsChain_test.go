@@ -1,12 +1,11 @@
-package chains_test
+package chains
 
 import (
 	"testing"
 
-	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/exp/prompts"
+	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func TestStuffDocumentsChain(t *testing.T) {
@@ -25,8 +24,8 @@ func TestStuffDocumentsChain(t *testing.T) {
 		return
 	}
 
-	llmChain := chains.NewLLMChain(model, prompt, nil)
-	chain := chains.NewStuffDocumentsChain(llmChain)
+	llmChain := NewLLMChain(model, prompt)
+	chain := NewStuffDocumentsChain(llmChain)
 
 	docs := []schema.Document{
 		{PageContent: "foo", Metadata: map[string]any{}},
@@ -37,7 +36,7 @@ func TestStuffDocumentsChain(t *testing.T) {
 		"input_documents": docs,
 	}
 
-	_, err = chains.Call(chain, inputValues)
+	_, err = Call(chain, inputValues)
 	if err != nil {
 		t.Errorf("Unexpected error %s", err.Error())
 		return
