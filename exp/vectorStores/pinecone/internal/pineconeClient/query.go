@@ -49,7 +49,7 @@ func (c Client) Query(ctx context.Context, vector []float64, numVectors int, nam
 	}
 	defer body.Close()
 
-	if statusCode != 200 {
+	if statusCode != http.StatusOK {
 		return QueriesResponse{}, errorMessageFromErrorResponse("querying index", body)
 	}
 
