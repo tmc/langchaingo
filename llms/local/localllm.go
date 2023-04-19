@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
@@ -60,15 +61,45 @@ func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
 // New creates a new local LLM implementation.
 func New() (*LLM, error) {
 	// Require the user to set the path to the local LLM binary
-	bin := os.Getenv(localLLMBinVarName)
-	path, err := exec.LookPath(bin)
-	if err != nil {
-		return nil, errors.Join(ErrMissingBin, err)
-	}
+	binPath := os.Getenv(localLLMBinVarName)
 
 	// Allow the user to pass CLI arguments to the local LLM binary (optional)
 	args := os.Getenv(localLLMArgsVarName)
-	c, err := localclient.New(path, args)
+
+	// Expand tilde in the path
+	if binPath[0] == '~' {
+		binPath = os.Getenv("HOME") + binPath[1:]
+	}
+
+	// Expand environment variables in the path
+	binPath = os.ExpandEnv(binPath)
+
+	// Handle relative paths
+	if strings.Index(binPath, "./") == 0 {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+
+		binPath = wd + binPath[1:]
+	}
+
+	// Return if the supplied path is valid
+	if _, err := os.Stat(binPath); err == nil {
+		c, err := localclient.New(binPath, args)
+		return &LLM{
+			client: c,
+		}, err
+	}
+
+	// If all else fails, attempt to find the binary in the PATH
+	binPath, err := exec.LookPath(binPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the client
+	c, err := localclient.New(binPath, args)
 	return &LLM{
 		client: c,
 	}, err

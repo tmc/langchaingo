@@ -53,7 +53,7 @@ type EmbeddingRequest struct {
 	Model string   `json:"model"`
 }
 
-// CreateCompletion creates embeddings.
+// CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
