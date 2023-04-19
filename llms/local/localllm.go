@@ -3,9 +3,9 @@ package local
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
@@ -71,30 +71,10 @@ func New() (*LLM, error) {
 		binPath = os.Getenv("HOME") + binPath[1:]
 	}
 
-	// Expand environment variables in the path
-	binPath = os.ExpandEnv(binPath)
-
-	// Handle relative paths
-	if strings.Index(binPath, "./") == 0 {
-		wd, err := os.Getwd()
-		if err != nil {
-			return nil, err
-		}
-
-		binPath = wd + binPath[1:]
-	}
-
-	// Return if the supplied path is valid
-	if _, err := os.Stat(binPath); err == nil {
-		c, err := localclient.New(binPath, args)
-		return &LLM{
-			client: c,
-		}, err
-	}
-
-	// If all else fails, attempt to find the binary in the PATH
+	// Ensure the path is valid
 	binPath, err := exec.LookPath(binPath)
 	if err != nil {
+		fmt.Println("bad")
 		return nil, err
 	}
 
