@@ -67,8 +67,11 @@ func New() (*LLM, error) {
 
 	// Expand tilde in the path
 	if binPath[0] == '~' {
-		binPath = os.Getenv("HOME") + binPath[1:]
+		binPath = "$HOME" + binPath[1:]
 	}
+
+	// Expand environment variables in the path
+	binPath = os.ExpandEnv(binPath)
 
 	// Ensure the path is valid
 	binPath, err := exec.LookPath(binPath)
