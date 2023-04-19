@@ -4,7 +4,7 @@
 
 - [ ] Read the [Contributing documentation](https://github.com/tmc/langchaingo/blob/main/CONTRIBUTING.md).
 - [ ] Read the [Code of conduct documentation](https://github.com/tmc/langchaingo/blob/main/CODE_OF_CONDUCT.md).
-- [ ] Name your Pull Request title clearly and concisely, prefixed the type of changes you made according to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). (such as `feat: added memory support` or `docs: updated memory module documentations`)
+- [ ] - Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such as `memory: added interfaces` or `util: added helpers`)
 - [ ] Check that there isn't already a PR that solves the problem the same way to avoid creating a duplicate.
 - [ ] Provide a description in this PR that addresses **what** the PR is solving, or reference the issue that it solves (e.g. `fixes #123`).
 - [ ] Contains test coverage for new functions

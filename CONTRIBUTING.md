@@ -148,7 +148,7 @@ Commit the changes once you are happy with them. Don't forget to self-review to 
 #### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
-- Name your Pull Request title clearly and concisely, prefixed the type of changes you made according to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). (such as `feat: added memory support` or `docs: updated memory module documentations`)
+- Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such as `memory: added interfaces` or `util: added helpers`)
 - **We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.**
 - Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
 - Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
