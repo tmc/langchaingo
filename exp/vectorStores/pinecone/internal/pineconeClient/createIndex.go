@@ -1,9 +1,11 @@
 package pineconeClient
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"net/http"
 )
 
 var ErrIndexExists = errors.New("Index of given name already exists.")
@@ -31,19 +33,18 @@ func (c Client) createIndex() error {
 	if err != nil {
 		return err
 	}
-
-	if statusCode == 201 {
+	if statusCode == http.StatusCreated {
 		return nil
 	}
-
-	if statusCode == 409 {
+	if statusCode == http.StatusConflict {
 		return ErrIndexExists
 	}
 
-	errMessage, err := ioutil.ReadAll(body)
+	errBuf := new(bytes.Buffer)
+	_, err = io.Copy(errBuf, body)
 	if err != nil {
 		return fmt.Errorf("Error creating index. %s", err)
 	}
 
-	return fmt.Errorf("Error creating index. Status code: %v. %s", statusCode, errMessage)
+	return fmt.Errorf("Error creating index. Status code: %v. %s", statusCode, errBuf.String())
 }
