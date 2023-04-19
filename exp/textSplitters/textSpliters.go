@@ -2,6 +2,7 @@ package textSplitters
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/tmc/langchaingo/exp/schema"
@@ -119,7 +120,7 @@ func MergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 	for _, split := range splits {
 		if total+len(split) > chunkSize {
 			if total > chunkSize+chunkOverlap {
-				fmt.Printf("Warning: created a chunk with size of %v, which is longer then the specified %v\n", total, chunkSize+chunkOverlap)
+				log.Printf("[WARN] created a chunk with size of %v, which is longer then the specified %v\n", total, chunkSize+chunkOverlap)
 			}
 
 			if len(currentDoc) > 0 {

@@ -1,10 +1,10 @@
 package pineconeClient
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/google/uuid"
 )
@@ -44,13 +44,14 @@ type errorResponse struct {
 	Details []detail `json:"details"`
 }
 
-func errorMessageFromErrorResponse(task string, body io.ReadCloser) error {
-	bytes, err := ioutil.ReadAll(body)
+func errorMessageFromErrorResponse(task string, body io.Reader) error {
+	buf := new(bytes.Buffer)
+	_, err := io.Copy(buf, body)
 	if err != nil {
 		return fmt.Errorf("error reading body of error message: %s", err.Error())
 	}
 
-	return fmt.Errorf("Error %s: body: %s", task, string(bytes))
+	return fmt.Errorf("Error %s: body: %s", task, buf.String())
 }
 
 func (c Client) Upsert(ctx context.Context, vectors []Vector, nameSpace string) error {

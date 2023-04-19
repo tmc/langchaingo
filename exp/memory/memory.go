@@ -55,10 +55,8 @@ func getBufferString(messages []schema.ChatMessage, humanPrefix, aiPrefix string
 		switch message := messages[i].(type) {
 		case schema.AiChatMessage:
 			role = aiPrefix
-			break
 		case schema.HumanChatMessage:
 			role = humanPrefix
-			break
 		default:
 			role = message.GetType()
 
