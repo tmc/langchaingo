@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
 
@@ -74,7 +73,6 @@ func New() (*LLM, error) {
 	// Ensure the path is valid
 	binPath, err := exec.LookPath(binPath)
 	if err != nil {
-		fmt.Println("bad")
 		return nil, err
 	}
 
