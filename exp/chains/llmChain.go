@@ -13,17 +13,15 @@ type LLMChain struct {
 	OutputKey    string
 	Memory       memory.Memory
 	OutputParser outputParsers.OutputParser
-	StopWords    []string
 }
 
-func NewLLMChain(llm llms.LLM, prompt prompts.Template, stopWords []string) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
 		OutputKey:    "text",
 		OutputParser: outputParsers.NewEmptyOutputParser(),
 		Memory:       memory.NewEmptyMemory(),
-		StopWords:    stopWords,
 	}
 
 	return chain
@@ -34,13 +32,17 @@ func (c LLMChain) GetMemory() memory.Memory {
 }
 
 func (c LLMChain) Call(values ChainValues) (ChainValues, error) {
-
+	var stop []string
 	promptValue, err := c.prompt.FormatPromptValue(values)
 	if err != nil {
 		return ChainValues{}, err
 	}
 
-	generations, err := c.llm.Generate([]string{promptValue.String()}, c.StopWords)
+	if stopVal, ok := values["stop"].([]string); ok {
+		stop = stopVal
+	}
+
+	generations, err := c.llm.Generate([]string{promptValue.String()}, stop)
 	if err != nil {
 		return ChainValues{}, err
 	}
