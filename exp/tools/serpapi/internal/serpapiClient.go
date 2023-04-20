@@ -34,9 +34,9 @@ func New() (*SerpapiClient, error) {
 }
 
 func (s *SerpapiClient) Search(query string) (string, error) {
-	var params url.Values
+	params := make(url.Values)
 	query = strings.ReplaceAll(query, " ", "+")
-	params.Set("q", query)
+	params.Add("q", query)
 	params.Add("google_domain", "google.com")
 	params.Add("gl", "us")
 	params.Add("hl", "en")
