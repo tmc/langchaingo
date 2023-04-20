@@ -76,10 +76,10 @@ func createPrompt(
 	options ...PromptTemplateOption,
 ) (prompts.PromptTemplate, error) {
 	opts := &CreatePromptOptions{}
+	opts.handleDefaultValues()
 	for _, option := range options {
 		option(opts)
 	}
-	opts.handleDefaultValues()
 
 	var toolsStrings strings.Builder
 	for _, tool := range tools {
