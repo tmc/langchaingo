@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var ErrMissingToken = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
+var ErrMissingToken = errors.New("missing the OpenAI API key, set it in the SERPAPI_API_KEY environment variable")
 var NoGoodResult = "No good search result found"
 
 type SerpapiClient struct {
