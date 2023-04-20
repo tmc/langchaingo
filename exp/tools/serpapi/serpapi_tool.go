@@ -19,12 +19,15 @@ func New() (*tools.Tool, error) {
         "Useful for when you need to answer questions about current events. "
 		"Always one of the first options when you need to find information on internet"
         "Input should be a search query."`,
-		Run: func(input string) string {
-			result, _ := client.Search(input)
-			if len(result) == 0 {
-				return "No good Google Search Result was found"
+		Run: func(input string) (string, error) {
+			result, err := client.Search(input)
+			if err != nil {
+				return "", err
 			}
-			return strings.Join(strings.Fields(result), " ")
+			if len(result) == 0 {
+				return "No good Google Search Result was found", nil
+			}
+			return strings.Join(strings.Fields(result), " "), nil
 		},
 	}, nil
 
