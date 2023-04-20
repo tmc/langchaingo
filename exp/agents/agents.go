@@ -14,7 +14,7 @@ type AgentOptions map[string]any
 type AgentType string
 
 const (
-	OneShotZeroAgent AgentType = "OneShotZeroAgent"
+	ZeroShotReactDescription AgentType = "zeroShotReactDescription"
 )
 
 type Options func(p *AgentOptions)
@@ -43,7 +43,7 @@ func InitializeAgent(
 		opt(&options)
 	}
 	switch agentType {
-	case OneShotZeroAgent:
+	case ZeroShotReactDescription:
 		return mrkl.NewOneShotAgent(llm, tools, options)
 	default:
 		return nil, errors.New("Unknown agent type")
