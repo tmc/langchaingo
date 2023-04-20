@@ -18,3 +18,6 @@ test-race:
 test-cover:
 	go run test -cover ./...
 
+.PHONY: run-pkgsite
+run-pkgsite:
+	go run golang.org/x/pkgsite/cmd/pkgsite@latest
