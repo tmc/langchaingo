@@ -32,14 +32,17 @@ func (c LLMChain) GetMemory() memory.Memory {
 }
 
 func (c LLMChain) Call(values ChainValues) (ChainValues, error) {
-	//TODO: stop
-
+	var stop []string
 	promptValue, err := c.prompt.FormatPromptValue(values)
 	if err != nil {
 		return ChainValues{}, err
 	}
 
-	generations, err := c.llm.Generate([]string{promptValue.String()})
+	if stopVal, ok := values["stop"].([]string); ok {
+		stop = stopVal
+	}
+
+	generations, err := c.llm.Generate([]string{promptValue.String()}, stop)
 	if err != nil {
 		return ChainValues{}, err
 	}
