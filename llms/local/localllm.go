@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"os"
-	"os/exec"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
+	"github.com/tmc/langchaingo/util"
 )
 
 const (
@@ -62,22 +62,19 @@ func New() (*LLM, error) {
 	// Require the user to set the path to the local LLM binary
 	binPath := os.Getenv(localLLMBinVarName)
 
-	// Allow the user to pass CLI arguments to the local LLM binary (optional)
-	args := os.Getenv(localLLMArgsVarName)
-
-	// Expand tilde in the path
-	if binPath[0] == '~' {
-		binPath = "$HOME" + binPath[1:]
+	// Ensure binary path is supplied
+	if binPath == "" {
+		return nil, ErrMissingBin
 	}
 
-	// Expand environment variables in the path
-	binPath = os.ExpandEnv(binPath)
-
-	// Ensure the path is valid
-	binPath, err := exec.LookPath(binPath)
+	// Find the full path to the binary
+	binPath, err := util.LookPath(binPath)
 	if err != nil {
 		return nil, err
 	}
+
+	// Allow the user to pass CLI arguments to the local LLM binary (optional)
+	args := os.Getenv(localLLMArgsVarName)
 
 	// Return the client
 	c, err := localclient.New(binPath, args)
