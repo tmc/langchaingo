@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/schema"
+	"github.com/tmc/langchaingo/schema"
 )
 
 /*
@@ -20,7 +20,7 @@ type Message struct {
 func (m Message) format(values map[string]any) (schema.ChatMessage, error) {
 	formatted, err := m.prompt.Format(values)
 	if err != nil {
-		return schema.AiChatMessage{}, err
+		return schema.AIChatMessage{}, err
 	}
 
 	return m.toChatMessage(formatted), nil
@@ -45,7 +45,7 @@ func NewHumanMessage(systemPrompt Template) Message {
 func NewAiMessage(systemPrompt Template) Message {
 	return Message{
 		prompt:         systemPrompt,
-		toChatMessage:  func(message string) schema.ChatMessage { return schema.AiChatMessage{Text: message} },
+		toChatMessage:  func(message string) schema.ChatMessage { return schema.AIChatMessage{Text: message} },
 		inputVariables: systemPrompt.GetInputVariables(),
 	}
 }
