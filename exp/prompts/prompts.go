@@ -1,7 +1,7 @@
 package prompts
 
 import (
-	"github.com/tmc/langchaingo/exp/schema"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type Template interface {
