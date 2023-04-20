@@ -34,7 +34,8 @@ func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
 
 func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation, error) {
 	result, err := o.client.CreateCompletion(context.TODO(), &openaiclient.CompletionRequest{
-		Prompt: prompts[0],
+		Prompt:    prompts[0],
+		StopWords: stopWords,
 	})
 	if err != nil {
 		return nil, err
