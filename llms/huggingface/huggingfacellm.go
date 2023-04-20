@@ -22,8 +22,8 @@ type LLM struct {
 
 var _ llms.LLM = (*LLM)(nil)
 
-func (o *LLM) Call(prompt string) (string, error) {
-	r, err := o.Generate([]string{prompt})
+func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
+	r, err := o.Generate([]string{prompt}, stopWords)
 	if err != nil {
 		return "", err
 	}
@@ -33,7 +33,7 @@ func (o *LLM) Call(prompt string) (string, error) {
 	return r[0].Text, nil
 }
 
-func (o *LLM) Generate(prompts []string) ([]*llms.Generation, error) {
+func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation, error) {
 	result, err := o.client.RunInference(context.TODO(), &huggingfaceclient.InferenceRequest{
 		RepoID: "google/flan-t5-xl",
 		Prompt: prompts[0],
