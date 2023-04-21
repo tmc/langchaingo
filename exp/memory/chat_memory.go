@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/tmc/langchaingo/exp/schema"
+import "github.com/tmc/langchaingo/schema"
 
 type ChatMessageHistory struct {
 	messages []schema.ChatMessage
@@ -8,7 +8,7 @@ type ChatMessageHistory struct {
 
 func (h *ChatMessageHistory) GetMessages() []schema.ChatMessage { return h.messages }
 func (h *ChatMessageHistory) AddAiMessage(text string) {
-	h.messages = append(h.messages, schema.AiChatMessage{Text: text})
+	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
 }
 func (h *ChatMessageHistory) AddUserMessage(text string) {
 	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})

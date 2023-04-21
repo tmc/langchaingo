@@ -1,25 +1,20 @@
 package chains
 
-import "github.com/tmc/langchaingo/exp/memory"
-
-type ChainValues map[string]any
+import "github.com/tmc/langchaingo/schema"
 
 type Chain interface {
-	Call(ChainValues) (ChainValues, error)
-	GetMemory() memory.Memory
+	Call(map[string]any) (map[string]any, error)
+	GetMemory() schema.Memory
 }
 
-func Call(c Chain, inputValues map[string]any) (ChainValues, error) {
-	fullValues := make(ChainValues, 0)
+func Call(c Chain, inputValues map[string]any) (map[string]any, error) {
+	fullValues := make(map[string]any, 0)
 
 	for key, value := range inputValues {
 		fullValues[key] = value
 	}
 
-	newValues, err := c.GetMemory().LoadMemoryVariables(inputValues)
-	if err != nil {
-		return ChainValues{}, err
-	}
+	newValues := c.GetMemory().LoadMemoryVariables(inputValues)
 
 	for key, value := range newValues {
 		fullValues[key] = value
@@ -27,12 +22,12 @@ func Call(c Chain, inputValues map[string]any) (ChainValues, error) {
 
 	outputValues, err := c.Call(fullValues)
 	if err != nil {
-		return ChainValues{}, err
+		return map[string]any{}, err
 	}
 
-	err = c.GetMemory().SaveContext(inputValues, memory.InputValues(outputValues))
+	err = c.GetMemory().SaveContext(inputValues, outputValues)
 	if err != nil {
-		return ChainValues{}, err
+		return map[string]any{}, err
 	}
 
 	return outputValues, nil

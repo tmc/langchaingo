@@ -1,11 +1,11 @@
-package textSplitters
+package text_splitters
 
 import (
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/schema"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type TextSplitter interface {

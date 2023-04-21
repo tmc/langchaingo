@@ -1,8 +1,9 @@
-package outputParsers
+package output_parsers
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type testCase struct {
@@ -34,7 +35,7 @@ func TestCommaSeparatedListOutputParser(t *testing.T) {
 			t.Logf("Unexpected error %s", err.Error())
 		}
 
-		if !reflect.DeepEqual(output, test.expectedOutput) {
+		if !cmp.Equal(output, test.expectedOutput) {
 			t.Logf("Parsing with comma separated list did not get expected. Got: %v. Expected %v", output, test.expectedOutput)
 		}
 	}

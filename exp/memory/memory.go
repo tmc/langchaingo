@@ -4,17 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/schema"
+	"github.com/tmc/langchaingo/schema"
 )
 
-type Memory interface {
-	LoadMemoryVariables(InputValues) (InputValues, error)
-	SaveContext(InputValues, InputValues) error
-}
-
-type InputValues map[string]any
-
-func getInputValue(inputValues InputValues, inputKey string) (string, error) {
+func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
 	if inputKey != "" {
 		inputValue, ok := inputValues[inputKey]
 		if !ok {
@@ -37,7 +30,7 @@ func getInputValue(inputValues InputValues, inputKey string) (string, error) {
 	return "", fmt.Errorf(`input values %v have multiple keys. Specify input key when creating the buffer memory or remove keys`, inputValues)
 }
 
-func getInputValueReturnToString(inputValue interface{}, inputValues InputValues, inputKey string) (string, error) {
+func getInputValueReturnToString(inputValue interface{}, inputValues map[string]any, inputKey string) (string, error) {
 	switch value := inputValue.(type) {
 	case string:
 		return value, nil
@@ -53,12 +46,12 @@ func getBufferString(messages []schema.ChatMessage, humanPrefix, aiPrefix string
 		role := ""
 
 		switch message := messages[i].(type) {
-		case schema.AiChatMessage:
+		case schema.AIChatMessage:
 			role = aiPrefix
 		case schema.HumanChatMessage:
 			role = humanPrefix
 		default:
-			role = message.GetType()
+			role = string(message.GetType())
 
 		}
 
@@ -70,8 +63,19 @@ func getBufferString(messages []schema.ChatMessage, humanPrefix, aiPrefix string
 
 type EmptyMemory struct{}
 
-func (m EmptyMemory) LoadMemoryVariables(InputValues) (InputValues, error) { return InputValues{}, nil }
-func (m EmptyMemory) SaveContext(InputValues, InputValues) error           { return nil }
+func (m EmptyMemory) MemoryVariables() []string {
+	return []string{}
+}
+func (m EmptyMemory) LoadMemoryVariables(map[string]any) map[string]any {
+	return map[string]any{}
+}
+func (m EmptyMemory) SaveContext(inputs map[string]any, outputs map[string]any) error {
+	return nil
+}
+
+func (m EmptyMemory) Clear() error {
+	return nil
+}
 
 func NewEmptyMemory() EmptyMemory {
 	return EmptyMemory{}

@@ -10,7 +10,7 @@ type BufferMemory struct {
 	MemoryKey      string
 }
 
-func (m BufferMemory) SaveContext(inputValues InputValues, outputValues InputValues) error {
+func (m BufferMemory) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
 	userInputValue, err := getInputValue(inputValues, m.InputKey)
 	if err != nil {
 		return err
@@ -28,16 +28,16 @@ func (m BufferMemory) SaveContext(inputValues InputValues, outputValues InputVal
 	return nil
 }
 
-func (m BufferMemory) LoadMemoryVariables(inputValuesGiven InputValues) (InputValues, error) {
+func (m BufferMemory) LoadMemoryVariables(inputValuesGiven map[string]any) map[string]any {
 	if m.ReturnMessages {
-		return InputValues{
+		return map[string]any{
 			m.MemoryKey: m.ChatHistory.messages,
-		}, nil
+		}
 	}
 
-	return InputValues{
+	return map[string]any{
 		m.MemoryKey: getBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AiPrefix),
-	}, nil
+	}
 }
 
 func NewBufferMemory() BufferMemory {

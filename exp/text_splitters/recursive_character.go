@@ -1,4 +1,4 @@
-package textSplitters
+package text_splitters
 
 import (
 	"strings"

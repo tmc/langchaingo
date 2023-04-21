@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type testRetriever struct{}

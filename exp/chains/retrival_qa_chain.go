@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/exp/memory"
-	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type RetrievalQAChain struct {
@@ -60,6 +60,6 @@ func (c RetrievalQAChain) Call(values ChainValues) (ChainValues, error) {
 	return result, nil
 }
 
-func (c RetrievalQAChain) GetMemory() memory.Memory {
+func (c RetrievalQAChain) GetMemory() schema.Memory {
 	return memory.NewEmptyMemory()
 }

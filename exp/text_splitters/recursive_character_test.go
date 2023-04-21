@@ -1,10 +1,10 @@
-package textSplitters
+package text_splitters
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/tmc/langchaingo/exp/schema"
+	"github.com/google/go-cmp/cmp"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type test struct {
@@ -81,7 +81,7 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			t.Errorf("Unexpected error creating documents with recursive character splitter: %s ", err.Error())
 		}
 
-		if !reflect.DeepEqual(docs, test.expectedDocs) {
+		if !cmp.Equal(docs, test.expectedDocs) {
 			t.Logf("Result creating documents with recursive character splitter not equal expected. \n Got:\n %v \nWant:\n %v \n", docs, test.expectedDocs)
 		}
 	}

@@ -8,25 +8,25 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/exp/embeddings"
-	"github.com/tmc/langchaingo/exp/schema"
-	"github.com/tmc/langchaingo/exp/vectorStores/pinecone/internal/pineconeClient"
+	"github.com/tmc/langchaingo/exp/vector_stores/pinecone/internal/pineconeClient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 const pineconeEnvVrName = "PINECONE_API_KEY"
 
 var ErrMissingToken = errors.New("missing the Pinecone API key, set it in the PINECONE_API_KEY environment variable")
 
-type Pinecone struct {
+type Client struct {
 	client     pineconeClient.Client
 	embeddings embeddings.Embeddings
 	textKey    string
 }
 
 // Environment for project is found in the pinecone console. Index name must not be larger then 45 characters.
-func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string, dimensions int) (Pinecone, error) {
+func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string, dimensions int) (Client, error) {
 	token := os.Getenv(pineconeEnvVrName)
 	if token == "" {
-		return Pinecone{}, ErrMissingToken
+		return Client{}, ErrMissingToken
 	}
 
 	p, err := pineconeClient.New(
@@ -36,7 +36,7 @@ func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string
 		pineconeClient.WithDimensions(dimensions),
 	)
 
-	return Pinecone{
+	return Client{
 		client:     p,
 		embeddings: embeddings,
 		textKey:    "text",
@@ -44,7 +44,7 @@ func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string
 }
 
 // If the length of the documentIds slice is 0 uuids will be used as ids.
-func (p Pinecone) AddDocuments(documents []schema.Document, documentIds []string, nameSpace string) error {
+func (p Client) AddDocuments(documents []schema.Document, documentIds []string, nameSpace string) error {
 	if len(documentIds) == 0 {
 		for i := 0; i < len(documents); i++ {
 			documentIds = append(documentIds, uuid.New().String())
@@ -84,7 +84,7 @@ func (p Pinecone) AddDocuments(documents []schema.Document, documentIds []string
 	return p.client.Upsert(context.Background(), vectors, nameSpace)
 }
 
-func (p Pinecone) SimilaritySearch(query string, numDocuments int, nameSpace string) ([]schema.Document, error) {
+func (p Client) SimilaritySearch(query string, numDocuments int, nameSpace string) ([]schema.Document, error) {
 	vector, err := p.embeddings.EmbedQuery(query)
 	if err != nil {
 		return []schema.Document{}, err
@@ -116,7 +116,7 @@ func (p Pinecone) SimilaritySearch(query string, numDocuments int, nameSpace str
 	return resultDocuments, nil
 }
 
-func (p Pinecone) ToRetriever(numDocs int, nameSpace string) PineconeRetriever {
+func (p Client) ToRetriever(numDocs int, nameSpace string) PineconeRetriever {
 	return PineconeRetriever{
 		p:       p,
 		numDocs: numDocs,
@@ -124,7 +124,7 @@ func (p Pinecone) ToRetriever(numDocs int, nameSpace string) PineconeRetriever {
 }
 
 type PineconeRetriever struct {
-	p         Pinecone
+	p         Client
 	numDocs   int
 	nameSpace string
 }

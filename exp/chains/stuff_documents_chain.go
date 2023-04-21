@@ -5,8 +5,8 @@ import (
 
 	"github.com/tmc/langchaingo/exp/memory"
 	"github.com/tmc/langchaingo/exp/prompts"
-	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type StuffDocumentsChain struct {
@@ -25,15 +25,15 @@ func NewStuffDocumentsChain(llmChain LLMChain) StuffDocumentsChain {
 	}
 }
 
-func (c StuffDocumentsChain) Call(values ChainValues) (ChainValues, error) {
+func (c StuffDocumentsChain) Call(values map[string]any) (map[string]any, error) {
 	docsAny, ok := values[c.InputKey]
 	if !ok {
-		return ChainValues{}, fmt.Errorf("Document key %s not found", c.InputKey)
+		return map[string]any{}, fmt.Errorf("Document key %s not found", c.InputKey)
 	}
 
 	docs, ok := docsAny.([]schema.Document)
 	if !ok {
-		return ChainValues{}, fmt.Errorf("Document key %s not of type []Document", c.InputKey)
+		return map[string]any{}, fmt.Errorf("Document key %s not of type []Document", c.InputKey)
 	}
 
 	text := ""
@@ -50,7 +50,7 @@ func (c StuffDocumentsChain) Call(values ChainValues) (ChainValues, error) {
 	return Call(c.llmChain, inputValues)
 }
 
-func (c StuffDocumentsChain) GetMemory() memory.Memory {
+func (c StuffDocumentsChain) GetMemory() schema.Memory {
 	return memory.NewEmptyMemory()
 }
 

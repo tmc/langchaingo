@@ -1,8 +1,9 @@
-package outputParsers
+package output_parsers
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestStructuredOutputParserFromNameAndDescription(t *testing.T) {
@@ -23,7 +24,7 @@ func TestStructuredOutputParserFromNameAndDescription(t *testing.T) {
 
 	expectedParsed := map[string]string{"url": "https://google.com"}
 
-	if !reflect.DeepEqual(parsed, expectedParsed) {
+	if !cmp.Equal(parsed, expectedParsed) {
 		t.Errorf("StructuredOutputParser parsing result not equal expected: Got: %v. Expected: %v", parsed, expectedParsed)
 	}
 }

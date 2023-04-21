@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/exp/prompts"
-	"github.com/tmc/langchaingo/exp/schema"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func TestStuffDocumentsChain(t *testing.T) {

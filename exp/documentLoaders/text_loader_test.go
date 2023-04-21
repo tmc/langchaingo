@@ -1,8 +1,9 @@
 package documentLoaders
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestTextLoader(t *testing.T) {
@@ -26,7 +27,7 @@ func TestTextLoader(t *testing.T) {
 		"source": "./testdata/test.txt",
 	}
 
-	if !reflect.DeepEqual(docs[0].Metadata, expectedMetadata) {
+	if !cmp.Equal(docs[0].Metadata, expectedMetadata) {
 		t.Errorf("Meta data form text loader not the same as expected. Got:\n %s\nExpect:%s\n", docs[0].Metadata, expectedMetadata)
 	}
 }
