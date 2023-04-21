@@ -88,6 +88,7 @@ func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
 	}
 	return nil, fmt.Errorf("Agent did not finish after %d attempts", attempts)
 }
+
 func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
 	var scratchpad []string
 	// Perform your desired operation with the text value
