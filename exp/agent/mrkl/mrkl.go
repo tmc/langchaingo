@@ -22,6 +22,8 @@ type OneShotZeroAgent struct {
 	maxRetries int
 }
 
+// OneShotZeroAgentOptions is a type alias for a map of string keys to any value,
+// representing the options for the OneShotZeroAgent.
 type OneShotZeroAgentOptions map[string]any
 
 var _ executor.AgentExecutor = (*OneShotZeroAgent)(nil)
