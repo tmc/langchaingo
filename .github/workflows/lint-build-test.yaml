@@ -1,0 +1,40 @@
+name: lint-build-test
+
+on: push
+
+jobs:
+    lint:
+        strategy:
+            matrix:
+                version: ["1.20"]
+                os: [ubuntu-latest]
+
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/setup-go@v4
+              with:
+                go-version: ${{ matrix.version }}
+                # Cache is managed by golangci-lint
+                # https://github.com/actions/setup-go#caching-dependency-files-and-build-outputs
+                cache: false
+            - uses: actions/checkout@v3
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v3.4.0
+              with:
+                only-new-issues: true
+
+    build-test:
+        strategy:
+            matrix:
+                version: ["1.20", "stable"]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-go@v4
+              with:
+                go-version: ${{ matrix.version }}
+                cache: false
+            - uses: actions/checkout@v3
+            - name: Build
+              run: go build -v ./...
+            - name: Test
+              run: go test -v ./...
