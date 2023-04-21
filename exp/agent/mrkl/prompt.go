@@ -24,6 +24,7 @@ const Suffix = `Begin!
 Question: {input}
 Thought:{agent_scratchpad}`
 
+// CreatePromptOptions is a struct that holds options for creating a prompt template.
 type CreatePromptOptions struct {
 	Prefix             string
 	Suffix             string
@@ -31,26 +32,31 @@ type CreatePromptOptions struct {
 	InputVariables     []string
 }
 
+// PromptTemplateOption is a function type that can be used to modify the CreatePromptOptions.
 type PromptTemplateOption func(p *CreatePromptOptions)
 
+// WithPrefix is a function that sets a custom prefix for the prompt template.
 func WithPrefix(prefix string) PromptTemplateOption {
 	return func(p *CreatePromptOptions) {
 		p.Prefix = prefix
 	}
 }
 
+// WithSuffix is a function that sets a custom suffix for the prompt template.
 func WithSuffix(suffix string) PromptTemplateOption {
 	return func(p *CreatePromptOptions) {
 		p.Suffix = suffix
 	}
 }
 
+// WithFormatInstructions is a function that sets custom format instructions for the prompt template.
 func WithFormatInstructions(formatInstructions string) PromptTemplateOption {
 	return func(p *CreatePromptOptions) {
 		p.FormatInstructions = formatInstructions
 	}
 }
 
+// WithInputVariables is a function that sets custom input variables for the prompt template.
 func WithInputVariables(inputVariables []string) PromptTemplateOption {
 	return func(p *CreatePromptOptions) {
 		p.InputVariables = inputVariables
@@ -71,6 +77,9 @@ func (options *CreatePromptOptions) handleDefaultValues() {
 	}
 }
 
+// createPrompt is a function that takes a slice of tools and a variadic list of prompt
+// template options, and returns a prompt template with the specified options.
+// It returns an error if there is any issue during the creation process.
 func createPrompt(
 	tools []tools.Tool,
 	options ...PromptTemplateOption,
