@@ -33,17 +33,6 @@ type upsertPayload struct {
 	Namespace string   `json:"namespace"`
 }
 
-type detail struct {
-	TypeUrl string `json:"typeUrl"`
-	Value   string `json:"value"`
-}
-
-type errorResponse struct {
-	Code    int      `json:"code"`
-	Message string   `json:"message"`
-	Details []detail `json:"details"`
-}
-
 func errorMessageFromErrorResponse(task string, body io.Reader) error {
 	buf := new(bytes.Buffer)
 	_, err := io.Copy(buf, body)
