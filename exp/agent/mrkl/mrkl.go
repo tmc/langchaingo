@@ -92,7 +92,10 @@ func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
 func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
 	var scratchpad []string
 	// Perform your desired operation with the text value
-	observation := runTool(action.Tool, action.ToolInput.(string), &a.tools)
+	observation, err := runTool(action.Tool, action.ToolInput.(string), &a.tools)
+	if err != nil {
+		return "", err
+	}
 	scratchpad = append(scratchpad, action.Log+observation)
 	if a.verbose {
 		fmt.Println(getCurrentThought(scratchpad))
@@ -164,13 +167,17 @@ func getAgentAction(input string) schema.AgentAction {
 	return agentAction
 }
 
-func runTool(action string, actionInput string, tools *[]tools.Tool) string {
+func runTool(action string, actionInput string, tools *[]tools.Tool) (string, error) {
 	var observation string
 	for _, tool := range *tools {
+		toolOutput, err := tool.Run(actionInput)
+		if err != nil {
+			return "", err
+		}
 		if tool.Name == strings.Trim(action, " ") {
-			observation = "\nObservation: " + tool.Run(actionInput) + "\n"
+			observation = "\nObservation: " + toolOutput + "\n"
 			break
 		}
 	}
-	return observation
+	return observation, nil
 }
