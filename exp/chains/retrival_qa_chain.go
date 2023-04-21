@@ -61,5 +61,5 @@ func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 }
 
 func (c RetrievalQAChain) GetMemory() schema.Memory {
-	return memory.NewEmptyMemory()
+	return memory.NewEmpty()
 }

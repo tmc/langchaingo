@@ -51,7 +51,7 @@ func (c StuffDocumentsChain) Call(values map[string]any) (map[string]any, error)
 }
 
 func (c StuffDocumentsChain) GetMemory() schema.Memory {
-	return memory.NewEmptyMemory()
+	return memory.NewEmpty()
 }
 
 var DefaultQAPrompt, _ = prompts.NewPromptTemplate(
