@@ -36,7 +36,7 @@ func TestLLMChain(t *testing.T) {
 		return
 	}
 
-	result, ok := resultAny.(string)
+	result, _ := resultAny.(string)
 	result = strings.TrimSpace(result)
 
 	if result != "Paris." {
