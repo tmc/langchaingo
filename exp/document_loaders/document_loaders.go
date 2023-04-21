@@ -1,4 +1,4 @@
-package documentLoaders
+package document_loaders
 
 import (
 	"github.com/tmc/langchaingo/exp/text_splitters"

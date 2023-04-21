@@ -1,4 +1,4 @@
-package documentLoaders
+package document_loaders
 
 import (
 	"testing"

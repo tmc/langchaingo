@@ -1,5 +1,6 @@
 package memory
 
+// BufferMemory is a simple form of memory that remembers previous conversational back and forths directly.
 type BufferMemory struct {
 	ChatHistory    *ChatMessageHistory
 	ReturnMessages bool

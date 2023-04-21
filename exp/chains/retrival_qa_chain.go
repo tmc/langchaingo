@@ -27,7 +27,7 @@ func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) Retrie
 	}
 }
 
-func (c RetrievalQAChain) Call(values ChainValues) (ChainValues, error) {
+func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 	queryAny, ok := values[c.InputKey]
 	if !ok {
 		return map[string]any{}, fmt.Errorf("Input key %s not found", c.InputKey)
