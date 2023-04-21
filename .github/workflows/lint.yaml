@@ -1,0 +1,36 @@
+name: lint-build-test
+
+on: push
+
+jobs:
+
+    lint:
+        strategy:
+            matrix:
+                version: [1.20]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-go@v4
+              with:
+                go-version: ${ matrix.version }
+                cache: false
+            - uses: actions/checkout@v3
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v3
+              with:
+                version: v1.29
+    build-test:
+        strategy:
+            matrix:
+                version: [1.17, 1.18, 1.19, 1.20]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/setup-go@v4
+              with:
+                go-version: ${ matrix.version }
+                cache: false
+            - uses: actions/checkout@v3
+            - name: Build
+              run: go build -v ./...
+            - name: Test
+              run: go test -v ./...
