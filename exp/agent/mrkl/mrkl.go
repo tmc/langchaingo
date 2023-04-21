@@ -40,7 +40,9 @@ func checkOptions(opts OneShotZeroAgentOptions) OneShotZeroAgentOptions {
 	return opts
 }
 
-//Aqui se crea el chain
+// NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
+// and options. It returns a pointer to the created agent and an error if there is any
+// issue during the creation process.
 func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*OneShotZeroAgent, error) {
 	firtPrompt, err := createPrompt(tools)
 	if err != nil {
