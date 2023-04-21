@@ -60,7 +60,9 @@ func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*On
 
 }
 
-// Run implements agents.Agent
+// Run is an implementation of the AgentExecutor interface. It takes a query as input
+// and executes it, returning an AgentFinish object containing the result, or an error
+// if the execution fails.
 func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
 	var attempts int
 	a.query = query
