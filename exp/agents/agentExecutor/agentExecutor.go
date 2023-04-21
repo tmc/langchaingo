@@ -1,5 +1,7 @@
 package agentExecutor
 
+import "github.com/tmc/langchaingo/schema"
+
 type AgentExecutor interface {
-	Run(query string) (string, error)
+	Run(query string) (*schema.AgentFinish, error)
 }
