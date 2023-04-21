@@ -5,10 +5,10 @@ package tools
 type Tool struct {
 	Name        string
 	Description string
-	Run         func(string) string
+	Run         func(string) (string, error)
 }
 
-func NewTool(name, description string, run func(string) string) *Tool {
+func NewTool(name, description string, run func(string) (string, error)) *Tool {
 	return &Tool{
 		Name:        name,
 		Description: description,
