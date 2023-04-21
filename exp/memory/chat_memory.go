@@ -2,18 +2,12 @@ package memory
 
 import "github.com/tmc/langchaingo/schema"
 
+// ChatMessageHistory stores chat messages
 type ChatMessageHistory struct {
 	messages []schema.ChatMessage
 }
 
-func (h *ChatMessageHistory) GetMessages() []schema.ChatMessage { return h.messages }
-func (h *ChatMessageHistory) AddAiMessage(text string) {
-	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
-}
-func (h *ChatMessageHistory) AddUserMessage(text string) {
-	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
-}
-
+// Creates new ChatMessageHistory
 func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory {
 	h := &ChatMessageHistory{
 		messages: make([]schema.ChatMessage, 0),
@@ -26,6 +20,22 @@ func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory 
 	return h
 }
 
+// Returns all messages stored
+func (h *ChatMessageHistory) Messages() []schema.ChatMessage {
+	return h.messages
+}
+
+// Adds an AIMessage to the chat message history
+func (h *ChatMessageHistory) AddAIMessage(text string) {
+	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
+}
+
+// Adds an user to the chat message history
+func (h *ChatMessageHistory) AddUserMessage(text string) {
+	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
+}
+
+// Option for creating new chat message history
 type NewChatMessageOption func(m *ChatMessageHistory)
 
 // Option for NewChatMessageHistory adding previous messages to the history

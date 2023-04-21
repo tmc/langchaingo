@@ -1,8 +1,15 @@
 package memory
 
-// BufferMemory is a simple form of memory that remembers previous conversational back and forths directly.
-type BufferMemory struct {
-	ChatHistory    *ChatMessageHistory
+import (
+	"fmt"
+
+	"github.com/tmc/langchaingo/schema"
+)
+
+// memory.Buffer is a simple form of memory that remembers previous conversational back and forths directly.
+type Buffer struct {
+	ChatHistory *ChatMessageHistory
+
 	ReturnMessages bool
 	InputKey       string
 	OutputKey      string
@@ -11,7 +18,54 @@ type BufferMemory struct {
 	MemoryKey      string
 }
 
-func (m BufferMemory) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
+// statically assert that BufferMemory implement the memory interface:
+var _ schema.Memory = &Buffer{}
+
+// Creates new buffer memory
+func NewBuffer() *Buffer {
+	m := Buffer{
+		ChatHistory:    NewChatMessageHistory(),
+		ReturnMessages: false,
+		InputKey:       "",
+		OutputKey:      "",
+		HumanPrefix:    "Human",
+		AiPrefix:       "AI",
+		MemoryKey:      "history",
+	}
+
+	return &m
+}
+
+// Gets the input key the buffer memory class will load dynamically
+func (m *Buffer) MemoryVariables() []string {
+	return []string{m.InputKey}
+}
+
+// Returns the previous chat messages. Previous chat messages are returned via the key specified in the MemoryKey field. Defaults to "history"
+// If ReturnMessages is true the output is of the type []schema.ChatMessage
+// If ReturnMessages is false the output is a buffer string of the chat messages
+func (m *Buffer) LoadMemoryVariables(inputValuesGiven map[string]any) (map[string]any, error) {
+	if m.ReturnMessages {
+		return map[string]any{
+			m.MemoryKey: m.ChatHistory.messages,
+		}, nil
+	}
+
+	bufferString, err := schema.GetBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AiPrefix)
+	if err != nil {
+		return map[string]any{}, err
+	}
+
+	return map[string]any{
+		m.MemoryKey: bufferString,
+	}, nil
+}
+
+// Adds input values as a user message and output values as ai message
+// By default the input and output key is an empty string. In cases where this is not changed the input and output values must only contain one entry. The two entries from the input and output values will be added as a user and ai message respectively.
+// If a input key is set this key will be used to get the user message from the inputValues. The same is true for the output values map.
+// The input and output values used has to be a string
+func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
 	userInputValue, err := getInputValue(inputValues, m.InputKey)
 	if err != nil {
 		return err
@@ -24,33 +78,45 @@ func (m BufferMemory) SaveContext(inputValues map[string]any, outputValues map[s
 		return nil
 	}
 
-	m.ChatHistory.AddAiMessage(aiOutputValue)
+	m.ChatHistory.AddAIMessage(aiOutputValue)
 
 	return nil
 }
 
-func (m BufferMemory) LoadMemoryVariables(inputValuesGiven map[string]any) map[string]any {
-	if m.ReturnMessages {
-		return map[string]any{
-			m.MemoryKey: m.ChatHistory.messages,
+// Sets the chat messages to a new and empty chat message history
+func (m *Buffer) Clear() error {
+	m.ChatHistory = NewChatMessageHistory()
+	return nil
+}
+
+func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
+	if inputKey != "" {
+		inputValue, ok := inputValues[inputKey]
+		if !ok {
+			return "", fmt.Errorf("input values %v do not contain inputKey %s", inputValues, inputKey)
+		}
+
+		return getInputValueReturnToString(inputValue, inputValues, inputKey)
+	}
+
+	if len(inputValues) == 1 {
+		for _, inputValue := range inputValues {
+			return getInputValueReturnToString(inputValue, inputValues, inputKey)
 		}
 	}
 
-	return map[string]any{
-		m.MemoryKey: getBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AiPrefix),
+	if len(inputValues) == 0 {
+		return "", fmt.Errorf(`input values %v have 0 keys `, inputValues)
 	}
+
+	return "", fmt.Errorf(`input values %v have multiple keys. Specify input key when creating the buffer memory or remove keys`, inputValues)
 }
 
-func NewBufferMemory() BufferMemory {
-	m := BufferMemory{
-		ChatHistory:    NewChatMessageHistory(),
-		ReturnMessages: false,
-		InputKey:       "",
-		OutputKey:      "",
-		HumanPrefix:    "Human",
-		AiPrefix:       "AI",
-		MemoryKey:      "history",
+func getInputValueReturnToString(inputValue interface{}, inputValues map[string]any, inputKey string) (string, error) {
+	switch value := inputValue.(type) {
+	case string:
+		return value, nil
+	default:
+		return "", fmt.Errorf("Input values to buffer memory must be string. Got type %T. Input values: %v. Memory input key: %s", inputValue, inputValues, inputKey)
 	}
-
-	return m
 }

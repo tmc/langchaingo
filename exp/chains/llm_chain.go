@@ -22,7 +22,7 @@ func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
 		llm:          llm,
 		OutputKey:    "text",
 		OutputParser: output_parsers.NewEmptyOutputParser(),
-		Memory:       memory.NewEmptyMemory(),
+		Memory:       memory.NewEmpty(),
 	}
 
 	return chain
