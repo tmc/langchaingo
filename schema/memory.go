@@ -8,7 +8,7 @@ type Memory interface {
 	// If None, return all memories
 	LoadMemoryVariables(inputs map[string]any) map[string]any
 	// Save the context of this model run to memory.
-	SaveContext(inputs map[string]any, outputs map[string]string) error
+	SaveContext(inputs map[string]any, outputs map[string]any) error
 	// Clear memory contents.
 	Clear() error
 }
