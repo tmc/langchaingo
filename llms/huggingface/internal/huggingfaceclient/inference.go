@@ -36,7 +36,8 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s%s", hfInferenceAPI, payload.Model), body) //nolint:lll
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
+		fmt.Sprintf("%s%s", hfInferenceAPI, payload.Model), body)
 	if err != nil {
 		return nil, err
 	}

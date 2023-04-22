@@ -9,7 +9,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
-const tokenEnvVarName = "OPENAI_API_KEY" //nolint:gosec
+const tokenEnvVarName = "OPENAI_API_KEY" //nolint:gosec // false positive
 
 var (
 	ErrEmptyResponse = errors.New("no response")

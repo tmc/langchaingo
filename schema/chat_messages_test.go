@@ -34,7 +34,8 @@ func TestGetBufferString(t *testing.T) {
 			},
 			humanPrefix: "Human",
 			aiPrefix:    "AI",
-			expected:    "Human: Hello, how are you?\nAI: I'm doing great!\nSystem: Please be polite.\nModerator: Keep the conversation on topic.", //nolint:lll
+			expected: "Human: Hello, how are you?\nAI: I'm doing great!\n" +
+				"System: Please be polite.\nModerator: Keep the conversation on topic.",
 			expectError: false,
 		},
 		{

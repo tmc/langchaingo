@@ -13,7 +13,8 @@ const tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
 
 var (
 	ErrEmptyResponse = errors.New("empty response")
-	ErrMissingToken  = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
+	ErrMissingToken  = errors.New("missing the Hugging Face API token. " +
+		"Set it in the HUGGINGFACEHUB_API_TOKEN environment variable")
 )
 
 type LLM struct {

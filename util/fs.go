@@ -11,11 +11,11 @@ import (
 // environment variables and tilde in the path.
 //
 // The following formats are supported:
-// /home/xxx/path/to/binary_name   - Full path
-// $VAR/path/to/binary_name        - Env variable expansion
-// ~/path/to/binary_name           - Tilde expansion
-// ./path/to/binary_name           - Relative path
-// binary_name                     - $PATH lookup
+// /home/xxx/path/to/binary_name   - Full path.
+// $VAR/path/to/binary_name        - Env variable expansion.
+// ~/path/to/binary_name           - Tilde expansion.
+// ./path/to/binary_name           - Relative path.
+// binary_name                     - $PATH lookup.
 func LookPath(path string) (string, error) {
 	// Expand tilde in the path
 	if strings.HasPrefix(path, "~") {
