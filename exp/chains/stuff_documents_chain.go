@@ -28,12 +28,12 @@ func NewStuffDocumentsChain(llmChain LLMChain) StuffDocumentsChain {
 func (c StuffDocumentsChain) Call(values map[string]any) (map[string]any, error) {
 	docsAny, ok := values[c.InputKey]
 	if !ok {
-		return map[string]any{}, fmt.Errorf("Document key %s not found", c.InputKey)
+		return nil, fmt.Errorf("Document key %s not found", c.InputKey)
 	}
 
 	docs, ok := docsAny.([]schema.Document)
 	if !ok {
-		return map[string]any{}, fmt.Errorf("Document key %s not of type []Document", c.InputKey)
+		return nil, fmt.Errorf("Document key %s not of type []Document", c.InputKey)
 	}
 
 	text := ""

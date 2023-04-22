@@ -24,7 +24,7 @@ func TestRetrievalQAChain(t *testing.T) {
 	r := testRetriever{}
 	llm, err := openai.New()
 	if err != nil {
-		t.Errorf("Unexpected error %s", err.Error())
+		t.Fatalf("Unexpected error %s", err.Error())
 		return
 	}
 
@@ -34,7 +34,7 @@ func TestRetrievalQAChain(t *testing.T) {
 		"query": "foz?",
 	})
 	if err != nil {
-		t.Errorf("Unexpected error %s", err.Error())
+		t.Fatalf("Unexpected error %s", err.Error())
 		return
 	}
 }

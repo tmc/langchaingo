@@ -32,7 +32,7 @@ func TestLLMChain(t *testing.T) {
 
 	resultAny, ok := resultChainValue["text"]
 	if !ok {
-		t.Error("No value in chain value text field")
+		t.Fatal("No value in chain value text field")
 		return
 	}
 
@@ -40,6 +40,6 @@ func TestLLMChain(t *testing.T) {
 	result = strings.TrimSpace(result)
 
 	if result != "Paris." {
-		t.Errorf("Expected to get Paris. Got %s", result)
+		t.Fatalf("Expected to get Paris. Got %s", result)
 	}
 }
