@@ -21,3 +21,11 @@ linters:
     - varnamelen
     - nlreturn
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
+
+linters-settings:
+  funlen:
+    lines: 90
+
+run:
+  skip-dirs:
+    - 'exp'
