@@ -1,8 +1,9 @@
 package prompts
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
+	"log"
 
 	"github.com/tmc/langchaingo/schema"
 )
@@ -153,12 +154,22 @@ type ChatPromptValue struct {
 
 // Formats the ChatPromptValue as a JSON string.
 func (v ChatPromptValue) String() string {
-	keyValueJSON := make([]string, 0)
-	for i := 0; i < len(v.messages); i++ {
-		keyValueJSON = append(keyValueJSON, fmt.Sprintf("{\"text\":\"%s\"}", v.messages[i].GetText()))
+	type chatMessage struct {
+		Text string `json:"text"`
 	}
 
+	chatMessages := make([]chatMessage, 0, len(v.messages))
+	for _, message := range v.messages {
+		chatMessages = append(chatMessages, chatMessage{message.GetText()})
+	}
 
+	str, err := json.Marshal(chatMessages)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return "[]"
+	}
+
+	return string(str)
 }
 
 func (v ChatPromptValue) ToChatMessages() []schema.ChatMessage {
