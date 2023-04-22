@@ -10,3 +10,5 @@
 - [ ] References existing implementations as appropriate.
 - [ ] Contains test coverage for new functions.
 - [ ] Passes all [`golangci-lint`](https://golangci-lint.run/) checks.
+- [ ] (remove and do not use this row unless you are a trusted contributor) I am an existing
+  contributor.

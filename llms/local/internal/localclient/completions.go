@@ -17,6 +17,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	// Append the prompt to the args
 	c.args = append(c.args, payload.Prompt)
 
+	// #nosec G204
 	out, err := exec.CommandContext(ctx, c.binPath, c.args...).Output()
 	if err != nil {
 		return nil, err
