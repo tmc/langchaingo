@@ -4,8 +4,8 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// Empty memory is a class that implement the memory interface, but does nothing
-// Used as default in multiple chains
+// Empty memory is a class that implement the memory interface, but does nothing.
+// Used as default in multiple chains.
 type Empty struct{}
 
 func NewEmpty() Empty {
