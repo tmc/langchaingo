@@ -31,16 +31,17 @@ func renderTemplate(template string, templateFormat string, inputValues map[stri
 	return formatter(template, inputValues)
 }
 
-type parsedFStringNode interface{}
-type fStringLiteral struct{ text string }
-type fStringVariable struct{ name string }
+type (
+	parsedFStringNode interface{}
+	fStringLiteral    struct{ text string }
+	fStringVariable   struct{ name string }
+)
 
 func paresFString(_template string) ([]parsedFStringNode, error) {
 	template := []rune(_template)
 	nodes := make([]parsedFStringNode, 0)
 
 	for i := 0; i < len(template); {
-
 		if template[i] == '{' && i+1 < len(template) && template[i+1] == '{' {
 			nodes = append(nodes, fStringLiteral{text: "{"})
 			i += 2
@@ -115,7 +116,6 @@ func interpolateFString(template string, values map[string]any) (string, error) 
 			output += fmt.Sprintf("%v", variableValue)
 		case fStringLiteral:
 			output += n.text
-
 		}
 	}
 

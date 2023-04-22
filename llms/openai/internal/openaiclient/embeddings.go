@@ -22,12 +22,12 @@ type embeddingResponsePayload struct {
 		Object    string    `json:"object"`
 		Embedding []float64 `json:"embedding"`
 		Index     int       `json:"index"`
-	}
+	} `json:"data"`
 	Model string `json:"model"`
 	Usage struct {
 		PromptTokens int `json:"prompt_tokens"`
 		TotalTokens  int `json:"total_tokens"`
-	}
+	} `json:"usage"`
 }
 
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
@@ -37,7 +37,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 	}
 
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.openai.com/v1/embeddings", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/embeddings", body)
 	if err != nil {
 		return nil, err
 	}

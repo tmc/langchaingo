@@ -7,6 +7,7 @@ import (
 )
 
 func TestGetBufferString(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		name        string
 		messages    []schema.ChatMessage
@@ -33,7 +34,7 @@ func TestGetBufferString(t *testing.T) {
 			},
 			humanPrefix: "Human",
 			aiPrefix:    "AI",
-			expected:    "Human: Hello, how are you?\nAI: I'm doing great!\nSystem: Please be polite.\nModerator: Keep the conversation on topic.",
+			expected:    "Human: Hello, how are you?\nAI: I'm doing great!\nSystem: Please be polite.\nModerator: Keep the conversation on topic.", //nolint:lll
 			expectError: false,
 		},
 		{
@@ -49,7 +50,9 @@ func TestGetBufferString(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			result, err := schema.GetBufferString(tc.messages, tc.humanPrefix, tc.aiPrefix)
 			if (err != nil) != tc.expectError {
 				t.Fatalf("expected error: %v, got: %v", tc.expectError, err)

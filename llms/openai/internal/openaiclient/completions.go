@@ -12,10 +12,11 @@ const (
 )
 
 type completionPayload struct {
-	Model       string `json:"model"`
-	Prompt      string `json:"prompt"`
-	Temperature int    `json:"temperature"`
-	MaxTokens   int    `json:"max_tokens"`
+	Model       string   `json:"model"`
+	Prompt      string   `json:"prompt"`
+	Temperature int      `json:"temperature"`
+	MaxTokens   int      `json:"max_tokens"`
+	StopWords   []string `json:"stop,omitempty"`
 }
 
 type completionResponsePayload struct {
@@ -40,12 +41,15 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 256
 	}
+	if len(payload.StopWords) == 0 {
+		payload.StopWords = nil
+	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.openai.com/v1/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", body)
 	if err != nil {
 		return nil, err
 	}

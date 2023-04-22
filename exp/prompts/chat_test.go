@@ -58,7 +58,6 @@ func TestChatTemplate(t *testing.T) {
 	// use cmp to compare:
 	if !cmp.Equal(chatMessages.ToChatMessages(), expectedChatMessages) {
 		t.Errorf("Chat template format prompt value chat messages not equal to expected. Diff: %s", cmp.Diff(chatMessages.ToChatMessages(), expectedChatMessages))
-
 	}
 
 	if !(chatMessages.String() == expectedString) {

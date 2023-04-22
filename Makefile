@@ -8,7 +8,19 @@ test:
 
 .PHONY: lint
 lint:
-	golangci-lint run ./...
+	golangci-lint run --color=always --sort-results --skip-dirs=exp ./...
+
+.PHONY: lint-exp
+lint-exp:
+	golangci-lint run --fix --config .golangci-exp.yaml ./...
+
+.PHONY: lint-fix
+lint-fix:
+	golangci-lint run --fix --skip-dirs=exp ./...
+
+.PHONY: lint-all
+lint-all:
+	golangci-lint run --color=always --sort-results ./...
 
 .PHONY: test-race
 test-race:
