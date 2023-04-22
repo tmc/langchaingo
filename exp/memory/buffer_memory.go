@@ -18,10 +18,10 @@ type Buffer struct {
 	MemoryKey      string
 }
 
-// statically assert that BufferMemory implement the memory interface.
+// Statically assert that Buffer implement the memory interface:
 var _ schema.Memory = &Buffer{}
 
-// NewBuffer creates a new buffer memory
+// NewBuffer is a function for crating a new buffer memory.
 func NewBuffer() *Buffer {
 	m := Buffer{
 		ChatHistory:    NewChatMessageHistory(),
