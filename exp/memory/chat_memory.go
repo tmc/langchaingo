@@ -2,7 +2,7 @@ package memory
 
 import "github.com/tmc/langchaingo/schema"
 
-// ChatMessageHistory stores chat messages
+// ChatMessageHistory stores chat messages.
 type ChatMessageHistory struct {
 	messages []schema.ChatMessage
 }

@@ -121,6 +121,6 @@ func getInputValueReturnToString(inputValue interface{}, inputValues map[string]
 	case string:
 		return value, nil
 	default:
-		return "", fmt.Errorf("Input values to buffer memory must be string. Got type %T. Input values: %v. Memory input key: %s", inputValue, inputValues, inputKey)
+		return "", fmt.Errorf("input values to buffer memory must be string. Got type %T. Input values: %v. Memory input key: %s", inputValue, inputValues, inputKey)
 	}
 }
