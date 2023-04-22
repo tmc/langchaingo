@@ -16,11 +16,11 @@ func NewEmpty() Empty {
 var _ schema.Memory = Empty{}
 
 func (m Empty) MemoryVariables() []string {
-	return []string{}
+	return nil
 }
 
 func (m Empty) LoadMemoryVariables(map[string]any) (map[string]any, error) {
-	return map[string]any{}, nil
+	return nil, nil
 }
 
 func (m Empty) SaveContext(inputs map[string]any, outputs map[string]any) error {
