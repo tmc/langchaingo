@@ -1,0 +1,30 @@
+linters:
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - test
+    - unused
+  disable:
+    - godox # We allow TODO lines.
+    - tagliatelle # As we're dealing with third parties we must accept snake case.
+    - wsl # We don't agree with wsl's style rules
+    - exhaustruct
+    - varnamelen
+    - nlreturn
+    - wrapcheck # TODO: we should probably enable this one (at least for new code).
+  exclude-rules:
+    - path: ^exp/.*.go
+      linters:
+      - errorlint
+# issues:
+#   new: true
+#   new-from-rev: HEAD

@@ -49,7 +49,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.openai.com/v1/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", body)
 	if err != nil {
 		return nil, err
 	}

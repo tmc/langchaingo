@@ -15,32 +15,8 @@ type Client struct {
 }
 
 // New returns a new local client.
-func New(binPath string, args string) (*Client, error) {
-	var parts []string
-	var currentPart string
-	var inDoubleQuote, inSingleQuote bool
-
-	for _, char := range args {
-		switch {
-		case char == ' ' && !inDoubleQuote && !inSingleQuote:
-			if currentPart != "" {
-				parts = append(parts, currentPart)
-				currentPart = ""
-			}
-		case char == '"' && !inSingleQuote:
-			inDoubleQuote = !inDoubleQuote
-		case char == '\'' && !inDoubleQuote:
-			inSingleQuote = !inSingleQuote
-		default:
-			currentPart += string(char)
-		}
-	}
-
-	if currentPart != "" {
-		parts = append(parts, currentPart)
-	}
-
-	c := &Client{binPath: binPath, args: parts}
+func New(binPath string, args ...string) (*Client, error) {
+	c := &Client{binPath: binPath, args: args}
 	return c, nil
 }
 

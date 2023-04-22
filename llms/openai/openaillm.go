@@ -3,17 +3,20 @@ package openai
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
-const tokenEnvVarName = "OPENAI_API_KEY"
+const tokenEnvVarName = "OPENAI_API_KEY" //nolint:gosec
 
-var ErrEmptyResponse = errors.New("no response")
-var ErrMissingToken = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
+var (
+	ErrEmptyResponse = errors.New("no response")
+	ErrMissingToken  = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
+
+	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+)
 
 type LLM struct {
 	client *openaiclient.Client
@@ -45,6 +48,7 @@ func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation
 	}, nil
 }
 
+// CreateEmbedding creates an embedding for the given input text.
 func (o *LLM) CreateEmbedding(inputTexts []string) ([][]float64, error) {
 	embeddings, err := o.client.CreateEmbedding(context.TODO(), &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
@@ -59,7 +63,7 @@ func (o *LLM) CreateEmbedding(inputTexts []string) ([][]float64, error) {
 	}
 
 	if len(inputTexts) != len(embeddings) {
-		return embeddings, fmt.Errorf("Number of input texts does not match number of vectors gotten")
+		return embeddings, ErrUnexpectedResponseLength
 	}
 
 	return embeddings, nil

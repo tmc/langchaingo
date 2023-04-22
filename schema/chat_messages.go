@@ -1,12 +1,16 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
 // ChatMessageType is the type of a chat message.
 type ChatMessageType string
+
+// ErrUnexpectedChatMessageType is returned when a chat message is of an unexpected type.
+var ErrUnexpectedChatMessageType = errors.New("unexpected chat message type")
 
 const (
 	// ChatMessageTypeAI is a message sent by an AI.
@@ -25,7 +29,7 @@ type ChatMessage interface {
 	GetType() ChatMessageType
 }
 
-// statically assert that the types implement the interface:
+// Statically assert that the types implement the interface.
 var (
 	_ ChatMessage = AIChatMessage{}
 	_ ChatMessage = HumanChatMessage{}
@@ -93,11 +97,11 @@ func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string
 		case ChatMessageTypeGeneric:
 			cgm, ok := m.(GenericChatMessage)
 			if !ok {
-				return "", fmt.Errorf("Got generic message type but couldn't cast to GenericChatMessage: %+v", m)
+				return "", fmt.Errorf("%w -%+v", ErrUnexpectedChatMessageType, m)
 			}
 			role = cgm.Role
 		default:
-			return "", fmt.Errorf("Got unsupported message type: %+v", m)
+			return "", ErrUnexpectedChatMessageType
 		}
 		stringMessages = append(stringMessages, fmt.Sprintf("%s: %s", role, m.GetText()))
 	}

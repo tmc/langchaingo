@@ -46,6 +46,7 @@ func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
 
 // Generate generates completions using the local LLM binary.
 func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation, error) {
+	_ = stopWords // TODO: use this
 	result, err := o.client.CreateCompletion(context.TODO(), &localclient.CompletionRequest{
 		Prompt: prompts[0],
 	})
