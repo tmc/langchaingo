@@ -36,7 +36,7 @@ func (c LLMChain) Call(values map[string]any) (map[string]any, error) {
 	var stop []string
 	promptValue, err := c.prompt.FormatPromptValue(values)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	if stopVal, ok := values["stop"].([]string); ok {
@@ -45,12 +45,12 @@ func (c LLMChain) Call(values map[string]any) (map[string]any, error) {
 
 	generations, err := c.llm.Generate([]string{promptValue.String()}, stop)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	finalOutput, err := c.OutputParser.ParseWithPrompt(generations[0].Text, promptValue)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	return map[string]any{c.OutputKey: finalOutput}, nil

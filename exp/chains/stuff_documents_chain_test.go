@@ -15,8 +15,7 @@ func TestStuffDocumentsChain(t *testing.T) {
 	}
 	model, err := openai.New()
 	if err != nil {
-		t.Errorf("Unexpected error %s", err)
-		return
+		t.Fatal(err)
 	}
 
 	prompt, err := prompts.NewPromptTemplate(
@@ -24,8 +23,7 @@ func TestStuffDocumentsChain(t *testing.T) {
 		[]string{"context"},
 	)
 	if err != nil {
-		t.Errorf("Unexpected error %s", err)
-		return
+		t.Fatal(err)
 	}
 
 	llmChain := NewLLMChain(model, prompt)
@@ -42,7 +40,6 @@ func TestStuffDocumentsChain(t *testing.T) {
 
 	_, err = Call(chain, inputValues)
 	if err != nil {
-		t.Errorf("Unexpected error %s", err.Error())
-		return
+		t.Fatal(err)
 	}
 }

@@ -17,7 +17,7 @@ func Call(c Chain, inputValues map[string]any) (map[string]any, error) {
 
 	newValues, err := c.GetMemory().LoadMemoryVariables(inputValues)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	for key, value := range newValues {
@@ -26,12 +26,12 @@ func Call(c Chain, inputValues map[string]any) (map[string]any, error) {
 
 	outputValues, err := c.Call(fullValues)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	err = c.GetMemory().SaveContext(inputValues, outputValues)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	return outputValues, nil
