@@ -85,7 +85,7 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
 	result, err := m.LoadMemoryVariables(map[string]any{})
 	if err != nil {
-
+		t.Fatal(err)
 	}
 
 	if !cmp.Equal(result, expected) {
