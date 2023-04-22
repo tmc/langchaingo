@@ -59,7 +59,7 @@ var DefaultQAPrompt, _ = prompts.NewPromptTemplate(
 	[]string{"context", "question"},
 )
 
-// TODO: add conditional after chat model is added
+// TODO: add conditional after chat model is added.
 var QAPromptSelector = prompts.NewConditionalPromptSelector(DefaultQAPrompt, []prompts.Conditional{})
 
 func loadQAStuffChain(llm llms.LLM) StuffDocumentsChain {

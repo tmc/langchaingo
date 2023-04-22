@@ -57,7 +57,6 @@ func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*On
 		verbose:    opts["verbose"].(bool),
 		maxRetries: opts["maxRetries"].(int),
 	}, nil
-
 }
 
 // Run is an implementation of the AgentExecutor interface. It takes a query as input
@@ -113,7 +112,7 @@ func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
 
 	// Use the updated resp in the next iteration
 	return newResp["text"].(string), nil
-
+}
 }
 func (a *OneShotZeroAgent) plan(info string) (*schema.AgentAction, *schema.AgentFinish) {
 	action := getAgentAction(info)

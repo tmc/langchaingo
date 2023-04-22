@@ -2,7 +2,7 @@ package output_parsers
 
 import "github.com/tmc/langchaingo/exp/prompts"
 
-// Output parser that does nothing
+// Output parser that does nothing.
 type EmptyOutputParser struct{}
 
 func (p EmptyOutputParser) GetFormatInstructions() string  { return "" }

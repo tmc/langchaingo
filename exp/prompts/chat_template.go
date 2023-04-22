@@ -151,15 +151,14 @@ type ChatPromptValue struct {
 	messages []schema.ChatMessage
 }
 
-// Formats the ChatPromptValue as a JSON string
+// Formats the ChatPromptValue as a JSON string.
 func (v ChatPromptValue) String() string {
-
 	keyValueJSON := make([]string, 0)
 	for i := 0; i < len(v.messages); i++ {
 		keyValueJSON = append(keyValueJSON, fmt.Sprintf("{\"text\":\"%s\"}", v.messages[i].GetText()))
 	}
 
-	return fmt.Sprintf("[%s]", strings.Join(keyValueJSON, ",")) //Joins the string with [] around creating an array of objects
+
 }
 
 func (v ChatPromptValue) ToChatMessages() []schema.ChatMessage {

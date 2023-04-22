@@ -16,7 +16,6 @@ type test struct {
 
 var tests = []test{
 	{
-
 		text:         "Hi.\nI'm Harrison.\n\nHow?\na\nb",
 		chunkOverlap: 1,
 		chunkSize:    20,
@@ -42,7 +41,6 @@ var tests = []test{
 		},
 	},
 	{
-
 		text:         "Hi.\nI'm Harrison.\n\nHow?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb",
 		chunkOverlap: 1,
 		chunkSize:    40,
@@ -85,5 +83,4 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			t.Logf("Result creating documents with recursive character splitter not equal expected. \n Got:\n %v \nWant:\n %v \n", docs, test.expectedDocs)
 		}
 	}
-
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/exp/tools/serpapi/internal"
 )
 
-//Create a new tool for serpapi to search on internet
+// Create a new tool for serpapi to search on internet.
 func New() (*tools.Tool, error) {
 	client, err := internal.New()
 	if err != nil {
@@ -30,5 +30,4 @@ func New() (*tools.Tool, error) {
 			return strings.Join(strings.Fields(result), " "), nil
 		},
 	}, nil
-
 }

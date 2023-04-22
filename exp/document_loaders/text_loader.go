@@ -9,7 +9,7 @@ import (
 
 type TextLoader struct {
 	filePath string
-	//Todo: blob equivalent
+	// Todo: blob equivalent
 }
 
 func NewTextLoaderFromFile(filePath string) TextLoader {

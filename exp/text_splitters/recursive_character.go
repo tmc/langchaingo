@@ -19,8 +19,7 @@ func NewRecursiveCharactersSplitter() RecursiveCharactersSplitter {
 }
 
 func (s RecursiveCharactersSplitter) SplitText(text string) ([]string, error) {
-
-	//Find the appropriate separator
+	// Find the appropriate separator
 	separator := s.Separators[len(s.Separators)-1]
 	for _, s := range s.Separators {
 		if s == "" {
@@ -34,15 +33,14 @@ func (s RecursiveCharactersSplitter) SplitText(text string) ([]string, error) {
 		}
 	}
 
-	//Split the text
+
 	splits := strings.Split(text, separator)
 
-	//Merge
+
 	finalChunks := make([]string, 0)
 	goodSplits := make([]string, 0)
 
 	for _, split := range splits {
-
 		if len(split) < s.ChunkSize {
 			goodSplits = append(goodSplits, split)
 			continue

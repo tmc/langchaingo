@@ -52,13 +52,12 @@ func getBufferString(messages []schema.ChatMessage, humanPrefix, aiPrefix string
 			role = humanPrefix
 		default:
 			role = string(message.GetType())
-
 		}
 
 		stringMessages = append(stringMessages, fmt.Sprintf("%s: %s", role, messages[i].GetText()))
 	}
 
-	return strings.Join(stringMessages[:], "\n")
+	return strings.Join(stringMessages, "\n")
 }
 
 type EmptyMemory struct{}
@@ -66,9 +65,11 @@ type EmptyMemory struct{}
 func (m EmptyMemory) MemoryVariables() []string {
 	return []string{}
 }
+
 func (m EmptyMemory) LoadMemoryVariables(map[string]any) map[string]any {
 	return map[string]any{}
 }
+
 func (m EmptyMemory) SaveContext(inputs map[string]any, outputs map[string]any) error {
 	return nil
 }

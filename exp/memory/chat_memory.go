@@ -10,6 +10,7 @@ func (h *ChatMessageHistory) GetMessages() []schema.ChatMessage { return h.messa
 func (h *ChatMessageHistory) AddAiMessage(text string) {
 	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
 }
+
 func (h *ChatMessageHistory) AddUserMessage(text string) {
 	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
 }
@@ -28,7 +29,7 @@ func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory 
 
 type NewChatMessageOption func(m *ChatMessageHistory)
 
-// Option for NewChatMessageHistory adding previous messages to the history
+// Option for NewChatMessageHistory adding previous messages to the history.
 func WithPreviousMessages(previousMessages []schema.ChatMessage) NewChatMessageOption {
 	return func(m *ChatMessageHistory) {
 		m.messages = append(m.messages, previousMessages...)

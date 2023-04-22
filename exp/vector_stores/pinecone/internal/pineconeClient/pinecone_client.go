@@ -37,7 +37,7 @@ func New(options ...ClientOption) (Client, error) {
 		option(&c)
 	}
 
-	//Check if missing required options
+
 	if c.apiKey == "" {
 		return c, fmt.Errorf("No value set for api key. Use WithApiKey when creating a new client")
 	}
@@ -57,7 +57,7 @@ func New(options ...ClientOption) (Client, error) {
 		return c, err
 	}
 
-	//If name is not specified the name will be set to a uuid. If not, an index will be created with the name. If the index already exist no error will be given to the user.
+
 	if c.IndexName == "" {
 		c.IndexName = uuid.New().String()
 		err := c.createIndex()
@@ -124,7 +124,7 @@ func WithEnvironment(environment string) ClientOption {
 	}
 }
 
-// Must be set
+// Must be set.
 func WithDimensions(vectorDimension int) ClientOption {
 	return func(c *Client) {
 		c.vectorDimension = vectorDimension
@@ -138,21 +138,21 @@ func WithIndexName(name string) ClientOption {
 	}
 }
 
-// Default is one
+// Default is one.
 func WithPods(numPods int) ClientOption {
 	return func(c *Client) {
 		c.pods = numPods
 	}
 }
 
-// Default is "s1"
+// Default is "s1".
 func WithPodType(podType string) ClientOption {
 	return func(c *Client) {
 		c.podType = podType
 	}
 }
 
-// Context used for the create index and whoami calls
+// Context used for the create index and whoami calls.
 func WithContext(ctx context.Context) ClientOption {
 	return func(c *Client) {
 		c.context = ctx
@@ -167,14 +167,14 @@ const (
 	Dotproduct Metric = "dotproduct"
 )
 
-// The distance metric to be used for similarity search. You can use 'euclidean', 'cosine', or 'dotproduct'. Default is cosine
+// The distance metric to be used for similarity search. You can use 'euclidean', 'cosine', or 'dotproduct'. Default is cosine.
 func WithMetric(metric Metric) ClientOption {
 	return func(c *Client) {
 		c.metric = string(metric)
 	}
 }
 
-// Default is one
+// Default is one.
 func WithReplicas(replicas int) ClientOption {
 	return func(c *Client) {
 		c.replicas = replicas

@@ -32,7 +32,7 @@ type LOCMetadata struct {
 	Lines LineData
 }
 
-// Creates documents with a text splitter
+// Creates documents with a text splitter.
 func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
@@ -56,12 +56,11 @@ func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[
 		}
 
 		for _, chunk := range chunks {
-
 			// Code for adding line number to the metadata of the chunk.
 			// Does not work because some chunks generated are very small and can be written multiple places in the file
 			// Makes it impossible to find the correct index
 
-			//Find complete number of newlines between last chunk and current chunk
+			// Find complete number of newlines between last chunk and current chunk
 			/* 			numberOfIntermediateNewLines := 0
 			   			if !first {
 			   				prevIndexChunk := strings.Index(text, prevChunk)
@@ -142,7 +141,6 @@ func MergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 
 	doc := joinDocs(currentDoc, separator)
 	if doc != "" {
-
 		docs = append(docs, doc)
 	}
 

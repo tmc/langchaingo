@@ -44,9 +44,7 @@ func New(
 	tools []tools.Tool,
 	agentType AgentType,
 	opts ...Options,
-
 ) (executor.AgentExecutor, error) {
-
 	options := defaultOptions()
 	for _, opt := range opts {
 		opt(&options)
