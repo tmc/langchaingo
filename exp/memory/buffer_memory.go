@@ -18,10 +18,10 @@ type Buffer struct {
 	MemoryKey      string
 }
 
-// statically assert that Buffer implement the memory interface:
+// Statically assert that Buffer implement the memory interface:
 var _ schema.Memory = &Buffer{}
 
-// Creates a new buffer memory.
+// NewBuffer is a function for crating a new buffer memory.
 func NewBuffer() *Buffer {
 	m := Buffer{
 		ChatHistory:    NewChatMessageHistory(),
@@ -36,12 +36,12 @@ func NewBuffer() *Buffer {
 	return &m
 }
 
-// Gets the input key the buffer memory class will load dynamically.
+// MemoryVariables gets the input key the buffer memory class will load dynamically.
 func (m *Buffer) MemoryVariables() []string {
 	return []string{m.InputKey}
 }
 
-// Returns the previous chat messages. Previous chat messages are returned via the key specified in the MemoryKey field. Defaults to "history".
+// LoadMemoryVariables returns the previous chat messages stored. Previous chat messages are returned via the key specified in the MemoryKey field. Defaults to "history".
 // If ReturnMessages is true the output is of the type []schema.ChatMessage.
 // If ReturnMessages is false the output is a buffer string of the chat messages.
 func (m *Buffer) LoadMemoryVariables(inputValuesGiven map[string]any) (map[string]any, error) {
@@ -61,7 +61,7 @@ func (m *Buffer) LoadMemoryVariables(inputValuesGiven map[string]any) (map[strin
 	}, nil
 }
 
-// Adds input values as a user message and output values as ai message.
+// SaveContext saves input value as a user message and output value as ai message.
 // By default the input and output key is an empty string. In cases where this is not changed the input and output values must only contain one entry. The two entries from the input and output values will be added as a user and ai message respectively.
 // If a input key is set this key will be used to get the user message from the inputValues. The same is true for the output values map.
 // The input and output values used has to be a string.
@@ -83,7 +83,7 @@ func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string
 	return nil
 }
 
-// Sets the chat messages to a new and empty chat message history.
+// Clear sets the chat messages to a new and empty chat message history.
 func (m *Buffer) Clear() error {
 	m.ChatHistory = NewChatMessageHistory()
 	return nil
