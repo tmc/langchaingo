@@ -18,7 +18,7 @@ type Buffer struct {
 	MemoryKey      string
 }
 
-// Statically assert that Buffer implement the memory interface:
+// Statically assert that Buffer implement the memory interface.
 var _ schema.Memory = &Buffer{}
 
 // NewBuffer is a function for crating a new buffer memory.

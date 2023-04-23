@@ -26,7 +26,6 @@ func (h *ChatMessageHistory) Messages() []schema.ChatMessage {
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-// AddAIMessage adds an AIMessage to the chat message history.
 func (h *ChatMessageHistory) AddAIMessage(text string) {
 	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
 }
@@ -36,7 +35,6 @@ func (h *ChatMessageHistory) AddUserMessage(text string) {
 	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
 }
 
-// NewChatMessageOption is a function type that can be used when creating a new chat message history.
 // NewChatMessageOption is a function for creating new chat message history
 // with other then the default values.
 type NewChatMessageOption func(m *ChatMessageHistory)
