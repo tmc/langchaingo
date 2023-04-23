@@ -3,31 +3,25 @@ package document_loaders
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTextLoader(t *testing.T) {
+	t.Parallel()
+
 	loader := NewTextLoaderFromFile("./testdata/test.txt")
 
 	docs, err := loader.Load()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(docs) != 1 {
-		t.Errorf("Number of docs from text loader expected to be 1")
-	}
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
 
 	expectedPageContent := "Foo Bar Baz"
-	if docs[0].PageContent != expectedPageContent {
-		t.Errorf("Page content form text loader not the same as expected. Got:\n %s\nExpect:\n%s", docs[0].PageContent, expectedPageContent)
-	}
+	assert.Equal(t, docs[0].PageContent, expectedPageContent)
 
 	expectedMetadata := map[string]any{
 		"source": "./testdata/test.txt",
 	}
 
-	if !cmp.Equal(docs[0].Metadata, expectedMetadata) {
-		t.Errorf("Meta data form text loader not the same as expected. Got:\n %s\nExpect:%s\n", docs[0].Metadata, expectedMetadata)
-	}
+	assert.Equal(t, docs[0].Metadata, expectedMetadata)
 }
