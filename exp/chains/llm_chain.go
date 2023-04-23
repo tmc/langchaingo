@@ -16,7 +16,7 @@ type LLMChain struct {
 	OutputParser output_parsers.OutputParser
 }
 
-func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
