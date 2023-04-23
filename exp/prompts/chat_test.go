@@ -3,25 +3,25 @@ package prompts
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func TestChatTemplate(t *testing.T) {
+	t.Parallel()
+
 	systemPrompt, err := NewPromptTemplate("Here's some context: {context}", []string{"context"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	userPrompt, err := NewPromptTemplate("Hello AI. Give me a long response. {question}", []string{"question"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	aiPrompt, err := NewPromptTemplate("Very good question. My answer to {question} is {answer}", []string{"answer", "question"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	aiPrompt, err := NewPromptTemplate(
+		"Very good question. My answer to {question} is {answer}",
+		[]string{"answer", "question"},
+	)
+	require.NoError(t, err)
 
 	messages := []Message{
 		NewSystemMessage(systemPrompt),
@@ -30,37 +30,28 @@ func TestChatTemplate(t *testing.T) {
 	}
 
 	_, err = NewChatTemplate(messages, []string{"answer", "context"})
-	if err == nil {
-		t.Errorf("Expected error creating chat template with too few variables")
-	}
+	require.NoError(t, err)
 
 	_, err = NewChatTemplate(messages, []string{"answer", "context", "question", "foo"})
-	if err == nil {
-		t.Errorf("Expected error creating chat template with too many variables")
-	}
+	require.NoError(t, err)
 
 	chatTemplate, err := NewChatTemplate(messages, []string{"answer", "context", "question"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	chatMessages, err := chatTemplate.FormatPromptValue(map[string]any{"context": "foo", "question": "bar", "answer": "foobar"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	chatMessages, err := chatTemplate.FormatPromptValue(map[string]any{
+		"context":  "foo",
+		"question": "bar",
+		"answer":   "foobar",
+	})
+	require.NoError(t, err)
+
 	expectedChatMessages := []schema.ChatMessage{
 		schema.SystemChatMessage{Text: "Here's some context: foo"},
 		schema.HumanChatMessage{Text: "Hello AI. Give me a long response. bar"},
 		schema.AIChatMessage{Text: "Very good question. My answer to bar is foobar"},
 	}
+
 	expectedString := `[{"text":"Here's some context: foo"},{"text":"Hello AI. Give me a long response. bar"},{"text":"Very good question. My answer to bar is foobar"}]`
-
-	// use cmp to compare:
-	if !cmp.Equal(chatMessages.ToChatMessages(), expectedChatMessages) {
-		t.Errorf("Chat template format prompt value chat messages not equal to expected. Diff: %s", cmp.Diff(chatMessages.ToChatMessages(), expectedChatMessages))
-	}
-
-	if !(chatMessages.String() == expectedString) {
-		t.Errorf("Chat template format prompt value string not equal to expected.\n Got:\n %v\n Expect:\n %v", chatMessages.String(), expectedString)
-	}
+	assert.Equal(t, expectedChatMessages, chatMessages.ToChatMessages())
+	assert.Equal(t, expectedString, chatMessages.String())
 }

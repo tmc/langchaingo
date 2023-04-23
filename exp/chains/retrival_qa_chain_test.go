@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -18,23 +19,20 @@ func (r testRetriever) GetRelevantDocuments(query string) ([]schema.Document, er
 }
 
 func TestRetrievalQAChain(t *testing.T) {
+	t.Parallel()
+
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
+
 	r := testRetriever{}
 	llm, err := openai.New()
-	if err != nil {
-		t.Errorf("Unexpected error %s", err.Error())
-		return
-	}
+	require.NoError(t, err)
 
 	chain := NewRetrievalQAChainFromLLM(llm, r)
 
 	_, err = Call(chain, map[string]any{
 		"query": "foz?",
 	})
-	if err != nil {
-		t.Errorf("Unexpected error %s", err.Error())
-		return
-	}
+	require.NoError(t, err)
 }

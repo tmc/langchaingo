@@ -5,41 +5,38 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func TestLLMChain(t *testing.T) {
+	t.Parallel()
+
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 	model, err := openai.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	prompt, err := prompts.NewPromptTemplate("What is the capital of {country}", []string{"country"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)
 
-	resultChainValue, err := Call(chain, map[string]any{"country": "France", "stop": []string{"\nObservation", "\n\tObservation"}})
-	if err != nil {
-		t.Fatal(err)
-	}
+	resultChainValue, err := Call(chain,
+		map[string]any{
+			"country": "France",
+			"stop":    []string{"\nObservation", "\n\tObservation"},
+		},
+	)
+	require.NoError(t, err)
 
 	resultAny, ok := resultChainValue["text"]
-	if !ok {
-		t.Error("No value in chain value text field")
-		return
-	}
+	require.True(t, ok)
 
 	result, _ := resultAny.(string)
 	result = strings.TrimSpace(result)
-
-	if result != "Paris." {
-		t.Errorf("Expected to get Paris. Got %s", result)
-	}
+	assert.Equal(t, "Paris", result)
 }
