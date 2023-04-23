@@ -21,6 +21,7 @@ linters:
     - varnamelen
     - nlreturn
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
+    - testpackage
 
 linters-settings:
   funlen:
