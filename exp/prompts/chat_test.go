@@ -30,10 +30,10 @@ func TestChatTemplate(t *testing.T) {
 	}
 
 	_, err = NewChatTemplate(messages, []string{"answer", "context"})
-	require.NoError(t, err)
+	require.Error(t, err)
 
 	_, err = NewChatTemplate(messages, []string{"answer", "context", "question", "foo"})
-	require.NoError(t, err)
+	require.Error(t, err)
 
 	chatTemplate, err := NewChatTemplate(messages, []string{"answer", "context", "question"})
 	require.NoError(t, err)

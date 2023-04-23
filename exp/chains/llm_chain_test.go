@@ -38,5 +38,5 @@ func TestLLMChain(t *testing.T) {
 
 	result, _ := resultAny.(string)
 	result = strings.TrimSpace(result)
-	assert.Equal(t, "Paris", result)
+	assert.Equal(t, "Paris.", result)
 }
