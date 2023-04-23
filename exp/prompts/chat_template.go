@@ -8,10 +8,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-/*
-The Message struct has the responsibilities of BaseMessageStringPromptTemplate and all sub classes in the typeScript version.
-*/
-
+// The Message struct has the responsibilities of BaseMessageStringPromptTemplate and all sub classes in the typeScript version.
 type Message struct {
 	inputVariables []string
 	prompt         Template
