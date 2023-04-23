@@ -27,8 +27,6 @@ func getEnvironmentAndApiKey(t *testing.T) (string, string) {
 }
 
 func TestUpsertAndQuery(t *testing.T) {
-	t.Parallel()
-
 	environment, apiKey := getEnvironmentAndApiKey(t)
 
 	c, err := pineconeClient.New(

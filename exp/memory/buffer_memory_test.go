@@ -11,15 +11,15 @@ import (
 func TestBufferMemory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBufferMemory()
-	result1 := m.LoadMemoryVariables(map[string]any{})
+	m := NewBuffer()
+	result1, err := m.LoadMemoryVariables(map[string]any{})
 	expected1 := map[string]any{"history": ""}
 	assert.Equal(t, expected1, result1)
 
-	err := m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
 
-	result2 := m.LoadMemoryVariables(map[string]any{})
+	result2, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
 
 	expected2 := map[string]any{"history": "Human: bar\nAI: foo"}
@@ -29,16 +29,17 @@ func TestBufferMemory(t *testing.T) {
 func TestBufferMemoryReturnMessage(t *testing.T) {
 	t.Parallel()
 
-	m := NewBufferMemory()
+	m := NewBuffer()
 	m.ReturnMessages = true
-	result1 := m.LoadMemoryVariables(map[string]any{})
 	expected1 := map[string]any{"history": []schema.ChatMessage{}}
+	result1, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 	assert.Equal(t, expected1, result1)
 
-	err := m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
 
-	result2 := m.LoadMemoryVariables(map[string]any{})
+	result2, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
@@ -48,14 +49,14 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 		}),
 	)
 
-	expected2 := map[string]any{"history": expectedChatHistory.GetMessages()}
+	expected2 := map[string]any{"history": expectedChatHistory.Messages()}
 	assert.Equal(t, expected2, result2)
 }
 
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBufferMemory()
+	m := NewBuffer()
 	m.ChatHistory = NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Text: "bar"},
@@ -63,7 +64,8 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 		}),
 	)
 
-	result := m.LoadMemoryVariables(map[string]any{})
+	result, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
 	assert.Equal(t, expected, result)
 }

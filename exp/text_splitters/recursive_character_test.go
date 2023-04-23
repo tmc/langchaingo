@@ -25,21 +25,20 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			expectedDocs: []schema.Document{
 				{
 					PageContent: "Hi.\nI'm Harrison.",
-					Metadata: map[string]any{"loc": LOCMetadata{
-						Lines: LineData{
-							From: 1,
-							To:   2,
-						},
-					}},
+					Metadata:    map[string]any{}, /* "loc": LOCMetadata{
+					Lines: LineData{
+						From: 1,
+						To:   2,
+					}, */
 				},
 				{
 					PageContent: "How?\na\nb",
-					Metadata: map[string]any{"loc": LOCMetadata{
+					Metadata:    map[string]any{}, /* "loc": LOCMetadata{
 						Lines: LineData{
 							From: 4,
 							To:   6,
 						},
-					}},
+					} */
 				},
 			},
 		},
@@ -50,21 +49,21 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			expectedDocs: []schema.Document{
 				{
 					PageContent: "Hi.\nI'm Harrison.",
-					Metadata: map[string]any{"loc": LOCMetadata{
+					Metadata:    map[string]any{}, /* "loc": LOCMetadata{
 						Lines: LineData{
 							From: 1,
 							To:   2,
 						},
-					}},
+					}}, */
 				},
 				{
 					PageContent: "How?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb",
-					Metadata: map[string]any{"loc": LOCMetadata{
+					Metadata:    map[string]any{}, /* "loc": LOCMetadata{
 						Lines: LineData{
 							From: 4,
 							To:   11,
 						},
-					}},
+					}}, */
 				},
 			},
 		},

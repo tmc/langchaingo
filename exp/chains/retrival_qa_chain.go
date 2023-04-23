@@ -30,17 +30,17 @@ func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) Retrie
 func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 	queryAny, ok := values[c.InputKey]
 	if !ok {
-		return map[string]any{}, fmt.Errorf("Input key %s not found", c.InputKey)
+		return nil, fmt.Errorf("Input key %s not found", c.InputKey)
 	}
 
 	query, ok := queryAny.(string)
 	if !ok {
-		return map[string]any{}, fmt.Errorf("Input value %s not string", c.InputKey)
+		return nil, fmt.Errorf("Input value %s not string", c.InputKey)
 	}
 
 	docs, err := c.retriever.GetRelevantDocuments(query)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	inputs := map[string]any{
@@ -50,7 +50,7 @@ func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 
 	result, err := Call(c.combineDocumentChain, inputs)
 	if err != nil {
-		return map[string]any{}, err
+		return nil, err
 	}
 
 	if c.ReturnSourceDocuments {
@@ -61,5 +61,5 @@ func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 }
 
 func (c RetrievalQAChain) GetMemory() schema.Memory {
-	return memory.NewEmptyMemory()
+	return memory.NewEmpty()
 }
