@@ -1,4 +1,4 @@
-package outputParser
+package outputparser
 
 import (
 	"strings"
@@ -33,7 +33,7 @@ func (p CommaSeparatedList) Parse(text string) ([]string, error) {
 	return values, nil
 }
 
-// Parse with prompts does the same as Parse
+// Parse with prompts does the same as Parse.
 func (p CommaSeparatedList) ParseWithPrompt(text string, _ schema.PromptValue) ([]string, error) {
 	return p.Parse(text)
 }

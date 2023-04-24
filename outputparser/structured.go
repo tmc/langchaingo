@@ -1,4 +1,4 @@
-package outputParser
+package outputparser
 
 import (
 	"encoding/json"
