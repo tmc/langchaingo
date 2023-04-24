@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/exp/chains"
-	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	template := "What is a good name for a company that makes {product}?"
+	template := "What is a good name for a company that makes {{.product}}?"
 	prompt, err := prompts.NewPromptTemplate(template, []string{"product"})
 	if err != nil {
 		log.Fatal(err)

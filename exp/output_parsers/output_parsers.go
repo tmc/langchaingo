@@ -1,11 +1,11 @@
 package output_parsers
 
-import "github.com/tmc/langchaingo/exp/prompts"
+import "github.com/tmc/langchaingo/schema"
 
 type OutputParser interface {
 	GetFormatInstructions() string
 	Parse(text string) (any, error)
-	ParseWithPrompt(text string, prompt prompts.PromptValue) (any, error)
+	ParseWithPrompt(text string, prompt schema.PromptValue) (any, error)
 }
 
 type OutputParserException struct {

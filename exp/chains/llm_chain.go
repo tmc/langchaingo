@@ -3,20 +3,20 @@ package chains
 import (
 	"github.com/tmc/langchaingo/exp/memory"
 	"github.com/tmc/langchaingo/exp/output_parsers"
-	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
 
 type LLMChain struct {
-	prompt       prompts.Template
+	prompt       prompts.FormatPrompter
 	llm          llms.LLM
 	OutputKey    string
 	Memory       schema.Memory
 	OutputParser output_parsers.OutputParser
 }
 
-func NewLLMChain(llm llms.LLM, prompt prompts.Template) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.FormatPrompter) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
@@ -34,7 +34,7 @@ func (c LLMChain) GetMemory() schema.Memory {
 
 func (c LLMChain) Call(values map[string]any) (map[string]any, error) {
 	var stop []string
-	promptValue, err := c.prompt.FormatPromptValue(values)
+	promptValue, err := c.prompt.FormatPrompt(values)
 	if err != nil {
 		return nil, err
 	}
