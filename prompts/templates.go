@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/samber/lo"
+	"golang.org/x/exp/maps"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -31,8 +31,8 @@ const (
 // Interpolator is the function that interpolates the given template with the given values.
 type Interpolator func(string, TemplateFormat, map[string]any) (string, error)
 
-// DefaultFormatterMapping is the default mapping of TemplateFormat to Interpolator.
-var DefaultFormatterMapping = map[TemplateFormat]Interpolator{
+// defaultFormatterMapping is the default mapping of TemplateFormat to Interpolator.
+var defaultformatterMapping = map[TemplateFormat]Interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
 }
 
@@ -57,14 +57,14 @@ func newInvalidTemplateError(gotTemplateFormat TemplateFormat) error {
 	return fmt.Errorf("%w, got: %s, should be one of %s",
 		ErrInvalidTemplateFormat,
 		gotTemplateFormat,
-		lo.Keys(DefaultFormatterMapping),
+		maps.Keys(defaultformatterMapping),
 	)
 }
 
 // CheckValidTemplate checks if the template is valid through checking whether the given
 // TemplateFormat is available and whether the template can be rendered.
 func CheckValidTemplate(template string, templateFormat TemplateFormat, inputVariables []string) error {
-	_, ok := DefaultFormatterMapping[templateFormat]
+	_, ok := defaultformatterMapping[templateFormat]
 	if !ok {
 		return newInvalidTemplateError(templateFormat)
 	}
@@ -80,7 +80,7 @@ func CheckValidTemplate(template string, templateFormat TemplateFormat, inputVar
 
 // RenderTemplate renders the template with the given values.
 func RenderTemplate(tmpl string, tmplFormat TemplateFormat, values map[string]any) (string, error) {
-	formatter, ok := DefaultFormatterMapping[tmplFormat]
+	formatter, ok := defaultformatterMapping[tmplFormat]
 	if !ok {
 		return "", newInvalidTemplateError(tmplFormat)
 	}
