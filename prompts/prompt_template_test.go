@@ -1,10 +1,10 @@
 package prompts
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPromptTemplateFormatPrompt(t *testing.T) {
@@ -62,12 +62,14 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 				PartialVariables: tc.partialVars,
 			}
 			fp, err := p.FormatPrompt(tc.vars)
-			if tc.wantErr {
-				require.Error(t, err)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("PromptTemplate.FormatPrompt() error = %v, wantErr %v", err, tc.wantErr)
 				return
 			}
-			require.NoError(t, err)
-			got := fp.String()
+			if tc.wantErr {
+				return
+			}
+			got := fmt.Sprint(fp)
 			if cmp.Diff(tc.expected, got) != "" {
 				t.Errorf("unexpected prompt output (-want +got):\n%s", cmp.Diff(tc.expected, got))
 			}
