@@ -15,20 +15,16 @@ var (
 	ErrInvalidPartialVariableType = errors.New("invalid partial variable type")
 )
 
-// Formatter is an interface for formatting a map of values into a string.
-type Formatter interface {
-	Format(values map[string]any) (string, error)
-}
-
-// FormatPrompter is an interface for formatting a map of values into a prompt value.
-type FormatPrompter interface {
-	FormatPrompt(values map[string]any) (schema.PromptValue, error)
-}
-
 // PromptTemplate contains common fields for all prompt templates.
 type PromptTemplate struct {
 	// A list of variable names the prompt template expects.
 	InputVariables []string
+
+	// Template is the prompt template.
+	Template string
+
+	// TemplateFormat is the format of the prompt template.
+	TemplateFormat TemplateFormat
 
 	// OutputParser is a function that parses the output of the prompt template.
 	OutputParser schema.OutputParser[any]
@@ -36,6 +32,53 @@ type PromptTemplate struct {
 	// PartialVariables represents a map of variable names to values or functions that return values.
 	// If the value is a function, it will be called when the prompt template is rendered.
 	PartialVariables map[string]any
+}
+
+var (
+	_ Formatter      = (*PromptTemplate)(nil)
+	_ FormatPrompter = (*PromptTemplate)(nil)
+)
+
+// Format formats the prompt template and returns a string value.
+func (p *PromptTemplate) Format(values map[string]any) (string, error) {
+	if err := checkInputVariables(p.InputVariables); err != nil {
+		return "", err
+	}
+	if err := checkPartialVariables(p.PartialVariables); err != nil {
+		return "", err
+	}
+	resolvedValues, err := resolvePartialValues(p.PartialVariables, values)
+	if err != nil {
+		return "", err
+	}
+	return RenderTemplate(p.Template, p.TemplateFormat, resolvedValues)
+}
+
+// FormatPrompt formats the prompt template and returns a string prompt value.
+func (p *PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
+	f, err := p.Format(values)
+	if err != nil {
+		return nil, err
+	}
+	return StringPromptValue(f), nil
+}
+
+func resolvePartialValues(partialValues map[string]any, values map[string]any) (map[string]any, error) {
+	resolvedValues := make(map[string]any)
+	for variable, value := range partialValues {
+		switch value := value.(type) {
+		case string:
+			resolvedValues[variable] = value
+		case func() string:
+			resolvedValues[variable] = value()
+		default:
+			return nil, fmt.Errorf("%w: %v", ErrInvalidPartialVariableType, variable)
+		}
+	}
+	for variable, value := range values {
+		resolvedValues[variable] = value
+	}
+	return resolvedValues, nil
 }
 
 // checkInputVariables validates the input variable names do not include restricted names.

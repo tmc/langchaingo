@@ -13,43 +13,34 @@ import (
 // not supported.
 var ErrInvalidTemplateFormat = errors.New("invalid template format")
 
-// TemplateFormat is the format of the template, options: go-template, f-string, jinja2.
+// TemplateFormat is the format of the template.
 type TemplateFormat string
 
 const (
-	// TemplateFormatGoTemplate is the format for Go Template
-	// TemplateFormatGoTemplate.
+	// TemplateFormatGoTemplate is the format for go-template.
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
-	// TemplateFormatFString is the format for f-string
-	// TODO: Add support for f-string.
-	TemplateFormatFString TemplateFormat = "f-string"
-	// TemplateFormatJinja2 is the format for jinja2
-	// TODO: Add support for jinja2.
-	TemplateFormatJinja2 TemplateFormat = "jinja2"
 )
 
-// Interpolator is the function that interpolates the given template with the given values.
-type Interpolator func(string, TemplateFormat, map[string]any) (string, error)
+// interpolator is the function that interpolates the given template with the given values.
+type interpolator func(template string, values map[string]any) (string, error)
 
-// defaultFormatterMapping is the default mapping of TemplateFormat to Interpolator.
-var defaultformatterMapping = map[TemplateFormat]Interpolator{ //nolint:gochecknoglobals
+// defaultFormatterMapping is the default mapping of TemplateFormat to interpolator.
+var defaultformatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
 }
 
 // interpolateGoTemplate interpolates the given template with the given values by using
 // text/template.
-func interpolateGoTemplate(tmpl string, _ TemplateFormat, values map[string]any) (string, error) {
+func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	parsedTmpl, err := template.New("template").Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
-
 	sb := new(strings.Builder)
 	err = parsedTmpl.Execute(sb, values)
 	if err != nil {
 		return "", err
 	}
-
 	return sb.String(), nil
 }
 
@@ -85,5 +76,5 @@ func RenderTemplate(tmpl string, tmplFormat TemplateFormat, values map[string]an
 		return "", newInvalidTemplateError(tmplFormat)
 	}
 
-	return formatter(tmpl, tmplFormat, values)
+	return formatter(tmpl, values)
 }

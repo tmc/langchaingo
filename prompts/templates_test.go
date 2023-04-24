@@ -53,7 +53,7 @@ func TestInterpolateGoTemplate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			actual, err := interpolateGoTemplate(tc.template, TemplateFormatGoTemplate, tc.templateValues)
+			actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
 			require.NoError(t, err)
 			assert.Equal(t, tc.expected, actual)
 		})
@@ -79,7 +79,7 @@ func TestInterpolateGoTemplate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			_, err := interpolateGoTemplate(tc.template, TemplateFormatGoTemplate, map[string]any{})
+			_, err := interpolateGoTemplate(tc.template, map[string]any{})
 			require.Error(t, err)
 			assert.EqualError(t, err, tc.errValue)
 		})
