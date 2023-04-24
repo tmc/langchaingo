@@ -53,7 +53,7 @@ func (c *Client) createChat(ctx context.Context, payload *chatPayload) (*chatRes
 	}
 
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.openai.com/v1/chat/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", body)
 	if err != nil {
 		return nil, err
 	}

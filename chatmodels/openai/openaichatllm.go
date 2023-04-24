@@ -38,7 +38,7 @@ func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
 	return r[0].Text, nil
 }
 
-// Generate calls the OpenAI API
+// Generate calls the OpenAI API.
 func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation, error) {
 	result, err := o.client.Chat(context.TODO(), &openaiclient.ChatRequest{
 		Messages: prompts,
