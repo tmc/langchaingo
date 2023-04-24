@@ -63,7 +63,6 @@ func (p Structured) Parse(text string) (map[string]string, error) {
 	}
 
 	jsonString := withoutJSONEnd[0]
-	fmt.Println("json stir", jsonString)
 
 	var parsed map[string]string
 	err := json.Unmarshal([]byte(jsonString), &parsed)
