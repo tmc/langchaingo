@@ -3,7 +3,7 @@ package output_parser_test
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/output_parser"
 )
 
@@ -30,12 +30,7 @@ func TestCommaSeparatedList(t *testing.T) {
 
 	for _, tc := range testCases {
 		output, err := parser.Parse(tc.input)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if !cmp.Equal(output, tc.expected) {
-			t.Logf("expected %v, got: %v", tc.expected, output)
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, tc.expected, output)
 	}
 }
