@@ -1,10 +1,10 @@
-package output_parser_test
+package outputParser_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/output_parser"
+	"github.com/tmc/langchaingo/outputParser"
 )
 
 func TestCommaSeparatedList(t *testing.T) {
@@ -26,7 +26,7 @@ func TestCommaSeparatedList(t *testing.T) {
 		},
 	}
 
-	parser := output_parser.NewCommaSeparatedList()
+	parser := outputParser.NewCommaSeparatedList()
 
 	for _, tc := range testCases {
 		output, err := parser.Parse(tc.input)

@@ -1,4 +1,4 @@
-package output_parser
+package outputParser
 
 import (
 	"encoding/json"
@@ -7,6 +7,16 @@ import (
 
 	"github.com/tmc/langchaingo/schema"
 )
+
+// ParseError is the error type returned by output parsers.
+type ParseError struct {
+	Text   string
+	Reason string
+}
+
+func (e ParseError) Error() string {
+	return fmt.Sprintf("parse text %s. %s", e.Text, e.Reason)
+}
 
 const (
 	// _structuredFormatInstructionTemplate is a template for the format
@@ -21,8 +31,8 @@ const (
 )
 
 // ResponseSchema is struct used in the structured output parser to describe
-// how the llm should format it's response. The name field of the struct is a
-// key in the parsed output map. The description
+// how the llm should format it's response. Name is a key in the parsed
+// output map. Description is a description of what the value should contain.
 type ResponseSchema struct {
 	Name        string
 	Description string
@@ -54,12 +64,12 @@ func (p Structured) Parse(text string) (map[string]string, error) {
 	// that should be at the end of the text.
 	withoutJSONStart := strings.Split(text, "```json")
 	if len(withoutJSONStart) < 2 {
-		return nil, fmt.Errorf("Text: %s. Error: no ```json at start of output", text)
+		return nil, ParseError{Text: text, Reason: "no ```json at start of output"}
 	}
 
 	withoutJSONEnd := strings.Split(withoutJSONStart[1], "```")
 	if len(withoutJSONEnd) < 1 {
-		return nil, fmt.Errorf("Text: %s. Error: no ``` at end of output", text)
+		return nil, ParseError{Text: text, Reason: "no ``` at end of output"}
 	}
 
 	jsonString := withoutJSONEnd[0]
@@ -80,14 +90,17 @@ func (p Structured) Parse(text string) (map[string]string, error) {
 	}
 
 	if len(missingKeys) > 0 {
-		return nil, fmt.Errorf("Text: %s. Error: output is missing the following fields %v", text, missingKeys)
+		return nil, ParseError{
+			Text:   text,
+			Reason: fmt.Sprintf("output is missing the following fields %v", missingKeys),
+		}
 	}
 
 	return parsed, nil
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p Structured) ParseWithPrompt(text string, prompt schema.PromptValue) (map[string]string, error) {
+func (p Structured) ParseWithPrompt(text string, _ schema.PromptValue) (map[string]string, error) {
 	return p.Parse(text)
 }
 

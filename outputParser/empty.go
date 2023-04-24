@@ -1,4 +1,4 @@
-package output_parser
+package outputParser
 
 import "github.com/tmc/langchaingo/schema"
 
@@ -11,7 +11,7 @@ var _ schema.OutputParser[any] = Empty{}
 
 func (p Empty) GetFormatInstructions() string  { return "" }
 func (p Empty) Parse(text string) (any, error) { return text, nil }
-func (p Empty) ParseWithPrompt(text string, prompt schema.PromptValue) (any, error) {
+func (p Empty) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
 	return text, nil
 }
 func (p Empty) Type() string { return "empty_parser" }

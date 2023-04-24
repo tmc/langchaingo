@@ -1,4 +1,4 @@
-package output_parser
+package outputParser
 
 import (
 	"testing"
