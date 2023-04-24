@@ -1,6 +1,8 @@
 name: lint-build-test
 
-on: push
+on:
+  - push
+  - pull_request
 
 jobs:
   lint:
