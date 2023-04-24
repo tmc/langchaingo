@@ -17,11 +17,11 @@ var (
 
 // PromptTemplate contains common fields for all prompt templates.
 type PromptTemplate struct {
-	// A list of variable names the prompt template expects.
-	InputVariables []string
-
 	// Template is the prompt template.
 	Template string
+
+	// A list of variable names the prompt template expects.
+	InputVariables []string
 
 	// TemplateFormat is the format of the prompt template.
 	TemplateFormat TemplateFormat
@@ -34,13 +34,22 @@ type PromptTemplate struct {
 	PartialVariables map[string]any
 }
 
+// NewPromptTemplate returns a new prompt template.
+func NewPromptTemplate(template string, inputVars []string) (*PromptTemplate, error) {
+	return &PromptTemplate{
+		Template:       template,
+		InputVariables: inputVars,
+		TemplateFormat: TemplateFormatGoTemplate,
+	}, nil
+}
+
 var (
 	_ Formatter      = (*PromptTemplate)(nil)
 	_ FormatPrompter = (*PromptTemplate)(nil)
 )
 
 // Format formats the prompt template and returns a string value.
-func (p *PromptTemplate) Format(values map[string]any) (string, error) {
+func (p PromptTemplate) Format(values map[string]any) (string, error) {
 	if err := checkInputVariables(p.InputVariables); err != nil {
 		return "", err
 	}
@@ -55,7 +64,7 @@ func (p *PromptTemplate) Format(values map[string]any) (string, error) {
 }
 
 // FormatPrompt formats the prompt template and returns a string prompt value.
-func (p *PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
+func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
 	f, err := p.Format(values)
 	if err != nil {
 		return nil, err
