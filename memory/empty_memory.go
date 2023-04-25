@@ -20,10 +20,10 @@ func (m Empty) MemoryVariables() []string {
 }
 
 func (m Empty) LoadMemoryVariables(map[string]any) (map[string]any, error) {
-	return nil, nil
+	return make(map[string]any, 0), nil
 }
 
-func (m Empty) SaveContext(inputs map[string]any, outputs map[string]any) error {
+func (m Empty) SaveContext(map[string]any, map[string]any) error {
 	return nil
 }
 

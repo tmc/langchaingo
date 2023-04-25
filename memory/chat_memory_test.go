@@ -8,6 +8,8 @@ import (
 )
 
 func TestChatMessageHistory(t *testing.T) {
+	t.Parallel()
+
 	h := NewChatMessageHistory()
 	h.AddAIMessage("foo")
 	h.AddUserMessage("bar")
