@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/prompts"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type StructuredOutputParser struct {
@@ -67,6 +67,6 @@ func (p StructuredOutputParser) Parse(text string) (any, error) {
 	return parsed, nil
 }
 
-func (p StructuredOutputParser) ParseWithPrompt(text string, prompt prompts.PromptValue) (any, error) {
+func (p StructuredOutputParser) ParseWithPrompt(text string, prompt schema.PromptValue) (any, error) {
 	return p.Parse(text)
 }
