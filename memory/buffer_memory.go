@@ -42,7 +42,7 @@ func NewBuffer() *Buffer {
 
 // MemoryVariables gets the input key the buffer memory class will load dynamically.
 func (m *Buffer) MemoryVariables() []string {
-	return []string{m.InputKey}
+	return []string{m.MemoryKey}
 }
 
 // Returns the previous chat messages stored in memory. Previous chat messages are returned in
