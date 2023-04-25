@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/exp/outputParsers"
-	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
 )
 
 //The structured output parser can be used when you want to return multiple fields.

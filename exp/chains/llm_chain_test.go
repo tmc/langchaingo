@@ -7,20 +7,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
 )
 
 func TestLLMChain(t *testing.T) {
 	t.Parallel()
-
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 	model, err := openai.New()
 	require.NoError(t, err)
 
-	prompt, err := prompts.NewPromptTemplate("What is the capital of {country}", []string{"country"})
+	prompt, err := prompts.NewPromptTemplate("What is the capital of {{.country}}", []string{"country"})
 	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/prompts"
 	"github.com/tmc/langchaingo/exp/tools"
+	"github.com/tmc/langchaingo/prompts"
 )
 
 const (
@@ -108,5 +108,8 @@ func createPrompt(
 
 	template := strings.Join([]string{opts.Prefix, toolsStrings.String(), formatInstructions, opts.Suffix}, "\n\n")
 
-	return prompts.NewPromptTemplate(template, []string{"input", "tool_names", "agent_scratchpad"})
+	return prompts.PromptTemplate{
+		Template:       template,
+		InputVariables: []string{"input", "tool_names", "agent_scratchpad"},
+	}, nil
 }

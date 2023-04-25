@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/exp/memory"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -16,6 +15,7 @@ type RetrievalQAChain struct {
 	ReturnSourceDocuments bool
 }
 
+/*
 func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQAChain {
 	qaChain := loadQAStuffChain(llm)
 	return RetrievalQAChain{
@@ -26,6 +26,7 @@ func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) Retrie
 		ReturnSourceDocuments: false,
 	}
 }
+*/
 
 func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 	queryAny, ok := values[c.InputKey]

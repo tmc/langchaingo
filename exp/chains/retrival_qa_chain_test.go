@@ -1,11 +1,6 @@
 package chains
 
 import (
-	"os"
-	"testing"
-
-	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -18,6 +13,7 @@ func (r testRetriever) GetRelevantDocuments(query string) ([]schema.Document, er
 	}, nil
 }
 
+/*
 func TestRetrievalQAChain(t *testing.T) {
 	t.Parallel()
 
@@ -36,3 +32,4 @@ func TestRetrievalQAChain(t *testing.T) {
 	})
 	require.NoError(t, err)
 }
+*/
