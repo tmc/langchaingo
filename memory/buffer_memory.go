@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// ErrInvalidInputValues is returned when input values given to a memory is invalid.
+// ErrInvalidInputValues is returned when input values given to a memory in save context is invalid.
 var ErrInvalidInputValues = errors.New("invalid input values")
 
 // Buffer is a simple form of memory that remembers previous conversational back and forths directly.
@@ -109,12 +109,12 @@ func getInputValue(inputValues map[string]any, inputKey string) (string, error) 
 			)
 		}
 
-		return getInputValueReturnToString(inputValue, inputValues, inputKey)
+		return getInputValueReturnToString(inputValue)
 	}
 
 	if len(inputValues) == 1 {
 		for _, inputValue := range inputValues {
-			return getInputValueReturnToString(inputValue, inputValues, inputKey)
+			return getInputValueReturnToString(inputValue)
 		}
 	}
 
@@ -130,18 +130,15 @@ func getInputValue(inputValues map[string]any, inputKey string) (string, error) 
 
 func getInputValueReturnToString(
 	inputValue interface{},
-	inputValues map[string]any,
-	inputKey string,
 ) (string, error) {
 	switch value := inputValue.(type) {
 	case string:
 		return value, nil
 	default:
 		return "", fmt.Errorf(
-			"input values to buffer memory must be string. Got type %T. Input values: %v. Memory input key: %s",
+			"%w: input value %v not string",
+			ErrInvalidInputValues,
 			inputValue,
-			inputValues,
-			inputKey,
 		)
 	}
 }
