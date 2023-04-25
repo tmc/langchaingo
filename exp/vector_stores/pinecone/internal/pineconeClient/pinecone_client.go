@@ -37,7 +37,6 @@ func New(options ...ClientOption) (Client, error) {
 		option(&c)
 	}
 
-
 	if c.apiKey == "" {
 		return c, fmt.Errorf("No value set for api key. Use WithApiKey when creating a new client")
 	}
@@ -56,7 +55,6 @@ func New(options ...ClientOption) (Client, error) {
 	if err != nil {
 		return c, err
 	}
-
 
 	if c.IndexName == "" {
 		c.IndexName = uuid.New().String()

@@ -113,7 +113,7 @@ func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
 	// Use the updated resp in the next iteration
 	return newResp["text"].(string), nil
 }
-}
+
 func (a *OneShotZeroAgent) plan(info string) (*schema.AgentAction, *schema.AgentFinish) {
 	action := getAgentAction(info)
 	if aswer := getFinalAnswer(action.Log); aswer != "" {

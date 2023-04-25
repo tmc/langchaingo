@@ -6,7 +6,7 @@ type Memory interface {
 	MemoryVariables() []string
 	// Return key-value pairs given the text input to the chain.
 	// If None, return all memories
-	LoadMemoryVariables(inputs map[string]any) map[string]any
+	LoadMemoryVariables(inputs map[string]any) (map[string]any, error)
 	// Save the context of this model run to memory.
 	SaveContext(inputs map[string]any, outputs map[string]any) error
 	// Clear memory contents.

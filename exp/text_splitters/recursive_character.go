@@ -33,9 +33,7 @@ func (s RecursiveCharactersSplitter) SplitText(text string) ([]string, error) {
 		}
 	}
 
-
 	splits := strings.Split(text, separator)
-
 
 	finalChunks := make([]string, 0)
 	goodSplits := make([]string, 0)

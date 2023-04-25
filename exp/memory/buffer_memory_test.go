@@ -3,55 +3,45 @@ package memory
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func TestBufferMemory(t *testing.T) {
-	m := NewBufferMemory()
-	result1 := m.LoadMemoryVariables(map[string]any{})
+	t.Parallel()
+
+	m := NewBuffer()
+	result1, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 	expected1 := map[string]any{"history": ""}
+	assert.Equal(t, expected1, result1)
 
-	if !cmp.Equal(result1, expected1) {
-		t.Errorf("Empty buffer memory loaded memory variables not equal expected. Got: %v, Wanted: %v", result1, expected1)
-	}
+	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	require.NoError(t, err)
 
-	err := m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
-	if err != nil {
-		t.Errorf("Unexpected error: %e", err)
-	}
-
-	result2 := m.LoadMemoryVariables(map[string]any{})
-	if err != nil {
-		t.Errorf("Unexpected error: %e", err)
-	}
+	result2, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 
 	expected2 := map[string]any{"history": "Human: bar\nAI: foo"}
-
-	if !cmp.Equal(result2, expected2) {
-		t.Errorf("Buffer memory with messages loaded memory variables not equal expected. Got: %v, Wanted: %v", result2, expected2)
-	}
+	assert.Equal(t, expected2, result2)
 }
 
 func TestBufferMemoryReturnMessage(t *testing.T) {
-	m := NewBufferMemory()
+	t.Parallel()
+
+	m := NewBuffer()
 	m.ReturnMessages = true
-	result1 := m.LoadMemoryVariables(map[string]any{})
 	expected1 := map[string]any{"history": []schema.ChatMessage{}}
+	result1, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
+	assert.Equal(t, expected1, result1)
 
-	if !cmp.Equal(result1, expected1) {
-		t.Errorf("Empty buffer memory with return messages true loaded memory variables not equal expected. Got: %v, Wanted: %v", result1, expected1)
-	}
+	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	require.NoError(t, err)
 
-	err := m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
-	if err != nil {
-		t.Errorf("Unexpected error: %e", err)
-	}
-
-	result2 := m.LoadMemoryVariables(map[string]any{})
-	if err != nil {
-		t.Errorf("Unexpected error: %e", err)
-	}
+	result2, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
@@ -60,15 +50,14 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 		}),
 	)
 
-	expected2 := map[string]any{"history": expectedChatHistory.GetMessages()}
-
-	if !cmp.Equal(result2, expected2) {
-		t.Errorf("Buffer memory with return messages true and messages loaded memory variables not equal expected. Got: %v, Wanted: %v", result2, expected2)
-	}
+	expected2 := map[string]any{"history": expectedChatHistory.Messages()}
+	assert.Equal(t, expected2, result2)
 }
 
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
-	m := NewBufferMemory()
+	t.Parallel()
+
+	m := NewBuffer()
 	m.ChatHistory = NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Text: "bar"},
@@ -76,10 +65,8 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 		}),
 	)
 
-	result := m.LoadMemoryVariables(map[string]any{})
+	result, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
-
-	if !cmp.Equal(result, expected) {
-		t.Errorf("Buffer memory with messages pre loaded, loaded memory variables not equal expected. Got: %v, Wanted: %v", result, expected)
-	}
+	assert.Equal(t, expected, result)
 }
