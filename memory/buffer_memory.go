@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// ErrInvalidInputValues is returned when input values given to a memory in save context is invalid.
+// ErrInvalidInputValues is returned when input values given to a memory in save context are invalid.
 var ErrInvalidInputValues = errors.New("invalid input values")
 
 // Buffer is a simple form of memory that remembers previous conversational back and forths directly.
@@ -18,7 +18,7 @@ type Buffer struct {
 	InputKey       string
 	OutputKey      string
 	HumanPrefix    string
-	AiPrefix       string
+	AIPrefix       string
 	MemoryKey      string
 }
 
@@ -33,7 +33,7 @@ func NewBuffer() *Buffer {
 		InputKey:       "",
 		OutputKey:      "",
 		HumanPrefix:    "Human",
-		AiPrefix:       "AI",
+		AIPrefix:       "AI",
 		MemoryKey:      "history",
 	}
 
@@ -56,7 +56,7 @@ func (m *Buffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AiPrefix)
+	bufferString, err := schema.GetBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +98,7 @@ func (m *Buffer) Clear() error {
 }
 
 func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
+	// If the input key is set, return the value in the inputValues with the input key.
 	if inputKey != "" {
 		inputValue, ok := inputValues[inputKey]
 		if !ok {
@@ -112,20 +113,19 @@ func getInputValue(inputValues map[string]any, inputKey string) (string, error) 
 		return getInputValueReturnToString(inputValue)
 	}
 
-	if len(inputValues) == 1 {
-		for _, inputValue := range inputValues {
-			return getInputValueReturnToString(inputValue)
-		}
+	// Otherwise error if length of map isn't one, or return the only entry in the map.
+	if len(inputValues) > 1 {
+		return "", fmt.Errorf(
+			"%w: multiple keys and no input key set",
+			ErrInvalidInputValues,
+		)
 	}
 
-	if len(inputValues) == 0 {
-		return "", fmt.Errorf("%w: 0 keys", ErrInvalidInputValues)
+	for _, inputValue := range inputValues {
+		return getInputValueReturnToString(inputValue)
 	}
 
-	return "", fmt.Errorf(
-		"%w: multiple keys and no input key",
-		ErrInvalidInputValues,
-	)
+	return "", fmt.Errorf("%w: 0 keys", ErrInvalidInputValues)
 }
 
 func getInputValueReturnToString(

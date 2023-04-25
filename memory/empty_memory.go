@@ -4,29 +4,29 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// Empty memory is a class that implement the memory interface, but does nothing.
+// Simple is a class that implement the memory interface, but does nothing.
 // The class is used as default in multiple chains.
-type Empty struct{}
+type Simple struct{}
 
-func NewEmpty() Empty {
-	return Empty{}
+func NewEmpty() Simple {
+	return Simple{}
 }
 
-// Statically assert that EmptyMemory implement the memory interface.
-var _ schema.Memory = Empty{}
+// Statically assert that Simple implement the memory interface.
+var _ schema.Memory = Simple{}
 
-func (m Empty) MemoryVariables() []string {
+func (m Simple) MemoryVariables() []string {
 	return nil
 }
 
-func (m Empty) LoadMemoryVariables(map[string]any) (map[string]any, error) {
+func (m Simple) LoadMemoryVariables(map[string]any) (map[string]any, error) {
 	return make(map[string]any, 0), nil
 }
 
-func (m Empty) SaveContext(map[string]any, map[string]any) error {
+func (m Simple) SaveContext(map[string]any, map[string]any) error {
 	return nil
 }
 
-func (m Empty) Clear() error {
+func (m Simple) Clear() error {
 	return nil
 }
