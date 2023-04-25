@@ -1,5 +1,6 @@
 package schema
 
+// OutputParser is an interface for parsing the output of an LLM call.
 type OutputParser[T any] interface {
 	// Parse parses the output of an LLM call.
 	Parse(text string) (T, error)

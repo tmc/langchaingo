@@ -8,7 +8,7 @@ test:
 
 .PHONY: lint
 lint:
-	golangci-lint run --color=always --sort-results --skip-dirs=exp ./...
+	golangci-lint run --color=always --sort-results ./...
 
 .PHONY: lint-exp
 lint-exp:
@@ -33,3 +33,10 @@ test-cover:
 .PHONY: run-pkgsite
 run-pkgsite:
 	go run golang.org/x/pkgsite/cmd/pkgsite@latest
+
+.PHONY: clean
+clean: clean-lint-cache
+
+.PHONY: clean-lint-cache
+clean-lint-cache:
+	golangci-lint cache clean

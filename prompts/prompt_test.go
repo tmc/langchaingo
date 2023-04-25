@@ -10,11 +10,11 @@ import (
 func TestStringPromptValueString(t *testing.T) {
 	t.Parallel()
 
-	spv := NewStringPromptValue("")
+	spv := StringPromptValue("")
 	str := spv.String()
 	assert.Empty(t, str)
 
-	spv = NewStringPromptValue("test")
+	spv = StringPromptValue("test")
 	str = spv.String()
 	assert.Equal(t, "test", str)
 }
@@ -22,11 +22,11 @@ func TestStringPromptValueString(t *testing.T) {
 func TestStringPromptValueMessages(t *testing.T) {
 	t.Parallel()
 
-	spv := NewStringPromptValue("")
+	spv := StringPromptValue("")
 	msgs := spv.Messages()
 	require.Len(t, msgs, 1)
 
-	spv = NewStringPromptValue("test")
+	spv = StringPromptValue("test")
 	msgs = spv.Messages()
 	require.Len(t, msgs, 1)
 	assert.Equal(t, "test", msgs[0].GetText())

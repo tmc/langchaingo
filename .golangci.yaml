@@ -26,7 +26,19 @@ linters:
 linters-settings:
   funlen:
     lines: 90
-
+  depguard:
+    list-type: denylist
+    packages:
+      - github.com/samber/lo # Use exp packages or internal utilities instead.
+    additional-guards:
+      - list-type: denylist
+        include-go-root: false
+        packages:
+          - github.com/stretchr/testify
+        # Specify rules by which the linter ignores certain files for consideration.
+        ignore-file-rules:
+          - "**/*_test.go"
+          - "**/mock/**/*.go"
 run:
   skip-dirs:
     - 'exp'
