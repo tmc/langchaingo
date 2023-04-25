@@ -93,7 +93,7 @@ func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string
 
 // Clear sets the chat messages to a new and empty chat message history.
 func (m *Buffer) Clear() error {
-	m.ChatHistory = NewChatMessageHistory()
+	m.ChatHistory.Clear()
 	return nil
 }
 

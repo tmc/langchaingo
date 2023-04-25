@@ -35,6 +35,10 @@ func (h *ChatMessageHistory) AddUserMessage(text string) {
 	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
 }
 
+func (h *ChatMessageHistory) Clear() {
+	h.messages = make([]schema.ChatMessage, 0)
+}
+
 // NewChatMessageOption is a function for creating new chat message history
 // with other then the default values.
 type NewChatMessageOption func(m *ChatMessageHistory)
