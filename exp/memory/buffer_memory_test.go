@@ -13,6 +13,7 @@ func TestBufferMemory(t *testing.T) {
 
 	m := NewBuffer()
 	result1, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
 	expected1 := map[string]any{"history": ""}
 	assert.Equal(t, expected1, result1)
 
