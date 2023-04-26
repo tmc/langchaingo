@@ -8,7 +8,7 @@ import (
 // The class is used as default in multiple chains.
 type Simple struct{}
 
-func NewEmpty() Simple {
+func NewSimple() Simple {
 	return Simple{}
 }
 

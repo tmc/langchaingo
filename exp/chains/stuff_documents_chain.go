@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tmc/langchaingo/exp/memory"
+	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -51,7 +51,7 @@ func (c StuffDocumentsChain) Call(ctx context.Context, values map[string]any) (m
 }
 
 func (c StuffDocumentsChain) GetMemory() schema.Memory {
-	return memory.NewEmpty()
+	return memory.NewSimple()
 }
 
 var DefaultQAPrompt = prompts.PromptTemplate{
