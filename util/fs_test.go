@@ -9,6 +9,7 @@ import (
 	"github.com/tmc/langchaingo/util"
 )
 
+// nolint: paralleltest // This test needs to set environment variables, so it can't be run in parallel
 func TestLookPath(t *testing.T) {
 	lookPathTests := []struct {
 		input          string
@@ -37,9 +38,6 @@ func TestLookPath(t *testing.T) {
 		// Invalid environment variable
 		{input: "$INVALID_ENV_VAR/hello", expectedOutput: "", expectsError: true, errorString: "no such file or directory"},
 	}
-
-	// Parallelize test
-	t.Parallel()
 
 	// Set an environment variable for testing
 	t.Setenv("TEST_DIR", getCallerPath()+"/testdata")
