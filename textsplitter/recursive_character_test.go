@@ -1,7 +1,6 @@
 package textsplitter
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,7 +43,7 @@ I'm Harrison.
 How? Are? You?
 Okay then f f f f.
 This is a weird text to write, but gotta test the splittingggg some how.
-			
+
 Bye!
 
 -H.`,
@@ -77,7 +76,6 @@ Bye!
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
 
-		fmt.Println("creating documents with ", tc.text)
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)

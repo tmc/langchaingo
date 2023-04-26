@@ -2,7 +2,6 @@ package textsplitter
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -65,24 +64,16 @@ func joinDocs(docs []string, separator string) string {
 
 // mergeSplits merges smaller splits into splits that are closer to the chunkSize.
 func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap int) []string {
-	fmt.Print("merging: [")
-	for _, split := range splits {
-		fmt.Print(split + ",")
-	}
-	fmt.Println("]")
-	fmt.Println("seperator len ", len(separator))
 	docs := make([]string, 0)
 	currentDoc := make([]string, 0)
 	total := 0
 
 	for _, split := range splits {
-		fmt.Println("current doc start", currentDoc)
 		sepLen := len(separator)
 		if len(currentDoc) == 0 {
 			sepLen = 0
 		}
 
-		fmt.Println("total+len(split)+sepLen > chunkSize:", total+len(split)+sepLen > chunkSize, total, len(split), sepLen, chunkSize)
 		if total+len(split)+sepLen > chunkSize {
 			if total > chunkSize {
 				log.Printf(
@@ -99,10 +90,11 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 				}
 
 				for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
-					fmt.Println("cur doc before pop", currentDoc)
+					if len(currentDoc) < 2 {
+						sepLen = 0
+					}
 					total -= len(currentDoc[0]) + sepLen
 					currentDoc = currentDoc[1:]
-					fmt.Println("cur doc after pop", currentDoc)
 				}
 			}
 		}
@@ -112,7 +104,6 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 		if len(currentDoc) < 2 {
 			sepLen = 0
 		}
-		fmt.Println("adding to total ", len(split)+sepLen, "len", len(split), "sep", sepLen)
 		total += len(split) + sepLen
 	}
 
@@ -121,11 +112,6 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 		docs = append(docs, doc)
 	}
 
-	fmt.Print("result: [")
-	for _, doc := range docs {
-		fmt.Print(doc + ",")
-	}
-	fmt.Println("]")
 	return docs
 }
 
