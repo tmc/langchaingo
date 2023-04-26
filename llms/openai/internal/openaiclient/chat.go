@@ -8,25 +8,26 @@ import (
 )
 
 const (
-	defaultCompletionModel = "text-davinci-003"
+	defaultChatModel = "gpt-3.5-turbo"
 )
 
-type completionPayload struct {
-	Model       string   `json:"model"`
-	Prompt      string   `json:"prompt"`
-	Temperature int      `json:"temperature"`
-	MaxTokens   int      `json:"max_tokens"`
-	StopWords   []string `json:"stop,omitempty"`
+type chatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
-type completionResponsePayload struct {
+type chatPayload struct {
+	Model    string        `json:"model"`
+	Messages []chatMessage `json:"messages"`
+}
+
+type chatResponsePayload struct {
 	ID      string  `json:"id,omitempty"`
 	Created float64 `json:"created,omitempty"`
 	Choices []struct {
 		FinishReason string      `json:"finish_reason,omitempty"`
 		Index        float64     `json:"index,omitempty"`
-		Logprobs     interface{} `json:"logprobs,omitempty"`
-		Text         string      `json:"text,omitempty"`
+		Message      chatMessage `json:"message,omitempty"`
 	} `json:"choices,omitempty"`
 	Model  string `json:"model,omitempty"`
 	Object string `json:"object,omitempty"`
@@ -37,16 +38,7 @@ type completionResponsePayload struct {
 	} `json:"usage,omitempty"`
 }
 
-func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
-	// Set defaults
-	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 256
-	}
-
-	if len(payload.StopWords) == 0 {
-		payload.StopWords = nil
-	}
-
+func (c *Client) createChat(ctx context.Context, payload *chatPayload) (*chatResponsePayload, error) {
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -55,7 +47,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 
 	// Build request
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", body)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +62,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	defer r.Body.Close()
 
 	// Parse response
-	var response completionResponsePayload
+	var response chatResponsePayload
 	err = json.NewDecoder(r.Body).Decode(&response)
 	if err != nil {
 		return nil, err

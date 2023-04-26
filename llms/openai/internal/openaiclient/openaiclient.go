@@ -11,16 +11,18 @@ var ErrEmptyResponse = errors.New("empty response")
 // Client is a client for the OpenAI API.
 type Client struct {
 	token string
+	model string
 }
 
 // New returns a new OpenAI client.
-func New(token string) (*Client, error) {
-	c := &Client{token: token}
+func New(token string, model string) (*Client, error) {
+	c := &Client{token: token, model: model}
 	return c, nil
 }
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
+	Model     string   `json:"model"`
 	Prompt    string   `json:"prompt"`
 	MaxTokens int      `json:"max_tokens"`
 	StopWords []string `json:"stop,omitempty"`
@@ -33,8 +35,13 @@ type Completion struct {
 
 // CreateCompletion creates a completion.
 func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*Completion, error) {
+	r.Model = c.model
+	if r.Model == "" {
+		r.Model = defaultCompletionModel
+	}
+
 	resp, err := c.createCompletion(ctx, &completionPayload{
-		Model:     defaultModel,
+		Model:     r.Model,
 		Prompt:    r.Prompt,
 		MaxTokens: r.MaxTokens,
 		StopWords: r.StopWords,
@@ -50,13 +57,15 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 	}, nil
 }
 
+// EmbeddingRequest is a request to create an embedding.
 type EmbeddingRequest struct {
-	Input []string `json:"input"`
 	Model string   `json:"model"`
+	Input []string `json:"input"`
 }
 
 // CreateCompletion creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
+	r.Model = c.model
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -79,4 +88,38 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 	}
 
 	return embeddings, nil
+}
+
+// ChatRequest is a request to create an embedding.
+type ChatRequest struct {
+	Model  string `json:"model"`
+	Prompt string `json:"messages"`
+}
+
+type ChatResponse struct {
+	Text string `json:"text"`
+}
+
+// CreateChat creates chat request.
+func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
+	r.Model = c.model
+	if r.Model == "" {
+		r.Model = defaultChatModel
+	}
+
+	resp, err := c.createChat(ctx, &chatPayload{
+		Model:    r.Model,
+		Messages: []chatMessage{{Role: "user", Content: r.Prompt}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	return &ChatResponse{
+		Text: resp.Choices[0].Message.Content,
+	}, nil
 }
