@@ -1,6 +1,10 @@
 name: lint-build-test
 
-on: push
+on:
+  push:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   lint:
