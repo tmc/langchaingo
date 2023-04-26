@@ -8,6 +8,13 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+var (
+	// ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
+	// given to CreateDocuments does not match. The function will not error if the
+	// length of the metadatas slice is zero.
+	ErrMismatchMetadatasAndText = errors.New("number of texts and metadatas does not match")
+)
+
 // SplitDocuments splits documents using a textsplitter.
 func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]schema.Document, error) {
 	texts := make([]string, 0)
@@ -21,15 +28,15 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 }
 
 // CreateDocuments creates documents from texts and metadatas with a text splitter. If
-// the length of the metadatas is zero or metadatas is nil, the result documents will
-// contain no metadata. Otherwise the numbers of texts and metadatas must match.
+// the length of the metadatas is zero, the result documents will contain no metadata.
+// Otherwise the numbers of texts and metadatas must match.
 func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
 	}
 
 	if len(texts) != len(metadatas) {
-		return nil, errors.New("number of texts and metadatas does not match")
+		return nil, ErrMismatchMetadatasAndText
 	}
 
 	documents := make([]schema.Document, 0)
@@ -120,7 +127,8 @@ func printWarning(total, chunkSize int) {
 //   - the chunk is larger then the chunk overlap
 //   - or if there are any chunks and the length is long
 func shouldPop(chunkOverlap, chunkSize, total, splitLen, separatorLen, currentDocLen int) bool {
-	if currentDocLen < 2 {
+	docsNeededToAddSep := 2
+	if currentDocLen < docsNeededToAddSep {
 		separatorLen = 0
 	}
 

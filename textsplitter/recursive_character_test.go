@@ -37,6 +37,7 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			},
 		},
 		{
+			//nolint:dupword
 			text: `Hi.
 I'm Harrison.
 
