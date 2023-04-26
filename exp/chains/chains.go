@@ -1,15 +1,19 @@
 package chains
 
-import "github.com/tmc/langchaingo/schema"
+import (
+	"context"
+
+	"github.com/tmc/langchaingo/schema"
+)
 
 // Cain is the interface all chains must implement.
 type Chain interface {
-	Call(map[string]any) (map[string]any, error)
+	Call(context.Context, map[string]any) (map[string]any, error)
 	GetMemory() schema.Memory
 }
 
 // Call is the function used for calling chains.
-func Call(c Chain, inputValues map[string]any) (map[string]any, error) {
+func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]any, error) {
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -24,7 +28,7 @@ func Call(c Chain, inputValues map[string]any) (map[string]any, error) {
 		fullValues[key] = value
 	}
 
-	outputValues, err := c.Call(fullValues)
+	outputValues, err := c.Call(ctx, fullValues)
 	if err != nil {
 		return nil, err
 	}

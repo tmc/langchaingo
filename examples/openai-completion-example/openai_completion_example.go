@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -12,7 +13,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	completion, err := llm.Call("The first man to walk on the moon", []string{"Armstrong"})
+	ctx := context.Background()
+	completion, err := llm.Call(ctx, "The first man to walk on the moon", []string{"Armstrong"})
 	if err != nil {
 		log.Fatal(err)
 	}

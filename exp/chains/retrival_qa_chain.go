@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/tmc/langchaingo/exp/memory"
@@ -28,7 +29,7 @@ func NewRetrievalQAChainFromLLM(llm llms.LLM, retriever schema.Retriever) Retrie
 }
 */
 
-func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
+func (c RetrievalQAChain) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
 	queryAny, ok := values[c.InputKey]
 	if !ok {
 		return nil, fmt.Errorf("Input key %s not found", c.InputKey)
@@ -49,7 +50,7 @@ func (c RetrievalQAChain) Call(values map[string]any) (map[string]any, error) {
 		"input_documents": docs,
 	}
 
-	result, err := Call(c.combineDocumentChain, inputs)
+	result, err := Call(ctx, c.combineDocumentChain, inputs)
 	if err != nil {
 		return nil, err
 	}

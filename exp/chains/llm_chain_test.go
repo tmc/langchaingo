@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -24,7 +25,7 @@ func TestLLMChain(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	resultChainValue, err := Call(chain,
+	resultChainValue, err := Call(context.Background(), chain,
 		map[string]any{
 			"country": "France",
 			"stop":    []string{"\nObservation", "\n\tObservation"},
