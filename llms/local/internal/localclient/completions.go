@@ -14,11 +14,8 @@ type completionResponsePayload struct {
 }
 
 func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
-	// Append the prompt to the args
-	c.args = append(c.args, payload.Prompt)
-
 	// #nosec G204
-	out, err := exec.CommandContext(ctx, c.binPath, c.args...).Output()
+	out, err := exec.CommandContext(ctx, c.binPath, append(c.args, payload.Prompt)...).Output()
 	if err != nil {
 		return nil, err
 	}
