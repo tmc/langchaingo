@@ -25,7 +25,7 @@ func TestStructured(t *testing.T) {
 				{Name: "url", Description: "A link to the resource"},
 			},
 			llmOutput:         "```json\n{\n\t\"url\": \"https://google.com\" \n}\n```",
-			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"url\": string // A link to the resource\n}\n```",
+			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"url\": string // A link to the resource\n}\n```", //nolint
 			parsed:            map[string]string{"url": "https://google.com"},
 			expectError:       false,
 		},
@@ -36,7 +36,7 @@ func TestStructured(t *testing.T) {
 				{Name: "source", Description: "A link to the source"},
 			},
 			llmOutput:         " ``` foo```json \n{\n\t\"answer\": \"Paris\",\n\t\"source\": \"https://google.com\" \n}\n``` ``` bar zoo",
-			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"answer\": string // The answer to the question\n\t\"source\": string // A link to the source\n}\n```",
+			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"answer\": string // The answer to the question\n\t\"source\": string // A link to the source\n}\n```", //nolint
 			parsed:            map[string]string{"answer": "Paris", "source": "https://google.com"},
 			expectError:       false,
 		},
@@ -47,7 +47,7 @@ func TestStructured(t *testing.T) {
 				{Name: "source", Description: "A link to the source"},
 			},
 			llmOutput:         "```json \n{\n\t\"source\": \"https://google.com\" \n}\n```",
-			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"answer\": string // The answer to the question\n\t\"source\": string // A link to the source\n}\n```",
+			formatInstruction: "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n\t\"answer\": string // The answer to the question\n\t\"source\": string // A link to the source\n}\n```", //nolint
 			parsed:            nil,
 			expectError:       true,
 		},

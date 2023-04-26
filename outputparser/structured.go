@@ -21,7 +21,7 @@ func (e ParseError) Error() string {
 const (
 	// _structuredFormatInstructionTemplate is a template for the format
 	// instructions of the structured output parser.
-	_structuredFormatInstructionTemplate = "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n%s}\n```"
+	_structuredFormatInstructionTemplate = "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n%s}\n```" //nolint
 
 	// _structuredLineTemplate is a single line of the json schema in the
 	// format instruction of the structured output parser. The fist verb is
@@ -63,7 +63,7 @@ func (p Structured) Parse(text string) (map[string]string, error) {
 	// Remove the ```json that should be at the start of the text, and the ```
 	// that should be at the end of the text.
 	withoutJSONStart := strings.Split(text, "```json")
-	if len(withoutJSONStart) < 2 {
+	if !(len(withoutJSONStart) > 1) {
 		return nil, ParseError{Text: text, Reason: "no ```json at start of output"}
 	}
 
