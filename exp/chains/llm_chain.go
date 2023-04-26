@@ -16,6 +16,7 @@ type LLMChain struct {
 	OutputParser output_parsers.OutputParser
 }
 
+
 func NewLLMChain(llm llms.LLM, prompt prompts.FormatPrompter) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
