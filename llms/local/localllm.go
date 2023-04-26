@@ -59,6 +59,7 @@ func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation
 }
 
 // New creates a new local LLM implementation.
+// nolint: cyclop // This can be written with less cyclomatic complexity, but it would end up being less readable.
 func New() (*LLM, error) {
 	// Require the user to set the path to the local LLM binary
 	binPath := os.Getenv(localLLMBinVarName)
