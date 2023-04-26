@@ -15,7 +15,7 @@ type Client struct {
 }
 
 // New returns a new local client.
-func New(binPath string, args ...string) (*Client, error) {
+func New(binPath string, args []string) (*Client, error) {
 	c := &Client{binPath: binPath, args: args}
 	return c, nil
 }

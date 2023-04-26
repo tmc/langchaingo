@@ -77,8 +77,32 @@ func New() (*LLM, error) {
 	// Allow the user to pass CLI arguments to the local LLM binary (optional)
 	args := os.Getenv(localLLMArgsVarName)
 
+	var parts []string
+	var currentPart string
+	var inDoubleQuote, inSingleQuote bool
+
+	for _, char := range args {
+		switch {
+		case char == ' ' && !inDoubleQuote && !inSingleQuote:
+			if currentPart != "" {
+				parts = append(parts, currentPart)
+				currentPart = ""
+			}
+		case char == '"' && !inSingleQuote:
+			inDoubleQuote = !inDoubleQuote
+		case char == '\'' && !inDoubleQuote:
+			inSingleQuote = !inSingleQuote
+		default:
+			currentPart += string(char)
+		}
+	}
+
+	if currentPart != "" {
+		parts = append(parts, currentPart)
+	}
+
 	// Return the client
-	c, err := localclient.New(binPath, args)
+	c, err := localclient.New(binPath, parts)
 	return &LLM{
 		client: c,
 	}, err
