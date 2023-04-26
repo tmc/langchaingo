@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tmc/langchaingo/exp/memory"
+	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -63,5 +63,5 @@ func (c RetrievalQAChain) Call(ctx context.Context, values map[string]any) (map[
 }
 
 func (c RetrievalQAChain) GetMemory() schema.Memory {
-	return memory.NewEmpty()
+	return memory.NewSimple()
 }

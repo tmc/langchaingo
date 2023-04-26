@@ -45,10 +45,10 @@ func (m *Buffer) MemoryVariables() []string {
 	return []string{m.MemoryKey}
 }
 
-// Returns the previous chat messages stored in memory. Previous chat messages are returned in
-// a map with the key specified in the MemoryKey field. This key defaults to "history". If
-// ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise the output
-// is a buffer string of the chat messages.
+// LoadMemoryVariables returns the previous chat messages stored in memory. Previous chat messages
+// are returned in a map with the key specified in the MemoryKey field. This key defaults to
+// "history". If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise
+// the output is a buffer string of the chat messages.
 func (m *Buffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
 	if m.ReturnMessages {
 		return map[string]any{
