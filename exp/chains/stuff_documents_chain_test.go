@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -37,6 +38,6 @@ func TestStuffDocumentsChain(t *testing.T) {
 		"input_documents": docs,
 	}
 
-	_, err = Call(chain, inputValues)
+	_, err = Call(context.Background(), chain, inputValues)
 	require.NoError(t, err)
 }

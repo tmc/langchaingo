@@ -1,6 +1,7 @@
 package mrkl
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -62,10 +63,10 @@ func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*On
 // Run is an implementation of the AgentExecutor interface. It takes a query as input
 // and executes it, returning an AgentFinish object containing the result, or an error
 // if the execution fails.
-func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
+func (a *OneShotZeroAgent) Run(ctx context.Context, query string) (*schema.AgentFinish, error) {
 	var attempts int
 	a.query = query
-	resp, _ := a.chain.Call(map[string]interface{}{
+	resp, _ := a.chain.Call(ctx, map[string]interface{}{
 		"input":            a.query,
 		"agent_scratchpad": "",
 		"stop":             []string{"\nObservation:", "\n\tObservation:"},
@@ -78,7 +79,7 @@ func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
 		if finish != nil {
 			return finish, nil
 		}
-		output, err = a.nextStep(*action)
+		output, err = a.nextStep(ctx, *action)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +89,7 @@ func (a *OneShotZeroAgent) Run(query string) (*schema.AgentFinish, error) {
 	return nil, fmt.Errorf("Agent did not finish after %d attempts", attempts)
 }
 
-func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
+func (a *OneShotZeroAgent) nextStep(ctx context.Context, action schema.AgentAction) (string, error) {
 	var scratchpad []string
 	// Perform your desired operation with the text value
 	observation, err := runTool(action.Tool, action.ToolInput.(string), &a.tools)
@@ -101,7 +102,7 @@ func (a *OneShotZeroAgent) nextStep(action schema.AgentAction) (string, error) {
 	}
 
 	// Update resp using a.chain.Call()
-	newResp, err := a.chain.Call(map[string]interface{}{
+	newResp, err := a.chain.Call(ctx, map[string]interface{}{
 		"input":            a.query,
 		"agent_scratchpad": strings.Join(scratchpad, "\n"),
 		"stop":             []string{"\nObservation:", "\n\tObservation:"},

@@ -28,8 +28,8 @@ type LLM struct {
 var _ llms.LLM = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
-func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
-	r, err := o.Generate([]string{prompt}, stopWords)
+func (o *LLM) Call(ctx context.Context, prompt string, stopWords []string) (string, error) {
+	r, err := o.Generate(ctx, []string{prompt}, stopWords)
 	if err != nil {
 		return "", err
 	}
@@ -39,8 +39,8 @@ func (o *LLM) Call(prompt string, stopWords []string) (string, error) {
 	return r[0].Text, nil
 }
 
-func (o *LLM) Generate(prompts []string, stopWords []string) ([]*llms.Generation, error) {
-	result, err := o.client.CreateCompletion(context.TODO(), &openaiclient.CompletionRequest{
+func (o *LLM) Generate(ctx context.Context, prompts []string, stopWords []string) ([]*llms.Generation, error) {
+	result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
 		Prompt:    prompts[0],
 		StopWords: stopWords,
 	})

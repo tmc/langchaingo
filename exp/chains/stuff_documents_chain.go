@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/tmc/langchaingo/exp/memory"
@@ -24,7 +25,7 @@ func NewStuffDocumentsChain(llmChain LLMChain) StuffDocumentsChain {
 	}
 }
 
-func (c StuffDocumentsChain) Call(values map[string]any) (map[string]any, error) {
+func (c StuffDocumentsChain) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
 	docsAny, ok := values[c.InputKey]
 	if !ok {
 		return nil, fmt.Errorf("Document key %s not found", c.InputKey)
@@ -46,7 +47,7 @@ func (c StuffDocumentsChain) Call(values map[string]any) (map[string]any, error)
 	}
 
 	inputValues[c.DocumentVariableName] = text
-	return Call(c.llmChain, inputValues)
+	return Call(ctx, c.llmChain, inputValues)
 }
 
 func (c StuffDocumentsChain) GetMemory() schema.Memory {

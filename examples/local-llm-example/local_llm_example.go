@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -12,7 +13,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	completion, err := llm.Call("How many sides does a square have?")
+	ctx := context.Background()
+	completion, err := llm.Call(ctx, "How many sides does a square have?", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
