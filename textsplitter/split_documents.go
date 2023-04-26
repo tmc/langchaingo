@@ -8,12 +8,10 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-var (
-	// ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
-	// given to CreateDocuments does not match. The function will not error if the
-	// length of the metadatas slice is zero.
-	ErrMismatchMetadatasAndText = errors.New("number of texts and metadatas does not match")
-)
+// ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
+// given to CreateDocuments does not match. The function will not error if the
+// length of the metadatas slice is zero.
+var ErrMismatchMetadatasAndText = errors.New("number of texts and metadatas does not match")
 
 // SplitDocuments splits documents using a textsplitter.
 func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]schema.Document, error) {

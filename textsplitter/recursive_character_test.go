@@ -7,6 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+//nolint:dupword
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	t.Parallel()
 
@@ -37,7 +38,6 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			},
 		},
 		{
-			//nolint:dupword
 			text: `Hi.
 I'm Harrison.
 
