@@ -18,8 +18,8 @@ type RecursiveCharacter struct {
 func NewRecursiveCharacter() RecursiveCharacter {
 	return RecursiveCharacter{
 		Separators:   []string{"\n\n", "\n", " ", ""},
-		ChunkSize:    4000,
-		ChunkOverlap: 200,
+		ChunkSize:    _defaultChunkSize,
+		ChunkOverlap: _defaultChunkOverlap,
 	}
 }
 

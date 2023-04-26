@@ -69,42 +69,33 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 	total := 0
 
 	for _, split := range splits {
-		sepLen := len(separator)
-		if len(currentDoc) == 0 {
-			sepLen = 0
+		totalWithSplit := total + len(split)
+		if len(currentDoc) != 0 {
+			totalWithSplit += len(separator)
 		}
 
-		if total+len(split)+sepLen > chunkSize {
-			if total > chunkSize {
-				log.Printf(
-					"[WARN] created a chunk with size of %v, which is longer then the specified %v\n",
-					total,
-					chunkSize,
-				)
+		printWarning(total, chunkSize)
+		if totalWithSplit > chunkSize && len(currentDoc) > 0 {
+			doc := joinDocs(currentDoc, separator)
+			if doc != "" {
+				docs = append(docs, doc)
 			}
 
-			if len(currentDoc) > 0 {
-				doc := joinDocs(currentDoc, separator)
-				if doc != "" {
-					docs = append(docs, doc)
+			for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
+				total -= len(currentDoc[0])
+				if len(currentDoc) > 1 {
+					total -= len(separator)
 				}
 
-				for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
-					if len(currentDoc) < 2 {
-						sepLen = 0
-					}
-					total -= len(currentDoc[0]) + sepLen
-					currentDoc = currentDoc[1:]
-				}
+				currentDoc = currentDoc[1:]
 			}
 		}
 
 		currentDoc = append(currentDoc, split)
-		sepLen = len(separator)
-		if len(currentDoc) < 2 {
-			sepLen = 0
+		total += len(split)
+		if len(currentDoc) > 1 {
+			total += len(separator)
 		}
-		total += len(split) + sepLen
 	}
 
 	doc := joinDocs(currentDoc, separator)
@@ -113,6 +104,16 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 	}
 
 	return docs
+}
+
+func printWarning(total, chunkSize int) {
+	if total > chunkSize {
+		log.Printf(
+			"[WARN] created a chunk with size of %v, which is longer then the specified %v\n",
+			total,
+			chunkSize,
+		)
+	}
 }
 
 // Keep poping if:
