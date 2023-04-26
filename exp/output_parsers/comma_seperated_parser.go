@@ -3,7 +3,7 @@ package output_parsers
 import (
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/prompts"
+	"github.com/tmc/langchaingo/schema"
 )
 
 type CommaSeparatedListOutputParser struct{}
@@ -25,6 +25,6 @@ func (p CommaSeparatedListOutputParser) Parse(text string) (any, error) {
 	return values, nil
 }
 
-func (p CommaSeparatedListOutputParser) ParseWithPrompt(text string, prompt prompts.PromptValue) (any, error) {
+func (p CommaSeparatedListOutputParser) ParseWithPrompt(text string, prompt schema.PromptValue) (any, error) {
 	return p.Parse(text)
 }
