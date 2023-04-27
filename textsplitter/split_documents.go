@@ -79,7 +79,7 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 			totalWithSplit += len(separator)
 		}
 
-		printWarning(total, chunkSize)
+		maybePrintWarning(total, chunkSize)
 		if totalWithSplit > chunkSize && len(currentDoc) > 0 {
 			doc := joinDocs(currentDoc, separator)
 			if doc != "" {
@@ -111,7 +111,7 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 	return docs
 }
 
-func printWarning(total, chunkSize int) {
+func maybePrintWarning(total, chunkSize int) {
 	if total > chunkSize {
 		log.Printf(
 			"[WARN] created a chunk with size of %v, which is longer then the specified %v\n",
@@ -121,7 +121,7 @@ func printWarning(total, chunkSize int) {
 	}
 }
 
-// Keep poping if:
+// Keep popping if:
 //   - the chunk is larger then the chunk overlap
 //   - or if there are any chunks and the length is long
 func shouldPop(chunkOverlap, chunkSize, total, splitLen, separatorLen, currentDocLen int) bool {
