@@ -35,9 +35,10 @@ func NewLLMChain(llm llms.LLM, prompt *prompts.PromptTemplate) LLMChain {
 	return chain
 }
 
-// Call_ formats the prompts with the input values, generates using the llm and, parses
+// Call_ formats the prompts with the input values, generates using the llm, and parses
 // the output from the llm with the output parser. This function should not be called
-// directly, use rather the Call or Run function.
+// directly, use rather the Call or Run function if the prompt only requires one input
+// value.
 func (c LLMChain) Call_(ctx context.Context, values map[string]any) (map[string]any, error) {
 	promptValue, err := c.prompt.FormatPrompt(values)
 	if err != nil {
@@ -67,7 +68,7 @@ func (c LLMChain) GetMemory() schema.Memory {
 	return c.Memory
 }
 
-// GetInputKeys returns the input keys.
+// GetInputKeys returns the expected input keys.
 func (c LLMChain) GetInputKeys() []string {
 	return c.prompt.InputVariables
 }

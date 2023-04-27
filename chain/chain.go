@@ -14,11 +14,23 @@ var (
 	// ErrInvalidOutputValues is returned when expected output keys to a chain does
 	// not match the actual keys in the return output values map.
 	ErrInvalidOutputValues = errors.New("missing keys in output values")
+
+	// ErrMultipleInputsInRun is returned in the run function if the chain expects
+	// more then one input values.
+	ErrMultipleInputsInRun = errors.New("run not supported in chain with more then one expected input")
+	// ErrMultipleOutputsInRun is returned in the run function if the chain expects
+	// more then one output values.
+	ErrMultipleOutputsInRun = errors.New("run not supported in chain with more then one expected output")
+	// ErrMultipleOutputsInRun is returned in the run function if the chain returns
+	// a value that is not a string.
+	ErrWrongOutputTypeInRun = errors.New("run not supported in chain that returns value that is not string")
 )
 
 // Cain is the interface all chains must implement.
 type Chain interface {
-	// Call runs the logic of the chain and returns the output.
+	// Call runs the logic of the chain and returns the output. This method should
+	// not be called directly. Use rather the Call function that handles the memory
+	// of the chain.
 	Call_(context.Context, map[string]any) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
@@ -30,6 +42,10 @@ type Chain interface {
 
 // Call is the function used for calling chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]any, error) {
+	if err := validateInputs(c, inputValues); err != nil {
+		return nil, err
+	}
+
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -48,6 +64,9 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]
 	if err != nil {
 		return nil, err
 	}
+	if err := validateOutputs(c, outputValues); err != nil {
+		return nil, err
+	}
 
 	err = c.GetMemory().SaveContext(inputValues, outputValues)
 	if err != nil {
@@ -57,9 +76,32 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]
 	return outputValues, nil
 }
 
-// Run can be used if the chain only expects one string input and  one output
-// string.
-func Run(ctx context.Context, c Chain, input string) string
+// Run can be used to call a chain if the chain only expects one string input
+// and one string output.
+func Run(ctx context.Context, c Chain, input string) (string, error) {
+	inputKeys := c.GetInputKeys()
+	if len(inputKeys) != 1 {
+		return "", ErrMultipleInputsInRun
+	}
+
+	outputKeys := c.GetOutputKeys()
+	if len(outputKeys) != 1 {
+		return "", ErrMultipleOutputsInRun
+	}
+
+	inputValues := map[string]any{inputKeys[0]: input}
+	outputValues, err := Call(ctx, c, inputValues)
+	if err != nil {
+		return "", err
+	}
+
+	outputValue, ok := outputValues[outputKeys[0]].(string)
+	if !ok {
+		return "", ErrWrongOutputTypeInRun
+	}
+
+	return outputValue, nil
+}
 
 func validateInputs(c Chain, inputValues map[string]any) error {
 	for _, k := range c.GetInputKeys() {
