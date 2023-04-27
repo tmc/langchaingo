@@ -9,22 +9,27 @@ import (
 )
 
 const (
-	Prefix             = `Answer the following questions as best you can. You have access to the following Tools:`
+	Prefix = `Today is {{.today}} and you can use tools to get new information.
+Answer the following questions as best you can using the following tools:
+
+{{.tool_descriptions}}`
+
 	FormatInstructions = `Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take, should be one of [ {tool_names} ]
+Action: the action to take, should be one of [ {{.tool_names}} ]
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`
-)
-const Suffix = `Begin!
 
-Question: {input}
-Thought:{agent_scratchpad}`
+	Suffix = `Begin!
+
+Question: {{.input}}
+Thought: {{.agent_scratchpad}}`
+)
 
 // CreatePromptOptions is a struct that holds options for creating a prompt template.
 type CreatePromptOptions struct {
@@ -79,37 +84,43 @@ func (options *CreatePromptOptions) handleDefaultValues() {
 	}
 }
 
+func toolNames(tools []tools.Tool) string {
+	var tn strings.Builder
+	for i, tool := range tools {
+		if i > 0 {
+			tn.WriteString(", ")
+		}
+		tn.WriteString(tool.Name)
+	}
+
+	return tn.String()
+}
+
+func toolDescriptions(tools []tools.Tool) string {
+	var ts strings.Builder
+	for _, tool := range tools {
+		ts.WriteString(fmt.Sprintf("- %s: %s\n", tool.Name, tool.Description))
+	}
+
+	return ts.String()
+}
+
 // createPrompt is a function that takes a slice of tools and a variadic list of prompt
 // template options, and returns a prompt template with the specified options.
-// It returns an error if there is any issue during the creation process.
 func createPrompt(
-	tools []tools.Tool,
 	options ...PromptTemplateOption,
-) (prompts.PromptTemplate, error) {
+) prompts.PromptTemplate {
 	opts := &CreatePromptOptions{}
 	for _, option := range options {
 		option(opts)
 	}
 	opts.handleDefaultValues()
 
-	var toolsStrings strings.Builder
-	for _, tool := range tools {
-		toolsStrings.WriteString(fmt.Sprintf("%s: %s\n", tool.Name, tool.Description))
-	}
-
-	var toolsNames strings.Builder
-	for i, tool := range tools {
-		if i > 0 {
-			toolsNames.WriteString(", ")
-		}
-		toolsNames.WriteString(tool.Name)
-	}
-	formatInstructions := strings.Replace(FormatInstructions, "{tool_names}", toolsNames.String(), -1)
-
-	template := strings.Join([]string{opts.Prefix, toolsStrings.String(), formatInstructions, opts.Suffix}, "\n\n")
+	template := strings.Join([]string{opts.Prefix, opts.FormatInstructions, opts.Suffix}, "\n\n")
 
 	return prompts.PromptTemplate{
 		Template:       template,
-		InputVariables: []string{"input", "tool_names", "agent_scratchpad"},
-	}, nil
+		TemplateFormat: prompts.TemplateFormatGoTemplate,
+		InputVariables: []string{"input", "tools", "tool_names", "tools_list", "agent_scratchpad"},
+	}
 }
