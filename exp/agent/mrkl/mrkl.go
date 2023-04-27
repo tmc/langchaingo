@@ -2,8 +2,10 @@ package mrkl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/tmc/langchaingo/exp/agent/executor"
 	"github.com/tmc/langchaingo/exp/chains"
@@ -45,15 +47,13 @@ func checkOptions(opts OneShotZeroAgentOptions) OneShotZeroAgentOptions {
 // and options. It returns a pointer to the created agent and an error if there is any
 // issue during the creation process.
 func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*OneShotZeroAgent, error) {
-	firtPrompt, err := createPrompt(tools)
-	if err != nil {
-		return nil, err
-	}
+	// Validate opts
 	opts = checkOptions(opts)
+
 	return &OneShotZeroAgent{
 		llm:        llm,
 		query:      "",
-		chain:      chains.NewLLMChain(llm, firtPrompt),
+		chain:      chains.NewLLMChain(llm, createPrompt()),
 		tools:      tools,
 		verbose:    opts["verbose"].(bool),
 		maxRetries: opts["maxRetries"].(int),
@@ -66,13 +66,23 @@ func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*On
 func (a *OneShotZeroAgent) Run(ctx context.Context, query string) (*schema.AgentFinish, error) {
 	var attempts int
 	a.query = query
+
+	// Call the chain
 	resp, _ := a.chain.Call(ctx, map[string]interface{}{
-		"input":            a.query,
-		"agent_scratchpad": "",
-		"stop":             []string{"\nObservation:", "\n\tObservation:"},
+		"today":             time.Now().Format("January 02, 2006"),
+		"tool_names":        toolNames(a.tools),
+		"tool_descriptions": toolDescriptions(a.tools),
+		"input":             a.query,
+		"agent_scratchpad":  "",
+		"stop":              []string{"\nObservation:", "\n\tObservation:"},
 	})
 
-	output := resp["text"].(string)
+	// Validate the response
+	output, ok := resp["text"].(string)
+	if !ok {
+		return nil, errors.New("Agent did not return a string")
+	}
+
 	for output != "" || attempts < a.maxRetries {
 		var err error
 		action, finish := a.plan(output)
@@ -86,6 +96,7 @@ func (a *OneShotZeroAgent) Run(ctx context.Context, query string) (*schema.Agent
 
 		attempts++
 	}
+
 	return nil, fmt.Errorf("Agent did not finish after %d attempts", attempts)
 }
 
@@ -168,16 +179,28 @@ func getAgentAction(input string) schema.AgentAction {
 }
 
 func runTool(action string, actionInput string, tools *[]tools.Tool) (string, error) {
+	// Sanitize the action
+	action = strings.ToLower(strings.Trim(action, " "))
+
+	// Sanitize the action input
+	actionInput = strings.TrimSpace(actionInput)
+
+	// Find the tool that matches the action
 	var observation string
 	for _, tool := range *tools {
+		if tool.Name != strings.Trim(action, " ") {
+			continue
+		}
+
+		// Run the tool
 		toolOutput, err := tool.Run(actionInput)
 		if err != nil {
 			return "", err
 		}
-		if tool.Name == strings.Trim(action, " ") {
-			observation = "\nObservation: " + toolOutput + "\n"
-			break
-		}
+
+		// Add the tool's output to the observation
+		observation = "\nObservation: " + toolOutput + "\n"
+		break
 	}
 	return observation, nil
 }
