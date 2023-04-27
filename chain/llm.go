@@ -39,7 +39,7 @@ func NewLLMChain(llm llms.LLM, prompt *prompts.PromptTemplate) LLMChain {
 // the output from the llm with the output parser. This function should not be called
 // directly, use rather the Call or Run function if the prompt only requires one input
 // value.
-func (c LLMChain) Call_(ctx context.Context, values map[string]any) (map[string]any, error) {
+func (c LLMChain) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
 	promptValue, err := c.prompt.FormatPrompt(values)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (c LLMChain) Call_(ctx context.Context, values map[string]any) (map[string]
 }
 
 // GetMemory returns the memory.
-func (c LLMChain) GetMemory() schema.Memory {
+func (c LLMChain) GetMemory() schema.Memory { //nolint
 	return c.Memory
 }
 

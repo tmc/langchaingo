@@ -31,7 +31,7 @@ type Chain interface {
 	// Call runs the logic of the chain and returns the output. This method should
 	// not be called directly. Use rather the Call function that handles the memory
 	// of the chain.
-	Call_(context.Context, map[string]any) (map[string]any, error)
+	Call(context.Context, map[string]any) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
 	// InputKeys returns the input keys the chain expects.
@@ -60,7 +60,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]
 		fullValues[key] = value
 	}
 
-	outputValues, err := c.Call_(ctx, fullValues)
+	outputValues, err := c.Call(ctx, fullValues)
 	if err != nil {
 		return nil, err
 	}
