@@ -1,6 +1,7 @@
 package documentloader
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,8 +10,10 @@ import (
 
 func TestTextLoader(t *testing.T) {
 	t.Parallel()
+	file, err := os.Open("./testdata/test.txt")
+	assert.NoError(t, err)
 
-	loader := NewText("./testdata/test.txt")
+	loader := NewText(file)
 
 	docs, err := loader.Load()
 	require.NoError(t, err)
@@ -19,9 +22,6 @@ func TestTextLoader(t *testing.T) {
 	expectedPageContent := "Foo Bar Baz"
 	assert.Equal(t, docs[0].PageContent, expectedPageContent)
 
-	expectedMetadata := map[string]any{
-		"source": "./testdata/test.txt",
-	}
-
+	expectedMetadata := map[string]any{}
 	assert.Equal(t, docs[0].Metadata, expectedMetadata)
 }
