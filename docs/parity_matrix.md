@@ -4,13 +4,22 @@ This page provides a list of features and their status indicators for LangChain 
 
 Please note that this page lists the current state of the LangChain Go project, and some features may still be under development or planned for future releases. If you are interested in contributing to a specific integration or feature, feel free to choose from the list of features that are not yet done and let us know so we can help you get started. 
 
+## Prompt Templates
+| Feature                            | Status |
+|------------------------------------|--------|
+| Prompt Templates                   | ❌     |
+| Few Shot Prompt Template           | ❌     |
+| Output Parsers                     | ❌     |
+| Example Selectors                  | ❌     |
+
+
 ## Text Splitters
 
 | Feature                           | Status |
 | --------------------------------- | ------ |
-| Character Text Splitter           | ✅     |
+| Character Text Splitter           | ❌     |
 | Recursive Character Text Splitter | ✅     |
-| Markdown Text Splitter            | ✅     |
+| Markdown Text Splitter            | ❌     |
 
 ## Chains
 
@@ -18,20 +27,21 @@ Please note that this page lists the current state of the LangChain Go project, 
 | -------------------------------------- | ------ |
 | LLM Chain                              | ✅     |
 | Stuff Combine Documents Chain          | ✅     |
-| Map Reduce Combine Documents Chain     | ✅     |
-| Refine Combine Documents Chain         | ✅     |
+| Retrieval QA Chain                     | ✅     |
+| Map Reduce Combine Documents Chain     | ❌     |
+| Refine Combine Documents Chain         | ❌     |
 | Map Rerank Combine Documents Chain     | ❌ [#68](https://github.com/tmc/langchaingo/issues/68) |
-| Chat Vector DB Chain                   | ✅     |
-| Vector DB QA Chain                     | ✅     |
-| Analyze Document Chain                 | ✅     |
-| Question Answering Chains              | ✅     |
-| Summarization Chains                   | ✅     |
+| Chat Vector DB Chain                   | ❌     |
+| Vector DB QA Chain                     | ❌     |
+| Analyze Document Chain                 | ❌     |
+| Question Answering Chains              | ❌     |
+| Summarization Chains                   | ❌     |
 | Question Answering With Sources Chains | ❌     |
-| SQL Database Chain                     | ✅     |
+| SQL Database Chain                     | ❌     |
 | API Chain                              | ❌     |
 | Transformation Chain                   | ❌     |
 | Constitutional Chain                   | ❌     |
-| Conversational Chain                   | ✅     |
+| Conversational Chain                   | ❌     |
 | Graph QA Chain                         | ❌     |
 | HyDE Chain                             | ❌     |
 | LLM Bash Chain                         | ❌     |
@@ -47,18 +57,18 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Feature                             | Status |
 | ----------------------------------- | ------ |
 | zero-shot-react-description         | ✅     |
-| chat-zero-shot-react-description    | ✅     |
+| chat-zero-shot-react-description    | ❌     |
 | self-ask-with-search                | ❌     |
 | react-docstore                      | ❌     |
 | conversational-react-description    | ❌     |
-| chat-conversational-react-description | ✅   |
+| chat-conversational-react-description | ❌   |
 
 ## Memory
 
 | Feature                      | Status |
 | ----------------------------| ------ |
 | Buffer Memory               | ✅     |
-| Buffer Window Meory         | ✅     |
+| Buffer Window Memory         | ❌     |
 | Summary Memory              | ❌     |
 | Entity Memory               | ❌     |
 | Summary Buffer Memory       | ❌     |
