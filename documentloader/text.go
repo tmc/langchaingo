@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/textsplitter"
 )
 
-// Text loads data from a text file.
+// Text loads text data from a text file.
 type Text struct {
 	filePath string
 }
