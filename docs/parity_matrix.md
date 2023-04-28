@@ -73,3 +73,18 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Entity Memory               | ❌     |
 | Summary Buffer Memory       | ❌     |
 | Knowledge Graph Memory      | ❌     |
+
+## Output Parsers
+
+| Feature                      | Status |
+| ----------------------------| ------ |
+| Simple                      | ✅     |
+| Structured                  | ✅     |
+| Boolean                     | ❌     |
+| Combining Parsers           | ❌     |
+| Regex                       | ❌     |
+| Regex Dictionary            | ❌     |
+| Comma separated list        | ✅     |
+| Parser fixer                | ❌     |
+| Retry                       | ❌     |
+| Guardrail                   | ❌     |
