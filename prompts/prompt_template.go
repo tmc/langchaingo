@@ -69,6 +69,7 @@ func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue,
 	if err != nil {
 		return nil, err
 	}
+
 	return StringPromptValue(f), nil
 }
 

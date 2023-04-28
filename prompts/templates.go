@@ -75,6 +75,5 @@ func RenderTemplate(tmpl string, tmplFormat TemplateFormat, values map[string]an
 	if !ok {
 		return "", newInvalidTemplateError(tmplFormat)
 	}
-
 	return formatter(tmpl, values)
 }
