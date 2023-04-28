@@ -180,7 +180,7 @@ func getAgentAction(input string) schema.AgentAction {
 
 func runTool(action string, actionInput string, tools *[]tools.Tool) (string, error) {
 	// Sanitize the action
-	action = strings.ToLower(strings.Trim(action, " "))
+	action = strings.ToLower(strings.TrimSpace(action))
 
 	// Sanitize the action input
 	actionInput = strings.TrimSpace(actionInput)
@@ -188,7 +188,7 @@ func runTool(action string, actionInput string, tools *[]tools.Tool) (string, er
 	// Find the tool that matches the action
 	var observation string
 	for _, tool := range *tools {
-		if tool.Name != strings.Trim(action, " ") {
+		if tool.Name != action {
 			continue
 		}
 
