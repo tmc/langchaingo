@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/exp/embeddings"
+	"github.com/tmc/langchaingo/embedding"
 	"github.com/tmc/langchaingo/exp/vector_stores/pinecone/internal/pineconeClient"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -18,12 +18,12 @@ var ErrMissingToken = errors.New("missing the Pinecone API key, set it in the PI
 
 type Client struct {
 	client     pineconeClient.Client
-	embeddings embeddings.Embeddings
+	embeddings embedding.Embedder
 	textKey    string
 }
 
 // Environment for project is found in the pinecone console. Index name must not be larger then 45 characters.
-func NewPinecone(embeddings embeddings.Embeddings, environment, indexName string, dimensions int) (Client, error) {
+func NewPinecone(embeddings embedding.Embedder, environment, indexName string, dimensions int) (Client, error) {
 	token := os.Getenv(pineconeEnvVrName)
 	if token == "" {
 		return Client{}, ErrMissingToken
@@ -60,7 +60,7 @@ func (p Client) AddDocuments(documents []schema.Document, documentIds []string, 
 		texts = append(texts, documents[i].PageContent)
 	}
 
-	vectorData, err := p.embeddings.EmbedDocuments(texts)
+	vectorData, err := p.embeddings.EmbedDocuments(context.TODO(), texts)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (p Client) AddDocuments(documents []schema.Document, documentIds []string, 
 }
 
 func (p Client) SimilaritySearch(query string, numDocuments int, nameSpace string) ([]schema.Document, error) {
-	vector, err := p.embeddings.EmbedQuery(query)
+	vector, err := p.embeddings.EmbedQuery(context.TODO(), query)
 	if err != nil {
 		return []schema.Document{}, err
 	}
