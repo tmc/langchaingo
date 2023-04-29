@@ -21,7 +21,7 @@ func TestOpenaiEmbeddings(t *testing.T) {
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
 	require.NoError(t, err)
 
-	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world", "The world is ending", "bye bye"})
+	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world", "The world is ending", "good bye"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 3)
 }

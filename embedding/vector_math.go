@@ -76,7 +76,7 @@ func getAverage(vectors [][]float64, weights []int) ([]float64, error) {
 func getNorm(v []float64) float64 {
 	var sum float64
 	for i := 0; i < len(v); i++ {
-		sum += math.Pow(v[i], 2)
+		sum += v[i] * v[i]
 	}
 
 	return math.Sqrt(sum)

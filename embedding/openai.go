@@ -7,6 +7,9 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
+// DefaultBatchSize is the default length of batches.
+const DefaultBatchSize = 512
+
 // OpenAI is the embedder using the OpenAI api.
 type OpenAI struct {
 	client *openai.LLM
@@ -28,7 +31,7 @@ func NewOpenAI() (OpenAI, error) {
 	return OpenAI{
 		client:        client,
 		StripNewLines: true,
-		BatchSize:     512,
+		BatchSize:     DefaultBatchSize,
 	}, nil
 }
 
