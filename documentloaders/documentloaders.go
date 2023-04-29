@@ -1,6 +1,8 @@
-package documentloader
+package documentloaders
 
 import (
+	"context"
+
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
 )
@@ -8,7 +10,7 @@ import (
 // Loader is the interface for loading and splitting documents from a source.
 type Loader interface {
 	// Loads loads from a source and returns documents.
-	Load() ([]schema.Document, error)
+	Load(context.Context) ([]schema.Document, error)
 	// LoadAndSplit loads from a source and splits the documents using a text splitter.
-	LoadAndSplit(textsplitter.TextSplitter) ([]schema.Document, error)
+	LoadAndSplit(context.Context, textsplitter.TextSplitter) ([]schema.Document, error)
 }

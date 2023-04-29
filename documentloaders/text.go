@@ -1,7 +1,8 @@
-package documentloader
+package documentloaders
 
 import (
 	"bytes"
+	"context"
 	"io"
 
 	"github.com/tmc/langchaingo/schema"
@@ -23,7 +24,7 @@ func NewText(r io.Reader) Text {
 }
 
 // Load reads from the io.Reader and returns a single document with the data.
-func (l Text) Load() ([]schema.Document, error) {
+func (l Text) Load(_ context.Context) ([]schema.Document, error) {
 	buf := new(bytes.Buffer)
 	_, err := io.Copy(buf, l.r)
 	if err != nil {
@@ -40,8 +41,8 @@ func (l Text) Load() ([]schema.Document, error) {
 
 // LoadAndSplit reads text data from the io.Reader and splits it into multiple
 // documents using a text splitter.
-func (l Text) LoadAndSplit(splitter textsplitter.TextSplitter) ([]schema.Document, error) {
-	docs, err := l.Load()
+func (l Text) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
+	docs, err := l.Load(ctx)
 	if err != nil {
 		return nil, err
 	}
