@@ -2,7 +2,7 @@ package embedding
 
 import "context"
 
-// Embedder is the interface for creating vector embeddings from texts.
+// Embedder is the interface used for creating vector embeddings from texts.
 type Embedder interface {
 	// EmbedDocuments returns a vector for each text.
 	EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error)

@@ -7,14 +7,18 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
+// OpenAI is the embedder using the OpenAI api.
 type OpenAI struct {
-	client        *openai.LLM
+	client *openai.LLM
+
 	StripNewLines bool
 	BatchSize     int
 }
 
 var _ Embedder = OpenAI{}
 
+// NewOpenAi creates a new OpenAI with StripNewLines set to true and batch
+// size set to 512.
 func NewOpenAI() (OpenAI, error) {
 	client, err := openai.New()
 	if err != nil {
@@ -28,7 +32,7 @@ func NewOpenAI() (OpenAI, error) {
 	}, nil
 }
 
-// EmbedDocuments creates a vector embedding for each of the texts.
+// EmbedDocuments creates one vector embedding for each of the texts.
 func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := batchTexts(
 		maybeRemoveNewLines(texts, e.StripNewLines),
@@ -41,7 +45,16 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 		if err != nil {
 			return nil, err
 		}
-		combined, err := combineVectors(curTextEmbeddings)
+
+		textLengths := make([]int, 0, len(texts))
+		for _, text := range texts {
+			textLengths = append(textLengths, len(text))
+		}
+
+		combined, err := combineVectors(curTextEmbeddings, textLengths)
+		if err != nil {
+			return nil, err
+		}
 
 		embeddings = append(embeddings, combined)
 	}
@@ -49,6 +62,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 	return embeddings, nil
 }
 
+// EmbedQuery embeds a single text.
 func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
@@ -56,7 +70,7 @@ func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) 
 
 	embeddings, err := e.client.CreateEmbedding(ctx, []string{text})
 	if err != nil {
-		return []float64{}, err
+		return nil, err
 	}
 
 	return embeddings[0], nil
@@ -91,8 +105,4 @@ func batchTexts(texts []string, batchSize int) [][]string {
 	}
 
 	return batchedTexts
-}
-
-func combineVectors(vectors [][]float64) ([]float64, error) {
-	return vectors[0], nil
 }
