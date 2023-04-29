@@ -1,4 +1,4 @@
-package embedding
+package embeddings
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	// ErrVectorsNotSameSize is returned if the vectors gotten from the
+	// ErrVectorsNotSameSize is returned if the vectors returned from the
 	// embeddings api have different sizes.
 	ErrVectorsNotSameSize = errors.New("vectors gotten not the same size")
 	// ErrAllTextsLenZero is returned if all texts to be embedded has the combined

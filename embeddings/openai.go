@@ -1,4 +1,4 @@
-package embedding
+package embeddings
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-// DefaultBatchSize is the default length of batches.
-const DefaultBatchSize = 512
+// defaultBatchSize is the default length of batches.
+const defaultBatchSize = 512
 
 // OpenAI is the embedder using the OpenAI api.
 type OpenAI struct {
@@ -20,7 +20,7 @@ type OpenAI struct {
 
 var _ Embedder = OpenAI{}
 
-// NewOpenAi creates a new OpenAI with StripNewLines set to true and batch
+// NewOpenAI creates a new OpenAI with StripNewLines set to true and batch
 // size set to 512.
 func NewOpenAI() (OpenAI, error) {
 	client, err := openai.New()
@@ -31,7 +31,7 @@ func NewOpenAI() (OpenAI, error) {
 	return OpenAI{
 		client:        client,
 		StripNewLines: true,
-		BatchSize:     DefaultBatchSize,
+		BatchSize:     defaultBatchSize,
 	}, nil
 }
 
