@@ -7,7 +7,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 ## Prompt Templates
 | Feature                            | Status |
 |------------------------------------|--------|
-| Prompt Templates                   | ❌     |
+| Prompt Templates                   | ✅     |
 | Few Shot Prompt Template           | ❌     |
 | Output Parsers                     | ❌     |
 | Example Selectors                  | ❌     |
