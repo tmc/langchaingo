@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embedding"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/exp/vector_stores/pinecone/internal/pineconeClient"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -18,12 +18,12 @@ var ErrMissingToken = errors.New("missing the Pinecone API key, set it in the PI
 
 type Client struct {
 	client     pineconeClient.Client
-	embeddings embedding.Embedder
+	embeddings embeddings.Embedder
 	textKey    string
 }
 
 // Environment for project is found in the pinecone console. Index name must not be larger then 45 characters.
-func NewPinecone(embeddings embedding.Embedder, environment, indexName string, dimensions int) (Client, error) {
+func NewPinecone(embeddings embeddings.Embedder, environment, indexName string, dimensions int) (Client, error) {
 	token := os.Getenv(pineconeEnvVrName)
 	if token == "" {
 		return Client{}, ErrMissingToken
