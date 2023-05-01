@@ -1,6 +1,6 @@
 package pinecone
 
-import (
+/* import (
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -124,4 +124,4 @@ func float64ToFloat32(input []float64) []float32 {
 		output[i] = float32(v)
 	}
 	return output
-}
+} */
