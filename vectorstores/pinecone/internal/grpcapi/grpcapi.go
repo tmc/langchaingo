@@ -5,8 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/pinecone-io/go-pinecone/pinecone_grpc"
@@ -30,7 +28,7 @@ func GetGRPCConn(
 	apiKey string,
 ) (*grpc.ClientConn, error) {
 	config := &tls.Config{
-		MinVersion: 1.2,
+		MinVersion: tls.VersionTLS12,
 	}
 
 	target := fmt.Sprintf(
