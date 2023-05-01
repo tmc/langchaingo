@@ -1,9 +1,8 @@
-package grpcapi
+package pinecone
 
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -15,30 +14,19 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-var (
-	ErrEmptyResponse  = errors.New("empty response")
-	ErrMissingTextKey = errors.New("missing text key in vector metadata")
-)
-
-func GetGRPCConn(
-	ctx context.Context,
-	indexName,
-	projectName,
-	environment string,
-	apiKey string,
-) (*grpc.ClientConn, error) {
+func (s Store) getGRPCConn(ctx context.Context) (*grpc.ClientConn, error) {
 	config := &tls.Config{
 		MinVersion: tls.VersionTLS12,
 	}
 
 	target := fmt.Sprintf(
 		"%s-%s.svc.%s.pinecone.io:443",
-		indexName,
-		projectName,
-		environment,
+		s.indexName,
+		s.projectName,
+		s.environment,
 	)
 
-	ctx = metadata.AppendToOutgoingContext(ctx, "api-key", apiKey)
+	ctx = metadata.AppendToOutgoingContext(ctx, "api-key", s.apiKey)
 
 	conn, err := grpc.DialContext(
 		ctx,
@@ -54,12 +42,11 @@ func GetGRPCConn(
 	return conn, nil
 }
 
-func Upsert(
+func (s Store) grpcUpsert(
 	ctx context.Context,
 	conn *grpc.ClientConn,
 	vectors [][]float64,
 	metadatas []map[string]any,
-	nameSpace string,
 ) error {
 	client := pinecone_grpc.NewVectorServiceClient(conn)
 
@@ -82,19 +69,17 @@ func Upsert(
 
 	_, err := client.Upsert(ctx, &pinecone_grpc.UpsertRequest{
 		Vectors:   pineconeVectors,
-		Namespace: nameSpace,
+		Namespace: s.nameSpace,
 	})
 
 	return err
 }
 
-func Query(
+func (s Store) grpcQuery(
 	ctx context.Context,
 	conn *grpc.ClientConn,
 	vector []float64,
 	numDocs int,
-	nameSpace string,
-	textKey string,
 ) ([]schema.Document, error) {
 	client := pinecone_grpc.NewVectorServiceClient(conn)
 
@@ -104,7 +89,7 @@ func Query(
 		},
 		TopK:          uint32(numDocs),
 		IncludeValues: false,
-		Namespace:     nameSpace,
+		Namespace:     s.nameSpace,
 	})
 	if err != nil {
 		return nil, err
@@ -118,11 +103,11 @@ func Query(
 	for _, match := range queryResult.Results[0].Matches {
 		metadata := match.Metadata.AsMap()
 
-		pageContent, ok := metadata[textKey].(string)
+		pageContent, ok := metadata[s.textKey].(string)
 		if !ok {
 			return nil, ErrMissingTextKey
 		}
-		delete(metadata, textKey)
+		delete(metadata, s.textKey)
 
 		resultDocuments = append(resultDocuments, schema.Document{
 			PageContent: pageContent,

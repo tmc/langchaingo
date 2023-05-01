@@ -1,10 +1,9 @@
-package restapi
+package pinecone
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,28 +13,25 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-var (
-	ErrMissingTextKey = errors.New("missing text key in vector metadata")
-	ErrEmptyResponse  = errors.New("empty response")
-)
-
-type apiError struct {
-	task    string
-	message string
+// APIError is an error type returned if the status code from the rest
+// api is not 200.
+type APIError struct {
+	Task    string
+	Message string
 }
 
-func newAPIError(task string, body io.ReadCloser) apiError {
+func newAPIError(task string, body io.ReadCloser) APIError {
 	buf := new(bytes.Buffer)
 	_, err := io.Copy(buf, body)
 	if err != nil {
-		return apiError{task: "reading body of error message", message: err.Error()}
+		return APIError{Task: "reading body of error message", Message: err.Error()}
 	}
 
-	return apiError{task: task, message: buf.String()}
+	return APIError{Task: task, Message: buf.String()}
 }
 
-func (e apiError) Error() string {
-	return fmt.Sprintf("%s: %s", e.task, e.message)
+func (e APIError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Task, e.Message)
 }
 
 type vector struct {
@@ -49,15 +45,10 @@ type upsertPayload struct {
 	Namespace string   `json:"namespace"`
 }
 
-func Upsert(
+func (s Store) restUpsert(
 	ctx context.Context,
 	vectors [][]float64,
 	metadatas []map[string]any,
-	apiKey string,
-	nameSpace string,
-	indexName string,
-	projectName string,
-	environment string,
 ) error {
 	v := make([]vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
@@ -70,14 +61,14 @@ func Upsert(
 
 	payload := upsertPayload{
 		Vectors:   v,
-		Namespace: nameSpace,
+		Namespace: s.nameSpace,
 	}
 
 	body, status, err := doRequest(
 		ctx,
 		payload,
-		getEndpoint(indexName, projectName, environment)+"/vectors/upsert",
-		apiKey,
+		getEndpoint(s.indexName, s.projectName, s.environment)+"/vectors/upsert",
+		s.apiKey,
 		http.MethodPost,
 	)
 	if err != nil {
@@ -118,30 +109,24 @@ type queryPayload struct {
 	Namespace       string    `json:"namespace"`
 }
 
-func Query(
+func (s Store) restQuery(
 	ctx context.Context,
 	vector []float64,
 	numVectors int,
-	apiKey,
-	textKey,
-	nameSpace string,
-	indexName string,
-	projectName string,
-	environment string,
 ) ([]schema.Document, error) {
 	payload := queryPayload{
 		IncludeValues:   true,
 		IncludeMetadata: true,
 		Vector:          vector,
 		TopK:            numVectors,
-		Namespace:       nameSpace,
+		Namespace:       s.nameSpace,
 	}
 
 	body, statusCode, err := doRequest(
 		ctx,
 		payload,
-		getEndpoint(indexName, projectName, environment)+"/query",
-		apiKey,
+		getEndpoint(s.indexName, s.projectName, s.environment)+"/query",
+		s.apiKey,
 		http.MethodPost,
 	)
 	if err != nil {
@@ -167,11 +152,11 @@ func Query(
 
 	docs := make([]schema.Document, 0, len(response.Matches))
 	for _, match := range response.Matches {
-		pageContent, ok := match.Metadata[textKey].(string)
+		pageContent, ok := match.Metadata[s.textKey].(string)
 		if !ok {
 			return nil, ErrMissingTextKey
 		}
-		delete(match.Metadata, textKey)
+		delete(match.Metadata, s.textKey)
 
 		docs = append(docs, schema.Document{
 			PageContent: pageContent,
@@ -188,8 +173,8 @@ type whoamiResponse struct {
 	UserName    string `json:"user_name"`
 }
 
-// Whoami returns the project name associated with the api key.
-func Whoami(ctx context.Context, environment, apiKey string) (string, error) {
+// whoami returns the project name associated with the api key.
+func whoami(ctx context.Context, environment, apiKey string) (string, error) {
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,

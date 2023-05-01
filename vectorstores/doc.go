@@ -1,3 +1,3 @@
-// Package vector stores includes an interface for saving and querying documents in
+// Package vectorstores includes an interface for saving and querying documents in
 // the form of vector embeddings.
 package vectorstores

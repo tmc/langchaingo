@@ -7,17 +7,19 @@ import (
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pinecone/internal/grpcapi"
-	"github.com/tmc/langchaingo/vectorstores/pinecone/internal/restapi"
 )
 
 var (
 	// ErrMissingTextKey is returned in SimilaritySearch if a vector
 	// from the query is missing the text key.
-	ErrMissingTextKey             = errors.New("missing text key in vector metadata")
+	ErrMissingTextKey = errors.New("missing text key in vector metadata")
+	// ErrMissingTextKey is returned when if the embedder returns a number
+	// of vectors that is not equal to the number of documents given.
 	ErrEmbedderWrongNumberVectors = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
+	// ErrEmptyResponse is returned if the API gives an empty response.
+	ErrEmptyResponse = errors.New("empty response")
 )
 
 // Store is a wrapper around the pinecone rest API and grpc client.
@@ -68,25 +70,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document) error {
 		metadatas = append(metadatas, metadata)
 	}
 
-	if s.useGRPC {
-		conn, err := grpcapi.GetGRPCConn(ctx, s.indexName, s.projectName, s.environment, s.apiKey)
-		if err != nil {
-			return err
-		}
-
-		return grpcapi.Upsert(ctx, conn, vectors, metadatas, s.nameSpace)
-	}
-
-	return restapi.Upsert(
-		ctx,
-		vectors,
-		metadatas,
-		s.apiKey,
-		s.nameSpace,
-		s.indexName,
-		s.projectName,
-		s.environment,
-	)
+	return s.restUpsert(ctx, vectors, metadatas)
 }
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
@@ -97,61 +81,5 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return nil, err
 	}
 
-	if s.useGRPC {
-		conn, err := grpcapi.GetGRPCConn(ctx, s.indexName, s.projectName, s.environment, s.apiKey)
-		if err != nil {
-			return nil, err
-		}
-
-		docs, err := grpcapi.Query(
-			ctx,
-			conn,
-			vector,
-			numDocuments,
-			s.nameSpace,
-			s.textKey,
-		)
-
-		if err != nil && errors.Is(err, grpcapi.ErrMissingTextKey) {
-			return nil, ErrMissingTextKey
-		}
-
-		return docs, err
-	}
-
-	docs, err := restapi.Query(
-		ctx,
-		vector,
-		numDocuments,
-		s.apiKey,
-		s.textKey,
-		s.nameSpace,
-		s.indexName,
-		s.projectName,
-		s.environment,
-	)
-
-	if err != nil && errors.Is(err, restapi.ErrMissingTextKey) {
-		return nil, ErrMissingTextKey
-	}
-
-	return docs, err
-}
-
-func (s Store) ToRetriever(numDocuments int) Retriever {
-	return Retriever{
-		s:            s,
-		numDocuments: numDocuments,
-	}
-}
-
-type Retriever struct {
-	s            Store
-	numDocuments int
-}
-
-var _ schema.Retriever = Retriever{}
-
-func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
-	return r.s.SimilaritySearch(ctx, query, r.numDocuments)
+	return s.restQuery(ctx, vector, numDocuments)
 }
