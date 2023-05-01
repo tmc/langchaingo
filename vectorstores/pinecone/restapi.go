@@ -167,39 +167,6 @@ func (s Store) restQuery(
 	return docs, nil
 }
 
-type whoamiResponse struct {
-	ProjectName string `json:"project_name"`
-	UserLabel   string `json:"user_label"`
-	UserName    string `json:"user_name"`
-}
-
-// whoami returns the project name associated with the api key.
-func whoami(ctx context.Context, environment, apiKey string) (string, error) {
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodGet,
-		fmt.Sprintf("https://controller.%s.pinecone.io/actions/whoami", environment),
-		nil,
-	)
-	if err != nil {
-		return "", err
-	}
-
-	req.Header.Set("Api-Key", apiKey)
-
-	r, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer r.Body.Close()
-
-	var response whoamiResponse
-
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&response)
-	return response.ProjectName, err
-}
-
 func doRequest(ctx context.Context, payload any, url, apiKey, method string) (io.ReadCloser, int, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
