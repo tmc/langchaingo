@@ -78,7 +78,7 @@ func Upsert(
 		payload,
 		getEndpoint(indexName, projectName, environment)+"/vectors/upsert",
 		apiKey,
-		"POST",
+		http.MethodPost,
 	)
 	if err != nil {
 		return err
@@ -142,7 +142,7 @@ func Query(
 		payload,
 		getEndpoint(indexName, projectName, environment)+"/query",
 		apiKey,
-		"POST",
+		http.MethodPost,
 	)
 	if err != nil {
 		return nil, err
@@ -191,7 +191,8 @@ type whoamiResponse struct {
 // Whoami returns the project name associated with the api key.
 func Whoami(ctx context.Context, environment, apiKey string) (string, error) {
 	req, err := http.NewRequestWithContext(
-		ctx, "GET",
+		ctx,
+		http.MethodGet,
 		fmt.Sprintf("https://controller.%s.pinecone.io/actions/whoami", environment),
 		nil,
 	)
