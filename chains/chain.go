@@ -1,32 +1,12 @@
-package chain
+package chains
 
 import (
 	"context"
-	"errors"
 
 	"github.com/tmc/langchaingo/schema"
 )
 
-var (
-	// ErrInvalidInputValues is returned when some expected input values keys to
-	// a chain is missing.
-	ErrInvalidInputValues = errors.New("missing keys in input values")
-	// ErrInvalidOutputValues is returned when expected output keys to a chain does
-	// not match the actual keys in the return output values map.
-	ErrInvalidOutputValues = errors.New("missing keys in output values")
-
-	// ErrMultipleInputsInRun is returned in the run function if the chain expects
-	// more then one input values.
-	ErrMultipleInputsInRun = errors.New("run not supported in chain with more then one expected input")
-	// ErrMultipleOutputsInRun is returned in the run function if the chain expects
-	// more then one output values.
-	ErrMultipleOutputsInRun = errors.New("run not supported in chain with more then one expected output")
-	// ErrMultipleOutputsInRun is returned in the run function if the chain returns
-	// a value that is not a string.
-	ErrWrongOutputTypeInRun = errors.New("run not supported in chain that returns value that is not string")
-)
-
-// Cain is the interface all chains must implement.
+// Chain is the interface all chains must implement.
 type Chain interface {
 	// Call runs the logic of the chain and returns the output. This method should
 	// not be called directly. Use rather the Call function that handles the memory
