@@ -13,7 +13,7 @@ const (
 	_defaultTextKey    = "text"
 )
 
-// ErrInvalidOptions is returned when the options
+// ErrInvalidOptions is returned when the options given are invalid.
 var ErrInvalidOptions = errors.New("invalid options")
 
 // Option is a function type that can be used to modify the client.
@@ -49,10 +49,10 @@ func WithEmbedder(e embeddings.Embedder) Option {
 	}
 }
 
-// WithApiKey is an option for setting the api key. If the option is not set
+// WithAPIKey is an option for setting the api key. If the option is not set
 // the api key is read from the PINECONE_API_KEY environment variable. If the
 // variable is not present, an error will be returned.
-func WithApiKey(apiKey string) Option {
+func WithAPIKey(apiKey string) Option {
 	return func(p *Store) {
 		p.apiKey = apiKey
 	}
@@ -109,7 +109,7 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		o.apiKey = os.Getenv(_pineconeEnvVrName)
 		if o.apiKey == "" {
 			return Store{}, fmt.Errorf(
-				"%w: missing api key. Pass it as an option or set the %s environment variable.",
+				"%w: missing api key. Pass it as an option or set the %s environment variable",
 				ErrInvalidOptions,
 				_pineconeEnvVrName,
 			)

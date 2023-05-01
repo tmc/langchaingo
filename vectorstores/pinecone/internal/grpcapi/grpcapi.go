@@ -29,8 +29,9 @@ func GetGRPCConn(
 	environment string,
 	apiKey string,
 ) (*grpc.ClientConn, error) {
-	rand.Seed(time.Now().UTC().UnixNano())
-	config := &tls.Config{}
+	config := &tls.Config{
+		MinVersion: 1.2,
+	}
 
 	target := fmt.Sprintf(
 		"%s-%s.svc.%s.pinecone.io:443",

@@ -43,7 +43,7 @@ func TestPineconeStoreGRPC(t *testing.T) {
 	require.NoError(t, err)
 
 	storer, err := New(
-		WithApiKey(apiKey),
+		WithAPIKey(apiKey),
 		WithEnvironment(environment),
 		WithIndexName(indexName),
 		WithProjectName(projectName),
@@ -73,7 +73,7 @@ func TestPineconeStoreRest(t *testing.T) {
 	require.NoError(t, err)
 
 	storer, err := New(
-		WithApiKey(apiKey),
+		WithAPIKey(apiKey),
 		WithEnvironment(environment),
 		WithIndexName(indexName),
 		WithProjectName(projectName),

@@ -20,7 +20,7 @@ var (
 	)
 )
 
-// Store is a wrapper around the pinecone grpc client.
+// Store is a wrapper around the pinecone rest API and grpc client.
 type Store struct {
 	embedder embeddings.Embedder
 

@@ -24,7 +24,7 @@ type apiError struct {
 	message string
 }
 
-func newApiError(task string, body io.ReadCloser) apiError {
+func newAPIError(task string, body io.ReadCloser) apiError {
 	buf := new(bytes.Buffer)
 	_, err := io.Copy(buf, body)
 	if err != nil {
@@ -89,7 +89,7 @@ func Upsert(
 		return nil
 	}
 
-	return newApiError("upserting vectors", body)
+	return newAPIError("upserting vectors", body)
 }
 
 type sparseValues struct {
@@ -150,13 +150,16 @@ func Query(
 	defer body.Close()
 
 	if statusCode != http.StatusOK {
-		return nil, newApiError("querying index", body)
+		return nil, newAPIError("querying index", body)
 	}
 
 	var response queriesResponse
 
 	decoder := json.NewDecoder(body)
 	err = decoder.Decode(&response)
+	if err != nil {
+		return nil, err
+	}
 
 	if len(response.Matches) == 0 {
 		return nil, ErrEmptyResponse

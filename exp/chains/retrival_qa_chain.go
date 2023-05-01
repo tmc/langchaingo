@@ -40,7 +40,7 @@ func (c RetrievalQAChain) Call(ctx context.Context, values map[string]any) (map[
 		return nil, fmt.Errorf("Input value %s not string", c.InputKey)
 	}
 
-	docs, err := c.retriever.GetRelevantDocuments(query)
+	docs, err := c.retriever.GetRelevantDocuments(ctx, query)
 	if err != nil {
 		return nil, err
 	}
