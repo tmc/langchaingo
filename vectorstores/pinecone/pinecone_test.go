@@ -12,6 +12,8 @@ import (
 )
 
 func getValues(t *testing.T) (string, string, string, string) {
+	t.Helper()
+
 	apiKey := os.Getenv("PINECONE_API_KEY")
 	if apiKey == "" {
 		t.Skip("Must set PINECONE_API_KEY to run test")
