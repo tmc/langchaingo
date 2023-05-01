@@ -140,7 +140,8 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 
 func (s Store) ToRetriever(numDocuments int) Retriever {
 	return Retriever{
-		s: s,
+		s:            s,
+		numDocuments: numDocuments,
 	}
 }
 
