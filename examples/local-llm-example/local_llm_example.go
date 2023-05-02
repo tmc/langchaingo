@@ -14,7 +14,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, "How many sides does a square have?", nil)
+	completion, err := llm.Call(ctx, "How many sides does a square have?")
 	if err != nil {
 		log.Fatal(err)
 	}
