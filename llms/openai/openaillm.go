@@ -75,9 +75,9 @@ func (o *LLM) Chat(prompt string) (string, error) {
 	return result.Text, nil
 }
 
-// CreateEmbedding creates an embedding for the given input text.
-func (o *LLM) CreateEmbedding(inputTexts []string) ([][]float64, error) {
-	embeddings, err := o.client.CreateEmbedding(context.TODO(), &openaiclient.EmbeddingRequest{
+// CreateEmbedding creates embeddings for the given input texts.
+func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
 

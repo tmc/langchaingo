@@ -3,8 +3,8 @@ package document_loaders
 import (
 	"os"
 
-	"github.com/tmc/langchaingo/exp/text_splitters"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/textsplitter"
 )
 
 type TextLoader struct {
@@ -32,11 +32,11 @@ func (l TextLoader) Load() ([]schema.Document, error) {
 	}, nil
 }
 
-func (l TextLoader) LoadAndSplit(splitter text_splitters.TextSplitter) ([]schema.Document, error) {
+func (l TextLoader) LoadAndSplit(splitter textsplitter.TextSplitter) ([]schema.Document, error) {
 	docs, err := l.Load()
 	if err != nil {
 		return []schema.Document{}, err
 	}
 
-	return text_splitters.SplitDocuments(splitter, docs)
+	return textsplitter.SplitDocuments(splitter, docs)
 }

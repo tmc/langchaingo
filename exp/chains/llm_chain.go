@@ -3,9 +3,9 @@ package chains
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/exp/output_parsers"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
+	"github.com/tmc/langchaingo/outputparser"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -15,7 +15,7 @@ type LLMChain struct {
 	llm          llms.LLM
 	OutputKey    string
 	Memory       schema.Memory
-	OutputParser output_parsers.OutputParser
+	OutputParser schema.OutputParser[any]
 }
 
 func NewLLMChain(llm llms.LLM, prompt prompts.FormatPrompter) LLMChain {
@@ -23,7 +23,7 @@ func NewLLMChain(llm llms.LLM, prompt prompts.FormatPrompter) LLMChain {
 		prompt:       prompt,
 		llm:          llm,
 		OutputKey:    "text",
-		OutputParser: output_parsers.NewEmptyOutputParser(),
+		OutputParser: outputparser.NewSimple(),
 		Memory:       memory.NewSimple(),
 	}
 
