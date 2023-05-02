@@ -1,6 +1,6 @@
 package pinecone
 
-/* import (
+import (
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -44,12 +44,9 @@ func (s Store) getGRPCConn(ctx context.Context) (*grpc.ClientConn, error) {
 
 func (s Store) grpcUpsert(
 	ctx context.Context,
-	conn *grpc.ClientConn,
 	vectors [][]float64,
 	metadatas []map[string]any,
 ) error {
-	client := pinecone_grpc.NewVectorServiceClient(conn)
-
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		metadataStruct, err := structpb.NewStruct(metadatas[i])
@@ -67,7 +64,7 @@ func (s Store) grpcUpsert(
 		)
 	}
 
-	_, err := client.Upsert(ctx, &pinecone_grpc.UpsertRequest{
+	_, err := s.client.Upsert(ctx, &pinecone_grpc.UpsertRequest{
 		Vectors:   pineconeVectors,
 		Namespace: s.nameSpace,
 	})
@@ -77,13 +74,11 @@ func (s Store) grpcUpsert(
 
 func (s Store) grpcQuery(
 	ctx context.Context,
-	conn *grpc.ClientConn,
 	vector []float64,
 	numDocs int,
 ) ([]schema.Document, error) {
-	client := pinecone_grpc.NewVectorServiceClient(conn)
 
-	queryResult, err := client.Query(ctx, &pinecone_grpc.QueryRequest{
+	queryResult, err := s.client.Query(ctx, &pinecone_grpc.QueryRequest{
 		Queries: []*pinecone_grpc.QueryVector{
 			{Values: float64ToFloat32(vector)},
 		},
@@ -124,4 +119,4 @@ func float64ToFloat32(input []float64) []float32 {
 		output[i] = float32(v)
 	}
 	return output
-} */
+}

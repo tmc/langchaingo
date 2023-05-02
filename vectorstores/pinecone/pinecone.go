@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/pinecone-io/go-pinecone/pinecone_grpc"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -25,6 +27,8 @@ var (
 // Store is a wrapper around the pinecone rest API and grpc client.
 type Store struct {
 	embedder embeddings.Embedder
+	grpcConn *grpc.ClientConn
+	client   pinecone_grpc.VectorServiceClient
 
 	indexName   string
 	projectName string
@@ -38,8 +42,24 @@ type Store struct {
 var _ vectorstores.VectorStore = Store{}
 
 // New crates a new Store with options.
-func New(opts ...Option) (Store, error) {
-	return applyClientOptions(opts...)
+func New(ctx context.Context, opts ...Option) (Store, error) {
+	s, err := applyClientOptions(opts...)
+	if err != nil {
+		return Store{}, err
+	}
+
+	if s.useGRPC {
+		conn, err := s.getGRPCConn(ctx)
+		if err != nil {
+			return Store{}, err
+		}
+		s.grpcConn = conn
+
+		client := pinecone_grpc.NewVectorServiceClient(conn)
+		s.client = client
+	}
+
+	return s, nil
 }
 
 // AddDocuments creates vector embeddings from the documents using the embedder
@@ -70,6 +90,10 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document) error {
 		metadatas = append(metadatas, metadata)
 	}
 
+	if s.useGRPC {
+		return s.grpcUpsert(ctx, vectors, metadatas)
+	}
+
 	return s.restUpsert(ctx, vectors, metadatas)
 }
 
@@ -81,5 +105,14 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return nil, err
 	}
 
+	if s.useGRPC {
+		return s.grpcQuery(ctx, vector, numDocuments)
+	}
+
 	return s.restQuery(ctx, vector, numDocuments)
+}
+
+// Close closes the grpc connection.
+func (s Store) Close() error {
+	return s.grpcConn.Close()
 }

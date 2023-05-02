@@ -74,6 +74,7 @@ func WithNameSpace(nameSpace string) Option {
 	}
 }
 
+// withGrpc is an option for using the grpc api instead of the rest api.
 func withGrpc() Option {
 	return func(p *Store) {
 		p.useGRPC = true
