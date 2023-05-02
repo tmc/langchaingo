@@ -11,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/exp/chains"
 	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/logger"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -21,7 +22,6 @@ type OneShotZeroAgent struct {
 	query      string
 	chain      chains.Chain
 	tools      []tools.Tool
-	verbose    bool
 	maxRetries int
 }
 
@@ -34,9 +34,6 @@ var _ executor.AgentExecutor = (*OneShotZeroAgent)(nil)
 const FinalAnswerAction = "Final Answer:"
 
 func checkOptions(opts OneShotZeroAgentOptions) OneShotZeroAgentOptions {
-	if _, ok := opts["verbose"].(bool); !ok {
-		opts["verbose"] = false
-	}
 	if _, ok := opts["maxRetries"].(int); !ok {
 		opts["maxRetries"] = 3
 	}
@@ -55,7 +52,6 @@ func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*On
 		query:      "",
 		chain:      chains.NewLLMChain(llm, createPrompt()),
 		tools:      tools,
-		verbose:    opts["verbose"].(bool),
 		maxRetries: opts["maxRetries"].(int),
 	}, nil
 }
@@ -108,9 +104,7 @@ func (a *OneShotZeroAgent) nextStep(ctx context.Context, action schema.AgentActi
 		return "", err
 	}
 	scratchpad = append(scratchpad, action.Log+observation)
-	if a.verbose {
-		fmt.Println(getCurrentThought(scratchpad))
-	}
+	logger.AgentThought(getCurrentScratchpad(scratchpad))
 
 	// Update resp using a.chain.Call()
 	newResp, err := a.chain.Call(ctx, map[string]interface{}{
@@ -122,7 +116,12 @@ func (a *OneShotZeroAgent) nextStep(ctx context.Context, action schema.AgentActi
 		return "", err
 	}
 
-	// Use the updated resp in the next iteration
+	// Validate the response from the chain
+	if _, ok := newResp["text"].(string); !ok {
+		return "", errors.New("Agent did not return a string")
+	}
+
+	// Use the updated response in the next iteration
 	return newResp["text"].(string), nil
 }
 
@@ -139,14 +138,20 @@ func (a *OneShotZeroAgent) plan(info string) (*schema.AgentAction, *schema.Agent
 	return &action, nil
 }
 
-func getCurrentThought(scratchpad []string) string {
+func getCurrentScratchpad(scratchpad []string) string {
 	if len(scratchpad) == 0 {
 		return ""
 	}
 	lastThought := scratchpad[len(scratchpad)-1]
 	if len(scratchpad) == 1 {
-		lastThought = "Thought:" + lastThought
+		lastThought = lastThought
 	}
+
+	// The first line of the scratchpad string should be the agent's thought.
+	// The second line of the scratchpad string should be the action that the agent chooses.
+	// The third line of the scratchpad string should be the action input.
+	// The fourth line of the scratchpad string (if any) should be the observation.
+	// YMMV depending on how well your particular LLM adheres to the initial instructions.
 
 	return lastThought
 }

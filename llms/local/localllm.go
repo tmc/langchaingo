@@ -8,6 +8,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
+	"github.com/tmc/langchaingo/logger"
 )
 
 const (
@@ -34,25 +35,37 @@ var _ llms.LLM = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, stopWords []string) (string, error) {
+	// Generate a completion
+	logger.LLMRequest(prompt)
 	r, err := o.Generate(ctx, []string{prompt}, stopWords)
 	if err != nil {
 		return "", err
 	}
+
+	// Validate
 	if len(r) == 0 {
+		logger.LLMResponse(ErrEmptyResponse.Error())
 		return "", ErrEmptyResponse
 	}
+
+	// Return the first completion
+	logger.LLMResponse(r[0].Text)
 	return r[0].Text, nil
 }
 
 // Generate generates completions using the local LLM binary.
 func (o *LLM) Generate(ctx context.Context, prompts []string, stopWords []string) ([]*llms.Generation, error) {
+	logger.LLMRequest(prompts[0])
 	_ = stopWords // TODO: use this
 	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
 		Prompt: prompts[0],
 	})
 	if err != nil {
+		logger.LLMResponse(err.Error())
 		return nil, err
 	}
+
+	logger.LLMResponse(result.Text)
 	return []*llms.Generation{
 		{Text: result.Text},
 	}, nil
