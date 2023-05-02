@@ -77,15 +77,17 @@ func (s Store) grpcQuery(
 	vector []float64,
 	numDocs int,
 ) ([]schema.Document, error) {
-
-	queryResult, err := s.client.Query(ctx, &pinecone_grpc.QueryRequest{
-		Queries: []*pinecone_grpc.QueryVector{
-			{Values: float64ToFloat32(vector)},
+	queryResult, err := s.client.Query(
+		ctx,
+		&pinecone_grpc.QueryRequest{
+			Queries: []*pinecone_grpc.QueryVector{
+				{Values: float64ToFloat32(vector)},
+			},
+			TopK:          uint32(numDocs),
+			IncludeValues: false,
+			Namespace:     s.nameSpace,
 		},
-		TopK:          uint32(numDocs),
-		IncludeValues: false,
-		Namespace:     s.nameSpace,
-	})
+	)
 	if err != nil {
 		return nil, err
 	}
