@@ -106,6 +106,10 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		return Store{}, fmt.Errorf("%w: missing name space", ErrInvalidOptions)
 	}
 
+	if o.embedder == nil {
+		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
+	}
+
 	if o.apiKey == "" {
 		o.apiKey = os.Getenv(_pineconeEnvVrName)
 		if o.apiKey == "" {
