@@ -143,9 +143,6 @@ func getCurrentScratchpad(scratchpad []string) string {
 		return ""
 	}
 	lastThought := scratchpad[len(scratchpad)-1]
-	if len(scratchpad) == 1 {
-		lastThought = lastThought
-	}
 
 	// The first line of the scratchpad string should be the agent's thought.
 	// The second line of the scratchpad string should be the action that the agent chooses.

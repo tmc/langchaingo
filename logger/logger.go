@@ -32,7 +32,7 @@ func logFormat() int {
 
 // banner displays a banner with the given title.
 //
-//nolint:forbidigo // This is a debug function.
+//nolint:forbidigo // This is a debug function. fmt.Print is necessary.
 func banner(title string) {
 	lf := logFormat()
 	if lf == logFormatNone {
@@ -57,7 +57,8 @@ func banner(title string) {
 }
 
 // message displays a message with the given label and message.
-// nolint:forbidigo // This is a debug function.
+//
+//nolint:forbidigo // This is a debug function. fmt.Print is necessary.
 func message(label string, msg string, colorFunc func(format string, a ...interface{})) {
 	lf := logFormat()
 	if lf == logFormatNone {
