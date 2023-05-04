@@ -33,8 +33,8 @@ type LLM struct {
 var _ llms.LLM = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
-func (o *LLM) Call(ctx context.Context, prompt string, stopWords []string) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, stopWords)
+func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	r, err := o.Generate(ctx, []string{prompt}, options...)
 	if err != nil {
 		return "", err
 	}
@@ -45,8 +45,11 @@ func (o *LLM) Call(ctx context.Context, prompt string, stopWords []string) (stri
 }
 
 // Generate generates completions using the local LLM binary.
-func (o *LLM) Generate(ctx context.Context, prompts []string, stopWords []string) ([]*llms.Generation, error) {
-	_ = stopWords // TODO: use this
+func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	opts := &llms.CallOptions{}
+	for _, opt := range options {
+		opt(opts)
+	}
 	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
 		Prompt: prompts[0],
 	})
