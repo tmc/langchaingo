@@ -33,3 +33,10 @@ func WithStopWords(stopWords []string) CallOption {
 		o.StopWords = stopWords
 	}
 }
+
+// WithOptions is an option for LLM.Call.
+func WithOptions(options CallOptions) CallOption {
+	return func(o *CallOptions) {
+		(*o) = options
+	}
+}
