@@ -11,7 +11,10 @@ const (
 )
 
 var (
-	initOptions    sync.Once
+	// nolint: gochecknoglobals
+	initOptions sync.Once
+
+	// nolint: gochecknoglobals
 	defaultOptions *options
 )
 
