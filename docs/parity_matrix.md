@@ -88,3 +88,82 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Parser fixer                | ❌     |
 | Retry                       | ❌     |
 | Guardrail                   | ❌     |
+
+##Document Loaders
+
+| Feature                         | Status |
+|---------------------------------|--------|
+| Blob Loaders                    | ❌      |
+| Airbyte JSON                    | ❌      |
+| Apify Dataset                   | ❌      |
+| Arxiv Document Loader           | ❌      |
+| Azlyrics                        | ❌      |
+| Azure Blob Storage              | ❌      |
+| BigQuery                        | ❌      |
+| Bilibili                        | ❌      |
+| Blackboard                      | ❌      |
+| Blockchain                      | ❌      |
+| ChatGPT                         | ❌      |
+| College Confidential            | ❌      |
+| Confluence                      | ❌      |
+| CoNLL-U                         | ❌      |
+| CSV Loader                      | ❌      |
+| Dataframe                       | ❌      |
+| Diffbot                         | ❌      |
+| Directory                       | ❌      |
+| Discord                         | ❌      |
+| DuckDB Loader                   | ❌      |
+| Email                           | ❌      |
+| EPUB                            | ❌      |
+| Evernote                        | ❌      |
+| Facebook Chat                   | ❌      |
+| Figma                           | ❌      |
+| GCS Directory                   | ❌      |
+| GCS File                        | ❌      |
+| Git                             | ❌      |
+| Gitbook                         | ❌      |
+| Google Drive                    | ❌      |
+| Gutenberg Books                 | ❌      |
+| HN                              | ❌      |
+| HTML                            | ❌      |
+| HTML BS                         | ❌      |
+| Hugging Face Dataset            | ❌      |
+| iFixit                          | ❌      |
+| Image                           | ❌      |
+| Image Captions                  | ❌      |
+| IMSDb                           | ❌      |
+| Markdown                        | ❌      |
+| MediaWiki XML                   | ❌      |
+| Modern Treasury                 | ❌      |
+| Notebook                        | ❌      |
+| Notion                          | ❌      |
+| Notion Database                 | ❌      |
+| Obsidian                        | ❌      |
+| OneDrive                        | ❌      |
+| OneDrive File                   | ❌      |
+| PDF                             | ❌      |
+| PowerPoint                      | ❌      |
+| Python                          | ❌      |
+| ReadTheDocs                     | ❌      |
+| Reddit                          | ❌      |
+| Roam                            | ❌      |
+| RTF                             | ❌      |
+| S3 Directory                    | ❌      |
+| S3 File                         | ❌      |
+| Sitemap                         | ❌      |
+| Slack Directory                 | ❌      |
+| Spreedly                        | ❌      |
+| SRT                             | ❌      |
+| Stripe                          | ❌      |
+| Telegram                        | ❌      |
+| Text                            | ✅      |
+| TOML                            | ❌      |
+| Twitter                         | ❌      |
+| Unstructured                    | ❌      |
+| URL                             | ❌      |
+| URL Playwright                  | ❌      |
+| URL Selenium                    | ❌      |
+| Web Base                        | ❌      |
+| WhatsApp                        | ❌      |
+| Word Document                   | ❌      |
+| YouTube                         | ❌      |
