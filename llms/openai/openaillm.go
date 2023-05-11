@@ -3,15 +3,9 @@ package openai
 import (
 	"context"
 	"errors"
-	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
-)
-
-const (
-	tokenEnvVarName = "OPENAI_API_KEY" //nolint:gosec
-	modelEnvVarName = "OPENAI_MODEL"   //nolint:gosec
 )
 
 var (
@@ -87,20 +81,28 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-// New returns a new OpenAI client.
-func New() (*LLM, error) {
-	// Require the OpenAI API key to be set.
-	token := os.Getenv(tokenEnvVarName)
-	if token == "" {
+// New returns a new OpenAI LLM.
+func New(opts ...Option) (*LLM, error) {
+	// Ensure options are initialized only once.
+	initOptions.Do(initOpts)
+
+	options := &options{}
+	*options = *defaultOptions // Copy default options.
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.token) == 0 {
 		return nil, ErrMissingToken
 	}
 
-	// Allow model selection.
-	model := os.Getenv(modelEnvVarName)
+	client, err := openaiclient.New(options.token, options.model)
+	if err != nil {
+		return nil, err
+	}
 
-	// Create the client.
-	c, err := openaiclient.New(token, model)
 	return &LLM{
-		client: c,
-	}, err
+		client: client,
+	}, nil
 }
