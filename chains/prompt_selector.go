@@ -14,8 +14,8 @@ type PromptSelector interface {
 // ConditionalPromptSelector is a formatter selector that selects a prompt
 // depending on conditionals.
 type ConditionalPromptSelector struct {
-	DefaultFormatter *prompts.PromptTemplate
-	Conditionals     []struct {
+	DefaultPrompt *prompts.PromptTemplate
+	Conditionals  []struct {
 		Condition func(llms.LLM) bool
 		Prompt    *prompts.PromptTemplate
 	}
@@ -30,5 +30,5 @@ func (s ConditionalPromptSelector) GetPrompt(llm llms.LLM) *prompts.PromptTempla
 		}
 	}
 
-	return s.DefaultFormatter
+	return s.DefaultPrompt
 }

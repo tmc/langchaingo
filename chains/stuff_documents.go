@@ -20,15 +20,17 @@ const (
 // a string in the key specified by the "DocumentVariableName" field that is
 // by default set to "context".
 type StuffDocuments struct {
-	// LLMChain is the LLMChain used to call with the stuffed document.
+	// LLMChain is the LLMChain called after formatting the documents.
 	LLMChain LLMChain
 
 	// Input key is the input key the StuffDocuments chain expects the documents
 	// to be in.
 	InputKey string
+
 	// DocumentVariableName is the variable name used in the llm_chain to put
 	// the documents in.
 	DocumentVariableName string
+
 	// Separator The is the string used to join the documents.
 	Separator string
 }
@@ -69,12 +71,11 @@ func (c StuffDocuments) Call(ctx context.Context, values map[string]any) (map[st
 }
 
 // GetMemory returns a simple memory.
-func (c StuffDocuments) GetMemory() schema.Memory { //nolint
+func (c StuffDocuments) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
-// GetInputKeys returns the expected input keys, by default "input_documents" and
-// the keys for the llm chain.
+// GetInputKeys returns the expected input keys, by default "input_documents".
 func (c StuffDocuments) GetInputKeys() []string {
 	return []string{c.InputKey}
 }

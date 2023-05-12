@@ -16,7 +16,7 @@ type testRetriever struct{}
 
 var _ schema.Retriever = testRetriever{}
 
-func (r testRetriever) GetRelevantDocuments(_ context.Context, query string) ([]schema.Document, error) {
+func (r testRetriever) GetRelevantDocuments(_ context.Context, _ string) ([]schema.Document, error) {
 	return []schema.Document{
 		{PageContent: "foo is 34"},
 		{PageContent: "bar is 1"},

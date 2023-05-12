@@ -9,15 +9,15 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-var (
+const (
 	_retrievalQADefaultInputKey          = "query"
 	_retrievalQADefaultSourceDocumentKey = "source_documents"
 )
 
 // RetrievalQA is a chain used for question-answering against a retriever.
 type RetrievalQA struct {
-	retriever             schema.Retriever
-	combineDocumentsChain Chain
+	Retriever             schema.Retriever
+	CombineDocumentsChain Chain
 
 	InputKey              string
 	ReturnSourceDocuments bool
@@ -30,15 +30,15 @@ var _ Chain = RetrievalQA{}
 // have the expected input values "question" and "input_documents".
 func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) RetrievalQA {
 	return RetrievalQA{
-		retriever:             retriever,
-		combineDocumentsChain: combineDocumentsChain,
+		Retriever:             retriever,
+		CombineDocumentsChain: combineDocumentsChain,
 		InputKey:              _retrievalQADefaultInputKey,
 		ReturnSourceDocuments: false,
 	}
 }
 
-// NewRetrievalQAFromLLM loads a combine documents chain from the llm and creates
-// a new retrievalQA chain.
+// NewRetrievalQAFromLLM loads a combine documents chain from the llm and
+// creates a new retrievalQA chain.
 func NewRetrievalQAFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQA {
 	return NewRetrievalQA(
 		LoadQAStuffChain(llm),
@@ -54,12 +54,12 @@ func (c RetrievalQA) Call(ctx context.Context, values map[string]any) (map[strin
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
 
-	docs, err := c.retriever.GetRelevantDocuments(ctx, query)
+	docs, err := c.Retriever.GetRelevantDocuments(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := Call(ctx, c.combineDocumentsChain, map[string]any{
+	result, err := Call(ctx, c.CombineDocumentsChain, map[string]any{
 		"question":        query,
 		"input_documents": docs,
 	})
@@ -74,7 +74,7 @@ func (c RetrievalQA) Call(ctx context.Context, values map[string]any) (map[strin
 	return result, nil
 }
 
-func (c RetrievalQA) GetMemory() schema.Memory {
+func (c RetrievalQA) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
@@ -83,7 +83,7 @@ func (c RetrievalQA) GetInputKeys() []string {
 }
 
 func (c RetrievalQA) GetOutputKeys() []string {
-	outputKeys := append([]string{}, c.combineDocumentsChain.GetOutputKeys()...)
+	outputKeys := append([]string{}, c.CombineDocumentsChain.GetOutputKeys()...)
 	if c.ReturnSourceDocuments {
 		outputKeys = append(outputKeys, _retrievalQADefaultSourceDocumentKey)
 	}

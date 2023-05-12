@@ -9,7 +9,7 @@ var (
 	// a chain is missing.
 	ErrMissingInputValues = errors.New("missing key in input values")
 	// ErrInputValuesWrongType is returned if an input value to a chain is of
-	// wrong type
+	// wrong type.
 	ErrInputValuesWrongType = errors.New("input key is of wrong type")
 	// ErrInvalidOutputValues is returned when expected output keys to a chain does
 	// not match the actual keys in the return output values map.
