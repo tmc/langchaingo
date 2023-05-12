@@ -10,6 +10,8 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+const _llmChainDefaultOutputKey = "text"
+
 type LLMChain struct {
 	prompt       prompts.PromptTemplate
 	llm          llms.LLM
@@ -29,7 +31,7 @@ func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) LLMChain {
 		OutputParser: outputparser.NewSimple(),
 		Memory:       memory.NewSimple(),
 
-		OutputKey: "text",
+		OutputKey: _llmChainDefaultOutputKey,
 	}
 
 	return chain
@@ -54,7 +56,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		generateOptions = append(generateOptions, llms.WithStopWords(opts.StopWords))
 	}
 
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, generateOptions...)
+	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, llms.WithStopWords(stop))
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +76,7 @@ func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 
 // GetInputKeys returns the expected input keys.
 func (c LLMChain) GetInputKeys() []string {
-	return c.prompt.InputVariables
+	return append([]string{}, c.prompt.InputVariables...)
 }
 
 // GetOutputKeys returns the output keys the chain will return.
