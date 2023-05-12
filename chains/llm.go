@@ -11,7 +11,7 @@ import (
 )
 
 type LLMChain struct {
-	prompt       *prompts.PromptTemplate
+	prompt       prompts.PromptTemplate
 	llm          llms.LLM
 	Memory       schema.Memory
 	OutputParser schema.OutputParser[any]
@@ -22,7 +22,7 @@ type LLMChain struct {
 var _ Chain = LLMChain{}
 
 // NewLLMChain creates a new LLMChain with an llm and a prompt.
-func NewLLMChain(llm llms.LLM, prompt *prompts.PromptTemplate) LLMChain {
+func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) LLMChain {
 	chain := LLMChain{
 		prompt:       prompt,
 		llm:          llm,
