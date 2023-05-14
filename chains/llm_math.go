@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	_ticks         = "```"
-	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Python. Use the output of running this code to answer the question.
+	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Python.
+Use the output of running this code to answer the question.
 
 ---
 Question: (Question with math problem.)
@@ -94,7 +94,7 @@ func (c LLMMathChain) processLLMResult(llmOutput string) (string, error) {
 	if strings.Contains(llmOutput, "Answer:") {
 		return strings.TrimSpace(strings.Split(llmOutput, "Answer:")[1]), nil
 	}
-	return "", fmt.Errorf("unknown format from LLM: %s", llmOutput)
+	return "", fmt.Errorf("unknown format from LLM: %s", llmOutput) //nolint:goerr113
 }
 
 func (c LLMMathChain) evaluateExpression(expression string) (string, error) {

@@ -20,7 +20,8 @@ func TestLLMMath(t *testing.T) {
 	require.NoError(t, err)
 
 	chain := NewLLMMathChain(llm)
-	result, err := Run(context.Background(), chain, "what is forty plus three? take that then multiply it by ten thousand divided by 7324.3")
+	q := "what is forty plus three? take that then multiply it by ten thousand divided by 7324.3"
+	result, err := Run(context.Background(), chain, q)
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "58.708"), "expected 58.708 in result")
 }
