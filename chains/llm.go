@@ -68,7 +68,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 }
 
 // GetMemory returns the memory.
-func (c LLMChain) GetMemory() schema.Memory { //nolint
+func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 	return c.Memory
 }
 

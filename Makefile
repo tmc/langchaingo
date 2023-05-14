@@ -16,7 +16,7 @@ lint-exp:
 
 .PHONY: lint-fix
 lint-fix:
-	golangci-lint run --fix --skip-dirs=exp ./...
+	golangci-lint run --fix --skip-dirs=./exp ./...
 
 .PHONY: lint-all
 lint-all:
