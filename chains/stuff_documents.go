@@ -23,15 +23,15 @@ type StuffDocuments struct {
 	// LLMChain is the LLMChain called after formatting the documents.
 	LLMChain LLMChain
 
-	// Input key is the input key the StuffDocuments chain expects the documents
-	// to be in.
+	// Input key is the input key the StuffDocuments chain expects the
+	//  documents to be in.
 	InputKey string
 
 	// DocumentVariableName is the variable name used in the llm_chain to put
 	// the documents in.
 	DocumentVariableName string
 
-	// Separator The is the string used to join the documents.
+	// Separator is the string used to join the documents.
 	Separator string
 }
 

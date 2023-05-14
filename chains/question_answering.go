@@ -9,7 +9,7 @@ import (
 // chain.
 func LoadQAStuffChain(llm llms.LLM) StuffDocuments {
 	defaultQAPromptTemplate := prompts.NewPromptTemplate(
-		"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n{{.context}}\n\nQuestion: {{.question}}\nHelpful Answer:", //nolint
+		"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n{{.context}}\n\nQuestion: {{.question}}\nHelpful Answer:", //nolint: lll
 		[]string{"context", "question"},
 	)
 
