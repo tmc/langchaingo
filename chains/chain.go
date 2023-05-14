@@ -36,7 +36,7 @@ func WithStopWords(stopWords []string) ChainCallOption {
 type ChainCallOption func(*chainCallOptions)
 
 // Call is the function used for calling chains.
-func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) {
+func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
 	if err := validateInputs(c, inputValues); err != nil {
 		return nil, err
 	}
