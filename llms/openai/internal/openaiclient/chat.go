@@ -27,7 +27,8 @@ type ChatMessage struct {
 	Role string `json:"role"`
 	// The content of the message.
 	Content string `json:"content"`
-	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores, with a maximum length of 64 characters.
+	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
+	// with a maximum length of 64 characters.
 	Name string `json:"name,omitempty"`
 }
 
