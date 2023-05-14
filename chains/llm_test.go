@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
@@ -32,6 +33,7 @@ func TestLLMChain(t *testing.T) {
 		map[string]any{
 			"country": "France",
 		},
+		llms.WithStopWords([]string{"\nObservation", "\n\tObservation"}),
 	)
 	require.NoError(t, err)
 

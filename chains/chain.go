@@ -12,7 +12,7 @@ type Chain interface {
 	// Call runs the logic of the chain and returns the output. This method should
 	// not be called directly. Use rather the Call function that handles the memory
 	// of the chain.
-	Call(context.Context, map[string]any) (map[string]any, error)
+	Call(context.Context, map[string]any, ...ChainCallOption) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
 	// InputKeys returns the input keys the chain expects.
@@ -21,12 +21,25 @@ type Chain interface {
 	GetOutputKeys() []string
 }
 
+type chainCallOptions struct {
+	StopWords []string
+}
+
+// WithStopWords is a ChainCallOption that can be used to set the stop words of the chain.
+func WithStopWords(stopWords []string) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.StopWords = stopWords
+	}
+}
+
+// ChainCallOption is a function that can be used to modify the behavior of the Call function.
+type ChainCallOption func(*chainCallOptions)
+
 // Call is the function used for calling chains.
-func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]any, error) {
+func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) {
 	if err := validateInputs(c, inputValues); err != nil {
 		return nil, err
 	}
-
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -41,7 +54,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any) (map[string]
 		fullValues[key] = value
 	}
 
-	outputValues, err := c.Call(ctx, fullValues)
+	outputValues, err := c.Call(ctx, fullValues, options...)
 	if err != nil {
 		return nil, err
 	}

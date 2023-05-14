@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -12,10 +13,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	completion, err := llm.Chat("What would be a good company name a company that makes colorful socks?")
+	ctx := context.Background()
+	completion, err := llm.Chat(ctx, []openai.ChatMessage{{Role: "user", Content: "What would be a good company name a company that makes colorful socks?"}})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(completion)
+	fmt.Println(completion.Content)
 }
