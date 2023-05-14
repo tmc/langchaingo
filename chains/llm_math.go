@@ -1,0 +1,106 @@
+package chains
+
+import (
+	"context"
+	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/memory"
+	"github.com/tmc/langchaingo/prompts"
+	"github.com/tmc/langchaingo/schema"
+	"go.starlark.net/starlark"
+)
+
+const (
+	_ticks         = "```"
+	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Python. Use the output of running this code to answer the question.
+
+---
+Question: (Question with math problem.)
+` + "```" + `python
+$(single line expression that solves the problem)
+` + "```" + `
+
+---
+Question: What is 37593 * 67?
+` + "```" + `python
+37593 * 67
+` + "```" + `
+
+---
+Question: {{.question}}
+`
+)
+
+// LLMMathChain is a chain used for evaluating math expressions.
+type LLMMathChain struct {
+	LLMChain *LLMChain
+}
+
+var _ Chain = LLMMathChain{}
+
+func NewLLMMathChain(llm llms.LLM) LLMMathChain {
+	p := prompts.NewPromptTemplate(_llmMathPrompt, []string{"question"})
+	c := NewLLMChain(llm, p)
+	return LLMMathChain{
+		LLMChain: c,
+	}
+}
+
+// Call gets relevant documents from the retriever and gives them to the combine
+// documents chain.
+func (c LLMMathChain) Call(ctx context.Context, values map[string]any, _ ...ChainCallOption) (map[string]any, error) { //nolint: lll
+	question, ok := values["question"].(string)
+	if !ok {
+		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
+	}
+	output, err := Call(ctx, c.LLMChain, map[string]any{
+		"question": question,
+	})
+	if err != nil {
+		return nil, err
+	}
+	output["answer"], err = c.processLLMResult(output["text"].(string))
+	return output, err
+}
+
+func (c LLMMathChain) GetMemory() schema.Memory { //nolint:ireturn
+	return memory.NewSimple()
+}
+
+func (c LLMMathChain) GetInputKeys() []string {
+	return []string{"question"}
+}
+
+func (c LLMMathChain) GetOutputKeys() []string {
+	return []string{"answer"}
+}
+
+var pythonBlockRegex = regexp.MustCompile("(?s)```python(.*)```")
+
+func (c LLMMathChain) processLLMResult(llmOutput string) (string, error) {
+	llmOutput = strings.TrimSpace(llmOutput)
+	textMatch := pythonBlockRegex.FindStringSubmatch(llmOutput)
+	if len(textMatch) > 0 {
+		expression := textMatch[1]
+		output, err := c.evaluateExpression(expression)
+		if err != nil {
+			return "", err
+		}
+		return output, nil
+	}
+	if strings.Contains(llmOutput, "Answer:") {
+		return strings.TrimSpace(strings.Split(llmOutput, "Answer:")[1]), nil
+	}
+	return "", fmt.Errorf("unknown format from LLM: %s", llmOutput)
+}
+
+func (c LLMMathChain) evaluateExpression(expression string) (string, error) {
+	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "", expression, nil)
+	if err != nil {
+		return "", err
+	}
+	return v.String(), nil
+}
