@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tmc/langchaingo/schema"
 )
@@ -86,16 +87,16 @@ func Run(ctx context.Context, c Chain, input string) (string, error) {
 func validateInputs(c Chain, inputValues map[string]any) error {
 	for _, k := range c.GetInputKeys() {
 		if _, ok := inputValues[k]; !ok {
-			return ErrInvalidInputValues
+			return fmt.Errorf("%w: %v", ErrInvalidInputValues, k)
 		}
 	}
 	return nil
 }
 
 func validateOutputs(c Chain, outputValues map[string]any) error {
-	for _, k := range c.GetInputKeys() {
+	for _, k := range c.GetOutputKeys() {
 		if _, ok := outputValues[k]; !ok {
-			return ErrInvalidOutputValues
+			return fmt.Errorf("%w: %v", ErrInvalidOutputValues, k)
 		}
 	}
 	return nil
