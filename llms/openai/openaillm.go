@@ -50,14 +50,23 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}, nil
 }
 
-// Chat requests a chat response for the given prompt.
-func (o *LLM) Chat(prompt string) (string, error) {
-	result, err := o.client.CreateChat(context.TODO(), &openaiclient.ChatRequest{Prompt: prompt})
-	if err != nil {
-		return "", err
-	}
+type ChatMessage = openaiclient.ChatMessage
 
-	return result.Text, nil
+// Chat requests a chat response for the given prompt.
+func (o *LLM) Chat(ctx context.Context, messages []ChatMessage, options ...llms.CallOption) (*ChatMessage, error) {
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+	result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
+		Model:     opts.Model,
+		StopWords: opts.StopWords,
+		Messages:  messages,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &result.Choices[0].Message, nil
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

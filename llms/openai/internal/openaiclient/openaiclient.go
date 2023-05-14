@@ -90,36 +90,18 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 	return embeddings, nil
 }
 
-// ChatRequest is a request to create an embedding.
-type ChatRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"messages"`
-}
-
-type ChatResponse struct {
-	Text string `json:"text"`
-}
-
 // CreateChat creates chat request.
 func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
 	r.Model = c.model
 	if r.Model == "" {
 		r.Model = defaultChatModel
 	}
-
-	resp, err := c.createChat(ctx, &chatPayload{
-		Model:    r.Model,
-		Messages: []chatMessage{{Role: "user", Content: r.Prompt}},
-	})
+	resp, err := c.createChat(ctx, r)
 	if err != nil {
 		return nil, err
 	}
-
 	if len(resp.Choices) == 0 {
 		return nil, ErrEmptyResponse
 	}
-
-	return &ChatResponse{
-		Text: resp.Choices[0].Message.Content,
-	}, nil
+	return resp, nil
 }

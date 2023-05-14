@@ -35,22 +35,26 @@ func NewLLMChain(llm llms.LLM, prompt *prompts.PromptTemplate) LLMChain {
 	return chain
 }
 
-// Call_ formats the prompts with the input values, generates using the llm, and parses
+// Call formats the prompts with the input values, generates using the llm, and parses
 // the output from the llm with the output parser. This function should not be called
 // directly, use rather the Call or Run function if the prompt only requires one input
 // value.
-func (c LLMChain) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
+func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) {
 	promptValue, err := c.prompt.FormatPrompt(values)
 	if err != nil {
 		return nil, err
 	}
-
-	var stop []string
-	if stopVal, ok := values["stop"].([]string); ok {
-		stop = stopVal
+	opts := &chainCallOptions{}
+	for _, option := range options {
+		option(opts)
 	}
 
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, llms.WithStopWords(stop))
+	generateOptions := []llms.CallOption{}
+	if opts.StopWords != nil {
+		generateOptions = append(generateOptions, llms.WithStopWords(opts.StopWords))
+	}
+
+	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, generateOptions...)
 	if err != nil {
 		return nil, err
 	}
