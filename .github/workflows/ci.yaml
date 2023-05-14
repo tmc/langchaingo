@@ -20,7 +20,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3.4.0
         with:
-          args: --skip-dirs=exp
+          skip-cache: true
   build-test:
     runs-on: ubuntu-latest
     steps:
