@@ -102,10 +102,6 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		return Store{}, fmt.Errorf("%w: missing project name", ErrInvalidOptions)
 	}
 
-	if o.nameSpace == "" {
-		return Store{}, fmt.Errorf("%w: missing name space", ErrInvalidOptions)
-	}
-
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
