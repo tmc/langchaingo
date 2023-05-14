@@ -40,6 +40,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	if err := validateInputs(c, inputValues); err != nil {
 		return nil, err
 	}
+
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -72,7 +73,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 
 // Run can be used to call a chain if the chain only expects one string input
 // and one string output.
-func Run(ctx context.Context, c Chain, input string) (string, error) {
+func Run(ctx context.Context, c Chain, input string, options ...ChainCallOption) (string, error) {
 	inputKeys := c.GetInputKeys()
 	if len(inputKeys) != 1 {
 		return "", ErrMultipleInputsInRun
@@ -84,7 +85,7 @@ func Run(ctx context.Context, c Chain, input string) (string, error) {
 	}
 
 	inputValues := map[string]any{inputKeys[0]: input}
-	outputValues, err := Call(ctx, c, inputValues)
+	outputValues, err := Call(ctx, c, inputValues, options...)
 	if err != nil {
 		return "", err
 	}
@@ -100,7 +101,7 @@ func Run(ctx context.Context, c Chain, input string) (string, error) {
 func validateInputs(c Chain, inputValues map[string]any) error {
 	for _, k := range c.GetInputKeys() {
 		if _, ok := inputValues[k]; !ok {
-			return fmt.Errorf("%w: %v", ErrInvalidInputValues, k)
+			return fmt.Errorf("%w: %w: %v", ErrInvalidInputValues, ErrMissingInputValues, k)
 		}
 	}
 	return nil
