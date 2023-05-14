@@ -35,17 +35,17 @@ type PromptTemplate struct {
 }
 
 // NewPromptTemplate returns a new prompt template.
-func NewPromptTemplate(template string, inputVars []string) (*PromptTemplate, error) {
-	return &PromptTemplate{
+func NewPromptTemplate(template string, inputVars []string) PromptTemplate {
+	return PromptTemplate{
 		Template:       template,
 		InputVariables: inputVars,
 		TemplateFormat: TemplateFormatGoTemplate,
-	}, nil
+	}
 }
 
 var (
-	_ Formatter      = (*PromptTemplate)(nil)
-	_ FormatPrompter = (*PromptTemplate)(nil)
+	_ Formatter      = PromptTemplate{}
+	_ FormatPrompter = PromptTemplate{}
 )
 
 // Format formats the prompt template and returns a string value.

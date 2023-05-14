@@ -20,7 +20,7 @@ func TestLLMChain(t *testing.T) {
 	model, err := openai.New()
 	require.NoError(t, err)
 
-	prompt, err := prompts.NewPromptTemplate(
+	prompt := prompts.NewPromptTemplate(
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)

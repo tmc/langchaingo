@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/exp/agent/executor"
-	"github.com/tmc/langchaingo/exp/chains"
 	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
