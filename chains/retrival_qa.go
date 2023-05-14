@@ -48,7 +48,7 @@ func NewRetrievalQAFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQA
 
 // Call gets relevant documents from the retriever and gives them to the combine
 // documents chain.
-func (c RetrievalQA) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
+func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) {
 	query, ok := values[c.InputKey].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)

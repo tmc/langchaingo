@@ -56,7 +56,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		generateOptions = append(generateOptions, llms.WithStopWords(opts.StopWords))
 	}
 
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, llms.WithStopWords(stop))
+	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, generateOptions...)
 	if err != nil {
 		return nil, err
 	}

@@ -32,7 +32,7 @@ func TestRetrievalQA(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	prompt, err := prompts.NewPromptTemplate(
+	prompt := prompts.NewPromptTemplate(
 		"answer this question {{.question}} with this context {{.context}}",
 		[]string{"question", "context"},
 	)

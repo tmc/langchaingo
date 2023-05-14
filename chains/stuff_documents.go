@@ -50,7 +50,7 @@ func NewStuffDocuments(llmChain LLMChain) StuffDocuments {
 }
 
 // Call handles the inner logic of the StuffDocuments chain.
-func (c StuffDocuments) Call(ctx context.Context, values map[string]any) (map[string]any, error) {
+func (c StuffDocuments) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
 	docs, ok := values[c.InputKey].([]schema.Document)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
