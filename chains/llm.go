@@ -50,7 +50,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any) (map[string]a
 		stop = stopVal
 	}
 
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, stop)
+	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, llms.WithStopWords(stop))
 	if err != nil {
 		return nil, err
 	}

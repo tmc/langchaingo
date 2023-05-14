@@ -31,7 +31,6 @@ func TestLLMChain(t *testing.T) {
 	resultChainValue, err := Call(context.Background(), chain,
 		map[string]any{
 			"country": "France",
-			"stop":    []string{"\nObservation", "\n\tObservation"},
 		},
 	)
 	require.NoError(t, err)
