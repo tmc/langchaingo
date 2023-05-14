@@ -10,22 +10,23 @@ import (
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
+	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )
 
 const (
-	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Python.
+	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Starlark.
 Use the output of running this code to answer the question.
 
 ---
 Question: (Question with math problem.)
-` + "```" + `python
+` + "```" + `starlark
 $(single line expression that solves the problem)
 ` + "```" + `
 
 ---
 Question: What is 37593 * 67?
-` + "```" + `python
+` + "```" + `starlark
 37593 * 67
 ` + "```" + `
 
@@ -78,11 +79,11 @@ func (c LLMMathChain) GetOutputKeys() []string {
 	return []string{"answer"}
 }
 
-var pythonBlockRegex = regexp.MustCompile("(?s)```python(.*)```")
+var starlarkBlockRegex = regexp.MustCompile("(?s)```starlark(.*)```")
 
 func (c LLMMathChain) processLLMResult(llmOutput string) (string, error) {
 	llmOutput = strings.TrimSpace(llmOutput)
-	textMatch := pythonBlockRegex.FindStringSubmatch(llmOutput)
+	textMatch := starlarkBlockRegex.FindStringSubmatch(llmOutput)
 	if len(textMatch) > 0 {
 		expression := textMatch[1]
 		output, err := c.evaluateExpression(expression)
@@ -98,7 +99,8 @@ func (c LLMMathChain) processLLMResult(llmOutput string) (string, error) {
 }
 
 func (c LLMMathChain) evaluateExpression(expression string) (string, error) {
-	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "", expression, nil)
+	expression = strings.TrimSpace(expression)
+	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", expression, math.Module.Members)
 	if err != nil {
 		return "", err
 	}
