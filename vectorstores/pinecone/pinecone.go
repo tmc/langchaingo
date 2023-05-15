@@ -41,7 +41,8 @@ type Store struct {
 
 var _ vectorstores.VectorStore = Store{}
 
-// New crates a new Store with options.
+// New creates a new Store with options. Options for index name, environment, project name
+// and embedder must be set.
 func New(ctx context.Context, opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
@@ -64,7 +65,9 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 
 // AddDocuments creates vector embeddings from the documents using the embedder
 // and upsert the vectors to the pinecone index.
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document) error {
+func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+	nameSpace := s.getNameSpace(options...)
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
@@ -91,28 +94,42 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document) error {
 	}
 
 	if s.useGRPC {
-		return s.grpcUpsert(ctx, vectors, metadatas)
+		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace)
 	}
 
-	return s.restUpsert(ctx, vectors, metadatas)
+	return s.restUpsert(ctx, vectors, metadatas, nameSpace)
 }
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
-func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int) ([]schema.Document, error) {
+func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
+	nameSpace := s.getNameSpace(options...)
+
 	vector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
 	if s.useGRPC {
-		return s.grpcQuery(ctx, vector, numDocuments)
+		return s.grpcQuery(ctx, vector, numDocuments, nameSpace)
 	}
 
-	return s.restQuery(ctx, vector, numDocuments)
+	return s.restQuery(ctx, vector, numDocuments, nameSpace)
 }
 
 // Close closes the grpc connection.
 func (s Store) Close() error {
 	return s.grpcConn.Close()
+}
+
+func (s Store) getNameSpace(options ...vectorstores.Option) string {
+	opts := vectorstores.Options{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	if opts.NameSpace != "" {
+		return opts.NameSpace
+	}
+	return s.nameSpace
 }
