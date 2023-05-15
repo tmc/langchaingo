@@ -41,7 +41,7 @@ type Store struct {
 
 var _ vectorstores.VectorStore = Store{}
 
-// New crates a new Store with options. Options for index name, environment, project name
+// New creates a new Store with options. Options for index name, environment, project name
 // and embedder must be set.
 func New(ctx context.Context, opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
