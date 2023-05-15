@@ -186,6 +186,9 @@ func doRequest(ctx context.Context, payload any, url, apiKey, method string) (io
 	req.Header.Set("Api-Key", apiKey)
 
 	r, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
 	return r.Body, r.StatusCode, err
 }
 
