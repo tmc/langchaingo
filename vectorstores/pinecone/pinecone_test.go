@@ -19,8 +19,8 @@ import (
 func getValues(t *testing.T) (string, string, string, string) {
 	t.Helper()
 
-	pineconeApiKey := os.Getenv("PINECONE_API_KEY")
-	if pineconeApiKey == "" {
+	pineconeAPIKey := os.Getenv("PINECONE_API_KEY")
+	if pineconeAPIKey == "" {
 		t.Skip("Must set PINECONE_API_KEY to run test")
 	}
 
@@ -43,7 +43,7 @@ func getValues(t *testing.T) (string, string, string, string) {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	return environment, pineconeApiKey, indexName, projectName
+	return environment, pineconeAPIKey, indexName, projectName
 }
 
 /* func TestPineconeStoreGRPC(t *testing.T) {
@@ -122,10 +122,11 @@ func TestPineconeAsRetriever(t *testing.T) {
 		pinecone.WithProjectName(projectName),
 		pinecone.WithEmbedder(e),
 	)
+	require.NoError(t, err)
 
 	id := uuid.New().String()
 
-	store.AddDocuments(
+	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -134,6 +135,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
+	require.NoError(t, err)
 
 	llm, err := openai.New()
 	require.NoError(t, err)
@@ -146,6 +148,6 @@ func TestPineconeAsRetriever(t *testing.T) {
 		),
 		"What color is the desk?",
 	)
-
+	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
 }
