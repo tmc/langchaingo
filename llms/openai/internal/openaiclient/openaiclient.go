@@ -35,11 +35,6 @@ type Completion struct {
 
 // CreateCompletion creates a completion.
 func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*Completion, error) {
-	r.Model = c.model
-	if r.Model == "" {
-		r.Model = defaultCompletionModel
-	}
-
 	resp, err := c.createCompletion(ctx, &completionPayload{
 		Model:     r.Model,
 		Prompt:    r.Prompt,

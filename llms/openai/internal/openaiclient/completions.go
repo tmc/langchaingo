@@ -56,6 +56,18 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 		payload.StopWords = nil
 	}
 
+	switch {
+	// Prefer the model specified in the payload.
+	case payload.Model != "":
+
+	// If no model is set in the payload, take the one specified in the client.
+	case c.model != "":
+		payload.Model = c.model
+	// Fallback: use the default model
+	default:
+		payload.Model = defaultCompletionModel
+	}
+
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
