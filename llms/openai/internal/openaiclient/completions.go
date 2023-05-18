@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -36,6 +37,13 @@ type completionResponsePayload struct {
 		PromptTokens     float64 `json:"prompt_tokens,omitempty"`
 		TotalTokens      float64 `json:"total_tokens,omitempty"`
 	} `json:"usage,omitempty"`
+}
+
+type errorMessage struct {
+	Error struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
 }
 
 func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
@@ -71,7 +79,16 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	defer r.Body.Close()
 
 	if r.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned %d", r.StatusCode)
+		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
+
+		// No need to check the error here: if it fails, we'll just return the
+		// status code.
+		var errResp errorMessage
+		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
+			return nil, errors.New(msg)
+		}
+
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 	}
 
 	// Parse response
