@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -50,30 +51,33 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
 	// Build request
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", bytes.NewReader(payloadBytes))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create request: %w", err)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	// Send request
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("send request: %w", err)
 	}
 	defer r.Body.Close()
 
+	if r.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned %d", r.StatusCode)
+	}
+
 	// Parse response
 	var response completionResponsePayload
-	err = json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("parse response: %w", err)
 	}
 
 	return &response, nil
