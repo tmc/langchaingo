@@ -46,7 +46,7 @@ type errorMessage struct {
 	} `json:"error"`
 }
 
-func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
+func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 256
@@ -67,6 +67,11 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	default:
 		payload.Model = defaultCompletionModel
 	}
+}
+
+// nolint:lll
+func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
+	c.setCompletionDefaults(payload)
 
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
@@ -97,10 +102,10 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg)
+			return nil, errors.New(msg) // nolint:goerr113
 		}
 
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
 
 	// Parse response
