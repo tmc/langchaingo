@@ -105,12 +105,10 @@ func toolDescriptions(tools []tools.Tool) string {
 	return ts.String()
 }
 
-// createPrompt is a function that takes a slice of tools and a variadic list of prompt
-// template options, and returns a prompt template with the specified options.
-func createPrompt(
-	tools []tools.Tool,
-	options ...PromptTemplateOption,
-) prompts.PromptTemplate {
+// CreatePrompt is a function that takes a slice of tools and a variadic list of prompt
+// template options, and returns a prompt template used by the agent with the specified
+// options.
+func CreatePrompt(tools []tools.Tool, options ...PromptTemplateOption) prompts.PromptTemplate {
 	opts := &CreatePromptOptions{}
 	for _, option := range options {
 		option(opts)
@@ -120,9 +118,12 @@ func createPrompt(
 	template := strings.Join([]string{opts.Prefix, opts.FormatInstructions, opts.Suffix}, "\n\n")
 
 	return prompts.PromptTemplate{
-		Template:         template,
-		TemplateFormat:   prompts.TemplateFormatGoTemplate,
-		InputVariables:   []string{"input", "agent_scratchpad", "today"},
-		PartialVariables: map[string]any{"tool_names": toolNames(tools), "tool_descriptions": toolDescriptions(tools)},
+		Template:       template,
+		TemplateFormat: prompts.TemplateFormatGoTemplate,
+		InputVariables: []string{"input", "agent_scratchpad", "today"},
+		PartialVariables: map[string]any{
+			"tool_names":        toolNames(tools),
+			"tool_descriptions": toolDescriptions(tools),
+		},
 	}
 }

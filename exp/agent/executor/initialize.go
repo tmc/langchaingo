@@ -16,15 +16,16 @@ const (
 	ZeroShotReactDescription AgentType = "zeroShotReactDescription"
 )
 
-// Options is a type alias for a map of string keys to any value,
+// options is a type alias for a map of string keys to any value,
 // representing the options for the agent and the executor.
-type Options map[string]any
+type options map[string]any
 
-// Option is a function type that can be used to modify the Options.
-type Option func(p *Options)
+// Option is a function type that can be used to modify the creation of the
+// executor and agent.
+type Option func(p *options)
 
-func defaultOptions() Options {
-	return Options{
+func defaultOptions() options {
+	return options{
 		"verbose":       false,
 		"maxIterations": 3,
 	}
@@ -32,20 +33,20 @@ func defaultOptions() Options {
 
 // WithVerbosity is a function that sets the verbosity option for the agent.
 func WithVerbosity() Option {
-	return func(p *Options) {
+	return func(p *options) {
 		(*p)["verbose"] = true
 	}
 }
 
 // WithMaxIterations is a function that sets the max iterations for the executor.
 func WithMaxIterations(maxIterations int) Option {
-	return func(p *Options) {
+	return func(p *options) {
 		(*p)["maxIterations"] = maxIterations
 	}
 }
 
-// New is a function that creates a new agent with the specified LLM model,
-// tools, agent type, and options. It returns an Executor or an error
+// Initialize is a function that creates a new executor with the specified LLM
+// model, tools, agent type, and options. It returns an Executor or an error
 // if there is any issue during the creation process.
 func Initialize(
 	llm llms.LLM,

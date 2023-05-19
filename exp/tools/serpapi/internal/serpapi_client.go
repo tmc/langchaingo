@@ -8,13 +8,12 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
 var (
 	ErrMissingToken = errors.New("missing the OpenAI API key, set it in the SERPAPI_API_KEY environment variable")
-	NoGoodResult    = "No good search result found"
+	ErrNoGoodResult = errors.New("no good search results found")
 )
 
 type SerpapiClient struct {
@@ -22,17 +21,11 @@ type SerpapiClient struct {
 	baseURL string
 }
 
-func New() (*SerpapiClient, error) {
-	apiKey := os.Getenv("SERPAPI_API_KEY")
-	if apiKey == "" {
-		return nil, ErrMissingToken
-	}
-
+func New(apiKey string) *SerpapiClient {
 	return &SerpapiClient{
-			apiKey:  apiKey,
-			baseURL: "https://serpapi.com/search",
-		},
-		nil
+		apiKey:  apiKey,
+		baseURL: "https://serpapi.com/search",
+	}
 }
 
 func (s *SerpapiClient) Search(query string) (string, error) {
@@ -107,5 +100,5 @@ func processResponse(res map[string]interface{}) (string, error) {
 		}
 	}
 
-	return NoGoodResult, nil
+	return "", ErrNoGoodResult
 }
