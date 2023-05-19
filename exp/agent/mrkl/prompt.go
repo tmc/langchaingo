@@ -90,7 +90,7 @@ func toolNames(tools []tools.Tool) string {
 		if i > 0 {
 			tn.WriteString(", ")
 		}
-		tn.WriteString(tool.Name)
+		tn.WriteString(tool.Name())
 	}
 
 	return tn.String()
@@ -99,7 +99,7 @@ func toolNames(tools []tools.Tool) string {
 func toolDescriptions(tools []tools.Tool) string {
 	var ts strings.Builder
 	for _, tool := range tools {
-		ts.WriteString(fmt.Sprintf("- %s: %s\n", tool.Name, tool.Description))
+		ts.WriteString(fmt.Sprintf("- %s: %s\n", tool.Name(), tool.Description()))
 	}
 
 	return ts.String()
@@ -108,6 +108,7 @@ func toolDescriptions(tools []tools.Tool) string {
 // createPrompt is a function that takes a slice of tools and a variadic list of prompt
 // template options, and returns a prompt template with the specified options.
 func createPrompt(
+	tools []tools.Tool,
 	options ...PromptTemplateOption,
 ) prompts.PromptTemplate {
 	opts := &CreatePromptOptions{}
@@ -119,8 +120,9 @@ func createPrompt(
 	template := strings.Join([]string{opts.Prefix, opts.FormatInstructions, opts.Suffix}, "\n\n")
 
 	return prompts.PromptTemplate{
-		Template:       template,
-		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "tools", "tool_names", "tools_list", "agent_scratchpad"},
+		Template:         template,
+		TemplateFormat:   prompts.TemplateFormatGoTemplate,
+		InputVariables:   []string{"input", "agent_scratchpad", "today"},
+		PartialVariables: map[string]any{"tool_names": toolNames(tools), "tool_descriptions": toolDescriptions(tools)},
 	}
 }
