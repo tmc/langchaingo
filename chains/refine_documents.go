@@ -20,10 +20,10 @@ const (
 // the next document as context.
 type RefineDocuments struct {
 	// Chain used to construct the first text using the first document.
-	LLMChain LLMChain
+	LLMChain *LLMChain
 
 	// Chain used to refine the first text using the additional documents.
-	RefineLLMChain LLMChain
+	RefineLLMChain *LLMChain
 
 	// Prompt to format the documents. Documents are given in the variable
 	// with the name "page_content". All metadata from the documents are
@@ -41,7 +41,7 @@ var _ Chain = RefineDocuments{}
 // NewRefineDocuments creates a new refine documents chain from the llm
 // chain used to construct the initial text and the llm used to refine
 // the text.
-func NewRefineDocuments(initialLLMChain, refineLLMChain LLMChain) RefineDocuments {
+func NewRefineDocuments(initialLLMChain, refineLLMChain *LLMChain) RefineDocuments {
 	return RefineDocuments{
 		LLMChain:       initialLLMChain,
 		RefineLLMChain: refineLLMChain,
