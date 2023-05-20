@@ -29,6 +29,7 @@ func TestRefineQA(t *testing.T) {
 			"question":        "What is the name of the lion?",
 		},
 	)
+	require.NoError(t, err)
 
 	_, ok := results["text"].(string)
 	require.True(t, ok, "result does not contain text key")

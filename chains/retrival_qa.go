@@ -17,7 +17,7 @@ const (
 // RetrievalQA is a chain used for question-answering against a retriever.
 // First the chain gets documents from the retriever, then the documents
 // and the query is used as input to another chain. Typically that chain
-// combines the documents into a prompt
+// combines the documents into a prompt that is sent to an llm.
 type RetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
@@ -29,7 +29,7 @@ type RetrievalQA struct {
 	InputKey string
 
 	// If the chain should return the documents used by the combine
-	// combine documents chain in the "source_documents" key.
+	// documents chain in the "source_documents" key.
 	ReturnSourceDocuments bool
 }
 

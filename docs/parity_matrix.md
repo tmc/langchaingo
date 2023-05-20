@@ -34,8 +34,8 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Chat Vector DB Chain                   | ❌     |
 | Vector DB QA Chain                     | ❌     |
 | Analyze Document Chain                 | ❌     |
-| Question Answering Chains              | ❌     |
-| Summarization Chains                   | ❌     |
+| Question Answering Chains              | ✅     |
+| Summarization Chains                   | ✅     |
 | Question Answering With Sources Chains | ❌     |
 | SQL Database Chain                     | ❌     |
 | API Chain                              | ❌     |
