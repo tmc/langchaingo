@@ -87,7 +87,7 @@ func (c RefineDocuments) Call(ctx context.Context, values map[string]any, _ ...C
 	}
 
 	// Refine the text using the rest of the documents.
-	for i := 0; i < len(docs); i++ {
+	for i := 1; i < len(docs); i++ {
 		refineInputs, err := c.constructRefineInputs(docs[i], response, rest)
 		if err != nil {
 			return nil, err
@@ -152,7 +152,7 @@ func (c RefineDocuments) getBaseInputs(doc schema.Document, rest map[string]any)
 
 func (c RefineDocuments) GetInputKeys() []string {
 	inputKeys := []string{c.InputKey}
-	for _, key := range c.RefineLLMChain.GetInputKeys() {
+	for _, key := range c.LLMChain.GetInputKeys() {
 		if key == c.DocumentVariableName {
 			continue
 		}

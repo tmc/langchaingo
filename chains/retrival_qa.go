@@ -52,7 +52,7 @@ func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) Ret
 // from the llm and creates a new retrievalQA chain.
 func NewRetrievalQAFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQA {
 	return NewRetrievalQA(
-		LoadQAStuffChain(llm),
+		LoadStuffQA(llm),
 		retriever,
 	)
 }
