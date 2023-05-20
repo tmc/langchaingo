@@ -46,6 +46,7 @@ func (s Store) grpcUpsert(
 	ctx context.Context,
 	vectors [][]float64,
 	metadatas []map[string]any,
+	nameSpace string,
 ) error {
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
@@ -66,7 +67,7 @@ func (s Store) grpcUpsert(
 
 	_, err := s.client.Upsert(ctx, &pinecone_grpc.UpsertRequest{
 		Vectors:   pineconeVectors,
-		Namespace: s.nameSpace,
+		Namespace: nameSpace,
 	})
 
 	return err
@@ -76,6 +77,7 @@ func (s Store) grpcQuery(
 	ctx context.Context,
 	vector []float64,
 	numDocs int,
+	nameSpace string,
 ) ([]schema.Document, error) {
 	queryResult, err := s.client.Query(
 		ctx,
@@ -85,7 +87,7 @@ func (s Store) grpcQuery(
 			},
 			TopK:          uint32(numDocs),
 			IncludeValues: false,
-			Namespace:     s.nameSpace,
+			Namespace:     nameSpace,
 		},
 	)
 	if err != nil {

@@ -49,6 +49,7 @@ func (s Store) restUpsert(
 	ctx context.Context,
 	vectors [][]float64,
 	metadatas []map[string]any,
+	nameSpace string,
 ) error {
 	v := make([]vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
@@ -61,7 +62,7 @@ func (s Store) restUpsert(
 
 	payload := upsertPayload{
 		Vectors:   v,
-		Namespace: s.nameSpace,
+		Namespace: nameSpace,
 	}
 
 	body, status, err := doRequest(
@@ -113,13 +114,14 @@ func (s Store) restQuery(
 	ctx context.Context,
 	vector []float64,
 	numVectors int,
+	nameSpace string,
 ) ([]schema.Document, error) {
 	payload := queryPayload{
 		IncludeValues:   true,
 		IncludeMetadata: true,
 		Vector:          vector,
 		TopK:            numVectors,
-		Namespace:       s.nameSpace,
+		Namespace:       nameSpace,
 	}
 
 	body, statusCode, err := doRequest(
@@ -184,6 +186,9 @@ func doRequest(ctx context.Context, payload any, url, apiKey, method string) (io
 	req.Header.Set("Api-Key", apiKey)
 
 	r, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
 	return r.Body, r.StatusCode, err
 }
 

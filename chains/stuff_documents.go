@@ -22,7 +22,7 @@ const (
 // by default set to "context".
 type StuffDocuments struct {
 	// LLMChain is the LLMChain called after formatting the documents.
-	LLMChain LLMChain
+	LLMChain *LLMChain
 
 	// Input key is the input key the StuffDocuments chain expects the
 	//  documents to be in.
@@ -40,7 +40,7 @@ var _ Chain = StuffDocuments{}
 
 // NewStuffDocuments creates a new stuff documents chain with a llm chain used
 // after formatting the documents.
-func NewStuffDocuments(llmChain LLMChain) StuffDocuments {
+func NewStuffDocuments(llmChain *LLMChain) StuffDocuments {
 	return StuffDocuments{
 		LLMChain: llmChain,
 

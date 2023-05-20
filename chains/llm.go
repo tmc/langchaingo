@@ -21,11 +21,11 @@ type LLMChain struct {
 	OutputKey string
 }
 
-var _ Chain = LLMChain{}
+var _ Chain = &LLMChain{}
 
 // NewLLMChain creates a new LLMChain with an llm and a prompt.
-func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) LLMChain {
-	chain := LLMChain{
+func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) *LLMChain {
+	chain := &LLMChain{
 		prompt:       prompt,
 		llm:          llm,
 		OutputParser: outputparser.NewSimple(),
