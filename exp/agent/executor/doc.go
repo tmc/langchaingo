@@ -1,19 +1,21 @@
-// Package executor provides interfaces and implementations for executing
-// agent queries.
+// Package executor provides a standard chain for executing agent queries.
 //
-// An agent query is a string that describes a task to be performed by an agent,
-// which is a software program that acts on behalf of a user or another program.
-// The query can specify various parameters, such as input data, processing
-// options, and output format.
+// The Executor is an Agent and set of Tools. The agent executor is
+// responsible for calling the agent, getting back and action and action input,
+// calling the tool that the action references with the corresponding input,
+// getting the output of the tool, and then passing all that information back
+// into the Agent to get the next action it should take.
 //
-// To execute an agent query, an application needs to create an object that
-// implements the AgentExecutor interface, which defines a method for running
-// a query and returning the result. The AgentFinish type from the langchaingo
-// schema package is used to represent the result of a successful execution.
-// If the execution fails, an error is returned.
+// The package also contains functions to initialize executors with agents and
+// supports different agent types and options to customize the agent's behavior.
 //
-// The executor package provides a sample implementation of the AgentExecutor
-// interface, called BasicExecutor, which executes queries using a simple
-// command-line interface. This implementation is intended for testing and
-// demonstration purposes only and should not be used in production environments.
+// AgentType is a string type representing the type of agent to create.
+// The package currently supports the "zeroShotReactDescription" agent type.
+//
+// Options is a type alias for a map of string keys to any value,
+// representing the options for the agent and the executor.
+//
+// Option is a function type that can be used to modify the Options,
+// such as the WithVerbosity function, which sets the verbosity option
+// for the agent.
 package executor

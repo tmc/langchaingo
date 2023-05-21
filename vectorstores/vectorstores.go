@@ -17,20 +17,22 @@ type VectorStore interface {
 type Retriever struct {
 	v       VectorStore
 	numDocs int
+	options []Option
 }
 
 var _ schema.Retriever = Retriever{}
 
 // GetRelevantDocuments returns documents using the vector store.
 func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
-	return r.v.SimilaritySearch(ctx, query, r.numDocs)
+	return r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
 }
 
 // ToRetriever takes a vector store and returns a retriever using the
 // vector store to retrieve documents.
-func ToRetriever(vectorStore VectorStore, numDocuments int) Retriever {
+func ToRetriever(vectorStore VectorStore, numDocuments int, options ...Option) Retriever {
 	return Retriever{
 		v:       vectorStore,
 		numDocs: numDocuments,
+		options: options,
 	}
 }
