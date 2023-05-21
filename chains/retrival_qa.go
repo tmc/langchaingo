@@ -15,19 +15,30 @@ const (
 )
 
 // RetrievalQA is a chain used for question-answering against a retriever.
+// First the chain gets documents from the retriever, then the documents
+// and the query is used as input to another chain. Typically that chain
+// combines the documents into a prompt that is sent to an llm.
 type RetrievalQA struct {
-	Retriever             schema.Retriever
+	// Retriever used to retrieve the relevant documents.
+	Retriever schema.Retriever
+
+	// The chain the documents and query is given to.
 	CombineDocumentsChain Chain
 
-	InputKey              string
+	// The input key to get the query from, by default "query".
+	InputKey string
+
+	// If the chain should return the documents used by the combine
+	// documents chain in the "source_documents" key.
 	ReturnSourceDocuments bool
 }
 
 var _ Chain = RetrievalQA{}
 
 // NewRetrievalQA creates a new RetrievalQA from a retriever and a chain for
-// combining documents. The chain for combining documents is expected to only
-// have the expected input values "question" and "input_documents".
+// combining documents. The chain for combining documents is expected to
+// have the expected input values for the "question" and "input_documents"
+// key.
 func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) RetrievalQA {
 	return RetrievalQA{
 		Retriever:             retriever,
@@ -37,11 +48,11 @@ func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) Ret
 	}
 }
 
-// NewRetrievalQAFromLLM loads a combine documents chain from the llm and
-// creates a new retrievalQA chain.
+// NewRetrievalQAFromLLM loads a question answering combine documents chain
+// from the llm and creates a new retrievalQA chain.
 func NewRetrievalQAFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQA {
 	return NewRetrievalQA(
-		LoadQAStuffChain(llm),
+		LoadStuffQA(llm),
 		retriever,
 	)
 }

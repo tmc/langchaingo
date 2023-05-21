@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	_stuffDocumentsDefaultInputKey             = "input_documents"
-	_stuffDocumentsDefaultDocumentVariableName = "context"
-	_stuffDocumentsDefaultSeparator            = "\n\n"
+	_combineDocumentsDefaultInputKey             = "input_documents"
+	_combineDocumentsDefaultOutputKey            = "text"
+	_combineDocumentsDefaultDocumentVariableName = "context"
+	_stuffDocumentsDefaultSeparator              = "\n\n"
 )
 
 // StuffDocuments is a chain that combines documents with a separator and uses
@@ -43,8 +44,8 @@ func NewStuffDocuments(llmChain *LLMChain) StuffDocuments {
 	return StuffDocuments{
 		LLMChain: llmChain,
 
-		InputKey:             _stuffDocumentsDefaultInputKey,
-		DocumentVariableName: _stuffDocumentsDefaultDocumentVariableName,
+		InputKey:             _combineDocumentsDefaultInputKey,
+		DocumentVariableName: _combineDocumentsDefaultDocumentVariableName,
 		Separator:            _stuffDocumentsDefaultSeparator,
 	}
 }

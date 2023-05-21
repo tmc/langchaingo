@@ -69,6 +69,21 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	return map[string]any{c.OutputKey: finalOutput}, nil
 }
 
+// Predict runs the chain and returns the output as a string. Returns an error
+// if the output parser in the llm chain does not return a string.
+func (c LLMChain) Predict(ctx context.Context, values map[string]any, options ...ChainCallOption) (string, error) {
+	result, err := Call(ctx, c, values, options...)
+	if err != nil {
+		return "", err
+	}
+
+	output, ok := result[c.OutputKey].(string)
+	if !ok {
+		return "", ErrOutputNotStringInPredict
+	}
+	return output, nil
+}
+
 // GetMemory returns the memory.
 func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 	return c.Memory

@@ -14,6 +14,7 @@ var (
 	// ErrInvalidOutputValues is returned when expected output keys to a chain does
 	// not match the actual keys in the return output values map.
 	ErrInvalidOutputValues = errors.New("missing key in output values")
+
 	// ErrMultipleInputsInRun is returned in the run function if the chain expects
 	// more then one input values.
 	ErrMultipleInputsInRun = errors.New("run not supported in chain with more then one expected input")
@@ -23,4 +24,8 @@ var (
 	// ErrMultipleOutputsInRun is returned in the run function if the chain returns
 	// a value that is not a string.
 	ErrWrongOutputTypeInRun = errors.New("run not supported in chain that returns value that is not string")
+
+	// ErrOutputNotStringInPredict is returned if the output parser in the llm chain
+	// returns a value that is not a string in the llm chain.
+	ErrOutputNotStringInPredict = errors.New("predict is not supported with a llm chain that does not return a string")
 )
