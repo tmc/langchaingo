@@ -4,203 +4,154 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent/executor"
+	"github.com/tmc/langchaingo/exp/agent"
 	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
-// OneShotZeroAgent is a struct that represents an agent responsible for executing a query
-// and returning the result using the LLM model, tools, and an internal chain.
+var (
+	// ErrUnableToParseOutput is returned if the output of the llm is unparsable.
+	ErrUnableToParseOutput = errors.New("unable to parse agent output")
+	// ErrInvalidChainReturnType is returned if the internal chain of the agent
+	// returns a value in the "text" filed that is not a string.
+	ErrInvalidChainReturnType = errors.New("agent chain did not return a string")
+	// ErrInvalidOptions is returned if the options given to the NewOneShotAgent
+	// function is invalid.
+	ErrInvalidOptions = errors.New("options given are invalid")
+)
+
+const (
+	_finalAnswerAction = "Final Answer:"
+	_defaultOutputKey  = "output"
+)
+
+// OneShotZeroAgent is a struct that represents an agent responsible for deciding
+// what to do or give the final output if the task is finished given a set of inputs
+// and previous steps taken.
+//
+// This agent is optimized to be used with LLMs.
 type OneShotZeroAgent struct {
-	llm        llms.LLM
-	query      string
-	chain      chains.Chain
-	tools      []tools.Tool
-	verbose    bool
-	maxRetries int
+	// Chain is the chain used to call with the values. The chain should have an
+	// input called "agent_scratchpad" for the agent to put it's thoughts in.
+	Chain chains.Chain
+	// Tools is a list of the tools the agent can use.
+	Tools []tools.Tool
+	// Output key is the key where the final output is placed.
+	OutputKey string
 }
+
+var _ agent.Agent = (*OneShotZeroAgent)(nil)
 
 // OneShotZeroAgentOptions is a type alias for a map of string keys to any value,
 // representing the options for the OneShotZeroAgent.
 type OneShotZeroAgentOptions map[string]any
 
-var _ executor.AgentExecutor = (*OneShotZeroAgent)(nil)
-
-const FinalAnswerAction = "Final Answer:"
-
 func checkOptions(opts OneShotZeroAgentOptions) OneShotZeroAgentOptions {
-	if _, ok := opts["verbose"].(bool); !ok {
-		opts["verbose"] = false
-	}
-	if _, ok := opts["maxRetries"].(int); !ok {
-		opts["maxRetries"] = 3
+	if _, ok := opts["outputKey"].(string); !ok {
+		opts["outputKey"] = _defaultOutputKey
 	}
 	return opts
 }
 
 // NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
-// and options. It returns a pointer to the created agent and an error if there is any
-// issue during the creation process.
-func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) (*OneShotZeroAgent, error) {
-	// Validate opts
+// and options. It returns a pointer to the created agent.
+func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) *OneShotZeroAgent {
+	// Validate opts.
 	opts = checkOptions(opts)
 
 	return &OneShotZeroAgent{
-		llm:        llm,
-		query:      "",
-		chain:      chains.NewLLMChain(llm, createPrompt()),
-		tools:      tools,
-		verbose:    opts["verbose"].(bool),
-		maxRetries: opts["maxRetries"].(int),
-	}, nil
+		Chain:     chains.NewLLMChain(llm, CreatePrompt(tools)),
+		Tools:     tools,
+		OutputKey: opts["outputKey"].(string),
+	}
 }
 
-// Run is an implementation of the AgentExecutor interface. It takes a query as input
-// and executes it, returning an AgentFinish object containing the result, or an error
-// if the execution fails.
-func (a *OneShotZeroAgent) Run(ctx context.Context, query string) (*schema.AgentFinish, error) {
-	var attempts int
-	a.query = query
+// Plan decides what action to take or returns the final result of the input.
+func (a *OneShotZeroAgent) Plan(
+	ctx context.Context,
+	intermediateSteps []schema.AgentStep,
+	inputs map[string]string,
+) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	fullInputs := make(map[string]any, len(inputs))
+	for key, value := range inputs {
+		fullInputs[key] = value
+	}
 
-	// Call the chain
-	resp, _ := a.chain.Call(ctx, map[string]interface{}{
-		"today":             time.Now().Format("January 02, 2006"),
-		"tool_names":        toolNames(a.tools),
-		"tool_descriptions": toolDescriptions(a.tools),
-		"input":             a.query,
-		"agent_scratchpad":  "",
-		"stop":              []string{"\nObservation:", "\n\tObservation:"},
-	})
+	fullInputs["agent_scratchpad"] = a.constructScratchPad(intermediateSteps)
+	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
-	// Validate the response
+	resp, err := chains.Call(
+		ctx,
+		a.Chain,
+		fullInputs,
+		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	output, ok := resp["text"].(string)
 	if !ok {
-		return nil, errors.New("Agent did not return a string")
+		return nil, nil, ErrInvalidChainReturnType
 	}
 
-	for output != "" || attempts < a.maxRetries {
-		var err error
-		action, finish := a.plan(output)
-		if finish != nil {
-			return finish, nil
-		}
-		output, err = a.nextStep(ctx, *action)
-		if err != nil {
-			return nil, err
-		}
-
-		attempts++
-	}
-
-	return nil, fmt.Errorf("Agent did not finish after %d attempts", attempts)
+	return a.parseOutput(output)
 }
 
-func (a *OneShotZeroAgent) nextStep(ctx context.Context, action schema.AgentAction) (string, error) {
-	var scratchpad []string
-	// Perform your desired operation with the text value
-	observation, err := runTool(action.Tool, action.ToolInput.(string), &a.tools)
-	if err != nil {
-		return "", err
-	}
-	scratchpad = append(scratchpad, action.Log+observation)
-	if a.verbose {
-		fmt.Println(getCurrentThought(scratchpad))
-	}
+func (a *OneShotZeroAgent) GetInputKeys() []string {
+	chainInputs := a.Chain.GetInputKeys()
 
-	// Update resp using a.chain.Call()
-	newResp, err := a.chain.Call(ctx, map[string]interface{}{
-		"input":            a.query,
-		"agent_scratchpad": strings.Join(scratchpad, "\n"),
-		"stop":             []string{"\nObservation:", "\n\tObservation:"},
-	})
-	if err != nil {
-		return "", err
-	}
-
-	// Use the updated resp in the next iteration
-	return newResp["text"].(string), nil
-}
-
-func (a *OneShotZeroAgent) plan(info string) (*schema.AgentAction, *schema.AgentFinish) {
-	action := getAgentAction(info)
-	if aswer := getFinalAnswer(action.Log); aswer != "" {
-		return nil, &schema.AgentFinish{
-			ReturnValues: map[string]any{
-				"answer": aswer,
-			},
-			Log: action.Log,
-		}
-	}
-	return &action, nil
-}
-
-func getCurrentThought(scratchpad []string) string {
-	if len(scratchpad) == 0 {
-		return ""
-	}
-	lastThought := scratchpad[len(scratchpad)-1]
-	if len(scratchpad) == 1 {
-		lastThought = "Thought:" + lastThought
-	}
-
-	return lastThought
-}
-
-func getFinalAnswer(text string) string {
-	finalAnswerPrefix := "Final Answer:"
-	startIndex := strings.Index(text, finalAnswerPrefix)
-
-	if startIndex == -1 {
-		return ""
-	}
-	startIndex += len(finalAnswerPrefix)
-	text = text[startIndex:]
-	trimmed := strings.Join(strings.Fields(text), " ")
-	return trimmed
-}
-
-func getAgentAction(input string) schema.AgentAction {
-	var agentAction schema.AgentAction
-	agentAction.Log = input
-	fields := strings.Split(input, "\n")
-	for _, field := range fields {
-		if strings.HasPrefix(field, "Action: ") {
-			agentAction.Tool = strings.TrimPrefix(field, "Action: ")
-		} else if strings.HasPrefix(field, "Action Input: ") {
-			agentAction.ToolInput = strings.TrimPrefix(field, "Action Input: ")
-		}
-	}
-	return agentAction
-}
-
-func runTool(action string, actionInput string, tools *[]tools.Tool) (string, error) {
-	// Sanitize the action
-	action = strings.ToLower(strings.Trim(action, " "))
-
-	// Sanitize the action input
-	actionInput = strings.TrimSpace(actionInput)
-
-	// Find the tool that matches the action
-	var observation string
-	for _, tool := range *tools {
-		if tool.Name != strings.Trim(action, " ") {
+	// Remove inputs given in plan.
+	agentInput := make([]string, 0, len(chainInputs))
+	for _, v := range chainInputs {
+		if v == "agent_scratchpad" || v == "today" {
 			continue
 		}
-
-		// Run the tool
-		toolOutput, err := tool.Run(actionInput)
-		if err != nil {
-			return "", err
-		}
-
-		// Add the tool's output to the observation
-		observation = "\nObservation: " + toolOutput + "\n"
-		break
+		agentInput = append(agentInput, v)
 	}
-	return observation, nil
+
+	return agentInput
+}
+
+func (a *OneShotZeroAgent) GetOutputKeys() []string {
+	return []string{a.OutputKey}
+}
+
+func (a *OneShotZeroAgent) constructScratchPad(steps []schema.AgentStep) string {
+	var scratchPad string
+	for _, step := range steps {
+		scratchPad += step.Action.Log
+		scratchPad += "Observation: " + step.Observation
+	}
+
+	return scratchPad
+}
+
+func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	if strings.Contains(output, _finalAnswerAction) {
+		splits := strings.Split(output, _finalAnswerAction)
+
+		return nil, &schema.AgentFinish{
+			ReturnValues: map[string]any{
+				a.OutputKey: splits[len(splits)-1],
+			},
+			Log: output,
+		}, nil
+	}
+
+	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s*(.+)`)
+	matches := r.FindStringSubmatch(output)
+	if len(matches) == 0 {
+		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
+	}
+
+	return []schema.AgentAction{
+		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
+	}, nil, nil
 }

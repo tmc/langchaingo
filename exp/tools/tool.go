@@ -1,17 +1,8 @@
-// Package tools defines the types for tools to be used by the llms agents.
 package tools
 
-// Tool is a tool for the llm agent to interact with different application.
-type Tool struct {
-	Name        string
-	Description string
-	Run         func(string) (string, error)
-}
-
-func NewTool(name, description string, run func(string) (string, error)) *Tool {
-	return &Tool{
-		Name:        name,
-		Description: description,
-		Run:         run,
-	}
+// Tool is a tool for the llm agent to interact with different applications.
+type Tool interface {
+	Name() string
+	Description() string
+	Call(string) (string, error)
 }
