@@ -3,6 +3,7 @@ package openaiclient
 import (
 	"context"
 	"errors"
+	"net/http"
 )
 
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.
@@ -10,13 +11,42 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // Client is a client for the OpenAI API.
 type Client struct {
-	token string
-	model string
+	token      string
+	model      string
+	httpClient Doer
+}
+
+// Option is an option for the OpenAI client.
+type Option func(*Client) error
+
+// Doer performs a HTTP request.
+type Doer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// WithHTTPClient allows setting a custom HTTP client.
+func WithHTTPClient(client Doer) Option {
+	return func(c *Client) error {
+		c.httpClient = client
+
+		return nil
+	}
 }
 
 // New returns a new OpenAI client.
-func New(token string, model string) (*Client, error) {
-	c := &Client{token: token, model: model}
+func New(token string, model string, opts ...Option) (*Client, error) {
+	c := &Client{
+		token:      token,
+		model:      model,
+		httpClient: http.DefaultClient,
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+
 	return c, nil
 }
 
@@ -63,7 +93,7 @@ type EmbeddingRequest struct {
 	Input []string `json:"input"`
 }
 
-// CreateCompletion creates embeddings.
+// CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
 	r.Model = c.model
 	if r.Model == "" {

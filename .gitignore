@@ -6,3 +6,5 @@ coverage.out
 
 # macOS Specific
 .DS_Store
+
+.idea

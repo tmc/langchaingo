@@ -63,7 +63,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	// Send request
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
