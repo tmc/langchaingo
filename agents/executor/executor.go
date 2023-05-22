@@ -36,11 +36,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	if err != nil {
 		return nil, err
 	}
-
-	nameToTool := make(map[string]tools.Tool, len(e.Tools))
-	for _, tool := range e.Tools {
-		nameToTool[tool.Name()] = tool
-	}
+	nameToTool := getNameToTool(e.Tools)
 
 	steps := make([]schema.AgentStep, 0)
 	iterations := 0
@@ -93,7 +89,7 @@ func (e Executor) GetOutputKeys() []string {
 	return e.Agent.GetOutputKeys()
 }
 
-func (e Executor) GetMemory() schema.Memory {
+func (e Executor) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
@@ -109,4 +105,13 @@ func inputsToString(inputValues map[string]any) (map[string]string, error) {
 	}
 
 	return inputs, nil
+}
+
+func getNameToTool(t []tools.Tool) map[string]tools.Tool {
+	nameToTool := make(map[string]tools.Tool, len(t))
+	for _, tool := range t {
+		nameToTool[tool.Name()] = tool
+	}
+
+	return nameToTool
 }

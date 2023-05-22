@@ -21,8 +21,7 @@ var (
 )
 
 type Client struct {
-	apiKey  string
-	baseURL string
+	apiKey string
 }
 
 func New(apiKey string) *Client {

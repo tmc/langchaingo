@@ -15,6 +15,8 @@ import (
 )
 
 func TestMRKL(t *testing.T) {
+	t.Parallel()
+
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}

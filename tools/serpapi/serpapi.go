@@ -46,7 +46,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
-			return "No good Google Search Result was found", nil
+			return "No good Google Search Results was found", nil
 		}
 
 		return "", err

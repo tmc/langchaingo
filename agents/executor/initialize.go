@@ -7,6 +7,8 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
+const _defaultMaxIterations = 5
+
 // AgentType is a string type representing the type of agent to create.
 type AgentType string
 
@@ -27,7 +29,7 @@ type Option func(p *options)
 func defaultOptions() options {
 	return options{
 		"verbose":       false,
-		"maxIterations": 3,
+		"maxIterations": _defaultMaxIterations,
 	}
 }
 
@@ -58,8 +60,12 @@ func Initialize(
 	for _, opt := range opts {
 		opt(&options)
 	}
-	var agent agents.Agent
+	maxIterations, ok := options["maxIterations"].(int)
+	if !ok {
+		return Executor{}, ErrInvalidOptions
+	}
 
+	var agent agents.Agent
 	switch agentType {
 	case ZeroShotReactDescription:
 		agent = mrkl.NewOneShotAgent(llm, tools, options)
@@ -70,6 +76,6 @@ func Initialize(
 	return Executor{
 		Agent:         agent,
 		Tools:         tools,
-		MaxIterations: options["maxIterations"].(int),
+		MaxIterations: maxIterations,
 	}, nil
 }
