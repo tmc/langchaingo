@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"golang.org/x/exp/maps"
 )
 
@@ -32,7 +33,9 @@ var defaultformatterMapping = map[TemplateFormat]interpolator{ //nolint:gocheckn
 // interpolateGoTemplate interpolates the given template with the given values by using
 // text/template.
 func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
-	parsedTmpl, err := template.New("template").Parse(tmpl)
+	parsedTmpl, err := template.New("template").
+		Funcs(sprig.FuncMap()).
+		Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
