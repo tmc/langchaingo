@@ -6,6 +6,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -20,6 +21,7 @@ type LLM struct {
 }
 
 var _ llms.LLM = (*LLM)(nil)
+var _ llms.ChatLLM = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -55,20 +57,48 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 type ChatMessage = openaiclient.ChatMessage
 
 // Chat requests a chat response for the given prompt.
-func (o *LLM) Chat(ctx context.Context, messages []ChatMessage, options ...llms.CallOption) (*ChatMessage, error) {
+func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*llms.ChatGeneration, error) {
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
+	msgs := make([]*openaiclient.ChatMessage, len(messages))
+	for i, m := range messages {
+		msg := &openaiclient.ChatMessage{
+			Content: m.GetText(),
+		}
+		typ := m.GetType()
+		switch typ {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = "system"
+		case schema.ChatMessageTypeAI:
+			msg.Role = "assistant"
+		case schema.ChatMessageTypeHuman:
+			msg.Role = "user"
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = "user"
+			// TODO: support name
+		}
+		msgs[i] = msg
+	}
+
 	result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
 		Model:     opts.Model,
 		StopWords: opts.StopWords,
-		Messages:  messages,
+		Messages:  msgs,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &result.Choices[0].Message, nil
+	if len(result.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+	return &llms.ChatGeneration{
+		Message: &schema.AIChatMessage{
+			Text: result.Choices[0].Message.Content,
+		},
+		// TODO: fill in generation info
+	}, nil
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

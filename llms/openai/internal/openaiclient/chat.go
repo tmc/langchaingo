@@ -13,12 +13,12 @@ const (
 
 // ChatRequest is a request to create an embedding.
 type ChatRequest struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	Temperature float64       `json:"temperature,omitempty"`
-	TopP        int           `json:"top_p,omitempty"`
-	N           int           `json:"n,omitempty"`
-	StopWords   []string      `json:"stop,omitempty"`
+	Model       string         `json:"model"`
+	Messages    []*ChatMessage `json:"messages"`
+	Temperature float64        `json:"temperature,omitempty"`
+	TopP        int            `json:"top_p,omitempty"`
+	N           int            `json:"n,omitempty"`
+	StopWords   []string       `json:"stop,omitempty"`
 }
 
 // ChatMessage is a message in a chat request.
