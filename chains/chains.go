@@ -12,7 +12,7 @@ type Chain interface {
 	// Call runs the logic of the chain and returns the output. This method should
 	// not be called directly. Use rather the Call function that handles the memory
 	// of the chain.
-	Call(context.Context, map[string]any, ...ChainCallOption) (map[string]any, error)
+	Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
 	// InputKeys returns the input keys the chain expects.
