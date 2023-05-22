@@ -1,34 +1,35 @@
 package internal
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
 var (
-	ErrMissingToken = errors.New("missing the OpenAI API key, set it in the SERPAPI_API_KEY environment variable")
+	ErrMissingToken = errors.New("missing the SerpAPI API key, set it in the SERPAPI_API_KEY environment variable")
 	ErrNoGoodResult = errors.New("no good search results found")
 )
 
-type SerpapiClient struct {
+type Client struct {
 	apiKey  string
 	baseURL string
 }
 
-func New(apiKey string) *SerpapiClient {
-	return &SerpapiClient{
+func New(apiKey string) *Client {
+	return &Client{
 		apiKey:  apiKey,
 		baseURL: "https://serpapi.com/search",
 	}
 }
 
-func (s *SerpapiClient) Search(query string) (string, error) {
+func (s *Client) Search(ctx context.Context, query string) (string, error) {
 	params := make(url.Values)
 	query = strings.ReplaceAll(query, " ", "+")
 	params.Add("q", query)
@@ -38,23 +39,27 @@ func (s *SerpapiClient) Search(query string) (string, error) {
 	params.Add("api_key", s.apiKey)
 
 	reqURL := fmt.Sprintf("%s?%s", s.baseURL, params.Encode())
-	resp, err := http.Get(reqURL)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
-		log.Printf("Error: %s\n", err)
-		return "", err
+		return "", fmt.Errorf("creating request in serpapi: %w", err)
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Printf("Error: %s\n", err)
-		return "", err
+		return "", fmt.Errorf("doing response in serpapi: %w", err)
 	}
-	var result map[string]interface{}
-	err = json.Unmarshal([]byte(body), &result)
+	defer res.Body.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, res.Body)
 	if err != nil {
-		log.Printf("Error: %s\n", err)
-		return "", err
+		return "", fmt.Errorf("coping data in serpapi: %w", err)
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(buf.Bytes(), &result)
+	if err != nil {
+		return "", fmt.Errorf("unmarshal data in serpapi: %w", err)
 	}
 
 	return processResponse(result)

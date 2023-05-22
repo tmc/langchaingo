@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"context"
+
 	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )
@@ -23,7 +25,7 @@ func (c Calculator) Name() string {
 
 // Call evaluates the input using a starlak evaluator and returns the
 // result as a string.
-func (c Calculator) Call(input string) (string, error) {
+func (c Calculator) Call(_ context.Context, input string) (string, error) {
 	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", input, math.Module.Members)
 	if err != nil {
 		return "I don't know how to do that.", nil

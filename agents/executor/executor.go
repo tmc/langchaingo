@@ -67,7 +67,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 				})
 			}
 
-			observation, err := tool.Call(action.ToolInput)
+			observation, err := tool.Call(ctx, action.ToolInput)
 			if err != nil {
 				return nil, err
 			}

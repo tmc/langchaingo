@@ -1,6 +1,7 @@
 package serpapi
 
 import (
+	"context"
 	"errors"
 	"os"
 	"strings"
@@ -12,7 +13,7 @@ import (
 var ErrMissingToken = errors.New("missing the serpapi API key, set it in the SERPAPI_API_KEY environment variable")
 
 type Tool struct {
-	client *internal.SerpapiClient
+	client *internal.Client
 }
 
 var _ tools.Tool = Tool{}
@@ -41,8 +42,8 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
-func (t Tool) Call(input string) (string, error) {
-	result, err := t.client.Search(input)
+func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good Google Search Result was found", nil
