@@ -21,6 +21,7 @@ type LLM struct {
 }
 
 var _ llms.LLM = (*LLM)(nil)
+
 var _ llms.ChatLLM = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
@@ -57,7 +58,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 type ChatMessage = openaiclient.ChatMessage
 
 // Chat requests a chat response for the given prompt.
-func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*llms.ChatGeneration, error) {
+func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*llms.ChatGeneration, error) { // nolint: lll
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
