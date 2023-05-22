@@ -1,5 +1,5 @@
 // Package agents defines the types for langchaingo Agent.
-package agent
+package agents
 
 import (
 	"context"

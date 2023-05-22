@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/agents/executor"
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent/executor"
-	"github.com/tmc/langchaingo/exp/tools"
-	"github.com/tmc/langchaingo/exp/tools/serpapi"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/serpapi"
 )
 
 func TestMRKL(t *testing.T) {

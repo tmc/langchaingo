@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tmc/langchaingo/exp/tools"
-	"github.com/tmc/langchaingo/exp/tools/serpapi/internal"
+	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/serpapi/internal"
 )
 
 var ErrMissingToken = errors.New("missing the serpapi API key, set it in the SERPAPI_API_KEY environment variable")

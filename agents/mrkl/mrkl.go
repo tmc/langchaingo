@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/tools"
 )
 
 var (
@@ -46,7 +46,7 @@ type OneShotZeroAgent struct {
 	OutputKey string
 }
 
-var _ agent.Agent = (*OneShotZeroAgent)(nil)
+var _ agents.Agent = (*OneShotZeroAgent)(nil)
 
 // OneShotZeroAgentOptions is a type alias for a map of string keys to any value,
 // representing the options for the OneShotZeroAgent.

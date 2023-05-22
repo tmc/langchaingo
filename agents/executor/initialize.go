@@ -1,10 +1,10 @@
 package executor
 
 import (
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/agent/mrkl"
-	"github.com/tmc/langchaingo/exp/tools"
+	"github.com/tmc/langchaingo/agents"
+	"github.com/tmc/langchaingo/agents/mrkl"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/tools"
 )
 
 // AgentType is a string type representing the type of agent to create.
@@ -47,7 +47,7 @@ func WithMaxIterations(maxIterations int) Option {
 
 // Initialize is a function that creates a new executor with the specified LLM
 // model, tools, agent type, and options. It returns an Executor or an error
-// if there is any issue during the creation process.
+// if there is any issues during the creation process.
 func Initialize(
 	llm llms.LLM,
 	tools []tools.Tool,
@@ -58,7 +58,7 @@ func Initialize(
 	for _, opt := range opts {
 		opt(&options)
 	}
-	var agent agent.Agent
+	var agent agents.Agent
 
 	switch agentType {
 	case ZeroShotReactDescription:

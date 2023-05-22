@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/tools"
 )
 
 // Executor is the chain responsible for running agents.
 type Executor struct {
-	Agent agent.Agent
+	Agent agents.Agent
 	Tools []tools.Tool
 
 	MaxIterations int
@@ -23,7 +23,7 @@ var _ chains.Chain = Executor{}
 
 // New creates a new agent executor with a agent, the tools the agent can use
 // and the max number of iterations.
-func New(agent agent.Agent, tools []tools.Tool, maxIterations int) Executor {
+func New(agent agents.Agent, tools []tools.Tool, maxIterations int) Executor {
 	return Executor{
 		Agent:         agent,
 		Tools:         tools,
