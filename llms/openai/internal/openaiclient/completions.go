@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -37,7 +39,14 @@ type completionResponsePayload struct {
 	} `json:"usage,omitempty"`
 }
 
-func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
+type errorMessage struct {
+	Error struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
+}
+
+func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 256
@@ -47,33 +56,62 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 		payload.StopWords = nil
 	}
 
+	switch {
+	// Prefer the model specified in the payload.
+	case payload.Model != "":
+
+	// If no model is set in the payload, take the one specified in the client.
+	case c.model != "":
+		payload.Model = c.model
+	// Fallback: use the default model
+	default:
+		payload.Model = defaultCompletionModel
+	}
+}
+
+// nolint:lll
+func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
+	c.setCompletionDefaults(payload)
+
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
 	// Build request
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", bytes.NewReader(payloadBytes))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create request: %w", err)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	// Send request
 	r, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("send request: %w", err)
 	}
 	defer r.Body.Close()
 
+	if r.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
+
+		// No need to check the error here: if it fails, we'll just return the
+		// status code.
+		var errResp errorMessage
+		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
+			return nil, errors.New(msg) // nolint:goerr113
+		}
+
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
+	}
+
 	// Parse response
 	var response completionResponsePayload
-	err = json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("parse response: %w", err)
 	}
 
 	return &response, nil

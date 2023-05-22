@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 )
 
@@ -30,16 +32,16 @@ type embeddingResponsePayload struct {
 	} `json:"usage"`
 }
 
+// nolint:lll
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/embeddings", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/embeddings", bytes.NewReader(payloadBytes))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -47,14 +49,28 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("send request: %w", err)
 	}
 	defer r.Body.Close()
 
-	var response embeddingResponsePayload
-	err = json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
+	if r.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
+
+		// No need to check the error here: if it fails, we'll just return the
+		// status code.
+		var errResp errorMessage
+		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
+			return nil, errors.New(msg) // nolint:goerr113
+		}
+
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
+
+	var response embeddingResponsePayload
+
+	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
 	return &response, nil
 }
