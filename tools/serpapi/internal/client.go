@@ -12,9 +12,12 @@ import (
 	"strings"
 )
 
+const _url = "https://serpapi.com/search"
+
 var (
 	ErrMissingToken = errors.New("missing the SerpAPI API key, set it in the SERPAPI_API_KEY environment variable")
 	ErrNoGoodResult = errors.New("no good search results found")
+	ErrAPIError     = errors.New("error from SerpAPI")
 )
 
 type Client struct {
@@ -24,8 +27,7 @@ type Client struct {
 
 func New(apiKey string) *Client {
 	return &Client{
-		apiKey:  apiKey,
-		baseURL: "https://serpapi.com/search",
+		apiKey: apiKey,
 	}
 }
 
@@ -38,7 +40,7 @@ func (s *Client) Search(ctx context.Context, query string) (string, error) {
 	params.Add("hl", "en")
 	params.Add("api_key", s.apiKey)
 
-	reqURL := fmt.Sprintf("%s?%s", s.baseURL, params.Encode())
+	reqURL := fmt.Sprintf("%s?%s", _url, params.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
 		return "", fmt.Errorf("creating request in serpapi: %w", err)
@@ -67,43 +69,75 @@ func (s *Client) Search(ctx context.Context, query string) (string, error) {
 
 func processResponse(res map[string]interface{}) (string, error) {
 	if errorValue, ok := res["error"]; ok {
-		return "", fmt.Errorf("Got error from SerpAPI: %v", errorValue)
+		return "", fmt.Errorf("%w: %v", ErrAPIError, errorValue)
+	}
+	if res := getAnswerBox(res); res != "" {
+		return res, nil
+	}
+	if res := getSportResult(res); res != "" {
+		return res, nil
+	}
+	if res := getKnowledgeGraph(res); res != "" {
+		return res, nil
+	}
+	if res := getOrganicResult(res); res != "" {
+		return res, nil
 	}
 
-	answerBox, answerBoxExists := res["answer_box"].(map[string]interface{})
-	sportsResults, sportsResultsExists := res["sports_results"].(map[string]interface{})
-	knowledgeGraph, knowledgeGraphExists := res["knowledge_graph"].(map[string]interface{})
-	organicResults, organicResultsExists := res["organic_results"].([]interface{})
+	return "", ErrNoGoodResult
+}
 
+func getAnswerBox(res map[string]interface{}) string {
+	answerBox, answerBoxExists := res["answer_box"].(map[string]interface{})
 	if answerBoxExists {
 		if answer, ok := answerBox["answer"].(string); ok {
-			return answer, nil
+			return answer
 		}
 		if snippet, ok := answerBox["snippet"].(string); ok {
-			return snippet, nil
+			return snippet
 		}
-		if snippetHighlightedWords, ok := answerBox["snippet_highlighted_words"].([]interface{}); ok && len(snippetHighlightedWords) > 0 {
-			return snippetHighlightedWords[0].(string), nil
+		snippetHighlightedWords, ok := answerBox["snippet_highlighted_words"].([]interface{})
+		if ok && len(snippetHighlightedWords) > 0 {
+			return fmt.Sprintf("%v", snippetHighlightedWords[0])
 		}
 	}
+
+	return ""
+}
+
+func getSportResult(res map[string]interface{}) string {
+	sportsResults, sportsResultsExists := res["sports_results"].(map[string]interface{})
 	if sportsResultsExists {
 		if gameSpotlight, ok := sportsResults["game_spotlight"].(string); ok {
-			return gameSpotlight, nil
+			return gameSpotlight
 		}
 	}
+
+	return ""
+}
+
+func getKnowledgeGraph(res map[string]interface{}) string {
+	knowledgeGraph, knowledgeGraphExists := res["knowledge_graph"].(map[string]interface{})
 	if knowledgeGraphExists {
 		if description, ok := knowledgeGraph["description"].(string); ok {
-			return description, nil
+			return description
 		}
 	}
+
+	return ""
+}
+
+func getOrganicResult(res map[string]interface{}) string {
+	organicResults, organicResultsExists := res["organic_results"].([]interface{})
+
 	if organicResultsExists && len(organicResults) > 0 {
 		organicResult, ok := organicResults[0].(map[string]interface{})
 		if ok {
 			if snippet, ok := organicResult["snippet"].(string); ok {
-				return snippet, nil
+				return snippet
 			}
 		}
 	}
 
-	return "", ErrNoGoodResult
+	return ""
 }
