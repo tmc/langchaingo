@@ -108,6 +108,10 @@ func inputsToString(inputValues map[string]any) (map[string]string, error) {
 }
 
 func getNameToTool(t []tools.Tool) map[string]tools.Tool {
+	if len(t) == 0 {
+		return nil
+	}
+
 	nameToTool := make(map[string]tools.Tool, len(t))
 	for _, tool := range t {
 		nameToTool[tool.Name()] = tool
