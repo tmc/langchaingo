@@ -1,11 +1,13 @@
 package executor
 
 import (
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/agent/mrkl"
-	"github.com/tmc/langchaingo/exp/tools"
+	"github.com/tmc/langchaingo/agents"
+	"github.com/tmc/langchaingo/agents/mrkl"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/tools"
 )
+
+const _defaultMaxIterations = 5
 
 // AgentType is a string type representing the type of agent to create.
 type AgentType string
@@ -27,7 +29,7 @@ type Option func(p *options)
 func defaultOptions() options {
 	return options{
 		"verbose":       false,
-		"maxIterations": 3,
+		"maxIterations": _defaultMaxIterations,
 	}
 }
 
@@ -47,7 +49,7 @@ func WithMaxIterations(maxIterations int) Option {
 
 // Initialize is a function that creates a new executor with the specified LLM
 // model, tools, agent type, and options. It returns an Executor or an error
-// if there is any issue during the creation process.
+// if there is any issues during the creation process.
 func Initialize(
 	llm llms.LLM,
 	tools []tools.Tool,
@@ -58,8 +60,12 @@ func Initialize(
 	for _, opt := range opts {
 		opt(&options)
 	}
-	var agent agent.Agent
+	maxIterations, ok := options["maxIterations"].(int)
+	if !ok {
+		return Executor{}, ErrInvalidOptions
+	}
 
+	var agent agents.Agent
 	switch agentType {
 	case ZeroShotReactDescription:
 		agent = mrkl.NewOneShotAgent(llm, tools, options)
@@ -70,6 +76,6 @@ func Initialize(
 	return Executor{
 		Agent:         agent,
 		Tools:         tools,
-		MaxIterations: options["maxIterations"].(int),
+		MaxIterations: maxIterations,
 	}, nil
 }

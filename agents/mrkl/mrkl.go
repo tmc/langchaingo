@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/tools"
 )
 
 var (
@@ -46,29 +46,33 @@ type OneShotZeroAgent struct {
 	OutputKey string
 }
 
-var _ agent.Agent = (*OneShotZeroAgent)(nil)
+var _ agents.Agent = (*OneShotZeroAgent)(nil)
 
-// OneShotZeroAgentOptions is a type alias for a map of string keys to any value,
-// representing the options for the OneShotZeroAgent.
-type OneShotZeroAgentOptions map[string]any
+type OneShotZeroAgentOptions struct {
+	outputKey string
+}
 
-func checkOptions(opts OneShotZeroAgentOptions) OneShotZeroAgentOptions {
-	if _, ok := opts["outputKey"].(string); !ok {
-		opts["outputKey"] = _defaultOutputKey
+func checkOptions(opts map[string]any) OneShotZeroAgentOptions {
+	options := OneShotZeroAgentOptions{
+		outputKey: _defaultOutputKey,
 	}
-	return opts
+	if outputKey, ok := opts["outputKey"].(string); ok {
+		options.outputKey = outputKey
+	}
+	return options
 }
 
 // NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
-// and options. It returns a pointer to the created agent.
+// and options. It returns a pointer to the created agent. The opts parameter
+// represents the options for the agent. "outputKey" sets the output key of the
+// agent.
 func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) *OneShotZeroAgent {
-	// Validate opts.
-	opts = checkOptions(opts)
+	options := checkOptions(opts)
 
 	return &OneShotZeroAgent{
 		Chain:     chains.NewLLMChain(llm, CreatePrompt(tools)),
 		Tools:     tools,
-		OutputKey: opts["outputKey"].(string),
+		OutputKey: options.outputKey,
 	}
 }
 
