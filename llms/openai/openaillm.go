@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
@@ -125,11 +126,10 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {
-	// Ensure options are initialized only once.
-	initOptions.Do(initOpts)
-
-	options := &options{}
-	*options = *defaultOptions // Copy default options.
+	options := &options{
+		token: os.Getenv(tokenEnvVarName),
+		model: os.Getenv(modelEnvVarName),
+	}
 
 	for _, opt := range opts {
 		opt(options)
