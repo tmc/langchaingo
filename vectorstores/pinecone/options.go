@@ -26,14 +26,14 @@ func WithIndexName(name string) Option {
 	}
 }
 
-// WithIndexName is an option for specifying the environment. Must be set.
+// WithEnvironment is an option for specifying the environment. Must be set.
 func WithEnvironment(environment string) Option {
 	return func(p *Store) {
 		p.environment = environment
 	}
 }
 
-// WithIndexName is an option for specifying the project name. Must be set. The
+// WithProjectName is an option for specifying the project name. Must be set. The
 // project name associated with the api key can be obtained using the whoami
 // operation.
 func WithProjectName(name string) Option {
@@ -58,7 +58,7 @@ func WithAPIKey(apiKey string) Option {
 	}
 }
 
-// TextKey is an option for setting the text key in the metadata to the vectors
+// WithTextKey is an option for setting the text key in the metadata to the vectors
 // in the index. The text key stores the text of the document the vector represents.
 func WithTextKey(textKey string) Option {
 	return func(p *Store) {
@@ -75,7 +75,7 @@ func WithNameSpace(nameSpace string) Option {
 }
 
 // withGrpc is an option for using the grpc api instead of the rest api.
-func withGrpc() Option { //nolint: unused
+func withGrpc() Option { // nolint: unused
 	return func(p *Store) {
 		p.useGRPC = true
 	}
