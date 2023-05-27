@@ -19,13 +19,12 @@ var _ Embedder = VertexAIPaLM{}
 
 // NewVertexAIPaLM creates a new VertexAI with StripNewLines set to true and batch
 // size set to 512.
-func NewVertexAIPaLM() (Embedder, error) {
+func NewVertexAIPaLM() (*VertexAIPaLM, error) {
 	client, err := vertexai.New()
 	if err != nil {
 		return nil, err
 	}
-
-	return VertexAIPaLM{
+	return &VertexAIPaLM{
 		client:        client,
 		StripNewLines: true,
 		BatchSize:     defaultBatchSize,

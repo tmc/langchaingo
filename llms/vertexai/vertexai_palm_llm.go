@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrEmptyResponse            = errors.New("no response")
-	ErrMissingProjectID         = errors.New("missing the GCP Project ID, set it in the GOOGLE_CLOUD_PROJECT environment variable")
+	ErrMissingProjectID         = errors.New("missing the GCP Project ID, set it in the GOOGLE_CLOUD_PROJECT environment variable") //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
@@ -133,7 +133,6 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
-
 	if err != nil {
 		return [][]float64{}, err
 	}

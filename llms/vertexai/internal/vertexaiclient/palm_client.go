@@ -20,21 +20,28 @@ const (
 )
 
 var (
-	defaultParameters = map[string]interface{}{
-		"temperature":     0.2,
-		"maxOutputTokens": 256,
-		"topP":            0.8,
-		"topK":            40,
-	}
+	// ErrMissingValue is returned when a value is missing.
+	ErrMissingValue = errors.New("missing value")
+	// ErrInvalidValue is returned when a value is invalid.
+	ErrInvalidValue = errors.New("invalid value")
 )
+
+var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
+	"temperature":     0.2, //nolint:gomnd
+	"maxOutputTokens": 256, //nolint:gomnd
+	"topP":            0.8, //nolint:gomnd
+	"topK":            40,  //nolint:gomnd
+}
 
 const (
 	embeddingModelName = "textembedding-gecko"
 	textModelName      = "text-bison"
 	chatModelName      = "chat-bison"
+
+	defaultMaxConns = 4
 )
 
-// PaLMClient represents a Vertex AI based PaLM API client
+// PaLMClient represents a Vertex AI based PaLM API client.
 type PaLMClient struct {
 	client    *aiplatform.PredictionClient
 	projectID string
@@ -43,8 +50,8 @@ type PaLMClient struct {
 // New returns a new Vertex AI based PaLM API client.
 func New(projectID string, opts ...option.ClientOption) (*PaLMClient, error) {
 	numConns := runtime.GOMAXPROCS(0)
-	if numConns > 4 {
-		numConns = 4
+	if numConns > defaultMaxConns {
+		numConns = defaultMaxConns
 	}
 	o := []option.ClientOption{
 		option.WithGRPCConnectionPool(numConns),
@@ -95,7 +102,10 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 	completions := []*Completion{}
 	for _, p := range predictions {
 		value := p.GetStructValue().AsMap()
-		text := value["content"].(string)
+		text, ok := value["content"].(string)
+		if !ok {
+			return nil, fmt.Errorf("%w: %v", ErrMissingValue, "content")
+		}
 		completions = append(completions, &Completion{
 			Text: text,
 		})
@@ -121,15 +131,19 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 		value := res.GetStructValue().AsMap()
 		embedding, ok := value["embeddings"].(map[string]interface{})
 		if !ok {
-			return nil, errors.New("embeddings not found")
+			return nil, fmt.Errorf("%w: %v", ErrMissingValue, "embeddings")
 		}
 		values, ok := embedding["values"].([]interface{})
 		if !ok {
-			return nil, errors.New("values not found")
+			return nil, fmt.Errorf("%w: %v", ErrMissingValue, "values")
 		}
 		floatValues := []float64{}
 		for _, v := range values {
-			floatValues = append(floatValues, v.(float64))
+			val, ok := v.(float64)
+			if !ok {
+				return nil, fmt.Errorf("%w: %v is not a float64", ErrInvalidValue, "value")
+			}
+			floatValues = append(floatValues, val)
 		}
 		embeddings = append(embeddings, floatValues)
 	}
@@ -146,6 +160,7 @@ type ChatRequest struct {
 	CandidateCount int            `json:"candidate_count,omitempty"`
 }
 
+// ChatMessage is a message in a chat.
 type ChatMessage struct {
 	// The content of the message.
 	Content string `json:"content"`
@@ -158,6 +173,7 @@ var (
 	_ schema.ChatMessage = ChatMessage{}
 )
 
+// GetType returns the type of the message.
 func (m ChatMessage) GetType() schema.ChatMessageType {
 	switch m.Author {
 	case "user":
@@ -166,6 +182,8 @@ func (m ChatMessage) GetType() schema.ChatMessageType {
 		return schema.ChatMessageTypeAI
 	}
 }
+
+// GetText returns the text of the message.
 func (m ChatMessage) GetText() string {
 	return m.Content
 }
@@ -186,17 +204,20 @@ func (c *PaLMClient) CreateChat(ctx context.Context, r *ChatRequest) (*ChatRespo
 	value := res.GetStructValue().AsMap()
 	candidates, ok := value["candidates"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("candidates not found")
+		return nil, fmt.Errorf("%w: %v", ErrMissingValue, "candidates")
 	}
 	for _, c := range candidates {
-		candidate := c.(map[string]interface{})
+		candidate, ok := c.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("%w: %v is not a map[string]interface{}", ErrInvalidValue, "candidate")
+		}
 		author, ok := candidate["author"].(string)
 		if !ok {
-			return nil, fmt.Errorf("author not found")
+			return nil, fmt.Errorf("%w: %v is not a string", ErrInvalidValue, "author")
 		}
 		content, ok := candidate["content"].(string)
 		if !ok {
-			return nil, fmt.Errorf("content not found")
+			return nil, fmt.Errorf("%w: %v is not a string", ErrInvalidValue, "content")
 		}
 		chatResponse.Candidates = append(chatResponse.Candidates, ChatMessage{
 			Author:  author,
@@ -233,7 +254,7 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 	return smergedParams
 }
 
-func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) {
+func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) { //nolint:lll
 	mergedParams := mergeParams(defaultParameters, params)
 	instances := []*structpb.Value{}
 	for _, prompt := range prompts {

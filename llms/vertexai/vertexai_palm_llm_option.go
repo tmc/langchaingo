@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	projectIdEnvVarName = "GOOGLE_CLOUD_PROJECT" //nolint:gosec
+	projectIDEnvVarName = "GOOGLE_CLOUD_PROJECT" //nolint:gosec
 )
 
 var (
@@ -24,12 +24,13 @@ type options struct {
 	clientOptions []option.ClientOption
 }
 
+// Option is a function that can be passed to NewClient to configure options.
 type Option func(*options)
 
 // initOpts initializes defaultOptions with the environment variables.
 func initOpts() {
 	defaultOptions = &options{
-		projectID: os.Getenv(projectIdEnvVarName),
+		projectID: os.Getenv(projectIDEnvVarName),
 	}
 }
 
@@ -43,17 +44,23 @@ func WithProjectID(projectID string) Option {
 
 // WithAPIKey returns a ClientOption that specifies an API key to be used
 // as the basis for authentication.
-var WithAPIKey = convertStringOption(option.WithAPIKey)
+func WithAPIKey(apiKey string) Option {
+	return convertStringOption(option.WithAPIKey)(apiKey)
+}
 
 // WithCredentialsFile returns a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials file.
-var WithCredentialsFile = convertStringOption(option.WithCredentialsFile)
+func WithCredentialsFile(path string) Option {
+	return convertStringOption(option.WithCredentialsFile)(path)
+}
 
 // WithCredentialsJSON returns a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials.
-var WithCredentialsJSON = convertByteArrayOption(option.WithCredentialsJSON)
+func WithCredentialsJSON(json []byte) Option {
+	return convertByteArrayOption(option.WithCredentialsJSON)(json)
+}
 
 func convertStringOption(fopt func(string) option.ClientOption) func(string) Option {
 	return func(param string) Option {
