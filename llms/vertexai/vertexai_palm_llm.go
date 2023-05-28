@@ -3,6 +3,7 @@ package vertexai
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
@@ -91,6 +92,9 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
+	}
+	if opts.StreamingFunc != nil {
+		return nil, fmt.Errorf("not implemented")
 	}
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
 	for i, m := range messages {

@@ -70,7 +70,7 @@ type ChatResponse struct {
 	} `json:"usage,omitempty"`
 }
 
-// StreamedChatRkesponsePayload is a chunk from the stream
+// StreamedChatRkesponsePayload is a chunk from the stream.
 type StreamedChatRkesponsePayload struct {
 	ID      string  `json:"id,omitempty"`
 	Created float64 `json:"created,omitempty"`
@@ -173,7 +173,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 
 			err := payload.StreamingFunc(ctx, []byte(streamResponse.Choices[0].Delta.Content))
 			if err != nil {
-				return nil, fmt.Errorf("streaming func returned an error: %v", err)
+				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
 	}
