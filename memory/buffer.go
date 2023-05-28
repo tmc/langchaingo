@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tmc/langchaingo/memory/history"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -12,7 +13,7 @@ var ErrInvalidInputValues = errors.New("invalid input values")
 
 // Buffer is a simple form of memory that remembers previous conversational back and forths directly.
 type Buffer struct {
-	ChatHistory *ChatMessageHistory
+	ChatHistory schema.ChatMessageHistory
 
 	ReturnMessages bool
 	InputKey       string
@@ -28,7 +29,7 @@ var _ schema.Memory = &Buffer{}
 // NewBuffer is a function for crating a new buffer memory.
 func NewBuffer() *Buffer {
 	m := Buffer{
-		ChatHistory:    NewChatMessageHistory(),
+		ChatHistory:    history.NewSimpleChatMessageHistory(),
 		ReturnMessages: false,
 		InputKey:       "",
 		OutputKey:      "",
@@ -52,11 +53,11 @@ func (m *Buffer) MemoryVariables() []string {
 func (m *Buffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
 	if m.ReturnMessages {
 		return map[string]any{
-			m.MemoryKey: m.ChatHistory.messages,
+			m.MemoryKey: m.ChatHistory.Messages(),
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(m.ChatHistory.messages, m.HumanPrefix, m.AIPrefix)
+	bufferString, err := schema.GetBufferString(m.ChatHistory.Messages(), m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}

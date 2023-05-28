@@ -1,4 +1,4 @@
-package memory
+package history
 
 import (
 	"testing"
@@ -7,10 +7,10 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func TestChatMessageHistory(t *testing.T) {
+func TestSimpleChatMessageHistory(t *testing.T) {
 	t.Parallel()
 
-	h := NewChatMessageHistory()
+	h := NewSimpleChatMessageHistory()
 	h.AddAIMessage("foo")
 	h.AddUserMessage("bar")
 	assert.Equal(t, []schema.ChatMessage{
@@ -18,7 +18,7 @@ func TestChatMessageHistory(t *testing.T) {
 		schema.HumanChatMessage{Text: "bar"},
 	}, h.Messages())
 
-	h = NewChatMessageHistory(
+	h = NewSimpleChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.AIChatMessage{Text: "foo"},
 			schema.SystemChatMessage{Text: "bar"},

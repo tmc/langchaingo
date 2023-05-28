@@ -107,3 +107,11 @@ func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string
 	}
 	return strings.Join(stringMessages, "\n"), nil
 }
+
+// ChatMessageHistory is the chat history definition.
+type ChatMessageHistory interface {
+	Messages() []ChatMessage
+	AddAIMessage(text string)
+	AddUserMessage(text string)
+	Clear()
+}
