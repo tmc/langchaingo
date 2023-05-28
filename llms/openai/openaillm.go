@@ -85,9 +85,10 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	}
 
 	result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
-		Model:     opts.Model,
-		StopWords: opts.StopWords,
-		Messages:  msgs,
+		Model:         opts.Model,
+		StopWords:     opts.StopWords,
+		Messages:      msgs,
+		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
 		return nil, err

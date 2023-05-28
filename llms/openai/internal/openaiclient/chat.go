@@ -1,12 +1,15 @@
 package openaiclient
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -21,6 +24,11 @@ type ChatRequest struct {
 	TopP        int            `json:"top_p,omitempty"`
 	N           int            `json:"n,omitempty"`
 	StopWords   []string       `json:"stop,omitempty"`
+	Stream      bool           `json:"stream,omitempty"`
+
+	// StreamingFunc is a function to be called for each chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 // ChatMessage is a message in a chat request.
@@ -50,23 +58,38 @@ type ChatUsage struct {
 
 // ChatResponse is a response to a chat request.
 type ChatResponse struct {
-	ID      string  `json:"id,omitempty"`
-	Created float64 `json:"created,omitempty"`
-	Choices []struct {
-		FinishReason string      `json:"finish_reason,omitempty"`
-		Index        float64     `json:"index,omitempty"`
-		Message      ChatMessage `json:"message,omitempty"`
-	} `json:"choices,omitempty"`
-	Model  string `json:"model,omitempty"`
-	Object string `json:"object,omitempty"`
-	Usage  struct {
+	ID      string        `json:"id,omitempty"`
+	Created float64       `json:"created,omitempty"`
+	Choices []*ChatChoice `json:"choices,omitempty"`
+	Model   string        `json:"model,omitempty"`
+	Object  string        `json:"object,omitempty"`
+	Usage   struct {
 		CompletionTokens float64 `json:"completion_tokens,omitempty"`
 		PromptTokens     float64 `json:"prompt_tokens,omitempty"`
 		TotalTokens      float64 `json:"total_tokens,omitempty"`
 	} `json:"usage,omitempty"`
 }
 
+// StreamedChatRkesponsePayload is a chunk from the stream
+type StreamedChatRkesponsePayload struct {
+	ID      string  `json:"id,omitempty"`
+	Created float64 `json:"created,omitempty"`
+	Model   string  `json:"model,omitempty"`
+	Object  string  `json:"object,omitempty"`
+	Choices []struct {
+		Index float64 `json:"index,omitempty"`
+		Delta struct {
+			Role    string `json:"role,omitempty"`
+			Content string `json:"content,omitempty"`
+		} `json:"delta,omitempty"`
+		FinishReason interface{} `json:"finish_reason,omitempty"`
+	} `json:"choices,omitempty"`
+}
+
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatResponse, error) {
+	if payload.StreamingFunc != nil {
+		payload.Stream = true
+	}
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -101,13 +124,58 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
-
+	if payload.StreamingFunc != nil {
+		return parseStreamingChatResponse(ctx, r, payload)
+	}
 	// Parse response
 	var response ChatResponse
-	err = json.NewDecoder(r.Body).Decode(&response)
-	if err != nil {
-		return nil, err
+	return &response, json.NewDecoder(r.Body).Decode(&response)
+}
+
+func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) {
+	scanner := bufio.NewScanner(r.Body)
+	responseChan := make(chan StreamedChatRkesponsePayload)
+	go func() {
+		defer close(responseChan)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if line == "" {
+				continue
+			}
+			if !strings.HasPrefix(line, "data:") {
+				log.Fatalf("unexpected line: %v", line)
+			}
+			data := strings.TrimPrefix(line, "data: ")
+			if data == "[DONE]" {
+				return
+			}
+			var streamPayload StreamedChatRkesponsePayload
+			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
+			if err != nil {
+				log.Fatalf("failed to decode stream payload: %v", err)
+			}
+			responseChan <- streamPayload
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatalf("failed to scan response: %v", err)
+		}
+	}()
+	// Parse response
+	response := ChatResponse{
+		Choices: []*ChatChoice{
+			{},
+		},
 	}
 
+	for streamResponse := range responseChan {
+		if payload.StreamingFunc != nil {
+			response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+
+			err := payload.StreamingFunc(ctx, []byte(streamResponse.Choices[0].Delta.Content))
+			if err != nil {
+				return nil, fmt.Errorf("streaming func returned an error: %v", err)
+			}
+		}
+	}
 	return &response, nil
 }

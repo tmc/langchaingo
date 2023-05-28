@@ -1,5 +1,7 @@
 package llms
 
+import "context"
+
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
 
@@ -13,6 +15,9 @@ type CallOptions struct {
 	Temperature float64 `json:"temperature"`
 	// StopWords is a list of words to stop on.
 	StopWords []string `json:"stop_words"`
+	// StreamingFunc is a function to be called for each chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingFunc func(ctx context.Context, chunk []byte) error
 }
 
 // WithModel is an option for LLM.Call.
@@ -47,5 +52,12 @@ func WithStopWords(stopWords []string) CallOption {
 func WithOptions(options CallOptions) CallOption {
 	return func(o *CallOptions) {
 		(*o) = options
+	}
+}
+
+// WithStreamingFunc is an option for LLM.Call that allows streaming responses.
+func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) error) CallOption {
+	return func(o *CallOptions) {
+		o.StreamingFunc = streamingFunc
 	}
 }
