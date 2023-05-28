@@ -39,7 +39,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(opts)
 	}
 	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
-		RepoID: "google/flan-t5-xl",
+		RepoID: opts.RepoId,
 		Prompt: prompts[0],
 		Task:   huggingfaceclient.InferenceTaskTextGeneration,
 	})
@@ -57,6 +57,7 @@ func New() (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 	c, err := huggingfaceclient.New(token)
+
 	return &LLM{
 		client: c,
 	}, err
