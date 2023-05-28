@@ -28,7 +28,7 @@ Final Answer: the final answer to the original input question`
 	Suffix = `Begin!
 
 Question: {{.input}}
-Thought: {{.agent_scratchpad}}`
+Thought:{{.agent_scratchpad}}`
 )
 
 // CreatePromptOptions is a struct that holds options for creating a prompt template.
