@@ -13,6 +13,15 @@ type CallOptions struct {
 	Temperature float64 `json:"temperature"`
 	// StopWords is a list of words to stop on.
 	StopWords []string `json:"stop_words"`
+	// RepoId is the repository ID to use.
+	RepoId string `json:"repo_id"`
+}
+
+// WithRepoId is an option for LLM.Call.
+func WithRepoId(repoId string) CallOption {
+	return func(o *CallOptions) {
+		o.RepoId = repoId
+	}
 }
 
 // WithModel is an option for LLM.Call.
