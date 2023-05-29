@@ -107,6 +107,98 @@ func TestPineconeStoreRest(t *testing.T) {
 	require.Equal(t, docs[0].PageContent, "tokyo")
 }
 
+func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	storer, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+		pinecone.WithNameSpace(uuid.New().String()),
+	)
+	require.NoError(t, err)
+
+	err = storer.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London "},
+		{PageContent: "New York"},
+	})
+	require.NoError(t, err)
+
+	// test with a score threshold of 0.8, expected 6 documents
+	docs, err := storer.SimilaritySearch(context.Background(),
+		"Which of these are cities in Japan", 10,
+		vectorstores.WithScoreThreshold(0.8))
+	require.NoError(t, err)
+	require.Len(t, docs, 6)
+
+	// test with a score threshold of 0, expected all 10 documents
+	docs, err = storer.SimilaritySearch(context.Background(),
+		"Which of these are cities in Japan", 10,
+		vectorstores.WithScoreThreshold(0))
+	require.NoError(t, err)
+	require.Len(t, docs, 10)
+
+}
+
+func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	storer, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+		pinecone.WithNameSpace(uuid.New().String()),
+	)
+	require.NoError(t, err)
+
+	err = storer.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London "},
+		{PageContent: "New York"},
+	})
+	require.NoError(t, err)
+
+	_, err = storer.SimilaritySearch(context.Background(),
+		"Which of these are cities in Japan", 10,
+		vectorstores.WithScoreThreshold(-0.8))
+	require.Error(t, err)
+
+	_, err = storer.SimilaritySearch(context.Background(),
+		"Which of these are cities in Japan", 10,
+		vectorstores.WithScoreThreshold(1.8))
+	require.Error(t, err)
+
+}
+
 func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
 
@@ -145,6 +237,52 @@ func TestPineconeAsRetriever(t *testing.T) {
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(id)),
+		),
+		"What color is the desk?",
+	)
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
+}
+
+func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	id := uuid.New().String()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the house is blue."},
+			{PageContent: "The color of the car is red."},
+			{PageContent: "The color of the desk is orange."},
+		},
+		vectorstores.WithNameSpace(id),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(
+				id), vectorstores.WithScoreThreshold(0.8)),
 		),
 		"What color is the desk?",
 	)

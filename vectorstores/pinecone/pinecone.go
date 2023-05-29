@@ -21,7 +21,8 @@ var (
 		"number of vectors from embedder does not match number of documents",
 	)
 	// ErrEmptyResponse is returned if the API gives an empty response.
-	ErrEmptyResponse = errors.New("empty response")
+	ErrEmptyResponse         = errors.New("empty response")
+	ErrInvalidScoreThreshold = errors.New("Score threshold must be between 0 and 1")
 )
 
 // Store is a wrapper around the pinecone rest API and grpc client.
@@ -30,13 +31,14 @@ type Store struct {
 	grpcConn *grpc.ClientConn
 	client   pinecone_grpc.VectorServiceClient
 
-	indexName   string
-	projectName string
-	environment string
-	apiKey      string
-	textKey     string
-	nameSpace   string
-	useGRPC     bool
+	indexName      string
+	projectName    string
+	environment    string
+	apiKey         string
+	textKey        string
+	nameSpace      string
+	useGRPC        bool
+	scoreThreshold float64
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -66,7 +68,7 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 // AddDocuments creates vector embeddings from the documents using the embedder
 // and upsert the vectors to the pinecone index.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
-	nameSpace := s.getNameSpace(options...)
+	nameSpace := s.getNamespace(options...)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -103,7 +105,11 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
-	nameSpace := s.getNameSpace(options...)
+	nameSpace := s.getNamespace(options...)
+	scoreThreshold, err := s.getScoreThreshold(options...)
+	if err != nil {
+		return nil, err
+	}
 
 	vector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
@@ -114,7 +120,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return s.grpcQuery(ctx, vector, numDocuments, nameSpace)
 	}
 
-	return s.restQuery(ctx, vector, numDocuments, nameSpace)
+	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold)
 }
 
 // Close closes the grpc connection.
@@ -122,14 +128,29 @@ func (s Store) Close() error {
 	return s.grpcConn.Close()
 }
 
-func (s Store) getNameSpace(options ...vectorstores.Option) string {
+func (s Store) getNamespace(options ...vectorstores.Option) string {
+	opts := s.getOptions(options...)
+	if opts.NameSpace != "" {
+		return opts.NameSpace
+	}
+	return s.nameSpace
+}
+
+func (s Store) getScoreThreshold(options ...vectorstores.Option) (float64,
+	error) {
+	opts := s.getOptions(options...)
+	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
+		return 0, ErrInvalidScoreThreshold
+	}
+
+	return opts.ScoreThreshold, nil
+}
+
+func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	opts := vectorstores.Options{}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	if opts.NameSpace != "" {
-		return opts.NameSpace
-	}
-	return s.nameSpace
+	return opts
 }
