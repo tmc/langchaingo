@@ -68,7 +68,7 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 // AddDocuments creates vector embeddings from the documents using the embedder
 // and upsert the vectors to the pinecone index.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
-	nameSpace := s.getNamespace(options...)
+	nameSpace := s.getNameSpace(options...)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -105,7 +105,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
-	nameSpace := s.getNamespace(options...)
+	nameSpace := s.getNameSpace(options...)
 	scoreThreshold, err := s.getScoreThreshold(options...)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (s Store) Close() error {
 	return s.grpcConn.Close()
 }
 
-func (s Store) getNamespace(options ...vectorstores.Option) string {
+func (s Store) getNameSpace(options ...vectorstores.Option) string {
 	opts := s.getOptions(options...)
 	if opts.NameSpace != "" {
 		return opts.NameSpace
