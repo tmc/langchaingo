@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/agent"
-	"github.com/tmc/langchaingo/exp/tools"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/tools"
 )
 
 // Executor is the chain responsible for running agents.
 type Executor struct {
-	Agent agent.Agent
+	Agent agents.Agent
 	Tools []tools.Tool
 
 	MaxIterations int
@@ -23,7 +23,7 @@ var _ chains.Chain = Executor{}
 
 // New creates a new agent executor with a agent, the tools the agent can use
 // and the max number of iterations.
-func New(agent agent.Agent, tools []tools.Tool, maxIterations int) Executor {
+func New(agent agents.Agent, tools []tools.Tool, maxIterations int) Executor {
 	return Executor{
 		Agent:         agent,
 		Tools:         tools,
@@ -36,11 +36,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	if err != nil {
 		return nil, err
 	}
-
-	nameToTool := make(map[string]tools.Tool, len(e.Tools))
-	for _, tool := range e.Tools {
-		nameToTool[tool.Name()] = tool
-	}
+	nameToTool := getNameToTool(e.Tools)
 
 	steps := make([]schema.AgentStep, 0)
 	iterations := 0
@@ -67,7 +63,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 				})
 			}
 
-			observation, err := tool.Call(action.ToolInput)
+			observation, err := tool.Call(ctx, action.ToolInput)
 			if err != nil {
 				return nil, err
 			}
@@ -93,7 +89,7 @@ func (e Executor) GetOutputKeys() []string {
 	return e.Agent.GetOutputKeys()
 }
 
-func (e Executor) GetMemory() schema.Memory {
+func (e Executor) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
@@ -109,4 +105,17 @@ func inputsToString(inputValues map[string]any) (map[string]string, error) {
 	}
 
 	return inputs, nil
+}
+
+func getNameToTool(t []tools.Tool) map[string]tools.Tool {
+	if len(t) == 0 {
+		return nil
+	}
+
+	nameToTool := make(map[string]tools.Tool, len(t))
+	for _, tool := range t {
+		nameToTool[tool.Name()] = tool
+	}
+
+	return nameToTool
 }

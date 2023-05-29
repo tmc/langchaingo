@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenaiEmbeddings(t *testing.T) {
+func TestVertexAIPaLMEmbeddings(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	if gcpProjectID := os.Getenv("GOOGLE_CLOUD_PROJECT"); gcpProjectID == "" {
+		t.Skip("GOOGLE_CLOUD_PROJECT not set")
 	}
-	e, err := NewOpenAI()
+	e, err := NewVertexAIPaLM()
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")

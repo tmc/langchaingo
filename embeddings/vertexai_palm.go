@@ -4,31 +4,27 @@ import (
 	"context"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/llms/vertexai"
 )
 
-// defaultBatchSize is the default length of batches.
-const defaultBatchSize = 512
-
-// OpenAI is the embedder using the OpenAI api.
-type OpenAI struct {
-	client *openai.LLM
+// VertexAIPaLM is the embedder using the Google PaLM api.
+type VertexAIPaLM struct {
+	client *vertexai.LLM
 
 	StripNewLines bool
 	BatchSize     int
 }
 
-var _ Embedder = OpenAI{}
+var _ Embedder = VertexAIPaLM{}
 
-// NewOpenAI creates a new OpenAI with StripNewLines set to true and batch
+// NewVertexAIPaLM creates a new VertexAI with StripNewLines set to true and batch
 // size set to 512.
-func NewOpenAI() (OpenAI, error) {
-	client, err := openai.New()
+func NewVertexAIPaLM() (*VertexAIPaLM, error) {
+	client, err := vertexai.New()
 	if err != nil {
-		return OpenAI{}, err
+		return nil, err
 	}
-
-	return OpenAI{
+	return &VertexAIPaLM{
 		client:        client,
 		StripNewLines: true,
 		BatchSize:     defaultBatchSize,
@@ -36,7 +32,7 @@ func NewOpenAI() (OpenAI, error) {
 }
 
 // EmbedDocuments creates one vector embedding for each of the texts.
-func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
+func (e VertexAIPaLM) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := batchTexts(
 		maybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
@@ -66,7 +62,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 }
 
 // EmbedQuery embeds a single text.
-func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e VertexAIPaLM) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

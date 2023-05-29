@@ -1,29 +1,53 @@
-package openai
+package vertexai
 
 import (
 	"context"
 	"errors"
-	"os"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
 	"github.com/tmc/langchaingo/schema"
 )
 
 var (
-	ErrEmptyResponse = errors.New("no response")
-	ErrMissingToken  = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable")
-
+	ErrEmptyResponse            = errors.New("no response")
+	ErrMissingProjectID         = errors.New("missing the GCP Project ID, set it in the GOOGLE_CLOUD_PROJECT environment variable") //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
 type LLM struct {
-	client *openaiclient.Client
+	client *vertexaiclient.PaLMClient
 }
 
 var _ llms.LLM = (*LLM)(nil)
 
 var _ llms.ChatLLM = (*LLM)(nil)
+
+// New returns a new VertexAI PaLM LLM.
+func New(opts ...Option) (*LLM, error) {
+	// Ensure options are initialized only once.
+	initOptions.Do(initOpts)
+
+	options := &options{}
+	*options = *defaultOptions // Copy default options.
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.projectID) == 0 {
+		return nil, ErrMissingProjectID
+	}
+
+	client, err := vertexaiclient.New(options.projectID, options.clientOptions...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LLM{
+		client: client,
+	}, nil
+}
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -42,21 +66,25 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	for _, opt := range options {
 		opt(&opts)
 	}
-	result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
-		Model:     opts.Model,
-		Prompt:    prompts[0],
-		MaxTokens: opts.MaxTokens,
-		StopWords: opts.StopWords,
+	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
+		Prompts:     prompts,
+		MaxTokens:   opts.MaxTokens,
+		Temperature: opts.Temperature,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return []*llms.Generation{
-		{Text: result.Text},
-	}, nil
+
+	generations := []*llms.Generation{}
+	for _, r := range results {
+		generations = append(generations, &llms.Generation{
+			Text: r.Text,
+		})
+	}
+	return generations, nil
 }
 
-type ChatMessage = openaiclient.ChatMessage
+type ChatMessage = vertexaiclient.ChatMessage
 
 // Chat requests a chat response for the given prompt.
 func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*llms.ChatGeneration, error) { // nolint: lll
@@ -64,57 +92,53 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	for _, opt := range options {
 		opt(&opts)
 	}
-	msgs := make([]*openaiclient.ChatMessage, len(messages))
+	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
 	for i, m := range messages {
-		msg := &openaiclient.ChatMessage{
+		msg := &vertexaiclient.ChatMessage{
 			Content: m.GetText(),
 		}
 		typ := m.GetType()
 		switch typ {
 		case schema.ChatMessageTypeSystem:
-			msg.Role = "system"
+			msg.Author = "bot"
 		case schema.ChatMessageTypeAI:
-			msg.Role = "assistant"
+			msg.Author = "bot"
 		case schema.ChatMessageTypeHuman:
-			msg.Role = "user"
+			msg.Author = "user"
 		case schema.ChatMessageTypeGeneric:
-			msg.Role = "user"
-			// TODO: support name
+			msg.Author = "user"
 		}
 		msgs[i] = msg
 	}
 
-	result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
-		Model:     opts.Model,
-		StopWords: opts.StopWords,
-		Messages:  msgs,
+	result, err := o.client.CreateChat(ctx, &vertexaiclient.ChatRequest{
+		Temperature: opts.Temperature,
+		Messages:    msgs,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if len(result.Choices) == 0 {
+	if len(result.Candidates) == 0 {
 		return nil, ErrEmptyResponse
 	}
 	return &llms.ChatGeneration{
 		Message: &schema.AIChatMessage{
-			Text: result.Choices[0].Message.Content,
+			Text: result.Candidates[0].Content,
 		},
-		// TODO: fill in generation info
 	}, nil
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
-	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
+	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
+	if err != nil {
+		return [][]float64{}, err
+	}
 
 	if len(embeddings) == 0 {
 		return [][]float64{}, ErrEmptyResponse
-	}
-
-	if err != nil {
-		return [][]float64{}, err
 	}
 
 	if len(inputTexts) != len(embeddings) {
@@ -122,29 +146,4 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	return embeddings, nil
-}
-
-// New returns a new OpenAI LLM.
-func New(opts ...Option) (*LLM, error) {
-	options := &options{
-		token: os.Getenv(tokenEnvVarName),
-		model: os.Getenv(modelEnvVarName),
-	}
-
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	if len(options.token) == 0 {
-		return nil, ErrMissingToken
-	}
-
-	client, err := openaiclient.New(options.token, options.model)
-	if err != nil {
-		return nil, err
-	}
-
-	return &LLM{
-		client: client,
-	}, nil
 }

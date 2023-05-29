@@ -15,7 +15,7 @@ var (
 	// ErrMissingTextKey is returned in SimilaritySearch if a vector
 	// from the query is missing the text key.
 	ErrMissingTextKey = errors.New("missing text key in vector metadata")
-	// ErrMissingTextKey is returned when if the embedder returns a number
+	// ErrEmbedderWrongNumberVectors is returned when if the embedder returns a number
 	// of vectors that is not equal to the number of documents given.
 	ErrEmbedderWrongNumberVectors = errors.New(
 		"number of vectors from embedder does not match number of documents",
