@@ -269,6 +269,8 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
 			{PageContent: "The color of the desk is orange."},
+			{PageContent: "The color of the lamp beside the desk is black."},
+			{PageContent: "The color of the chair beside the desk is beige."},
 		},
 		vectorstores.WithNameSpace(id),
 	)
@@ -281,11 +283,14 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
 				id), vectorstores.WithScoreThreshold(0.8)),
 		),
-		"What color is the desk?",
+		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
+
+	require.Contains(t, result, "orange", "expected orange in result")
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "beige", "expected beige in result")
 }
