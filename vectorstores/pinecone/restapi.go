@@ -115,6 +115,7 @@ func (s Store) restQuery(
 	vector []float64,
 	numVectors int,
 	nameSpace string,
+	scoreThreshold float64,
 ) ([]schema.Document, error) {
 	payload := queryPayload{
 		IncludeValues:   true,
@@ -160,10 +161,17 @@ func (s Store) restQuery(
 		}
 		delete(match.Metadata, s.textKey)
 
-		docs = append(docs, schema.Document{
+		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    match.Metadata,
-		})
+		}
+
+		// If scoreThreshold is not 0, we only return matches with a score above the threshold.
+		if scoreThreshold != 0 && match.Score >= scoreThreshold {
+			docs = append(docs, doc)
+		} else if scoreThreshold == 0 { // If scoreThreshold is 0, we return all matches.
+			docs = append(docs, doc)
+		}
 	}
 
 	return docs, nil
