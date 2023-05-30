@@ -32,14 +32,13 @@ type Store struct {
 	grpcConn *grpc.ClientConn
 	client   pinecone_grpc.VectorServiceClient
 
-	indexName      string
-	projectName    string
-	environment    string
-	apiKey         string
-	textKey        string
-	nameSpace      string
-	useGRPC        bool
-	scoreThreshold float64
+	indexName   string
+	projectName string
+	environment string
+	apiKey      string
+	textKey     string
+	nameSpace   string
+	useGRPC     bool
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -138,7 +137,8 @@ func (s Store) getNameSpace(options ...vectorstores.Option) string {
 }
 
 func (s Store) getScoreThreshold(options ...vectorstores.Option) (float64,
-	error) {
+	error,
+) {
 	opts := s.getOptions(options...)
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold

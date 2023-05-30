@@ -152,7 +152,6 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 		vectorstores.WithScoreThreshold(0))
 	require.NoError(t, err)
 	require.Len(t, docs, 10)
-
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
@@ -196,7 +195,6 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
 	require.Error(t, err)
-
 }
 
 func TestPineconeAsRetriever(t *testing.T) {
