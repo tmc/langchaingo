@@ -39,7 +39,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(opts)
 	}
 	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
-		RepoID: opts.RepoID,
+		RepoID: opts.Model,
 		Prompt: prompts[0],
 		Task:   huggingfaceclient.InferenceTaskTextGeneration,
 	})

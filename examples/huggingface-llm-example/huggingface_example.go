@@ -17,7 +17,7 @@ func main() {
 	ctx := context.Background()
 
 	var generateOptions []llms.CallOption
-	generateOptions = append(generateOptions, llms.WithRepoId("gpt2"))
+	generateOptions = append(generateOptions, llms.WithModel("gpt2"))
 
 	completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?", generateOptions...)
 	if err != nil {
