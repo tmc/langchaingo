@@ -11,8 +11,10 @@ func TestSimpleChatMessageHistory(t *testing.T) {
 	t.Parallel()
 
 	h := NewSimpleChatMessageHistory()
-	h.AddAIMessage("foo")
-	h.AddUserMessage("bar")
+	err := h.AddAIMessage("foo")
+	assert.NoError(t, err)
+	err = h.AddUserMessage("bar")
+	assert.NoError(t, err)
 	msgs, err := h.Messages()
 	assert.NoError(t, err)
 
@@ -27,7 +29,8 @@ func TestSimpleChatMessageHistory(t *testing.T) {
 			schema.SystemChatMessage{Text: "bar"},
 		}),
 	)
-	h.AddUserMessage("zoo")
+	err = h.AddUserMessage("zoo")
+	assert.NoError(t, err)
 
 	msgs, err = h.Messages()
 	assert.NoError(t, err)

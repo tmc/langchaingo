@@ -84,22 +84,27 @@ func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string
 		return err
 	}
 
-	m.ChatHistory.AddUserMessage(userInputValue)
+	err = m.ChatHistory.AddUserMessage(userInputValue)
+	if err != nil {
+		return err
+	}
 
 	aiOutputValue, err := getInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
 	}
 
-	m.ChatHistory.AddAIMessage(aiOutputValue)
+	err = m.ChatHistory.AddAIMessage(aiOutputValue)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // Clear sets the chat messages to a new and empty chat message history.
 func (m *Buffer) Clear() error {
-	m.ChatHistory.Clear()
-	return nil
+	return m.ChatHistory.Clear()
 }
 
 func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
