@@ -11,44 +11,45 @@ type SimpleChatMessageHistory struct {
 }
 
 // NewSimpleChatMessageHistory creates a new SimpleChatMessageHistory using chat message options.
-func NewSimpleChatMessageHistory(options ...NewChatMessageOption) *SimpleChatMessageHistory {
+func NewSimpleChatMessageHistory(options ...NewSimpleChatMessageOption) *SimpleChatMessageHistory {
 	h := &SimpleChatMessageHistory{
 		messages: make([]schema.ChatMessage, 0),
 	}
-
 	for _, option := range options {
 		option(h)
 	}
-
 	return h
 }
 
 // Messages returns all messages stored.
-func (h *SimpleChatMessageHistory) Messages() []schema.ChatMessage {
-	return h.messages
+func (h *SimpleChatMessageHistory) Messages() ([]schema.ChatMessage, error) {
+	return h.messages, nil
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-func (h *SimpleChatMessageHistory) AddAIMessage(text string) {
+func (h *SimpleChatMessageHistory) AddAIMessage(text string) error {
 	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
+	return nil
 }
 
 // AddUserMessage adds an user to the chat message history.
-func (h *SimpleChatMessageHistory) AddUserMessage(text string) {
+func (h *SimpleChatMessageHistory) AddUserMessage(text string) error {
 	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
+	return nil
 }
 
-func (h *SimpleChatMessageHistory) Clear() {
+func (h *SimpleChatMessageHistory) Clear() error {
 	h.messages = make([]schema.ChatMessage, 0)
+	return nil
 }
 
-// NewChatMessageOption is a function for creating new chat message history
+// NewSimpleChatMessageOption is a function for creating new chat message history
 // with other then the default values.
-type NewChatMessageOption func(m *SimpleChatMessageHistory)
+type NewSimpleChatMessageOption func(m *SimpleChatMessageHistory)
 
 // WithPreviousMessages is an option for NewSimpleChatMessageHistory for adding
 // previous messages to the history.
-func WithPreviousMessages(previousMessages []schema.ChatMessage) NewChatMessageOption {
+func WithPreviousMessages(previousMessages []schema.ChatMessage) NewSimpleChatMessageOption {
 	return func(m *SimpleChatMessageHistory) {
 		m.messages = append(m.messages, previousMessages...)
 	}

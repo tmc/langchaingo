@@ -13,10 +13,13 @@ func TestSimpleChatMessageHistory(t *testing.T) {
 	h := NewSimpleChatMessageHistory()
 	h.AddAIMessage("foo")
 	h.AddUserMessage("bar")
+	msgs, err := h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Text: "foo"},
 		schema.HumanChatMessage{Text: "bar"},
-	}, h.Messages())
+	}, msgs)
 
 	h = NewSimpleChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
@@ -25,9 +28,13 @@ func TestSimpleChatMessageHistory(t *testing.T) {
 		}),
 	)
 	h.AddUserMessage("zoo")
+
+	msgs, err = h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Text: "foo"},
 		schema.SystemChatMessage{Text: "bar"},
 		schema.HumanChatMessage{Text: "zoo"},
-	}, h.Messages())
+	}, msgs)
 }
