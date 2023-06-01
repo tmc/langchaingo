@@ -9,8 +9,10 @@ import (
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
 )
 
-const tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
-const defaultModel = "gpt2"
+const (
+	tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
+	defaultModel    = "gpt2"
+)
 
 var (
 	ErrEmptyResponse = errors.New("empty response")
