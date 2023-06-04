@@ -13,6 +13,7 @@ var (
 	ErrEmptyResponse            = errors.New("no response")
 	ErrMissingProjectID         = errors.New("missing the GCP Project ID, set it in the GOOGLE_CLOUD_PROJECT environment variable") //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+	ErrNotImplemented           = errors.New("not implemented")
 )
 
 type LLM struct {
@@ -91,6 +92,9 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
+	}
+	if opts.StreamingFunc != nil {
+		return nil, ErrNotImplemented
 	}
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
 	for i, m := range messages {
