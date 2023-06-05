@@ -129,9 +129,12 @@ func (a *OneShotZeroAgent) GetOutputKeys() []string {
 
 func (a *OneShotZeroAgent) constructScratchPad(steps []schema.AgentStep) string {
 	var scratchPad string
-	for _, step := range steps {
-		scratchPad += step.Action.Log
-		scratchPad += "Observation: " + step.Observation
+	if len(steps) > 0 {
+		for _, step := range steps {
+			scratchPad += step.Action.Log
+			scratchPad += "\nObservation: " + step.Observation
+		}
+		scratchPad += "\n" + "Thought:"
 	}
 
 	return scratchPad

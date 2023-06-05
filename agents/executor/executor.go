@@ -61,6 +61,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 					Action:      action,
 					Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
 				})
+				continue
 			}
 
 			observation, err := tool.Call(ctx, action.ToolInput)
