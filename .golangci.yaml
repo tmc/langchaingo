@@ -23,6 +23,7 @@ linters:
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
     - testpackage
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
+    - depguard # disabling temporarily
 
 linters-settings:
   funlen:
