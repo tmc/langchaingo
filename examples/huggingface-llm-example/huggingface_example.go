@@ -16,10 +16,14 @@ func main() {
 	}
 	ctx := context.Background()
 
-	var generateOptions []llms.CallOption
-	generateOptions = append(generateOptions, llms.WithModel("gpt2"))
+	// By default, library will use default model described in huggingface.defaultModel
+	// completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?")
 
+	// Or override default model to another one
+	generateOptions := []llms.CallOption{llms.WithModel("gpt2")}
 	completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?", generateOptions...)
+
+	// Check for errors
 	if err != nil {
 		log.Fatal(err)
 	}

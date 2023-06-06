@@ -9,7 +9,10 @@ import (
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
 )
 
-const tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
+const (
+	tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
+	defaultModel    = "gpt2"
+)
 
 var (
 	ErrEmptyResponse = errors.New("empty response")
@@ -34,7 +37,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	opts := &llms.CallOptions{}
+	opts := &llms.CallOptions{Model: defaultModel}
 	for _, opt := range options {
 		opt(opts)
 	}
