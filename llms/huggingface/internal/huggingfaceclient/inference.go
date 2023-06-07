@@ -25,6 +25,7 @@ type inferencePayload struct {
 	MinLength         int     `json:"min_length,omitempty"`
 	MaxLength         int     `json:"max_length,omitempty"`
 	RepetitionPenalty float64 `json:"repetition_penalty,omitempty"`
+	Seed              int     `json:"seed,omitempty"`
 }
 
 type (

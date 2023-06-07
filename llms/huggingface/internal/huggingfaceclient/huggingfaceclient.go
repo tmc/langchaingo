@@ -36,6 +36,7 @@ type InferenceRequest struct {
 	MinLength         int           `json:"min_length,omitempty"`
 	MaxLength         int           `json:"max_length,omitempty"`
 	RepetitionPenalty float64       `json:"repetition_penalty,omitempty"`
+	Seed              int           `json:"seed,omitempty"`
 }
 
 type InferenceResponse struct {
@@ -52,6 +53,7 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		MinLength:         request.MinLength,
 		MaxLength:         request.MaxLength,
 		RepetitionPenalty: request.RepetitionPenalty,
+		Seed:              request.Seed,
 	}
 	resp, err := c.runInference(ctx, payload)
 	if err != nil {

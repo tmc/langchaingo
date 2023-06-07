@@ -46,6 +46,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		MinLength:         opts.MinLength,
 		MaxLength:         opts.MaxLength,
 		RepetitionPenalty: opts.RepetitionPenalty,
+		Seed:              opts.Seed,
 	})
 	if err != nil {
 		return nil, err
