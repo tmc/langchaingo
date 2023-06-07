@@ -3,13 +3,13 @@ package openai
 const (
 	tokenEnvVarName   = "OPENAI_API_KEY"  //nolint:gosec
 	modelEnvVarName   = "OPENAI_MODEL"    //nolint:gosec
-	baseUrlEnvVarName = "OPENAI_BASE_URL" //nolint:gosec
+	baseURLEnvVarName = "OPENAI_BASE_URL" //nolint:gosec
 )
 
 type options struct {
 	token   string
 	model   string
-	baseUrl string
+	baseURL string
 }
 
 type Option func(*options)
@@ -30,11 +30,11 @@ func WithModel(model string) Option {
 	}
 }
 
-// WithBaseUrl passes the OpenAI base url to the client. If not set, the base url
+// WithBaseURL passes the OpenAI base url to the client. If not set, the base url
 // is read from the OPENAI_BASE_URL environment variable. If still not set in ENV
 // VAR OPENAI_BASE_URL, then the default value is https://api.openai.com is used.
-func WithBaseUrl(baseUrl string) Option {
+func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
-		opts.baseUrl = baseUrl
+		opts.baseURL = baseURL
 	}
 }
