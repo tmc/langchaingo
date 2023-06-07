@@ -12,20 +12,22 @@ var (
 )
 
 type Client struct {
-	token string
+	Token string
+	Model string
 }
 
-func New(token string) (*Client, error) {
+func New(token string, model string) (*Client, error) {
 	if token == "" {
 		return nil, ErrInvalidToken
 	}
 	return &Client{
-		token: token,
+		Token: token,
+		Model: model,
 	}, nil
 }
 
 type InferenceRequest struct {
-	RepoID            string        `json:"repositoryId"`
+	Model             string        `json:"repositoryId"`
 	Prompt            string        `json:"prompt"`
 	Task              InferenceTask `json:"task"`
 	Temperature       float64       `json:"temperature,omitempty"`
@@ -42,7 +44,7 @@ type InferenceResponse struct {
 
 func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
 	payload := &inferencePayload{
-		Model:             request.RepoID,
+		Model:             request.Model,
 		Inputs:            request.Prompt,
 		Temperature:       request.Temperature,
 		TopP:              request.TopP,

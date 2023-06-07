@@ -46,7 +46,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("Content-Type", "application/json")
 
 	// debug print the http request with httputil:

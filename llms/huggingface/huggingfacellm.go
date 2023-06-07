@@ -37,7 +37,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(opts)
 	}
 	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
-		RepoID:            opts.Model,
+		Model:             o.client.Model,
 		Prompt:            prompts[0],
 		Task:              huggingfaceclient.InferenceTaskTextGeneration,
 		Temperature:       opts.Temperature,
@@ -69,7 +69,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	c, err := huggingfaceclient.New(options.token)
+	c, err := huggingfaceclient.New(options.token, options.model)
 	if err != nil {
 		return nil, err
 	}
