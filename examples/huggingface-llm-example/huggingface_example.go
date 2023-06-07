@@ -20,7 +20,11 @@ func main() {
 	// completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?")
 
 	// Or override default model to another one
-	generateOptions := []llms.CallOption{llms.WithModel("gpt2")}
+	generateOptions := []llms.CallOption{
+		llms.WithModel("gpt2"),
+		//llms.WithTopK(10),
+		//llms.WithTopP(0.95),
+	}
 	completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?", generateOptions...)
 
 	// Check for errors
