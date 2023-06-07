@@ -79,8 +79,12 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
+	if c.baseUrl == "" {
+		c.baseUrl = "https://api.openai.com"
+	}
+
 	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/completions", bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/completions", c.baseUrl), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
