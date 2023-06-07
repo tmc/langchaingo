@@ -17,8 +17,14 @@ const (
 )
 
 type inferencePayload struct {
-	Model  string `json:"-"`
-	Inputs string `json:"inputs"`
+	Model             string  `json:"-"`
+	Inputs            string  `json:"inputs"`
+	Temperature       float64 `json:"temperature,omitempty"`
+	TopP              float64 `json:"top_p,omitempty"`
+	TopK              int     `json:"top_k,omitempty"`
+	MinLength         int     `json:"min_length,omitempty"`
+	MaxLength         int     `json:"max_length,omitempty"`
+	RepetitionPenalty float64 `json:"repetition_penalty,omitempty"`
 }
 
 type (

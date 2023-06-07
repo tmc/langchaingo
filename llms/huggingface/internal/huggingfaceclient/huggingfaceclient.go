@@ -25,9 +25,15 @@ func New(token string) (*Client, error) {
 }
 
 type InferenceRequest struct {
-	RepoID string        `json:"repositoryId"`
-	Prompt string        `json:"prompt"`
-	Task   InferenceTask `json:"task"`
+	RepoID            string        `json:"repositoryId"`
+	Prompt            string        `json:"prompt"`
+	Task              InferenceTask `json:"task"`
+	Temperature       float64       `json:"temperature,omitempty"`
+	TopP              float64       `json:"top_p,omitempty"`
+	TopK              int           `json:"top_k,omitempty"`
+	MinLength         int           `json:"min_length,omitempty"`
+	MaxLength         int           `json:"max_length,omitempty"`
+	RepetitionPenalty float64       `json:"repetition_penalty,omitempty"`
 }
 
 type InferenceResponse struct {
@@ -35,10 +41,17 @@ type InferenceResponse struct {
 }
 
 func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
-	resp, err := c.runInference(ctx, &inferencePayload{
-		Model:  request.RepoID,
-		Inputs: request.Prompt,
-	})
+	payload := &inferencePayload{
+		Model:             request.RepoID,
+		Inputs:            request.Prompt,
+		Temperature:       request.Temperature,
+		TopP:              request.TopP,
+		TopK:              request.TopK,
+		MinLength:         request.MinLength,
+		MaxLength:         request.MaxLength,
+		RepetitionPenalty: request.RepetitionPenalty,
+	}
+	resp, err := c.runInference(ctx, payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run inference: %w", err)
 	}
