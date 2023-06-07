@@ -1,4 +1,4 @@
-package executor
+package agents
 
 import "errors"
 
@@ -14,4 +14,10 @@ var (
 	ErrUnknownAgentType = errors.New("unknown agent type")
 	// ErrInvalidOptions is returned if the options given to the initializer is invalid.
 	ErrInvalidOptions = errors.New("invalid options")
+
+	// ErrUnableToParseOutput is returned if the output of the llm is unparsable.
+	ErrUnableToParseOutput = errors.New("unable to parse agent output")
+	// ErrInvalidChainReturnType is returned if the internal chain of the agent eturns a value in the
+	// "text" filed that is not a string.
+	ErrInvalidChainReturnType = errors.New("agent chain did not return a string")
 )

@@ -1,4 +1,4 @@
-package mrkl
+package agents
 
 import (
 	"testing"

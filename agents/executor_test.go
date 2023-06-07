@@ -1,4 +1,4 @@
-package executor_test
+package agents_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/agents/executor"
+	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/tools"
@@ -32,10 +32,10 @@ func TestMRKL(t *testing.T) {
 
 	calculator := tools.Calculator{}
 
-	a, err := executor.Initialize(
+	a, err := agents.Initialize(
 		llm,
 		[]tools.Tool{searchTool, calculator},
-		executor.ZeroShotReactDescription,
+		agents.ZeroShotReactDescription,
 	)
 	require.NoError(t, err)
 
