@@ -130,6 +130,7 @@ func New(opts ...Option) (*LLM, error) {
 	options := &options{
 		token: os.Getenv(tokenEnvVarName),
 		model: os.Getenv(modelEnvVarName),
+		baseUrl: os.Getenv(baseUrlEnvVarName),
 	}
 
 	for _, opt := range opts {
@@ -140,7 +141,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	client, err := openaiclient.New(options.token, options.model)
+	client, err := openaiclient.New(options.token, options.model, options.baseUrl)
 	if err != nil {
 		return nil, err
 	}
