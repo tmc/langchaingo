@@ -1,5 +1,5 @@
 // Package agent contains the standard interface all agents must implement,
-// implementations of this interface and and agent executor.
+// implementations of this interface, and an agent executor.
 //
 // An Agent is a wrapper around a model, which takes in user input and returns
 // a response corresponding to an “action” to take and a corresponding
