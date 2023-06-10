@@ -161,7 +161,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			responseChan <- streamPayload
 		}
 		if err := scanner.Err(); err != nil {
-			log.Fatalf("failed to scan response: %v", err)
+			log.Println("issue scanning response:", err)
 		}
 	}()
 	// Parse response
