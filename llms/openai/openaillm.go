@@ -128,8 +128,9 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {
 	options := &options{
-		token: os.Getenv(tokenEnvVarName),
-		model: os.Getenv(modelEnvVarName),
+		token:   os.Getenv(tokenEnvVarName),
+		model:   os.Getenv(modelEnvVarName),
+		baseURL: os.Getenv(baseURLEnvVarName),
 	}
 
 	for _, opt := range opts {
@@ -140,7 +141,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	client, err := openaiclient.New(options.token, options.model)
+	client, err := openaiclient.New(options.token, options.model, options.baseURL)
 	if err != nil {
 		return nil, err
 	}

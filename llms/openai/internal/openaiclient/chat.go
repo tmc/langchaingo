@@ -14,6 +14,7 @@ import (
 
 const (
 	defaultChatModel = "gpt-3.5-turbo"
+	defaultBaseURL   = "https://api.openai.com"
 )
 
 // ChatRequest is a request to create an embedding.
@@ -98,7 +99,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 
 	// Build request
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/chat/completions", body)
+	if c.baseURL == "" {
+		c.baseURL = defaultBaseURL
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/chat/completions", c.baseURL), body)
 	if err != nil {
 		return nil, err
 	}
