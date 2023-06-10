@@ -1,29 +1,16 @@
-package mrkl
+package agents
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
-)
-
-var (
-	// ErrUnableToParseOutput is returned if the output of the llm is unparsable.
-	ErrUnableToParseOutput = errors.New("unable to parse agent output")
-	// ErrInvalidChainReturnType is returned if the internal chain of the agent
-	// returns a value in the "text" filed that is not a string.
-	ErrInvalidChainReturnType = errors.New("agent chain did not return a string")
-	// ErrInvalidOptions is returned if the options given to the NewOneShotAgent
-	// function is invalid.
-	ErrInvalidOptions = errors.New("options given are invalid")
 )
 
 const (
@@ -46,31 +33,19 @@ type OneShotZeroAgent struct {
 	OutputKey string
 }
 
-var _ agents.Agent = (*OneShotZeroAgent)(nil)
-
-type OneShotZeroAgentOptions struct {
-	outputKey string
-}
-
-func checkOptions(opts map[string]any) OneShotZeroAgentOptions {
-	options := OneShotZeroAgentOptions{
-		outputKey: _defaultOutputKey,
-	}
-	if outputKey, ok := opts["outputKey"].(string); ok {
-		options.outputKey = outputKey
-	}
-	return options
-}
+var _ Agent = (*OneShotZeroAgent)(nil)
 
 // NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
 // and options. It returns a pointer to the created agent. The opts parameter
-// represents the options for the agent. "outputKey" sets the output key of the
-// agent.
-func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts map[string]any) *OneShotZeroAgent {
-	options := checkOptions(opts)
+// represents the options for the agent.
+func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts ...CreationOption) *OneShotZeroAgent {
+	options := mrklDefaultOptions()
+	for _, opt := range opts {
+		opt(&options)
+	}
 
 	return &OneShotZeroAgent{
-		Chain:     chains.NewLLMChain(llm, CreatePrompt(tools)),
+		Chain:     chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
 		Tools:     tools,
 		OutputKey: options.outputKey,
 	}

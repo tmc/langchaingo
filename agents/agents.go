@@ -1,4 +1,3 @@
-// Package agents defines the types for langchaingo Agent.
 package agents
 
 import (
