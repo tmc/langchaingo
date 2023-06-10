@@ -17,8 +17,15 @@ const (
 )
 
 type inferencePayload struct {
-	Model  string `json:"-"`
-	Inputs string `json:"inputs"`
+	Model             string  `json:"-"`
+	Inputs            string  `json:"inputs"`
+	Temperature       float64 `json:"temperature,omitempty"`
+	TopP              float64 `json:"top_p,omitempty"`
+	TopK              int     `json:"top_k,omitempty"`
+	MinLength         int     `json:"min_length,omitempty"`
+	MaxLength         int     `json:"max_length,omitempty"`
+	RepetitionPenalty float64 `json:"repetition_penalty,omitempty"`
+	Seed              int     `json:"seed,omitempty"`
 }
 
 type (
@@ -40,7 +47,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("Content-Type", "application/json")
 
 	// debug print the http request with httputil:

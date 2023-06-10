@@ -9,11 +9,6 @@ import (
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
 )
 
-const (
-	tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
-	defaultModel    = "gpt2"
-)
-
 var (
 	ErrEmptyResponse = errors.New("empty response")
 	ErrMissingToken  = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
@@ -42,9 +37,16 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(opts)
 	}
 	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
-		RepoID: opts.Model,
-		Prompt: prompts[0],
-		Task:   huggingfaceclient.InferenceTaskTextGeneration,
+		Model:             o.client.Model,
+		Prompt:            prompts[0],
+		Task:              huggingfaceclient.InferenceTaskTextGeneration,
+		Temperature:       opts.Temperature,
+		TopP:              opts.TopP,
+		TopK:              opts.TopK,
+		MinLength:         opts.MinLength,
+		MaxLength:         opts.MaxLength,
+		RepetitionPenalty: opts.RepetitionPenalty,
+		Seed:              opts.Seed,
 	})
 	if err != nil {
 		return nil, err
@@ -54,14 +56,26 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}, nil
 }
 
-func New() (*LLM, error) {
-	token := os.Getenv(tokenEnvVarName)
-	if token == "" {
+func New(opts ...Option) (*LLM, error) {
+	options := &options{
+		token: os.Getenv(tokenEnvVarName),
+		model: defaultModel,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.token) == 0 {
 		return nil, ErrMissingToken
 	}
-	c, err := huggingfaceclient.New(token)
+
+	c, err := huggingfaceclient.New(options.token, options.model)
+	if err != nil {
+		return nil, err
+	}
 
 	return &LLM{
 		client: c,
-	}, err
+	}, nil
 }
