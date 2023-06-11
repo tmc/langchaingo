@@ -111,7 +111,6 @@ func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string
 // ChatMessageHistory is the chat history definition.
 type ChatMessageHistory interface {
 	Messages() ([]ChatMessage, error)
-	AddAIMessage(string) error
-	AddUserMessage(string) error
+	AddMessage(ChatMessage) error
 	Clear() error
 }

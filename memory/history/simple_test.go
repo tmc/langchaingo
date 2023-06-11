@@ -9,12 +9,14 @@ import (
 
 func TestSimpleChatMessageHistory(t *testing.T) {
 	t.Parallel()
-
 	h := NewSimpleChatMessageHistory()
-	err := h.AddAIMessage("foo")
+
+	err := h.AddMessage(schema.AIChatMessage{Text: "foo"})
 	assert.NoError(t, err)
-	err = h.AddUserMessage("bar")
+
+	err = h.AddMessage(schema.HumanChatMessage{Text: "bar"})
 	assert.NoError(t, err)
+
 	msgs, err := h.Messages()
 	assert.NoError(t, err)
 
@@ -29,7 +31,8 @@ func TestSimpleChatMessageHistory(t *testing.T) {
 			schema.SystemChatMessage{Text: "bar"},
 		}),
 	)
-	err = h.AddUserMessage("zoo")
+
+	err = h.AddMessage(schema.HumanChatMessage{Text: "zoo"})
 	assert.NoError(t, err)
 
 	msgs, err = h.Messages()

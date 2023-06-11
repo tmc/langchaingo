@@ -27,14 +27,8 @@ func (h *SimpleChatMessageHistory) Messages() ([]schema.ChatMessage, error) {
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-func (h *SimpleChatMessageHistory) AddAIMessage(text string) error {
-	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
-	return nil
-}
-
-// AddUserMessage adds an user to the chat message history.
-func (h *SimpleChatMessageHistory) AddUserMessage(text string) error {
-	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
+func (h *SimpleChatMessageHistory) AddMessage(msg schema.ChatMessage) error {
+	h.messages = append(h.messages, msg)
 	return nil
 }
 

@@ -84,7 +84,7 @@ func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string
 		return err
 	}
 
-	err = m.ChatHistory.AddUserMessage(userInputValue)
+	err = m.ChatHistory.AddMessage(schema.HumanChatMessage{Text: userInputValue})
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (m *Buffer) SaveContext(inputValues map[string]any, outputValues map[string
 		return err
 	}
 
-	err = m.ChatHistory.AddAIMessage(aiOutputValue)
+	err = m.ChatHistory.AddMessage(schema.AIChatMessage{Text: aiOutputValue})
 	if err != nil {
 		return err
 	}
