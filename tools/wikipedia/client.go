@@ -78,12 +78,12 @@ type pageResult struct {
 	} `json:"query"`
 }
 
-func getPage(ctx context.Context, pageId int, languageCode, userAgent string) (pageResult, error) {
+func getPage(ctx context.Context, pageID int, languageCode, userAgent string) (pageResult, error) {
 	params := make(url.Values)
 	params.Add("format", "json")
 	params.Add("action", "query")
 	params.Add("prop", "extracts")
-	params.Add("pageids", fmt.Sprintf("%v", (pageId)))
+	params.Add("pageids", fmt.Sprintf("%v", (pageID)))
 
 	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseURL, languageCode), params.Encode())
 
