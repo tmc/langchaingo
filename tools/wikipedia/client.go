@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-const _baseUrl = "https://%s.wikipedia.org/w/api.php"
+const _baseURL = "https://%s.wikipedia.org/w/api.php"
 
 type searchResponse struct {
 	Query struct {
 		Search []struct {
 			Ns        int       `json:"ns"`
 			Title     string    `json:"title"`
-			PageId    int       `json:"pageid"`
+			PageID    int       `json:"pageid"`
 			Size      int       `json:"size"`
 			WordCount int       `json:"wordcount"`
 			Snippet   string    `json:"snippet"`
@@ -41,7 +41,7 @@ func search(
 	params.Add("srsearch", query)
 	params.Add("srlimit", fmt.Sprintf("%v", limit))
 
-	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseUrl, languageCode), params.Encode())
+	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseURL, languageCode), params.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
 		return searchResponse{}, fmt.Errorf("creating request in wikipedia: %w ", err)
@@ -85,7 +85,7 @@ func getPage(ctx context.Context, pageId int, languageCode, userAgent string) (p
 	params.Add("prop", "extracts")
 	params.Add("pageids", fmt.Sprintf("%v", (pageId)))
 
-	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseUrl, languageCode), params.Encode())
+	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseURL, languageCode), params.Encode())
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {

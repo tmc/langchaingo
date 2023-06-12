@@ -14,8 +14,8 @@ const (
 	_defaultLanguageCode = "en"
 )
 
-// ErrUnexpectedApiResult is returned if the result form the wikipedia api is unexpected.
-var ErrUnexpectedApiResult = errors.New("unexpected result from wikipedia api")
+// ErrUnexpectedAPIResult is returned if the result form the wikipedia api is unexpected.
+var ErrUnexpectedAPIResult = errors.New("unexpected result from wikipedia api")
 
 // Tool is an implementation of the tool interface that finds information using the wikipedia api.
 type Tool struct {
@@ -69,16 +69,15 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	result := ""
 
 	for _, search := range searchResult.Query.Search {
-		getPageResult, err := getPage(ctx, search.PageId, t.LanguageCode, t.UserAgent)
+		getPageResult, err := getPage(ctx, search.PageID, t.LanguageCode, t.UserAgent)
 		if err != nil {
 			return "", err
 		}
 
-		page, ok := getPageResult.Query.Pages[fmt.Sprintf("%v", search.PageId)]
+		page, ok := getPageResult.Query.Pages[fmt.Sprintf("%v", search.PageID)]
 		if !ok {
-			return "", ErrUnexpectedApiResult
+			return "", ErrUnexpectedAPIResult
 		}
-		fmt.Println(page.Title)
 		if len(page.Extract) >= t.DocMaxChars {
 			result += page.Extract[0:t.DocMaxChars]
 			continue
