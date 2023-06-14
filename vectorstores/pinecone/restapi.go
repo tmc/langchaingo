@@ -103,11 +103,12 @@ type queriesResponse struct {
 }
 
 type queryPayload struct {
-	IncludeValues   bool      `json:"includeValues"`
-	IncludeMetadata bool      `json:"includeMetadata"`
-	Vector          []float64 `json:"vector"`
-	TopK            int       `json:"topK"`
-	Namespace       string    `json:"namespace"`
+	IncludeValues   bool           `json:"includeValues"`
+	IncludeMetadata bool           `json:"includeMetadata"`
+	Vector          []float64      `json:"vector"`
+	TopK            int            `json:"topK"`
+	Namespace       string         `json:"namespace"`
+	Filter          map[string]any `json:"filter"`
 }
 
 func (s Store) restQuery(
@@ -116,13 +117,19 @@ func (s Store) restQuery(
 	numVectors int,
 	nameSpace string,
 	scoreThreshold float64,
+	filter map[string]any,
 ) ([]schema.Document, error) {
+
 	payload := queryPayload{
 		IncludeValues:   true,
 		IncludeMetadata: true,
 		Vector:          vector,
 		TopK:            numVectors,
 		Namespace:       nameSpace,
+	}
+
+	if filter != nil {
+		payload.Filter = filter
 	}
 
 	body, statusCode, err := doRequest(

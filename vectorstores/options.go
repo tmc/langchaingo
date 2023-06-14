@@ -7,6 +7,7 @@ type Option func(*Options)
 type Options struct {
 	NameSpace      string
 	ScoreThreshold float64
+	Filters        map[string]any
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -19,5 +20,11 @@ func WithNameSpace(nameSpace string) Option {
 func WithScoreThreshold(scoreThreshold float64) Option {
 	return func(o *Options) {
 		o.ScoreThreshold = scoreThreshold
+	}
+}
+
+func WithFilters(filters map[string]any) Option {
+	return func(o *Options) {
+		o.Filters = filters
 	}
 }

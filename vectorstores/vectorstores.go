@@ -22,7 +22,7 @@ type Retriever struct {
 
 var _ schema.Retriever = Retriever{}
 
-// GetRelevantDocuments returns documents using the vector store.
+// GetRelevantDocuments returns documents using the vecto	r store.
 func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
 	return r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
 }

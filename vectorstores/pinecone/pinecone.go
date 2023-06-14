@@ -105,8 +105,11 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
+
 	nameSpace := s.getNameSpace(options...)
 	scoreThreshold, err := s.getScoreThreshold(options...)
+	filters := s.getFilters(options...)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +123,8 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return s.grpcQuery(ctx, vector, numDocuments, nameSpace)
 	}
 
-	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold)
+	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold,
+		filters)
 }
 
 // Close closes the grpc connection.
@@ -144,6 +148,14 @@ func (s Store) getScoreThreshold(options ...vectorstores.Option) (float64,
 		return 0, ErrInvalidScoreThreshold
 	}
 	return opts.ScoreThreshold, nil
+}
+
+func (s Store) getFilters(options ...vectorstores.Option) map[string]any {
+	opts := s.getOptions(options...)
+	if opts.Filters != nil {
+		return opts.Filters
+	}
+	return nil
 }
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
