@@ -46,7 +46,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(&opts)
 	}
 
-	generations := make([]*llms.Generation, len(prompts))
+	generations := make([]*llms.Generation, 0, len(prompts))
 	for _, prompt := range prompts {
 		result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
 			Model:     opts.Model,
@@ -66,7 +66,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 }
 
 func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	prompts := make([]string, len(promptValues))
+	prompts := make([]string, 0, len(promptValues))
 	for _, promptValue := range promptValues {
 		prompts = append(prompts, promptValue.String())
 	}
@@ -118,7 +118,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 	return r[0].Message.Text, nil
 }
 
-func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) {
+func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
