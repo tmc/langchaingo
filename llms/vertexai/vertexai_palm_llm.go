@@ -22,8 +22,6 @@ type LLM struct {
 
 var _ llms.LLM = (*LLM)(nil)
 
-var _ llms.ChatLLM = (*LLM)(nil)
-
 // New returns a new VertexAI PaLM LLM.
 func New(opts ...Option) (*LLM, error) {
 	// Ensure options are initialized only once.
