@@ -10,14 +10,12 @@ import (
 //nolint:dupword
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	t.Parallel()
-
 	type testCase struct {
 		text         string
 		chunkOverlap int
 		chunkSize    int
 		expectedDocs []schema.Document
 	}
-
 	testCases := []testCase{
 		{
 			text:         "Hi.\nI'm Harrison.\n\nHow?\na\nb",
@@ -35,6 +33,27 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			expectedDocs: []schema.Document{
 				{PageContent: "Hi.\nI'm Harrison.", Metadata: map[string]any{}},
 				{PageContent: "How?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb", Metadata: map[string]any{}},
+			},
+		},
+		{
+			text:         "name: Harrison\nage: 30",
+			chunkOverlap: 1,
+			chunkSize:    40,
+			expectedDocs: []schema.Document{
+				{PageContent: "name: Harrison\nage: 30", Metadata: map[string]any{}},
+			},
+		},
+		{
+			text: `name: Harrison
+age: 30
+
+name: Joe
+age: 32`,
+			chunkOverlap: 1,
+			chunkSize:    40,
+			expectedDocs: []schema.Document{
+				{PageContent: "name: Harrison\nage: 30", Metadata: map[string]any{}},
+				{PageContent: "name: Joe\nage: 32", Metadata: map[string]any{}},
 			},
 		},
 		{
@@ -71,7 +90,6 @@ Bye!
 			},
 		},
 	}
-
 	splitter := NewRecursiveCharacter()
 	for _, tc := range testCases {
 		splitter.ChunkOverlap = tc.chunkOverlap
