@@ -42,3 +42,25 @@ type LLMResult struct {
 	Generations [][]*Generation
 	LLMOutput   map[string]any
 }
+
+func GeneratePrompt(ctx context.Context, l LLM, promptValues []schema.PromptValue, options ...CallOption) (LLMResult, error) { //nolint:lll
+	prompts := make([]string, 0, len(promptValues))
+	for _, promptValue := range promptValues {
+		prompts = append(prompts, promptValue.String())
+	}
+	generations, err := l.Generate(ctx, prompts, options...)
+	return LLMResult{
+		Generations: [][]*Generation{generations},
+	}, err
+}
+
+func GenerateChatPrompt(ctx context.Context, l ChatLLM, promptValues []schema.PromptValue, options ...CallOption) (LLMResult, error) { //nolint:lll
+	messages := make([][]schema.ChatMessage, 0, len(promptValues))
+	for _, promptValue := range promptValues {
+		messages = append(messages, promptValue.Messages())
+	}
+	generations, err := l.Generate(ctx, messages, options...)
+	return LLMResult{
+		Generations: [][]*Generation{generations},
+	}, err
+}

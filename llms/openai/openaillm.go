@@ -66,14 +66,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 }
 
 func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	prompts := make([]string, 0, len(promptValues))
-	for _, promptValue := range promptValues {
-		prompts = append(prompts, promptValue.String())
-	}
-	generations, err := o.Generate(ctx, prompts, options...)
-	return llms.LLMResult{
-		Generations: [][]*llms.Generation{generations},
-	}, err
+	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {
@@ -176,14 +169,7 @@ func (o *Chat) GetNumTokens(text string) int {
 }
 
 func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	messages := make([][]schema.ChatMessage, len(promptValues))
-	for _, promptValue := range promptValues {
-		messages = append(messages, promptValue.Messages())
-	}
-	generations, err := o.Generate(ctx, messages, options...)
-	return llms.LLMResult{
-		Generations: [][]*llms.Generation{generations},
-	}, err
+	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
 // New returns a new OpenAI LLM.

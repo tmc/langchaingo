@@ -29,6 +29,10 @@ func GetModelContextSize(model string) int {
 		return 8000
 	case "code-cushman-001":
 		return 2048
+	case "text-bison":
+		return 8192
+	case "chat-bison":
+		return 4096
 	default:
 		return 4097
 	}
@@ -38,11 +42,11 @@ func GetModelContextSize(model string) int {
 func CountTokens(model, text string) int {
 	e, err := tiktoken.EncodingForModel(model)
 	if err != nil {
-		log.Printf(
-			"[WARN] Failed to calculate number of tokens for model %s, falling back to approximate count",
-			model,
-		)
-		return len([]rune(text)) / _tokenApproximation
+		e, err = tiktoken.GetEncoding("gpt2")
+		if err != nil {
+			log.Printf("[WARN] Failed to calculate number of tokens for model, falling back to approximate count")
+			return len([]rune(text)) / _tokenApproximation
+		}
 	}
 	return len(e.Encode(text, nil, nil))
 }
