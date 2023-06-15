@@ -126,10 +126,7 @@ func (s Store) restQuery(
 		Vector:          vector,
 		TopK:            numVectors,
 		Namespace:       nameSpace,
-	}
-
-	if filter != nil {
-		payload.Filter = filter
+		Filter:          filter,
 	}
 
 	body, statusCode, err := doRequest(
