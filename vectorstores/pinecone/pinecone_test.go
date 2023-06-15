@@ -292,3 +292,158 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }
+
+func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	id := uuid.New().String()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location": "kitchen",
+				}},
+			{PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location": "bedroom",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location": "office",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location": "sitting room",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location": "patio",
+				},
+			},
+		},
+		vectorstores.WithNameSpace(id),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	filter := make(map[string]any)
+	filterValue := make(map[string]any)
+	filterValue["$eq"] = "patio"
+	filter["location"] = filterValue
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
+				id), vectorstores.WithFilters(filter)),
+		),
+		"What colors is the lamp?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "yellow", "expected yellow in result")
+
+}
+
+func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	id := uuid.New().String()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location": "kitchen",
+				}},
+			{PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location": "bedroom",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location": "office",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location": "sitting room",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location": "patio",
+				},
+			},
+		},
+		vectorstores.WithNameSpace(id),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	filter := make(map[string]any)
+	filterValue := make(map[string]any)
+	filterValue["$in"] = []string{"office", "kitchen"}
+	filter["location"] = filterValue
+
+	//filters := map[string]map[string][]string{
+	//	"genre": {
+	//		"$in": []string{"documentary", "action"},
+	//	},
+	//}
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
+				id), vectorstores.WithFilters(filter)),
+		),
+		"What color is the lamp in each room?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "orange", "expected orange in result")
+
+}
