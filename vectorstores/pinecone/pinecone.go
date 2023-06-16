@@ -107,7 +107,6 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
-
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
