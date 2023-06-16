@@ -25,31 +25,27 @@ const (
 	_defaultContextSize      = 2048
 )
 
+// nolint:gochecknoglobals
+var modelToContextSize = map[string]int{
+	"gpt-3.5-turbo":    _gpt35TurboContextSize,
+	"gpt-4-32k":        _gpt432KContextSize,
+	"gpt-4":            _gpt4ContextSize,
+	"text-davinci-003": _textDavinci3ContextSize,
+	"text-curie-001":   _textCurie1ContextSize,
+	"text-babbage-001": _textBabbage1ContextSize,
+	"text-ada-001":     _textBabbage1ContextSize,
+	"code-davinci-002": _codeDavinci2ContextSize,
+	"code-cushman-001": _codeCushman1ContextSize,
+}
+
 // ModelContextSize gets the max number of tokens for a language model. If the model
 // name isn't recognized the default value 4097 is returned.
 func GetModelContextSize(model string) int {
-	switch model {
-	case "gpt-3.5-turbo":
-		return _gpt35TurboContextSize
-	case "gpt-4-32k":
-		return _gpt432KContextSize
-	case "gpt-4":
-		return _gpt4ContextSize
-	case "text-davinci-003":
-		return _textDavinci3ContextSize
-	case "text-curie-001":
-		return _textCurie1ContextSize
-	case "text-babbage-001":
-		return _textBabbage1ContextSize
-	case "text-ada-001":
-		return _textBabbage1ContextSize
-	case "code-davinci-002":
-		return _codeDavinci2ContextSize
-	case "code-cushman-001":
-		return _codeCushman1ContextSize
-	default:
+	contextSize, ok := modelToContextSize[model]
+	if !ok {
 		return _defaultContextSize
 	}
+	return contextSize
 }
 
 // CountTokens gets the number of tokens the text contains.
