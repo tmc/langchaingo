@@ -426,12 +426,6 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	filterValue["$in"] = []string{"office", "kitchen"}
 	filter["location"] = filterValue
 
-	//filters := map[string]map[string][]string{
-	//	"genre": {
-	//		"$in": []string{"documentary", "action"},
-	//	},
-	//}
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -445,5 +439,167 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "orange", "expected orange in result")
+
+}
+
+func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	id := uuid.New().String()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location": "kitchen",
+				}},
+			{PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location": "bedroom",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location": "office",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location": "sitting room",
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location": "patio",
+				},
+			},
+		},
+		vectorstores.WithNameSpace(id),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
+				id)),
+		),
+		"What color is the lamp in each room?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "blue", "expected blue in result")
+	require.Contains(t, result, "orange", "expected orange in result")
+	require.Contains(t, result, "purple", "expected purple in result")
+	require.Contains(t, result, "yellow", "expected yellow in result")
+
+}
+
+func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	id := uuid.New().String()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location":    "kitchen",
+					"square_feet": 100,
+				}},
+			{PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location":    "bedroom",
+					"square_feet": 200,
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location":    "office",
+					"square_feet": 100,
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location":    "sitting room",
+					"square_feet": 400,
+				},
+			},
+			{PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location":    "patio",
+					"square_feet": 800,
+				},
+			},
+		},
+		vectorstores.WithNameSpace(id),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	filter := map[string]interface{}{
+		"$and": []map[string]interface{}{
+			{
+				"location": map[string]interface{}{
+					"$in": []string{"office", "kitchen", "sitting room"},
+				},
+			},
+			{
+				"square_feet": map[string]interface{}{
+					"$gte": 300,
+				},
+			},
+		},
+	}
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
+				id), vectorstores.WithFilters(filter)),
+		),
+		"What color is the lamp in each room?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "purple", "expected black in purple")
 
 }
