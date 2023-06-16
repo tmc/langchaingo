@@ -110,7 +110,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 	return r[0].Message.Text, nil
 }
 
-// Chat requests a chat response for the given prompt.
+// Generate requests a chat response for each of the sets of messages.
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint: lll
 	opts := llms.CallOptions{}
 	for _, opt := range options {
@@ -122,25 +122,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		msgs := make([]*vertexaiclient.ChatMessage, len(messages))
-		for i, m := range messages {
-			msg := &vertexaiclient.ChatMessage{
-				Content: m.GetText(),
-			}
-			typ := m.GetType()
-			switch typ {
-			case schema.ChatMessageTypeSystem:
-				msg.Author = "bot"
-			case schema.ChatMessageTypeAI:
-				msg.Author = "bot"
-			case schema.ChatMessageTypeHuman:
-				msg.Author = "user"
-			case schema.ChatMessageTypeGeneric:
-				msg.Author = "user"
-			}
-			msgs[i] = msg
-		}
-
+		msgs := toClientChatMessage(messages)
 		result, err := o.client.CreateChat(ctx, &vertexaiclient.ChatRequest{
 			Temperature: opts.Temperature,
 			Messages:    msgs,
@@ -168,6 +150,28 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptV
 
 func (o *Chat) GetNumTokens(text string) int {
 	return llms.CalculateMaxTokens(vertexaiclient.TextModelName, text)
+}
+
+func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {
+	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
+	for i, m := range messages {
+		msg := &vertexaiclient.ChatMessage{
+			Content: m.GetText(),
+		}
+		typ := m.GetType()
+		switch typ {
+		case schema.ChatMessageTypeSystem:
+			msg.Author = "bot"
+		case schema.ChatMessageTypeAI:
+			msg.Author = "bot"
+		case schema.ChatMessageTypeHuman:
+			msg.Author = "user"
+		case schema.ChatMessageTypeGeneric:
+			msg.Author = "user"
+		}
+		msgs[i] = msg
+	}
+	return msgs
 }
 
 // New returns a new VertexAI PaLM LLM.

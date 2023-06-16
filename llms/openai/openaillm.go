@@ -117,7 +117,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		opt(&opts)
 	}
 
-	generations := make([]*llms.Generation, len(messageSets))
+	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messageSet := range messageSets {
 		msgs := make([]*openaiclient.ChatMessage, len(messageSet))
 		for i, m := range messageSet {
