@@ -8,31 +8,48 @@ import (
 
 const (
 	_tokenApproximation = 4
-	_defaultContextSize = 4096
 )
 
-var modelToContextSize = map[string]int{
-	"gpt-3.5-turbo":    4096,
-	"gpt-4-32k":        32768,
-	"gpt-4":            8192,
-	"text-davinci-003": 4097,
-	"text-curie-001":   2048,
-	"text-babbage-001": 2048,
-	"text-ada-001":     2048,
-	"code-davinci-002": 8000,
-	"code-cushman-001": 2048,
-	"text-bison":       8192,
-	"chat-bison":       4096,
-}
+const (
+	_gpt35TurboContextSize   = 4096
+	_gpt432KContextSize      = 32768
+	_gpt4ContextSize         = 8192
+	_textDavinci3ContextSize = 4097
+	_textBabbage1ContextSize = 2048
+	_textAda1ContextSize     = 2048
+	_textCurie1ContextSize   = 2048
+	_codeDavinci2ContextSize = 8000
+	_codeCushman1ContextSize = 2048
+	_textBisonContextSize    = 2048
+	_chatBisonContextSize    = 2048
+	_defaultContextSize      = 2048
+)
 
-// ModelContextSize gets the max number of tokens for a model. If the model
+// ModelContextSize gets the max number of tokens for a language model. If the model
 // name isn't recognized the default value 4097 is returned.
 func GetModelContextSize(model string) int {
-	contextSize, ok := modelToContextSize[model]
-	if !ok {
+	switch model {
+	case "gpt-3.5-turbo":
+		return _gpt35TurboContextSize
+	case "gpt-4-32k":
+		return _gpt432KContextSize
+	case "gpt-4":
+		return _gpt4ContextSize
+	case "text-davinci-003":
+		return _textDavinci3ContextSize
+	case "text-curie-001":
+		return _textCurie1ContextSize
+	case "text-babbage-001":
+		return _textBabbage1ContextSize
+	case "text-ada-001":
+		return _textBabbage1ContextSize
+	case "code-davinci-002":
+		return _codeDavinci2ContextSize
+	case "code-cushman-001":
+		return _codeCushman1ContextSize
+	default:
 		return _defaultContextSize
 	}
-	return contextSize
 }
 
 // CountTokens gets the number of tokens the text contains.
