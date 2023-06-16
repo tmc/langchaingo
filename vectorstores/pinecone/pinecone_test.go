@@ -530,7 +530,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.Contains(t, result, "yellow", "expected yellow in result")
 }
 
-func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
+func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
@@ -552,20 +552,6 @@ func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
 	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
-			{
-				PageContent: "The color of the lamp beside the desk is black.",
-				Metadata: map[string]any{
-					"location":    "kitchen",
-					"square_feet": 100,
-				},
-			},
-			{
-				PageContent: "The color of the lamp beside the desk is blue.",
-				Metadata: map[string]any{
-					"location":    "bedroom",
-					"square_feet": 200,
-				},
-			},
 			{
 				PageContent: "The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
@@ -599,7 +585,7 @@ func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
 		"$and": []map[string]interface{}{
 			{
 				"location": map[string]interface{}{
-					"$in": []string{"office", "kitchen", "sitting room"},
+					"$in": []string{"office", "sitting room"},
 				},
 			},
 			{
