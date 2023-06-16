@@ -39,7 +39,7 @@ var modelToContextSize = map[string]int{
 }
 
 // ModelContextSize gets the max number of tokens for a language model. If the model
-// name isn't recognized the default value 4097 is returned.
+// name isn't recognized the default value 2048 is returned.
 func GetModelContextSize(model string) int {
 	contextSize, ok := modelToContextSize[model]
 	if !ok {

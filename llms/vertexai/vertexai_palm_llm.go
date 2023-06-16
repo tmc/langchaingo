@@ -84,7 +84,7 @@ func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptVa
 }
 
 func (o *LLM) GetNumTokens(text string) int {
-	return llms.CalculateMaxTokens(vertexaiclient.TextModelName, text)
+	return llms.CountTokens(vertexaiclient.TextModelName, text)
 }
 
 type ChatMessage = vertexaiclient.ChatMessage
@@ -149,7 +149,7 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptV
 }
 
 func (o *Chat) GetNumTokens(text string) int {
-	return llms.CalculateMaxTokens(vertexaiclient.TextModelName, text)
+	return llms.CountTokens(vertexaiclient.TextModelName, text)
 }
 
 func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {

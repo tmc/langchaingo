@@ -70,7 +70,7 @@ func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptVa
 }
 
 func (o *LLM) GetNumTokens(text string) int {
-	return llms.CalculateMaxTokens(o.client.Model, text)
+	return llms.CountTokens(o.client.Model, text)
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
@@ -165,7 +165,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 }
 
 func (o *Chat) GetNumTokens(text string) int {
-	return llms.CalculateMaxTokens(o.client.Model, text)
+	return llms.CountTokens(o.client.Model, text)
 }
 
 func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll

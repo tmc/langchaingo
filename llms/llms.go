@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// LanguageModel is the base class for all language models.
+// LanguageModel is the interface all language models must implement.
 type LanguageModel interface {
 	// Take in a list of prompt values and return an LLMResult.
 	GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...CallOption) (LLMResult, error)
