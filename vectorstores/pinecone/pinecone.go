@@ -154,7 +154,6 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float64,
 }
 
 func (s Store) getFilters(opts vectorstores.Options) map[string]any {
-
 	if opts.Filters != nil {
 		return opts.Filters
 	}

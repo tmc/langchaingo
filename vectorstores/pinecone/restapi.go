@@ -119,7 +119,6 @@ func (s Store) restQuery(
 	scoreThreshold float64,
 	filter map[string]any,
 ) ([]schema.Document, error) {
-
 	payload := queryPayload{
 		IncludeValues:   true,
 		IncludeMetadata: true,

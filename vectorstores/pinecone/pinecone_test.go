@@ -315,26 +315,32 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
-			{PageContent: "The color of the lamp beside the desk is black.",
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
 				Metadata: map[string]any{
 					"location": "kitchen",
-				}},
-			{PageContent: "The color of the lamp beside the desk is blue.",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
 				Metadata: map[string]any{
 					"location": "bedroom",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is orange.",
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location": "office",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is purple.",
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location": "sitting room",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is yellow.",
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location": "patio",
 				},
@@ -364,7 +370,6 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Contains(t, result, "yellow", "expected yellow in result")
-
 }
 
 func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
@@ -389,26 +394,32 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
-			{PageContent: "The color of the lamp beside the desk is black.",
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
 				Metadata: map[string]any{
 					"location": "kitchen",
-				}},
-			{PageContent: "The color of the lamp beside the desk is blue.",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
 				Metadata: map[string]any{
 					"location": "bedroom",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is orange.",
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location": "office",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is purple.",
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location": "sitting room",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is yellow.",
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location": "patio",
 				},
@@ -439,7 +450,6 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "orange", "expected orange in result")
-
 }
 
 func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
@@ -464,26 +474,32 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
-			{PageContent: "The color of the lamp beside the desk is black.",
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
 				Metadata: map[string]any{
 					"location": "kitchen",
-				}},
-			{PageContent: "The color of the lamp beside the desk is blue.",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
 				Metadata: map[string]any{
 					"location": "bedroom",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is orange.",
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location": "office",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is purple.",
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location": "sitting room",
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is yellow.",
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location": "patio",
 				},
@@ -512,7 +528,6 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "purple", "expected purple in result")
 	require.Contains(t, result, "yellow", "expected yellow in result")
-
 }
 
 func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
@@ -537,30 +552,36 @@ func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
 	err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
-			{PageContent: "The color of the lamp beside the desk is black.",
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
 				Metadata: map[string]any{
 					"location":    "kitchen",
 					"square_feet": 100,
-				}},
-			{PageContent: "The color of the lamp beside the desk is blue.",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
 				Metadata: map[string]any{
 					"location":    "bedroom",
 					"square_feet": 200,
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is orange.",
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location":    "office",
 					"square_feet": 100,
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is purple.",
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location":    "sitting room",
 					"square_feet": 400,
 				},
 			},
-			{PageContent: "The color of the lamp beside the desk is yellow.",
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location":    "patio",
 					"square_feet": 800,
@@ -601,5 +622,4 @@ func TestPineconeAsRetrieverWithMetadataFilterMultipleFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Contains(t, result, "purple", "expected black in purple")
-
 }
