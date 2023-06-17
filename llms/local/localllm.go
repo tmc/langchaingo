@@ -3,18 +3,12 @@ package local
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
-)
-
-const (
-	// The name of the environment variable that contains the path to the local LLM binary.
-	localLLMBinVarName = "LOCAL_LLM_BIN"
-	// The name of the environment variable that contains the CLI arguments to pass to the local LLM binary.
-	localLLMArgsVarName = "LOCAL_LLM_ARGS"
 )
 
 var (
@@ -44,12 +38,45 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return r[0].Text, nil
 }
 
+func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
+	if opts.Temperature != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", opts.Temperature))
+	}
+	if opts.TopP != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_p=%f", opts.TopP))
+	}
+	if opts.TopK != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_k=%d", opts.TopK))
+	}
+	if opts.MinLength != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--min_length=%d", opts.MinLength))
+	}
+	if opts.MaxLength != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--max_length=%d", opts.MaxLength))
+	}
+	if opts.RepetitionPenalty != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--repetition_penalty=%f", opts.RepetitionPenalty))
+	}
+	if opts.Seed != 0 {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", opts.Seed))
+	}
+
+	return o.client.Args
+}
+
 // Generate generates completions using the local LLM binary.
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
 	}
+
+	// If o.client.GlobalAsArgs is true
+	if o.client.GlobalAsArgs {
+		// Then add the option to the args in --key=value format
+		o.appendGlobalsToArgs(*opts)
+	}
+
 	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
 		Prompt: prompts[0],
 	})
@@ -62,17 +89,23 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 }
 
 // New creates a new local LLM implementation.
-func New() (*LLM, error) {
-	// Require the user to set the path to the local LLM binary
-	bin := os.Getenv(localLLMBinVarName)
-	path, err := exec.LookPath(bin)
+func New(opts ...Option) (*LLM, error) {
+
+	options := &options{
+		bin:  os.Getenv(localLLMBinVarName),
+		args: os.Getenv(localLLMArgsVarName),
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	path, err := exec.LookPath(options.bin)
 	if err != nil {
 		return nil, errors.Join(ErrMissingBin, err)
 	}
 
-	// Allow the user to pass CLI arguments to the local LLM binary (optional)
-	args := os.Getenv(localLLMArgsVarName)
-	c, err := localclient.New(path, args)
+	c, err := localclient.New(path, options.globalAsArgs, options.args)
 	return &LLM{
 		client: c,
 	}, err
