@@ -1,8 +1,8 @@
 # LangChain Go Features
 
-This page provides a list of features and their status indicators for LangChain Go, a natural language processing library built in Golang. Our main focus at the moment is to reach parity with the Python version of LangChain. 
+This page provides a list of features and their status indicators for LangChain Go, a natural language processing library built in Golang. Our main focus at the moment is to reach parity with the Python version of LangChain.
 
-Please note that this page lists the current state of the LangChain Go project, and some features may still be under development or planned for future releases. If you are interested in contributing to a specific integration or feature, feel free to choose from the list of features that are not yet done and let us know so we can help you get started. 
+Please note that this page lists the current state of the LangChain Go project, and some features may still be under development or planned for future releases. If you are interested in contributing to a specific integration or feature, feel free to choose from the list of features that are not yet done and let us know so we can help you get started.
 
 ## Prompt Templates
 | Feature                            | Status |
@@ -107,7 +107,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | College Confidential            | ❌      |
 | Confluence                      | ❌      |
 | CoNLL-U                         | ❌      |
-| CSV Loader                      | ❌      |
+| CSV Loader                      | ✅      |
 | Dataframe                       | ❌      |
 | Diffbot                         | ❌      |
 | Directory                       | ❌      |
