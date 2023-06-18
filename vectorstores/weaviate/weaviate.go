@@ -83,7 +83,8 @@ func New(opts ...Option) (Store, error) {
 }
 
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
-	nameSpace := s.getNameSpace(options...)
+	opts := s.getOptions(options...)
+	nameSpace := s.getNameSpace(opts)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -132,8 +133,9 @@ func (s Store) SimilaritySearch(
 	numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
-	nameSpace := s.getNameSpace(options...)
-	scoreThreshold, err := s.getScoreThreshold(options...)
+	opts := s.getOptions(options...)
+	nameSpace := s.getNameSpace(opts)
+	scoreThreshold, err := s.getScoreThreshold(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -193,16 +195,14 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 	return docs, nil
 }
 
-func (s Store) getNameSpace(options ...vectorstores.Option) string {
-	opts := s.getOptions(options...)
+func (s Store) getNameSpace(opts vectorstores.Options) string {
 	if opts.NameSpace != "" {
 		return opts.NameSpace
 	}
 	return s.nameSpace
 }
 
-func (s Store) getScoreThreshold(options ...vectorstores.Option) (float32, error) {
-	opts := s.getOptions(options...)
+func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
 	}
