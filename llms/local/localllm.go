@@ -90,7 +90,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 // New creates a new local LLM implementation.
 func New(opts ...Option) (*LLM, error) {
-
 	options := &options{
 		bin:  os.Getenv(localLLMBinVarName),
 		args: os.Getenv(localLLMArgsVarName),
