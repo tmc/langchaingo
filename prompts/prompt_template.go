@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/schema"
-	"golang.org/x/exp/maps"
 )
 
 var (
@@ -50,16 +49,11 @@ var (
 
 // Format formats the prompt template and returns a string value.
 func (p PromptTemplate) Format(values map[string]any) (string, error) {
-	if err := checkInputVariables(p.InputVariables); err != nil {
-		return "", err
-	}
-	if err := checkPartialVariables(p.PartialVariables); err != nil {
-		return "", err
-	}
 	resolvedValues, err := resolvePartialValues(p.PartialVariables, values)
 	if err != nil {
 		return "", err
 	}
+
 	return RenderTemplate(p.Template, p.TemplateFormat, resolvedValues)
 }
 
@@ -71,6 +65,11 @@ func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue,
 	}
 
 	return StringPromptValue(f), nil
+}
+
+// GetInputVariables returns the input variables the prompt expect.
+func (p PromptTemplate) GetInputVariables() []string {
+	return p.InputVariables
 }
 
 func resolvePartialValues(partialValues map[string]any, values map[string]any) (map[string]any, error) {
@@ -89,19 +88,4 @@ func resolvePartialValues(partialValues map[string]any, values map[string]any) (
 		resolvedValues[variable] = value
 	}
 	return resolvedValues, nil
-}
-
-// checkInputVariables validates the input variable names do not include restricted names.
-func checkInputVariables(inputVariables []string) error {
-	for _, variable := range inputVariables {
-		if variable == "stop" {
-			return fmt.Errorf("%w: %v", ErrInputVariableReserved, variable)
-		}
-	}
-	return nil
-}
-
-// checkPartialVariables validates the partial variable names do not include restricted names.
-func checkPartialVariables(partialValues map[string]any) error {
-	return checkInputVariables(maps.Keys(partialValues))
 }
