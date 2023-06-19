@@ -64,7 +64,7 @@ func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue,
 		return nil, err
 	}
 
-	return StringPromptValue(f), nil
+	return StringPromptValue(f), nil //nolint:ireturn
 }
 
 // GetInputVariables returns the input variables the prompt expect.
