@@ -19,7 +19,7 @@ var (
 )
 
 // FormatPrompt formats the messages into a chat prompt value.
-func (p ChatPromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) {
+func (p ChatPromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
 	resolvedValues, err := resolvePartialValues(p.PartialVariables, values)
 	if err != nil {
 		return nil, err
