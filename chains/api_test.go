@@ -10,8 +10,8 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-// nolint: lll
-const OpenMETEODocs = `BASE URL: https://api.open-meteo.com/
+// nolint
+const MeteoDocs = `BASE URL: https://api.open-meteo.com/
 
 API Documentation
 The API endpoint /v1/forecast accepts a geographical coordinate, a list of weather variables and responds with a JSON hourly weather forecast for 7 days. Time always starts at 0:00 today and contains 168 hours. All URL parameters are listed below:
@@ -55,7 +55,7 @@ func TestLLMAPI(t *testing.T) {
 
 	chain := NewAPIChain(llm)
 	q := map[string]any{
-		"api_docs": OpenMETEODocs,
+		"api_docs": MeteoDocs,
 		"question": "What is the weather of [latitude:52.52, longitude:13.419998]?",
 	}
 	result, err := Call(context.Background(), chain, q)
