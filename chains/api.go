@@ -3,7 +3,7 @@ package chains
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -33,7 +33,7 @@ Summarize this response to answer the original question.
 Summary:`
 )
 
-// HTTPRequester http requester interface
+// HTTPRequester http requester interface.
 type HTTPRequester interface {
 	Get(url string) (resp *http.Response, err error)
 }
@@ -59,9 +59,9 @@ func NewAPIChain(llm llms.LLM) APIChain {
 	}
 }
 
-// Call call api chain
-// Input: api_docs, question
-// Output: answer
+// Call call api chain.
+// Input: api_docs, question.
+// Output: answer.
 func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...ChainCallOption) (map[string]any, error) {
 	tmpOutput, err := Call(ctx, a.RequestChain, values, opts...)
 	if err != nil {
@@ -71,7 +71,7 @@ func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...Chain
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidOutputValues, ErrInputValuesWrongType)
 	}
-	// FIXME this is a hack to get the first line of the output
+	// this is a hack to get the first line of the output
 	apiURL = strings.TrimSpace(strings.Split(apiURL, "\n")[0])
 	apiResponse, err := a.get(apiURL)
 	if err != nil {
@@ -91,7 +91,7 @@ func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...Chain
 	return map[string]any{"answer": tmpOutput["text"]}, err
 }
 
-func (a APIChain) GetMemory() schema.Memory {
+func (a APIChain) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
@@ -109,7 +109,7 @@ func (a APIChain) get(url string) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

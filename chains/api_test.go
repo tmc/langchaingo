@@ -2,8 +2,8 @@ package chains
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -59,6 +59,6 @@ func TestLLMAPI(t *testing.T) {
 	}
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
-	fmt.Println(result)
-	//require.True(t, strings.Contains(result, "58.708"), "expected 58.708 in result")
+
+	require.True(t, strings.Contains(result["answer"].(string), "weather"), "expected 58.708 in result")
 }
