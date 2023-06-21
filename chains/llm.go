@@ -76,7 +76,7 @@ func (c LLMChain) Predict(ctx context.Context, values map[string]any, options ..
 }
 
 // GetMemory returns the memory.
-func (c LLMChain) GetMemory() schema.Memory {
+func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 	return c.Memory //nolint:ireturn
 }
 
