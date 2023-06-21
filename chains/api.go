@@ -44,7 +44,7 @@ type HTTPRequester interface {
 type APIChain struct {
 	RequestChain *LLMChain
 	AnswerChain  *LLMChain
-	HttpClient   HTTPRequester
+	Requester    HTTPRequester
 }
 
 func NewAPIChain(llm llms.LLM) APIChain {
@@ -57,7 +57,7 @@ func NewAPIChain(llm llms.LLM) APIChain {
 	return APIChain{
 		RequestChain: reqC,
 		AnswerChain:  respC,
-		HttpClient:   http.DefaultClient,
+		Requester:    http.DefaultClient,
 	}
 }
 
@@ -106,7 +106,7 @@ func (a APIChain) GetOutputKeys() []string {
 }
 
 func (a APIChain) get(url string) (string, error) {
-	resp, err := a.HttpClient.Get(url)
+	resp, err := a.Requester.Get(url)
 	if err != nil {
 		return "", err
 	}
