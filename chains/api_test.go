@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
+// nolint: lll
 const OPEN_METEO_DOCS = `BASE URL: https://api.open-meteo.com/
 
 API Documentation

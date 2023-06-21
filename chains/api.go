@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	// nolint: lll
 	_llmAPIURLPrompt = `You are given the below API Documentation:
 {{.api_docs}}
 Using this documentation, generate the full API url to call for answering the user question.
@@ -22,6 +23,7 @@ You should build the API url in order to get a response that is as short as poss
 Question:{{.question}}
 API url:`
 
+	// nolint: lll
 	_llmAPIResponsePrompt = _llmAPIURLPrompt + `{api_url}
 
 Here is the response from the API:
