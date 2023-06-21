@@ -60,5 +60,9 @@ func TestLLMAPI(t *testing.T) {
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
 
-	require.True(t, strings.Contains(result["answer"].(string), "weather"), "expected 58.708 in result")
+	answer, ok := result["answer"].(string)
+	if !ok {
+		t.Fatal("expected answer to be a string")
+	}
+	require.True(t, strings.Contains(answer, "weather"), "expected 58.708 in result")
 }
