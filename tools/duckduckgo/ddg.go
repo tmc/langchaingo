@@ -29,8 +29,8 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
-	result, err := t.client.Search(ctx, input)
+func (t Tool) Call(_ context.Context, input string) (string, error) {
+	result, err := t.client.Search(input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good DuckDuckGo Search Results was found", nil
