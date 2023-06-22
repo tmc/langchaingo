@@ -15,6 +15,8 @@ require (
 	cloud.google.com/go/longrunning v0.4.2 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
+	github.com/PuerkitoBio/goquery v1.8.1 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -45,6 +47,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/google/go-cmp v0.5.9
 	github.com/pinecone-io/go-pinecone v0.3.0
+	gitlab.com/psheets/ddgquery v0.0.0-20171103050336-ab8ec8eaa7c5
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17
 	google.golang.org/api v0.122.0
