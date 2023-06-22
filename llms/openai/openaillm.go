@@ -43,10 +43,11 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(&opts)
 	}
 	result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
-		Model:     opts.Model,
-		Prompt:    prompts[0],
-		MaxTokens: opts.MaxTokens,
-		StopWords: opts.StopWords,
+		Model:       opts.Model,
+		Prompt:      prompts[0],
+		Temperature: opts.Temperature,
+		MaxTokens:   opts.MaxTokens,
+		StopWords:   opts.StopWords,
 	})
 	if err != nil {
 		return nil, err

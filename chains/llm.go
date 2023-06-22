@@ -55,6 +55,12 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	if opts.StopWords != nil {
 		generateOptions = append(generateOptions, llms.WithStopWords(opts.StopWords))
 	}
+	if opts.MaxTokens != 0 {
+		generateOptions = append(generateOptions, llms.WithMaxTokens(opts.MaxTokens))
+	}
+	if opts.Temperature != 0.0 {
+		generateOptions = append(generateOptions, llms.WithTemperature(opts.Temperature))
+	}
 
 	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, generateOptions...)
 	if err != nil {

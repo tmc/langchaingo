@@ -22,13 +22,29 @@ type Chain interface {
 }
 
 type chainCallOptions struct {
-	StopWords []string
+	Temperature float64
+	StopWords   []string
+	MaxTokens   int
 }
 
 // WithStopWords is a ChainCallOption that can be used to set the stop words of the chain.
 func WithStopWords(stopWords []string) ChainCallOption {
 	return func(options *chainCallOptions) {
 		options.StopWords = stopWords
+	}
+}
+
+// WithMaxTokens is a ChainCallOption that can be used to set the max tokens of the chain.
+func WithMaxTokens(maxTokens int) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.MaxTokens = maxTokens
+	}
+}
+
+// WithTemperature is a ChainCallOption that can be used to set the temperature of the chain.
+func WithTemperature(temperature float64) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.Temperature = temperature
 	}
 }
 

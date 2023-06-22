@@ -54,10 +54,11 @@ func New(token string, model string, baseURL string, opts ...Option) (*Client, e
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Model     string   `json:"model"`
-	Prompt    string   `json:"prompt"`
-	MaxTokens int      `json:"max_tokens"`
-	StopWords []string `json:"stop,omitempty"`
+	Model       string   `json:"model"`
+	Prompt      string   `json:"prompt"`
+	Temperature float64  `json:"temperature"`
+	MaxTokens   int      `json:"max_tokens"`
+	StopWords   []string `json:"stop,omitempty"`
 }
 
 // Completion is a completion.
@@ -68,10 +69,11 @@ type Completion struct {
 // CreateCompletion creates a completion.
 func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*Completion, error) {
 	resp, err := c.createCompletion(ctx, &completionPayload{
-		Model:     r.Model,
-		Prompt:    r.Prompt,
-		MaxTokens: r.MaxTokens,
-		StopWords: r.StopWords,
+		Model:       r.Model,
+		Prompt:      r.Prompt,
+		Temperature: r.Temperature,
+		MaxTokens:   r.MaxTokens,
+		StopWords:   r.StopWords,
 	})
 	if err != nil {
 		return nil, err
