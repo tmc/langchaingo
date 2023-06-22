@@ -21,7 +21,9 @@ type SearchResult struct {
 	Ref    string
 }
 
-func New() *Client
+func New() *Client {
+	return &Client{}
+}
 
 func (client *Client) Search(ctx context.Context, query string) (string, error) {
 	var search []SearchResult
