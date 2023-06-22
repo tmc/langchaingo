@@ -24,8 +24,8 @@ func (t Tool) Name() string {
 
 func (t Tool) Description() string {
 	return `
-	"A wrapper around DuckDuckGo Search. "
-	"Free search alternative to google and serpapi"
+	"A wrapper around DuckDuckGo Search."
+	"Free search alternative to google and serpapi."
 	"Input should be a search query."`
 }
 
