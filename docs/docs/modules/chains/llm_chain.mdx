@@ -3,6 +3,9 @@ sidebar_label: LLM Chain
 sidebar_position: 1
 ---
 
+import CodeBlock from "@theme/CodeBlock";
+import ExampleLLM from "@examples/llm-chain-example/llm_chain.go";
+
 # Getting Started: LLMChain
 
 :::info
@@ -17,11 +20,6 @@ An `LLMChain` consists of a `PromptTemplate` and a language model (either an [LL
 
 We can construct an LLMChain which takes user input, formats it with a PromptTemplate, and then passes the formatted response to an LLM:
 
-## Usage with Chat Models
+<CodeBlock language="go">{ExampleLLM}</CodeBlock>
 
-We can also construct an LLMChain which takes user input, formats it with a PromptTemplate, and then passes the formatted response to a ChatModel:
-
-## Usage in Streaming Mode
-
-We can also construct an LLMChain which takes user input, formats it with a PromptTemplate, and then passes the formatted response to an LLM in streaming mode, which will stream back tokens as they are generated:
 

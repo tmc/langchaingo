@@ -6,18 +6,18 @@
 const { ProvidePlugin } = require("webpack");
 const path = require("path");
 
-const examplesPath = path.resolve(__dirname, "..", "examples", "src");
+const examplesPath = path.resolve(__dirname, "..", "examples");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "🦜️🔗 Langchain",
-  tagline: "LangChain JS Docs",
+  tagline: "LangChain Go Docs",
   favicon: "img/favicon.ico",
   customFields: {
     mendableAnonKey: process.env.MENDABLE_ANON_KEY,
   },
   // Set the production url of your site here
-  url: "https://js.langchain.com",
+  url: "https://go.langchain.com",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
@@ -26,12 +26,6 @@ const config = {
   onBrokenMarkdownLinks: "throw",
 
   plugins: [
-    [
-      "docusaurus-plugin-typedoc",
-      {
-        tsconfig: "../langchain/tsconfig.json",
-      },
-    ],
     () => ({
       name: "custom-webpack-config",
       configureWebpack: () => ({
@@ -56,7 +50,7 @@ const config = {
               use: ["json-loader", "./code-block-loader.js"],
             },
             {
-              test: /\.m?js/,
+              test: /\.m?go/,
               resolve: {
                 fullySpecified: false,
               },
@@ -74,7 +68,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/hwchase17/langchainjs/edit/main/docs/",
+          editUrl: "https://github.com/tmc/langchaingo/edit/main/docs/",
           remarkPlugins: [
             [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
           ],
