@@ -90,6 +90,8 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 		StopWords:     opts.StopWords,
 		Messages:      msgs,
 		StreamingFunc: opts.StreamingFunc,
+		Temperature:   opts.Temperature,
+		MaxTokens:     opts.MaxTokens,
 	})
 	if err != nil {
 		return nil, err
