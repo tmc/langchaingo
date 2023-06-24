@@ -6,30 +6,18 @@ import (
 )
 
 type CreationOptions struct {
-	maxIterations      int
-	outputKey          string
-	promptPrefix       string
-	formatInstructions string
-	promptSuffix       string
-	prompt             prompts.PromptTemplate
+	prompt                  prompts.PromptTemplate
+	maxIterations           int
+	returnIntermediateSteps bool
+	outputKey               string
+	promptPrefix            string
+	formatInstructions      string
+	promptSuffix            string
 }
 
 // CreationOption is a function type that can be used to modify the creation of the agents
 // and executors.
 type CreationOption func(*CreationOptions)
-
-func (co CreationOptions) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
-	if co.prompt.Template != "" {
-		return co.prompt
-	}
-
-	return createMRKLPrompt(
-		tools,
-		co.promptPrefix,
-		co.formatInstructions,
-		co.promptSuffix,
-	)
-}
 
 func executorDefaultOptions() CreationOptions {
 	return CreationOptions{
@@ -49,11 +37,24 @@ func mrklDefaultOptions() CreationOptions {
 
 func conversationalDefaultOptions() CreationOptions {
 	return CreationOptions{
-		promptPrefix:       _defaultConverationalPreffix,
-		formatInstructions: _defaultConverationalFormatInstructions,
-		promptSuffix:       _defaultConverationalSuffix,
+		promptPrefix:       _defaultConversationalPrefix,
+		formatInstructions: _defaultConversationalFormatInstructions,
+		promptSuffix:       _defaultConversationalSuffix,
 		outputKey:          _defaultOutputKey,
 	}
+}
+
+func (co CreationOptions) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
+	if co.prompt.Template != "" {
+		return co.prompt
+	}
+
+	return createMRKLPrompt(
+		tools,
+		co.promptPrefix,
+		co.formatInstructions,
+		co.promptSuffix,
+	)
 }
 
 func (co CreationOptions) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemplate {
@@ -91,8 +92,8 @@ func WithPromptPrefix(prefix string) CreationOption {
 	}
 }
 
-// WithPromptFormatInstructions is an option for setting the format instructions of the
-// prompt used by the agent.
+// WithPromptFormatInstructions is an option for setting the format instructions of the prompt
+// used by the agent.
 func WithPromptFormatInstructions(instructions string) CreationOption {
 	return func(co *CreationOptions) {
 		co.formatInstructions = instructions
@@ -110,5 +111,13 @@ func WithPromptSuffix(suffix string) CreationOption {
 func WithPrompt(prompt prompts.PromptTemplate) CreationOption {
 	return func(co *CreationOptions) {
 		co.prompt = prompt
+	}
+}
+
+// WithReturnIntermediateSteps is an option for making the executor return the intermediate steps
+// taken
+func WithReturnIntermediateSteps() CreationOption {
+	return func(co *CreationOptions) {
+		co.returnIntermediateSteps = true
 	}
 }

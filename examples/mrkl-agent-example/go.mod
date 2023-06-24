@@ -1,4 +1,4 @@
-module llm-math-chain-example
+module mrkl-agent-example
 
 go 1.19
 

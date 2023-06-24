@@ -28,11 +28,6 @@ func Initialize(
 	agentType AgentType,
 	opts ...CreationOption,
 ) (Executor, error) {
-	options := executorDefaultOptions()
-	for _, opt := range opts {
-		opt(&options)
-	}
-
 	var agent Agent
 	switch agentType {
 	case ZeroShotReactDescription:
@@ -42,10 +37,5 @@ func Initialize(
 	default:
 		return Executor{}, ErrUnknownAgentType
 	}
-
-	return Executor{
-		Agent:         agent,
-		Tools:         tools,
-		MaxIterations: options.maxIterations,
-	}, nil
+	return NewExecutor(agent, tools, opts...), nil
 }
