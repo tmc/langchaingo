@@ -1,4 +1,3 @@
-// Package llms defines the types for langchaingo LLMs.
 package llms
 
 import (
