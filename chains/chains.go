@@ -21,6 +21,36 @@ type Chain interface {
 	GetOutputKeys() []string
 }
 
+type chainCallOptions struct {
+	Temperature float64
+	StopWords   []string
+	MaxTokens   int
+}
+
+// WithStopWords is a ChainCallOption that can be used to set the stop words of the chain.
+func WithStopWords(stopWords []string) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.StopWords = stopWords
+	}
+}
+
+// WithMaxTokens is a ChainCallOption that can be used to set the max tokens of the chain.
+func WithMaxTokens(maxTokens int) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.MaxTokens = maxTokens
+	}
+}
+
+// WithTemperature is a ChainCallOption that can be used to set the temperature of the chain.
+func WithTemperature(temperature float64) ChainCallOption {
+	return func(options *chainCallOptions) {
+		options.Temperature = temperature
+	}
+}
+
+// ChainCallOption is a function that can be used to modify the behavior of the Call function.
+type ChainCallOption func(*chainCallOptions)
+
 // Call is the function used for calling chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
 	if err := validateInputs(c, inputValues); err != nil {
