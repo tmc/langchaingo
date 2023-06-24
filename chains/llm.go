@@ -46,17 +46,8 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	if err != nil {
 		return nil, err
 	}
-	opts := &chainCallOptions{}
-	for _, option := range options {
-		option(opts)
-	}
 
-	generateOptions := []llms.CallOption{}
-	if opts.StopWords != nil {
-		generateOptions = append(generateOptions, llms.WithStopWords(opts.StopWords))
-	}
-
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, generateOptions...)
+	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, getLLMCallOptions(options...)...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +77,7 @@ func (c LLMChain) Predict(ctx context.Context, values map[string]any, options ..
 
 // GetMemory returns the memory.
 func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
-	return c.Memory
+	return c.Memory //nolint:ireturn
 }
 
 // GetInputKeys returns the expected input keys.

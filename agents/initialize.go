@@ -14,6 +14,9 @@ const (
 	// ZeroShotReactDescription is an AgentType constant that represents
 	// the "zeroShotReactDescription" agent type.
 	ZeroShotReactDescription AgentType = "zeroShotReactDescription"
+	// ConversationalReactDescription is an AgentType constant that represents
+	// the "conversationalReactDescription" agent type.
+	ConversationalReactDescription AgentType = "conversationalReactDescription"
 )
 
 // Initialize is a function that creates a new executor with the specified LLM
@@ -34,6 +37,8 @@ func Initialize(
 	switch agentType {
 	case ZeroShotReactDescription:
 		agent = NewOneShotAgent(llm, tools, opts...)
+	case ConversationalReactDescription:
+		agent = NewConversationalAgent(llm, tools, opts...)
 	default:
 		return Executor{}, ErrUnknownAgentType
 	}

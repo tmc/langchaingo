@@ -68,7 +68,9 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 // AddDocuments creates vector embeddings from the documents using the embedder
 // and upsert the vectors to the pinecone index.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
-	nameSpace := s.getNameSpace(options...)
+	opts := s.getOptions(options...)
+
+	nameSpace := s.getNameSpace(opts)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -105,8 +107,13 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
-	nameSpace := s.getNameSpace(options...)
-	scoreThreshold, err := s.getScoreThreshold(options...)
+	opts := s.getOptions(options...)
+
+	nameSpace := s.getNameSpace(opts)
+
+	filters := s.getFilters(opts)
+
+	scoreThreshold, err := s.getScoreThreshold(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +127,8 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return s.grpcQuery(ctx, vector, numDocuments, nameSpace)
 	}
 
-	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold)
+	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold,
+		filters)
 }
 
 // Close closes the grpc connection.
@@ -128,22 +136,28 @@ func (s Store) Close() error {
 	return s.grpcConn.Close()
 }
 
-func (s Store) getNameSpace(options ...vectorstores.Option) string {
-	opts := s.getOptions(options...)
+func (s Store) getNameSpace(opts vectorstores.Options) string {
 	if opts.NameSpace != "" {
 		return opts.NameSpace
 	}
 	return s.nameSpace
 }
 
-func (s Store) getScoreThreshold(options ...vectorstores.Option) (float64,
+func (s Store) getScoreThreshold(opts vectorstores.Options) (float64,
 	error,
 ) {
-	opts := s.getOptions(options...)
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
 	}
 	return opts.ScoreThreshold, nil
+}
+
+func (s Store) getFilters(opts vectorstores.Options) map[string]any {
+	if opts.Filters != nil {
+		return opts.Filters
+	}
+
+	return nil
 }
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {

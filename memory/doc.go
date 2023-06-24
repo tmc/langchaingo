@@ -1,3 +1,9 @@
-// Package memory contains implementations of the memory interface.
-// Memory is used for storing and retrieving data in the process of a conversation.
+/*
+Package memory provides an interface for managing conversational data and
+a variety of implementations for storing and retrieving that data.
+
+The main components of this package are:
+- ChatMessageHistory: a struct that stores chat messages.
+- Buffer: a simple form of memory that remembers previous conversational back and forths directly.
+*/
 package memory
