@@ -54,11 +54,15 @@ func New(token string, model string, baseURL string, opts ...Option) (*Client, e
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Model       string   `json:"model"`
-	Prompt      string   `json:"prompt"`
-	Temperature float64  `json:"temperature"`
-	MaxTokens   int      `json:"max_tokens"`
-	StopWords   []string `json:"stop,omitempty"`
+	Model            string   `json:"model"`
+	Prompt           string   `json:"prompt"`
+	Temperature      float64  `json:"temperature,omitempty"`
+	MaxTokens        int      `json:"max_tokens,omitempty"`
+	N                int      `json:"n,omitempty"`
+	StopWords        []string `json:"stop,omitempty"`
+	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
+	TopP             float64  `json:"top_p,omitempty"`
 }
 
 // Completion is a completion.
