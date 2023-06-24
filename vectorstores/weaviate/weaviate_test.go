@@ -3,7 +3,6 @@ package weaviate
 import (
 	"context"
 	"fmt"
-	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
 	"os"
 	"strings"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
 	"github.com/weaviate/weaviate/entities/models"
 )
 

@@ -68,7 +68,7 @@ var _ vectorstores.VectorStore = Store{}
 
 // New creates a new Store with options.
 // When using weaviate,
-// the properties in the Class of weaviate must have properties with the values set by textKey and nameSpaceKey
+// the properties in the Class of weaviate must have properties with the values set by textKey and nameSpaceKey.
 func New(opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
