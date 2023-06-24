@@ -30,12 +30,11 @@ func main() {
 	// Or override default model to another one
 	generateOptions := []llms.CallOption{
 		llms.WithModel("gpt2"),
-		//llms.WithTopK(10),
-		//llms.WithTopP(0.95),
-		//llms.WithSeed(13),
+		// llms.WithTopK(10),
+		// llms.WithTopP(0.95),
+		// llms.WithSeed(13),
 	}
 	completion, err := llm.Call(ctx, "What would be a good company name be for name a company that makes colorful socks?", generateOptions...)
-
 	// Check for errors
 	if err != nil {
 		log.Fatal(err)
