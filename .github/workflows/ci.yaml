@@ -18,7 +18,7 @@ jobs:
           cache: false
       - uses: actions/checkout@v3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3.5.0
+        uses: golangci/golangci-lint-action@v3.6.0
   build-test:
     runs-on: ubuntu-latest
     steps:
