@@ -20,7 +20,7 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 	}{
 		{"empty", "", nil, nil, nil, "", false},
 		{"ok-input-var", "", []string{"foobar"}, nil, nil, "", false},
-		{"bad-input-var", "", []string{"stop"}, nil, nil, "", true}, // expect a error.
+		{"missing-input-var", "{{.name}}", []string{"job"}, nil, nil, "", true}, // expect a error.
 		{"hello world", "hello world", nil, nil, nil, "hello world", false},
 		{"basic", "hello {{.name}}", nil, nil, map[string]any{
 			"name": "richard",
@@ -39,10 +39,9 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 			"hello richard", false,
 		},
 		{
-			"partials w err", "{{.greeting}} {{.name}}", nil,
+			"partials w err", "{{.greeting}} {{.name}} {{.message}}", nil,
 			map[string]any{
 				"name": func() string { return "richard" },
-				"stop": "foobar",
 			},
 			map[string]any{
 				"greeting": "hello",

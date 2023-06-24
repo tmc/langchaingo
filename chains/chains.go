@@ -21,20 +21,6 @@ type Chain interface {
 	GetOutputKeys() []string
 }
 
-type chainCallOptions struct {
-	StopWords []string
-}
-
-// WithStopWords is a ChainCallOption that can be used to set the stop words of the chain.
-func WithStopWords(stopWords []string) ChainCallOption {
-	return func(options *chainCallOptions) {
-		options.StopWords = stopWords
-	}
-}
-
-// ChainCallOption is a function that can be used to modify the behavior of the Call function.
-type ChainCallOption func(*chainCallOptions)
-
 // Call is the function used for calling chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
 	if err := validateInputs(c, inputValues); err != nil {

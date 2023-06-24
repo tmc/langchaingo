@@ -10,13 +10,14 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // Client is a client for a local LLM.
 type Client struct {
-	binPath string
-	args    []string
+	BinPath      string
+	Args         []string
+	GlobalAsArgs bool
 }
 
 // New returns a new local client.
-func New(binPath string, args ...string) (*Client, error) {
-	c := &Client{binPath: binPath, args: args}
+func New(binPath string, globalAsArgs bool, args ...string) (*Client, error) {
+	c := &Client{BinPath: binPath, GlobalAsArgs: globalAsArgs, Args: args}
 	return c, nil
 }
 
