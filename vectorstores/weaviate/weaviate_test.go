@@ -352,7 +352,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	require.NoError(t, err)
 
 	filter := make(map[string]any)
-	filter["where_filter"] = filters.Where().
+	filter[FilterWhereKey] = filters.Where().
 		WithPath([]string{"location"}).
 		WithOperator(filters.Equal).
 		WithValueString("patio")
@@ -512,7 +512,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	filter := make(map[string]any)
-	filter["where_filter"] = filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
+	filter[FilterWhereKey] = filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
 		filters.Where().WithOperator(filters.Or).WithOperands([]*filters.WhereBuilder{
 			filters.Where().WithPath([]string{"location"}).
 				WithOperator(filters.Equal).WithValueString("office"),

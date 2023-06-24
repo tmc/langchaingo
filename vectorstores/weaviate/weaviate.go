@@ -35,6 +35,10 @@ var (
 	ErrInvalidFilter = errors.New("invalid filter")
 )
 
+const (
+	FilterWhereKey = "where_filter"
+)
+
 // Store is a wrapper around the weaviate rest API and grpc client.
 type Store struct {
 	embedder embeddings.Embedder
@@ -228,11 +232,11 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 }
 
 func (s Store) createWhereBuilder(namespace string, filter map[string]any) (*filters.WhereBuilder, error) {
-	if filter["where_filter"] == nil {
+	if filter[FilterWhereKey] == nil {
 		return filters.Where().WithPath([]string{s.nameSpaceKey}).WithOperator(filters.Equal).WithValueString(namespace), nil
 	}
 
-	whereFilter, ok := filter["where_filter"].(*filters.WhereBuilder)
+	whereFilter, ok := filter[FilterWhereKey].(*filters.WhereBuilder)
 	if !ok {
 		return nil, ErrInvalidFilter
 	}
