@@ -351,8 +351,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	filter := make(map[string]any)
-	filter[FilterWhereKey] = filters.Where().
+	filter := filters.Where().
 		WithPath([]string{"location"}).
 		WithOperator(filters.Equal).
 		WithValueString("patio")
@@ -511,8 +510,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	filter := make(map[string]any)
-	filter[FilterWhereKey] = filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
+	filter := filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
 		filters.Where().WithOperator(filters.Or).WithOperands([]*filters.WhereBuilder{
 			filters.Where().WithPath([]string{"location"}).
 				WithOperator(filters.Equal).WithValueString("office"),

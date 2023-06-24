@@ -35,11 +35,6 @@ var (
 	ErrInvalidFilter = errors.New("invalid filter")
 )
 
-const (
-	// FilterWhereKey is the key used for the where filter.
-	FilterWhereKey = "where_filter"
-)
-
 // Store is a wrapper around the weaviate client.
 type Store struct {
 	embedder embeddings.Embedder
@@ -218,7 +213,7 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	return f32, nil
 }
 
-func (s Store) getFilters(opts vectorstores.Options) map[string]any {
+func (s Store) getFilters(opts vectorstores.Options) any {
 	if opts.Filters != nil {
 		return opts.Filters
 	}
@@ -233,12 +228,12 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func (s Store) createWhereBuilder(namespace string, filter map[string]any) (*filters.WhereBuilder, error) {
-	if filter[FilterWhereKey] == nil {
+func (s Store) createWhereBuilder(namespace string, filter any) (*filters.WhereBuilder, error) {
+	if filter == nil {
 		return filters.Where().WithPath([]string{s.nameSpaceKey}).WithOperator(filters.Equal).WithValueString(namespace), nil
 	}
 
-	whereFilter, ok := filter[FilterWhereKey].(*filters.WhereBuilder)
+	whereFilter, ok := filter.(*filters.WhereBuilder)
 	if !ok {
 		return nil, ErrInvalidFilter
 	}
