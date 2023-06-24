@@ -19,19 +19,6 @@ async function webpackLoader(content, map, meta) {
   } catch (err) {
     cb(err)
   }
-
-  /* if (!this.resourcePath.endsWith(".go")) {
-    cb(null, JSON.stringify({ content, imports: [] }), map, meta);
-    return;
-  } */
-
-  /* console.log(this.resourcePath)
-
-  try {
-    cb(null, JSON.stringify({ contentcontent, map, meta);
-  } catch (err) {
-    cb(err);
-  } */
 }
 
 module.exports = webpackLoader;
