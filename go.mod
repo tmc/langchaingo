@@ -25,7 +25,6 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/loads v0.21.1 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
-	github.com/go-openapi/strfmt v0.21.3 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-openapi/validate v0.21.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -45,7 +44,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	github.com/weaviate/weaviate v1.19.0 // indirect
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
@@ -61,8 +59,10 @@ require (
 require (
 	cloud.google.com/go/aiplatform v1.42.0
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/go-openapi/strfmt v0.21.3
 	github.com/google/go-cmp v0.5.9
 	github.com/pinecone-io/go-pinecone v0.3.0
+	github.com/weaviate/weaviate v1.19.0
 	github.com/weaviate/weaviate-go-client/v4 v4.8.1
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17
