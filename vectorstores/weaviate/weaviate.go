@@ -36,10 +36,11 @@ var (
 )
 
 const (
+	// FilterWhereKey is the key used for the where filter.
 	FilterWhereKey = "where_filter"
 )
 
-// Store is a wrapper around the weaviate rest API and grpc client.
+// Store is a wrapper around the weaviate client.
 type Store struct {
 	embedder embeddings.Embedder
 	client   *weaviate.Client
@@ -65,8 +66,9 @@ type Store struct {
 
 var _ vectorstores.VectorStore = Store{}
 
-// New creates a new Store with options. Options for index name, environment, project name
-// and embedder must be set.
+// New creates a new Store with options.
+// When using weaviate,
+// the properties in the Class of weaviate must have properties with the values set by textKey and nameSpaceKey
 func New(opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
