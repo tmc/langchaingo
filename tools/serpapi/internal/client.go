@@ -15,7 +15,6 @@ import (
 const _url = "https://serpapi.com/search"
 
 var (
-	ErrMissingToken = errors.New("missing the SerpAPI API key, set it in the SERPAPI_API_KEY environment variable")
 	ErrNoGoodResult = errors.New("no good search results found")
 	ErrAPIError     = errors.New("error from SerpAPI")
 )

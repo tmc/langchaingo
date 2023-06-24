@@ -24,6 +24,7 @@ linters:
     - testpackage
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
     - depguard # disabling temporarily
+    - ireturn # disabling temporarily
 
 linters-settings:
   funlen:
