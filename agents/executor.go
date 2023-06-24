@@ -58,11 +58,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		}
 
 		if finish != nil {
-			if e.ReturnIntermediateSteps {
-				finish.ReturnValues[_intermediateStepsOutputKey] = steps
-			}
-
-			return finish.ReturnValues, nil
+			return e.getReturn(finish, steps), nil
 		}
 
 		for _, action := range actions {
@@ -88,6 +84,14 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	}
 
 	return nil, ErrNotFinished
+}
+
+func (e Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
+	if e.ReturnIntermediateSteps {
+		finish.ReturnValues[_intermediateStepsOutputKey] = steps
+	}
+
+	return finish.ReturnValues
 }
 
 // GetInputKeys gets the input keys the agent of the executor expects.

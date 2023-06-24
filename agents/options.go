@@ -115,7 +115,7 @@ func WithPrompt(prompt prompts.PromptTemplate) CreationOption {
 }
 
 // WithReturnIntermediateSteps is an option for making the executor return the intermediate steps
-// taken
+// taken.
 func WithReturnIntermediateSteps() CreationOption {
 	return func(co *CreationOptions) {
 		co.returnIntermediateSteps = true
