@@ -19,13 +19,16 @@ const (
 
 // ChatRequest is a request to create an embedding.
 type ChatRequest struct {
-	Model       string         `json:"model"`
-	Messages    []*ChatMessage `json:"messages"`
-	Temperature float64        `json:"temperature,omitempty"`
-	TopP        int            `json:"top_p,omitempty"`
-	N           int            `json:"n,omitempty"`
-	StopWords   []string       `json:"stop,omitempty"`
-	Stream      bool           `json:"stream,omitempty"`
+	Model            string         `json:"model"`
+	Messages         []*ChatMessage `json:"messages"`
+	Temperature      float64        `json:"temperature,omitempty"`
+	TopP             float64        `json:"top_p,omitempty"`
+	MaxTokens        int            `json:"max_tokens,omitempty"`
+	N                int            `json:"n,omitempty"`
+	StopWords        []string       `json:"stop,omitempty"`
+	Stream           bool           `json:"stream,omitempty"`
+	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.

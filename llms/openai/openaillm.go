@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"reflect"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
@@ -49,10 +50,15 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	generations := make([]*llms.Generation, 0, len(prompts))
 	for _, prompt := range prompts {
 		result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
-			Model:     opts.Model,
-			Prompt:    prompt,
-			MaxTokens: opts.MaxTokens,
-			StopWords: opts.StopWords,
+			Model:            opts.Model,
+			Prompt:           prompt,
+			MaxTokens:        opts.MaxTokens,
+			StopWords:        opts.StopWords,
+			Temperature:      opts.Temperature,
+			N:                opts.N,
+			FrequencyPenalty: opts.FrequencyPenalty,
+			PresencePenalty:  opts.PresencePenalty,
+			TopP:             opts.TopP,
 		})
 		if err != nil {
 			return nil, err
@@ -140,10 +146,15 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		}
 
 		result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
-			Model:         opts.Model,
-			StopWords:     opts.StopWords,
-			Messages:      msgs,
-			StreamingFunc: opts.StreamingFunc,
+			Model:            opts.Model,
+			StopWords:        opts.StopWords,
+			Messages:         msgs,
+			StreamingFunc:    opts.StreamingFunc,
+			Temperature:      opts.Temperature,
+			MaxTokens:        opts.MaxTokens,
+			N:                opts.N,
+			FrequencyPenalty: opts.FrequencyPenalty,
+			PresencePenalty:  opts.PresencePenalty,
 		})
 		if err != nil {
 			return nil, err
@@ -152,12 +163,16 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			return nil, ErrEmptyResponse
 		}
 		text := result.Choices[0].Message.Content
+		generationInfo := make(map[string]any, reflect.ValueOf(result.Usage).NumField())
+		generationInfo["CompletionTokens"] = result.Usage.CompletionTokens
+		generationInfo["PromptTokens"] = result.Usage.PromptTokens
+		generationInfo["TotalTokens"] = result.Usage.TotalTokens
 		generations = append(generations, &llms.Generation{
 			Message: &schema.AIChatMessage{
 				Text: text,
 			},
-			Text: text,
-			// TODO: fill in generation info
+			Text:           text,
+			GenerationInfo: generationInfo,
 		})
 	}
 
