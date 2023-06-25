@@ -9,6 +9,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -23,8 +24,11 @@ type LLM struct {
 	client *localclient.Client
 }
 
-// _ ensures that LLM implements the llms.LLM interface.
-var _ llms.LLM = (*LLM)(nil)
+// _ ensures that LLM implements the llms.LLM and language model interface.
+var (
+	_ llms.LLM           = (*LLM)(nil)
+	_ llms.LanguageModel = (*LLM)(nil)
+)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -86,6 +90,14 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return []*llms.Generation{
 		{Text: result.Text},
 	}, nil
+}
+
+func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+	return llms.GeneratePrompt(ctx, o, prompts, options...)
+}
+
+func (o *LLM) GetNumTokens(text string) int {
+	return llms.CountTokens("gpt2", text)
 }
 
 // New creates a new local LLM implementation.

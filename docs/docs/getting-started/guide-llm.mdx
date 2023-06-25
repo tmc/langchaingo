@@ -1,0 +1,264 @@
+---
+sidebar_position: 1
+---
+
+# Quickstart, using LLMs
+
+This tutorial gives you a quick walkthrough about building an end-to-end language model application with LangChain.
+
+## Installation
+
+To get started, install LangChain but running the following command in the directory of your project:
+
+```bash 
+go get github.com/tmc/langchaingo
+```
+## Picking up a LLM
+
+Using LangChain will usually require integrations with one or more model providers, data stores, apis, etc.
+
+For this example, we will be using OpenAI's APIs, so no additional setup is required.
+
+## Building a Language Model Application
+
+Now that we have installed LangChain, we can start building our language model application.
+
+LangChain provides many modules that can be used to build language model applications. Modules can be combined to create more complex applications, or be used individually for simple applications.
+
+### LLMs: Get Predictions from a Language Model
+
+The most basic building block of LangChain is calling an LLM on some input. Let's walk through a simple example of how to do this. For this purpose, let's pretend we are building a service that generates a company name based on what the company makes.
+
+In order to do this, we first need to import the LLM wrapper.
+
+```go
+import "github.com/tmc/langchaingo/llms/openai"
+```
+
+We will then need to set the the OpenAI key. There are two options here:
+
+1. We can do this by setting the environment variable OPENAI_API_KEY to the api key.
+
+2. Or we can do it when initializing the wrapper along with other arguments.
+
+ 
+   ```go
+    model, err := openai.New(openai.WithToken(apiToken))
+   ```
+ 
+
+Once we have initialized the wrapper, we can  call it on some input!
+
+```go
+res, err := model.Call(
+  context.Background(), 
+  "What would be a good company name a company that makes colorful socks?",
+)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(res)
+```
+
+```
+Fantasy Sockery
+```
+
+### Prompt Templates: Manage Prompts for LLMs
+
+Calling an LLM is a great first step, but it's just the beginning. Normally when you use an LLM in an application, you are not sending user input directly to the LLM. Instead, you are probably taking user input and constructing a prompt, and then sending that to the LLM.
+
+For example, in the previous example, the text we passed in was hardcoded to ask for a name for a company that made colorful socks. In this imaginary service, what we would want to do is take only the user input describing what the company does, and then format the prompt with that information.
+
+This is easy to do with LangChain!
+
+First lets define the prompt template:
+
+```go
+package main
+
+import "github.com/tmc/langchaingo/prompts"
+
+func main() {
+  template := "What is a good name for a company that makes {{.product}}?"
+  prompt := prompts.NewPromptTemplate(
+    template,
+    []string{"product"},
+  )
+}
+```
+
+Let's now see how this works! We can call the `.Format` method to format it.
+
+```go
+res, err := prompt.Format(map[string]any{"product": "colorful socks"})
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println(res)
+```
+
+```
+What is a good name for a company that makes colorful socks? 
+```
+
+### Chains: Combine LLMs and Prompts in Multi-Step Workflows
+
+Up until now, we've worked with the PromptTemplate and LLM primitives by themselves. But of course, a real application is not just one primitive, but rather a combination of them.
+
+A chain in LangChain is made up of links, which can be either primitives like LLMs or other chains.
+
+The most core type of chain is an LLMChain, which consists of a PromptTemplate and an LLM.
+
+Extending the previous example, we can construct an LLMChain which takes user input, formats it with a PromptTemplate, and then passes the formatted response to an LLM.
+
+```go
+import (
+	"log"
+
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
+)
+
+func main() {
+	model, err := openai.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	template := "What is a good name for a company that makes {{.product}}?"
+	prompt := prompts.NewPromptTemplate(
+		template,
+		[]string{"product"},
+	)
+
+	chain := chains.NewLLMChain(model, prompt)
+}
+```
+
+Now we can run that chain only specifying the product!
+
+```go
+res, err := chains.Call(
+  context.Background(),
+  chain,
+  map[string]any{
+    "product": "colorful socks",
+  },
+)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println(res)
+```
+
+```
+map[text:
+
+Socktastic!]
+```
+
+There we go! There's the first chain - an LLM Chain. This is one of the simpler types of chains, but understanding how it works will set you up well for working with more complex chains.
+
+### Agents: Dynamically Run Chains Based on User Input
+
+So far the chains we've looked at run in a predetermined order.
+
+Agents no longer do: they use an LLM to determine which actions to take and in what order. An action can either be using a tool and observing its output, or returning to the user.
+
+When used correctly agents can be extremely powerful. In this tutorial, we show you how to easily use agents through the simplest, highest level API.
+
+In order to load agents, you should understand the following concepts:
+
+- Tool: A function that performs a specific duty. This can be things like: Google Search, Database lookup, code REPL, other chains. The interface for a tool is currently a method that has a string as an input, with a string as an output, a function returning the name of the tool and a function returing a description of the tool.
+- LLM: The language model powering the agent.
+- Agent: The agent to use. Because this tutorial focuses on the simplest, highest level API, this only covers using one of the standard supported agents.
+
+For this example, you'll need to set the SerpAPI environment variable.
+
+```bash
+SERPAPI_API_KEY="..."
+```
+Now we can get started!
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+  "log"
+	"os"
+
+	"github.com/tmc/langchaingo/agents"
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/serpapi"
+)
+
+func main() {
+  // Firstly we need to create the llm to be used.
+	llm, err := openai.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+  // Next we need some tools for the agent to use.
+	search, err := serpapi.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+	agentTools := []tools.Tool{
+		tools.Calculator{},
+		search,
+	}
+
+  // Now we can create an agent.
+	agent, err := agents.Initialize(
+		llm,
+		agentTools,
+		agents.ZeroShotReactDescription,
+		agents.WithMaxIterations(3),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	question := "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
+	answer, err := chains.Run(context.Background(), agent, question)
+	fmt.Println(answer)
+	return err
+}
+```
+
+```
+Olivia Wilde's boyfriend is Jason Sudeikis, and his current age raised to the 0.23 power is 2.4242784855673896.
+```
+
+## Streaming
+
+You can also use the streaming API to get words streamed back to you as they are generated. This is useful for eg. chatbots, where you want to show the user what is being generated as it is being generated. Note: OpenAI as of this writing does not support `tokenUsage` reporting while streaming is enabled.
+
+```go
+func main() {
+	llm, err := openai.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+	completion, err := llm.Generate(
+    ctx, 
+    "Who is the owner of microsoft?",
+	  llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+      fmt.Print(string(chunk))
+      return nil
+    }),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```

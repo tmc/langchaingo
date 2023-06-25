@@ -7,6 +7,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -18,7 +19,10 @@ type LLM struct {
 	client *huggingfaceclient.Client
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var (
+	_ llms.LLM           = (*LLM)(nil)
+	_ llms.LanguageModel = (*LLM)(nil)
+)
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	r, err := o.Generate(ctx, []string{prompt}, options...)
@@ -54,6 +58,14 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return []*llms.Generation{
 		{Text: result.Text},
 	}, nil
+}
+
+func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+	return llms.GeneratePrompt(ctx, o, prompts, options...)
+}
+
+func (o *LLM) GetNumTokens(text string) int {
+	return llms.CountTokens("gpt2", text)
 }
 
 func New(opts ...Option) (*LLM, error) {

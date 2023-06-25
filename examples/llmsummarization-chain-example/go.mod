@@ -1,4 +1,4 @@
-module basic-llm-example
+module mrkl-agent-example
 
 go 1.19
 

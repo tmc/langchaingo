@@ -1,0 +1,85 @@
+---
+hide_table_of_contents: true
+sidebar_label: Unfinished Chains
+sidebar_position: 6
+---
+
+import DocCardList from "@theme/DocCardList";
+import CodeBlock from "@theme/CodeBlock";
+
+# Getting Started: Chains
+
+:::info
+[Conceptual Guide](https://docs.langchain.com/docs/components/chains)
+:::info
+
+Using a language model in isolation is fine for some applications, but it is often useful to combine language models with other sources of information, third-party APIs, or even other language models. This is where the concept of a chain comes in.
+
+LangChain provides a standard interface for chains, as well as a number of built-in chains that can be used out of the box. You can also create your own chains by creating structs that implement the chain interface.
+
+## Executing chains
+
+In LangChain there are multiple functions ment to execute chains.
+
+### Call
+Call is the standard function used for executing an chain. The function takes a context, the chain to be executed and the input values of the chain. The input values is a map with string keys and any value. The function returns the output values of the chain and a potential error.
+
+```go
+res, err := chains.Call(
+  context.Background(),
+  chain,
+  map[string]any{
+    "product": "colorful socks",
+  },
+)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println(res)
+```
+
+```
+map[text:
+
+Socktastic!]
+```
+
+### Run
+If a chain only expects one input and returns a string the run function can be used to execute the chain. The privious example could therefore be written like this:
+
+```go
+text, err := chains.Run(
+    context.Background(),
+    chain,
+    "colorful socks",
+)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println(text)
+```
+
+```
+Socktastic!
+```
+
+## Advanced
+
+To implement your own custom chain you must create an struct that implements the chain interface. 
+
+```go
+// Chain is the interface all chains must implement.
+type Chain interface {
+	// Call runs the logic of the chain and returns the output. This method should
+	// not be called directly. 
+	Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error)
+	// GetMemory gets the memory of the chain.
+	GetMemory() schema.Memory
+	// InputKeys returns the input keys the chain expects.
+	GetInputKeys() []string
+	// OutputKeys returns the output keys the chain expects.
+	GetOutputKeys() []string
+}
+```
+
+<DocCardList />

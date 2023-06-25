@@ -32,9 +32,10 @@ var (
 	ErrInvalidResponse       = errors.New("invalid response")
 	ErrInvalidScoreThreshold = errors.New(
 		"score threshold must be between 0 and 1")
+	ErrInvalidFilter = errors.New("invalid filter")
 )
 
-// Store is a wrapper around the weaviate rest API and grpc client.
+// Store is a wrapper around the weaviate client.
 type Store struct {
 	embedder embeddings.Embedder
 	client   *weaviate.Client
@@ -60,8 +61,9 @@ type Store struct {
 
 var _ vectorstores.VectorStore = Store{}
 
-// New creates a new Store with options. Options for index name, environment, project name
-// and embedder must be set.
+// New creates a new Store with options.
+// When using weaviate,
+// the properties in the Class of weaviate must have properties with the values set by textKey and nameSpaceKey.
 func New(opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
@@ -139,6 +141,11 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
+	filter := s.getFilters(opts)
+	whereBuilder, err := s.createWhereBuilder(nameSpace, filter)
+	if err != nil {
+		return nil, err
+	}
 
 	vector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
@@ -152,11 +159,7 @@ func (s Store) SimilaritySearch(
 			WithVector(convertVector(vector)).
 			WithCertainty(scoreThreshold),
 		).
-		WithWhere(filters.Where().
-			WithPath([]string{s.nameSpaceKey}).
-			WithOperator(filters.Equal).
-			WithValueString(nameSpace),
-		).
+		WithWhere(whereBuilder).
 		WithClassName(s.indexName).
 		WithLimit(numDocuments).
 		WithFields(s.createFields()...).Do(ctx)
@@ -210,12 +213,34 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	return f32, nil
 }
 
+func (s Store) getFilters(opts vectorstores.Options) any {
+	if opts.Filters != nil {
+		return opts.Filters
+	}
+	return nil
+}
+
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	opts := vectorstores.Options{}
 	for _, opt := range options {
 		opt(&opts)
 	}
 	return opts
+}
+
+func (s Store) createWhereBuilder(namespace string, filter any) (*filters.WhereBuilder, error) {
+	if filter == nil {
+		return filters.Where().WithPath([]string{s.nameSpaceKey}).WithOperator(filters.Equal).WithValueString(namespace), nil
+	}
+
+	whereFilter, ok := filter.(*filters.WhereBuilder)
+	if !ok {
+		return nil, ErrInvalidFilter
+	}
+	return filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
+		filters.Where().WithPath([]string{s.nameSpaceKey}).WithOperator(filters.Equal).WithValueString(namespace),
+		whereFilter,
+	}), nil
 }
 
 func (s Store) createFields() []graphql.Field {

@@ -12,7 +12,7 @@ var ErrEmptyResponse = errors.New("empty response")
 // Client is a client for the OpenAI API.
 type Client struct {
 	token      string
-	model      string
+	Model      string
 	baseURL    string
 	httpClient Doer
 }
@@ -38,7 +38,7 @@ func WithHTTPClient(client Doer) Option {
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
 		token:      token,
-		model:      model,
+		Model:      model,
 		baseURL:    baseURL,
 		httpClient: http.DefaultClient,
 	}
@@ -102,7 +102,7 @@ type EmbeddingRequest struct {
 
 // CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
-	r.Model = c.model
+	r.Model = c.Model
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -129,7 +129,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 
 // CreateChat creates chat request.
 func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
-	r.Model = c.model
+	r.Model = c.Model
 	if r.Model == "" {
 		r.Model = defaultChatModel
 	}
