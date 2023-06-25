@@ -14,7 +14,7 @@ const _llmChainDefaultOutputKey = "text"
 
 type LLMChain struct {
 	prompt       prompts.PromptTemplate
-	llm          llms.LLM
+	llm          llms.LanguageModel
 	Memory       schema.Memory
 	OutputParser schema.OutputParser[any]
 
@@ -24,7 +24,7 @@ type LLMChain struct {
 var _ Chain = &LLMChain{}
 
 // NewLLMChain creates a new LLMChain with an llm and a prompt.
-func NewLLMChain(llm llms.LLM, prompt prompts.PromptTemplate) *LLMChain {
+func NewLLMChain(llm llms.LanguageModel, prompt prompts.PromptTemplate) *LLMChain {
 	chain := &LLMChain{
 		prompt:       prompt,
 		llm:          llm,
@@ -47,32 +47,21 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	generations, err := c.llm.Generate(ctx, []string{promptValue.String()}, getLLMCallOptions(options...)...)
+	result, err := c.llm.GeneratePrompt(
+		ctx,
+		[]schema.PromptValue{promptValue},
+		getLLMCallOptions(options...)...,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(generations[0].Text, promptValue)
+	finalOutput, err := c.OutputParser.ParseWithPrompt(result.Generations[0][0].Text, promptValue)
 	if err != nil {
 		return nil, err
 	}
 
 	return map[string]any{c.OutputKey: finalOutput}, nil
-}
-
-// Predict runs the chain and returns the output as a string. Returns an error
-// if the output parser in the llm chain does not return a string.
-func (c LLMChain) Predict(ctx context.Context, values map[string]any, options ...ChainCallOption) (string, error) {
-	result, err := Call(ctx, c, values, options...)
-	if err != nil {
-		return "", err
-	}
-
-	output, ok := result[c.OutputKey].(string)
-	if !ok {
-		return "", ErrOutputNotStringInPredict
-	}
-	return output, nil
 }
 
 // GetMemory returns the memory.

@@ -50,7 +50,7 @@ func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) Ret
 
 // NewRetrievalQAFromLLM loads a question answering combine documents chain
 // from the llm and creates a new retrievalQA chain.
-func NewRetrievalQAFromLLM(llm llms.LLM, retriever schema.Retriever) RetrievalQA {
+func NewRetrievalQAFromLLM(llm llms.LanguageModel, retriever schema.Retriever) RetrievalQA {
 	return NewRetrievalQA(
 		LoadStuffQA(llm),
 		retriever,
