@@ -14,6 +14,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
 	"github.com/weaviate/weaviate/entities/models"
 )
 
@@ -285,4 +286,254 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
+}
+
+func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"location"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	nameSpace := randomizedCamelCaseClass()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location": "kitchen",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location": "bedroom",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location": "office",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location": "sitting room",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location": "patio",
+				},
+			},
+		},
+		vectorstores.WithNameSpace(nameSpace),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	filter := filters.Where().
+		WithPath([]string{"location"}).
+		WithOperator(filters.Equal).
+		WithValueString("patio")
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store,
+				5,
+				vectorstores.WithNameSpace(nameSpace),
+				vectorstores.WithFilters(filter)),
+		),
+		"What colors is the lamp?",
+	)
+	require.NoError(t, err)
+
+	require.NotContains(t, result, "black", "expected black not in result")
+	require.NotContains(t, result, "blue", "expected blue not in result")
+	require.NotContains(t, result, "orange", "expected orange not in result")
+	require.NotContains(t, result, "purple", "expected purple not in result")
+	require.Contains(t, result, "yellow", "expected yellow in result")
+}
+
+func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"location"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	nameSpace := randomizedCamelCaseClass()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{
+				PageContent: "The color of the lamp beside the desk is black.",
+				Metadata: map[string]any{
+					"location": "kitchen",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is blue.",
+				Metadata: map[string]any{
+					"location": "bedroom",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location": "office",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location": "sitting room",
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location": "patio",
+				},
+			},
+		},
+		vectorstores.WithNameSpace(nameSpace),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(nameSpace)),
+		),
+		"What color is the lamp in each room?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "blue", "expected blue in result")
+	require.Contains(t, result, "orange", "expected orange in result")
+	require.Contains(t, result, "purple", "expected purple in result")
+	require.Contains(t, result, "yellow", "expected yellow in result")
+}
+
+func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	e, err := embeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"location"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	nameSpace := randomizedCamelCaseClass()
+
+	err = store.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{
+				PageContent: "The color of the lamp beside the desk is orange.",
+				Metadata: map[string]any{
+					"location":    "office",
+					"square_feet": 100,
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is purple.",
+				Metadata: map[string]any{
+					"location":    "sitting room",
+					"square_feet": 400,
+				},
+			},
+			{
+				PageContent: "The color of the lamp beside the desk is yellow.",
+				Metadata: map[string]any{
+					"location":    "patio",
+					"square_feet": 800,
+				},
+			},
+		},
+		vectorstores.WithNameSpace(nameSpace),
+	)
+	require.NoError(t, err)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	filter := filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
+		filters.Where().WithOperator(filters.Or).WithOperands([]*filters.WhereBuilder{
+			filters.Where().WithPath([]string{"location"}).
+				WithOperator(filters.Equal).WithValueString("office"),
+			filters.Where().WithPath([]string{"location"}).
+				WithOperator(filters.Equal).WithValueString("sitting room"),
+		}),
+		filters.Where().WithPath([]string{"square_feet"}).
+			WithOperator(filters.GreaterThanEqual).WithValueNumber(300),
+	})
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(store,
+				5,
+				vectorstores.WithFilters(filter),
+				vectorstores.WithNameSpace(nameSpace)),
+		),
+		"What color is the lamp in each room?",
+	)
+	require.NoError(t, err)
+	require.Contains(t, result, "purple", "expected purple in result")
+	require.NotContains(t, result, "orange", "expected not orange in result")
+	require.NotContains(t, result, "yellow", "expected not yellow in result")
 }

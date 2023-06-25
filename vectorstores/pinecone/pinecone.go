@@ -152,7 +152,7 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float64,
 	return opts.ScoreThreshold, nil
 }
 
-func (s Store) getFilters(opts vectorstores.Options) map[string]any {
+func (s Store) getFilters(opts vectorstores.Options) any {
 	if opts.Filters != nil {
 		return opts.Filters
 	}

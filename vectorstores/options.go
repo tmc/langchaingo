@@ -7,7 +7,7 @@ type Option func(*Options)
 type Options struct {
 	NameSpace      string
 	ScoreThreshold float64
-	Filters        map[string]any
+	Filters        any
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -27,7 +27,7 @@ func WithScoreThreshold(scoreThreshold float64) Option {
 // filters retrieve exactly the number of nearest-neighbors results that match the filters. In
 // most cases the search latency will be lower than unfiltered searches
 // See https://docs.pinecone.io/docs/metadata-filtering
-func WithFilters(filters map[string]any) Option {
+func WithFilters(filters any) Option {
 	return func(o *Options) {
 		o.Filters = filters
 	}
