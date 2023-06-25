@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"reflect"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
@@ -43,10 +44,15 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(&opts)
 	}
 	result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
-		Model:     opts.Model,
-		Prompt:    prompts[0],
-		MaxTokens: opts.MaxTokens,
-		StopWords: opts.StopWords,
+		Model:            opts.Model,
+		Prompt:           prompts[0],
+		Temperature:      opts.Temperature,
+		MaxTokens:        opts.MaxTokens,
+		StopWords:        opts.StopWords,
+		N:                opts.N,
+		FrequencyPenalty: opts.FrequencyPenalty,
+		PresencePenalty:  opts.PresencePenalty,
+		TopP:             opts.TopP,
 	})
 	if err != nil {
 		return nil, err
@@ -85,10 +91,15 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	}
 
 	result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
-		Model:         opts.Model,
-		StopWords:     opts.StopWords,
-		Messages:      msgs,
-		StreamingFunc: opts.StreamingFunc,
+		Model:            opts.Model,
+		StopWords:        opts.StopWords,
+		Messages:         msgs,
+		StreamingFunc:    opts.StreamingFunc,
+		Temperature:      opts.Temperature,
+		MaxTokens:        opts.MaxTokens,
+		N:                opts.N,
+		FrequencyPenalty: opts.FrequencyPenalty,
+		PresencePenalty:  opts.PresencePenalty,
 	})
 	if err != nil {
 		return nil, err
@@ -96,11 +107,15 @@ func (o *LLM) Chat(ctx context.Context, messages []schema.ChatMessage, options .
 	if len(result.Choices) == 0 {
 		return nil, ErrEmptyResponse
 	}
+	generationInfo := make(map[string]any, reflect.ValueOf(result.Usage).NumField())
+	generationInfo["CompletionTokens"] = result.Usage.CompletionTokens
+	generationInfo["PromptTokens"] = result.Usage.PromptTokens
+	generationInfo["TotalTokens"] = result.Usage.TotalTokens
 	return &llms.ChatGeneration{
 		Message: &schema.AIChatMessage{
 			Text: result.Choices[0].Message.Content,
 		},
-		// TODO: fill in generation info
+		GenerationInfo: generationInfo,
 	}, nil
 }
 
