@@ -47,7 +47,9 @@ type APIChain struct {
 	Requester    HTTPRequester
 }
 
-func NewAPIChain(llm llms.LLM) APIChain {
+// NewAPIChain creates a chain that makes API calls base the docs and
+// summarizes the responses to answer a question.
+func NewAPIChain(llm llms.LLM, requester HTTPRequester) APIChain {
 	reqP := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "question"})
 	reqC := NewLLMChain(llm, reqP)
 
@@ -57,7 +59,7 @@ func NewAPIChain(llm llms.LLM) APIChain {
 	return APIChain{
 		RequestChain: reqC,
 		AnswerChain:  respC,
-		Requester:    http.DefaultClient,
+		Requester:    requester,
 	}
 }
 

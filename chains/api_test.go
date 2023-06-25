@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -53,7 +54,7 @@ func TestLLMAPI(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	chain := NewAPIChain(llm)
+	chain := NewAPIChain(llm, http.DefaultClient)
 	q := map[string]any{
 		"api_docs": MeteoDocs,
 		"question": "What is the weather of [latitude:52.52, longitude:13.419998]?",
@@ -65,5 +66,5 @@ func TestLLMAPI(t *testing.T) {
 	if !ok {
 		t.Fatal("expected answer to be a string")
 	}
-	require.True(t, strings.Contains(answer, "weather"), "expected 58.708 in result")
+	require.True(t, strings.Contains(answer, "weather"), `result does not contain the keyword 'weather'`)
 }
