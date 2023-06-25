@@ -3,6 +3,7 @@ package agents
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/memory"
@@ -10,23 +11,31 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
+const _intermediateStepsOutputKey = "intermediateSteps"
+
 // Executor is the chain responsible for running agents.
 type Executor struct {
 	Agent Agent
 	Tools []tools.Tool
 
-	MaxIterations int
+	MaxIterations           int
+	ReturnIntermediateSteps bool
 }
 
 var _ chains.Chain = Executor{}
 
-// New creates a new agent executor with a agent, the tools the agent can use
-// and the max number of iterations.
-func New(agent Agent, tools []tools.Tool, maxIterations int) Executor {
+// NewExecutor creates a new agent executor with a agent and the tools the agent can use.
+func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Executor {
+	options := executorDefaultOptions()
+	for _, opt := range opts {
+		opt(&options)
+	}
+
 	return Executor{
-		Agent:         agent,
-		Tools:         tools,
-		MaxIterations: maxIterations,
+		Agent:                   agent,
+		Tools:                   tools,
+		MaxIterations:           options.maxIterations,
+		ReturnIntermediateSteps: options.returnIntermediateSteps,
 	}
 }
 
@@ -38,8 +47,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	nameToTool := getNameToTool(e.Tools)
 
 	steps := make([]schema.AgentStep, 0)
-	iterations := 0
-	for iterations < e.MaxIterations {
+	for i := 0; i < e.MaxIterations; i++ {
 		actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
 		if err != nil {
 			return nil, err
@@ -50,11 +58,11 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		}
 
 		if finish != nil {
-			return finish.ReturnValues, nil
+			return e.getReturn(finish, steps), nil
 		}
 
 		for _, action := range actions {
-			tool, ok := nameToTool[action.Tool]
+			tool, ok := nameToTool[strings.ToUpper(action.Tool)]
 			if !ok {
 				steps = append(steps, schema.AgentStep{
 					Action:      action,
@@ -76,6 +84,14 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	}
 
 	return nil, ErrNotFinished
+}
+
+func (e Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
+	if e.ReturnIntermediateSteps {
+		finish.ReturnValues[_intermediateStepsOutputKey] = steps
+	}
+
+	return finish.ReturnValues
 }
 
 // GetInputKeys gets the input keys the agent of the executor expects.
@@ -114,7 +130,7 @@ func getNameToTool(t []tools.Tool) map[string]tools.Tool {
 
 	nameToTool := make(map[string]tools.Tool, len(t))
 	for _, tool := range t {
-		nameToTool[tool.Name()] = tool
+		nameToTool[strings.ToUpper(tool.Name())] = tool
 	}
 
 	return nameToTool
