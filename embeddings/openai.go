@@ -12,8 +12,9 @@ const defaultBatchSize = 512
 
 // OpenAI is the embedder using the OpenAI api.
 type OpenAI struct {
-	client *openai.LLM
+	client *openai.EmbeddingLLM
 
+	Model         string
 	StripNewLines bool
 	BatchSize     int
 }
@@ -23,13 +24,14 @@ var _ Embedder = OpenAI{}
 // NewOpenAI creates a new OpenAI with StripNewLines set to true and batch
 // size set to 512.
 func NewOpenAI() (OpenAI, error) {
-	client, err := openai.New()
+	client, err := openai.NewEmbedding()
 	if err != nil {
 		return OpenAI{}, err
 	}
 
 	return OpenAI{
 		client:        client,
+		Model:         "",
 		StripNewLines: true,
 		BatchSize:     defaultBatchSize,
 	}, nil
@@ -44,7 +46,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 
 	embeddings := make([][]float64, 0, len(texts))
 	for _, texts := range batchedTexts {
-		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts)
+		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, e.Model, texts)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +73,7 @@ func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) 
 		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
-	embeddings, err := e.client.CreateEmbedding(ctx, []string{text})
+	embeddings, err := e.client.CreateEmbedding(ctx, e.Model, []string{text})
 	if err != nil {
 		return nil, err
 	}

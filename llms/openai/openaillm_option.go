@@ -32,7 +32,7 @@ func WithModel(model string) Option {
 
 // WithBaseURL passes the OpenAI base url to the client. If not set, the base url
 // is read from the OPENAI_BASE_URL environment variable. If still not set in ENV
-// VAR OPENAI_BASE_URL, then the default value is https://api.openai.com is used.
+// VAR OPENAI_BASE_URL, then the default value is https://api.openai.com/v1 is used.
 func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
 		opts.baseURL = baseURL

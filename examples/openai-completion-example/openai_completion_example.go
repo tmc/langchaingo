@@ -15,7 +15,11 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, "The first man to walk on the moon", llms.WithStopWords([]string{"Armstrong"}))
+	completion, err := llm.Call(ctx, "The first man to walk on the moon", llms.WithStopWords([]string{"Armstrong"}),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}))
 	if err != nil {
 		log.Fatal(err)
 	}
