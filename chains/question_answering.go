@@ -24,7 +24,7 @@ Given the new context, refine the original answer to better answer the question.
 If the context isn't useful, return the original answer.`
 
 // LoadStuffQA loads a StuffDocuments chain with default prompts for the llm chain.
-func LoadStuffQA(llm llms.LLM) StuffDocuments {
+func LoadStuffQA(llm llms.LanguageModel) StuffDocuments {
 	defaultQAPromptTemplate := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
@@ -41,7 +41,7 @@ func LoadStuffQA(llm llms.LLM) StuffDocuments {
 
 // LoadRefineQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadRefineQA(llm llms.LLM) RefineDocuments {
+func LoadRefineQA(llm llms.LanguageModel) RefineDocuments {
 	questionPrompt := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},

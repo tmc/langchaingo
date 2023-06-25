@@ -28,7 +28,7 @@ REFINED SUMMARY:`
 
 // LoadStuffSummarization loads a summarization chain that stuffs all documents
 // given into the prompt.
-func LoadStuffSummarization(llm llms.LLM) StuffDocuments {
+func LoadStuffSummarization(llm llms.LanguageModel) StuffDocuments {
 	llmChain := NewLLMChain(llm, prompts.NewPromptTemplate(
 		_stuffSummarizationTemplate, []string{"context"},
 	))
@@ -38,7 +38,7 @@ func LoadStuffSummarization(llm llms.LLM) StuffDocuments {
 
 // LoadRefineSummarization loads a refine documents chain for summarization of
 // documents.
-func LoadRefineSummarization(llm llms.LLM) RefineDocuments {
+func LoadRefineSummarization(llm llms.LanguageModel) RefineDocuments {
 	llmChain := NewLLMChain(llm, prompts.NewPromptTemplate(
 		_stuffSummarizationTemplate, []string{"context"},
 	))

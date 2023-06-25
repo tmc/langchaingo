@@ -21,12 +21,8 @@ type Chain interface {
 	GetOutputKeys() []string
 }
 
-// Call is the function used for calling chains.
+// Call is the standard function used for executing chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
-	if err := validateInputs(c, inputValues); err != nil {
-		return nil, err
-	}
-
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -39,6 +35,10 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 
 	for key, value := range newValues {
 		fullValues[key] = value
+	}
+
+	if err := validateInputs(c, inputValues); err != nil {
+		return nil, err
 	}
 
 	outputValues, err := c.Call(ctx, fullValues, options...)
@@ -57,9 +57,9 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	return outputValues, nil
 }
 
-// Run can be used to call a chain if the chain only expects one string input
-// and one string output.
-func Run(ctx context.Context, c Chain, input string, options ...ChainCallOption) (string, error) {
+// Run can be used to execute a chain if the chain only expects one input and one
+// string output.
+func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (string, error) {
 	inputKeys := c.GetInputKeys()
 	if len(inputKeys) != 1 {
 		return "", ErrMultipleInputsInRun
@@ -79,6 +79,26 @@ func Run(ctx context.Context, c Chain, input string, options ...ChainCallOption)
 	outputValue, ok := outputValues[outputKeys[0]].(string)
 	if !ok {
 		return "", ErrWrongOutputTypeInRun
+	}
+
+	return outputValue, nil
+}
+
+// Predict can be used to execute a chain if the chain only expects one string output.
+func Predict(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (string, error) {
+	outputValues, err := Call(ctx, c, inputValues, options...)
+	if err != nil {
+		return "", err
+	}
+
+	outputKeys := c.GetOutputKeys()
+	if len(outputKeys) != 1 {
+		return "", ErrMultipleOutputsInPredict
+	}
+
+	outputValue, ok := outputValues[outputKeys[0]].(string)
+	if !ok {
+		return "", ErrOutputNotStringInPredict
 	}
 
 	return outputValue, nil

@@ -45,7 +45,7 @@ snow_depth	Instant	meters	Snow depth on the ground
 freezinglevel_height	Instant	meters	Altitude above sea level of the 0°C level
 visibility	Instant	meters	Viewing distance in meters. Influenced by low clouds, humidity and aerosols. Maximum visibility is approximately 24 km.`
 
-func TestLLMAPI(t *testing.T) {
+func TestAPI(t *testing.T) {
 	t.Parallel()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
@@ -57,7 +57,7 @@ func TestLLMAPI(t *testing.T) {
 	chain := NewAPIChain(llm, http.DefaultClient)
 	q := map[string]any{
 		"api_docs": MeteoDocs,
-		"question": "What is the weather of [latitude:52.52, longitude:13.419998]?",
+		"question": "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
 	}
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
@@ -66,5 +66,5 @@ func TestLLMAPI(t *testing.T) {
 	if !ok {
 		t.Fatal("expected answer to be a string")
 	}
-	require.True(t, strings.Contains(answer, "weather"), `result does not contain the keyword 'weather'`)
+	require.True(t, strings.Contains(answer, "temperature"), `result does not contain the keyword 'temperature'`)
 }

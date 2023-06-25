@@ -25,7 +25,10 @@ var (
 	// a value that is not a string.
 	ErrWrongOutputTypeInRun = errors.New("run not supported in chain that returns value that is not string")
 
-	// ErrOutputNotStringInPredict is returned if the output parser in the llm chain
-	// returns a value that is not a string in the llm chain.
-	ErrOutputNotStringInPredict = errors.New("predict is not supported with a llm chain that does not return a string")
+	// ErrOutputNotStringInPredict is returned if a chain does not return a string
+	// in the predict function.
+	ErrOutputNotStringInPredict = errors.New("predict is not supported with a chain that does not return a string")
+	// ErrMultipleOutputsInPredict is returned if a chain has multiple return values
+	// in predict.
+	ErrMultipleOutputsInPredict = errors.New("predict is not supported with a chain that returns multiple values")
 )
