@@ -102,7 +102,8 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	}
 
 	// Predict sql query
-	out, err := Call(ctx, s.LLMChain, llmInputs, WithStopWords([]string{stopWord}))
+	opt := append(options, WithStopWords([]string{stopWord}))
+	out, err := Call(ctx, s.LLMChain, llmInputs, opt...)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 
 	// Generate answer
 	llmInputs["input"] = query + queryPrefixWith + sqlQuery + stopWord + queryResult
-	out, err = Call(ctx, s.LLMChain, llmInputs)
+	out, err = Call(ctx, s.LLMChain, llmInputs, options...)
 	if err != nil {
 		return nil, err
 	}
