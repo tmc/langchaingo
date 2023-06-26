@@ -42,8 +42,8 @@ func Test(t *testing.T) {
 	require.NoError(t, err)
 
 	desc = strings.TrimSpace(desc)
-	require.True(t, 0 == strings.Index(desc, "CREATE TABLE"))
-	require.True(t, strings.Contains(desc, "Activity"))  //nolint:stylecheck
-	require.True(t, strings.Contains(desc, "Activity1")) //nolint:stylecheck
-	require.True(t, strings.Contains(desc, "Activity2")) //nolint:stylecheck
+	require.True(t, 0 == strings.Index(desc, "CREATE TABLE")) //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity"))       //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity1"))      //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity2"))      //nolint:stylecheck
 }
