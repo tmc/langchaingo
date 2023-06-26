@@ -64,7 +64,7 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 // Outputs
 //
 //	"result" : with the result of the query.
-func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) {
+func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
 	query, ok := inputs["query"].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
@@ -73,7 +73,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	var tables []string
 	if ts, ok := inputs["table_names_to_use"]; ok {
 		tables = make([]string, 0, len(s.Database.TableNames()))
-		strs := strings.Split(ts.(string), ",")
+		strs := strings.Split(ts.(string), ",") //nolint:forcetypeassert
 		for _, s := range strs {
 			s = strings.TrimSpace(s)
 			if len(s) > 0 {

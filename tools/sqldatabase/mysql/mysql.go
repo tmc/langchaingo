@@ -30,7 +30,7 @@ func NewMySQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(32)
+	db.SetMaxOpenConns(32) //nolint:gomnd
 
 	return &MySQL{
 		db: db,
@@ -41,7 +41,7 @@ func (m MySQL) Dialect() string {
 	return EngineName
 }
 
-func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
+func (m MySQL) Query(ctx context.Context, query string, args ...any) ([]string, [][]string, error) {
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, nil, err
@@ -50,10 +50,11 @@ func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []str
 		return nil, nil, err
 	}
 	defer rows.Close()
-	cols, err = rows.Columns()
+	cols, err := rows.Columns()
 	if err != nil {
 		return nil, nil, err
 	}
+	results := make([][]string, 0)
 	for rows.Next() {
 		row := make([]string, len(cols))
 		rowPtrs := make([]interface{}, len(cols))
@@ -66,7 +67,7 @@ func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []str
 		}
 		results = append(results, row)
 	}
-	return
+	return cols, results, nil
 }
 
 func (m MySQL) TableNames(ctx context.Context) ([]string, error) {
@@ -87,13 +88,13 @@ func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", sqldatabase.ErrorTableNotFound
+		return "", sqldatabase.ErrTableNotFound
 	}
-	if len(result[0]) < 2 {
+	if len(result[0]) < 2 { //nolint:gomnd
 		return "", sqldatabase.ErrInvalidResult
 	}
 
-	return result[0][1], nil
+	return result[0][1], nil //nolint:gomnd
 }
 
 func (m MySQL) Close() error {

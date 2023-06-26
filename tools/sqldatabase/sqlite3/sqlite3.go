@@ -12,35 +12,35 @@ const EngineName = "sqlite3"
 
 //nolint:gochecknoinits
 func init() {
-	sqldatabase.RegisterEngine(EngineName, NewSQLite)
+	sqldatabase.RegisterEngine(EngineName, NewSQLite3)
 }
 
-var _ sqldatabase.Engine = SQLite{}
+var _ sqldatabase.Engine = SQLite3{}
 
-// SQLite is a SQLite engine.
-type SQLite struct {
+// SQLite3 is a SQLite3 engine.
+type SQLite3 struct {
 	db *sql.DB
 }
 
-// NewSQLite creates a new SQLite engine.
+// NewSQLite3 creates a new SQLite3 engine.
 // The dsn is the data source name.(e.g. file:locked.sqlite?cache=shared).
-func NewSQLite(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
+func NewSQLite3(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 	db, err := sql.Open(EngineName, dsn)
 	if err != nil {
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
 
-	return &SQLite{
+	return &SQLite3{
 		db: db,
 	}, nil
 }
 
-func (m SQLite) Dialect() string {
+func (m SQLite3) Dialect() string {
 	return EngineName
 }
 
-func (m SQLite) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
+func (m SQLite3) Query(ctx context.Context, query string, args ...any) ([]string, [][]string, error) {
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, nil, err
@@ -49,10 +49,11 @@ func (m SQLite) Query(ctx context.Context, query string, args ...any) (cols []st
 		return nil, nil, err
 	}
 	defer rows.Close()
-	cols, err = rows.Columns()
+	cols, err := rows.Columns()
 	if err != nil {
 		return nil, nil, err
 	}
+	results := make([][]string, 0)
 	for rows.Next() {
 		row := make([]string, len(cols))
 		rowPtrs := make([]interface{}, len(cols))
@@ -65,10 +66,10 @@ func (m SQLite) Query(ctx context.Context, query string, args ...any) (cols []st
 		}
 		results = append(results, row)
 	}
-	return
+	return cols, results, nil
 }
 
-func (m SQLite) TableNames(ctx context.Context) ([]string, error) {
+func (m SQLite3) TableNames(ctx context.Context) ([]string, error) {
 	_, result, err := m.Query(ctx, "SELECT name FROM sqlite_master WHERE type='table';")
 	if err != nil {
 		return nil, err
@@ -80,13 +81,13 @@ func (m SQLite) TableNames(ctx context.Context) ([]string, error) {
 	return ret, nil
 }
 
-func (m SQLite) TableInfo(ctx context.Context, table string) (string, error) {
+func (m SQLite3) TableInfo(ctx context.Context, table string) (string, error) {
 	_, result, err := m.Query(ctx, "SELECT sql FROM sqlite_master WHERE type='table' AND name=?;", table)
 	if err != nil {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", sqldatabase.ErrorTableNotFound
+		return "", sqldatabase.ErrTableNotFound
 	}
 	if len(result[0]) < 1 {
 		return "", sqldatabase.ErrInvalidResult
@@ -95,6 +96,6 @@ func (m SQLite) TableInfo(ctx context.Context, table string) (string, error) {
 	return result[0][0], nil
 }
 
-func (m SQLite) Close() error {
+func (m SQLite3) Close() error {
 	return m.db.Close()
 }

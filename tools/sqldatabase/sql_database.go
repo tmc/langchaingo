@@ -39,8 +39,8 @@ type Engine interface {
 var (
 	ErrUnknownDialect = fmt.Errorf("unknown dialect")
 
-	ErrorTableNotFound = fmt.Errorf("table not found")
-	ErrInvalidResult   = fmt.Errorf("invalid result")
+	ErrTableNotFound = fmt.Errorf("table not found")
+	ErrInvalidResult = fmt.Errorf("invalid result")
 )
 
 // SQLDatabase sql wrapper.
@@ -54,9 +54,9 @@ type SQLDatabase struct {
 func NewSQLDatabase(engine Engine, ignoreTables map[string]struct{}) (*SQLDatabase, error) {
 	sd := &SQLDatabase{
 		Engine:           engine,
-		SampleRowsNumber: 3,
+		SampleRowsNumber: 3, //nolint:gomnd
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint:gomnd
 	defer cancel()
 	tbs, err := engine.TableNames(ctx)
 	if err != nil {

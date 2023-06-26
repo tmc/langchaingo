@@ -32,10 +32,11 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	require.NoError(t, err)
 
 	chain := NewSQLDatabaseChain(llm, 5, db)
-	result, err := chain.Call(context.Background(),
-		map[string]interface{}{
-			"query":              "总共有几张卡牌",
-			"table_names_to_use": "AllianceAuthority,AllianceGift,Card"})
+	input := map[string]interface{}{
+		"query":              "总共有几张卡牌",
+		"table_names_to_use": "AllianceAuthority,AllianceGift,Card",
+	}
+	result, err := chain.Call(context.Background(), input)
 	require.NoError(t, err)
 
 	ret, ok := result["result"].(string)
