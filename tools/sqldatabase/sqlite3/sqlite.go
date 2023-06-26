@@ -11,6 +11,7 @@ import (
 
 const name = "sqlite3"
 
+//nolint:gochecknoinits
 func init() {
 	sqldatabase.RegisterEngine(name, NewSQLite)
 }
@@ -23,7 +24,7 @@ type SQLite struct {
 }
 
 // NewSQLite creates a new SQLite engine.
-// The dsn is the data source name.(e.g. file:locked.sqlite?cache=shared)
+// The dsn is the data source name.(e.g. file:locked.sqlite?cache=shared).
 func NewSQLite(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 	db, err := sql.Open(name, dsn)
 	if err != nil {
@@ -43,6 +44,9 @@ func (m SQLite) Dialect() string {
 func (m SQLite) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := rows.Err(); err != nil {
 		return nil, nil, err
 	}
 	defer rows.Close()
@@ -83,10 +87,10 @@ func (m SQLite) TableInfo(ctx context.Context, table string) (string, error) {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", fmt.Errorf("table %s not found", table)
+		return "", fmt.Errorf("table not found")
 	}
 	if len(result[0]) < 1 {
-		return "", fmt.Errorf("invalid result %v", result)
+		return "", fmt.Errorf("invalid result")
 	}
 
 	return result[0][0], nil

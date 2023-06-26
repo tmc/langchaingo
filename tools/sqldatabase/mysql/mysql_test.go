@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/tmc/langchaingo/tools/sqldatabase"
 	_ "github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 
 	"github.com/joho/godotenv"

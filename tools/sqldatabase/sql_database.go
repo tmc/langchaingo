@@ -10,6 +10,7 @@ import (
 // EngineFunc is the function that returns the database engine.
 type EngineFunc func(string) (Engine, error)
 
+//nolint:gochecknoglobals
 var engines = make(map[string]EngineFunc)
 
 func RegisterEngine(name string, engineFunc EngineFunc) {
@@ -68,7 +69,7 @@ func NewSQLDatabase(engine Engine, ignoreTables map[string]struct{}) (*SQLDataba
 func NewSQLDatabaseWithDSN(dialect, dsn string, ignoreTables map[string]struct{}) (*SQLDatabase, error) {
 	engineFunc, ok := engines[dialect]
 	if !ok {
-		return nil, fmt.Errorf("unknown dialect %s", dialect)
+		return nil, fmt.Errorf("unknown dialect")
 	}
 	engine, err := engineFunc(dsn)
 	if err != nil {

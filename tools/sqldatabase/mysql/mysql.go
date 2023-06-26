@@ -11,6 +11,7 @@ import (
 
 const EnginName = "mysql"
 
+//nolint:gochecknoinits
 func init() {
 	sqldatabase.RegisterEngine(EnginName, NewMySQL)
 }
@@ -23,7 +24,7 @@ type MySQL struct {
 }
 
 // NewMySQL creates a new MySQL engine.
-// The dsn is the data source name.(e.g. root:password@tcp(localhost:3306)/test)
+// The dsn is the data source name.(e.g. root:password@tcp(localhost:3306)/test).
 func NewMySQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 	db, err := sql.Open(EnginName, dsn)
 	if err != nil {
@@ -43,6 +44,9 @@ func (m MySQL) Dialect() string {
 func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := rows.Err(); err != nil {
 		return nil, nil, err
 	}
 	defer rows.Close()
@@ -83,10 +87,10 @@ func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", fmt.Errorf("table %s not found", table)
+		return "", fmt.Errorf("table not found")
 	}
 	if len(result[0]) < 2 {
-		return "", fmt.Errorf("invalid result %v", result)
+		return "", fmt.Errorf("invalid result")
 	}
 
 	return result[0][1], nil
