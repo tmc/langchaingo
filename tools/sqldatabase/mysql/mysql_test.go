@@ -11,6 +11,8 @@ import (
 )
 
 func Test(t *testing.T) {
+	t.Parallel()
+
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {

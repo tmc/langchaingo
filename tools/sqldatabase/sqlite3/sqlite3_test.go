@@ -13,6 +13,8 @@ import (
 )
 
 func Test(t *testing.T) {
+	t.Parallel()
+
 	const dsn = `test.sqlite`
 	os.Remove(dsn)
 	defer os.Remove(dsn)
@@ -41,7 +43,7 @@ func Test(t *testing.T) {
 
 	desc = strings.TrimSpace(desc)
 	require.True(t, 0 == strings.Index(desc, "CREATE TABLE"))
-	require.True(t, strings.Contains(desc, "Activity"))
-	require.True(t, strings.Contains(desc, "Activity1"))
-	require.True(t, strings.Contains(desc, "Activity2"))
+	require.True(t, strings.Contains(desc, "Activity"))  //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity1")) //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity2")) //nolint:stylecheck
 }
