@@ -7,4 +7,9 @@ coverage.out
 # macOS Specific
 .DS_Store
 
+# IDE
 .idea
+.vscode
+
+# dev
+.env
