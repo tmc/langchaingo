@@ -23,9 +23,9 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQLURI")
+	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
-		t.Skip("LANGCHAINGO_TEST_MYSQL_URI not set")
+		t.Skip("LANGCHAINGO_TEST_MYSQL not set")
 	}
 	engine, err := mysql.NewMySQL(mysqlURI)
 	require.NoError(t, err)
@@ -34,10 +34,11 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	require.NoError(t, err)
 
 	chain := NewSQLDatabaseChain(llm, 5, db)
-	result, err := chain.Call(context.Background(), map[string]interface{}{"query": "总共有几张卡牌", "table_names_to_use": "Card"})
+	result, err := chain.Call(context.Background(), map[string]interface{}{"query": "总共有几张卡牌", "table_names_to_use": "AllianceAuthority,AllianceGift,Card"})
 	require.NoError(t, err)
 
-	ret := result["result"].(string)
+	ret, ok := result["result"].(string)
+	require.True(t, ok)
 	require.Greater(t, len(ret), 0)
 
 	t.Log(ret)

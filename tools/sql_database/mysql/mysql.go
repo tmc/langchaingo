@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/tmc/langchaingo/tools/sql_database"
@@ -74,16 +75,17 @@ func (m MySQL) TableNames(ctx context.Context) ([]string, error) {
 	return ret, nil
 }
 
-func (m MySQL) TableInfo(ctx context.Context, tables []string) ([]string, error) {
-	ret := make([]string, 0, len(tables))
-
-	for _, table := range tables {
-		_, result, err := m.Query(ctx, "SHOW CREATE TABLE "+table)
-		if err != nil {
-			return nil, err
-		}
-		ret = append(ret, result[0][1])
+func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
+	_, result, err := m.Query(ctx, "SHOW CREATE TABLE "+table)
+	if err != nil {
+		return "", err
+	}
+	if len(result) == 0 {
+		return "", fmt.Errorf("table %s not found", table)
+	}
+	if len(result[0]) < 2 {
+		return "", fmt.Errorf("invalid result %v", result)
 	}
 
-	return ret, nil
+	return result[0][1], nil
 }

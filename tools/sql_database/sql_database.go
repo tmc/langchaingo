@@ -27,7 +27,7 @@ type Engine interface {
 
 	// TableInfo returns the table information of the database.
 	// Typically, it returns the CREATE TABLE statement.
-	TableInfo(ctx context.Context, tables []string) ([]string, error)
+	TableInfo(ctx context.Context, tables string) (string, error)
 }
 
 // SQLDatabase is a database that can execute sql query.
@@ -86,25 +86,26 @@ func (sd *SQLDatabase) TableInfo(ctx context.Context, tables []string) (string, 
 	if len(tables) == 0 {
 		tables = sd.allTables
 	}
-	infos, err := sd.Engine.TableInfo(ctx, tables)
-	if err != nil {
-		return "", err
-	}
-
-	if sd.SampleRowsNumber <= 0 {
-		return strings.Join(infos, "\n\n"), nil
-	}
-
-	strs := ""
-	for _, info := range infos {
-		sampleRows, err := sd.sampleRows(ctx, tables[0], sd.SampleRowsNumber)
+	str := ""
+	for _, tb := range tables {
+		// Get table info
+		info, err := sd.Engine.TableInfo(ctx, tb)
 		if err != nil {
 			return "", err
 		}
-		strs += info + "\n\n/*" + sampleRows + "*/"
+		str += info + "\n\n"
+
+		// Get sample rows
+		if sd.SampleRowsNumber > 0 {
+			sampleRows, err := sd.sampleRows(ctx, tb, sd.SampleRowsNumber)
+			if err != nil {
+				return "", err
+			}
+			str += "/*\n" + sampleRows + "*/ \n\n"
+		}
 	}
 
-	return strings.Join(infos, "\n\n"), nil
+	return str, nil
 }
 
 // Query executes the query and returns the string that contains columns and results.
@@ -127,7 +128,7 @@ func (sd *SQLDatabase) sampleRows(ctx context.Context, table string, rows int) (
 	if err != nil {
 		return "", err
 	}
-	ret := fmt.Sprintf(`%d rows from %s table:\n`, rows, table)
+	ret := fmt.Sprintf("%d rows from %s table:\n", rows, table)
 	ret += result
 	return ret, nil
 }
