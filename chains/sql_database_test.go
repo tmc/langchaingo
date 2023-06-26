@@ -5,15 +5,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/tools/sqldatabase"
 	"github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
-	godotenv.Overload()
-
 	t.Parallel()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
@@ -22,6 +20,7 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
+	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
 		t.Skip("LANGCHAINGO_TEST_MYSQL not set")

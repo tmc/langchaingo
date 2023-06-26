@@ -5,21 +5,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 	_ "github.com/tmc/langchaingo/tools/sqldatabase/mysql"
-
-	"github.com/joho/godotenv"
-	"github.com/stretchr/testify/require"
-)
-
-var (
-	ctx = context.Background()
 )
 
 func Test(t *testing.T) {
-	// Same as export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
-	godotenv.Overload()
-
+	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
 		t.Skip("LANGCHAINGO_TEST_MYSQL not set")
@@ -30,7 +22,7 @@ func Test(t *testing.T) {
 	tbs := db.TableNames()
 	require.Greater(t, len(tbs), 0)
 
-	desc, err := db.TableInfo(ctx, tbs)
+	desc, err := db.TableInfo(context.Background(), tbs)
 	require.NoError(t, err)
 
 	t.Log(desc)
