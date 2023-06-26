@@ -40,7 +40,7 @@ type HTTPRequester interface {
 	Get(url string) (resp *http.Response, err error)
 }
 
-// APIChain is a chain used for request api.
+// APIChain is a chain used for letting llms interact with APIs.
 type APIChain struct {
 	RequestChain *LLMChain
 	AnswerChain  *LLMChain
@@ -49,7 +49,7 @@ type APIChain struct {
 
 // NewAPIChain creates a chain that makes API calls base the docs and
 // summarizes the responses to answer a question.
-func NewAPIChain(llm llms.LLM, requester HTTPRequester) APIChain {
+func NewAPIChain(llm llms.LanguageModel, requester HTTPRequester) APIChain {
 	reqP := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "question"})
 	reqC := NewLLMChain(llm, reqP)
 
@@ -63,7 +63,7 @@ func NewAPIChain(llm llms.LLM, requester HTTPRequester) APIChain {
 	}
 }
 
-// Call call api chain.
+// Call handles the inner logic of the api chain.
 // Input: api_docs, question.
 // Output: answer.
 func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...ChainCallOption) (map[string]any, error) {

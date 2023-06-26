@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	llm, err := vertexai.New()
+	llm, err := vertexai.NewChat()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,17 +21,19 @@ func main() {
 	fmt.Println("---ASK---")
 	fmt.Println(question.GetText())
 	messages := []schema.ChatMessage{question}
-	completion, err := llm.Chat(ctx, messages)
+	completion, err := llm.Call(ctx, messages)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	response := completion.Message
+	response := completion
 	fmt.Println("---RESPONSE---")
-	fmt.Println(response.GetText())
+	fmt.Println(response)
 
 	// keep track of conversation
-	messages = append(messages, response)
+	messages = append(messages, &schema.AIChatMessage{
+		Text: response,
+	})
 
 	question = schema.HumanChatMessage{
 		Text: "Any other recommendation on how to get started with the company ?",
@@ -40,12 +42,12 @@ func main() {
 	fmt.Println(question.GetText())
 	messages = append(messages, question)
 
-	completion, err = llm.Chat(ctx, messages)
+	completion, err = llm.Call(ctx, messages)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	response = completion.Message
+	response = completion
 	fmt.Println("---RESPONSE---")
-	fmt.Println(response.GetText())
+	fmt.Println(response)
 }

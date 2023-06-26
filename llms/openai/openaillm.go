@@ -70,7 +70,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		TopP:             float32(opts.TopP),
 		Stream:           opts.StreamingFunc != nil,
 		Stop:             opts.StopWords,
-		FrequencyPenalty: float32(opts.RepetitionPenalty),
+		N:                opts.N,
+		FrequencyPenalty: float32(opts.FrequencyPenalty),
+		PresencePenalty:  float32(opts.PresencePenalty),
 	}
 
 	generations := make([]*llms.Generation, 0, len(prompts))
@@ -128,7 +130,7 @@ func (o *LLM) createCompletionStream(ctx context.Context, request openai.Complet
 	return &llms.Generation{
 		Text: output,
 		GenerationInfo: map[string]any{
-			"finishReason": finishReason,
+			"FinishReason": finishReason,
 		},
 	}, nil
 }
@@ -148,7 +150,10 @@ func (o *LLM) createCompletion(ctx context.Context, request openai.CompletionReq
 	return &llms.Generation{
 		Text: text,
 		GenerationInfo: map[string]any{
-			"finishReason": finishReason,
+			"CompletionTokens": resp.Usage.CompletionTokens,
+			"PromptTokens":     resp.Usage.PromptTokens,
+			"TotalTokens":      resp.Usage.TotalTokens,
+			"FinishReason":     finishReason,
 		},
 	}, nil
 }
@@ -243,7 +248,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		TopP:             float32(opts.TopP),
 		Stream:           opts.StreamingFunc != nil,
 		Stop:             opts.StopWords,
-		FrequencyPenalty: float32(opts.RepetitionPenalty),
+		N:                opts.N,
+		FrequencyPenalty: float32(opts.FrequencyPenalty),
+		PresencePenalty:  float32(opts.PresencePenalty),
 	}
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
@@ -328,7 +335,7 @@ func (o *Chat) createChatCompletionStream(ctx context.Context, request openai.Ch
 			Text: text,
 		},
 		GenerationInfo: map[string]any{
-			"finishReason": finishReason,
+			"FinishReason": finishReason,
 		},
 	}, nil
 }
@@ -350,7 +357,10 @@ func (o *Chat) createChatCompletion(ctx context.Context, request openai.ChatComp
 			Text: text,
 		},
 		GenerationInfo: map[string]any{
-			"finishReason": finishReason,
+			"CompletionTokens": resp.Usage.CompletionTokens,
+			"PromptTokens":     resp.Usage.PromptTokens,
+			"TotalTokens":      resp.Usage.TotalTokens,
+			"FinishReason":     finishReason,
 		},
 	}, nil
 }

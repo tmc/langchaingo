@@ -1,8 +1,11 @@
-module basic-llm-example
+module pinecone-vectorstore-example
 
-go 1.19
+go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20230625081011-4d9d55dbcaba
+require (
+	github.com/google/uuid v1.3.0
+	github.com/tmc/langchaingo v0.0.0-20230625081011-4d9d55dbcaba
+)
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
@@ -16,9 +19,10 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/s2a-go v0.1.3 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2 // indirect
+	github.com/pinecone-io/go-pinecone v0.3.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect

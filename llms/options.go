@@ -28,8 +28,14 @@ type CallOptions struct {
 	MinLength int `json:"min_length"`
 	// MaxLength is the maximum length of the generated text.
 	MaxLength int `json:"max_length"`
+	// N is how many chat completion choices to generate for each input message.
+	N int `json:"n"`
 	// RepetitionPenalty is the repetition penalty for sampling.
 	RepetitionPenalty float64 `json:"repetition_penalty"`
+	// FrequencyPenalty is the frequency penalty for sampling.
+	FrequencyPenalty float64 `json:"frequency_penalty"`
+	// PresencePenalty is the presence penalty for sampling.
+	PresencePenalty float64 `json:"presence_penalty"`
 }
 
 // WithModel is an option for LLM.Call.
@@ -109,9 +115,30 @@ func WithMaxLength(maxLength int) CallOption {
 	}
 }
 
+// WithN will add an option to set how many chat completion choices to generate for each input message.
+func WithN(n int) CallOption {
+	return func(o *CallOptions) {
+		o.N = n
+	}
+}
+
 // WithRepetitionPenalty will add an option to set the repetition penalty for sampling.
 func WithRepetitionPenalty(repetitionPenalty float64) CallOption {
 	return func(o *CallOptions) {
 		o.RepetitionPenalty = repetitionPenalty
+	}
+}
+
+// WithFrequencyPenalty will add an option to set the frequency penalty for sampling.
+func WithFrequencyPenalty(frequencyPenalty float64) CallOption {
+	return func(o *CallOptions) {
+		o.FrequencyPenalty = frequencyPenalty
+	}
+}
+
+// WithPresencePenalty will add an option to set the presence penalty for sampling.
+func WithPresencePenalty(presencePenalty float64) CallOption {
+	return func(o *CallOptions) {
+		o.PresencePenalty = presencePenalty
 	}
 }
