@@ -9,11 +9,11 @@ import (
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
-const EnginName = "mysql"
+const EngineName = "mysql"
 
 //nolint:gochecknoinits
 func init() {
-	sqldatabase.RegisterEngine(EnginName, NewMySQL)
+	sqldatabase.RegisterEngine(EngineName, NewMySQL)
 }
 
 var _ sqldatabase.Engine = MySQL{}
@@ -26,7 +26,7 @@ type MySQL struct {
 // NewMySQL creates a new MySQL engine.
 // The dsn is the data source name.(e.g. root:password@tcp(localhost:3306)/test).
 func NewMySQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
-	db, err := sql.Open(EnginName, dsn)
+	db, err := sql.Open(EngineName, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func NewMySQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 }
 
 func (m MySQL) Dialect() string {
-	return EnginName
+	return EngineName
 }
 
 func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
@@ -87,10 +87,10 @@ func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", fmt.Errorf("table not found")
+		return "", sqldatabase.ErrorTableNotFound
 	}
 	if len(result[0]) < 2 {
-		return "", fmt.Errorf("invalid result")
+		return "", sqldatabase.ErrInvalidResult
 	}
 
 	return result[0][1], nil

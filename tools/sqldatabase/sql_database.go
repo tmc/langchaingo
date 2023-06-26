@@ -36,6 +36,13 @@ type Engine interface {
 	Close() error
 }
 
+var (
+	ErrUnknownDialect = fmt.Errorf("unknown dialect")
+
+	ErrorTableNotFound = fmt.Errorf("table not found")
+	ErrInvalidResult   = fmt.Errorf("invalid result")
+)
+
 // SQLDatabase sql wrapper.
 type SQLDatabase struct {
 	Engine           Engine // The database engine.
@@ -69,7 +76,7 @@ func NewSQLDatabase(engine Engine, ignoreTables map[string]struct{}) (*SQLDataba
 func NewSQLDatabaseWithDSN(dialect, dsn string, ignoreTables map[string]struct{}) (*SQLDatabase, error) {
 	engineFunc, ok := engines[dialect]
 	if !ok {
-		return nil, fmt.Errorf("unknown dialect")
+		return nil, ErrUnknownDialect
 	}
 	engine, err := engineFunc(dsn)
 	if err != nil {

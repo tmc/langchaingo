@@ -3,17 +3,16 @@ package sqlite3
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	_ "github.com/mattn/go-sqlite3" // sqlite3 driver
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
-const name = "sqlite3"
+const EngineName = "sqlite3"
 
 //nolint:gochecknoinits
 func init() {
-	sqldatabase.RegisterEngine(name, NewSQLite)
+	sqldatabase.RegisterEngine(EngineName, NewSQLite)
 }
 
 var _ sqldatabase.Engine = SQLite{}
@@ -26,7 +25,7 @@ type SQLite struct {
 // NewSQLite creates a new SQLite engine.
 // The dsn is the data source name.(e.g. file:locked.sqlite?cache=shared).
 func NewSQLite(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
-	db, err := sql.Open(name, dsn)
+	db, err := sql.Open(EngineName, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +37,7 @@ func NewSQLite(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 }
 
 func (m SQLite) Dialect() string {
-	return name
+	return EngineName
 }
 
 func (m SQLite) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
@@ -87,10 +86,10 @@ func (m SQLite) TableInfo(ctx context.Context, table string) (string, error) {
 		return "", err
 	}
 	if len(result) == 0 {
-		return "", fmt.Errorf("table not found")
+		return "", sqldatabase.ErrorTableNotFound
 	}
 	if len(result[0]) < 1 {
-		return "", fmt.Errorf("invalid result")
+		return "", sqldatabase.ErrInvalidResult
 	}
 
 	return result[0][0], nil

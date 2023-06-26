@@ -13,7 +13,7 @@ import (
 )
 
 //nolint:lll
-const _defaultSqlTemplate = `Given an input question, first create a syntactically correct {{.dialect}} query to run, then look at the results of the query and return the answer. Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {{.top_k}} results. You can order the results by a relevant column to return the most interesting examples in the database.
+const _defaultSQLTemplate = `Given an input question, first create a syntactically correct {{.dialect}} query to run, then look at the results of the query and return the answer. Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {{.top_k}} results. You can order the results by a relevant column to return the most interesting examples in the database.
 
 Never query for all the columns from a specific table, only ask for a the few relevant columns given the question.
 
@@ -29,7 +29,7 @@ Answer: Final answer here
 `
 
 //nolint:lll
-const _defaultSqlSuffix = `Only use the following tables:
+const _defaultSQLSuffix = `Only use the following tables:
 {{.table_info}}
 
 Question: {{.input}}`
@@ -44,7 +44,8 @@ type SQLDatabaseChain struct {
 // NewSQLDatabaseChain creates a new SQLDatabaseChain.
 // The topK is the max number of results to return.
 func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase.SQLDatabase) *SQLDatabaseChain {
-	p := prompts.NewPromptTemplate(_defaultSqlTemplate+_defaultSqlSuffix, []string{"dialect", "top_k", "table_info", "input"})
+	p := prompts.NewPromptTemplate(_defaultSQLTemplate+_defaultSQLSuffix,
+		[]string{"dialect", "top_k", "table_info", "input"})
 	c := NewLLMChain(llm, p)
 	return &SQLDatabaseChain{
 		LLMChain: c,
@@ -57,7 +58,8 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 // Inputs:
 //
 //	"query" : key with the query to run.
-//	"table_names_to_use" (optionally): the only table names(others will be ignored) to use with a comma separated list of.
+//	"table_names_to_use" (optionally): the only table names(others will be ignored)
+//		to use with a comma separated list of.
 //
 // Outputs
 //
@@ -68,8 +70,9 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
 
-	tables := make([]string, 0, len(s.Database.TableNames()))
+	var tables []string
 	if ts, ok := inputs["table_names_to_use"]; ok {
+		tables = make([]string, 0, len(s.Database.TableNames()))
 		strs := strings.Split(ts.(string), ",")
 		for _, s := range strs {
 			s = strings.TrimSpace(s)
@@ -77,7 +80,8 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 				tables = append(tables, s)
 			}
 		}
-
+	} else {
+		tables = nil
 	}
 
 	// Get tables infos
@@ -87,8 +91,8 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	}
 
 	const (
-		queryPrefixWith = "\nSQLQuery:"
-		stopWord        = "\nSQLResult:"
+		queryPrefixWith = "\nSQLQuery:"  //nolint:gosec
+		stopWord        = "\nSQLResult:" //nolint:gosec
 	)
 	llmInputs := map[string]any{
 		"input":      query + queryPrefixWith,
@@ -102,7 +106,11 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	if err != nil {
 		return nil, err
 	}
-	sqlQuery := strings.TrimSpace(out["text"].(string))
+	sqlQuery, ok := out["text"].(string)
+	if !ok {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidOutputValues, "text")
+	}
+	sqlQuery = strings.TrimSpace(sqlQuery)
 
 	// Execute sql query
 	queryResult, err := s.Database.Query(ctx, sqlQuery)
@@ -116,7 +124,10 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	if err != nil {
 		return nil, err
 	}
-	result := out["text"].(string)
+	result, ok := out["text"].(string)
+	if !ok {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidOutputValues, "text")
+	}
 	// Hack answer string
 	strs := strings.Split(strings.Split(result, "\n\n")[0], "Answer:")
 	result = strs[0]
