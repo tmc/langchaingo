@@ -15,7 +15,10 @@ type Tool struct {
 var _ tools.Tool = Tool{}
 
 func New() (*Tool, error) {
-	return &Tool{}, nil
+	maxResults := 5
+	return &Tool{
+		client: internal.New(maxResults),
+	}, nil
 }
 
 func (t Tool) Name() string {
@@ -29,8 +32,8 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
-func (t Tool) Call(_ context.Context, input string) (string, error) {
-	result, err := t.client.Search(input)
+func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good DuckDuckGo Search Results was found", nil
