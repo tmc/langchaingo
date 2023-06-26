@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 )
 
+// EngineFunc is the function that returns the database engine.
 type EngineFunc func(string) (Engine, error)
 
 var engines = make(map[string]EngineFunc)
@@ -20,7 +22,7 @@ type Engine interface {
 	Dialect() string
 
 	// Query executes the query and returns the columns and results.
-	Query(ctx context.Context, query string) (cols []string, results [][]string, err error)
+	Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error)
 
 	// TableNames returns all the table names of the database.
 	TableNames(ctx context.Context) ([]string, error)
@@ -28,9 +30,12 @@ type Engine interface {
 	// TableInfo returns the table information of the database.
 	// Typically, it returns the CREATE TABLE statement.
 	TableInfo(ctx context.Context, tables string) (string, error)
+
+	// Close closes the database.
+	Close() error
 }
 
-// SQLDatabase is a database that can execute sql query.
+// SQLDatabase sql wrapper.
 type SQLDatabase struct {
 	Engine           Engine // The database engine.
 	SampleRowsNumber int    // The number of sample rows to show. 0 means no sample rows.
@@ -43,7 +48,9 @@ func NewSQLDatabase(engine Engine, ignoreTables map[string]struct{}) (*SQLDataba
 		Engine:           engine,
 		SampleRowsNumber: 3,
 	}
-	tbs, err := engine.TableNames(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	tbs, err := engine.TableNames(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +127,11 @@ func (sd *SQLDatabase) Query(ctx context.Context, query string) (string, error) 
 		str += strings.Join(row, "\t") + "\n"
 	}
 	return str, nil
+}
+
+// Close closes the database.
+func (sd *SQLDatabase) Close() error {
+	return sd.Engine.Close()
 }
 
 func (sd *SQLDatabase) sampleRows(ctx context.Context, table string, rows int) (string, error) {

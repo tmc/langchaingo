@@ -117,7 +117,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 		return nil, err
 	}
 	// Hack answer string
-	strs := strings.Split(strings.Split(result, "\n")[0], "Answer:")
+	strs := strings.Split(strings.Split(result, "\n\n")[0], "Answer:")
 	result = strs[0]
 	if len(strs) > 1 {
 		result = strings.TrimSpace(strs[1])

@@ -2,8 +2,6 @@ package mysql_test
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -19,14 +17,14 @@ var (
 )
 
 func Test(t *testing.T) {
-	err := godotenv.Overload()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Same as export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
+	godotenv.Overload()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s",
-		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_DATABASE"))
-	db, err := sql_database.NewSQLDatabaseWithDSN("mysql", dsn, nil)
+	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
+	if mysqlURI == "" {
+		t.Skip("LANGCHAINGO_TEST_MYSQL not set")
+	}
+	db, err := sql_database.NewSQLDatabaseWithDSN("mysql", mysqlURI, nil)
 	require.NoError(t, err)
 
 	tbs := db.TableNames()

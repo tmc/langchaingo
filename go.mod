@@ -64,6 +64,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/google/go-cmp v0.5.9
 	github.com/joho/godotenv v1.3.0
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
 	github.com/weaviate/weaviate v1.19.0

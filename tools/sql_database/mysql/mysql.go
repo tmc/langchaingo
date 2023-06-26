@@ -9,8 +9,10 @@ import (
 	"github.com/tmc/langchaingo/tools/sql_database"
 )
 
+const EnginName = "mysql"
+
 func init() {
-	sql_database.RegisterEngine("mysql", NewMySQL)
+	sql_database.RegisterEngine(EnginName, NewMySQL)
 }
 
 var _ sql_database.Engine = MySQL{}
@@ -23,7 +25,7 @@ type MySQL struct {
 // NewMySQL creates a new MySQL engine.
 // The dsn is the data source name.(e.g. root:password@tcp(localhost:3306)/test)
 func NewMySQL(dsn string) (sql_database.Engine, error) { //nolint:ireturn
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open(EnginName, dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -35,11 +37,11 @@ func NewMySQL(dsn string) (sql_database.Engine, error) { //nolint:ireturn
 }
 
 func (m MySQL) Dialect() string {
-	return "mysql"
+	return EnginName
 }
 
-func (m MySQL) Query(ctx context.Context, query string) (cols []string, results [][]string, err error) {
-	rows, err := m.db.QueryContext(ctx, query)
+func (m MySQL) Query(ctx context.Context, query string, args ...any) (cols []string, results [][]string, err error) {
+	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -76,7 +78,7 @@ func (m MySQL) TableNames(ctx context.Context) ([]string, error) {
 }
 
 func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
-	_, result, err := m.Query(ctx, "SHOW CREATE TABLE "+table)
+	_, result, err := m.Query(ctx, fmt.Sprintf("SHOW CREATE TABLE %s", table))
 	if err != nil {
 		return "", err
 	}
@@ -88,4 +90,8 @@ func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
 	}
 
 	return result[0][1], nil
+}
+
+func (m MySQL) Close() error {
+	return m.db.Close()
 }
