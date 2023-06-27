@@ -28,6 +28,7 @@ func TestConversationalWithMemory(t *testing.T) {
 		ConversationalReactDescription,
 		WithMemory(memory.NewBuffer()),
 	)
+	require.NoError(t, err)
 
 	_, err = chains.Run(context.Background(), executor, "Hi! my name is Bob and the year I was born is 1987")
 	require.NoError(t, err)
