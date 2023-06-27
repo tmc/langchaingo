@@ -15,6 +15,7 @@ require (
 	cloud.google.com/go/longrunning v0.4.2 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
@@ -60,6 +61,7 @@ require (
 require (
 	cloud.google.com/go/aiplatform v1.42.0
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/google/go-cmp v0.5.9
