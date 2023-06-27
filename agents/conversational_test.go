@@ -29,10 +29,10 @@ func TestConversationalWithMemory(t *testing.T) {
 		WithMemory(memory.NewBuffer()),
 	)
 
-	res, err := chains.Run(context.Background(), executor, "Hi! my name is Bob and the year I was born is 1987")
+	_, err = chains.Run(context.Background(), executor, "Hi! my name is Bob and the year I was born is 1987")
 	require.NoError(t, err)
 
-	res, err = chains.Run(context.Background(), executor, "What is the year I was born times 34")
+	res, err := chains.Run(context.Background(), executor, "What is the year I was born times 34")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "67558"), `result does not contain the correct answer '67558'`)
 }
