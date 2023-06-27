@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
@@ -15,8 +14,9 @@ const _intermediateStepsOutputKey = "intermediateSteps"
 
 // Executor is the chain responsible for running agents.
 type Executor struct {
-	Agent Agent
-	Tools []tools.Tool
+	Agent  Agent
+	Tools  []tools.Tool
+	Memory schema.Memory
 
 	MaxIterations           int
 	ReturnIntermediateSteps bool
@@ -34,6 +34,7 @@ func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Execut
 	return Executor{
 		Agent:                   agent,
 		Tools:                   tools,
+		Memory:                  options.memory,
 		MaxIterations:           options.maxIterations,
 		ReturnIntermediateSteps: options.returnIntermediateSteps,
 	}
@@ -106,7 +107,7 @@ func (e Executor) GetOutputKeys() []string {
 }
 
 func (e Executor) GetMemory() schema.Memory { //nolint:ireturn
-	return memory.NewSimple()
+	return e.Memory
 }
 
 func inputsToString(inputValues map[string]any) (map[string]string, error) {

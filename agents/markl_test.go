@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func TestOutputParser(t *testing.T) {
+func TestMRKLOutputParser(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
