@@ -64,7 +64,9 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 // Outputs
 //
 //	"result" : with the result of the query.
-func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+//
+//nolint:all
+func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) {
 	query, ok := inputs["query"].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
@@ -102,7 +104,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	}
 
 	// Predict sql query
-	opt := append(options, WithStopWords([]string{stopWord}))
+	opt := append(options, WithStopWords([]string{stopWord})) //nolint:cyclop
 	out, err := Call(ctx, s.LLMChain, llmInputs, opt...)
 	if err != nil {
 		return nil, err
