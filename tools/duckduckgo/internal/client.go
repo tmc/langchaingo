@@ -69,16 +69,19 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 
 		info := node.Find(".result__snippet").Text()
 		title := titleNode.Text()
+		ref := ""
 
-		ref, err := url.QueryUnescape(
-			strings.TrimPrefix(
-				titleNode.Nodes[0].Attr[2].Val,
-				"/l/?kh=-1&uddg=",
-			),
-		)
-		if err != nil {
-			log.Printf("Error: %s", err)
-			return "", err
+		if len(titleNode.Nodes) > 0 && len(titleNode.Nodes[0].Attr) > 2 {
+			ref, err = url.QueryUnescape(
+				strings.TrimPrefix(
+					titleNode.Nodes[0].Attr[2].Val,
+					"/l/?kh=-1&uddg=",
+				),
+			)
+			if err != nil {
+				log.Printf("Error: %s", err)
+				return "", err
+			}
 		}
 
 		results = append(results, Result{title, info, ref})
@@ -91,20 +94,7 @@ func (client *Client) SetMaxResults(n int) {
 	client.maxResults = n
 }
 
-// formatResults will return a structured string with the results in the format:
-
-// Title: Leonardo DiCaprio & Camila Morrone's Full Relationship Timeline
-// Source: duckduckgo.com
-// Description: Leonardo DiCaprio and Camila Morrone are pros at keeping their
-// relationship under wraps from public scrutiny.
-// URL: //duckduckgo.com/l/?uddg=https://www.harpersbazaar.com/celebrity/latest/
-
-// Title: Who Is Leonardo DiCaprio Dating Now 2022? Victoria Lamas, Gigi Hadid ...
-// Source: duckduckgo.com
-// Description: After getting out of very highly publicized relationships, many Leo fans are asking:
-// Who is Leonardo DiCaprio dating now? After launching his career as an actor in the 90s, Leo has been in many...
-// URL: //duckduckgo.com/l/?uddg=https://stylecaster.com/entertainment/celebrity-news/1348452
-
+// formatResults will return a structured string with the results.
 func (client *Client) formatResults(results []Result) string {
 	formattedResults := ""
 
