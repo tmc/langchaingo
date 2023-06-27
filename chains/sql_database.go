@@ -34,11 +34,18 @@ const _defaultSQLSuffix = `Only use the following tables:
 
 Question: {{.input}}`
 
+const (
+	_sqlChainDefaultInputKeyQuery      = "query"
+	_sqlChainDefaultInputKeyTableNames = "table_names_to_use"
+	_sqlChainDefaultOutputKey          = "result"
+)
+
 // SQLDatabaseChain is a chain used for interacting with SQL Database.
 type SQLDatabaseChain struct {
-	LLMChain *LLMChain
-	TopK     int
-	Database *sqldatabase.SQLDatabase
+	LLMChain  *LLMChain
+	TopK      int
+	Database  *sqldatabase.SQLDatabase
+	OutputKey string
 }
 
 // NewSQLDatabaseChain creates a new SQLDatabaseChain.
@@ -48,9 +55,10 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 		[]string{"dialect", "top_k", "table_info", "input"})
 	c := NewLLMChain(llm, p)
 	return &SQLDatabaseChain{
-		LLMChain: c,
-		TopK:     topK,
-		Database: database,
+		LLMChain:  c,
+		TopK:      topK,
+		Database:  database,
+		OutputKey: _sqlChainDefaultOutputKey,
 	}
 }
 
@@ -58,8 +66,8 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 // Inputs:
 //
 //	"query" : key with the query to run.
-//	"table_names_to_use" (optionally): the only table names(others will be ignored)
-//		to use with a comma separated list of.
+//	"table_names_to_use" (optionally): a slice string of the only table names
+//		to use(others will be ignored).
 //
 // Outputs
 //
@@ -67,20 +75,15 @@ func NewSQLDatabaseChain(llm llms.LanguageModel, topK int, database *sqldatabase
 //
 //nolint:all
 func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) {
-	query, ok := inputs["query"].(string)
+	query, ok := inputs[_sqlChainDefaultInputKeyQuery].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
 
 	var tables []string
-	if ts, ok := inputs["table_names_to_use"]; ok {
-		tables = make([]string, 0, len(s.Database.TableNames()))
-		strs := strings.Split(ts.(string), ",") //nolint:forcetypeassert
-		for _, s := range strs {
-			s = strings.TrimSpace(s)
-			if len(s) > 0 {
-				tables = append(tables, s)
-			}
+	if ts, ok := inputs[_sqlChainDefaultInputKeyTableNames]; ok {
+		if tables, ok = ts.([]string); !ok {
+			return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 		}
 	} else {
 		tables = nil
@@ -105,15 +108,11 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 
 	// Predict sql query
 	opt := append(options, WithStopWords([]string{stopWord})) //nolint:cyclop
-	out, err := Call(ctx, s.LLMChain, llmInputs, opt...)
+	out, err := Predict(ctx, s.LLMChain, llmInputs, opt...)
 	if err != nil {
 		return nil, err
 	}
-	sqlQuery, ok := out["text"].(string)
-	if !ok {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidOutputValues, "text")
-	}
-	sqlQuery = strings.TrimSpace(sqlQuery)
+	sqlQuery := strings.TrimSpace(out)
 
 	// Execute sql query
 	queryResult, err := s.Database.Query(ctx, sqlQuery)
@@ -123,22 +122,19 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 
 	// Generate answer
 	llmInputs["input"] = query + queryPrefixWith + sqlQuery + stopWord + queryResult
-	out, err = Call(ctx, s.LLMChain, llmInputs, options...)
+	out, err = Predict(ctx, s.LLMChain, llmInputs, options...)
 	if err != nil {
 		return nil, err
 	}
-	result, ok := out["text"].(string)
-	if !ok {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidOutputValues, "text")
-	}
+
 	// Hack answer string
-	strs := strings.Split(strings.Split(result, "\n\n")[0], "Answer:")
-	result = strs[0]
+	strs := strings.Split(strings.Split(out, "\n\n")[0], "Answer:")
+	out = strs[0]
 	if len(strs) > 1 {
-		result = strings.TrimSpace(strs[1])
+		out = strings.TrimSpace(strs[1])
 	}
 
-	return map[string]any{"result": result}, nil
+	return map[string]any{s.OutputKey: out}, nil
 }
 
 func (s SQLDatabaseChain) GetMemory() schema.Memory { //nolint:ireturn
@@ -146,9 +142,9 @@ func (s SQLDatabaseChain) GetMemory() schema.Memory { //nolint:ireturn
 }
 
 func (s SQLDatabaseChain) GetInputKeys() []string {
-	return []string{"query"}
+	return []string{_sqlChainDefaultInputKeyQuery}
 }
 
 func (s SQLDatabaseChain) GetOutputKeys() []string {
-	return []string{"result"}
+	return []string{s.OutputKey}
 }

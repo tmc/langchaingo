@@ -92,10 +92,26 @@ func run() error {
 
 	sqlDatabaseChain := chains.NewSQLDatabaseChain(llm, 100, db)
 	ctx := context.Background()
-	out, err := chains.Run(ctx, sqlDatabaseChain, "Return all data from the foo table where the ID is less than 23.")
+	out, err := chains.Run(ctx, sqlDatabaseChain, "Return all rows from the foo table where the ID is less than 23.")
+	if err != nil {
+		return err
+	}
+	fmt.Println(out)
+
+	input := map[string]any{
+		"query":              "Return all rows that the ID is less than 23.",
+		"table_names_to_use": []string{"foo"},
+	}
+	out, err = chains.Predict(ctx, sqlDatabaseChain, input)
+	if err != nil {
+		return err
+	}
 	fmt.Println(out)
 
 	out, err = chains.Run(ctx, sqlDatabaseChain, "Which table has more data, foo or foo1?")
+	if err != nil {
+		return err
+	}
 	fmt.Println(out)
 	return err
 }
