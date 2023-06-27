@@ -40,3 +40,8 @@ clean: clean-lint-cache
 .PHONY: clean-lint-cache
 clean-lint-cache:
 	golangci-lint cache clean
+
+.PHONY: build-examples
+build-examples:
+	for example in $(shell find ./examples -mindepth 1 -maxdepth 1 -type d); do \
+		(cd $$example; echo Build $$example; go mod tidy; go build -o /dev/null) || exit 1; done

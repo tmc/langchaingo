@@ -1,12 +1,15 @@
 package agents
 
 import (
+	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
+	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
 
 type CreationOptions struct {
 	prompt                  prompts.PromptTemplate
+	memory                  schema.Memory
 	maxIterations           int
 	returnIntermediateSteps bool
 	outputKey               string
@@ -23,6 +26,7 @@ func executorDefaultOptions() CreationOptions {
 	return CreationOptions{
 		maxIterations: _defaultMaxIterations,
 		outputKey:     _defaultOutputKey,
+		memory:        memory.NewSimple(),
 	}
 }
 
@@ -119,5 +123,11 @@ func WithPrompt(prompt prompts.PromptTemplate) CreationOption {
 func WithReturnIntermediateSteps() CreationOption {
 	return func(co *CreationOptions) {
 		co.returnIntermediateSteps = true
+	}
+}
+
+func WithMemory(m schema.Memory) CreationOption {
+	return func(co *CreationOptions) {
+		co.memory = m
 	}
 }
