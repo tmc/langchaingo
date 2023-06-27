@@ -14,33 +14,28 @@ const (
 	// ZeroShotReactDescription is an AgentType constant that represents
 	// the "zeroShotReactDescription" agent type.
 	ZeroShotReactDescription AgentType = "zeroShotReactDescription"
+	// ConversationalReactDescription is an AgentType constant that represents
+	// the "conversationalReactDescription" agent type.
+	ConversationalReactDescription AgentType = "conversationalReactDescription"
 )
 
 // Initialize is a function that creates a new executor with the specified LLM
 // model, tools, agent type, and options. It returns an Executor or an error
 // if there is any issues during the creation process.
 func Initialize(
-	llm llms.LLM,
+	llm llms.LanguageModel,
 	tools []tools.Tool,
 	agentType AgentType,
 	opts ...CreationOption,
 ) (Executor, error) {
-	options := executorDefaultOptions()
-	for _, opt := range opts {
-		opt(&options)
-	}
-
 	var agent Agent
 	switch agentType {
 	case ZeroShotReactDescription:
 		agent = NewOneShotAgent(llm, tools, opts...)
+	case ConversationalReactDescription:
+		agent = NewConversationalAgent(llm, tools, opts...)
 	default:
 		return Executor{}, ErrUnknownAgentType
 	}
-
-	return Executor{
-		Agent:         agent,
-		Tools:         tools,
-		MaxIterations: options.maxIterations,
-	}, nil
+	return NewExecutor(agent, tools, opts...), nil
 }

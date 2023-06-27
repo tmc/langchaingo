@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	llm, err := openai.New()
+	llm, err := openai.NewChat()
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Chat(ctx, []schema.ChatMessage{
+	completion, err := llm.Call(ctx, []schema.ChatMessage{
 		schema.SystemChatMessage{Text: "Hello, I am a friendly chatbot. I love to talk about movies, books and music. Answer in long form yaml."},
 		schema.HumanChatMessage{Text: "What would be a good company name a company that makes colorful socks?"},
 	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
@@ -28,5 +28,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(completion.Message.Text)
+	fmt.Println(completion)
 }

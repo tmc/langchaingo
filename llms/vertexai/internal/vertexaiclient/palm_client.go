@@ -35,8 +35,8 @@ var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
 
 const (
 	embeddingModelName = "textembedding-gecko"
-	textModelName      = "text-bison"
-	chatModelName      = "chat-bison"
+	TextModelName      = "text-bison"
+	ChatModelName      = "chat-bison"
 
 	defaultMaxConns = 4
 )
@@ -95,7 +95,7 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 		"top_p":           r.TopP,
 		"top_k":           r.TopK,
 	}
-	predictions, err := c.batchPredict(ctx, textModelName, r.Prompts, params)
+	predictions, err := c.batchPredict(ctx, TextModelName, r.Prompts, params)
 	if err != nil {
 		return nil, err
 	}
@@ -169,9 +169,7 @@ type ChatMessage struct {
 }
 
 // Statically assert that the types implement the interface.
-var (
-	_ schema.ChatMessage = ChatMessage{}
-)
+var _ schema.ChatMessage = ChatMessage{}
 
 // GetType returns the type of the message.
 func (m ChatMessage) GetType() schema.ChatMessageType {
@@ -303,7 +301,7 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 		structpb.NewStructValue(instance),
 	}
 	resp, err := c.client.Predict(ctx, &aiplatformpb.PredictRequest{
-		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", chatModelName),
+		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", ChatModelName),
 		Instances:  instances,
 		Parameters: structpb.NewStructValue(mergedParams),
 	})

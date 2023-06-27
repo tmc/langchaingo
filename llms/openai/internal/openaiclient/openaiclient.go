@@ -12,7 +12,7 @@ var ErrEmptyResponse = errors.New("empty response")
 // Client is a client for the OpenAI API.
 type Client struct {
 	token      string
-	model      string
+	Model      string
 	baseURL    string
 	httpClient Doer
 }
@@ -38,7 +38,7 @@ func WithHTTPClient(client Doer) Option {
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
 		token:      token,
-		model:      model,
+		Model:      model,
 		baseURL:    baseURL,
 		httpClient: http.DefaultClient,
 	}
@@ -54,10 +54,15 @@ func New(token string, model string, baseURL string, opts ...Option) (*Client, e
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Model     string   `json:"model"`
-	Prompt    string   `json:"prompt"`
-	MaxTokens int      `json:"max_tokens"`
-	StopWords []string `json:"stop,omitempty"`
+	Model            string   `json:"model"`
+	Prompt           string   `json:"prompt"`
+	Temperature      float64  `json:"temperature,omitempty"`
+	MaxTokens        int      `json:"max_tokens,omitempty"`
+	N                int      `json:"n,omitempty"`
+	StopWords        []string `json:"stop,omitempty"`
+	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
+	TopP             float64  `json:"top_p,omitempty"`
 }
 
 // Completion is a completion.
@@ -68,10 +73,15 @@ type Completion struct {
 // CreateCompletion creates a completion.
 func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*Completion, error) {
 	resp, err := c.createCompletion(ctx, &completionPayload{
-		Model:     r.Model,
-		Prompt:    r.Prompt,
-		MaxTokens: r.MaxTokens,
-		StopWords: r.StopWords,
+		Model:            r.Model,
+		Prompt:           r.Prompt,
+		Temperature:      r.Temperature,
+		MaxTokens:        r.MaxTokens,
+		StopWords:        r.StopWords,
+		N:                r.N,
+		FrequencyPenalty: r.FrequencyPenalty,
+		PresencePenalty:  r.PresencePenalty,
+		TopP:             r.TopP,
 	})
 	if err != nil {
 		return nil, err
@@ -92,7 +102,7 @@ type EmbeddingRequest struct {
 
 // CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
-	r.Model = c.model
+	r.Model = c.Model
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -119,7 +129,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 
 // CreateChat creates chat request.
 func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
-	r.Model = c.model
+	r.Model = c.Model
 	if r.Model == "" {
 		r.Model = defaultChatModel
 	}

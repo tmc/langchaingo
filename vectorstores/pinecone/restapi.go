@@ -108,6 +108,7 @@ type queryPayload struct {
 	Vector          []float64 `json:"vector"`
 	TopK            int       `json:"topK"`
 	Namespace       string    `json:"namespace"`
+	Filter          any       `json:"filter"`
 }
 
 func (s Store) restQuery(
@@ -116,6 +117,7 @@ func (s Store) restQuery(
 	numVectors int,
 	nameSpace string,
 	scoreThreshold float64,
+	filter any,
 ) ([]schema.Document, error) {
 	payload := queryPayload{
 		IncludeValues:   true,
@@ -123,6 +125,7 @@ func (s Store) restQuery(
 		Vector:          vector,
 		TopK:            numVectors,
 		Namespace:       nameSpace,
+		Filter:          filter,
 	}
 
 	body, statusCode, err := doRequest(

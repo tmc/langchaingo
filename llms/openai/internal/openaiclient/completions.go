@@ -14,11 +14,15 @@ const (
 )
 
 type completionPayload struct {
-	Model       string   `json:"model"`
-	Prompt      string   `json:"prompt"`
-	Temperature int      `json:"temperature"`
-	MaxTokens   int      `json:"max_tokens"`
-	StopWords   []string `json:"stop,omitempty"`
+	Model            string   `json:"model"`
+	Prompt           string   `json:"prompt"`
+	Temperature      float64  `json:"temperature,omitempty"`
+	MaxTokens        int      `json:"max_tokens,omitempty"`
+	N                int      `json:"n,omitempty"`
+	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
+	TopP             float64  `json:"top_p,omitempty"`
+	StopWords        []string `json:"stop,omitempty"`
 }
 
 type completionResponsePayload struct {
@@ -61,8 +65,8 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	case payload.Model != "":
 
 	// If no model is set in the payload, take the one specified in the client.
-	case c.model != "":
-		payload.Model = c.model
+	case c.Model != "":
+		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
 		payload.Model = defaultCompletionModel

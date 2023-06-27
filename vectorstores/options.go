@@ -7,6 +7,7 @@ type Option func(*Options)
 type Options struct {
 	NameSpace      string
 	ScoreThreshold float64
+	Filters        any
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -19,5 +20,15 @@ func WithNameSpace(nameSpace string) Option {
 func WithScoreThreshold(scoreThreshold float64) Option {
 	return func(o *Options) {
 		o.ScoreThreshold = scoreThreshold
+	}
+}
+
+// Vector searches can be limited bsaed on metadata filters. Searches with  metadata
+// filters retrieve exactly the number of nearest-neighbors results that match the filters. In
+// most cases the search latency will be lower than unfiltered searches
+// See https://docs.pinecone.io/docs/metadata-filtering
+func WithFilters(filters any) Option {
+	return func(o *Options) {
+		o.Filters = filters
 	}
 }
