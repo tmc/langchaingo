@@ -50,8 +50,8 @@ func (h HTML) Load(_ context.Context) ([]schema.Document, error) {
 
 // LoadAndSplit reads text data from the io.Reader and splits it into multiple
 // documents using a text splitter.
-func (l HTML) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
-	docs, err := l.Load(ctx)
+func (h HTML) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
+	docs, err := h.Load(ctx)
 	if err != nil {
 		return nil, err
 	}
