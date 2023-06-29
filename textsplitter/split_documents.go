@@ -41,7 +41,6 @@ func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[
 	documents := make([]schema.Document, 0)
 
 	for i := 0; i < len(texts); i++ {
-		
 		chunks, err := NewRecursiveCharacter().SplitText(texts[i])
 		if err != nil {
 			return nil, err
