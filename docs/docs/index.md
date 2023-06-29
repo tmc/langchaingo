@@ -16,11 +16,9 @@ Checkout the guide below for a walkthrough of how to get started using LangChain
 
 ## Components
 
-There are several main modules that LangChain provides support for. For each module we provide some examples to get started and get familiar with some of the concepts. Each example links to API documentation for the modules used.
+There are several main modules that LangChain provides support for. For each module we provide some examples to get started and get familiar with some of the concepts. 
 
 These modules are, in increasing order of complexity:
-
-- [Schema](./modules/schema/): This includes interfaces and other types used throughout the library.
 
 - [Models](./modules/models/): This includes integrations with a variety of LLMs, Chat Models and Embeddings models.
 

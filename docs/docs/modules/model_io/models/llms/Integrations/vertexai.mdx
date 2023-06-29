@@ -1,0 +1,13 @@
+---
+sidebar_label: Vertex AI
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleVertexAICompletion from "@examples/vertexai-palm-completion-example/vertexai_palm_completion_example.go";
+
+
+# Vertex AI
+To use the Vertex AI LLM you need to set the google project ID. 
+You can do this by setting the GOOGLE_CLOUD_PROJECT environment variable or giving it as a variaic option when creating the wrapper.
+
+<CodeBlock language="go">{ExampleVertexAICompletion}</CodeBlock>

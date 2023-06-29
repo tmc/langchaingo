@@ -1,0 +1,58 @@
+---
+sidebar_position: 2
+hide_table_of_contents: true
+sidebar_label: Models
+---
+
+import DocCardList from "@theme/DocCardList";
+
+# Models
+
+:::info
+[Conceptual Guide](https://docs.langchain.com/docs/components/models/)
+:::
+
+Models are a core component of LangChain. LangChain is not a provider of models, but rather provides a standard interface through which you can interact with a variety of language models.
+LangChain provides support for both text-based Large Language Models (LLMs), Chat Models, and Text Embedding models.
+
+LLMs use a text-based input and output, while Chat Models use a message-based input and output.
+
+> **_Note:_** Chat model APIs are fairly new, so we are still figuring out the correct abstractions. If you have any feedback, please let us know!
+
+## All Models
+
+<DocCardList />
+
+## Advanced
+
+_This section is for users who want a deeper technical understanding of how LangChain works. If you are just getting started, you can skip this section._
+
+All LLMs and Chat Models implement the BaseLanguage interface. This allows us to easily swap out models in chains without changing the rest of the code.
+
+```go
+// LanguageModel is the interface all language models must implement.
+type LanguageModel interface {
+	// Take in a list of prompt values and return an LLMResult.
+	GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...CallOption) (LLMResult, error)
+	// Get the number of tokens present in the text.
+	GetNumTokens(text string) int
+}
+```
+
+In adition to implementing the LanguageModel interface, LLMs also implements the LLM interface.
+
+```go
+type LLM interface {
+	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
+	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
+}
+```
+
+The same is true for chat models, they implement both the LanguageModel interface and the ChatLLM interface.
+
+```go
+type ChatLLM interface {
+	Call(ctx context.Context, messages []schema.ChatMessage, options ...CallOption) (schema.ChatMessage, error)
+	Generate(ctx context.Context, messages [][]schema.ChatMessage, options ...CallOption) ([]*Generation, error)
+}
+```

@@ -1,0 +1,52 @@
+---
+sidebar_position: 1
+hide_table_of_contents: true
+sidebar_label: LLMs
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import DocCardList from "@theme/DocCardList";
+
+# LLMs
+
+:::info
+[Conceptual Guide](https://docs.langchain.com/docs/components/models/language-model)
+:::
+
+Large Language Models (LLMs) are a core component of LangChain. 
+LangChain does not serve it's own LLMs, but rather provides a standard interface for interacting with many different LLMs.
+
+```go
+type LLM interface {
+	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
+	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
+}
+```
+As you can see LLMs expose two main methods. The Call metod takes a prompt and returns a completion and an evetuall error.
+With the generate method you can take multiple prompts and get a generation for each of the prompts.
+
+```go
+// Generation is a single generation from a langchaingo LLM.
+type Generation struct {
+	// Text is the generated text.
+	Text string `json:"text"`
+	// Message stores the potentially generated message.
+	Message *schema.AIChatMessage `json:"message"`
+	// GenerationInfo is the generation info. This can contain vendor-specific information.
+	GenerationInfo map[string]any `json:"generation_info"`
+}
+```
+
+Beacuse all LLMs also implement the LanguageModel interface, you can also use the GeneratePrompt and GetNumTokens functions on all of the LLMs.
+
+```go
+// LanguageModel is the interface all language models must implement.
+type LanguageModel interface {
+	// Take in a list of prompt values and return an LLMResult.
+	GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...CallOption) (LLMResult, error)
+	// Get the number of tokens present in the text.
+	GetNumTokens(text string) int
+}
+```
+
+<DocCardList />

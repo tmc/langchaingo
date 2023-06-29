@@ -1,0 +1,107 @@
+---
+hide_table_of_contents: true
+sidebar_label: Prompt Templates
+sidebar_position: 1
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import DocCardList from "@theme/DocCardList";
+
+# Prompt templates
+
+:::info
+[Conceptual Guide](https://docs.langchain.com/docs/components/prompts/prompt-template)
+:::
+
+A fundemental part of working with language models is taking some input and formatting it in some way using a template. 
+Doing this is simple using LangChain. Here is a simple example: 
+
+```go
+import "github.com/tmc/langchaingo/prompts"
+
+func main() {
+    prompt := prompts.NewPromptTemplate(
+        "What is a good name for a company that makes {{.product}}?",
+        []string{"product"}, 
+    )
+
+    result, err := prompt.Format(map[string]any{
+        "product": "colorful socks",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(result)
+}
+```
+
+```
+What is a good name for a company that makes colorful socks?
+```
+
+A prompt template can take any number of inputs as shown belown.
+
+```go
+prompt := prompts.NewPromptTemplate(
+    "Tell me a {{.adjective}} joke about {{.content}}.",
+    []string{"adjective", "content"}, 
+)
+
+result, err := prompt.Format(map[string]any{
+    "adjective": "funny",
+    "content": "chickens", 
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println(result)
+```
+```
+Tell me a funny joke about chickens.
+```
+
+## Creating prompt templates for chat messages
+Chat Models take a list of chat messages as input - this list is commonly referred to as a prompt. 
+These chat messages differ from a raw string (which you would pass into a LLM model), in that every message is associated with a role.
+
+For example, in OpenAI Chat Completion API, a chat message can be associated with the AI, human or system role. 
+The model is supposed to follow instruction from system chat message more closely.
+
+You are encouraged to use these chat related prompt templates instead of PromptTemplate when querying chat models to fully exploit the potential of underlying chat model.
+
+```go
+import "github.com/tmc/langchaingo/prompts"
+
+func main() {
+   prompt := prompts.NewChatPromptTemplate([]MessageFormatter{
+        NewSystemMessagePromptTemplate(
+            "You are a translation engine that can only translate text and cannot interpret it.",
+            nil,
+        ),
+        NewHumanMessagePromptTemplate(
+            `translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+            []string{"inputLang", "outputLang", "input"},
+        ),
+    })
+
+    result, err := prompt.Format(map[string]any{
+        "inputLang": "English",
+        "outputLang": "Chinese",
+        "input": "I love programming",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(result)
+}
+```
+```
+[{You are a translation engine that can only translate text and cannot interpret it.} {translate this text from English to Chinese:\nI love programming}]
+```
+
+## Dig deeper
+
+<DocCardList />
