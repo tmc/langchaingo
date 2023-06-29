@@ -29,6 +29,7 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 // the length of the metadatas is zero, the result documents will contain no metadata.
 // Otherwise the numbers of texts and metadatas must match.
 func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
+	_ = textSplitter
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
 	}
@@ -40,6 +41,7 @@ func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[
 	documents := make([]schema.Document, 0)
 
 	for i := 0; i < len(texts); i++ {
+		
 		chunks, err := NewRecursiveCharacter().SplitText(texts[i])
 		if err != nil {
 			return nil, err
