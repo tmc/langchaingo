@@ -89,7 +89,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Retry                       | ❌     |
 | Guardrail                   | ❌     |
 
-##Document Loaders
+## Document Loaders
 
 | Feature                         | Status |
 |---------------------------------|--------|
@@ -125,7 +125,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Google Drive                    | ❌      |
 | Gutenberg Books                 | ❌      |
 | HN                              | ❌      |
-| HTML                            | ❌      |
+| HTML                            | ✅      |
 | HTML BS                         | ❌      |
 | Hugging Face Dataset            | ❌      |
 | iFixit                          | ❌      |
