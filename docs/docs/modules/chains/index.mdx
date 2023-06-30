@@ -1,7 +1,7 @@
 ---
 hide_table_of_contents: true
 sidebar_label: Unfinished Chains
-sidebar_position: 6
+sidebar_position: 3
 ---
 
 import DocCardList from "@theme/DocCardList";
@@ -63,6 +63,24 @@ fmt.Println(text)
 Socktastic!
 ```
 
+### Predict
+Many chains expect multiple input values and retruns one string. For these cases the predict function is handy.
+
+```go
+text, err := chains.Predict(
+    context.Background(),
+    chain,
+    map[string]any{
+      "product": "colorful socks",
+      "description": "The company is based in California"
+    }
+)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println(text)
+```
+
 ## Advanced
 
 To implement your own custom chain you must create an struct that implements the chain interface. 
@@ -70,8 +88,9 @@ To implement your own custom chain you must create an struct that implements the
 ```go
 // Chain is the interface all chains must implement.
 type Chain interface {
-	// Call runs the logic of the chain and returns the output. This method should
-	// not be called directly. 
+  // Call runs the logic of the chain and returns the output. This method should
+	// not be called directly. Use rather the Call, Run or Predict functions that
+	// handles the memory and other aspects of the chain.
 	Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
