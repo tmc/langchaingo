@@ -1,13 +1,16 @@
 package textsplitter
 
 import (
+	"errors"
 	"fmt"
 	"github.com/pkoukk/tiktoken-go"
 )
 
 const (
-	_defaultTokenModelName = "gpt-3.5-turbo"
-	_defaultTokenEncoding  = "cl100k_base"
+	_defaultTokenModelName    = "gpt-3.5-turbo"
+	_defaultTokenEncoding     = "cl100k_base"
+	_defaultTokenChunkSize    = 512
+	_defaultTokenChunkOverlap = 100
 )
 
 // TokenSplitter is a text splitter that will split texts by tokens.
@@ -22,8 +25,8 @@ type TokenSplitter struct {
 
 func NewTokenSplitter() TokenSplitter {
 	return TokenSplitter{
-		ChunkSize:         512,
-		ChunkOverlap:      100,
+		ChunkSize:         _defaultTokenChunkSize,
+		ChunkOverlap:      _defaultTokenChunkOverlap,
 		ModelName:         _defaultTokenModelName,
 		EncodingName:      _defaultTokenEncoding,
 		AllowedSpecial:    []string{},
@@ -36,12 +39,13 @@ func (s TokenSplitter) SplitText(text string) ([]string, error) {
 	// Get the tokenizer
 	var tk *tiktoken.Tiktoken
 	var err error
+	// nolint:gocritic
 	if s.ModelName != "" {
 		tk, err = tiktoken.EncodingForModel(s.ModelName)
 	} else if s.EncodingName != "" {
 		tk, err = tiktoken.GetEncoding(s.EncodingName)
 	} else {
-		err = fmt.Errorf("must have either model name or encoding name")
+		err = errors.New("must have either model name or encoding name")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("tiktoken.GetEncoding: %w", err)
