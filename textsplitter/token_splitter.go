@@ -1,12 +1,13 @@
 package textsplitter
 
 import (
-	"errors"
 	"fmt"
+
 	"github.com/pkoukk/tiktoken-go"
 )
 
 const (
+	// nolint:gosec
 	_defaultTokenModelName    = "gpt-3.5-turbo"
 	_defaultTokenEncoding     = "cl100k_base"
 	_defaultTokenChunkSize    = 512
@@ -39,13 +40,10 @@ func (s TokenSplitter) SplitText(text string) ([]string, error) {
 	// Get the tokenizer
 	var tk *tiktoken.Tiktoken
 	var err error
-	// nolint:gocritic
-	if s.ModelName != "" {
-		tk, err = tiktoken.EncodingForModel(s.ModelName)
-	} else if s.EncodingName != "" {
+	if s.EncodingName != "" {
 		tk, err = tiktoken.GetEncoding(s.EncodingName)
 	} else {
-		err = errors.New("must have either model name or encoding name")
+		tk, err = tiktoken.EncodingForModel(s.ModelName)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("tiktoken.GetEncoding: %w", err)

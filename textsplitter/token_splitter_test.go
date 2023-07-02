@@ -1,9 +1,10 @@
 package textsplitter
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/schema"
-	"testing"
 )
 
 func TestTokenSplitter(t *testing.T) {
@@ -14,6 +15,7 @@ func TestTokenSplitter(t *testing.T) {
 		chunkSize    int
 		expectedDocs []schema.Document
 	}
+	//nolint:dupword
 	testCases := []testCase{
 		{
 			text:         "Hi.\nI'm Harrison.\n\nHow?\na\nb",
