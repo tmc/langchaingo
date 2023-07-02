@@ -90,10 +90,9 @@ Bye!
 			},
 		},
 	}
-	splitter := NewRecursiveCharacter()
+
 	for _, tc := range testCases {
-		splitter.ChunkOverlap = tc.chunkOverlap
-		splitter.ChunkSize = tc.chunkSize
+		splitter := NewRecursiveCharacter(WithChunkOverlap(tc.chunkOverlap), WithChunkSize(tc.chunkSize))
 
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		assert.NoError(t, err)
