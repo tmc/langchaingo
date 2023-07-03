@@ -23,7 +23,7 @@ func run() error {
 		return err
 	}
 
-	// We can use LoadStuffQA to create a cain that takes input documents and a question,
+	// We can use LoadStuffQA to create a chain that takes input documents and a question,
 	// stuffs all the documents into the prompt of the llm and returns an answer to the
 	// question. It is suitable for a small number of documents.
 	stuffQAChain := chains.LoadStuffQA(llm)
@@ -41,7 +41,7 @@ func run() error {
 	}
 	fmt.Println(answer)
 
-	// An other option is to use the refine documents chain for question answering. This
+	// Another option is to use the refine documents chain for question answering. This
 	// chain iterates over the input documents one by one, updating an intermediate answer
 	// with each iteration. It uses the previous version of the answer and the next document
 	// as context. The downside of this type of chain is that it uses multiple llm calls that
