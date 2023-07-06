@@ -11,11 +11,11 @@ import (
 )
 
 type listResponse struct {
-	Results           []listResult `json:"results"`
+	Results           []ListResult `json:"results"`
 	ConfigurationLink string       `json:"configuration_link"`
 }
 
-type listResult struct {
+type ListResult struct {
 	ID          string            `json:"id"`
 	OperationID string            `json:"operation_id"`
 	Description string            `json:"description"`
@@ -29,16 +29,16 @@ type executionResponse struct {
 	Error      string      `json:"error"`
 }
 
-var (
-	ZapierNLABaseURL = "https://nla.zapier.com/api/v1"
+const (
+	zapierNLABaseURL = "https://nla.zapier.com/api/v1"
 )
 
-// Client for interacting with Zapier NLA API
+// Client for interacting with Zapier NLA API.
 type Client struct {
 	client *http.Client
 }
 
-// Transport RoundTripper for Zapier NLA API which adds on Correct Headers
+// Transport RoundTripper for Zapier NLA API which adds on Correct Headers.
 type Transport struct {
 	RoundTripper http.RoundTripper
 	apiKey       string
@@ -46,14 +46,16 @@ type Transport struct {
 	UserAgent    string
 }
 
-// ClientOptions for configuring a new Client
+// ClientOptions for configuring a new Client.
 type ClientOptions struct {
-	// User OAuth Access Token for Zapier NLA Takes Precedents over APIKey
+	// User OAuth Access Token for Zapier NLA Takes Precedents over APIKey.
 	AccessToken string
-	// API Key for Zapier NLA
+	// API Key for Zapier NLA.
 	APIKey string
-	// Customer User-Agent if one isn't passed Defaults to "LangChainGo/X.X.X"
+	// Customer User-Agent if one isn't passed Defaults to "LangChainGo/X.X.X".
 	UserAgent string
+	// Base URL for Zapier NLA API.
+	ZapierNLABaseURL string
 }
 
 func (cOpts *ClientOptions) Validate() error {
@@ -62,11 +64,15 @@ func (cOpts *ClientOptions) Validate() error {
 	}
 
 	if cOpts.APIKey == "" && cOpts.AccessToken == "" {
-		return ErrNoCredentials{}
+		return NoCredentialsError{}
 	}
 
 	if cOpts.UserAgent == "" {
 		cOpts.UserAgent = "LangChainGo/0.0.1"
+	}
+
+	if cOpts.ZapierNLABaseURL == "" {
+		cOpts.ZapierNLABaseURL = zapierNLABaseURL
 	}
 
 	return nil
@@ -128,9 +134,9 @@ a list of ListResult structs, which look like this:
 `Params` will always contain an `instructions` key, the only required
 param. All others optional and if provided will override any AI guesses
 (see "understanding the AI guessing flow" here:
-https://nla.zapier.com/api/v1/docs)
+https://nla.zapier.com/api/v1/docs).
 */
-func (c *Client) List(ctx context.Context) ([]listResult, error) {
+func (c *Client) List(ctx context.Context) ([]ListResult, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, formatListURL(), nil)
 	if err != nil {
 		return nil, err
@@ -166,7 +172,12 @@ The return JSON is guaranteed to be less than ~500 words (350
 tokens) making it safe to inject into the prompt of another LLM
 call.
 */
-func (c *Client) Execute(ctx context.Context, actionID string, input string, params map[string]string) (interface{}, error) {
+func (c *Client) Execute(
+	ctx context.Context,
+	actionID string,
+	input string,
+	params map[string]string,
+) (interface{}, error) {
 	body, err := createPayload(input, params)
 	if err != nil {
 		return "", err
@@ -200,7 +211,12 @@ func (c *Client) Execute(ctx context.Context, actionID string, input string, par
 /*
 ExecuteAsString is a convenience wrapper around Execute that returns a string response.
 */
-func (c *Client) ExecuteAsString(ctx context.Context, actionID string, input string, params map[string]string) (string, error) {
+func (c *Client) ExecuteAsString(
+	ctx context.Context,
+	actionID string,
+	input string,
+	params map[string]string,
+) (string, error) {
 	r, err := c.Execute(ctx, actionID, input, params)
 	if err != nil {
 		return "", err
@@ -210,11 +226,11 @@ func (c *Client) ExecuteAsString(ctx context.Context, actionID string, input str
 }
 
 func formatListURL() string {
-	return fmt.Sprintf("%s/exposed", ZapierNLABaseURL)
+	return fmt.Sprintf("%s/exposed", zapierNLABaseURL)
 }
 
 func formatExecuteURL(actionID string) string {
-	return fmt.Sprintf("%s/exposed/%s/execute/", ZapierNLABaseURL, actionID)
+	return fmt.Sprintf("%s/exposed/%s/execute/", zapierNLABaseURL, actionID)
 }
 
 func createPayload(input string, params map[string]string) (*bytes.Buffer, error) {

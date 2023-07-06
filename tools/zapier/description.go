@@ -11,5 +11,6 @@ const (
 		"up params, they will be explicitly specified in the tool description. If you do not have enough information " +
 		"to fill in the params, just say 'not enough information provided in the instruction, missing <param>'. If you " +
 		"get a none or null response, STOP EXECUTION, do not try to another tool! This tool specifically used for: " +
-		"{{.ZapierDescription}}, and has params: [{{$params := .Params}}{{ range $index, $element := .Params}}{{if $index}}, {{end}}'{{$element}}'{{end}}]"
+		"{{.ZapierDescription}}, and has params: " +
+		"[{{$params := .Params}}{{ range $index, $element := .Params}}{{if $index}}, {{end}}'{{$element}}'{{end}}]"
 )

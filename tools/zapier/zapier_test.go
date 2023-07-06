@@ -7,6 +7,8 @@ import (
 )
 
 func TestCreateDescription(t *testing.T) {
+	t.Parallel()
+
 	tool, err := New(ToolOptions{
 		Name:     "Test Tool",
 		ActionID: "test1234",

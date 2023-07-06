@@ -8,12 +8,14 @@ import (
 )
 
 type ToolkitOpts struct {
-	// User OAuth Access Token for Zapier NLA Takes Precedents over APIKey
+	// User OAuth Access Token for Zapier NLA Takes Precedents over APIKey.
 	AccessToken string
-	// API Key for Zapier NLA
+	// API Key for Zapier NLA.
 	APIKey string
-	// Customer User-Agent if one isn't passed Defaults to "LangChainGo/X.X.X"
+	// Customer User-Agent if one isn't passed Defaults to "LangChainGo/X.X.X".
 	UserAgent string
+	// Base URL for Zapier NLA API.
+	ZapierNLABaseURL string
 }
 
 /*
@@ -32,9 +34,10 @@ developer support.
 */
 func Toolkit(ctx context.Context, opts ToolkitOpts) ([]tools.Tool, error) {
 	c, err := internal.NewClient(internal.ClientOptions{
-		APIKey:      opts.APIKey,
-		AccessToken: opts.AccessToken,
-		UserAgent:   opts.UserAgent,
+		APIKey:           opts.APIKey,
+		AccessToken:      opts.AccessToken,
+		UserAgent:        opts.UserAgent,
+		ZapierNLABaseURL: opts.ZapierNLABaseURL,
 	})
 	if err != nil {
 		return nil, err
