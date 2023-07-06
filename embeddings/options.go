@@ -12,7 +12,7 @@ const (
 // Option is a function type that can be used to modify the client.
 type Option func(p *OpenAI)
 
-// WithClient is an option for providing the LLM client
+// WithClient is an option for providing the LLM client.
 func WithClient(client openai.LLM) Option {
 	return func(p *OpenAI) {
 		p.client = &client
