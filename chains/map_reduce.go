@@ -163,8 +163,8 @@ func (c MapReduceDocuments) GetInputKeys() []string {
 	if c.ReturnIntermediateSteps {
 		inputKeys = append(inputKeys, _intermediateStepsOutputKey)
 	}
-	return inputKeys
 
+	return inputKeys
 }
 
 func (c MapReduceDocuments) GetOutputKeys() []string {
