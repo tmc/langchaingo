@@ -42,19 +42,27 @@ func New(maxResults int, userAgent string) *Client {
 	}
 }
 
-// Search performs a search query and returns
-// the result as string and an error if any.
-func (client *Client) Search(ctx context.Context, query string) (string, error) {
-	results := []Result{}
-	queryURL := fmt.Sprintf("https://html.duckduckgo.com/html/?q=%s", url.QueryEscape(query))
-
+func (client *Client) newRequest(ctx context.Context, queryURL string) (*http.Request, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("creating duckduckgo request: %w", err)
+		return nil, fmt.Errorf("creating duckduckgo request: %w", err)
 	}
 
 	if client.userAgent != "" {
 		request.Header.Add("User-Agent", client.userAgent)
+	}
+
+	return request, nil
+}
+
+// Search performs a search query and returns
+// the result as string and an error if any.
+func (client *Client) Search(ctx context.Context, query string) (string, error) {
+	queryURL := fmt.Sprintf("https://html.duckduckgo.com/html/?q=%s", url.QueryEscape(query))
+
+	request, err := client.newRequest(ctx, queryURL)
+	if err != nil {
+		return "", err
 	}
 
 	response, err := http.DefaultClient.Do(request)
@@ -72,6 +80,7 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", fmt.Errorf("new document error: %w", err)
 	}
 
+	results := []Result{}
 	sel := doc.Find(".web-result")
 
 	for i := range sel.Nodes {
