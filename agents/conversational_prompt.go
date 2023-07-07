@@ -39,7 +39,7 @@ AI: [your response here]
 const _defaultConversationalSuffix = `Begin!
 
 Previous conversation history:
-{{.chat_history}}
+{{.history}}
 
 New input: {{.input}}
 
@@ -55,7 +55,7 @@ func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),
-			"chat_history":      "",
+			"history":           "",
 		},
 	}
 }

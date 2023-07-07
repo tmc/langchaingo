@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
@@ -170,6 +171,14 @@ func (s Store) SimilaritySearch(
 }
 
 func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]schema.Document, error) {
+	if len(res.Errors) > 0 {
+		messages := make([]string, 0, len(res.Errors))
+		for _, e := range res.Errors {
+			messages = append(messages, e.Message)
+		}
+		return nil, fmt.Errorf("%w: %s", ErrInvalidResponse, strings.Join(messages, ", "))
+	}
+
 	data, ok := res.Data["Get"].(map[string]any)[s.indexName]
 	if !ok || data == nil {
 		return nil, ErrEmptyResponse

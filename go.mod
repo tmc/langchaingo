@@ -17,7 +17,9 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
+	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/go-openapi/analysis v0.21.2 // indirect
@@ -33,6 +35,7 @@ require (
 	github.com/google/s2a-go v0.1.3 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
+	github.com/gorilla/css v1.0.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
@@ -41,7 +44,6 @@ require (
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
@@ -61,9 +63,14 @@ require (
 require (
 	cloud.google.com/go/aiplatform v1.42.0
 	github.com/Masterminds/sprig/v3 v3.2.3
+	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/go-openapi/strfmt v0.21.3
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/google/go-cmp v0.5.9
+	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/microcosm-cc/bluemonday v1.0.24
 	github.com/pinecone-io/go-pinecone v0.3.0
+	github.com/pkoukk/tiktoken-go v0.1.2
 	github.com/weaviate/weaviate v1.19.0
 	github.com/weaviate/weaviate-go-client/v4 v4.8.1
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254

@@ -4,9 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
+
+var ErrUnexpectedStatusCode = errors.New("unexpected status code")
 
 // InferenceTask is the type of inference task to run.
 type InferenceTask string
@@ -17,8 +21,12 @@ const (
 )
 
 type inferencePayload struct {
-	Model             string  `json:"-"`
-	Inputs            string  `json:"inputs"`
+	Model      string     `json:"-"`
+	Inputs     string     `json:"inputs"`
+	Parameters parameters `json:"parameters,omitempty"`
+}
+
+type parameters struct {
 	Temperature       float64 `json:"temperature,omitempty"`
 	TopP              float64 `json:"top_p,omitempty"`
 	TopK              int     `json:"top_k,omitempty"`
@@ -43,7 +51,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s%s", hfInferenceAPI, payload.Model), body) //nolint:lll
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s%s", c.url, payload.Model), body) //nolint:lll
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +71,20 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 		return nil, err
 	}
 	defer r.Body.Close()
+
+	if r.StatusCode != http.StatusOK {
+		b, err := io.ReadAll(r.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		if len(b) > 0 {
+			err = fmt.Errorf("%w: %d, body: %s", ErrUnexpectedStatusCode, r.StatusCode, string(b))
+		} else {
+			err = fmt.Errorf("%w: %d", ErrUnexpectedStatusCode, r.StatusCode)
+		}
+		return nil, err
+	}
 
 	// debug print the http response with httputil:
 	// resDump, err := httputil.DumpResponse(r, true)

@@ -62,10 +62,10 @@ func (a *OneShotZeroAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = a.constructScratchPad(intermediateSteps)
+	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
 	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
-	resp, err := chains.Call(
+	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
@@ -73,11 +73,6 @@ func (a *OneShotZeroAgent) Plan(
 	)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	output, ok := resp["text"].(string)
-	if !ok {
-		return nil, nil, ErrInvalidChainReturnType
 	}
 
 	return a.parseOutput(output)
@@ -100,19 +95,6 @@ func (a *OneShotZeroAgent) GetInputKeys() []string {
 
 func (a *OneShotZeroAgent) GetOutputKeys() []string {
 	return []string{a.OutputKey}
-}
-
-func (a *OneShotZeroAgent) constructScratchPad(steps []schema.AgentStep) string {
-	var scratchPad string
-	if len(steps) > 0 {
-		for _, step := range steps {
-			scratchPad += step.Action.Log
-			scratchPad += "\nObservation: " + step.Observation
-		}
-		scratchPad += "\n" + "Thought:"
-	}
-
-	return scratchPad
 }
 
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
