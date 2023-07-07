@@ -48,3 +48,14 @@ func LoadRefineSummarization(llm llms.LanguageModel) RefineDocuments {
 
 	return NewRefineDocuments(llmChain, refineLLMChain)
 }
+
+// LoadMapReduceSummarization loads a map reduce documents chain for
+// summarization of documents.
+func LoadMapReduceSummarization(llm llms.LanguageModel) MapReduceDocuments {
+	mapChain := NewLLMChain(llm, prompts.NewPromptTemplate(
+		_stuffSummarizationTemplate, []string{"context"},
+	))
+	combineChain := LoadStuffSummarization(llm)
+
+	return NewMapReduceDocuments(mapChain, combineChain)
+}

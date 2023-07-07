@@ -39,9 +39,11 @@ func TestMapReduce(t *testing.T) {
 			testLanguageModel{},
 			prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
 		),
-		NewLLMChain(
-			testLanguageModel{},
-			prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
+		NewStuffDocuments(
+			NewLLMChain(
+				testLanguageModel{},
+				prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
+			),
 		),
 	)
 
