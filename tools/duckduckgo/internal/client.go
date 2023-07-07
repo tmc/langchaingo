@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,28 +11,27 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const _defaultUserAgent = "github.com/tmc/langchaingo/tools/duckduckgo"
-
 var (
 	ErrNoGoodResult = errors.New("no good search results found")
 	ErrAPIResponse  = errors.New("duckduckgo api responded with error")
 )
 
+// Client defines an HTTP client for communicating with duckduckgo.
 type Client struct {
 	maxResults int
 	userAgent  string
 }
 
+// Result defines a search query result type.
 type Result struct {
 	Title string
 	Info  string
 	Ref   string
 }
 
+// New initializes a Client with arguments for setting a max
+// results per search query and a value for the user agent header.
 func New(maxResults int, userAgent string) *Client {
-	if userAgent == "" {
-		userAgent = _defaultUserAgent
-	}
 	if maxResults == 0 {
 		maxResults = 1
 	}
@@ -44,6 +42,8 @@ func New(maxResults int, userAgent string) *Client {
 	}
 }
 
+// Search performs a search query and returns
+// the result as string and an error if any.
 func (client *Client) Search(ctx context.Context, query string) (string, error) {
 	results := []Result{}
 	queryURL := fmt.Sprintf("https://html.duckduckgo.com/html/?q=%s", url.QueryEscape(query))
@@ -53,7 +53,9 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", fmt.Errorf("creating duckduckgo request: %w", err)
 	}
 
-	request.Header.Add("User-Agent", client.userAgent)
+	if client.userAgent != "" {
+		request.Header.Add("User-Agent", client.userAgent)
+	}
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
@@ -92,7 +94,6 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 				),
 			)
 			if err != nil {
-				log.Printf("Error: %s", err)
 				return "", err
 			}
 		}
