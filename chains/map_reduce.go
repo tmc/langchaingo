@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 	"golang.org/x/exp/maps"
 )
@@ -37,14 +38,24 @@ type MapReduceDocuments struct {
 	// The input key where the documents to be combined should be.
 	InputKey string
 
-	// The key where the combined text is put.
-	OutputKey string
-
 	// Wether or not to add the intermediate steps to the output.
 	ReturnIntermediateSteps bool
 }
 
 var _ Chain = MapReduceDocuments{}
+
+// NewMapReduceDocuments creates a new map reduce documents chain with some default values.
+func NewMapReduceDocuments(llmChain *LLMChain, reduceChain Chain) MapReduceDocuments {
+	return MapReduceDocuments{
+		LLMChain:                   llmChain,
+		ReduceChain:                reduceChain,
+		Memory:                     memory.NewSimple(),
+		ReduceDocumentVariableName: _combineDocumentsDefaultDocumentVariableName,
+		LLMChainInputVariableName:  _combineDocumentsDefaultDocumentVariableName,
+		MaxNumberOfConcurrent:      _defaultApplyMaxNumberWorkers,
+		InputKey:                   _combineDocumentsDefaultInputKey,
+	}
+}
 
 // Call handles the inner logic of the MapReduceDocuments documents chain.
 func (c MapReduceDocuments) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint:lll
@@ -157,7 +168,7 @@ func (c MapReduceDocuments) GetInputKeys() []string {
 }
 
 func (c MapReduceDocuments) GetOutputKeys() []string {
-	return []string{c.OutputKey}
+	return c.ReduceChain.GetOutputKeys()
 }
 
 func (c MapReduceDocuments) GetMemory() schema.Memory { //nolint:ireturn
