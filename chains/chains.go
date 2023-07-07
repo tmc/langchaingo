@@ -157,12 +157,12 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 	}
 
 	results := make([]map[string]any, len(inputValues))
-	for range inputValues {
+	for i := range inputValues {
 		r := <-resultsChan
 		if r.err != nil {
 			return nil, r.err
 		}
-		results = append(results, r.result)
+		results[i] = r.result
 	}
 
 	return results, nil
