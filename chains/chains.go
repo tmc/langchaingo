@@ -121,6 +121,53 @@ func Predict(ctx context.Context, c Chain, inputValues map[string]any, options .
 	return outputValue, nil
 }
 
+const _defaultApplyMaxNumberWorkers = 5
+
+// Apply executes the chain for each of the inputs asynchronously.
+func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorkers int, options ...ChainCallOption) ([]map[string]any, error) { // nolint:lll
+	if maxWorkers <= 0 {
+		maxWorkers = _defaultApplyMaxNumberWorkers
+	}
+
+	inputJobs := make(chan map[string]any, len(inputValues))
+	resultsChan := make(chan struct {
+		result map[string]any
+		err    error
+	}, len(inputValues))
+	defer close(inputJobs)
+	defer close(resultsChan)
+
+	for w := 0; w < maxWorkers; w++ {
+		go func() {
+			for input := range inputJobs {
+				res, err := Call(ctx, c, input, options...)
+				resultsChan <- struct {
+					result map[string]any
+					err    error
+				}{
+					result: res,
+					err:    err,
+				}
+			}
+		}()
+	}
+
+	for _, input := range inputValues {
+		inputJobs <- input
+	}
+
+	results := make([]map[string]any, len(inputValues))
+	for i := range inputValues {
+		r := <-resultsChan
+		if r.err != nil {
+			return nil, r.err
+		}
+		results[i] = r.result
+	}
+
+	return results, nil
+}
+
 func validateInputs(c Chain, inputValues map[string]any) error {
 	for _, k := range c.GetInputKeys() {
 		if _, ok := inputValues[k]; !ok {
