@@ -13,3 +13,4 @@ coverage.out
 
 # dev
 .env
+vendor/*
