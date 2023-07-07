@@ -14,6 +14,7 @@ var (
 type Client struct {
 	Token string
 	Model string
+	url   string
 }
 
 func New(token string, model string) (*Client, error) {
@@ -23,6 +24,7 @@ func New(token string, model string) (*Client, error) {
 	return &Client{
 		Token: token,
 		Model: model,
+		url:   hfInferenceAPI,
 	}, nil
 }
 
@@ -45,15 +47,17 @@ type InferenceResponse struct {
 
 func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
 	payload := &inferencePayload{
-		Model:             request.Model,
-		Inputs:            request.Prompt,
-		Temperature:       request.Temperature,
-		TopP:              request.TopP,
-		TopK:              request.TopK,
-		MinLength:         request.MinLength,
-		MaxLength:         request.MaxLength,
-		RepetitionPenalty: request.RepetitionPenalty,
-		Seed:              request.Seed,
+		Model:  request.Model,
+		Inputs: request.Prompt,
+		Parameters: parameters{
+			Temperature:       request.Temperature,
+			TopP:              request.TopP,
+			TopK:              request.TopK,
+			MinLength:         request.MinLength,
+			MaxLength:         request.MaxLength,
+			RepetitionPenalty: request.RepetitionPenalty,
+			Seed:              request.Seed,
+		},
 	}
 	resp, err := c.runInference(ctx, payload)
 	if err != nil {
