@@ -12,7 +12,7 @@ import (
 
 type testLanguageModel struct{}
 
-func (l testLanguageModel) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+func (l testLanguageModel) GeneratePrompt(_ context.Context, _ []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
 	return llms.LLMResult{
 		Generations: [][]*llms.Generation{{&llms.Generation{
 			Text: "result",

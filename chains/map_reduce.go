@@ -138,10 +138,10 @@ func (c MapReduceDocuments) mapResultsToLLMChainInputs(
 }
 
 func (c MapReduceDocuments) copyInputValuesWithoutInputKey(inputValues map[string]any) map[string]any {
-	copy := make(map[string]any)
-	maps.Copy(copy, inputValues)
-	delete(copy, c.InputKey)
-	return copy
+	inputValuesCopy := make(map[string]any)
+	maps.Copy(inputValuesCopy, inputValues)
+	delete(inputValuesCopy, c.InputKey)
+	return inputValuesCopy
 }
 
 func (c MapReduceDocuments) GetInputKeys() []string {
