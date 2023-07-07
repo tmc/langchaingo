@@ -14,10 +14,9 @@ type Tool struct {
 
 var _ tools.Tool = Tool{}
 
-func New() (*Tool, error) {
-	maxResults := 5
+func New(maxResults int, userAgent string) (*Tool, error) {
 	return &Tool{
-		client: internal.New(maxResults),
+		client: internal.New(maxResults, userAgent),
 	}, nil
 }
 
