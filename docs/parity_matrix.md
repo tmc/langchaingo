@@ -65,10 +65,10 @@ Please note that this page lists the current state of the LangChain Go project, 
 
 ## Memory
 
-| Feature                      | Status |
+| Feature                     | Status |
 | ----------------------------| ------ |
 | Buffer Memory               | ✅     |
-| Buffer Window Memory         | ❌     |
+| Buffer Window Memory        | ❌     |
 | Summary Memory              | ❌     |
 | Entity Memory               | ❌     |
 | Summary Buffer Memory       | ❌     |
@@ -82,7 +82,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Structured                  | ✅     |
 | Boolean                     | ❌     |
 | Combining Parsers           | ❌     |
-| Regex                       | ❌     |
+| Regex                       | ✅     |
 | Regex Dictionary            | ❌     |
 | Comma separated list        | ✅     |
 | Parser fixer                | ❌     |
