@@ -138,7 +138,6 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 		err    error
 		i      int
 	}, len(inputValues))
-	defer close(inputJobs)
 	defer close(resultsChan)
 
 	for w := 0; w < maxWorkers; w++ {
@@ -167,6 +166,7 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 			i:     i,
 		}
 	}
+	close(inputJobs)
 
 	results := make([]map[string]any, len(inputValues))
 	for range inputValues {
