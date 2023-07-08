@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
@@ -14,6 +15,7 @@ import (
 type testLanguageModel struct{}
 
 func (l testLanguageModel) GeneratePrompt(_ context.Context, _ []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+	time.Sleep(time.Second)
 	return llms.LLMResult{
 		Generations: [][]*llms.Generation{{&llms.Generation{
 			Text: "result",

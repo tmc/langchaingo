@@ -3,6 +3,7 @@ package chains
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/tmc/langchaingo/schema"
 )
@@ -138,20 +139,31 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 		err    error
 		i      int
 	}, len(inputValues))
-	defer close(resultsChan)
+
+	var wg sync.WaitGroup
+	wg.Add(maxWorkers)
 
 	for w := 0; w < maxWorkers; w++ {
 		go func() {
-			for input := range inputJobs {
-				res, err := Call(ctx, c, input.input, options...)
-				resultsChan <- struct {
-					result map[string]any
-					err    error
-					i      int
-				}{
-					result: res,
-					err:    err,
-					i:      input.i,
+			defer wg.Done()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case input, ok := <-inputJobs:
+					if !ok {
+						return
+					}
+					res, err := Call(ctx, c, input.input, options...)
+					resultsChan <- struct {
+						result map[string]any
+						err    error
+						i      int
+					}{
+						result: res,
+						err:    err,
+						i:      input.i,
+					}
 				}
 			}
 		}()
@@ -168,8 +180,13 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 	}
 	close(inputJobs)
 
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+	}()
+
 	results := make([]map[string]any, len(inputValues))
-	for range inputValues {
+	for range results {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
