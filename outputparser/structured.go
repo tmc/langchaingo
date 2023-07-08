@@ -31,7 +31,7 @@ const (
 )
 
 // ResponseSchema is struct used in the structured output parser to describe
-// how the llm should format it's response. Name is a key in the parsed
+// how the llm should format its response. Name is a key in the parsed
 // output map. Description is a description of what the value should contain.
 type ResponseSchema struct {
 	Name        string
@@ -53,7 +53,7 @@ func NewStructured(schema []ResponseSchema) Structured {
 	}
 }
 
-// Statically assert that CommaSeparatedList implement the OutputParser interface.
+// Statically assert that Structured implement the OutputParser interface.
 var _ schema.OutputParser[map[string]string] = Structured{}
 
 // Parse parses the output of an llm into a map. If the output of the llm doesn't
@@ -105,7 +105,7 @@ func (p Structured) ParseWithPrompt(text string, _ schema.PromptValue) (map[stri
 }
 
 // GetFormatInstructions returns a string explaining how the llm should format
-// it's response.
+// its response.
 func (p Structured) GetFormatInstructions() string {
 	jsonLines := ""
 	for _, rs := range p.ResponseSchemas {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,29 +16,53 @@ var (
 	ErrAPIResponse  = errors.New("duckduckgo api responded with error")
 )
 
+// Client defines an HTTP client for communicating with duckduckgo.
 type Client struct {
 	maxResults int
+	userAgent  string
 }
 
+// Result defines a search query result type.
 type Result struct {
 	Title string
 	Info  string
 	Ref   string
 }
 
-func New(maxResults int) *Client {
+// New initializes a Client with arguments for setting a max
+// results per search query and a value for the user agent header.
+func New(maxResults int, userAgent string) *Client {
+	if maxResults == 0 {
+		maxResults = 1
+	}
+
 	return &Client{
 		maxResults: maxResults,
+		userAgent:  userAgent,
 	}
 }
 
-func (client *Client) Search(ctx context.Context, query string) (string, error) {
-	results := []Result{}
-	queryURL := fmt.Sprintf("https://duckduckgo.com/html/?q=%s", url.QueryEscape(query))
-
+func (client *Client) newRequest(ctx context.Context, queryURL string) (*http.Request, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("creating duckduckgo request: %w", err)
+		return nil, fmt.Errorf("creating duckduckgo request: %w", err)
+	}
+
+	if client.userAgent != "" {
+		request.Header.Add("User-Agent", client.userAgent)
+	}
+
+	return request, nil
+}
+
+// Search performs a search query and returns
+// the result as string and an error if any.
+func (client *Client) Search(ctx context.Context, query string) (string, error) {
+	queryURL := fmt.Sprintf("https://html.duckduckgo.com/html/?q=%s", url.QueryEscape(query))
+
+	request, err := client.newRequest(ctx, queryURL)
+	if err != nil {
+		return "", err
 	}
 
 	response, err := http.DefaultClient.Do(request)
@@ -57,6 +80,7 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", fmt.Errorf("new document error: %w", err)
 	}
 
+	results := []Result{}
 	sel := doc.Find(".web-result")
 
 	for i := range sel.Nodes {
@@ -79,7 +103,6 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 				),
 			)
 			if err != nil {
-				log.Printf("Error: %s", err)
 				return "", err
 			}
 		}

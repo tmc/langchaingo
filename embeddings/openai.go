@@ -20,19 +20,14 @@ type OpenAI struct {
 
 var _ Embedder = OpenAI{}
 
-// NewOpenAI creates a new OpenAI with StripNewLines set to true and batch
-// size set to 512.
-func NewOpenAI() (OpenAI, error) {
-	client, err := openai.New()
+// NewOpenAI creates a new OpenAI with options. Options for client, strip new lines and batch.
+func NewOpenAI(opts ...Option) (OpenAI, error) {
+	o, err := applyClientOptions(opts...)
 	if err != nil {
 		return OpenAI{}, err
 	}
 
-	return OpenAI{
-		client:        client,
-		StripNewLines: true,
-		BatchSize:     defaultBatchSize,
-	}, nil
+	return o, nil
 }
 
 // EmbedDocuments creates one vector embedding for each of the texts.

@@ -67,3 +67,23 @@ func TestRefineSummarization(t *testing.T) {
 	)
 	require.NoError(t, err)
 }
+
+func TestMapReduceSummarization(t *testing.T) {
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	docs := loadTestData(t)
+
+	chain := LoadMapReduceSummarization(llm)
+	_, err = Run(
+		context.Background(),
+		chain,
+		docs,
+	)
+	require.NoError(t, err)
+}
