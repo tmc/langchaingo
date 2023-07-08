@@ -13,8 +13,8 @@ import (
 const _llmChainDefaultOutputKey = "text"
 
 type LLMChain struct {
-	prompt       prompts.PromptTemplate
-	llm          llms.LanguageModel
+	Prompt       prompts.FormatPrompter
+	LLM          llms.LanguageModel
 	Memory       schema.Memory
 	OutputParser schema.OutputParser[any]
 
@@ -24,10 +24,10 @@ type LLMChain struct {
 var _ Chain = &LLMChain{}
 
 // NewLLMChain creates a new LLMChain with an llm and a prompt.
-func NewLLMChain(llm llms.LanguageModel, prompt prompts.PromptTemplate) *LLMChain {
+func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter) *LLMChain {
 	chain := &LLMChain{
-		prompt:       prompt,
-		llm:          llm,
+		Prompt:       prompt,
+		LLM:          llm,
 		OutputParser: outputparser.NewSimple(),
 		Memory:       memory.NewSimple(),
 
@@ -42,12 +42,12 @@ func NewLLMChain(llm llms.LanguageModel, prompt prompts.PromptTemplate) *LLMChai
 // directly, use rather the Call or Run function if the prompt only requires one input
 // value.
 func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) {
-	promptValue, err := c.prompt.FormatPrompt(values)
+	promptValue, err := c.Prompt.FormatPrompt(values)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := c.llm.GeneratePrompt(
+	result, err := c.LLM.GeneratePrompt(
 		ctx,
 		[]schema.PromptValue{promptValue},
 		getLLMCallOptions(options...)...,
@@ -71,7 +71,7 @@ func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 
 // GetInputKeys returns the expected input keys.
 func (c LLMChain) GetInputKeys() []string {
-	return append([]string{}, c.prompt.InputVariables...)
+	return append([]string{}, c.Prompt.GetInputVariables()...)
 }
 
 // GetOutputKeys returns the output keys the chain will return.
