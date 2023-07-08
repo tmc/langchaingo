@@ -124,21 +124,25 @@ func Predict(ctx context.Context, c Chain, inputValues map[string]any, options .
 
 const _defaultApplyMaxNumberWorkers = 5
 
+type applyInputJob struct {
+	input map[string]any
+	i     int
+}
+
+type applyResult struct {
+	result map[string]any
+	err    error
+	i      int
+}
+
 // Apply executes the chain for each of the inputs asynchronously.
 func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorkers int, options ...ChainCallOption) ([]map[string]any, error) { // nolint:lll
 	if maxWorkers <= 0 {
 		maxWorkers = _defaultApplyMaxNumberWorkers
 	}
 
-	inputJobs := make(chan struct {
-		input map[string]any
-		i     int
-	}, len(inputValues))
-	resultsChan := make(chan struct {
-		result map[string]any
-		err    error
-		i      int
-	}, len(inputValues))
+	inputJobs := make(chan applyInputJob, len(inputValues))
+	resultsChan := make(chan applyResult, len(inputValues))
 
 	var wg sync.WaitGroup
 	wg.Add(maxWorkers)
@@ -155,11 +159,7 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 						return
 					}
 					res, err := Call(ctx, c, input.input, options...)
-					resultsChan <- struct {
-						result map[string]any
-						err    error
-						i      int
-					}{
+					resultsChan <- applyResult{
 						result: res,
 						err:    err,
 						i:      input.i,
@@ -169,22 +169,26 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 		}()
 	}
 
-	for i, input := range inputValues {
-		inputJobs <- struct {
-			input map[string]any
-			i     int
-		}{
-			input: input,
-			i:     i,
-		}
-	}
-	close(inputJobs)
-
 	go func() {
 		wg.Wait()
 		close(resultsChan)
 	}()
 
+	sendApplyInputJobs(inputJobs, inputValues)
+	return getApplyResults(ctx, resultsChan, inputValues)
+}
+
+func sendApplyInputJobs(inputJobs chan applyInputJob, inputValues []map[string]any) {
+	for i, input := range inputValues {
+		inputJobs <- applyInputJob{
+			input: input,
+			i:     i,
+		}
+	}
+	close(inputJobs)
+}
+
+func getApplyResults(ctx context.Context, resultsChan chan applyResult, inputValues []map[string]any) ([]map[string]any, error) { //nolint:lll
 	results := make([]map[string]any, len(inputValues))
 	for range results {
 		select {
