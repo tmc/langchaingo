@@ -2,7 +2,9 @@ package chains
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
@@ -13,6 +15,7 @@ import (
 type testLanguageModel struct{}
 
 func (l testLanguageModel) GeneratePrompt(_ context.Context, _ []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+	time.Sleep(time.Second)
 	return llms.LLMResult{
 		Generations: [][]*llms.Generation{{&llms.Generation{
 			Text: "result",
@@ -37,4 +40,25 @@ func TestApply(t *testing.T) {
 	results, err := Apply(context.Background(), c, inputs, maxWorkers)
 	require.NoError(t, err)
 	require.Equal(t, numInputs, len(results), "number of inputs and results not equal")
+}
+
+func TestApplyWithCanceledContext(t *testing.T) {
+	t.Parallel()
+
+	numInputs := 10
+	maxWorkers := 5
+	inputs := make([]map[string]any, numInputs)
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	c := NewLLMChain(testLanguageModel{}, prompts.NewPromptTemplate("test", nil))
+
+	go func() {
+		defer wg.Done()
+		_, err := Apply(ctx, c, inputs, maxWorkers)
+		require.Error(t, err)
+	}()
+
+	cancelFunc()
+	wg.Wait()
 }

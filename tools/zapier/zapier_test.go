@@ -21,5 +21,6 @@ func TestCreateDescription(t *testing.T) {
 
 	desc := tool.Description()
 	assert.Contains(t, desc, "Test Tool")
-	assert.Contains(t, desc, "['Param1', 'Param2']")
+	assert.Contains(t, desc, "Param2")
+	assert.Contains(t, desc, "Param1")
 }

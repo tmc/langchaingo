@@ -28,7 +28,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | LLM Chain                              | ✅     |
 | Stuff Combine Documents Chain          | ✅     |
 | Retrieval QA Chain                     | ✅     |
-| Map Reduce Combine Documents Chain     | ❌     |
+| Map Reduce Combine Documents Chain     | ✅     |
 | Refine Combine Documents Chain         | ✅     |
 | Map Rerank Combine Documents Chain     | ❌ [#68](https://github.com/tmc/langchaingo/issues/68) |
 | Chat Vector DB Chain                   | ❌     |
@@ -37,8 +37,8 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Question Answering Chains              | ✅     |
 | Summarization Chains                   | ✅     |
 | Question Answering With Sources Chains | ❌     |
-| SQL Database Chain                     | ❌     |
-| API Chain                              | ❌     |
+| SQL Database Chain                     | ✅     |
+| API Chain                              | ✅     |
 | Transformation Chain                   | ❌     |
 | Constitutional Chain                   | ❌     |
 | Conversational Chain                   | ❌     |

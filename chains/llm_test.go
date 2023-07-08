@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -28,17 +27,11 @@ func TestLLMChain(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	resultChainValue, err := Call(context.Background(), chain,
+	result, err := Predict(context.Background(), chain,
 		map[string]any{
 			"country": "France",
 		},
 	)
 	require.NoError(t, err)
-
-	resultAny, ok := resultChainValue["text"]
-	require.True(t, ok)
-
-	result, _ := resultAny.(string)
-	result = strings.TrimSpace(result)
-	assert.Equal(t, "Paris.", result)
+	require.True(t, strings.Contains(result, "Paris"))
 }

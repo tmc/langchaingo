@@ -50,7 +50,7 @@ func NewMapReduceDocuments(llmChain *LLMChain, reduceChain Chain) MapReduceDocum
 		LLMChain:                   llmChain,
 		ReduceChain:                reduceChain,
 		Memory:                     memory.NewSimple(),
-		ReduceDocumentVariableName: _combineDocumentsDefaultDocumentVariableName,
+		ReduceDocumentVariableName: _combineDocumentsDefaultInputKey,
 		LLMChainInputVariableName:  _combineDocumentsDefaultDocumentVariableName,
 		MaxNumberOfConcurrent:      _defaultApplyMaxNumberWorkers,
 		InputKey:                   _combineDocumentsDefaultInputKey,
@@ -72,12 +72,12 @@ func (c MapReduceDocuments) Call(ctx context.Context, values map[string]any, opt
 	}
 
 	// Create a document for each of map results and create input values for each of the document.
-	llmChainInputs, err := c.mapResultsToLLMChainInputs(docs, mapResults, values)
+	reduceInputs, err := c.mapResultsToReduceInputs(docs, mapResults, values)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := Call(ctx, c.ReduceChain, llmChainInputs, options...)
+	result, err := Call(ctx, c.ReduceChain, reduceInputs, options...)
 	return c.maybeAddIntermediateSteps(result, mapResults), err
 }
 
@@ -112,7 +112,7 @@ func (c MapReduceDocuments) getApplyInputs(values map[string]any, docs []schema.
 	return inputs
 }
 
-func (c MapReduceDocuments) mapResultsToLLMChainInputs(
+func (c MapReduceDocuments) mapResultsToReduceInputs(
 	docs []schema.Document,
 	mapResults []map[string]any,
 	inputValues map[string]any,
@@ -130,7 +130,7 @@ func (c MapReduceDocuments) mapResultsToLLMChainInputs(
 		})
 	}
 
-	documentInputVariable := c.getInputVariable(c.LLMChainInputVariableName, c.LLMChain.GetInputKeys())
+	documentInputVariable := c.getInputVariable(c.ReduceDocumentVariableName, c.ReduceChain.GetInputKeys())
 	reduceInputs := c.copyInputValuesWithoutInputKey(inputValues)
 	reduceInputs[documentInputVariable] = resultDocs
 
@@ -145,30 +145,31 @@ func (c MapReduceDocuments) copyInputValuesWithoutInputKey(inputValues map[strin
 }
 
 func (c MapReduceDocuments) GetInputKeys() []string {
-	inputKeys := []string{c.InputKey}
+	inputKeys := map[string]bool{c.InputKey: true}
 	for _, key := range c.LLMChain.GetInputKeys() {
 		if key == c.LLMChainInputVariableName {
 			continue
 		}
-		inputKeys = append(inputKeys, key)
+		inputKeys[key] = true
 	}
 
 	for _, key := range c.ReduceChain.GetInputKeys() {
 		if key == c.ReduceDocumentVariableName {
 			continue
 		}
-		inputKeys = append(inputKeys, key)
+		inputKeys[key] = true
 	}
 
-	if c.ReturnIntermediateSteps {
-		inputKeys = append(inputKeys, _intermediateStepsOutputKey)
-	}
-
-	return inputKeys
+	return maps.Keys(inputKeys)
 }
 
 func (c MapReduceDocuments) GetOutputKeys() []string {
-	return c.ReduceChain.GetOutputKeys()
+	outputKeys := c.ReduceChain.GetOutputKeys()
+	if c.ReturnIntermediateSteps {
+		outputKeys = append(outputKeys, _intermediateStepsOutputKey)
+	}
+
+	return outputKeys
 }
 
 func (c MapReduceDocuments) GetMemory() schema.Memory { //nolint:ireturn
