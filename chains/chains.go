@@ -129,10 +129,14 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 		maxWorkers = _defaultApplyMaxNumberWorkers
 	}
 
-	inputJobs := make(chan map[string]any, len(inputValues))
+	inputJobs := make(chan struct {
+		input map[string]any
+		i     int
+	}, len(inputValues))
 	resultsChan := make(chan struct {
 		result map[string]any
 		err    error
+		i      int
 	}, len(inputValues))
 	defer close(inputJobs)
 	defer close(resultsChan)
@@ -140,29 +144,37 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 	for w := 0; w < maxWorkers; w++ {
 		go func() {
 			for input := range inputJobs {
-				res, err := Call(ctx, c, input, options...)
+				res, err := Call(ctx, c, input.input, options...)
 				resultsChan <- struct {
 					result map[string]any
 					err    error
+					i      int
 				}{
 					result: res,
 					err:    err,
+					i:      input.i,
 				}
 			}
 		}()
 	}
 
-	for _, input := range inputValues {
-		inputJobs <- input
+	for i, input := range inputValues {
+		inputJobs <- struct {
+			input map[string]any
+			i     int
+		}{
+			input: input,
+			i:     i,
+		}
 	}
 
 	results := make([]map[string]any, len(inputValues))
-	for i := range inputValues {
+	for range inputValues {
 		r := <-resultsChan
 		if r.err != nil {
 			return nil, r.err
 		}
-		results[i] = r.result
+		results[r.i] = r.result
 	}
 
 	return results, nil
