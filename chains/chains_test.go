@@ -2,9 +2,9 @@ package chains
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
@@ -12,13 +12,14 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+// testLanguageModel is a struct that implement the language model interface
+// and returns the prompt value as a string.
 type testLanguageModel struct{}
 
-func (l testLanguageModel) GeneratePrompt(_ context.Context, _ []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	time.Sleep(time.Second)
+func (l testLanguageModel) GeneratePrompt(_ context.Context, promptValue []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
 	return llms.LLMResult{
 		Generations: [][]*llms.Generation{{&llms.Generation{
-			Text: "result",
+			Text: promptValue[0].String(),
 		}}},
 	}, nil
 }
@@ -35,11 +36,16 @@ func TestApply(t *testing.T) {
 	numInputs := 10
 	maxWorkers := 5
 	inputs := make([]map[string]any, numInputs)
+	for i := 0; i < len(inputs); i++ {
+		inputs[i] = map[string]any{
+			"text": fmt.Sprint(i),
+		}
+	}
 
-	c := NewLLMChain(testLanguageModel{}, prompts.NewPromptTemplate("test", nil))
+	c := NewLLMChain(testLanguageModel{}, prompts.NewPromptTemplate("{{.text}}", []string{"text"}))
 	results, err := Apply(context.Background(), c, inputs, maxWorkers)
 	require.NoError(t, err)
-	require.Equal(t, numInputs, len(results), "number of inputs and results not equal")
+	require.Equal(t, inputs, results, "inputs and results not equal")
 }
 
 func TestApplyWithCanceledContext(t *testing.T) {

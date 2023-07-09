@@ -17,11 +17,11 @@ AI:`
 
 func NewConversation(llm llms.LanguageModel, memory schema.Memory) LLMChain {
 	return LLMChain{
-		prompt: prompts.NewPromptTemplate(
+		Prompt: prompts.NewPromptTemplate(
 			_conversationTemplate,
 			[]string{"history", "input"},
 		),
-		llm:          llm,
+		LLM:          llm,
 		Memory:       memory,
 		OutputParser: outputparser.NewSimple(),
 		OutputKey:    _llmChainDefaultOutputKey,
