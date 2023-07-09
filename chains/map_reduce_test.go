@@ -54,5 +54,5 @@ func TestMapReduce(t *testing.T) {
 		{PageContent: "doo"},
 	})
 	require.NoError(t, err)
-	require.Equal(t, "result", result)
+	require.Equal(t, "foo\n\nboo\n\nzoo\n\ndoo\n\n", result)
 }

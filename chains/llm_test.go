@@ -35,3 +35,21 @@ func TestLLMChain(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Paris"))
 }
+
+func TestLLMChainWithChatPromptTemplate(t *testing.T) {
+	t.Parallel()
+
+	c := NewLLMChain(
+		testLanguageModel{},
+		prompts.NewChatPromptTemplate([]prompts.MessageFormatter{
+			prompts.NewAIMessagePromptTemplate("{{.foo}}", []string{"foo"}),
+			prompts.NewHumanMessagePromptTemplate("{{.boo}}", []string{"boo"}),
+		}),
+	)
+	result, err := Predict(context.Background(), c, map[string]any{
+		"foo": "foo",
+		"boo": "boo",
+	})
+	require.NoError(t, err)
+	require.Equal(t, "AI: foo\nHuman: boo", result)
+}
