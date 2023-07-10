@@ -20,7 +20,7 @@ func TestPDFLoader(t *testing.T) {
 	docs, err := loader.Load(context.Background())
 	require.NoError(t, err)
 
-	expected := "Lorem ipsum dolor sit amet, dico fastidii omnesque mea in. Eam ut iusto fastidii, id qui audire abhorreant"
+	expected := "Lorem ipsum dolor sit amet, dico fastidii omnesque mea in."
 	segments := strings.Split(docs[0].PageContent, ".")
 	assert.Contains(t, expected, segments[0])
 	assert.Equal(t, "1", docs[0].Metadata["Pages"])
