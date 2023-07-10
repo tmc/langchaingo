@@ -90,12 +90,12 @@ func (c MapRerankDocuments) Call(ctx context.Context, values map[string]any, opt
 	outputs := make([]map[string]any, len(mapResults))
 
 	for i, res := range mapResults {
-		output := c.parseMapResults(res[c.LLMChain.OutputKey].(map[string]string))
-		if err != nil {
+		rankedAnswer, ok := res[c.LLMChain.OutputKey].(map[string]string)
+		if !ok {
 			return nil, ErrInvalidOutputValues
 		}
 
-		outputs[i] = output
+		outputs[i] = c.parseMapResults(rankedAnswer)
 	}
 
 	sort.Slice(outputs, func(i, j int) bool {
@@ -158,7 +158,12 @@ func (c MapRerankDocuments) parseMapResults(inputs map[string]string) map[string
 
 // formatOutputs returns the first output and the intermediate steps, if enabled.
 func (c MapRerankDocuments) formatOutputs(outputs []map[string]any) map[string]any {
-	formattedOutputs := make(map[string]any)
+	var formattedOutputs map[string]any
+
+	if len(outputs) == 0 {
+		return nil
+	}
+
 	formattedOutputs = outputs[0]
 
 	if c.ReturnIntermediateSteps {
