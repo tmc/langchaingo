@@ -81,7 +81,6 @@ func (c MapRerankDocuments) Call(ctx context.Context, values map[string]any, opt
 
 	applyInputs := c.getApplyInputs(values, docs)
 	mapResults, err := Apply(ctx, c.LLMChain, applyInputs, c.MaxConcurrentWorkers, options...)
-
 	if err != nil {
 		return nil, err
 	}
