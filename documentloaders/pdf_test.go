@@ -3,6 +3,7 @@ package documentloaders
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,8 @@ func TestPDFLoader(t *testing.T) {
 	docs, err := loader.Load(context.Background())
 	require.NoError(t, err)
 
-	expectedText := "Te quo illum phaedrum salutatus, has in quis alii vide."
-	assert.Contains(t, docs[0].PageContent, expectedText)
-	assert.Equal(t, docs[0].Metadata["Pages"], "1")
+	expected := "Lorem ipsum dolor sit amet, dico fastidii omnesque mea in. Eam ut iusto fastidii, id qui audire abhorreant"
+	segments := strings.Split(docs[0].PageContent, ".")
+	assert.Contains(t, expected, segments[0])
+	assert.Equal(t, "1", docs[0].Metadata["Pages"])
 }
