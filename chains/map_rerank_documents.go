@@ -30,8 +30,10 @@ type MapRerankDocuments struct {
 
 	// The name of the document variable in the LLMChain.
 	DocumentVariableName string
+
 	// Key used to access document inputs.
 	InputKey string
+
 	// Key used to access map results.
 	OutputKey string
 
