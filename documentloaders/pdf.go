@@ -1,12 +1,13 @@
 package documentloaders
 
 import (
-	"code.sajari.com/docconv"
 	"context"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
 	"io"
 	"strings"
+
+	"code.sajari.com/docconv"
+	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/textsplitter"
 )
 
 type PDF struct {
@@ -18,7 +19,7 @@ func NewPDF(r io.ReadSeeker) PDF {
 }
 
 // Load reads from the io.ReadSeeker and returns a single document with the data.
-func (p PDF) Load(ctx context.Context) ([]schema.Document, error) {
+func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 	_, err := p.r.Seek(0, io.SeekStart)
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func (p PDF) Load(ctx context.Context) ([]schema.Document, error) {
 
 	// Remove extra space and newlines
 	contents := strings.TrimSpace(bodyResult)
-	var docs = []schema.Document{
+	docs := []schema.Document{
 		{
 			PageContent: contents,
 			Metadata:    metadata,
