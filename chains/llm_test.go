@@ -40,7 +40,7 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 	t.Parallel()
 
 	c := NewLLMChain(
-		testLanguageModel{},
+		&testLanguageModel{},
 		prompts.NewChatPromptTemplate([]prompts.MessageFormatter{
 			prompts.NewAIMessagePromptTemplate("{{.foo}}", []string{"foo"}),
 			prompts.NewHumanMessagePromptTemplate("{{.boo}}", []string{"boo"}),
