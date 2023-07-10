@@ -205,9 +205,10 @@ func NewChat(opts ...Option) (*Chat, error) {
 
 func newClient(opts ...Option) (*openaiclient.Client, error) {
 	options := &options{
-		token:   os.Getenv(tokenEnvVarName),
-		model:   os.Getenv(modelEnvVarName),
-		baseURL: os.Getenv(baseURLEnvVarName),
+		token:        os.Getenv(tokenEnvVarName),
+		model:        os.Getenv(modelEnvVarName),
+		baseURL:      os.Getenv(baseURLEnvVarName),
+		organization: os.Getenv(organizationEnvVarName),
 	}
 
 	for _, opt := range opts {
@@ -218,5 +219,5 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return openaiclient.New(options.token, options.model, options.baseURL)
+	return openaiclient.New(options.token, options.model, options.baseURL, options.organization)
 }
