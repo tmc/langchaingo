@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.0.0-20230625081011-4d9d55dbcaba
+	github.com/tmc/langchaingo v0.0.0-20230710002755-32d9295eb39d
 )
 
 require (
@@ -25,7 +25,7 @@ require (
 	github.com/pinecone-io/go-pinecone v0.3.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
+	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
