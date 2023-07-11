@@ -147,5 +147,7 @@ func LoadMapRerankQA(llm llms.LanguageModel) MapRerankDocuments {
 
 	mapRerankLLMChain := NewLLMChain(llm, mapRerankPrompt)
 
-	return NewMapRerankDocuments(mapRerankLLMChain)
+	mapRerank := NewMapRerankDocuments(mapRerankLLMChain)
+
+	return *mapRerank
 }

@@ -84,11 +84,7 @@ func TestMapRerankQA(t *testing.T) {
 
 	require.NoError(t, err)
 
-	answer, ok := results["answer"].(string)
-	require.True(t, ok, "result does not contain answer key")
+	answer, ok := results["text"].(string)
+	require.True(t, ok, "result does not contain text key")
 	require.True(t, strings.Contains(answer, "Leo"), "result does not contain correct answer Leo")
-
-	score, ok := results["score"].(string)
-	require.True(t, ok, "result does not contain score key")
-	require.True(t, strings.Contains(score, "100"), "result does not score answer as 100")
 }

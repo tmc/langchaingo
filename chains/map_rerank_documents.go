@@ -50,11 +50,11 @@ type MapRerankDocuments struct {
 var _ Chain = MapRerankDocuments{}
 
 // NewMapRerankDocuments creates a new map rerank documents chain.
-func NewMapRerankDocuments(mapRerankLLMChain *LLMChain) MapRerankDocuments {
+func NewMapRerankDocuments(mapRerankLLMChain *LLMChain) *MapRerankDocuments {
 	mapRerankRE := `\s*(?P<answer>.*?)\nScore: (?P<score>.*)`
 	mapRerankLLMChain.OutputParser = outputparser.NewRegexParser(mapRerankRE)
 
-	return MapRerankDocuments{
+	return &MapRerankDocuments{
 		LLMChain:                  mapRerankLLMChain,
 		MaxConcurrentWorkers:      1,
 		LLMChainInputVariableName: _combineDocumentsDefaultDocumentVariableName,
@@ -157,17 +157,22 @@ func (c MapRerankDocuments) parseMapResults(inputs map[string]string) map[string
 
 // formatOutputs returns the first output and the intermediate steps, if enabled.
 func (c MapRerankDocuments) formatOutputs(outputs []map[string]any) map[string]any {
-	var formattedOutputs map[string]any
-
 	if len(outputs) == 0 {
 		return nil
 	}
 
-	formattedOutputs = outputs[0]
+	formattedOutputs := make(map[string]any)
+	answerOutput := maps.Clone(outputs[0])
 
-	if c.ReturnIntermediateSteps {
-		formattedOutputs[_intermediateStepsOutputKey] = outputs
+	for _, outputKey := range c.LLMChain.GetOutputKeys() {
+		formattedOutputs[outputKey] = answerOutput[c.AnswerKey]
 	}
+
+	if !c.ReturnIntermediateSteps {
+		return formattedOutputs
+	}
+
+	formattedOutputs[_intermediateStepsOutputKey] = outputs
 
 	return formattedOutputs
 }
@@ -187,7 +192,13 @@ func (c MapRerankDocuments) GetInputKeys() []string {
 
 // GetOutputKeys returns the output keys for the MapRerankDocuments chain.
 func (c MapRerankDocuments) GetOutputKeys() []string {
-	return []string{c.RankKey, c.AnswerKey}
+	outputKeys := c.LLMChain.GetOutputKeys()
+
+	if c.ReturnIntermediateSteps {
+		outputKeys = append(outputKeys, _intermediateStepsOutputKey)
+	}
+
+	return outputKeys
 }
 
 // GetMemory returns the memory for the MapRerankDocuments chain.
