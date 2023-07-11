@@ -52,7 +52,7 @@ func TestMapRerankDocumentsCall(t *testing.T) {
 
 	// Test that the answer cannot be processed if ReturnIntermediateSteps is true.
 	mapRerankDocumentsChain.ReturnIntermediateSteps = true
-	answer, err = Run(context.Background(), mapRerankDocumentsChain, docs)
+	_, err = Run(context.Background(), mapRerankDocumentsChain, docs)
 
 	require.Error(t, err)
 }
