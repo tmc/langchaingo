@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -32,11 +33,11 @@ func NewSequentialChain(chains []Chain, inputKeys []string, outputKeys []string)
 }
 
 func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) error {
-	knownKeys := toSet(inputKeys)
+	knownKeys := util.ToSet(inputKeys)
 
 	for i, c := range chain {
 		// Check that chain has input keys that are in knownKeys
-		missingKeys := difference(c.GetInputKeys(), knownKeys)
+		missingKeys := util.Difference(c.GetInputKeys(), knownKeys)
 		if len(missingKeys) > 0 {
 			return fmt.Errorf(
 				"%w: chain at index %d is missing required input keys: %v",
@@ -45,7 +46,7 @@ func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) er
 		}
 
 		// Check that chain does not have output keys that are already in knownKeys
-		overlappingKeys := intersection(c.GetOutputKeys(), knownKeys)
+		overlappingKeys := util.Intersection(c.GetOutputKeys(), knownKeys)
 		if len(overlappingKeys) > 0 {
 			return fmt.Errorf(
 				"%w: chain at index %d has output keys that already exist: %v",
@@ -69,49 +70,21 @@ func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) er
 	return nil
 }
 
-// toSet converts a list to a set.
-func toSet(list []string) map[string]struct{} {
-	set := make(map[string]struct{}, 0)
-	for _, v := range list {
-		set[v] = struct{}{}
-	}
-	return set
-}
-
-// difference returns the elements in list that are not in set.
-func difference(list []string, set map[string]struct{}) []string {
-	diff := make([]string, 0)
-	for _, v := range list {
-		if _, ok := set[v]; !ok {
-			diff = append(diff, v)
-		}
-	}
-	return diff
-}
-
-// intersection returns the elements in list that are in set.
-func intersection(list []string, set map[string]struct{}) []string {
-	intersection := make([]string, 0)
-	for _, v := range list {
-		if _, ok := set[v]; ok {
-			intersection = append(intersection, v)
-		}
-	}
-	return intersection
-}
-
 // Call runs the logic of the chains and returns the outputs. This method should
 // not be called directly. Use rather the Call, Run or Predict functions that
 // handles the memory and other aspects of the chain.
 func (c *SequentialChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint:lll
+	var outputs map[string]any
+	var err error
 	for _, chain := range c.chains {
-		var err error
-		inputs, err = Call(ctx, chain, inputs, options...)
+		outputs, err = Call(ctx, chain, inputs, options...)
 		if err != nil {
 			return nil, err
 		}
+		// Set the input for the next chain to the output of the current chain
+		inputs = outputs
 	}
-	return inputs, nil
+	return outputs, nil
 }
 
 // GetMemory gets the memory of the chain.
