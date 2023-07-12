@@ -20,7 +20,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3.6.0
         with:
-          args: --timeout=2m
+          args: --timeout=4m
   build-examples:
     runs-on: ubuntu-latest
     steps:
