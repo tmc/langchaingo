@@ -20,7 +20,8 @@ type Transform struct {
 
 var _ Chain = Transform{}
 
-// NewTransform creates a new transform chain with
+// NewTransform creates a new transform chain with the function to use, the
+// expected input and output variables.
 func NewTransform(f TransformFunc, inputVariables []string, outputVariables []string) Transform {
 	return Transform{
 		Memory:     memory.NewSimple(),
