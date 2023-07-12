@@ -1,8 +1,11 @@
 package prompts
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/tmc/langchaingo/schema"
 )
@@ -11,7 +14,10 @@ var (
 	// ErrInputVariableReserved is returned when there is a conflict with a reserved variable name.
 	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
-	ErrInvalidPartialVariableType = errors.New("invalid partial variable type")
+	ErrInvalidPartialVariableType                     = errors.New("invalid partial variable type")
+	ErrPromptTemplateCannotBeSaveWithPartialVariables = errors.New("prompt template cannot be saved with partial variables")
+	ErrInvalidPromptTemplateSavePath                  = errors.New("invalid prompt template save path")
+	ErrCreatingPromptTemplateSavePath                 = errors.New("error creating prompt template save path")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
@@ -70,6 +76,40 @@ func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue,
 // GetInputVariables returns the input variables the prompt expect.
 func (p PromptTemplate) GetInputVariables() []string {
 	return p.InputVariables
+}
+
+func (p PromptTemplate) Save(path string) error {
+
+	if p.PartialVariables != nil {
+		// create logic which serializes the partial variables to a file in json format and saves it to the path
+		return ErrPromptTemplateCannotBeSaveWithPartialVariables
+	}
+
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return ErrInvalidPromptTemplateSavePath
+	}
+
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+
+		dir := filepath.Dir(absPath)
+		err := os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return ErrCreatingPromptTemplateSavePath
+		}
+	}
+
+	jsonData, err := json.Marshal(p)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(absPath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Prompt template saved to", absPath)
+	return nil
 }
 
 func resolvePartialValues(partialValues map[string]any, values map[string]any) (map[string]any, error) {
