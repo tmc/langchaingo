@@ -55,4 +55,15 @@ func TestMapRerankDocumentsCall(t *testing.T) {
 	_, err = Run(context.Background(), mapRerankDocumentsChain, docs)
 
 	require.Error(t, err)
+
+	// Test that an error is returned if the score cannot be processed.
+	mapRerankDocumentsChain.ReturnIntermediateSteps = false
+	docs = []schema.Document{
+		{PageContent: "Test Low\nScore:"},
+		{PageContent: "Test High\nScore:"},
+	}
+
+	_, err = Run(context.Background(), mapRerankDocumentsChain, docs)
+
+	require.Error(t, err)
 }

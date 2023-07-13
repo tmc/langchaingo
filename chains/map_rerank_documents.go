@@ -164,9 +164,7 @@ func (c MapRerankDocuments) formatOutputs(outputs []map[string]any) map[string]a
 	formattedOutputs := make(map[string]any)
 	answerOutput := maps.Clone(outputs[0])
 
-	for _, outputKey := range c.LLMChain.GetOutputKeys() {
-		formattedOutputs[outputKey] = answerOutput[c.AnswerKey]
-	}
+	formattedOutputs[c.LLMChain.OutputKey] = answerOutput[c.AnswerKey]
 
 	if !c.ReturnIntermediateSteps {
 		return formattedOutputs
