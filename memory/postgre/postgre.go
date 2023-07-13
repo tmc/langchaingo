@@ -10,8 +10,12 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// ErrInvalidInputValues is returned when input values given to a memory in save context are invalid.
-var ErrInvalidInputValues = errors.New("invalid input values")
+var (
+	// ErrInvalidInputValues is returned when input values given to a memory in save context are invalid.
+	ErrInvalidInputValues = errors.New("invalid input values")
+	// ErrMissingSessionID is returned when input memory retrival or save context is missing session id.
+	ErrMissingSessionID = errors.New("session id can not be empty")
+)
 
 type PostgreBuffer struct {
 	ChatHistory *memory.ChatMessageHistory
@@ -23,8 +27,10 @@ type PostgreBuffer struct {
 	HumanPrefix    string
 	AIPrefix       string
 	MemoryKey      string
+	SessionID      string
 }
 
+// Statically assert that PostgreBuffer implement the memory interface.
 var _ schema.Memory = &PostgreBuffer{}
 
 func NewPostgreBuffer(dsn string) *PostgreBuffer {
@@ -49,20 +55,27 @@ func NewPostgreBuffer(dsn string) *PostgreBuffer {
 	return &buffer
 }
 
+// SetSession sets the session ID for the PostgreBuffer.
 func (buffer *PostgreBuffer) SetSession(id string) {
-	buffer.DB.SetSession(id)
+	buffer.SessionID = id
 }
 
-func (buffer *PostgreBuffer) SessionID() string {
-	return buffer.DB.SessionID()
-}
-
+// MemoryVariables gets the input key the buffer memory class will load dynamically.
 func (buffer *PostgreBuffer) MemoryVariables() []string {
 	return []string{buffer.MemoryKey}
 }
 
-func (buffer *PostgreBuffer) LoadMemoryVariables(inputs map[string]any) (map[string]any, error) {
-	msgs, err := buffer.DB.GetHistroy()
+// LoadMemoryVariables returns the previous chat messages stored in postgreSQL database. Previous
+// chat messages are loaded from db and loaded into the ChatMessageHistory. Messages are returned in
+// a map with the key specified in the MemoryKey field. This key defaults to "history".
+// If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise
+// the output is a buffer string of the chat messages.
+func (buffer *PostgreBuffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
+	if buffer.SessionID == "" {
+		return nil, ErrMissingSessionID
+	}
+
+	msgs, err := buffer.DB.GetHistroy(buffer.SessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,18 +101,19 @@ func (buffer *PostgreBuffer) LoadMemoryVariables(inputs map[string]any) (map[str
 }
 
 // SaveContext saves the context of the PostgreBuffer.
-//
 // It takes in two maps, inputs and outputs, which contain key-value pairs of any type.
-// The function retrieves the value associated with buffer.InputKey from the inputs map
+// The function retrieves the value associated with buffer. InputKey from the inputs map
 // and adds it as a user message to the ChatHistory. Then, it retrieves the value
 // associated with buffer.OutputKey from the outputs map and adds it as an AI message
 // to the ChatHistory. The function then uses the ChatHistory, HumanPrefix, and AIPrefix
 // properties of the buffer to generate a bufferString using the GetBufferString function
 // from the schema package. Finally, it saves the ChatHistory messages and bufferString
 // to the DB using the SaveHistory function, and returns any error encountered.
-//
-// Return type: error.
 func (buffer *PostgreBuffer) SaveContext(inputs map[string]any, outputs map[string]any) error {
+	if buffer.SessionID == "" {
+		return ErrMissingSessionID
+	}
+
 	userInputValue, err := getInputValue(inputs, buffer.InputKey)
 	if err != nil {
 		return err
@@ -119,7 +133,7 @@ func (buffer *PostgreBuffer) SaveContext(inputs map[string]any, outputs map[stri
 		return err
 	}
 
-	err = buffer.DB.SaveHistory(buffer.ChatHistory.Messages(), bufferString)
+	err = buffer.DB.SaveHistory(buffer.SessionID, buffer.ChatHistory.Messages(), bufferString)
 	if err != nil {
 		return err
 	}

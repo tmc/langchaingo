@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	ErrDBConnection     = errors.New("can't connect to database")
-	ErrDBMigration      = errors.New("can't migrate database")
-	ErrMissingSessionID = errors.New("session id can not be empty")
+	// ErrDBConnection is returned when there is an issue connecting to the database. Usually incorrect DSN.
+	ErrDBConnection = errors.New("can't connect to database")
+	// ErrDBMigration is returned when there is an issue migrating the database.
+	ErrDBMigration = errors.New("can't migrate database")
 )
 
 type Database struct {
@@ -20,6 +21,10 @@ type Database struct {
 	sessionID string
 }
 
+// NewDatabase creates a new Database instance.
+//
+// It takes a DSN (Data Source Name) string as a parameter.
+// It returns a pointer to the created Database instance and an error.
 func NewDatabase(dsn string) (*Database, error) {
 	database := &Database{
 		history: &ChatHistory{},
@@ -40,17 +45,32 @@ func NewDatabase(dsn string) (*Database, error) {
 	return database, nil
 }
 
+// SetSession sets the session ID of the Database.
+//
+// id: the session ID to set.
 func (db *Database) SetSession(id string) {
 	db.sessionID = id
 }
 
+// SessionID returns the session ID of the Database.
+//
+// No parameters.
+// Returns a string.
 func (db *Database) SessionID() string {
 	return db.sessionID
 }
 
-func (db *Database) SaveHistory(msgs []schema.ChatMessage, bs string) error {
+// SaveHistory saves the chat history to the database.
+//
+// It takes the following parameters:
+// - id: the ID of the session
+// - msgs: the chat messages to be saved
+// - bs: the buffer string
+//
+// It returns an error if there was an issue saving the history.
+func (db *Database) SaveHistory(id string, msgs []schema.ChatMessage, bs string) error {
 	if db.sessionID == "" {
-		return ErrMissingSessionID
+		db.sessionID = id
 	}
 
 	newMsgs := Messages{}
@@ -73,9 +93,14 @@ func (db *Database) SaveHistory(msgs []schema.ChatMessage, bs string) error {
 	return nil
 }
 
-func (db *Database) GetHistroy() ([]schema.ChatMessage, error) {
+// GetHistory retrieves the chat history for a given session ID from the database.
+//
+// id: The ID of the session.
+// []schema.ChatMessage: An array of chat messages representing the chat history.
+// error: An error if there was a problem retrieving the chat history.
+func (db *Database) GetHistroy(id string) ([]schema.ChatMessage, error) {
 	if db.sessionID == "" {
-		return nil, ErrMissingSessionID
+		db.sessionID = id
 	}
 
 	err := db.gorm.Where(ChatHistory{SessionID: db.sessionID}).Find(&db.history).Error
@@ -102,5 +127,9 @@ func (db *Database) GetHistroy() ([]schema.ChatMessage, error) {
 }
 
 func (db *Database) ClearHistroy() error {
+	err := db.gorm.Where(ChatHistory{SessionID: db.sessionID}).Delete(&db.history).Error
+	if err != nil {
+		return err
+	}
 	return nil
 }
