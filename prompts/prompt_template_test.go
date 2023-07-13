@@ -2,9 +2,9 @@ package prompts
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestPromptTemplateFormatPrompt(t *testing.T) {
@@ -74,4 +74,41 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPromptTemplateSaveToFile(t *testing.T) {
+
+	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
+	prompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
+
+	_, err := prompt.FormatPrompt(map[string]interface{}{
+		"inputLanguage":  "English",
+		"outputLanguage": "Chinese",
+		"text":           "I love programming",
+	})
+	assert.NoError(t, err)
+	err = prompt.Save("prompt_template.json")
+	if err != nil {
+		t.Errorf("PromptTemplate.Save() error = %v", err)
+		return
+	}
+}
+
+func TestPromptTemplateSavePartialVariables(t *testing.T) {
+	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}} and summarise in {{.number}} words. {{.text}}"
+	prompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
+
+	prompt.PartialVariables = map[string]any{
+		"number": func() string {
+			return "200"
+		},
+	}
+	_, err := prompt.FormatPrompt(map[string]interface{}{
+		"inputLanguage":  "English",
+		"outputLanguage": "Chinese",
+		"text":           "I love programming",
+	})
+	assert.NoError(t, err)
+	err = prompt.Save("prompt_template.json")
+	assert.Error(t, err)
 }

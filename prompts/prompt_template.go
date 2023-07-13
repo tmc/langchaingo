@@ -1,12 +1,9 @@
 package prompts
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
-
+	"github.com/tmc/langchaingo/load"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -14,29 +11,29 @@ var (
 	// ErrInputVariableReserved is returned when there is a conflict with a reserved variable name.
 	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
-	ErrInvalidPartialVariableType                     = errors.New("invalid partial variable type")
-	ErrPromptTemplateCannotBeSaveWithPartialVariables = errors.New("prompt template cannot be saved with partial variables")
-	ErrInvalidPromptTemplateSavePath                  = errors.New("invalid prompt template save path")
-	ErrCreatingPromptTemplateSavePath                 = errors.New("error creating prompt template save path")
+	ErrInvalidPartialVariableType     = errors.New("invalid partial variable type")
+	ErrPromptTemplateCannotBeSaved    = errors.New("prompt template cannot be saved with partial variables")
+	ErrInvalidPromptTemplateSavePath  = errors.New("invalid prompt template save path")
+	ErrCreatingPromptTemplateSavePath = errors.New("error creating prompt template save path")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
 type PromptTemplate struct {
 	// Template is the prompt template.
-	Template string
+	Template string `json:"template"`
 
 	// A list of variable names the prompt template expects.
-	InputVariables []string
+	InputVariables []string `json:"input_variables"`
 
 	// TemplateFormat is the format of the prompt template.
-	TemplateFormat TemplateFormat
+	TemplateFormat TemplateFormat `json:"template_format"`
 
 	// OutputParser is a function that parses the output of the prompt template.
-	OutputParser schema.OutputParser[any]
+	OutputParser schema.OutputParser[any] `json:"output_parser"`
 
 	// PartialVariables represents a map of variable names to values or functions that return values.
 	// If the value is a function, it will be called when the prompt template is rendered.
-	PartialVariables map[string]any
+	PartialVariables map[string]any `json:"partial_variables"`
 }
 
 // NewPromptTemplate returns a new prompt template.
@@ -79,36 +76,13 @@ func (p PromptTemplate) GetInputVariables() []string {
 }
 
 func (p PromptTemplate) Save(path string) error {
-
 	if p.PartialVariables != nil {
-		// create logic which serializes the partial variables to a file in json format and saves it to the path
-		return ErrPromptTemplateCannotBeSaveWithPartialVariables
+		return ErrPromptTemplateCannotBeSaved
 	}
-
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return ErrInvalidPromptTemplateSavePath
-	}
-
-	if _, err := os.Stat(absPath); os.IsNotExist(err) {
-
-		dir := filepath.Dir(absPath)
-		err := os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return ErrCreatingPromptTemplateSavePath
-		}
-	}
-
-	jsonData, err := json.Marshal(p)
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}
-
-	err = os.WriteFile(absPath, jsonData, 0644)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Prompt template saved to", absPath)
 	return nil
 }
 

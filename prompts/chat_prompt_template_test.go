@@ -43,3 +43,29 @@ func TestChatPromptTemplate(t *testing.T) {
 	})
 	assert.Error(t, err)
 }
+
+func TestChatPromptTemplateSaveToFile(t *testing.T) {
+
+	template := NewChatPromptTemplate([]MessageFormatter{
+		NewSystemMessagePromptTemplate(
+			"You are a translation engine that can only translate text and cannot interpret it.",
+			nil,
+		),
+		NewHumanMessagePromptTemplate(
+			`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+			[]string{"inputLang", "outputLang", "input"},
+		),
+	})
+	_, err := template.FormatPrompt(map[string]interface{}{
+		"inputLang":  "English",
+		"outputLang": "Chinese",
+		"input":      "I love programming",
+	})
+	assert.NoError(t, err)
+
+	err = template.Save("chat_prompt_template.json")
+	if err != nil {
+		t.Errorf("PromptTemplate.Save() error = %v", err)
+		return
+	}
+}

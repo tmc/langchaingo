@@ -17,4 +17,5 @@ type MessageFormatter interface {
 type FormatPrompter interface {
 	FormatPrompt(values map[string]any) (schema.PromptValue, error)
 	GetInputVariables() []string
+	Save(path string) error
 }

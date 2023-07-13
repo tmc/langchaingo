@@ -1,15 +1,18 @@
 package prompts
 
-import "github.com/tmc/langchaingo/schema"
+import (
+	"github.com/tmc/langchaingo/load"
+	"github.com/tmc/langchaingo/schema"
+)
 
 // ChatPromptTemplate is a prompt template for chat messages.
 type ChatPromptTemplate struct {
 	// Messages is the list of the messages to be formatted.
-	Messages []MessageFormatter
+	Messages []MessageFormatter `json:"messages"`
 
 	// PartialVariables represents a map of variable names to values or functions that return values.
 	// If the value is a function, it will be called when the prompt template is rendered.
-	PartialVariables map[string]any
+	PartialVariables map[string]any `json:"partial_variables"`
 }
 
 var (
@@ -64,6 +67,18 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 		inputVariables = append(inputVariables, variable)
 	}
 	return inputVariables
+}
+
+func (p ChatPromptTemplate) Save(path string) error {
+	if p.PartialVariables != nil {
+		// create logic which serializes the partial variables to a file in json format and saves it to the path
+		return ErrPromptTemplateCannotBeSaved
+	}
+	err := load.ToFile(p, path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewChatPromptTemplate creates a new chat prompt template from a list of message formatters.
