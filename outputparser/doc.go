@@ -9,5 +9,7 @@ The outputparser package includes the following parsers:
     a map[string]string while validating against a provided schema.
   - CommaSeparatedList: a parser that takes a string with comma-separated values
     and returns them as a string slice.
+  - RegexParser: a parser that takes a string, compiles it into a regular expression,
+    and returns map[string]string of the regex groups.
 */
 package outputparser
