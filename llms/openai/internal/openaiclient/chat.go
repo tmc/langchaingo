@@ -111,6 +111,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
+	if c.organization != "" {
+		req.Header.Set("OpenAI-Organization", c.organization)
+	}
 
 	// Send request
 	r, err := http.DefaultClient.Do(req)

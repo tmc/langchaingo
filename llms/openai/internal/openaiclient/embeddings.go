@@ -48,6 +48,9 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
+	if c.organization != "" {
+		req.Header.Set("OpenAI-Organization", c.organization)
+	}
 
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {

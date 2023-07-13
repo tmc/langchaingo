@@ -11,10 +11,11 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // Client is a client for the OpenAI API.
 type Client struct {
-	token      string
-	Model      string
-	baseURL    string
-	httpClient Doer
+	token        string
+	Model        string
+	baseURL      string
+	organization string
+	httpClient   Doer
 }
 
 // Option is an option for the OpenAI client.
@@ -35,12 +36,13 @@ func WithHTTPClient(client Doer) Option {
 }
 
 // New returns a new OpenAI client.
-func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
+func New(token string, model string, baseURL string, organization string, opts ...Option) (*Client, error) {
 	c := &Client{
-		token:      token,
-		Model:      model,
-		baseURL:    baseURL,
-		httpClient: http.DefaultClient,
+		token:        token,
+		Model:        model,
+		baseURL:      baseURL,
+		organization: organization,
+		httpClient:   http.DefaultClient,
 	}
 
 	for _, opt := range opts {

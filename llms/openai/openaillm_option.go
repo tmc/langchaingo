@@ -1,15 +1,17 @@
 package openai
 
 const (
-	tokenEnvVarName   = "OPENAI_API_KEY"  //nolint:gosec
-	modelEnvVarName   = "OPENAI_MODEL"    //nolint:gosec
-	baseURLEnvVarName = "OPENAI_BASE_URL" //nolint:gosec
+	tokenEnvVarName        = "OPENAI_API_KEY"      //nolint:gosec
+	modelEnvVarName        = "OPENAI_MODEL"        //nolint:gosec
+	baseURLEnvVarName      = "OPENAI_BASE_URL"     //nolint:gosec
+	organizationEnvVarName = "OPENAI_ORGANIZATION" //nolint:gosec
 )
 
 type options struct {
-	token   string
-	model   string
-	baseURL string
+	token        string
+	model        string
+	baseURL      string
+	organization string
 }
 
 type Option func(*options)
@@ -36,5 +38,13 @@ func WithModel(model string) Option {
 func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
 		opts.baseURL = baseURL
+	}
+}
+
+// WithOrganization passes the OpenAI organization to the client. If not set, the
+// organization is read from the OPENAI_ORGANIZATION.
+func WithOrganization(organization string) Option {
+	return func(opts *options) {
+		opts.organization = organization
 	}
 }
