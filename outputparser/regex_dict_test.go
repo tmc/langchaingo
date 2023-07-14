@@ -32,10 +32,12 @@ we expect the result to only contain the following fields:
 }`
 
 	testCases := []struct {
-		outputKeys map[string]string
-		expected   map[string]string
+		noUpdateValue string
+		outputKeys    map[string]string
+		expected      map[string]string
 	}{
 		{
+			noUpdateValue: "",
 			outputKeys: map[string]string{
 				"action":       "Action",
 				"action_input": "Action Input",
@@ -45,10 +47,20 @@ we expect the result to only contain the following fields:
 				"action_input": "How to use this class?",
 			},
 		},
+		{
+			noUpdateValue: "Search",
+			outputKeys: map[string]string{
+				"action":       "Action",
+				"action_input": "Action Input",
+			},
+			expected: map[string]string{
+				"action_input": "How to use this class?",
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		parser := outputparser.NewRegexDict(tc.outputKeys, "")
+		parser := outputparser.NewRegexDict(tc.outputKeys, tc.noUpdateValue)
 
 		actual, err := parser.Parse(testText)
 		if err != nil {
