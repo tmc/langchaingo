@@ -25,7 +25,7 @@ func NewRegexParser(expressionStr string) RegexParser {
 }
 
 // Statically assert that RegexParser implements the OutputParser interface.
-var _ schema.OutputParser[map[string]string] = RegexParser{}
+var _ schema.OutputParser[any] = RegexParser{}
 
 // GetFormatInstructions returns instructions on the expected output format.
 func (p RegexParser) GetFormatInstructions() string {
@@ -58,12 +58,12 @@ func (p RegexParser) parse(text string) (map[string]string, error) {
 }
 
 // Parse parses the output of an llm into a map of strings.
-func (p RegexParser) Parse(text string) (map[string]string, error) {
+func (p RegexParser) Parse(text string) (any, error) {
 	return p.parse(text)
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p RegexParser) ParseWithPrompt(text string, _ schema.PromptValue) (map[string]string, error) {
+func (p RegexParser) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

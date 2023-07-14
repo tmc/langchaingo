@@ -8,6 +8,9 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+// Key name used to store the intermediate steps in the output, when configured.
+const _intermediateStepsOutputKey = "intermediateSteps"
+
 // Chain is the interface all chains must implement.
 type Chain interface {
 	// Call runs the logic of the chain and returns the output. This method should
