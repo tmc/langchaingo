@@ -14,7 +14,7 @@ type RegexDict struct {
 }
 
 const (
-	REGEX_DICT_PATTERN = `(?:%s):\s?(?P<value>(?:[^.'\n']*)\.?)`
+	regexDictPattern = `(?:%s):\s?(?P<value>(?:[^.'\n']*)\.?)`
 )
 
 // NewRegexParser returns a new RegexParser.
@@ -38,19 +38,21 @@ func (p RegexDict) GetFormatInstructions() string {
 
 func (p RegexDict) parse(text string) (map[string]string, error) {
 	results := make(map[string]string, len(p.OutputKeyToFormat))
+	// We only expect to get a single matched value pair for each output key.
+	expectedMatches := 2
 
 	for key, format := range p.OutputKeyToFormat {
-		expression := regexp.MustCompile(fmt.Sprintf(REGEX_DICT_PATTERN, format))
+		expression := regexp.MustCompile(fmt.Sprintf(regexDictPattern, format))
 		matches := expression.FindStringSubmatch(text)
 
-		if len(matches) < 2 {
+		if len(matches) < expectedMatches {
 			return nil, ParseError{
 				Text:   text,
 				Reason: fmt.Sprintf("No match found for expression %s", expression),
 			}
 		}
 
-		if len(matches) > 2 {
+		if len(matches) > expectedMatches {
 			return nil, ParseError{
 				Text:   text,
 				Reason: fmt.Sprintf("Multiple matches found for expression %s", expression),
