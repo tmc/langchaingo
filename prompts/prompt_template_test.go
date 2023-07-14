@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
+	"github.com/tmc/langchaingo/load"
 	"testing"
 )
 
@@ -87,7 +88,9 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 		"text":           "I love programming",
 	})
 	assert.NoError(t, err)
-	err = prompt.Save("prompt_template.json")
+
+	serializer := load.NewSerializer()
+	err = prompt.Save("prompt_template.json", serializer)
 	if err != nil {
 		t.Errorf("PromptTemplate.Save() error = %v", err)
 		return
@@ -109,6 +112,7 @@ func TestPromptTemplateSavePartialVariables(t *testing.T) {
 		"text":           "I love programming",
 	})
 	assert.NoError(t, err)
-	err = prompt.Save("prompt_template.json")
+	serializer := load.NewSerializer()
+	err = prompt.Save("prompt_template.json", serializer)
 	assert.Error(t, err)
 }

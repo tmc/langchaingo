@@ -11,10 +11,8 @@ var (
 	// ErrInputVariableReserved is returned when there is a conflict with a reserved variable name.
 	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
-	ErrInvalidPartialVariableType     = errors.New("invalid partial variable type")
-	ErrPromptTemplateCannotBeSaved    = errors.New("prompt template cannot be saved with partial variables")
-	ErrInvalidPromptTemplateSavePath  = errors.New("invalid prompt template save path")
-	ErrCreatingPromptTemplateSavePath = errors.New("error creating prompt template save path")
+	ErrInvalidPartialVariableType  = errors.New("invalid partial variable type")
+	ErrPromptTemplateCannotBeSaved = errors.New("prompt template cannot be saved with partial variables")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
@@ -75,11 +73,12 @@ func (p PromptTemplate) GetInputVariables() []string {
 	return p.InputVariables
 }
 
-func (p PromptTemplate) Save(path string) error {
+func (p PromptTemplate) Save(path string, serializer load.Serializer) error {
 	if p.PartialVariables != nil {
 		return ErrPromptTemplateCannotBeSaved
 	}
-	err := load.ToFile(p, path)
+
+	err := serializer.ToFile(p, path)
 	if err != nil {
 		return err
 	}

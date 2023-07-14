@@ -1,6 +1,9 @@
 package prompts
 
-import "github.com/tmc/langchaingo/schema"
+import (
+	"github.com/tmc/langchaingo/load"
+	"github.com/tmc/langchaingo/schema"
+)
 
 // Formatter is an interface for formatting a map of values into a string.
 type Formatter interface {
@@ -17,5 +20,5 @@ type MessageFormatter interface {
 type FormatPrompter interface {
 	FormatPrompt(values map[string]any) (schema.PromptValue, error)
 	GetInputVariables() []string
-	Save(path string) error
+	Save(path string, serializer load.Serializer) error
 }

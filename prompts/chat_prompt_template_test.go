@@ -1,6 +1,7 @@
 package prompts
 
 import (
+	"github.com/tmc/langchaingo/load"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,8 @@ func TestChatPromptTemplateSaveToFile(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	err = template.Save("chat_prompt_template.json")
+	serializer := load.NewSerializer()
+	err = template.Save("chat_prompt_template.json", serializer)
 	if err != nil {
 		t.Errorf("PromptTemplate.Save() error = %v", err)
 		return
