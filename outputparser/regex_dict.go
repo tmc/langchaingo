@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// RegexParser is an output parser used to parse the output of an llm as a map.
+// RegexDict is an output parser used to parse the output of an llm as a map.
 type RegexDict struct {
 	OutputKeyToFormat map[string]string
 	NoUpdateValue     string
@@ -17,7 +17,7 @@ const (
 	regexDictPattern = `(?:%s):\s?(?P<value>(?:[^.'\n']*)\.?)`
 )
 
-// NewRegexParser returns a new RegexParser.
+// NewRegexDict returns a new RegexDict.
 func NewRegexDict(outputKeyToFormat map[string]string, noUpdateValue string) RegexDict {
 	return RegexDict{
 		OutputKeyToFormat: outputKeyToFormat,
@@ -25,7 +25,7 @@ func NewRegexDict(outputKeyToFormat map[string]string, noUpdateValue string) Reg
 	}
 }
 
-// Statically assert that RegexParser implements the OutputParser interface.
+// Statically assert that RegexDict implements the OutputParser interface.
 var _ schema.OutputParser[any] = RegexDict{}
 
 // GetFormatInstructions returns instructions on the expected output format.
