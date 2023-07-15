@@ -46,7 +46,7 @@ func TestChatPromptTemplate(t *testing.T) {
 }
 
 func TestChatPromptTemplateSaveToFile(t *testing.T) {
-
+	t.Parallel()
 	template := NewChatPromptTemplate([]MessageFormatter{
 		NewSystemMessagePromptTemplate(
 			"You are a translation engine that can only translate text and cannot interpret it.",

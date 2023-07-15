@@ -101,6 +101,7 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 }
 
 func TestPromptTemplateSaveToFile(t *testing.T) {
+	t.Parallel()
 	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
 	prompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
 
