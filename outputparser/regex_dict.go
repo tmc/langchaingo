@@ -9,8 +9,12 @@ import (
 
 // RegexDict is an output parser used to parse the output of an llm as a map.
 type RegexDict struct {
+	// OutputKeyToFormat is a map which has a key that represents an identifier for the regex,
+	// and a value to search for as a key in the parsed text.
 	OutputKeyToFormat map[string]string
-	NoUpdateValue     string
+
+	// NoUpdateValue is a string that prevents assignment to parsed outputs map when matched.
+	NoUpdateValue string
 }
 
 const (
