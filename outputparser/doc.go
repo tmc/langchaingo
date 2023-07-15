@@ -4,6 +4,7 @@ unstructured data from language models (LLMs).
 
 The outputparser package includes the following parsers:
 
+  - BooleanParser: a parser that returns a boolean value based on string values assigned to true and false.
   - Simple: a basic parser that returns the raw text as-is without any processing.
   - Structured: a parser that expects a JSON-formatted response and returns it as
     a map[string]string while validating against a provided schema.
