@@ -23,6 +23,10 @@ func TestBooleanParser(t *testing.T) {
 			expected: false,
 		},
 		{
+			input:    "YESNO",
+			expected: false,
+		},
+		{
 			input:    "ok",
 			err:      outputparser.ParseError{},
 			expected: false,
