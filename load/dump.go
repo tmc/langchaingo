@@ -4,17 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tmc/langchaingo/load/internal"
-	"gopkg.in/yaml.v3"
-	"path/filepath"
+	"reflect"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 var (
-	ErrJSONSerializationFailed = errors.New("failed to serialize to JSON")
-	ErrYAMLSerializationFailed = errors.New("failed to serialize to YAML")
-	ErrInvalidSavePath         = errors.New("invalid prompt template save path")
-	ErrInvalidFileSuffix       = errors.New("invalid file suffix")
+	ErrInvalidFileSuffix = errors.New("invalid file suffix")
+	ErrNoDataToSerialize = errors.New("no data to serialize")
 )
 
 type Serializer interface {
@@ -22,41 +20,44 @@ type Serializer interface {
 }
 
 type FileSerializer struct {
-	FileHelper *internal.FileHelper
+	FileSystem FileSystem
 }
 
-func NewSerializer() *FileSerializer {
+func NewSerializer(fs FileSystem) *FileSerializer {
 	return &FileSerializer{
-		FileHelper: &internal.FileHelper{},
+		FileSystem: fs,
 	}
 }
 
-func (s *FileSerializer) ToFile(d any, path string) error {
-	suffix := getSuffix(path)
-	switch suffix {
+func (s *FileSerializer) ToFile(data any, path string) error {
+	if path == "" {
+		return ErrInvalidSavePath
+	}
+
+	if reflect.ValueOf(data).IsZero() {
+		return ErrNoDataToSerialize
+	}
+
+	suffix := s.FileSystem.NormalizeSuffix(path)
+	switch strings.ToLower(suffix) {
 	case ".json":
-		return s.ToJSON(d, path)
-	case ".yaml":
-		return s.ToYAML(d, path)
+		return s.ToJSON(data, path)
+	case ".yaml", ".yml":
+		return s.ToYAML(data, path)
 	case "":
-		return s.ToJSON(d, path)
+		return s.ToJSON(data, path+".json")
 	default:
-		return ErrInvalidFileSuffix
+		return fmt.Errorf("%w:%s", ErrInvalidFileSuffix, suffix)
 	}
 }
 
 func (s *FileSerializer) ToJSON(d any, path string) error {
 	data, err := json.Marshal(d)
 	if err != nil {
-		return fmt.Errorf("%s: %w", ErrJSONSerializationFailed, err)
+		return fmt.Errorf("failed to serialize JSON: %w", err)
 	}
 
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return fmt.Errorf("%s: %w", ErrInvalidSavePath, err)
-	}
-
-	err = s.FileHelper.Write(absPath, data)
+	err = s.FileSystem.Write(path, data)
 	if err != nil {
 		return err
 	}
@@ -67,26 +68,13 @@ func (s *FileSerializer) ToJSON(d any, path string) error {
 func (s *FileSerializer) ToYAML(d any, path string) error {
 	data, err := yaml.Marshal(d)
 	if err != nil {
-		return fmt.Errorf("%s: %w", ErrYAMLSerializationFailed, err)
+		return fmt.Errorf("failed to serialize YAML: %w", err)
 	}
 
-	absPath, err := filepath.Abs(path)
+	err = s.FileSystem.Write(path, data)
 	if err != nil {
-		return fmt.Errorf("%s: %w", ErrInvalidSavePath, err)
-	}
-
-	err = s.FileHelper.Write(absPath, data)
-	if err != nil {
-		return err
+		return fmt.Errorf("failed to write to file: %w", err)
 	}
 
 	return nil
-}
-
-func getSuffix(path string) string {
-	index := strings.LastIndex(path, ".")
-	if index != -1 && index != len(path)-1 {
-		return path[index:]
-	}
-	return ""
 }

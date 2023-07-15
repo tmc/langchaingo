@@ -85,6 +85,14 @@ func (p PromptTemplate) Save(path string, serializer load.Serializer) error {
 	return nil
 }
 
+func (p PromptTemplate) IsEmpty() bool {
+	return p.Template == "" &&
+		len(p.InputVariables) == 0 &&
+		p.TemplateFormat == "" &&
+		p.OutputParser == nil &&
+		len(p.PartialVariables) == 0
+}
+
 func resolvePartialValues(partialValues map[string]any, values map[string]any) (map[string]any, error) {
 	resolvedValues := make(map[string]any)
 	for variable, value := range partialValues {

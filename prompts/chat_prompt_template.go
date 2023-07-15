@@ -71,7 +71,6 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 
 func (p ChatPromptTemplate) Save(path string, serializer load.Serializer) error {
 	if p.PartialVariables != nil {
-		// create logic which serializes the partial variables to a file in json format and saves it to the path
 		return ErrPromptTemplateCannotBeSaved
 	}
 	err := serializer.ToFile(p, path)
