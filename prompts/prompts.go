@@ -14,6 +14,7 @@ type Formatter interface {
 type MessageFormatter interface {
 	FormatMessages(values map[string]any) ([]schema.ChatMessage, error)
 	GetInputVariables() []string
+	Save(path string, serializer load.Serializer) error
 }
 
 type MessageFormatters []MessageFormatter

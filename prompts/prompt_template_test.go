@@ -130,11 +130,12 @@ func TestPromptTemplateLoadFromFile(t *testing.T) {
 	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
 	expectedPrompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
 
-	fileSystem := &MockFileSystem{
-		Storage: make(map[string][]byte, 0),
-	}
+	// fileSystem := &MockFileSystem{
+	//	Storage: make(map[string][]byte, 0),
+	//}
 
-	serializer := load.NewSerializer(fileSystem)
+
+	serializer := load.NewSerializer(&load.LocalFileSystem{})
 	// first load data to mock file system
 	err := serializer.ToFile(expectedPrompt, "simple_prompt_with_JSON_suffix.json")
 	assert.NoError(t, err)

@@ -1,6 +1,9 @@
 package prompts
 
-import "github.com/tmc/langchaingo/schema"
+import (
+	"github.com/tmc/langchaingo/load"
+	"github.com/tmc/langchaingo/schema"
+)
 
 // SystemMessagePromptTemplate is a message formatter that returns a system message.
 type SystemMessagePromptTemplate struct {
@@ -18,6 +21,14 @@ func (p SystemMessagePromptTemplate) FormatMessages(values map[string]any) ([]sc
 // GetInputVariables returns the input variables the prompt expects.
 func (p SystemMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
+}
+
+func (p SystemMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
+	err := serializer.ToFile(p, path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewSystemMessagePromptTemplate creates a new system message prompt template.
@@ -45,6 +56,14 @@ func (p AIMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
 }
 
+func (p AIMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
+	err := serializer.ToFile(p, path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // NewAIMessagePromptTemplate creates a new AI message prompt template.
 func NewAIMessagePromptTemplate(template string, inputVariables []string) AIMessagePromptTemplate {
 	return AIMessagePromptTemplate{
@@ -68,6 +87,14 @@ func (p HumanMessagePromptTemplate) FormatMessages(values map[string]any) ([]sch
 // GetInputVariables returns the input variables the prompt expects.
 func (p HumanMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
+}
+
+func (p HumanMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
+	err := serializer.ToFile(p, path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewHumanMessagePromptTemplate creates a new human message prompt template.
@@ -94,6 +121,14 @@ func (p GenericMessagePromptTemplate) FormatMessages(values map[string]any) ([]s
 // GetInputVariables returns the input variables the prompt expects.
 func (p GenericMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
+}
+
+func (p GenericMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
+	err := serializer.ToFile(p, path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // NewGenericMessagePromptTemplate creates a new generic message prompt template.

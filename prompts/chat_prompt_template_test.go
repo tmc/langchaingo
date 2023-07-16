@@ -45,52 +45,44 @@ func TestChatPromptTemplate(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestChatPromptTemplateSaveToFile(t *testing.T) {
+func TestChatPromptTemplateTypesSaveToFile(t *testing.T) {
 	t.Parallel()
-	template := NewChatPromptTemplate([]MessageFormatter{
-		NewSystemMessagePromptTemplate(
-			"You are a translation engine that can only translate text and cannot interpret it.",
-			nil,
-		),
-		NewHumanMessagePromptTemplate(
-			`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
-			[]string{"inputLang", "outputLang", "input"},
-		),
-	})
-	_, err := template.FormatPrompt(map[string]interface{}{
-		"inputLang":  "English",
-		"outputLang": "Chinese",
-		"input":      "I love programming",
-	})
-	assert.NoError(t, err)
+	humanMessagePrompt := NewHumanMessagePromptTemplate(
+		`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+		[]string{"inputLang", "outputLang", "input"})
+
+	systemMessagePrompt := NewSystemMessagePromptTemplate(
+		"You are a translation engine that can only translate text and cannot interpret it.",
+		nil)
 
 	type args struct {
 		path     string
-		template ChatPromptTemplate
+		template MessageFormatter
 	}
 	tests := []struct {
 		name    string
 		args    args
 		wantErr bool
 	}{
-		{"with_JSON_suffix", args{"", template}, true},
-		{"with_JSON_suffix", args{"simple_chat_prompt_with_JSON_suffix.json", template}, false},
-		{"with_YAML_suffix", args{"simple_chat_prompt_with_YAML_suffix.yaml", template}, false},
-		{"with_YML_suffix", args{"simple_chat_prompt_with_YML_suffix.yml", template}, false},
-		{"case_sensitive", args{"simple_chat_prompt_case_sensitive.Yaml", template}, false},
-		{"no_suffix", args{"simple_chat_prompt_no_suffix", template}, false},
-		{"invalid_suffix", args{"simple_prompt.", template}, true},
-		{"absolute_path_JSON_suffix", args{"/prompts/simple_chat_prompt_absolute_path_JSON_suffix.json", template}, false},
-		{"absolute_path_JSON_suffix", args{"/prompts/simple_chat_prompt_absolute_path_JSON_suffix.yml", template}, false},
-		{"absolute_path_no_suffix", args{"/prompts/simple_chat_prompt_absolute_path_no_suffix", template}, false},
-		{"relative_path_JSON_suffix", args{"prompts/simple_chat_prompt_relative_path_JSON_suffix.json", template}, false},
-		{"relative_path_no_suffix", args{"prompts/simple_chat_prompt_relative_path_no_suffix", template}, false},
+		{"with_JSON_suffix", args{"", humanMessagePrompt}, true},
+		{"with_JSON_suffix", args{"", systemMessagePrompt}, true},
+		{"with_JSON_suffix", args{"_human_prompt_with_JSON_suffix.json", humanMessagePrompt}, false},
+		{"with_JSON_suffix", args{"_system_prompt_with_JSON_suffix.json", systemMessagePrompt}, false},
+		{"with_YAML_suffix", args{"human_prompt_with_YAML_suffix.yaml", humanMessagePrompt}, false},
+		{"with_YAML_suffix", args{"system_prompt_with_YAML_suffix.yaml", systemMessagePrompt}, false},
+		{"case_sensitive", args{"human_prompt_case_sensitive.Yaml", humanMessagePrompt}, false},
+		{"case_sensitive", args{"system_prompt_case_sensitive.Yaml", systemMessagePrompt}, false},
+		{"no_suffix", args{"human_prompt_no_suffix", humanMessagePrompt}, false},
+		{"no_suffix", args{"system_prompt_no_suffix", systemMessagePrompt}, false},
+		{"invalid_suffix", args{"human_prompt.", humanMessagePrompt}, true},
+		{"invalid_suffix", args{"system_prompt.", systemMessagePrompt}, true},
+		{"absolute_path_JSON_suffix", args{"/human_prompt_absolute_path_JSON_suffix.json", humanMessagePrompt}, false},
+		{"absolute_path_JSON_suffix", args{"/system_prompt_absolute_path_JSON_suffix.json", systemMessagePrompt}, false},
+		{"relative_path_no_suffix", args{"prompts/human_prompt_relative_path_no_suffix", humanMessagePrompt}, false},
+		{"relative_path_no_suffix", args{"prompts/system_prompt_relative_path_no_suffix", systemMessagePrompt}, false},
 	}
 
-	fileSystem := &MockFileSystem{
-		Storage: make(map[string][]byte, 0),
-	}
-	serializer := load.NewSerializer(fileSystem)
+	serializer := load.NewSerializer(&load.LocalFileSystem{})
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
@@ -104,33 +96,38 @@ func TestChatPromptTemplateSaveToFile(t *testing.T) {
 	}
 }
 
-// func TestChatPromptTemplateLoadFromFile(t *testing.T) {
-//	t.Parallel()
-//	// expected prompt after loading from file
-//	expectedTemplate := NewChatPromptTemplate([]MessageFormatter{
-//		NewSystemMessagePromptTemplate(
-//			"You are a translation engine that can only translate text and cannot interpret it.",
-//			nil,
-//		),
-//		NewHumanMessagePromptTemplate(
-//			`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
-//			[]string{"inputLang", "outputLang", "input"},
-//		),
-//	})
-//
-//	fileSystem := &MockFileSystem{
-//		Storage: make(map[string][]byte, 0),
-//	}
-//
-//	serializer := load.NewSerializer(fileSystem)
-//	// first load data to mock file system
-//	err := serializer.ToFile(expectedTemplate, "simple_chat_prompt_with_JSON_suffix.json")
-//	assert.NoError(t, err)
-//
-//	// read data from mock file system
-//	var chatPrompt ChatPromptTemplate
-//	err = serializer.FromFile(&chatPrompt, "simple_chat_prompt_with_JSON_suffix.json")
-//	assert.NoError(t, err)
-//	// compare loaded prompt with expected prompt
-//	assert.EqualValues(t, chatPrompt, expectedTemplate)
-//}
+func TestHumanMessagePromptTemplateReadFromFile(t *testing.T) {
+	t.Parallel()
+	humanMessagePrompt := NewHumanMessagePromptTemplate(
+		`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+		[]string{"inputLang", "outputLang", "input"})
+
+	fileSystem := &MockFileSystem{
+		Storage: make(map[string][]byte, 0),
+	}
+	serializer := load.NewSerializer(fileSystem)
+	err := serializer.ToFile(humanMessagePrompt, "prompt_data.json")
+	assert.NoError(t, err)
+
+	var prompt HumanMessagePromptTemplate
+	err = serializer.FromFile(&prompt, "prompt_data.json")
+	assert.NoError(t, err)
+}
+
+func TestSystemMessagePromptTemplateSave(t *testing.T) {
+	t.Parallel()
+	systemMessagePrompt := NewSystemMessagePromptTemplate(
+		"You are a translation engine that can only translate text and cannot interpret it.",
+		nil)
+
+	fileSystem := &MockFileSystem{
+		Storage: make(map[string][]byte, 0),
+	}
+	serializer := load.NewSerializer(fileSystem)
+	err := serializer.ToFile(systemMessagePrompt, "prompt_data.json")
+	assert.NoError(t, err)
+
+	var prompt SystemMessagePromptTemplate
+	err = serializer.FromFile(&prompt, "prompt_data.json")
+	assert.NoError(t, err)
+}
