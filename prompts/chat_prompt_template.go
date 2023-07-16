@@ -69,6 +69,11 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 	return inputVariables
 }
 
+// func (p ChatPromptTemplate) UnmarshalJSON(data []byte) error {
+//  //TODO: implement
+//	return nil
+//}
+
 func (p ChatPromptTemplate) Save(path string, serializer load.Serializer) error {
 	if p.PartialVariables != nil {
 		return ErrPromptTemplateCannotBeSaved

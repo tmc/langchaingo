@@ -3,6 +3,7 @@ package load
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -44,7 +45,18 @@ func (f *LocalFileSystem) Write(path string, data []byte) error {
 }
 
 func (f *LocalFileSystem) Read(path string) ([]byte, error) {
-	return os.ReadFile(path)
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	byteData, err := io.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
+	return byteData, nil
 }
 
 func (f *LocalFileSystem) makeDirectoriesIfNeeded(absPath string) error {

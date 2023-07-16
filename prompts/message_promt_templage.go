@@ -4,7 +4,7 @@ import "github.com/tmc/langchaingo/schema"
 
 // SystemMessagePromptTemplate is a message formatter that returns a system message.
 type SystemMessagePromptTemplate struct {
-	Prompt PromptTemplate
+	Prompt PromptTemplate `json:"systemPrompt,omitempty"`
 }
 
 var _ MessageFormatter = SystemMessagePromptTemplate{}
@@ -29,7 +29,7 @@ func NewSystemMessagePromptTemplate(template string, inputVariables []string) Sy
 
 // AIMessagePromptTemplate is a message formatter that returns a AI message.
 type AIMessagePromptTemplate struct {
-	Prompt PromptTemplate
+	Prompt PromptTemplate `json:"aiPrompt,omitempty"`
 }
 
 var _ MessageFormatter = AIMessagePromptTemplate{}
@@ -54,7 +54,7 @@ func NewAIMessagePromptTemplate(template string, inputVariables []string) AIMess
 
 // HumanMessagePromptTemplate is a message formatter that returns a human message.
 type HumanMessagePromptTemplate struct {
-	Prompt PromptTemplate
+	Prompt PromptTemplate `json:"humanPrompt,omitempty"`
 }
 
 var _ MessageFormatter = HumanMessagePromptTemplate{}
@@ -79,8 +79,8 @@ func NewHumanMessagePromptTemplate(template string, inputVariables []string) Hum
 
 // GenericMessagePromptTemplate is a message formatter that returns message with the specified speaker.
 type GenericMessagePromptTemplate struct {
-	Prompt PromptTemplate
-	Role   string
+	Prompt PromptTemplate `json:"prompt,omitempty"`
+	Role   string         `json:"role,omitempty"`
 }
 
 var _ MessageFormatter = GenericMessagePromptTemplate{}

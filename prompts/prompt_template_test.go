@@ -2,34 +2,12 @@ package prompts
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/load"
-	"path/filepath"
-	"testing"
 )
-
-type MockFileSystem struct {
-	FS load.FileSystem
-}
-
-func (f *MockFileSystem) Write(path string, data []byte) error {
-	// verify a valid path and data is passed in.
-	if path == "" || data == nil {
-		return fmt.Errorf("%s", load.ErrWritingToFile)
-	}
-	// mock write function does nothing.
-	return nil
-}
-
-func (f *MockFileSystem) NormalizeSuffix(path string) string {
-	return filepath.Ext(path)
-}
-
-func (f *MockFileSystem) Read(path string) ([]byte, error) {
-	// mock read function not used in this test.
-	return nil, nil
-}
 
 func TestPromptTemplateFormatPrompt(t *testing.T) {
 	t.Parallel()
@@ -102,15 +80,9 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 
 func TestPromptTemplateSaveToFile(t *testing.T) {
 	t.Parallel()
+	// test prompt template.
 	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
 	prompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
-
-	_, err := prompt.FormatPrompt(map[string]interface{}{
-		"inputLanguage":  "English",
-		"outputLanguage": "Chinese",
-		"text":           "I love programming",
-	})
-	assert.NoError(t, err)
 
 	type args struct {
 		path   string
@@ -121,6 +93,7 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
+		// test cases.
 		{"with_JSON_suffix", args{"", prompt}, true},
 		{"empty_prompt", args{"empty_prompt_with_JSON_suffix.json", PromptTemplate{}}, true},
 		{"with_JSON_suffix", args{"simple_prompt_with_JSON_suffix.json", prompt}, false},
@@ -135,13 +108,38 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 		{"relative_path_JSON_suffix", args{"prompts/simply_prompt_relative_path_JSON_suffix.json", prompt}, false},
 		{"relative_path_no_suffix", args{"prompts/simply_prompt_relative_path_no_suffix", prompt}, false},
 	}
+	// write prompt to mock file system
 	serializer := load.NewSerializer(&MockFileSystem{})
-
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if err := tt.args.prompt.Save(tt.args.path, serializer); (err != nil) != tt.wantErr {
 				t.Errorf("ToFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+func TestPromptTemplateLoadFromFile(t *testing.T) {
+	t.Parallel()
+	// expected prompt after loading from file
+	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
+	expectedPrompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
+
+	fileSystem := &MockFileSystem{
+		Storage: make(map[string][]byte, 0),
+	}
+
+	serializer := load.NewSerializer(fileSystem)
+	// first load data to mock file system
+	err := serializer.ToFile(expectedPrompt, "simple_prompt_with_JSON_suffix.json")
+	assert.NoError(t, err)
+
+	// read data from mock file system
+	var prompt PromptTemplate
+	err = serializer.FromFile(&prompt, "simple_prompt_with_JSON_suffix.json")
+	assert.NoError(t, err)
+	// compare loaded prompt with expected prompt
+	assert.EqualValues(t, prompt, expectedPrompt)
 }

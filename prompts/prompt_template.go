@@ -3,6 +3,7 @@ package prompts
 import (
 	"errors"
 	"fmt"
+
 	"github.com/tmc/langchaingo/load"
 	"github.com/tmc/langchaingo/schema"
 )

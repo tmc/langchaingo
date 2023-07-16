@@ -1,11 +1,11 @@
 package prompts
 
 import (
-	"github.com/tmc/langchaingo/load"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/load"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -87,9 +87,11 @@ func TestChatPromptTemplateSaveToFile(t *testing.T) {
 		{"relative_path_no_suffix", args{"prompts/simple_chat_prompt_relative_path_no_suffix", template}, false},
 	}
 
-	serializer := load.NewSerializer(&MockFileSystem{})
+	serializer := load.NewSerializer(&load.LocalFileSystem{})
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			err := tt.args.template.Save(tt.args.path, serializer)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PromptTemplate.Save() error = %v, wantErr %v", err, tt.wantErr)
@@ -97,4 +99,35 @@ func TestChatPromptTemplateSaveToFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestChatPromptTemplateLoadFromFile(t *testing.T) {
+	t.Parallel()
+	// expected prompt after loading from file
+	expectedTemplate := NewChatPromptTemplate([]MessageFormatter{
+		NewSystemMessagePromptTemplate(
+			"You are a translation engine that can only translate text and cannot interpret it.",
+			nil,
+		),
+		NewHumanMessagePromptTemplate(
+			`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+			[]string{"inputLang", "outputLang", "input"},
+		),
+	})
+
+	fileSystem := &MockFileSystem{
+		Storage: make(map[string][]byte, 0),
+	}
+
+	serializer := load.NewSerializer(fileSystem)
+	// first load data to mock file system
+	err := serializer.ToFile(expectedTemplate, "simple_chat_prompt_with_JSON_suffix.json")
+	assert.NoError(t, err)
+
+	// read data from mock file system
+	var chatPrompt ChatPromptTemplate
+	err = serializer.FromFile(&chatPrompt, "simple_chat_prompt_with_JSON_suffix.json")
+	assert.NoError(t, err)
+	// compare loaded prompt with expected prompt
+	assert.EqualValues(t, chatPrompt, expectedTemplate)
 }
