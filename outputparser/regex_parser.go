@@ -30,7 +30,7 @@ var _ schema.OutputParser[any] = RegexParser{}
 // GetFormatInstructions returns instructions on the expected output format.
 func (p RegexParser) GetFormatInstructions() string {
 	instructions := "Your output should be a map of strings. e.g.:\n"
-	instructions += "map[string]string{\"key1\": \"value1\", \"key2\": \"value2\"}\n"
+	instructions += "map[string]string{\"key1\": \"value1\", \"key2\": \"value2\"}"
 
 	return instructions
 }
