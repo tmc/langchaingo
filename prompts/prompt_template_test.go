@@ -109,7 +109,10 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 		{"relative_path_no_suffix", args{"prompts/simply_prompt_relative_path_no_suffix", prompt}, false},
 	}
 	// write prompt to mock file system
-	serializer := load.NewSerializer(&MockFileSystem{})
+	fileSystem := &MockFileSystem{
+		Storage: make(map[string][]byte, 0),
+	}
+	serializer := load.NewSerializer(fileSystem)
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {

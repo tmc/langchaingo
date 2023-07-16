@@ -9,7 +9,6 @@ import (
 type ChatPromptTemplate struct {
 	// Messages is the list of the messages to be formatted.
 	Messages []MessageFormatter `json:"messages"`
-
 	// PartialVariables represents a map of variable names to values or functions that return values.
 	// If the value is a function, it will be called when the prompt template is rendered.
 	PartialVariables map[string]any `json:"partial_variables"`
@@ -68,11 +67,6 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 	}
 	return inputVariables
 }
-
-// func (p ChatPromptTemplate) UnmarshalJSON(data []byte) error {
-//  //TODO: implement
-//	return nil
-//}
 
 func (p ChatPromptTemplate) Save(path string, serializer load.Serializer) error {
 	if p.PartialVariables != nil {

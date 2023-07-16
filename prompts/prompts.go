@@ -16,6 +16,8 @@ type MessageFormatter interface {
 	GetInputVariables() []string
 }
 
+type MessageFormatters []MessageFormatter
+
 // FormatPrompter is an interface for formatting a map of values into a prompt.
 type FormatPrompter interface {
 	FormatPrompt(values map[string]any) (schema.PromptValue, error)
