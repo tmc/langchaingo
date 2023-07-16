@@ -14,6 +14,7 @@ var (
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
 	ErrInvalidPartialVariableType  = errors.New("invalid partial variable type")
 	ErrPromptTemplateCannotBeSaved = errors.New("prompt template cannot be saved with partial variables")
+	ErrNotImplemented              = errors.New("not implemented")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
