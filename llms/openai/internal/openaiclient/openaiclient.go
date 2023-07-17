@@ -105,7 +105,7 @@ type EmbeddingRequest struct {
 // CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
 	if r.Model == "" {
-	    r.Model = defaultEmbeddingModel	
+		r.Model = defaultEmbeddingModel
 	}
 
 	resp, err := c.createEmbedding(ctx, &embeddingPayload{
@@ -134,7 +134,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 		if c.Model == "" {
 			r.Model = defaultChatModel
 		} else {
-		        r.Model = c.Model	
+			r.Model = c.Model
 		}
 	}
 	resp, err := c.createChat(ctx, r)
