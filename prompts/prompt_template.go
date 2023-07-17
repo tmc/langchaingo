@@ -45,6 +45,16 @@ func NewPromptTemplate(template string, inputVars []string) PromptTemplate {
 	}
 }
 
+func NewPromptTemplateFromFile(path string, serializer load.Serializer) (PromptTemplate, error) {
+	var promptTemplate PromptTemplate
+	err := serializer.FromFile(&promptTemplate, path)
+	if err != nil {
+		return PromptTemplate{}, err
+	}
+
+	return promptTemplate, nil
+}
+
 var (
 	_ Formatter      = PromptTemplate{}
 	_ FormatPrompter = PromptTemplate{}

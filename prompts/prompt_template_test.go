@@ -81,8 +81,9 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 func TestPromptTemplateSaveToFile(t *testing.T) {
 	t.Parallel()
 	// test prompt template.
-	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
-	prompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
+	prompt := NewPromptTemplate(
+		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
+		[]string{"inputLanguage", "outputLanguage", "text"})
 
 	type args struct {
 		path   string
@@ -108,7 +109,6 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 		{"relative_path_JSON_suffix", args{"prompts/simply_prompt_relative_path_JSON_suffix.json", prompt}, false},
 		{"relative_path_no_suffix", args{"prompts/simply_prompt_relative_path_no_suffix", prompt}, false},
 	}
-	// write prompt to mock file system
 	fileSystem := &MockFileSystem{
 		Storage: make(map[string][]byte, 0),
 	}
@@ -127,22 +127,18 @@ func TestPromptTemplateSaveToFile(t *testing.T) {
 func TestPromptTemplateLoadFromFile(t *testing.T) {
 	t.Parallel()
 	// expected prompt after loading from file
-	template := "Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}"
-	expectedPrompt := NewPromptTemplate(template, []string{"inputLanguage", "outputLanguage", "text"})
+	expectedPrompt := NewPromptTemplate(
+		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
+		[]string{"inputLanguage", "outputLanguage", "text"})
 
 	fileSystem := &MockFileSystem{
 		Storage: make(map[string][]byte, 0),
 	}
-
 	serializer := load.NewSerializer(fileSystem)
-	// first load data to mock file system
-	err := serializer.ToFile(expectedPrompt, "simple_prompt_with_JSON_suffix.json")
+	err := expectedPrompt.Save("simple_prompt_with_JSON_suffix.json", serializer)
 	assert.NoError(t, err)
 
-	// read data from mock file system
-	var prompt PromptTemplate
-	err = serializer.FromFile(&prompt, "simple_prompt_with_JSON_suffix.json")
-
+	prompt, err := NewPromptTemplateFromFile("simple_prompt_with_JSON_suffix.json", serializer)
 	assert.NoError(t, err)
 	// compare loaded prompt with expected prompt
 	assert.EqualValues(t, prompt, expectedPrompt)

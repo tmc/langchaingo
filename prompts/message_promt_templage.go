@@ -38,6 +38,15 @@ func NewSystemMessagePromptTemplate(template string, inputVariables []string) Sy
 	}
 }
 
+func NewSystemMessagePromptFromFile(path string, serializer load.Serializer) (SystemMessagePromptTemplate, error) {
+	var promptTemplate SystemMessagePromptTemplate
+	err := serializer.FromFile(&promptTemplate, path)
+	if err != nil {
+		return SystemMessagePromptTemplate{}, err
+	}
+	return promptTemplate, nil
+}
+
 // AIMessagePromptTemplate is a message formatter that returns a AI message.
 type AIMessagePromptTemplate struct {
 	Prompt PromptTemplate `json:"aiPrompt,omitempty"`
@@ -102,6 +111,15 @@ func NewHumanMessagePromptTemplate(template string, inputVariables []string) Hum
 	return HumanMessagePromptTemplate{
 		Prompt: NewPromptTemplate(template, inputVariables),
 	}
+}
+
+func NewHumanMessagePromptFromFile(path string, serializer load.Serializer) (HumanMessagePromptTemplate, error) {
+	var promptTemplate HumanMessagePromptTemplate
+	err := serializer.FromFile(&promptTemplate, path)
+	if err != nil {
+		return HumanMessagePromptTemplate{}, err
+	}
+	return promptTemplate, nil
 }
 
 // GenericMessagePromptTemplate is a message formatter that returns message with the specified speaker.

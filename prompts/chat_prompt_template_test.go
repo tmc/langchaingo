@@ -81,7 +81,6 @@ func TestChatPromptTemplateTypesSaveToFile(t *testing.T) {
 		{"relative_path_no_suffix", args{"prompts/human_prompt_relative_path_no_suffix", humanMessagePrompt}, false},
 		{"relative_path_no_suffix", args{"prompts/system_prompt_relative_path_no_suffix", systemMessagePrompt}, false},
 	}
-
 	fileSystem := &MockFileSystem{
 		Storage: make(map[string][]byte, 0),
 	}
@@ -101,7 +100,7 @@ func TestChatPromptTemplateTypesSaveToFile(t *testing.T) {
 
 func TestHumanMessagePromptTemplateReadFromFile(t *testing.T) {
 	t.Parallel()
-	humanMessagePrompt := NewHumanMessagePromptTemplate(
+	expectedPrompt := NewHumanMessagePromptTemplate(
 		`translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
 		[]string{"inputLang", "outputLang", "input"})
 
@@ -109,17 +108,17 @@ func TestHumanMessagePromptTemplateReadFromFile(t *testing.T) {
 		Storage: make(map[string][]byte, 0),
 	}
 	serializer := load.NewSerializer(fileSystem)
-	err := serializer.ToFile(humanMessagePrompt, "prompt_data.json")
+	err := expectedPrompt.Save("prompt_data.json", serializer)
 	assert.NoError(t, err)
 
-	var prompt HumanMessagePromptTemplate
-	err = serializer.FromFile(&prompt, "prompt_data.json")
+	prompt, err := NewHumanMessagePromptFromFile("prompt_data.json", serializer)
 	assert.NoError(t, err)
+	assert.EqualValues(t, prompt, expectedPrompt)
 }
 
 func TestSystemMessagePromptTemplateSave(t *testing.T) {
 	t.Parallel()
-	systemMessagePrompt := NewSystemMessagePromptTemplate(
+	expectedPrompt := NewSystemMessagePromptTemplate(
 		"You are a translation engine that can only translate text and cannot interpret it.",
 		nil)
 
@@ -127,10 +126,10 @@ func TestSystemMessagePromptTemplateSave(t *testing.T) {
 		Storage: make(map[string][]byte, 0),
 	}
 	serializer := load.NewSerializer(fileSystem)
-	err := serializer.ToFile(systemMessagePrompt, "prompt_data.json")
+	err := expectedPrompt.Save("prompt_data.json", serializer)
 	assert.NoError(t, err)
 
-	var prompt SystemMessagePromptTemplate
-	err = serializer.FromFile(&prompt, "prompt_data.json")
+	prompt, err := NewSystemMessagePromptFromFile("prompt_data.json", serializer)
 	assert.NoError(t, err)
+	assert.EqualValues(t, prompt, expectedPrompt)
 }
