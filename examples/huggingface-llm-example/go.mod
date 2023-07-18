@@ -1,4 +1,4 @@
-module basic-llm-example
+module huggingface-llm-example
 
 go 1.19
 

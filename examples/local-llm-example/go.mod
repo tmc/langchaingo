@@ -1,4 +1,4 @@
-module basic-llm-example
+module local-llm-example
 
 go 1.19
 

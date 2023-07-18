@@ -1,4 +1,4 @@
-module basic-llm-example
+module openai-chat-example
 
 go 1.19
 

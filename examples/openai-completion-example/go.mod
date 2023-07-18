@@ -1,4 +1,4 @@
-module basic-llm-example
+module openai-completion-example
 
 go 1.19
 

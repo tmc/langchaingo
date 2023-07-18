@@ -1,4 +1,4 @@
-module llm-math-chain-example
+module document-qa-example
 
 go 1.19
 

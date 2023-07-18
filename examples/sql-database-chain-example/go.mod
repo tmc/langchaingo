@@ -1,4 +1,4 @@
-module llm-math-chain-example
+module sql-database-chain-example
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module prompts-with-partial-example
+module prompts-with-partial-func-example
 
 go 1.20
 

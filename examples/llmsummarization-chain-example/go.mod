@@ -1,4 +1,4 @@
-module mrkl-agent-example
+module llmsummarization-chain-example
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module basic-llm-example
+module vertexai-palm-completion-example
 
 go 1.19
 

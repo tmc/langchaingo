@@ -1,4 +1,4 @@
-module zapier-llm-exmaple
+module zapier-llm-example
 
 go 1.19
 
