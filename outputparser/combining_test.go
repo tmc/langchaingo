@@ -35,7 +35,7 @@ func TestCombine(t *testing.T) {
 		regexParser,
 	}
 
-	validOutput := map[string]string{
+	validOutput := map[string]any{
 		"answer":      "Paris",
 		"source":      "https://en.wikipedia.org/wiki/France",
 		"confidence":  "A",
@@ -49,7 +49,7 @@ func TestCombine(t *testing.T) {
 	testCases := []struct {
 		text     string
 		parsers  Combining
-		expected map[string]string
+		expected map[string]any
 		err      error
 	}{
 		{

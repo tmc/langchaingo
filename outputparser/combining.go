@@ -39,9 +39,9 @@ func (p Combining) GetFormatInstructions() string {
 	return text
 }
 
-func (p Combining) parse(text string) (map[string]string, error) {
+func (p Combining) parse(text string) (map[string]any, error) {
 	texts := strings.Split(text, "\n\n")
-	output := make(map[string]string)
+	output := make(map[string]any)
 
 	if len(p.Parsers) <= 1 {
 		return nil, ParseError{
