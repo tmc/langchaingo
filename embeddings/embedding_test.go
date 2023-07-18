@@ -27,6 +27,6 @@ func TestBatchTexts(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		assert.Equal(t, tc.expected, batchTexts(tc.texts, tc.batchSize))
+		assert.Equal(t, tc.expected, BatchTexts(tc.texts, tc.batchSize))
 	}
 }

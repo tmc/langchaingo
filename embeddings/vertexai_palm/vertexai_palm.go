@@ -1,9 +1,10 @@
-package embeddings
+package vertexai_palm
 
 import (
 	"context"
 	"strings"
 
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/vertexai"
 )
 
@@ -15,30 +16,26 @@ type VertexAIPaLM struct {
 	BatchSize     int
 }
 
-var _ Embedder = VertexAIPaLM{}
+var _ embeddings.Embedder = VertexAIPaLM{}
 
-// NewVertexAIPaLM creates a new VertexAI with StripNewLines set to true and batch
-// size set to 512.
-func NewVertexAIPaLM() (*VertexAIPaLM, error) {
-	client, err := vertexai.New()
+// NewVertexAIPaLM creates a new VertexAI with options. Options for client, strip new lines and batch size.
+func NewVertexAIPaLM(opts ...Option) (*VertexAIPaLM, error) {
+	v, err := applyClientOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
-	return &VertexAIPaLM{
-		client:        client,
-		StripNewLines: true,
-		BatchSize:     defaultBatchSize,
-	}, nil
+
+	return v, nil
 }
 
 // EmbedDocuments creates one vector embedding for each of the texts.
 func (e VertexAIPaLM) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
-	batchedTexts := batchTexts(
-		maybeRemoveNewLines(texts, e.StripNewLines),
+	batchedTexts := embeddings.BatchTexts(
+		embeddings.MaybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
 	)
 
-	embeddings := make([][]float64, 0, len(texts))
+	emb := make([][]float64, 0, len(texts))
 	for _, texts := range batchedTexts {
 		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts)
 		if err != nil {
@@ -50,15 +47,15 @@ func (e VertexAIPaLM) EmbedDocuments(ctx context.Context, texts []string) ([][]f
 			textLengths = append(textLengths, len(text))
 		}
 
-		combined, err := combineVectors(curTextEmbeddings, textLengths)
+		combined, err := embeddings.CombineVectors(curTextEmbeddings, textLengths)
 		if err != nil {
 			return nil, err
 		}
 
-		embeddings = append(embeddings, combined)
+		emb = append(emb, combined)
 	}
 
-	return embeddings, nil
+	return emb, nil
 }
 
 // EmbedQuery embeds a single text.
@@ -67,10 +64,10 @@ func (e VertexAIPaLM) EmbedQuery(ctx context.Context, text string) ([]float64, e
 		text = strings.ReplaceAll(text, "\n", " ")
 	}
 
-	embeddings, err := e.client.CreateEmbedding(ctx, []string{text})
+	emb, err := e.client.CreateEmbedding(ctx, []string{text})
 	if err != nil {
 		return nil, err
 	}
 
-	return embeddings[0], nil
+	return emb[0], nil
 }

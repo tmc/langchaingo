@@ -9,13 +9,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
+	"github.com/weaviate/weaviate/entities/models"
+
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
+	openai2 "github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
-	"github.com/weaviate/weaviate/entities/models"
 )
 
 func getValues(t *testing.T) (string, string) {
@@ -66,7 +67,7 @@ func TestWeaviateStoreRest(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -101,7 +102,7 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -149,7 +150,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -193,7 +194,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -240,7 +241,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -292,7 +293,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -380,7 +381,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(
@@ -460,7 +461,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := embeddings.NewOpenAI()
+	e, err := openai2.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := New(

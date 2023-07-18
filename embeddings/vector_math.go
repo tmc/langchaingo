@@ -14,7 +14,7 @@ var (
 	ErrAllTextsLenZero = errors.New("all texts have length 0")
 )
 
-func combineVectors(vectors [][]float64, weights []int) ([]float64, error) {
+func CombineVectors(vectors [][]float64, weights []int) ([]float64, error) {
 	average, err := getAverage(vectors, weights)
 	if err != nil {
 		return nil, err
