@@ -53,14 +53,11 @@ func WithHTTPClient(client Doer) Option {
 	}
 }
 
-var azureMap = map[string]string{
-	"gpt-3.5-turbo": "gpt-35-turbo",
-}
-
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string,
-	opts ...Option) (*Client, error) {
+	opts ...Option,
+) (*Client, error) {
 	c := &Client{
 		token:        token,
 		Model:        model,
@@ -134,9 +131,6 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
-	if len(r.Input) <= 0 {
-		return nil, ErrEmptyResponse
-	}
 
 	resp, err := c.createEmbedding(ctx, &embeddingPayload{
 		Model: r.Model,
@@ -203,7 +197,6 @@ func (c *Client) buildURL(suffix string) string {
 }
 
 func (c *Client) buildAzureURL(suffix string) string {
-
 	baseURL := c.baseURL
 	baseURL = strings.TrimRight(baseURL, "/")
 

@@ -247,7 +247,7 @@ func newAzureClient(opts ...Option) (*openaiclient.Client, error) {
 		baseURL:      os.Getenv(baseURLEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
 		apiType:      APITypeAzure,
-		apiVersion:   DefaultApiVersion,
+		apiVersion:   DefaultAPIVersion,
 	}
 
 	for _, opt := range opts {

@@ -16,7 +16,7 @@ const (
 )
 
 const (
-	DefaultApiVersion = "2023-05-15"
+	DefaultAPIVersion = "2023-05-15"
 )
 
 type options struct {
@@ -64,17 +64,17 @@ func WithOrganization(organization string) Option {
 	}
 }
 
-// WithApiType passes the api type to the client. If not set, the default value
-// is APITypeOpenAI
-func WithApiType(apiType APIType) Option {
+// WithAPIType passes the api type to the client. If not set, the default value
+// is APITypeOpenAI.
+func WithAPIType(apiType APIType) Option {
 	return func(opts *options) {
 		opts.apiType = apiType
 	}
 }
 
-// WithApiVersion passes the api version to the client. If not set, the default value
-// is DefaultApiVersion
-func WithApiVersion(apiVersion string) Option {
+// WithAPIVersion passes the api version to the client. If not set, the default value
+// is DefaultAPIVersion.
+func WithAPIVersion(apiVersion string) Option {
 	return func(opts *options) {
 		opts.apiVersion = apiVersion
 	}
