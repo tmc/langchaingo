@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
-	openai2 "github.com/tmc/langchaingo/embeddings/openai"
+	openaiEmbeddings "github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -81,7 +81,7 @@ func TestPineconeStoreRest(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -111,7 +111,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -158,7 +158,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -201,7 +201,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -246,7 +246,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -297,7 +297,7 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -376,7 +376,7 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -456,7 +456,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -534,7 +534,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := openai2.NewOpenAI()
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
