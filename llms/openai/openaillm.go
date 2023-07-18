@@ -209,6 +209,7 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 		model:        os.Getenv(modelEnvVarName),
 		baseURL:      os.Getenv(baseURLEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
+		apiType:      APITypeOpenAI,
 	}
 
 	for _, opt := range opts {
@@ -219,5 +220,44 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return openaiclient.New(options.token, options.model, options.baseURL, options.organization)
+	return openaiclient.New(options.token, options.model, options.baseURL, options.organization,
+		openaiclient.APIType(options.apiType), "")
+}
+
+// NewAzure returns a new Azure OpenAI LLM .
+func NewAzure(opts ...Option) (*LLM, error) {
+	c, err := newAzureClient(opts...)
+	return &LLM{
+		client: c,
+	}, err
+}
+
+// NewAzureChat returns a new OpenAI chat LLM.
+func NewAzureChat(opts ...Option) (*Chat, error) {
+	c, err := newAzureClient(opts...)
+	return &Chat{
+		client: c,
+	}, err
+}
+
+func newAzureClient(opts ...Option) (*openaiclient.Client, error) {
+	options := &options{
+		token:        os.Getenv(tokenEnvVarName),
+		model:        os.Getenv(modelEnvVarName),
+		baseURL:      os.Getenv(baseURLEnvVarName),
+		organization: os.Getenv(organizationEnvVarName),
+		apiType:      APITypeAzure,
+		apiVersion:   DefaultApiVersion,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.token) == 0 {
+		return nil, ErrMissingToken
+	}
+
+	return openaiclient.New(options.token, options.model, options.baseURL,
+		options.organization, openaiclient.APIType(options.apiType), options.apiVersion)
 }

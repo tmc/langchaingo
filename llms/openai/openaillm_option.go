@@ -7,11 +7,26 @@ const (
 	organizationEnvVarName = "OPENAI_ORGANIZATION" //nolint:gosec
 )
 
+type APIType string
+
+const (
+	APITypeOpenAI  APIType = "OPEN_AI"
+	APITypeAzure   APIType = "AZURE"
+	APITypeAzureAD APIType = "AZURE_AD"
+)
+
+const (
+	DefaultApiVersion = "2023-05-15"
+)
+
 type options struct {
 	token        string
 	model        string
 	baseURL      string
 	organization string
+
+	apiType    APIType
+	apiVersion string // required when APIType is APITypeAzure or APITypeAzureAD
 }
 
 type Option func(*options)
@@ -34,7 +49,7 @@ func WithModel(model string) Option {
 
 // WithBaseURL passes the OpenAI base url to the client. If not set, the base url
 // is read from the OPENAI_BASE_URL environment variable. If still not set in ENV
-// VAR OPENAI_BASE_URL, then the default value is https://api.openai.com is used.
+// VAR OPENAI_BASE_URL, then the default value is https://api.openai.com/v1 is used.
 func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
 		opts.baseURL = baseURL
@@ -46,5 +61,21 @@ func WithBaseURL(baseURL string) Option {
 func WithOrganization(organization string) Option {
 	return func(opts *options) {
 		opts.organization = organization
+	}
+}
+
+// WithApiType passes the api type to the client. If not set, the default value
+// is APITypeOpenAI
+func WithApiType(apiType APIType) Option {
+	return func(opts *options) {
+		opts.apiType = apiType
+	}
+}
+
+// WithApiVersion passes the api version to the client. If not set, the default value
+// is DefaultApiVersion
+func WithApiVersion(apiVersion string) Option {
+	return func(opts *options) {
+		opts.apiVersion = apiVersion
 	}
 }
