@@ -9,14 +9,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
-	"github.com/weaviate/weaviate/entities/models"
-
 	"github.com/tmc/langchaingo/chains"
 	openai2 "github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
+	"github.com/weaviate/weaviate/entities/models"
 )
 
 func getValues(t *testing.T) (string, string) {

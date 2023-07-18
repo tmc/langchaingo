@@ -1,4 +1,4 @@
-package vertexai_palm
+package vertexai
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 // VertexAIPaLM is the embedder using the Google PaLM api.
-type VertexAIPaLM struct {
+type VertexAIPaLM struct { //nolint:revive
 	client *vertexai.LLM
 
 	StripNewLines bool

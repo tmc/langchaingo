@@ -1,4 +1,4 @@
-package vertexai_palm
+package vertexai
 
 import (
 	"github.com/tmc/langchaingo/llms/vertexai"
