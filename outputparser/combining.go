@@ -15,9 +15,8 @@ type Combining struct {
 // NewCombining creates a new combining parser.
 func NewCombining(parsers []schema.OutputParser[any]) Combining {
 	p := make([]schema.OutputParser[any], len(parsers))
-	for i, parser := range parsers {
-		p[i] = parser
-	}
+
+	copy(p, parsers)
 
 	return Combining{
 		Parsers: p,
@@ -29,7 +28,8 @@ var _ schema.OutputParser[any] = Combining{}
 
 // GetFormatInstructions returns the format instructions.
 func (p Combining) GetFormatInstructions() string {
-	text := "Your response will be a map of strings combining the output of parsers\nusing text delimited by two successive newline characters, to the respective parser.\n\n"
+	text := "Your response will be a map of strings combining the output of parsers\n"
+	text += "using text delimited by two successive newline characters, to the respective parser.\n\n"
 	text += "The output parser instructions are:"
 
 	for _, parser := range p.Parsers {
@@ -66,7 +66,15 @@ func (p Combining) parse(text string) (map[string]any, error) {
 			return nil, err
 		}
 
-		for k, result := range parsed.(map[string]string) {
+		parsedMap, ok := parsed.(map[string]string)
+		if !ok {
+			return nil, ParseError{
+				Text:   textChunk,
+				Reason: fmt.Sprintf("Parser %d does not return a map of strings", parsed),
+			}
+		}
+
+		for k, result := range parsedMap {
 			output[k] = result
 		}
 	}

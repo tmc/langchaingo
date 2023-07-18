@@ -1,6 +1,7 @@
 package outputparser
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -80,7 +81,7 @@ func TestCombine(t *testing.T) {
 
 	for _, tc := range testCases {
 		actual, err := tc.parsers.Parse(tc.text)
-		if tc.err != nil && tc.err != err {
+		if tc.err != nil && !errors.Is(tc.err, err) {
 			t.Errorf("Expected error %v, got %v", err, tc.err)
 		}
 
