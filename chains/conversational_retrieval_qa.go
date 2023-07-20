@@ -18,15 +18,38 @@ const (
 // ConversationalRetrievalQA chain builds on RetrievalQA to provide a chat history component.
 type ConversationalRetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
-	Retriever               schema.Retriever
-	Memory                  memory.Buffer
-	CombineDocumentsChain   Chain
-	CondenseQuestionChain   Chain
-	OutputKey               string
-	RephraseQuestion        bool
+	Retriever schema.Retriever
+
+	// Buffer is a simple form of memory that remembers previous conversational back and forths directly.
+	Memory memory.Buffer
+
+	// CombineDocumentsChain The chain used to combine any retrieved documents.
+	CombineDocumentsChain Chain
+
+	// CondenseQuestionChain The chain the documents and query is given to.
+	// The chain used to generate a new question for the sake of retrieval.
+	// This chain will take in the current question (with variable `question`)
+	// and any chat history (with variable `chat_history`) and will produce
+	// a new standalone question to be used later on.
+	CondenseQuestionChain Chain
+
+	// OutputKey The output key to return the final answer of this chain in.
+	OutputKey string
+
+	// RephraseQuestion Whether to pass the new generated question to the CombineDocumentsChain.
+	// If true, will pass the new generated question along.
+	// If false, will only use the new generated question for retrieval and pass the
+	// original question along to the CombineDocumentsChain.
+	RephraseQuestion bool
+
+	// ReturnGeneratedQuestion Return the generated question as part of the final result.
 	ReturnGeneratedQuestion bool
-	InputKey                string
-	ReturnSourceDocuments   bool
+
+	// InputKey The input key to get the query from, by default "query".
+	InputKey string
+
+	// ReturnSourceDocuments Return the retrieved source documents as part of the final result.
+	ReturnSourceDocuments bool
 }
 
 var _ Chain = ConversationalRetrievalQA{}
@@ -34,15 +57,15 @@ var _ Chain = ConversationalRetrievalQA{}
 // NewConversationalRetrievalQA creates a new NewConversationalRetrievalQA
 func NewConversationalRetrievalQA(combineDocumentsChain Chain, condenseQuestionChain Chain, retriever schema.Retriever, memory memory.Buffer) ConversationalRetrievalQA {
 	return ConversationalRetrievalQA{
+		Memory:                  memory,
 		Retriever:               retriever,
 		CombineDocumentsChain:   combineDocumentsChain,
 		CondenseQuestionChain:   condenseQuestionChain,
 		InputKey:                _conversationalRetrievalQADefaultInputKey,
-		ReturnSourceDocuments:   false,
-		Memory:                  memory,
 		OutputKey:               _llmChainDefaultOutputKey,
 		RephraseQuestion:        true,
 		ReturnGeneratedQuestion: false,
+		ReturnSourceDocuments:   false,
 	}
 }
 
@@ -63,19 +86,18 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
 
-	newQuestion, err := c.getQuestion(ctx, query)
+	question, err := c.getQuestion(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	docs, err := c.Retriever.GetRelevantDocuments(ctx, newQuestion)
+	docs, err := c.Retriever.GetRelevantDocuments(ctx, question)
 	if err != nil {
 		return nil, err
 	}
-	//docs = append(docs)
 
 	result, err := Predict(ctx, c.CombineDocumentsChain, map[string]any{
-		"question":        c.rephraseQuestion(query, newQuestion),
+		"question":        c.rephraseQuestion(query, question),
 		"input_documents": docs,
 	}, options...)
 	if err != nil {
@@ -89,7 +111,7 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 		output[_conversationalRetrievalQADefaultSourceDocumentKey] = docs
 	}
 	if c.ReturnGeneratedQuestion {
-		output[_conversationalRetrievalQADefaultGeneratedQuestionKey] = newQuestion
+		output[_conversationalRetrievalQADefaultGeneratedQuestionKey] = question
 	}
 
 	return output, nil
@@ -117,7 +139,7 @@ func (c ConversationalRetrievalQA) getQuestion(ctx context.Context, question str
 		return question, nil
 	}
 
-	chatHistoryStr, err := schema.GetBufferString(c.Memory.ChatHistory.Messages(), "Human", "Assistant")
+	chatHistoryStr, err := schema.GetBufferString(c.Memory.ChatHistory.Messages(), "Human", "AI")
 	if err != nil {
 		return "", err
 	}
@@ -146,5 +168,6 @@ func (c ConversationalRetrievalQA) rephraseQuestion(question string, newQuestion
 	if c.RephraseQuestion {
 		return newQuestion
 	}
+
 	return question
 }

@@ -15,10 +15,8 @@ import (
 
 type testConversationalRetriever struct{}
 
-var run = 0
-
 func (t testConversationalRetriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
-	if run == 0 {
+	if query == "What did the president say about Ketanji Brown Jackson" {
 		return []schema.Document{
 			{
 				PageContent: "Tonight. I call on the Senate to: Pass the Freedom to Vote Act. Pass the John Lewis Voting Rights Act. And while you’re at it, pass the Disclose Act so Americans can know who is funding our elections. \n\nTonight, I’d like to honor someone who has dedicated his life to serve this country: Justice Stephen Breyer—an Army veteran, Constitutional scholar, and retiring Justice of the United States Supreme Court. Justice Breyer, thank you for your service. \n\nOne of the most serious constitutional responsibilities a President has is nominating someone to serve on the United States Supreme Court. \n\nAnd I did that 4 days ago, when I nominated Circuit Court of Appeals Judge Ketanji Brown Jackson. One of our nation’s top legal minds, who will continue Justice Breyer’s legacy of excellence.",
@@ -56,10 +54,11 @@ var _ schema.Retriever = testConversationalRetriever{}
 
 func TestConversationalRetrievalQA(t *testing.T) {
 	t.Parallel()
-	ctx := context.Background()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
+
+	ctx := context.Background()
 
 	llm, err := openai.New()
 	require.NoError(t, err)
@@ -71,14 +70,11 @@ func TestConversationalRetrievalQA(t *testing.T) {
 	chain := NewConversationalRetrievalQA(combinedStuffQAChain, combinedQuestionGeneratorChain, r, *memory.NewBuffer())
 	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
-
-	// flag for retriever to return second set of data
-	run++
+	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 
 	result, err = Run(ctx, chain, "Did he mention who she succeeded")
 	require.NoError(t, err)
-
-	require.True(t, strings.Contains(result, "Oliver"), "expected Oliver in result")
+	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }
 
 func TestConversationalRetrievalQAFromLLM(t *testing.T) {
@@ -87,18 +83,18 @@ func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
+	ctx := context.Background()
+
 	r := testConversationalRetriever{}
 	llm, err := openai.New()
 	require.NoError(t, err)
-	//chatHistory := []schema.ChatMessage{
-	//	schema.HumanChatMessage{Text: "Hello, I'm interested to buy the BMW, what do you think about that car?"},
-	//	schema.AIChatMessage{Text: "The BMW is a great car, with great petrol and diesel engines."},
-	//	schema.HumanChatMessage{Text: "What is the difference between petrol and diesel engine?"},
-	//	schema.AIChatMessage{Text: "The diesel engine is lower on fuel consumption."},
-	//}
 
 	chain := NewConversationalRetrievalQAFromLLM(llm, r, *memory.NewBuffer())
-	result, err := Run(context.Background(), chain, "what is foo? ")
+	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
-	require.True(t, strings.Contains(result, "34"), "expected 34 in result")
+	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
+
+	result, err = Run(ctx, chain, "Did he mention who she succeeded")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }
