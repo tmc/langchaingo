@@ -26,7 +26,6 @@ var (
 	_ llms.LanguageModel = (*LLM)(nil)
 )
 
-// Call requests a generation for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	r, err := o.Generate(ctx, []string{prompt}, options...)
 	if err != nil {
@@ -74,7 +73,6 @@ func (o *LLM) GeneratePrompt(
 	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
-// New returns a new Cohere LLM.
 func New(opts ...Option) (*LLM, error) {
 	c, err := newClient(opts...)
 	return &LLM{

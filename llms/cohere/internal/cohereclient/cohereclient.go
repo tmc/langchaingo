@@ -7,11 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cohere-ai/tokenizer"
 )
 
-var ErrEmptyResponse = errors.New("empty response")
+var (
+	ErrEmptyResponse = errors.New("empty response")
+	ErrModelNotFound = errors.New("model not found")
+)
 
 type Client struct {
 	token      string
@@ -60,12 +64,10 @@ func New(token string, baseURL string, model string, opts ...Option) (*Client, e
 	return c, nil
 }
 
-// GenerationRequest is a request to create a generation.
 type GenerationRequest struct {
 	Prompt string `json:"prompt"`
 }
 
-// Generation is a generation.
 type Generation struct {
 	Text string `json:"text"`
 }
@@ -84,7 +86,6 @@ type generateResponsePayload struct {
 	} `json:"generations,omitempty"`
 }
 
-// CreateGeneration creates a generation.
 func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*Generation, error) {
 	if c.baseURL == "" {
 		c.baseURL = "https://api.cohere.ai"
@@ -100,7 +101,6 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	// build request
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
@@ -114,7 +114,6 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 	req.Header.Set("content-type", "application/json")
 	req.Header.Set("authorization", "bearer "+c.token)
 
-	// send request
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("send request: %w", err)
@@ -127,6 +126,9 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 	}
 
 	if len(response.Generations) == 0 {
+		if strings.HasPrefix(response.Message, "model not found") {
+			return nil, ErrModelNotFound
+		}
 		return nil, ErrEmptyResponse
 	}
 
