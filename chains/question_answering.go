@@ -83,6 +83,7 @@ Context:
 Question: {{.question}}
 Helpful Answer:`
 
+// nolint: lll
 const _defaultCondenseQuestionTemplate = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
 
 Chat History:

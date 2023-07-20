@@ -54,8 +54,13 @@ type ConversationalRetrievalQA struct {
 
 var _ Chain = ConversationalRetrievalQA{}
 
-// NewConversationalRetrievalQA creates a new NewConversationalRetrievalQA
-func NewConversationalRetrievalQA(combineDocumentsChain Chain, condenseQuestionChain Chain, retriever schema.Retriever, memory memory.Buffer) ConversationalRetrievalQA {
+// NewConversationalRetrievalQA creates a new NewConversationalRetrievalQA.
+func NewConversationalRetrievalQA(
+	combineDocumentsChain Chain,
+	condenseQuestionChain Chain,
+	retriever schema.Retriever,
+	memory memory.Buffer,
+) ConversationalRetrievalQA {
 	return ConversationalRetrievalQA{
 		Memory:                  memory,
 		Retriever:               retriever,
@@ -69,7 +74,11 @@ func NewConversationalRetrievalQA(combineDocumentsChain Chain, condenseQuestionC
 	}
 }
 
-func NewConversationalRetrievalQAFromLLM(llm llms.LanguageModel, retriever schema.Retriever, memory memory.Buffer) ConversationalRetrievalQA {
+func NewConversationalRetrievalQAFromLLM(
+	llm llms.LanguageModel,
+	retriever schema.Retriever,
+	memory memory.Buffer,
+) ConversationalRetrievalQA {
 	return NewConversationalRetrievalQA(
 		LoadStuffQA(llm),
 		LoadQuestionGenerator(llm),
