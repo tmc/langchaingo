@@ -81,7 +81,7 @@ func NewConversationalRetrievalQAFromLLM(
 ) ConversationalRetrievalQA {
 	return NewConversationalRetrievalQA(
 		LoadStuffQA(llm),
-		LoadQuestionGenerator(llm),
+		LoadCondenseQuestionGenerator(llm),
 		retriever,
 		memory,
 	)

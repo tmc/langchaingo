@@ -70,7 +70,7 @@ func TestConversationalRetrievalQA(t *testing.T) {
 	require.NoError(t, err)
 
 	combinedStuffQAChain := LoadStuffQA(llm)
-	combinedQuestionGeneratorChain := LoadQuestionGenerator(llm)
+	combinedQuestionGeneratorChain := LoadCondenseQuestionGenerator(llm)
 	r := testConversationalRetriever{}
 
 	chain := NewConversationalRetrievalQA(combinedStuffQAChain, combinedQuestionGeneratorChain, r, *memory.NewBuffer())

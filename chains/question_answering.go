@@ -91,11 +91,8 @@ Chat History:
 Follow Up Input: {{.question}}
 Standalone question:`
 
-// LoadQuestionGenerator chain is used to generate a new question for the sake of retrieval.
-// This chain will take in the current question (with variable `question`)
-// and any chat history (with variable `chat_history`) and will produce
-// a new standalone question to be used later on.
-func LoadQuestionGenerator(llm llms.LanguageModel) *LLMChain {
+// LoadCondenseQuestionGenerator chain is used to generate a new question for the sake of retrieval.
+func LoadCondenseQuestionGenerator(llm llms.LanguageModel) *LLMChain {
 	condenseQuestionPromptTemplate := prompts.NewPromptTemplate(
 		_defaultCondenseQuestionTemplate,
 		[]string{"chat_history", "question"},
