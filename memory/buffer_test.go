@@ -58,13 +58,12 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBuffer()
-	m.ChatHistory = NewChatMessageHistory(
+	m := NewBuffer(WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Text: "bar"},
 			schema.AIChatMessage{Text: "foo"},
 		}),
-	)
+	)))
 
 	result, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
