@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -68,5 +69,40 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	result, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
+	assert.Equal(t, expected, result)
+}
+
+type testChatMessageHistory struct{}
+
+var _ schema.ChatMessageHistory = testChatMessageHistory{}
+
+func (t testChatMessageHistory) AddUserMessage(message string) {
+}
+
+func (t testChatMessageHistory) AddAIMessage(message string) {
+}
+
+func (t testChatMessageHistory) AddMessage(message schema.ChatMessage) {
+}
+
+func (t testChatMessageHistory) Clear() {
+}
+
+func (t testChatMessageHistory) Messages() []schema.ChatMessage {
+	return []schema.ChatMessage{
+		schema.HumanChatMessage{Text: "user message test"},
+		schema.AIChatMessage{Text: "ai message test"},
+	}
+}
+
+func TestBufferMemoryWithChatHistoryOption(t *testing.T) {
+	t.Parallel()
+
+	chatMessageHistory := testChatMessageHistory{}
+	m := NewBuffer(WithChatHistory(chatMessageHistory))
+
+	result, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
+	expected := map[string]any{"history": "Human: user message test\nAI: ai message test"}
 	assert.Equal(t, expected, result)
 }

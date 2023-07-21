@@ -7,17 +7,12 @@ type ChatMessageHistory struct {
 	messages []schema.ChatMessage
 }
 
+// Statically assert that ChatMessageHistory implement the chat message history interface.
+var _ schema.ChatMessageHistory = &ChatMessageHistory{}
+
 // NewChatMessageHistory creates a new ChatMessageHistory using chat message options.
-func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory {
-	h := &ChatMessageHistory{
-		messages: make([]schema.ChatMessage, 0),
-	}
-
-	for _, option := range options {
-		option(h)
-	}
-
-	return h
+func NewChatMessageHistory(options ...ChatMessageHistoryOption) *ChatMessageHistory {
+	return applyChatOptions(options...)
 }
 
 // Messages returns all messages stored.
@@ -39,14 +34,6 @@ func (h *ChatMessageHistory) Clear() {
 	h.messages = make([]schema.ChatMessage, 0)
 }
 
-// NewChatMessageOption is a function for creating new chat message history
-// with other then the default values.
-type NewChatMessageOption func(m *ChatMessageHistory)
-
-// WithPreviousMessages is an option for NewChatMessageHistory for adding
-// previous messages to the history.
-func WithPreviousMessages(previousMessages []schema.ChatMessage) NewChatMessageOption {
-	return func(m *ChatMessageHistory) {
-		m.messages = append(m.messages, previousMessages...)
-	}
+func (h *ChatMessageHistory) AddMessage(message schema.ChatMessage) {
+	h.messages = append(h.messages, message)
 }
