@@ -81,7 +81,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Simple                      | ✅     |
 | Structured                  | ✅     |
 | Boolean                     | ❌     |
-| Combining Parsers           | ❌     |
+| Combining Parsers           | ✅     |
 | Regex                       | ✅     |
 | Regex Dictionary            | ❌     |
 | Comma separated list        | ✅     |
