@@ -41,7 +41,7 @@ func (l *testLanguageModel) GeneratePrompt(_ context.Context, promptValue []sche
 	}, nil
 }
 
-func (l testLanguageModel) GetNumTokens(text string) int {
+func (l *testLanguageModel) GetNumTokens(text string) int {
 	return len(text)
 }
 
