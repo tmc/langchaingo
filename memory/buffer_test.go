@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -75,13 +74,13 @@ type testChatMessageHistory struct{}
 
 var _ schema.ChatMessageHistory = testChatMessageHistory{}
 
-func (t testChatMessageHistory) AddUserMessage(message string) {
+func (t testChatMessageHistory) AddUserMessage(_ string) {
 }
 
-func (t testChatMessageHistory) AddAIMessage(message string) {
+func (t testChatMessageHistory) AddAIMessage(_ string) {
 }
 
-func (t testChatMessageHistory) AddMessage(message schema.ChatMessage) {
+func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) {
 }
 
 func (t testChatMessageHistory) Clear() {
