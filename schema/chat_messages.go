@@ -34,6 +34,11 @@ type ChatMessage interface {
 	GetContent() string
 }
 
+// Named is an interface for objects that have a name.
+type Named interface {
+	GetName() string
+}
+
 // Statically assert that the types implement the interface.
 var (
 	_ ChatMessage = AIChatMessage{}
@@ -80,21 +85,23 @@ type GenericChatMessage struct {
 
 func (m GenericChatMessage) GetType() ChatMessageType { return ChatMessageTypeGeneric }
 func (m GenericChatMessage) GetContent() string       { return m.Content }
+func (m GenericChatMessage) GetName() string          { return m.Name }
 
 // FunctionChatMessage is a chat message representing the result of a function call.
 type FunctionChatMessage struct {
-	Name    string
-	Content string
+	Name    string `json:"name"`
+	Content string `json:"content"`
 }
 
 // FunctionCall is the name and arguments of a function call.
 type FunctionCall struct {
-	Name      string
-	Arguments any
+	Name      string `json:"name"`
+	Arguments any    `json:"arguments"`
 }
 
 func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeFunction }
-func (m FunctionChatMessage) GetContent() string       { return "" }
+func (m FunctionChatMessage) GetContent() string       { return m.Content }
+func (m FunctionChatMessage) GetName() string          { return m.Name }
 
 // ChatGeneration is the output of a single chat generation.
 type ChatGeneration struct {
@@ -112,31 +119,42 @@ type ChatResult struct {
 func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string) (string, error) {
 	result := []string{}
 	for _, m := range messages {
-		var role string
-		switch m.GetType() {
-		case ChatMessageTypeHuman:
-			role = humanPrefix
-		case ChatMessageTypeAI:
-			role = aiPrefix
-		case ChatMessageTypeSystem:
-			role = "System"
-		case ChatMessageTypeGeneric:
-			cgm, ok := m.(GenericChatMessage)
-			if !ok {
-				return "", fmt.Errorf("%w -%+v", ErrUnexpectedChatMessageType, m)
-			}
-			role = cgm.Role
-		case ChatMessageTypeFunction:
-			role = "Function"
-		default:
-			return "", ErrUnexpectedChatMessageType
+		role, err := getMessageRole(m, humanPrefix, aiPrefix)
+		if err != nil {
+			return "", err
 		}
 		msg := fmt.Sprintf("%s: %s", role, m.GetContent())
 		if m, ok := m.(AIChatMessage); ok && m.FunctionCall != nil {
-			j, _ := json.Marshal(m.FunctionCall)
+			j, err := json.Marshal(m.FunctionCall)
+			if err != nil {
+				return "", err
+			}
 			msg = fmt.Sprintf("%s %s", msg, string(j))
 		}
 		result = append(result, msg)
 	}
 	return strings.Join(result, "\n"), nil
+}
+
+func getMessageRole(m ChatMessage, humanPrefix, aiPrefix string) (string, error) {
+	var role string
+	switch m.GetType() {
+	case ChatMessageTypeHuman:
+		role = humanPrefix
+	case ChatMessageTypeAI:
+		role = aiPrefix
+	case ChatMessageTypeSystem:
+		role = "System"
+	case ChatMessageTypeGeneric:
+		cgm, ok := m.(GenericChatMessage)
+		if !ok {
+			return "", fmt.Errorf("%w -%+v", ErrUnexpectedChatMessageType, m)
+		}
+		role = cgm.Role
+	case ChatMessageTypeFunction:
+		role = "Function"
+	default:
+		return "", ErrUnexpectedChatMessageType
+	}
+	return role, nil
 }

@@ -16,6 +16,11 @@ var (
 	ErrNotImplemented           = errors.New("not implemented")
 )
 
+const (
+	userAuthor = "user"
+	botAuthor  = "bot"
+)
+
 type LLM struct {
 	client *vertexaiclient.PaLMClient
 }
@@ -99,15 +104,15 @@ var (
 )
 
 // Chat requests a chat response for the given messages.
-func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (string, error) { // nolint: lll
+func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll
 	r, err := o.Generate(ctx, [][]schema.ChatMessage{messages}, options...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(r) == 0 {
-		return "", ErrEmptyResponse
+		return nil, ErrEmptyResponse
 	}
-	return r[0].Message.Text, nil
+	return r[0].Message, nil
 }
 
 // Generate requests a chat response for each of the sets of messages.
@@ -135,7 +140,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		}
 		generations = append(generations, &llms.Generation{
 			Message: &schema.AIChatMessage{
-				Text: result.Candidates[0].Content,
+				Content: result.Candidates[0].Content,
 			},
 			Text: result.Candidates[0].Content,
 		})
@@ -156,18 +161,23 @@ func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMe
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
 	for i, m := range messages {
 		msg := &vertexaiclient.ChatMessage{
-			Content: m.GetText(),
+			Content: m.GetContent(),
 		}
 		typ := m.GetType()
 		switch typ {
 		case schema.ChatMessageTypeSystem:
-			msg.Author = "bot"
+			msg.Author = botAuthor
 		case schema.ChatMessageTypeAI:
-			msg.Author = "bot"
+			msg.Author = botAuthor
 		case schema.ChatMessageTypeHuman:
-			msg.Author = "user"
+			msg.Author = userAuthor
 		case schema.ChatMessageTypeGeneric:
-			msg.Author = "user"
+			msg.Author = userAuthor
+		case schema.ChatMessageTypeFunction:
+			msg.Author = userAuthor
+		}
+		if n, ok := m.(schema.Named); ok {
+			msg.Author = n.GetName()
 		}
 		msgs[i] = msg
 	}

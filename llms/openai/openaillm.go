@@ -2,9 +2,7 @@ package openai
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"reflect"
 
@@ -119,12 +117,11 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 	return r[0].Message, nil
 }
 
-func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll
+func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messageSet := range messageSets {
 		msgs := make([]*openaiclient.ChatMessage, len(messageSet))
@@ -142,11 +139,14 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 				msg.Role = "user"
 			case schema.ChatMessageTypeGeneric:
 				msg.Role = "user"
-				// TODO: support name
+			case schema.ChatMessageTypeFunction:
+				msg.Role = "function"
+			}
+			if n, ok := m.(schema.Named); ok {
+				msg.Name = n.GetName()
 			}
 			msgs[i] = msg
 		}
-
 		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
@@ -174,18 +174,12 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		if len(result.Choices) == 0 {
 			return nil, ErrEmptyResponse
 		}
-		// dump generation:
-		j, _ := json.Marshal(result)
-		fmt.Printf("%v\n", string(j))
-
-		text := result.Choices[0].Message.Content
 		generationInfo := make(map[string]any, reflect.ValueOf(result.Usage).NumField())
 		generationInfo["CompletionTokens"] = result.Usage.CompletionTokens
 		generationInfo["PromptTokens"] = result.Usage.PromptTokens
 		generationInfo["TotalTokens"] = result.Usage.TotalTokens
-
 		msg := &schema.AIChatMessage{
-			Content: text,
+			Content: result.Choices[0].Message.Content,
 		}
 		if result.Choices[0].FinishReason == "function_call" {
 			msg.FunctionCall = &schema.FunctionCall{
@@ -195,7 +189,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		}
 		generations = append(generations, &llms.Generation{
 			Message:        msg,
-			Text:           text,
+			Text:           msg.Content,
 			GenerationInfo: generationInfo,
 		})
 	}
