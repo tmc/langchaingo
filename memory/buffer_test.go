@@ -57,16 +57,50 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBuffer()
-	m.ChatHistory = NewChatMessageHistory(
+	m := NewBuffer(WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Text: "bar"},
 			schema.AIChatMessage{Text: "foo"},
 		}),
-	)
+	)))
 
 	result, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
+	assert.Equal(t, expected, result)
+}
+
+type testChatMessageHistory struct{}
+
+var _ schema.ChatMessageHistory = testChatMessageHistory{}
+
+func (t testChatMessageHistory) AddUserMessage(_ string) {
+}
+
+func (t testChatMessageHistory) AddAIMessage(_ string) {
+}
+
+func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) {
+}
+
+func (t testChatMessageHistory) Clear() {
+}
+
+func (t testChatMessageHistory) Messages() []schema.ChatMessage {
+	return []schema.ChatMessage{
+		schema.HumanChatMessage{Text: "user message test"},
+		schema.AIChatMessage{Text: "ai message test"},
+	}
+}
+
+func TestBufferMemoryWithChatHistoryOption(t *testing.T) {
+	t.Parallel()
+
+	chatMessageHistory := testChatMessageHistory{}
+	m := NewBuffer(WithChatHistory(chatMessageHistory))
+
+	result, err := m.LoadMemoryVariables(map[string]any{})
+	require.NoError(t, err)
+	expected := map[string]any{"history": "Human: user message test\nAI: ai message test"}
 	assert.Equal(t, expected, result)
 }
