@@ -83,7 +83,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Boolean                     | ❌     |
 | Combining Parsers           | ✅     |
 | Regex                       | ✅     |
-| Regex Dictionary            | ❌     |
+| Regex Dictionary            | ✅     |
 | Comma separated list        | ✅     |
 | Parser fixer                | ❌     |
 | Retry                       | ❌     |

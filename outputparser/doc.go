@@ -12,5 +12,7 @@ The outputparser package includes the following parsers:
     and returns them as a string slice.
   - RegexParser: a parser that takes a string, compiles it into a regular expression,
     and returns map[string]string of the regex groups.
+  - RegexDict: a parser that searches a string for values in a dictionary format,
+    and returns a map[string]string of the keys and their associated value.
 */
 package outputparser
