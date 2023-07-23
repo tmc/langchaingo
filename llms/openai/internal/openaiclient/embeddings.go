@@ -39,18 +39,14 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 	if c.baseURL == "" {
-		c.baseURL = "https://api.openai.com"
+		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/embeddings", c.baseURL), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings"), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
-	if c.organization != "" {
-		req.Header.Set("OpenAI-Organization", c.organization)
-	}
+	c.setHeaders(req)
 
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
