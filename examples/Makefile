@@ -12,4 +12,4 @@ rm-go-work-files: ## Add go work files to all examples
 
 .PHONY: install-all
 install-all: ## Add go work files to all examples
-	find . -name go.mod -execdir go install \;
+	@find . -name go.mod -execdir go install \;
