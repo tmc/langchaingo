@@ -31,4 +31,6 @@ var (
 	// ErrMultipleOutputsInPredict is returned if a chain has multiple return values
 	// in predict.
 	ErrMultipleOutputsInPredict = errors.New("predict is not supported with a chain that returns multiple values")
+	// ErrChainNotInitialized is returned if a chain is not initialized appropriately.
+	ErrChainInitialization = errors.New("error initializing chain")
 )
