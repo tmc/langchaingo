@@ -1,6 +1,8 @@
+SYNC_REF?=main
+
 .PHONY: sync
 sync: ## Sync all go.mod files
-	@sh .update-all-to-latest.sh
+	@sh .update-all-to-latest.sh ${SYNC_REF}
 
 .PHONY: add-go-work-files
 add-go-work-files: ## Add go work files to all examples
