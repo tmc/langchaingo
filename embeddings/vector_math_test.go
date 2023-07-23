@@ -22,7 +22,7 @@ func TestCombineVectors(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		combined, err := combineVectors(tc.vectors, tc.weights)
+		combined, err := CombineVectors(tc.vectors, tc.weights)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expected, combined)
 	}

@@ -1,4 +1,4 @@
-package embeddings
+package openai
 
 import (
 	"context"
