@@ -83,6 +83,23 @@ Context:
 Question: {{.question}}
 Helpful Answer:`
 
+// nolint: lll
+const _defaultCondenseQuestionTemplate = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.
+
+Chat History:
+{{.chat_history}}
+Follow Up Input: {{.question}}
+Standalone question:`
+
+// LoadCondenseQuestionGenerator chain is used to generate a new question for the sake of retrieval.
+func LoadCondenseQuestionGenerator(llm llms.LanguageModel) *LLMChain {
+	condenseQuestionPromptTemplate := prompts.NewPromptTemplate(
+		_defaultCondenseQuestionTemplate,
+		[]string{"chat_history", "question"},
+	)
+	return NewLLMChain(llm, condenseQuestionPromptTemplate)
+}
+
 // LoadStuffQA loads a StuffDocuments chain with default prompts for the llm chain.
 func LoadStuffQA(llm llms.LanguageModel) StuffDocuments {
 	defaultQAPromptTemplate := prompts.NewPromptTemplate(
