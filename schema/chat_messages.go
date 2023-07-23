@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -21,12 +22,16 @@ const (
 	ChatMessageTypeSystem ChatMessageType = "system"
 	// ChatMessageTypeGeneric is a message sent by a generic user.
 	ChatMessageTypeGeneric ChatMessageType = "generic"
+	// ChatMessageTypeFunction is a message sent by a function.
+	ChatMessageTypeFunction ChatMessageType = "function"
 )
 
-// ChatMessage is a message sent by a user or the system.
+// ChatMessage represents a message in a chat.
 type ChatMessage interface {
-	GetText() string
+	// GetType gets the type of the message.
 	GetType() ChatMessageType
+	// GetContent gets the content of the message.
+	GetContent() string
 }
 
 // Statically assert that the types implement the interface.
@@ -35,40 +40,61 @@ var (
 	_ ChatMessage = HumanChatMessage{}
 	_ ChatMessage = SystemChatMessage{}
 	_ ChatMessage = GenericChatMessage{}
+	_ ChatMessage = FunctionChatMessage{}
 )
 
 // AIChatMessage is a message sent by an AI.
 type AIChatMessage struct {
-	Text string
+	// Content is the content of the message.
+	Content string
+
+	// FunctionCall represents the model choosing to call a function.
+	FunctionCall *FunctionCall `json:"function_call,omitempty"`
 }
 
 func (m AIChatMessage) GetType() ChatMessageType { return ChatMessageTypeAI }
-func (m AIChatMessage) GetText() string          { return m.Text }
+func (m AIChatMessage) GetContent() string       { return m.Content }
 
 // HumanChatMessage is a message sent by a human.
 type HumanChatMessage struct {
-	Text string
+	Content string
 }
 
 func (m HumanChatMessage) GetType() ChatMessageType { return ChatMessageTypeHuman }
-func (m HumanChatMessage) GetText() string          { return m.Text }
+func (m HumanChatMessage) GetContent() string       { return m.Content }
 
 // SystemChatMessage is a chat message representing information that should be instructions to the AI system.
 type SystemChatMessage struct {
-	Text string
+	Content string
 }
 
 func (m SystemChatMessage) GetType() ChatMessageType { return ChatMessageTypeSystem }
-func (m SystemChatMessage) GetText() string          { return m.Text }
+func (m SystemChatMessage) GetContent() string       { return m.Content }
 
 // GenericChatMessage is a chat message with an arbitrary speaker.
 type GenericChatMessage struct {
-	Text string
-	Role string
+	Content string
+	Role    string
+	Name    string
 }
 
 func (m GenericChatMessage) GetType() ChatMessageType { return ChatMessageTypeGeneric }
-func (m GenericChatMessage) GetText() string          { return m.Text }
+func (m GenericChatMessage) GetContent() string       { return m.Content }
+
+// FunctionChatMessage is a chat message representing the result of a function call.
+type FunctionChatMessage struct {
+	Name    string
+	Content string
+}
+
+// FunctionCall is the name and arguments of a function call.
+type FunctionCall struct {
+	Name      string
+	Arguments any
+}
+
+func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeFunction }
+func (m FunctionChatMessage) GetContent() string       { return "" }
 
 // ChatGeneration is the output of a single chat generation.
 type ChatGeneration struct {
@@ -84,7 +110,7 @@ type ChatResult struct {
 
 // GetBufferString gets the buffer string of messages.
 func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string) (string, error) {
-	stringMessages := []string{}
+	result := []string{}
 	for _, m := range messages {
 		var role string
 		switch m.GetType() {
@@ -100,10 +126,17 @@ func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string
 				return "", fmt.Errorf("%w -%+v", ErrUnexpectedChatMessageType, m)
 			}
 			role = cgm.Role
+		case ChatMessageTypeFunction:
+			role = "Function"
 		default:
 			return "", ErrUnexpectedChatMessageType
 		}
-		stringMessages = append(stringMessages, fmt.Sprintf("%s: %s", role, m.GetText()))
+		msg := fmt.Sprintf("%s: %s", role, m.GetContent())
+		if m, ok := m.(AIChatMessage); ok && m.FunctionCall != nil {
+			j, _ := json.Marshal(m.FunctionCall)
+			msg = fmt.Sprintf("%s %s", msg, string(j))
+		}
+		result = append(result, msg)
 	}
-	return strings.Join(stringMessages, "\n"), nil
+	return strings.Join(result, "\n"), nil
 }

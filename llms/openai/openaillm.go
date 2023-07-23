@@ -2,7 +2,9 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 
@@ -106,15 +108,15 @@ var (
 )
 
 // Chat requests a chat response for the given messages.
-func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (string, error) { // nolint: lll
+func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll
 	r, err := o.Generate(ctx, [][]schema.ChatMessage{messages}, options...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(r) == 0 {
-		return "", ErrEmptyResponse
+		return nil, ErrEmptyResponse
 	}
-	return r[0].Message.Text, nil
+	return r[0].Message, nil
 }
 
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll
@@ -128,7 +130,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		msgs := make([]*openaiclient.ChatMessage, len(messageSet))
 		for i, m := range messageSet {
 			msg := &openaiclient.ChatMessage{
-				Content: m.GetText(),
+				Content: m.GetContent(),
 			}
 			typ := m.GetType()
 			switch typ {
@@ -145,7 +147,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			msgs[i] = msg
 		}
 
-		result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
+		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
 			Messages:         msgs,
@@ -155,22 +157,44 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			N:                opts.N,
 			FrequencyPenalty: opts.FrequencyPenalty,
 			PresencePenalty:  opts.PresencePenalty,
-		})
+
+			FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+		}
+		for _, fn := range opts.Functions {
+			req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+				Name:        fn.Name,
+				Description: fn.Description,
+				Parameters:  fn.Parameters,
+			})
+		}
+		result, err := o.client.CreateChat(ctx, req)
 		if err != nil {
 			return nil, err
 		}
 		if len(result.Choices) == 0 {
 			return nil, ErrEmptyResponse
 		}
+		// dump generation:
+		j, _ := json.Marshal(result)
+		fmt.Printf("%v\n", string(j))
+
 		text := result.Choices[0].Message.Content
 		generationInfo := make(map[string]any, reflect.ValueOf(result.Usage).NumField())
 		generationInfo["CompletionTokens"] = result.Usage.CompletionTokens
 		generationInfo["PromptTokens"] = result.Usage.PromptTokens
 		generationInfo["TotalTokens"] = result.Usage.TotalTokens
+
+		msg := &schema.AIChatMessage{
+			Content: text,
+		}
+		if result.Choices[0].FinishReason == "function_call" {
+			msg.FunctionCall = &schema.FunctionCall{
+				Name:      result.Choices[0].Message.FunctionCall.Name,
+				Arguments: result.Choices[0].Message.FunctionCall.Arguments,
+			}
+		}
 		generations = append(generations, &llms.Generation{
-			Message: &schema.AIChatMessage{
-				Text: text,
-			},
+			Message:        msg,
 			Text:           text,
 			GenerationInfo: generationInfo,
 		})
