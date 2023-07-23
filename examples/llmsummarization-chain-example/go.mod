@@ -2,7 +2,7 @@ module llmsummarization-chain-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230710002755-32d9295eb39d
+require github.com/tmc/langchaingo v0.0.0-20230718035245-c01f5d3bd72e
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
@@ -28,6 +28,7 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
+	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.24 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
