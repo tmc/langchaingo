@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,10 @@ import (
 
 func TestTokenBufferMemory(t *testing.T) {
 	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 
 	llm, err := openai.New()
 	require.NoError(t, err)
@@ -33,6 +38,10 @@ func TestTokenBufferMemory(t *testing.T) {
 
 func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 
 	llm, err := openai.New()
 	require.NoError(t, err)
@@ -62,6 +71,10 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 
 func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
 
 	llm, err := openai.New()
 	require.NoError(t, err)
