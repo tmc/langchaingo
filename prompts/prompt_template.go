@@ -45,9 +45,9 @@ func NewPromptTemplate(template string, inputVars []string) PromptTemplate {
 	}
 }
 
-func NewPromptTemplateFromFile(path string, serializer load.Serializer) (PromptTemplate, error) {
+func NewPromptTemplateFromFile(path string) (PromptTemplate, error) {
 	var promptTemplate PromptTemplate
-	err := serializer.FromFile(&promptTemplate, path)
+	err := load.FromFile(&promptTemplate, path)
 	if err != nil {
 		return PromptTemplate{}, err
 	}
@@ -85,12 +85,12 @@ func (p PromptTemplate) GetInputVariables() []string {
 	return p.InputVariables
 }
 
-func (p PromptTemplate) Save(path string, serializer load.Serializer) error {
+func (p PromptTemplate) Save(path string) error {
 	if p.PartialVariables != nil {
 		return ErrPromptTemplateCannotBeSaved
 	}
 
-	err := serializer.ToFile(p, path)
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}

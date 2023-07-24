@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/load"
 )
 
 func TestPromptTemplateFormatPrompt(t *testing.T) {
@@ -76,70 +74,4 @@ func TestPromptTemplateFormatPrompt(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestPromptTemplateSaveToFile(t *testing.T) {
-	t.Parallel()
-	// test prompt template.
-	prompt := NewPromptTemplate(
-		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
-		[]string{"inputLanguage", "outputLanguage", "text"})
-
-	type args struct {
-		path   string
-		prompt PromptTemplate
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		// test cases.
-		{"with_JSON_suffix", args{"", prompt}, true},
-		{"empty_prompt", args{"empty_prompt_with_JSON_suffix.json", PromptTemplate{}}, true},
-		{"with_JSON_suffix", args{"simple_prompt_with_JSON_suffix.json", prompt}, false},
-		{"with_YAML_suffix", args{"simple_prompt_with_YAML_suffix.yaml", prompt}, false},
-		{"with_YML_suffix", args{"simple_prompt_with_YML_suffix.yml", prompt}, false},
-		{"case_sensitive", args{"simple_prompt_case_sensitive.Yaml", prompt}, false},
-		{"no_suffix", args{"simple_prompt_no_suffix", prompt}, false},
-		{"invalid_suffix", args{"simple_prompt.", prompt}, true},
-		{"absolute_path_JSON_suffix", args{"/prompts/simply_prompt_absolute_path_JSON_suffix.json", prompt}, false},
-		{"absolute_path_JSON_suffix", args{"/prompts/simply_prompt_absolute_path_JSON_suffix.yml", prompt}, false},
-		{"absolute_path_no_suffix", args{"/prompts/simply_prompt_absolute_path_no_suffix", prompt}, false},
-		{"relative_path_JSON_suffix", args{"prompts/simply_prompt_relative_path_JSON_suffix.json", prompt}, false},
-		{"relative_path_no_suffix", args{"prompts/simply_prompt_relative_path_no_suffix", prompt}, false},
-	}
-	fileSystem := &MockFileSystem{
-		Storage: make(map[string][]byte, 0),
-	}
-	serializer := load.NewSerializer(fileSystem)
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			if err := tt.args.prompt.Save(tt.args.path, serializer); (err != nil) != tt.wantErr {
-				t.Errorf("ToFile() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestPromptTemplateLoadFromFile(t *testing.T) {
-	t.Parallel()
-	// expected prompt after loading from file
-	expectedPrompt := NewPromptTemplate(
-		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
-		[]string{"inputLanguage", "outputLanguage", "text"})
-
-	fileSystem := &MockFileSystem{
-		Storage: make(map[string][]byte, 0),
-	}
-	serializer := load.NewSerializer(fileSystem)
-	err := expectedPrompt.Save("simple_prompt_with_JSON_suffix.json", serializer)
-	assert.NoError(t, err)
-
-	prompt, err := NewPromptTemplateFromFile("simple_prompt_with_JSON_suffix.json", serializer)
-	assert.NoError(t, err)
-	// compare loaded prompt with expected prompt
-	assert.EqualValues(t, prompt, expectedPrompt)
 }

@@ -1,7 +1,6 @@
 package prompts
 
 import (
-	"github.com/tmc/langchaingo/load"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -14,7 +13,7 @@ type Formatter interface {
 type MessageFormatter interface {
 	FormatMessages(values map[string]any) ([]schema.ChatMessage, error)
 	GetInputVariables() []string
-	Save(path string, serializer load.Serializer) error
+	Save(path string) error
 }
 
 type MessageFormatters []MessageFormatter
@@ -23,5 +22,5 @@ type MessageFormatters []MessageFormatter
 type FormatPrompter interface {
 	FormatPrompt(values map[string]any) (schema.PromptValue, error)
 	GetInputVariables() []string
-	Save(path string, serializer load.Serializer) error
+	Save(path string) error
 }

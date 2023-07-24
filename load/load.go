@@ -4,33 +4,43 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-var ErrInvalidPath = errors.New("invalid file path")
+var (
+	ErrInvalidPath = errors.New("invalid file path")
+)
 
-func (s *FileSerializer) FromFile(data any, path string) error {
+func FromFile(data any, path string) error {
 	if path == "" {
 		return ErrInvalidPath
 	}
 
-	suffix := s.FileSystem.NormalizeSuffix(path)
+	suffix := NormalizeSuffix(path)
 	switch strings.ToLower(suffix) {
 	case ".json":
-		return s.fromJSON(data, path)
+		return fromJSON(data, path)
 	case ".yaml", ".yml":
-		return s.fromYAML(data, path)
+		return fromYAML(data, path)
 	default:
 		return fmt.Errorf("%w:%s", ErrInvalidPath, suffix)
 	}
 }
 
-func (s *FileSerializer) fromJSON(data any, path string) error {
-	byteData, err := s.FileSystem.Read(path)
+func fromJSON(data any, path string) error {
+	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	byteData, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
 	}
 
 	err = json.Unmarshal(byteData, data)
@@ -41,10 +51,16 @@ func (s *FileSerializer) fromJSON(data any, path string) error {
 	return nil
 }
 
-func (s *FileSerializer) fromYAML(data any, path string) error {
-	byteData, err := s.FileSystem.Read(path)
+func fromYAML(data any, path string) error {
+	file, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	byteData, err := io.ReadAll(file)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
 	}
 
 	err = yaml.Unmarshal(byteData, data)

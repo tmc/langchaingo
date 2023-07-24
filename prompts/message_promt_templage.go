@@ -23,8 +23,8 @@ func (p SystemMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
 }
 
-func (p SystemMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
-	err := serializer.ToFile(p, path)
+func (p SystemMessagePromptTemplate) Save(path string) error {
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}
@@ -38,9 +38,9 @@ func NewSystemMessagePromptTemplate(template string, inputVariables []string) Sy
 	}
 }
 
-func NewSystemMessagePromptFromFile(path string, serializer load.Serializer) (SystemMessagePromptTemplate, error) {
+func NewSystemMessagePromptFromFile(path string) (SystemMessagePromptTemplate, error) {
 	var promptTemplate SystemMessagePromptTemplate
-	err := serializer.FromFile(&promptTemplate, path)
+	err := load.FromFile(&promptTemplate, path)
 	if err != nil {
 		return SystemMessagePromptTemplate{}, err
 	}
@@ -65,8 +65,8 @@ func (p AIMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
 }
 
-func (p AIMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
-	err := serializer.ToFile(p, path)
+func (p AIMessagePromptTemplate) Save(path string) error {
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}
@@ -98,8 +98,8 @@ func (p HumanMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
 }
 
-func (p HumanMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
-	err := serializer.ToFile(p, path)
+func (p HumanMessagePromptTemplate) Save(path string) error {
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}
@@ -113,9 +113,9 @@ func NewHumanMessagePromptTemplate(template string, inputVariables []string) Hum
 	}
 }
 
-func NewHumanMessagePromptFromFile(path string, serializer load.Serializer) (HumanMessagePromptTemplate, error) {
+func NewHumanMessagePromptFromFile(path string) (HumanMessagePromptTemplate, error) {
 	var promptTemplate HumanMessagePromptTemplate
-	err := serializer.FromFile(&promptTemplate, path)
+	err := load.FromFile(&promptTemplate, path)
 	if err != nil {
 		return HumanMessagePromptTemplate{}, err
 	}
@@ -141,8 +141,8 @@ func (p GenericMessagePromptTemplate) GetInputVariables() []string {
 	return p.Prompt.InputVariables
 }
 
-func (p GenericMessagePromptTemplate) Save(path string, serializer load.Serializer) error {
-	err := serializer.ToFile(p, path)
+func (p GenericMessagePromptTemplate) Save(path string) error {
+	err := load.ToFile(p, path)
 	if err != nil {
 		return err
 	}
