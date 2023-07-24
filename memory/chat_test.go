@@ -14,20 +14,20 @@ func TestChatMessageHistory(t *testing.T) {
 	h.AddAIMessage("foo")
 	h.AddUserMessage("bar")
 	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Text: "foo"},
-		schema.HumanChatMessage{Text: "bar"},
+		schema.AIChatMessage{Content: "foo"},
+		schema.HumanChatMessage{Content: "bar"},
 	}, h.Messages())
 
 	h = NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
-			schema.AIChatMessage{Text: "foo"},
-			schema.SystemChatMessage{Text: "bar"},
+			schema.AIChatMessage{Content: "foo"},
+			schema.SystemChatMessage{Content: "bar"},
 		}),
 	)
 	h.AddUserMessage("zoo")
 	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Text: "foo"},
-		schema.SystemChatMessage{Text: "bar"},
-		schema.HumanChatMessage{Text: "zoo"},
+		schema.AIChatMessage{Content: "foo"},
+		schema.SystemChatMessage{Content: "bar"},
+		schema.HumanChatMessage{Content: "zoo"},
 	}, h.Messages())
 }

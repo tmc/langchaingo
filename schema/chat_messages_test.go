@@ -27,10 +27,10 @@ func TestGetBufferString(t *testing.T) {
 		{
 			name: "Mixed messages",
 			messages: []schema.ChatMessage{
-				schema.HumanChatMessage{Text: "Hello, how are you?"},
-				schema.AIChatMessage{Text: "I'm doing great!"},
-				schema.SystemChatMessage{Text: "Please be polite."},
-				schema.GenericChatMessage{Role: "Moderator", Text: "Keep the conversation on topic."},
+				schema.HumanChatMessage{Content: "Hello, how are you?"},
+				schema.AIChatMessage{Content: "I'm doing great!"},
+				schema.SystemChatMessage{Content: "Please be polite."},
+				schema.GenericChatMessage{Role: "Moderator", Content: "Keep the conversation on topic."},
 			},
 			humanPrefix: "Human",
 			aiPrefix:    "AI",
@@ -68,4 +68,4 @@ func TestGetBufferString(t *testing.T) {
 type unsupportedChatMessage struct{}
 
 func (m unsupportedChatMessage) GetType() schema.ChatMessageType { return "unsupported" }
-func (m unsupportedChatMessage) GetText() string                 { return "Unsupported message" }
+func (m unsupportedChatMessage) GetContent() string              { return "Unsupported message" }
