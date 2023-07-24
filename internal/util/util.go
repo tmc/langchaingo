@@ -31,3 +31,11 @@ func Intersection(list []string, set map[string]struct{}) []string {
 	}
 	return intersection
 }
+
+func ListKeys[T any](m map[string]T) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
