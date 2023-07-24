@@ -1,4 +1,4 @@
-module openai-chat-example
+module openai-function-call-example
 
 go 1.19
 

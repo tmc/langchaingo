@@ -16,6 +16,6 @@ func (v StringPromptValue) String() string {
 // Messages returns a single-element ChatMessage slice.
 func (v StringPromptValue) Messages() []schema.ChatMessage {
 	return []schema.ChatMessage{
-		schema.HumanChatMessage{Text: string(v)},
+		schema.HumanChatMessage{Content: string(v)},
 	}
 }
