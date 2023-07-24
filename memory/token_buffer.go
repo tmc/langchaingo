@@ -68,15 +68,10 @@ func (tb *TokenBuffer) Clear() error {
 }
 
 func (tb *TokenBuffer) getNumTokensFromMessages() (int, error) {
-	sum := 0
-	for _, message := range tb.ChatHistory.Messages() {
-		bufferString, err := schema.GetBufferString([]schema.ChatMessage{message}, tb.Buffer.HumanPrefix, tb.Buffer.AIPrefix)
-		if err != nil {
-			return 0, err
-		}
-
-		sum += tb.LLM.GetNumTokens(bufferString)
+	bufferString, err := schema.GetBufferString(tb.ChatHistory.Messages(), tb.Buffer.HumanPrefix, tb.Buffer.AIPrefix)
+	if err != nil {
+		return 0, err
 	}
 
-	return sum, nil
+	return tb.LLM.GetNumTokens(bufferString), nil
 }
