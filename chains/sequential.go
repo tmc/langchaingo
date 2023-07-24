@@ -22,23 +22,44 @@ type SequentialChain struct {
 	memory     schema.Memory
 }
 
-func NewSequentialChain(chains []Chain, inputKeys []string, outputKeys []string) (*SequentialChain, error) {
-	if err := validateSeqChain(chains, inputKeys, outputKeys); err != nil {
-		return nil, err
-	}
-
-	return &SequentialChain{
+func NewSequentialChain(chains []Chain, inputKeys []string, outputKeys []string, opts ...SequentialChainOption) (*SequentialChain, error) { //nolint:lll
+	s := &SequentialChain{
 		chains:     chains,
 		inputKeys:  inputKeys,
 		outputKeys: outputKeys,
 		memory:     memory.NewSimple(),
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	if err := s.validateSeqChain(); err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
-func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) error {
-	knownKeys := util.ToSet(inputKeys)
+func (c *SequentialChain) validateSeqChain() error {
+	knownKeys := util.ToSet(c.inputKeys)
 
-	for i, c := range chain {
+	// Make sure memory keys don't collide with input keys
+	memoryKeys := c.memory.MemoryVariables()
+	overlappingKeys := util.Intersection(memoryKeys, knownKeys)
+	if len(overlappingKeys) > 0 {
+		return fmt.Errorf(
+			"%w: input keys [%v] also exist in the memory keys: [%v] - please use input keys and memory keys that don't overlap",
+			ErrChainInitialization, strings.Join(overlappingKeys, delimiter), strings.Join(memoryKeys, delimiter),
+		)
+	}
+
+	// Add memory keys to known keys
+	for _, key := range memoryKeys {
+		knownKeys[key] = struct{}{}
+	}
+
+	for i, c := range c.chains {
 		// Check that chain has input keys that are in knownKeys
 		missingKeys := util.Difference(c.GetInputKeys(), knownKeys)
 		if len(missingKeys) > 0 {
@@ -64,7 +85,7 @@ func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) er
 	}
 
 	// Check that outputKeys are in knownKeys
-	for _, key := range outputKeys {
+	for _, key := range c.outputKeys {
 		if _, ok := knownKeys[key]; !ok {
 			return fmt.Errorf("%w: output key %s is not in the known keys", ErrChainInitialization, key)
 		}
@@ -178,4 +199,12 @@ func (c *SimpleSequentialChain) GetInputKeys() []string {
 // OutputKeys returns the output keys of the last chain.
 func (c *SimpleSequentialChain) GetOutputKeys() []string {
 	return []string{output}
+}
+
+type SequentialChainOption func(*SequentialChain)
+
+func WithSeqChainMemory(memory schema.Memory) SequentialChainOption {
+	return func(c *SequentialChain) {
+		c.memory = memory
+	}
 }
