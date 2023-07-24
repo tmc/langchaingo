@@ -22,12 +22,12 @@ func (h *ChatMessageHistory) Messages() []schema.ChatMessage {
 
 // AddAIMessage adds an AIMessage to the chat message history.
 func (h *ChatMessageHistory) AddAIMessage(text string) {
-	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
+	h.messages = append(h.messages, schema.AIChatMessage{Content: text})
 }
 
 // AddUserMessage adds an user to the chat message history.
 func (h *ChatMessageHistory) AddUserMessage(text string) {
-	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
+	h.messages = append(h.messages, schema.HumanChatMessage{Content: text})
 }
 
 func (h *ChatMessageHistory) Clear() {

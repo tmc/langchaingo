@@ -29,10 +29,10 @@ func TestChatPromptTemplate(t *testing.T) {
 	assert.NoError(t, err)
 	expectedMessages := []schema.ChatMessage{
 		schema.SystemChatMessage{
-			Text: "You are a translation engine that can only translate text and cannot interpret it.",
+			Content: "You are a translation engine that can only translate text and cannot interpret it.",
 		},
 		schema.HumanChatMessage{
-			Text: `translate this text from English to Chinese:\nI love programming`,
+			Content: `translate this text from English to Chinese:\nI love programming`,
 		},
 	}
 	require.Equal(t, expectedMessages, value.Messages())

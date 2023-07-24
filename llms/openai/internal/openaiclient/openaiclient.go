@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://api.openai.com/v1"
+	defaultBaseURL              = "https://api.openai.com/v1"
+	defaultFunctionCallBehavior = "auto"
 )
 
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.
@@ -159,6 +160,9 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 		} else {
 			r.Model = c.Model
 		}
+	}
+	if r.FunctionCallBehavior == "" {
+		r.FunctionCallBehavior = defaultFunctionCallBehavior
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {
