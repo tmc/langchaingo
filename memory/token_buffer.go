@@ -36,7 +36,7 @@ func (tb *TokenBuffer) LoadMemoryVariables(inputs map[string]any) (map[string]an
 	return tb.Buffer.LoadMemoryVariables(inputs)
 }
 
-// SaveContext uses Buffer method for saving context and prunes memory buffer.
+// SaveContext uses Buffer method for saving context and prunes memory buffer if needed.
 func (tb *TokenBuffer) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
 	err := tb.Buffer.SaveContext(inputValues, outputValues)
 	if err != nil {
@@ -49,8 +49,9 @@ func (tb *TokenBuffer) SaveContext(inputValues map[string]any, outputValues map[
 
 	if currBufferLength > tb.MaxTokenLimit {
 		// while currBufferLength is greater than MaxTokenLimit we keep removing messages from the memory
+		// from the oldest
 		for currBufferLength > tb.MaxTokenLimit {
-			tb.chatHistory.SetMessages(append(tb.chatHistory.Messages()[:0], tb.chatHistory.Messages()[1:]...))
+			tb.ChatHistory.SetMessages(append(tb.ChatHistory.Messages()[:0], tb.ChatHistory.Messages()[1:]...))
 			currBufferLength, err = tb.getNumTokensFromMessages()
 			if err != nil {
 				return err
@@ -68,7 +69,7 @@ func (tb *TokenBuffer) Clear() error {
 
 func (tb *TokenBuffer) getNumTokensFromMessages() (int, error) {
 	sum := 0
-	for _, message := range tb.chatHistory.Messages() {
+	for _, message := range tb.ChatHistory.Messages() {
 		bufferString, err := schema.GetBufferString([]schema.ChatMessage{message}, tb.Buffer.HumanPrefix, tb.Buffer.AIPrefix)
 		if err != nil {
 			return 0, err

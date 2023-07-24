@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -87,7 +86,7 @@ func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) {
 func (t testChatMessageHistory) Clear() {
 }
 
-func (t testChatMessageHistory) SetMessages(messages []schema.ChatMessage) {
+func (t testChatMessageHistory) SetMessages(_ []schema.ChatMessage) {
 }
 
 func (t testChatMessageHistory) Messages() []schema.ChatMessage {

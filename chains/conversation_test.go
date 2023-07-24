@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/memory"
 )
@@ -18,10 +17,10 @@ func TestConversation(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-	model, err := openai.New()
+	llm, err := openai.New()
 	require.NoError(t, err)
 
-	c := NewConversation(model, memory.NewBuffer())
+	c := NewConversation(llm, memory.NewBuffer())
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
@@ -31,6 +30,8 @@ func TestConversation(t *testing.T) {
 }
 
 func TestConversationMemoryPrune(t *testing.T) {
+	t.Parallel()
+
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
@@ -38,12 +39,16 @@ func TestConversationMemoryPrune(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	c := NewConversation(llm, memory.NewTokenBuffer(llm, 100, memory.WithReturnMessages(true)))
+	c := NewConversation(llm, memory.NewTokenBuffer(llm, 50))
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
 	res, err := Run(context.Background(), c, "What is my name?")
 	require.NoError(t, err)
-	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
+	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 
+	// this message will hit the maxTokenLimit and will initiate the prune of the messages to fit the context
+	res, err = Run(context.Background(), c, "Are you sure that my name is Jim?")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 }
