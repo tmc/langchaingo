@@ -16,4 +16,7 @@ type ChatMessageHistory interface {
 
 	// Messages get all messages from the store
 	Messages() []ChatMessage
+
+	// SetMessages replaces existing messages in the store
+	SetMessages(messages []ChatMessage)
 }
