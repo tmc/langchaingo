@@ -6,13 +6,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 )
 
-func TestBufferMemory(t *testing.T) {
+func TestTokenBufferMemory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBuffer()
+	llm, err := openai.New()
+	require.NoError(t, err)
+	m := NewTokenBuffer(llm, 2000)
+
 	result1, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
 	expected1 := map[string]any{"history": ""}
@@ -28,11 +32,13 @@ func TestBufferMemory(t *testing.T) {
 	assert.Equal(t, expected2, result2)
 }
 
-func TestBufferMemoryReturnMessage(t *testing.T) {
+func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	t.Parallel()
 
-	m := NewBuffer()
-	m.ReturnMessages = true
+	llm, err := openai.New()
+	require.NoError(t, err)
+	m := NewTokenBuffer(llm, 2000, WithReturnMessages(true))
+
 	expected1 := map[string]any{"history": []schema.ChatMessage{}}
 	result1, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
@@ -55,10 +61,13 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 	assert.Equal(t, expected2, result2)
 }
 
-func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
+func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
-	m := NewBuffer(WithChatHistory(NewChatMessageHistory(
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	m := NewTokenBuffer(llm, 2000, WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Text: "bar"},
 			schema.AIChatMessage{Text: "foo"},
@@ -71,40 +80,36 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
-type testChatMessageHistory struct{}
-
-var _ schema.ChatMessageHistory = testChatMessageHistory{}
-
-func (t testChatMessageHistory) AddUserMessage(_ string) {
-}
-
-func (t testChatMessageHistory) AddAIMessage(_ string) {
-}
-
-func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) {
-}
-
-func (t testChatMessageHistory) Clear() {
-}
-
-func (t testChatMessageHistory) SetMessages(messages []schema.ChatMessage) {
-}
-
-func (t testChatMessageHistory) Messages() []schema.ChatMessage {
-	return []schema.ChatMessage{
-		schema.HumanChatMessage{Text: "user message test"},
-		schema.AIChatMessage{Text: "ai message test"},
-	}
-}
-
-func TestBufferMemoryWithChatHistoryOption(t *testing.T) {
+func TestTokenBufferMemoryPrune(t *testing.T) {
 	t.Parallel()
 
-	chatMessageHistory := testChatMessageHistory{}
-	m := NewBuffer(WithChatHistory(chatMessageHistory))
-
-	result, err := m.LoadMemoryVariables(map[string]any{})
+	llm, err := openai.New()
 	require.NoError(t, err)
-	expected := map[string]any{"history": "Human: user message test\nAI: ai message test"}
-	assert.Equal(t, expected, result)
+
+	m := NewTokenBuffer(llm, 20, WithChatHistory(NewChatMessageHistory(
+		WithPreviousMessages([]schema.ChatMessage{
+			schema.HumanChatMessage{Text: "human message test for max token"},
+			schema.AIChatMessage{Text: "ai message test for max token"},
+		}),
+	)))
+
+	buffStringMsg1, err := schema.GetBufferString([]schema.ChatMessage{
+		schema.HumanChatMessage{Text: "human message test for max token"},
+	}, "Human", "AI")
+	require.NoError(t, err)
+	tokenNumMsg1 := m.LLM.GetNumTokens(buffStringMsg1)
+	assert.Equal(t, 9, tokenNumMsg1)
+
+	buffStringMsg2, err := schema.GetBufferString([]schema.ChatMessage{
+		schema.AIChatMessage{Text: "ai message test for max token"},
+	}, "Human", "AI")
+	require.NoError(t, err)
+	tokenNumMsg2 := m.LLM.GetNumTokens(buffStringMsg2)
+	assert.Equal(t, 8, tokenNumMsg2)
+
+	assert.Equal(t, tokenNumMsg1+tokenNumMsg2, 17)
+
+	_, err = llm.Call()
+	require.NoError(t, err)
+
 }

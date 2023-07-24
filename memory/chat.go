@@ -37,3 +37,7 @@ func (h *ChatMessageHistory) Clear() {
 func (h *ChatMessageHistory) AddMessage(message schema.ChatMessage) {
 	h.messages = append(h.messages, message)
 }
+
+func (h *ChatMessageHistory) SetMessages(messages []schema.ChatMessage) {
+	h.messages = messages
+}
