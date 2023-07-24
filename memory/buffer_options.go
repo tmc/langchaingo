@@ -9,7 +9,7 @@ type BufferOption func(b *Buffer)
 // WithChatHistory is an option for providing the chat history store.
 func WithChatHistory(chatHistory schema.ChatMessageHistory) BufferOption {
 	return func(b *Buffer) {
-		b.chatHistory = chatHistory
+		b.ChatHistory = chatHistory
 	}
 }
 
@@ -69,8 +69,8 @@ func applyBufferOptions(opts ...BufferOption) *Buffer {
 		opt(m)
 	}
 
-	if m.chatHistory == nil {
-		m.chatHistory = NewChatMessageHistory()
+	if m.ChatHistory == nil {
+		m.ChatHistory = NewChatMessageHistory()
 	}
 
 	return m
