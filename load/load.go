@@ -11,9 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	ErrInvalidPath = errors.New("invalid file path")
-)
+var ErrInvalidPath = errors.New("invalid file path")
 
 func FromFile(data any, path string) error {
 	if path == "" {
@@ -32,15 +30,9 @@ func FromFile(data any, path string) error {
 }
 
 func fromJSON(data any, path string) error {
-	file, err := os.Open(path)
+	byteData, err := readFrom(path)
 	if err != nil {
-		return fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	byteData, err := io.ReadAll(file)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+		return err
 	}
 
 	err = json.Unmarshal(byteData, data)
@@ -52,15 +44,9 @@ func fromJSON(data any, path string) error {
 }
 
 func fromYAML(data any, path string) error {
-	file, err := os.Open(path)
+	byteData, err := readFrom(path)
 	if err != nil {
-		return fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	byteData, err := io.ReadAll(file)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+		return err
 	}
 
 	err = yaml.Unmarshal(byteData, data)
@@ -69,4 +55,18 @@ func fromYAML(data any, path string) error {
 	}
 
 	return nil
+}
+
+func readFrom(path string) ([]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	byteData, err := io.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+	return byteData, nil
 }

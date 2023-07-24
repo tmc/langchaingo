@@ -48,17 +48,7 @@ func toJSON(d any, path string) error {
 		return fmt.Errorf("failed to serialize JSON: %w", err)
 	}
 
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path: %w", err)
-	}
-
-	err = makeDirectoriesIfNeeded(absPath)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(absPath, data, filePermission)
+	err = writeTo(path, data)
 	if err != nil {
 		return fmt.Errorf("failed writing to file: %w", err)
 	}
@@ -72,6 +62,15 @@ func toYAML(d any, path string) error {
 		return fmt.Errorf("failed to serialize YAML: %w", err)
 	}
 
+	err = writeTo(path, data)
+	if err != nil {
+		return fmt.Errorf("failed writing to file: %w", err)
+	}
+
+	return nil
+}
+
+func writeTo(path string, data []byte) error {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
@@ -86,7 +85,6 @@ func toYAML(d any, path string) error {
 	if err != nil {
 		return fmt.Errorf("failed writing to file: %w", err)
 	}
-
 	return nil
 }
 
