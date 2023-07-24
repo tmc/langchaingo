@@ -182,7 +182,7 @@ func (m ChatMessage) GetType() schema.ChatMessageType {
 }
 
 // GetText returns the text of the message.
-func (m ChatMessage) GetText() string {
+func (m ChatMessage) GetContent() string {
 	return m.Content
 }
 

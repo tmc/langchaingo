@@ -1,8 +1,8 @@
-module sql-database-chain-example
+module sequential-chain-example
 
-go 1.19
+go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20230724172206-807bc9459e52
+require github.com/tmc/langchaingo v0.0.0-20230723211647-311c3ee65e1e
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -12,7 +12,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect

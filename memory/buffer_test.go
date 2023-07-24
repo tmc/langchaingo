@@ -45,8 +45,8 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 
 	expectedChatHistory := NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Text: "bar"},
-			schema.AIChatMessage{Text: "foo"},
+			schema.HumanChatMessage{Content: "bar"},
+			schema.AIChatMessage{Content: "foo"},
 		}),
 	)
 
@@ -59,8 +59,8 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 
 	m := NewBuffer(WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Text: "bar"},
-			schema.AIChatMessage{Text: "foo"},
+			schema.HumanChatMessage{Content: "bar"},
+			schema.AIChatMessage{Content: "foo"},
 		}),
 	)))
 
@@ -91,8 +91,8 @@ func (t testChatMessageHistory) SetMessages(_ []schema.ChatMessage) {
 
 func (t testChatMessageHistory) Messages() []schema.ChatMessage {
 	return []schema.ChatMessage{
-		schema.HumanChatMessage{Text: "user message test"},
-		schema.AIChatMessage{Text: "ai message test"},
+		schema.HumanChatMessage{Content: "user message test"},
+		schema.AIChatMessage{Content: "ai message test"},
 	}
 }
 

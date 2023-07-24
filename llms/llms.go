@@ -22,7 +22,7 @@ type LLM interface {
 
 // ChatLLM is a langchaingo LLM that can be used for chatting.
 type ChatLLM interface {
-	Call(ctx context.Context, messages []schema.ChatMessage, options ...CallOption) (string, error)
+	Call(ctx context.Context, messages []schema.ChatMessage, options ...CallOption) (*schema.AIChatMessage, error)
 	Generate(ctx context.Context, messages [][]schema.ChatMessage, options ...CallOption) ([]*Generation, error)
 }
 

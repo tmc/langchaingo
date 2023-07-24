@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
+
+const delimiter = ","
 
 // SequentialChain is a chain that runs multiple chains in sequence,
 // where the output of one chain is the input of the next.
@@ -40,8 +43,8 @@ func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) er
 		missingKeys := util.Difference(c.GetInputKeys(), knownKeys)
 		if len(missingKeys) > 0 {
 			return fmt.Errorf(
-				"%w: chain at index %d is missing required input keys: %v",
-				ErrChainInitialization, i, missingKeys,
+				"%w: missing required input keys: [%v], only had: [%v]",
+				ErrChainInitialization, strings.Join(missingKeys, delimiter), strings.Join(util.ListKeys(knownKeys), delimiter),
 			)
 		}
 
@@ -50,7 +53,7 @@ func validateSeqChain(chain []Chain, inputKeys []string, outputKeys []string) er
 		if len(overlappingKeys) > 0 {
 			return fmt.Errorf(
 				"%w: chain at index %d has output keys that already exist: %v",
-				ErrChainInitialization, i, overlappingKeys,
+				ErrChainInitialization, i, strings.Join(overlappingKeys, delimiter),
 			)
 		}
 
