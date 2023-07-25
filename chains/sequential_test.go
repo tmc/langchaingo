@@ -125,10 +125,11 @@ func TestSequentialChainErrors(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		name    string
-		chains  []Chain
-		initErr error
-		execErr error
+		name         string
+		chains       []Chain
+		initErr      error
+		execErr      error
+		seqChainOpts []SequentialChainOption
 	}{
 		{
 			name: "missing input key",
@@ -165,13 +166,21 @@ func TestSequentialChainErrors(t *testing.T) {
 			},
 			execErr: errDummy,
 		},
+		{
+			name: "memory key collides with input key",
+			chains: []Chain{
+				&testLLMChain{inputKeys: []string{"input1"}, outputKeys: []string{"output"}},
+			},
+			initErr:      ErrChainInitialization,
+			seqChainOpts: []SequentialChainOption{WithSeqChainMemory(memory.NewBuffer(memory.WithMemoryKey("input1")))},
+		},
 	}
 
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			c, err := NewSequentialChain(tc.chains, []string{"input1", "input2"}, []string{"output"})
+			c, err := NewSequentialChain(tc.chains, []string{"input1", "input2"}, []string{"output"}, tc.seqChainOpts...)
 			if tc.initErr != nil {
 				assert.ErrorIs(t, err, tc.initErr)
 			} else {
