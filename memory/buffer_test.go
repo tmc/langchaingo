@@ -50,7 +50,9 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 		}),
 	)
 
-	expected2 := map[string]any{"history": expectedChatHistory.Messages()}
+	messages, err := expectedChatHistory.Messages()
+	assert.NoError(t, err)
+	expected2 := map[string]any{"history": messages}
 	assert.Equal(t, expected2, result2)
 }
 
@@ -74,26 +76,31 @@ type testChatMessageHistory struct{}
 
 var _ schema.ChatMessageHistory = testChatMessageHistory{}
 
-func (t testChatMessageHistory) AddUserMessage(_ string) {
+func (t testChatMessageHistory) AddUserMessage(_ string) error {
+	return nil
 }
 
-func (t testChatMessageHistory) AddAIMessage(_ string) {
+func (t testChatMessageHistory) AddAIMessage(_ string) error {
+	return nil
 }
 
-func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) {
+func (t testChatMessageHistory) AddMessage(_ schema.ChatMessage) error {
+	return nil
 }
 
-func (t testChatMessageHistory) Clear() {
+func (t testChatMessageHistory) Clear() error {
+	return nil
 }
 
-func (t testChatMessageHistory) SetMessages(_ []schema.ChatMessage) {
+func (t testChatMessageHistory) SetMessages(_ []schema.ChatMessage) error {
+	return nil
 }
 
-func (t testChatMessageHistory) Messages() []schema.ChatMessage {
+func (t testChatMessageHistory) Messages() ([]schema.ChatMessage, error) {
 	return []schema.ChatMessage{
 		schema.HumanChatMessage{Content: "user message test"},
 		schema.AIChatMessage{Content: "ai message test"},
-	}
+	}, nil
 }
 
 func TestBufferMemoryWithChatHistoryOption(t *testing.T) {

@@ -16,28 +16,33 @@ func NewChatMessageHistory(options ...ChatMessageHistoryOption) *ChatMessageHist
 }
 
 // Messages returns all messages stored.
-func (h *ChatMessageHistory) Messages() []schema.ChatMessage {
-	return h.messages
+func (h *ChatMessageHistory) Messages() ([]schema.ChatMessage, error) {
+	return h.messages, nil
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-func (h *ChatMessageHistory) AddAIMessage(text string) {
+func (h *ChatMessageHistory) AddAIMessage(text string) error {
 	h.messages = append(h.messages, schema.AIChatMessage{Content: text})
+	return nil
 }
 
 // AddUserMessage adds an user to the chat message history.
-func (h *ChatMessageHistory) AddUserMessage(text string) {
+func (h *ChatMessageHistory) AddUserMessage(text string) error {
 	h.messages = append(h.messages, schema.HumanChatMessage{Content: text})
+	return nil
 }
 
-func (h *ChatMessageHistory) Clear() {
+func (h *ChatMessageHistory) Clear() error {
 	h.messages = make([]schema.ChatMessage, 0)
+	return nil
 }
 
-func (h *ChatMessageHistory) AddMessage(message schema.ChatMessage) {
+func (h *ChatMessageHistory) AddMessage(message schema.ChatMessage) error {
 	h.messages = append(h.messages, message)
+	return nil
 }
 
-func (h *ChatMessageHistory) SetMessages(messages []schema.ChatMessage) {
+func (h *ChatMessageHistory) SetMessages(messages []schema.ChatMessage) error {
 	h.messages = messages
+	return nil
 }

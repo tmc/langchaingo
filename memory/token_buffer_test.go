@@ -65,7 +65,9 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 		}),
 	)
 
-	expected2 := map[string]any{"history": expectedChatHistory.Messages()}
+	messages, err := expectedChatHistory.Messages()
+	require.NoError(t, err)
+	expected2 := map[string]any{"history": messages}
 	assert.Equal(t, expected2, result2)
 }
 

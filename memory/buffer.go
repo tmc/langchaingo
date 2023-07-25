@@ -30,11 +30,6 @@ func NewConversationBuffer(options ...ConversationBufferOption) *ConversationBuf
 	return applyBufferOptions(options...)
 }
 
-// Buffer gets buffer from memory.
-func (m *ConversationBuffer) Buffer() []schema.ChatMessage {
-	return m.ChatHistory.Messages()
-}
-
 // MemoryVariables gets the input key the buffer memory class will load dynamically.
 func (m *ConversationBuffer) MemoryVariables() []string {
 	return []string{m.MemoryKey}
@@ -45,13 +40,18 @@ func (m *ConversationBuffer) MemoryVariables() []string {
 // "history". If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise
 // the output is a buffer string of the chat messages.
 func (m *ConversationBuffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
+	messages, err := m.ChatHistory.Messages()
+	if err != nil {
+		return nil, err
+	}
+
 	if m.ReturnMessages {
 		return map[string]any{
-			m.MemoryKey: m.ChatHistory.Messages(),
+			m.MemoryKey: messages,
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(m.ChatHistory.Messages(), m.HumanPrefix, m.AIPrefix)
+	bufferString, err := schema.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -73,21 +73,26 @@ func (m *ConversationBuffer) SaveContext(inputValues map[string]any, outputValue
 	if err != nil {
 		return err
 	}
-	m.ChatHistory.AddUserMessage(userInputValue)
+	err = m.ChatHistory.AddUserMessage(userInputValue)
+	if err != nil {
+		return err
+	}
 
 	aiOutputValue, err := getInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
 	}
-	m.ChatHistory.AddAIMessage(aiOutputValue)
+	err = m.ChatHistory.AddAIMessage(aiOutputValue)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // Clear sets the chat messages to a new and empty chat message history.
 func (m *ConversationBuffer) Clear() error {
-	m.ChatHistory.Clear()
-	return nil
+	return m.ChatHistory.Clear()
 }
 
 func (m *ConversationBuffer) GetMemoryKey() string {

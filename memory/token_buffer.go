@@ -55,11 +55,20 @@ func (tb *ConversationTokenBuffer) SaveContext(inputValues map[string]any, outpu
 		// while currBufferLength is greater than MaxTokenLimit we keep removing messages from the memory
 		// from the oldest
 		for currBufferLength > tb.MaxTokenLimit {
-			if len(tb.ChatHistory.Messages()) == 0 {
+			messages, err := tb.ChatHistory.Messages()
+			if err != nil {
+				return err
+			}
+
+			if len(messages) == 0 {
 				break
 			}
 
-			tb.ChatHistory.SetMessages(append(tb.ChatHistory.Messages()[:0], tb.ChatHistory.Messages()[1:]...))
+			err = tb.ChatHistory.SetMessages(append(messages[:0], messages[1:]...))
+			if err != nil {
+				return err
+			}
+
 			currBufferLength, err = tb.getNumTokensFromMessages()
 			if err != nil {
 				return err
@@ -76,8 +85,13 @@ func (tb *ConversationTokenBuffer) Clear() error {
 }
 
 func (tb *ConversationTokenBuffer) getNumTokensFromMessages() (int, error) {
+	messages, err := tb.ChatHistory.Messages()
+	if err != nil {
+		return 0, err
+	}
+
 	bufferString, err := schema.GetBufferString(
-		tb.ChatHistory.Messages(),
+		messages,
 		tb.ConversationBuffer.HumanPrefix,
 		tb.ConversationBuffer.AIPrefix,
 	)
