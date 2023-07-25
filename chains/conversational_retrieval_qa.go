@@ -49,9 +49,6 @@ type ConversationalRetrievalQA struct {
 
 	// ReturnSourceDocuments Return the retrieved source documents as part of the final result.
 	ReturnSourceDocuments bool
-
-	// get_chat_history: Optional[Callable[[List[CHAT_TURN_TYPE]], str]] = None
-	// """An optional function to get a string of the chat history.
 }
 
 var _ Chain = ConversationalRetrievalQA{}
