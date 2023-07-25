@@ -93,13 +93,22 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
-	chatHistory, ok := values[c.Memory.GetMemoryKey()].([]schema.ChatMessage)
+	chatHistoryStr, ok := values[c.Memory.GetMemoryKey()].(string)
 	if !ok {
-		return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
+		chatHistory, ok := values[c.Memory.GetMemoryKey()].([]schema.ChatMessage)
+		if !ok {
+			return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
+		}
+
+		bufferStr, err := schema.GetBufferString(chatHistory, "Human", "AI")
+		if err != nil {
+			return nil, err
+		}
+
+		chatHistoryStr = bufferStr
 	}
 
-	question, err := c.getQuestion(ctx, query, chatHistory)
+	question, err := c.getQuestion(ctx, query, chatHistoryStr)
 	if err != nil {
 		return nil, err
 	}
@@ -150,15 +159,10 @@ func (c ConversationalRetrievalQA) GetOutputKeys() []string {
 func (c ConversationalRetrievalQA) getQuestion(
 	ctx context.Context,
 	question string,
-	chatHistory []schema.ChatMessage,
+	chatHistoryStr string,
 ) (string, error) {
-	if len(chatHistory) == 0 {
+	if len(chatHistoryStr) == 0 {
 		return question, nil
-	}
-
-	chatHistoryStr, err := schema.GetBufferString(chatHistory, "Human", "AI")
-	if err != nil {
-		return "", err
 	}
 
 	results, err := Call(

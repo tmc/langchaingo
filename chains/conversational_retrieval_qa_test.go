@@ -77,7 +77,7 @@ func TestConversationalRetrievalQA(t *testing.T) {
 		combinedStuffQAChain,
 		combinedQuestionGeneratorChain,
 		r,
-		memory.NewConversationBuffer(memory.WithReturnMessages(true)),
+		memory.NewConversationBuffer(),
 	)
 	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestConversationalRetrievalQA(t *testing.T) {
 	require.True(t, strings.Contains(result, "Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }
 
-func TestConversationalRetrievalQAInvalidMemoryValue(t *testing.T) {
+func TestConversationalRetrievalQAWithReturnMessages(t *testing.T) {
 	t.Parallel()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
@@ -107,11 +107,15 @@ func TestConversationalRetrievalQAInvalidMemoryValue(t *testing.T) {
 		combinedStuffQAChain,
 		combinedQuestionGeneratorChain,
 		r,
-		memory.NewConversationBuffer(memory.WithReturnMessages(false)),
+		memory.NewConversationBuffer(memory.WithReturnMessages(true)),
 	)
-	_, err = Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
-	require.Error(t, err)
-	require.True(t, strings.Contains(err.Error(), ErrMemoryValuesWrongType.Error()), "expected valid error to be thrown")
+	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
+
+	result, err = Run(ctx, chain, "Did he mention who she succeeded")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, "Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }
 
 func TestConversationalRetrievalQAFromLLM(t *testing.T) {
@@ -126,14 +130,14 @@ func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	chain := NewConversationalRetrievalQAFromLLM(llm, r, memory.NewConversationBuffer(memory.WithReturnMessages(true)))
+	chain := NewConversationalRetrievalQAFromLLM(llm, r, memory.NewConversationBuffer())
 	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 
 	result, err = Run(ctx, chain, "Did he mention who she succeeded")
 	require.NoError(t, err)
-	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
+	require.True(t, strings.Contains(result, "Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }
 
 func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.T) {
@@ -151,7 +155,7 @@ func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.
 	chain := NewConversationalRetrievalQAFromLLM(
 		llm,
 		r,
-		memory.NewConversationTokenBuffer(llm, 2000, memory.WithReturnMessages(true)),
+		memory.NewConversationTokenBuffer(llm, 2000),
 	)
 	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
@@ -159,5 +163,5 @@ func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.
 
 	result, err = Run(ctx, chain, "Did he mention who she succeeded")
 	require.NoError(t, err)
-	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
+	require.True(t, strings.Contains(result, "Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
 }

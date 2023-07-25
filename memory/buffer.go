@@ -12,7 +12,7 @@ var ErrInvalidInputValues = errors.New("invalid input values")
 
 // ConversationBuffer is a simple form of memory that remembers previous conversational back and forths directly.
 type ConversationBuffer struct {
-	chatHistory schema.ChatMessageHistory
+	ChatHistory schema.ChatMessageHistory
 
 	ReturnMessages bool
 	InputKey       string
@@ -32,7 +32,7 @@ func NewConversationBuffer(options ...ConversationBufferOption) *ConversationBuf
 
 // Buffer gets buffer from memory.
 func (m *ConversationBuffer) Buffer() []schema.ChatMessage {
-	return m.chatHistory.Messages()
+	return m.ChatHistory.Messages()
 }
 
 // MemoryVariables gets the input key the buffer memory class will load dynamically.
@@ -47,11 +47,11 @@ func (m *ConversationBuffer) MemoryVariables() []string {
 func (m *ConversationBuffer) LoadMemoryVariables(map[string]any) (map[string]any, error) {
 	if m.ReturnMessages {
 		return map[string]any{
-			m.MemoryKey: m.chatHistory.Messages(),
+			m.MemoryKey: m.ChatHistory.Messages(),
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(m.chatHistory.Messages(), m.HumanPrefix, m.AIPrefix)
+	bufferString, err := schema.GetBufferString(m.ChatHistory.Messages(), m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -73,20 +73,20 @@ func (m *ConversationBuffer) SaveContext(inputValues map[string]any, outputValue
 	if err != nil {
 		return err
 	}
-	m.chatHistory.AddUserMessage(userInputValue)
+	m.ChatHistory.AddUserMessage(userInputValue)
 
 	aiOutputValue, err := getInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
 	}
-	m.chatHistory.AddAIMessage(aiOutputValue)
+	m.ChatHistory.AddAIMessage(aiOutputValue)
 
 	return nil
 }
 
 // Clear sets the chat messages to a new and empty chat message history.
 func (m *ConversationBuffer) Clear() error {
-	m.chatHistory.Clear()
+	m.ChatHistory.Clear()
 	return nil
 }
 
