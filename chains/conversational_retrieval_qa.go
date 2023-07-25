@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -20,8 +19,8 @@ type ConversationalRetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
 
-	// Buffer is a simple form of memory that remembers previous conversational back and forths directly.
-	Memory memory.Buffer
+	// Memory that remembers previous conversational back and forths directly.
+	Memory schema.Memory
 
 	// CombineDocumentsChain The chain used to combine any retrieved documents.
 	CombineDocumentsChain Chain
@@ -50,6 +49,9 @@ type ConversationalRetrievalQA struct {
 
 	// ReturnSourceDocuments Return the retrieved source documents as part of the final result.
 	ReturnSourceDocuments bool
+
+	// get_chat_history: Optional[Callable[[List[CHAT_TURN_TYPE]], str]] = None
+	// """An optional function to get a string of the chat history.
 }
 
 var _ Chain = ConversationalRetrievalQA{}
@@ -59,7 +61,7 @@ func NewConversationalRetrievalQA(
 	combineDocumentsChain Chain,
 	condenseQuestionChain Chain,
 	retriever schema.Retriever,
-	memory memory.Buffer,
+	memory schema.Memory,
 ) ConversationalRetrievalQA {
 	return ConversationalRetrievalQA{
 		Memory:                  memory,
@@ -77,7 +79,7 @@ func NewConversationalRetrievalQA(
 func NewConversationalRetrievalQAFromLLM(
 	llm llms.LanguageModel,
 	retriever schema.Retriever,
-	memory memory.Buffer,
+	memory schema.Memory,
 ) ConversationalRetrievalQA {
 	return NewConversationalRetrievalQA(
 		LoadStuffQA(llm),
@@ -95,7 +97,12 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
 
-	question, err := c.getQuestion(ctx, query)
+	chatHistory, ok := values[c.Memory.GetMemoryKey()].([]schema.ChatMessage)
+	if !ok {
+		return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
+	}
+
+	question, err := c.getQuestion(ctx, query, chatHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +134,7 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 }
 
 func (c ConversationalRetrievalQA) GetMemory() schema.Memory {
-	return &c.Memory
+	return c.Memory
 }
 
 func (c ConversationalRetrievalQA) GetInputKeys() []string {
@@ -143,12 +150,16 @@ func (c ConversationalRetrievalQA) GetOutputKeys() []string {
 	return outputKeys
 }
 
-func (c ConversationalRetrievalQA) getQuestion(ctx context.Context, question string) (string, error) {
-	if len(c.Memory.ChatHistory.Messages()) == 0 {
+func (c ConversationalRetrievalQA) getQuestion(
+	ctx context.Context,
+	question string,
+	chatHistory []schema.ChatMessage,
+) (string, error) {
+	if len(chatHistory) == 0 {
 		return question, nil
 	}
 
-	chatHistoryStr, err := schema.GetBufferString(c.Memory.ChatHistory.Messages(), "Human", "AI")
+	chatHistoryStr, err := schema.GetBufferString(chatHistory, "Human", "AI")
 	if err != nil {
 		return "", err
 	}

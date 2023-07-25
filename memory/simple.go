@@ -30,3 +30,7 @@ func (m Simple) SaveContext(map[string]any, map[string]any) error {
 func (m Simple) Clear() error {
 	return nil
 }
+
+func (m Simple) GetMemoryKey() string {
+	return ""
+}

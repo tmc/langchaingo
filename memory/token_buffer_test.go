@@ -19,7 +19,7 @@ func TestTokenBufferMemory(t *testing.T) {
 
 	llm, err := openai.New()
 	require.NoError(t, err)
-	m := NewTokenBuffer(llm, 2000)
+	m := NewConversationTokenBuffer(llm, 2000)
 
 	result1, err := m.LoadMemoryVariables(map[string]any{})
 	require.NoError(t, err)
@@ -45,7 +45,7 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 
 	llm, err := openai.New()
 	require.NoError(t, err)
-	m := NewTokenBuffer(llm, 2000, WithReturnMessages(true))
+	m := NewConversationTokenBuffer(llm, 2000, WithReturnMessages(true))
 
 	expected1 := map[string]any{"history": []schema.ChatMessage{}}
 	result1, err := m.LoadMemoryVariables(map[string]any{})
@@ -79,7 +79,7 @@ func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	m := NewTokenBuffer(llm, 2000, WithChatHistory(NewChatMessageHistory(
+	m := NewConversationTokenBuffer(llm, 2000, WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
 			schema.HumanChatMessage{Content: "bar"},
 			schema.AIChatMessage{Content: "foo"},

@@ -5,40 +5,44 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// TokenBuffer for storing conversation memory.
-type TokenBuffer struct {
-	Buffer
+// ConversationTokenBuffer for storing conversation memory.
+type ConversationTokenBuffer struct {
+	ConversationBuffer
 	LLM           llms.LanguageModel
 	MaxTokenLimit int
 }
 
-// Statically assert that TokenBuffer implement the memory interface.
-var _ schema.Memory = &TokenBuffer{}
+// Statically assert that ConversationTokenBuffer implement the memory interface.
+var _ schema.Memory = &ConversationTokenBuffer{}
 
-// NewTokenBuffer is a function for crating a new token buffer memory.
-func NewTokenBuffer(llm llms.LanguageModel, maxTokenLimit int, options ...BufferOption) *TokenBuffer {
-	tb := &TokenBuffer{
-		LLM:           llm,
-		MaxTokenLimit: maxTokenLimit,
-		Buffer:        *applyBufferOptions(options...),
+// NewConversationTokenBuffer is a function for crating a new token buffer memory.
+func NewConversationTokenBuffer(
+	llm llms.LanguageModel,
+	maxTokenLimit int,
+	options ...ConversationBufferOption,
+) *ConversationTokenBuffer {
+	tb := &ConversationTokenBuffer{
+		LLM:                llm,
+		MaxTokenLimit:      maxTokenLimit,
+		ConversationBuffer: *applyBufferOptions(options...),
 	}
 
 	return tb
 }
 
-// MemoryVariables uses Buffer method for memory variables.
-func (tb *TokenBuffer) MemoryVariables() []string {
-	return tb.Buffer.MemoryVariables()
+// MemoryVariables uses ConversationBuffer method for memory variables.
+func (tb *ConversationTokenBuffer) MemoryVariables() []string {
+	return tb.ConversationBuffer.MemoryVariables()
 }
 
-// LoadMemoryVariables uses Buffer method for loading memory variables.
-func (tb *TokenBuffer) LoadMemoryVariables(inputs map[string]any) (map[string]any, error) {
-	return tb.Buffer.LoadMemoryVariables(inputs)
+// LoadMemoryVariables uses ConversationBuffer method for loading memory variables.
+func (tb *ConversationTokenBuffer) LoadMemoryVariables(inputs map[string]any) (map[string]any, error) {
+	return tb.ConversationBuffer.LoadMemoryVariables(inputs)
 }
 
-// SaveContext uses Buffer method for saving context and prunes memory buffer if needed.
-func (tb *TokenBuffer) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
-	err := tb.Buffer.SaveContext(inputValues, outputValues)
+// SaveContext uses ConversationBuffer method for saving context and prunes memory buffer if needed.
+func (tb *ConversationTokenBuffer) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
+	err := tb.ConversationBuffer.SaveContext(inputValues, outputValues)
 	if err != nil {
 		return err
 	}
@@ -51,11 +55,11 @@ func (tb *TokenBuffer) SaveContext(inputValues map[string]any, outputValues map[
 		// while currBufferLength is greater than MaxTokenLimit we keep removing messages from the memory
 		// from the oldest
 		for currBufferLength > tb.MaxTokenLimit {
-			if len(tb.ChatHistory.Messages()) == 0 {
+			if len(tb.chatHistory.Messages()) == 0 {
 				break
 			}
 
-			tb.ChatHistory.SetMessages(append(tb.ChatHistory.Messages()[:0], tb.ChatHistory.Messages()[1:]...))
+			tb.chatHistory.SetMessages(append(tb.chatHistory.Messages()[:0], tb.chatHistory.Messages()[1:]...))
 			currBufferLength, err = tb.getNumTokensFromMessages()
 			if err != nil {
 				return err
@@ -66,13 +70,17 @@ func (tb *TokenBuffer) SaveContext(inputValues map[string]any, outputValues map[
 	return nil
 }
 
-// Clear uses Buffer method for clearing buffer memory.
-func (tb *TokenBuffer) Clear() error {
-	return tb.Buffer.Clear()
+// Clear uses ConversationBuffer method for clearing buffer memory.
+func (tb *ConversationTokenBuffer) Clear() error {
+	return tb.ConversationBuffer.Clear()
 }
 
-func (tb *TokenBuffer) getNumTokensFromMessages() (int, error) {
-	bufferString, err := schema.GetBufferString(tb.ChatHistory.Messages(), tb.Buffer.HumanPrefix, tb.Buffer.AIPrefix)
+func (tb *ConversationTokenBuffer) getNumTokensFromMessages() (int, error) {
+	bufferString, err := schema.GetBufferString(
+		tb.chatHistory.Messages(),
+		tb.ConversationBuffer.HumanPrefix,
+		tb.ConversationBuffer.AIPrefix,
+	)
 	if err != nil {
 		return 0, err
 	}

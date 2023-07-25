@@ -20,7 +20,7 @@ func TestConversation(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	c := NewConversation(llm, memory.NewBuffer())
+	c := NewConversation(llm, memory.NewConversationBuffer())
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestConversationMemoryPrune(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	c := NewConversation(llm, memory.NewTokenBuffer(llm, 50))
+	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 50))
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 

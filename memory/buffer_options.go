@@ -2,61 +2,61 @@ package memory
 
 import "github.com/tmc/langchaingo/schema"
 
-// BufferOption is a function for creating new buffer
+// ConversationBufferOption is a function for creating new buffer
 // with other then the default values.
-type BufferOption func(b *Buffer)
+type ConversationBufferOption func(b *ConversationBuffer)
 
 // WithChatHistory is an option for providing the chat history store.
-func WithChatHistory(chatHistory schema.ChatMessageHistory) BufferOption {
-	return func(b *Buffer) {
-		b.ChatHistory = chatHistory
+func WithChatHistory(chatHistory schema.ChatMessageHistory) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
+		b.chatHistory = chatHistory
 	}
 }
 
 // WithReturnMessages is an option for specifying should it return messages.
-func WithReturnMessages(returnMessages bool) BufferOption {
-	return func(b *Buffer) {
+func WithReturnMessages(returnMessages bool) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.ReturnMessages = returnMessages
 	}
 }
 
 // WithInputKey is an option for specifying the input key.
-func WithInputKey(inputKey string) BufferOption {
-	return func(b *Buffer) {
+func WithInputKey(inputKey string) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.InputKey = inputKey
 	}
 }
 
 // WithOutputKey is an option for specifying the output key.
-func WithOutputKey(outputKey string) BufferOption {
-	return func(b *Buffer) {
+func WithOutputKey(outputKey string) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.OutputKey = outputKey
 	}
 }
 
 // WithHumanPrefix is an option for specifying the human prefix.
-func WithHumanPrefix(humanPrefix string) BufferOption {
-	return func(b *Buffer) {
+func WithHumanPrefix(humanPrefix string) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.HumanPrefix = humanPrefix
 	}
 }
 
 // WithAIPrefix is an option for specifying the AI prefix.
-func WithAIPrefix(aiPrefix string) BufferOption {
-	return func(b *Buffer) {
+func WithAIPrefix(aiPrefix string) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.AIPrefix = aiPrefix
 	}
 }
 
 // WithMemoryKey is an option for specifying the memory key.
-func WithMemoryKey(memoryKey string) BufferOption {
-	return func(b *Buffer) {
+func WithMemoryKey(memoryKey string) ConversationBufferOption {
+	return func(b *ConversationBuffer) {
 		b.MemoryKey = memoryKey
 	}
 }
 
-func applyBufferOptions(opts ...BufferOption) *Buffer {
-	m := &Buffer{
+func applyBufferOptions(opts ...ConversationBufferOption) *ConversationBuffer {
+	m := &ConversationBuffer{
 		ReturnMessages: false,
 		InputKey:       "",
 		OutputKey:      "",
@@ -69,8 +69,8 @@ func applyBufferOptions(opts ...BufferOption) *Buffer {
 		opt(m)
 	}
 
-	if m.ChatHistory == nil {
-		m.ChatHistory = NewChatMessageHistory()
+	if m.chatHistory == nil {
+		m.chatHistory = NewChatMessageHistory()
 	}
 
 	return m

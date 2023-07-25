@@ -73,14 +73,45 @@ func TestConversationalRetrievalQA(t *testing.T) {
 	combinedQuestionGeneratorChain := LoadCondenseQuestionGenerator(llm)
 	r := testConversationalRetriever{}
 
-	chain := NewConversationalRetrievalQA(combinedStuffQAChain, combinedQuestionGeneratorChain, r, *memory.NewBuffer())
+	chain := NewConversationalRetrievalQA(
+		combinedStuffQAChain,
+		combinedQuestionGeneratorChain,
+		r,
+		memory.NewConversationBuffer(memory.WithReturnMessages(true)),
+	)
 	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 
 	result, err = Run(ctx, chain, "Did he mention who she succeeded")
 	require.NoError(t, err)
-	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
+	require.True(t, strings.Contains(result, "Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
+}
+
+func TestConversationalRetrievalQAInvalidMemoryValue(t *testing.T) {
+	t.Parallel()
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	combinedStuffQAChain := LoadStuffQA(llm)
+	combinedQuestionGeneratorChain := LoadCondenseQuestionGenerator(llm)
+	r := testConversationalRetriever{}
+
+	chain := NewConversationalRetrievalQA(
+		combinedStuffQAChain,
+		combinedQuestionGeneratorChain,
+		r,
+		memory.NewConversationBuffer(memory.WithReturnMessages(false)),
+	)
+	_, err = Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), ErrMemoryValuesWrongType.Error()), "expected valid error to be thrown")
 }
 
 func TestConversationalRetrievalQAFromLLM(t *testing.T) {
@@ -95,7 +126,33 @@ func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 	llm, err := openai.New()
 	require.NoError(t, err)
 
-	chain := NewConversationalRetrievalQAFromLLM(llm, r, *memory.NewBuffer())
+	chain := NewConversationalRetrievalQAFromLLM(llm, r, memory.NewConversationBuffer(memory.WithReturnMessages(true)))
+	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
+
+	result, err = Run(ctx, chain, "Did he mention who she succeeded")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, " Justice Stephen Breyer"), "expected  Justice Stephen Breyer in result")
+}
+
+func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.T) {
+	t.Parallel()
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+
+	ctx := context.Background()
+
+	r := testConversationalRetriever{}
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	chain := NewConversationalRetrievalQAFromLLM(
+		llm,
+		r,
+		memory.NewConversationTokenBuffer(llm, 2000, memory.WithReturnMessages(true)),
+	)
 	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
