@@ -171,8 +171,10 @@ func TestSequentialChainErrors(t *testing.T) {
 			chains: []Chain{
 				&testLLMChain{inputKeys: []string{"input1"}, outputKeys: []string{"output"}},
 			},
-			initErr:      ErrChainInitialization,
-			seqChainOpts: []SequentialChainOption{WithSeqChainMemory(memory.NewBuffer(memory.WithMemoryKey("input1")))},
+			initErr: ErrChainInitialization,
+			seqChainOpts: []SequentialChainOption{WithSeqChainMemory(
+				memory.NewConversationBuffer(memory.WithMemoryKey("input1")),
+			)},
 		},
 	}
 

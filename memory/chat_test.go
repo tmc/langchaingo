@@ -11,12 +11,18 @@ func TestChatMessageHistory(t *testing.T) {
 	t.Parallel()
 
 	h := NewChatMessageHistory()
-	h.AddAIMessage("foo")
-	h.AddUserMessage("bar")
+	err := h.AddAIMessage("foo")
+	assert.NoError(t, err)
+	err = h.AddUserMessage("bar")
+	assert.NoError(t, err)
+
+	messages, err := h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Content: "foo"},
 		schema.HumanChatMessage{Content: "bar"},
-	}, h.Messages())
+	}, messages)
 
 	h = NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
@@ -24,10 +30,15 @@ func TestChatMessageHistory(t *testing.T) {
 			schema.SystemChatMessage{Content: "bar"},
 		}),
 	)
-	h.AddUserMessage("zoo")
+	err = h.AddUserMessage("zoo")
+	assert.NoError(t, err)
+
+	messages, err = h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Content: "foo"},
 		schema.SystemChatMessage{Content: "bar"},
 		schema.HumanChatMessage{Content: "zoo"},
-	}, h.Messages())
+	}, messages)
 }
