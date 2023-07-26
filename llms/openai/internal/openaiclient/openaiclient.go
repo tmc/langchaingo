@@ -161,7 +161,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 			r.Model = c.Model
 		}
 	}
-	if r.FunctionCallBehavior == "" {
+	if r.FunctionCallBehavior == "" && len(r.Functions) > 0 {
 		r.FunctionCallBehavior = defaultFunctionCallBehavior
 	}
 	resp, err := c.createChat(ctx, r)

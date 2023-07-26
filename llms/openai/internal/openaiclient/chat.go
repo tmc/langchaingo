@@ -30,12 +30,12 @@ type ChatRequest struct {
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
 	// Function defitions to include in the request.
-	Functions []FunctionDefinition `json:"functions"`
+	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
 	//
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call"`
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
@@ -114,6 +114,8 @@ type FunctionDefinition struct {
 type FunctionCallBehavior string
 
 const (
+	// FunctionCallBehaviorUnspecified is the empty string.
+	FunctionCallBehaviorUnspecified FunctionCallBehavior = ""
 	// FunctionCallBehaviorNone will not call any functions.
 	FunctionCallBehaviorNone FunctionCallBehavior = "none"
 	// FunctionCallBehaviorAuto will call functions automatically.
