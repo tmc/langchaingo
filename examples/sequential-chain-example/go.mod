@@ -2,7 +2,7 @@ module sequential-chain-example
 
 go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20230723211647-311c3ee65e1e
+require github.com/tmc/langchaingo v0.0.0-20230726014306-3585e0de43bd
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
