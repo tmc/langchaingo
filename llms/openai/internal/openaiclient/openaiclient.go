@@ -3,11 +3,26 @@ package openaiclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
+)
+
+const (
+	defaultBaseURL              = "https://api.openai.com/v1"
+	defaultFunctionCallBehavior = "auto"
 )
 
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.
 var ErrEmptyResponse = errors.New("empty response")
+
+type APIType string
+
+const (
+	APITypeOpenAI  APIType = "OPEN_AI"
+	APITypeAzure   APIType = "AZURE"
+	APITypeAzureAD APIType = "AZURE_AD"
+)
 
 // Client is a client for the OpenAI API.
 type Client struct {
@@ -15,7 +30,11 @@ type Client struct {
 	Model        string
 	baseURL      string
 	organization string
-	httpClient   Doer
+
+	apiType    APIType
+	apiVersion string // required when APIType is APITypeAzure or APITypeAzureAD
+
+	httpClient Doer
 }
 
 // Option is an option for the OpenAI client.
@@ -26,23 +45,19 @@ type Doer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// WithHTTPClient allows setting a custom HTTP client.
-func WithHTTPClient(client Doer) Option {
-	return func(c *Client) error {
-		c.httpClient = client
-
-		return nil
-	}
-}
-
 // New returns a new OpenAI client.
-func New(token string, model string, baseURL string, organization string, opts ...Option) (*Client, error) {
+func New(token string, model string, baseURL string, organization string,
+	apiType APIType, apiVersion string, httpClient Doer,
+	opts ...Option,
+) (*Client, error) {
 	c := &Client{
 		token:        token,
 		Model:        model,
 		baseURL:      baseURL,
 		organization: organization,
-		httpClient:   http.DefaultClient,
+		apiType:      apiType,
+		apiVersion:   apiVersion,
+		httpClient:   httpClient,
 	}
 
 	for _, opt := range opts {
@@ -104,7 +119,6 @@ type EmbeddingRequest struct {
 
 // CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
-	r.Model = c.Model
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -131,9 +145,15 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 
 // CreateChat creates chat request.
 func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
-	r.Model = c.Model
 	if r.Model == "" {
-		r.Model = defaultChatModel
+		if c.Model == "" {
+			r.Model = defaultChatModel
+		} else {
+			r.Model = c.Model
+		}
+	}
+	if r.FunctionCallBehavior == "" && len(r.Functions) > 0 {
+		r.FunctionCallBehavior = defaultFunctionCallBehavior
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {
@@ -143,4 +163,43 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 		return nil, ErrEmptyResponse
 	}
 	return resp, nil
+}
+
+func isAzure(apiType APIType) bool {
+	if apiType == APITypeAzure || apiType == APITypeAzureAD {
+		return true
+	}
+	return false
+}
+
+func (c *Client) setHeaders(req *http.Request) {
+	req.Header.Set("Content-Type", "application/json")
+	if isAzure(c.apiType) {
+		req.Header.Set("api-key", c.token)
+	} else {
+		req.Header.Set("Authorization", "Bearer "+c.token)
+	}
+	if c.organization != "" {
+		req.Header.Set("OpenAI-Organization", c.organization)
+	}
+}
+
+func (c *Client) buildURL(suffix string) string {
+	if isAzure(c.apiType) {
+		return c.buildAzureURL(suffix)
+	}
+
+	// open ai implement:
+	return fmt.Sprintf("%s%s", c.baseURL, suffix)
+}
+
+func (c *Client) buildAzureURL(suffix string) string {
+	baseURL := c.baseURL
+	baseURL = strings.TrimRight(baseURL, "/")
+
+	// azure example url:
+	// /openai/deployments/{model}/chat/completions?api-version={api_version}
+	return fmt.Sprintf("%s/openai/deployments/%s%s?api-version=%s",
+		baseURL, c.Model, suffix, c.apiVersion,
+	)
 }

@@ -14,11 +14,11 @@ func TestMapReduceInputVariables(t *testing.T) {
 
 	c := MapReduceDocuments{
 		LLMChain: NewLLMChain(
-			testLanguageModel{},
+			&testLanguageModel{},
 			prompts.NewPromptTemplate("{{.text}} {{.foo}}", []string{"text", "foo"}),
 		),
 		ReduceChain: NewLLMChain(
-			testLanguageModel{},
+			&testLanguageModel{},
 			prompts.NewPromptTemplate("{{.texts}} {{.baz}}", []string{"texts", "baz"}),
 		),
 		ReduceDocumentVariableName: "texts",
@@ -36,12 +36,12 @@ func TestMapReduce(t *testing.T) {
 
 	c := NewMapReduceDocuments(
 		NewLLMChain(
-			testLanguageModel{},
+			&testLanguageModel{},
 			prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
 		),
 		NewStuffDocuments(
 			NewLLMChain(
-				testLanguageModel{},
+				&testLanguageModel{},
 				prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
 			),
 		),
@@ -54,5 +54,5 @@ func TestMapReduce(t *testing.T) {
 		{PageContent: "doo"},
 	})
 	require.NoError(t, err)
-	require.Equal(t, "foo\n\nboo\n\nzoo\n\ndoo\n\n", result)
+	require.Equal(t, "foo\n\nboo\n\nzoo\n\ndoo", result)
 }

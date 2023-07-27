@@ -7,46 +7,42 @@ type ChatMessageHistory struct {
 	messages []schema.ChatMessage
 }
 
+// Statically assert that ChatMessageHistory implement the chat message history interface.
+var _ schema.ChatMessageHistory = &ChatMessageHistory{}
+
 // NewChatMessageHistory creates a new ChatMessageHistory using chat message options.
-func NewChatMessageHistory(options ...NewChatMessageOption) *ChatMessageHistory {
-	h := &ChatMessageHistory{
-		messages: make([]schema.ChatMessage, 0),
-	}
-
-	for _, option := range options {
-		option(h)
-	}
-
-	return h
+func NewChatMessageHistory(options ...ChatMessageHistoryOption) *ChatMessageHistory {
+	return applyChatOptions(options...)
 }
 
 // Messages returns all messages stored.
-func (h *ChatMessageHistory) Messages() []schema.ChatMessage {
-	return h.messages
+func (h *ChatMessageHistory) Messages() ([]schema.ChatMessage, error) {
+	return h.messages, nil
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-func (h *ChatMessageHistory) AddAIMessage(text string) {
-	h.messages = append(h.messages, schema.AIChatMessage{Text: text})
+func (h *ChatMessageHistory) AddAIMessage(text string) error {
+	h.messages = append(h.messages, schema.AIChatMessage{Content: text})
+	return nil
 }
 
 // AddUserMessage adds an user to the chat message history.
-func (h *ChatMessageHistory) AddUserMessage(text string) {
-	h.messages = append(h.messages, schema.HumanChatMessage{Text: text})
+func (h *ChatMessageHistory) AddUserMessage(text string) error {
+	h.messages = append(h.messages, schema.HumanChatMessage{Content: text})
+	return nil
 }
 
-func (h *ChatMessageHistory) Clear() {
+func (h *ChatMessageHistory) Clear() error {
 	h.messages = make([]schema.ChatMessage, 0)
+	return nil
 }
 
-// NewChatMessageOption is a function for creating new chat message history
-// with other then the default values.
-type NewChatMessageOption func(m *ChatMessageHistory)
+func (h *ChatMessageHistory) AddMessage(message schema.ChatMessage) error {
+	h.messages = append(h.messages, message)
+	return nil
+}
 
-// WithPreviousMessages is an option for NewChatMessageHistory for adding
-// previous messages to the history.
-func WithPreviousMessages(previousMessages []schema.ChatMessage) NewChatMessageOption {
-	return func(m *ChatMessageHistory) {
-		m.messages = append(m.messages, previousMessages...)
-	}
+func (h *ChatMessageHistory) SetMessages(messages []schema.ChatMessage) error {
+	h.messages = messages
+	return nil
 }

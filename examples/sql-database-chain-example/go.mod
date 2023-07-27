@@ -1,8 +1,8 @@
-module llm-math-chain-example
+module sql-database-chain-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230710002755-32d9295eb39d
+require github.com/tmc/langchaingo v0.0.0-20230726014306-3585e0de43bd
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

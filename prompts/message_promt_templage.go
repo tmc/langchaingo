@@ -15,7 +15,7 @@ var _ MessageFormatter = SystemMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p SystemMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.SystemChatMessage{Text: text}}, err
+	return []schema.ChatMessage{schema.SystemChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -57,7 +57,7 @@ var _ MessageFormatter = AIMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p AIMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.AIChatMessage{Text: text}}, err
+	return []schema.ChatMessage{schema.AIChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -90,7 +90,7 @@ var _ MessageFormatter = HumanMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p HumanMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.HumanChatMessage{Text: text}}, err
+	return []schema.ChatMessage{schema.HumanChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -133,7 +133,7 @@ var _ MessageFormatter = GenericMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p GenericMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.GenericChatMessage{Text: text, Role: p.Role}}, err
+	return []schema.ChatMessage{schema.GenericChatMessage{Content: text, Role: p.Role}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.

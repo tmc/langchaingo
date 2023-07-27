@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"reflect"
 
@@ -106,29 +107,28 @@ var (
 )
 
 // Chat requests a chat response for the given messages.
-func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (string, error) { // nolint: lll
+func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll
 	r, err := o.Generate(ctx, [][]schema.ChatMessage{messages}, options...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(r) == 0 {
-		return "", ErrEmptyResponse
+		return nil, ErrEmptyResponse
 	}
-	return r[0].Message.Text, nil
+	return r[0].Message, nil
 }
 
-func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll
+func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messageSet := range messageSets {
 		msgs := make([]*openaiclient.ChatMessage, len(messageSet))
 		for i, m := range messageSet {
 			msg := &openaiclient.ChatMessage{
-				Content: m.GetText(),
+				Content: m.GetContent(),
 			}
 			typ := m.GetType()
 			switch typ {
@@ -140,12 +140,15 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 				msg.Role = "user"
 			case schema.ChatMessageTypeGeneric:
 				msg.Role = "user"
-				// TODO: support name
+			case schema.ChatMessageTypeFunction:
+				msg.Role = "function"
+			}
+			if n, ok := m.(schema.Named); ok {
+				msg.Name = n.GetName()
 			}
 			msgs[i] = msg
 		}
-
-		result, err := o.client.CreateChat(ctx, &openaiclient.ChatRequest{
+		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
 			Messages:         msgs,
@@ -155,23 +158,39 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			N:                opts.N,
 			FrequencyPenalty: opts.FrequencyPenalty,
 			PresencePenalty:  opts.PresencePenalty,
-		})
+
+			FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+		}
+		for _, fn := range opts.Functions {
+			req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+				Name:        fn.Name,
+				Description: fn.Description,
+				Parameters:  fn.Parameters,
+			})
+		}
+		result, err := o.client.CreateChat(ctx, req)
 		if err != nil {
 			return nil, err
 		}
 		if len(result.Choices) == 0 {
 			return nil, ErrEmptyResponse
 		}
-		text := result.Choices[0].Message.Content
 		generationInfo := make(map[string]any, reflect.ValueOf(result.Usage).NumField())
 		generationInfo["CompletionTokens"] = result.Usage.CompletionTokens
 		generationInfo["PromptTokens"] = result.Usage.PromptTokens
 		generationInfo["TotalTokens"] = result.Usage.TotalTokens
+		msg := &schema.AIChatMessage{
+			Content: result.Choices[0].Message.Content,
+		}
+		if result.Choices[0].FinishReason == "function_call" {
+			msg.FunctionCall = &schema.FunctionCall{
+				Name:      result.Choices[0].Message.FunctionCall.Name,
+				Arguments: result.Choices[0].Message.FunctionCall.Arguments,
+			}
+		}
 		generations = append(generations, &llms.Generation{
-			Message: &schema.AIChatMessage{
-				Text: text,
-			},
-			Text:           text,
+			Message:        msg,
+			Text:           msg.Content,
 			GenerationInfo: generationInfo,
 		})
 	}
@@ -209,6 +228,8 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 		model:        os.Getenv(modelEnvVarName),
 		baseURL:      os.Getenv(baseURLEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
+		apiType:      APITypeOpenAI,
+		httpClient:   http.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -219,5 +240,45 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return openaiclient.New(options.token, options.model, options.baseURL, options.organization)
+	return openaiclient.New(options.token, options.model, options.baseURL, options.organization,
+		openaiclient.APIType(options.apiType), "", options.httpClient)
+}
+
+// NewAzure returns a new Azure OpenAI LLM .
+func NewAzure(opts ...Option) (*LLM, error) {
+	c, err := newAzureClient(opts...)
+	return &LLM{
+		client: c,
+	}, err
+}
+
+// NewAzureChat returns a new OpenAI chat LLM.
+func NewAzureChat(opts ...Option) (*Chat, error) {
+	c, err := newAzureClient(opts...)
+	return &Chat{
+		client: c,
+	}, err
+}
+
+func newAzureClient(opts ...Option) (*openaiclient.Client, error) {
+	options := &options{
+		token:        os.Getenv(tokenEnvVarName),
+		model:        os.Getenv(modelEnvVarName),
+		baseURL:      os.Getenv(baseURLEnvVarName),
+		organization: os.Getenv(organizationEnvVarName),
+		apiType:      APITypeAzure,
+		apiVersion:   DefaultAPIVersion,
+		httpClient:   http.DefaultClient,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.token) == 0 {
+		return nil, ErrMissingToken
+	}
+
+	return openaiclient.New(options.token, options.model, options.baseURL,
+		options.organization, openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient)
 }

@@ -13,7 +13,7 @@ func TestMapRerankInputVariables(t *testing.T) {
 	t.Parallel()
 
 	mapRerankLLMChain := NewLLMChain(
-		testLanguageModel{},
+		&testLanguageModel{},
 		prompts.NewPromptTemplate("{{.text}} {{.foo}}", []string{"text", "foo"}),
 	)
 
@@ -33,7 +33,7 @@ func TestMapRerankDocumentsCall(t *testing.T) {
 	t.Parallel()
 
 	mapRerankLLMChain := NewLLMChain(
-		testLanguageModel{},
+		&testLanguageModel{},
 		prompts.NewPromptTemplate("{{.context}}", []string{"context"}),
 	)
 

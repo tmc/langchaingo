@@ -16,10 +16,10 @@ func main() {
 	}
 	ctx := context.Background()
 	question := schema.HumanChatMessage{
-		Text: "What would be a good company name a company that makes colorful socks?",
+		Content: "What would be a good company name a company that makes colorful socks?",
 	}
 	fmt.Println("---ASK---")
-	fmt.Println(question.GetText())
+	fmt.Println(question.GetContent())
 	messages := []schema.ChatMessage{question}
 	completion, err := llm.Call(ctx, messages)
 	if err != nil {
@@ -31,15 +31,13 @@ func main() {
 	fmt.Println(response)
 
 	// keep track of conversation
-	messages = append(messages, &schema.AIChatMessage{
-		Text: response,
-	})
+	messages = append(messages, response)
 
 	question = schema.HumanChatMessage{
-		Text: "Any other recommendation on how to get started with the company ?",
+		Content: "Any other recommendation on how to get started with the company ?",
 	}
 	fmt.Println("---ASK---")
-	fmt.Println(question.GetText())
+	fmt.Println(question.GetContent())
 	messages = append(messages, question)
 
 	completion, err = llm.Call(ctx, messages)

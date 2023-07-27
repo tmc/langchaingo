@@ -1,14 +1,12 @@
-package embeddings
+package openai
 
 import (
 	"context"
 	"strings"
 
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 )
-
-// defaultBatchSize is the default length of batches.
-const defaultBatchSize = 512
 
 // OpenAI is the embedder using the OpenAI api.
 type OpenAI struct {
@@ -18,7 +16,7 @@ type OpenAI struct {
 	BatchSize     int
 }
 
-var _ Embedder = OpenAI{}
+var _ embeddings.Embedder = OpenAI{}
 
 // NewOpenAI creates a new OpenAI with options. Options for client, strip new lines and batch.
 func NewOpenAI(opts ...Option) (OpenAI, error) {
@@ -32,12 +30,12 @@ func NewOpenAI(opts ...Option) (OpenAI, error) {
 
 // EmbedDocuments creates one vector embedding for each of the texts.
 func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
-	batchedTexts := batchTexts(
-		maybeRemoveNewLines(texts, e.StripNewLines),
+	batchedTexts := embeddings.BatchTexts(
+		embeddings.MaybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
 	)
 
-	embeddings := make([][]float64, 0, len(texts))
+	emb := make([][]float64, 0, len(texts))
 	for _, texts := range batchedTexts {
 		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts)
 		if err != nil {
@@ -49,15 +47,15 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 			textLengths = append(textLengths, len(text))
 		}
 
-		combined, err := combineVectors(curTextEmbeddings, textLengths)
+		combined, err := embeddings.CombineVectors(curTextEmbeddings, textLengths)
 		if err != nil {
 			return nil, err
 		}
 
-		embeddings = append(embeddings, combined)
+		emb = append(emb, combined)
 	}
 
-	return embeddings, nil
+	return emb, nil
 }
 
 // EmbedQuery embeds a single text.

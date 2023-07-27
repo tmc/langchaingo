@@ -1,8 +1,8 @@
-module basic-llm-example
+module vertexai-palm-completion-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230710002755-32d9295eb39d
+require github.com/tmc/langchaingo v0.0.0-20230726014306-3585e0de43bd
 
 require (
 	cloud.google.com/go v0.110.0 // indirect

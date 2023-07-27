@@ -47,6 +47,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
@@ -67,6 +68,7 @@ require (
 	cloud.google.com/go/aiplatform v1.42.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/google/go-cmp v0.5.9

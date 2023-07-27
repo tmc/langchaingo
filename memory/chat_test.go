@@ -11,23 +11,34 @@ func TestChatMessageHistory(t *testing.T) {
 	t.Parallel()
 
 	h := NewChatMessageHistory()
-	h.AddAIMessage("foo")
-	h.AddUserMessage("bar")
+	err := h.AddAIMessage("foo")
+	assert.NoError(t, err)
+	err = h.AddUserMessage("bar")
+	assert.NoError(t, err)
+
+	messages, err := h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Text: "foo"},
-		schema.HumanChatMessage{Text: "bar"},
-	}, h.Messages())
+		schema.AIChatMessage{Content: "foo"},
+		schema.HumanChatMessage{Content: "bar"},
+	}, messages)
 
 	h = NewChatMessageHistory(
 		WithPreviousMessages([]schema.ChatMessage{
-			schema.AIChatMessage{Text: "foo"},
-			schema.SystemChatMessage{Text: "bar"},
+			schema.AIChatMessage{Content: "foo"},
+			schema.SystemChatMessage{Content: "bar"},
 		}),
 	)
-	h.AddUserMessage("zoo")
+	err = h.AddUserMessage("zoo")
+	assert.NoError(t, err)
+
+	messages, err = h.Messages()
+	assert.NoError(t, err)
+
 	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Text: "foo"},
-		schema.SystemChatMessage{Text: "bar"},
-		schema.HumanChatMessage{Text: "zoo"},
-	}, h.Messages())
+		schema.AIChatMessage{Content: "foo"},
+		schema.SystemChatMessage{Content: "bar"},
+		schema.HumanChatMessage{Content: "zoo"},
+	}, messages)
 }
