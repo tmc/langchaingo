@@ -1,11 +1,13 @@
 package chains
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"regexp"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
@@ -15,84 +17,108 @@ import (
 
 const (
 	// nolint: lll
-	_llmAPIURLPrompt = `You are given the below API Documentation:
-{{.api_docs}}
-Using this documentation, generate the full API url to call for answering the user question.
-You should build the API url in order to get a response that is as short as possible, while still getting the necessary information to answer the question. Pay attention to deliberately exclude any unnecessary pieces of data in the API call.
+	_llmAPIURLPrompt = `
+	You are given the API Documentation:
 
-Question:{{.question}}
-API url:`
+	{{.api_docs}}
+
+	Your task is to construct a full API JSON object based on the provided input. The input could be a question that requires an API call for its answer, or a direct or indirect instruction to consume an API. The input will be unpredictable and could come from a user or an agent.
+
+	Your goal is to create an API call that accurately reflects the intent of the input. Be sure to exclude any unnecessary data in the API call to ensure efficiency.
+
+	Input: {{.input}}
+
+	Respond with a JSON object.
+
+	{
+		"method":  [the HTTP method for the API call, such as GET or POST],
+		"headers": [object representing the HTTP headers required for the API call, always add a "Content-Type" header],
+		"url": 	   [full for the API call],
+		"body":    [object containing the data sent with the request, if needed]
+	}`
 
 	// nolint: lll
-	_llmAPIResponsePrompt = _llmAPIURLPrompt + `{api_url}
+	_llmAPIResponsePrompt = _llmAPIURLPrompt + `
+	Here is the response from the API:
 
-Here is the response from the API:
+	{{.api_response}}
 
-{{.api_response}}
+	Now, summarize this response. Your summary should reflect the original input and highlight the key information from the API response that answers or relates to that input. Try to make your summary concise, yet informative.
 
-Summarize this response to answer the original question.
-
-Summary:`
+	Summary:`
 )
 
 // HTTPRequester http requester interface.
-type HTTPRequester interface {
-	Get(url string) (resp *http.Response, err error)
+type HTTPRequest interface {
+	Do(*http.Request) (*http.Response, error)
 }
 
-// APIChain is a chain used for letting llms interact with APIs.
 type APIChain struct {
 	RequestChain *LLMChain
 	AnswerChain  *LLMChain
-	Requester    HTTPRequester
+	Request      HTTPRequest
 }
 
-// NewAPIChain creates a chain that makes API calls base the docs and
-// summarizes the responses to answer a question.
-func NewAPIChain(llm llms.LanguageModel, requester HTTPRequester) APIChain {
-	reqP := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "question"})
-	reqC := NewLLMChain(llm, reqP)
+func NewAPIChain(llm llms.LanguageModel, request HTTPRequest) APIChain {
+	reqPrompt := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "input"})
+	reqChain := NewLLMChain(llm, reqPrompt)
 
-	respP := prompts.NewPromptTemplate(_llmAPIResponsePrompt, []string{"api_docs", "question", "api_url", "api_response"})
-	respC := NewLLMChain(llm, respP)
+	resPrompt := prompts.NewPromptTemplate(_llmAPIResponsePrompt, []string{"input", "api_docs", "api_response"})
+	resChain := NewLLMChain(llm, resPrompt)
 
 	return APIChain{
-		RequestChain: reqC,
-		AnswerChain:  respC,
-		Requester:    requester,
+		RequestChain: reqChain,
+		AnswerChain:  resChain,
+		Request:      request,
 	}
 }
 
-// Call handles the inner logic of the api chain.
-// Input: api_docs, question.
-// Output: answer.
 func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...ChainCallOption) (map[string]any, error) {
+	reqChainTmp := 0.0
+	opts = append(opts, WithTemperature(reqChainTmp))
+
 	tmpOutput, err := Call(ctx, a.RequestChain, values, opts...)
 	if err != nil {
 		return nil, err
 	}
-	apiURL, ok := tmpOutput["text"].(string)
+
+	outputText, ok := tmpOutput["text"].(string)
 	if !ok {
-		return nil, fmt.Errorf("%w: %w", ErrInvalidOutputValues, ErrInputValuesWrongType)
+		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-	// this is a hack to get the first line of the output
-	apiURL = strings.TrimSpace(strings.Split(apiURL, "\n")[0])
-	apiResponse, err := a.get(apiURL)
+
+	// Extract the json from llm output
+	re := regexp.MustCompile(`(?s)\{.*\}`)
+	jsonString := re.FindString(outputText)
+
+	// Convert the LLM output into the anonymous struct.
+	var output struct {
+		Method  string            `json:"method"`
+		Headers map[string]string `json:"headers"`
+		URL     string            `json:"url"`
+		Body    map[string]string `json:"body"`
+	}
+
+	err = json.Unmarshal([]byte(jsonString), &output)
 	if err != nil {
 		return nil, err
 	}
 
+	apiResponse, err := a.runRequest(ctx, output.Method, output.URL, output.Headers, output.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	tmpOutput["input"] = values["input"]
 	tmpOutput["api_docs"] = values["api_docs"]
-	tmpOutput["question"] = values["question"]
 	tmpOutput["api_response"] = apiResponse
-	tmpOutput["api_url"] = apiURL
 
-	tmpOutput, err = Call(ctx, a.AnswerChain, tmpOutput, opts...)
+	answer, err := Call(ctx, a.AnswerChain, tmpOutput, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return map[string]any{"answer": tmpOutput["text"]}, err
+	return map[string]any{"answer": answer["text"]}, err
 }
 
 func (a APIChain) GetMemory() schema.Memory { //nolint:ireturn
@@ -100,22 +126,53 @@ func (a APIChain) GetMemory() schema.Memory { //nolint:ireturn
 }
 
 func (a APIChain) GetInputKeys() []string {
-	return []string{"api_docs", "question"}
+	return []string{"api_docs", "input"}
 }
 
 func (a APIChain) GetOutputKeys() []string {
 	return []string{"answer"}
 }
 
-func (a APIChain) get(url string) (string, error) {
-	resp, err := a.Requester.Get(url)
+func (a APIChain) runRequest(
+	ctx context.Context,
+	method string,
+	url string,
+	headers map[string]string,
+	body map[string]string,
+) (string, error) {
+	var bodyReader io.Reader
+
+	if method == "POST" || method == "PUT" {
+		bodyBytes, err := json.Marshal(body)
+		if err != nil {
+			return "", err
+		}
+
+		bodyReader = bytes.NewBuffer(bodyBytes)
+	}
+
+	// Create the new request defined by reqChain
+	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
 	if err != nil {
 		return "", err
 	}
+
+	// set request headers passed from reqChain
+	for key, value := range headers {
+		req.Header.Add(key, value)
+	}
+
+	resp, err := a.Request.Do(req)
+	if err != nil {
+		return "", err
+	}
+
 	defer resp.Body.Close()
+
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
+
 	return string(b), nil
 }
