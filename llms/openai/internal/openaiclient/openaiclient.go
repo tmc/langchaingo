@@ -166,10 +166,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 }
 
 func IsAzure(apiType APIType) bool {
-	if apiType == APITypeAzure || apiType == APITypeAzureAD {
-		return true
-	}
-	return false
+	return apiType == APITypeAzure || apiType == APITypeAzureAD
 }
 
 func (c *Client) setHeaders(req *http.Request) {

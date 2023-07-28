@@ -15,13 +15,14 @@ var (
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
+// newClient is wrapper for openaiclient internal package.
 func newClient(opts ...Option) (*openaiclient.Client, error) {
 	options := &options{
 		token:        os.Getenv(tokenEnvVarName),
 		model:        os.Getenv(modelEnvVarName),
 		baseURL:      os.Getenv(baseURLEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
-		apiType:      openaiclient.APITypeOpenAI,
+		apiType:      APIType(openaiclient.APITypeOpenAI),
 		httpClient:   http.DefaultClient,
 	}
 
@@ -30,7 +31,7 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 	}
 
 	// set of options needed for Azure client
-	if openaiclient.IsAzure(options.apiType) && options.apiVersion == "" {
+	if openaiclient.IsAzure(openaiclient.APIType(options.apiType)) && options.apiVersion == "" {
 		options.apiVersion = DefaultAPIVersion
 	}
 
@@ -39,5 +40,5 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 	}
 
 	return openaiclient.New(options.token, options.model, options.baseURL, options.organization,
-		options.apiType, options.apiVersion, options.httpClient)
+		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient)
 }

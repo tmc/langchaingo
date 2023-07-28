@@ -9,6 +9,14 @@ const (
 	organizationEnvVarName = "OPENAI_ORGANIZATION" //nolint:gosec
 )
 
+type APIType openaiclient.APIType
+
+const (
+	APITypeOpenAI  APIType = APIType(openaiclient.APITypeOpenAI)
+	APITypeAzure           = APIType(openaiclient.APITypeAzure)
+	APITypeAzureAD         = APIType(openaiclient.APITypeAzureAD)
+)
+
 const (
 	DefaultAPIVersion = "2023-05-15"
 )
@@ -19,7 +27,7 @@ type options struct {
 	baseURL      string
 	organization string
 
-	apiType    openaiclient.APIType
+	apiType    APIType
 	apiVersion string // required when APIType is APITypeAzure or APITypeAzureAD
 
 	httpClient openaiclient.Doer
@@ -62,7 +70,7 @@ func WithOrganization(organization string) Option {
 
 // WithAPIType passes the api type to the client. If not set, the default value
 // is APITypeOpenAI.
-func WithAPIType(apiType openaiclient.APIType) Option {
+func WithAPIType(apiType APIType) Option {
 	return func(opts *options) {
 		opts.apiType = apiType
 	}

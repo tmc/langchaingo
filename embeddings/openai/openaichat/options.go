@@ -1,4 +1,4 @@
-package openai_chat
+package openaichat
 
 import (
 	"github.com/tmc/langchaingo/llms/openai"
