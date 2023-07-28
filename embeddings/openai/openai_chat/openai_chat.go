@@ -1,4 +1,4 @@
-package openai
+package openai_chat
 
 import (
 	"context"
@@ -8,28 +8,27 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-// OpenAI is the embedder using the OpenAI api.
-type OpenAI struct {
-	client *openai.LLM
+// ChatOpenAI is the embedder using the OpenAI api.
+type ChatOpenAI struct {
+	client *openai.Chat
 
 	StripNewLines bool
 	BatchSize     int
 }
 
-var _ embeddings.Embedder = OpenAI{}
+var _ embeddings.Embedder = ChatOpenAI{}
 
-// NewOpenAI creates a new OpenAI with options. Options for client, strip new lines and batch.
-func NewOpenAI(opts ...Option) (OpenAI, error) {
-	o, err := applyClientOptions(opts...)
+// NewChatOpenAI creates a new ChatOpenAI with options. Options for client, strip new lines and batch.
+func NewChatOpenAI(opts ...ChatOption) (ChatOpenAI, error) {
+	o, err := applyChatClientOptions(opts...)
 	if err != nil {
-		return OpenAI{}, err
+		return ChatOpenAI{}, err
 	}
 
 	return o, nil
 }
 
-// EmbedDocuments creates one vector embedding for each of the texts.
-func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
+func (e ChatOpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
@@ -58,8 +57,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 	return emb, nil
 }
 
-// EmbedQuery embeds a single text.
-func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e ChatOpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

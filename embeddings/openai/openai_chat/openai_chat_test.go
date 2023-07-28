@@ -1,4 +1,4 @@
-package openai
+package openai_chat
 
 import (
 	"context"
@@ -11,13 +11,13 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-func TestOpenaiEmbeddings(t *testing.T) {
+func TestOpenAIChatEmbeddings(t *testing.T) {
 	t.Parallel()
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-	e, err := NewOpenAI()
+	e, err := NewChatOpenAI()
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
@@ -28,17 +28,17 @@ func TestOpenaiEmbeddings(t *testing.T) {
 	assert.Len(t, embeddings, 3)
 }
 
-func TestOpenaiEmbeddingsWithOptions(t *testing.T) {
+func TestOpenAIChatEmbeddingsWithOptions(t *testing.T) {
 	t.Parallel()
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	client, err := openai.New()
+	client, err := openai.NewChat()
 	require.NoError(t, err)
 
-	e, err := NewOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
+	e, err := NewChatOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
