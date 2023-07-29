@@ -1,8 +1,6 @@
 package prompts
 
-import (
-	"github.com/tmc/langchaingo/schema"
-)
+import "github.com/tmc/langchaingo/schema"
 
 // ChatPromptTemplate is a prompt template for chat messages.
 type ChatPromptTemplate struct {
@@ -68,6 +66,7 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 }
 
 func (p ChatPromptTemplate) Save(path string) error {
+	_ = path
 	return ErrNotImplemented
 }
 
