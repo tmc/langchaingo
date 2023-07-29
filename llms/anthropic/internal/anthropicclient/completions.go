@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	defaultCompletionModel = "claude-instant-1"
+	defaultCompletionModel = "claude-1"
 )
 
 type completionPayload struct {

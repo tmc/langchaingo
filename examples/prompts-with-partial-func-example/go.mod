@@ -2,7 +2,7 @@ module prompts-with-partial-func-example
 
 go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20230726014306-3585e0de43bd
+require github.com/tmc/langchaingo v0.0.0-20230729231952-1f3948210849
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
