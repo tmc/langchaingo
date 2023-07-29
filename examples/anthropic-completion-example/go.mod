@@ -1,4 +1,4 @@
-module openai-chat-example
+module anthropic-completion-example
 
 go 1.19
 
