@@ -169,10 +169,10 @@ func (a APIChain) runRequest(
 
 	defer resp.Body.Close()
 
-	b, err := io.ReadAll(resp.Body)
+	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
-	return string(b), nil
+	return string(resBody), nil
 }
