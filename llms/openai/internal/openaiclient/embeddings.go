@@ -48,7 +48,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 
 	c.setHeaders(req)
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("send request: %w", err)
 	}

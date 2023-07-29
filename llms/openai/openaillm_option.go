@@ -1,5 +1,7 @@
 package openai
 
+import "github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+
 const (
 	tokenEnvVarName        = "OPENAI_API_KEY"      //nolint:gosec
 	modelEnvVarName        = "OPENAI_MODEL"        //nolint:gosec
@@ -27,6 +29,8 @@ type options struct {
 
 	apiType    APIType
 	apiVersion string // required when APIType is APITypeAzure or APITypeAzureAD
+
+	httpClient openaiclient.Doer
 }
 
 type Option func(*options)
@@ -77,5 +81,13 @@ func WithAPIType(apiType APIType) Option {
 func WithAPIVersion(apiVersion string) Option {
 	return func(opts *options) {
 		opts.apiVersion = apiVersion
+	}
+}
+
+// WithHTTPClient allows setting a custom HTTP client. If not set, the default value
+// is http.DefaultClient.
+func WithHTTPClient(client openaiclient.Doer) Option {
+	return func(opts *options) {
+		opts.httpClient = client
 	}
 }

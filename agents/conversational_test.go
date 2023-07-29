@@ -26,7 +26,7 @@ func TestConversationalWithMemory(t *testing.T) {
 		llm,
 		[]tools.Tool{tools.Calculator{}},
 		ConversationalReactDescription,
-		WithMemory(memory.NewBuffer()),
+		WithMemory(memory.NewConversationBuffer()),
 	)
 	require.NoError(t, err)
 

@@ -2,6 +2,8 @@ package schema
 
 // Memory is the interface for memory in chains.
 type Memory interface {
+	// GetMemoryKey getter for memory key.
+	GetMemoryKey() string
 	// MemoryVariables Input keys this memory class will load dynamically.
 	MemoryVariables() []string
 	// LoadMemoryVariables Return key-value pairs given the text input to the chain.

@@ -45,18 +45,9 @@ type Doer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// WithHTTPClient allows setting a custom HTTP client.
-func WithHTTPClient(client Doer) Option {
-	return func(c *Client) error {
-		c.httpClient = client
-
-		return nil
-	}
-}
-
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
-	apiType APIType, apiVersion string,
+	apiType APIType, apiVersion string, httpClient Doer,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
@@ -66,7 +57,7 @@ func New(token string, model string, baseURL string, organization string,
 		organization: organization,
 		apiType:      apiType,
 		apiVersion:   apiVersion,
-		httpClient:   http.DefaultClient,
+		httpClient:   httpClient,
 	}
 
 	for _, opt := range opts {

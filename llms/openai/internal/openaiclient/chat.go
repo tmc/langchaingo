@@ -153,7 +153,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	c.setHeaders(req)
 
 	// Send request
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
