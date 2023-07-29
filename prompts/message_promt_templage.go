@@ -7,7 +7,7 @@ import (
 
 // SystemMessagePromptTemplate is a message formatter that returns a system message.
 type SystemMessagePromptTemplate struct {
-	Prompt PromptTemplate `json:"systemPrompt,omitempty"`
+	Prompt PromptTemplate `json:"systemPrompt"`
 }
 
 var _ MessageFormatter = SystemMessagePromptTemplate{}
@@ -49,7 +49,7 @@ func NewSystemMessagePromptFromFile(path string) (SystemMessagePromptTemplate, e
 
 // AIMessagePromptTemplate is a message formatter that returns a AI message.
 type AIMessagePromptTemplate struct {
-	Prompt PromptTemplate `json:"aiPrompt,omitempty"`
+	Prompt PromptTemplate `json:"aiPrompt"`
 }
 
 var _ MessageFormatter = AIMessagePromptTemplate{}
@@ -82,7 +82,7 @@ func NewAIMessagePromptTemplate(template string, inputVariables []string) AIMess
 
 // HumanMessagePromptTemplate is a message formatter that returns a human message.
 type HumanMessagePromptTemplate struct {
-	Prompt PromptTemplate `json:"humanPrompt,omitempty"`
+	Prompt PromptTemplate `json:"humanPrompt"`
 }
 
 var _ MessageFormatter = HumanMessagePromptTemplate{}
@@ -124,8 +124,8 @@ func NewHumanMessagePromptFromFile(path string) (HumanMessagePromptTemplate, err
 
 // GenericMessagePromptTemplate is a message formatter that returns message with the specified speaker.
 type GenericMessagePromptTemplate struct {
-	Prompt PromptTemplate `json:"prompt,omitempty"`
-	Role   string         `json:"role,omitempty"`
+	Prompt PromptTemplate `json:"prompt"`
+	Role   string
 }
 
 var _ MessageFormatter = GenericMessagePromptTemplate{}

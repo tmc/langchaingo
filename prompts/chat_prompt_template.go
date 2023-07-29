@@ -1,7 +1,6 @@
 package prompts
 
 import (
-	"github.com/tmc/langchaingo/load"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -69,19 +68,5 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 }
 
 func (p ChatPromptTemplate) Save(path string) error {
-	if p.PartialVariables != nil {
-		return ErrPromptTemplateCannotBeSaved
-	}
-	err := load.ToFile(p, path)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// NewChatPromptTemplate creates a new chat prompt template from a list of message formatters.
-func NewChatPromptTemplate(messages []MessageFormatter) ChatPromptTemplate {
-	return ChatPromptTemplate{
-		Messages: messages,
-	}
+	return ErrNotImplemented
 }
