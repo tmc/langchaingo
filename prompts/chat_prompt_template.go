@@ -70,3 +70,10 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 func (p ChatPromptTemplate) Save(path string) error {
 	return ErrNotImplemented
 }
+
+// NewChatPromptTemplate creates a new chat prompt template from a list of message formatters.
+func NewChatPromptTemplate(messages []MessageFormatter) ChatPromptTemplate {
+	return ChatPromptTemplate{
+		Messages: messages,
+	}
+}
