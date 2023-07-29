@@ -48,7 +48,7 @@ const (
 	Summary:`
 )
 
-// HTTPRequester http requester interface.
+// HTTPRequest http requester interface.
 type HTTPRequest interface {
 	Do(*http.Request) (*http.Response, error)
 }
@@ -59,6 +59,10 @@ type APIChain struct {
 	Request      HTTPRequest
 }
 
+// NewAPIChain creates a new APIChain object.
+//
+// It takes a LanguageModel(llm) and an HTTPRequest(request) as parameters.
+// It returns an APIChain object.
 func NewAPIChain(llm llms.LanguageModel, request HTTPRequest) APIChain {
 	reqPrompt := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "input"})
 	reqChain := NewLLMChain(llm, reqPrompt)
@@ -73,6 +77,10 @@ func NewAPIChain(llm llms.LanguageModel, request HTTPRequest) APIChain {
 	}
 }
 
+// Call executes the APIChain and returns the result.
+//
+// It takes a context.Context object, a map[string]any values, and optional ChainCallOption
+// values as input parameters. It returns a map[string]any and an error as output.
 func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...ChainCallOption) (map[string]any, error) {
 	reqChainTmp := 0.0
 	opts = append(opts, WithTemperature(reqChainTmp))
@@ -121,14 +129,26 @@ func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...Chain
 	return map[string]any{"answer": answer["text"]}, err
 }
 
+// GetMemory returns the memory of the APIChain.
+//
+// This function does not take any parameters.
+// It returns a schema.Memory object.
 func (a APIChain) GetMemory() schema.Memory { //nolint:ireturn
 	return memory.NewSimple()
 }
 
+// GetInputKeys returns the input keys of the APIChain.
+//
+// No parameters.
+// Returns a slice of strings, which contains the output keys.
 func (a APIChain) GetInputKeys() []string {
 	return []string{"api_docs", "input"}
 }
 
+// GetOutputKeys returns the output keys of the APIChain.
+//
+// It does not take any parameters.
+// It returns a slice of strings, which contains the output keys.
 func (a APIChain) GetOutputKeys() []string {
 	return []string{"answer"}
 }
