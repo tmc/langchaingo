@@ -7,10 +7,10 @@ import (
 // ChatPromptTemplate is a prompt template for chat messages.
 type ChatPromptTemplate struct {
 	// Messages is the list of the messages to be formatted.
-	Messages []MessageFormatter `json:"messages"`
+	Messages []MessageFormatter
 	// PartialVariables represents a map of variable names to values or functions that return values.
 	// If the value is a function, it will be called when the prompt template is rendered.
-	PartialVariables map[string]any `json:"partial_variables"`
+	PartialVariables map[string]any
 }
 
 var (
