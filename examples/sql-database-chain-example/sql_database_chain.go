@@ -70,8 +70,8 @@ func makeSample(dsn string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
+
 func run() error {
 	llm, err := openai.New()
 	if err != nil {
