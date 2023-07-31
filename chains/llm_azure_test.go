@@ -19,7 +19,7 @@ func TestLLMChainAzure(t *testing.T) {
 	if openaiBase := os.Getenv("OPENAI_BASE_URL"); openaiBase == "" {
 		t.Skip("OPENAI_BASE_URL not set")
 	}
-	model, err := openai.NewAzure(openai.WithModel("gpt-35-turbo"))
+	model, err := openai.New(openai.WithModel("gpt-35-turbo"), openai.WithAPIType(openai.APITypeAzure))
 	require.NoError(t, err)
 
 	prompt := prompts.NewPromptTemplate(

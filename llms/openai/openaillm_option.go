@@ -9,12 +9,12 @@ const (
 	organizationEnvVarName = "OPENAI_ORGANIZATION" //nolint:gosec
 )
 
-type APIType string
+type APIType openaiclient.APIType
 
 const (
-	APITypeOpenAI  APIType = "OPEN_AI"
-	APITypeAzure   APIType = "AZURE"
-	APITypeAzureAD APIType = "AZURE_AD"
+	APITypeOpenAI  APIType = APIType(openaiclient.APITypeOpenAI)
+	APITypeAzure           = APIType(openaiclient.APITypeAzure)
+	APITypeAzureAD         = APIType(openaiclient.APITypeAzureAD)
 )
 
 const (

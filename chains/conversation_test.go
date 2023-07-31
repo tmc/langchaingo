@@ -29,17 +29,17 @@ func TestConversation(t *testing.T) {
 	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
 }
 
-func TestConversationMemoryPrune(t *testing.T) {
+func TestConversationWithChatLLM(t *testing.T) {
 	t.Parallel()
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	llm, err := openai.New()
+	llm, err := openai.NewChat()
 	require.NoError(t, err)
 
-	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 50))
+	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 

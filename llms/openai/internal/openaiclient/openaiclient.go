@@ -165,16 +165,13 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 	return resp, nil
 }
 
-func isAzure(apiType APIType) bool {
-	if apiType == APITypeAzure || apiType == APITypeAzureAD {
-		return true
-	}
-	return false
+func IsAzure(apiType APIType) bool {
+	return apiType == APITypeAzure || apiType == APITypeAzureAD
 }
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	if isAzure(c.apiType) {
+	if IsAzure(c.apiType) {
 		req.Header.Set("api-key", c.token)
 	} else {
 		req.Header.Set("Authorization", "Bearer "+c.token)
@@ -185,7 +182,7 @@ func (c *Client) setHeaders(req *http.Request) {
 }
 
 func (c *Client) buildURL(suffix string) string {
-	if isAzure(c.apiType) {
+	if IsAzure(c.apiType) {
 		return c.buildAzureURL(suffix)
 	}
 
