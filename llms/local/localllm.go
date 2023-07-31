@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
@@ -92,7 +93,11 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}, nil
 }
 
-func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
+func (o *LLM) GeneratePrompt(
+	ctx context.Context,
+	prompts []schema.PromptValue,
+	options ...llms.CallOption,
+) (llms.LLMResult, error) { //nolint:lll
 	return llms.GeneratePrompt(ctx, o, prompts, options...)
 }
 
@@ -116,7 +121,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, errors.Join(ErrMissingBin, err)
 	}
 
-	c, err := localclient.New(path, options.globalAsArgs, options.args)
+	c, err := localclient.New(path, options.globalAsArgs, strings.Split(options.args, " ")...)
 	return &LLM{
 		client: c,
 	}, err
