@@ -72,7 +72,7 @@ func New(opts ...Option) (Store, error) {
 	}
 	headers := make(map[string]string)
 	if s.apiKey != nil {
-		headers["Authorization"] = fmt.Sprintf("Authorization: Bearer %s", *s.apiKey)
+		headers["Authorization"] = fmt.Sprintf("Bearer %s", *s.apiKey)
 	}
 	s.client = weaviate.New(weaviate.Config{
 		Scheme:           s.scheme,
