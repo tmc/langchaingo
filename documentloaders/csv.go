@@ -8,9 +8,10 @@ import (
 	"io"
 	"strings"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
-	"golang.org/x/exp/slices"
 )
 
 // CSV represents a CSV document loader.
@@ -53,7 +54,7 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 		for i, value := range row {
 			if c.columns != nil &&
 				len(c.columns) > 0 &&
-				!slices.Contains[string](c.columns, header[i]) {
+				!slices.Contains(c.columns, header[i]) {
 				continue
 			}
 
