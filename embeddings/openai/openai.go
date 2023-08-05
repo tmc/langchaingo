@@ -28,6 +28,19 @@ func NewOpenAI(opts ...Option) (OpenAI, error) {
 	return o, nil
 }
 
+func NewOpenAIWithClient(client *openai.LLM, opts ...Option) (OpenAI, error) {
+	o, err := NewOpenAI(opts...)
+	if err != nil {
+		return OpenAI{}, err
+	}
+
+	if client != nil {
+		o.client = client
+	}
+
+	return o, nil
+}
+
 // EmbedDocuments creates one vector embedding for each of the texts.
 func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := embeddings.BatchTexts(
