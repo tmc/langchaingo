@@ -66,8 +66,8 @@ func (m MySQL) Query(ctx context.Context, query string, args ...any) ([]string, 
 		if err != nil {
 			return nil, nil, err
 		}
-		for _, v := range rowNullable {
-			row = append(row, v.String)
+		for i := range rowNullable {
+			row[i] = rowNullable[i].String
 		}
 		results = append(results, row)
 	}
