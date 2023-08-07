@@ -32,7 +32,9 @@ func Test(t *testing.T) {
 
 	for _, tableName := range tbs {
 		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
-		if err == sql.ErrNoRows { // exclude no row error, since we only need to check if db.Query function can perform query correctly
+		/* exclude no row error,
+		since we only need to check if db.Query function can perform query correctly*/
+		if err == sql.ErrNoRows {
 			continue
 		}
 		require.NoError(t, err)
