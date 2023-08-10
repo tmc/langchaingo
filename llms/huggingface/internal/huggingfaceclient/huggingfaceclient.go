@@ -11,6 +11,8 @@ var (
 	ErrEmptyResponse = errors.New("empty response")
 )
 
+const huggingfaceAPIBaseURL = "https://api-inference.huggingface.co"
+
 type Client struct {
 	Token string
 	Model string

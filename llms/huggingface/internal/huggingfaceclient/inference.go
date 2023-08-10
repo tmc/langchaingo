@@ -43,8 +43,6 @@ type (
 	}
 )
 
-const huggingfaceAPIBaseURL = "https://api-inference.huggingface.co"
-
 func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (inferenceResponsePayload, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
