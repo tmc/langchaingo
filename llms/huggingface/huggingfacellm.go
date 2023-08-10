@@ -94,7 +94,12 @@ func New(opts ...Option) (*LLM, error) {
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string, model string, task string) ([][]float64, error) {
+func (o *LLM) CreateEmbedding(
+	ctx context.Context,
+	inputTexts []string,
+	model string,
+	task string,
+) ([][]float64, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, model, task, &huggingfaceclient.EmbeddingRequest{
 		Inputs: inputTexts,
 		Options: map[string]any{

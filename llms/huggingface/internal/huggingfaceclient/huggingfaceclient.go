@@ -83,7 +83,12 @@ type EmbeddingRequest struct {
 }
 
 // CreateEmbedding creates embeddings.
-func (c *Client) CreateEmbedding(ctx context.Context, model string, task string, r *EmbeddingRequest) ([][]float64, error) {
+func (c *Client) CreateEmbedding(
+	ctx context.Context,
+	model string,
+	task string,
+	r *EmbeddingRequest,
+) ([][]float64, error) {
 	resp, err := c.createEmbedding(ctx, model, task, &embeddingPayload{
 		Inputs:  r.Inputs,
 		Options: r.Options,
