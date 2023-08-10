@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	ErrEmptyResponse = errors.New("empty response")
-	ErrMissingToken  = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
+	ErrEmptyResponse            = errors.New("empty response")
+	ErrMissingToken             = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
+	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
 type LLM struct {
@@ -90,4 +91,25 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client: c,
 	}, nil
+}
+
+// CreateEmbedding creates embeddings for the given input texts.
+func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string, model string, task string) ([][]float64, error) {
+	embeddings, err := o.client.CreateEmbedding(ctx, model, task, &huggingfaceclient.EmbeddingRequest{
+		Inputs: inputTexts,
+		Options: map[string]any{
+			"use_gpu":        false,
+			"wait_for_model": true,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(embeddings) == 0 {
+		return nil, ErrEmptyResponse
+	}
+	if len(inputTexts) != len(embeddings) {
+		return embeddings, ErrUnexpectedResponseLength
+	}
+	return embeddings, nil
 }

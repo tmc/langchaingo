@@ -43,7 +43,7 @@ type (
 	}
 )
 
-const hfInferenceAPI = "https://api-inference.huggingface.co/models/"
+const huggingfaceAPIBaseURL = "https://api-inference.huggingface.co"
 
 func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (inferenceResponsePayload, error) {
 	payloadBytes, err := json.Marshal(payload)
@@ -51,7 +51,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s%s", c.url, payload.Model), body) //nolint:lll
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/models/%s", c.url, payload.Model), body) //nolint:lll
 	if err != nil {
 		return nil, err
 	}
