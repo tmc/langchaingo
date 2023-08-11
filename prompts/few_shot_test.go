@@ -7,32 +7,35 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// ExampleSelector is not included because ExampleSelector is not implemented.
-type testCaseStruct struct {
-	name          string
-	examplePrompt PromptTemplate
-	examples      []map[string]string
-	prefix        string
-	suffix        string
-	input         map[string]interface{}
-	partialInput  map[string]interface{}
-	options       FewShotCallOptions
-	wantErr       bool
-	expected      string
-}
-
+// nolint: funlen
 func TestFewShotPrompt_Format(t *testing.T) {
 	examplePrompt := NewPromptTemplate("{{.question}}: {{.answer}}", []string{"question", "answer"})
 	t.Parallel()
-	testCases := []testCaseStruct{
+	testCases := []struct {
+		name             string
+		examplePrompt    PromptTemplate
+		examples         []map[string]string
+		prefix           string
+		suffix           string
+		input            map[string]interface{}
+		partialInput     map[string]interface{}
+		exampleSeparator string
+		templateFormat   TemplateFormat
+		validateTemplate bool
+		wantErr          bool
+		expected         string
+	}{
 		{
 			"prefix only", examplePrompt,
 			[]map[string]string{},
 			"This is a {{.foo}} test.", "",
 			map[string]interface{}{"foo": "bar"},
 			nil,
-			FewShotCallOptions{},
-			false, "This is a bar test.",
+			"",
+			TemplateFormatGoTemplate,
+			true,
+			false,
+			"This is a bar test.",
 		},
 		{
 			"suffix only", examplePrompt,
@@ -40,8 +43,11 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"", "This is a {{.foo}} test.",
 			map[string]interface{}{"foo": "bar"},
 			nil,
-			FewShotCallOptions{},
-			false, "This is a bar test.",
+			"",
+			TemplateFormatGoTemplate,
+			true,
+			false,
+			"This is a bar test.",
 		},
 		{
 			"insufficient InputVariables w err",
@@ -51,7 +57,9 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"This is a {{.foo}} test.",
 			map[string]interface{}{"bar": "bar"},
 			nil,
-			FewShotCallOptions{},
+			"",
+			TemplateFormatGoTemplate,
+			true,
 			true,
 			`template: template:1:12: executing "template" at <.foo>: map has no entry for key "foo"`,
 		},
@@ -63,7 +71,9 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"",
 			map[string]interface{}{"bar": "bar"},
 			nil,
-			FewShotCallOptions{},
+			"",
+			TemplateFormatGoTemplate,
+			true,
 			true,
 			ErrNoExample.Error(),
 		},
@@ -75,7 +85,9 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"Now you try to talk about {{.new_content}}.",
 			map[string]interface{}{"content": "animals", "new_content": "party"},
 			nil,
-			FewShotCallOptions{ExampleSeparator: "\n"},
+			"\n",
+			TemplateFormatGoTemplate,
+			true,
 			false,
 			"This is a test about animals.\nfoo: bar\nbaz: foo\nNow you try to talk about party.",
 		},
@@ -87,7 +99,9 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"Now you try to talk about {{.new_content}}.",
 			map[string]interface{}{"content": "animals"},
 			map[string]interface{}{"new_content": func() string { return "party" }},
-			FewShotCallOptions{ExampleSeparator: "\n"},
+			"\n",
+			TemplateFormatGoTemplate,
+			true,
 			false,
 			"This is a test about animals.\nfoo: bar\nbaz: foo\nNow you try to talk about party.",
 		},
@@ -99,7 +113,9 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			"Now you try to talk about {{.new_content}}.",
 			map[string]interface{}{"content": "animals"},
 			map[string]interface{}{"new_content": func() string { return "party" }},
-			FewShotCallOptions{ExampleSeparator: "\n"},
+			"\n",
+			TemplateFormatGoTemplate,
+			true,
 			true,
 			"template: template:1:23: executing \"template\" at <.wrong_content>: map has no entry for key " +
 				"\"wrong_content\"",
@@ -109,38 +125,22 @@ func TestFewShotPrompt_Format(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			runTest(t, tc)
+			t.Helper()
+			p, err := NewFewShotPrompt(tc.examplePrompt, tc.examples, nil, tc.prefix, tc.suffix, tc.input,
+				tc.partialInput, tc.exampleSeparator, tc.templateFormat, tc.validateTemplate)
+			if tc.wantErr {
+				checkError(t, err, tc.expected)
+				return
+			}
+			fp, err := p.Format(tc.input)
+			if checkError(t, err, "") {
+				return
+			}
+			got := fmt.Sprint(fp)
+			if diff := cmp.Diff(tc.expected, got); diff != "" {
+				t.Errorf("unexpected prompt output (-want +got):\n%s", diff)
+			}
 		})
-	}
-}
-
-func runTest(t *testing.T, tc struct {
-	name          string
-	examplePrompt PromptTemplate
-	examples      []map[string]string
-	prefix        string
-	suffix        string
-	input         map[string]interface{}
-	partialInput  map[string]interface{}
-	options       FewShotCallOptions
-	wantErr       bool
-	expected      string
-},
-) {
-	t.Helper()
-	p, err := NewFewShotPrompt(tc.examplePrompt, tc.examples, nil, tc.prefix, tc.suffix, tc.input,
-		tc.partialInput, tc.options)
-	if tc.wantErr {
-		checkError(t, err, tc.expected)
-		return
-	}
-	fp, err := p.Format(tc.input)
-	if checkError(t, err, "") {
-		return
-	}
-	got := fmt.Sprint(fp)
-	if diff := cmp.Diff(tc.expected, got); diff != "" {
-		t.Errorf("unexpected prompt output (-want +got):\n%s", diff)
 	}
 }
 

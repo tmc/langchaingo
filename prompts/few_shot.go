@@ -39,23 +39,11 @@ type FewShotPrompt struct {
 	ValidateTemplate bool
 }
 
-// FewShotCallOptions contains optional fields for FewShotPrompt.
-type FewShotCallOptions struct {
-	// ExampleSeparator separates between prefix, examples and suffix. Default is "\n\n"
-	ExampleSeparator string
-	// TemplateFormat is the format of the template
-	TemplateFormat TemplateFormat
-	// ValidateTemplate causes validations on prefix, suffix,templateFormat, input, and partial variables. Default is
-	// true.
-	ValidateTemplate *bool
-}
-
-// NewFewShotPrompt creates a new few-shot prompt with the given input. It applies the optional input if provided. It
-// returns error if there is no example, both examples and exampleSelector are provided, or CheckValidTemplate returns
-// err when ValidateTemplate is true.
+// NewFewShotPrompt creates a new few-shot prompt with the given input. It returns error if there is no example, both
+// examples and exampleSelector are provided, or CheckValidTemplate returns err when ValidateTemplate is true.
 func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string, exampleSelector ExampleSelector,
 	prefix string, suffix string, input map[string]interface{}, partialInput map[string]interface{},
-	options ...FewShotCallOptions,
+	exampleSeparator string, templateFormat TemplateFormat, validateTemplate bool,
 ) (*FewShotPrompt, error) {
 	err := validateExamples(examples, exampleSelector)
 	if err != nil {
@@ -70,23 +58,11 @@ func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string
 		Examples:         examples,
 		ExampleSelector:  exampleSelector,
 		ExampleSeparator: "\n\n",
-		TemplateFormat:   TemplateFormatGoTemplate,
-		ValidateTemplate: true,
+		TemplateFormat:   templateFormat,
+		ValidateTemplate: validateTemplate,
 	}
-
-	if len(options) > 0 {
-		option := options[0]
-		if option.ExampleSeparator != "" {
-			prompt.ExampleSeparator = option.ExampleSeparator
-		}
-		if option.TemplateFormat != "" {
-			prompt.TemplateFormat = option.TemplateFormat
-		}
-		if option.ValidateTemplate != nil {
-			prompt.ValidateTemplate = *option.ValidateTemplate
-		} else {
-			prompt.ValidateTemplate = true
-		}
+	if exampleSeparator != "" {
+		prompt.ExampleSeparator = exampleSeparator
 	}
 
 	if prompt.ValidateTemplate {
