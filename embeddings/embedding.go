@@ -13,7 +13,7 @@ type Embedder interface {
 	EmbedQuery(ctx context.Context, text string) ([]float64, error)
 }
 
-func maybeRemoveNewLines(texts []string, removeNewLines bool) []string {
+func MaybeRemoveNewLines(texts []string, removeNewLines bool) []string {
 	if !removeNewLines {
 		return texts
 	}
@@ -25,8 +25,8 @@ func maybeRemoveNewLines(texts []string, removeNewLines bool) []string {
 	return texts
 }
 
-// batchTexts splits strings by the length batchSize.
-func batchTexts(texts []string, batchSize int) [][]string {
+// BatchTexts splits strings by the length batchSize.
+func BatchTexts(texts []string, batchSize int) [][]string {
 	batchedTexts := make([][]string, len(texts))
 	for i, text := range texts {
 		runeText := []rune(text)

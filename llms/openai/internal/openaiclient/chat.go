@@ -14,7 +14,6 @@ import (
 
 const (
 	defaultChatModel = "gpt-3.5-turbo"
-	defaultBaseURL   = "https://api.openai.com"
 )
 
 // ChatRequest is a request to create an embedding.
@@ -30,6 +29,14 @@ type ChatRequest struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
+	// Function defitions to include in the request.
+	Functions []FunctionDefinition `json:"functions,omitempty"`
+	// FunctionCallBehavior is the behavior to use when calling functions.
+	//
+	// If a specific function should be invoked, use the format:
+	// `{"name": "my_function"}`
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
@@ -44,6 +51,9 @@ type ChatMessage struct {
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
 	Name string `json:"name,omitempty"`
+
+	// FunctionCall represents a function call to be made in the message.
+	FunctionCall *FunctionCall `json:"function_call,omitempty"`
 }
 
 // ChatChoice is a choice in a chat response.
@@ -74,8 +84,8 @@ type ChatResponse struct {
 	} `json:"usage,omitempty"`
 }
 
-// StreamedChatRkesponsePayload is a chunk from the stream.
-type StreamedChatRkesponsePayload struct {
+// StreamedChatResponsePayload is a chunk from the stream.
+type StreamedChatResponsePayload struct {
 	ID      string  `json:"id,omitempty"`
 	Created float64 `json:"created,omitempty"`
 	Model   string  `json:"model,omitempty"`
@@ -88,6 +98,36 @@ type StreamedChatRkesponsePayload struct {
 		} `json:"delta,omitempty"`
 		FinishReason interface{} `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
+}
+
+// FunctionDefinition is a definition of a function that can be called by the model.
+type FunctionDefinition struct {
+	// Name is the name of the function.
+	Name string `json:"name"`
+	// Description is a description of the function.
+	Description string `json:"description"`
+	// Parameters is a list of parameters for the function.
+	Parameters any `json:"parameters"`
+}
+
+// FunctionCallBehavior is the behavior to use when calling functions.
+type FunctionCallBehavior string
+
+const (
+	// FunctionCallBehaviorUnspecified is the empty string.
+	FunctionCallBehaviorUnspecified FunctionCallBehavior = ""
+	// FunctionCallBehaviorNone will not call any functions.
+	FunctionCallBehaviorNone FunctionCallBehavior = "none"
+	// FunctionCallBehaviorAuto will call functions automatically.
+	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
+)
+
+// FunctionCall is a call to a function.
+type FunctionCall struct {
+	// Name is the name of the function to call.
+	Name string `json:"name"`
+	// Arguments is a list of arguments to pass to the function.
+	Arguments any `json:"arguments"`
 }
 
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatResponse, error) {
@@ -105,18 +145,15 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/chat/completions", c.baseURL), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions"), body)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
-	if c.organization != "" {
-		req.Header.Set("OpenAI-Organization", c.organization)
-	}
+
+	c.setHeaders(req)
 
 	// Send request
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +181,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 
 func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) {
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan StreamedChatRkesponsePayload)
+	responseChan := make(chan StreamedChatResponsePayload)
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -159,7 +196,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if data == "[DONE]" {
 				return
 			}
-			var streamPayload StreamedChatRkesponsePayload
+			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
 				log.Fatalf("failed to decode stream payload: %v", err)

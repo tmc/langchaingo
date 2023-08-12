@@ -1,4 +1,4 @@
-package embeddings
+package openai
 
 import (
 	"github.com/tmc/langchaingo/llms/openai"

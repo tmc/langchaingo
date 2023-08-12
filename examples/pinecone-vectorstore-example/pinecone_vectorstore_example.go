@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/pinecone"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// Create an embeddings client using the OpenAI API. Requires environment variable OPENAI_API_KEY to be set.
-	e, err := embeddings.NewOpenAI()
+	e, err := openai.NewOpenAI()
 	if err != nil {
 		log.Fatal(err)
 	}

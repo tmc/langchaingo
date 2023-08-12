@@ -1,4 +1,4 @@
-package embeddings
+package huggingface
 
 import (
 	"context"
@@ -9,13 +9,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestVertexAIPaLMEmbeddings(t *testing.T) {
+func TestHuggingfaceEmbeddings(t *testing.T) {
 	t.Parallel()
 
-	if gcpProjectID := os.Getenv("GOOGLE_CLOUD_PROJECT"); gcpProjectID == "" {
-		t.Skip("GOOGLE_CLOUD_PROJECT not set")
+	if openaiKey := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); openaiKey == "" {
+		t.Skip("HUGGINGFACEHUB_API_TOKEN not set")
 	}
-	e, err := NewVertexAIPaLM()
+	e, err := NewHuggingface()
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")

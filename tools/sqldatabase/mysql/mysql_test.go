@@ -2,6 +2,9 @@ package mysql_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"os"
 	"testing"
 
@@ -28,4 +31,14 @@ func Test(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log(desc)
+
+	for _, tableName := range tbs {
+		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
+		/* exclude no row error,
+		since we only need to check if db.Query function can perform query correctly*/
+		if errors.Is(err, sql.ErrNoRows) {
+			continue
+		}
+		require.NoError(t, err)
+	}
 }

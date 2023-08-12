@@ -84,20 +84,16 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	}
 
 	if c.baseURL == "" {
-		c.baseURL = "https://api.openai.com"
+		c.baseURL = defaultBaseURL
 	}
 
 	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/completions", c.baseURL), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/completions"), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
-	if c.organization != "" {
-		req.Header.Set("OpenAI-Organization", c.organization)
-	}
+	c.setHeaders(req)
 
 	// Send request
 	r, err := c.httpClient.Do(req)

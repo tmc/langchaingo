@@ -49,8 +49,8 @@ Please note that this page lists the current state of the LangChain Go project, 
 | PAL Chain                              | ❌     |
 | LLM Requests Chain                     | ❌     |
 | Moderation Chain                       | ❌     |
-| Sequential Chain                       | ❌     |
-| Simple Sequential Chain                | ❌     |
+| Sequential Chain                       | ✅     |
+| Simple Sequential Chain                | ✅     |
 
 ## Agents
 
@@ -80,10 +80,10 @@ Please note that this page lists the current state of the LangChain Go project, 
 | ----------------------------| ------ |
 | Simple                      | ✅     |
 | Structured                  | ✅     |
-| Boolean                     | ❌     |
+| Boolean                     | ✅     |
 | Combining Parsers           | ✅     |
 | Regex                       | ✅     |
-| Regex Dictionary            | ❌     |
+| Regex Dictionary            | ✅     |
 | Comma separated list        | ✅     |
 | Parser fixer                | ❌     |
 | Retry                       | ❌     |
