@@ -31,6 +31,14 @@ type Scraper struct {
 
 var _ tools.Tool = Scraper{}
 
+// New creates a new instance of Scraper with the provided options.
+//
+// The options parameter is a variadic argument allowing the user to specify
+// custom configuration options for the Scraper. These options can be
+// functions that modify the Scraper's properties.
+//
+// The function returns a pointer to a Scraper instance and an error. The
+// error value is nil if the Scraper is created successfully.
 func New(options ...Options) (*Scraper, error) {
 	scraper := &Scraper{
 		MaxDepth:  DefualtMaxDept,
