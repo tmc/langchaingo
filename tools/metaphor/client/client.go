@@ -14,7 +14,7 @@ import (
 type MetaphorClient struct {
 	apiKey      string
 	RequestBody RequestBody
-	options     []ClientOptions
+	options     []Options
 }
 
 type RequestBody struct {
@@ -62,7 +62,7 @@ var (
 	ErrNoContentExtracted     = errors.New("no content was extracted")
 )
 
-func New(apiKey string, options ...ClientOptions) (*MetaphorClient, error) {
+func New(apiKey string, options ...Options) (*MetaphorClient, error) {
 	client := &MetaphorClient{
 		apiKey:      apiKey,
 		RequestBody: RequestBody{},
@@ -75,7 +75,7 @@ func New(apiKey string, options ...ClientOptions) (*MetaphorClient, error) {
 func (client *MetaphorClient) Search(
 	ctx context.Context,
 	query string,
-	options ...ClientOptions,
+	options ...Options,
 ) (*SearchResponse, error) {
 	client.RequestBody = RequestBody{
 		Query:         query,
@@ -118,7 +118,7 @@ func (client *MetaphorClient) Search(
 func (client *MetaphorClient) FindSimilar(
 	ctx context.Context,
 	url string,
-	options ...ClientOptions,
+	options ...Options,
 ) (*SearchResponse, error) {
 	client.RequestBody = RequestBody{
 		URL:           url,
@@ -214,7 +214,7 @@ func (client *MetaphorClient) runRequest(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (client *MetaphorClient) loadOptions(options []ClientOptions) {
+func (client *MetaphorClient) loadOptions(options []Options) {
 	if len(options) > 0 {
 		client.options = options
 	}

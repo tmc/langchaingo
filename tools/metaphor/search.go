@@ -18,7 +18,7 @@ var _ tools.Tool = &Search{}
 
 var ErrMissingToken = errors.New("missing the Metaphor API key, set it as the METAPHOR_API_KEY environment variable")
 
-func NewSearch(options ...client.ClientOptions) (*Search, error) {
+func NewSearch(options ...client.Options) (*Search, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
 	if apiKey == "" {
 		return nil, ErrMissingToken
@@ -68,7 +68,7 @@ func (tool *Search) formatResults(response *client.SearchResponse) string {
 	formattedResults := ""
 
 	for _, result := range response.Results {
-		formattedResults += fmt.Sprintf("Title: %s\nURL: %s\nID: %s\n\n", result.Title, result.Url, result.Id)
+		formattedResults += fmt.Sprintf("Title: %s\nURL: %s\nID: %s\n\n", result.Title, result.URL, result.ID)
 	}
 
 	return formattedResults
