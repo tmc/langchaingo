@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gpt/util/tools/metaphor/client"
 	"os"
 
 	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
 type MetaphorLinksSearch struct {

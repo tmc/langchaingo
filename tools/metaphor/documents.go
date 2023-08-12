@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gpt/util/tools/metaphor/client"
 	"os"
 	"strings"
 
 	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
 type MetaphorContents struct {
@@ -42,7 +42,7 @@ func (tool *MetaphorContents) Description() string {
 	return `
 	To be used with Metaphor Search and/or Metaphor Links Search Tool.
 	Retrieve contents of web pages based on a list of ID strings.
-	Input should be a list(or a single ID) of comma seperated IDs, 
+	Input should be a list(or a single ID) of comma seperated IDs,
 	obtained from either Metaphor Search or Metaphor Search Links tool.
 	Expected input format:
 	"8U71IlQ5DUTdsherhhYA,9segZCZGNjjQB2yD2uyK,..."`

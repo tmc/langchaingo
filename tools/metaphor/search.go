@@ -4,42 +4,42 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gpt/util/tools/metaphor/client"
 	"os"
 
 	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
-type MetaphorSearch struct {
+type Search struct {
 	client *client.MetaphorClient
 }
 
-var _ tools.Tool = &MetaphorSearch{}
+var _ tools.Tool = &Search{}
 
 var ErrMissingToken = errors.New("missing the Metaphor API key, set it as the METAPHOR_API_KEY environment variable")
 
-func NewSearch(options ...client.ClientOptions) (*MetaphorSearch, error) {
+func NewSearch(options ...client.ClientOptions) (*Search, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
 	if apiKey == "" {
 		return nil, ErrMissingToken
 	}
 
-	client, err := client.NewClient(apiKey, options...)
+	client, err := client.New(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
-	metaphor := &MetaphorSearch{
+	metaphor := &Search{
 		client: client,
 	}
 
 	return metaphor, nil
 }
 
-func (tool *MetaphorSearch) Name() string {
+func (tool *Search) Name() string {
 	return "Metaphor Search"
 }
 
-func (tool *MetaphorSearch) Description() string {
+func (tool *Search) Description() string {
 	return `
 	Metaphor Search uses a transformer architecture to predict links given text,
 	and it gets its power from having been trained on the way that people talk
@@ -52,7 +52,7 @@ func (tool *MetaphorSearch) Description() string {
 	`
 }
 
-func (tool *MetaphorSearch) Call(ctx context.Context, input string) (string, error) {
+func (tool *Search) Call(ctx context.Context, input string) (string, error) {
 	response, err := tool.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, client.ErrNoSearchResults) {
@@ -64,7 +64,7 @@ func (tool *MetaphorSearch) Call(ctx context.Context, input string) (string, err
 	return tool.formatResults(response), nil
 }
 
-func (tool *MetaphorSearch) formatResults(response *client.SearchResponse) string {
+func (tool *Search) formatResults(response *client.SearchResponse) string {
 	formattedResults := ""
 
 	for _, result := range response.Results {
