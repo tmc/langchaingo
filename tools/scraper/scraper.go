@@ -31,13 +31,7 @@ type Scraper struct {
 
 var _ tools.Tool = Scraper{}
 
-// NewScraper initializes a new Scraper object with the given maximum depth.
-//
-// It takes an optional parameter `maxDepth` which specifies the maximum depth to scrape.
-// The default value of `maxDepth` is 1 if not provided.
-//
-// It returns a pointer to a Scraper object and an error.
-func New() (*Scraper, error) {
+func New(options ...Options) (*Scraper, error) {
 	scraper := &Scraper{
 		MaxDepth:  DefualtMaxDept,
 		Parallels: DefualtParallels,
@@ -52,6 +46,10 @@ func New() (*Scraper, error) {
 			"download",
 			"redirect",
 		},
+	}
+
+	for _, opt := range options {
+		opt(scraper)
 	}
 
 	return scraper, nil

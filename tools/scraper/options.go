@@ -4,6 +4,8 @@ type Options func(*Scraper)
 
 // WithMaxDepth sets the maximum depth for the Scraper.
 //
+// Default value: 1
+//
 // maxDepth: the maximum depth to set.
 // Returns: an Options function.
 func WithMaxDepth(maxDepth int) Options {
@@ -14,6 +16,8 @@ func WithMaxDepth(maxDepth int) Options {
 
 // WithParallelsNum sets the number of maximum allowed concurrent
 // requests of the matching domains
+//
+// Default value: 2
 //
 // parallels: the number of parallels to set.
 // Returns: the updated Scraper options.
@@ -28,6 +32,8 @@ func WithParallelsNum(parallels int) Options {
 // The delay parameter specifies the amount of time in milliseconds that
 // the Scraper should wait between requests.
 //
+// Default value: 3
+//
 // delay: the delay to set.
 // Returns: an Options function.
 func WithDelay(delay int64) Options {
@@ -38,6 +44,8 @@ func WithDelay(delay int64) Options {
 
 // WithAsync sets the async option for the Scraper.
 //
+// Default value: true
+
 // async: The boolean value indicating if the scraper should run asynchronously.
 // Returns a function that sets the async option for the Scraper.
 func WithAsync(async bool) Options {
