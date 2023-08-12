@@ -1,24 +1,35 @@
-package tools
+package scraper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/tmc/langchaingo/tools"
 )
 
-const ErrScrapingFailed = "scraper could not read URL, or scraping is not allowed for provided URL"
+const (
+	DefualtMaxDept   = 1
+	DefualtParallels = 2
+	DefualtDelay     = 3
+	DefualtAsync     = true
+)
+
+var ErrScrapingFailed = errors.New("scraper could not read URL, or scraping is not allowed for provided URL")
 
 type Scraper struct {
 	MaxDepth  int
 	Parallels int
 	Delay     int64
+	Blacklist []string
+	Async     bool
 }
 
-var _ Tool = Scraper{}
+var _ tools.Tool = Scraper{}
 
 // NewScraper initializes a new Scraper object with the given maximum depth.
 //
@@ -26,20 +37,24 @@ var _ Tool = Scraper{}
 // The default value of `maxDepth` is 1 if not provided.
 //
 // It returns a pointer to a Scraper object and an error.
-func NewScraper(maxDepth ...int) (*Scraper, error) {
-	depth := 1
-	parallels := 2
-	delay := 3
-
-	if len(maxDepth) > 0 {
-		depth = maxDepth[0]
+func New() (*Scraper, error) {
+	scraper := &Scraper{
+		MaxDepth:  DefualtMaxDept,
+		Parallels: DefualtParallels,
+		Delay:     int64(DefualtDelay),
+		Async:     DefualtAsync,
+		Blacklist: []string{
+			"login",
+			"signup",
+			"signin",
+			"register",
+			"logout",
+			"download",
+			"redirect",
+		},
 	}
 
-	return &Scraper{
-		MaxDepth:  depth,
-		Parallels: parallels,
-		Delay:     int64(delay),
-	}, nil
+	return scraper, nil
 }
 
 // Name returns the name of the Scraper.
@@ -76,7 +91,7 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 
 	c := colly.NewCollector(
 		colly.MaxDepth(s.MaxDepth),
-		colly.Async(true),
+		colly.Async(s.Async),
 	)
 
 	err = c.Limit(&colly.LimitRule{
@@ -157,16 +172,7 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		}
 
 		// Check for redundant pages
-		blacklist := []string{
-			"login",
-			"signup",
-			"signin",
-			"register",
-			"logout",
-			"download",
-			"redirect",
-		}
-		for _, item := range blacklist {
+		for _, item := range s.Blacklist {
 			if strings.Contains(u.Path, item) {
 				return
 			}
