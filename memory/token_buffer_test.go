@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -21,15 +22,15 @@ func TestTokenBufferMemory(t *testing.T) {
 	require.NoError(t, err)
 	m := NewConversationTokenBuffer(llm, 2000)
 
-	result1, err := m.LoadMemoryVariables(map[string]any{})
+	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	expected1 := map[string]any{"history": ""}
 	assert.Equal(t, expected1, result1)
 
-	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
 
-	result2, err := m.LoadMemoryVariables(map[string]any{})
+	result2, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 
 	expected2 := map[string]any{"history": "Human: bar\nAI: foo"}
@@ -48,14 +49,14 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	m := NewConversationTokenBuffer(llm, 2000, WithReturnMessages(true))
 
 	expected1 := map[string]any{"history": []schema.ChatMessage{}}
-	result1, err := m.LoadMemoryVariables(map[string]any{})
+	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	assert.Equal(t, expected1, result1)
 
-	err = m.SaveContext(map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
 
-	result2, err := m.LoadMemoryVariables(map[string]any{})
+	result2, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
@@ -65,7 +66,7 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 		}),
 	)
 
-	messages, err := expectedChatHistory.Messages()
+	messages, err := expectedChatHistory.Messages(context.Background())
 	require.NoError(t, err)
 	expected2 := map[string]any{"history": messages}
 	assert.Equal(t, expected2, result2)
@@ -88,7 +89,7 @@ func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 		}),
 	)))
 
-	result, err := m.LoadMemoryVariables(map[string]any{})
+	result, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
 	assert.Equal(t, expected, result)

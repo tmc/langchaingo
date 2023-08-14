@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"context"
+
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -31,22 +33,26 @@ func NewConversationTokenBuffer(
 }
 
 // MemoryVariables uses ConversationBuffer method for memory variables.
-func (tb *ConversationTokenBuffer) MemoryVariables() []string {
-	return tb.ConversationBuffer.MemoryVariables()
+func (tb *ConversationTokenBuffer) MemoryVariables(ctx context.Context) []string {
+	return tb.ConversationBuffer.MemoryVariables(ctx)
 }
 
 // LoadMemoryVariables uses ConversationBuffer method for loading memory variables.
-func (tb *ConversationTokenBuffer) LoadMemoryVariables(inputs map[string]any) (map[string]any, error) {
-	return tb.ConversationBuffer.LoadMemoryVariables(inputs)
+func (tb *ConversationTokenBuffer) LoadMemoryVariables(
+	ctx context.Context, inputs map[string]any,
+) (map[string]any, error) {
+	return tb.ConversationBuffer.LoadMemoryVariables(ctx, inputs)
 }
 
 // SaveContext uses ConversationBuffer method for saving context and prunes memory buffer if needed.
-func (tb *ConversationTokenBuffer) SaveContext(inputValues map[string]any, outputValues map[string]any) error {
-	err := tb.ConversationBuffer.SaveContext(inputValues, outputValues)
+func (tb *ConversationTokenBuffer) SaveContext(
+	ctx context.Context, inputValues map[string]any, outputValues map[string]any,
+) error {
+	err := tb.ConversationBuffer.SaveContext(ctx, inputValues, outputValues)
 	if err != nil {
 		return err
 	}
-	currBufferLength, err := tb.getNumTokensFromMessages()
+	currBufferLength, err := tb.getNumTokensFromMessages(ctx)
 	if err != nil {
 		return err
 	}
@@ -55,7 +61,7 @@ func (tb *ConversationTokenBuffer) SaveContext(inputValues map[string]any, outpu
 		// while currBufferLength is greater than MaxTokenLimit we keep removing messages from the memory
 		// from the oldest
 		for currBufferLength > tb.MaxTokenLimit {
-			messages, err := tb.ChatHistory.Messages()
+			messages, err := tb.ChatHistory.Messages(ctx)
 			if err != nil {
 				return err
 			}
@@ -64,12 +70,12 @@ func (tb *ConversationTokenBuffer) SaveContext(inputValues map[string]any, outpu
 				break
 			}
 
-			err = tb.ChatHistory.SetMessages(append(messages[:0], messages[1:]...))
+			err = tb.ChatHistory.SetMessages(ctx, append(messages[:0], messages[1:]...))
 			if err != nil {
 				return err
 			}
 
-			currBufferLength, err = tb.getNumTokensFromMessages()
+			currBufferLength, err = tb.getNumTokensFromMessages(ctx)
 			if err != nil {
 				return err
 			}
@@ -84,8 +90,8 @@ func (tb *ConversationTokenBuffer) Clear() error {
 	return tb.ConversationBuffer.Clear()
 }
 
-func (tb *ConversationTokenBuffer) getNumTokensFromMessages() (int, error) {
-	messages, err := tb.ChatHistory.Messages()
+func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context) (int, error) {
+	messages, err := tb.ChatHistory.Messages(ctx)
 	if err != nil {
 		return 0, err
 	}

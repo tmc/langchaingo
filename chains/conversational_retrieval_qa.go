@@ -88,14 +88,14 @@ func NewConversationalRetrievalQAFromLLM(
 
 // Call gets question, and relevant documents by question from the retriever and gives them to the combine
 // documents chain.
-func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	query, ok := values[c.InputKey].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-	chatHistoryStr, ok := values[c.Memory.GetMemoryKey()].(string)
+	chatHistoryStr, ok := values[c.Memory.GetMemoryKey(ctx)].(string)
 	if !ok {
-		chatHistory, ok := values[c.Memory.GetMemoryKey()].([]schema.ChatMessage)
+		chatHistory, ok := values[c.Memory.GetMemoryKey(ctx)].([]schema.ChatMessage)
 		if !ok {
 			return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
 		}
