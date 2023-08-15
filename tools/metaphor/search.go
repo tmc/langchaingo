@@ -1,3 +1,4 @@
+// trunk-ignore(golangci-lint/dupl)
 package metaphor
 
 import (
@@ -6,33 +7,35 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/metaphorsystems/metaphor-go"
 	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
 type Search struct {
-	client *client.MetaphorClient
+	client  *metaphor.Client
+	options []metaphor.ClientOptions
 }
 
 var _ tools.Tool = &Search{}
 
-var ErrMissingToken = errors.New("missing the Metaphor API key, set it as the METAPHOR_API_KEY environment variable")
-
-func NewSearch(options ...client.Options) (*Search, error) {
+func NewSearch(options ...metaphor.ClientOptions) (*Search, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-	if apiKey == "" {
-		return nil, ErrMissingToken
-	}
 
-	client, err := client.New(apiKey, options...)
+	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
+
 	metaphor := &Search{
-		client: client,
+		client:  client,
+		options: options,
 	}
 
 	return metaphor, nil
+}
+
+func (tool *Search) SetOptions(options ...metaphor.ClientOptions) {
+	tool.options = options
 }
 
 func (tool *Search) Name() string {
@@ -43,19 +46,17 @@ func (tool *Search) Description() string {
 	return `
 	Metaphor Search uses a transformer architecture to predict links given text,
 	and it gets its power from having been trained on the way that people talk
-	about links on the Internet. This training produces a model that returns
-	links that are both high in relevance and quality. However, the model does
-	expect queries that look like how people describe a link on the Internet.
-	For example:
+	about links on the Internet. The model does expect queries that look like
+	how people describe a link on the Internet. For example:
 	"'best restaurants in SF" is a bad query, whereas
 	"Here is the best restaurant in SF:" is a good query.
 	`
 }
 
 func (tool *Search) Call(ctx context.Context, input string) (string, error) {
-	response, err := tool.client.Search(ctx, input)
+	response, err := tool.client.Search(ctx, input, tool.options...)
 	if err != nil {
-		if errors.Is(err, client.ErrNoSearchResults) {
+		if errors.Is(err, metaphor.ErrNoSearchResults) {
 			return "Metaphor Search didn't return any results", nil
 		}
 		return "", err
@@ -64,7 +65,7 @@ func (tool *Search) Call(ctx context.Context, input string) (string, error) {
 	return tool.formatResults(response), nil
 }
 
-func (tool *Search) formatResults(response *client.SearchResponse) string {
+func (tool *Search) formatResults(response *metaphor.SearchResponse) string {
 	formattedResults := ""
 
 	for _, result := range response.Results {

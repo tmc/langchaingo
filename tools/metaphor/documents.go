@@ -7,30 +7,33 @@ import (
 	"os"
 	"strings"
 
+	"github.com/metaphorsystems/metaphor-go"
 	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
 type Documents struct {
-	client *client.MetaphorClient
+	client  *metaphor.Client
+	options []metaphor.ClientOptions
 }
 
 var _ tools.Tool = &Documents{}
 
-func NewDocuments(options ...client.Options) (*Documents, error) {
+func NewDocuments(options ...metaphor.ClientOptions) (*Documents, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-	if apiKey == "" {
-		return nil, ErrMissingToken
-	}
 
-	client, err := client.New(apiKey, options...)
+	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Documents{
-		client: client,
+		client:  client,
+		options: options,
 	}, nil
+}
+
+func (tool *Documents) SetOptions(options ...metaphor.ClientOptions) {
+	tool.options = options
 }
 
 func (tool *Documents) Name() string {
@@ -54,7 +57,7 @@ func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
 
 	contents, err := tool.client.GetContents(ctx, ids)
 	if err != nil {
-		if errors.Is(err, client.ErrNoContentExtracted) {
+		if errors.Is(err, metaphor.ErrNoContentExtracted) {
 			return "Metaphor Extractor didn't return any results", nil
 		}
 		return "", err
@@ -63,7 +66,7 @@ func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
 	return tool.formatContents(contents), nil
 }
 
-func (tool *Documents) formatContents(response *client.ContentsResponse) string {
+func (tool *Documents) formatContents(response *metaphor.ContentsResponse) string {
 	formattedResults := ""
 
 	for _, result := range response.Contents {

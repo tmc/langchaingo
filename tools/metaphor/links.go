@@ -1,3 +1,4 @@
+// trunk-ignore(golangci-lint/dupl)
 package metaphor
 
 import (
@@ -6,31 +7,34 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/metaphorsystems/metaphor-go"
 	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/metaphor/client"
 )
 
 type LinksSearch struct {
-	client *client.MetaphorClient
+	client  *metaphor.Client
+	options []metaphor.ClientOptions
 }
 
 var _ tools.Tool = &LinksSearch{}
 
-func NewLinksSearch(options ...client.Options) (*LinksSearch, error) {
+func NewLinksSearch(options ...metaphor.ClientOptions) (*LinksSearch, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-	if apiKey == "" {
-		return nil, ErrMissingToken
-	}
 
-	client, err := client.New(apiKey, options...)
+	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
 	metaphor := &LinksSearch{
-		client: client,
+		client:  client,
+		options: options,
 	}
 
 	return metaphor, nil
+}
+
+func (tool *LinksSearch) SetOptions(options ...metaphor.ClientOptions) {
+	tool.options = options
 }
 
 func (tool *LinksSearch) Name() string {
@@ -44,9 +48,9 @@ func (tool *LinksSearch) Description() string {
 }
 
 func (tool *LinksSearch) Call(ctx context.Context, input string) (string, error) {
-	links, err := tool.client.FindSimilar(ctx, input)
+	links, err := tool.client.FindSimilar(ctx, input, tool.options...)
 	if err != nil {
-		if errors.Is(err, client.ErrNoLinksFound) {
+		if errors.Is(err, metaphor.ErrNoLinksFound) {
 			return "Metaphor Links Search didn't return any results", nil
 		}
 		return "", err
@@ -55,7 +59,7 @@ func (tool *LinksSearch) Call(ctx context.Context, input string) (string, error)
 	return tool.formatLinks(links), nil
 }
 
-func (tool *LinksSearch) formatLinks(response *client.SearchResponse) string {
+func (tool *LinksSearch) formatLinks(response *metaphor.SearchResponse) string {
 	formattedResults := ""
 
 	for _, result := range response.Results {
