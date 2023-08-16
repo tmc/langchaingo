@@ -58,6 +58,12 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 				msg.Role = "system"
 			case schema.ChatMessageTypeAI:
 				msg.Role = "assistant"
+				if aiChatMsg, ok := m.(schema.AIChatMessage); ok && aiChatMsg.FunctionCall != nil {
+					msg.FunctionCall = &openaiclient.FunctionCall{
+						Name:      aiChatMsg.FunctionCall.Name,
+						Arguments: aiChatMsg.FunctionCall.Arguments,
+					}
+				}
 			case schema.ChatMessageTypeHuman:
 				msg.Role = "user"
 			case schema.ChatMessageTypeGeneric:
