@@ -53,7 +53,7 @@ func WithModel(model string) Option {
 	}
 }
 
-// WithEmbeddingModel passes the OpenAI model to the client. Required when ApiType is Azure
+// WithEmbeddingModel passes the OpenAI model to the client. Required when ApiType is Azure.
 func WithEmbeddingModel(embeddingModel string) Option {
 	return func(opts *options) {
 		opts.embeddingModel = embeddingModel
