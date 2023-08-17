@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
@@ -61,12 +60,14 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 		t.Skip("OPENAI_BASE_URL not set")
 	}
 
-	// Azure documentation that will explain needed field - https://learn.microsoft.com/en-us/azure/ai-services/openai/quickstart?tabs=command-line&pivots=rest-api#retrieve-key-and-endpoint
 	client, err := openai.New(
 		openai.WithAPIType(openai.APITypeAzure),
-		openai.WithModel("model"),                    // Azure deployment that uses desired model ex. gpt-3.5-turbo, the name depends on what we define in the Azure deployment section
-		openai.WithEmbeddingModel("model-embedding"), // Azure deployment that uses embeddings model, the name depends on what we define in the Azure deployment section
+		// Azure deployment that uses desired model the name depends on what we define in the Azure deployment section
+		openai.WithModel("model"),
+		// Azure deployment that uses embeddings model, the name depends on what we define in the Azure deployment section
+		openai.WithEmbeddingModel("model-embedding"),
 	)
+	assert.NoError(t, err)
 
 	e, err := NewOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)
