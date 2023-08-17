@@ -30,11 +30,12 @@ type Client struct {
 	Model        string
 	baseURL      string
 	organization string
+	apiType      APIType
+	httpClient   Doer
 
-	apiType    APIType
-	apiVersion string // required when APIType is APITypeAzure or APITypeAzureAD
-
-	httpClient Doer
+	// required when APIType is APITypeAzure or APITypeAzureAD
+	apiVersion      string
+	embeddingsModel string
 }
 
 // Option is an option for the OpenAI client.
@@ -47,17 +48,18 @@ type Doer interface {
 
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
-	apiType APIType, apiVersion string, httpClient Doer,
+	apiType APIType, apiVersion string, httpClient Doer, embeddingsModel string,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:        token,
-		Model:        model,
-		baseURL:      baseURL,
-		organization: organization,
-		apiType:      apiType,
-		apiVersion:   apiVersion,
-		httpClient:   httpClient,
+		token:           token,
+		Model:           model,
+		embeddingsModel: embeddingsModel,
+		baseURL:         baseURL,
+		organization:    organization,
+		apiType:         apiType,
+		apiVersion:      apiVersion,
+		httpClient:      httpClient,
 	}
 
 	for _, opt := range opts {
@@ -181,22 +183,22 @@ func (c *Client) setHeaders(req *http.Request) {
 	}
 }
 
-func (c *Client) buildURL(suffix string) string {
+func (c *Client) buildURL(suffix string, model string) string {
 	if IsAzure(c.apiType) {
-		return c.buildAzureURL(suffix)
+		return c.buildAzureURL(suffix, model)
 	}
 
 	// open ai implement:
 	return fmt.Sprintf("%s%s", c.baseURL, suffix)
 }
 
-func (c *Client) buildAzureURL(suffix string) string {
+func (c *Client) buildAzureURL(suffix string, model string) string {
 	baseURL := c.baseURL
 	baseURL = strings.TrimRight(baseURL, "/")
 
 	// azure example url:
 	// /openai/deployments/{model}/chat/completions?api-version={api_version}
 	return fmt.Sprintf("%s/openai/deployments/%s%s?api-version=%s",
-		baseURL, c.Model, suffix, c.apiVersion,
+		baseURL, model, suffix, c.apiVersion,
 	)
 }
