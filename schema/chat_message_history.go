@@ -1,22 +1,24 @@
 package schema
 
+import "context"
+
 // ChatMessageHistory is the interface for chat history in memory/store.
 type ChatMessageHistory interface {
 	// AddUserMessage Convenience method for adding a human message string to the store.
-	AddUserMessage(message string) error
+	AddUserMessage(ctx context.Context, message string) error
 
 	// AddAIMessage Convenience method for adding an AI message string to the store.
-	AddAIMessage(message string) error
+	AddAIMessage(ctx context.Context, message string) error
 
 	// AddMessage Add a Message object to the store.
-	AddMessage(message ChatMessage) error
+	AddMessage(ctx context.Context, message ChatMessage) error
 
 	// Clear Remove all messages from the store.
 	Clear() error
 
 	// Messages get all messages from the store
-	Messages() ([]ChatMessage, error)
+	Messages(ctx context.Context) ([]ChatMessage, error)
 
 	// SetMessages replaces existing messages in the store
-	SetMessages(messages []ChatMessage) error
+	SetMessages(ctx context.Context, messages []ChatMessage) error
 }
