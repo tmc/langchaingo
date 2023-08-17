@@ -45,7 +45,7 @@ func (c *SequentialChain) validateSeqChain() error {
 	knownKeys := util.ToSet(c.inputKeys)
 
 	// Make sure memory keys don't collide with input keys
-	memoryKeys := c.memory.MemoryVariables()
+	memoryKeys := c.memory.MemoryVariables(context.Background())
 	overlappingKeys := util.Intersection(memoryKeys, knownKeys)
 	if len(overlappingKeys) > 0 {
 		return fmt.Errorf(
