@@ -20,19 +20,9 @@ type API struct {
 }
 
 type ToolInput struct {
-	Operation  string `json:"operation"`
-	Input      string `json:"input"`
-	ReqOptions struct {
-		NumResults         int      `json:"numResults,omitempty"`
-		IncludeDomains     []string `json:"includeDomains,omitempty"`
-		ExcludeDomains     []string `json:"excludeDomains,omitempty"`
-		StartCrawlDate     string   `json:"startCrawlDate,omitempty"`
-		EndCrawlDate       string   `json:"endCrawlDate,omitempty"`
-		StartPublishedDate string   `json:"startPublishedDate,omitempty"`
-		EndPublishedDate   string   `json:"endPublishedDate,omitempty"`
-		UseAutoprompt      bool     `json:"useAutoprompt,omitempty"`
-		Type               string   `json:"type,omitempty"`
-	} `json:"reqOptions"`
+	Operation  string                  `json:"operation"`
+	Input      string                  `json:"input"`
+	ReqOptions metaphor.RequestOptions `json:"reqOptions"`
 }
 
 func NewClient() (*API, error) {
@@ -54,25 +44,25 @@ func (tool *API) Name() string {
 
 func (tool *API) Description() string {
 	return `
-	Metaphor API Tool is a tool to interact with the Metaphor API.
-	Metaphor is a search engine trained to do link prediction.
-	This means that given some text prompt, it tries to predict the
-	link that would most likely follow that prompt.
+	Metaphor API Tool is a tool to interact with the Metaphor API. Metaphor is a search engine
+	trained to do link prediction.
+	This means that given some text prompt, it tries to predict the link that would most likely
+	follow that prompt. This tool shouls be used when you want to add spcific filters to your search qeury
 
 	Tool expects string json of the format as input:
 	{
 		"operation": "YourOperation",
 		"input": "YourInput",
 		"reqOptions": {
-		"numResults": 10,
-		"includeDomains": ["example.com", "example2.com"],
-		"excludeDomains": ["exclude.com"],
-		"startCrawlDate": "2023-08-15T00:00:00Z",
-		"endCrawlDate": "2023-08-16T00:00:00Z",
-		"startPublishedDate": "2023-08-15T00:00:00Z",
-		"endPublishedDate": "2023-08-16T00:00:00Z",
-		"useAutoprompt": true,
-		"type": "neural"
+			"numResults": 10,
+			"includeDomains": ["example.com", "example2.com"],
+			"excludeDomains": ["exclude.com"],
+			"startCrawlDate": "2023-08-15T00:00:00Z",
+			"endCrawlDate": "2023-08-16T00:00:00Z",
+			"startPublishedDate": "2023-08-15T00:00:00Z",
+			"endPublishedDate": "2023-08-16T00:00:00Z",
+			"useAutoprompt": true,
+			"type": "neural"
 		}
 	}
 
@@ -136,9 +126,7 @@ func (tool *API) Description() string {
 
 		QUERY PARAMS
 		ids (array of strings, required)
-			An array of document IDs obtained from either /search or /findSimilar endpoints.
-
-	`
+			An array of document IDs obtained from either /search or /findSimilar endpoints.`
 }
 
 func (tool *API) Call(ctx context.Context, input string) (string, error) {
@@ -168,7 +156,7 @@ func (tool *API) performSearch(ctx context.Context, toolInput ToolInput) (string
 	response, err := tool.client.Search(
 		ctx,
 		toolInput.Input,
-		// metaphor.WithReqOptions(toolInput.ReqOptions),
+		metaphor.WithRequestOptions(&toolInput.ReqOptions),
 	)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoSearchResults) {
@@ -183,7 +171,7 @@ func (tool *API) findSimilar(ctx context.Context, toolInput ToolInput) (string, 
 	response, err := tool.client.FindSimilar(
 		ctx,
 		toolInput.Input,
-		// metaphor.WithReqOptions(toolInput.ReqOptions),
+		metaphor.WithRequestOptions(&toolInput.ReqOptions),
 	)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoLinksFound) {
@@ -200,11 +188,7 @@ func (tool *API) getContents(ctx context.Context, toolInput ToolInput) (string, 
 		ids[i] = strings.TrimSpace(id)
 	}
 
-	response, err := tool.client.GetContents(
-		ctx,
-		ids,
-		// metaphor.WithReqOptions(toolInput.ReqOptions),
-	)
+	response, err := tool.client.GetContents(ctx, ids)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoContentExtracted) {
 			return "Metaphor Extractor didn't return any results", nil
