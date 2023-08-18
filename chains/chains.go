@@ -26,13 +26,13 @@ type Chain interface {
 }
 
 // Call is the standard function used for executing chains.
-func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
 	}
 
-	newValues, err := c.GetMemory().LoadMemoryVariables(inputValues)
+	newValues, err := c.GetMemory().LoadMemoryVariables(ctx, inputValues)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		return nil, err
 	}
 
-	err = c.GetMemory().SaveContext(inputValues, outputValues)
+	err = c.GetMemory().SaveContext(ctx, inputValues, outputValues)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 // string output.
 func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (string, error) {
 	inputKeys := c.GetInputKeys()
-	memoryKeys := c.GetMemory().MemoryVariables()
+	memoryKeys := c.GetMemory().MemoryVariables(ctx)
 	neededKeys := make([]string, 0, len(inputKeys))
 
 	// Remove keys gotten from the memory.

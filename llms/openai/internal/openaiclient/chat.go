@@ -145,7 +145,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions"), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", c.Model), body)
 	if err != nil {
 		return nil, err
 	}
