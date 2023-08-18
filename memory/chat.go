@@ -36,7 +36,7 @@ func (h *ChatMessageHistory) AddUserMessage(_ context.Context, text string) erro
 	return nil
 }
 
-func (h *ChatMessageHistory) Clear() error {
+func (h *ChatMessageHistory) Clear(_ context.Context) error {
 	h.messages = make([]schema.ChatMessage, 0)
 	return nil
 }
