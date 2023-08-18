@@ -88,7 +88,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	}
 
 	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/completions"), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/completions", c.Model), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}

@@ -41,7 +41,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings"), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.embeddingsModel), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
