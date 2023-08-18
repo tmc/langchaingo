@@ -270,8 +270,6 @@ github.com/markbates/oncer v0.0.0-20181203154359-bf2de49a0be2/go.mod h1:Ld9puTsI
 github.com/markbates/safe v1.0.1/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kNSCBdG0=
 github.com/mattn/go-sqlite3 v1.14.17 h1:mCRHCLDUBXgpKAqIKsaAaAsrAlbkeomtRFKXh2L6YIM=
 github.com/mattn/go-sqlite3 v1.14.17/go.mod h1:2eHXhiwb8IkHr+BDWZGa96P6+rkvnG63S2DGjv9HUNg=
-github.com/metaphorsystems/metaphor-go v0.0.0-20230813191523-78d5427b5a84 h1:CsTF04UVEdnYhUQn4AgCrGMEUzBNjIU0zsd7EzSQ+68=
-github.com/metaphorsystems/metaphor-go v0.0.0-20230813191523-78d5427b5a84/go.mod h1:mDz8kHE7x6Ja95drCQ2T1vLyPRc/t69Cf3wau91E3QU=
 github.com/metaphorsystems/metaphor-go v0.0.0-20230816231421-43794c04824e h1:4N462rhrxy7KezYYyL3RjJPWlhXiSkfFes0YsMqicd0=
 github.com/metaphorsystems/metaphor-go v0.0.0-20230816231421-43794c04824e/go.mod h1:mDz8kHE7x6Ja95drCQ2T1vLyPRc/t69Cf3wau91E3QU=
 github.com/microcosm-cc/bluemonday v1.0.24 h1:NGQoPtwGVcbGkKfvyYk1yRqknzBuoMiUrO6R7uFTPlw=
