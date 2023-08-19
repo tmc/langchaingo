@@ -10,7 +10,7 @@ import (
 // LogHandler is a callback handler that prints to the standard output.
 type LogHandler struct{}
 
-var _ CallbackHandler = LogHandler{}
+var _ Handler = LogHandler{}
 
 func (l LogHandler) HandleText(text string) {
 	fmt.Println(text)

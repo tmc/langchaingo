@@ -5,7 +5,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-type CallbackHandler interface {
+type Handler interface {
 	HandleText(text string)
 	HandleLLMStart(prompts []string)
 	HandleLLMEnd(output llms.LLMResult)
@@ -16,4 +16,8 @@ type CallbackHandler interface {
 	HandleAgentAction(action schema.AgentAction)
 	HandleRetrieverStart(query string)
 	HandleRetrieverEnd(documents []schema.Document)
+}
+
+type HandlerHaver interface {
+	GetCallbackHandler() Handler
 }

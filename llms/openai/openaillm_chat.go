@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 	"github.com/tmc/langchaingo/schema"
@@ -12,7 +13,8 @@ import (
 type ChatMessage = openaiclient.ChatMessage
 
 type Chat struct {
-	client *openaiclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *openaiclient.Client
 }
 
 var (
@@ -42,6 +44,10 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 
 //nolint:funlen
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(getPromptsFromMessageSets(messageSets))
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -150,4 +156,17 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 		return embeddings, ErrUnexpectedResponseLength
 	}
 	return embeddings, nil
+}
+
+func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
+	prompts := make([]string, 0, len(messageSets))
+	for i := 0; i < len(messageSets); i++ {
+		curPrompt := ""
+		for j := 0; j < len(messageSets[i]); j++ {
+			curPrompt += messageSets[i][j].GetContent()
+		}
+		prompts = append(prompts, curPrompt)
+	}
+
+	return prompts
 }

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
 	"github.com/tmc/langchaingo/schema"
@@ -22,7 +23,8 @@ var (
 
 // LLM is a local LLM implementation.
 type LLM struct {
-	client *localclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *localclient.Client
 }
 
 // _ ensures that LLM implements the llms.LLM and language model interface.
@@ -71,6 +73,10 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
 
 // Generate generates completions using the local LLM binary.
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(prompts)
+	}
+
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
@@ -82,15 +88,23 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		o.appendGlobalsToArgs(*opts)
 	}
 
-	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
-		Prompt: prompts[0],
-	})
-	if err != nil {
-		return nil, err
+	generations := make([]*llms.Generation, len(prompts))
+	for _, prompt := range prompts {
+		result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
+			Prompt: prompt,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		generations = append(generations, &llms.Generation{Text: result.Text})
 	}
-	return []*llms.Generation{
-		{Text: result.Text},
-	}, nil
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+	}
+
+	return generations, nil
 }
 
 func (o *LLM) GeneratePrompt(

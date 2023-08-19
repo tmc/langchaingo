@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 	"github.com/tmc/langchaingo/schema"
@@ -18,7 +19,8 @@ var (
 )
 
 type LLM struct {
-	client *anthropicclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *anthropicclient.Client
 }
 
 var (
@@ -63,6 +65,10 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(prompts)
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -87,6 +93,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		})
 	}
 
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+	}
 	return generations, nil
 }
 
