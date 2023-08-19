@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -41,6 +42,11 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		fullValues[key] = value
 	}
 
+	callbacksHandler := getChainCallbackHandler(c)
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainStart(inputValues)
+	}
+
 	if err := validateInputs(c, fullValues); err != nil {
 		return nil, err
 	}
@@ -51,6 +57,10 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	}
 	if err := validateOutputs(c, outputValues); err != nil {
 		return nil, err
+	}
+
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainEnd(outputValues)
 	}
 
 	err = c.GetMemory().SaveContext(ctx, inputValues, outputValues)
@@ -222,6 +232,13 @@ func validateOutputs(c Chain, outputValues map[string]any) error {
 		if _, ok := outputValues[k]; !ok {
 			return fmt.Errorf("%w: %v", ErrInvalidOutputValues, k)
 		}
+	}
+	return nil
+}
+
+func getChainCallbackHandler(c Chain) callbacks.Handler {
+	if handlerHaver, ok := c.(callbacks.HandlerHaver); ok {
+		return handlerHaver.GetCallbackHandler()
 	}
 	return nil
 }
