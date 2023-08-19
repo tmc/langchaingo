@@ -1,4 +1,4 @@
-// trunk-ignore(golangci-lint/dupl)
+//nolint:dupl
 package metaphor
 
 import (
