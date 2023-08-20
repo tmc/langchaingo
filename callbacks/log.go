@@ -30,7 +30,6 @@ func (l LogHandler) HandleChainStart(inputs map[string]any) {
 }
 
 func (l LogHandler) HandleChainEnd(outputs map[string]any) {
-
 	fmt.Println("Exiting chain with outputs:", formatChainValues(outputs))
 }
 

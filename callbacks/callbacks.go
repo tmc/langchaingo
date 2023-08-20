@@ -5,7 +5,8 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// Handler is the interface that allows for hooking
+// Handler is the interface that allows for hooking into specific parts of an
+// LLM application.
 type Handler interface {
 	HandleText(text string)
 	HandleLLMStart(prompts []string)

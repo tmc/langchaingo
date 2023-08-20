@@ -88,7 +88,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		o.appendGlobalsToArgs(*opts)
 	}
 
-	generations := make([]*llms.Generation, len(prompts))
+	generations := make([]*llms.Generation, 0, len(prompts))
 	for _, prompt := range prompts {
 		result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
 			Prompt: prompt,

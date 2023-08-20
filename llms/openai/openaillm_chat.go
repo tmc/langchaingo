@@ -86,7 +86,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
-			Messages:         msgs,
+			Messages:         messagesToClientMessages(messageSet),
 			StreamingFunc:    opts.StreamingFunc,
 			Temperature:      opts.Temperature,
 			MaxTokens:        opts.MaxTokens,
@@ -173,4 +173,32 @@ func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	}
 
 	return prompts
+}
+
+func messagesToClientMessages(messages []schema.ChatMessage) []*openaiclient.ChatMessage {
+	msgs := make([]*openaiclient.ChatMessage, len(messages))
+	for i, m := range messages {
+		msg := &openaiclient.ChatMessage{
+			Content: m.GetContent(),
+		}
+		typ := m.GetType()
+		switch typ {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = "system"
+		case schema.ChatMessageTypeAI:
+			msg.Role = "assistant"
+		case schema.ChatMessageTypeHuman:
+			msg.Role = "user"
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = "user"
+		case schema.ChatMessageTypeFunction:
+			msg.Role = "function"
+		}
+		if n, ok := m.(schema.Named); ok {
+			msg.Name = n.GetName()
+		}
+		msgs[i] = msg
+	}
+
+	return msgs
 }
