@@ -130,6 +130,10 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		})
 	}
 
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+	}
+
 	return generations, nil
 }
 

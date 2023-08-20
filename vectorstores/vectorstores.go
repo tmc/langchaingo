@@ -3,6 +3,7 @@ package vectorstores
 import (
 	"context"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -15,16 +16,30 @@ type VectorStore interface {
 
 // Retriever is a retriever for vector stores.
 type Retriever struct {
-	v       VectorStore
-	numDocs int
-	options []Option
+	CallbacksHandler callbacks.Handler
+	v                VectorStore
+	numDocs          int
+	options          []Option
 }
 
 var _ schema.Retriever = Retriever{}
 
 // GetRelevantDocuments returns documents using the vector store.
 func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
-	return r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
+	if r.CallbacksHandler != nil {
+		r.CallbacksHandler.HandleRetrieverStart(query)
+	}
+
+	docs, err := r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
+	if err != nil {
+		return nil, err
+	}
+
+	if r.CallbacksHandler != nil {
+		r.CallbacksHandler.HandleRetrieverEnd(docs)
+	}
+
+	return docs, nil
 }
 
 // ToRetriever takes a vector store and returns a retriever using the

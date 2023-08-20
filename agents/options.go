@@ -1,6 +1,7 @@
 package agents
 
 import (
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -10,6 +11,7 @@ import (
 type CreationOptions struct {
 	prompt                  prompts.PromptTemplate
 	memory                  schema.Memory
+	callbacksHandler        callbacks.Handler
 	maxIterations           int
 	returnIntermediateSteps bool
 	outputKey               string
@@ -129,5 +131,11 @@ func WithReturnIntermediateSteps() CreationOption {
 func WithMemory(m schema.Memory) CreationOption {
 	return func(co *CreationOptions) {
 		co.memory = m
+	}
+}
+
+func WithCallbacksHandler(handler callbacks.Handler) CreationOption {
+	return func(co *CreationOptions) {
+		co.callbacksHandler = handler
 	}
 }

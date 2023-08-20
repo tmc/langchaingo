@@ -5,6 +5,7 @@ import (
 	"context"
 	"text/template"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/zapier/internal"
 )
@@ -15,11 +16,12 @@ type description struct {
 }
 
 type Tool struct {
-	client      *internal.Client
-	name        string
-	description string
-	actionID    string
-	params      map[string]string
+	CallbacksHandler callbacks.Handler
+	client           *internal.Client
+	name             string
+	description      string
+	actionID         string
+	params           map[string]string
 }
 
 var _ tools.Tool = Tool{}
@@ -77,9 +79,17 @@ func (t Tool) Description() string {
 }
 
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(input)
+	}
+
 	result, err := t.client.ExecuteAsString(ctx, t.actionID, input, t.params)
 	if err != nil {
 		return "", err
+	}
+
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolEnd(result)
 	}
 
 	return result, nil

@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )
 
 // Calculator is a tool that can do math.
-type Calculator struct{}
+type Calculator struct {
+	CallbacksHandler callbacks.Handler
+}
 
 var _ Tool = Calculator{}
 
@@ -28,10 +31,19 @@ func (c Calculator) Name() string {
 // string. If the evaluator errors the error is given in the result to give the
 // agent the ability to retry.
 func (c Calculator) Call(_ context.Context, input string) (string, error) {
+	if c.CallbacksHandler != nil {
+		c.CallbacksHandler.HandleToolStart(input)
+	}
+
 	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", input, math.Module.Members)
 	if err != nil {
 		return fmt.Sprintf("error from evaluator: %s", err.Error()), nil //nolint:nilerr
 	}
+	result := v.String()
 
-	return v.String(), nil
+	if c.CallbacksHandler != nil {
+		c.CallbacksHandler.HandleToolEnd(result)
+	}
+
+	return result, nil
 }
