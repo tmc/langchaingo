@@ -1,6 +1,5 @@
-package callbacks
-
 //nolint:forbidigo
+package callbacks
 
 import (
 	"fmt"

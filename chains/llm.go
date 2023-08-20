@@ -23,8 +23,10 @@ type LLMChain struct {
 	OutputKey string
 }
 
-var _ Chain = &LLMChain{}
-var _ callbacks.HandlerHaver = &LLMChain{}
+var (
+	_ Chain                  = &LLMChain{}
+	_ callbacks.HandlerHaver = &LLMChain{}
+)
 
 // NewLLMChain creates a new LLMChain with an llm and a prompt.
 func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter) *LLMChain {
