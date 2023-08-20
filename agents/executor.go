@@ -67,32 +67,43 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		}
 
 		for _, action := range actions {
-			if e.CallbacksHandler != nil {
-				e.CallbacksHandler.HandleAgentAction(action)
-			}
-
-			tool, ok := nameToTool[strings.ToUpper(action.Tool)]
-			if !ok {
-				steps = append(steps, schema.AgentStep{
-					Action:      action,
-					Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
-				})
-				continue
-			}
-
-			observation, err := tool.Call(ctx, action.ToolInput)
+			steps, err = e.doAction(ctx, steps, nameToTool, action)
 			if err != nil {
 				return nil, err
 			}
-
-			steps = append(steps, schema.AgentStep{
-				Action:      action,
-				Observation: observation,
-			})
 		}
 	}
 
 	return nil, ErrNotFinished
+}
+
+func (e Executor) doAction(
+	ctx context.Context,
+	steps []schema.AgentStep,
+	nameToTool map[string]tools.Tool,
+	action schema.AgentAction,
+) ([]schema.AgentStep, error) {
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleAgentAction(action)
+	}
+
+	tool, ok := nameToTool[strings.ToUpper(action.Tool)]
+	if !ok {
+		return append(steps, schema.AgentStep{
+			Action:      action,
+			Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
+		}), nil
+	}
+
+	observation, err := tool.Call(ctx, action.ToolInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(steps, schema.AgentStep{
+		Action:      action,
+		Observation: observation,
+	}), nil
 }
 
 func (e Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
