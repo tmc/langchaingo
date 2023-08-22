@@ -1,4 +1,4 @@
-package vertexai
+package vertexaichat
 
 import (
 	"context"
@@ -11,13 +11,14 @@ import (
 	"github.com/tmc/langchaingo/llms/vertexai"
 )
 
-func TestVertexAIPaLMEmbeddings(t *testing.T) {
+func TestVertexAIChatEmbeddings(t *testing.T) {
 	t.Parallel()
 
 	if gcpProjectID := os.Getenv("GOOGLE_CLOUD_PROJECT"); gcpProjectID == "" {
 		t.Skip("GOOGLE_CLOUD_PROJECT not set")
 	}
-	e, err := NewVertexAIPaLM()
+
+	e, err := NewChatVertexAI()
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
@@ -28,17 +29,17 @@ func TestVertexAIPaLMEmbeddings(t *testing.T) {
 	assert.Len(t, embeddings, 3)
 }
 
-func TestVertexAIPaLMEmbeddingsWithOptions(t *testing.T) {
+func TestVertexAIChatEmbeddingsWithOptions(t *testing.T) {
 	t.Parallel()
 
 	if gcpProjectID := os.Getenv("GOOGLE_CLOUD_PROJECT"); gcpProjectID == "" {
 		t.Skip("GOOGLE_CLOUD_PROJECT not set")
 	}
 
-	client, err := vertexai.New()
+	client, err := vertexai.NewChat()
 	require.NoError(t, err)
 
-	e, err := NewVertexAIPaLM(WithClient(*client), WithBatchSize(5), WithStripNewLines(false))
+	e, err := NewChatVertexAI(WithClient(*client), WithBatchSize(5), WithStripNewLines(false))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
