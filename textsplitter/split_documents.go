@@ -87,15 +87,13 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 			}
 
 			for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
-				if len(currentDoc) == 0 {
-					continue
+				if len(currentDoc) > 0 {
+					total -= len(currentDoc[0])
+					if len(currentDoc) > 1 {
+						total -= len(separator)
+					}
+					currentDoc = currentDoc[1:]
 				}
-
-				total -= len(currentDoc[0])
-				if len(currentDoc) > 1 {
-					total -= len(separator)
-				}
-				currentDoc = currentDoc[1:]
 			}
 		}
 
