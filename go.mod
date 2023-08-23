@@ -4,12 +4,12 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 )
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
-	cloud.google.com/go/compute v1.19.0 // indirect
+	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.0.1 // indirect
 	cloud.google.com/go/longrunning v0.4.2 // indirect
@@ -62,11 +62,15 @@ require (
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
+	google.golang.org/genproto v0.0.0-20230526161137-0005af68ea54 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230525234035-dd9d682886f9 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -85,12 +89,11 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.24
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
-	github.com/weaviate/weaviate v1.19.0
+	github.com/weaviate/weaviate v1.19.13
 	github.com/weaviate/weaviate-go-client/v4 v4.8.1
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17
-	golang.org/x/net v0.10.0
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	google.golang.org/api v0.122.0
-	google.golang.org/grpc v1.55.0
+	google.golang.org/grpc v1.57.0
 	google.golang.org/protobuf v1.30.0
 )
