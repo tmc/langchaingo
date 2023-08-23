@@ -29,7 +29,7 @@ func (m Simple) SaveContext(context.Context, map[string]any, map[string]any) err
 	return nil
 }
 
-func (m Simple) Clear() error {
+func (m Simple) Clear(context.Context) error {
 	return nil
 }
 

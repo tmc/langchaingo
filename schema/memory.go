@@ -14,5 +14,5 @@ type Memory interface {
 	// SaveContext Save the context of this model run to memory.
 	SaveContext(ctx context.Context, inputs map[string]any, outputs map[string]any) error
 	// Clear memory contents.
-	Clear() error
+	Clear(ctx context.Context) error
 }

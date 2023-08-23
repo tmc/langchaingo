@@ -89,7 +89,7 @@ func (t testChatMessageHistory) AddMessage(context.Context, schema.ChatMessage) 
 	return nil
 }
 
-func (t testChatMessageHistory) Clear() error {
+func (t testChatMessageHistory) Clear(context.Context) error {
 	return nil
 }
 
