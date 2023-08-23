@@ -40,6 +40,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 	return r[0].Message, nil
 }
 
+//nolint:funlen
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
 	opts := llms.CallOptions{}
 	for _, opt := range options {
@@ -58,6 +59,12 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 				msg.Role = "system"
 			case schema.ChatMessageTypeAI:
 				msg.Role = "assistant"
+				if aiChatMsg, ok := m.(schema.AIChatMessage); ok && aiChatMsg.FunctionCall != nil {
+					msg.FunctionCall = &openaiclient.FunctionCall{
+						Name:      aiChatMsg.FunctionCall.Name,
+						Arguments: aiChatMsg.FunctionCall.Arguments,
+					}
+				}
 			case schema.ChatMessageTypeHuman:
 				msg.Role = "user"
 			case schema.ChatMessageTypeGeneric:
