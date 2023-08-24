@@ -11,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
+// Documents defines a tool implementation for the Metaphor Web scrapper.
 type Documents struct {
 	client  *metaphor.Client
 	options []metaphor.ClientOptions
@@ -18,6 +19,10 @@ type Documents struct {
 
 var _ tools.Tool = &Documents{}
 
+// NewDocuments creates a new instance of the Documents struct.
+//
+// The function takes in optional metaphorm.ClientOptions as parameters.
+// It returns a pointer to a Documents struct and an error.
 func NewDocuments(options ...metaphor.ClientOptions) (*Documents, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
 
@@ -32,14 +37,26 @@ func NewDocuments(options ...metaphor.ClientOptions) (*Documents, error) {
 	}, nil
 }
 
+// SetOptions sets the options for the Documents struct.
+//
+// It takes in variadic parameter(s) of type `metaphor.ClientOptions`.
 func (tool *Documents) SetOptions(options ...metaphor.ClientOptions) {
 	tool.options = options
 }
 
+// Name returns the name of the Documents tool.
+//
+// It does not take any parameters.
+// It returns a string, which is the name of the tool.
 func (tool *Documents) Name() string {
 	return "Metaphor Contents Extractor"
 }
 
+// Description returns the contents of web pages based on a list of ID strings.
+//
+// It is designed to be used with Metaphor Search and/or Metaphor Links Search Tool.
+// The expected input format is a list of ID strings obtained from either Metaphor Search or Metaphor Search Links tool.
+// The function returns a string.
 func (tool *Documents) Description() string {
 	return `
 	To be used with Metaphor Search and/or Metaphor Links Search Tool.
@@ -49,6 +66,11 @@ func (tool *Documents) Description() string {
 	"8U71IlQ5DUTdsherhhYA,9segZCZGNjjQB2yD2uyK,..."`
 }
 
+// Call calls the Documents API with the given input and returns the formatted contents.
+//
+// The input is a string that contains a comma-separated list of IDs.
+//
+// It returns a string which represents the formatted contents and an error if any.
 func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
 	ids := strings.Split(input, ",")
 	for i, id := range ids {

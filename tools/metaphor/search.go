@@ -11,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
+// Search defines a tool implementation for the Metaphor Search.
 type Search struct {
 	client  *metaphor.Client
 	options []metaphor.ClientOptions
@@ -18,6 +19,10 @@ type Search struct {
 
 var _ tools.Tool = &Search{}
 
+// NewSearch creates a new Metaphot Search instance.
+//
+// It accepts an optional variadic parameter of type metaphor.ClientOptions.
+// The function returns a pointer to a Search instance and an error.
 func NewSearch(options ...metaphor.ClientOptions) (*Search, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
 
@@ -34,14 +39,25 @@ func NewSearch(options ...metaphor.ClientOptions) (*Search, error) {
 	return metaphor, nil
 }
 
+// SetOptions sets the options for the Search tool.
+//
+// options is a variadic parameter of type metaphor.ClientOptions.
 func (tool *Search) SetOptions(options ...metaphor.ClientOptions) {
 	tool.options = options
 }
 
+// Name returns the name of the Search tool.
+//
+// This function takes no parameters.
+// It returns a string.
 func (tool *Search) Name() string {
 	return "Metaphor Search"
 }
 
+// Description returns the description of the Search tool.
+//
+// This function does not take any parameters.
+// It returns a string that contains the description of the Search tool.
 func (tool *Search) Description() string {
 	return `
 	Metaphor Search uses a transformer architecture to predict links given text,
@@ -53,6 +69,10 @@ func (tool *Search) Description() string {
 	`
 }
 
+// Call performs a search using the Search client.
+//
+// It takes a context.Context and a search query as string input as parameters.
+// It returns a string and an error.
 func (tool *Search) Call(ctx context.Context, input string) (string, error) {
 	response, err := tool.client.Search(ctx, input, tool.options...)
 	if err != nil {

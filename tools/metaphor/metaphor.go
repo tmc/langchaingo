@@ -15,16 +15,25 @@ import (
 
 var _ tools.Tool = &API{}
 
+// API defines a tool implementation for the Metaphor API.
 type API struct {
 	client *metaphor.Client
 }
 
+// ToolInput defines a struct the tool expects as input.
 type ToolInput struct {
 	Operation  string                  `json:"operation"`
 	Input      string                  `json:"input"`
 	ReqOptions metaphor.RequestOptions `json:"reqOptions"`
 }
 
+// NewClient initializes a new API client.
+//
+// It retrieves the API key from the environment variable "METAPHOR_API_KEY"
+// and creates a new client using the retrieved API key. If the API key is not
+// set or an error occurs during client creation, an error is returned.
+//
+// Returns a pointer to the created API client and an error, if any.
 func NewClient() (*API, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
 
@@ -38,10 +47,20 @@ func NewClient() (*API, error) {
 	}, nil
 }
 
+// Name returns the name of the tool.
+//
+// No parameters.
+// Returns a string.
 func (tool *API) Name() string {
 	return "Metaphor API Tool"
 }
 
+// Description returns the Description of the tool.
+// Description contains a short instruction how to use the tool
+// with the Metaphor API
+//
+// No parameters.
+// Returns a string.
 func (tool *API) Description() string {
 	return `
 	Metaphor API Tool is a tool to interact with the Metaphor API. Metaphor is a search engine
@@ -129,6 +148,21 @@ func (tool *API) Description() string {
 			An array of document IDs obtained from either /search or /findSimilar endpoints.`
 }
 
+// Call is a function that takes a context and an input string and returns a string and an error.
+//
+// The function expects a JSON string as input and unmarshals it into a ToolInput struct.
+// It then performs different operations based on the value of the Operation field in the ToolInput struct.
+// The supported operations are "Search", "FindSimilar", and "GetContents".
+//
+// If the Operation is "Search", the function calls the performSearch method passing the
+// context and the ToolInput struct.
+// If the Operation is "FindSimilar", the function calls the findSimilar method passing the
+// context and the ToolInput struct.
+// If the Operation is "GetContents", the function calls the getContents method passing the
+// context and the ToolInput struct.
+//
+// The function returns the result of the respective operation or an empty string and nil
+// if the Operation is not supported.
 func (tool *API) Call(ctx context.Context, input string) (string, error) {
 	var toolInput ToolInput
 
