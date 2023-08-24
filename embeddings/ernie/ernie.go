@@ -9,28 +9,41 @@ import (
 
 // Ernie https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
 type Ernie struct {
-	client *ernie.LLM
+	client        *ernie.LLM
+	batchSize     int
+	stripNewLines bool
 }
 
 var _ embeddings.Embedder = &Ernie{}
 
-// todo: use option pass, more: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu#body%E5%8F%82%E6%95%B0
-const batchSize = 16
-
-func NewErnie() (*Ernie, error) {
-	llm, e := ernie.New()
-	if e != nil {
-		return nil, e
+// NewErnie creates a new Ernie with options. Options for client, strip new lines and batch size.
+func NewErnie(opts ...Option) (*Ernie, error) {
+	v := &Ernie{
+		stripNewLines: defaultStripNewLines,
+		batchSize:     defaultBatchSize,
 	}
-	return &Ernie{client: llm}, nil
+
+	for _, opt := range opts {
+		opt(v)
+	}
+
+	if v.client == nil {
+		client, err := ernie.New()
+		if err != nil {
+			return nil, err
+		}
+		v.client = client
+	}
+
+	return v, nil
 }
 
 // EmbedDocuments implements embeddings.Embedder .
 // simple impl.
 func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := embeddings.BatchTexts(
-		embeddings.MaybeRemoveNewLines(texts, true),
-		batchSize,
+		embeddings.MaybeRemoveNewLines(texts, e.stripNewLines),
+		e.batchSize,
 	)
 
 	emb := make([][]float64, 0, len(texts))
