@@ -82,6 +82,7 @@ require (
 	github.com/jackc/pgx/v5 v5.4.1
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/metaphorsystems/metaphor-go v0.0.0-20230816231421-43794c04824e
 	github.com/microcosm-cc/bluemonday v1.0.24
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
