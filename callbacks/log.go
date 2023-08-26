@@ -2,6 +2,7 @@
 package callbacks
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,43 +15,43 @@ type LogHandler struct{}
 
 var _ Handler = LogHandler{}
 
-func (l LogHandler) HandleText(text string) {
+func (l LogHandler) HandleText(ctx context.Context, text string) {
 	fmt.Println(text)
 }
 
-func (l LogHandler) HandleLLMStart(prompts []string) {
+func (l LogHandler) HandleLLMStart(ctx context.Context, prompts []string) {
 	fmt.Println("Entering LLM with prompts:", prompts)
 }
 
-func (l LogHandler) HandleLLMEnd(output llms.LLMResult) {
+func (l LogHandler) HandleLLMEnd(ctx context.Context, output llms.LLMResult) {
 	fmt.Println("Exiting LLM with results:", formatLLMResult(output))
 }
 
-func (l LogHandler) HandleChainStart(inputs map[string]any) {
+func (l LogHandler) HandleChainStart(ctx context.Context, inputs map[string]any) {
 	fmt.Println("Entering chain with inputs:", formatChainValues(inputs))
 }
 
-func (l LogHandler) HandleChainEnd(outputs map[string]any) {
+func (l LogHandler) HandleChainEnd(ctx context.Context, outputs map[string]any) {
 	fmt.Println("Exiting chain with outputs:", formatChainValues(outputs))
 }
 
-func (l LogHandler) HandleToolStart(input string) {
+func (l LogHandler) HandleToolStart(ctx context.Context, input string) {
 	fmt.Println("Entering tool with input:", removeNewLines(input))
 }
 
-func (l LogHandler) HandleToolEnd(output string) {
+func (l LogHandler) HandleToolEnd(ctx context.Context, output string) {
 	fmt.Println("Exiting tool with output:", removeNewLines(output))
 }
 
-func (l LogHandler) HandleAgentAction(action schema.AgentAction) {
+func (l LogHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {
 	fmt.Println("Agent selected action:", formatAgentAction(action))
 }
 
-func (l LogHandler) HandleRetrieverStart(query string) {
+func (l LogHandler) HandleRetrieverStart(ctx context.Context, query string) {
 	fmt.Println("Entering retriever with query:", removeNewLines(query))
 }
 
-func (l LogHandler) HandleRetrieverEnd(documents []schema.Document) {
+func (l LogHandler) HandleRetrieverEnd(ctx context.Context, documents []schema.Document) {
 	fmt.Println("Exiting retirer with documents:", documents)
 }
 

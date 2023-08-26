@@ -44,7 +44,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 
 	callbacksHandler := getChainCallbackHandler(c)
 	if callbacksHandler != nil {
-		callbacksHandler.HandleChainStart(inputValues)
+		callbacksHandler.HandleChainStart(ctx, inputValues)
 	}
 
 	if err := validateInputs(c, fullValues); err != nil {
@@ -60,7 +60,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	}
 
 	if callbacksHandler != nil {
-		callbacksHandler.HandleChainEnd(outputValues)
+		callbacksHandler.HandleChainEnd(ctx, outputValues)
 	}
 
 	err = c.GetMemory().SaveContext(ctx, inputValues, outputValues)

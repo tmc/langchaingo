@@ -40,7 +40,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(prompts)
+		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
 	}
 
 	opts := &llms.CallOptions{Model: defaultModel}
@@ -68,7 +68,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}
 
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
 	}
 	return generations, nil
 }

@@ -30,9 +30,9 @@ func (c Calculator) Name() string {
 // Call evaluates the input using a starlak evaluator and returns the result as a
 // string. If the evaluator errors the error is given in the result to give the
 // agent the ability to retry.
-func (c Calculator) Call(_ context.Context, input string) (string, error) {
+func (c Calculator) Call(ctx context.Context, input string) (string, error) {
 	if c.CallbacksHandler != nil {
-		c.CallbacksHandler.HandleToolStart(input)
+		c.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
 	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", input, math.Module.Members)
@@ -42,7 +42,7 @@ func (c Calculator) Call(_ context.Context, input string) (string, error) {
 	result := v.String()
 
 	if c.CallbacksHandler != nil {
-		c.CallbacksHandler.HandleToolEnd(result)
+		c.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return result, nil

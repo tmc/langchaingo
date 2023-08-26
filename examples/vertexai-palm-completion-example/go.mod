@@ -2,7 +2,7 @@ module vertexai-palm-completion-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230729231952-1f3948210849
+require github.com/tmc/langchaingo v0.0.0-20230826015154-aa97aec400c0
 
 require (
 	cloud.google.com/go v0.110.0 // indirect

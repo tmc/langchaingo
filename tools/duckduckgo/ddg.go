@@ -44,7 +44,7 @@ func (t Tool) Description() string {
 // Call performs the search and return the result.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(input)
+		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
 	result, err := t.client.Search(ctx, input)
@@ -56,7 +56,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	}
 
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolEnd(result)
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return result, nil

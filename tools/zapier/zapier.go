@@ -80,7 +80,7 @@ func (t Tool) Description() string {
 
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(input)
+		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
 	result, err := t.client.ExecuteAsString(ctx, t.actionID, input, t.params)
@@ -89,7 +89,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	}
 
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolEnd(result)
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return result, nil

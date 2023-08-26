@@ -27,7 +27,7 @@ var _ schema.Retriever = Retriever{}
 // GetRelevantDocuments returns documents using the vector store.
 func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
 	if r.CallbacksHandler != nil {
-		r.CallbacksHandler.HandleRetrieverStart(query)
+		r.CallbacksHandler.HandleRetrieverStart(ctx, query)
 	}
 
 	docs, err := r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
@@ -36,7 +36,7 @@ func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]sc
 	}
 
 	if r.CallbacksHandler != nil {
-		r.CallbacksHandler.HandleRetrieverEnd(docs)
+		r.CallbacksHandler.HandleRetrieverEnd(ctx, docs)
 	}
 
 	return docs, nil

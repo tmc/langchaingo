@@ -45,7 +45,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 //nolint:funlen
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(getPromptsFromMessageSets(messageSets))
+		o.CallbacksHandler.HandleLLMStart(ctx, getPromptsFromMessageSets(messageSets))
 	}
 
 	opts := llms.CallOptions{}
@@ -131,7 +131,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
 	}
 
 	return generations, nil

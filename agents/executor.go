@@ -86,7 +86,7 @@ func (e Executor) doAction(
 	action schema.AgentAction,
 ) ([]schema.AgentStep, error) {
 	if e.CallbacksHandler != nil {
-		e.CallbacksHandler.HandleAgentAction(action)
+		e.CallbacksHandler.HandleAgentAction(ctx, action)
 	}
 
 	tool, ok := nameToTool[strings.ToUpper(action.Tool)]

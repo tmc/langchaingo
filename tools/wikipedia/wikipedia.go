@@ -60,7 +60,7 @@ func (t Tool) Description() string {
 // the first part of the documents combined.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(input)
+		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
 	searchResult, err := search(ctx, t.TopK, input, t.LanguageCode, t.UserAgent)
@@ -92,7 +92,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	}
 
 	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolEnd(result)
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return result, nil
