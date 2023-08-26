@@ -38,7 +38,7 @@ func (m *ConversationBuffer) MemoryVariables(context.Context) []string {
 
 // LoadMemoryVariables returns the previous chat messages stored in memory. Previous chat messages
 // are returned in a map with the key specified in the MemoryKey field. This key defaults to
-// "history". If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise
+// "history". If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise,
 // the output is a buffer string of the chat messages.
 func (m *ConversationBuffer) LoadMemoryVariables(
 	ctx context.Context, _ map[string]any,
@@ -98,8 +98,8 @@ func (m *ConversationBuffer) SaveContext(
 }
 
 // Clear sets the chat messages to a new and empty chat message history.
-func (m *ConversationBuffer) Clear() error {
-	return m.ChatHistory.Clear()
+func (m *ConversationBuffer) Clear(ctx context.Context) error {
+	return m.ChatHistory.Clear(ctx)
 }
 
 func (m *ConversationBuffer) GetMemoryKey(context.Context) string {

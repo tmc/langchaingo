@@ -14,7 +14,7 @@ type ChatMessageHistory interface {
 	AddMessage(ctx context.Context, message ChatMessage) error
 
 	// Clear Remove all messages from the store.
-	Clear() error
+	Clear(ctx context.Context) error
 
 	// Messages get all messages from the store
 	Messages(ctx context.Context) ([]ChatMessage, error)

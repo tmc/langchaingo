@@ -86,8 +86,8 @@ func (tb *ConversationTokenBuffer) SaveContext(
 }
 
 // Clear uses ConversationBuffer method for clearing buffer memory.
-func (tb *ConversationTokenBuffer) Clear() error {
-	return tb.ConversationBuffer.Clear()
+func (tb *ConversationTokenBuffer) Clear(ctx context.Context) error {
+	return tb.ConversationBuffer.Clear(ctx)
 }
 
 func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context) (int, error) {

@@ -27,12 +27,11 @@ type options struct {
 	baseURL      string
 	organization string
 	apiType      APIType
+	httpClient   openaiclient.Doer
 
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion     string
 	embeddingModel string
-
-	httpClient openaiclient.Doer
 }
 
 type Option func(*options)
