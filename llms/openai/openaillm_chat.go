@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 	"github.com/tmc/langchaingo/schema"
@@ -12,8 +13,16 @@ import (
 type ChatMessage = openaiclient.ChatMessage
 
 type Chat struct {
-	client *openaiclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *openaiclient.Client
 }
+
+const (
+	RoleSystem    = "system"
+	RoleAssistant = "assistant"
+	RoleUser      = "user"
+	RoleFunction  = "function"
+)
 
 var (
 	_ llms.ChatLLM       = (*Chat)(nil)
@@ -42,6 +51,10 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 
 //nolint:funlen
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(ctx, getPromptsFromMessageSets(messageSets))
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -56,9 +69,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			typ := m.GetType()
 			switch typ {
 			case schema.ChatMessageTypeSystem:
-				msg.Role = "system"
+				msg.Role = RoleSystem
 			case schema.ChatMessageTypeAI:
-				msg.Role = "assistant"
+				msg.Role = RoleAssistant
 				if aiChatMsg, ok := m.(schema.AIChatMessage); ok && aiChatMsg.FunctionCall != nil {
 					msg.FunctionCall = &openaiclient.FunctionCall{
 						Name:      aiChatMsg.FunctionCall.Name,
@@ -66,11 +79,11 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 					}
 				}
 			case schema.ChatMessageTypeHuman:
-				msg.Role = "user"
+				msg.Role = RoleUser
 			case schema.ChatMessageTypeGeneric:
-				msg.Role = "user"
+				msg.Role = RoleUser
 			case schema.ChatMessageTypeFunction:
-				msg.Role = "function"
+				msg.Role = RoleFunction
 			}
 			if n, ok := m.(schema.Named); ok {
 				msg.Name = n.GetName()
@@ -80,7 +93,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
-			Messages:         msgs,
+			Messages:         messagesToClientMessages(messageSet),
 			StreamingFunc:    opts.StreamingFunc,
 			Temperature:      opts.Temperature,
 			MaxTokens:        opts.MaxTokens,
@@ -124,6 +137,10 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		})
 	}
 
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+	}
+
 	return generations, nil
 }
 
@@ -150,4 +167,45 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 		return embeddings, ErrUnexpectedResponseLength
 	}
 	return embeddings, nil
+}
+
+func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
+	prompts := make([]string, 0, len(messageSets))
+	for i := 0; i < len(messageSets); i++ {
+		curPrompt := ""
+		for j := 0; j < len(messageSets[i]); j++ {
+			curPrompt += messageSets[i][j].GetContent()
+		}
+		prompts = append(prompts, curPrompt)
+	}
+
+	return prompts
+}
+
+func messagesToClientMessages(messages []schema.ChatMessage) []*openaiclient.ChatMessage {
+	msgs := make([]*openaiclient.ChatMessage, len(messages))
+	for i, m := range messages {
+		msg := &openaiclient.ChatMessage{
+			Content: m.GetContent(),
+		}
+		typ := m.GetType()
+		switch typ {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = "system"
+		case schema.ChatMessageTypeAI:
+			msg.Role = "assistant"
+		case schema.ChatMessageTypeHuman:
+			msg.Role = "user"
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = "user"
+		case schema.ChatMessageTypeFunction:
+			msg.Role = "function"
+		}
+		if n, ok := m.(schema.Named); ok {
+			msg.Name = n.GetName()
+		}
+		msgs[i] = msg
+	}
+
+	return msgs
 }

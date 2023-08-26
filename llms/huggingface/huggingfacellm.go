@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
 	"github.com/tmc/langchaingo/schema"
@@ -17,7 +18,8 @@ var (
 )
 
 type LLM struct {
-	client *huggingfaceclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *huggingfaceclient.Client
 }
 
 var (
@@ -37,6 +39,10 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+	}
+
 	opts := &llms.CallOptions{Model: defaultModel}
 	for _, opt := range options {
 		opt(opts)
@@ -56,9 +62,15 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	if err != nil {
 		return nil, err
 	}
-	return []*llms.Generation{
+
+	generations := []*llms.Generation{
 		{Text: result.Text},
-	}, nil
+	}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+	}
+	return generations, nil
 }
 
 func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll

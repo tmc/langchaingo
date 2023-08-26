@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
@@ -18,6 +19,7 @@ func TestLLMChain(t *testing.T) {
 	}
 	model, err := openai.New()
 	require.NoError(t, err)
+	model.CallbacksHandler = callbacks.LogHandler{}
 
 	prompt := prompts.NewPromptTemplate(
 		"What is the capital of {{.country}}",

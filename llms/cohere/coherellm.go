@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cohere/internal/cohereclient"
 	"github.com/tmc/langchaingo/schema"
@@ -18,7 +19,8 @@ var (
 )
 
 type LLM struct {
-	client *cohereclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *cohereclient.Client
 }
 
 var (
@@ -38,6 +40,10 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -56,6 +62,10 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		generations = append(generations, &llms.Generation{
 			Text: result.Text,
 		})
+	}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
 	}
 
 	return generations, nil
