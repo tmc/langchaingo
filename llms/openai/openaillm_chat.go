@@ -17,6 +17,13 @@ type Chat struct {
 	client           *openaiclient.Client
 }
 
+const (
+	RoleSystem    = "system"
+	RoleAssistant = "assistant"
+	RoleUser      = "user"
+	RoleFunction  = "function"
+)
+
 var (
 	_ llms.ChatLLM       = (*Chat)(nil)
 	_ llms.LanguageModel = (*Chat)(nil)
@@ -62,9 +69,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			typ := m.GetType()
 			switch typ {
 			case schema.ChatMessageTypeSystem:
-				msg.Role = "system"
+				msg.Role = RoleSystem
 			case schema.ChatMessageTypeAI:
-				msg.Role = "assistant"
+				msg.Role = RoleAssistant
 				if aiChatMsg, ok := m.(schema.AIChatMessage); ok && aiChatMsg.FunctionCall != nil {
 					msg.FunctionCall = &openaiclient.FunctionCall{
 						Name:      aiChatMsg.FunctionCall.Name,
@@ -72,11 +79,11 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 					}
 				}
 			case schema.ChatMessageTypeHuman:
-				msg.Role = "user"
+				msg.Role = RoleUser
 			case schema.ChatMessageTypeGeneric:
-				msg.Role = "user"
+				msg.Role = RoleUser
 			case schema.ChatMessageTypeFunction:
-				msg.Role = "function"
+				msg.Role = RoleFunction
 			}
 			if n, ok := m.(schema.Named); ok {
 				msg.Name = n.GetName()
