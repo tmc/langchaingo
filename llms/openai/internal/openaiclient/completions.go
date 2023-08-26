@@ -1,19 +1,11 @@
 package openaiclient
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
 )
 
-const (
-	defaultCompletionModel = "text-davinci-003"
-)
-
-type completionPayload struct {
+// CompletionRequest is a request to complete a completion.
+type CompletionRequest struct {
 	Model            string   `json:"model"`
 	Prompt           string   `json:"prompt"`
 	Temperature      float64  `json:"temperature,omitempty"`
@@ -23,9 +15,13 @@ type completionPayload struct {
 	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
 	TopP             float64  `json:"top_p,omitempty"`
 	StopWords        []string `json:"stop,omitempty"`
+
+	// StreamingFunc is a function to be called for each chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
-type completionResponsePayload struct {
+type CompletionResponse struct {
 	ID      string  `json:"id,omitempty"`
 	Created float64 `json:"created,omitempty"`
 	Choices []struct {
@@ -50,7 +46,7 @@ type errorMessage struct {
 	} `json:"error"`
 }
 
-func (c *Client) setCompletionDefaults(payload *completionPayload) {
+func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 256
@@ -69,57 +65,25 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultCompletionModel
+		payload.Model = defaultChatModel
 	}
 }
 
 // nolint:lll
-func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*completionResponsePayload, error) {
+func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatResponse, error) {
 	c.setCompletionDefaults(payload)
-
-	// Build request payload
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("marshal payload: %w", err)
-	}
-
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
-	}
-
-	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/completions", c.Model), bytes.NewReader(payloadBytes))
-	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
-	}
-
-	c.setHeaders(req)
-
-	// Send request
-	r, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
-	}
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
-	}
-
-	// Parse response
-	var response completionResponsePayload
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("parse response: %w", err)
-	}
-
-	return &response, nil
+	return c.createChat(ctx, &ChatRequest{
+		Model: payload.Model,
+		Messages: []*ChatMessage{
+			{Role: "user", Content: payload.Prompt},
+		},
+		Temperature:      payload.Temperature,
+		TopP:             payload.TopP,
+		MaxTokens:        payload.MaxTokens,
+		N:                payload.N,
+		StopWords:        payload.StopWords,
+		FrequencyPenalty: payload.FrequencyPenalty,
+		PresencePenalty:  payload.PresencePenalty,
+		StreamingFunc:    payload.StreamingFunc,
+	})
 }

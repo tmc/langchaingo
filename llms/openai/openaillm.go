@@ -61,6 +61,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			FrequencyPenalty: opts.FrequencyPenalty,
 			PresencePenalty:  opts.PresencePenalty,
 			TopP:             opts.TopP,
+			StreamingFunc:    opts.StreamingFunc,
 		})
 		if err != nil {
 			return nil, err

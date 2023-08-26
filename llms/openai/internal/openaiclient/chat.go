@@ -16,7 +16,7 @@ const (
 	defaultChatModel = "gpt-3.5-turbo"
 )
 
-// ChatRequest is a request to create an embedding.
+// ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
 	Model            string         `json:"model"`
 	Messages         []*ChatMessage `json:"messages"`
@@ -96,7 +96,7 @@ type StreamedChatResponsePayload struct {
 			Role    string `json:"role,omitempty"`
 			Content string `json:"content,omitempty"`
 		} `json:"delta,omitempty"`
-		FinishReason interface{} `json:"finish_reason,omitempty"`
+		FinishReason string `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
 }
 
