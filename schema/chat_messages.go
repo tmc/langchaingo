@@ -96,7 +96,7 @@ type FunctionChatMessage struct {
 // FunctionCall is the name and arguments of a function call.
 type FunctionCall struct {
 	Name      string `json:"name"`
-	Arguments any    `json:"arguments"`
+	Arguments string `json:"arguments"`
 }
 
 func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeFunction }

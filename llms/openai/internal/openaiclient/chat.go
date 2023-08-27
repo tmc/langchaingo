@@ -93,8 +93,9 @@ type StreamedChatResponsePayload struct {
 	Choices []struct {
 		Index float64 `json:"index,omitempty"`
 		Delta struct {
-			Role    string `json:"role,omitempty"`
-			Content string `json:"content,omitempty"`
+			Role         string        `json:"role,omitempty"`
+			Content      string        `json:"content,omitempty"`
+			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason string `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
@@ -126,8 +127,8 @@ const (
 type FunctionCall struct {
 	// Name is the name of the function to call.
 	Name string `json:"name"`
-	// Arguments is a list of arguments to pass to the function.
-	Arguments any `json:"arguments"`
+	// Arguments is the set of arguments to pass to the function.
+	Arguments string `json:"arguments"`
 }
 
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatResponse, error) {
@@ -215,10 +216,19 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	}
 
 	for streamResponse := range responseChan {
-		if payload.StreamingFunc != nil {
-			response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		chunk := []byte(streamResponse.Choices[0].Delta.Content)
+		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		if streamResponse.Choices[0].Delta.FunctionCall != nil {
+			if response.Choices[0].Message.FunctionCall == nil {
+				response.Choices[0].Message.FunctionCall = streamResponse.Choices[0].Delta.FunctionCall
+			} else {
+				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
+			}
+			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall)
+		}
 
-			err := payload.StreamingFunc(ctx, []byte(streamResponse.Choices[0].Delta.Content))
+		if payload.StreamingFunc != nil {
+			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
