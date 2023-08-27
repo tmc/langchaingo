@@ -1,4 +1,4 @@
-# Welcome to LangChain
+# Welcome to LangChainGo
 
 LangChain is a framework for developing applications powered by language models. We believe that the most powerful and differentiated applications will not only call out to a language model via an API, but will also:
 
