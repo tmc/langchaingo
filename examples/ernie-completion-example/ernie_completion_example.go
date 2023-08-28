@@ -41,5 +41,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("emb:", len(emb))
+	fmt.Println("Embedding-V1:", len(emb), len(emb[0]))
 }
