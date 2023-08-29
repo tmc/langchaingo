@@ -10,7 +10,7 @@ const examplesPath = path.resolve(__dirname, "..", "examples");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "🦜️🔗 Langchain",
+  title: "🦜️🔗 LangchainGo",
   tagline: "LangChain Go Docs",
   favicon: "img/favicon.ico",
   customFields: {
@@ -148,7 +148,7 @@ const config = {
           },
           {
             to: "/docs/",
-            label: "GoLang Docs",
+            label: "Go Docs",
             position: "left",
           },
           // Please keep GitHub link to the right for consistency.
@@ -187,7 +187,7 @@ const config = {
                 href: "https://github.com/hwchase17/langchainjs",
               },
               {
-                label: "GoLang",
+                label: "Go",
                 href: "https://github.com/tmc/langchaingo",
               },
             ],
