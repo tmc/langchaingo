@@ -7,10 +7,11 @@ import (
 	"github.com/tmc/langchaingo/llms/ernie"
 )
 
-// Ernie https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
+// Ernie Embedding-V1 doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
 type Ernie struct {
 	client        *ernie.LLM
-	batchSize     int
+	batchSize     int // 每个文本长度不超过 384个token
+	batchCount    int // 文本数量不超过16
 	stripNewLines bool
 }
 
@@ -21,6 +22,7 @@ func NewErnie(opts ...Option) (*Ernie, error) {
 	v := &Ernie{
 		stripNewLines: defaultStripNewLines,
 		batchSize:     defaultBatchSize,
+		batchCount:    defaultBatchCount,
 	}
 
 	for _, opt := range opts {
@@ -38,8 +40,30 @@ func NewErnie(opts ...Option) (*Ernie, error) {
 	return v, nil
 }
 
-// EmbedDocuments implements embeddings.Embedder .
-// simple impl.
+// split texts with batchCount.
+func (e *Ernie) embed(ctx context.Context, texts []string) ([][]float64, error) {
+	emb := make([][]float64, 0, len(texts))
+
+	offsetLen := len(texts) / e.batchCount
+	for i := 0; i <= offsetLen; i++ {
+		start := i * e.batchCount
+		end := i*e.batchCount + e.batchCount
+
+		if end > len(texts) {
+			end = len(texts)
+		}
+
+		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts[start:end])
+		if err != nil {
+			return nil, err
+		}
+
+		emb = append(emb, curTextEmbeddings...)
+	}
+	return emb, nil
+}
+
+// EmbedDocuments use ernie Embedding-V1.
 func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, e.stripNewLines),
@@ -47,20 +71,31 @@ func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 	)
 
 	emb := make([][]float64, 0, len(texts))
-	for _, curTexts := range batchedTexts {
-		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, curTexts)
+	for _, texts := range batchedTexts {
+		curTextEmbeddings, err := e.embed(ctx, texts)
 		if err != nil {
 			return nil, err
 		}
-		emb = append(emb, curTextEmbeddings...)
+
+		textLengths := make([]int, 0, len(texts))
+		for _, text := range texts {
+			textLengths = append(textLengths, len(text))
+		}
+
+		combined, err := embeddings.CombineVectors(curTextEmbeddings, textLengths)
+		if err != nil {
+			return nil, err
+		}
+
+		emb = append(emb, combined)
 	}
 
 	return emb, nil
 }
 
-// EmbedQuery implements embeddings.Embedder.
+// EmbedQuery use ernie Embedding-V1.
 func (e *Ernie) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
-	emb, err := e.client.CreateEmbedding(ctx, []string{text})
+	emb, err := e.EmbedDocuments(ctx, []string{text})
 	if err != nil {
 		return nil, err
 	}

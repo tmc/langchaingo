@@ -47,10 +47,11 @@ func newClient(opts ...Option) (*ernieclient.Client, error) {
 
 	if options.accessToken == "" && (options.apiKey == "" || options.secretKey == "") {
 		return nil, fmt.Errorf(`%w
-you can pass auth info by use ernie.New(ernie.WithAKSK("{api Key}","{serect Key}")) ,
+You can pass auth info by use ernie.New(ernie.WithAKSK("{api Key}","{serect Key}")) ,
 or
 export ERNIE_API_KEY={API Key} 
-export ERNIE_SECRET_KEY={Secret Key}`, ernieclient.ErrNotSetAuth)
+export ERNIE_SECRET_KEY={Secret Key}
+doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNotSetAuth)
 	}
 
 	return ernieclient.New(
@@ -114,6 +115,10 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return generations, nil
 }
 
+// CreateEmbedding use ernie Embedding-V1.
+// 1. texts counts less than 16
+// 2. text runes counts less than 384
+// doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
 func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float64, error) {
 	resp, e := l.client.CreateEmbedding(ctx, texts)
 	if e != nil {

@@ -213,8 +213,7 @@ func (c *Client) CreateCompletion(ctx context.Context, modelPath ModelPath, r *C
 	return &response, json.NewDecoder(resp.Body).Decode(&response)
 }
 
-// EmbedDocuments
-// https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
+// CreateEmbedding use ernie Embedding-V1.
 func (c *Client) CreateEmbedding(ctx context.Context, texts []string) (*EmbeddingResponse, error) {
 	url := "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/embeddings/embedding-v1?access_token=" +
 		c.accessToken
