@@ -9,15 +9,15 @@ import (
 	"gitlab.com/golang-commonmark/markdown"
 )
 
-// NewMarkdownHeaderTextSplitter creates a new markdown header text splitter.
-func NewMarkdownHeaderTextSplitter(opts ...Option) *MarkdownHeaderTextSplitter {
+// NewMarkdownTextSplitter creates a new Markdown text splitter.
+func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 	options := DefaultOptions()
 
 	for _, o := range opts {
 		o(&options)
 	}
 
-	sp := &MarkdownHeaderTextSplitter{
+	sp := &MarkdownTextSplitter{
 		ChunkSize:      options.ChunkSize,
 		ChunkOverlap:   options.ChunkOverlap,
 		SecondSplitter: options.SecondSplitter,
@@ -38,14 +38,14 @@ func NewMarkdownHeaderTextSplitter(opts ...Option) *MarkdownHeaderTextSplitter {
 	return sp
 }
 
-var _ TextSplitter = (*MarkdownHeaderTextSplitter)(nil)
+var _ TextSplitter = (*MarkdownTextSplitter)(nil)
 
-// MarkdownHeaderTextSplitter markdown header text splitter.
+// MarkdownTextSplitter markdown header text splitter.
 //
 // Now, we support H1/H2/H3/H4/H5/H6, BulletList, OrderedList, Table, Paragraph, Blockquote,
 // other format will be ignored. If your origin document is HTML, you purify and convert to markdown,
 // then split it.
-type MarkdownHeaderTextSplitter struct {
+type MarkdownTextSplitter struct {
 	ChunkSize    int
 	ChunkOverlap int
 	// SecondSplitter splits paragraphs
@@ -53,7 +53,7 @@ type MarkdownHeaderTextSplitter struct {
 }
 
 // SplitText splits a text into multiple text.
-func (sp MarkdownHeaderTextSplitter) SplitText(s string) ([]string, error) {
+func (sp MarkdownTextSplitter) SplitText(s string) ([]string, error) {
 	mdParser := markdown.New(markdown.XHTMLOutput(true))
 	tokens := mdParser.Parse([]byte(s))
 

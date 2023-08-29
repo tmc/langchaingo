@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -52,7 +53,7 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 		},
 	}
 
-	splitter := NewMarkdownHeaderTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
+	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 	for _, tc := range testCases {
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		assert.NoError(t, err)
@@ -91,12 +92,12 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		splitter := NewMarkdownHeaderTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
+		splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 
-		splitter = NewMarkdownHeaderTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
+		splitter = NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err = CreateDocuments(splitter, []string{tc.markdown}, nil)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
@@ -111,7 +112,7 @@ func TestMarkdownHeaderTextSplitter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	splitter := NewMarkdownHeaderTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
+	splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 	docs, err := CreateDocuments(splitter, []string{string(data)}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -185,7 +186,7 @@ func TestMarkdownHeaderTextSplitter_BulletList(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		splitter := NewMarkdownHeaderTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
+		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
@@ -245,7 +246,7 @@ for a review.`, Metadata: map[string]any{},
 	}
 
 	for _, tc := range testCases {
-		splitter := NewMarkdownHeaderTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
+		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		assert.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
