@@ -180,7 +180,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	return &response, json.NewDecoder(r.Body).Decode(&response)
 }
 
-func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) {
+func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan StreamedChatResponsePayload)
 	go func() {
@@ -224,7 +224,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			} else {
 				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
 			}
-			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall)
+			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
 		}
 
 		if payload.StreamingFunc != nil {
