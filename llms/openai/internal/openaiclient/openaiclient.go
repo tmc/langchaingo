@@ -150,10 +150,10 @@ func IsAzure(apiType APIType) bool {
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	if IsAzure(c.apiType) {
-		req.Header.Set("api-key", c.token)
-	} else {
+	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
 		req.Header.Set("Authorization", "Bearer "+c.token)
+	} else {
+		req.Header.Set("api-key", c.token)
 	}
 	if c.organization != "" {
 		req.Header.Set("OpenAI-Organization", c.organization)
