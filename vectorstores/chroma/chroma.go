@@ -12,48 +12,72 @@ import (
 )
 
 var (
-	// TODO (noodnik2): confirm additional errors used by other adapters are irrelevant here (for consistency)
-	ErrInvalidScoreThreshold = errors.New("score threshold must be between 0 and 1")
+	ErrInvalidScoreThreshold    = errors.New("score threshold must be between 0 and 1")
+	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+	ErrResetDB                  = errors.New("error resetting database")
+	ErrNewClient                = errors.New("error creating collection")
+	ErrRemoveCollection         = errors.New("error resetting collection")
+	ErrUnsupportedOptions       = errors.New("unsupported options")
 )
 
-// Store is a wrapper around the chromaGo API and client
+// Store is a wrapper around the chromaGo API and client.
 type Store struct {
+	client           *chromago.Client
 	collection       *chromago.Collection
 	distanceFunction chromago.DistanceFunction
 	resetChroma      bool
-	chromaUrl        string
-	openaiApiKey     string
-	collectionName   string // noodnik2: preferred this to "nameSpace" since it's germaine to Chroma
+	chromaURL        string
+	openaiAPIKey     string
+	collectionName   string
 	// TODO (noodnik2): clarify need for / support of the following fields
-	//embedder    embeddings.Embedder
-	//grpcConn    *grpc.ClientConn
-	//client      pinecone_grpc.VectorServiceClient
-	//indexName   string
-	//projectName string
-	//environment string
-	//apiKey      string
-	//textKey     string
-	//nameSpace   string
-	//useGRPC     bool
+	// nameSpace   string
+	// embedder    embeddings.Embedder
+	// grpcConn    *grpc.ClientConn
+	// client      pinecone_grpc.VectorServiceClient
+	// indexName   string
+	// projectName string
+	// environment string
+	// apiKey      string
+	// textKey     string
+	// useGRPC     bool
 }
 
 // TODO (noodnik2): (why) is this needed?
-//var _ vectorstores.VectorStore = Store{}
+// var _ vectorstores.VectorStore = Store{}
 
 func New(_ context.Context, opts ...Option) (Store, error) {
-	store, coErr := applyClientOptions(opts...)
+	s, coErr := applyClientOptions(opts...)
 	if coErr != nil {
-		return Store{}, coErr
+		return s, coErr
 	}
-	col, cgErr := newChromaGo(store)
-	if cgErr != nil {
-		return Store{}, cgErr
+
+	s.client = chromago.NewClient(s.chromaURL)
+	if s.resetChroma {
+		// TODO (noodnik2): is this really needed?
+		if _, errRest := s.client.Reset(); errRest != nil {
+			return s, fmt.Errorf("%w: %w", ErrResetDB, errRest)
+		}
 	}
-	store.collection = col
-	return store, nil
+
+	embeddingFunction := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
+	// TODO (noodnik2): integrate "embedding function" similar to the other vectorstore adapters
+	col, errCc := s.client.CreateCollection(s.collectionName, map[string]any{}, true,
+		embeddingFunction, s.distanceFunction)
+	if errCc != nil {
+		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
+	}
+
+	s.collection = col
+	return s, nil
 }
 
-func (s Store) AddDocuments(_ context.Context, docs []schema.Document, _ ...vectorstores.Option) error {
+func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+	opts := s.getOptions(options...)
+	if opts.NameSpace != "" || opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
+		// TODO (noodnik2): implement (some of?) these
+		return ErrUnsupportedOptions
+	}
+
 	ids := make([]string, len(docs))
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
@@ -67,17 +91,19 @@ func (s Store) AddDocuments(_ context.Context, docs []schema.Document, _ ...vect
 	if _, addErr := col.Add(nil, metadatas, texts, ids); addErr != nil {
 		return fmt.Errorf("adding documents: %w", addErr)
 	}
-	//countDocs, countErr := col.Count()
-	//if countErr != nil {
-	//	return fmt.Errorf("counting documents: %s", countErr)
-	//}
-	//fmt.Printf("document count: %v\n", countDocs)
 	return nil
 }
 
-func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) {
-	//fmt.Printf("querying query(%v)\n", query)
+func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
+
+	if opts.NameSpace != "" || opts.Embedder != nil {
+		// TODO (noodnik2): implement these
+		return nil, fmt.Errorf("%w: NameSpace, Embedder", ErrUnsupportedOptions)
+	}
+
 	scoreThreshold, stErr := s.getScoreThreshold(opts)
 	if stErr != nil {
 		return nil, stErr
@@ -87,17 +113,15 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	if queryErr != nil {
 		return nil, queryErr
 	}
-	//fmt.Printf("qr: %v\n", qr.Documents[0][0])
 
 	if len(qr.Documents) != len(qr.Metadatas) || len(qr.Metadatas) != len(qr.Distances) {
-		return nil, fmt.Errorf("unexpected lengths: qr.Documents[%d], qr.Metadatas[%d], qr.Distances[%d]\n",
-			len(qr.Documents), len(qr.Metadatas), len(qr.Distances))
+		return nil, fmt.Errorf("%w: qr.Documents[%d], qr.Metadatas[%d], qr.Distances[%d]",
+			ErrUnexpectedResponseLength, len(qr.Documents), len(qr.Metadatas), len(qr.Distances))
 	}
 	var sDocs []schema.Document
 	for docsI := range qr.Documents {
 		for docI := range qr.Documents[docsI] {
 			distanceFound := float64(qr.Distances[docsI][docI])
-			//fmt.Printf("df(%f), st(%f)\n", distanceFound, scoreThreshold)
 			if (1.0 - distanceFound) >= scoreThreshold {
 				sDocs = append(sDocs, schema.Document{
 					Metadata:    qr.Metadatas[docsI][docI],
@@ -110,31 +134,25 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	return sDocs, nil
 }
 
-func newChromaGo(s Store) (*chromago.Collection, error) {
-	client := chromago.NewClient(s.chromaUrl)
-	if s.resetChroma {
-		// TODO (noodnik2): is this really needed?
-		if _, errRest := client.Reset(); errRest != nil {
-			return nil, fmt.Errorf("resetting database: %w", errRest)
-		}
+func (s Store) RemoveCollection() error {
+	if s.client == nil || s.collection == nil {
+		return fmt.Errorf("%w: no collection", ErrRemoveCollection)
 	}
-	embeddingFunction := openai.NewOpenAIEmbeddingFunction(s.openaiApiKey)
-	// TODO (noodnik2): integrate "embedding function" similar to the other vectorstore adapters
-	col, errCreate := client.CreateCollection(s.collectionName, map[string]any{}, true, embeddingFunction, s.distanceFunction)
-	if errCreate != nil {
-		return nil, fmt.Errorf("creating collection: %w", errCreate)
+	_, errDc := s.client.DeleteCollection(s.collection.Name)
+	if errDc != nil {
+		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name, errDc)
 	}
-	return col, nil
+	return nil
 }
 
 // TODO (noodnik2): does this map to chroma.Store.collectionName?  E.g., for consistency with
 //  the existing model, or to leave it in the local "chroma.Option" where it is now?
-//func (s Store) getNameSpace(opts vectorstores.Options) string {
-//	if opts.NameSpace != "" {
-//		return opts.NameSpace
-//	}
-//	return s.nameSpace
-//}
+//  func (s Store) getNameSpace(opts vectorstores.Options) string {
+//  	if opts.NameSpace != "" {
+//  		return opts.NameSpace
+//  	}
+//  	return s.nameSpace
+//  }
 
 func (s Store) getScoreThreshold(opts vectorstores.Options) (float64, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {

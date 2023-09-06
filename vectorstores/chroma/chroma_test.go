@@ -2,6 +2,7 @@ package chroma_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -18,62 +19,64 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
 
-// TODO (noodnik2): update documentation to reflect the need to have a running Chroma server before running these tests
-const chromaTestUrl = "http://localhost:8000"
-const chromaTestCollection = "test-collection"
+const chromaTestURL = "http://localhost:8000"
 
-// TODO (noodnik2): add relevant tests from "weaviate_test.go" (these are based upon those found in "pinecone_test.go")
-// TODO (noodnik2): consider refactoring out standard set of vectorstore unit tests to run across all implementations
+// TODO (noodnik2):
+//  update documentation to reflect the need to have a running Chroma server before running these tests
+//  add relevant tests from "weaviate_test.go" (the initial tests are based upon those found in "pinecone_test.go")
+//  consider refactoring out standard set of vectorstore unit tests to run across all implementations
 
 func TestChromaGoStoreRest(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	storer, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
 		chroma.WithDistanceFunction(chromago.COSINE),
-		chroma.WithResetChroma(true),
-		//chroma.WithEmbedder(e),
+		// chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
+
+	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
 
-	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1)
+	docs, err := s.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, docs[0].PageContent, "tokyo")
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e , err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	storer, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
 		chroma.WithDistanceFunction(chromago.COSINE),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
+
+	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -88,14 +91,14 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	// test with a score threshold of 0.8, expected 6 documents
-	docs, err := storer.SimilaritySearch(context.Background(),
+	docs, err := s.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.8))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
 
 	// test with a score threshold of 0, expected all 10 documents
-	docs, err = storer.SimilaritySearch(context.Background(),
+	docs, err = s.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0))
 	require.NoError(t, err)
@@ -103,23 +106,24 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	storer, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
+
+	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -133,44 +137,42 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	_, err = storer.SimilaritySearch(context.Background(),
+	_, err = s.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8))
 	require.Error(t, err)
 
-	_, err = storer.SimilaritySearch(context.Background(),
+	_, err = s.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
 	require.Error(t, err)
 }
 
 func TestChromaAsRetriever(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	err = store.AddDocuments(
+	err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
 			{PageContent: "The color of the desk is orange."},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
 
@@ -181,7 +183,7 @@ func TestChromaAsRetriever(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(id)),
+			vectorstores.ToRetriever(s, 1),
 		),
 		"What color is the desk?",
 	)
@@ -190,25 +192,24 @@ func TestChromaAsRetriever(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	err = store.AddDocuments(
+	err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -217,7 +218,6 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 			{PageContent: "The color of the lamp beside the desk is black."},
 			{PageContent: "The color of the chair beside the desk is beige."},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
 
@@ -228,38 +228,38 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
-				id), vectorstores.WithScoreThreshold(0.8)),
+			vectorstores.ToRetriever(s, 5, vectorstores.WithScoreThreshold(0.8)),
 		),
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
 
-	//require.Contains(t, result, "orange", "expected orange in result") // TODO (noodnik2): clarify - WHY WOULD THIS BE EXPECTED?
+	// TODO (noodnik2): clarify - WHY should we see "orange" in the result,
+	//  as required by (expected in) the original "Pinecone" test??
+	//   require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }
 
 func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	err = store.AddDocuments(
+	err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -293,7 +293,6 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 				},
 			},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
 
@@ -309,8 +308,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
-				id), vectorstores.WithFilters(filter)),
+			vectorstores.ToRetriever(s, 5, vectorstores.WithFilters(filter)),
 		),
 		"What colors is the lamp?",
 	)
@@ -320,25 +318,24 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, newChromaErr := chroma.New(
+	s, newChromaErr := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, newChromaErr)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	addDocumentsErr := store.AddDocuments(
+	addDocumentsErr := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -372,7 +369,6 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 				},
 			},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, addDocumentsErr)
 
@@ -388,40 +384,38 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
-				id), vectorstores.WithFilters(filter)),
+			vectorstores.ToRetriever(s, 5, vectorstores.WithFilters(filter)),
 		),
 		"What color is the lamp in each room?",
 	)
 	require.Error(t, runChainErr)
 	require.Equal(t, "500 Internal Server Error", runChainErr.Error())
-	message := string(runChainErr.(*openapi.GenericOpenAPIError).Body())
+	var apiError *openapi.GenericOpenAPIError
+	require.True(t, errors.As(runChainErr, &apiError))
+	message := string(apiError.Body())
 	// Chroma doesn't (yet) support the `$in` operator
 	require.Contains(t, message, "Expected where operator to be one of $gt, $gte, $lt, $lte, $ne, $eq, got $in")
-
-	fmt.Printf("\n")
 }
 
 func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	err = store.AddDocuments(
+	err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -455,7 +449,6 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 				},
 			},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
 
@@ -466,8 +459,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
-				id)),
+			vectorstores.ToRetriever(s, 5),
 		),
 		"What color is the lamp in each room?",
 	)
@@ -475,14 +467,13 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	// TODO (noodnik2): hmm..., for this expected result (e.g., see analogous test for "Pinecone"),
 	//  (how) does it connect a "location" to a "room"?
-	//require.Contains(t, result, "black", "expected black in result")
-	//require.Contains(t, result, "blue", "expected blue in result")
-	//require.Contains(t, result, "orange", "expected orange in result")
-	//require.Contains(t, result, "purple", "expected purple in result")
-	//require.Contains(t, result, "yellow", "expected yellow in result")
-
-	// Rather, I receive something like "I don't have enough information to answer the question."
-	// which seems correct to me.  What am I missing?
+	//   require.Contains(t, result, "black", "expected black in result")
+	//   require.Contains(t, result, "blue", "expected blue in result")
+	//   require.Contains(t, result, "orange", "expected orange in result")
+	//   require.Contains(t, result, "purple", "expected purple in result")
+	//   require.Contains(t, result, "yellow", "expected yellow in result")
+	//  Rather, I observe something like "I don't have enough information to answer the question."
+	//  which seems correct to me; otherwise, perhaps I am missing something?
 	require.Equal(t, 1, len(strings.Split(result, "\n")))
 	require.Contains(t, result, "don't")
 	for _, color := range []string{"black", "blue", "orange", "purple", "yellow"} {
@@ -491,25 +482,24 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
-	//t.Parallel() // TODO (noodnik2): restore ability to run in parallel (e.g., using random collection names), removing "WithResetChroma"
+	t.Parallel()
 
-	openaiApiKey := getValues(t)
-	//e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	//require.NoError(t, err)
+	openaiAPIKey := getValues(t)
+	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	// require.NoError(t, err)
 
-	store, err := chroma.New(
+	s, err := chroma.New(
 		context.Background(),
-		chroma.WithOpenAiApiKey(openaiApiKey),
-		chroma.WithChromaUrl(chromaTestUrl),
-		chroma.WithCollectionName(chromaTestCollection),
-		chroma.WithResetChroma(true),
-		//pinecone.WithEmbedder(e),
+		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithCollectionName(getTestCollectionName()),
+		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	id := uuid.New().String()
+	defer func() { require.NoError(t, s.RemoveCollection()) }()
 
-	err = store.AddDocuments(
+	err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -534,7 +524,6 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 				},
 			},
 		},
-		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
 
@@ -560,19 +549,27 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
-				id), vectorstores.WithFilters(filter)),
+			vectorstores.ToRetriever(s, 5, vectorstores.WithFilters(filter)),
 		),
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
 
-	// TODO (noodnik2): hmm..., once received error: '"I don't know, as the context only mentions the color of the lamp beside
-	//  the desk and doesn't provide information about the other rooms or their lamps." does not contain "purple"'
+	// TODO (noodnik2): hmm..., once received error: '"I don't know, as the context only
+	//  mentions the color of the lamp beside the desk and doesn't provide information
+	//  about the other rooms or their lamps." does not contain "purple"'
 	require.Contains(t, result, "purple", "expected black in purple")
 }
 
 func getValues(t *testing.T) string {
 	t.Helper()
-	return os.Getenv("OPENAI_API_KEY")
+	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+	if openaiAPIKey == "" {
+		t.Skip("Must set OPENAI_API_KEY to run test")
+	}
+	return openaiAPIKey
+}
+
+func getTestCollectionName() string {
+	return fmt.Sprintf("test-collection-%s", uuid.New().String())
 }

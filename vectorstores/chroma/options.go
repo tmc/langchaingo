@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	_openAiApiKeyEnvVrName = "OPENAI_API_KEY"
+	_openAiAPIKeyEnvVrName = "OPENAI_API_KEY" // #nosec G101
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -25,43 +25,43 @@ func WithCollectionName(name string) Option {
 	}
 }
 
-// TODO (noodnik2): determine whether (or not) to use this instead of the more Chroma-specific "WithCollectionName"
-//// NameSpace is an option for setting the nameSpace to upsert and query the vectors
-//// from. Must be set.
-//func WithNameSpace(nameSpace string) Option {
-//	return func(p *Store) {
-//		p.nameSpace = nameSpace
-//	}
-//}
+// TODO (noodnik2): implement "NameSpace"
+//  // NameSpace is an option for setting the nameSpace to upsert and query the vectors
+//  // from. Must be set.
+//  func WithNameSpace(nameSpace string) Option {
+//  	return func(p *Store) {
+//  		p.nameSpace = nameSpace
+//  	}
+//  }
 
-// WithChromaUrl is an option for specifying the Chroma URL. Must be set.
-func WithChromaUrl(chromaUrl string) Option {
+// WithChromaURL is an option for specifying the Chroma URL. Must be set.
+func WithChromaURL(chromaURL string) Option {
 	return func(p *Store) {
-		p.chromaUrl = chromaUrl
+		p.chromaURL = chromaURL
 	}
 }
 
 // TODO (noodnik2): clarify need and implement if so
-//// WithProjectName is an option for specifying the project name. Must be set. The
-//// project name associated with the api key can be obtained using the whoami
-//// operation.
-//func WithProjectName(name string) Option {
-//	return func(p *Store) {
-//		p.projectName = name
-//	}
-//}
+//  // WithProjectName is an option for specifying the project name. Must be set. The
+//  // project name associated with the api key can be obtained using the whoami
+//  // operation.
+//  func WithProjectName(name string) Option {
+//  	return func(p *Store) {
+//  		p.projectName = name
+//  	}
+//  }
 //
 
 // TODO (noodnik2): implement
-//// WithEmbedder is an option for setting the embedder to use. Must be set.
-//func WithEmbedder(e embeddings.Embedder) Option {
-//	return func(p *Store) {
-//		p.embedder = e
-//	}
-//}
+//  // WithEmbedder is an option for setting the embedder to use. Must be set.
+//  func WithEmbedder(e embeddings.Embedder) Option {
+//  	return func(p *Store) {
+//  		p.embedder = e
+//  	}
+//  }
 
 // WithResetChroma specifies whether chroma database is to be reset upon initialization of the vector store (true=yes)
-// TODO (noodnik2): see if this stands the test of scrutiny / is justified
+// TODO (noodnik2): remove this functionality if not needed.
 func WithResetChroma(resetFlag bool) Option {
 	return func(p *Store) {
 		p.resetChroma = resetFlag
@@ -76,20 +76,17 @@ func WithDistanceFunction(distanceFunction chromago.DistanceFunction) Option {
 	}
 }
 
-// WithOpenAiApiKey is an option for setting the OpenAI api key. If the option is not set
+// WithOpenAiAPIKey is an option for setting the OpenAI api key. If the option is not set
 // the api key is read from the OPENAI_API_KEY environment variable. If the
 // variable is not present, an error will be returned.
-func WithOpenAiApiKey(openAiApiKey string) Option {
+func WithOpenAiAPIKey(openAiAPIKey string) Option {
 	return func(p *Store) {
-		p.openaiApiKey = openAiApiKey
+		p.openaiAPIKey = openAiAPIKey
 	}
 }
 
 func applyClientOptions(opts ...Option) (Store, error) {
-	o := &Store{
-		//textKey: _defaultTextKey,
-	}
-
+	o := &Store{}
 	for _, opt := range opts {
 		opt(o)
 	}
@@ -98,7 +95,7 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		return Store{}, fmt.Errorf("%w: missing collection name", ErrInvalidOptions)
 	}
 
-	if o.chromaUrl == "" {
+	if o.chromaURL == "" {
 		return Store{}, fmt.Errorf("%w: missing chroma URL", ErrInvalidOptions)
 	}
 
@@ -106,13 +103,13 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		o.distanceFunction = chromago.COSINE
 	}
 
-	if o.openaiApiKey == "" {
-		o.openaiApiKey = os.Getenv(_openAiApiKeyEnvVrName)
-		if o.openaiApiKey == "" {
+	if o.openaiAPIKey == "" {
+		o.openaiAPIKey = os.Getenv(_openAiAPIKeyEnvVrName)
+		if o.openaiAPIKey == "" {
 			return Store{}, fmt.Errorf(
 				"%w: missing OpenAiApi key. Pass it as an option or set the %s environment variable",
 				ErrInvalidOptions,
-				_openAiApiKeyEnvVrName,
+				_openAiAPIKeyEnvVrName,
 			)
 		}
 	}
