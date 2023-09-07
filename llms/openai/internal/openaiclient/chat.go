@@ -29,7 +29,7 @@ type ChatRequest struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
-	// Function defitions to include in the request.
+	// Function definitions to include in the request.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
 	//
@@ -216,6 +216,9 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	}
 
 	for streamResponse := range responseChan {
+		if len(streamResponse.Choices) == 0 {
+			continue
+		}
 		chunk := []byte(streamResponse.Choices[0].Delta.Content)
 		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
 		if streamResponse.Choices[0].Delta.FunctionCall != nil {
