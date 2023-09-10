@@ -19,31 +19,33 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
 
-const chromaTestURL = "http://localhost:8000"
-
 // TODO (noodnik2):
-//  update documentation to reflect the need to have a running Chroma server before running these tests
 //  add relevant tests from "weaviate_test.go" (the initial tests are based upon those found in "pinecone_test.go")
 //  consider refactoring out standard set of vectorstore unit tests to run across all implementations
+
+//
+// NOTE: View the 'getValues()' function to see which environment variables are required to run these tests.
+// WARNING: When these values are not provided, the tests will not fail, but will be (silently) skipped.
+//
 
 func TestChromaGoStoreRest(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
-		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithCollectionName(getTestCollectionName()),
 		// chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
@@ -60,21 +62,20 @@ func TestChromaGoStoreRest(t *testing.T) {
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e , err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
-		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
-		// pinecone.WithEmbedder(e),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithCollectionName(getTestCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
@@ -108,20 +109,19 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
@@ -151,20 +151,19 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestChromaAsRetriever(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(
 		context.Background(),
@@ -194,20 +193,20 @@ func TestChromaAsRetriever(t *testing.T) {
 func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromago.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(
 		context.Background(),
@@ -244,20 +243,19 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(
 		context.Background(),
@@ -320,20 +318,19 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, newChromaErr)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	addDocumentsErr := s.AddDocuments(
 		context.Background(),
@@ -400,20 +397,19 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(
 		context.Background(),
@@ -484,20 +480,19 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
-	openaiAPIKey := getValues(t)
+	testChromaURL, openaiAPIKey := getValues(t)
 	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
 	// require.NoError(t, err)
 
 	s, err := chroma.New(
-		context.Background(),
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(chromaTestURL),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
-	defer func() { require.NoError(t, s.RemoveCollection()) }()
+	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(
 		context.Background(),
@@ -561,15 +556,31 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Contains(t, result, "purple", "expected black in purple")
 }
 
-func getValues(t *testing.T) string {
+func getValues(t *testing.T) (string, string) {
 	t.Helper()
+
+	chromaURL := os.Getenv("CHROMA_URL")
+	if chromaURL == "" {
+		t.Skip("Must set CHROMA_URL to run test")
+	}
+
 	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
 	if openaiAPIKey == "" {
 		t.Skip("Must set OPENAI_API_KEY to run test")
 	}
-	return openaiAPIKey
+
+	return chromaURL, openaiAPIKey
+}
+
+func cleanupTestArtifacts(t *testing.T, s chroma.Store) {
+	t.Helper()
+	require.NoError(t, s.RemoveCollection())
 }
 
 func getTestCollectionName() string {
 	return fmt.Sprintf("test-collection-%s", uuid.New().String())
+}
+
+func getTestNameSpace() string {
+	return fmt.Sprintf("test-namespace-%s", uuid.New().String())
 }

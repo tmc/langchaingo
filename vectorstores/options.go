@@ -26,7 +26,7 @@ func WithScoreThreshold(scoreThreshold float64) Option {
 	}
 }
 
-// Vector searches can be limited bsaed on metadata filters. Searches with  metadata
+// WithFilters searches can be limited based on metadata filters. Searches with  metadata
 // filters retrieve exactly the number of nearest-neighbors results that match the filters. In
 // most cases the search latency will be lower than unfiltered searches
 // See https://docs.pinecone.io/docs/metadata-filtering

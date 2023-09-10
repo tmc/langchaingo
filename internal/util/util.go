@@ -39,3 +39,13 @@ func ListKeys[T any](m map[string]T) []string {
 	}
 	return keys
 }
+
+// NewMap will create a new map based upon the provided map.
+// If the provided map is `nil`, a new, empty map will be returned.
+func NewMap[K, V comparable](m map[K]V) map[K]V {
+	result := make(map[K]V, len(m))
+	for k, v := range m {
+		result[k] = v
+	}
+	return result
+}

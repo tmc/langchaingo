@@ -7,6 +7,7 @@ import (
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
+	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
@@ -14,8 +15,8 @@ import (
 var (
 	ErrInvalidScoreThreshold    = errors.New("score threshold must be between 0 and 1")
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
-	ErrResetDB                  = errors.New("error resetting database")
 	ErrNewClient                = errors.New("error creating collection")
+	ErrAddDocument              = errors.New("error adding document")
 	ErrRemoveCollection         = errors.New("error resetting collection")
 	ErrUnsupportedOptions       = errors.New("unsupported options")
 )
@@ -25,39 +26,33 @@ type Store struct {
 	client           *chromago.Client
 	collection       *chromago.Collection
 	distanceFunction chromago.DistanceFunction
-	resetChroma      bool
 	chromaURL        string
 	openaiAPIKey     string
 	collectionName   string
-	// TODO (noodnik2): clarify need for / support of the following fields
-	// nameSpace   string
-	// embedder    embeddings.Embedder
-	// grpcConn    *grpc.ClientConn
-	// client      pinecone_grpc.VectorServiceClient
-	// indexName   string
-	// projectName string
-	// environment string
-	// apiKey      string
-	// textKey     string
-	// useGRPC     bool
+	nameSpace        string
+	nameSpaceKey     string
+	// embedder    embeddings.Embedder  // TODO (noodnik2): implement embedder consistent with other adapters
+	// indexName   string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/indexes
+	// projectName string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/projects
+	// textKey     string // TODO (noodnik2): Is this called for / needed?
 }
 
-// TODO (noodnik2): (why) is this needed?
-// var _ vectorstores.VectorStore = Store{}
+var _ vectorstores.VectorStore = Store{}
 
-func New(_ context.Context, opts ...Option) (Store, error) {
+// New creates an active client connection to the (specified, or default) collection in the Chroma server
+// and returns the `Store` object needed by the other accessors.
+func New(opts ...Option) (Store, error) {
 	s, coErr := applyClientOptions(opts...)
 	if coErr != nil {
 		return s, coErr
 	}
 
-	s.client = chromago.NewClient(s.chromaURL)
-	if s.resetChroma {
-		// TODO (noodnik2): is this really needed?
-		if _, errRest := s.client.Reset(); errRest != nil {
-			return s, fmt.Errorf("%w: %w", ErrResetDB, errRest)
-		}
+	// create the client connection and confirm that we can access the server with it
+	chromaClient := chromago.NewClient(s.chromaURL)
+	if _, errHb := chromaClient.Heartbeat(); errHb != nil {
+		return s, errHb
 	}
+	s.client = chromaClient
 
 	embeddingFunction := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
 	// TODO (noodnik2): integrate "embedding function" similar to the other vectorstore adapters
@@ -73,23 +68,32 @@ func New(_ context.Context, opts ...Option) (Store, error) {
 
 func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) error {
 	opts := s.getOptions(options...)
-	if opts.NameSpace != "" || opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
-		// TODO (noodnik2): implement (some of?) these
+	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
 		return ErrUnsupportedOptions
+	}
+
+	nameSpace := s.getNameSpace(opts)
+	if nameSpace != "" && s.nameSpaceKey == "" {
+		return fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
 	}
 
 	ids := make([]string, len(docs))
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
-	for i, doc := range docs {
-		texts[i] = doc.PageContent
-		metadatas[i] = doc.Metadata
-		ids[i] = fmt.Sprintf("id%d", i+1) // TODO (noodnik2): clarify meaning / use of "ids"
+	for docIdx, doc := range docs {
+		// TODO (noodnik2): making up an "id" value here seems meaningless; is
+		//  there a "well-known" metadata (or other) value we can use instead?
+		ids[docIdx] = fmt.Sprintf("%s-%d", nameSpace, docIdx)
+		texts[docIdx] = doc.PageContent
+		metadatas[docIdx] = util.NewMap(doc.Metadata)
+		if nameSpace != "" {
+			metadatas[docIdx][s.nameSpaceKey] = nameSpace
+		}
 	}
 
 	col := s.collection
 	if _, addErr := col.Add(nil, metadatas, texts, ids); addErr != nil {
-		return fmt.Errorf("adding documents: %w", addErr)
+		return fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
 	return nil
 }
@@ -99,17 +103,18 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
 
-	if opts.NameSpace != "" || opts.Embedder != nil {
+	if opts.Embedder != nil {
 		// TODO (noodnik2): implement these
-		return nil, fmt.Errorf("%w: NameSpace, Embedder", ErrUnsupportedOptions)
+		return nil, fmt.Errorf("%w: Embedder", ErrUnsupportedOptions)
 	}
 
 	scoreThreshold, stErr := s.getScoreThreshold(opts)
 	if stErr != nil {
 		return nil, stErr
 	}
-	filters, _ := s.getFilters(opts).(map[string]any)
-	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filters, nil, nil)
+
+	filter := s.getNamespacedFilter(opts)
+	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filter, nil, nil)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -145,14 +150,13 @@ func (s Store) RemoveCollection() error {
 	return nil
 }
 
-// TODO (noodnik2): does this map to chroma.Store.collectionName?  E.g., for consistency with
-//  the existing model, or to leave it in the local "chroma.Option" where it is now?
-//  func (s Store) getNameSpace(opts vectorstores.Options) string {
-//  	if opts.NameSpace != "" {
-//  		return opts.NameSpace
-//  	}
-//  	return s.nameSpace
-//  }
+func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
+	opts := vectorstores.Options{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+	return opts
+}
 
 func (s Store) getScoreThreshold(opts vectorstores.Options) (float64, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
@@ -161,17 +165,25 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float64, error) {
 	return opts.ScoreThreshold, nil
 }
 
-func (s Store) getFilters(opts vectorstores.Options) any {
-	if opts.Filters != nil {
-		return opts.Filters
+func (s Store) getNameSpace(opts vectorstores.Options) string {
+	if opts.NameSpace != "" {
+		return opts.NameSpace
 	}
-	return nil
+	return s.nameSpace
 }
 
-func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
-	opts := vectorstores.Options{}
-	for _, opt := range options {
-		opt(&opts)
+func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
+	filter, _ := opts.Filters.(map[string]any)
+
+	nameSpace := s.getNameSpace(opts)
+	if nameSpace == "" || s.nameSpaceKey == "" {
+		return filter
 	}
-	return opts
+
+	nameSpaceFilter := map[string]any{s.nameSpaceKey: nameSpace}
+	if filter == nil {
+		return nameSpaceFilter
+	}
+
+	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
 }
