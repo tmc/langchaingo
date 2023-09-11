@@ -2,14 +2,13 @@ package chroma_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
 	chromago "github.com/amikos-tech/chroma-go"
-	openapi "github.com/amikos-tech/chroma-go/swagger"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
@@ -49,7 +48,9 @@ func TestChromaGoStoreRest(t *testing.T) {
 	defer cleanupTestArtifacts(t, s)
 
 	err = s.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "tokyo"},
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"country": "japan",
+		}},
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
@@ -58,13 +59,22 @@ func TestChromaGoStoreRest(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, docs[0].PageContent, "tokyo")
+
+	rawCountry := fmt.Sprintf("%s", docs[0].Metadata["country"])
+	// TODO (noodnik2): why is the metadata (apparently being) surrounded by quotes??
+	country, err := strconv.Unquote(rawCountry)
+	require.NoError(t, err)
+	require.Equal(t, country, "japan")
+
+	// if the following fails, please revisit the stripping of the quotes (above)
+	require.NotEqual(t, rawCountry, country)
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -112,7 +122,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	e, err := openaiEmbeddings.NewOpenAI()
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -331,11 +341,12 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	s, newChromaErr := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
 		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, newChromaErr)
+
+	ns := getTestNameSpace()
 
 	defer cleanupTestArtifacts(t, s)
 
@@ -373,6 +384,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 				},
 			},
 		},
+		vectorstores.WithNameSpace(ns),
 	)
 	require.NoError(t, addDocumentsErr)
 
@@ -384,21 +396,19 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	filterValue["$in"] = []string{"office", "kitchen"}
 	filter["location"] = filterValue
 
-	_, runChainErr := chains.Run(
+	result, runChainErr := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(s, 5, vectorstores.WithFilters(filter)),
+			vectorstores.ToRetriever(s, 5, vectorstores.WithNameSpace(ns),
+				vectorstores.WithFilters(filter)),
 		),
-		"What color is the lamp in each room?",
+		"What color(s) was/were the lamp(s) beside the desk described as?",
 	)
-	require.Error(t, runChainErr)
-	require.Equal(t, "500 Internal Server Error", runChainErr.Error())
-	var apiError *openapi.GenericOpenAPIError
-	require.True(t, errors.As(runChainErr, &apiError))
-	message := string(apiError.Body())
-	// Chroma doesn't (yet) support the `$in` operator
-	require.Contains(t, message, "Expected where operator to be one of $gt, $gte, $lt, $lte, $ne, $eq, got $in")
+	require.NoError(t, runChainErr)
+
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "orange", "expected orange in result")
 }
 
 func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
@@ -465,24 +475,15 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 			llm,
 			vectorstores.ToRetriever(s, 5),
 		),
-		"What color is the lamp in each room?",
+		"What color(s) was/were the lamp(s) beside the desk described as?",
 	)
 	require.NoError(t, err)
 
-	// TODO (noodnik2): hmm..., for this expected result (e.g., see analogous test for "Pinecone"),
-	//  (how) does it connect a "location" to a "room"?
-	//   require.Contains(t, result, "black", "expected black in result")
-	//   require.Contains(t, result, "blue", "expected blue in result")
-	//   require.Contains(t, result, "orange", "expected orange in result")
-	//   require.Contains(t, result, "purple", "expected purple in result")
-	//   require.Contains(t, result, "yellow", "expected yellow in result")
-	//  Rather, I observe something like "I don't have enough information to answer the question."
-	//  which seems correct to me; otherwise, perhaps I am missing something?
-	require.Equal(t, 1, len(strings.Split(result, "\n")))
-	require.Contains(t, result, "don't")
-	for _, color := range []string{"black", "blue", "orange", "purple", "yellow"} {
-		require.NotContains(t, result, color)
-	}
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "blue", "expected blue in result")
+	require.Contains(t, result, "orange", "expected orange in result")
+	require.Contains(t, result, "purple", "expected purple in result")
+	require.Contains(t, result, "yellow", "expected yellow in result")
 }
 
 func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
@@ -555,27 +556,24 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 			llm,
 			vectorstores.ToRetriever(s, 5, vectorstores.WithFilters(filter)),
 		),
-		"What color is the lamp in each room?",
+		"What color is the lamp beside the desk?",
 	)
 	require.NoError(t, err)
 
-	// TODO (noodnik2): hmm..., once received error: '"I don't know, as the context only
-	//  mentions the color of the lamp beside the desk and doesn't provide information
-	//  about the other rooms or their lamps." does not contain "purple"'
 	require.Contains(t, result, "purple", "expected black in purple")
 }
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
 
-	chromaURL := os.Getenv("CHROMA_URL")
+	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		t.Skip("Must set CHROMA_URL to run test")
+		t.Skipf("Must set %s to run test", chroma.ChromaURLKeyEnvVarName)
 	}
 
-	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+	openaiAPIKey := os.Getenv(chroma.OpenAiAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
-		t.Skip("Must set OPENAI_API_KEY to run test")
+		t.Skipf("Must set %s to run test", chroma.OpenAiAPIKeyEnvVarName)
 	}
 
 	return chromaURL, openaiAPIKey

@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	_openAiAPIKeyEnvVrName = "OPENAI_API_KEY" // #nosec G101
-	_defaultNameSpace      = "langchain"
-	_defaultNameSpaceKey   = "nameSpace"
-	_defaultCollectionName = "langchaingo"
-	_defaultDistanceFunc   = chromago.L2
+	OpenAiAPIKeyEnvVarName = "OPENAI_API_KEY" // #nosec G101
+	ChromaURLKeyEnvVarName = "CHROMA_URL"
+	DefaultNameSpace       = "langchain"
+	DefaultNameSpaceKey    = "nameSpace"
+	DefaultCollectionName  = "langchaingo"
+	DefaultDistanceFunc    = chromago.L2
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -59,6 +60,13 @@ func WithDistanceFunction(distanceFunction chromago.DistanceFunction) Option {
 	}
 }
 
+// WithIncludes is an option for setting the includes to query the vectors.
+func WithIncludes(includes []chromago.QueryEnum) Option {
+	return func(p *Store) {
+		p.includes = includes
+	}
+}
+
 // WithOpenAiAPIKey is an option for setting the OpenAI api key. If the option is not set
 // the api key is read from the OPENAI_API_KEY environment variable. If the
 // variable is not present, an error will be returned.
@@ -70,10 +78,10 @@ func WithOpenAiAPIKey(openAiAPIKey string) Option {
 
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
-		nameSpace:        _defaultNameSpace,
-		nameSpaceKey:     _defaultNameSpaceKey,
-		collectionName:   _defaultCollectionName,
-		distanceFunction: _defaultDistanceFunc,
+		nameSpace:        DefaultNameSpace,
+		nameSpaceKey:     DefaultNameSpaceKey,
+		collectionName:   DefaultCollectionName,
+		distanceFunction: DefaultDistanceFunc,
 	}
 
 	for _, opt := range opts {
@@ -85,17 +93,20 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	}
 
 	if o.chromaURL == "" {
-		return Store{}, fmt.Errorf("%w: missing chroma URL", ErrInvalidOptions)
+		o.chromaURL = os.Getenv(ChromaURLKeyEnvVarName)
+		if o.chromaURL == "" {
+			return Store{}, fmt.Errorf(
+				"%w: missing chroma URL. Pass it as an option or set the %s environment variable",
+				ErrInvalidOptions, ChromaURLKeyEnvVarName)
+		}
 	}
 
 	if o.openaiAPIKey == "" {
-		o.openaiAPIKey = os.Getenv(_openAiAPIKeyEnvVrName)
+		o.openaiAPIKey = os.Getenv(OpenAiAPIKeyEnvVarName)
 		if o.openaiAPIKey == "" {
 			return Store{}, fmt.Errorf(
-				"%w: missing OpenAiApi key. Pass it as an option or set the %s environment variable",
-				ErrInvalidOptions,
-				_openAiAPIKeyEnvVrName,
-			)
+				"%w: missing OpenAiAPI key. Pass it as an option or set the %s environment variable",
+				ErrInvalidOptions, OpenAiAPIKeyEnvVarName)
 		}
 	}
 

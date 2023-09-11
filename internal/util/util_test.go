@@ -27,8 +27,8 @@ func TestNewMap(t *testing.T) {
 		},
 		{
 			name:           "simple map with nil value is preserved",
-			sourceMap:      map[string]any{"a": 1, "b": 3.1415926, "c": "hi", "d": nil},
-			expectedNewMap: map[string]any{"a": 1, "b": 3.1415926, "c": "hi", "d": nil},
+			sourceMap:      map[string]any{"a": 1, "b": 3.14159265, "c": "hi", "d": nil, "": 0},
+			expectedNewMap: map[string]any{"a": 1, "b": 3.14159265, "c": "hi", "d": nil, "": 0},
 		},
 	}
 

@@ -34,9 +34,7 @@ type Store struct {
 	nameSpace        string
 	nameSpaceKey     string
 	embedder         embeddings.Embedder
-	// indexName   string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/indexes
-	// projectName string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/projects
-	// textKey     string // TODO (noodnik2): Is this called for / needed?
+	includes         []chromago.QueryEnum
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -90,7 +88,7 @@ func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options .
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): can we find & use something more meaningful?
+		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
 		texts[docIdx] = doc.PageContent
 		metadatas[docIdx] = util.NewMap(doc.Metadata)
 		if nameSpace != "" {
@@ -111,7 +109,7 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	opts := s.getOptions(options...)
 
 	if opts.Embedder != nil {
-		// TODO (noodnik2): implement these
+		// embedder is not used by this method, so shouldn't ever be specified
 		return nil, fmt.Errorf("%w: Embedder", ErrUnsupportedOptions)
 	}
 
@@ -121,7 +119,7 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filter, nil, nil)
+	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
