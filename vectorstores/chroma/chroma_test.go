@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
+	openaiEmbeddings "github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -32,8 +33,8 @@ func TestChromaGoStoreRest(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
@@ -41,7 +42,7 @@ func TestChromaGoStoreRest(t *testing.T) {
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
-		// chroma.WithEmbedder(e),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -63,8 +64,8 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e , err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
@@ -72,6 +73,7 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -110,14 +112,15 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -152,14 +155,15 @@ func TestChromaAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -194,8 +198,8 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
@@ -203,6 +207,7 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -244,14 +249,15 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -319,14 +325,15 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, newChromaErr)
 
@@ -398,14 +405,15 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
@@ -481,14 +489,15 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	// e, err := openaiEmbeddings.NewOpenAI() // TODO (noodnik2): add ability to inject this
-	// require.NoError(t, err)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
 
 	s, err := chroma.New(
 		chroma.WithOpenAiAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithCollectionName(getTestCollectionName()),
+		chroma.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 

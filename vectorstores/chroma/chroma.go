@@ -7,6 +7,8 @@ import (
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
+	"github.com/google/uuid"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -31,7 +33,7 @@ type Store struct {
 	collectionName   string
 	nameSpace        string
 	nameSpaceKey     string
-	// embedder    embeddings.Embedder  // TODO (noodnik2): implement embedder consistent with other adapters
+	embedder         embeddings.Embedder
 	// indexName   string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/indexes
 	// projectName string // TODO (noodnik2): Chroma equivalent?  https://docs.pinecone.io/docs/projects
 	// textKey     string // TODO (noodnik2): Is this called for / needed?
@@ -54,8 +56,15 @@ func New(opts ...Option) (Store, error) {
 	}
 	s.client = chromaClient
 
-	embeddingFunction := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
-	// TODO (noodnik2): integrate "embedding function" similar to the other vectorstore adapters
+	var embeddingFunction chromago.EmbeddingFunction
+	if s.embedder != nil {
+		// inject user's embedding function, if provided
+		embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
+	} else {
+		// otherwise use standard langchaingo OpenAI embedding function
+		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
+	}
+
 	col, errCc := s.client.CreateCollection(s.collectionName, map[string]any{}, true,
 		embeddingFunction, s.distanceFunction)
 	if errCc != nil {
@@ -81,9 +90,7 @@ func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options .
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		// TODO (noodnik2): making up an "id" value here seems meaningless; is
-		//  there a "well-known" metadata (or other) value we can use instead?
-		ids[docIdx] = fmt.Sprintf("%s-%d", nameSpace, docIdx)
+		ids[docIdx] = uuid.New().String() // TODO (noodnik2): can we find & use something more meaningful?
 		texts[docIdx] = doc.PageContent
 		metadatas[docIdx] = util.NewMap(doc.Metadata)
 		if nameSpace != "" {

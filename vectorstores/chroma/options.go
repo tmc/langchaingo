@@ -6,6 +6,7 @@ import (
 	"os"
 
 	chromago "github.com/amikos-tech/chroma-go"
+	"github.com/tmc/langchaingo/embeddings"
 )
 
 const (
@@ -43,13 +44,12 @@ func WithChromaURL(chromaURL string) Option {
 	}
 }
 
-// TODO (noodnik2): implement
-//  // WithEmbedder is an option for setting the embedder to use.
-//  func WithEmbedder(e embeddings.Embedder) Option {
-//  	return func(p *Store) {
-//  		p.embedder = e
-//  	}
-//  }
+// WithEmbedder is an option for setting the embedder to use.
+func WithEmbedder(e embeddings.Embedder) Option {
+	return func(p *Store) {
+		p.embedder = e
+	}
+}
 
 // WithDistanceFunction specifies the distance function which will be used
 // see: https://github.com/amikos-tech/chroma-go/blob/d0087270239eccdb2f4f03d84b18d875c601ad6b/main.go#L96
