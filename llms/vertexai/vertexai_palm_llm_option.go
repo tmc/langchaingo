@@ -1,10 +1,12 @@
 package vertexai
 
 import (
+	"net/http"
 	"os"
 	"sync"
 
 	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 )
 
 const (
