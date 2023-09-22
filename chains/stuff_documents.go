@@ -51,15 +51,12 @@ func NewStuffDocuments(llmChain *LLMChain) StuffDocuments {
 }
 
 // Call handles the inner logic of the StuffDocuments chain.
-func (c StuffDocuments) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func (c StuffDocuments) Call(
+	ctx context.Context, values map[string]any, options ...ChainCallOption,
+) (map[string]any, error) {
 	docs, ok := values[c.InputKey].([]schema.Document)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
-	}
-
-	var text string
-	for _, doc := range docs {
-		text += doc.PageContent + c.Separator
 	}
 
 	inputValues := make(map[string]any)
@@ -67,12 +64,12 @@ func (c StuffDocuments) Call(ctx context.Context, values map[string]any, options
 		inputValues[key] = value
 	}
 
-	inputValues[c.DocumentVariableName] = text
+	inputValues[c.DocumentVariableName] = c.joinDocuments(docs)
 	return Call(ctx, c.LLMChain, inputValues, options...)
 }
 
 // GetMemory returns a simple memory.
-func (c StuffDocuments) GetMemory() schema.Memory { //nolint:ireturn
+func (c StuffDocuments) GetMemory() schema.Memory {
 	return memory.NewSimple()
 }
 
@@ -84,4 +81,17 @@ func (c StuffDocuments) GetInputKeys() []string {
 // GetOutputKeys returns the output keys the chain will return.
 func (c StuffDocuments) GetOutputKeys() []string {
 	return append([]string{}, c.LLMChain.GetOutputKeys()...)
+}
+
+// joinDocuments joins the documents with the separator.
+func (c StuffDocuments) joinDocuments(docs []schema.Document) string {
+	var text string
+	docLen := len(docs)
+	for k, doc := range docs {
+		text += doc.PageContent
+		if k != docLen-1 {
+			text += c.Separator
+		}
+	}
+	return text
 }

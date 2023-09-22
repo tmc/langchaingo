@@ -44,3 +44,53 @@ func TestStuffDocuments(t *testing.T) {
 		require.True(t, ok)
 	}
 }
+
+func TestStuffDocuments_joinDocs(t *testing.T) {
+	t.Parallel()
+
+	testcases := []struct {
+		name string
+		docs []schema.Document
+		want string
+	}{
+		{
+			name: "empty",
+			docs: []schema.Document{},
+			want: "",
+		},
+		{
+			name: "single",
+			docs: []schema.Document{
+				{PageContent: "foo"},
+			},
+			want: "foo",
+		},
+		{
+			name: "multiple",
+			docs: []schema.Document{
+				{PageContent: "foo"},
+				{PageContent: "bar"},
+			},
+			want: "foo\n\nbar",
+		},
+		{
+			name: "multiple with separator",
+			docs: []schema.Document{
+				{PageContent: "foo"},
+				{PageContent: "bar\n\n"},
+			},
+			want: "foo\n\nbar\n\n",
+		},
+	}
+
+	chain := NewStuffDocuments(&LLMChain{})
+
+	for _, tc := range testcases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := chain.joinDocuments(tc.docs)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
