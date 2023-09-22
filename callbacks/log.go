@@ -51,8 +51,8 @@ func (l LogHandler) HandleRetrieverStart(_ context.Context, query string) {
 	fmt.Println("Entering retriever with query:", removeNewLines(query))
 }
 
-func (l LogHandler) HandleRetrieverEnd(_ context.Context, documents []schema.Document) {
-	fmt.Println("Exiting retirer with documents:", documents)
+func (l LogHandler) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
+	fmt.Println("Exiting retriever with documents for query:", documents, query)
 }
 
 func formatChainValues(values map[string]any) string {
