@@ -48,10 +48,11 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		msgs := toClientChatMessage(messages)
+		msgs, chatContext := toClientChatMessage(messages)
 		result, err := o.client.CreateChat(ctx, &vertexaiclient.ChatRequest{
 			Temperature: opts.Temperature,
 			Messages:    msgs,
+			Context:     chatContext,
 		})
 		if err != nil {
 			return nil, err
@@ -78,13 +79,20 @@ func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(vertexaiclient.TextModelName, text)
 }
 
-func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {
+func toClientChatMessage(messages []schema.ChatMessage) ([]*vertexaiclient.ChatMessage, string) {
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
+	chatContext := ""
 	for i, m := range messages {
 		msg := &vertexaiclient.ChatMessage{
 			Content: m.GetContent(),
 		}
 		typ := m.GetType()
+		// system message aka context/prompt will not be included in the message list
+		if i == 0 && typ == schema.ChatMessageTypeSystem {
+			chatContext = msg.GetContent()
+			continue
+		}
+
 		switch typ {
 		case schema.ChatMessageTypeSystem:
 			msg.Author = botAuthor
@@ -102,7 +110,7 @@ func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMe
 		}
 		msgs[i] = msg
 	}
-	return msgs
+	return msgs, chatContext
 }
 
 // NewChat returns a new VertexAI PaLM Chat LLM.
