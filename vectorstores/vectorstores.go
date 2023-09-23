@@ -36,7 +36,7 @@ func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]sc
 	}
 
 	if r.CallbacksHandler != nil {
-		r.CallbacksHandler.HandleRetrieverEnd(ctx, docs)
+		r.CallbacksHandler.HandleRetrieverEnd(ctx, query, docs)
 	}
 
 	return docs, nil
