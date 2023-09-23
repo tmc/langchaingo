@@ -245,12 +245,7 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 				mergedParams[paramKey] = value
 			}
 		case []string:
-			new := make([]interface{}, len(value))
-			for i, v := range value {
-				new[i] = v
-			}
-			//mergedParams[paramKey], _ = structpb.NewList(new)*/
-			mergedParams[paramKey] = new
+			mergedParams[paramKey] = convertArray(value)
 		}
 	}
 	smergedParams, err := structpb.NewStruct(mergedParams)
@@ -259,6 +254,14 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 		return smergedParams
 	}
 	return smergedParams
+}
+
+func convertArray(value []string) interface{} {
+	new := make([]interface{}, len(value))
+	for i, v := range value {
+		new[i] = v
+	}
+	return new
 }
 
 func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) { //nolint:lll
