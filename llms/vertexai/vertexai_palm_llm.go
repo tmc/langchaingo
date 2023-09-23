@@ -49,9 +49,10 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(&opts)
 	}
 	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
-		Prompts:     prompts,
-		MaxTokens:   opts.MaxTokens,
-		Temperature: opts.Temperature,
+		Prompts:       prompts,
+		MaxTokens:     opts.MaxTokens,
+		Temperature:   opts.Temperature,
+		StopSequences: opts.StopWords,
 	})
 	if err != nil {
 		return nil, err
