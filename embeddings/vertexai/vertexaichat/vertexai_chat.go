@@ -57,7 +57,7 @@ func (e ChatVertexAI) EmbedDocuments(ctx context.Context, texts []string) ([][]f
 	return emb, nil
 }
 
-func (e ChatVertexAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e ChatVertexAI) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

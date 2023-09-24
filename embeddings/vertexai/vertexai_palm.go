@@ -59,7 +59,7 @@ func (e VertexAIPaLM) EmbedDocuments(ctx context.Context, texts []string) ([][]f
 }
 
 // EmbedQuery embeds a single text.
-func (e VertexAIPaLM) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e VertexAIPaLM) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

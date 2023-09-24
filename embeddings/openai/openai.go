@@ -59,7 +59,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float32
 }
 
 // EmbedQuery embeds a single text.
-func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

@@ -120,7 +120,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 		objects = append(objects, &models.Object{
 			Class:      s.indexName,
 			ID:         strfmt.UUID(uuid.New().String()),
-			Vector:     convertVector(vectors[i]),
+			Vector:     vectors[i],
 			Properties: metadatas[i],
 		})
 	}
@@ -157,7 +157,7 @@ func (s Store) SimilaritySearch(
 		Get().
 		WithNearVector(s.client.GraphQL().
 			NearVectorArgBuilder().
-			WithVector(convertVector(vector)).
+			WithVector(vector).
 			WithCertainty(scoreThreshold),
 		).
 		WithWhere(whereBuilder).
@@ -266,12 +266,4 @@ func (s Store) createFields() []graphql.Field {
 		},
 	})
 	return fields
-}
-
-func convertVector(v []float64) []float32 {
-	v32 := make([]float32, len(v))
-	for i, f := range v {
-		v32[i] = float32(f)
-	}
-	return v32
 }

@@ -59,7 +59,7 @@ func (s Store) grpcUpsert(
 			pineconeVectors,
 			&pinecone_grpc.Vector{
 				Id:       uuid.New().String(),
-				Values:   float64ToFloat32(vectors[i]),
+				Values:   vectors[i],
 				Metadata: metadataStruct,
 			},
 		)
@@ -75,7 +75,7 @@ func (s Store) grpcUpsert(
 
 func (s Store) grpcQuery(
 	ctx context.Context,
-	vector []float64,
+	vector []float32,
 	numDocs int,
 	nameSpace string,
 ) ([]schema.Document, error) {
@@ -83,7 +83,7 @@ func (s Store) grpcQuery(
 		ctx,
 		&pinecone_grpc.QueryRequest{
 			Queries: []*pinecone_grpc.QueryVector{
-				{Values: float64ToFloat32(vector)},
+				{Values: vector},
 			},
 			TopK:          uint32(numDocs),
 			IncludeValues: false,
@@ -115,12 +115,4 @@ func (s Store) grpcQuery(
 	}
 
 	return resultDocuments, nil
-}
-
-func float64ToFloat32(input []float64) []float32 {
-	output := make([]float32, len(input))
-	for i, v := range input {
-		output[i] = float32(v)
-	}
-	return output
 }

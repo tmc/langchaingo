@@ -57,7 +57,7 @@ func (e ChatOpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]flo
 	return emb, nil
 }
 
-func (e ChatOpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e ChatOpenAI) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

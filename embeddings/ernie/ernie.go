@@ -94,7 +94,7 @@ func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float32
 }
 
 // EmbedQuery use ernie Embedding-V1.
-func (e *Ernie) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e *Ernie) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	emb, err := e.EmbedDocuments(ctx, []string{text})
 	if err != nil {
 		return nil, err

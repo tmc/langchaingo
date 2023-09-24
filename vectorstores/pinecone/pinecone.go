@@ -143,9 +143,7 @@ func (s Store) getNameSpace(opts vectorstores.Options) string {
 	return s.nameSpace
 }
 
-func (s Store) getScoreThreshold(opts vectorstores.Options) (float64,
-	error,
-) {
+func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
 	}

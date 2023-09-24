@@ -8,7 +8,7 @@ type Option func(*Options)
 // Options is a set of options for similarity search and add documents.
 type Options struct {
 	NameSpace      string
-	ScoreThreshold float64
+	ScoreThreshold float32
 	Filters        any
 	Embedder       embeddings.Embedder
 }
@@ -20,7 +20,7 @@ func WithNameSpace(nameSpace string) Option {
 	}
 }
 
-func WithScoreThreshold(scoreThreshold float64) Option {
+func WithScoreThreshold(scoreThreshold float32) Option {
 	return func(o *Options) {
 		o.ScoreThreshold = scoreThreshold
 	}
