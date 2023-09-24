@@ -2,7 +2,7 @@ module openai-completion-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230924223218-1c87838fe743
+require github.com/tmc/langchaingo v0.0.0-20230924223441-4dac573d3b3f
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect
