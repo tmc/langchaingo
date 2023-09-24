@@ -120,7 +120,7 @@ func NewChat(opts ...Option) (*Chat, error) {
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})

@@ -97,7 +97,7 @@ type EmbeddingRequest struct {
 }
 
 // CreateEmbedding creates embeddings.
-func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
+func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -114,7 +114,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 		return nil, ErrEmptyResponse
 	}
 
-	embeddings := make([][]float64, 0)
+	embeddings := make([][]float32, 0)
 	for i := 0; i < len(resp.Data); i++ {
 		embeddings = append(embeddings, resp.Data[i].Embedding)
 	}

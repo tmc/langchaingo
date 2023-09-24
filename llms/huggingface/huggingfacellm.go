@@ -111,7 +111,7 @@ func (o *LLM) CreateEmbedding(
 	inputTexts []string,
 	model string,
 	task string,
-) ([][]float64, error) {
+) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, model, task, &huggingfaceclient.EmbeddingRequest{
 		Inputs: inputTexts,
 		Options: map[string]any{

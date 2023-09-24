@@ -88,7 +88,7 @@ func (c *Client) CreateEmbedding(
 	model string,
 	task string,
 	r *EmbeddingRequest,
-) ([][]float64, error) {
+) ([][]float32, error) {
 	resp, err := c.createEmbedding(ctx, model, task, &embeddingPayload{
 		Inputs:  r.Inputs,
 		Options: r.Options,
@@ -101,17 +101,5 @@ func (c *Client) CreateEmbedding(
 		return nil, ErrEmptyResponse
 	}
 
-	return c.convertFloat32ToFloat64(resp), nil
-}
-
-func (c *Client) convertFloat32ToFloat64(input [][]float32) [][]float64 {
-	output := make([][]float64, len(input))
-	for i, row := range input {
-		output[i] = make([]float64, len(row))
-		for j, val := range row {
-			output[i][j] = float64(val)
-		}
-	}
-
-	return output
+	return resp, nil
 }

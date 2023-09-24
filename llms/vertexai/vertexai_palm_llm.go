@@ -71,16 +71,16 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
 	if err != nil {
-		return [][]float64{}, err
+		return [][]float32{}, err
 	}
 
 	if len(embeddings) == 0 {
-		return [][]float64{}, ErrEmptyResponse
+		return nil, ErrEmptyResponse
 	}
 	if len(inputTexts) != len(embeddings) {
 		return embeddings, ErrUnexpectedResponseLength

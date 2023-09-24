@@ -44,7 +44,7 @@ func (s Store) getGRPCConn(ctx context.Context) (*grpc.ClientConn, error) {
 
 func (s Store) grpcUpsert(
 	ctx context.Context,
-	vectors [][]float64,
+	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
 ) error {

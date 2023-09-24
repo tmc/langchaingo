@@ -47,7 +47,7 @@ type upsertPayload struct {
 
 func (s Store) restUpsert(
 	ctx context.Context,
-	vectors [][]float64,
+	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
 ) error {
