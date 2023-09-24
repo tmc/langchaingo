@@ -95,7 +95,7 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 		"temperature":     r.Temperature,
 		"top_p":           r.TopP,
 		"top_k":           r.TopK,
-		"stopSequences":   r.StopSequences,
+		"stopSequences":   convertArray(r.StopSequences),
 	}
 	predictions, err := c.batchPredict(ctx, TextModelName, r.Prompts, params)
 	if err != nil {
@@ -244,8 +244,6 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 			if value != 0 {
 				mergedParams[paramKey] = value
 			}
-		case []string:
-			mergedParams[paramKey] = convertArray(value)
 		}
 	}
 	smergedParams, err := structpb.NewStruct(mergedParams)
@@ -257,11 +255,11 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 }
 
 func convertArray(value []string) interface{} {
-	new := make([]interface{}, len(value))
+	newArray := make([]interface{}, len(value))
 	for i, v := range value {
-		new[i] = v
+		newArray[i] = v
 	}
-	return new
+	return newArray
 }
 
 func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) { //nolint:lll
