@@ -75,11 +75,12 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Prompts     []string `json:"prompts"`
-	MaxTokens   int      `json:"max_tokens"`
-	Temperature float64  `json:"temperature,omitempty"`
-	TopP        int      `json:"top_p,omitempty"`
-	TopK        int      `json:"top_k,omitempty"`
+	Prompts       []string `json:"prompts"`
+	MaxTokens     int      `json:"max_tokens"`
+	Temperature   float64  `json:"temperature,omitempty"`
+	TopP          int      `json:"top_p,omitempty"`
+	TopK          int      `json:"top_k,omitempty"`
+	StopSequences []string `json:"stop_sequences"`
 }
 
 // Completion is a completion.
@@ -94,6 +95,7 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 		"temperature":     r.Temperature,
 		"top_p":           r.TopP,
 		"top_k":           r.TopK,
+		"stopSequences":   convertArray(r.StopSequences),
 	}
 	predictions, err := c.batchPredict(ctx, TextModelName, r.Prompts, params)
 	if err != nil {
@@ -250,6 +252,14 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 		return smergedParams
 	}
 	return smergedParams
+}
+
+func convertArray(value []string) interface{} {
+	newArray := make([]interface{}, len(value))
+	for i, v := range value {
+		newArray[i] = v
+	}
+	return newArray
 }
 
 func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) { //nolint:lll
