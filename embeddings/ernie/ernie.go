@@ -41,8 +41,8 @@ func NewErnie(opts ...Option) (*Ernie, error) {
 }
 
 // split texts with batchCount.
-func (e *Ernie) embed(ctx context.Context, texts []string) ([][]float64, error) {
-	emb := make([][]float64, 0, len(texts))
+func (e *Ernie) embed(ctx context.Context, texts []string) ([][]float32, error) {
+	emb := make([][]float32, 0, len(texts))
 
 	offsetLen := len(texts) / e.batchCount
 	for i := 0; i <= offsetLen; i++ {
@@ -64,13 +64,13 @@ func (e *Ernie) embed(ctx context.Context, texts []string) ([][]float64, error) 
 }
 
 // EmbedDocuments use ernie Embedding-V1.
-func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
+func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, e.stripNewLines),
 		e.batchSize,
 	)
 
-	emb := make([][]float64, 0, len(texts))
+	emb := make([][]float32, 0, len(texts))
 	for _, texts := range batchedTexts {
 		curTextEmbeddings, err := e.embed(ctx, texts)
 		if err != nil {
@@ -94,7 +94,7 @@ func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 }
 
 // EmbedQuery use ernie Embedding-V1.
-func (e *Ernie) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e *Ernie) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	emb, err := e.EmbedDocuments(ctx, []string{text})
 	if err != nil {
 		return nil, err

@@ -12,9 +12,9 @@ const (
 type ChatOption func(p *ChatOpenAI)
 
 // WithClient is an option for providing the LLM client.
-func WithClient(client openai.Chat) ChatOption {
+func WithClient(client *openai.Chat) ChatOption {
 	return func(p *ChatOpenAI) {
-		p.client = &client
+		p.client = client
 	}
 }
 

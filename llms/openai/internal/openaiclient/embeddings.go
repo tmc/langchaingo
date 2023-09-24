@@ -22,7 +22,7 @@ type embeddingResponsePayload struct {
 	Object string `json:"object"`
 	Data   []struct {
 		Object    string    `json:"object"`
-		Embedding []float64 `json:"embedding"`
+		Embedding []float32 `json:"embedding"`
 		Index     int       `json:"index"`
 	} `json:"data"`
 	Model string `json:"model"`

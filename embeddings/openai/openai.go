@@ -29,13 +29,13 @@ func NewOpenAI(opts ...Option) (OpenAI, error) {
 }
 
 // EmbedDocuments creates one vector embedding for each of the texts.
-func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
+func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
 	)
 
-	emb := make([][]float64, 0, len(texts))
+	emb := make([][]float32, 0, len(texts))
 	for _, texts := range batchedTexts {
 		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts)
 		if err != nil {
@@ -59,7 +59,7 @@ func (e OpenAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float64
 }
 
 // EmbedQuery embeds a single text.
-func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e OpenAI) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}

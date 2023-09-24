@@ -121,14 +121,14 @@ type EmbeddingRequest struct {
 }
 
 // CreateEmbedding creates embeddings.
-func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
+func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	params := map[string]interface{}{}
 	responses, err := c.batchPredict(ctx, embeddingModelName, r.Input, params)
 	if err != nil {
 		return nil, err
 	}
 
-	embeddings := [][]float64{}
+	embeddings := [][]float32{}
 	for _, res := range responses {
 		value := res.GetStructValue().AsMap()
 		embedding, ok := value["embeddings"].(map[string]interface{})
@@ -139,11 +139,11 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 		if !ok {
 			return nil, fmt.Errorf("%w: %v", ErrMissingValue, "values")
 		}
-		floatValues := []float64{}
+		floatValues := []float32{}
 		for _, v := range values {
-			val, ok := v.(float64)
+			val, ok := v.(float32)
 			if !ok {
-				return nil, fmt.Errorf("%w: %v is not a float64", ErrInvalidValue, "value")
+				return nil, fmt.Errorf("%w: %v is not a float32, it is a %T", ErrInvalidValue, "value", v)
 			}
 			floatValues = append(floatValues, val)
 		}
