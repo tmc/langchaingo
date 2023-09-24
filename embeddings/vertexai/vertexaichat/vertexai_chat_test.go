@@ -38,7 +38,7 @@ func TestVertexAIChatEmbeddingsWithOptions(t *testing.T) {
 	client, err := vertexai.NewChat()
 	require.NoError(t, err)
 
-	e, err := NewChatVertexAI(WithClient(*client), WithBatchSize(5), WithStripNewLines(false))
+	e, err := NewChatVertexAI(WithClient(client), WithBatchSize(5), WithStripNewLines(false))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")

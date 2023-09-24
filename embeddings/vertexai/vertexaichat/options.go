@@ -12,9 +12,9 @@ const (
 type ChatOption func(p *ChatVertexAI)
 
 // WithClient is an option for providing the LLM client.
-func WithClient(client vertexai.Chat) ChatOption {
+func WithClient(client *vertexai.Chat) ChatOption {
 	return func(p *ChatVertexAI) {
-		p.client = &client
+		p.client = client
 	}
 }
 
