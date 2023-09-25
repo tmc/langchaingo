@@ -244,6 +244,8 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 			if value != 0 {
 				mergedParams[paramKey] = value
 			}
+		case []interface{}:
+			mergedParams[paramKey] = value
 		}
 	}
 	smergedParams, err := structpb.NewStruct(mergedParams)
