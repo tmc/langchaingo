@@ -132,6 +132,7 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption {
 		llms.WithStopWords(opts.StopWords),
 		llms.WithStreamingFunc(opts.StreamingFunc),
 		llms.WithTopK(opts.TopK),
+		llms.WithTopP(opts.TopP),
 		llms.WithSeed(opts.Seed),
 		llms.WithMinLength(opts.MinLength),
 		llms.WithMaxLength(opts.MaxLength),

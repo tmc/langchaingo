@@ -8,9 +8,9 @@ import (
 // Embedder is the interface for creating vector embeddings from texts.
 type Embedder interface {
 	// EmbedDocuments returns a vector for each text.
-	EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error)
+	EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error)
 	// EmbedQuery embeds a single text.
-	EmbedQuery(ctx context.Context, text string) ([]float64, error)
+	EmbedQuery(ctx context.Context, text string) ([]float32, error)
 }
 
 func MaybeRemoveNewLines(texts []string, removeNewLines bool) []string {

@@ -124,7 +124,7 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptV
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})

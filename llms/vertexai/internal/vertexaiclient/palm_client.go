@@ -75,11 +75,12 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
-	Prompts     []string `json:"prompts"`
-	MaxTokens   int      `json:"max_tokens"`
-	Temperature float64  `json:"temperature,omitempty"`
-	TopP        int      `json:"top_p,omitempty"`
-	TopK        int      `json:"top_k,omitempty"`
+	Prompts       []string `json:"prompts"`
+	MaxTokens     int      `json:"max_tokens"`
+	Temperature   float64  `json:"temperature,omitempty"`
+	TopP          int      `json:"top_p,omitempty"`
+	TopK          int      `json:"top_k,omitempty"`
+	StopSequences []string `json:"stop_sequences"`
 }
 
 // Completion is a completion.
@@ -94,6 +95,7 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 		"temperature":     r.Temperature,
 		"top_p":           r.TopP,
 		"top_k":           r.TopK,
+		"stopSequences":   convertArray(r.StopSequences),
 	}
 	predictions, err := c.batchPredict(ctx, TextModelName, r.Prompts, params)
 	if err != nil {
@@ -119,14 +121,14 @@ type EmbeddingRequest struct {
 }
 
 // CreateEmbedding creates embeddings.
-func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
+func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	params := map[string]interface{}{}
 	responses, err := c.batchPredict(ctx, embeddingModelName, r.Input, params)
 	if err != nil {
 		return nil, err
 	}
 
-	embeddings := [][]float64{}
+	embeddings := [][]float32{}
 	for _, res := range responses {
 		value := res.GetStructValue().AsMap()
 		embedding, ok := value["embeddings"].(map[string]interface{})
@@ -137,11 +139,11 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 		if !ok {
 			return nil, fmt.Errorf("%w: %v", ErrMissingValue, "values")
 		}
-		floatValues := []float64{}
+		floatValues := []float32{}
 		for _, v := range values {
-			val, ok := v.(float64)
+			val, ok := v.(float32)
 			if !ok {
-				return nil, fmt.Errorf("%w: %v is not a float64", ErrInvalidValue, "value")
+				return nil, fmt.Errorf("%w: %v is not a float32, it is a %T", ErrInvalidValue, "value", v)
 			}
 			floatValues = append(floatValues, val)
 		}
@@ -250,6 +252,14 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 		return smergedParams
 	}
 	return smergedParams
+}
+
+func convertArray(value []string) interface{} {
+	newArray := make([]interface{}, len(value))
+	for i, v := range value {
+		newArray[i] = v
+	}
+	return newArray
 }
 
 func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []string, params map[string]interface{}) ([]*structpb.Value, error) { //nolint:lll

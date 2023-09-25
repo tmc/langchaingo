@@ -35,7 +35,7 @@ var defaultformatterMapping = map[TemplateFormat]interpolator{ //nolint:gocheckn
 func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	parsedTmpl, err := template.New("template").
 		Option("missingkey=error").
-		Funcs(sprig.FuncMap()).
+		Funcs(sprig.TxtFuncMap()).
 		Parse(tmpl)
 	if err != nil {
 		return "", err

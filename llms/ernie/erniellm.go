@@ -119,7 +119,7 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 // 1. texts counts less than 16
 // 2. text runes counts less than 384
 // doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
-func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float64, error) {
+func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	resp, e := l.client.CreateEmbedding(ctx, texts)
 	if e != nil {
 		return nil, e
@@ -130,7 +130,7 @@ func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float64,
 			ErrCodeResponse, resp.ErrorCode, resp.ErrorMsg)
 	}
 
-	emb := make([][]float64, 0, len(texts))
+	emb := make([][]float32, 0, len(texts))
 	for i := range resp.Data {
 		emb = append(emb, resp.Data[i].Embedding)
 	}

@@ -29,13 +29,13 @@ func NewHuggingface(opts ...Option) (*Huggingface, error) {
 	return v, nil
 }
 
-func (e *Huggingface) EmbedDocuments(ctx context.Context, texts []string) ([][]float64, error) {
+func (e *Huggingface) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, e.StripNewLines),
 		e.BatchSize,
 	)
 
-	emb := make([][]float64, 0, len(texts))
+	emb := make([][]float32, 0, len(texts))
 	for _, texts := range batchedTexts {
 		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts, e.Model, e.Task)
 		if err != nil {
@@ -58,7 +58,7 @@ func (e *Huggingface) EmbedDocuments(ctx context.Context, texts []string) ([][]f
 	return emb, nil
 }
 
-func (e *Huggingface) EmbedQuery(ctx context.Context, text string) ([]float64, error) {
+func (e *Huggingface) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if e.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}
