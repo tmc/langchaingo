@@ -8,9 +8,10 @@ import (
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
+
+	"github.com/tmc/langchaingo/schema"
 )
 
 const (
@@ -143,7 +144,11 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 		for _, v := range values {
 			val, ok := v.(float32)
 			if !ok {
-				return nil, fmt.Errorf("%w: %v is not a float32, it is a %T", ErrInvalidValue, "value", v)
+				valF64, ok := v.(float64)
+				if !ok {
+					return nil, fmt.Errorf("%w: %v is not a float64 or float32, it is a %T", ErrInvalidValue, "value", v)
+				}
+				val = float32(valF64)
 			}
 			floatValues = append(floatValues, val)
 		}
