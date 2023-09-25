@@ -48,7 +48,12 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		msgs, chatContext := toClientChatMessage(messages)
+		chatContext := parseContext(messages)
+		if len(chatContext) > 0 {
+			// remove system context from messages
+			messages = messages[1:]
+		}
+		msgs := toClientChatMessage(messages)
 		result, err := o.client.CreateChat(ctx, &vertexaiclient.ChatRequest{
 			Temperature: opts.Temperature,
 			Messages:    msgs,
@@ -79,19 +84,14 @@ func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(vertexaiclient.TextModelName, text)
 }
 
-func toClientChatMessage(messages []schema.ChatMessage) ([]*vertexaiclient.ChatMessage, string) {
+func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
-	chatContext := ""
+
 	for i, m := range messages {
 		msg := &vertexaiclient.ChatMessage{
 			Content: m.GetContent(),
 		}
 		typ := m.GetType()
-		// system message aka context/prompt will not be included in the message list
-		if i == 0 && typ == schema.ChatMessageTypeSystem {
-			chatContext = msg.GetContent()
-			continue
-		}
 
 		switch typ {
 		case schema.ChatMessageTypeSystem:
@@ -110,7 +110,18 @@ func toClientChatMessage(messages []schema.ChatMessage) ([]*vertexaiclient.ChatM
 		}
 		msgs[i] = msg
 	}
-	return msgs, chatContext
+	return msgs
+}
+
+func parseContext(messages []schema.ChatMessage) string {
+	if len(messages) == 0 {
+		return ""
+	}
+	// check if 1st message type is system. use it as context.
+	if messages[0].GetType() == schema.ChatMessageTypeSystem {
+		return messages[0].GetContent()
+	}
+	return ""
 }
 
 // NewChat returns a new VertexAI PaLM Chat LLM.
