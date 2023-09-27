@@ -167,6 +167,7 @@ func (s Store) restQuery(
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    match.Metadata,
+			Score:       match.Score,
 		}
 
 		// If scoreThreshold is not 0, we only return matches with a score above the threshold.
