@@ -230,6 +230,10 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
 		}
 
+		if streamResponse.Choices[0].FinishReason != "" {
+			response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
+		}
+
 		if payload.StreamingFunc != nil {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
