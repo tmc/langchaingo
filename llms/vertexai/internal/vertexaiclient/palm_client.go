@@ -232,10 +232,7 @@ func (c *PaLMClient) CreateChat(ctx context.Context, r *ChatRequest) (*ChatRespo
 }
 
 func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct {
-	mergedParams := map[string]interface{}{}
-	for paramKey, paramValue := range defaultParameters {
-		mergedParams[paramKey] = paramValue
-	}
+	mergedParams := cloneDefaultParameters()
 	for paramKey, paramValue := range params {
 		switch value := paramValue.(type) {
 		case float64:
@@ -248,14 +245,28 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 			if value != 0 {
 				mergedParams[paramKey] = value
 			}
+		case []interface{}:
+			mergedParams[paramKey] = value
 		}
 	}
+	return convertToOutputStruct(defaultParams, mergedParams)
+}
+
+func convertToOutputStruct(defaultParams map[string]interface{}, mergedParams map[string]interface{}) *structpb.Struct {
 	smergedParams, err := structpb.NewStruct(mergedParams)
 	if err != nil {
 		smergedParams, _ = structpb.NewStruct(defaultParams)
 		return smergedParams
 	}
 	return smergedParams
+}
+
+func cloneDefaultParameters() map[string]interface{} {
+	mergedParams := map[string]interface{}{}
+	for paramKey, paramValue := range defaultParameters {
+		mergedParams[paramKey] = paramValue
+	}
+	return mergedParams
 }
 
 func convertArray(value []string) interface{} {
