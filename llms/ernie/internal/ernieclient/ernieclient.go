@@ -281,11 +281,14 @@ func parseStreamingCompletionResponse(ctx context.Context, resp *http.Response, 
 			if line == "" {
 				continue
 			}
-			if !strings.HasPrefix(line, dataPrefix) {
+
+			if !strings.HasPrefix(line, dataPrefix) && !strings.HasPrefix(line, "{") {
 				continue
 			}
+
 			data := strings.TrimPrefix(line, dataPrefix)
 			streamPayload := &Completion{}
+
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
 				log.Fatalf("failed to decode stream payload: %v", err)
