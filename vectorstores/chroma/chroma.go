@@ -9,9 +9,9 @@ import (
 	"github.com/amikos-tech/chroma-go/openai"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"golang.org/x/exp/maps"
 )
 
 var (
@@ -73,6 +73,7 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
+// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
 func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) error {
 	opts := s.getOptions(options...)
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
@@ -90,7 +91,9 @@ func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options .
 	for docIdx, doc := range docs {
 		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
 		texts[docIdx] = doc.PageContent
-		metadatas[docIdx] = util.NewMap(doc.Metadata)
+		mc := make(map[string]any, 0)
+		maps.Copy(mc, doc.Metadata)
+		metadatas[docIdx] = mc
 		if nameSpace != "" {
 			metadatas[docIdx][s.nameSpaceKey] = nameSpace
 		}
