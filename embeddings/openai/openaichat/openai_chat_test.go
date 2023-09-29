@@ -37,7 +37,7 @@ func TestOpenAIChatEmbeddingsWithOptions(t *testing.T) {
 	client, err := openai.NewChat()
 	require.NoError(t, err)
 
-	e, err := NewChatOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
+	e, err := NewChatOpenAI(WithClient(client), WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")

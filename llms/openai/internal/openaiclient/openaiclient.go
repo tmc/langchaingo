@@ -97,7 +97,7 @@ type EmbeddingRequest struct {
 }
 
 // CreateEmbedding creates embeddings.
-func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float64, error) {
+func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
@@ -114,7 +114,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 		return nil, ErrEmptyResponse
 	}
 
-	embeddings := make([][]float64, 0)
+	embeddings := make([][]float32, 0)
 	for i := 0; i < len(resp.Data); i++ {
 		embeddings = append(embeddings, resp.Data[i].Embedding)
 	}
@@ -150,10 +150,10 @@ func IsAzure(apiType APIType) bool {
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	if IsAzure(c.apiType) {
-		req.Header.Set("api-key", c.token)
-	} else {
+	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
 		req.Header.Set("Authorization", "Bearer "+c.token)
+	} else {
+		req.Header.Set("api-key", c.token)
 	}
 	if c.organization != "" {
 		req.Header.Set("OpenAI-Organization", c.organization)

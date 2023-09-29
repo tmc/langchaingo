@@ -61,35 +61,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messageSet := range messageSets {
-		msgs := make([]*openaiclient.ChatMessage, len(messageSet))
-		for i, m := range messageSet {
-			msg := &openaiclient.ChatMessage{
-				Content: m.GetContent(),
-			}
-			typ := m.GetType()
-			switch typ {
-			case schema.ChatMessageTypeSystem:
-				msg.Role = RoleSystem
-			case schema.ChatMessageTypeAI:
-				msg.Role = RoleAssistant
-				if aiChatMsg, ok := m.(schema.AIChatMessage); ok && aiChatMsg.FunctionCall != nil {
-					msg.FunctionCall = &openaiclient.FunctionCall{
-						Name:      aiChatMsg.FunctionCall.Name,
-						Arguments: aiChatMsg.FunctionCall.Arguments,
-					}
-				}
-			case schema.ChatMessageTypeHuman:
-				msg.Role = RoleUser
-			case schema.ChatMessageTypeGeneric:
-				msg.Role = RoleUser
-			case schema.ChatMessageTypeFunction:
-				msg.Role = RoleFunction
-			}
-			if n, ok := m.(schema.Named); ok {
-				msg.Name = n.GetName()
-			}
-			msgs[i] = msg
-		}
 		req := &openaiclient.ChatRequest{
 			Model:            opts.Model,
 			StopWords:        opts.StopWords,
@@ -153,7 +124,7 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptV
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})

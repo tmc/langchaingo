@@ -68,8 +68,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/tmc/langchaingo v0.0.0-20230829032009-e89bc0bd369f h1:ShpjfnVRy2kt5W2clOMYb4Op7C27dGAjXBuQABVEExw=
-github.com/tmc/langchaingo v0.0.0-20230829032009-e89bc0bd369f/go.mod h1:vCdA1t5qnS5YPkDsznowOziBHFn0Ul11ZqfJ2GOAi0s=
+github.com/tmc/langchaingo v0.0.0-20230924223441-4dac573d3b3f h1:FjHL9wyH+2dMo+brQ/Rycsh+HY7plvPbArMx41Bi3xE=
+github.com/tmc/langchaingo v0.0.0-20230924223441-4dac573d3b3f/go.mod h1:vCdA1t5qnS5YPkDsznowOziBHFn0Ul11ZqfJ2GOAi0s=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.starlark.net v0.0.0-20230302034142-4b1e35fe2254 h1:Ss6D3hLXTM0KobyBYEAygXzFfGcjnmfEJOBgSbemCtg=
 go.starlark.net v0.0.0-20230302034142-4b1e35fe2254/go.mod h1:jxU+3+j+71eXOW14274+SmmuW82qJzl6iZSeqEtTGds=

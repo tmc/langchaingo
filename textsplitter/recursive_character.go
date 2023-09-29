@@ -15,12 +15,19 @@ type RecursiveCharacter struct {
 // NewRecursiveCharacter creates a new recursive character splitter with default values. By
 // default the separators used are "\n\n", "\n", " " and "". The chunk size is set to 4000
 // and chunk overlap is set to 200.
-func NewRecursiveCharacter() RecursiveCharacter {
-	return RecursiveCharacter{
-		Separators:   []string{"\n\n", "\n", " ", ""},
-		ChunkSize:    _defaultChunkSize,
-		ChunkOverlap: _defaultChunkOverlap,
+func NewRecursiveCharacter(opts ...Option) RecursiveCharacter {
+	options := DefaultOptions()
+	for _, o := range opts {
+		o(&options)
 	}
+
+	s := RecursiveCharacter{
+		Separators:   options.Separators,
+		ChunkSize:    options.ChunkSize,
+		ChunkOverlap: options.ChunkOverlap,
+	}
+
+	return s
 }
 
 // SplitText splits a text into multiple text.

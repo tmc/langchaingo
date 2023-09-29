@@ -48,10 +48,16 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
+		chatContext := parseContext(messages)
+		if len(chatContext) > 0 {
+			// remove system context from messages
+			messages = messages[1:]
+		}
 		msgs := toClientChatMessage(messages)
 		result, err := o.client.CreateChat(ctx, &vertexaiclient.ChatRequest{
 			Temperature: opts.Temperature,
 			Messages:    msgs,
+			Context:     chatContext,
 		})
 		if err != nil {
 			return nil, err
@@ -80,11 +86,13 @@ func (o *Chat) GetNumTokens(text string) int {
 
 func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
+
 	for i, m := range messages {
 		msg := &vertexaiclient.ChatMessage{
 			Content: m.GetContent(),
 		}
 		typ := m.GetType()
+
 		switch typ {
 		case schema.ChatMessageTypeSystem:
 			msg.Author = botAuthor
@@ -105,6 +113,17 @@ func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMe
 	return msgs
 }
 
+func parseContext(messages []schema.ChatMessage) string {
+	if len(messages) == 0 {
+		return ""
+	}
+	// check if 1st message type is system. use it as context.
+	if messages[0].GetType() == schema.ChatMessageTypeSystem {
+		return messages[0].GetContent()
+	}
+	return ""
+}
+
 // NewChat returns a new VertexAI PaLM Chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {
 	client, err := newClient(opts...)
@@ -112,7 +131,7 @@ func NewChat(opts ...Option) (*Chat, error) {
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
-func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float64, error) {
+func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
 		Input: inputTexts,
 	})

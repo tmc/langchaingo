@@ -1,10 +1,12 @@
 package vertexai
 
 import (
+	"net/http"
 	"os"
 	"sync"
 
 	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -60,6 +62,18 @@ func WithCredentialsFile(path string) Option {
 // credentials.
 func WithCredentialsJSON(json []byte) Option {
 	return convertByteArrayOption(option.WithCredentialsJSON)(json)
+}
+
+func WithGRPCDialOption(opt grpc.DialOption) Option {
+	return func(opts *options) {
+		opts.clientOptions = append(opts.clientOptions, option.WithGRPCDialOption(opt))
+	}
+}
+
+func WithHTTPClient(client *http.Client) Option {
+	return func(opts *options) {
+		opts.clientOptions = append(opts.clientOptions, option.WithHTTPClient(client))
+	}
 }
 
 func convertStringOption(fopt func(string) option.ClientOption) func(string) Option {

@@ -28,14 +28,6 @@ var (
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
-	c, err := newClient(opts...)
-
-	return &LLM{
-		client: c,
-	}, err
-}
-
-func newClient(opts ...Option) (*ernieclient.Client, error) {
 	options := &options{
 		apiKey:    os.Getenv(ernieAPIKey),
 		secretKey: os.Getenv(ernieSecretKey),
@@ -45,7 +37,16 @@ func newClient(opts ...Option) (*ernieclient.Client, error) {
 		opt(options)
 	}
 
-	if options.accessToken == "" && (options.apiKey == "" || options.secretKey == "") {
+	c, err := newClient(options)
+
+	return &LLM{
+		client: c,
+		model:  options.modelName,
+	}, err
+}
+
+func newClient(opts *options) (*ernieclient.Client, error) {
+	if opts.accessToken == "" && (opts.apiKey == "" || opts.secretKey == "") {
 		return nil, fmt.Errorf(`%w
 You can pass auth info by use ernie.New(ernie.WithAKSK("{api Key}","{serect Key}")) ,
 or
@@ -55,8 +56,8 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 	}
 
 	return ernieclient.New(
-		ernieclient.WithAccessToken(options.accessToken),
-		ernieclient.WithAKSK(options.apiKey, options.secretKey))
+		ernieclient.WithAccessToken(opts.accessToken),
+		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
 }
 
 // GeneratePrompt implements llms.LanguageModel.
@@ -107,6 +108,11 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		if err != nil {
 			return nil, err
 		}
+		if result.ErrorCode > 0 {
+			return nil, fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
+				ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
+		}
+
 		generations = append(generations, &llms.Generation{
 			Text: result.Result,
 		})
@@ -119,18 +125,18 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 // 1. texts counts less than 16
 // 2. text runes counts less than 384
 // doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
-func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float64, error) {
+func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	resp, e := l.client.CreateEmbedding(ctx, texts)
 	if e != nil {
 		return nil, e
 	}
 
 	if resp.ErrorCode > 0 {
-		return nil, fmt.Errorf("%w, error_code:%v, erro_msg:%v",
-			ErrCodeResponse, resp.ErrorCode, resp.ErrorMsg)
+		return nil, fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
+			ErrCodeResponse, resp.ErrorCode, resp.ErrorMsg, resp.ID)
 	}
 
-	emb := make([][]float64, 0, len(texts))
+	emb := make([][]float32, 0, len(texts))
 	for i := range resp.Data {
 		emb = append(emb, resp.Data[i].Embedding)
 	}
@@ -159,6 +165,7 @@ func (l *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
 	case ModelNameLlama2_70BChat:
 		return "llama_2_70b"
 	default:
+
 		return ernieclient.DefaultCompletionModelPath
 	}
 }
