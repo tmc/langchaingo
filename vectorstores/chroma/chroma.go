@@ -134,8 +134,7 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	var sDocs []schema.Document
 	for docsI := range qr.Documents {
 		for docI := range qr.Documents[docsI] {
-			distanceFound := float64(qr.Distances[docsI][docI])
-			if (1.0 - distanceFound) >= scoreThreshold {
+			if (1.0 - qr.Distances[docsI][docI]) >= scoreThreshold {
 				sDocs = append(sDocs, schema.Document{
 					Metadata:    qr.Metadatas[docsI][docI],
 					PageContent: qr.Documents[docsI][docI],
@@ -165,8 +164,7 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	}
 	return opts
 }
-
-func (s Store) getScoreThreshold(opts vectorstores.Options) (float64, error) {
+func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
 	}
