@@ -164,6 +164,7 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	}
 	return opts
 }
+
 func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
