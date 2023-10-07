@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -20,16 +20,20 @@ func main() {
 	}
 
 	ctx := context.Background()
+	PCAPI := os.Getenv("PINECONE_API_KEY")
+	PCENV := os.Getenv("PINECONE_ENV")
+	PCPRO := os.Getenv("PINECONE_PROJECT")
+	PCIND := os.Getenv("PINECONE_INDEX")
 
 	// Create a new Pinecone vector store.
 	store, err := pinecone.New(
 		ctx,
-		pinecone.WithProjectName("YOUR_PROJECT_NAME"),
-		pinecone.WithIndexName("YOUR_INDEX_NAME"),
-		pinecone.WithEnvironment("YOUR_ENVIRONMENT"),
+		pinecone.WithProjectName(PCPRO),
+		pinecone.WithIndexName(PCIND),
+		pinecone.WithEnvironment(PCENV),
 		pinecone.WithEmbedder(e),
-		pinecone.WithAPIKey("YOUR_API_KEY"),
-		pinecone.WithNameSpace(uuid.New().String()),
+		pinecone.WithAPIKey(PCAPI),
+		pinecone.WithNameSpace("Tymeline IDs"),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -86,7 +90,7 @@ func main() {
 				"area":       1523,
 			},
 		},
-	})
+	}, "id")
 	if err != nil {
 		log.Fatal(err)
 	}
