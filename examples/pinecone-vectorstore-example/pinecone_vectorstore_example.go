@@ -33,14 +33,14 @@ func main() {
 		pinecone.WithEnvironment(PCENV),
 		pinecone.WithEmbedder(e),
 		pinecone.WithAPIKey(PCAPI),
-		pinecone.WithNameSpace("Tymeline IDs"),
+		pinecone.WithNameSpace(PCIND),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Add documents to the Pinecone vector store.
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	err = store.AddDocuments(context.Background(), "id", []schema.Document{
 		{
 			PageContent: "Tokyo",
 			Metadata: map[string]any{
@@ -90,7 +90,7 @@ func main() {
 				"area":       1523,
 			},
 		},
-	}, "id")
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
