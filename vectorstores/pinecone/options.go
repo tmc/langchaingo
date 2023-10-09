@@ -119,3 +119,10 @@ func applyClientOptions(opts ...Option) (Store, error) {
 
 	return *o, nil
 }
+
+// Id is an option for setting the vector Id to upsert
+func WithId(id string) Option {
+	return func(p *Store) {
+		p.id = id
+	}
+}

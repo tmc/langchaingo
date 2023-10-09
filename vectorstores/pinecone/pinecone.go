@@ -39,6 +39,7 @@ type Store struct {
 	textKey     string
 	nameSpace   string
 	useGRPC     bool
+	id          string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -71,6 +72,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
+	id := s.getId(opts)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -98,10 +100,10 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	}
 
 	if s.useGRPC {
-		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace)
+		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace, id)
 	}
 
-	return s.restUpsert(ctx, vectors, metadatas, nameSpace)
+	return s.restUpsert(ctx, vectors, metadatas, nameSpace, id)
 }
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
@@ -164,4 +166,8 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 		opt(&opts)
 	}
 	return opts
+}
+
+func (s Store) getId(opts vectorstores.Options) string {
+	return opts.Id
 }

@@ -11,6 +11,7 @@ type Options struct {
 	ScoreThreshold float32
 	Filters        any
 	Embedder       embeddings.Embedder
+	Id             string
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -42,5 +43,12 @@ func WithFilters(filters any) Option {
 func WithEmbedder(embedder embeddings.Embedder) Option {
 	return func(o *Options) {
 		o.Embedder = embedder
+	}
+}
+
+//WithId returns an Option for setting vector ID for document
+func WithId(id string) Option {
+	return func(o *Options) {
+		o.Id = id
 	}
 }

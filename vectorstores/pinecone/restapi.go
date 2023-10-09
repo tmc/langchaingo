@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -50,13 +49,14 @@ func (s Store) restUpsert(
 	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
+	id string,
 ) error {
 	v := make([]vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		v = append(v, vector{
 			Values:   vectors[i],
 			Metadata: metadatas[i],
-			ID:       uuid.New().String(),
+			ID:       id,
 		})
 	}
 

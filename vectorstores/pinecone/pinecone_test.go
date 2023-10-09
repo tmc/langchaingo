@@ -609,3 +609,37 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	require.Contains(t, result, "purple", "expected black in purple")
 }
+
+func TestPineconeAddDocumenttWithId(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+	e, err := openaiEmbeddings.NewOpenAI()
+	require.NoError(t, err)
+
+	storer, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+		pinecone.WithNameSpace(uuid.New().String()),
+	)
+	require.NoError(t, err)
+
+	err = storer.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London "},
+		{PageContent: "New York"},
+	}, vectorstores.WithId("TEST-ID"))
+	require.NoError(t, err)
+
+}
