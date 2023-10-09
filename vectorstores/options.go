@@ -46,7 +46,7 @@ func WithEmbedder(embedder embeddings.Embedder) Option {
 	}
 }
 
-// WithId returns an Option for setting vector ID for document.
+// WithID returns an Option for setting vectorId for document
 func WithID(id string) Option {
 	return func(o *Options) {
 		o.ID = id
