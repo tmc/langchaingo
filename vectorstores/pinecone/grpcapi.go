@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/google/uuid"
 
 	"github.com/pinecone-io/go-pinecone/pinecone_grpc"
 	"github.com/tmc/langchaingo/schema"
@@ -48,6 +49,9 @@ func (s Store) grpcUpsert(
 	nameSpace string,
 	id string,
 ) error {
+	if id == "" {
+		id = uuid.New().String()
+	}
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		metadataStruct, err := structpb.NewStruct(metadatas[i])
