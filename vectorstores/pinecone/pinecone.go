@@ -39,7 +39,6 @@ type Store struct {
 	textKey     string
 	nameSpace   string
 	useGRPC     bool
-	id          string
 }
 
 var _ vectorstores.VectorStore = Store{}
