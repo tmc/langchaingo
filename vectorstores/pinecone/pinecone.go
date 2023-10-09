@@ -72,7 +72,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
-	id := s.getId(opts)
+	id := s.getID(opts)
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -168,6 +168,6 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func (s Store) getId(opts vectorstores.Options) string {
-	return opts.Id
+func (s Store) getID(opts vectorstores.Options) string {
+	return opts.ID
 }

@@ -639,7 +639,7 @@ func TestPineconeAddDocumenttWithId(t *testing.T) {
 		{PageContent: "Paris"},
 		{PageContent: "London "},
 		{PageContent: "New York"},
-	}, vectorstores.WithId("TEST-ID"))
+	}, vectorstores.WithID("TEST-ID"))
 	require.NoError(t, err)
 
 }

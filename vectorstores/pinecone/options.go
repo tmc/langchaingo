@@ -119,9 +119,3 @@ func applyClientOptions(opts ...Option) (Store, error) {
 
 	return *o, nil
 }
-
-func WithId(id string) Option {
-	return func(p *Store) {
-		p.id = id
-	}
-}
