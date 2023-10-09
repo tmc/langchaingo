@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+
 	"github.com/google/uuid"
 
 	"github.com/pinecone-io/go-pinecone/pinecone_grpc"
