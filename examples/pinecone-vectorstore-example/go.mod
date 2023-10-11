@@ -13,9 +13,9 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2 // indirect
 	github.com/pinecone-io/go-pinecone v0.3.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/genproto v0.0.0-20230526161137-0005af68ea54 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230525234035-dd9d682886f9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
