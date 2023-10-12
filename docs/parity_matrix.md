@@ -40,7 +40,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | SQL Database Chain                     | ✅     |
 | API Chain                              | ✅     |
 | Transformation Chain                   | ❌     |
-| Constitutional Chain                   | ❌     |
+| Constitutional Chain                   | ✅     |
 | Conversational Chain                   | ❌     |
 | Graph QA Chain                         | ❌     |
 | HyDE Chain                             | ❌     |
