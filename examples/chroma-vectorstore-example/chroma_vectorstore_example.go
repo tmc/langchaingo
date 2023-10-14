@@ -21,7 +21,6 @@ func main() {
 		chroma.WithChromaURL(os.Getenv("CHROMA_URL")),
 		chroma.WithOpenAiAPIKey(os.Getenv("OPENAI_API_KEY")),
 		chroma.WithDistanceFunction(chroma_go.COSINE),
-		chroma.WithCollectionName(uuid.New().String()),
 		chroma.WithNameSpace(uuid.New().String()),
 	)
 	if errNs != nil {

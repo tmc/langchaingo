@@ -14,7 +14,6 @@ const (
 	ChromaURLKeyEnvVarName = "CHROMA_URL"
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
-	DefaultCollectionName  = "langchaingo"
 	DefaultDistanceFunc    = chromago.L2
 )
 
@@ -23,13 +22,6 @@ var ErrInvalidOptions = errors.New("invalid options")
 
 // Option is a function type that can be used to modify the client.
 type Option func(p *Store)
-
-// WithCollectionName is an option for specifying the name of the Chroma collection to use. Must be set.
-func WithCollectionName(name string) Option {
-	return func(p *Store) {
-		p.collectionName = name
-	}
-}
 
 // WithNameSpace sets the nameSpace used to upsert and query the vectors from.
 func WithNameSpace(nameSpace string) Option {
@@ -80,16 +72,12 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		nameSpace:        DefaultNameSpace,
 		nameSpaceKey:     DefaultNameSpaceKey,
-		collectionName:   DefaultCollectionName,
 		distanceFunction: DefaultDistanceFunc,
+		openaiAPIKey:     os.Getenv(OpenAiAPIKeyEnvVarName),
 	}
 
 	for _, opt := range opts {
 		opt(o)
-	}
-
-	if o.collectionName == "" {
-		return Store{}, fmt.Errorf("%w: missing collection name", ErrInvalidOptions)
 	}
 
 	if o.chromaURL == "" {
@@ -101,13 +89,9 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		}
 	}
 
-	if o.openaiAPIKey == "" {
-		o.openaiAPIKey = os.Getenv(OpenAiAPIKeyEnvVarName)
-		if o.openaiAPIKey == "" {
-			return Store{}, fmt.Errorf(
-				"%w: missing OpenAiAPI key. Pass it as an option or set the %s environment variable",
-				ErrInvalidOptions, OpenAiAPIKeyEnvVarName)
-		}
+	// a embedder or an openai api key must be provided
+	if o.openaiAPIKey == "" && o.embedder == nil {
+		return Store{}, fmt.Errorf("%w: missing embedder or openai api key", ErrInvalidOptions)
 	}
 
 	return *o, nil
