@@ -30,11 +30,11 @@ type Store struct {
 	distanceFunction chromago.DistanceFunction
 	chromaURL        string
 	openaiAPIKey     string
-	collectionName   string
-	nameSpace        string
-	nameSpaceKey     string
-	embedder         embeddings.Embedder
-	includes         []chromago.QueryEnum
+
+	nameSpace    string
+	nameSpaceKey string
+	embedder     embeddings.Embedder
+	includes     []chromago.QueryEnum
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -63,7 +63,7 @@ func New(opts ...Option) (Store, error) {
 		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
 	}
 
-	col, errCc := s.client.CreateCollection(s.collectionName, map[string]any{}, true,
+	col, errCc := s.client.CreateCollection(s.nameSpace, map[string]any{}, true,
 		embeddingFunction, s.distanceFunction)
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
