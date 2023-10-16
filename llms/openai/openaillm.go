@@ -90,6 +90,7 @@ func (o *LLM) GetNumTokens(text string) int {
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
+		Model: o.client.Model,
 	})
 	if err != nil {
 		return nil, err
