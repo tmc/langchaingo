@@ -1,6 +1,9 @@
 package vectorstores
 
-import "github.com/tmc/langchaingo/embeddings"
+import (
+	"github.com/google/uuid"
+	"github.com/tmc/langchaingo/embeddings"
+)
 
 // Option is a function that configures an Options.
 type Option func(*Options)
@@ -47,8 +50,15 @@ func WithEmbedder(embedder embeddings.Embedder) Option {
 }
 
 // WithID returns an Option for setting vectorId for document.
+// Inserting documents using a custom vector identifier or auto generated UUID.
+// This approach is beneficial when we need to perform deletions or updates on the vector within the Pinecone index.
 func WithID(id string) Option {
+	if id != "" {
+		return func(o *Options) {
+			o.ID = id
+		}
+	}
 	return func(o *Options) {
-		o.ID = id
+		o.ID = uuid.NewString()
 	}
 }

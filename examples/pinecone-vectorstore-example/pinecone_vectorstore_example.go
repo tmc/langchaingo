@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-
+	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/pinecone"
+	"log"
 )
 
 func main() {
@@ -18,22 +17,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	ctx := context.Background()
-	PCAPI := os.Getenv("PINECONE_API_KEY")
-	PCENV := os.Getenv("PINECONE_ENV")
-	PCPRO := os.Getenv("PINECONE_PROJECT")
-	PCIND := os.Getenv("PINECONE_INDEX")
 
 	// Create a new Pinecone vector store.
 	store, err := pinecone.New(
 		ctx,
-		pinecone.WithProjectName(PCPRO),
-		pinecone.WithIndexName(PCIND),
-		pinecone.WithEnvironment(PCENV),
+		pinecone.WithProjectName("YOUR_PROJECT_NAME"),
+		pinecone.WithIndexName("YOUR_INDEX_NAME"),
+		pinecone.WithEnvironment("YOUR_ENVIRONMENT"),
 		pinecone.WithEmbedder(e),
-		pinecone.WithAPIKey(PCAPI),
-		pinecone.WithNameSpace(PCIND),
+		pinecone.WithAPIKey("YOUR_API_KEY"),
+		pinecone.WithNameSpace(uuid.New().String()),
 	)
 	if err != nil {
 		log.Fatal(err)
