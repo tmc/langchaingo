@@ -2,7 +2,7 @@ module prompts-with-partial-example
 
 go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20230924223441-4dac573d3b3f
+require github.com/tmc/langchaingo v0.0.0-20231016073449-5620c5b08983
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -15,6 +15,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 )

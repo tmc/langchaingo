@@ -6,12 +6,13 @@ go 1.20
 replace github.com/tmc/langchaingo => ../..
 
 require (
+	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
 	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.0.0-20230829032009-e89bc0bd369f
+	github.com/tmc/langchaingo v0.0.0-20231016073449-5620c5b08983
 )
 
 require (
-	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 )
