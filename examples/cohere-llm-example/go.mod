@@ -2,7 +2,7 @@ module basic-llm-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20230924223441-4dac573d3b3f
+require github.com/tmc/langchaingo v0.0.0-20231016073449-5620c5b08983
 
 require (
 	github.com/cohere-ai/tokenizer v1.1.2 // indirect
