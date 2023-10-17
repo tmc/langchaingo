@@ -7,6 +7,7 @@ import (
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
+	chromaopenapi "github.com/amikos-tech/chroma-go/swagger"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -48,7 +49,16 @@ func New(opts ...Option) (Store, error) {
 	}
 
 	// create the client connection and confirm that we can access the server with it
-	chromaClient := chromago.NewClient(s.chromaURL)
+	configuration := chromaopenapi.NewConfiguration()
+	configuration.Servers = chromaopenapi.ServerConfigurations{
+		{
+			URL:         s.chromaURL,
+			Description: "Chromadb server url for this store",
+		},
+	}
+	chromaClient := &chromago.Client{
+		ApiClient: chromaopenapi.NewAPIClient(configuration),
+	}
 	if _, errHb := chromaClient.Heartbeat(); errHb != nil {
 		return s, errHb
 	}
