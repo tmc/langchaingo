@@ -27,10 +27,12 @@ func (e StatusError) Error() string {
 }
 
 type GenerateRequest struct {
-	Model   string `json:"model"`
-	Prompt  string `json:"prompt"`
-	Context []int  `json:"context,omitempty"`
-	Stream  *bool  `json:"stream,omitempty"`
+	Model    string `json:"model"`
+	Prompt   string `json:"prompt"`
+	System   string `json:"system"`
+	Template string `json:"template"`
+	Context  []int  `json:"context,omitempty"`
+	Stream   *bool  `json:"stream,omitempty"`
 
 	Options `json:"options"`
 }

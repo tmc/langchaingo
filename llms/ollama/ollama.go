@@ -82,8 +82,15 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 	for _, prompt := range prompts {
 		req := &ollamaclient.GenerateRequest{
-			Model:   model,
-			Prompt:  prompt,
+			Model:  model,
+			Prompt: prompt,
+			Template: func() string {
+				if o.options.useModelTemplating {
+					return "{{.Prompt}}"
+				} else {
+					return ""
+				}
+			}(),
 			Options: ollamaOptions,
 			Stream:  func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
 		}

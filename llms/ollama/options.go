@@ -8,9 +8,10 @@ import (
 )
 
 type options struct {
-	ollamaServerURL *url.URL
-	model           string
-	ollamaOptions   ollamaclient.Options
+	ollamaServerURL    *url.URL
+	model              string
+	ollamaOptions      ollamaclient.Options
+	useModelTemplating bool
 }
 
 type Option func(*options)
@@ -19,6 +20,13 @@ type Option func(*options)
 func WithModel(model string) Option {
 	return func(opts *options) {
 		opts.model = model
+	}
+}
+
+// WithModelTemplating To enable the templating done on the ollama model side.
+func WithModelTemplating() Option {
+	return func(opts *options) {
+		opts.useModelTemplating = true
 	}
 }
 
