@@ -7,9 +7,9 @@ import (
 )
 
 type StatusError struct {
-	Status       string
+	Status       string `json:"status,omitempty"`
 	ErrorMessage string `json:"error"`
-	StatusCode   int
+	StatusCode   int    `json:"code,omitempty"`
 }
 
 func (e StatusError) Error() string {
@@ -74,7 +74,8 @@ func (r *GenerateResponse) Summary() {
 
 	if r.PromptEvalDuration > 0 {
 		fmt.Fprintf(os.Stderr, "prompt eval duration: %s\n", r.PromptEvalDuration)
-		fmt.Fprintf(os.Stderr, "prompt eval rate:     %.2f tokens/s\n", float64(r.PromptEvalCount)/r.PromptEvalDuration.Seconds())
+		fmt.Fprintf(os.Stderr, "prompt eval rate:     %.2f tokens/s\n",
+			float64(r.PromptEvalCount)/r.PromptEvalDuration.Seconds())
 	}
 
 	if r.EvalCount > 0 {

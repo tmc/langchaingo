@@ -15,10 +15,6 @@ import (
 	"strings"
 )
 
-const DefaultHost = "127.0.0.1:11434"
-
-var envHost = os.Getenv("OLLAMA_HOST")
-
 type Client struct {
 	base *url.URL
 	http http.Client
@@ -41,9 +37,7 @@ func checkError(resp *http.Response, body []byte) error {
 }
 
 func NewClient(ourl *url.URL) (*Client, error) {
-
 	if ourl == nil {
-
 		scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
 		if !ok {
 			scheme, hostport = "http", os.Getenv("OLLAMA_HOST")
@@ -61,26 +55,15 @@ func NewClient(ourl *url.URL) (*Client, error) {
 			Scheme: scheme,
 			Host:   net.JoinHostPort(host, port),
 		}
-
 	}
 
 	client := Client{
 		base: ourl,
 	}
 
-	mockRequest, err := http.NewRequest("HEAD", client.base.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	proxyURL, err := http.ProxyFromEnvironment(mockRequest)
-	if err != nil {
-		return nil, err
-	}
-
 	client.http = http.Client{
 		Transport: &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
+			Proxy: http.ProxyFromEnvironment,
 		},
 	}
 
@@ -107,7 +90,8 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent", fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+	request.Header.Set("User-Agent",
+		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	respObj, err := c.http.Do(request)
 	if err != nil {
@@ -153,7 +137,8 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/x-ndjson")
-	request.Header.Set("User-Agent", fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+	request.Header.Set("User-Agent",
+		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	response, err := c.http.Do(request)
 	if err != nil {
@@ -172,11 +157,11 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 
 		bts := scanner.Bytes()
 		if err := json.Unmarshal(bts, &errorResponse); err != nil {
-			return fmt.Errorf("unmarshal: %w", err)
+			return err
 		}
 
 		if errorResponse.Error != "" {
-			return fmt.Errorf(errorResponse.Error)
+			return fmt.Errorf(errorResponse.Error) //nolint
 		}
 
 		if response.StatusCode >= http.StatusBadRequest {
@@ -208,7 +193,8 @@ func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn Generate
 	})
 }
 
-func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (resp *EmbeddingResponse, err error) {
+func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
+	resp := &EmbeddingResponse{}
 	if err := c.do(ctx, http.MethodPost, "/api/embeddings", req, &resp); err != nil {
 		return resp, err
 	}

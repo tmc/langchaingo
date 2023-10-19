@@ -10,15 +10,20 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+var (
+	ErrEmptyResponse       = errors.New("no response")
+	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
+)
+
+// LLM is a ollama LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *ollamaclient.Client
 	options          options
 }
 
-// New creates a new ollama LLM implementation
+// New creates a new ollama LLM implementation.
 func New(opts ...Option) (*LLM, error) {
-
 	o := options{}
 	for _, opt := range opts {
 		opt(&o)
@@ -32,22 +37,20 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{client: client, options: o}, nil
 }
 
-// Call Implement the call interface for LLM
+// Call Implement the call interface for LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-
 	r, err := o.Generate(ctx, []string{prompt}, options...)
 	if err != nil {
 		return "", err
 	}
 	if len(r) == 0 {
-		return "", errors.New("no response")
+		return "", ErrEmptyResponse
 	}
 	return r[0].Text, nil
 }
 
-// Generate implemente the generate interface for LLM
+// Generate implemente the generate interface for LLM.
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
 	}
@@ -78,7 +81,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	generations := make([]*llms.Generation, 0, len(prompts))
 
 	for _, prompt := range prompts {
-
 		req := &ollamaclient.GenerateRequest{
 			Model:   model,
 			Prompt:  prompt,
@@ -115,32 +117,31 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 }
 
 func (o *LLM) CreateEmbedding(ctx context.Context, model string, inputTexts []string) ([][]float32, error) {
-
-	var embeddings [][]float32
+	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
 		embedding, err := o.client.CreateEmbedding(ctx, &ollamaclient.EmbeddingRequest{
 			Prompt: input,
 			Model:  model,
 		})
-
 		if err != nil {
 			return nil, err
 		}
 
 		if len(embedding.Embedding) == 0 {
-			return nil, errors.New("no response")
+			return nil, ErrEmptyResponse
 		}
 
 		embeddings = append(embeddings, embedding.Embedding)
 	}
 
 	if len(inputTexts) != len(embeddings) {
-		return embeddings, errors.New("no all input got emmbedded")
+		return embeddings, ErrIncompleteEmbedding
 	}
 
 	return embeddings, nil
 }
+
 func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
 	return llms.GeneratePrompt(ctx, o, prompts, options...)
 }
