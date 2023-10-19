@@ -85,7 +85,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			Model:  model,
 			Prompt: prompt,
 			Template: func() string {
-				if o.options.useModelTemplating {
+				if !o.options.useModelTemplating {
 					return "{{.Prompt}}"
 				} else {
 					return ""
