@@ -126,8 +126,8 @@ func TestFewShotPrompt_Format(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			t.Helper()
-			p, err := NewFewShotPrompt(tc.examplePrompt, tc.examples, nil, tc.prefix, tc.suffix, tc.input,
-				tc.partialInput, tc.exampleSeparator, tc.templateFormat, tc.validateTemplate)
+			p, err := NewFewShotPrompt(tc.examplePrompt, tc.examples, nil, tc.prefix, tc.suffix,
+				getMapKeys(tc.input), tc.partialInput, tc.exampleSeparator, tc.templateFormat, tc.validateTemplate)
 			if tc.wantErr {
 				checkError(t, err, tc.expected)
 				return

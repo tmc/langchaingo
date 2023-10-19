@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -27,7 +29,7 @@ type FewShotPrompt struct {
 	// A prompt template string to put after the examples.
 	Suffix string
 	// A list of the names of the variables the prompt template expects.
-	InputVariables map[string]any
+	InputVariables []string
 	// Represents a map of variable names to values or functions that return values. If the value is a function, it will
 	// be called when the prompt template is rendered.
 	PartialVariables map[string]any
@@ -42,7 +44,7 @@ type FewShotPrompt struct {
 // NewFewShotPrompt creates a new few-shot prompt with the given input. It returns error if there is no example, both
 // examples and exampleSelector are provided, or CheckValidTemplate returns err when ValidateTemplate is true.
 func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string, exampleSelector ExampleSelector,
-	prefix string, suffix string, input map[string]interface{}, partialInput map[string]interface{},
+	prefix string, suffix string, input []string, partialInput map[string]interface{},
 	exampleSeparator string, templateFormat TemplateFormat, validateTemplate bool,
 ) (*FewShotPrompt, error) {
 	err := validateExamples(examples, exampleSelector)
@@ -66,7 +68,7 @@ func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string
 	}
 
 	if prompt.ValidateTemplate {
-		err := CheckValidTemplate(prompt.Prefix+prompt.Suffix, prompt.TemplateFormat, append(getMapKeys(input),
+		err := CheckValidTemplate(prompt.Prefix+prompt.Suffix, prompt.TemplateFormat, append(input,
 			getMapKeys(partialInput)...))
 		if err != nil {
 			return nil, err
@@ -107,7 +109,11 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 	for k, v := range resolvedValues {
 		strVal, ok := v.(string)
 		if !ok {
-			return "", fmt.Errorf("%w: %T", ErrInvalidPartialVariableType, v)
+			strVal2, ok := v.(StringPromptValue)
+			if !ok {
+				return "", fmt.Errorf("%w: %T", ErrInvalidPartialVariableType, v)
+			}
+			strVal = strVal2.String()
 		}
 		stringResolvedValues[k] = strVal
 	}
@@ -130,16 +136,16 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 		exampleStrings[i] = res
 	}
 
-	template := assemblePieces(p.Prefix, p.Suffix, exampleStrings, p.ExampleSeparator)
+	template := p.AssemblePieces(exampleStrings)
 	return defaultformatterMapping[p.TemplateFormat](template, resolvedValues)
 }
 
-// assemblePieces assembles the pieces of the few-shot prompt.
-func assemblePieces(prefix, suffix string, exampleStrings []string, separator string) string {
+// AssemblePieces assembles the pieces of the few-shot prompt.
+func (p *FewShotPrompt) AssemblePieces(exampleStrings []string) string {
 	const additionalCapacity = 2
 	pieces := make([]string, 0, len(exampleStrings)+additionalCapacity)
-	if prefix != "" {
-		pieces = append(pieces, prefix)
+	if p.Prefix != "" {
+		pieces = append(pieces, p.Prefix)
 	}
 
 	for _, elem := range exampleStrings {
@@ -148,11 +154,11 @@ func assemblePieces(prefix, suffix string, exampleStrings []string, separator st
 		}
 	}
 
-	if suffix != "" {
-		pieces = append(pieces, suffix)
+	if p.Suffix != "" {
+		pieces = append(pieces, p.Suffix)
 	}
 
-	return strings.Join(pieces, separator)
+	return strings.Join(pieces, p.ExampleSeparator)
 }
 
 // getMapKeys returns the keys of the provided map.
@@ -162,4 +168,17 @@ func getMapKeys(inputMap map[string]any) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func (p *FewShotPrompt) FormatPrompt(values map[string]any) (schema.PromptValue, error) {
+	f, err := p.Format(values)
+	if err != nil {
+		return nil, err
+	}
+
+	return StringPromptValue(f), nil
+}
+
+func (p *FewShotPrompt) GetInputVariables() []string {
+	return p.InputVariables
 }
