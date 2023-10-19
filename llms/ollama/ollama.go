@@ -87,9 +87,8 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			Template: func() string {
 				if !o.options.useModelTemplating {
 					return "{{.Prompt}}"
-				} else {
-					return ""
 				}
+				return ""
 			}(),
 			Options: ollamaOptions,
 			Stream:  func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
