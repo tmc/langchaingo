@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -53,7 +54,20 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	} else {
 		fmt.Println(jsonData)
+		var queries []QueryOutput
+
+		// Unmarshal the JSON data
+		err = json.Unmarshal(jsonData, &queries)
+		if err != nil {
+		}
+
+		// Print the data
+		for _, q := range queries {
+			fmt.Println("Query: %s, Output: %s\n", q.Query, q.Output)
+		}
 	}
+
+	fmt.Println(promptValue)
 
 	result, err := c.LLM.GeneratePrompt(
 		ctx,
