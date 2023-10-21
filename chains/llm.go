@@ -2,6 +2,8 @@ package chains
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
@@ -45,6 +47,12 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	promptValue, err := c.Prompt.FormatPrompt(values)
 	if err != nil {
 		return nil, err
+	}
+
+	if jsonData, err := os.ReadFile("/Users/chihiro/Desktop/data.json"); err != nil {
+		return nil, err
+	} else {
+		fmt.Println(jsonData)
 	}
 
 	result, err := c.LLM.GeneratePrompt(
