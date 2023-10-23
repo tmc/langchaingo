@@ -8,10 +8,11 @@ import (
 )
 
 type options struct {
-	ollamaServerURL    *url.URL
-	model              string
-	ollamaOptions      ollamaclient.Options
-	useModelTemplating bool
+	ollamaServerURL     *url.URL
+	model               string
+	ollamaOptions       ollamaclient.Options
+	customModelTemplate string
+	system              string
 }
 
 type Option func(*options)
@@ -23,10 +24,20 @@ func WithModel(model string) Option {
 	}
 }
 
-// WithModelTemplating To enable the templating done on the ollama model side.
-func WithModelTemplating() Option {
+// WithSystem Set the system prompt. This is only valid if
+// WithCustomTemplate is not set and the ollama model use
+// .System in its model template OR if WithCustomTemplate
+// is set using {{.System}}.
+func WithSystemPrompt(p string) Option {
 	return func(opts *options) {
-		opts.useModelTemplating = true
+		opts.system = p
+	}
+}
+
+// WithCustomTemplate To override the templating done on Ollama model side.
+func WithCustomTemplate(template string) Option {
+	return func(opts *options) {
+		opts.customModelTemplate = template
 	}
 }
 

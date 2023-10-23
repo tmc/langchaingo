@@ -22,6 +22,11 @@ type LLM struct {
 	options          options
 }
 
+var (
+	_ llms.LLM           = (*LLM)(nil)
+	_ llms.LanguageModel = (*LLM)(nil)
+)
+
 // New creates a new ollama LLM implementation.
 func New(opts ...Option) (*LLM, error) {
 	o := options{}
@@ -82,16 +87,12 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 	for _, prompt := range prompts {
 		req := &ollamaclient.GenerateRequest{
-			Model:  model,
-			Prompt: prompt,
-			Template: func() string {
-				if !o.options.useModelTemplating {
-					return "{{.Prompt}}"
-				}
-				return ""
-			}(),
-			Options: ollamaOptions,
-			Stream:  func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
+			Model:    model,
+			System:   o.options.system,
+			Prompt:   prompt,
+			Template: o.options.customModelTemplate,
+			Options:  ollamaOptions,
+			Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
 		}
 
 		var fn ollamaclient.GenerateResponseFunc
@@ -122,13 +123,13 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return generations, nil
 }
 
-func (o *LLM) CreateEmbedding(ctx context.Context, model string, inputTexts []string) ([][]float32, error) {
+func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
 		embedding, err := o.client.CreateEmbedding(ctx, &ollamaclient.EmbeddingRequest{
 			Prompt: input,
-			Model:  model,
+			Model:  o.options.model,
 		})
 		if err != nil {
 			return nil, err
@@ -153,5 +154,5 @@ func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, 
 }
 
 func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens("gpt2", text)
+	return llms.CountTokens(o.options.model, text)
 }
