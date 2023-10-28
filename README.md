@@ -2,6 +2,8 @@
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/tmc/langchaingo)
 [![scorecard](https://goreportcard.com/badge/github.com/tmc/langchaingo)](https://goreportcard.com/report/github.com/tmc/langchaingo)
+[![](https://dcbadge.vercel.app/api/server/kTsKBkzN)](https://discord.gg/kTsKBkzN)
+
 
 ⚡ Building applications with LLMs through composability ⚡
 
