@@ -7,8 +7,8 @@ replace github.com/tmc/langchaingo => ../..
 
 require (
 	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
-	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.0.0-20231016073449-5620c5b08983
+	github.com/google/uuid v1.3.1
+	github.com/tmc/langchaingo v0.0.0-20231020205806-b33244eb8de8
 )
 
 require (
