@@ -1,4 +1,4 @@
-module llm-chain-example
+module github.com/tmc/langchaingo/examples/llm-chain-example
 
 go 1.19
 

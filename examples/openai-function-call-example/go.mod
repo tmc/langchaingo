@@ -1,4 +1,4 @@
-module openai-function-call-example
+module github.com/tmc/langchaingo/examples/openai-function-call-example
 
 go 1.19
 

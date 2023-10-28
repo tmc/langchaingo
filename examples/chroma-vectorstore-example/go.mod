@@ -1,4 +1,4 @@
-module chroma-vectorstore-example
+module github.com/tmc/langchaingo/examples/chroma-vectorstore-example
 
 go 1.20
 

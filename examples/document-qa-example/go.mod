@@ -1,4 +1,4 @@
-module document-qa-example
+module github.com/tmc/langchaingo/examples/document-qa-example
 
 go 1.19
 

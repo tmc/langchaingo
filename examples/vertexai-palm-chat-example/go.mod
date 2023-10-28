@@ -1,4 +1,4 @@
-module vertexai-palm-chat-example
+module github.com/tmc/langchaingo/examples/vertexai-palm-chat-example
 
 go 1.19
 

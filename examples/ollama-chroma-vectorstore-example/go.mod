@@ -1,4 +1,4 @@
-module ollama-chroma-vectorstore-example
+module github.com/tmc/langchaingo/examples/ollama-chroma-vectorstore-example
 
 go 1.20
 

@@ -1,4 +1,4 @@
-module mrkl-agent-example
+module github.com/tmc/langchaingo/examples/mrkl-agent-example
 
 go 1.19
 

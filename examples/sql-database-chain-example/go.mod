@@ -1,4 +1,4 @@
-module sql-database-chain-example
+module github.com/tmc/langchaingo/examples/sql-database-chain-example
 
 go 1.19
 

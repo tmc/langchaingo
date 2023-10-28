@@ -1,4 +1,4 @@
-module openai-completion-example
+module github.com/tmc/langchaingo/examples/openai-completion-example
 
 go 1.19
 
