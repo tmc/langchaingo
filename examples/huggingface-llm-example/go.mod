@@ -2,7 +2,7 @@ module huggingface-llm-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231028222858-db767867bbad
+require github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect

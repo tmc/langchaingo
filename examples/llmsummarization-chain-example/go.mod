@@ -2,7 +2,7 @@ module llmsummarization-chain-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231028222858-db767867bbad
+require github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
