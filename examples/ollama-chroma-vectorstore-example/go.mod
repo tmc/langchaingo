@@ -1,4 +1,4 @@
-module chroma-vectorstore-example
+module ollama-chroma-vectorstore-example
 
 go 1.20
 

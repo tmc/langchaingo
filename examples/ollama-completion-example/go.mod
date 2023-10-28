@@ -1,4 +1,4 @@
-module anthropic-completion-example
+module ollama-completion-example
 
 go 1.19
 

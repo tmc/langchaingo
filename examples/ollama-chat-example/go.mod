@@ -1,4 +1,4 @@
-module openai-chat-example
+module ollama-chat-example
 
 go 1.19
 
