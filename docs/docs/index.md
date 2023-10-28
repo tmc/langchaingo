@@ -33,11 +33,11 @@ These modules are, in increasing order of complexity:
 
 <!-- - [Data connection](./modules/data_connection/): This includes patterns and functionality for working with your own data, and making it ready to interact with language models (including document loaders, vectorstores, text splitters and retrievers). -->
 
-- [Chains](./modules/chains/): Chains go beyond just a single LLM call, and are sequences of calls (whether to an LLM or a different utility). LangChain provides a standard interface for chains, lots of integrations with other tools, and end-to-end chains for common applications.
+<!-- - [Chains](./modules/chains/): Chains go beyond just a single LLM call, and are sequences of calls (whether to an LLM or a different utility). LangChain provides a standard interface for chains, lots of integrations with other tools, and end-to-end chains for common applications.-->
 
-- [Memory](./modules/memory/): Memory is the concept of persisting state between calls of a chain/agent. LangChain provides a standard interface for memory, a collection of memory implementations, and examples of chains/agents that use memory.
+<!-- - [Memory](./modules/memory/): Memory is the concept of persisting state between calls of a chain/agent. LangChain provides a standard interface for memory, a collection of memory implementations, and examples of chains/agents that use memory. -->
 
-- [Agents](./modules/agents/): Agents involve an LLM making decisions about which Actions to take, taking that Action, seeing an Observation, and repeating that until done. LangChain provides a standard interface for agents, a selection of agents to choose from, and examples of end-to-end agents.
+<!-- - [Agents](./modules/agents/): Agents involve an LLM making decisions about which Actions to take, taking that Action, seeing an Observation, and repeating that until done. LangChain provides a standard interface for agents, a selection of agents to choose from, and examples of end-to-end agents. -->
 
 ## API Reference
 
