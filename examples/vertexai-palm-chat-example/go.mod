@@ -2,7 +2,7 @@ module vertexai-palm-chat-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231020205806-b33244eb8de8
+require github.com/tmc/langchaingo v0.0.0-20231028222858-db767867bbad
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
