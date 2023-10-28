@@ -1,4 +1,4 @@
-module sequential-chain-example
+module github.com/tmc/langchaingo/examples/sequential-chain-example
 
 go 1.20
 

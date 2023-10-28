@@ -1,4 +1,4 @@
-module llmsummarization-chain-example
+module github.com/tmc/langchaingo/examples/llmsummarization-chain-example
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module ollama-completion-example
+module github.com/tmc/langchaingo/examples/ollama-completion-example
 
 go 1.19
 

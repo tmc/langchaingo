@@ -1,4 +1,4 @@
-module basic-llm-example
+module github.com/tmc/langchaingo/examples/basic-llm-example
 
 go 1.19
 

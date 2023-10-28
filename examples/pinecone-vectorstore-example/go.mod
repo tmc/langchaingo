@@ -1,4 +1,4 @@
-module pinecone-vectorstore-example
+module github.com/tmc/langchaingo/examples/pinecone-vectorstore-example
 
 go 1.20
 

@@ -1,4 +1,4 @@
-module prompts-with-partial-func-example
+module github.com/tmc/langchaingo/examples/prompts-with-partial-func-example
 
 go 1.20
 

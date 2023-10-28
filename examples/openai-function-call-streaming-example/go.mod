@@ -1,4 +1,4 @@
-module openai-function-call-streaming-example
+module github.com/tmc/langchaingo/examples/openai-function-call-streaming-example
 
 go 1.19
 

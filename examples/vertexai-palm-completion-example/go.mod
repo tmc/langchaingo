@@ -1,4 +1,4 @@
-module vertexai-palm-completion-example
+module github.com/tmc/langchaingo/examples/vertexai-palm-completion-example
 
 go 1.19
 

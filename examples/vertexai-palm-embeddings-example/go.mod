@@ -1,4 +1,4 @@
-module vertexai-palm-embeddings-example
+module github.com/tmc/langchaingo/examples/vertexai-palm-embeddings-example
 
 go 1.19
 

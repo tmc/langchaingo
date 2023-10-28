@@ -1,4 +1,4 @@
-module openai-chat-example
+module github.com/tmc/langchaingo/examples/openai-chat-example
 
 go 1.19
 

@@ -1,4 +1,4 @@
-module huggingface-llm-example
+module github.com/tmc/langchaingo/examples/huggingface-llm-example
 
 go 1.19
 
