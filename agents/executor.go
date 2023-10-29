@@ -58,34 +58,10 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 
 	steps := make([]schema.AgentStep, 0)
 	for i := 0; i < e.MaxIterations; i++ {
-		actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
-		if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
-			formattedObservation := err.Error()
-			if e.ErrorHandler.Formatter != nil {
-				formattedObservation = e.ErrorHandler.Formatter(formattedObservation)
-			}
-			steps = append(steps, schema.AgentStep{
-				Observation: formattedObservation,
-			})
-			continue
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		if len(actions) == 0 && finish == nil {
-			return nil, ErrAgentNoReturn
-		}
-
-		if finish != nil {
-			return e.getReturn(finish, steps), nil
-		}
-
-		for _, action := range actions {
-			steps, err = e.doAction(ctx, steps, nameToTool, action)
-			if err != nil {
-				return nil, err
-			}
+		var finish map[string]any
+		steps, finish, err = e.doIteration(ctx, steps, nameToTool, inputs)
+		if finish != nil || err != nil {
+			return finish, err
 		}
 	}
 
@@ -93,6 +69,45 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		&schema.AgentFinish{ReturnValues: make(map[string]any)},
 		steps,
 	), ErrNotFinished
+}
+
+func (e Executor) doIteration(
+	ctx context.Context,
+	steps []schema.AgentStep,
+	nameToTool map[string]tools.Tool,
+	inputs map[string]string,
+) ([]schema.AgentStep, map[string]any, error) {
+	actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
+	if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
+		formattedObservation := err.Error()
+		if e.ErrorHandler.Formatter != nil {
+			formattedObservation = e.ErrorHandler.Formatter(formattedObservation)
+		}
+		steps = append(steps, schema.AgentStep{
+			Observation: formattedObservation,
+		})
+		return steps, nil, nil
+	}
+	if err != nil {
+		return steps, nil, err
+	}
+
+	if len(actions) == 0 && finish == nil {
+		return steps, nil, ErrAgentNoReturn
+	}
+
+	if finish != nil {
+		return steps, e.getReturn(finish, steps), nil
+	}
+
+	for _, action := range actions {
+		steps, err = e.doAction(ctx, steps, nameToTool, action)
+		if err != nil {
+			return steps, nil, err
+		}
+	}
+
+	return steps, nil, nil
 }
 
 func (e Executor) doAction(
