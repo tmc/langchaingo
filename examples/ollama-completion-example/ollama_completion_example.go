@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	llm, err := ollama.New(ollama.WithModel("zephyr"))
+	llm, err := ollama.New(ollama.WithModel("llama2"))
 	if err != nil {
 		log.Fatal(err)
 	}
