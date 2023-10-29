@@ -2,6 +2,7 @@ package agents
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -19,6 +20,7 @@ type Executor struct {
 	Tools            []tools.Tool
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
+	ErrorHandler     *ParserErrorHandler
 
 	MaxIterations           int
 	ReturnIntermediateSteps bool
@@ -43,6 +45,7 @@ func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Execut
 		MaxIterations:           options.maxIterations,
 		ReturnIntermediateSteps: options.returnIntermediateSteps,
 		CallbacksHandler:        options.callbacksHandler,
+		ErrorHandler:            options.errorHandler,
 	}
 }
 
@@ -56,6 +59,16 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	steps := make([]schema.AgentStep, 0)
 	for i := 0; i < e.MaxIterations; i++ {
 		actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
+		if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
+			formattedObservation := err.Error()
+			if e.ErrorHandler.Formatter != nil {
+				formattedObservation = e.ErrorHandler.Formatter(formattedObservation)
+			}
+			steps = append(steps, schema.AgentStep{
+				Observation: formattedObservation,
+			})
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +89,10 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		}
 	}
 
-	return nil, ErrNotFinished
+	return e.getReturn(
+		&schema.AgentFinish{ReturnValues: make(map[string]any)},
+		steps,
+	), ErrNotFinished
 }
 
 func (e Executor) doAction(

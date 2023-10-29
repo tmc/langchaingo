@@ -12,6 +12,7 @@ type CreationOptions struct {
 	prompt                  prompts.PromptTemplate
 	memory                  schema.Memory
 	callbacksHandler        callbacks.Handler
+	errorHandler            *ParserErrorHandler
 	maxIterations           int
 	returnIntermediateSteps bool
 	outputKey               string
@@ -128,14 +129,23 @@ func WithReturnIntermediateSteps() CreationOption {
 	}
 }
 
+// WithMemory is an option for setting the memory of the executor.
 func WithMemory(m schema.Memory) CreationOption {
 	return func(co *CreationOptions) {
 		co.memory = m
 	}
 }
 
+// WithCallbacksHandler is an option for setting a callback handler to an executor.
 func WithCallbacksHandler(handler callbacks.Handler) CreationOption {
 	return func(co *CreationOptions) {
 		co.callbacksHandler = handler
+	}
+}
+
+// WithParserErrorHandler is an option for setting a parser error handler to an executor.
+func WithParserErrorHandler(errorHandler *ParserErrorHandler) CreationOption {
+	return func(co *CreationOptions) {
+		co.errorHandler = errorHandler
 	}
 }
