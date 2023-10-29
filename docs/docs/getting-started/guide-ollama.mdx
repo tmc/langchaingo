@@ -2,30 +2,30 @@
 sidebar_position: 1
 ---
 
-# Quickstart, using Ollama
+# Quickstart: LangChainGo with Ollama
 
-This tutorial gives you a quick walkthrough about running your first program with LangChainGo and [Ollama](https://ollama.ai/).
+Get started with running your first program using LangChainGo and [Ollama](https://ollama.ai/). Ollama provides the most straightforward method for local LLM inference across all computer platforms.
 
-[Ollama](https://ollama.ai/) is the easiest way to get set up with local LLM inference on any computer.
+## Pre-requisites
+
+1. **Ollama**: [Download and install Ollama](https://ollama.ai/).
+2. **Go**: [Download and install Go](https://go.dev/doc/install).
 
 ## Steps
 
-To get started, install LangChain but running the following command in the directory of your project:
+1. **Initialize Ollama**: In your terminal, execute the command `$ ollama run llama2`. The first run might take some time as the model needs to be fetched to your computer.
+2. **Run the Example**: Enter the command:
+   ```shell
+   go run github.com/tmc/langchaingo/examples/ollama-completion-example@main
+   ```
 
-1. [Ollama](https://ollama.ai/) Download and install Ollama.
-2. In a terminal, run a 7B llama2 model: `$ ollama run llama2` (note that this will take some time the first time you run it as you need to fetch the model to your computer).
-## Installation
-3. Install [Go](https://go.dev/doc/install).
-4. Run `go run github.com/tmc/langchaingo/examples/ollama-completion-example@main`
-
-You should see output such as:
+You should receive (something like) the following output:
 
 ```shell
-$ go run github.com/tmc/langchaingo/examples/ollama-completion-example@main
 The first human to set foot on the moon was Neil Armstrong, an American astronaut, who stepped onto the lunar surface during the Apollo 11 mission on July 20, 1969.
 ```
 
-That's it! You've built and run your first open source LLM based program using local inference.
+Congratulations! You've successfully built and executed your first open-source LLM-based program using local inference.
 
 Here is the entire program (from [ollama-chat-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-chat-example/ollama_chat_example.go)).
 
