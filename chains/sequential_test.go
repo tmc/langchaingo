@@ -71,11 +71,11 @@ func TestSimpleSequentialErrors(t *testing.T) {
 			t.Parallel()
 			c, err := NewSimpleSequentialChain([]Chain{tc.chain})
 			if tc.initErr != nil {
-				assert.ErrorIs(t, err, tc.initErr)
+				require.ErrorIs(t, err, tc.initErr)
 			} else {
 				require.NoError(t, err)
 				_, err := Run(context.Background(), c, "Do something")
-				assert.ErrorIs(t, err, tc.execErr)
+				require.ErrorIs(t, err, tc.execErr)
 			}
 		})
 	}
@@ -184,11 +184,11 @@ func TestSequentialChainErrors(t *testing.T) {
 			t.Parallel()
 			c, err := NewSequentialChain(tc.chains, []string{"input1", "input2"}, []string{"output"}, tc.seqChainOpts...)
 			if tc.initErr != nil {
-				assert.ErrorIs(t, err, tc.initErr)
+				require.ErrorIs(t, err, tc.initErr)
 			} else {
 				require.NoError(t, err)
 				_, err := Call(context.Background(), c, map[string]any{"input1": "foo", "input2": "bar"})
-				assert.ErrorIs(t, err, tc.execErr)
+				require.ErrorIs(t, err, tc.execErr)
 			}
 		})
 	}

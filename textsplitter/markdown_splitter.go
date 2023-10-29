@@ -53,9 +53,9 @@ type MarkdownTextSplitter struct {
 }
 
 // SplitText splits a text into multiple text.
-func (sp MarkdownTextSplitter) SplitText(s string) ([]string, error) {
+func (sp MarkdownTextSplitter) SplitText(text string) ([]string, error) {
 	mdParser := markdown.New(markdown.XHTMLOutput(true))
-	tokens := mdParser.Parse([]byte(s))
+	tokens := mdParser.Parse([]byte(text))
 
 	mc := &markdownContext{
 		startAt:        0,

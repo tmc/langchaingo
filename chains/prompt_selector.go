@@ -8,7 +8,7 @@ import (
 // PromptSelector is the interface for selecting a formatter depending on the
 // LLM given.
 type PromptSelector interface {
-	GetPrompt(llms.LanguageModel) prompts.PromptTemplate
+	GetPrompt(llm llms.LanguageModel) prompts.PromptTemplate
 }
 
 // ConditionalPromptSelector is a formatter selector that selects a prompt

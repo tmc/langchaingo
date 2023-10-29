@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const _userAgent = "langchaingo test (https://github.com/tmc/langchaingo)"
@@ -14,5 +14,5 @@ func TestWikipedia(t *testing.T) {
 
 	tool := New(_userAgent)
 	_, err := tool.Call(context.Background(), "america")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

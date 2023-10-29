@@ -38,16 +38,16 @@ func Test(t *testing.T) {
 	defer db.Close()
 
 	tbs := db.TableNames()
-	require.Equal(t, len(tbs), 3)
+	require.Len(t, tbs, 3)
 
 	desc, err := db.TableInfo(context.Background(), tbs)
 	require.NoError(t, err)
 
 	desc = strings.TrimSpace(desc)
-	require.True(t, 0 == strings.Index(desc, "CREATE TABLE")) //nolint:stylecheck
-	require.True(t, strings.Contains(desc, "Activity"))       //nolint:stylecheck
-	require.True(t, strings.Contains(desc, "Activity1"))      //nolint:stylecheck
-	require.True(t, strings.Contains(desc, "Activity2"))      //nolint:stylecheck
+	require.Equal(t, 0, strings.Index(desc, "CREATE TABLE")) //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity"))      //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity1"))     //nolint:stylecheck
+	require.True(t, strings.Contains(desc, "Activity2"))     //nolint:stylecheck
 
 	for _, tableName := range tbs {
 		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))

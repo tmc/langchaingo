@@ -2,7 +2,7 @@ package chains
 
 import (
 	"context"
-	"fmt"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -55,7 +55,7 @@ func TestApply(t *testing.T) {
 	inputs := make([]map[string]any, numInputs)
 	for i := 0; i < len(inputs); i++ {
 		inputs[i] = map[string]any{
-			"text": fmt.Sprint(i),
+			"text": strconv.Itoa(i),
 		}
 	}
 

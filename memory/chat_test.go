@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -13,12 +14,12 @@ func TestChatMessageHistory(t *testing.T) {
 
 	h := NewChatMessageHistory()
 	err := h.AddAIMessage(context.Background(), "foo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = h.AddUserMessage(context.Background(), "bar")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	messages, err := h.Messages(context.Background())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Content: "foo"},
@@ -32,10 +33,10 @@ func TestChatMessageHistory(t *testing.T) {
 		}),
 	)
 	err = h.AddUserMessage(context.Background(), "zoo")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	messages, err = h.Messages(context.Background())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []schema.ChatMessage{
 		schema.AIChatMessage{Content: "foo"},

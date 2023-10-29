@@ -28,7 +28,7 @@ func TestMapReduceInputVariables(t *testing.T) {
 
 	inputKeys := c.GetInputKeys()
 	expectedLength := 3
-	require.Equal(t, expectedLength, len(inputKeys))
+	require.Len(t, inputKeys, expectedLength)
 }
 
 func TestMapReduce(t *testing.T) {
