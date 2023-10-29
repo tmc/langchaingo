@@ -20,6 +20,7 @@ type Handler interface {
 	HandleAgentAction(ctx context.Context, action schema.AgentAction)
 	HandleRetrieverStart(ctx context.Context, query string)
 	HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document)
+	HandleStreamingFunc(ctx context.Context, chunk []byte)
 }
 
 // HandlerHaver is an interface used to get callbacks handler.
