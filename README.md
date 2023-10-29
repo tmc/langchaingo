@@ -6,7 +6,7 @@
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/tmc/langchaingo)
 [<img src="https://github.com/codespaces/badge.svg" title="Open in Github Codespace" width="150" height="20">](https://codespaces.new/tmc/langchaingo)
 
-⚡ Building applications with LLMs through composability ⚡
+⚡ Building applications with LLMs through composability, with Go! ⚡
 
 ## 🤔 What is this?
 
@@ -14,6 +14,7 @@ This is the Go language implementation of LangChain.
 
 ## 📖 Documentation
 
+- [Documentation Site](https://tmc.github.io/langchaingo/docs/)
 - [API Reference](https://pkg.go.dev/github.com/tmc/langchaingo)
 
 
