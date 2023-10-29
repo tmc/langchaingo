@@ -129,7 +129,7 @@ const config = {
       },
       image: "img/parrot-chainlink-icon.png",
       navbar: {
-        title: "🦜️🔗 LangChain",
+        title: "🦜️🔗 LangChainGo",
         items: [
           {
             href: "https://docs.langchain.com/docs/",
