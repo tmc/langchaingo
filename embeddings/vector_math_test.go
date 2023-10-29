@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCombineVectors(t *testing.T) {
@@ -23,7 +24,7 @@ func TestCombineVectors(t *testing.T) {
 
 	for _, tc := range cases {
 		combined, err := CombineVectors(tc.vectors, tc.weights)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expected, combined)
 	}
 }
@@ -55,7 +56,7 @@ func TestGetAverage(t *testing.T) {
 
 	for _, tc := range cases {
 		average, err := getAverage(tc.vectors, tc.weights)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expected, average)
 	}
 }
@@ -78,6 +79,6 @@ func TestGetNorm(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		assert.Equal(t, tc.expected, getNorm(tc.vector))
+		assert.InEpsilon(t, tc.expected, getNorm(tc.vector), 0.0001)
 	}
 }

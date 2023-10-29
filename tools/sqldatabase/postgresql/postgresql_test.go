@@ -24,7 +24,7 @@ func Test(t *testing.T) {
 	require.NoError(t, err)
 
 	tbs := db.TableNames()
-	require.Greater(t, len(tbs), 0)
+	require.NotEmpty(t, tbs)
 
 	desc, err := db.TableInfo(context.Background(), tbs)
 	require.NoError(t, err)
