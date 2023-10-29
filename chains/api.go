@@ -50,7 +50,7 @@ const (
 
 // HTTPRequest http requester interface.
 type HTTPRequest interface {
-	Do(*http.Request) (*http.Response, error)
+	Do(req *http.Request) (*http.Response, error)
 }
 
 type APIChain struct {

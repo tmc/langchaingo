@@ -41,7 +41,7 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 
 	ret, ok := result["result"].(string)
 	require.True(t, ok)
-	require.Greater(t, len(ret), 0)
+	require.NotEmpty(t, ret)
 
 	t.Log(ret)
 }

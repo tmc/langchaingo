@@ -15,20 +15,21 @@ import (
 )
 
 const (
+	quote          = "```"
 	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Starlark.
 Use the output of running this code to answer the question.
 
 ---
 Question: (Question with math problem.)
-` + "```" + `starlark
+` + quote + `starlark
 $(single line expression that solves the problem)
-` + "```" + `
+` + quote + `
 
 ---
 Question: What is 37593 * 67?
-` + "```" + `starlark
+` + quote + `starlark
 37593 * 67
-` + "```" + `
+` + quote + `
 
 ---
 Question: {{.question}}

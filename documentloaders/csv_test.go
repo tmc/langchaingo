@@ -12,7 +12,7 @@ import (
 func TestCSVLoader(t *testing.T) {
 	t.Parallel()
 	file, err := os.Open("./testdata/test.csv")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	loader := NewCSV(file)
 
@@ -33,7 +33,7 @@ country: United Kingdom`
 func TestCSVLoaderWithFilteringColumns(t *testing.T) {
 	t.Parallel()
 	file, err := os.Open("./testdata/test.csv")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	loader := NewCSV(file, "city")
 

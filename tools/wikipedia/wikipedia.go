@@ -3,7 +3,7 @@ package wikipedia
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strconv"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
@@ -80,7 +80,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 			return "", err
 		}
 
-		page, ok := getPageResult.Query.Pages[fmt.Sprintf("%v", search.PageID)]
+		page, ok := getPageResult.Query.Pages[strconv.Itoa(search.PageID)]
 		if !ok {
 			return "", ErrUnexpectedAPIResult
 		}

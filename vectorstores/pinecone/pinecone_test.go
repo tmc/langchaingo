@@ -104,7 +104,7 @@ func TestPineconeStoreRest(t *testing.T) {
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "tokyo")
+	require.Equal(t, "tokyo", docs[0].PageContent)
 }
 
 func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {

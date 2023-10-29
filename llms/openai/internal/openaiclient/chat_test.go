@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
@@ -26,7 +27,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 
 	resp, err := parseStreamingChatResponse(context.Background(), r, req)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.Equal(t, "stop", resp.Choices[0].FinishReason)
 }
