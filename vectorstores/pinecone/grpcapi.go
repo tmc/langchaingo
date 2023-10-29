@@ -94,13 +94,13 @@ func (s Store) grpcQuery(
 		return nil, err
 	}
 
-	if len(queryResult.Results) == 0 {
+	if len(queryResult.GetResults()) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
 	resultDocuments := make([]schema.Document, 0)
-	for _, match := range queryResult.Results[0].Matches {
-		metadata := match.Metadata.AsMap()
+	for _, match := range queryResult.GetResults()[0].GetMatches() {
+		metadata := match.GetMetadata().AsMap()
 
 		pageContent, ok := metadata[s.textKey].(string)
 		if !ok {

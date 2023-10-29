@@ -11,5 +11,6 @@ for gm in $(find . -name go.mod); do
   cd $(dirname $gm)
   go get -u github.com/tmc/langchaingo@${syncref}
   go mod tidy
-)
+) &
 done
+wait

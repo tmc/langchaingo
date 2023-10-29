@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateDescription(t *testing.T) {
@@ -17,7 +18,7 @@ func TestCreateDescription(t *testing.T) {
 			"Param2": "Param2 Description",
 		},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	desc := tool.Description()
 	assert.Contains(t, desc, "Test Tool")

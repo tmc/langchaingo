@@ -1,4 +1,4 @@
-module chroma-vectorstore-example
+module github.com/tmc/langchaingo/examples/chroma-vectorstore-example
 
 go 1.20
 
@@ -7,8 +7,8 @@ replace github.com/tmc/langchaingo => ../..
 
 require (
 	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
-	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.0.0-20231016073449-5620c5b08983
+	github.com/google/uuid v1.3.1
+	github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
 )
 
 require (

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -81,7 +82,7 @@ Bye!
 		splitter.ChunkSize = tc.chunkSize
 
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }

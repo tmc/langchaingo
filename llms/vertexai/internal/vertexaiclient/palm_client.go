@@ -294,10 +294,10 @@ func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []s
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Predictions) == 0 {
+	if len(resp.GetPredictions()) == 0 {
 		return nil, ErrEmptyResponse
 	}
-	return resp.Predictions, nil
+	return resp.GetPredictions(), nil
 }
 
 func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Value, error) {
@@ -333,10 +333,10 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Predictions) == 0 {
+	if len(resp.GetPredictions()) == 0 {
 		return nil, ErrEmptyResponse
 	}
-	return resp.Predictions, nil
+	return resp.GetPredictions(), nil
 }
 
 func (c *PaLMClient) projectLocationPublisherModelPath(projectID, location, publisher, model string) string {
