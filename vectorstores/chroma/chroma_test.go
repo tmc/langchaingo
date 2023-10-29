@@ -57,13 +57,13 @@ func TestChromaGoStoreRest(t *testing.T) {
 	docs, err := s.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "tokyo")
+	require.Equal(t, "tokyo", docs[0].PageContent)
 
 	rawCountry := fmt.Sprintf("%s", docs[0].Metadata["country"])
 	// TODO (noodnik2): why is the metadata (apparently being) surrounded by quotes??
 	country, err := strconv.Unquote(rawCountry)
 	require.NoError(t, err)
-	require.Equal(t, country, "japan")
+	require.Equal(t, "japan", country)
 
 	// if the following fails, please revisit the stripping of the quotes (above)
 	require.NotEqual(t, rawCountry, country)

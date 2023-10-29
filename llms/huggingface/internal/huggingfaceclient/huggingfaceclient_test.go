@@ -46,7 +46,7 @@ func TestRunInference(t *testing.T) {
 			resp, err := client.RunInference(context.TODO(), tc.req)
 			assert.Equal(t, tc.expected, resp)
 			if tc.wantErr != "" {
-				assert.ErrorContains(t, err, tc.wantErr)
+				require.ErrorContains(t, err, tc.wantErr)
 			}
 		})
 	}

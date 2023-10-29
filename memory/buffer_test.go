@@ -52,7 +52,7 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 	)
 
 	messages, err := expectedChatHistory.Messages(context.Background())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected2 := map[string]any{"history": messages}
 	assert.Equal(t, expected2, result2)
 }

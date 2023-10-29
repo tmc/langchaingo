@@ -67,7 +67,7 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 		// Azure deployment that uses embeddings model, the name depends on what we define in the Azure deployment section
 		openai.WithEmbeddingModel("model-embedding"),
 	)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	e, err := NewOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)

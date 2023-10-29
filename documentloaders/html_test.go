@@ -12,7 +12,7 @@ import (
 func TestHTMLLoader(t *testing.T) {
 	t.Parallel()
 	file, err := os.Open("./testdata/test.html")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	loader := NewHTML(file)
 
@@ -46,5 +46,5 @@ func TestHTMLLoader(t *testing.T) {
 	assert.NotContains(t, content, notexpected[5])
 
 	expectedMetadata := map[string]any{}
-	assert.Equal(t, docs[0].Metadata, expectedMetadata)
+	assert.Equal(t, expectedMetadata, docs[0].Metadata)
 }

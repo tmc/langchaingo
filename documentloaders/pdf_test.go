@@ -7,6 +7,7 @@ import (
 
 	"github.com/ledongthuc/pdf"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/textsplitter"
 )
 
@@ -38,13 +39,13 @@ func TestPDFLoader(t *testing.T) {
 	t.Run("PDFLoad", func(t *testing.T) {
 		t.Parallel()
 		f, err := os.Open("./testdata/sample.pdf")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 		finfo, err := f.Stat()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size())
 		docs, err := p.Load(context.Background())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Len(t, docs, 2)
 
@@ -57,13 +58,13 @@ func TestPDFLoader(t *testing.T) {
 	t.Run("PDFLoadPassword", func(t *testing.T) {
 		t.Parallel()
 		f, err := os.Open("./testdata/sample_password.pdf")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 		finfo, err := f.Stat()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size(), WithPassword("password"))
 		docs, err := p.Load(context.Background())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Len(t, docs, 2)
 
@@ -76,15 +77,15 @@ func TestPDFLoader(t *testing.T) {
 	t.Run("PDFLoadPasswordWrong", func(t *testing.T) {
 		t.Parallel()
 		f, err := os.Open("./testdata/sample_password.pdf")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 		finfo, err := f.Stat()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size(), WithPassword("password1"))
 		docs, err := p.Load(context.Background())
-		assert.Errorf(t, err, pdf.ErrInvalidPassword.Error())
+		require.Errorf(t, err, pdf.ErrInvalidPassword.Error())
 
-		assert.Len(t, docs, 0)
+		assert.Empty(t, docs)
 	})
 }
 
@@ -118,16 +119,16 @@ func TestPDFTextSplit(t *testing.T) {
 	t.Run("PDFTextSplit", func(t *testing.T) {
 		t.Parallel()
 		f, err := os.Open("./testdata/sample.pdf")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		defer f.Close()
 		finfo, err := f.Stat()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size())
 		split := textsplitter.NewRecursiveCharacter()
 		split.ChunkSize = 300
 		split.ChunkOverlap = 30
 		docs, err := p.LoadAndSplit(context.Background(), split)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Len(t, docs, 4)
 

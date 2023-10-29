@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -55,7 +56,7 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 	for _, tc := range testCases {
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }
@@ -93,12 +94,12 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 
 		splitter = NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err = CreateDocuments(splitter, []string{tc.markdown}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }
@@ -187,7 +188,7 @@ func TestMarkdownHeaderTextSplitter_BulletList(t *testing.T) {
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }
@@ -247,7 +248,7 @@ for a review.`, Metadata: map[string]any{},
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }
