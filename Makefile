@@ -26,7 +26,7 @@ lint-all:
 lint-deps:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo >&2 "golangci-lint not found. Installing..."; \
-		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.1; \
 	}
 
 .PHONY: test-race
