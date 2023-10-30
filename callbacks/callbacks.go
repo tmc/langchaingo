@@ -9,6 +9,8 @@ import (
 
 // Handler is the interface that allows for hooking into specific parts of an
 // LLM application.
+//
+//nolint:all
 type Handler interface {
 	HandleText(ctx context.Context, text string)
 	HandleLLMStart(ctx context.Context, prompts []string)

@@ -32,7 +32,7 @@ type ConversationalAgent struct {
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
-
+	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
 }
 
@@ -124,12 +124,14 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	if strings.Contains(output, _conversationalFinalAnswerAction) {
 		splits := strings.Split(output, _conversationalFinalAnswerAction)
 
-		return nil, &schema.AgentFinish{
+		finishAction := &schema.AgentFinish{
 			ReturnValues: map[string]any{
 				a.OutputKey: splits[len(splits)-1],
 			},
 			Log: output,
-		}, nil
+		}
+
+		return nil, finishAction, nil
 	}
 
 	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
