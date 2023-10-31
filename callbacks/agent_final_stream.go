@@ -8,8 +8,10 @@ import (
 //nolint:all
 var DefaultKeywords = []string{"Final Answer:", "Final:", "AI:"}
 
+// nolint:all
 type AgentFinalStreamHandler struct {
 	SimpleHandler
+	ctx             context.Context
 	egress          chan []byte
 	Keywords        []string
 	LastTokens      string
@@ -34,7 +36,20 @@ func (handler *AgentFinalStreamHandler) GetEgress() chan []byte {
 	return handler.egress
 }
 
-func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, chunk []byte) {
+func (handler *AgentFinalStreamHandler) ReadFromEgress(callback func(ctx context.Context, chunk []byte)) {
+	egressCtx, cancel := context.WithCancel(handler.ctx)
+	defer cancel()
+
+	go func() {
+		defer close(handler.egress)
+		for data := range handler.egress {
+			callback(egressCtx, data)
+		}
+	}()
+}
+
+func (handler *AgentFinalStreamHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {
+	handler.ctx = ctx
 	chunkStr := string(chunk)
 	handler.LastTokens += chunkStr
 
