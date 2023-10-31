@@ -81,7 +81,7 @@ func TestInterpolateGoTemplate(t *testing.T) {
 
 			_, err := interpolateGoTemplate(tc.template, map[string]any{})
 			require.Error(t, err)
-			assert.EqualError(t, err, tc.errValue)
+			require.EqualError(t, err, tc.errValue)
 		})
 	}
 }
@@ -94,8 +94,8 @@ func TestCheckValidTemplate(t *testing.T) {
 
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		assert.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template]")
+		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
+		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template]")
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestCheckValidTemplate(t *testing.T) {
 
 		err := CheckValidTemplate("Hello, {{{ test }}", TemplateFormatGoTemplate, []string{"test"})
 		require.Error(t, err)
-		assert.EqualError(t, err, "template: template:1: unexpected \"{\" in command")
+		require.EqualError(t, err, "template: template:1: unexpected \"{\" in command")
 	})
 
 	t.Run("TemplateValid", func(t *testing.T) {
@@ -142,6 +142,6 @@ func TestRenderTemplate(t *testing.T) {
 			},
 		)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrInvalidTemplateFormat)
+		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
 	})
 }

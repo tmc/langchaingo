@@ -1,5 +1,10 @@
 # Welcome to LangChainGo
 
+![gopher](https://pkg.go.dev/static/shared/icon/favicon.ico)
+
+LangchainGo is the [Go Programming Language](https://go.dev/) port/fork of
+[LangChain](https://www.langchain.com/).
+
 LangChain is a framework for developing applications powered by language models. We believe that the most powerful and differentiated applications will not only call out to a language model via an API, but will also:
 
 - _Be data-aware_: connect a language model to other sources of data
@@ -9,10 +14,12 @@ The LangChain framework is designed with the above principles in mind.
 
 ## Getting Started
 
+_**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo). For documentation on [the Python version](https://github.com/langchain-ai/langchain), [head here](https://python.langchain.com/docs)._
+
 Checkout the guide below for a walkthrough of how to get started using LangChain to create a Language Model application.
 
-- [Quickstart, using LLMs](./getting-started/guide-llm.mdx)
-- [Quickstart, using Chat Models](./getting-started/guide-chat.mdx)
+- [Quickstart, using Ollama](./getting-started/guide-ollama.mdx)
+- [Quickstart, using OpenAI](./getting-started/guide-openai.mdx)
 
 ## Components
 
@@ -24,13 +31,13 @@ These modules are, in increasing order of complexity:
 
 - [Prompts](./modules/model_io/prompts/): This includes prompt Templates and functionality to work with prompts like Output Parsers and Example Selectors
 
-- [Data connection](./modules/data_connection/): This includes patterns and functionality for working with your own data, and making it ready to interact with language models (including document loaders, vectorstores, text splitters and retrievers).
+<!-- - [Data connection](./modules/data_connection/): This includes patterns and functionality for working with your own data, and making it ready to interact with language models (including document loaders, vectorstores, text splitters and retrievers). -->
 
-- [Chains](./modules/chains/): Chains go beyond just a single LLM call, and are sequences of calls (whether to an LLM or a different utility). LangChain provides a standard interface for chains, lots of integrations with other tools, and end-to-end chains for common applications.
+<!-- - [Chains](./modules/chains/): Chains go beyond just a single LLM call, and are sequences of calls (whether to an LLM or a different utility). LangChain provides a standard interface for chains, lots of integrations with other tools, and end-to-end chains for common applications.-->
 
-- [Memory](./modules/memory/): Memory is the concept of persisting state between calls of a chain/agent. LangChain provides a standard interface for memory, a collection of memory implementations, and examples of chains/agents that use memory.
+<!-- - [Memory](./modules/memory/): Memory is the concept of persisting state between calls of a chain/agent. LangChain provides a standard interface for memory, a collection of memory implementations, and examples of chains/agents that use memory. -->
 
-- [Agents](./modules/agents/): Agents involve an LLM making decisions about which Actions to take, taking that Action, seeing an Observation, and repeating that until done. LangChain provides a standard interface for agents, a selection of agents to choose from, and examples of end-to-end agents.
+<!-- - [Agents](./modules/agents/): Agents involve an LLM making decisions about which Actions to take, taking that Action, seeing an Observation, and repeating that until done. LangChain provides a standard interface for agents, a selection of agents to choose from, and examples of end-to-end agents. -->
 
 ## API Reference
 

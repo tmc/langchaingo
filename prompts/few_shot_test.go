@@ -1,7 +1,6 @@
 package prompts
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -132,11 +131,10 @@ func TestFewShotPrompt_Format(t *testing.T) {
 				checkError(t, err, tc.expected)
 				return
 			}
-			fp, err := p.Format(tc.input)
+			got, err := p.Format(tc.input)
 			if checkError(t, err, "") {
 				return
 			}
-			got := fmt.Sprint(fp)
 			if diff := cmp.Diff(tc.expected, got); diff != "" {
 				t.Errorf("unexpected prompt output (-want +got):\n%s", diff)
 			}

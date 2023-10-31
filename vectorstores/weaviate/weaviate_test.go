@@ -93,8 +93,8 @@ func TestWeaviateStoreRest(t *testing.T) {
 	docs, err := store.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "tokyo")
-	require.Equal(t, docs[0].Metadata["country"], "japan")
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "japan", docs[0].Metadata["country"])
 }
 
 func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
