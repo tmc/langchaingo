@@ -54,7 +54,10 @@ func (handler *AgentFinalStreamHandler) GetEgress() chan []byte {
 // The callback function receives two parameters:
 // - ctx: the context.Context object for the egress operation.
 // - chunk: a byte slice representing a chunk of data from the egress channel.
-func (handler *AgentFinalStreamHandler) ReadFromEgress(ctx context.Context, callback func(ctx context.Context, chunk []byte)) {
+func (handler *AgentFinalStreamHandler) ReadFromEgress(
+	ctx context.Context,
+	callback func(ctx context.Context, chunk []byte),
+) {
 	go func() {
 		defer close(handler.egress)
 		for data := range handler.egress {
@@ -70,7 +73,7 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(ctx context.Context, call
 //
 // It takes in the context and a chunk of bytes as parameters.
 // There is no return type for this function.
-func (handler *AgentFinalStreamHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {
+func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, chunk []byte) {
 	chunkStr := string(chunk)
 	handler.LastTokens += chunkStr
 
