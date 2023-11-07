@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 const _url = "https://serpapi.com/search"
@@ -31,7 +30,6 @@ func New(apiKey string) *Client {
 
 func (s *Client) Search(ctx context.Context, query string) (string, error) {
 	params := make(url.Values)
-	query = strings.ReplaceAll(query, " ", "+")
 	params.Add("q", query)
 	params.Add("google_domain", "google.com")
 	params.Add("gl", "us")
