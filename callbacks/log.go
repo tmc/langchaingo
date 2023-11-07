@@ -11,7 +11,9 @@ import (
 )
 
 // LogHandler is a callback handler that prints to the standard output.
-type LogHandler struct{}
+type LogHandler struct {
+	SimpleHandler
+}
 
 var _ Handler = LogHandler{}
 
