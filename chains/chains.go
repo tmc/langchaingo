@@ -53,10 +53,10 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 
 	outputValues, err := c.Call(ctx, fullValues, options...)
 	if err != nil {
-		return nil, err
+		return outputValues, err
 	}
 	if err := validateOutputs(c, outputValues); err != nil {
-		return nil, err
+		return outputValues, err
 	}
 
 	if callbacksHandler != nil {
@@ -65,7 +65,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 
 	err = c.GetMemory().SaveContext(ctx, inputValues, outputValues)
 	if err != nil {
-		return nil, err
+		return outputValues, err
 	}
 
 	return outputValues, nil

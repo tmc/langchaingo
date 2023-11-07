@@ -17,7 +17,24 @@ var (
 
 	// ErrUnableToParseOutput is returned if the output of the llm is unparsable.
 	ErrUnableToParseOutput = errors.New("unable to parse agent output")
-	// ErrInvalidChainReturnType is returned if the internal chain of the agent eturns a value in the
+	// ErrInvalidChainReturnType is returned if the internal chain of the agent returns a value in the
 	// "text" filed that is not a string.
 	ErrInvalidChainReturnType = errors.New("agent chain did not return a string")
 )
+
+// ParserErrorHandler is the struct used to handle parse errors from the agent in the executor. If
+// an executor have a ParserErrorHandler, parsing errors will be formatted using the formatter
+// function and added as an observation. In the next executor step the agent will then have the
+// possibility to fix the error.
+type ParserErrorHandler struct {
+	// The formatter function can be used to format the parsing error. If nil the error will be given
+	// as an observation directly.
+	Formatter func(err string) string
+}
+
+// NewParserErrorHandler creates a new parser error handler.
+func NewParserErrorHandler(formatFunc func(string) string) *ParserErrorHandler {
+	return &ParserErrorHandler{
+		Formatter: formatFunc,
+	}
+}
