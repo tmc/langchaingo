@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -31,6 +32,8 @@ type ConversationalAgent struct {
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
+	// CallbacksHandler is the handler for callbacks.
+	CallbacksHandler callbacks.Handler
 }
 
 var _ Agent = (*ConversationalAgent)(nil)
@@ -42,9 +45,10 @@ func NewConversationalAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...
 	}
 
 	return &ConversationalAgent{
-		Chain:     chains.NewLLMChain(llm, options.getConversationalPrompt(tools)),
-		Tools:     tools,
-		OutputKey: options.outputKey,
+		Chain:            chains.NewLLMChain(llm, options.getConversationalPrompt(tools)),
+		Tools:            tools,
+		OutputKey:        options.outputKey,
+		CallbacksHandler: options.callbacksHandler,
 	}
 }
 
@@ -61,11 +65,21 @@ func (a *ConversationalAgent) Plan(
 
 	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
 
+	var stream func(ctx context.Context, chunk []byte) error
+
+	if a.CallbacksHandler != nil {
+		stream = func(ctx context.Context, chunk []byte) error {
+			a.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
+			return nil
+		}
+	}
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
 		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
 		return nil, nil, err
@@ -110,12 +124,14 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	if strings.Contains(output, _conversationalFinalAnswerAction) {
 		splits := strings.Split(output, _conversationalFinalAnswerAction)
 
-		return nil, &schema.AgentFinish{
+		finishAction := &schema.AgentFinish{
 			ReturnValues: map[string]any{
 				a.OutputKey: splits[len(splits)-1],
 			},
 			Log: output,
-		}, nil
+		}
+
+		return nil, finishAction, nil
 	}
 
 	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)

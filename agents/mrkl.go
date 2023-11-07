@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -31,6 +32,8 @@ type OneShotZeroAgent struct {
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
+	// CallbacksHandler is the handler for callbacks.
+	CallbacksHandler callbacks.Handler
 }
 
 var _ Agent = (*OneShotZeroAgent)(nil)
@@ -45,9 +48,10 @@ func NewOneShotAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...Creatio
 	}
 
 	return &OneShotZeroAgent{
-		Chain:     chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
-		Tools:     tools,
-		OutputKey: options.outputKey,
+		Chain:            chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
+		Tools:            tools,
+		OutputKey:        options.outputKey,
+		CallbacksHandler: options.callbacksHandler,
 	}
 }
 
@@ -65,11 +69,21 @@ func (a *OneShotZeroAgent) Plan(
 	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
 	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
+	var stream func(ctx context.Context, chunk []byte) error
+
+	if a.CallbacksHandler != nil {
+		stream = func(ctx context.Context, chunk []byte) error {
+			a.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
+			return nil
+		}
+	}
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
 		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
 		return nil, nil, err
