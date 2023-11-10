@@ -156,6 +156,8 @@ func (l *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
 		return "completions"
 	case ModelNameERNIEBotTurbo:
 		return "eb-instant"
+	case ModelNameERNIEBotPro:
+		return "completions_pro"
 	case ModelNameBloomz7B:
 		return "bloomz_7b1"
 	case ModelNameLlama2_7BChat:
