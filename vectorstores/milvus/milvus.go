@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
@@ -122,21 +123,21 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 				Name:     s.textField,
 				DataType: entity.FieldTypeVarChar,
 				TypeParams: map[string]string{
-					entity.TypeParamMaxLength: fmt.Sprintf("%d", s.maxTextLength),
+					entity.TypeParamMaxLength: strconv.Itoa(s.maxTextLength),
 				},
 			},
 			{
 				Name:     s.metaField,
 				DataType: entity.FieldTypeVarChar,
 				TypeParams: map[string]string{
-					entity.TypeParamMaxLength: fmt.Sprintf("%d", s.maxTextLength),
+					entity.TypeParamMaxLength: strconv.Itoa(s.maxTextLength),
 				},
 			},
 			{
 				Name:     s.vectorField,
 				DataType: entity.FieldTypeFloatVector,
 				TypeParams: map[string]string{
-					entity.TypeParamDim: fmt.Sprintf("%d", dim),
+					entity.TypeParamDim: strconv.Itoa(dim),
 				},
 			},
 		},
