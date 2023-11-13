@@ -15,6 +15,7 @@ import (
 )
 
 func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
+	t.Helper()
 	url := os.Getenv("TEI_URL")
 	if url == "" {
 		t.Skip("must set TEI_URL to run test")
@@ -25,6 +26,7 @@ func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 }
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
+	t.Helper()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
 		t.Skip("must set MILVUS_URL to run test")
