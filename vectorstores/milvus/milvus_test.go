@@ -2,6 +2,7 @@ package milvus
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
@@ -13,20 +14,25 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func getEmbedder() (embeddings.Embedder, error) {
+func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
+	url := os.Getenv("TEI_URL")
+	if url == "" {
+		t.Skip("must set TEI_URL to run test")
+	}
 	return tei.New(
-		tei.WithAPIBaseURL("http://localhost:5500"),
+		tei.WithAPIBaseURL(url),
 	)
-	// return hfe.NewHuggingface(
-	// 	hfe.WithModel("thenlper/gte-large"),
-	// )
 }
 
-func getNewStore(opts ...Option) (Store, error) {
+func getNewStore(t *testing.T, opts ...Option) (Store, error) {
+	url := os.Getenv("MILVUS_URL")
+	if url == "" {
+		t.Skip("must set MILVUS_URL to run test")
+	}
 	config := client.Config{
 		Address: "http://localhost:19530",
 	}
-	e, err := getEmbedder()
+	e, err := getEmbedder(t)
 	if err != nil {
 		return Store{}, err
 	}
@@ -47,7 +53,7 @@ func getNewStore(opts ...Option) (Store, error) {
 
 func TestMilvusConnection(t *testing.T) {
 	t.Parallel()
-	storer, err := getNewStore(WithDropOld())
+	storer, err := getNewStore(t, WithDropOld())
 	require.NoError(t, err)
 
 	err = storer.AddDocuments(context.Background(), []schema.Document{
@@ -67,28 +73,6 @@ func TestMilvusConnection(t *testing.T) {
 	docs, err := storer.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.3))
-	require.NoError(t, err)
-	require.Len(t, docs, 6)
-
-	// test with a score threshold of 0, expected all 10 documents
-	docs, err = storer.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0))
-	require.NoError(t, err)
-	require.Len(t, docs, 10)
-}
-
-func TestMilvusSearch(t *testing.T) {
-	t.Parallel()
-	storer, err := getNewStore()
-	require.NoError(t, err)
-
-	require.NoError(t, err)
-	// test with a score threshold of 0.8, expected 6 documents
-	docs, err := storer.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0.3),
-	)
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
 
