@@ -130,16 +130,6 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptV
 	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
-func (o *Chat) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
-	model := ModelName(o.client.Model)
-
-	if model == "" {
-		model = ModelName(opts.Model)
-	}
-
-	return modelToPath(model)
-}
-
 func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
 	for i := 0; i < len(messageSets); i++ {
