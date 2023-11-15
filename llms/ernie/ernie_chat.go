@@ -34,6 +34,9 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}
 
 	c, err := newClient(options)
+	if err != nil {
+		return nil, err
+	}
 	c.ModelPath = modelToPath(ModelName(c.Model))
 
 	return &Chat{
