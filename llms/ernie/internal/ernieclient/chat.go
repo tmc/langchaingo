@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	defaultChatModel = "gpt-3.5-turbo"
-	defaultBaseUrl   = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1"
-	streamStopFlag   = "\"is_end\": true"
+	defaultBaseURL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1"
+	streamStopFlag = "\"is_end\": true"
 )
 
 // ChatRequest is a request to complete a chat completion..
@@ -72,22 +71,8 @@ type ChatUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-// ChatResponse is a response to a chat request.
-//type ChatResponse struct {
-//	ID      string        `json:"id,omitempty"`
-//	Created float64       `json:"created,omitempty"`
-//	Choices []*ChatChoice `json:"choices,omitempty"`
-//	Model   string        `json:"model,omitempty"`
-//	Object  string        `json:"object,omitempty"`
-//	Usage   struct {
-//		CompletionTokens float64 `json:"completion_tokens,omitempty"`
-//		PromptTokens     float64 `json:"prompt_tokens,omitempty"`
-//		TotalTokens      float64 `json:"total_tokens,omitempty"`
-//	} `json:"usage,omitempty"`
-//}
-
 type ChatResponse struct {
-	Id               string           `json:"id"`
+	ID               string           `json:"id"`
 	Object           string           `json:"object"`
 	Created          int              `json:"created"`
 	Result           string           `json:"result"`
@@ -107,28 +92,11 @@ type FunctionCallRes struct {
 	Arguments string `json:"arguments"`
 }
 
-// StreamedChatResponsePayload is a chunk from the stream.
-//type StreamedChatResponsePayload struct {
-//	ID      string  `json:"id,omitempty"`
-//	Created float64 `json:"created,omitempty"`
-//	Model   string  `json:"model,omitempty"`
-//	Object  string  `json:"object,omitempty"`
-//	Choices []struct {
-//		Index float64 `json:"index,omitempty"`
-//		Delta struct {
-//			Role         string        `json:"role,omitempty"`
-//			Content      string        `json:"content,omitempty"`
-//			FunctionCall *FunctionCall `json:"function_call,omitempty"`
-//		} `json:"delta,omitempty"`
-//		FinishReason string `json:"finish_reason,omitempty"`
-//	} `json:"choices,omitempty"`
-//}
-
 type StreamedChatResponsePayload struct {
-	Id               string           `json:"id"`
+	ID               string           `json:"id"`
 	Object           string           `json:"object"`
 	Created          int              `json:"created"`
-	SentenceId       int              `json:"sentence_id"`
+	SentenceID       int              `json:"sentence_id"`
 	IsEnd            bool             `json:"is_end"`
 	IsTruncated      bool             `json:"is_truncated"`
 	Result           string           `json:"result"`
@@ -254,11 +222,6 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		response.IsTruncated = streamResponse.IsTruncated
 		if streamResponse.FunctionCall != nil {
 			response.FunctionCall = streamResponse.FunctionCall
-			//if response.FunctionCall == nil {
-			//	response.FunctionCall = streamResponse.FunctionCall
-			//} else {
-			//	response.FunctionCall.Arguments += streamResponse.FunctionCall.Arguments
-			//}
 			chunk, _ = json.Marshal(response.FunctionCall) // nolint:errchkjson
 		}
 

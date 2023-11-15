@@ -341,7 +341,7 @@ func parseStreamingCompletionResponse(ctx context.Context, resp *http.Response, 
 }
 
 func (c *Client) buildURL(modelpath ModelPath) string {
-	baseURL := defaultBaseUrl
+	baseURL := defaultBaseURL
 	baseURL = strings.TrimRight(baseURL, "/")
 
 	// ernie example url:
