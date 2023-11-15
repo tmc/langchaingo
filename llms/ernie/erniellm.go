@@ -151,6 +151,10 @@ func (l *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
 		model = ModelName(opts.Model)
 	}
 
+	return modelToPath(model)
+}
+
+func modelToPath(model ModelName) ernieclient.ModelPath {
 	switch model {
 	case ModelNameERNIEBot:
 		return "completions"
