@@ -19,6 +19,7 @@ type Store struct {
 	dropOld          bool
 	async            bool
 	initialized      bool
+	collectionExists bool
 	shardNum         int32
 	maxTextLength    int
 	ef               int
@@ -56,12 +57,12 @@ func New(ctx context.Context, config client.Config, opts ...Option) (Store, erro
 	if s.client, err = client.NewClient(ctx, config); err != nil {
 		return s, err
 	}
-	ok, err := s.client.HasCollection(ctx, s.collectionName)
+	s.collectionExists, err = s.client.HasCollection(ctx, s.collectionName)
 	if err != nil {
 		return s, err
 	}
 
-	if ok && s.dropOld {
+	if s.collectionExists && s.dropOld {
 		if err := s.dropCollection(ctx, s.collectionName); err != nil {
 			return s, err
 		}
@@ -142,9 +143,11 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 			},
 		},
 	}
-	err := s.client.CreateCollection(ctx, s.schema, s.shardNum)
-	if err != nil {
-		return err
+	if !s.collectionExists {
+		err := s.client.CreateCollection(ctx, s.schema, s.shardNum)
+		if err != nil {
+			return err
+		}
 	}
 	s.initialized = true
 	return nil
