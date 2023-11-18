@@ -27,6 +27,30 @@ func TestOpenaiEmbeddings(t *testing.T) {
 	assert.Len(t, embeddings, 3)
 }
 
+func TestOpenaiEmbeddingsQueryVsDocuments(t *testing.T) {
+	// Verifies that we get the same embedding for the same string, regardless
+	// of which method we call.
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+	e, err := NewOpenAI()
+	require.NoError(t, err)
+
+	text := "hi there"
+
+	eq, err := e.EmbedQuery(context.Background(), text)
+	require.NoError(t, err)
+
+	eb, err := e.EmbedDocuments(context.Background(), []string{text})
+	require.NoError(t, err)
+
+	// Using strict equality should be OK here because we expect the same values
+	// for the same string, deterministically.
+	assert.Equal(t, eq, eb[0])
+}
+
 func TestOpenaiEmbeddingsWithOptions(t *testing.T) {
 	t.Parallel()
 
