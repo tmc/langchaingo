@@ -7,8 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -47,7 +49,7 @@ type ChatMessage struct {
 	// The role of the author of this message. One of system, user, or assistant.
 	Role string `json:"role"`
 	// The content of the message.
-	Content string `json:"content"`
+	Content any `json:"content"`
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
 	Name string `json:"name,omitempty"`
@@ -141,6 +143,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		return nil, err
 	}
 
+	// print raw payload:
+	fmt.Println(string(payloadBytes))
+
 	// Build request
 	body := bytes.NewReader(payloadBytes)
 	if c.baseURL == "" {
@@ -159,6 +164,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		return nil, err
 	}
 	defer r.Body.Close()
+
+	buf, err := io.ReadAll(r.Body)
+	io.Copy(os.Stdout, bytes.NewReader(buf))
 
 	if r.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
@@ -220,7 +228,8 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			continue
 		}
 		chunk := []byte(streamResponse.Choices[0].Delta.Content)
-		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		// response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		response.Choices[0].Message.Content = fmt.Sprintf("%s%s", response.Choices[0].Message.Content, streamResponse.Choices[0].Delta.Content)
 		response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
 		if streamResponse.Choices[0].Delta.FunctionCall != nil {
 			if response.Choices[0].Message.FunctionCall == nil {

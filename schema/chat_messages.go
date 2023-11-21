@@ -39,6 +39,11 @@ type Named interface {
 	GetName() string
 }
 
+// ContentList is an interface for objects that have a list of content.
+type ContentList interface {
+	GetContentList() []ChatMessageContentPart
+}
+
 // Statically assert that the types implement the interface.
 var (
 	_ ChatMessage = AIChatMessage{}
@@ -46,6 +51,17 @@ var (
 	_ ChatMessage = SystemChatMessage{}
 	_ ChatMessage = GenericChatMessage{}
 	_ ChatMessage = FunctionChatMessage{}
+	_ ChatMessage = CompoundChatMessage{}
+)
+
+// ContentType is the type of content in a message.
+type ContentType string
+
+const (
+	// ContentTypeText is text.
+	ContentTypeText ContentType = "text"
+	// ContentTypeImage is an image.
+	ContentTypeImage ContentType = "image_url"
 )
 
 // AIChatMessage is a message sent by an AI.
@@ -102,6 +118,61 @@ type FunctionCall struct {
 func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeFunction }
 func (m FunctionChatMessage) GetContent() string       { return m.Content }
 func (m FunctionChatMessage) GetName() string          { return m.Name }
+
+// CompoundChatMessage is a chat message with multiple parts.
+type CompoundChatMessage struct {
+	Type  ChatMessageType
+	Parts []ChatMessageContentPart
+}
+
+func (m CompoundChatMessage) GetType() ChatMessageType { return m.Type }
+func (m CompoundChatMessage) GetContent() string {
+	b, _ := json.Marshal(m.Parts)
+	return string(b)
+}
+
+func (m CompoundChatMessage) GetContentList() []ChatMessageContentPart {
+	return m.Parts
+}
+
+// ChatMessageContentPart is a part of a chat message.
+type ChatMessageContentPart interface {
+	isChatMessageContentPart()
+}
+
+// ChatMessageContentPartText is a text part of a chat message.
+type ChatMessageContentPartText struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+// ChatMessageContentPartImageURL is an image part of a chat message.
+type ChatMessageContentPartImageURL struct {
+	URL     string      `json:"url"`
+	Details ImageDetail `json:"detail,omitempty"`
+}
+
+// ImageDetail is the detail of an image.
+type ImageDetail string
+
+const (
+	// ImageDetailAuto is the default image detail.
+	ImageDetailAuto ImageDetail = "auto"
+	// ImageDetailLow is the low image detail.
+	ImageDetailLow ImageDetail = "low"
+	// ImageDetailHigh is the high image detail.
+	ImageDetailHigh ImageDetail = "high"
+)
+
+func (ChatMessageContentPartText) isChatMessageContentPart() {}
+
+// ChatMessageContentPartImage is an image part of a chat message.
+type ChatMessageContentPartImage struct {
+	Type     string                         `json:"type"`
+	ImageURL ChatMessageContentPartImageURL `json:"image_url,omitempty"`
+}
+
+func (ChatMessageContentPartImage) isChatMessageContentPart() {}
 
 // ChatGeneration is the output of a single chat generation.
 type ChatGeneration struct {

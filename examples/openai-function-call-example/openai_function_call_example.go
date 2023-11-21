@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	llm, err := openai.NewChat(openai.WithModel("gpt-3.5-turbo-0613"))
+	llm, err := openai.NewChat(openai.WithModel("gpt-3.5-turbo-1106"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,11 +29,17 @@ func main() {
 	}
 }
 
-func getCurrentWeather(location string, unit string) (string, error) {
+// Get the current weather in the specified location.
+func getCurrentWeather(req struct {
+	// The city and state, e.g. San Francisco, CA.
+	location string
+	// The temperature unit, either "celcius" or "fahrenheit".
+	unit string
+}) (string, error) {
 	weatherInfo := map[string]interface{}{
-		"location":    location,
+		"location":    req.location,
 		"temperature": "72",
-		"unit":        unit,
+		"unit":        req.unit,
 		"forecast":    []string{"sunny", "windy"},
 	}
 	b, err := json.Marshal(weatherInfo)
@@ -47,6 +53,6 @@ var functions = []llms.FunctionDefinition{
 	{
 		Name:        "getCurrentWeather",
 		Description: "Get the current weather in a given location",
-		Parameters:  json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
+		Parameters:  json.RawMessage(`{"type":"object","properties":{"req":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA."},"unit":{"type":"string","description":"The temperature unit, either \"celcius\" or \"fahrenheit\"."}}}},"required":["req","unit"]}`),
 	},
 }

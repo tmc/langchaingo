@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	llm, err := openai.NewChat(openai.WithModel("gpt-4-1106-preview"))
+	llm, err := openai.NewChat(openai.WithModel("gpt-3.5-turbo"))
 	if err != nil {
 		log.Fatal(err)
 	}

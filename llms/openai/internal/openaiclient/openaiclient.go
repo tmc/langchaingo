@@ -86,7 +86,7 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 		return nil, ErrEmptyResponse
 	}
 	return &Completion{
-		Text: resp.Choices[0].Message.Content,
+		Text: fmt.Sprint(resp.Choices[0].Message.Content),
 	}, nil
 }
 
