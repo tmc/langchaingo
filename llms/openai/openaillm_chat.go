@@ -169,7 +169,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		generationInfo["PromptTokens"] = result.Usage.PromptTokens
 		generationInfo["TotalTokens"] = result.Usage.TotalTokens
 		msg := &schema.AIChatMessage{
-			Content: result.Choices[0].Message.Content,
+			Content: fmt.Sprint(result.Choices[0].Message.Content),
 		}
 		if result.Choices[0].FinishReason == "function_call" {
 			msg.FunctionCall = &schema.FunctionCall{
@@ -249,6 +249,9 @@ func messagesToClientMessages(messages []schema.ChatMessage) []*openaiclient.Cha
 		}
 		if n, ok := m.(schema.Named); ok {
 			msg.Name = n.GetName()
+		}
+		if cl, ok := m.(schema.ContentList); ok {
+			msg.Content = cl.GetContentList()
 		}
 		msgs[i] = msg
 	}

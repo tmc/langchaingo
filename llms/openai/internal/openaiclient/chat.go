@@ -268,7 +268,8 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			continue
 		}
 		chunk := []byte(streamResponse.Choices[0].Delta.Content)
-		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		c := fmt.Sprintf("%s%s", response.Choices[0].Message.Content, streamResponse.Choices[0].Delta.Content)
+		response.Choices[0].Message.Content = c
 		response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
 		if streamResponse.Choices[0].Delta.FunctionCall != nil {
 			if response.Choices[0].Message.FunctionCall == nil {
