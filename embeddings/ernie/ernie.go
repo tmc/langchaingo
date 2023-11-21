@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/embeddings/internal/embedderclient"
 	"github.com/tmc/langchaingo/llms/ernie"
 )
 
@@ -40,57 +41,10 @@ func NewErnie(opts ...Option) (*Ernie, error) {
 	return v, nil
 }
 
-// split texts with batchCount.
-func (e *Ernie) embed(ctx context.Context, texts []string) ([][]float32, error) {
-	emb := make([][]float32, 0, len(texts))
-
-	offsetLen := len(texts) / e.batchCount
-	for i := 0; i <= offsetLen; i++ {
-		start := i * e.batchCount
-		end := i*e.batchCount + e.batchCount
-
-		if end > len(texts) {
-			end = len(texts)
-		}
-
-		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts[start:end])
-		if err != nil {
-			return nil, err
-		}
-
-		emb = append(emb, curTextEmbeddings...)
-	}
-	return emb, nil
-}
-
 // EmbedDocuments use ernie Embedding-V1.
 func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
-	batchedTexts := embeddings.BatchTexts(
-		embeddings.MaybeRemoveNewLines(texts, e.stripNewLines),
-		e.batchSize,
-	)
-
-	emb := make([][]float32, 0, len(texts))
-	for _, texts := range batchedTexts {
-		curTextEmbeddings, err := e.embed(ctx, texts)
-		if err != nil {
-			return nil, err
-		}
-
-		textLengths := make([]int, 0, len(texts))
-		for _, text := range texts {
-			textLengths = append(textLengths, len(text))
-		}
-
-		combined, err := embeddings.CombineVectors(curTextEmbeddings, textLengths)
-		if err != nil {
-			return nil, err
-		}
-
-		emb = append(emb, combined)
-	}
-
-	return emb, nil
+	texts = embeddings.MaybeRemoveNewLines(texts, e.stripNewLines)
+	return embedderclient.BatchedEmbed(ctx, e.client, texts, e.batchSize)
 }
 
 // EmbedQuery use ernie Embedding-V1.
