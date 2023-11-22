@@ -1,0 +1,8 @@
+github.com/dlclark/regexp2 v1.8.1 h1:6Lcdwya6GjPUNsBct8Lg/yRPwMhABj269AAzdGSiR+0=
+github.com/dlclark/regexp2 v1.8.1/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/pkoukk/tiktoken-go v0.1.2 h1:u7PCSBiWJ3nJYoTGShyM9iHXz4dNyYkurwwp+GHtyHY=
+github.com/pkoukk/tiktoken-go v0.1.2/go.mod h1:boMWvk9pQCOTx11pgu0DrIdrAKgQzzJKUP6vLXaz7Rw=
+github.com/tmc/langchaingo v0.0.0-20231121185739-386e1815ba71 h1:q+winaFnpLPXy+2wNNpjh/02nEl2M9slDoOACkfLe9M=
+github.com/tmc/langchaingo v0.0.0-20231121185739-386e1815ba71/go.mod h1:wwzKIaam0XFmiWfTlvSvdKwq7CkxE9Tz5rIkz1KKDws=
