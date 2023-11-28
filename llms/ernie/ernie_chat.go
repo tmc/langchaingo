@@ -78,6 +78,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			N:                opts.N, // TODO: note, we are not returning multiple completions
 			FrequencyPenalty: opts.FrequencyPenalty,
 			PresencePenalty:  opts.PresencePenalty,
+			System:           getSystem(messageSet),
 
 			FunctionCallBehavior: ernieclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		}
@@ -147,15 +148,15 @@ func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 }
 
 func messagesToClientMessages(messages []schema.ChatMessage) []*ernieclient.ChatMessage {
-	msgs := make([]*ernieclient.ChatMessage, len(messages))
-	for i, m := range messages {
+	msgs := make([]*ernieclient.ChatMessage, 0)
+	for _, m := range messages {
 		msg := &ernieclient.ChatMessage{
 			Content: m.GetContent(),
 		}
 		typ := m.GetType()
 		switch typ {
-		case schema.ChatMessageTypeSystem:
-			msg.Role = "system"
+		case schema.ChatMessageTypeSystem: // In Ernie's 'messages' parameter, there is no 'system' role.
+			continue
 		case schema.ChatMessageTypeAI:
 			msg.Role = "assistant"
 		case schema.ChatMessageTypeHuman:
@@ -168,8 +169,18 @@ func messagesToClientMessages(messages []schema.ChatMessage) []*ernieclient.Chat
 		if n, ok := m.(schema.Named); ok {
 			msg.Name = n.GetName()
 		}
-		msgs[i] = msg
+		msgs = append(msgs, msg)
 	}
 
 	return msgs
+}
+
+// getSystem Retrieve system parameter from messages.
+func getSystem(messages []schema.ChatMessage) string {
+	for _, message := range messages {
+		if message.GetType() == schema.ChatMessageTypeSystem {
+			return message.GetContent()
+		}
+	}
+	return ""
 }

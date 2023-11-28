@@ -29,6 +29,7 @@ type ChatRequest struct {
 	Stream           bool           `json:"stream,omitempty"`
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
+	System           string         `json:"system,omitempty"` //If the 'functions' parameter is set, setting the 'system' parameter is not supported.
 
 	// Function definitions to include in the request.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
