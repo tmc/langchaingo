@@ -1,14 +1,16 @@
 package ernie
 
 import (
-	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 	"reflect"
 	"testing"
+
+	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 
 	"github.com/tmc/langchaingo/schema"
 )
 
 func TestNewChat(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		opts []Option
 	}
@@ -45,6 +47,7 @@ func TestNewChat(t *testing.T) {
 }
 
 func TestGetSystem(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		messages []schema.ChatMessage
 	}
@@ -84,6 +87,7 @@ func TestGetSystem(t *testing.T) {
 }
 
 func TestMessagesToClientMessages(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		messages []schema.ChatMessage
 	}

@@ -3,6 +3,7 @@ package ernieclient
 import "testing"
 
 func TestClient_buildURL(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		apiKey      string
 		secretKey   string
