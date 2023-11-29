@@ -166,6 +166,11 @@ func messagesToClientMessages(messages []schema.ChatMessage) []*ernieclient.Chat
 		case schema.ChatMessageTypeFunction:
 			msg.Role = "function"
 		}
+
+		if n, ok := m.(FunctionCalled); ok {
+			msg.FunctionCall = n.GetFunctionCall()
+		}
+
 		if n, ok := m.(schema.Named); ok {
 			msg.Name = n.GetName()
 		}
@@ -183,4 +188,9 @@ func getSystem(messages []schema.ChatMessage) string {
 		}
 	}
 	return ""
+}
+
+// FunctionCalled is an interface for objects that have a function call info.
+type FunctionCalled interface {
+	GetFunctionCall() *schema.FunctionCall
 }
