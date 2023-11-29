@@ -40,7 +40,7 @@ func TestNewChat(t *testing.T) {
 			}
 
 			expectedType := reflect.TypeOf(tt.want)
-			if reflect.TypeOf(got) == expectedType {
+			if reflect.TypeOf(got) != expectedType {
 				t.Errorf("NewChat() got = %T, want %T", got, tt.want)
 			}
 		})
