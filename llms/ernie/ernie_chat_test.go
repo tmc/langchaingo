@@ -30,6 +30,7 @@ func TestNewChat(t *testing.T) {
 		}}, want: nil, wantErr: false},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got, err := NewChat(tt.args.opts...)
@@ -78,6 +79,7 @@ func TestGetSystem(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if got := getSystem(tt.args.messages); got != tt.want {
@@ -115,6 +117,7 @@ func TestMessagesToClientMessages(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got := messagesToClientMessages(tt.args.messages)
