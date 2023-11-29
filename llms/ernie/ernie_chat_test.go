@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
-
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -32,6 +31,7 @@ func TestNewChat(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := NewChat(tt.args.opts...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewChat() error = %v, wantErr %v", err, tt.wantErr)
@@ -79,6 +79,7 @@ func TestGetSystem(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := getSystem(tt.args.messages); got != tt.want {
 				t.Errorf("getSystem() = %v, want %v", got, tt.want)
 			}
@@ -115,6 +116,7 @@ func TestMessagesToClientMessages(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := messagesToClientMessages(tt.args.messages)
 			for i, v := range got {
 				if !reflect.DeepEqual(v.Content, tt.want[i].Content) {
