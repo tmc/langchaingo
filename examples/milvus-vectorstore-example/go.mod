@@ -7,7 +7,7 @@ replace github.com/tmc/langchaingo => ../..
 
 require (
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
-	github.com/tmc/langchaingo v0.0.0-00010101000000-000000000000
+	github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
 )
 
 require (

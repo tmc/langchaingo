@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/vertexai-palm-chat-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
+require github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
 
 require (
 	cloud.google.com/go v0.110.7 // indirect

@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/local-llm-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
+require github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect
