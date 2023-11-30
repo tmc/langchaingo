@@ -57,8 +57,9 @@ type AIChatMessage struct {
 	FunctionCall *FunctionCall `json:"function_call,omitempty"`
 }
 
-func (m AIChatMessage) GetType() ChatMessageType { return ChatMessageTypeAI }
-func (m AIChatMessage) GetContent() string       { return m.Content }
+func (m AIChatMessage) GetType() ChatMessageType       { return ChatMessageTypeAI }
+func (m AIChatMessage) GetContent() string             { return m.Content }
+func (m AIChatMessage) GetFunctionCall() *FunctionCall { return m.FunctionCall }
 
 // HumanChatMessage is a message sent by a human.
 type HumanChatMessage struct {
