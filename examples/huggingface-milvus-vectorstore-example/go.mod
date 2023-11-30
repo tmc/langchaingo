@@ -1,13 +1,10 @@
-module github.com/tmc/langchaingo/examples/ollama-milvus-vectorstore-example
+module github.com/tmc/langchaingo/examples/huggingface-milvus-vectorstore-example
 
 go 1.20
 
-// NOTE: remove the following line to use the official (rather than local development) version
-replace github.com/tmc/langchaingo => ../..
-
 require (
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
-	github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
+	github.com/tmc/langchaingo v0.0.0-20231130160443-fc423fab7b81
 )
 
 require (

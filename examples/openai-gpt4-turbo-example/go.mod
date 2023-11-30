@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/openai-gpt4-turbo-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
+require github.com/tmc/langchaingo v0.0.0-20231130160443-fc423fab7b81
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect

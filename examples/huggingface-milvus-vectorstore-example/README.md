@@ -1,4 +1,4 @@
-# Milvus vector store with local embeddings 
+# Milvus vector store with local embeddings via huggingface TEI.
 
 Dependencies:
 - [Text Embeddings Inference](https://github.com/huggingface/text-embeddings-inference)
@@ -8,10 +8,6 @@ Dependencies:
 # start milvus
 docker-compose up -d
 
-# start mistral on ollama
-ollama run mistral
-
 #start embedding server
 text-embeddings-router --model-id thenlper/gte-large --port 5500
-
 ```

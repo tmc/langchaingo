@@ -47,7 +47,7 @@ func newStore() (vectorstores.VectorStore, error) {
 	milvusConfig := client.Config{
 		Address: "http://localhost:19530",
 	}
-	// Create a new Chroma vector store.
+	// Create a new milvus vector store.
 	store, errNs := milvus.New(
 		ctx,
 		milvusConfig,
