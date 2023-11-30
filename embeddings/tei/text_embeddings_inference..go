@@ -13,6 +13,7 @@ import (
 type TextEmbeddingsInference struct {
 	client        *client.Client
 	StripNewLines bool
+	truncate      bool
 	BatchSize     int
 	baseURL       string
 	headers       map[string]string
@@ -46,7 +47,7 @@ func (e TextEmbeddingsInference) EmbedDocuments(_ context.Context, texts []strin
 
 	for _, txt := range batchedTexts {
 		p.Go(func() error {
-			curTextEmbeddings, err := e.client.Embed(strings.Join(txt, " "), false)
+			curTextEmbeddings, err := e.client.Embed(strings.Join(txt, " "), e.truncate)
 			if err != nil {
 				return err
 			}
