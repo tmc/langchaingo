@@ -5,7 +5,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-const DefaultKeyExpire = 900
+const DefaultKeyExpire = 0
 
 // RedisChatMessageHistoryOption is a function for creating new chat message history
 // with other then the default values.
