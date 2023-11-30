@@ -52,3 +52,8 @@ clean-lint-cache:
 build-examples:
 	for example in $(shell find ./examples -mindepth 1 -maxdepth 1 -type d); do \
 		(cd $$example; echo Build $$example; go mod tidy; go build -o /dev/null) || exit 1; done
+
+.PHONY: add-go-work
+add-go-work:
+	go work init .
+	go work use -r .
