@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/zapier-llm-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
+require github.com/tmc/langchaingo v0.0.0-20231130160443-fc423fab7b81
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -22,5 +22,3 @@ require (
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/sys v0.13.0 // indirect
 )
-
-replace github.com/tmc/langchaingo => ../../.
