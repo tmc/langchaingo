@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
@@ -102,4 +103,26 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 1)
+}
+
+func TestUseLLMAndChatAsEmbedderClient(t *testing.T) {
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	embedderFromLLM, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+	var _ embeddings.Embedder = embedderFromLLM
+
+	chat, err := openai.NewChat()
+	require.NoError(t, err)
+
+	embedderFromChat, err := embeddings.NewEmbedder(chat)
+	require.NoError(t, err)
+	var _ embeddings.Embedder = embedderFromChat
 }
