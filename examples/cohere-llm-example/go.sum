@@ -11,6 +11,6 @@ github.com/pkoukk/tiktoken-go v0.1.2 h1:u7PCSBiWJ3nJYoTGShyM9iHXz4dNyYkurwwp+GHt
 github.com/pkoukk/tiktoken-go v0.1.2/go.mod h1:boMWvk9pQCOTx11pgu0DrIdrAKgQzzJKUP6vLXaz7Rw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823 h1:vIYDdskaXk+iwfrMIaN9dM66o3wUedqvWWww1o7a1m4=
-github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823/go.mod h1:wwzKIaam0XFmiWfTlvSvdKwq7CkxE9Tz5rIkz1KKDws=
+github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb h1:hikrwYpmDgLFkdrau9QCZl0npDGt08ZnI0YzVBWv01I=
+github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb/go.mod h1:WgJkGMb5Ac/WpD6YLo3zRAiHtALrgGnH42Hcu5Rs4/A=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
