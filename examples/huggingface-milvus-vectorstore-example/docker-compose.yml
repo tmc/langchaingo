@@ -42,6 +42,15 @@ services:
       - "etcd"
       - "minio"
 
+  txt-inference:
+    platform: linux/x86_64
+    image: ghcr.io/huggingface/text-embeddings-inference:${TEI_TAG:-cpu-latest}
+    command: --model-id thenlper/gte-base
+    ports:
+      - 5500:80
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/txt-inference:/data
+
 networks:
   default:
     name: milvus
