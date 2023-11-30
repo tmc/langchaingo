@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/embeddings/internal/embedderclient"
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
@@ -32,7 +31,7 @@ func NewOllama(opts ...Option) (Ollama, error) {
 // EmbedDocuments creates one vector embedding for each of the texts.
 func (e Ollama) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	texts = embeddings.MaybeRemoveNewLines(texts, e.StripNewLines)
-	return embedderclient.BatchedEmbed(ctx, e.client, texts, e.BatchSize)
+	return embeddings.BatchedEmbed(ctx, e.client, texts, e.BatchSize)
 }
 
 // EmbedQuery embeds a single text.

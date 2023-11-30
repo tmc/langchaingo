@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/embeddings/internal/embedderclient"
 	"github.com/tmc/langchaingo/llms/ernie"
 )
 
@@ -44,7 +43,7 @@ func NewErnie(opts ...Option) (*Ernie, error) {
 // EmbedDocuments use ernie Embedding-V1.
 func (e *Ernie) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	texts = embeddings.MaybeRemoveNewLines(texts, e.stripNewLines)
-	return embedderclient.BatchedEmbed(ctx, e.client, texts, e.batchSize)
+	return embeddings.BatchedEmbed(ctx, e.client, texts, e.batchSize)
 }
 
 // EmbedQuery use ernie Embedding-V1.
