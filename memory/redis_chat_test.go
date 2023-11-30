@@ -13,7 +13,7 @@ func TestRedisChatMessageHistory(t *testing.T) {
 	t.Parallel()
 	h := NewRedisChatMessageHistory(
 		WithRedisConfOptions(RedisConfOptions{
-			Address:      "",
+			Address:      "localhost:6379",
 			Db:           5,
 			Password:     "",
 			ReadTimeout:  3000,
