@@ -5,6 +5,8 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+const DefaultMultiple = 2
+
 // ConversationBufferWindow is a simple form of memory that remembers previous conversational back and forths directly.
 type ConversationBufferWindow struct {
 	ChatHistory schema.ChatMessageHistory
@@ -41,8 +43,8 @@ func (c ConversationBufferWindow) LoadMemoryVariables(ctx context.Context, _ map
 	}
 	messageLength := len(messages)
 	start := 0
-	if messageLength > c.K*2 {
-		start = messageLength - c.K*2
+	if messageLength > c.K*DefaultMultiple {
+		start = messageLength - c.K*DefaultMultiple
 	}
 	newMessages := messages[start:]
 

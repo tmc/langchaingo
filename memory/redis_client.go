@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
 	"sync"
@@ -17,12 +18,6 @@ var (
 	redisClientIns = new(redisClientManager)
 )
 
-func init() {
-	redisClientIns.Once.Do(func() {
-		redisClientIns.clients = make(map[string]*redis.Client)
-	})
-}
-
 type RedisConfOptions struct {
 	Address      string
 	Password     string
@@ -32,15 +27,15 @@ type RedisConfOptions struct {
 	IdleTimeout  int
 	PoolTimeout  int
 	PoolSize     int
-	Ttl          int
-	SessionId    string
+	TTl          int
+	SessionID    string
 	KeyPrefix    string
 }
 
 func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions) (options *redis.Options, err error) {
 	options = &redis.Options{}
 	if redisConfOptions.Address == "" {
-		return options, fmt.Errorf("redis address is empty")
+		return options, errors.New("redis address is empty")
 	}
 	options.Addr = redisConfOptions.Address
 	if redisConfOptions.Password != "" {

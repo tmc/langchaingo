@@ -2,6 +2,8 @@ package memory
 
 import "github.com/tmc/langchaingo/schema"
 
+const DefaultK = 5
+
 // ConversationBufferWindowOption is a function for creating new buffer
 // with other then the default values.
 type ConversationBufferWindowOption func(b *ConversationBufferWindow)
@@ -70,7 +72,7 @@ func applyBufferWindowOptions(opts ...ConversationBufferWindowOption) *Conversat
 		HumanPrefix:    "Human",
 		AIPrefix:       "AI",
 		MemoryKey:      "history",
-		K:              5,
+		K:              DefaultK,
 	}
 
 	for _, opt := range opts {

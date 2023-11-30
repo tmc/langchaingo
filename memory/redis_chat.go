@@ -3,7 +3,9 @@ package memory
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-redis/redis"
 	"github.com/tmc/langchaingo/schema"
 	"time"
 )
@@ -29,7 +31,7 @@ func NewRedisChatMessageHistory(options ...RedisChatMessageHistoryOption) *Redis
 // AddUserMessage adds an user to the chat message history.
 func (r RedisChatMessageHistory) AddUserMessage(_ context.Context, message string) error {
 	chatMessage := RedisChatMessage{Content: message, Type: schema.ChatMessageTypeHuman}
-	redisClient, err := redisClientIns.GetClient(r.redisConfOptions)
+	redisClient, err := r.getRedisClientIns()
 	if err != nil {
 		return err
 	}
@@ -38,8 +40,8 @@ func (r RedisChatMessageHistory) AddUserMessage(_ context.Context, message strin
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.Ttl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.Ttl))
+	if err == nil && r.redisConfOptions.TTl > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
 	}
 	return err
 }
@@ -47,7 +49,7 @@ func (r RedisChatMessageHistory) AddUserMessage(_ context.Context, message strin
 // AddAIMessage adds an AIMessage to the chat message history.
 func (r RedisChatMessageHistory) AddAIMessage(_ context.Context, message string) error {
 	chatMessage := RedisChatMessage{Content: message, Type: schema.ChatMessageTypeAI}
-	redisClient, err := redisClientIns.GetClient(r.redisConfOptions)
+	redisClient, err := r.getRedisClientIns()
 	if err != nil {
 		return err
 	}
@@ -56,14 +58,14 @@ func (r RedisChatMessageHistory) AddAIMessage(_ context.Context, message string)
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.Ttl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.Ttl))
+	if err == nil && r.redisConfOptions.TTl > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
 	}
 	return err
 }
 
 func (r RedisChatMessageHistory) AddMessage(_ context.Context, message schema.ChatMessage) error {
-	redisClient, err := redisClientIns.GetClient(r.redisConfOptions)
+	redisClient, err := r.getRedisClientIns()
 	if err != nil {
 		return err
 	}
@@ -73,14 +75,14 @@ func (r RedisChatMessageHistory) AddMessage(_ context.Context, message schema.Ch
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.Ttl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.Ttl))
+	if err == nil && r.redisConfOptions.TTl > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
 	}
 	return err
 }
 
 func (r RedisChatMessageHistory) Clear(_ context.Context) error {
-	redisClient, err := redisClientIns.GetClient(r.redisConfOptions)
+	redisClient, err := r.getRedisClientIns()
 	if err != nil {
 		return err
 	}
@@ -90,7 +92,7 @@ func (r RedisChatMessageHistory) Clear(_ context.Context) error {
 
 // Messages returns all messages stored.
 func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessage, error) {
-	redisClient, err := redisClientIns.GetClient(r.redisConfOptions)
+	redisClient, err := r.getRedisClientIns()
 	var messageList []schema.ChatMessage
 	if err != nil {
 		return messageList, err
@@ -109,7 +111,7 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 		}
 		messageType, ok := chatMessageMap["type"].(string)
 		if !ok {
-			return messageList, fmt.Errorf("invalid message type")
+			return messageList, errors.New("invalid message type")
 		}
 		chatMessageType := schema.ChatMessageType(messageType)
 		if chatMessageType == schema.ChatMessageTypeAI {
@@ -161,5 +163,9 @@ func (r RedisChatMessageHistory) SetMessages(_ context.Context, messages []schem
 }
 
 func (r RedisChatMessageHistory) GetRedisKsy() string {
-	return fmt.Sprintf("%s:%s", r.redisConfOptions.KeyPrefix, r.redisConfOptions.SessionId)
+	return fmt.Sprintf("%s:%s", r.redisConfOptions.KeyPrefix, r.redisConfOptions.SessionID)
+}
+
+func (r RedisChatMessageHistory) getRedisClientIns() (*redis.Client, error) {
+	return redisClientIns.GetClient(r.redisConfOptions)
 }

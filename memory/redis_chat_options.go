@@ -34,7 +34,7 @@ func applyRedisChatOptions(options ...RedisChatMessageHistoryOption) *RedisChatM
 			Address:   "localhost:6379",
 			Password:  "",
 			Db:        0,
-			Ttl:       DefaultKeyExpire,
+			TTl:       DefaultKeyExpire,
 			KeyPrefix: "message_store:",
 		},
 	}
