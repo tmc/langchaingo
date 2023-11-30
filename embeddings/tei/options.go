@@ -77,6 +77,13 @@ func WithTimeout(dur time.Duration) Option {
 	}
 }
 
+// WithTruncate set the embedder to truncate input length.
+func WithTruncate() Option {
+	return func(emb *TextEmbeddingsInference) {
+		emb.truncate = true
+	}
+}
+
 func applyClientOptions(opts ...Option) (TextEmbeddingsInference, error) {
 	emb := TextEmbeddingsInference{
 		StripNewLines: _defaultStripNewLines,
