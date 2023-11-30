@@ -22,7 +22,6 @@ func main() {
 		log.Fatalf("new: %v\n", err)
 	}
 	citiesExample(store)
-
 }
 
 func newEmbedder() (embeddings.Embedder, error) {
@@ -114,12 +113,6 @@ func citiesExample(store vectorstores.VectorStore) {
 			numDocuments: 100,
 			options: []vectorstores.Option{
 				vectorstores.WithScoreThreshold(.4),
-				// vectorstores.WithFilters(filter{
-				// 	"$and": []filter{
-				// 		{"area": filter{"$gte": 1000}},
-				// 		{"population": filter{"$gte": 13}},
-				// 	},
-				// }),
 			},
 		},
 	}
