@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/prompts-with-partial-example
 
 go 1.20
 
-require github.com/tmc/langchaingo v0.0.0-20231028223410-5f4451567823
+require github.com/tmc/langchaingo v0.0.0-20231130155755-b52d04e23ecb
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
