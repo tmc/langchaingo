@@ -103,4 +103,5 @@ require (
 	google.golang.org/api v0.126.0
 	google.golang.org/grpc v1.57.1
 	google.golang.org/protobuf v1.31.0
+	github.com/go-redis/redis v6.15.9+incompatible
 )
