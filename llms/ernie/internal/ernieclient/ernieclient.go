@@ -18,6 +18,7 @@ var (
 	ErrCompletionCode  = errors.New("completion API returned unexpected status code")
 	ErrAccessTokenCode = errors.New("get access_token API returned unexpected status code")
 	ErrEmbeddingCode   = errors.New("embedding API returned unexpected status code")
+	ErrEmptyResponse   = errors.New("empty response")
 )
 
 // Client is a client for the ERNIE API.
@@ -26,6 +27,8 @@ type Client struct {
 	secretKey   string
 	accessToken string
 	httpClient  Doer
+	Model       string
+	ModelPath   ModelPath
 }
 
 // ModelPath ERNIE API URL path suffix distinguish models.
@@ -33,8 +36,9 @@ type ModelPath string
 
 // DefaultCompletionModelPath default model.
 const (
-	DefaultCompletionModelPath = "completions"
-	tryPeriod                  = 3 // minutes
+	DefaultCompletionModelPath  = "completions"
+	tryPeriod                   = 3 // minutes
+	defaultFunctionCallBehavior = "auto"
 )
 
 // Option is an option for the ERNIE client.
@@ -149,7 +153,7 @@ func New(opts ...Option) (*Client, error) {
 		return nil, ErrNotSetAuth
 	}
 
-	if c.apiKey != "" && c.secretKey != "" {
+	if c.apiKey != "" && c.secretKey != "" && c.accessToken == "" {
 		err := autoRefresh(c)
 		if err != nil {
 			return nil, err
@@ -270,6 +274,23 @@ func (c *Client) getAccessToken(ctx context.Context) (*authResponse, error) {
 	return &response, json.NewDecoder(resp.Body).Decode(&response)
 }
 
+// CreateChat creates chat request.
+func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
+	if r.FunctionCallBehavior == "" && len(r.Functions) > 0 {
+		r.FunctionCallBehavior = defaultFunctionCallBehavior
+	}
+	resp, err := c.createChat(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Result == "" && resp.FunctionCall == nil {
+		return nil, ErrEmptyResponse
+	}
+
+	return resp, nil
+}
+
 func parseStreamingCompletionResponse(ctx context.Context, resp *http.Response, req *CompletionRequest) (*Completion, error) { // nolint:lll
 	scanner := bufio.NewScanner(resp.Body)
 	responseChan := make(chan *Completion)
@@ -317,4 +338,19 @@ func parseStreamingCompletionResponse(ctx context.Context, resp *http.Response, 
 	lastResponse.Result = response.Result
 	lastResponse.Usage.CompletionTokens = lastResponse.Usage.TotalTokens - lastResponse.Usage.PromptTokens
 	return lastResponse, nil
+}
+
+func (c *Client) buildURL(modelpath ModelPath) string {
+	baseURL := defaultBaseURL
+	baseURL = strings.TrimRight(baseURL, "/")
+
+	// ernie example url:
+	// /wenxinworkshop/chat/eb-instant
+	return fmt.Sprintf("%s/wenxinworkshop/chat/%s?access_token=%s",
+		baseURL, modelpath, c.accessToken,
+	)
+}
+
+func (c *Client) setHeaders(req *http.Request) {
+	req.Header.Set("Content-Type", "application/json")
 }
