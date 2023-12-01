@@ -33,7 +33,7 @@ func applyRedisChatOptions(options ...RedisChatMessageHistoryOption) *RedisChatM
 		redisConfOptions: RedisConfOptions{
 			Address:   "localhost:6379",
 			Password:  "",
-			Db:        0,
+			DB:        0,
 			TTl:       DefaultKeyExpire,
 			KeyPrefix: "message_store:",
 		},
