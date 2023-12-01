@@ -5,6 +5,21 @@ import (
 	"strings"
 )
 
+// NewEmbedder creates a new Embedder from the given EmbedderClient, with
+// some options that affect how embedding will be done.
+func NewEmbedder(client EmbedderClient, opts ...Option) (*EmbedderImpl, error) {
+	e := &EmbedderImpl{
+		client:        client,
+		StripNewLines: defaultStripNewLines,
+		BatchSize:     defaultBatchSize,
+	}
+
+	for _, opt := range opts {
+		opt(e)
+	}
+	return e, nil
+}
+
 // Embedder is the interface for creating vector embeddings from texts.
 type Embedder interface {
 	// EmbedDocuments returns a vector for each text.
@@ -23,19 +38,6 @@ type EmbedderImpl struct {
 
 	StripNewLines bool
 	BatchSize     int
-}
-
-func NewEmbedder(client EmbedderClient, opts ...Option) (*EmbedderImpl, error) {
-	e := &EmbedderImpl{
-		client:        client,
-		StripNewLines: defaultStripNewLines,
-		BatchSize:     defaultBatchSize,
-	}
-
-	for _, opt := range opts {
-		opt(e)
-	}
-	return e, nil
 }
 
 // EmbedQuery embeds a single text.
