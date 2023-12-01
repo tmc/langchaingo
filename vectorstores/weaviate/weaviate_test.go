@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
-	openaiEmbeddings "github.com/tmc/langchaingo/embeddings/openai"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -66,7 +66,10 @@ func TestWeaviateStoreRest(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -101,7 +104,10 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -149,7 +155,9 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -193,7 +201,10 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -221,9 +232,6 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -240,7 +248,10 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -269,9 +280,6 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -292,7 +300,10 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -346,9 +357,6 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(nameSpace),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := filters.Where().
@@ -380,7 +388,10 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -436,9 +447,6 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -460,7 +468,10 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	scheme, host := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -505,9 +516,6 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(nameSpace),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{

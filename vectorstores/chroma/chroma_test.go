@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
-	openaiEmbeddings "github.com/tmc/langchaingo/embeddings/openai"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -32,7 +32,9 @@ func TestChromaGoStoreRest(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -73,7 +75,9 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -120,7 +124,9 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -162,7 +168,10 @@ func TestChromaAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -185,9 +194,6 @@ func TestChromaAsRetriever(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -204,7 +210,10 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -230,9 +239,6 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -254,7 +260,10 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -304,9 +313,6 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	filter := make(map[string]any)
 	filterValue := make(map[string]any)
 	filterValue["$eq"] = "patio"
@@ -329,7 +335,10 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
@@ -408,7 +417,10 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -458,9 +470,6 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -482,7 +491,10 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	e, err := openaiEmbeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	s, err := chroma.New(
@@ -521,9 +533,6 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 			},
 		},
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := map[string]interface{}{

@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
 	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.0.0-20231130160443-fc423fab7b81
+	github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2
 )
 
 require (
