@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"context" //nolint:gci
+	"context" //nolint:goimports,gofumpt,gci
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -36,7 +36,9 @@ func (c ConversationBufferWindow) MemoryVariables(_ context.Context) []string {
 	return []string{c.MemoryKey}
 }
 
-func (c ConversationBufferWindow) LoadMemoryVariables(ctx context.Context, _ map[string]any) (map[string]any, error) {
+func (c ConversationBufferWindow) LoadMemoryVariables(
+	ctx context.Context,
+	_ map[string]any) (map[string]any, error) { //nolint:gofumpt
 	messages, err := c.ChatHistory.Messages(ctx)
 	if err != nil {
 		return nil, err
@@ -64,8 +66,10 @@ func (c ConversationBufferWindow) LoadMemoryVariables(ctx context.Context, _ map
 	}, nil
 }
 
-func (c ConversationBufferWindow) SaveContext(ctx context.Context,
-	inputs map[string]any, outputs map[string]any) error {
+func (c ConversationBufferWindow) SaveContext(
+	ctx context.Context,
+	inputs map[string]any,
+	outputs map[string]any) error { //nolint:gofumpt
 	userInputValue, err := getInputValue(inputs, c.InputKey)
 	if err != nil {
 		return err

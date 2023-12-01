@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"context" //nolint:gci
+	"context" //nolint:goimports,gofumpt,gci
 	"github.com/tmc/langchaingo/schema"
 )
 

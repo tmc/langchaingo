@@ -2,10 +2,10 @@ package memory
 
 import (
 	"errors"
-	"fmt"
-	"github.com/go-redis/redis" //nolint:gci
-	"sync"
-	"time" //nolint:gci
+	"fmt"                       //nolint:goimports,gci,gofumpt
+	"github.com/go-redis/redis" //nolint:goimports,gci
+	"sync"                      //nolint:gofumpt
+	"time"                      //nolint:gci
 )
 
 var ErrAddressEmpty = errors.New("redis address is empty")
@@ -34,11 +34,12 @@ type RedisConfOptions struct {
 	KeyPrefix    string
 }
 
+//nolint:unparam
 func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions) (options *redis.Options, err error) {
-	options = &redis.Options{}
 	if redisConfOptions.Address == "" {
 		return options, ErrAddressEmpty
 	}
+	options = &redis.Options{}
 	options.Addr = redisConfOptions.Address
 	if redisConfOptions.Password != "" {
 		options.Password = redisConfOptions.Password
@@ -65,9 +66,7 @@ func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions
 func (manager *redisClientManager) Release(address string, db int) {
 	manager.mu.Lock()
 	keyName := fmt.Sprintf("%s%d", address, db)
-	if _, ok := manager.clients[keyName]; ok {
-		delete(manager.clients, keyName)
-	}
+	delete(manager.clients, keyName)
 	manager.mu.Unlock()
 }
 

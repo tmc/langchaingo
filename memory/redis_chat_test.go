@@ -23,7 +23,7 @@ func TestRedisChatMessageHistory(t *testing.T) {
 	//		schema.SystemChatMessage{Content: "bar"},
 	//	}),
 	//)
-	//err := h.AddUserMessage(context.Background(), "zoo")
+	// err := h.AddUserMessage(context.Background(), "zoo")
 	//require.NoError(t, err)
 	//
 	//messages, err := h.Messages(context.Background())

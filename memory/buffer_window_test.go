@@ -1,11 +1,11 @@
 package memory
 
 import (
-	"context"
+	"context" //nolint:gci
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
-	"testing"
+	"testing" //nolint:gci
 )
 
 func TestBufferWindowReturnMessage(t *testing.T) {
