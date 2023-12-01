@@ -26,14 +26,14 @@ func TestRedisChatMessageHistory(t *testing.T) {
 	// err := h.AddUserMessage(context.Background(), "zoo")
 	// require.NoError(t, err)
 	//
-	//messages, err := h.Messages(context.Background())
+	// messages, err := h.Messages(context.Background())
 	// require.NoError(t, err)
 	//
-	//assert.Equal(t, []schema.ChatMessage{
+	// assert.Equal(t, []schema.ChatMessage{
 	//	schema.AIChatMessage{Content: "foo"},
 	//	schema.SystemChatMessage{Content: "bar"},
 	//	schema.HumanChatMessage{Content: "zoo"},
-	//}, messages)
+	// }, messages)
 }
 
 /*

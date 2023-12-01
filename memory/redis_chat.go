@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt" //nolint:goimports,gofumpt,gci
+	"fmt" // nolint:goimports,gofumpt,gci
 	"github.com/go-redis/redis"
 	"github.com/tmc/langchaingo/schema"
-	"time" //nolint:goimports,gofumpt,gci
+	"time" // nolint:goimports,gofumpt,gci
 )
 
 var ErrInvalidMessageType = errors.New("invalid message type")
@@ -115,49 +115,52 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 	return messageList, nil
 }
 
+// nolint:cyclop
 func (r RedisChatMessageHistory) CoverMessageList(message string) (schemaMessage schema.ChatMessage, err error) {
+	messageType, err := r.getMessageType(message)
+	if err != nil {
+		return schemaMessage, err
+	}
+	return r.unmarshalMessage(messageType, message)
+}
+
+func (r RedisChatMessageHistory) unmarshalMessage(messageType schema.ChatMessageType, message string) (schema.ChatMessage, error) {
+	var chatMessage schema.ChatMessage
+
+	switch messageType {
+	case schema.ChatMessageTypeAI:
+		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.AIChatMessage{})
+	case schema.ChatMessageTypeHuman:
+		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.HumanChatMessage{})
+	case schema.ChatMessageTypeSystem:
+		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.SystemChatMessage{})
+	case schema.ChatMessageTypeFunction:
+		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.FunctionChatMessage{})
+	case schema.ChatMessageTypeGeneric:
+		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.GenericChatMessage{})
+	}
+
+	return chatMessage, nil
+}
+
+func (r RedisChatMessageHistory) unmarshalSpecificMessage(chatMessage *schema.ChatMessage, message string, specificMessage interface{}) (schema.ChatMessage, error) {
+	if unmarshalErr := json.Unmarshal([]byte(message), specificMessage); unmarshalErr != nil {
+		return *chatMessage, unmarshalErr
+	}
+	return *chatMessage, nil
+}
+
+func (r RedisChatMessageHistory) getMessageType(message string) (schemaType schema.ChatMessageType, err error) {
 	chatMessageMap := make(map[string]interface{})
 	if unmarshalErr := json.Unmarshal([]byte(message), &chatMessageMap); unmarshalErr != nil {
-		return schemaMessage, unmarshalErr
+		return schemaType, unmarshalErr
 	}
 	messageType, ok := chatMessageMap["type"].(string)
 	if !ok {
-		return schemaMessage, ErrInvalidMessageType
+		return schemaType, ErrInvalidMessageType
 	}
-	chatMessageType := schema.ChatMessageType(messageType)
-	switch chatMessageType {
-	case schema.ChatMessageTypeAI:
-		var aiChatMessage schema.AIChatMessage
-		if unmarshalErr := json.Unmarshal([]byte(message), &aiChatMessage); unmarshalErr != nil {
-			return aiChatMessage, unmarshalErr
-		}
-		return aiChatMessage, nil
-	case schema.ChatMessageTypeHuman:
-		var humanChatMessage schema.HumanChatMessage
-		if unmarshalErr := json.Unmarshal([]byte(message), &humanChatMessage); unmarshalErr != nil {
-			return humanChatMessage, unmarshalErr
-		}
-		return humanChatMessage, nil
-	case schema.ChatMessageTypeSystem:
-		var systemChatMessage schema.SystemChatMessage
-		if unmarshalErr := json.Unmarshal([]byte(message), &systemChatMessage); unmarshalErr != nil {
-			return systemChatMessage, unmarshalErr
-		}
-		return systemChatMessage, nil
-	case schema.ChatMessageTypeFunction:
-		var functionChatMessage schema.FunctionChatMessage
-		if unmarshalErr := json.Unmarshal([]byte(message), &functionChatMessage); unmarshalErr != nil {
-			return functionChatMessage, unmarshalErr
-		}
-		return functionChatMessage, nil
-	case schema.ChatMessageTypeGeneric:
-		var genericChatMessage schema.GenericChatMessage
-		if unmarshalErr := json.Unmarshal([]byte(message), &genericChatMessage); unmarshalErr != nil {
-			return genericChatMessage, unmarshalErr
-		}
-		return genericChatMessage, nil
-	}
-	return schemaMessage, nil
+	schemaType = schema.ChatMessageType(messageType)
+	return schemaType, nil
 }
 
 func (r RedisChatMessageHistory) SetMessages(context context.Context, messages []schema.ChatMessage) error {

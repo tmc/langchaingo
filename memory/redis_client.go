@@ -2,10 +2,10 @@ package memory
 
 import (
 	"errors"
-	"fmt"                       //nolint:goimports,gci,gofumpt
-	"github.com/go-redis/redis" //nolint:goimports,gci
-	"sync"                      //nolint:gofumpt
-	"time"                      //nolint:gci
+	"fmt"                       // nolint:goimports,gci,gofumpt
+	"github.com/go-redis/redis" // nolint:goimports,gci
+	"sync"                      // nolint:gofumpt
+	"time"                      // nolint:gci
 )
 
 var ErrAddressEmpty = errors.New("redis address is empty")
@@ -16,7 +16,7 @@ type redisClientManager struct {
 	clients map[string]*redis.Client
 }
 
-var ( //nolint:gofumpt
+var ( // nolint:gofumpt
 	redisClientIns = new(redisClientManager) //nolint:gochecknoglobals
 )
 
@@ -36,7 +36,8 @@ type RedisConfOptions struct {
 
 func (manager *redisClientManager) readOptions(
 	redisConfOptions RedisConfOptions) (
-	redisOptions *redis.Options, err error) {
+	*redis.Options, error) {
+	redisOptions := &redis.Options{}
 	if redisConfOptions.Address == "" {
 		return redisOptions, ErrAddressEmpty
 	}
