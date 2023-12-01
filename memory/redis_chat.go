@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"fmt" //nolint:gci
 	"github.com/go-redis/redis"
 	"github.com/tmc/langchaingo/schema"
 	"time"
@@ -116,31 +116,32 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 			return messageList, ErrInvalidMessageType
 		}
 		chatMessageType := schema.ChatMessageType(messageType)
-		if chatMessageType == schema.ChatMessageTypeAI {
+		switch chatMessageType {
+		case schema.ChatMessageTypeAI:
 			var aiChatMessage schema.AIChatMessage
 			if unmarshalErr := json.Unmarshal([]byte(message), &aiChatMessage); unmarshalErr != nil {
 				return messageList, unmarshalErr
 			}
 			messageList = append(messageList, aiChatMessage)
-		} else if chatMessageType == schema.ChatMessageTypeHuman {
+		case schema.ChatMessageTypeHuman:
 			var humanChatMessage schema.HumanChatMessage
 			if unmarshalErr := json.Unmarshal([]byte(message), &humanChatMessage); unmarshalErr != nil {
 				return messageList, unmarshalErr
 			}
 			messageList = append(messageList, humanChatMessage)
-		} else if chatMessageType == schema.ChatMessageTypeSystem {
+		case schema.ChatMessageTypeSystem:
 			var systemChatMessage schema.SystemChatMessage
 			if unmarshalErr := json.Unmarshal([]byte(message), &systemChatMessage); unmarshalErr != nil {
 				return messageList, unmarshalErr
 			}
 			messageList = append(messageList, systemChatMessage)
-		} else if chatMessageType == schema.ChatMessageTypeFunction {
+		case schema.ChatMessageTypeFunction:
 			var functionChatMessage schema.FunctionChatMessage
 			if unmarshalErr := json.Unmarshal([]byte(message), &functionChatMessage); unmarshalErr != nil {
 				return messageList, unmarshalErr
 			}
 			messageList = append(messageList, functionChatMessage)
-		} else if chatMessageType == schema.ChatMessageTypeGeneric {
+		case schema.ChatMessageTypeGeneric:
 			var genericChatMessage schema.GenericChatMessage
 			if unmarshalErr := json.Unmarshal([]byte(message), &genericChatMessage); unmarshalErr != nil {
 				return messageList, unmarshalErr
@@ -151,12 +152,12 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 	return messageList, nil
 }
 
-func (r RedisChatMessageHistory) SetMessages(_ context.Context, messages []schema.ChatMessage) error {
+func (r RedisChatMessageHistory) SetMessages(context context.Context, messages []schema.ChatMessage) error {
 	if len(messages) == 0 {
 		return nil
 	}
 	for _, message := range messages {
-		addMessageErr := r.AddMessage(context.Background(), message)
+		addMessageErr := r.AddMessage(context, message)
 		if addMessageErr != nil {
 			return addMessageErr
 		}

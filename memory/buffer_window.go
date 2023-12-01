@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"context"
+	"context" //nolint:gci
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -64,7 +64,8 @@ func (c ConversationBufferWindow) LoadMemoryVariables(ctx context.Context, _ map
 	}, nil
 }
 
-func (c ConversationBufferWindow) SaveContext(ctx context.Context, inputs map[string]any, outputs map[string]any) error {
+func (c ConversationBufferWindow) SaveContext(ctx context.Context,
+	inputs map[string]any, outputs map[string]any) error {
 	userInputValue, err := getInputValue(inputs, c.InputKey)
 	if err != nil {
 		return err

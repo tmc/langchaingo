@@ -3,9 +3,9 @@ package memory
 import (
 	"errors"
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis" //nolint:gci
 	"sync"
-	"time"
+	"time" //nolint:gci
 )
 
 var ErrAddressEmpty = errors.New("redis address is empty")
@@ -16,14 +16,14 @@ type redisClientManager struct {
 	clients map[string]*redis.Client
 }
 
-var (
-	redisClientIns = new(redisClientManager)
+var ( //nolint:gofumpt
+	redisClientIns = new(redisClientManager) //nolint:gochecknoglobals
 )
 
 type RedisConfOptions struct {
 	Address      string
 	Password     string
-	Db           int
+	DB           int
 	ReadTimeout  int
 	WriteTimeout int
 	IdleTimeout  int
@@ -43,7 +43,7 @@ func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions
 	if redisConfOptions.Password != "" {
 		options.Password = redisConfOptions.Password
 	}
-	options.DB = redisConfOptions.Db
+	options.DB = redisConfOptions.DB
 	if redisConfOptions.ReadTimeout > 0 {
 		options.ReadTimeout = time.Millisecond * time.Duration(redisConfOptions.ReadTimeout)
 	}
@@ -81,7 +81,7 @@ func (manager *redisClientManager) createClient(redisConfOptions RedisConfOption
 }
 
 func (manager *redisClientManager) GetClient(redisConfOptions RedisConfOptions) (*redis.Client, error) {
-	keyName := fmt.Sprintf("%s%d", redisConfOptions.Address, redisConfOptions.Db)
+	keyName := fmt.Sprintf("%s%d", redisConfOptions.Address, redisConfOptions.DB)
 	manager.mu.RLock()
 	client, exist := manager.clients[keyName]
 	manager.mu.RUnlock()

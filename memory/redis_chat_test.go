@@ -6,7 +6,7 @@ import (
 
 func TestRedisChatMessageHistory(t *testing.T) {
 	t.Parallel()
-	//h := NewRedisChatMessageHistory(
+	// h := NewRedisChatMessageHistory(
 	//	WithRedisConfOptions(RedisConfOptions{
 	//		Address:      "localhost:6379",
 	//		Db:           5,
