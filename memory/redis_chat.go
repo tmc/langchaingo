@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var ErrInvalidMessageType = errors.New("invalid message type")
+
 // RedisChatMessageHistory is a struct that stores chat messages.
 type RedisChatMessageHistory struct {
 	messages         []schema.ChatMessage
@@ -111,7 +113,7 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 		}
 		messageType, ok := chatMessageMap["type"].(string)
 		if !ok {
-			return messageList, errors.New("invalid message type")
+			return messageList, ErrInvalidMessageType
 		}
 		chatMessageType := schema.ChatMessageType(messageType)
 		if chatMessageType == schema.ChatMessageTypeAI {

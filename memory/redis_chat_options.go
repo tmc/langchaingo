@@ -15,7 +15,7 @@ type RedisChatMessageHistoryOption func(r *RedisChatMessageHistory)
 // previous messages to the history.
 func WithRedisPreviousMessages(previousMessages []schema.ChatMessage) RedisChatMessageHistoryOption {
 	return func(r *RedisChatMessageHistory) {
-		r.SetMessages(context.Background(), previousMessages)
+		_ = r.SetMessages(context.Background(), previousMessages)
 	}
 }
 

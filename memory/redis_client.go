@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var ErrAddressEmpty = errors.New("redis address is empty")
+
 type redisClientManager struct {
 	sync.Once
 	mu      sync.RWMutex
@@ -35,7 +37,7 @@ type RedisConfOptions struct {
 func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions) (options *redis.Options, err error) {
 	options = &redis.Options{}
 	if redisConfOptions.Address == "" {
-		return options, errors.New("redis address is empty")
+		return options, ErrAddressEmpty
 	}
 	options.Addr = redisConfOptions.Address
 	if redisConfOptions.Password != "" {
