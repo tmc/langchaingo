@@ -8,12 +8,13 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-func Example() {
+func Example() { //nolint:testableexamples
 	llm, err := openai.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Create a new Embedder from the given LLM.
 	embedder, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)
