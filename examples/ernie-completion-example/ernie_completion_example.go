@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	ernieembedding "github.com/tmc/langchaingo/embeddings/ernie"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie"
 )
@@ -34,7 +34,7 @@ func main() {
 	_ = completion
 
 	// embedding
-	embedding, _ := ernieembedding.NewErnie()
+	embedding, _ := embeddings.NewEmbedder(llm)
 
 	emb, err := embedding.EmbedDocuments(ctx, []string{"你好"})
 
