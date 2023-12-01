@@ -42,8 +42,8 @@ func (r RedisChatMessageHistory) AddUserMessage(_ context.Context, message strin
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.TTl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
+	if err == nil && r.redisConfOptions.TTL > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTL))
 	}
 	return err
 }
@@ -60,8 +60,8 @@ func (r RedisChatMessageHistory) AddAIMessage(_ context.Context, message string)
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.TTl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
+	if err == nil && r.redisConfOptions.TTL > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTL))
 	}
 	return err
 }
@@ -77,8 +77,8 @@ func (r RedisChatMessageHistory) AddMessage(_ context.Context, message schema.Ch
 		return err
 	}
 	_, err = redisClient.RPush(r.GetRedisKsy(), messageByte).Result()
-	if err == nil && r.redisConfOptions.TTl > 0 {
-		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTl))
+	if err == nil && r.redisConfOptions.TTL > 0 {
+		redisClient.Expire(r.GetRedisKsy(), time.Second*time.Duration(r.redisConfOptions.TTL))
 	}
 	return err
 }
@@ -95,7 +95,7 @@ func (r RedisChatMessageHistory) Clear(_ context.Context) error {
 // Messages returns all messages stored.
 func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessage, error) {
 	redisClient, err := r.getRedisClientIns()
-	var messageList []schema.ChatMessage
+	var messageList []schema.ChatMessage // nolint:prealloc
 	if err != nil {
 		return messageList, err
 	}
@@ -109,48 +109,64 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 	for _, message := range messages {
 		chatMessage, coverErr := r.CoverMessageList(message)
 		if coverErr != nil {
-			messageList = append(messageList, chatMessage)
+			return messageList, coverErr
 		}
+		messageList = append(messageList, chatMessage)
 	}
 	return messageList, nil
 }
 
-// nolint:cyclop
-func (r RedisChatMessageHistory) CoverMessageList(message string) (schemaMessage schema.ChatMessage, err error) {
+func (r RedisChatMessageHistory) CoverMessageList(message string) (
+	schema.ChatMessage, error) { // nolint:gofumpt
 	messageType, err := r.getMessageType(message)
 	if err != nil {
-		return schemaMessage, err
+		var emptyMessage schema.ChatMessage
+		return emptyMessage, err
 	}
 	return r.unmarshalMessage(messageType, message)
 }
 
-func (r RedisChatMessageHistory) unmarshalMessage(messageType schema.ChatMessageType, message string) (schema.ChatMessage, error) {
-	var chatMessage schema.ChatMessage
-
+// nolint:cyclop
+func (r RedisChatMessageHistory) unmarshalMessage(messageType schema.ChatMessageType, message string) (
+	schema.ChatMessage, error) { // nolint:gofumpt
+	var empty schema.ChatMessage
 	switch messageType {
 	case schema.ChatMessageTypeAI:
-		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.AIChatMessage{})
+		var aiMsg schema.AIChatMessage
+		if unmarshalErr := json.Unmarshal([]byte(message), &aiMsg); unmarshalErr != nil {
+			return empty, unmarshalErr
+		}
+		return aiMsg, nil
 	case schema.ChatMessageTypeHuman:
-		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.HumanChatMessage{})
+		var humanMsg schema.HumanChatMessage
+		if unmarshalErr := json.Unmarshal([]byte(message), &humanMsg); unmarshalErr != nil {
+			return empty, unmarshalErr
+		}
+		return humanMsg, nil
 	case schema.ChatMessageTypeSystem:
-		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.SystemChatMessage{})
+		var systemMsg schema.SystemChatMessage
+		if unmarshalErr := json.Unmarshal([]byte(message), &systemMsg); unmarshalErr != nil {
+			return empty, unmarshalErr
+		}
+		return systemMsg, nil
 	case schema.ChatMessageTypeFunction:
-		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.FunctionChatMessage{})
+		var funMsg schema.FunctionChatMessage
+		if unmarshalErr := json.Unmarshal([]byte(message), &funMsg); unmarshalErr != nil {
+			return empty, unmarshalErr
+		}
+		return funMsg, nil
 	case schema.ChatMessageTypeGeneric:
-		return r.unmarshalSpecificMessage(&chatMessage, message, &schema.GenericChatMessage{})
+		var genMsg schema.GenericChatMessage
+		if unmarshalErr := json.Unmarshal([]byte(message), &genMsg); unmarshalErr != nil {
+			return empty, unmarshalErr
+		}
+		return genMsg, nil
 	}
-
-	return chatMessage, nil
+	return empty, nil
 }
 
-func (r RedisChatMessageHistory) unmarshalSpecificMessage(chatMessage *schema.ChatMessage, message string, specificMessage interface{}) (schema.ChatMessage, error) {
-	if unmarshalErr := json.Unmarshal([]byte(message), specificMessage); unmarshalErr != nil {
-		return *chatMessage, unmarshalErr
-	}
-	return *chatMessage, nil
-}
-
-func (r RedisChatMessageHistory) getMessageType(message string) (schemaType schema.ChatMessageType, err error) {
+func (r RedisChatMessageHistory) getMessageType(message string) ( // nolint:nonamedreturns
+	schemaType schema.ChatMessageType, err error) { // nolint:gofumpt
 	chatMessageMap := make(map[string]interface{})
 	if unmarshalErr := json.Unmarshal([]byte(message), &chatMessageMap); unmarshalErr != nil {
 		return schemaType, unmarshalErr

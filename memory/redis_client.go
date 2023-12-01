@@ -20,6 +20,12 @@ var ( // nolint:gofumpt
 	redisClientIns = new(redisClientManager) //nolint:gochecknoglobals
 )
 
+func initRedisClientMap() {
+	redisClientIns.Once.Do(func() {
+		redisClientIns.clients = make(map[string]*redis.Client)
+	})
+}
+
 type RedisConfOptions struct {
 	Address      string
 	Password     string
@@ -29,14 +35,14 @@ type RedisConfOptions struct {
 	IdleTimeout  int
 	PoolTimeout  int
 	PoolSize     int
-	TTl          int
+	TTL          int
 	SessionID    string
 	KeyPrefix    string
 }
 
 func (manager *redisClientManager) readOptions(
 	redisConfOptions RedisConfOptions) (
-	*redis.Options, error) {
+	*redis.Options, error) { // nolint:gofumpt
 	redisOptions := &redis.Options{}
 	if redisConfOptions.Address == "" {
 		return redisOptions, ErrAddressEmpty
@@ -81,6 +87,7 @@ func (manager *redisClientManager) createClient(redisConfOptions RedisConfOption
 }
 
 func (manager *redisClientManager) GetClient(redisConfOptions RedisConfOptions) (*redis.Client, error) {
+	initRedisClientMap()
 	keyName := fmt.Sprintf("%s%d", redisConfOptions.Address, redisConfOptions.DB)
 	manager.mu.RLock()
 	client, exist := manager.clients[keyName]
