@@ -1,4 +1,4 @@
-package openai
+package embeddings
 
 import (
 	"context"
@@ -7,20 +7,30 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 )
+
+func newOpenAIEmbedder(t *testing.T, opts ...Option) *EmbedderImpl {
+	t.Helper()
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+		return nil
+	}
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	embedder, err := NewEmbedder(llm, opts...)
+	require.NoError(t, err)
+
+	return embedder
+}
 
 func TestOpenaiEmbeddings(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	e, err := NewOpenAI()
-	require.NoError(t, err)
-
-	_, err = e.EmbedQuery(context.Background(), "Hello world!")
+	e := newOpenAIEmbedder(t)
+	_, err := e.EmbedQuery(context.Background(), "Hello world!")
 	require.NoError(t, err)
 
 	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world", "The world is ending", "good bye"})
@@ -33,14 +43,8 @@ func TestOpenaiEmbeddingsQueryVsDocuments(t *testing.T) {
 	// of which method we call.
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	e, err := NewOpenAI()
-	require.NoError(t, err)
-
+	e := newOpenAIEmbedder(t)
 	text := "hi there"
-
 	eq, err := e.EmbedQuery(context.Background(), text)
 	require.NoError(t, err)
 
@@ -55,17 +59,9 @@ func TestOpenaiEmbeddingsQueryVsDocuments(t *testing.T) {
 func TestOpenaiEmbeddingsWithOptions(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	e := newOpenAIEmbedder(t, WithBatchSize(1), WithStripNewLines(false))
 
-	client, err := openai.New()
-	require.NoError(t, err)
-
-	e, err := NewOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
-	require.NoError(t, err)
-
-	_, err = e.EmbedQuery(context.Background(), "Hello world!")
+	_, err := e.EmbedQuery(context.Background(), "Hello world!")
 	require.NoError(t, err)
 
 	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world"})
@@ -94,7 +90,7 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	e, err := NewOpenAI(WithClient(*client), WithBatchSize(1), WithStripNewLines(false))
+	e, err := NewEmbedder(client, WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world!")
@@ -112,17 +108,11 @@ func TestUseLLMAndChatAsEmbedderClient(t *testing.T) {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
-	embedderFromLLM, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-	var _ embeddings.Embedder = embedderFromLLM
-
+	// Shows that we can pass an openai chat value to NewEmbedder
 	chat, err := openai.NewChat()
 	require.NoError(t, err)
 
-	embedderFromChat, err := embeddings.NewEmbedder(chat)
+	embedderFromChat, err := NewEmbedder(chat)
 	require.NoError(t, err)
-	var _ embeddings.Embedder = embedderFromChat
+	var _ Embedder = embedderFromChat
 }
