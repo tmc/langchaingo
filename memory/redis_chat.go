@@ -93,8 +93,6 @@ func (r RedisChatMessageHistory) Clear(_ context.Context) error {
 }
 
 // Messages returns all messages stored.
-//
-//nolint:funlen
 func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessage, error) {
 	redisClient, err := r.getRedisClientIns()
 	var messageList []schema.ChatMessage
@@ -117,15 +115,14 @@ func (r RedisChatMessageHistory) Messages(_ context.Context) ([]schema.ChatMessa
 	return messageList, nil
 }
 
-//nolint:cyclop
-func (r RedisChatMessageHistory) CoverMessageList(message string) (chatMessage schema.ChatMessage, err error) {
+func (r RedisChatMessageHistory) CoverMessageList(message string) (schemaMessage schema.ChatMessage, err error) {
 	chatMessageMap := make(map[string]interface{})
 	if unmarshalErr := json.Unmarshal([]byte(message), &chatMessageMap); unmarshalErr != nil {
-		return chatMessage, unmarshalErr
+		return schemaMessage, unmarshalErr
 	}
 	messageType, ok := chatMessageMap["type"].(string)
 	if !ok {
-		return chatMessage, ErrInvalidMessageType
+		return schemaMessage, ErrInvalidMessageType
 	}
 	chatMessageType := schema.ChatMessageType(messageType)
 	switch chatMessageType {
@@ -160,7 +157,7 @@ func (r RedisChatMessageHistory) CoverMessageList(message string) (chatMessage s
 		}
 		return genericChatMessage, nil
 	}
-	return chatMessage, nil
+	return schemaMessage, nil
 }
 
 func (r RedisChatMessageHistory) SetMessages(context context.Context, messages []schema.ChatMessage) error {

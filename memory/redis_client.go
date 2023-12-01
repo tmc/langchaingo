@@ -34,33 +34,33 @@ type RedisConfOptions struct {
 	KeyPrefix    string
 }
 
-//nolint:unparam
-func (manager *redisClientManager) readOptions(redisConfOptions RedisConfOptions) (options *redis.Options, err error) {
+func (manager *redisClientManager) readOptions(
+	redisConfOptions RedisConfOptions) (
+	redisOptions *redis.Options, err error) {
 	if redisConfOptions.Address == "" {
-		return options, ErrAddressEmpty
+		return redisOptions, ErrAddressEmpty
 	}
-	options = &redis.Options{}
-	options.Addr = redisConfOptions.Address
+	redisOptions.Addr = redisConfOptions.Address
 	if redisConfOptions.Password != "" {
-		options.Password = redisConfOptions.Password
+		redisOptions.Password = redisConfOptions.Password
 	}
-	options.DB = redisConfOptions.DB
+	redisOptions.DB = redisConfOptions.DB
 	if redisConfOptions.ReadTimeout > 0 {
-		options.ReadTimeout = time.Millisecond * time.Duration(redisConfOptions.ReadTimeout)
+		redisOptions.ReadTimeout = time.Millisecond * time.Duration(redisConfOptions.ReadTimeout)
 	}
 	if redisConfOptions.WriteTimeout > 0 {
-		options.WriteTimeout = time.Millisecond * time.Duration(redisConfOptions.WriteTimeout)
+		redisOptions.WriteTimeout = time.Millisecond * time.Duration(redisConfOptions.WriteTimeout)
 	}
 	if redisConfOptions.IdleTimeout > 0 {
-		options.IdleTimeout = time.Millisecond * time.Duration(redisConfOptions.IdleTimeout)
+		redisOptions.IdleTimeout = time.Millisecond * time.Duration(redisConfOptions.IdleTimeout)
 	}
 	if redisConfOptions.PoolTimeout > 0 {
-		options.PoolTimeout = time.Millisecond * time.Duration(redisConfOptions.PoolTimeout)
+		redisOptions.PoolTimeout = time.Millisecond * time.Duration(redisConfOptions.PoolTimeout)
 	}
 	if redisConfOptions.PoolSize > 0 {
-		options.PoolSize = redisConfOptions.PoolSize
+		redisOptions.PoolSize = redisConfOptions.PoolSize
 	}
-	return options, nil
+	return redisOptions, nil
 }
 
 func (manager *redisClientManager) Release(address string, db int) {

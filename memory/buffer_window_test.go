@@ -1,11 +1,11 @@
 package memory
 
 import (
-	"context" //nolint:gci
+	"context" //nolint:gofumpt,gci
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
-	"testing" //nolint:gci
+	"testing" //nolint:gofumpt,gci
 )
 
 func TestBufferWindowReturnMessage(t *testing.T) {
@@ -37,7 +37,7 @@ func TestBufferWindowReturnMessage(t *testing.T) {
 	expected2 := map[string]any{"history": messages}
 	assert.Equal(t, expected2, result2)
 
-	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
+	_ = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar1"}, map[string]any{"bar": "foo1"})
 	require.NoError(t, err)
 
