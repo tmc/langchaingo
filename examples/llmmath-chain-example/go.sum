@@ -66,8 +66,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2 h1:3arY5l84Sp5SRx+9xY8vXiTpin932qv0BNAOSQbtlHY=
-github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2/go.mod h1:WgJkGMb5Ac/WpD6YLo3zRAiHtALrgGnH42Hcu5Rs4/A=
+github.com/tmc/langchaingo v0.0.0-20231201183115-008d10978653 h1:r1veRxQGcnB5WKmrFxPJwfXZpizxKEm8MOkMqFGwboc=
+github.com/tmc/langchaingo v0.0.0-20231201183115-008d10978653/go.mod h1:WgJkGMb5Ac/WpD6YLo3zRAiHtALrgGnH42Hcu5Rs4/A=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/golang-commonmark/html v0.0.0-20191124015941-a22733972181 h1:K+bMSIx9A7mLES1rtG+qKduLIXq40DAzYHtb0XuCukA=
 gitlab.com/golang-commonmark/linkify v0.0.0-20191026162114-a0c2df6c8f82 h1:oYrL81N608MLZhma3ruL8qTM4xcpYECGut8KSxRY59g=

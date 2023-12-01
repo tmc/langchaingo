@@ -9,7 +9,7 @@ import (
 
 	chroma_go "github.com/amikos-tech/chroma-go"
 	"github.com/google/uuid"
-	ollama_emb "github.com/tmc/langchaingo/embeddings/ollama"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -17,14 +17,11 @@ import (
 )
 
 func main() {
-
-	// Create our ollama LLM to use as embedder
-	// Please note that current LLM generate poor embeddings
 	ollamaLLM, err := ollama.New(ollama.WithModel("llama2"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ollamaEmbeder, err := ollama_emb.NewOllama(ollama_emb.WithClient(*ollamaLLM))
+	ollamaEmbeder, err := embeddings.NewEmbedder(ollamaLLM)
 	if err != nil {
 		log.Fatal(err)
 	}

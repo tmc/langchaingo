@@ -19,8 +19,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXYbsQ=
 github.com/spf13/cast v1.3.1 h1:nFm6S0SMdyzrzcmThSipiEubIDy8WEXKNZ0UOgiRpng=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2 h1:3arY5l84Sp5SRx+9xY8vXiTpin932qv0BNAOSQbtlHY=
-github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2/go.mod h1:WgJkGMb5Ac/WpD6YLo3zRAiHtALrgGnH42Hcu5Rs4/A=
+github.com/tmc/langchaingo v0.0.0-20231201183115-008d10978653 h1:r1veRxQGcnB5WKmrFxPJwfXZpizxKEm8MOkMqFGwboc=
+github.com/tmc/langchaingo v0.0.0-20231201183115-008d10978653/go.mod h1:WgJkGMb5Ac/WpD6YLo3zRAiHtALrgGnH42Hcu5Rs4/A=
 go.starlark.net v0.0.0-20230302034142-4b1e35fe2254 h1:Ss6D3hLXTM0KobyBYEAygXzFfGcjnmfEJOBgSbemCtg=
 golang.org/x/crypto v0.14.0 h1:wBqGXzWJW6m1XrIKlAH0Hs1JJ7+9KBwnIO8v66Q9cHc=
 golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea h1:vLCWI/yYrdEHyN2JzIzPO3aaQJHQdp89IZBA/+azVC4=
