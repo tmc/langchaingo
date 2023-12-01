@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/vertexai-palm-embeddings-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231130223434-98fa24d3e7d2
+require github.com/tmc/langchaingo v0.0.0-20231201183115-008d10978653
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
