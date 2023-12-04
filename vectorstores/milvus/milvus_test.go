@@ -17,7 +17,6 @@ import (
 func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 	t.Helper()
 	url := os.Getenv("TEI_URL")
-	url = "http://localhost:5500"
 	if url == "" {
 		t.Skip("must set TEI_URL to run test")
 	}

@@ -29,7 +29,7 @@ func New(opts ...Option) (TextEmbeddingsInference, error) {
 }
 
 // CreateEmbedding creates one vector embedding for each of the texts.
-func (e TextEmbeddingsInference) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
+func (e TextEmbeddingsInference) CreateEmbedding(_ context.Context, inputTexts []string) ([][]float32, error) {
 	p := pool.NewWithResults[[]float32]().
 		WithMaxGoroutines(e.poolSize).
 		WithErrors()
