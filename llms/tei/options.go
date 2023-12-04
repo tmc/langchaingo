@@ -2,6 +2,7 @@ package tei
 
 import (
 	"errors"
+	"os"
 	"runtime"
 	"time"
 
@@ -9,33 +10,18 @@ import (
 )
 
 const (
-	_defaultBatchSize       = 512
-	_defaultStripNewLines   = true
-	_defaultTimeNanoSeconds = 60 * 1000000000
+	defaultTimeNanoSeconds = 60 * 1000000000
+	defaultURLEnvVarName   = "TEI_API_URL"
 )
 
 var ErrMissingAPIBaseURL = errors.New("missing the API Base URL") //nolint:lll
 
 type Option func(emb *TextEmbeddingsInference)
 
-// WithStripNewLines is an option for specifying the should it strip new lines.
-func WithStripNewLines(stripNewLines bool) Option {
-	return func(p *TextEmbeddingsInference) {
-		p.StripNewLines = stripNewLines
-	}
-}
-
 // WithPoolSize is an option for specifying the number of goroutines.
 func WithPoolSize(poolSize int) Option {
 	return func(p *TextEmbeddingsInference) {
 		p.poolSize = poolSize
-	}
-}
-
-// WithBatchSize is an option for specifying the batch size.
-func WithBatchSize(batchSize int) Option {
-	return func(p *TextEmbeddingsInference) {
-		p.BatchSize = batchSize
 	}
 }
 
@@ -86,10 +72,9 @@ func WithTruncate() Option {
 
 func applyClientOptions(opts ...Option) (TextEmbeddingsInference, error) {
 	emb := TextEmbeddingsInference{
-		StripNewLines: _defaultStripNewLines,
-		BatchSize:     _defaultBatchSize,
-		timeout:       time.Duration(_defaultTimeNanoSeconds),
-		poolSize:      runtime.GOMAXPROCS(0),
+		timeout:  time.Duration(defaultTimeNanoSeconds),
+		poolSize: runtime.GOMAXPROCS(0),
+		baseURL:  os.Getenv(defaultURLEnvVarName),
 	}
 	for _, opt := range opts {
 		opt(&emb)
