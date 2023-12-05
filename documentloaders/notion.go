@@ -2,7 +2,6 @@ package documentloaders
 
 import (
 	"os"
-
 	"path/filepath"
 
 	"github.com/tmc/langchaingo/schema"
@@ -38,7 +37,7 @@ func (n *NotionDirectoryLoader) Load() ([]schema.Document, error) {
 		return nil, err
 	}
 
-	var documents []schema.Document
+	documents := make([]schema.Document, 0, len(files))
 	for _, file := range files {
 		if file.IsDir() || filepath.Ext(file.Name()) != ".md" {
 			continue

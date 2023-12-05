@@ -44,7 +44,7 @@ func TestNotionDirectoryLoader_Load(t *testing.T) {
 
 	for _, file := range testFiles {
 		filePath := filepath.Join(tempDir, file.name)
-		err := os.WriteFile(filePath, []byte(file.content), 0644)
+		err := os.WriteFile(filePath, []byte(file.content), 0o600)
 		require.NoError(t, err)
 	}
 
