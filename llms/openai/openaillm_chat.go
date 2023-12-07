@@ -165,6 +165,12 @@ func messagesToClientMessages(messages []schema.ChatMessage) []*openaiclient.Cha
 			msg.Role = "system"
 		case schema.ChatMessageTypeAI:
 			msg.Role = "assistant"
+			if mm, ok := m.(schema.AIChatMessage); ok && mm.FunctionCall != nil {
+				msg.FunctionCall = &openaiclient.FunctionCall{
+					Name:      mm.FunctionCall.Name,
+					Arguments: mm.FunctionCall.Arguments,
+				}
+			}
 		case schema.ChatMessageTypeHuman:
 			msg.Role = "user"
 		case schema.ChatMessageTypeGeneric:
