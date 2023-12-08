@@ -1,0 +1,21 @@
+curl -s 'https://console.anthropic.com/api/auth/send_code' \
+  -H 'authority: console.anthropic.com' \
+  -H 'accept: */*' \
+  -H 'accept-language: en-US,en;q=0.9' \
+  -H 'anthropic-client-sha: 8d5f447bdc01f279d2506b07728f27b4c22ea674' \
+  -H 'anthropic-client-version: 1' \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -H 'dnt: 1' \
+  -H 'origin: https://console.anthropic.com' \
+  -H 'pragma: no-cache' \
+  -H 'referer: https://console.anthropic.com/join/g07-_dOn1i86fwawOI6_dQTlbcwo7CRCr_Al_VgyPPXmLL_TnOrju0uwD25rx5BRHgDDS4WxRpNq4_nVjCIsgA' \
+  -H 'sec-ch-ua: "Not/A)Brand";v="99", "Google Chrome";v="115", "Chromium";v="115"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36' \
+  --data-raw '{"email_address":"travis.cline@gmail.com","recaptcha_token":"03AAYGu2QMbtwx7qMHK0WblIt1z-GCzS1aSGyVgAub5NoXMRIbdZXplBDp5sUHpcB-f3nYlNGIILfKQQQpfsaXWXi4OyQqJicnAModDop5gm_4Tag1XQvjJ2a4NZaU4OlrZMmIOzRsL-_B47Ipn2tLOb82D-M1pGygz9tizC9t4iFXc-86_XXgnN1x2TUy20CmnZ0fcxs-ghXw1ShXXPVf21oLoFiiZczIMorAFHjjg-JR3CXvD6uKW1ZPBD6q0mHCF6H4LSR2gEkW41EILOSqrTclxtgweA_m2mssv9-wHs_gEQObTcs6thJ2t0Av6L07gH7pNRsshSVNLpJKLYRM2xfoA9DKc_dP7fPEfg5cex1uaaNY5lSzCagh9LCCfWSAeHffAAQPJsLncUlCZc38XxIZrbcMtskSU7OCzqmmwPRaNO7fz6lXLklaGfrcKtRxGyfSR74WMTq8Wy-yCLIZffdUe3jnsXBxsa71lBvGV7dAGQzN9xPaiMWwxURyxkK3XKbaWZ9OIyjYL5Te-13pJaDceo0Ng2C8Ioc6moQg4RjZn0gbb2ROpC_wPmSOsUb8JCtFmXV4rFKKu8rec-bseLs1BTvkqiJntvGXirCQkT6Oq4aJ_LMFQN_ormJpo8l_DHAoPxX--okYSBEqhoo0R1W4cSsoHaWOD_9kVxvzMk2ClGHpGVzGnylu7oqZusRjq8jfxMHtF4DyJLRwi3FYKL_V0y7dysZJjHqClV5cj4MD9HG7qR0X85YEX3cmGlzZri3tXEe7DOsi2PKcTvn_FekE2GINXdQLxfurNMHVmFOOe0LO_DbEdjzxW_rW8I_vt1v9S1ysQqniZWdkl_cJoGeT1eHTSxZMlA1RtmIwSYDs_Jp2lNTAGcyR6TAwtz2c8oXhWOsRPpxknSH9SeHB1umkHPCteeTwMjaKbXqduB6z5lTRZF6OU14b3xcQl_l0O_-m7ijQzF4PAZt8dzkty34YDtasUZ8OEnIqQ_LLKetLx7ND3bal7GrDO3qmnyf28j9aoWKgPjOkOXJZ-Uumk0DMTkYQU7odWeBbuKsaUCPwN6MkZL6PFHi535L3rq0-6i4ReoQx4MIhE1hvDqxEO9qto66J5PgZDqouScZjTbJTnDjW5fjZAv2otna4vesq2_rroWSMGhcec0QUjGEl-mxC_aWcNcZ13SM5YmCUTvbeGq_6E-QM5WBJDu9GZEe7OlCiBiKUbv3-Ex0SX4olAY0BlWam5cyM7u2ME8e4Awni4hWXv4by9W4n0ewju-EoeJdJOLGGHirvzoO4ODxp_7dNX2Lbe0zfNaMkZ3c-BsbHOnU-W-nJb5f-Wp4hvfdngA9eZMNrzxcgxmS1HSY5_RliW9VJ4-EJTJgoM1dSsBT8At1JfhzgZFxZx-J8n6iXal1p2aqyfue3wPOw03O5Vi7o-orvEeWIDxi5FTghFZnM2KwbdBbUlWFwVTerX-ZDIUD2VSvVnnq1JgWU7bMzY8H9PSO0rk2giCfE_nboQ-axVocUYSU5yM6awf8whmL3z7SPlOhotFCS0I38m5m6VVuqxYYH3k1omA","recaptcha_site_key":"6LcdsFgmAAAAAMfrnC1hEdmeRQRXCjpy8qT_kvfy"}' \
+  --compressed | tee .out
