@@ -1,7 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
-  push: main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -26,7 +28,7 @@ jobs:
         with:
           node-version: 18
           cache: yarn
-          cache-dependency-path: "docs/package-lock.json"
+          cache-dependency-path: 'docs/package-lock.json'
 
       - name: Install dependencies
         working-directory: docs
@@ -41,7 +43,7 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
-          path: "docs/build"
+          path: 'docs/build'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
