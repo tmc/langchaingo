@@ -9,20 +9,24 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/tei"
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
 func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 	t.Helper()
-	url := os.Getenv("TEI_URL")
-	if url == "" {
-		t.Skip("must set TEI_URL to run test")
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
 	}
-	llm, err := tei.New(
-		tei.WithAPIBaseURL(url),
-	)
+	url := os.Getenv("OPENAI_BASE_URL")
+	opts := []openai.Option{}
+	if url != "" {
+		opts = append(opts, openai.WithBaseURL(url))
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	return embeddings.NewEmbedder(llm)
 }
