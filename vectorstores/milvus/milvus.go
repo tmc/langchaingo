@@ -18,7 +18,7 @@ import (
 type Store struct {
 	dropOld          bool
 	async            bool
-	initialized      bool
+	loaded           bool
 	collectionExists bool
 	shardNum         int32
 	maxTextLength    int
@@ -66,13 +66,14 @@ func New(ctx context.Context, config client.Config, opts ...Option) (Store, erro
 		if err := s.dropCollection(ctx, s.collectionName); err != nil {
 			return s, err
 		}
+		s.collectionExists = false
 	}
 
 	return s, s.init(ctx, 0)
 }
 
 func (s *Store) init(ctx context.Context, dim int) error {
-	if s.initialized {
+	if s.loaded {
 		return nil
 	}
 	if err := s.createCollection(ctx, dim); err != nil {
@@ -95,7 +96,7 @@ func (s *Store) dropCollection(ctx context.Context, name string) error {
 }
 
 func (s *Store) extractFields(ctx context.Context) error {
-	if !s.initialized || s.schema.Fields != nil {
+	if !s.collectionExists || s.schema != nil {
 		return nil
 	}
 	collection, err := s.client.DescribeCollection(ctx, s.collectionName)
@@ -107,7 +108,7 @@ func (s *Store) extractFields(ctx context.Context) error {
 }
 
 func (s *Store) createCollection(ctx context.Context, dim int) error {
-	if dim < 1 {
+	if dim == 0 || s.collectionExists {
 		return nil
 	}
 	s.schema = &entity.Schema{
@@ -143,18 +144,17 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 			},
 		},
 	}
-	if !s.collectionExists {
-		err := s.client.CreateCollection(ctx, s.schema, s.shardNum)
-		if err != nil {
-			return err
-		}
+
+	err := s.client.CreateCollection(ctx, s.schema, s.shardNum)
+	if err != nil {
+		return err
 	}
-	s.initialized = true
+	s.collectionExists = true
 	return nil
 }
 
 func (s *Store) createIndex(ctx context.Context) error {
-	if !s.initialized {
+	if !s.collectionExists {
 		return nil
 	}
 
@@ -162,7 +162,7 @@ func (s *Store) createIndex(ctx context.Context) error {
 }
 
 func (s *Store) createSearchParams(ctx context.Context) error {
-	if !s.initialized || s.searchParameters != nil {
+	if s.searchParameters != nil {
 		return nil
 	}
 	return s.getIndex(ctx)
@@ -178,10 +178,15 @@ func (s *Store) getIndex(ctx context.Context) error {
 }
 
 func (s *Store) load(ctx context.Context) error {
-	if !s.initialized {
+	if s.loaded || !s.collectionExists {
 		return nil
 	}
-	return s.client.LoadCollection(ctx, s.collectionName, s.async)
+
+	err := s.client.LoadCollection(ctx, s.collectionName, s.async)
+	if err == nil {
+		s.loaded = true
+	}
+	return err
 }
 
 // AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store'.
@@ -245,6 +250,9 @@ func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]sc
 	var err error
 
 	for _, res := range searchResult {
+		if res.ResultCount == 0 {
+			continue
+		}
 		textcol, ok := res.Fields.GetColumn(s.textField).(*entity.ColumnVarChar)
 		if !ok {
 			return nil, fmt.Errorf("%w: text column missing", ErrColumnNotFound)
@@ -287,8 +295,9 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if err := s.init(ctx, len(vector)); err != nil {
 		return nil, err
 	}
-	fv := entity.FloatVector(vector)
-	vectors := []entity.Vector{fv}
+	vectors := []entity.Vector{
+		entity.FloatVector(vector),
+	}
 	partitions := []string{}
 	if s.partitionName != "" {
 		partitions = append(partitions, s.partitionName)

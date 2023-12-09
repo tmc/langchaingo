@@ -77,8 +77,6 @@ require (
 	gitlab.com/golang-commonmark/puny v0.0.0-20191124015043-9f83538fa04f // indirect
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
@@ -98,7 +96,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
 	github.com/cohere-ai/tokenizer v1.1.2
-	github.com/gage-technologies/tei-go v0.2.0
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocolly/colly v1.2.0
@@ -111,7 +108,6 @@ require (
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
-	github.com/sourcegraph/conc v0.3.0
 	github.com/weaviate/weaviate v1.19.13
 	github.com/weaviate/weaviate-go-client/v4 v4.8.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
