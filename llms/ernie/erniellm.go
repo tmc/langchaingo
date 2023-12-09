@@ -160,6 +160,8 @@ func modelToPath(model ModelName) ernieclient.ModelPath {
 		return "completions"
 	case ModelNameERNIEBotTurbo:
 		return "eb-instant"
+	case ModelNameERNIEBot8K:
+		return "ernie_bot_8k"
 	case ModelNameERNIEBotPro:
 		return "completions_pro"
 	case ModelNameBloomz7B:
