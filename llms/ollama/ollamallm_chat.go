@@ -122,24 +122,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	return generations, nil
 }
 
-func makeGenerationFromResponse(resp ollamaclient.GenerateResponse) *llms.Generation {
-	msg := &schema.AIChatMessage{
-		Content: resp.Response,
-	}
-
-	gen := &llms.Generation{
-		Message:        msg,
-		Text:           msg.Content,
-		GenerationInfo: make(map[string]any),
-	}
-
-	gen.GenerationInfo["CompletionTokens"] = resp.EvalCount
-	gen.GenerationInfo["PromptTokens"] = resp.PromptEvalCount
-	gen.GenerationInfo["TotalTokens"] = resp.PromptEvalCount + resp.EvalCount
-
-	return gen
-}
-
 func makeGenerationFromChatResponse(resp ollamaclient.ChatResponse) *llms.Generation {
 	msg := &schema.AIChatMessage{
 		Content: resp.Message.Content,
@@ -242,7 +224,7 @@ func messagesToChatRequest(messages []schema.ChatMessage) (*ollamaclient.ChatReq
 				Content: m.GetContent(),
 			})
 		case schema.ChatMessageTypeFunction:
-			return nil, fmt.Errorf("chat message type %s not implemented", typ)
+			return nil, fmt.Errorf("chat message type %s not implemented", typ) //nolint:goerr113
 		}
 	}
 	return req, nil
@@ -258,8 +240,8 @@ func typeToRole(typ schema.ChatMessageType) string {
 		fallthrough
 	case schema.ChatMessageTypeGeneric:
 		return "user"
-		// case schema.ChatMessageTypeFunction:
-		// 	return "function"
+	case schema.ChatMessageTypeFunction:
+		return "function"
 	}
 	return ""
 }
@@ -273,7 +255,7 @@ func (o Chat) messagesToClientMessages(messages []schema.ChatMessage) (*ollamacl
 	return messagesToGenerateRequestWithoutChatTemplate(messages)
 }
 
-func messagesToGenerateRequestWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
+func messagesToGenerateRequestWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) { //nolint:lll
 	var prompt string
 	req := &ollamaclient.GenerateRequest{}
 	for _, m := range messages {
