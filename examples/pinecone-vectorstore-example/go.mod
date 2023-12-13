@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/google/uuid v1.3.1
-	github.com/tmc/langchaingo v0.0.0-20231201195528-4182ba4d2165
+	github.com/tmc/langchaingo v0.0.0-20231213040814-aee820e3bbea
 )
 
 require (
