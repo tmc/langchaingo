@@ -32,15 +32,41 @@ type GenerateRequest struct {
 	System   string `json:"system"`
 	Template string `json:"template"`
 	Context  []int  `json:"context,omitempty"`
-	Stream   *bool  `json:"stream,omitempty"`
+	Stream   *bool  `json:"stream"`
 
-	Options `json:"options"`
+	Options Options `json:"options"`
+}
+
+type ImageData []byte
+
+type Message struct {
+	Role    string      `json:"role"` // one of ["system", "user", "assistant"]
+	Content string      `json:"content"`
+	Images  []ImageData `json:"images,omitempty"`
+}
+
+type ChatRequest struct {
+	Model    string     `json:"model"`
+	Messages []*Message `json:"messages"`
+	Stream   *bool      `json:"stream,omitempty"`
+	Format   string     `json:"format"`
+
+	Options Options `json:"options"`
+}
+
+type Metrics struct {
+	TotalDuration      time.Duration `json:"total_duration,omitempty"`
+	LoadDuration       time.Duration `json:"load_duration,omitempty"`
+	PromptEvalCount    int           `json:"prompt_eval_count,omitempty"`
+	PromptEvalDuration time.Duration `json:"prompt_eval_duration,omitempty"`
+	EvalCount          int           `json:"eval_count,omitempty"`
+	EvalDuration       time.Duration `json:"eval_duration,omitempty"`
 }
 
 type EmbeddingRequest struct {
-	Options map[string]interface{} `json:"options"`
-	Model   string                 `json:"model"`
-	Prompt  string                 `json:"prompt"`
+	Model   string  `json:"model"`
+	Prompt  string  `json:"prompt"`
+	Options Options `json:"options"`
 }
 
 type EmbeddingResponse struct {
@@ -59,6 +85,16 @@ type GenerateResponse struct {
 	EvalCount          int           `json:"eval_count,omitempty"`
 	EvalDuration       time.Duration `json:"eval_duration,omitempty"`
 	Done               bool          `json:"done"`
+}
+
+type ChatResponse struct {
+	Model     string    `json:"model"`
+	CreatedAt time.Time `json:"created_at"`
+	Message   *Message  `json:"message,omitempty"`
+
+	Done bool `json:"done"`
+
+	Metrics
 }
 
 func (r *GenerateResponse) Summary() {

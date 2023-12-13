@@ -26,7 +26,6 @@ func main() {
 			return nil
 		}),
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,7 +36,6 @@ func main() {
 	embedding, _ := embeddings.NewEmbedder(llm)
 
 	emb, err := embedding.EmbedDocuments(ctx, []string{"你好"})
-
 	if err != nil {
 		log.Fatal(err)
 	}
