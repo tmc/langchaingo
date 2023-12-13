@@ -74,7 +74,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		req, err := o.messagesToClientMessages(messages)
+		req, err := o.messagesToClientChatMessages(messages)
 		if err != nil {
 			return nil, err
 		}
@@ -83,31 +83,36 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		req.Options = ollamaOptions
 		req.Stream = func(b bool) *bool { return &b }(opts.StreamingFunc != nil)
 
-		var fn ollamaclient.GenerateResponseFunc
+		var fn ollamaclient.ChatResponseFunc
 
 		streamedResponse := ""
-		var resp ollamaclient.GenerateResponse
+		var resp ollamaclient.ChatResponse
 
-		fn = func(response ollamaclient.GenerateResponse) error {
-			if opts.StreamingFunc != nil {
-				if err := opts.StreamingFunc(ctx, []byte(response.Response)); err != nil {
+		fn = func(response ollamaclient.ChatResponse) error {
+			if opts.StreamingFunc != nil && response.Message != nil {
+				if err := opts.StreamingFunc(ctx, []byte(response.Message.Content)); err != nil {
 					return err
 				}
 			}
-			streamedResponse += response.Response
+			if response.Message != nil {
+				streamedResponse += response.Message.Content
+			}
 			if response.Done {
 				resp = response
-				resp.Response = streamedResponse
+				resp.Message = &ollamaclient.Message{
+					Role:    "assistant",
+					Content: streamedResponse,
+				}
 			}
 			return nil
 		}
 
-		err = o.client.Generate(ctx, req, fn)
+		err = o.client.GenerateChat(ctx, req, fn)
 		if err != nil {
 			return []*llms.Generation{}, err
 		}
 
-		generations = append(generations, makeGenerationFromResponse(resp))
+		generations = append(generations, makeGenerationFromChatResponse(resp))
 	}
 
 	if o.CallbacksHandler != nil {
@@ -120,6 +125,24 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 func makeGenerationFromResponse(resp ollamaclient.GenerateResponse) *llms.Generation {
 	msg := &schema.AIChatMessage{
 		Content: resp.Response,
+	}
+
+	gen := &llms.Generation{
+		Message:        msg,
+		Text:           msg.Content,
+		GenerationInfo: make(map[string]any),
+	}
+
+	gen.GenerationInfo["CompletionTokens"] = resp.EvalCount
+	gen.GenerationInfo["PromptTokens"] = resp.PromptEvalCount
+	gen.GenerationInfo["TotalTokens"] = resp.PromptEvalCount + resp.EvalCount
+
+	return gen
+}
+
+func makeGenerationFromChatResponse(resp ollamaclient.ChatResponse) *llms.Generation {
+	msg := &schema.AIChatMessage{
+		Content: resp.Message.Content,
 	}
 
 	gen := &llms.Generation{
@@ -194,15 +217,63 @@ func (o Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []st
 }
 
 // convert chatMessage to ollamaclient.GenrateRequest.
+func (o Chat) messagesToClientChatMessages(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
+	// Use the template if any
+	return messagesToChatRequest(messages)
+}
+
+func messagesToChatRequest(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
+	req := &ollamaclient.ChatRequest{}
+	for _, m := range messages {
+		typ := m.GetType()
+		switch typ {
+		case schema.ChatMessageTypeSystem:
+			fallthrough
+		case schema.ChatMessageTypeAI:
+			req.Messages = append(req.Messages, &ollamaclient.Message{
+				Role:    typeToRole(typ),
+				Content: m.GetContent(),
+			})
+		case schema.ChatMessageTypeHuman:
+			fallthrough
+		case schema.ChatMessageTypeGeneric:
+			req.Messages = append(req.Messages, &ollamaclient.Message{
+				Role:    typeToRole(typ),
+				Content: m.GetContent(),
+			})
+		case schema.ChatMessageTypeFunction:
+			return nil, fmt.Errorf("chat message type %s not implemented", typ)
+		}
+	}
+	return req, nil
+}
+
+func typeToRole(typ schema.ChatMessageType) string {
+	switch typ {
+	case schema.ChatMessageTypeSystem:
+		return "system"
+	case schema.ChatMessageTypeAI:
+		return "assistant"
+	case schema.ChatMessageTypeHuman:
+		fallthrough
+	case schema.ChatMessageTypeGeneric:
+		return "user"
+		// case schema.ChatMessageTypeFunction:
+		// 	return "function"
+	}
+	return ""
+}
+
+// convert chatMessage to ollamaclient.GenrateRequest.
 func (o Chat) messagesToClientMessages(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
 	// Use the template if any
 	if o.options.chatTemplate != "" {
 		return messagesToClientMessagesWithChatTemlate(o.options.chatTemplate, messages)
 	}
-	return messagesToClientMessagesWithoutChatTemplate(messages)
+	return messagesToGenerateRequestWithoutChatTemplate(messages)
 }
 
-func messagesToClientMessagesWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
+func messagesToGenerateRequestWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
 	var prompt string
 	req := &ollamaclient.GenerateRequest{}
 	for _, m := range messages {
