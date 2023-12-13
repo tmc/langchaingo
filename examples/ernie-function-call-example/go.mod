@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/ernie-function-call-example
 
 go 1.19
 
-require github.com/tmc/langchaingo v0.0.0-20231213040814-aee820e3bbea
+require github.com/tmc/langchaingo v0.1.0
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect

@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
-	github.com/tmc/langchaingo v0.0.0-20231213040814-aee820e3bbea
+	github.com/tmc/langchaingo v0.1.0
 )
 
 require (

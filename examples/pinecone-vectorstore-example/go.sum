@@ -168,8 +168,8 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-github.com/tmc/langchaingo v0.0.0-20231213040814-aee820e3bbea h1:BjpxP/B3KYfJMTq1tUI53LZEa7mUWEIn5/5Ge9Om2/Y=
-github.com/tmc/langchaingo v0.0.0-20231213040814-aee820e3bbea/go.mod h1:Jhp3ukqxk4zHo+JwwDRs5+5TCxkAzTKdnqZsU9sRfZc=
+github.com/tmc/langchaingo v0.1.0 h1:FnrTw0o0Ez273qQvMYGLrHAlAlUH1ZVeUJh4iIlD3L4=
+github.com/tmc/langchaingo v0.1.0/go.mod h1:Jhp3ukqxk4zHo+JwwDRs5+5TCxkAzTKdnqZsU9sRfZc=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
