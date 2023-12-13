@@ -17,7 +17,7 @@ func main() {
 	}
 	ctx := context.Background()
 	completion, err := llm.Call(ctx, []schema.ChatMessage{
-		schema.SystemChatMessage{Content: "You are a hyper-creative rhyming machin."},
+		schema.SystemChatMessage{Content: "You are a hyper-creative rhyming machine."},
 		schema.HumanChatMessage{Content: "Tell me a poem about Sam Altman"},
 	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))
