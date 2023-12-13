@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/tmc/langchaingo/llms/ernie"
 	"log"
+
+	"github.com/tmc/langchaingo/llms/ernie"
 
 	"github.com/tmc/langchaingo/jsonschema"
 	"github.com/tmc/langchaingo/llms"
