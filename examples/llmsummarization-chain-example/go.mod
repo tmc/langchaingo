@@ -41,13 +41,13 @@ require (
 	gitlab.com/golang-commonmark/puny v0.0.0-20191124015043-9f83538fa04f // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/api v0.126.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230822172742-b8732ec3820d // indirect
