@@ -57,7 +57,7 @@ func TestAPI(t *testing.T) {
 	chain := NewAPIChain(llm, http.DefaultClient)
 	q := map[string]any{
 		"api_docs": MeteoDocs,
-		"question": "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
+		"input":    "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
 	}
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
