@@ -31,9 +31,10 @@ var (
 
 // NewChat returns a new OpenAI chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {
-	c, err := newClient(opts...)
+	opt, c, err := newClient(opts...)
 	return &Chat{
-		client: c,
+		client:           c,
+		CallbacksHandler: opt.callbackHandler,
 	}, err
 }
 
