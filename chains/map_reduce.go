@@ -36,7 +36,7 @@ type MapReduceDocuments struct {
 	// The input key where the documents to be combined should be.
 	InputKey string
 
-	// Wether or not to add the intermediate steps to the output.
+	// Whether to add the intermediate steps to the output.
 	ReturnIntermediateSteps bool
 }
 

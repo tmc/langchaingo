@@ -16,8 +16,8 @@ const (
 
 // RetrievalQA is a chain used for question-answering against a retriever.
 // First the chain gets documents from the retriever, then the documents
-// and the query is used as input to another chain. Typically that chain
-// combines the documents into a prompt that is sent to an llm.
+// and the query is used as input to another chain. Typically, that chain
+// combines the documents into a prompt that is sent to an LLM.
 type RetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
@@ -59,7 +59,7 @@ func NewRetrievalQAFromLLM(llm llms.LanguageModel, retriever schema.Retriever) R
 
 // Call gets relevant documents from the retriever and gives them to the combine
 // documents chain.
-func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	query, ok := values[c.InputKey].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)

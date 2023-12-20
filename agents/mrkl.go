@@ -26,7 +26,7 @@ const (
 // This agent is optimized to be used with LLMs.
 type OneShotZeroAgent struct {
 	// Chain is the chain used to call with the values. The chain should have an
-	// input called "agent_scratchpad" for the agent to put it's thoughts in.
+	// input called "agent_scratchpad" for the agent to put its thoughts in.
 	Chain chains.Chain
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool

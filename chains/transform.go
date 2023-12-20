@@ -41,12 +41,12 @@ func (c Transform) GetMemory() schema.Memory {
 	return c.Memory
 }
 
-// InputKeys returns the input keys the chain expects.
+// GetInputKeys returns the input keys the chain expects.
 func (c Transform) GetInputKeys() []string {
 	return c.InputKeys
 }
 
-// OutputKeys returns the output keys the chain returns.
+// GetOutputKeys returns the output keys the chain returns.
 func (c Transform) GetOutputKeys() []string {
 	return c.OutputKeys
 }

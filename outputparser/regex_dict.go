@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// RegexDict is an output parser used to parse the output of an llm as a map.
+// RegexDict is an output parser used to parse the output of an LLM as a map.
 type RegexDict struct {
 	// OutputKeyToFormat is a map which has a key that represents an identifier for the regex,
 	// and a value to search for as a key in the parsed text.
@@ -75,7 +75,7 @@ func (p RegexDict) parse(text string) (map[string]string, error) {
 	return results, nil
 }
 
-// Parse parses the output of an llm into a map of strings.
+// Parse parses the output of an LLM into a map of strings.
 func (p RegexDict) Parse(text string) (any, error) {
 	return p.parse(text)
 }

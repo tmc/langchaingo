@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// BooleanParser is an output parser used to parse the output of an llm as a boolean.
+// BooleanParser is an output parser used to parse the output of an LLM as a boolean.
 type BooleanParser struct {
 	TrueStr  string
 	FalseStr string
@@ -51,7 +51,7 @@ func normalize(text string) string {
 	return text
 }
 
-// Parse parses the output of an llm into a map of strings.
+// Parse parses the output of an LLM into a map of strings.
 func (p BooleanParser) Parse(text string) (any, error) {
 	return p.parse(text)
 }

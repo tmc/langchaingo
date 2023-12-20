@@ -107,7 +107,7 @@ func WithPromptFormatInstructions(instructions string) CreationOption {
 	}
 }
 
-// WithPromptFormatInstructions is an option for setting the suffix of the prompt used by the agent.
+// WithPromptSuffix is an option for setting the suffix of the prompt used by the agent.
 func WithPromptSuffix(suffix string) CreationOption {
 	return func(co *CreationOptions) {
 		co.promptSuffix = suffix

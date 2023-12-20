@@ -38,7 +38,7 @@ type StuffDocuments struct {
 
 var _ Chain = StuffDocuments{}
 
-// NewStuffDocuments creates a new stuff documents chain with a llm chain used
+// NewStuffDocuments creates a new stuff documents chain with an LLM chain used
 // after formatting the documents.
 func NewStuffDocuments(llmChain *LLMChain) StuffDocuments {
 	return StuffDocuments{

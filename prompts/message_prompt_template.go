@@ -27,7 +27,7 @@ func NewSystemMessagePromptTemplate(template string, inputVariables []string) Sy
 	}
 }
 
-// AIMessagePromptTemplate is a message formatter that returns a AI message.
+// AIMessagePromptTemplate is a message formatter that returns an AI message.
 type AIMessagePromptTemplate struct {
 	Prompt PromptTemplate
 }

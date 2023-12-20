@@ -1,4 +1,4 @@
-// Package util contins general helper functions.
+// Package util contains general helper functions.
 package util
 
 // ToSet converts a list to a set.
