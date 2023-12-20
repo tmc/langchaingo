@@ -38,7 +38,7 @@ type ResponseSchema struct {
 	Description string
 }
 
-// Structured is an output parser that parses the output of a llm into key value
+// Structured is an output parser that parses the output of an LLM into key value
 // pairs. The name and description of what values the output of the llm should
 // contain is stored in a list of response schema.
 type Structured struct {
@@ -56,7 +56,7 @@ func NewStructured(schema []ResponseSchema) Structured {
 // Statically assert that Structured implement the OutputParser interface.
 var _ schema.OutputParser[any] = Structured{}
 
-// Parse parses the output of a llm into a map. If the output of the llm doesn't
+// Parse parses the output of an LLM into a map. If the output of the llm doesn't
 // contain every filed specified in the response schemas, the function will return
 // an error.
 func (p Structured) parse(text string) (map[string]string, error) {

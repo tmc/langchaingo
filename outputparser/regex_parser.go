@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// RegexParser is an output parser used to parse the output of a llm as a map.
+// RegexParser is an output parser used to parse the output of an LLM as a map.
 type RegexParser struct {
 	Expression *regexp.Regexp
 	OutputKeys []string
@@ -57,7 +57,7 @@ func (p RegexParser) parse(text string) (map[string]string, error) {
 	return matches, nil
 }
 
-// Parse parses the output of a llm into a map of strings.
+// Parse parses the output of an LLM into a map of strings.
 func (p RegexParser) Parse(text string) (any, error) {
 	return p.parse(text)
 }

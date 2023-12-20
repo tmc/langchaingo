@@ -6,7 +6,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// CommaSeparatedList is an output parser used to parse the output of a llm as a
+// CommaSeparatedList is an output parser used to parse the output of an LLM as a
 // string slice. Splits in the output from the llm are done every comma.
 type CommaSeparatedList struct{}
 
@@ -23,7 +23,7 @@ func (p CommaSeparatedList) GetFormatInstructions() string {
 	return "Your response should be a list of comma separated values, eg: `foo, bar, baz`"
 }
 
-// Parse parses the output of a llm into a string slice.
+// Parse parses the output of an LLM into a string slice.
 func (p CommaSeparatedList) Parse(text string) ([]string, error) {
 	values := strings.Split(strings.TrimSpace(text), ",")
 	for i := 0; i < len(values); i++ {
