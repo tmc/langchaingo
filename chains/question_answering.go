@@ -134,7 +134,7 @@ func LoadRefineQA(llm llms.LanguageModel) RefineDocuments {
 	)
 }
 
-// LoadRefineQA loads a refine documents chain for question answering. Inputs are
+// LoadMapReduceQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
 func LoadMapReduceQA(llm llms.LanguageModel) MapReduceDocuments {
 	getInfoPrompt := prompts.NewPromptTemplate(

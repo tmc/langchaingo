@@ -28,7 +28,7 @@ var (
 	_ callbacks.HandlerHaver = &LLMChain{}
 )
 
-// NewLLMChain creates a new LLMChain with an llm and a prompt.
+// NewLLMChain creates a new LLMChain with a llm and a prompt.
 func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter) *LLMChain {
 	chain := &LLMChain{
 		Prompt:       prompt,

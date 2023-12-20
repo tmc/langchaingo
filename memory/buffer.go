@@ -11,7 +11,7 @@ import (
 // ErrInvalidInputValues is returned when input values given to a memory in save context are invalid.
 var ErrInvalidInputValues = errors.New("invalid input values")
 
-// ConversationBuffer is a simple form of memory that remembers previous conversational back and forths directly.
+// ConversationBuffer is a simple form of memory that remembers previous conversational back and forth directly.
 type ConversationBuffer struct {
 	ChatHistory schema.ChatMessageHistory
 
@@ -65,11 +65,11 @@ func (m *ConversationBuffer) LoadMemoryVariables(
 }
 
 // SaveContext uses the input values to the llm to save a user message, and the output values
-// of the llm to save a ai message. If the input or output key is not set, the input values or
+// of the llm to save an AI message. If the input or output key is not set, the input values or
 // output values must contain only one key such that the function can know what string to
 // add as a user and AI message. On the other hand, if the output key or input key is set, the
 // input key must be a key in the input values and the output key must be a key in the output
-// values. The values in the input and output values used to save a user and ai message must
+// values. The values in the input and output values used to save a user and AI message must
 // be strings.
 func (m *ConversationBuffer) SaveContext(
 	ctx context.Context,

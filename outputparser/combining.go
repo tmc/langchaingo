@@ -87,7 +87,7 @@ func (p Combining) Parse(text string) (any, error) {
 	return p.parse(text)
 }
 
-// Parse with prompts does the same as Parse.
+// ParseWithPrompt with prompts does the same as Parse.
 func (p Combining) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
 	return p.parse(text)
 }

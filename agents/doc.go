@@ -1,4 +1,4 @@
-// Package agent contains the standard interface all agents must implement,
+// Package agents contains the standard interface all agents must implement,
 // implementations of this interface, and an agent executor.
 //
 // An Agent is a wrapper around a model, which takes in user input and returns
@@ -12,7 +12,7 @@
 // descriptions of tools) to decide what action to take. This agent is
 // optimized to be used with LLMs.
 //
-// To make agents more powerful we need to make them iterative, ie. call the
+// To make agents more powerful we need to make them iterative, i.e. call the
 // model multiple times until they arrive at the final answer. That's the job of
 // the Executor. The Executor is an Agent and set of Tools. The agent executor is
 // responsible for calling the agent, getting back and action and action input,

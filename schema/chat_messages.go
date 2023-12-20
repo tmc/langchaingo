@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// ChatMessageType is the type of a chat message.
+// ChatMessageType is the type of chat message.
 type ChatMessageType string
 
 // ErrUnexpectedChatMessageType is returned when a chat message is of an unexpected type.

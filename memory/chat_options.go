@@ -3,7 +3,7 @@ package memory
 import "github.com/tmc/langchaingo/schema"
 
 // ChatMessageHistoryOption is a function for creating new chat message history
-// with other then the default values.
+// with other than the default values.
 type ChatMessageHistoryOption func(m *ChatMessageHistory)
 
 // WithPreviousMessages is an option for NewChatMessageHistory for adding

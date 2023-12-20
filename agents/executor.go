@@ -31,7 +31,7 @@ var (
 	_ callbacks.HandlerHaver = Executor{}
 )
 
-// NewExecutor creates a new agent executor with a agent and the tools the agent can use.
+// NewExecutor creates a new agent executor with an agent and the tools the agent can use.
 func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Executor {
 	options := executorDefaultOptions()
 	for _, opt := range opts {

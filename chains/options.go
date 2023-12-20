@@ -10,28 +10,28 @@ import (
 type ChainCallOption func(*chainCallOption)
 
 type chainCallOption struct {
-	// Model is the model to use in an llm call.
+	// Model is the model to use in a llm call.
 	Model string
-	// MaxTokens is the maximum number of tokens to generate to use in an llm call.
+	// MaxTokens is the maximum number of tokens to generate to use in a llm call.
 	MaxTokens int
-	// Temperature is the temperature for sampling to use in an llm call, between 0 and 1.
+	// Temperature is the temperature for sampling to use in a llm call, between 0 and 1.
 	Temperature float64
-	// StopWords is a list of words to stop on to use in an llm call.
+	// StopWords is a list of words to stop on to use in a llm call.
 	StopWords []string
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming earl.
 	StreamingFunc func(ctx context.Context, chunk []byte) error
-	// TopK is the number of tokens to consider for top-k sampling in an llm call.
+	// TopK is the number of tokens to consider for top-k sampling in a llm call.
 	TopK int
-	// TopP is the cumulative probability for top-p sampling in an llm call.
+	// TopP is the cumulative probability for top-p sampling in a llm call.
 	TopP float64
-	// Seed is a seed for deterministic sampling in an llm call.
+	// Seed is a seed for deterministic sampling in a llm call.
 	Seed int
-	// MinLength is the minimum length of the generated text in an llm call.
+	// MinLength is the minimum length of the generated text in a llm call.
 	MinLength int
-	// MaxLength is the maximum length of the generated text in an llm call.
+	// MaxLength is the maximum length of the generated text in a llm call.
 	MaxLength int
-	// RepetitionPenalty is the repetition penalty for sampling in an llm call.
+	// RepetitionPenalty is the repetition penalty for sampling in a llm call.
 	RepetitionPenalty float64
 }
 
@@ -59,7 +59,7 @@ func WithTemperature(temperature float64) ChainCallOption {
 // WithOptions is an option for LLM.Call.
 func WithOptions(options chainCallOption) ChainCallOption {
 	return func(o *chainCallOption) {
-		(*o) = options
+		*o = options
 	}
 }
 

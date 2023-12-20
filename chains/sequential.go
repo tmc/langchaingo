@@ -116,12 +116,12 @@ func (c *SequentialChain) GetMemory() schema.Memory {
 	return c.memory
 }
 
-// InputKeys returns the input keys the chain expects.
+// GetInputKeys returns the input keys the chain expects.
 func (c *SequentialChain) GetInputKeys() []string {
 	return c.inputKeys
 }
 
-// OutputKeys returns the output keys the chain returns.
+// GetOutputKeys returns the output keys the chain returns.
 func (c *SequentialChain) GetOutputKeys() []string {
 	return c.outputKeys
 }
@@ -191,12 +191,12 @@ func (c *SimpleSequentialChain) GetMemory() schema.Memory {
 	return c.memory
 }
 
-// InputKeys returns the input keys of the first chain.
+// GetInputKeys returns the input keys of the first chain.
 func (c *SimpleSequentialChain) GetInputKeys() []string {
 	return []string{input}
 }
 
-// OutputKeys returns the output keys of the last chain.
+// GetOutputKeys returns the output keys of the last chain.
 func (c *SimpleSequentialChain) GetOutputKeys() []string {
 	return []string{output}
 }

@@ -26,7 +26,7 @@ var _ Handler = &AgentFinalStreamHandler{}
 // It accepts a variadic number of strings as keywords. If any keywords are provided,
 // the DefaultKeywords variable is updated with the provided keywords.
 //
-// DefualtKeywords is map of the agents final out prefix keywords.
+// DefaultKeywords is map of the agents final out prefix keywords.
 //
 // The function returns a pointer to the created AgentFinalStreamHandler struct.
 func NewFinalStreamHandler(keywords ...string) *AgentFinalStreamHandler {

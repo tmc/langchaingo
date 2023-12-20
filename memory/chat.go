@@ -30,7 +30,7 @@ func (h *ChatMessageHistory) AddAIMessage(_ context.Context, text string) error 
 	return nil
 }
 
-// AddUserMessage adds an user to the chat message history.
+// AddUserMessage adds a user to the chat message history.
 func (h *ChatMessageHistory) AddUserMessage(_ context.Context, text string) error {
 	h.messages = append(h.messages, schema.HumanChatMessage{Content: text})
 	return nil

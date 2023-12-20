@@ -66,7 +66,7 @@ func WithTextKey(textKey string) Option {
 	}
 }
 
-// NameSpace is an option for setting the nameSpace to upsert and query the vectors
+// WithNameSpace is an option for setting the nameSpace to upsert and query the vectors
 // from. Must be set.
 func WithNameSpace(nameSpace string) Option {
 	return func(p *Store) {

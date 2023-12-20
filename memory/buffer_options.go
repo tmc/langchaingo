@@ -3,7 +3,7 @@ package memory
 import "github.com/tmc/langchaingo/schema"
 
 // ConversationBufferOption is a function for creating new buffer
-// with other then the default values.
+// with other than the default values.
 type ConversationBufferOption func(b *ConversationBuffer)
 
 // WithChatHistory is an option for providing the chat history store.

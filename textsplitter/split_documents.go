@@ -27,7 +27,7 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 
 // CreateDocuments creates documents from texts and metadatas with a text splitter. If
 // the length of the metadatas is zero, the result documents will contain no metadata.
-// Otherwise the numbers of texts and metadatas must match.
+// Otherwise, the numbers of texts and metadatas must match.
 func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
@@ -121,7 +121,7 @@ func maybePrintWarning(total, chunkSize int) {
 }
 
 // Keep popping if:
-//   - the chunk is larger then the chunk overlap
+//   - the chunk is larger than the chunk overlap
 //   - or if there are any chunks and the length is long
 func shouldPop(chunkOverlap, chunkSize, total, splitLen, separatorLen, currentDocLen int) bool {
 	docsNeededToAddSep := 2

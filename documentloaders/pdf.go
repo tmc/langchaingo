@@ -28,7 +28,7 @@ func WithPassword(password string) PDFOptions {
 	}
 }
 
-// NewText creates a new text loader with an io.Reader.
+// NewPDF creates a new text loader with an io.Reader.
 func NewPDF(r io.ReaderAt, size int64, opts ...PDFOptions) PDF {
 	pdf := PDF{
 		r: r,
@@ -41,7 +41,7 @@ func NewPDF(r io.ReaderAt, size int64, opts ...PDFOptions) PDF {
 }
 
 // getPassword returns the password for the PDF
-// it than clears the password on the struct so it can't be used again
+// it than clears the password on the struct, so it can't be used again
 // if the password is cleared and tried to be used again it will fail.
 func (p *PDF) getPassword() string {
 	pass := p.password
