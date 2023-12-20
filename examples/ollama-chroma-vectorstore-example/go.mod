@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e
 	github.com/google/uuid v1.3.0
-	github.com/tmc/langchaingo v0.1.0
+	github.com/tmc/langchaingo v0.1.1
 )
 
 require (
@@ -20,6 +20,6 @@ require (
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 )

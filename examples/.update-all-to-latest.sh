@@ -4,7 +4,7 @@
 export GOPROXY=direct
 export GOWORK=off
 
-syncref="${1:-main}"
+syncref="${1:-latest}"
 
 for gm in $(find . -name go.mod); do
   (
