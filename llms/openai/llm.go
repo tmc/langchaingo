@@ -21,7 +21,7 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	options := &options{
 		token:        os.Getenv(tokenEnvVarName),
 		model:        os.Getenv(modelEnvVarName),
-		baseURL:      os.Getenv(baseURLEnvVarName),
+		baseURL:      getEnvs(baseURLEnvVarName, baseAPIBaseEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
 		apiType:      APIType(openaiclient.APITypeOpenAI),
 		httpClient:   http.DefaultClient,
@@ -46,4 +46,14 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
 		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel)
 	return options, cli, err
+}
+
+func getEnvs(keys ...string) string {
+	for _, key := range keys {
+		val, ok := os.LookupEnv(key)
+		if ok {
+			return val
+		}
+	}
+	return ""
 }
