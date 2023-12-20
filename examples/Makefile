@@ -1,4 +1,4 @@
-SYNC_REF?=main
+SYNC_REF?=latest
 
 .PHONY: sync
 sync: ## Sync all go.mod files
