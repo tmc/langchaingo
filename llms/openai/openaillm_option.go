@@ -1,6 +1,9 @@
 package openai
 
-import "github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+import (
+	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+)
 
 const (
 	tokenEnvVarName        = "OPENAI_API_KEY"      //nolint:gosec
@@ -32,6 +35,8 @@ type options struct {
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion     string
 	embeddingModel string
+
+	callbackHandler callbacks.Handler
 }
 
 type Option func(*options)
@@ -97,5 +102,12 @@ func WithAPIVersion(apiVersion string) Option {
 func WithHTTPClient(client openaiclient.Doer) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithCallback allows setting a custom Callback Handler.
+func WithCallback(callbackHandler callbacks.Handler) Option {
+	return func(opts *options) {
+		opts.callbackHandler = callbackHandler
 	}
 }

@@ -17,7 +17,7 @@ var (
 )
 
 // newClient is wrapper for openaiclient internal package.
-func newClient(opts ...Option) (*openaiclient.Client, error) {
+func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	options := &options{
 		token:        os.Getenv(tokenEnvVarName),
 		model:        os.Getenv(modelEnvVarName),
@@ -35,14 +35,15 @@ func newClient(opts ...Option) (*openaiclient.Client, error) {
 	if openaiclient.IsAzure(openaiclient.APIType(options.apiType)) && options.apiVersion == "" {
 		options.apiVersion = DefaultAPIVersion
 		if options.embeddingModel == "" {
-			return nil, ErrMissingAzureEmbeddingModel
+			return options, nil, ErrMissingAzureEmbeddingModel
 		}
 	}
 
 	if len(options.token) == 0 {
-		return nil, ErrMissingToken
+		return options, nil, ErrMissingToken
 	}
 
-	return openaiclient.New(options.token, options.model, options.baseURL, options.organization,
+	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
 		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel)
+	return options, cli, err
 }

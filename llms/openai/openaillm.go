@@ -21,9 +21,10 @@ var (
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {
-	c, err := newClient(opts...)
+	opt, c, err := newClient(opts...)
 	return &LLM{
-		client: c,
+		client:           c,
+		CallbacksHandler: opt.callbackHandler,
 	}, err
 }
 
