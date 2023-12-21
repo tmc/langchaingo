@@ -189,7 +189,8 @@ func (s *Store) load(ctx context.Context) error {
 	return err
 }
 
-// AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store' and returns the ids of the added documents.
+// AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store'.
+// and returns the ids of the added documents.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	_ ...vectorstores.Option,
 ) ([]string, error) {

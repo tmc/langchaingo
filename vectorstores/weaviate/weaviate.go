@@ -85,8 +85,13 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-// AddDocuments creates vector embeddings from the documents using the embedder and upsert the vectors to the weaviate index and returns the ids of the added documents.
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+// AddDocuments creates vector embeddings from the documents using the embedder
+// upsert the vectors to the weaviate index.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
 

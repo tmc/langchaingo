@@ -162,8 +162,12 @@ PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
 	return tx.Commit(ctx)
 }
 
-// AddDocuments adds documents to the Postgres collection associated with 'Store' and returns the ids of the added documents.
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+// AddDocuments adds documents to the Postgres collection associated with 'Store'.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	if opts.ScoreThreshold != 0 || opts.Filters != nil || opts.NameSpace != "" {
 		return nil, ErrUnsupportedOptions

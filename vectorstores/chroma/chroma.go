@@ -83,8 +83,12 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store' and returns the ids of the added documents.
-func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(_ context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
 		return nil, ErrUnsupportedOptions
