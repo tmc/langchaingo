@@ -66,8 +66,8 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 }
 
 // AddDocuments creates vector embeddings from the documents using the embedder
-// and upsert the vectors to the pinecone index.
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+// and upsert the vectors to the pinecone index and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
@@ -79,11 +79,11 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrEmbedderWrongNumberVectors
+		return nil, ErrEmbedderWrongNumberVectors
 	}
 
 	metadatas := make([]map[string]any, 0, len(docs))

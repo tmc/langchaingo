@@ -83,16 +83,16 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
-func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store' and returns the ids of the added documents.
+func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
 	opts := s.getOptions(options...)
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
-		return ErrUnsupportedOptions
+		return nil, ErrUnsupportedOptions
 	}
 
 	nameSpace := s.getNameSpace(opts)
 	if nameSpace != "" && s.nameSpaceKey == "" {
-		return fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
+		return nil, fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
 	}
 
 	ids := make([]string, len(docs))
@@ -111,9 +111,9 @@ func (s Store) AddDocuments(_ context.Context, docs []schema.Document, options .
 
 	col := s.collection
 	if _, addErr := col.Add(nil, metadatas, texts, ids); addErr != nil {
-		return fmt.Errorf("%w: %w", ErrAddDocument, addErr)
+		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
-	return nil
+	return ids, nil
 }
 
 func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments int,
