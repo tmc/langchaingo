@@ -1,0 +1,8 @@
+
+Here is the response from the API:
+
+{{.api_response}}
+
+Now, summarize this response. Your summary should reflect the original input and highlight the key information from the API response that answers or relates to that input. Try to make your summary concise, yet informative.
+
+Summary:

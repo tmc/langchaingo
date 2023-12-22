@@ -2,6 +2,7 @@ package agents
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"regexp"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
@@ -143,4 +145,28 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	return []schema.AgentAction{
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
 	}, nil, nil
+}
+
+//go:embed prompts/conversational_prefix.txt
+var _defaultConversationalPrefix string //nolint:gochecknoglobals
+
+//go:embed prompts/conversational_format_instructions.txt
+var _defaultConversationalFormatInstructions string //nolint:gochecknoglobals
+
+//go:embed prompts/conversational_suffix.txt
+var _defaultConversationalSuffix string //nolint:gochecknoglobals
+
+func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+
+	return prompts.PromptTemplate{
+		Template:       template,
+		TemplateFormat: prompts.TemplateFormatGoTemplate,
+		InputVariables: []string{"input", "agent_scratchpad"},
+		PartialVariables: map[string]any{
+			"tool_names":        toolNames(tools),
+			"tool_descriptions": toolDescriptions(tools),
+			"history":           "",
+		},
+	}
 }
