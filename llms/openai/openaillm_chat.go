@@ -106,6 +106,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			Message:        msg,
 			Text:           msg.Content,
 			GenerationInfo: generationInfo,
+			StopReason:     result.Choices[0].FinishReason,
 		})
 	}
 

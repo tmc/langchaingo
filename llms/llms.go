@@ -34,6 +34,8 @@ type Generation struct {
 	Message *schema.AIChatMessage `json:"message"`
 	// GenerationInfo is the generation info. This can contain vendor-specific information.
 	GenerationInfo map[string]any `json:"generation_info"`
+	// StopReason is the reason the generation stopped.
+	StopReason string `json:"stop_reason"`
 }
 
 // LLMResult is the class that contains all relevant information for an LLM Result.
