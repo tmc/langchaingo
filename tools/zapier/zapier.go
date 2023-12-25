@@ -85,6 +85,9 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 
 	result, err := t.client.ExecuteAsString(ctx, t.actionID, input, t.params)
 	if err != nil {
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return "", err
 	}
 

@@ -60,6 +60,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		Seed:              opts.Seed,
 	})
 	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
 		return nil, err
 	}
 
