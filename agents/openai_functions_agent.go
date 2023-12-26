@@ -150,7 +150,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 		return nil
 	}
 
-	var messages []schema.ChatMessage
+	messages := make([]schema.ChatMessage, 0)
 	for _, step := range steps {
 		messages = append(messages, schema.FunctionChatMessage{
 			Name:    step.Action.Tool,

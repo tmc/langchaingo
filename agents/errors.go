@@ -20,7 +20,8 @@ var (
 	// ErrInvalidChainReturnType is returned if the internal chain of the agent returns a value in the
 	// "text" filed that is not a string.
 	ErrInvalidChainReturnType = errors.New("agent chain did not return a string")
-	// ErrInvalidLLMGenerationsMessageReturn is returned if the internal llm of the agent returns a value generations message is nil.
+	// ErrInvalidLLMGenerationsMessageReturn is returned if the internal llm of the agent returns a value
+	// generations message is nil.
 	ErrInvalidLLMGenerationsMessageReturn = errors.New("agent llm did not return valid generations message")
 )
 
