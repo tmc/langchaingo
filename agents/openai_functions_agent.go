@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
@@ -84,7 +85,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	for key, value := range inputs {
 		fullInputs[key] = value
 	}
-	fullInputs["agent_scratchpad"] = o.constructScratchPad(intermediateSteps)
+	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateSteps)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -106,7 +107,6 @@ func (o *OpenAIFunctionsAgent) Plan(
 		llms.WithFunctions(o.functions()),
 		llms.WithStreamingFunc(stream),
 	)
-
 	if err != nil {
 		return nil, nil, err
 	}
@@ -120,7 +120,7 @@ func (o *OpenAIFunctionsAgent) GetInputKeys() []string {
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
-		if v == "agent_scratchpad" {
+		if v == agentScratchpad {
 			continue
 		}
 		agentInput = append(agentInput, v)
@@ -138,7 +138,7 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
 	messageFormatters = append(messageFormatters, prompts.MessagesPlaceholder{
-		VariableName: "agent_scratchpad",
+		VariableName: agentScratchpad,
 	})
 
 	tmpl := prompts.NewChatPromptTemplate(messageFormatters)
@@ -146,26 +146,26 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 }
 
 func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []schema.ChatMessage {
-	if len(steps) <= 0 {
+	if len(steps) == 0 {
 		return nil
 	}
 
 	var messages []schema.ChatMessage
-	if len(steps) > 0 {
-		for _, step := range steps {
-			messages = append(messages, schema.FunctionChatMessage{
-				Name:    step.Action.Tool,
-				Content: step.Observation,
-			})
-		}
+	for _, step := range steps {
+		messages = append(messages, schema.FunctionChatMessage{
+			Name:    step.Action.Tool,
+			Content: step.Observation,
+		})
 	}
 
 	return messages
 }
 
-func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) ([]schema.AgentAction, *schema.AgentFinish, error) {
+func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) (
+	[]schema.AgentAction, *schema.AgentFinish, error) {
 	if llmResult.Generations[0][0] == nil || llmResult.Generations[0][0].Message == nil {
-		return nil, nil, fmt.Errorf("wrong llmResult from OpenAIFunctionsAgent")
+		return nil, nil, fmt.Errorf("%w: %s", ErrInvalidLLMGenerationsMessageReturn,
+			"wrong llmResult from OpenAIFunctionsAgent")
 	}
 
 	// finish
@@ -188,11 +188,12 @@ func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) ([]schema.A
 		return nil, nil, err
 	}
 
-	var toolInput string
+	toolInput := toolInputStr
 	if arg1, ok := toolInputMap["__arg1"]; ok {
-		toolInput = arg1.(string)
-	} else {
-		toolInput = toolInputStr
+		toolInputCheck, ok := arg1.(string)
+		if ok {
+			toolInput = toolInputCheck
+		}
 	}
 
 	contentMsg := "\n"

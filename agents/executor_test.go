@@ -2,7 +2,6 @@ package agents_test
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/prompts"
 	"os"
 	"strings"
 	"testing"
@@ -11,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/serpapi"
@@ -124,12 +124,15 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		[]tools.Tool{searchTool, calculator},
 		agents.OpenAIFunctionAgentDescription,
 		agents.OpenAIOption.WithSystemMessage("you are a helpful assistant"),
-		agents.OpenAIOption.WithExtraMessages([]prompts.MessageFormatter{prompts.NewHumanMessagePromptTemplate("please be strict", nil)}),
+		agents.OpenAIOption.WithExtraMessages([]prompts.MessageFormatter{
+			prompts.NewHumanMessagePromptTemplate("please be strict", nil),
+		}),
 	)
 	require.NoError(t, err)
 
 	result, err := chains.Run(context.Background(), a, "what is HK singer Eason Chan's years old?") //nolint:lll
 	require.NoError(t, err)
 
-	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"), "correct answer 47 or 49 not in response")
+	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
+		"correct answer 47 or 49 not in response")
 }

@@ -2,6 +2,7 @@ package prompts
 
 import (
 	"fmt"
+
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -111,7 +112,7 @@ type MessagesPlaceholder struct {
 	VariableName string
 }
 
-// FormatMessages formats the messages from the values by variable name
+// FormatMessages formats the messages from the values by variable name.
 func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	value, ok := values[p.VariableName]
 	if !ok {
