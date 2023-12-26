@@ -123,8 +123,8 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		llm,
 		[]tools.Tool{searchTool, calculator},
 		agents.OpenAIFunctionAgentDescription,
-		agents.OpenAIOption.WithSystemMessage("you are a helpful assistant"),
-		agents.OpenAIOption.WithExtraMessages([]prompts.MessageFormatter{
+		agents.NewOpenAIOption().WithSystemMessage("you are a helpful assistant"),
+		agents.NewOpenAIOption().WithExtraMessages([]prompts.MessageFormatter{
 			prompts.NewHumanMessagePromptTemplate("please be strict", nil),
 		}),
 	)

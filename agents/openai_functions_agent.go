@@ -85,7 +85,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	for key, value := range inputs {
 		fullInputs[key] = value
 	}
-	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateSteps)
+	fullInputs[_agentScratchpad] = o.constructScratchPad(intermediateSteps)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -120,7 +120,7 @@ func (o *OpenAIFunctionsAgent) GetInputKeys() []string {
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
-		if v == agentScratchpad {
+		if v == _agentScratchpad {
 			continue
 		}
 		agentInput = append(agentInput, v)
@@ -138,7 +138,7 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
 	messageFormatters = append(messageFormatters, prompts.MessagesPlaceholder{
-		VariableName: agentScratchpad,
+		VariableName: _agentScratchpad,
 	})
 
 	tmpl := prompts.NewChatPromptTemplate(messageFormatters)

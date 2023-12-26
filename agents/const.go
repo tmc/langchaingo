@@ -1,3 +1,3 @@
 package agents
 
-var agentScratchpad = "agent_scratchpad"
+const _agentScratchpad = "agent_scratchpad"

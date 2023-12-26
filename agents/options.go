@@ -161,17 +161,19 @@ func WithParserErrorHandler(errorHandler *ParserErrorHandler) CreationOption {
 	}
 }
 
-type openAIOption struct{}
+type OpenAIOption struct{}
 
-var OpenAIOption openAIOption
+func NewOpenAIOption() OpenAIOption {
+	return OpenAIOption{}
+}
 
-func (o openAIOption) WithSystemMessage(msg string) CreationOption {
+func (o OpenAIOption) WithSystemMessage(msg string) CreationOption {
 	return func(co *CreationOptions) {
 		co.systemMessage = msg
 	}
 }
 
-func (o openAIOption) WithExtraMessages(extraMessages []prompts.MessageFormatter) CreationOption {
+func (o OpenAIOption) WithExtraMessages(extraMessages []prompts.MessageFormatter) CreationOption {
 	return func(co *CreationOptions) {
 		co.extraMessages = extraMessages
 	}
