@@ -19,6 +19,10 @@ type CreationOptions struct {
 	promptPrefix            string
 	formatInstructions      string
 	promptSuffix            string
+
+	// openai
+	systemMessage string
+	extraMessages []prompts.MessageFormatter
 }
 
 // CreationOption is a function type that can be used to modify the creation of the agents
@@ -48,6 +52,13 @@ func conversationalDefaultOptions() CreationOptions {
 		formatInstructions: _defaultConversationalFormatInstructions,
 		promptSuffix:       _defaultConversationalSuffix,
 		outputKey:          _defaultOutputKey,
+	}
+}
+
+func openAIFunctionsDefaultOptions() CreationOptions {
+	return CreationOptions{
+		systemMessage: "You are a helpful AI assistant.",
+		outputKey:     _defaultOutputKey,
 	}
 }
 
@@ -147,5 +158,21 @@ func WithCallbacksHandler(handler callbacks.Handler) CreationOption {
 func WithParserErrorHandler(errorHandler *ParserErrorHandler) CreationOption {
 	return func(co *CreationOptions) {
 		co.errorHandler = errorHandler
+	}
+}
+
+type openAIOption struct{}
+
+var OpenAIOption openAIOption
+
+func (o openAIOption) WithSystemMessage(msg string) CreationOption {
+	return func(co *CreationOptions) {
+		co.systemMessage = msg
+	}
+}
+
+func (o openAIOption) WithExtraMessages(extraMessages []prompts.MessageFormatter) CreationOption {
+	return func(co *CreationOptions) {
+		co.extraMessages = extraMessages
 	}
 }

@@ -17,6 +17,9 @@ const (
 	// ConversationalReactDescription is an AgentType constant that represents
 	// the "conversationalReactDescription" agent type.
 	ConversationalReactDescription AgentType = "conversationalReactDescription"
+	// OpenAIFunctionAgentDescription is an AgentType constant that represents
+	// the "openAIFunctionAgentDescription" agent type.
+	OpenAIFunctionAgentDescription AgentType = "openAIFunctionAgentDescription"
 )
 
 // Initialize is a function that creates a new executor with the specified LLM
@@ -34,6 +37,8 @@ func Initialize(
 		agent = NewOneShotAgent(llm, tools, opts...)
 	case ConversationalReactDescription:
 		agent = NewConversationalAgent(llm, tools, opts...)
+	case OpenAIFunctionAgentDescription:
+		agent = NewOpenAIFunctionsAgent(llm, tools, opts...)
 	default:
 		return Executor{}, ErrUnknownAgentType
 	}

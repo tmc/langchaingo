@@ -2,6 +2,7 @@ package agents_test
 
 import (
 	"context"
+	"github.com/tmc/langchaingo/prompts"
 	"os"
 	"strings"
 	"testing"
@@ -98,4 +99,37 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	require.NoError(t, err)
 
 	require.True(t, strings.Contains(result, "210"), "correct answer 210 not in response")
+}
+
+func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
+		t.Skip("SERPAPI_API_KEY not set")
+	}
+
+	llm, err := openai.NewChat()
+	require.NoError(t, err)
+
+	searchTool, err := serpapi.New()
+	require.NoError(t, err)
+
+	calculator := tools.Calculator{}
+
+	a, err := agents.Initialize(
+		llm,
+		[]tools.Tool{searchTool, calculator},
+		agents.OpenAIFunctionAgentDescription,
+		agents.OpenAIOption.WithSystemMessage("you are a helpful assistant"),
+		agents.OpenAIOption.WithExtraMessages([]prompts.MessageFormatter{prompts.NewHumanMessagePromptTemplate("please be strict", nil)}),
+	)
+	require.NoError(t, err)
+
+	result, err := chains.Run(context.Background(), a, "what is HK singer Eason Chan's years old?") //nolint:lll
+	require.NoError(t, err)
+
+	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"), "correct answer 47 or 49 not in response")
 }

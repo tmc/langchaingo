@@ -1,6 +1,9 @@
 package prompts
 
-import "github.com/tmc/langchaingo/schema"
+import (
+	"fmt"
+	"github.com/tmc/langchaingo/schema"
+)
 
 // SystemMessagePromptTemplate is a message formatter that returns a system message.
 type SystemMessagePromptTemplate struct {
@@ -102,4 +105,26 @@ func NewGenericMessagePromptTemplate(role, template string, inputVariables []str
 		Prompt: NewPromptTemplate(template, inputVariables),
 		Role:   role,
 	}
+}
+
+type MessagesPlaceholder struct {
+	VariableName string
+}
+
+// FormatMessages formats the messages from the values by variable name
+func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+	value, ok := values[p.VariableName]
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrNeedChatMessageList, value)
+	}
+	baseMessages, ok := value.([]schema.ChatMessage)
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrNeedChatMessageList, value)
+	}
+	return baseMessages, nil
+}
+
+// GetInputVariables returns the input variables the prompt expect.
+func (p MessagesPlaceholder) GetInputVariables() []string {
+	return []string{p.VariableName}
 }
