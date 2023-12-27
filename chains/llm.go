@@ -29,14 +29,18 @@ var (
 )
 
 // NewLLMChain creates a new LLMChain with an LLM and a prompt.
-func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter) *LLMChain {
+func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter, opts ...ChainCallOption) *LLMChain {
+	opt := &chainCallOption{}
+	for _, o := range opts {
+		o(opt)
+	}
 	chain := &LLMChain{
-		Prompt:       prompt,
-		LLM:          llm,
-		OutputParser: outputparser.NewSimple(),
-		Memory:       memory.NewSimple(),
-
-		OutputKey: _llmChainDefaultOutputKey,
+		Prompt:           prompt,
+		LLM:              llm,
+		OutputParser:     outputparser.NewSimple(),
+		Memory:           memory.NewSimple(),
+		OutputKey:        _llmChainDefaultOutputKey,
+		CallbacksHandler: opt.CallbackHandler,
 	}
 
 	return chain
