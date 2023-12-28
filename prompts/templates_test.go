@@ -1,6 +1,7 @@
 package prompts
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,11 +52,20 @@ func TestInterpolateGoTemplate(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			t.Run("go/template", func(t *testing.T) {
+				t.Parallel()
 
-			actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
-			require.NoError(t, err)
-			assert.Equal(t, tc.expected, actual)
+				actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
+				require.NoError(t, err)
+				assert.Equal(t, tc.expected, actual)
+			})
+			t.Run("jinjia2", func(t *testing.T) {
+				t.Parallel()
+
+				actual, err := interpolateJinjia2(strings.ReplaceAll(tc.template, "{{ .", "{{ "), tc.templateValues)
+				require.NoError(t, err)
+				assert.Equal(t, tc.expected, actual)
+			})
 		})
 	}
 
@@ -95,7 +105,7 @@ func TestCheckValidTemplate(t *testing.T) {
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
 		require.Error(t, err)
 		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template]")
+		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template jinjia2]")
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {
