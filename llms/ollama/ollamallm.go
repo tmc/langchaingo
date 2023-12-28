@@ -110,6 +110,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 		err := o.client.Generate(ctx, req, fn)
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return []*llms.Generation{}, err
 		}
 

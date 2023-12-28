@@ -55,6 +55,10 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 			return "No good Google Search Results was found", nil
 		}
 
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
+
 		return "", err
 	}
 
