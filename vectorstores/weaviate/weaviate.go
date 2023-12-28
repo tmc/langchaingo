@@ -170,6 +170,7 @@ func (s Store) SimilaritySearch(
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
+//nolint:cyclop
 func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]schema.Document, error) {
 	if len(res.Errors) > 0 {
 		messages := make([]string, 0, len(res.Errors))
@@ -197,10 +198,15 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 		if !ok {
 			return nil, ErrMissingTextKey
 		}
+		var score float64
+		if additional, ok := itemMap["_additional"].(map[string]any); ok {
+			score, _ = additional["certainty"].(float64)
+		}
 		delete(itemMap, s.textKey)
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    itemMap,
+			Score:       float32(score),
 		}
 		docs = append(docs, doc)
 	}
