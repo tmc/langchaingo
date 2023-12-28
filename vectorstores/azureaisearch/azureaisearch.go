@@ -19,7 +19,22 @@ type Store struct {
 	client                  *http.Client
 }
 
-func New(ctx context.Context, opts ...Option) (Store, error) {
+var (
+	ErrNumberOfVectorDoesNotMatch = errors.New(
+		"number of vectors from embedder does not match number of documents",
+	)
+	ErrAssertingSearchScore = errors.New(
+		"couldn't assert @search.score to float64",
+	)
+	ErrAssertingMetadata = errors.New(
+		"couldn't assert metadata to string",
+	)
+	ErrAssertingContent = errors.New(
+		"couldn't assert content to string",
+	)
+)
+
+func New(opts ...Option) (Store, error) {
 	s := Store{
 		client: http.DefaultClient,
 	}
@@ -44,19 +59,15 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		fmt.Printf("err embedding documents: %v\n", err)
 		return err
 	}
 
 	if len(vectors) != len(docs) {
-		return errors.New(
-			"number of vectors from embedder does not match number of documents",
-		)
+		return ErrNumberOfVectorDoesNotMatch
 	}
 
 	for i, doc := range docs {
 		if err = s.UploadDocument(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata); err != nil {
-			fmt.Printf("error uploading document to vector: %v\n", err)
 			return err
 		}
 	}
@@ -64,7 +75,11 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	return nil
 }
 
-func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) {
+func (s Store) SimilaritySearch(
+	ctx context.Context, query string,
+	numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
 
 	queryVector, err := s.embedder.EmbedQuery(ctx, query)
@@ -86,31 +101,52 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 
 	searchResults := SearchDocumentsRequestOuput{}
 	if err := s.SearchDocuments(ctx, opts.NameSpace, payload, &searchResults); err != nil {
-		fmt.Printf("error searching documents vector: %v\n", err)
 		return nil, err
 	}
+
 	output := []schema.Document{}
 	for _, searchResult := range searchResults.Value {
-		score := float32(searchResult["@search.score"].(float64))
-		fmt.Printf("result: %v | score: %v\n", searchResult["content"].(string), score)
-		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > score {
+		doc, err := assertResultValues(searchResult)
+		if err != nil {
+			return output, err
+		}
+
+		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > doc.Score {
 			continue
 		}
 
-		metadata := map[string]interface{}{}
-		if resultMetadata, ok := searchResult["metadata"].(string); ok {
-			if err := json.Unmarshal([]byte(resultMetadata), &metadata); err != nil {
-				fmt.Printf("err: %v\n", err)
-				continue
-			}
-		}
-
-		output = append(output, schema.Document{
-			PageContent: searchResult["content"].(string),
-			Metadata:    metadata,
-			Score:       score,
-		})
+		output = append(output, *doc)
 	}
 
 	return output, nil
+}
+
+func assertResultValues(searchResult map[string]interface{}) (*schema.Document, error) {
+	var score float32
+	if scoreFloat64, ok := searchResult["@search.score"].(float64); ok {
+		score = float32(scoreFloat64)
+	} else {
+		return nil, ErrAssertingSearchScore
+	}
+
+	metadata := map[string]interface{}{}
+	if resultMetadata, ok := searchResult["metadata"].(string); ok {
+		if err := json.Unmarshal([]byte(resultMetadata), &metadata); err != nil {
+			return nil, fmt.Errorf("couldn't unmarshall metadata %w", err)
+		}
+	} else {
+		return nil, ErrAssertingMetadata
+	}
+
+	var pageContent string
+	var ok bool
+	if pageContent, ok = searchResult["content"].(string); !ok {
+		return nil, ErrAssertingContent
+	}
+
+	return &schema.Document{
+		PageContent: pageContent,
+		Metadata:    metadata,
+		Score:       score,
+	}, nil
 }

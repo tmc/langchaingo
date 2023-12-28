@@ -2,12 +2,12 @@ package azureaisearch_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -17,30 +17,22 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/azureaisearch"
 )
 
-func getValues(t *testing.T) string {
+func checkEnvVariables(t *testing.T) {
 	t.Helper()
 
-	azureaisearchEndpoint := os.Getenv(azureaisearch.EnvironmentVariable_Endpoint)
+	azureaisearchEndpoint := os.Getenv(azureaisearch.EnvironmentVariableEndpoint)
 	if azureaisearchEndpoint == "" {
-		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariable_Endpoint)
+		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariableEndpoint)
 	}
 
-	azureaisearchAPIKey := os.Getenv(azureaisearch.EnvironmentVariable_APIKey)
+	azureaisearchAPIKey := os.Getenv(azureaisearch.EnvironmentVariableAPIKey)
 	if azureaisearchAPIKey == "" {
-		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariable_APIKey)
-	}
-
-	indexName := os.Getenv("COGNITIVE_SEARCH_INDEX")
-	if indexName == "" {
-		t.Fatal("Must set COGNITIVE_SEARCH_INDEX to run test")
+		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariableAPIKey)
 	}
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		fmt.Printf("openaiKey: %v\n", openaiKey)
 		t.Fatal("OPENAI_API_KEY not set")
 	}
-
-	return indexName
 }
 
 func setIndex(t *testing.T, storer azureaisearch.Store, indexName string) {
@@ -79,13 +71,15 @@ func setLLM(t *testing.T) *openai.LLM {
 }
 
 func TestCognitivesearchStoreRest(t *testing.T) {
-	indexName := getValues(t)
+	t.Parallel()
+	checkEnvVariables(t)
+	indexName := uuid.New().String()
+
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := azureaisearch.New(
-		context.Background(),
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -101,20 +95,20 @@ func TestCognitivesearchStoreRest(t *testing.T) {
 
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
-	fmt.Printf("docs: %v\n", len(docs))
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
 }
 
 func TestCognitivesearchStoreRestWithScoreThreshold(t *testing.T) {
-	indexName := getValues(t)
+	t.Parallel()
+	checkEnvVariables(t)
+	indexName := uuid.New().String()
 
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := azureaisearch.New(
-		context.Background(),
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -143,19 +137,18 @@ func TestCognitivesearchStoreRestWithScoreThreshold(t *testing.T) {
 		vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
-
 }
 
 func TestCognitivesearchAsRetriever(t *testing.T) {
-
-	indexName := getValues(t)
+	t.Parallel()
+	checkEnvVariables(t)
+	indexName := uuid.New().String()
 
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := azureaisearch.New(
-		context.Background(),
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -174,7 +167,7 @@ func TestCognitivesearchAsRetriever(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	time.Sleep(time.Second) // let the time for azure search to digest sent documents, otherwise only "The color of the house is blue." is fetched
+	time.Sleep(time.Second)
 
 	result, err := chains.Run(
 		context.TODO(),
@@ -189,15 +182,15 @@ func TestCognitivesearchAsRetriever(t *testing.T) {
 }
 
 func TestCognitivesearchAsRetrieverWithScoreThreshold(t *testing.T) {
-
-	indexName := getValues(t)
+	t.Parallel()
+	checkEnvVariables(t)
+	indexName := uuid.New().String()
 
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := azureaisearch.New(
-		context.Background(),
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)

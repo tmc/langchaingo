@@ -1,7 +1,7 @@
 package azureaisearch
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
@@ -10,8 +10,19 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-const EnvironmentVariable_Endpoint string = "COGNITIVE_SEARCH_ENDPOINT"
-const EnvironmentVariable_APIKey string = "COGNITIVE_SEARCH_API_KEY"
+const (
+	EnvironmentVariableEndpoint string = "COGNITIVE_SEARCH_ENDPOINT"
+	EnvironmentVariableAPIKey   string = "COGNITIVE_SEARCH_API_KEY"
+)
+
+var (
+	ErrMissingEnvVariableCognitiveSearchEndpoint = errors.New(
+		"missing cognitiveSearchEndpoint",
+	)
+	ErrMissingEmbedded = errors.New(
+		"missing embedder",
+	)
+)
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	opts := vectorstores.Options{}
@@ -21,7 +32,7 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func WithFilters(filters SimilaritySearchFilters) vectorstores.Option {
+func WithFilters(filters any) vectorstores.Option {
 	return func(o *vectorstores.Options) {
 		o.Filters = filters
 	}
@@ -53,18 +64,18 @@ func applyClientOptions(s *Store, opts ...Option) error {
 	}
 
 	if s.cognitiveSearchEndpoint == "" {
-		s.cognitiveSearchEndpoint = strings.TrimSuffix(os.Getenv(EnvironmentVariable_Endpoint), "/")
+		s.cognitiveSearchEndpoint = strings.TrimSuffix(os.Getenv(EnvironmentVariableEndpoint), "/")
 	}
 
 	if s.cognitiveSearchEndpoint == "" {
-		return fmt.Errorf("missing cognitiveSearchEndpoint")
+		return ErrMissingEnvVariableCognitiveSearchEndpoint
 	}
 
 	if s.embedder == nil {
-		return fmt.Errorf("missing embedder")
+		return ErrMissingEmbedded
 	}
 
-	if envVariableAPIKey := os.Getenv(EnvironmentVariable_APIKey); envVariableAPIKey != "" {
+	if envVariableAPIKey := os.Getenv(EnvironmentVariableAPIKey); envVariableAPIKey != "" {
 		s.cognitiveSearchAPIKey = envVariableAPIKey
 	}
 

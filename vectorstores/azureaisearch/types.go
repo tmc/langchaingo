@@ -6,15 +6,15 @@ import (
 
 type FieldType = string
 
-var (
-	FieldType_string         FieldType = "Edm.String"
-	FieldType_single         FieldType = "Edm.Single"
-	FieldType_int32          FieldType = "Edm.Int32"
-	FieldType_int64          FieldType = "Edm.Int64"
-	FieldType_double         FieldType = "Edm.Double"
-	FieldType_boolean        FieldType = "Edm.Boolean"
-	FieldType_datetimeOffset FieldType = "Edm.DateTimeOffset"
-	FieldType_complexType    FieldType = "Edm.ComplexType"
+const (
+	FieldTypeString         FieldType = "Edm.String"
+	FieldTypeSingle         FieldType = "Edm.Single"
+	FieldTypeInt32          FieldType = "Edm.Int32"
+	FieldTypeInt64          FieldType = "Edm.Int64"
+	FieldTypeDouble         FieldType = "Edm.Double"
+	FieldTypeBoolean        FieldType = "Edm.Boolean"
+	FieldTypeDatetimeOffset FieldType = "Edm.DateTimeOffset"
+	FieldTypeComplexType    FieldType = "Edm.ComplexType"
 )
 
 func CollectionField(fieldType FieldType) FieldType {

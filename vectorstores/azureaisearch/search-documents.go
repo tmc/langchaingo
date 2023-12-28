@@ -10,24 +10,24 @@ import (
 
 type QueryType string
 
-var (
-	QueryType_Simple   QueryType = "simple"
-	QueryType_Full     QueryType = "full"
-	QueryType_Semantic QueryType = "semantic"
+const (
+	QueryTypeSimple   QueryType = "simple"
+	QueryTypeFull     QueryType = "full"
+	QueryTypeSemantic QueryType = "semantic"
 )
 
 type QueryCaptions string
 
-var (
-	QueryType_Extractive QueryCaptions = "extractive"
-	QueryType_None       QueryCaptions = "none"
+const (
+	QueryTypeExtractive QueryCaptions = "extractive"
+	QueryTypeNone       QueryCaptions = "none"
 )
 
 type SpellerType string
 
-var (
-	SpellerType_Lexicon SpellerType = "lexicon"
-	SpellerType_None    SpellerType = "none"
+const (
+	SpellerTypeLexicon SpellerType = "lexicon"
+	SpellerTypeNone    SpellerType = "none"
 )
 
 type SearchDocumentsRequestInput struct {
@@ -79,19 +79,21 @@ type SearchDocumentsRequestOuput struct {
 	OdataNextLink            string                      `json:"@odata.nextLink,omitempty"`
 }
 
-func (s *Store) SearchDocuments(ctx context.Context, indexName string, payload SearchDocumentsRequestInput, output *SearchDocumentsRequestOuput) error {
+func (s *Store) SearchDocuments(
+	ctx context.Context,
+	indexName string,
+	payload SearchDocumentsRequestInput,
+	output *SearchDocumentsRequestOuput,
+) error {
 	URL := fmt.Sprintf("%s/indexes/%s/docs/search?api-version=2023-07-01-Preview", s.cognitiveSearchEndpoint, indexName)
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Printf("err marshalling document for cognitive search: %v\n", err)
-		return err
+		return fmt.Errorf("err marshalling document for cognitive search: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, URL, bytes.NewBuffer(body))
-
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, URL, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("err setting request for cognitive search document: %v\n", err)
-		return err
+		return fmt.Errorf("err setting request for cognitive search document: %w", err)
 	}
 
 	req.Header.Add("content-Type", "application/json")
@@ -99,5 +101,4 @@ func (s *Store) SearchDocuments(ctx context.Context, indexName string, payload S
 		req.Header.Add("api-key", s.cognitiveSearchAPIKey)
 	}
 	return s.HTTPDefaultSend(req, "search documents on cognitive search", output)
-
 }

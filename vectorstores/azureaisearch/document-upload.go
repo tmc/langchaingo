@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// mimicking langchain: https://github.com/langchain-ai/langchain/blob/bfc12a4a7644cfc4d832cc4023086a7a5374f46a/libs/langchain/langchain/vectorstores/azuresearch.py
 type Document struct {
 	SearchAction        string    `json:"@search.action"`
 	FieldsID            string    `json:"id"`
@@ -19,11 +18,15 @@ type Document struct {
 	FieldsMetadata      string    `json:"metadata"`
 }
 
-func (s *Store) UploadDocument(ctx context.Context, indexName string, text string, vector []float32, metadata map[string]any) error {
-
+func (s *Store) UploadDocument(
+	ctx context.Context,
+	indexName string,
+	text string,
+	vector []float32,
+	metadata map[string]any,
+) error {
 	metadataString, err := json.Marshal(metadata)
 	if err != nil {
-		fmt.Printf("error marshalling metadata: %v\n", err)
 		return err
 	}
 
@@ -45,7 +48,7 @@ func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, 
 	documentMap := map[string]interface{}{}
 	err := StructToMap(document, &documentMap)
 	if err != nil {
-		fmt.Printf("err converting document struc to map: %v\n", err)
+		return fmt.Errorf("err converting document struc to map: %w", err)
 	}
 
 	documentMap["@search.action"] = "mergeOrUpload"
@@ -55,17 +58,13 @@ func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, 
 			documentMap,
 		},
 	})
-
 	if err != nil {
-		fmt.Printf("err marshalling body for cognitive search: %v\n", err)
-		return err
+		return fmt.Errorf("err marshalling body for cognitive search: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, URL, bytes.NewBuffer(body))
-
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, URL, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Printf("err setting request for cognitive search upload document: %v\n", err)
-		return err
+		return fmt.Errorf("err setting request for cognitive search upload document: %w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")

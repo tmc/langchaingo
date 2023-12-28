@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
+)
+
+var ErrSendingRequest = errors.New(
+	"missing cognitiveSearchEndpoint",
 )
 
 func (s *Store) HTTPDefaultSend(req *http.Request, serviceName string, output any) error {
 	response, err := s.client.Do(req)
 	if err != nil {
-		fmt.Printf("err sending request for "+serviceName+": %v\n", err)
-		return err
+		return fmt.Errorf("err sending request for %s: %w", serviceName, err)
 	}
 
 	return HTTPReadBody(response, serviceName, output)
@@ -22,18 +24,13 @@ func (s *Store) HTTPDefaultSend(req *http.Request, serviceName string, output an
 func HTTPReadBody(response *http.Response, serviceName string, output any) error {
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
-
 	if err != nil {
-		fmt.Printf("err can't read response for "+serviceName+": %v\n", err)
-		return err
+		return fmt.Errorf("err can't read response for %s: %w", serviceName, err)
 	}
 
 	if output != nil {
-		// fmt.Printf("body: %v\n", string(body))
 		if err := json.Unmarshal(body, output); err != nil {
-			fmt.Printf("err unmarshal body for "+serviceName+": %v\n", err)
-			fmt.Printf("body: %v\n", string(body))
-			return err
+			return fmt.Errorf("err unmarshal body for %s: %w", serviceName, err)
 		}
 	}
 
@@ -42,9 +39,13 @@ func HTTPReadBody(response *http.Response, serviceName string, output any) error
 			return json.Unmarshal(body, output)
 		}
 		return nil
-	} else {
-		fmt.Printf("response: %v\n", string(body))
 	}
 
-	return errors.New("Error returned from " + serviceName + " " + response.Status + " | " + strconv.Itoa(response.StatusCode))
+	return fmt.Errorf("error returned from %s | Status : %s |  Status Code: %d | body: %s %w",
+		serviceName,
+		response.Status,
+		response.StatusCode,
+		string(body),
+		ErrSendingRequest,
+	)
 }

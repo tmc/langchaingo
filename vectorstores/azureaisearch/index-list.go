@@ -8,11 +8,9 @@ import (
 
 func (s *Store) ListIndexes(ctx context.Context, output *map[string]interface{}) error {
 	URL := fmt.Sprintf("%s/indexes?api-version=2023-11-01", s.cognitiveSearchEndpoint)
-	req, err := http.NewRequest(http.MethodGet, URL, nil)
-
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, URL, nil)
 	if err != nil {
-		fmt.Printf("err setting request for index retrieving: %v\n", err)
-		return err
+		return fmt.Errorf("err setting request for index retrieving: %w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
