@@ -3,6 +3,7 @@ package chains
 import (
 	"context"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -33,6 +34,8 @@ type chainCallOption struct {
 	MaxLength int
 	// RepetitionPenalty is the repetition penalty for sampling in an LLM call.
 	RepetitionPenalty float64
+	// CallbackHandler is the callback handler for Chain
+	CallbackHandler callbacks.Handler
 }
 
 // WithModel is an option for LLM.Call.
@@ -119,10 +122,23 @@ func WithStopWords(stopWords []string) ChainCallOption {
 	}
 }
 
+// WithCallback allows setting a custom Callback Handler.
+func WithCallback(callbackHandler callbacks.Handler) ChainCallOption {
+	return func(opts *chainCallOption) {
+		opts.CallbackHandler = callbackHandler
+	}
+}
+
 func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption {
 	opts := &chainCallOption{}
 	for _, option := range options {
 		option(opts)
+	}
+	if opts.StreamingFunc == nil && opts.CallbackHandler != nil {
+		opts.StreamingFunc = func(ctx context.Context, chunk []byte) error {
+			opts.CallbackHandler.HandleStreamingFunc(ctx, chunk)
+			return nil
+		}
 	}
 
 	chainCallOption := []llms.CallOption{

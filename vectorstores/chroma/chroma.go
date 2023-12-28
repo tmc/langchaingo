@@ -144,10 +144,11 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	var sDocs []schema.Document
 	for docsI := range qr.Documents {
 		for docI := range qr.Documents[docsI] {
-			if (1.0 - qr.Distances[docsI][docI]) >= scoreThreshold {
+			if score := 1.0 - qr.Distances[docsI][docI]; score >= scoreThreshold {
 				sDocs = append(sDocs, schema.Document{
 					Metadata:    qr.Metadatas[docsI][docI],
 					PageContent: qr.Documents[docsI][docI],
+					Score:       score,
 				})
 			}
 		}
