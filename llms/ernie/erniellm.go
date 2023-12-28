@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 	"github.com/tmc/langchaingo/schema"
@@ -17,8 +18,9 @@ var (
 )
 
 type LLM struct {
-	client *ernieclient.Client
-	model  ModelName
+	client           *ernieclient.Client
+	model            ModelName
+	CallbacksHandler callbacks.Handler
 }
 
 var (
@@ -40,8 +42,9 @@ func New(opts ...Option) (*LLM, error) {
 	c, err := newClient(options)
 
 	return &LLM{
-		client: c,
-		model:  options.modelName,
+		client:           c,
+		model:            options.modelName,
+		CallbacksHandler: options.callbacksHandler,
 	}, err
 }
 
@@ -61,22 +64,22 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 }
 
 // GeneratePrompt implements llms.LanguageModel.
-func (l *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue,
+func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue,
 	options ...llms.CallOption,
 ) (llms.LLMResult, error) {
-	return llms.GeneratePrompt(ctx, l, promptValues, options...)
+	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 // GetNumTokens implements llms.LanguageModel.
-func (l *LLM) GetNumTokens(_ string) int {
+func (o *LLM) GetNumTokens(_ string) int {
 	// todo: not provided yet
 	// see: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu
 	return -1
 }
 
 // Call implements llms.LLM.
-func (l *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := l.Generate(ctx, []string{prompt}, options...)
+func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	r, err := o.Generate(ctx, []string{prompt}, options...)
 	if err != nil {
 		return "", err
 	}
@@ -89,7 +92,11 @@ func (l *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // Generate implements llms.LLM.
-func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -97,7 +104,7 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 	generations := make([]*llms.Generation, 0, len(prompts))
 	for _, prompt := range prompts {
-		result, err := l.client.CreateCompletion(ctx, l.getModelPath(opts), &ernieclient.CompletionRequest{
+		result, err := o.client.CreateCompletion(ctx, o.getModelPath(opts), &ernieclient.CompletionRequest{
 			Messages:      []ernieclient.Message{{Role: "user", Content: prompt}},
 			Temperature:   opts.Temperature,
 			TopP:          opts.TopP,
@@ -106,11 +113,18 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			Stream:        opts.StreamingFunc != nil,
 		})
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return nil, err
 		}
 		if result.ErrorCode > 0 {
-			return nil, fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
+			err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
 				ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
+			return nil, err
 		}
 
 		generations = append(generations, &llms.Generation{
@@ -125,8 +139,8 @@ func (l *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 // 1. texts counts less than 16
 // 2. text runes counts less than 384
 // doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/alj562vvu
-func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	resp, e := l.client.CreateEmbedding(ctx, texts)
+func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+	resp, e := o.client.CreateEmbedding(ctx, texts)
 	if e != nil {
 		return nil, e
 	}
@@ -144,8 +158,8 @@ func (l *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 	return emb, nil
 }
 
-func (l *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
-	model := l.model
+func (o *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
+	model := o.model
 
 	if model == "" {
 		model = ModelName(opts.Model)

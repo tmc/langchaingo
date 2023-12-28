@@ -32,6 +32,9 @@ var (
 // NewChat returns a new OpenAI chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {
 	opt, c, err := newClient(opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &Chat{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
@@ -106,6 +109,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			Message:        msg,
 			Text:           msg.Content,
 			GenerationInfo: generationInfo,
+			StopReason:     result.Choices[0].FinishReason,
 		})
 	}
 
