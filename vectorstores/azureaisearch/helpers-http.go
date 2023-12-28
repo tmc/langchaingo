@@ -9,7 +9,7 @@ import (
 )
 
 var ErrSendingRequest = errors.New(
-	"missing cognitiveSearchEndpoint",
+	"missing azureAISearchEndpoint",
 )
 
 func (s *Store) HTTPDefaultSend(req *http.Request, serviceName string, output any) error {

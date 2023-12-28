@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	EnvironmentVariableEndpoint string = "COGNITIVE_SEARCH_ENDPOINT"
-	EnvironmentVariableAPIKey   string = "COGNITIVE_SEARCH_API_KEY"
+	EnvironmentVariableEndpoint string = "AZURE_AI_SEARCH_ENDPOINT"
+	EnvironmentVariableAPIKey   string = "AZURE_AI_SEARCH_API_KEY"
 )
 
 var (
-	ErrMissingEnvVariableCognitiveSearchEndpoint = errors.New(
-		"missing cognitiveSearchEndpoint",
+	ErrMissingEnvVariableAzureAISearchEndpoint = errors.New(
+		"missing azureAISearchEndpoint",
 	)
 	ErrMissingEmbedded = errors.New(
 		"missing embedder",
@@ -52,9 +52,9 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-func WithAPIKey(cognitiveSearchAPIKey string) Option {
+func WithAPIKey(azureAISearchAPIKey string) Option {
 	return func(s *Store) {
-		s.cognitiveSearchAPIKey = cognitiveSearchAPIKey
+		s.azureAISearchAPIKey = azureAISearchAPIKey
 	}
 }
 
@@ -63,12 +63,12 @@ func applyClientOptions(s *Store, opts ...Option) error {
 		opt(s)
 	}
 
-	if s.cognitiveSearchEndpoint == "" {
-		s.cognitiveSearchEndpoint = strings.TrimSuffix(os.Getenv(EnvironmentVariableEndpoint), "/")
+	if s.azureAISearchEndpoint == "" {
+		s.azureAISearchEndpoint = strings.TrimSuffix(os.Getenv(EnvironmentVariableEndpoint), "/")
 	}
 
-	if s.cognitiveSearchEndpoint == "" {
-		return ErrMissingEnvVariableCognitiveSearchEndpoint
+	if s.azureAISearchEndpoint == "" {
+		return ErrMissingEnvVariableAzureAISearchEndpoint
 	}
 
 	if s.embedder == nil {
@@ -76,7 +76,7 @@ func applyClientOptions(s *Store, opts ...Option) error {
 	}
 
 	if envVariableAPIKey := os.Getenv(EnvironmentVariableAPIKey); envVariableAPIKey != "" {
-		s.cognitiveSearchAPIKey = envVariableAPIKey
+		s.azureAISearchAPIKey = envVariableAPIKey
 	}
 
 	return nil

@@ -81,7 +81,7 @@ func (s *Store) CreateIndex(ctx context.Context, indexName string, opts ...Index
 }
 
 func (s *Store) CreateIndexAPIRequest(ctx context.Context, indexName string, payload any) error {
-	URL := fmt.Sprintf("%s/indexes/%s?api-version=2023-11-01", s.cognitiveSearchEndpoint, indexName)
+	URL := fmt.Sprintf("%s/indexes/%s?api-version=2023-11-01", s.azureAISearchEndpoint, indexName)
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("err marshalling json: %w", err)
@@ -93,11 +93,11 @@ func (s *Store) CreateIndexAPIRequest(ctx context.Context, indexName string, pay
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	if s.cognitiveSearchAPIKey != "" {
-		req.Header.Add("api-key", s.cognitiveSearchAPIKey)
+	if s.azureAISearchAPIKey != "" {
+		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	if err := s.HTTPDefaultSend(req, "index creating for cognitive search", nil); err != nil {
+	if err := s.HTTPDefaultSend(req, "index creating for azure ai search", nil); err != nil {
 		return fmt.Errorf("err request: %w", err)
 	}
 

@@ -13,10 +13,10 @@ import (
 )
 
 type Store struct {
-	cognitiveSearchEndpoint string
-	cognitiveSearchAPIKey   string
-	embedder                embeddings.Embedder
-	client                  *http.Client
+	azureAISearchEndpoint string
+	azureAISearchAPIKey   string
+	embedder              embeddings.Embedder
+	client                *http.Client
 }
 
 var (

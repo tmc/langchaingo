@@ -85,20 +85,20 @@ func (s *Store) SearchDocuments(
 	payload SearchDocumentsRequestInput,
 	output *SearchDocumentsRequestOuput,
 ) error {
-	URL := fmt.Sprintf("%s/indexes/%s/docs/search?api-version=2023-07-01-Preview", s.cognitiveSearchEndpoint, indexName)
+	URL := fmt.Sprintf("%s/indexes/%s/docs/search?api-version=2023-07-01-Preview", s.azureAISearchEndpoint, indexName)
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("err marshalling document for cognitive search: %w", err)
+		return fmt.Errorf("err marshalling document for azure ai search: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, URL, bytes.NewBuffer(body))
 	if err != nil {
-		return fmt.Errorf("err setting request for cognitive search document: %w", err)
+		return fmt.Errorf("err setting request for azure ai search document: %w", err)
 	}
 
 	req.Header.Add("content-Type", "application/json")
-	if s.cognitiveSearchAPIKey != "" {
-		req.Header.Add("api-key", s.cognitiveSearchAPIKey)
+	if s.azureAISearchAPIKey != "" {
+		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
-	return s.HTTPDefaultSend(req, "search documents on cognitive search", output)
+	return s.HTTPDefaultSend(req, "search documents on azure ai search", output)
 }

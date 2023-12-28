@@ -43,7 +43,7 @@ func (s *Store) UploadDocument(
 
 // tech debt: should use SDK when available: https://azure.github.io/azure-sdk/releases/latest/go.html
 func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, document any) error {
-	URL := fmt.Sprintf("%s/indexes/%s/docs/index?api-version=2020-06-30", s.cognitiveSearchEndpoint, indexName)
+	URL := fmt.Sprintf("%s/indexes/%s/docs/index?api-version=2020-06-30", s.azureAISearchEndpoint, indexName)
 
 	documentMap := map[string]interface{}{}
 	err := StructToMap(document, &documentMap)
@@ -59,18 +59,18 @@ func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, 
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("err marshalling body for cognitive search: %w", err)
+		return fmt.Errorf("err marshalling body for azure ai search: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, URL, bytes.NewBuffer(body))
 	if err != nil {
-		return fmt.Errorf("err setting request for cognitive search upload document: %w", err)
+		return fmt.Errorf("err setting request for azure ai search upload document: %w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	if s.cognitiveSearchAPIKey != "" {
-		req.Header.Add("api-key", s.cognitiveSearchAPIKey)
+	if s.azureAISearchAPIKey != "" {
+		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	return s.HTTPDefaultSend(req, "cognitive search upload document", nil)
+	return s.HTTPDefaultSend(req, "azure ai search upload document", nil)
 }

@@ -70,7 +70,7 @@ func setLLM(t *testing.T) *openai.LLM {
 	return llm
 }
 
-func TestCognitivesearchStoreRest(t *testing.T) {
+func TestAzureaiSearchStoreRest(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
@@ -99,7 +99,7 @@ func TestCognitivesearchStoreRest(t *testing.T) {
 	require.Equal(t, "tokyo", docs[0].PageContent)
 }
 
-func TestCognitivesearchStoreRestWithScoreThreshold(t *testing.T) {
+func TestAzureaiSearchStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
@@ -139,7 +139,7 @@ func TestCognitivesearchStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 6)
 }
 
-func TestCognitivesearchAsRetriever(t *testing.T) {
+func TestAzureaiSearchAsRetriever(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
@@ -181,7 +181,7 @@ func TestCognitivesearchAsRetriever(t *testing.T) {
 	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
 }
 
-func TestCognitivesearchAsRetrieverWithScoreThreshold(t *testing.T) {
+func TestAzureaiSearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
