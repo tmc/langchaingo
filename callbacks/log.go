@@ -29,6 +29,10 @@ func (l LogHandler) HandleLLMEnd(_ context.Context, output llms.LLMResult) {
 	fmt.Println("Exiting LLM with results:", formatLLMResult(output))
 }
 
+func (l LogHandler) HandleLLMError(_ context.Context, err error) {
+	fmt.Println("Exiting LLM with error:", err)
+}
+
 func (l LogHandler) HandleChainStart(_ context.Context, inputs map[string]any) {
 	fmt.Println("Entering chain with inputs:", formatChainValues(inputs))
 }
@@ -37,12 +41,20 @@ func (l LogHandler) HandleChainEnd(_ context.Context, outputs map[string]any) {
 	fmt.Println("Exiting chain with outputs:", formatChainValues(outputs))
 }
 
+func (l LogHandler) HandleChainError(_ context.Context, err error) {
+	fmt.Println("Exiting chain with error:", err)
+}
+
 func (l LogHandler) HandleToolStart(_ context.Context, input string) {
 	fmt.Println("Entering tool with input:", removeNewLines(input))
 }
 
 func (l LogHandler) HandleToolEnd(_ context.Context, output string) {
 	fmt.Println("Exiting tool with output:", removeNewLines(output))
+}
+
+func (l LogHandler) HandleToolError(_ context.Context, err error) {
+	fmt.Println("Exiting tool with error:", err)
 }
 
 func (l LogHandler) HandleAgentAction(_ context.Context, action schema.AgentAction) {
