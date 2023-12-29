@@ -19,10 +19,7 @@ type Chat struct {
 	client *vertexaiclient.PaLMClient
 }
 
-var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // Chat requests a chat response for the given messages.
 func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll
@@ -74,10 +71,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 
 	return generations, nil
-}
-
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
 func (o *Chat) GetNumTokens(text string) int {

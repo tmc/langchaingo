@@ -64,7 +64,7 @@ func TestMilvusConnection(t *testing.T) {
 	storer, err := getNewStore(t, WithDropOld())
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},

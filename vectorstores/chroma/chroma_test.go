@@ -48,7 +48,7 @@ func TestChromaGoStoreRest(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(context.Background(), []schema.Document{
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -91,7 +91,7 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(context.Background(), []schema.Document{
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -139,7 +139,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(context.Background(), []schema.Document{
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -184,7 +184,7 @@ func TestChromaAsRetriever(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(
+	_, err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -227,7 +227,7 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(
+	_, err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -276,7 +276,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(
+	_, err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -352,7 +352,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	addDocumentsErr := s.AddDocuments(
+	_, addDocumentsErr := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -433,7 +433,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(
+	_, err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -507,7 +507,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	err = s.AddDocuments(
+	_, err = s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{

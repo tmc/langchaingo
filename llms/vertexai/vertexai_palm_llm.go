@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -22,10 +21,7 @@ type LLM struct {
 	client           *vertexaiclient.PaLMClient
 }
 
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -91,10 +87,6 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	return embeddings, nil
-}
-
-func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {
