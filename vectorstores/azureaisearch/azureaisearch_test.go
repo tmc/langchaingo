@@ -87,7 +87,7 @@ func TestAzureaiSearchStoreRest(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
@@ -116,7 +116,7 @@ func TestAzureaiSearchStoreRestWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -156,7 +156,7 @@ func TestAzureaiSearchAsRetriever(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(
+	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -198,7 +198,7 @@ func TestAzureaiSearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(
+	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},

@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 type Document struct {
@@ -20,6 +18,7 @@ type Document struct {
 
 func (s *Store) UploadDocument(
 	ctx context.Context,
+	id string,
 	indexName string,
 	text string,
 	vector []float32,
@@ -32,7 +31,7 @@ func (s *Store) UploadDocument(
 
 	document := Document{
 		SearchAction:        "upload",
-		FieldsID:            uuid.NewString(),
+		FieldsID:            id,
 		FieldsContent:       text,
 		FieldsContentVector: vector,
 		FieldsMetadata:      string(metadataString),

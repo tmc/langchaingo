@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -48,8 +49,13 @@ func New(opts ...Option) (Store, error) {
 
 var _ vectorstores.VectorStore = Store{}
 
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+func (s Store) AddDocuments(
+	ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
+	ids := []string{}
 
 	texts := []string{}
 
@@ -59,20 +65,21 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return ids, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrNumberOfVectorDoesNotMatch
+		return ids, ErrNumberOfVectorDoesNotMatch
 	}
-
 	for i, doc := range docs {
-		if err = s.UploadDocument(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata); err != nil {
-			return err
+		id := uuid.NewString()
+		if err = s.UploadDocument(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata); err != nil {
+			return ids, err
 		}
+		ids = append(ids, id)
 	}
 
-	return nil
+	return ids, nil
 }
 
 func (s Store) SimilaritySearch(
