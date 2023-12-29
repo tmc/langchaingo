@@ -86,6 +86,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			StreamingFunc: opts.StreamingFunc,
 		})
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return nil, err
 		}
 		generations = append(generations, &llms.Generation{

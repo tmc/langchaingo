@@ -48,7 +48,11 @@ func NewOneShotAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...Creatio
 	}
 
 	return &OneShotZeroAgent{
-		Chain:            chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
+		Chain: chains.NewLLMChain(
+			llm,
+			options.getMrklPrompt(tools),
+			chains.WithCallback(options.callbacksHandler),
+		),
 		Tools:            tools,
 		OutputKey:        options.outputKey,
 		CallbacksHandler: options.callbacksHandler,

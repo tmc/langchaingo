@@ -45,7 +45,11 @@ func NewConversationalAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...
 	}
 
 	return &ConversationalAgent{
-		Chain:            chains.NewLLMChain(llm, options.getConversationalPrompt(tools)),
+		Chain: chains.NewLLMChain(
+			llm,
+			options.getConversationalPrompt(tools),
+			chains.WithCallback(options.callbacksHandler),
+		),
 		Tools:            tools,
 		OutputKey:        options.outputKey,
 		CallbacksHandler: options.callbacksHandler,

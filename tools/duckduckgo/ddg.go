@@ -52,6 +52,9 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good DuckDuckGo Search Results was found", nil
 		}
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return "", err
 	}
 
