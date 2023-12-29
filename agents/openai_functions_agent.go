@@ -29,19 +29,7 @@ type OpenAIFunctionsAgent struct {
 
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
-/*
-	An Agent driven by OpenAIs function powered API.
-
-Args:
-
-	llm: This should be an instance of ChatOpenAI, specifically a model
-		that supports using `functions`.
-	tools: The tools this agent has access to.
-	prompt: The prompt for this agent, should support agent_scratchpad as one
-		of the variables. For an easy way to construct this prompt, use
-		`OpenAIFunctionsAgent.create_prompt(...)`
-*/
-
+// NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
 func NewOpenAIFunctionsAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
