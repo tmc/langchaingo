@@ -39,7 +39,7 @@ type APIChain struct {
 //
 // It takes a LanguageModel(llm) and an HTTPRequest(request) as parameters.
 // It returns an APIChain object.
-func NewAPIChain(llm llms.LanguageModel, request HTTPRequest) APIChain {
+func NewAPIChain(llm llms.LLM, request HTTPRequest) APIChain {
 	reqPrompt := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "input"})
 	reqChain := NewLLMChain(llm, reqPrompt)
 
