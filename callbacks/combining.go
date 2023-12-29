@@ -79,3 +79,21 @@ func (l CombiningHandler) HandleStreamingFunc(ctx context.Context, chunk []byte)
 		handle.HandleStreamingFunc(ctx, chunk)
 	}
 }
+
+func (l CombiningHandler) HandleChainError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleChainError(ctx, err)
+	}
+}
+
+func (l CombiningHandler) HandleLLMError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleLLMError(ctx, err)
+	}
+}
+
+func (l CombiningHandler) HandleToolError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleToolError(ctx, err)
+	}
+}
