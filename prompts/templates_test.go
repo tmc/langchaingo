@@ -59,10 +59,10 @@ func TestInterpolateGoTemplate(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, tc.expected, actual)
 			})
-			t.Run("jinjia2", func(t *testing.T) {
+			t.Run("jinja2", func(t *testing.T) {
 				t.Parallel()
 
-				actual, err := interpolateJinjia2(strings.ReplaceAll(tc.template, "{{ .", "{{ "), tc.templateValues)
+				actual, err := interpolateJinja2(strings.ReplaceAll(tc.template, "{{ .", "{{ "), tc.templateValues)
 				require.NoError(t, err)
 				assert.Equal(t, tc.expected, actual)
 			})
@@ -105,7 +105,7 @@ func TestCheckValidTemplate(t *testing.T) {
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
 		require.Error(t, err)
 		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template jinjia2]")
+		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template jinja2]")
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {
