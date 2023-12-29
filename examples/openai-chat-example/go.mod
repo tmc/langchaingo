@@ -1,8 +1,10 @@
 module github.com/tmc/langchaingo/examples/openai-chat-example
 
-go 1.19
+go 1.21
 
-require github.com/tmc/langchaingo v0.1.1
+toolchain go1.21.4
+
+require github.com/tmc/langchaingo v0.1.2
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect
