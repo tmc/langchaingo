@@ -1,0 +1,18 @@
+You are given the API Documentation:
+
+{{.api_docs}}
+
+Your task is to construct a full API JSON object based on the provided input. The input could be a question that requires an API call for its answer, or a direct or indirect instruction to consume an API. The input will be unpredictable and could come from a user or an agent.
+
+Your goal is to create an API call that accurately reflects the intent of the input. Be sure to exclude any unnecessary data in the API call to ensure efficiency.
+
+Input: {{.input}}
+
+Respond with a JSON object.
+
+{
+    "method":  [the HTTP method for the API call, such as GET or POST],
+    "headers": [object representing the HTTP headers required for the API call, always add a "Content-Type" header],
+    "url": 	   [full for the API call],
+    "body":    [object containing the data sent with the request, if needed]
+}
