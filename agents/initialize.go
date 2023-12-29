@@ -22,6 +22,8 @@ const (
 // Initialize is a function that creates a new executor with the specified LLM
 // model, tools, agent type, and options. It returns an Executor or an error
 // if there is any issues during the creation process.
+//
+// Deprecated: Use specific agent creation functions instead.
 func Initialize(
 	llm llms.LanguageModel,
 	tools []tools.Tool,
