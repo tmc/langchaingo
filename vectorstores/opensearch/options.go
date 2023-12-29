@@ -27,14 +27,12 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func WithFilters(filters any) vectorstores.Option {
-	return func(o *vectorstores.Options) {
-		o.Filters = filters
-	}
-}
-
+// Option is a function type that can be used to modify the client.
 type Option func(p *Store)
 
+// WithEmbedder returns an Option for setting the embedder that could be used when
+// adding documents or doing similarity search (instead the embedder from the Store context)
+// this is useful when we are using multiple LLMs with single vectorstore.
 func WithEmbedder(e embeddings.Embedder) Option {
 	return func(p *Store) {
 		p.embedder = e

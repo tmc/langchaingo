@@ -1,6 +1,6 @@
 package opensearch
 
-type SearchResults struct {
+type searchResults struct {
 	Took     int  `json:"took"`
 	TimedOut bool `json:"timed_out"`
 	Shards   struct {
@@ -15,13 +15,13 @@ type SearchResults struct {
 			Relation string `json:"relation"`
 		} `json:"total"`
 		MaxScore float64            `json:"max_score"`
-		Hits     []SearchResultsHit `json:"hits"`
+		Hits     []searchResultsHit `json:"hits"`
 	} `json:"hits"`
 }
 
-type SearchResultsHit struct {
+type searchResultsHit struct {
 	Index  string   `json:"_index"`
 	ID     string   `json:"_id"`
 	Score  float32  `json:"_score"`
-	Source Document `json:"_source"`
+	Source document `json:"_source"`
 }

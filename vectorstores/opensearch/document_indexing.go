@@ -9,13 +9,13 @@ import (
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
-type Document struct {
-	FieldsContent       string    `json:"content"`
-	FieldsContentVector []float32 `json:"contentVector"`
-	FieldsMetadata      string    `json:"metadata"`
+type document struct {
+	FieldsContent       string                 `json:"content"`
+	FieldsContentVector []float32              `json:"contentVector"`
+	FieldsMetadata      map[string]interface{} `json:"metadata"`
 }
 
-func (s *Store) DocumentIndexing(
+func (s *Store) documentIndexing(
 	ctx context.Context,
 	id string,
 	indexName string,
@@ -23,15 +23,11 @@ func (s *Store) DocumentIndexing(
 	vector []float32,
 	metadata map[string]any,
 ) (*opensearchapi.Response, error) {
-	metadataString, err := json.Marshal(metadata)
-	if err != nil {
-		return nil, err
-	}
 
-	document := Document{
+	document := document{
 		FieldsContent:       text,
 		FieldsContentVector: vector,
-		FieldsMetadata:      string(metadataString),
+		FieldsMetadata:      metadata,
 	}
 
 	buf := new(bytes.Buffer)

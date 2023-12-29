@@ -16,6 +16,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
+// Store is a wrapper around the chromaGo API and client.
 type Store struct {
 	embedder embeddings.Embedder
 	client   *opensearchgo.Client
@@ -25,11 +26,14 @@ var (
 	ErrNumberOfVectorDoesNotMatch = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
+	// Metadata is stored as string, trigger
 	ErrAssertingMetadata = errors.New(
 		"couldn't assert metadata to map",
 	)
 )
 
+// New creates and returns a vectorstore object for Opensearch
+// and returns the `Store` object needed by the other accessors.
 func New(client *opensearchgo.Client, opts ...Option) (Store, error) {
 	s := Store{
 		client: client,
@@ -44,6 +48,8 @@ func New(client *opensearchgo.Client, opts ...Option) (Store, error) {
 
 var _ vectorstores.VectorStore = Store{}
 
+// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
+// and returns the ids of the added documents.
 func (s Store) AddDocuments(
 	ctx context.Context,
 	docs []schema.Document,
@@ -68,7 +74,7 @@ func (s Store) AddDocuments(
 
 	for i, doc := range docs {
 		id := uuid.NewString()
-		_, err := s.DocumentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
+		_, err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
 		if err != nil {
 			return ids, err
 		}
@@ -78,6 +84,8 @@ func (s Store) AddDocuments(
 	return ids, nil
 }
 
+// SimilaritySearch creates a vector embedding from the query using the embedder
+// and queries to find the most similar documents.
 func (s Store) SimilaritySearch(
 	ctx context.Context,
 	query string,
@@ -122,7 +130,7 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return output, fmt.Errorf("error reading search response body: %w", err)
 	}
-	searchResults := SearchResults{}
+	searchResults := searchResults{}
 	if err := json.Unmarshal(body, &searchResults); err != nil {
 		return output, fmt.Errorf("error unmarshalling search response body: %w %s", err, body)
 	}
@@ -132,14 +140,9 @@ func (s Store) SimilaritySearch(
 			continue
 		}
 
-		metadata := map[string]interface{}{}
-		if err := json.Unmarshal([]byte(hit.Source.FieldsMetadata), &metadata); err != nil {
-			return output, ErrAssertingMetadata
-		}
-
 		output = append(output, schema.Document{
 			PageContent: hit.Source.FieldsContent,
-			Metadata:    metadata,
+			Metadata:    hit.Source.FieldsMetadata,
 			Score:       hit.Score,
 		})
 	}
