@@ -2,22 +2,19 @@ package opensearch_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	opensearchgo "github.com/opensearch-project/opensearch-go"
-
 	"github.com/google/uuid"
+	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
 )
 
@@ -48,20 +45,18 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	setIndexResponse, err := storer.CreateIndex(context.TODO(), indexName)
+	_, err := storer.CreateIndex(context.TODO(), indexName)
 	if err != nil {
 		t.Fatalf("error creating index: %v\n", err)
 	}
-	fmt.Printf("setIndexResponse: %v\n", setIndexResponse)
 }
 
 func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	removeIndexResponse, err := storer.DeleteIndex(context.TODO(), indexName)
+	_, err := storer.DeleteIndex(context.TODO(), indexName)
 	if err != nil {
 		t.Fatalf("error deleting index: %v\n", err)
 	}
-	fmt.Printf("removeIndexResponse: %v\n", removeIndexResponse)
 }
 
 func setLLM(t *testing.T) *openai.LLM {
@@ -85,7 +80,13 @@ func setLLM(t *testing.T) *openai.LLM {
 	return llm
 }
 
-func setOpensearchClient(t *testing.T, opensearchEndpoint, opensearchUser, opensearchPassword string) *opensearchgo.Client {
+func setOpensearchClient(
+	t *testing.T,
+	opensearchEndpoint,
+	opensearchUser,
+	opensearchPassword string,
+) *opensearchgo.Client {
+	t.Helper()
 	client, err := opensearchgo.NewClient(opensearchgo.Config{
 		Addresses: []string{opensearchEndpoint},
 		Username:  opensearchUser,

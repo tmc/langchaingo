@@ -6,7 +6,10 @@ import (
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
-func (s *Store) DeleteIndex(ctx context.Context, indexName string, opts ...IndexOption) (*opensearchapi.Response, error) {
+func (s *Store) DeleteIndex(
+	ctx context.Context,
+	indexName string,
+) (*opensearchapi.Response, error) {
 	deleteIndex := opensearchapi.IndicesDeleteRequest{
 		Index: []string{indexName},
 	}

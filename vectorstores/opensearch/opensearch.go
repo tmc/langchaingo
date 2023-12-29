@@ -60,7 +60,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	if len(vectors) != len(docs) {
 		return ErrNumberOfVectorDoesNotMatch
 	}
-	fmt.Printf("opts: %v\n", opts)
+
 	for i, doc := range docs {
 		_, err := s.DocumentIndexing(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
 		if err != nil {
@@ -106,23 +106,21 @@ func (s Store) SimilaritySearch(
 		Body:  buf,
 	}
 	output := []schema.Document{}
-	searchResponse, err := search.Do(context.Background(), s.client)
+	searchResponse, err := search.Do(ctx, s.client)
 	if err != nil {
-		fmt.Printf("search.Do err: %v\n", err)
-		return output, err
+		return output, fmt.Errorf("search.Do err: %w", err)
 	}
 
 	body, err := io.ReadAll(searchResponse.Body)
 	if err != nil {
-		return output, fmt.Errorf("error reading search reponse body: %w", err)
+		return output, fmt.Errorf("error reading search response body: %w", err)
 	}
 	searchResults := SearchResults{}
 	if err := json.Unmarshal(body, &searchResults); err != nil {
-		return output, fmt.Errorf("error unmarshalling search reponse body: %w %s", err, body)
+		return output, fmt.Errorf("error unmarshalling search response body: %w %s", err, body)
 	}
 
 	for _, hit := range searchResults.Hits.Hits {
-		fmt.Printf("score: %v | content %s \n", hit.Score, hit.Source.FieldsContent)
 		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > hit.Score {
 			continue
 		}
@@ -135,7 +133,7 @@ func (s Store) SimilaritySearch(
 		output = append(output, schema.Document{
 			PageContent: hit.Source.FieldsContent,
 			Metadata:    metadata,
-			Score:       float32(hit.Score),
+			Score:       hit.Score,
 		})
 	}
 

@@ -23,7 +23,6 @@ func (s *Store) DocumentIndexing(
 	vector []float32,
 	metadata map[string]any,
 ) (*opensearchapi.Response, error) {
-
 	metadataString, err := json.Marshal(metadata)
 	if err != nil {
 		return nil, err
