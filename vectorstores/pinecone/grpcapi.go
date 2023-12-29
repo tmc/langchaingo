@@ -47,18 +47,22 @@ func (s Store) grpcUpsert(
 	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
-) error {
+) ([]string, error) {
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
+
+	ids := make([]string, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		metadataStruct, err := structpb.NewStruct(metadatas[i])
 		if err != nil {
-			return err
+			return nil, err
 		}
 
+		id := uuid.New().String()
+		ids[i] = id
 		pineconeVectors = append(
 			pineconeVectors,
 			&pinecone_grpc.Vector{
-				Id:       uuid.New().String(),
+				Id:       id,
 				Values:   vectors[i],
 				Metadata: metadataStruct,
 			},
@@ -70,7 +74,7 @@ func (s Store) grpcUpsert(
 		Namespace: nameSpace,
 	})
 
-	return err
+	return ids, err
 }
 
 func (s Store) grpcQuery(

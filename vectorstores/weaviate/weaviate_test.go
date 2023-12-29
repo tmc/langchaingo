@@ -85,7 +85,7 @@ func TestWeaviateStoreRest(t *testing.T) {
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
 
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -122,7 +122,7 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
 
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -172,7 +172,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
 
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -221,7 +221,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -267,7 +267,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -321,7 +321,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	nameSpace := randomizedCamelCaseClass()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -409,7 +409,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	nameSpace := randomizedCamelCaseClass()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -489,7 +489,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	nameSpace := randomizedCamelCaseClass()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
