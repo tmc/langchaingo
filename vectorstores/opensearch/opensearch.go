@@ -23,10 +23,12 @@ type Store struct {
 }
 
 var (
+	// ErrNumberOfVectorDoesNotMatch when providing documents,
+	// the number of vectors generated should be equal to the number of docs.
 	ErrNumberOfVectorDoesNotMatch = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
-	// Metadata is stored as string, trigger
+	// ErrAssertingMetadata Metadata is stored as string, trigger.
 	ErrAssertingMetadata = errors.New(
 		"couldn't assert metadata to map",
 	)

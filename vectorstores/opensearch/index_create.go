@@ -9,7 +9,7 @@ import (
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
-// IndexOption for passing the schema of the index as option argument for custom modification
+// IndexOption for passing the schema of the index as option argument for custom modification.
 type IndexOption func(indexMap *map[string]interface{})
 
 const (
@@ -22,7 +22,7 @@ const (
 	hnswParametersEfSearch       = 512
 )
 
-// CreateIndex for creating an index before to add a document to it
+// CreateIndex for creating an index before to add a document to it.
 func (s *Store) CreateIndex(
 	ctx context.Context,
 	indexName string,

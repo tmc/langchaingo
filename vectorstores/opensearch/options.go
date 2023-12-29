@@ -8,12 +8,11 @@ import (
 )
 
 var (
-	ErrMissingEnvVariableOpensearchEndpoint = errors.New(
-		"missing opensearchEndpoint",
-	)
+	// ErrMissingEmbedded an embedder must be provided.
 	ErrMissingEmbedded = errors.New(
 		"missing embedder",
 	)
+	// ErrMissingOpensearchClient an opensearch client must be provided.
 	ErrMissingOpensearchClient = errors.New(
 		"missing opensearch client",
 	)

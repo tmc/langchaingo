@@ -23,7 +23,6 @@ func (s *Store) documentIndexing(
 	vector []float32,
 	metadata map[string]any,
 ) (*opensearchapi.Response, error) {
-
 	document := document{
 		FieldsContent:       text,
 		FieldsContentVector: vector,
