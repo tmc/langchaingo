@@ -23,21 +23,21 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		t.Fatalf("Must set %s to run test", "OPENSEARCH_ENDPOINT")
+		t.Skip()
 	}
 
 	opensearchUser := os.Getenv("OPENSEARCH_USER")
 	if opensearchUser == "" {
-		t.Fatalf("Must set %s to run test", "OPENSEARCH_USER")
+		t.Skip()
 	}
 
 	opensearchPassword := os.Getenv("OPENSEARCH_PASSWORD")
 	if opensearchPassword == "" {
-		t.Fatalf("Must set %s to run test", "OPENSEARCH_PASSWORD")
+		t.Skip()
 	}
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	if openaiKey == "" {
-		t.Fatal("OPENAI_API_KEY not set")
+		t.Skip()
 	}
 
 	return opensearchEndpoint, opensearchUser, opensearchPassword
