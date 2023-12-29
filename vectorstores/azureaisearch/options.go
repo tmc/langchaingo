@@ -28,7 +28,7 @@ var (
 	)
 )
 
-func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
+func (s *Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	opts := vectorstores.Options{}
 	for _, opt := range options {
 		opt(&opts)

@@ -173,7 +173,7 @@ func TestAzureaiSearchAsRetriever(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(storer, 1, vectorstores.WithNameSpace(indexName)),
+			vectorstores.ToRetriever(&storer, 1, vectorstores.WithNameSpace(indexName)),
 		),
 		"What color is the desk?",
 	)
@@ -215,7 +215,7 @@ func TestAzureaiSearchAsRetrieverWithScoreThreshold(t *testing.T) {
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(storer, 5,
+			vectorstores.ToRetriever(&storer, 5,
 				vectorstores.WithNameSpace(indexName),
 				vectorstores.WithScoreThreshold(0.8)),
 		),

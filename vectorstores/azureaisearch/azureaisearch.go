@@ -55,11 +55,11 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-var _ vectorstores.VectorStore = Store{}
+var _ vectorstores.VectorStore = &Store{}
 
 // AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
 // and returns the ids of the added documents.
-func (s Store) AddDocuments(
+func (s *Store) AddDocuments(
 	ctx context.Context,
 	docs []schema.Document,
 	options ...vectorstores.Option,
@@ -94,8 +94,9 @@ func (s Store) AddDocuments(
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
-func (s Store) SimilaritySearch(
-	ctx context.Context, query string,
+func (s *Store) SimilaritySearch(
+	ctx context.Context,
+	query string,
 	numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
