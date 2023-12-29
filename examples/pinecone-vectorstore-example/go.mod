@@ -1,10 +1,12 @@
 module github.com/tmc/langchaingo/examples/pinecone-vectorstore-example
 
-go 1.20
+go 1.21
+
+toolchain go1.21.4
 
 require (
 	github.com/google/uuid v1.3.1
-	github.com/tmc/langchaingo v0.1.1
+	github.com/tmc/langchaingo v0.1.2-alpha.1
 )
 
 require (
