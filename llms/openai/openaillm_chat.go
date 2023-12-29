@@ -25,8 +25,7 @@ const (
 )
 
 var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
+	_ llms.ChatLLM = (*Chat)(nil)
 )
 
 // NewChat returns a new OpenAI chat LLM.

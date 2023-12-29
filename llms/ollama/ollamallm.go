@@ -23,8 +23,7 @@ type LLM struct {
 }
 
 var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
+	_ llms.LLM = (*LLM)(nil)
 )
 
 // New creates a new ollama LLM implementation.

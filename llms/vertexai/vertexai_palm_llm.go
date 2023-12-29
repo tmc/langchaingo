@@ -23,8 +23,7 @@ type LLM struct {
 }
 
 var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
+	_ llms.LLM = (*LLM)(nil)
 )
 
 // Call requests a completion for the given prompt.

@@ -24,8 +24,7 @@ type LLM struct {
 }
 
 var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
+	_ llms.LLM = (*LLM)(nil)
 )
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {

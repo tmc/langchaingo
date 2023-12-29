@@ -29,8 +29,7 @@ type LLM struct {
 
 // _ ensures that LLM implements the llms.LLM and language model interface.
 var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
+	_ llms.LLM = (*LLM)(nil)
 )
 
 // Call calls the local LLM binary with the given prompt.

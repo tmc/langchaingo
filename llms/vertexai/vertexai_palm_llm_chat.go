@@ -20,8 +20,7 @@ type Chat struct {
 }
 
 var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
+	_ llms.ChatLLM = (*Chat)(nil)
 )
 
 // Chat requests a chat response for the given messages.
