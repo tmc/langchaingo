@@ -22,16 +22,16 @@ func checkEnvVariables(t *testing.T) {
 
 	azureaisearchEndpoint := os.Getenv(azureaisearch.EnvironmentVariableEndpoint)
 	if azureaisearchEndpoint == "" {
-		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariableEndpoint)
+		t.Skip()
 	}
 
 	azureaisearchAPIKey := os.Getenv(azureaisearch.EnvironmentVariableAPIKey)
 	if azureaisearchAPIKey == "" {
-		t.Fatalf("Must set %s to run test", azureaisearch.EnvironmentVariableAPIKey)
+		t.Skip()
 	}
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Fatal("OPENAI_API_KEY not set")
+		t.Skip()
 	}
 }
 
