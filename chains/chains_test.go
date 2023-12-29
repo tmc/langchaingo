@@ -22,30 +22,50 @@ type testLanguageModel struct {
 	recordedPrompt []schema.PromptValue
 }
 
-func (l *testLanguageModel) GeneratePrompt(_ context.Context, promptValue []schema.PromptValue, _ ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	l.recordedPrompt = promptValue
+type stringPromptValue struct {
+	s string
+}
+
+func (spv stringPromptValue) String() string {
+	return spv.s
+}
+
+func (spv stringPromptValue) Messages() []schema.ChatMessage {
+	return nil
+}
+
+func (l *testLanguageModel) Call(_ context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	l.recordedPrompt = []schema.PromptValue{
+		stringPromptValue{s: prompt},
+	}
 	if l.simulateWork > 0 {
 		time.Sleep(l.simulateWork)
 	}
 
 	var llmResult string
+
 	if l.expResult != "" {
 		llmResult = l.expResult
 	} else {
-		llmResult = promptValue[0].String()
+		llmResult = prompt
 	}
-	return llms.LLMResult{
-		Generations: [][]*llms.Generation{{&llms.Generation{
-			Text: llmResult,
-		}}},
+
+	return llmResult, nil
+}
+
+func (l *testLanguageModel) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+	result, err := l.Call(ctx, prompts[0], options...)
+	if err != nil {
+		return nil, err
+	}
+	return []*llms.Generation{
+		&llms.Generation{
+			Text: result,
+		},
 	}, nil
 }
 
-func (l *testLanguageModel) GetNumTokens(text string) int {
-	return len(text)
-}
-
-var _ llms.LanguageModel = &testLanguageModel{}
+var _ llms.LLM = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
 	t.Parallel()
