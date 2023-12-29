@@ -38,7 +38,7 @@ func (l *testLanguageModel) GetNumTokens(_ string) int {
 	return -1
 }
 
-func (l *testLanguageModel) Call(_ context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (l *testLanguageModel) Call(_ context.Context, prompt string, _ ...llms.CallOption) (string, error) {
 	l.recordedPrompt = []schema.PromptValue{
 		stringPromptValue{s: prompt},
 	}
@@ -57,13 +57,15 @@ func (l *testLanguageModel) Call(_ context.Context, prompt string, options ...ll
 	return llmResult, nil
 }
 
-func (l *testLanguageModel) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+func (l *testLanguageModel) Generate(
+	ctx context.Context, prompts []string, options ...llms.CallOption,
+) ([]*llms.Generation, error) {
 	result, err := l.Call(ctx, prompts[0], options...)
 	if err != nil {
 		return nil, err
 	}
 	return []*llms.Generation{
-		&llms.Generation{
+		{
 			Text: result,
 		},
 	}, nil

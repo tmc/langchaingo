@@ -13,9 +13,7 @@ type LLM struct {
 	client           *openaiclient.Client
 }
 
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {

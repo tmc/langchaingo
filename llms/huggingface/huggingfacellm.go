@@ -21,9 +21,7 @@ type LLM struct {
 	client           *huggingfaceclient.Client
 }
 
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	r, err := o.Generate(ctx, []string{prompt}, options...)

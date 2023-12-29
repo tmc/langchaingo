@@ -24,9 +24,7 @@ const (
 	RoleFunction  = "function"
 )
 
-var (
-	_ llms.ChatLLM = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // NewChat returns a new OpenAI chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {

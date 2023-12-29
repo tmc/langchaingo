@@ -19,9 +19,7 @@ type Chat struct {
 	client *vertexaiclient.PaLMClient
 }
 
-var (
-	_ llms.ChatLLM = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // Chat requests a chat response for the given messages.
 func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll

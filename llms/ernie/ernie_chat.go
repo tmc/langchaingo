@@ -18,9 +18,7 @@ type Chat struct {
 	client           *ernieclient.Client
 }
 
-var (
-	_ llms.ChatLLM = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 func NewChat(opts ...Option) (*Chat, error) {
 	options := &options{

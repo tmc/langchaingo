@@ -22,9 +22,7 @@ type LLM struct {
 	CallbacksHandler callbacks.Handler
 }
 
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {

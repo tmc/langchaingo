@@ -21,9 +21,7 @@ type LLM struct {
 	options          options
 }
 
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New creates a new ollama LLM implementation.
 func New(opts ...Option) (*LLM, error) {

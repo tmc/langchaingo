@@ -19,9 +19,7 @@ type Chat struct {
 	options          chatOptions
 }
 
-var (
-	_ llms.ChatLLM = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // New creates a new ollama LLM implementation.
 func NewChat(opts ...ChatOption) (*Chat, error) {

@@ -22,9 +22,7 @@ type LLM struct {
 	client           *anthropicclient.Client
 }
 
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
