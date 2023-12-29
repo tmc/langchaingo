@@ -190,29 +190,30 @@ func (s *Store) load(ctx context.Context) error {
 }
 
 // AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store'.
+// and returns the ids of the added documents.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	_ ...vectorstores.Option,
-) error {
+) ([]string, error) {
 	texts := make([]string, 0, len(docs))
 	metadatas := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 		buf, err := json.Marshal(doc.Metadata)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		metadatas = append(metadatas, string(buf))
 	}
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrEmbedderWrongNumberVectors
+		return nil, ErrEmbedderWrongNumberVectors
 	}
 	if err := s.init(ctx, len(vectors[0])); err != nil {
-		return err
+		return nil, err
 	}
 
 	textCol := entity.NewColumnVarChar(s.textField, texts)
@@ -220,10 +221,10 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	vectorCol := entity.NewColumnFloatVector(s.vectorField, len(vectors[0]), vectors)
 	_, err = s.client.Insert(ctx, s.collectionName, s.partitionName, vectorCol, metaCol, textCol)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (s *Store) getSearchFields() []string {

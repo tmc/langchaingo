@@ -1,0 +1,8 @@
+Begin!
+
+Previous conversation history:
+{{.history}}
+
+New input: {{.input}}
+
+Thought:{{.agent_scratchpad}}
