@@ -40,7 +40,7 @@ func main() {
 	type meta = map[string]any
 
 	// Add documents to the vector store.
-	errAd := store.AddDocuments(context.Background(), []schema.Document{
+	_, errAd := store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo", Metadata: meta{"population": 9.7, "area": 622}},
 		{PageContent: "Kyoto", Metadata: meta{"population": 1.46, "area": 828}},
 		{PageContent: "Hiroshima", Metadata: meta{"population": 1.2, "area": 905}},
