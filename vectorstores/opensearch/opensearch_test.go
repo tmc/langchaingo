@@ -2,15 +2,17 @@ package opensearch_test
 
 import (
 	"context"
-	"crypto/tls"
-	"net/http"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
@@ -46,16 +48,20 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	if _, err := storer.CreateIndex(context.TODO(), indexName); err != nil {
+	setIndexResponse, err := storer.CreateIndex(context.TODO(), indexName)
+	if err != nil {
 		t.Fatalf("error creating index: %v\n", err)
 	}
+	fmt.Printf("setIndexResponse: %v\n", setIndexResponse)
 }
 
 func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	if _, err := storer.DeleteIndex(context.TODO(), indexName); err != nil {
+	removeIndexResponse, err := storer.DeleteIndex(context.TODO(), indexName)
+	if err != nil {
 		t.Fatalf("error deleting index: %v\n", err)
 	}
+	fmt.Printf("removeIndexResponse: %v\n", removeIndexResponse)
 }
 
 func setLLM(t *testing.T) *openai.LLM {
@@ -81,9 +87,6 @@ func setLLM(t *testing.T) *openai.LLM {
 
 func setOpensearchClient(t *testing.T, opensearchEndpoint, opensearchUser, opensearchPassword string) *opensearchgo.Client {
 	client, err := opensearchgo.NewClient(opensearchgo.Config{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
 		Addresses: []string{opensearchEndpoint},
 		Username:  opensearchUser,
 		Password:  opensearchPassword,
@@ -116,9 +119,140 @@ func TestOpensearchStoreRest(t *testing.T) {
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
-
+	time.Sleep(time.Second)
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
+}
+
+func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
+	t.Parallel()
+	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
+	indexName := uuid.New().String()
+
+	llm := setLLM(t)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	storer, err := opensearch.New(
+		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
+		opensearch.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	setIndex(t, storer, indexName)
+	defer removeIndex(t, storer, indexName)
+
+	err = storer.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London "},
+		{PageContent: "New York"},
+	}, vectorstores.WithNameSpace(indexName))
+	require.NoError(t, err)
+	time.Sleep(time.Second)
+	// test with a score threshold of 0.72, expected 6 documents
+	docs, err := storer.SimilaritySearch(context.Background(),
+		"Which of these are cities in Japan", 10,
+		vectorstores.WithScoreThreshold(0.72),
+		vectorstores.WithNameSpace(indexName))
+	require.NoError(t, err)
+	require.Len(t, docs, 6)
+}
+
+func TestOpensearchAsRetriever(t *testing.T) {
+	t.Parallel()
+	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
+	indexName := uuid.New().String()
+
+	llm := setLLM(t)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	storer, err := opensearch.New(
+		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
+		opensearch.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	setIndex(t, storer, indexName)
+	defer removeIndex(t, storer, indexName)
+
+	err = storer.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the house is blue."},
+			{PageContent: "The color of the car is red."},
+			{PageContent: "The color of the desk is orange."},
+		},
+		vectorstores.WithNameSpace(indexName),
+	)
+	require.NoError(t, err)
+
+	time.Sleep(time.Second)
+
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(storer, 1, vectorstores.WithNameSpace(indexName)),
+		),
+		"What color is the desk?",
+	)
+	require.NoError(t, err)
+	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
+}
+
+func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
+	t.Parallel()
+	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
+	indexName := uuid.New().String()
+
+	llm := setLLM(t)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	storer, err := opensearch.New(
+		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
+		opensearch.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	setIndex(t, storer, indexName)
+	defer removeIndex(t, storer, indexName)
+
+	err = storer.AddDocuments(
+		context.Background(),
+		[]schema.Document{
+			{PageContent: "The color of the house is blue."},
+			{PageContent: "The color of the car is red."},
+			{PageContent: "The color of the desk is orange."},
+			{PageContent: "The color of the lamp beside the desk is black."},
+			{PageContent: "The color of the chair beside the desk is beige."},
+		},
+		vectorstores.WithNameSpace(indexName),
+	)
+	require.NoError(t, err)
+	time.Sleep(time.Second)
+	result, err := chains.Run(
+		context.TODO(),
+		chains.NewRetrievalQAFromLLM(
+			llm,
+			vectorstores.ToRetriever(storer, 5,
+				vectorstores.WithNameSpace(indexName),
+				vectorstores.WithScoreThreshold(0.8)),
+		),
+		"What colors is each piece of furniture next to the desk?",
+	)
+	require.NoError(t, err)
+
+	require.Contains(t, result, "black", "expected black in result")
+	require.Contains(t, result, "beige", "expected beige in result")
 }

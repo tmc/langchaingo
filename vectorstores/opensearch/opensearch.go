@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
@@ -22,6 +23,9 @@ type Store struct {
 var (
 	ErrNumberOfVectorDoesNotMatch = errors.New(
 		"number of vectors from embedder does not match number of documents",
+	)
+	ErrAssertingMetadata = errors.New(
+		"couldn't assert metadata to map",
 	)
 )
 
@@ -48,21 +52,18 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 		texts = append(texts, doc.PageContent)
 	}
 
-	fmt.Printf("texts: %v\n", len(texts))
-
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("vectors: %v\n", vectors)
-	fmt.Printf("len(vectors): %v\n", len(vectors))
-	fmt.Printf("len(docs): %v\n", len(docs))
+
 	if len(vectors) != len(docs) {
 		return ErrNumberOfVectorDoesNotMatch
 	}
 	fmt.Printf("opts: %v\n", opts)
 	for i, doc := range docs {
-		if _, err = s.DocumentIndexing(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata); err != nil {
+		_, err := s.DocumentIndexing(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
+		if err != nil {
 			return err
 		}
 	}
@@ -87,7 +88,7 @@ func (s Store) SimilaritySearch(
 		"size": numDocuments,
 		"query": map[string]interface{}{
 			"knn": map[string]interface{}{
-				"vector_field": map[string]interface{}{
+				"contentVector": map[string]interface{}{
 					"vector": queryVector,
 					"k":      numDocuments,
 				},
@@ -107,9 +108,36 @@ func (s Store) SimilaritySearch(
 	output := []schema.Document{}
 	searchResponse, err := search.Do(context.Background(), s.client)
 	if err != nil {
+		fmt.Printf("search.Do err: %v\n", err)
 		return output, err
 	}
-	fmt.Printf("searchResponse: %v\n", searchResponse)
 
-	return []schema.Document{}, nil
+	body, err := io.ReadAll(searchResponse.Body)
+	if err != nil {
+		return output, fmt.Errorf("error reading search reponse body: %w", err)
+	}
+	searchResults := SearchResults{}
+	if err := json.Unmarshal(body, &searchResults); err != nil {
+		return output, fmt.Errorf("error unmarshalling search reponse body: %w %s", err, body)
+	}
+
+	for _, hit := range searchResults.Hits.Hits {
+		fmt.Printf("score: %v | content %s \n", hit.Score, hit.Source.FieldsContent)
+		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > hit.Score {
+			continue
+		}
+
+		metadata := map[string]interface{}{}
+		if err := json.Unmarshal([]byte(hit.Source.FieldsMetadata), &metadata); err != nil {
+			return output, ErrAssertingMetadata
+		}
+
+		output = append(output, schema.Document{
+			PageContent: hit.Source.FieldsContent,
+			Metadata:    metadata,
+			Score:       float32(hit.Score),
+		})
+	}
+
+	return output, nil
 }
