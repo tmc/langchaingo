@@ -1,0 +1,17 @@
+Translate a math problem into a expression that can be evaluated as Starlark.
+Use the output of running this code to answer the question.
+
+---
+Question: (Question with math problem.)
+```starlark
+$(single line expression that solves the problem)
+```
+
+---
+Question: What is 37593 * 67?
+```starlark
+37593 * 67
+```
+
+---
+Question: {{.question}}
