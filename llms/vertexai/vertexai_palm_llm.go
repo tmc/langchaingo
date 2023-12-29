@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -90,10 +89,6 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	return embeddings, nil
-}
-
-func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {

@@ -180,10 +180,6 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 	return embeddings, nil
 }
 
-func (o *Chat) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, prompts, options...)
-}
-
 func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(o.options.model, text)
 }

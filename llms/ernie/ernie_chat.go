@@ -129,10 +129,6 @@ func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(o.client.Model, text)
 }
 
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
-}
-
 func getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
 	for i := 0; i < len(messageSets); i++ {

@@ -123,10 +123,6 @@ func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(o.client.Model, text)
 }
 
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
-}
-
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{

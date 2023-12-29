@@ -75,10 +75,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	return generations, nil
 }
 
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
-}
-
 func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(vertexaiclient.TextModelName, text)
 }
