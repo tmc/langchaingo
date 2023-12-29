@@ -6,7 +6,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type LLM struct {
@@ -14,10 +13,7 @@ type LLM struct {
 	client           *openaiclient.Client
 }
 
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -83,10 +79,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}
 
 	return generations, nil
-}
-
-func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {

@@ -25,7 +25,7 @@ type LLMMathChain struct {
 
 var _ Chain = LLMMathChain{}
 
-func NewLLMMathChain(llm llms.LanguageModel) LLMMathChain {
+func NewLLMMathChain(llm llms.LLM) LLMMathChain {
 	p := prompts.NewPromptTemplate(_llmMathPrompt, []string{"question"})
 	c := NewLLMChain(llm, p)
 	return LLMMathChain{

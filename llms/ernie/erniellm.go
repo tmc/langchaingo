@@ -9,7 +9,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -23,10 +22,7 @@ type LLM struct {
 	CallbacksHandler callbacks.Handler
 }
 
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -63,14 +59,6 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
 }
 
-// GeneratePrompt implements llms.LanguageModel.
-func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue,
-	options ...llms.CallOption,
-) (llms.LLMResult, error) {
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
-}
-
-// GetNumTokens implements llms.LanguageModel.
 func (o *LLM) GetNumTokens(_ string) int {
 	// todo: not provided yet
 	// see: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu

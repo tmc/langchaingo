@@ -11,7 +11,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -29,8 +28,7 @@ type LLM struct {
 
 // _ ensures that LLM implements the llms.LLM and language model interface.
 var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
+	_ llms.LLM = (*LLM)(nil)
 )
 
 // Call calls the local LLM binary with the given prompt.
@@ -108,14 +106,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}
 
 	return generations, nil
-}
-
-func (o *LLM) GeneratePrompt(
-	ctx context.Context,
-	prompts []schema.PromptValue,
-	options ...llms.CallOption,
-) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, prompts, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {
