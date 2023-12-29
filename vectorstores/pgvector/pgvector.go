@@ -300,10 +300,7 @@ func (s *Store) createOrGetCollection(ctx context.Context) error {
 		return err
 	}
 	sql = fmt.Sprintf(`SELECT uuid FROM %s WHERE name = $1 ORDER BY name limit 1`, s.collectionTableName)
-	if err := s.conn.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID); err != nil {
-		return err
-	}
-	return nil
+	return s.conn.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID)
 }
 
 // getOptions applies given options to default Options and returns it
