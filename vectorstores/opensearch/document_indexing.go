@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
@@ -18,6 +17,7 @@ type Document struct {
 
 func (s *Store) DocumentIndexing(
 	ctx context.Context,
+	id string,
 	indexName string,
 	text string,
 	vector []float32,
@@ -42,7 +42,7 @@ func (s *Store) DocumentIndexing(
 
 	indice := opensearchapi.IndexRequest{
 		Index:      indexName,
-		DocumentID: uuid.NewString(),
+		DocumentID: id,
 		Body:       buf,
 	}
 

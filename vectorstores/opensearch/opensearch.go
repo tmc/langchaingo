@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 	"github.com/tmc/langchaingo/embeddings"
@@ -43,9 +44,13 @@ func New(client *opensearchgo.Client, opts ...Option) (Store, error) {
 
 var _ vectorstores.VectorStore = Store{}
 
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+func (s Store) AddDocuments(
+	ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
-
+	ids := []string{}
 	texts := []string{}
 
 	for _, doc := range docs {
@@ -54,21 +59,23 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return ids, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrNumberOfVectorDoesNotMatch
+		return ids, ErrNumberOfVectorDoesNotMatch
 	}
 
 	for i, doc := range docs {
-		_, err := s.DocumentIndexing(ctx, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
+		id := uuid.NewString()
+		_, err := s.DocumentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
 		if err != nil {
-			return err
+			return ids, err
 		}
+		ids = append(ids, id)
 	}
 
-	return nil
+	return ids, nil
 }
 
 func (s Store) SimilaritySearch(

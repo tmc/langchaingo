@@ -23,21 +23,21 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		t.Skip()
+		t.Skipf("Must set %s to run test", "OPENSEARCH_ENDPOINT")
 	}
 
 	opensearchUser := os.Getenv("OPENSEARCH_USER")
 	if opensearchUser == "" {
-		t.Skip()
+		t.Skipf("Must set %s to run test", "OPENSEARCH_USER")
 	}
 
 	opensearchPassword := os.Getenv("OPENSEARCH_PASSWORD")
 	if opensearchPassword == "" {
-		t.Skip()
+		t.Skipf("Must set %s to run test", "OPENSEARCH_PASSWORD")
 	}
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	if openaiKey == "" {
-		t.Skip()
+		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
 	}
 
 	return opensearchEndpoint, opensearchUser, opensearchPassword
@@ -115,7 +115,7 @@ func TestOpensearchStoreRest(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
@@ -145,7 +145,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -186,7 +186,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(
+	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -229,7 +229,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	err = storer.AddDocuments(
+	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
