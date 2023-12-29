@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// ListIndexes send a request to azure AI search Rest API for creatin an index, helper function.
 func (s *Store) ListIndexes(ctx context.Context, output *map[string]interface{}) error {
 	URL := fmt.Sprintf("%s/indexes?api-version=2023-11-01", s.azureAISearchEndpoint)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, URL, nil)
@@ -18,5 +19,5 @@ func (s *Store) ListIndexes(ctx context.Context, output *map[string]interface{})
 		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	return s.HTTPDefaultSend(req, "search documents on azure ai search", output)
+	return s.httpDefaultSend(req, "search documents on azure ai search", output)
 }

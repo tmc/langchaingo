@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+// IndexOption is used to customise the index when creating the index
+// useful if you use differemt embedder than text-embedding-ada-002.
 type IndexOption func(indexMap *map[string]interface{})
 
 const (
@@ -17,6 +19,8 @@ const (
 	hnswParametersEfSearch       = 500
 )
 
+// CreateIndex defines a default index (default one is made for text-embedding-ada-002)
+// but can be customised through IndexOption functions.
 func (s *Store) CreateIndex(ctx context.Context, indexName string, opts ...IndexOption) error {
 	defaultIndex := map[string]interface{}{
 		"name": indexName,
@@ -80,6 +84,7 @@ func (s *Store) CreateIndex(ctx context.Context, indexName string, opts ...Index
 	return nil
 }
 
+// CreateIndexAPIRequest send a request to azure AI search Rest API for creating an index.
 func (s *Store) CreateIndexAPIRequest(ctx context.Context, indexName string, payload any) error {
 	URL := fmt.Sprintf("%s/indexes/%s?api-version=2023-11-01", s.azureAISearchEndpoint, indexName)
 	body, err := json.Marshal(payload)
@@ -97,7 +102,7 @@ func (s *Store) CreateIndexAPIRequest(ctx context.Context, indexName string, pay
 		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	if err := s.HTTPDefaultSend(req, "index creating for azure ai search", nil); err != nil {
+	if err := s.httpDefaultSend(req, "index creating for azure ai search", nil); err != nil {
 		return fmt.Errorf("err request: %w", err)
 	}
 

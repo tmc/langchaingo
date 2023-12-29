@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// QueryType pseudo enum for SearchDocumentsRequestInput queryType property.
 type QueryType string
 
 const (
@@ -16,6 +17,7 @@ const (
 	QueryTypeSemantic QueryType = "semantic"
 )
 
+// QueryCaptions pseudo enum for SearchDocumentsRequestInput queryCaptions property.
 type QueryCaptions string
 
 const (
@@ -23,6 +25,7 @@ const (
 	QueryTypeNone       QueryCaptions = "none"
 )
 
+// SpellerType pseudo enum for SearchDocumentsRequestInput spellerType property.
 type SpellerType string
 
 const (
@@ -30,6 +33,7 @@ const (
 	SpellerTypeNone    SpellerType = "none"
 )
 
+// SearchDocumentsRequestInput is the input struct to format a payload in order to search for a document.
 type SearchDocumentsRequestInput struct {
 	Count                 bool                                `json:"count,omitempty"`
 	Captions              QueryCaptions                       `json:"captions,omitempty"`
@@ -58,6 +62,7 @@ type SearchDocumentsRequestInput struct {
 	VectorFilterMode      string                              `json:"vectorFilterMode,omitempty"`
 }
 
+// SearchDocumentsRequestInputVector is the input struct for vector search.
 type SearchDocumentsRequestInputVector struct {
 	Kind       string    `json:"kind,omitempty"`
 	Value      []float32 `json:"value,omitempty"`
@@ -66,6 +71,7 @@ type SearchDocumentsRequestInputVector struct {
 	Exhaustive bool      `json:"exhaustive,omitempty"`
 }
 
+// SearchDocumentsRequestOuput is the output struct for search.
 type SearchDocumentsRequestOuput struct {
 	OdataCount   int `json:"@odata.count,omitempty"`
 	SearchFacets struct {
@@ -79,6 +85,7 @@ type SearchDocumentsRequestOuput struct {
 	OdataNextLink            string                      `json:"@odata.nextLink,omitempty"`
 }
 
+// SearchDocuments send a request to azure AI search Rest API for searching documents.
 func (s *Store) SearchDocuments(
 	ctx context.Context,
 	indexName string,
@@ -100,5 +107,5 @@ func (s *Store) SearchDocuments(
 	if s.azureAISearchAPIKey != "" {
 		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
-	return s.HTTPDefaultSend(req, "search documents on azure ai search", output)
+	return s.httpDefaultSend(req, "search documents on azure ai search", output)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
+// Store is a wrapper to use azure AI search rest API.
 type Store struct {
 	azureAISearchEndpoint string
 	azureAISearchAPIKey   string
@@ -21,20 +22,27 @@ type Store struct {
 }
 
 var (
+	// ErrNumberOfVectorDoesNotMatch when providing documents,
+	// the number of vectors generated should be equal to the number of docs.
 	ErrNumberOfVectorDoesNotMatch = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
+	// ErrAssertingMetadata SearchScore is stored as float64.
 	ErrAssertingSearchScore = errors.New(
 		"couldn't assert @search.score to float64",
 	)
+	// ErrAssertingMetadata Metadata is stored as string.
 	ErrAssertingMetadata = errors.New(
 		"couldn't assert metadata to string",
 	)
+	// ErrAssertingContent Content is stored as string.
 	ErrAssertingContent = errors.New(
 		"couldn't assert content to string",
 	)
 )
 
+// New creates a vectorstore for azure AI search
+// and returns the `Store` object needed by the other accessors.
 func New(opts ...Option) (Store, error) {
 	s := Store{
 		client: http.DefaultClient,
@@ -49,6 +57,8 @@ func New(opts ...Option) (Store, error) {
 
 var _ vectorstores.VectorStore = Store{}
 
+// AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
+// and returns the ids of the added documents.
 func (s Store) AddDocuments(
 	ctx context.Context,
 	docs []schema.Document,
@@ -82,6 +92,8 @@ func (s Store) AddDocuments(
 	return ids, nil
 }
 
+// SimilaritySearch creates a vector embedding from the query using the embedder
+// and queries to find the most similar documents.
 func (s Store) SimilaritySearch(
 	ctx context.Context, query string,
 	numDocuments int,

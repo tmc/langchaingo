@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type Document struct {
+type document struct {
 	SearchAction        string    `json:"@search.action"`
 	FieldsID            string    `json:"id"`
 	FieldsContent       string    `json:"content"`
@@ -16,6 +16,7 @@ type Document struct {
 	FieldsMetadata      string    `json:"metadata"`
 }
 
+// UploadDocument format document for similiraty search and upload it.
 func (s *Store) UploadDocument(
 	ctx context.Context,
 	id string,
@@ -29,7 +30,7 @@ func (s *Store) UploadDocument(
 		return err
 	}
 
-	document := Document{
+	document := document{
 		SearchAction:        "upload",
 		FieldsID:            id,
 		FieldsContent:       text,
@@ -40,12 +41,13 @@ func (s *Store) UploadDocument(
 	return s.UploadDocumentAPIRequest(ctx, indexName, document)
 }
 
+// UploadDocumentAPIRequest makes a request to azure AI search to upload a document.
 // tech debt: should use SDK when available: https://azure.github.io/azure-sdk/releases/latest/go.html
 func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, document any) error {
 	URL := fmt.Sprintf("%s/indexes/%s/docs/index?api-version=2020-06-30", s.azureAISearchEndpoint, indexName)
 
 	documentMap := map[string]interface{}{}
-	err := StructToMap(document, &documentMap)
+	err := structToMap(document, &documentMap)
 	if err != nil {
 		return fmt.Errorf("err converting document struc to map: %w", err)
 	}
@@ -71,5 +73,5 @@ func (s *Store) UploadDocumentAPIRequest(ctx context.Context, indexName string, 
 		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	return s.HTTPDefaultSend(req, "azure ai search upload document", nil)
+	return s.httpDefaultSend(req, "azure ai search upload document", nil)
 }

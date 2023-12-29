@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// RetrieveIndex send a request to azure AI search Rest API for retrieving an index, helper function.
 func (s *Store) RetrieveIndex(ctx context.Context, indexName string, output *map[string]interface{}) error {
 	URL := fmt.Sprintf("%s/indexes/%s?api-version=2023-11-01", s.azureAISearchEndpoint, indexName)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, URL, nil)
@@ -18,5 +19,5 @@ func (s *Store) RetrieveIndex(ctx context.Context, indexName string, output *map
 		req.Header.Add("api-key", s.azureAISearchAPIKey)
 	}
 
-	return s.HTTPDefaultSend(req, "search documents on azure ai search", output)
+	return s.httpDefaultSend(req, "search documents on azure ai search", output)
 }

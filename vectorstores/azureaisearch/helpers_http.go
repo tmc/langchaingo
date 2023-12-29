@@ -8,20 +8,21 @@ import (
 	"net/http"
 )
 
+// ErrSendingRequest basic error when the request failed.
 var ErrSendingRequest = errors.New(
-	"missing azureAISearchEndpoint",
+	"error sedding request",
 )
 
-func (s *Store) HTTPDefaultSend(req *http.Request, serviceName string, output any) error {
+func (s *Store) httpDefaultSend(req *http.Request, serviceName string, output any) error {
 	response, err := s.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("err sending request for %s: %w", serviceName, err)
 	}
 
-	return HTTPReadBody(response, serviceName, output)
+	return httpReadBody(response, serviceName, output)
 }
 
-func HTTPReadBody(response *http.Response, serviceName string, output any) error {
+func httpReadBody(response *http.Response, serviceName string, output any) error {
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
