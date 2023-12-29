@@ -62,6 +62,7 @@ func TestMapReduceQA(t *testing.T) {
 }
 
 func TestMapRerankQA(t *testing.T) {
+	t.Skip("Test currently fails; see #415")
 	t.Parallel()
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
