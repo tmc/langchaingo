@@ -18,12 +18,3 @@ type AgentFinish struct {
 	ReturnValues map[string]any
 	Log          string
 }
-
-// Generation is the output of a single generation.
-type Generation struct {
-	// Generated text output.
-	Text string
-	// Raw generation info response from the provider.
-	// May include things like reason for finishing (e.g. in OpenAI).
-	GenerationInfo map[string]any
-}
