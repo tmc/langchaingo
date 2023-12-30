@@ -27,9 +27,3 @@ type Generation struct {
 	// May include things like reason for finishing (e.g. in OpenAI).
 	GenerationInfo map[string]any
 }
-
-// LLMResult is the class that contains all relevant information for an LLM Result.
-type LLMResult struct {
-	Generations [][]Generation
-	LLMOutput   map[string]any
-}
