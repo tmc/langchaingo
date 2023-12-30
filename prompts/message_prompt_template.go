@@ -116,11 +116,11 @@ type MessagesPlaceholder struct {
 func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
 	value, ok := values[p.VariableName]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrNeedChatMessageList, value)
+		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
 	}
 	baseMessages, ok := value.([]schema.ChatMessage)
 	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrNeedChatMessageList, value)
+		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
 	}
 	return baseMessages, nil
 }
