@@ -7,7 +7,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/nikolalohinski/gonja"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -20,14 +22,17 @@ type TemplateFormat string
 const (
 	// TemplateFormatGoTemplate is the format for go-template.
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
+	// TemplateFormatJinjia2 is the format for jinja2.
+	TemplateFormatJinjia2 TemplateFormat = "jinja2"
 )
 
 // interpolator is the function that interpolates the given template with the given values.
 type interpolator func(template string, values map[string]any) (string, error)
 
 // defaultFormatterMapping is the default mapping of TemplateFormat to interpolator.
-var defaultformatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
+var defaultFormatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
+	TemplateFormatJinjia2:    interpolateJinja2,
 }
 
 // interpolateGoTemplate interpolates the given template with the given values by using
@@ -48,18 +53,34 @@ func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	return sb.String(), nil
 }
 
+// interpolateJinjia2 interpolates the given template with the given values by using
+// jinja2(impl by https://github.com/NikolaLohinski/gonja).
+func interpolateJinja2(tmpl string, values map[string]any) (string, error) {
+	tpl, err := gonja.FromString(tmpl)
+	if err != nil {
+		return "", err
+	}
+	out, err := tpl.Execute(values)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
+}
+
 func newInvalidTemplateError(gotTemplateFormat TemplateFormat) error {
+	formats := maps.Keys(defaultFormatterMapping)
+	slices.Sort(formats)
 	return fmt.Errorf("%w, got: %s, should be one of %s",
 		ErrInvalidTemplateFormat,
 		gotTemplateFormat,
-		maps.Keys(defaultformatterMapping),
+		formats,
 	)
 }
 
 // CheckValidTemplate checks if the template is valid through checking whether the given
 // TemplateFormat is available and whether the template can be rendered.
 func CheckValidTemplate(template string, templateFormat TemplateFormat, inputVariables []string) error {
-	_, ok := defaultformatterMapping[templateFormat]
+	_, ok := defaultFormatterMapping[templateFormat]
 	if !ok {
 		return newInvalidTemplateError(templateFormat)
 	}
@@ -75,7 +96,7 @@ func CheckValidTemplate(template string, templateFormat TemplateFormat, inputVar
 
 // RenderTemplate renders the template with the given values.
 func RenderTemplate(tmpl string, tmplFormat TemplateFormat, values map[string]any) (string, error) {
-	formatter, ok := defaultformatterMapping[tmplFormat]
+	formatter, ok := defaultFormatterMapping[tmplFormat]
 	if !ok {
 		return "", newInvalidTemplateError(tmplFormat)
 	}

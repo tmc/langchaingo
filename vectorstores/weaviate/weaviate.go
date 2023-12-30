@@ -85,7 +85,13 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+// AddDocuments creates vector embeddings from the documents using the embedder
+// upsert the vectors to the weaviate index.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
 
@@ -96,11 +102,11 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrEmbedderWrongNumberVectors
+		return nil, ErrEmbedderWrongNumberVectors
 	}
 
 	metadatas := make([]map[string]any, 0, len(docs))
@@ -116,18 +122,21 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	}
 
 	objects := make([]*models.Object, 0, len(docs))
+	ids := make([]string, len(docs))
 	for i := range docs {
+		id := strfmt.UUID(uuid.New().String())
+		ids[i] = id.String()
 		objects = append(objects, &models.Object{
 			Class:      s.indexName,
-			ID:         strfmt.UUID(uuid.New().String()),
+			ID:         id,
 			Vector:     vectors[i],
 			Properties: metadatas[i],
 		})
 	}
 	if _, err := s.client.Batch().ObjectsBatcher().WithObjects(objects...).Do(ctx); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return ids, nil
 }
 
 func (s Store) SimilaritySearch(
@@ -170,6 +179,7 @@ func (s Store) SimilaritySearch(
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
+//nolint:cyclop
 func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]schema.Document, error) {
 	if len(res.Errors) > 0 {
 		messages := make([]string, 0, len(res.Errors))
@@ -197,10 +207,15 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 		if !ok {
 			return nil, ErrMissingTextKey
 		}
+		var score float64
+		if additional, ok := itemMap["_additional"].(map[string]any); ok {
+			score, _ = additional["certainty"].(float64)
+		}
 		delete(itemMap, s.textKey)
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    itemMap,
+			Score:       float32(score),
 		}
 		docs = append(docs, doc)
 	}

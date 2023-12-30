@@ -98,7 +98,7 @@ func TestPineconeStoreRest(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	})
@@ -131,7 +131,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -181,7 +181,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -228,7 +228,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -273,7 +273,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -324,7 +324,7 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -403,7 +403,7 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -483,7 +483,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -561,7 +561,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{

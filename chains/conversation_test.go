@@ -36,7 +36,7 @@ func TestConversationWithChatLLM(t *testing.T) {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	llm, err := openai.NewChat()
+	llm, err := openai.New()
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))

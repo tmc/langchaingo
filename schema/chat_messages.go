@@ -104,18 +104,6 @@ func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeF
 func (m FunctionChatMessage) GetContent() string       { return m.Content }
 func (m FunctionChatMessage) GetName() string          { return m.Name }
 
-// ChatGeneration is the output of a single chat generation.
-type ChatGeneration struct {
-	Generation
-	Message ChatMessage
-}
-
-// ChatResult is the class that contains all relevant information for a Chat Result.
-type ChatResult struct {
-	Generations []ChatGeneration
-	LLMOutput   map[string]any
-}
-
 // GetBufferString gets the buffer string of messages.
 func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string) (string, error) {
 	result := []string{}

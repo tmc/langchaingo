@@ -24,14 +24,14 @@ const (
 	RoleFunction  = "function"
 )
 
-var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // NewChat returns a new OpenAI chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {
 	opt, c, err := newClient(opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &Chat{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
@@ -106,6 +106,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 			Message:        msg,
 			Text:           msg.Content,
 			GenerationInfo: generationInfo,
+			StopReason:     result.Choices[0].FinishReason,
 		})
 	}
 
@@ -118,10 +119,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(o.client.Model, text)
-}
-
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

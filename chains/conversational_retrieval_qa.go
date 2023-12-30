@@ -74,7 +74,7 @@ func NewConversationalRetrievalQA(
 }
 
 func NewConversationalRetrievalQAFromLLM(
-	llm llms.LanguageModel,
+	llm llms.LLM,
 	retriever schema.Retriever,
 	memory schema.Memory,
 ) ConversationalRetrievalQA {

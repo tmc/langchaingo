@@ -8,7 +8,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -23,10 +22,7 @@ type LLM struct {
 	client           *anthropicclient.Client
 }
 
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -86,6 +82,9 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			StreamingFunc: opts.StreamingFunc,
 		})
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return nil, err
 		}
 		generations = append(generations, &llms.Generation{
@@ -97,10 +96,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
 	}
 	return generations, nil
-}
-
-func (o *LLM) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func (o *LLM) GetNumTokens(text string) int {

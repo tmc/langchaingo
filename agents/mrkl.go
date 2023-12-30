@@ -41,14 +41,18 @@ var _ Agent = (*OneShotZeroAgent)(nil)
 // NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
 // and options. It returns a pointer to the created agent. The opts parameter
 // represents the options for the agent.
-func NewOneShotAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...CreationOption) *OneShotZeroAgent {
+func NewOneShotAgent(llm llms.LLM, tools []tools.Tool, opts ...CreationOption) *OneShotZeroAgent {
 	options := mrklDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
 	}
 
 	return &OneShotZeroAgent{
-		Chain:            chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
+		Chain: chains.NewLLMChain(
+			llm,
+			options.getMrklPrompt(tools),
+			chains.WithCallback(options.callbacksHandler),
+		),
 		Tools:            tools,
 		OutputKey:        options.outputKey,
 		CallbacksHandler: options.callbacksHandler,

@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Add documents to the Pinecone vector store.
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{
 			PageContent: "Tokyo",
 			Metadata: map[string]any{
