@@ -1,6 +1,7 @@
 package vertexai
 
 import (
+	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
 	"net/http"
 	"os"
 	"sync"
@@ -22,6 +23,11 @@ var (
 )
 
 type options struct {
+	model          string
+	chatModel      string
+	embeddingModel string
+	publisher      string
+
 	projectID     string
 	clientOptions []option.ClientOption
 }
@@ -32,7 +38,21 @@ type Option func(*options)
 // initOpts initializes defaultOptions with the environment variables.
 func initOpts() {
 	defaultOptions = &options{
+		model:          aiplatformclient.TextModelName,
+		chatModel:      aiplatformclient.ChatModelName,
+		embeddingModel: aiplatformclient.EmbeddingModelName,
+
+		publisher: "google",
+
 		projectID: os.Getenv(projectIDEnvVarName),
+	}
+}
+
+// WithModel passes the VertexAI model to the client. If not set, the model
+// will default to the one used by PaLM.  This is to preserve existing behavior.
+func WithModel(model string) Option {
+	return func(opts *options) {
+		opts.model = model
 	}
 }
 
