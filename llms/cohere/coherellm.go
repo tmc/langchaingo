@@ -8,7 +8,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cohere/internal/cohereclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -23,10 +22,7 @@ type LLM struct {
 	client           *cohereclient.Client
 }
 
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.LLM = (*LLM)(nil)
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	r, err := o.Generate(ctx, []string{prompt}, options...)
@@ -76,14 +72,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 
 func (o *LLM) GetNumTokens(text string) int {
 	return o.client.GetNumTokens(text)
-}
-
-func (o *LLM) GeneratePrompt(
-	ctx context.Context,
-	promptValues []schema.PromptValue,
-	options ...llms.CallOption,
-) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, promptValues, options...)
 }
 
 func New(opts ...Option) (*LLM, error) {

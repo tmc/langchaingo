@@ -551,7 +551,6 @@ var closeTypes = map[reflect.Type]reflect.Type{ //nolint:gochecknoglobals
 	reflect.TypeOf(&markdown.ParagraphOpen{}):   reflect.TypeOf(&markdown.ParagraphClose{}),
 	reflect.TypeOf(&markdown.BlockquoteOpen{}):  reflect.TypeOf(&markdown.BlockquoteClose{}),
 	reflect.TypeOf(&markdown.ListItemOpen{}):    reflect.TypeOf(&markdown.ListItemClose{}),
-	reflect.TypeOf(&markdown.Fence{}):           reflect.TypeOf(&markdown.Fence{}),
 	reflect.TypeOf(&markdown.TableOpen{}):       reflect.TypeOf(&markdown.TableClose{}),
 	reflect.TypeOf(&markdown.TheadOpen{}):       reflect.TypeOf(&markdown.TheadClose{}),
 	reflect.TypeOf(&markdown.TbodyOpen{}):       reflect.TypeOf(&markdown.TbodyClose{}),
@@ -562,6 +561,11 @@ func indexOfCloseTag(tokens []markdown.Token, startAt int) int {
 	sameCount := 0
 	openType := reflect.ValueOf(tokens[startAt]).Type()
 	closeType := closeTypes[openType]
+
+	// some tokens (like Hr or Fence) are singular, i.e. they don't have a close type.
+	if closeType == nil {
+		return startAt
+	}
 
 	idx := startAt + 1
 	for ; idx < len(tokens); idx++ {

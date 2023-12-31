@@ -6,18 +6,14 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// LanguageModel is the interface all language models must implement.
-type LanguageModel interface {
-	// Take in a list of prompt values and return an LLMResult.
-	GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...CallOption) (LLMResult, error)
-	// Get the number of tokens present in the text.
-	GetNumTokens(text string) int
-}
-
 // LLM is a langchaingo Large Language Model.
 type LLM interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
+
+	// Get the number of tokens present in the text. Returns -1 if this
+	// functionality is unavailable for the model.
+	GetNumTokens(text string) int
 }
 
 // ChatLLM is a langchaingo LLM that can be used for chatting.
