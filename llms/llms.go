@@ -22,6 +22,11 @@ type ChatLLM interface {
 	Generate(ctx context.Context, messages [][]schema.ChatMessage, options ...CallOption) ([]*Generation, error)
 }
 
+// Model is an interface multi-modal models implement.
+type Model interface {
+	GenerateContent(ctx context.Context, parts []ContentPart, options ...CallOption) (*ContentResponse, error)
+}
+
 // Generation is a single generation from a langchaingo LLM.
 type Generation struct {
 	// Text is the generated text.
