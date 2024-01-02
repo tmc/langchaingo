@@ -47,10 +47,13 @@ type BinaryContent struct {
 
 func (BinaryContent) isPart() {}
 
+// ContentResponse is the response returned by a GenerateContent call.
+// It can potentially return multiple response choices.
 type ContentResponse struct {
 	Choices []*ContentChoice
 }
 
+// ContentChoice is one of the response choices returned by GenerateModel calls.
 type ContentChoice struct {
 	Content        string
 	StopReason     string
