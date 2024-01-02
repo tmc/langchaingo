@@ -106,6 +106,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 		err = o.client.GenerateChat(ctx, req, fn)
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return []*llms.Generation{}, err
 		}
 
