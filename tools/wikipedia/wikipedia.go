@@ -7,6 +7,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/util"
 )
 
 const (
@@ -60,6 +61,7 @@ func (t Tool) Description() string {
 // the first part of the documents combined.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 

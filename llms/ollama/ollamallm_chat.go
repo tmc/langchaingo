@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/util"
 )
 
 // LLM is a ollama LLM implementation.
@@ -52,6 +53,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 // Generate implemente the generate interface for LLM.
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { //nolint:lll,cyclop
 	if o.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		o.CallbacksHandler.HandleLLMStart(ctx, o.getPromptsFromMessageSets(messageSets))
 	}
 

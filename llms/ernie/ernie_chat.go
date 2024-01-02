@@ -9,6 +9,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/util"
 )
 
 type ChatMessage = ernieclient.ChatMessage
@@ -56,6 +57,7 @@ func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options 
 //nolint:funlen
 func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint:lll,cyclop
 	if o.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		o.CallbacksHandler.HandleLLMStart(ctx, getPromptsFromMessageSets(messageSets))
 	}
 

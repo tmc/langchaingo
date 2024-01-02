@@ -7,6 +7,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/duckduckgo/internal"
+	"github.com/tmc/langchaingo/util"
 )
 
 // DefaultUserAgent defines a default value for user-agent header.
@@ -44,6 +45,7 @@ func (t Tool) Description() string {
 // Call performs the search and return the result.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
