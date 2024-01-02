@@ -87,7 +87,7 @@ func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, op
 		}
 	}
 
-	return &llms.ContentResponse{choices}, nil
+	return &llms.ContentResponse{Choices: choices}, nil
 }
 
 // Call requests a chat response for the given messages.

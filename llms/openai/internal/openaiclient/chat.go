@@ -18,6 +18,8 @@ const (
 	defaultChatModel = "gpt-3.5-turbo"
 )
 
+var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
+
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
 	Model            string         `json:"model"`
@@ -63,7 +65,7 @@ type ChatMessage struct {
 
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	if m.Content != "" && m.MultiContent != nil {
-		return nil, errors.New("only one of Content / MultiContent allowed in message")
+		return nil, ErrContentExclusive
 	}
 	if len(m.MultiContent) > 0 {
 		msg := struct {

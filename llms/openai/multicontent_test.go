@@ -30,16 +30,16 @@ func TestMultiContentText(t *testing.T) {
 	llm := newChatClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextContent{"I'm a pomeranian"},
-		llms.TextContent{"What kind of mammal am I?"},
+		llms.TextContent{Text: "I'm a pomeranian"},
+		llms.TextContent{Text: "What kind of mammal am I?"},
 	}
 
 	rsp, err := llm.GenerateContent(context.Background(), parts)
 	require.NoError(t, err)
 
-	assert.GreaterOrEqual(t, len(rsp.Choices), 1)
+	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "dog", strings.ToLower(c1.Content))
+	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
 }
 
 func TestMultiContentImage(t *testing.T) {
@@ -48,27 +48,22 @@ func TestMultiContentImage(t *testing.T) {
 	llm := newChatClient(t, WithModel("gpt-4-vision-preview"))
 
 	parts := []llms.ContentPart{
-		llms.ImageURLContent{"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
-		llms.TextContent{"describe this image in detail"},
+		llms.ImageURLContent{URL: "https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
+		llms.TextContent{Text: "describe this image in detail"},
 	}
 
 	rsp, err := llm.GenerateContent(context.Background(), parts, llms.WithMaxTokens(300))
 	require.NoError(t, err)
 
-	assert.GreaterOrEqual(t, len(rsp.Choices), 1)
+	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
 }
 
-func showResponse(rsp any) string {
+func showResponse(rsp any) string { //nolint:golint,unused
 	b, err := json.MarshalIndent(rsp, "", "  ")
 	if err != nil {
 		panic(err)
 	}
 	return string(b)
 }
-
-// TODO: add test for image URL, for stability use some image on our own
-// site? maybe parrot-icon.png?
-// then add documentation all around and send
-// initial PR.

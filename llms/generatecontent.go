@@ -20,7 +20,7 @@ func (tc TextContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-func (_ TextContent) isPart() {}
+func (TextContent) isPart() {}
 
 // ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
@@ -37,14 +37,15 @@ func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
-func (_ ImageURLContent) isPart() {}
+func (ImageURLContent) isPart() {}
 
+// BinaryContent is content holding some binary data with a MIME type.
 type BinaryContent struct {
 	MIMEType string
 	Data     []byte
 }
 
-func (_ BinaryContent) isPart() {}
+func (BinaryContent) isPart() {}
 
 type ContentResponse struct {
 	Choices []*ContentChoice
