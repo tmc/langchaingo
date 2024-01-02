@@ -65,13 +65,18 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 		}
 	}
 
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleAgentFinish(ctx, schema.AgentFinish{
+			ReturnValues: map[string]any{"output": ErrNotFinished.Error()},
+		})
+	}
 	return e.getReturn(
 		&schema.AgentFinish{ReturnValues: make(map[string]any)},
 		steps,
 	), ErrNotFinished
 }
 
-func (e Executor) doIteration(
+func (e Executor) doIteration( // nolint
 	ctx context.Context,
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
@@ -97,6 +102,9 @@ func (e Executor) doIteration(
 	}
 
 	if finish != nil {
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleAgentFinish(ctx, *finish)
+		}
 		return steps, e.getReturn(finish, steps), nil
 	}
 

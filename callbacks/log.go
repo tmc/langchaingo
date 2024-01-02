@@ -61,6 +61,10 @@ func (l LogHandler) HandleAgentAction(_ context.Context, action schema.AgentActi
 	fmt.Println("Agent selected action:", formatAgentAction(action))
 }
 
+func (l LogHandler) HandleAgentFinish(_ context.Context, finish schema.AgentFinish) {
+	fmt.Printf("Agent finish: %v \n", finish)
+}
+
 func (l LogHandler) HandleRetrieverStart(_ context.Context, query string) {
 	fmt.Println("Entering retriever with query:", removeNewLines(query))
 }

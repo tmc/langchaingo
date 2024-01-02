@@ -23,6 +23,7 @@ func (SimpleHandler) HandleToolStart(context.Context, string)                   
 func (SimpleHandler) HandleToolEnd(context.Context, string)                         {}
 func (SimpleHandler) HandleToolError(context.Context, error)                        {}
 func (SimpleHandler) HandleAgentAction(context.Context, schema.AgentAction)         {}
+func (SimpleHandler) HandleAgentFinish(context.Context, schema.AgentFinish)         {}
 func (SimpleHandler) HandleRetrieverStart(context.Context, string)                  {}
 func (SimpleHandler) HandleRetrieverEnd(context.Context, string, []schema.Document) {}
 func (SimpleHandler) HandleStreamingFunc(context.Context, []byte)                   {}
