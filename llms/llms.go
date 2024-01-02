@@ -23,7 +23,9 @@ type ChatLLM interface {
 }
 
 // Model is an interface multi-modal models implement.
+// Note: this is an experimental API.
 type Model interface {
+	// GenerateContent asks the model to generate content from parts.
 	GenerateContent(ctx context.Context, parts []ContentPart, options ...CallOption) (*ContentResponse, error)
 }
 

@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -39,6 +40,32 @@ func TestMultiContentText(t *testing.T) {
 	assert.GreaterOrEqual(t, len(rsp.Choices), 1)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog", strings.ToLower(c1.Content))
+}
+
+func TestMultiContentImage(t *testing.T) {
+	t.Parallel()
+
+	llm := newChatClient(t, WithModel("gpt-4-vision-preview"))
+
+	parts := []llms.ContentPart{
+		llms.ImageURLContent{"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
+		llms.TextContent{"describe this image in detail"},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), parts, llms.WithMaxTokens(300))
+	require.NoError(t, err)
+
+	assert.GreaterOrEqual(t, len(rsp.Choices), 1)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
+}
+
+func showResponse(rsp any) string {
+	b, err := json.MarshalIndent(rsp, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
 
 // TODO: add test for image URL, for stability use some image on our own

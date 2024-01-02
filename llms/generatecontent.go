@@ -2,10 +2,12 @@ package llms
 
 import "encoding/json"
 
+// ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {
 	isPart()
 }
 
+// TextContent is content with some text.
 type TextContent struct {
 	Text string
 }
@@ -20,6 +22,7 @@ func (tc TextContent) MarshalJSON() ([]byte, error) {
 
 func (_ TextContent) isPart() {}
 
+// ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
 	URL string
 }
