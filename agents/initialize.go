@@ -37,8 +37,6 @@ func Initialize(
 		agent = NewOneShotAgent(llm, tools, opts...)
 	case ConversationalReactDescription:
 		agent = NewConversationalAgent(llm, tools, opts...)
-	case OpenAIFunctionAgentDescription:
-		agent = NewOpenAIFunctionsAgent(llm, tools, opts...)
 	default:
 		return Executor{}, ErrUnknownAgentType
 	}

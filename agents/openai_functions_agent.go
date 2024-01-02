@@ -16,7 +16,7 @@ import (
 type OpenAIFunctionsAgent struct {
 	// LLM is the llm used to call with the values. The llm should have an
 	// input called "agent_scratchpad" for the agent to put its thoughts in.
-	LLM    llms.LanguageModel
+	LLM    llms.ChatLLM
 	Prompt prompts.FormatPrompter
 	// Chain chains.Chain
 	// Tools is a list of the tools the agent can use.
@@ -30,7 +30,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.ChatLLM, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -89,8 +89,9 @@ func (o *OpenAIFunctionsAgent) Plan(
 		return nil, nil, err
 	}
 
-	result, err := o.LLM.GeneratePrompt(
+	result, err := llms.GenerateChatPrompt(
 		ctx,
+		o.LLM,
 		[]schema.PromptValue{prompt},
 		llms.WithFunctions(o.functions()),
 		llms.WithStreamingFunc(stream),

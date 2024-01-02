@@ -119,18 +119,20 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 
 	calculator := tools.Calculator{}
 
-	a, err := agents.Initialize(
-		llm,
-		[]tools.Tool{searchTool, calculator},
-		agents.OpenAIFunctionAgentDescription,
+	toolList := []tools.Tool{searchTool, calculator}
+
+	a := agents.NewOpenAIFunctionsAgent(llm,
+		toolList,
 		agents.NewOpenAIOption().WithSystemMessage("you are a helpful assistant"),
 		agents.NewOpenAIOption().WithExtraMessages([]prompts.MessageFormatter{
 			prompts.NewHumanMessagePromptTemplate("please be strict", nil),
 		}),
 	)
+
+	e := agents.NewExecutor(a, toolList)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), a, "what is HK singer Eason Chan's years old?") //nolint:lll
+	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
 	require.NoError(t, err)
 
 	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
