@@ -12,6 +12,9 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
+// agentScratchpad "agent_scratchpad" for the agent to put its thoughts in.
+const agentScratchpad = "agent_scratchpad"
+
 // OpenAIFunctionsAgent is an Agent driven by OpenAIs function powered API.
 type OpenAIFunctionsAgent struct {
 	// LLM is the llm used to call with the values. The llm should have an
@@ -73,7 +76,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	for key, value := range inputs {
 		fullInputs[key] = value
 	}
-	fullInputs["agent_scratchpad"] = o.constructScratchPad(intermediateSteps)
+	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateSteps)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -109,7 +112,7 @@ func (o *OpenAIFunctionsAgent) GetInputKeys() []string {
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
-		if v == "agent_scratchpad" {
+		if v == agentScratchpad {
 			continue
 		}
 		agentInput = append(agentInput, v)
@@ -127,7 +130,7 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
 	messageFormatters = append(messageFormatters, prompts.MessagesPlaceholder{
-		VariableName: "agent_scratchpad",
+		VariableName: agentScratchpad,
 	})
 
 	tmpl := prompts.NewChatPromptTemplate(messageFormatters)
