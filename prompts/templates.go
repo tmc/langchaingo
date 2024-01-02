@@ -22,8 +22,8 @@ type TemplateFormat string
 const (
 	// TemplateFormatGoTemplate is the format for go-template.
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
-	// TemplateFormatJinjia2 is the format for jinja2.
-	TemplateFormatJinjia2 TemplateFormat = "jinja2"
+	// TemplateFormatJinja2 is the format for jinja2.
+	TemplateFormatJinja2 TemplateFormat = "jinja2"
 )
 
 // interpolator is the function that interpolates the given template with the given values.
@@ -32,7 +32,7 @@ type interpolator func(template string, values map[string]any) (string, error)
 // defaultFormatterMapping is the default mapping of TemplateFormat to interpolator.
 var defaultFormatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
-	TemplateFormatJinjia2:    interpolateJinja2,
+	TemplateFormatJinja2:     interpolateJinja2,
 }
 
 // interpolateGoTemplate interpolates the given template with the given values by using
@@ -53,7 +53,7 @@ func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	return sb.String(), nil
 }
 
-// interpolateJinjia2 interpolates the given template with the given values by using
+// interpolateJinja2 interpolates the given template with the given values by using
 // jinja2(impl by https://github.com/NikolaLohinski/gonja).
 func interpolateJinja2(tmpl string, values map[string]any) (string, error) {
 	tpl, err := gonja.FromString(tmpl)
