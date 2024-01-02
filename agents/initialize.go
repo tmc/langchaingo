@@ -17,9 +17,6 @@ const (
 	// ConversationalReactDescription is an AgentType constant that represents
 	// the "conversationalReactDescription" agent type.
 	ConversationalReactDescription AgentType = "conversationalReactDescription"
-	// OpenAIFunctionAgentDescription is an AgentType constant that represents
-	// the "openAIFunctionAgentDescription" agent type.
-	OpenAIFunctionAgentDescription AgentType = "openAIFunctionAgentDescription"
 )
 
 // Initialize is a function that creates a new executor with the specified LLM
