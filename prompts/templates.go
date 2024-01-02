@@ -10,6 +10,8 @@ import (
 	"github.com/nikolalohinski/gonja"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+
+	"github.com/tmc/langchaingo/prompts/internal/fstring"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -24,6 +26,8 @@ const (
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
 	// TemplateFormatJinjia2 is the format for jinja2.
 	TemplateFormatJinjia2 TemplateFormat = "jinja2"
+	// TemplateFormatFString is the format for f-string.
+	TemplateFormatFString TemplateFormat = "f-string"
 )
 
 // interpolator is the function that interpolates the given template with the given values.
@@ -33,6 +37,7 @@ type interpolator func(template string, values map[string]any) (string, error)
 var defaultFormatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
 	TemplateFormatJinjia2:    interpolateJinja2,
+	TemplateFormatFString:    fstring.Format,
 }
 
 // interpolateGoTemplate interpolates the given template with the given values by using
