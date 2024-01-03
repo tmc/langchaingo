@@ -1,0 +1,6 @@
+```json
+{{
+    "query": "",
+    "filter": "NO_FILTER"
+}}
+```

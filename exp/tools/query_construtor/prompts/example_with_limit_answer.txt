@@ -1,0 +1,7 @@
+```json
+{{
+    "query": "love",
+    "filter": "NO_FILTER",
+    "limit": 2
+}}
+```

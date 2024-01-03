@@ -1,0 +1,8 @@
+
+<< Data Source >>
+```json
+{{{{
+    "content": "{{.content}}",
+    "attributes": {{.attributes}}
+}}}}
+```
