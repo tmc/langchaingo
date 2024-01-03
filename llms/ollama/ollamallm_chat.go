@@ -181,10 +181,6 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 	return embeddings, nil
 }
 
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(o.options.model, text)
-}
-
 func (o Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
 	for _, m := range messageSets {

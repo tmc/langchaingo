@@ -59,12 +59,6 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
 }
 
-func (o *LLM) GetNumTokens(_ string) int {
-	// todo: not provided yet
-	// see: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu
-	return -1
-}
-
 // Call implements llms.LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	r, err := o.Generate(ctx, []string{prompt}, options...)

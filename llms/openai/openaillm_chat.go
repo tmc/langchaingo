@@ -169,10 +169,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	return generations, nil
 }
 
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(o.client.Model, text)
-}
-
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
