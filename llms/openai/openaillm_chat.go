@@ -24,10 +24,7 @@ const (
 	RoleFunction  = "function"
 )
 
-var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // NewChat returns a new OpenAI chat LLM.
 func NewChat(opts ...Option) (*Chat, error) {
@@ -39,6 +36,58 @@ func NewChat(opts ...Option) (*Chat, error) {
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
 	}, err
+}
+
+func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	msgs := []*ChatMessage{
+		{
+			Role:         "user",
+			MultiContent: parts,
+		},
+	}
+
+	req := &openaiclient.ChatRequest{
+		Model:                opts.Model,
+		StopWords:            opts.StopWords,
+		Messages:             msgs,
+		StreamingFunc:        opts.StreamingFunc,
+		Temperature:          opts.Temperature,
+		MaxTokens:            opts.MaxTokens,
+		N:                    opts.N,
+		FrequencyPenalty:     opts.FrequencyPenalty,
+		PresencePenalty:      opts.PresencePenalty,
+		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+	}
+
+	for _, fn := range opts.Functions {
+		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+			Name:        fn.Name,
+			Description: fn.Description,
+			Parameters:  fn.Parameters,
+		})
+	}
+	result, err := o.client.CreateChat(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if len(result.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	choices := make([]*llms.ContentChoice, len(result.Choices))
+	for i, c := range result.Choices {
+		choices[i] = &llms.ContentChoice{
+			Content:    c.Message.Content,
+			StopReason: c.FinishReason,
+		}
+	}
+
+	return &llms.ContentResponse{Choices: choices}, nil
 }
 
 // Call requests a chat response for the given messages.
@@ -122,10 +171,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 func (o *Chat) GetNumTokens(text string) int {
 	return llms.CountTokens(o.client.Model, text)
-}
-
-func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

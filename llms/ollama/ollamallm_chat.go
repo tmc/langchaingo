@@ -19,10 +19,7 @@ type Chat struct {
 	options          chatOptions
 }
 
-var (
-	_ llms.ChatLLM       = (*Chat)(nil)
-	_ llms.LanguageModel = (*Chat)(nil)
-)
+var _ llms.ChatLLM = (*Chat)(nil)
 
 // New creates a new ollama LLM implementation.
 func NewChat(opts ...ChatOption) (*Chat, error) {
@@ -109,6 +106,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 		err = o.client.GenerateChat(ctx, req, fn)
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return []*llms.Generation{}, err
 		}
 
@@ -179,10 +179,6 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 	}
 
 	return embeddings, nil
-}
-
-func (o *Chat) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GenerateChatPrompt(ctx, o, prompts, options...)
 }
 
 func (o *Chat) GetNumTokens(text string) int {

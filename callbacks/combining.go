@@ -62,6 +62,12 @@ func (l CombiningHandler) HandleAgentAction(ctx context.Context, action schema.A
 	}
 }
 
+func (l CombiningHandler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {
+	for _, handle := range l.Callbacks {
+		handle.HandleAgentFinish(ctx, finish)
+	}
+}
+
 func (l CombiningHandler) HandleRetrieverStart(ctx context.Context, query string) {
 	for _, handle := range l.Callbacks {
 		handle.HandleRetrieverStart(ctx, query)
@@ -77,5 +83,23 @@ func (l CombiningHandler) HandleRetrieverEnd(ctx context.Context, query string, 
 func (l CombiningHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {
 	for _, handle := range l.Callbacks {
 		handle.HandleStreamingFunc(ctx, chunk)
+	}
+}
+
+func (l CombiningHandler) HandleChainError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleChainError(ctx, err)
+	}
+}
+
+func (l CombiningHandler) HandleLLMError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleLLMError(ctx, err)
+	}
+}
+
+func (l CombiningHandler) HandleToolError(ctx context.Context, err error) {
+	for _, handle := range l.Callbacks {
+		handle.HandleToolError(ctx, err)
 	}
 }

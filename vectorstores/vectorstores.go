@@ -10,7 +10,7 @@ import (
 // VectorStore is the interface for saving and querying documents in the
 // form of vector embeddings.
 type VectorStore interface {
-	AddDocuments(ctx context.Context, docs []schema.Document, options ...Option) error
+	AddDocuments(ctx context.Context, docs []schema.Document, options ...Option) ([]string, error)
 	SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...Option) ([]schema.Document, error) //nolint:lll
 }
 

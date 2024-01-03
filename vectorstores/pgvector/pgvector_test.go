@@ -60,7 +60,7 @@ func TestPgvectorStoreRest(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(ctx, []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -95,7 +95,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(context.Background(), []schema.Document{
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -149,7 +149,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(ctx, []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -200,7 +200,7 @@ func TestPgvectorAsRetriever(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -242,7 +242,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -289,7 +289,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		ctx,
 		[]schema.Document{
 			{
@@ -363,7 +363,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store)
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{

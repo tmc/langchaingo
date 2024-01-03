@@ -92,7 +92,7 @@ Follow Up Input: {{.question}}
 Standalone question:`
 
 // LoadCondenseQuestionGenerator chain is used to generate a new question for the sake of retrieval.
-func LoadCondenseQuestionGenerator(llm llms.LanguageModel) *LLMChain {
+func LoadCondenseQuestionGenerator(llm llms.LLM) *LLMChain {
 	condenseQuestionPromptTemplate := prompts.NewPromptTemplate(
 		_defaultCondenseQuestionTemplate,
 		[]string{"chat_history", "question"},
@@ -101,7 +101,7 @@ func LoadCondenseQuestionGenerator(llm llms.LanguageModel) *LLMChain {
 }
 
 // LoadStuffQA loads a StuffDocuments chain with default prompts for the llm chain.
-func LoadStuffQA(llm llms.LanguageModel) StuffDocuments {
+func LoadStuffQA(llm llms.LLM) StuffDocuments {
 	defaultQAPromptTemplate := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
@@ -118,7 +118,7 @@ func LoadStuffQA(llm llms.LanguageModel) StuffDocuments {
 
 // LoadRefineQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadRefineQA(llm llms.LanguageModel) RefineDocuments {
+func LoadRefineQA(llm llms.LLM) RefineDocuments {
 	questionPrompt := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
@@ -136,7 +136,7 @@ func LoadRefineQA(llm llms.LanguageModel) RefineDocuments {
 
 // LoadMapReduceQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadMapReduceQA(llm llms.LanguageModel) MapReduceDocuments {
+func LoadMapReduceQA(llm llms.LLM) MapReduceDocuments {
 	getInfoPrompt := prompts.NewPromptTemplate(
 		_defaultMapReduceGetInformationQATemplate,
 		[]string{"question", "context"},
@@ -156,7 +156,7 @@ func LoadMapReduceQA(llm llms.LanguageModel) MapReduceDocuments {
 
 // LoadMapRerankQA loads a map rerank documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadMapRerankQA(llm llms.LanguageModel) MapRerankDocuments {
+func LoadMapRerankQA(llm llms.LLM) MapRerankDocuments {
 	mapRerankPrompt := prompts.NewPromptTemplate(
 		_defaultMapRerankTemplate,
 		[]string{"context", "question"},

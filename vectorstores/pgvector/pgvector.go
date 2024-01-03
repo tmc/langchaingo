@@ -162,10 +162,15 @@ PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
 	return tx.Commit(ctx)
 }
 
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+// AddDocuments adds documents to the Postgres collection associated with 'Store'.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	if opts.ScoreThreshold != 0 || opts.Filters != nil || opts.NameSpace != "" {
-		return ErrUnsupportedOptions
+		return nil, ErrUnsupportedOptions
 	}
 
 	texts := make([]string, 0, len(docs))
@@ -179,21 +184,24 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	}
 	vectors, err := embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrEmbedderWrongNumberVectors
+		return nil, ErrEmbedderWrongNumberVectors
 	}
 	customID := uuid.New().String()
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
 		VALUES($1, $2, $3, $4, $5, $6)`, s.embeddingTableName)
+
+	ids := make([]string, len(docs))
 	for docIdx, doc := range docs {
 		id := uuid.New().String()
+		ids[docIdx] = id
 		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, customID, s.collectionUUID)
 	}
-	return s.conn.SendBatch(ctx, b).Close()
+	return ids, s.conn.SendBatch(ctx, b).Close()
 }
 
 //nolint:cyclop
@@ -292,10 +300,7 @@ func (s *Store) createOrGetCollection(ctx context.Context) error {
 		return err
 	}
 	sql = fmt.Sprintf(`SELECT uuid FROM %s WHERE name = $1 ORDER BY name limit 1`, s.collectionTableName)
-	if err := s.conn.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID); err != nil {
-		return err
-	}
-	return nil
+	return s.conn.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID)
 }
 
 // getOptions applies given options to default Options and returns it

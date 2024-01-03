@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"regexp"
 	"strings"
@@ -14,27 +15,8 @@ import (
 	"go.starlark.net/starlark"
 )
 
-const (
-	quote          = "```"
-	_llmMathPrompt = `Translate a math problem into a expression that can be evaluated as Starlark.
-Use the output of running this code to answer the question.
-
----
-Question: (Question with math problem.)
-` + quote + `starlark
-$(single line expression that solves the problem)
-` + quote + `
-
----
-Question: What is 37593 * 67?
-` + quote + `starlark
-37593 * 67
-` + quote + `
-
----
-Question: {{.question}}
-`
-)
+//go:embed prompts/llm_math.txt
+var _llmMathPrompt string //nolint:gochecknoglobals
 
 // LLMMathChain is a chain used for evaluating math expressions.
 type LLMMathChain struct {
@@ -43,7 +25,7 @@ type LLMMathChain struct {
 
 var _ Chain = LLMMathChain{}
 
-func NewLLMMathChain(llm llms.LanguageModel) LLMMathChain {
+func NewLLMMathChain(llm llms.LLM) LLMMathChain {
 	p := prompts.NewPromptTemplate(_llmMathPrompt, []string{"question"})
 	c := NewLLMChain(llm, p)
 	return LLMMathChain{
@@ -53,7 +35,7 @@ func NewLLMMathChain(llm llms.LanguageModel) LLMMathChain {
 
 // Call gets relevant documents from the retriever and gives them to the combine
 // documents chain.
-func (c LLMMathChain) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func (c LLMMathChain) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	question, ok := values["question"].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)

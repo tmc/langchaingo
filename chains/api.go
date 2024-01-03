@@ -3,6 +3,7 @@ package chains
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,38 +16,13 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-const (
-	// nolint: lll
-	_llmAPIURLPrompt = `
-	You are given the API Documentation:
+//go:embed prompts/llm_api_url.txt
+var _llmAPIURLPrompt string //nolint:gochecknoglobals
 
-	{{.api_docs}}
+//go:embed prompts/llm_api_url_response.txt
+var _llmAPIURLResponseTmpPrompt string //nolint:gochecknoglobals
 
-	Your task is to construct a full API JSON object based on the provided input. The input could be a question that requires an API call for its answer, or a direct or indirect instruction to consume an API. The input will be unpredictable and could come from a user or an agent.
-
-	Your goal is to create an API call that accurately reflects the intent of the input. Be sure to exclude any unnecessary data in the API call to ensure efficiency.
-
-	Input: {{.input}}
-
-	Respond with a JSON object.
-
-	{
-		"method":  [the HTTP method for the API call, such as GET or POST],
-		"headers": [object representing the HTTP headers required for the API call, always add a "Content-Type" header],
-		"url": 	   [full for the API call],
-		"body":    [object containing the data sent with the request, if needed]
-	}`
-
-	// nolint: lll
-	_llmAPIResponsePrompt = _llmAPIURLPrompt + `
-	Here is the response from the API:
-
-	{{.api_response}}
-
-	Now, summarize this response. Your summary should reflect the original input and highlight the key information from the API response that answers or relates to that input. Try to make your summary concise, yet informative.
-
-	Summary:`
-)
+var _llmAPIResponsePrompt = _llmAPIURLPrompt + _llmAPIURLResponseTmpPrompt //nolint:gochecknoglobals
 
 // HTTPRequest http requester interface.
 type HTTPRequest interface {
@@ -63,7 +39,7 @@ type APIChain struct {
 //
 // It takes a LanguageModel(llm) and an HTTPRequest(request) as parameters.
 // It returns an APIChain object.
-func NewAPIChain(llm llms.LanguageModel, request HTTPRequest) APIChain {
+func NewAPIChain(llm llms.LLM, request HTTPRequest) APIChain {
 	reqPrompt := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "input"})
 	reqChain := NewLLMChain(llm, reqPrompt)
 
