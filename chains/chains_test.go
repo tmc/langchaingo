@@ -34,10 +34,6 @@ func (spv stringPromptValue) Messages() []schema.ChatMessage {
 	return nil
 }
 
-func (l *testLanguageModel) GetNumTokens(_ string) int {
-	return -1
-}
-
 func (l *testLanguageModel) Call(_ context.Context, prompt string, _ ...llms.CallOption) (string, error) {
 	l.recordedPrompt = []schema.PromptValue{
 		stringPromptValue{s: prompt},

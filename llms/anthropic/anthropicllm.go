@@ -97,7 +97,3 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	}
 	return generations, nil
 }
-
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens(o.client.Model, text)
-}

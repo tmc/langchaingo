@@ -105,5 +105,5 @@ func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context)
 		return 0, err
 	}
 
-	return tb.LLM.GetNumTokens(bufferString), nil
+	return llms.CountTokens("", bufferString), nil
 }

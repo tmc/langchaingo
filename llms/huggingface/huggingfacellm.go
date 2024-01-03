@@ -72,10 +72,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return generations, nil
 }
 
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens("gpt2", text)
-}
-
 func New(opts ...Option) (*LLM, error) {
 	options := &options{
 		token: os.Getenv(tokenEnvVarName),
