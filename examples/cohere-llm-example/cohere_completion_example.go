@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cohere"
 )
 
@@ -22,8 +23,8 @@ func main() {
 
 	fmt.Println(completion)
 
-	inputToken := llm.GetNumTokens(input)
-	outputToken := llm.GetNumTokens(completion)
+	inputToken := llms.CountTokens("", input)
+	outputToken := llms.CountTokens("", completion)
 
 	fmt.Printf("%v/%v\n", inputToken, outputToken)
 }
