@@ -9,6 +9,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/nikolalohinski/gonja"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -21,8 +22,8 @@ type TemplateFormat string
 const (
 	// TemplateFormatGoTemplate is the format for go-template.
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
-	// TemplateFormatJinjia2 is the format for jinjia2.
-	TemplateFormatJinjia2 TemplateFormat = "jinjia2"
+	// TemplateFormatJinja2 is the format for jinja2.
+	TemplateFormatJinja2 TemplateFormat = "jinja2"
 )
 
 // interpolator is the function that interpolates the given template with the given values.
@@ -31,7 +32,7 @@ type interpolator func(template string, values map[string]any) (string, error)
 // defaultFormatterMapping is the default mapping of TemplateFormat to interpolator.
 var defaultFormatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
-	TemplateFormatJinjia2:    interpolateJinjia2,
+	TemplateFormatJinja2:     interpolateJinja2,
 }
 
 // interpolateGoTemplate interpolates the given template with the given values by using
@@ -52,9 +53,9 @@ func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	return sb.String(), nil
 }
 
-// interpolateJinjia2 interpolates the given template with the given values by using
-// jinjia2(impl by https://github.com/NikolaLohinski/gonja).
-func interpolateJinjia2(tmpl string, values map[string]any) (string, error) {
+// interpolateJinja2 interpolates the given template with the given values by using
+// jinja2(impl by https://github.com/NikolaLohinski/gonja).
+func interpolateJinja2(tmpl string, values map[string]any) (string, error) {
 	tpl, err := gonja.FromString(tmpl)
 	if err != nil {
 		return "", err
@@ -67,10 +68,12 @@ func interpolateJinjia2(tmpl string, values map[string]any) (string, error) {
 }
 
 func newInvalidTemplateError(gotTemplateFormat TemplateFormat) error {
+	formats := maps.Keys(defaultFormatterMapping)
+	slices.Sort(formats)
 	return fmt.Errorf("%w, got: %s, should be one of %s",
 		ErrInvalidTemplateFormat,
 		gotTemplateFormat,
-		maps.Keys(defaultFormatterMapping),
+		formats,
 	)
 }
 

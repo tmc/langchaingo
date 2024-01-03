@@ -38,6 +38,58 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}, err
 }
 
+func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	msgs := []*ChatMessage{
+		{
+			Role:         "user",
+			MultiContent: parts,
+		},
+	}
+
+	req := &openaiclient.ChatRequest{
+		Model:                opts.Model,
+		StopWords:            opts.StopWords,
+		Messages:             msgs,
+		StreamingFunc:        opts.StreamingFunc,
+		Temperature:          opts.Temperature,
+		MaxTokens:            opts.MaxTokens,
+		N:                    opts.N,
+		FrequencyPenalty:     opts.FrequencyPenalty,
+		PresencePenalty:      opts.PresencePenalty,
+		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+	}
+
+	for _, fn := range opts.Functions {
+		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+			Name:        fn.Name,
+			Description: fn.Description,
+			Parameters:  fn.Parameters,
+		})
+	}
+	result, err := o.client.CreateChat(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if len(result.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	choices := make([]*llms.ContentChoice, len(result.Choices))
+	for i, c := range result.Choices {
+		choices[i] = &llms.ContentChoice{
+			Content:    c.Message.Content,
+			StopReason: c.FinishReason,
+		}
+	}
+
+	return &llms.ContentResponse{Choices: choices}, nil
+}
+
 // Call requests a chat response for the given messages.
 func (o *Chat) Call(ctx context.Context, messages []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { // nolint: lll
 	r, err := o.Generate(ctx, [][]schema.ChatMessage{messages}, options...)

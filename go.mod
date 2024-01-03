@@ -117,6 +117,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
 	github.com/nikolalohinski/gonja v1.5.3
+	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
