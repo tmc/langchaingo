@@ -43,9 +43,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]lcgschema.ChatMessa
 		opt(&opts)
 	}
 
-	if len(opts.Model) == 0 {
-		opts.Model = o.Model
-	}
+	o.setDefaultCallOptions(&opts)
 
 	if opts.StreamingFunc != nil {
 		return nil, ErrNotImplemented
@@ -60,9 +58,11 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]lcgschema.ChatMessa
 		}
 		msgs := toClientChatMessage(messages)
 		result, err := o.client.CreateChat(ctx, opts.Model, o.Publisher, &schema.ChatRequest{
-			Temperature: opts.Temperature,
+			Temperature: float32(opts.Temperature),
 			Messages:    msgs,
 			Context:     chatContext,
+			TopK:        float32(opts.TopK),
+			TopP:        float32(int(opts.TopP)),
 		})
 		if err != nil {
 			return nil, err

@@ -6,6 +6,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/common"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
 )
 
 var (
@@ -65,4 +66,30 @@ func (o *baseLLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][
 
 func (o *baseLLM) GetNumTokens(text string) int {
 	return llms.CountTokens(o.Model, text)
+}
+
+func (o *baseLLM) setDefaultCallOptions(opts *llms.CallOptions) {
+	if len(opts.Model) == 0 {
+		opts.Model = o.Model
+	}
+
+	if opts.MaxTokens == 0 {
+		v, _ := schema.DefaultParameters["maxOutputTokens"].(int)
+		opts.MaxTokens = v
+	}
+
+	if opts.Temperature == 0 {
+		v, _ := schema.DefaultParameters["temperature"].(float64)
+		opts.Temperature = v
+	}
+
+	if opts.TopP == 0 {
+		v, _ := schema.DefaultParameters["topP"].(float64)
+		opts.TopP = v
+	}
+
+	if opts.TopK == 0 {
+		v, _ := schema.DefaultParameters["topK"].(int)
+		opts.TopK = v
+	}
 }

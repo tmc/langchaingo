@@ -69,7 +69,6 @@ func New(ctx context.Context, projectID string, opts ...option.ClientOption) (*V
 
 // CreateCompletion creates a completion.
 func (c *VertexClient) CreateCompletion(ctx context.Context, r *schema.CompletionRequest) ([]*schema.Completion, error) {
-
 	if strings.Contains(r.Model, "bison") || strings.Contains(r.Model, "gecko") {
 		return c.legacyClient.CreateCompletion(ctx, r)
 	}
@@ -127,5 +126,9 @@ func (c *VertexClient) getModelPath(model string) string {
 }
 
 func (c *VertexClient) CreateChat(ctx context.Context, model string, publisher string, r *schema.ChatRequest) (*schema.ChatResponse, error) {
-	return c.legacyClient.CreateChat(ctx, model, publisher, r)
+	if strings.Contains(model, "bison") || strings.Contains(model, "gecko") {
+		return c.legacyClient.CreateChat(ctx, model, publisher, r)
+	}
+
+	return c.genAIClient.CreateChat(ctx, model, publisher, r)
 }

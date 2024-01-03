@@ -44,10 +44,10 @@ type Completion struct {
 type ChatRequest struct {
 	Context        string         `json:"context"`
 	Messages       []*ChatMessage `json:"messages"`
-	Temperature    float64        `json:"temperature,omitempty"`
-	TopP           int            `json:"top_p,omitempty"`
-	TopK           int            `json:"top_k,omitempty"`
-	CandidateCount int            `json:"candidate_count,omitempty"`
+	Temperature    float32        `json:"temperature,omitempty"`
+	TopP           float32        `json:"top_p,omitempty"`
+	TopK           float32        `json:"top_k,omitempty"`
+	CandidateCount int32          `json:"candidate_count,omitempty"`
 }
 
 // ChatMessage is a message in a chat.

@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 	"context"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
+	lcgschema "github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/option"
 )
 
@@ -79,4 +80,53 @@ func (p GenAIClient) CreateCompletion(ctx context.Context, r *schema.CompletionR
 	}
 
 	return completions, nil
+}
+
+// CreateChat creates chat request.
+func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher string, r *schema.ChatRequest) (*schema.ChatResponse, error) {
+	model := p.client.GenerativeModel(modelName)
+
+	model.SetTemperature(float32(r.Temperature))
+	model.SetTopP(float32(r.TopP))
+	model.SetTopK(float32(r.TopK))
+
+	model.SetCandidateCount(int32(r.CandidateCount))
+
+	chat := model.StartChat()
+	for _, message := range r.Messages {
+		switch message.GetType() {
+		case lcgschema.ChatMessageTypeAI:
+			chat.History = append(chat.History, &genai.Content{
+				Role:  "model",
+				Parts: []genai.Part{genai.Text(message.Content)},
+			})
+		case lcgschema.ChatMessageTypeHuman:
+			chat.History = append(chat.History, &genai.Content{
+				Role:  "user",
+				Parts: []genai.Part{genai.Text(message.Content)},
+			})
+		default:
+			return nil, lcgschema.ErrUnexpectedChatMessageType
+		}
+	}
+
+	lastPart := chat.History[len(chat.History)-1].Parts
+	chat.History = make([]*genai.Content, 0)
+
+	chatResponse, err := chat.SendMessage(ctx, lastPart...)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &schema.ChatResponse{Candidates: make([]schema.ChatMessage, 0)}
+	for _, generation := range chatResponse.Candidates {
+		message := generation.Content.Parts[0].(genai.Text)
+		chatMessage := schema.ChatMessage{
+			Content: string(message),
+			Author:  "bot",
+		}
+		resp.Candidates = append(resp.Candidates, chatMessage)
+	}
+
+	return resp, nil
 }

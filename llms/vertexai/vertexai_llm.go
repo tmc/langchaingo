@@ -34,29 +34,7 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		opt(&opts)
 	}
 
-	if len(opts.Model) == 0 {
-		opts.Model = o.Model
-	}
-
-	if opts.MaxTokens == 0 {
-		v, _ := schema.DefaultParameters["maxOutputTokens"].(int)
-		opts.MaxTokens = v
-	}
-
-	if opts.Temperature == 0 {
-		v, _ := schema.DefaultParameters["temperature"].(float64)
-		opts.Temperature = v
-	}
-
-	if opts.TopP == 0 {
-		v, _ := schema.DefaultParameters["topP"].(float64)
-		opts.TopP = v
-	}
-
-	if opts.TopK == 0 {
-		v, _ := schema.DefaultParameters["topK"].(int)
-		opts.TopK = v
-	}
+	o.setDefaultCallOptions(&opts)
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
