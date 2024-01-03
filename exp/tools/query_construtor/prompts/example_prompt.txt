@@ -1,0 +1,9 @@
+<< Example {i}. >>
+Data Source:
+{{.data_source}}
+
+User Query:
+{{.user_query}}
+
+Structured Request:
+{{.structured_request}}

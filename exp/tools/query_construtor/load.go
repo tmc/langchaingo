@@ -25,6 +25,8 @@ var _schemaWithLimitPrompt string //nolint:gochecknoglobals
 var _userSpecifiedExample string //nolint:gochecknoglobals
 //go:embed prompts/with_data_source.txt
 var _withDataSource string //nolint:gochecknoglobals
+//go:embed prompts/example_prompt.txt
+var _examplePrompt string //nolint:gochecknoglobals
 
 // documentContents: The contents of the document to be queried.
 // attributeInfo: A list of AttributeInfo objects describing the attributes of the document.
@@ -40,7 +42,7 @@ type LoadArgs struct {
 	attributeInfo      []AttributeInfo
 	allowedComparators []Comparator
 	allowedOperators   []Operator
-	examples           []Example
+	inputOuputExamples []InputOuputExample
 	customExamples     []map[string]string
 	schemaPrompt       *string
 	enableLimit        *bool
@@ -57,17 +59,20 @@ func Load(args LoadArgs) (*prompts.FewShotPrompt, error) {
 		"allowed_comparators": strings.Join(args.allowedComparators, " | "),
 		"allowed_operators":   strings.Join(args.allowedOperators, " | "),
 	})
+	if err != nil {
+		return nil, fmt.Errorf("error formating 'default schema' prompt %w", err)
+	}
 
 	jsonAttributes, err := formatAttribute(args.attributeInfo)
 	if err != nil {
-		fmt.Errorf("error formating attribute while loading constructor %w", err)
+		return nil, fmt.Errorf("error formating attribute while loading constructor %w", err)
 	}
 
 	outputExample := setExampleOutput{}
 
-	if args.examples != nil && len(args.examples) > 0 {
-		if err := setInputOutputExamples(setInputOutputExampleInput{
-			examples:         args.examples,
+	if args.inputOuputExamples != nil && len(args.inputOuputExamples) > 0 {
+		if err := setInputOutputExamples(setInputOutputExamplesInput{
+			examples:         args.inputOuputExamples,
 			schema:           schema,
 			jsonAttributes:   string(jsonAttributes),
 			documentContents: args.documentContents,
@@ -78,15 +83,18 @@ func Load(args LoadArgs) (*prompts.FewShotPrompt, error) {
 	}
 
 	if args.customExamples != nil && len(args.customExamples) > 0 {
-
+		if err := setCustomExamples(setCustomExamplesInput{
+			examples:         args.customExamples,
+			schema:           schema,
+			jsonAttributes:   string(jsonAttributes),
+			documentContents: args.documentContents,
+			enableLimit:      args.enableLimit,
+		}, &outputExample); err != nil {
+			return nil, fmt.Errorf("error setting custom example %w", err)
+		}
 	}
 
-	examplePrompt, examples, prefix, suffix, err := setExamples(args.examples, args.customExamples, schema, string(jsonAttributes), args.documentContents, args.enableLimit)
-	if err != nil {
-		return nil, fmt.Errorf("error setting examples for query constructor %w", err)
-	}
-
-	return prompts.NewFewShotPrompt(*examplePrompt, examples, nil, *prefix, *suffix, []string{""}, nil, "", prompts.TemplateFormatGoTemplate, true)
+	return prompts.NewFewShotPrompt(outputExample.examplePrompt, outputExample.examples, nil, outputExample.prefix, outputExample.suffix, []string{"query"}, nil, "", prompts.TemplateFormatGoTemplate, true)
 }
 
 func getDefaultSchema(schemaPrompt *string, enableLimit *bool) string {
@@ -127,20 +135,20 @@ func formatAttribute(attributeInfo []AttributeInfo) ([]byte, error) {
 
 type setExampleOutput struct {
 	examplePrompt prompts.PromptTemplate
-	examples      []Example
+	examples      []map[string]string
 	prefix        string
 	suffix        string
 }
 
-type setInputOutputExampleInput struct {
-	examples         []Example
+type setInputOutputExamplesInput struct {
+	examples         []InputOuputExample
 	schema           string
 	jsonAttributes   string
 	documentContents string
 	enableLimit      *bool
 }
 
-func setInputOutputExamples(input setInputOutputExampleInput, output *setExampleOutput) error {
+func setInputOutputExamples(input setInputOutputExamplesInput, output *setExampleOutput) error {
 	formattedExamples := []map[string]string{}
 	var err error
 	for i, e := range input.examples {
@@ -156,6 +164,7 @@ func setInputOutputExamples(input setInputOutputExampleInput, output *setExample
 		})
 
 	}
+	output.examples = formattedExamples
 
 	output.examplePrompt = prompts.NewPromptTemplate(_userSpecifiedExample, []string{"i", "user_query", "structured_request"})
 
@@ -168,7 +177,7 @@ func setInputOutputExamples(input setInputOutputExampleInput, output *setExample
 		"content":    input.documentContents,
 		"attributes": input.jsonAttributes,
 	}); err != nil {
-		return fmt.Errorf("error formating 'default prefix' prompt %w", err)
+		return fmt.Errorf("error formating 'default prefix' and 'with data source' prompt %w", err)
 	}
 
 	if output.suffix, err = prompts.NewPromptTemplate(_suffixWithoutDatasourcePrompt, []string{"i"}).Format(map[string]interface{}{
@@ -180,6 +189,38 @@ func setInputOutputExamples(input setInputOutputExampleInput, output *setExample
 	return nil
 }
 
-func setCustomExamples(examples *[]Example, customExamples []map[string]string, schema string, jsonAttributes string, documentContents string, enableLimit *bool) (*prompts.PromptTemplate, []map[string]string, *string, *string, error) {
+type setCustomExamplesInput struct {
+	examples         []map[string]string
+	schema           string
+	jsonAttributes   string
+	documentContents string
+	enableLimit      *bool
+}
 
+func setCustomExamples(input setCustomExamplesInput, output *setExampleOutput) error {
+	var err error
+
+	output.examples = getDefaultExamples(input.examples, input.enableLimit)
+	output.examplePrompt = prompts.NewPromptTemplate(_examplePrompt, []string{
+		"i",
+		"data_source",
+		"user_query",
+		"structured_request",
+	})
+
+	if output.prefix, err = prompts.NewPromptTemplate(_defaultPrefixPrompt, []string{"schema"}).Format(map[string]any{
+		"schema": input.schema,
+	}); err != nil {
+		return fmt.Errorf("error formating 'default prefix' prompt %w", err)
+	}
+
+	if output.suffix, err = prompts.NewPromptTemplate(_defaultSuffixPrompt, []string{"i", "content", "attributes"}).Format(map[string]any{
+		"i":          strconv.Itoa(len(input.examples) + 1),
+		"content":    input.documentContents,
+		"attributes": input.jsonAttributes,
+	}); err != nil {
+		return fmt.Errorf("error formating 'default suffix' prompt %w", err)
+	}
+
+	return nil
 }

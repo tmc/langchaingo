@@ -6,7 +6,7 @@ type AttributeInfo struct {
 	Type        string
 }
 
-type Example struct {
+type InputOuputExample struct {
 	Input string
 	Ouput interface{}
 }
