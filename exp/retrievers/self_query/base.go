@@ -1,5 +1,0 @@
-package selfquery
-
-func FromLLM() {
-
-}
