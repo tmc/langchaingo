@@ -2,6 +2,7 @@ package vertexschema
 
 import (
 	"errors"
+
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -10,7 +11,7 @@ var (
 	ErrMissingValue = errors.New("missing value")
 	// ErrInvalidValue is returned when a value is invalid.
 	ErrInvalidValue = errors.New("invalid value")
-	// ErrInvalidReturnType is returned when the model generates the wrong type for the return value
+	// ErrInvalidReturnType is returned when the model generates the wrong type for the return value.
 	ErrInvalidReturnType = errors.New("unsupported model")
 )
 

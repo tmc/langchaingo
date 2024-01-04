@@ -3,12 +3,12 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/genaiclient"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"runtime"
 	"strings"
 
+	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/genaiclient"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"google.golang.org/api/option"
 )
 
@@ -54,7 +54,7 @@ func New(ctx context.Context, opts vertexschema.ConnectOptions, copts ...option.
 }
 
 // CreateCompletion creates a completion.
-func (c *VertexClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) {
+func (c *VertexClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) { //nolint:lll
 	if strings.Contains(r.Model, "bison") || strings.Contains(r.Model, "gecko") {
 		return c.legacyClient.CreateCompletion(ctx, r)
 	}
@@ -106,12 +106,7 @@ func (c *VertexClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest)
 	return embeddings, nil
 }
 
-func (c *VertexClient) getModelPath(model string) string {
-	// POST https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/publishers/google/models/gemini-pro:streamGenerateContent
-	return fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models/%s", c.ProjectID, c.Location, c.Publisher, model)
-}
-
-func (c *VertexClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
+func (c *VertexClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) { //nolint:lll
 	if strings.Contains(model, "bison") || strings.Contains(model, "gecko") {
 		return c.legacyClient.CreateChat(ctx, model, publisher, r)
 	}

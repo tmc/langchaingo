@@ -3,6 +3,7 @@ package vertexai
 import (
 	"context"
 	"errors"
+
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/common"

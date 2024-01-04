@@ -1,12 +1,12 @@
 package vertexai
 
 import (
-	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"net/http"
 	"os"
 	"sync"
 
+	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 )

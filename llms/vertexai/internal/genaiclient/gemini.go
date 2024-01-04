@@ -1,8 +1,9 @@
 package genaiclient
 
 import (
-	"cloud.google.com/go/vertexai/genai"
 	"context"
+
+	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/option"
@@ -48,7 +49,7 @@ func New(ctx context.Context, projectID string, location string, option ...optio
 	return gi, nil
 }
 
-func (p GenAIClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) {
+func (p GenAIClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) { //nolint:lll
 	model := p.client.GenerativeModel(r.Model)
 
 	model.SetTemperature(float32(r.Temperature))
@@ -82,12 +83,12 @@ func (p GenAIClient) CreateCompletion(ctx context.Context, r *vertexschema.Compl
 }
 
 // CreateChat creates chat request.
-func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
+func (p GenAIClient) CreateChat(ctx context.Context, modelName string, _ string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) { //nolint:lll
 	model := p.client.GenerativeModel(modelName)
 
-	model.SetTemperature(float32(r.Temperature))
-	model.SetTopP(float32(r.TopP))
-	model.SetTopK(float32(r.TopK))
+	model.SetTemperature(r.Temperature)
+	model.SetTopP(r.TopP)
+	model.SetTopK(r.TopK)
 
 	model.SetCandidateCount(r.CandidateCount)
 
@@ -99,12 +100,12 @@ func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher
 				Role:  "model",
 				Parts: []genai.Part{genai.Text(message.Content)},
 			})
-		case schema.ChatMessageTypeHuman:
+		case schema.ChatMessageTypeHuman, schema.ChatMessageTypeGeneric, schema.ChatMessageTypeSystem:
 			chat.History = append(chat.History, &genai.Content{
 				Role:  "user",
 				Parts: []genai.Part{genai.Text(message.Content)},
 			})
-		default:
+		case schema.ChatMessageTypeFunction:
 			return nil, schema.ErrUnexpectedChatMessageType
 		}
 	}
@@ -119,7 +120,10 @@ func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher
 
 	resp := &vertexschema.ChatResponse{Candidates: make([]vertexschema.ChatMessage, 0)}
 	for _, generation := range chatResponse.Candidates {
-		message := generation.Content.Parts[0].(genai.Text)
+		message, ok := generation.Content.Parts[0].(genai.Text)
+		if !ok {
+			return nil, schema.ErrUnexpectedChatMessageType
+		}
 		chatMessage := vertexschema.ChatMessage{
 			Content: string(message),
 			Author:  "bot",

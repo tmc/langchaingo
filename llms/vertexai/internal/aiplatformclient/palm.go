@@ -1,10 +1,11 @@
 package aiplatformclient
 
 import (
-	aiplatform "cloud.google.com/go/aiplatform/apiv1"
-	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"context"
 	"fmt"
+
+	aiplatform "cloud.google.com/go/aiplatform/apiv1"
+	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -37,7 +38,7 @@ func New(ctx context.Context, projectID string, location string, option ...optio
 	return gi, nil
 }
 
-func (p PalmClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) {
+func (p PalmClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) { //nolint:lll
 	params := map[string]interface{}{
 		"maxOutputTokens": r.MaxTokens,
 		"temperature":     r.Temperature,
@@ -91,6 +92,5 @@ func (p PalmClient) BatchPredict(ctx context.Context, model string, prompts []st
 }
 
 func (p PalmClient) getModelPath(project, location, publisher, model string) string {
-	// POST https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/publishers/google/models/gemini-pro:streamGenerateContent
 	return fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models/%s", project, location, publisher, model)
 }

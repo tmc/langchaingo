@@ -2,6 +2,7 @@ package vertexai
 
 import (
 	"context"
+
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	lcgschema "github.com/tmc/langchaingo/schema"

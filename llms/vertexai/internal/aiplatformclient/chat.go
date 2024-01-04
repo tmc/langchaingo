@@ -1,16 +1,17 @@
 package aiplatformclient
 
 import (
-	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // CreateChat creates chat request.
-func (c *PalmClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
-	responses, err := c.chat(ctx, model, publisher, r)
+func (p *PalmClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) { //nolint:lll
+	responses, err := p.chat(ctx, model, publisher, r)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func (c *PalmClient) CreateChat(ctx context.Context, model string, publisher str
 	return chatResponse, nil
 }
 
-func (c *PalmClient) chat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) ([]*structpb.Value, error) {
+func (p *PalmClient) chat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) ([]*structpb.Value, error) { //nolint:lll
 	params := map[string]interface{}{
 		"temperature": r.Temperature,
 		"top_p":       r.TopP,
@@ -72,8 +73,8 @@ func (c *PalmClient) chat(ctx context.Context, model string, publisher string, r
 		structpb.NewStructValue(instance),
 	}
 
-	resp, err := c.client.Predict(ctx, &aiplatformpb.PredictRequest{
-		Endpoint:   c.getModelPath(c.projectID, c.location, publisher, model),
+	resp, err := p.client.Predict(ctx, &aiplatformpb.PredictRequest{
+		Endpoint:   p.getModelPath(p.projectID, p.location, publisher, model),
 		Instances:  instances,
 		Parameters: structpb.NewStructValue(mergedParams),
 	})
