@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	queryconstructor_prompts "github.com/tmc/langchaingo/exp/tools/query_construtor/prompts"
+	queryconstructor_prompts "github.com/tmc/langchaingo/exp/tools/queryconstrutor/prompts"
 	"github.com/tmc/langchaingo/prompts"
 )
 
