@@ -85,7 +85,6 @@ func TestLLM_Chat(t *testing.T) {
 			assert.Contains(t, output.Content, "hello")
 		})
 	}
-
 }
 
 func TestBaseLLM_CreateEmbedding(t *testing.T) {
@@ -93,12 +92,22 @@ func TestBaseLLM_CreateEmbedding(t *testing.T) {
 		t.Skipf("Missing env var: %s, skipping test", projectIDEnvVarName)
 	}
 
-	llm, err := New()
-	assert.NoError(t, err)
+	testCases := []testCase{
+		{model: aiplatformclient.ChatModelName},
+		{model: genaiclient.ChatModelName},
+	}
 
 	text := []string{"some text"}
 
-	vector, err := llm.CreateEmbedding(context.Background(), text)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, vector)
+	for _, tt := range testCases {
+		t.Run(tt.model, func(t *testing.T) {
+			llm, err := New(WithModel(tt.model))
+			assert.NoError(t, err)
+
+			vector, err := llm.CreateEmbedding(context.Background(), text)
+			assert.NoError(t, err)
+			assert.NotEmpty(t, vector)
+		})
+	}
+
 }
