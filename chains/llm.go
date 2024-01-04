@@ -56,17 +56,12 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	result, err := llms.GeneratePrompt(
-		ctx,
-		c.LLM,
-		[]schema.PromptValue{promptValue},
-		getLLMCallOptions(options...)...,
-	)
+	result, err := c.LLM.Call(ctx, promptValue.String(), getLLMCallOptions(options...)...)
 	if err != nil {
 		return nil, err
 	}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(result.Generations[0][0].Text, promptValue)
+	finalOutput, err := c.OutputParser.ParseWithPrompt(result, promptValue)
 	if err != nil {
 		return nil, err
 	}
