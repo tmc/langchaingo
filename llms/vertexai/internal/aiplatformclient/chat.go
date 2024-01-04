@@ -4,37 +4,37 @@ import (
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"context"
 	"fmt"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // CreateChat creates chat request.
-func (c *PalmClient) CreateChat(ctx context.Context, model string, publisher string, r *schema.ChatRequest) (*schema.ChatResponse, error) {
+func (c *PalmClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
 	responses, err := c.chat(ctx, model, publisher, r)
 	if err != nil {
 		return nil, err
 	}
-	chatResponse := &schema.ChatResponse{}
+	chatResponse := &vertexschema.ChatResponse{}
 	res := responses[0]
 	value := res.GetStructValue().AsMap()
 	candidates, ok := value["candidates"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("%w: %v", schema.ErrMissingValue, "candidates")
+		return nil, fmt.Errorf("%w: %v", vertexschema.ErrMissingValue, "candidates")
 	}
 	for _, c := range candidates {
 		candidate, ok := c.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("%w: %v is not a map[string]interface{}", schema.ErrInvalidValue, "candidate")
+			return nil, fmt.Errorf("%w: %v is not a map[string]interface{}", vertexschema.ErrInvalidValue, "candidate")
 		}
 		author, ok := candidate["author"].(string)
 		if !ok {
-			return nil, fmt.Errorf("%w: %v is not a string", schema.ErrInvalidValue, "author")
+			return nil, fmt.Errorf("%w: %v is not a string", vertexschema.ErrInvalidValue, "author")
 		}
 		content, ok := candidate["content"].(string)
 		if !ok {
-			return nil, fmt.Errorf("%w: %v is not a string", schema.ErrInvalidValue, "content")
+			return nil, fmt.Errorf("%w: %v is not a string", vertexschema.ErrInvalidValue, "content")
 		}
-		chatResponse.Candidates = append(chatResponse.Candidates, schema.ChatMessage{
+		chatResponse.Candidates = append(chatResponse.Candidates, vertexschema.ChatMessage{
 			Author:  author,
 			Content: content,
 		})
@@ -42,13 +42,16 @@ func (c *PalmClient) CreateChat(ctx context.Context, model string, publisher str
 	return chatResponse, nil
 }
 
-func (c *PalmClient) chat(ctx context.Context, model string, publisher string, r *schema.ChatRequest) ([]*structpb.Value, error) {
+func (c *PalmClient) chat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) ([]*structpb.Value, error) {
 	params := map[string]interface{}{
 		"temperature": r.Temperature,
 		"top_p":       r.TopP,
 		"top_k":       r.TopK,
 	}
-	mergedParams := mergeParams(schema.DefaultParameters, params)
+	mergedParams, err := makeParams(params)
+	if err != nil {
+		return nil, err
+	}
 
 	messages := []interface{}{}
 	for _, msg := range r.Messages {
@@ -78,7 +81,7 @@ func (c *PalmClient) chat(ctx context.Context, model string, publisher string, r
 		return nil, err
 	}
 	if len(resp.GetPredictions()) == 0 {
-		return nil, schema.ErrEmptyResponse
+		return nil, vertexschema.ErrEmptyResponse
 	}
 	return resp.GetPredictions(), nil
 }

@@ -2,7 +2,7 @@ package vertexai
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 
 	"github.com/tmc/langchaingo/llms"
 	lcgschema "github.com/tmc/langchaingo/schema"
@@ -13,7 +13,7 @@ const (
 	botAuthor  = "bot"
 )
 
-type ChatMessage = schema.ChatMessage
+type ChatMessage = vertexschema.ChatMessage
 
 type Chat struct {
 	*baseLLM
@@ -39,11 +39,11 @@ func (o *Chat) Call(ctx context.Context, messages []lcgschema.ChatMessage, optio
 // Generate requests a chat response for each of the sets of messages.
 func (o *Chat) Generate(ctx context.Context, messageSets [][]lcgschema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { // nolint: lll
 	opts := llms.CallOptions{}
+	o.setDefaultCallOptions(&opts)
+
 	for _, opt := range options {
 		opt(&opts)
 	}
-
-	o.setDefaultCallOptions(&opts)
 
 	if opts.StreamingFunc != nil {
 		return nil, ErrNotImplemented
@@ -57,7 +57,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]lcgschema.ChatMessa
 			messages = messages[1:]
 		}
 		msgs := toClientChatMessage(messages)
-		result, err := o.client.CreateChat(ctx, opts.Model, o.Publisher, &schema.ChatRequest{
+		result, err := o.client.CreateChat(ctx, opts.Model, o.Publisher, &vertexschema.ChatRequest{
 			Temperature: float32(opts.Temperature),
 			Messages:    msgs,
 			Context:     chatContext,
@@ -85,11 +85,11 @@ func (o *Chat) GeneratePrompt(ctx context.Context, promptValues []lcgschema.Prom
 	return llms.GenerateChatPrompt(ctx, o, promptValues, options...)
 }
 
-func toClientChatMessage(messages []lcgschema.ChatMessage) []*schema.ChatMessage {
-	msgs := make([]*schema.ChatMessage, len(messages))
+func toClientChatMessage(messages []lcgschema.ChatMessage) []*vertexschema.ChatMessage {
+	msgs := make([]*vertexschema.ChatMessage, len(messages))
 
 	for i, m := range messages {
-		msg := &schema.ChatMessage{
+		msg := &vertexschema.ChatMessage{
 			Content: m.GetContent(),
 		}
 		typ := m.GetType()
@@ -132,15 +132,17 @@ func NewChat(opts ...Option) (*Chat, error) {
 
 	// Ensure options are initialized only once.
 	initOptions.Do(initOpts)
-	options := &options{}
+	options := &Options{}
 	*options = *defaultOptions // Copy default options.
+
+	// The Chat struct uses the chat model, not the prediction model, so set that as the default
+	options.model = options.chatModel
 
 	for _, opt := range opts {
 		opt(options)
 	}
 
-	// The Chat struct uses the chatModel provided in the options, so we configure the base with that
-	base, err := newBase(ctx, options.chatModel, *options)
+	base, err := newBase(ctx, *options)
 
 	return &Chat{baseLLM: base}, err
 }

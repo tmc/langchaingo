@@ -1,4 +1,4 @@
-package schema
+package vertexschema
 
 import (
 	"errors"
@@ -14,15 +14,15 @@ var (
 	ErrInvalidReturnType = errors.New("unsupported model")
 )
 
-var DefaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
-	"temperature":     0.2, //nolint:gomnd
-	"maxOutputTokens": 256, //nolint:gomnd
-	"topP":            0.8, //nolint:gomnd
-	"topK":            40,  //nolint:gomnd
-}
-
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.
 var ErrEmptyResponse = errors.New("empty response")
+
+type ConnectOptions struct {
+	ProjectID string
+	Location  string
+	Publisher string
+	Endpoint  string
+}
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {

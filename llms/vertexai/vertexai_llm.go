@@ -3,7 +3,7 @@ package vertexai
 import (
 	"context"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	lcgschema "github.com/tmc/langchaingo/schema"
 )
 
@@ -30,17 +30,17 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
 	opts := llms.CallOptions{}
+	o.setDefaultCallOptions(&opts)
+
 	for _, opt := range options {
 		opt(&opts)
 	}
-
-	o.setDefaultCallOptions(&opts)
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
 	}
 
-	results, err := o.client.CreateCompletion(ctx, &schema.CompletionRequest{
+	results, err := o.client.CreateCompletion(ctx, &vertexschema.CompletionRequest{
 		Prompts:       prompts,
 		MaxTokens:     opts.MaxTokens,
 		Temperature:   opts.Temperature,
@@ -77,15 +77,14 @@ func New(opts ...Option) (*LLM, error) {
 
 	// Ensure options are initialized only once.
 	initOptions.Do(initOpts)
-	options := &options{}
+	options := &Options{}
 	*options = *defaultOptions // Copy default options.
 
 	for _, opt := range opts {
 		opt(options)
 	}
 
-	// The LLM struct uses the prediction model provided in the options, so we configure the base with that
-	base, err := newBase(ctx, options.model, *options)
+	base, err := newBase(ctx, *options)
 
 	return &LLM{baseLLM: base}, err
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/common"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
 )
 
 var (
@@ -20,27 +19,36 @@ type baseLLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *common.VertexClient
 
-	Model          string
-	Publisher      string
+	// These are the defaults to use if not on the request
+	Model     string
+	Publisher string
+
 	EmbeddingModel string
 }
 
-func newBase(ctx context.Context, model string, opts options) (*baseLLM, error) {
-	if len(opts.projectID) == 0 {
+var defaultCallOptions = map[string]interface{}{ //nolint:gochecknoglobals
+	"temperature":     0.2, //nolint:gomnd
+	"maxOutputTokens": 256, //nolint:gomnd
+	"topP":            0.8, //nolint:gomnd
+	"topK":            40,  //nolint:gomnd
+}
+
+func newBase(ctx context.Context, opts Options) (*baseLLM, error) {
+	if len(opts.ProjectID) == 0 {
 		return nil, ErrMissingProjectID
 	}
 
-	client, err := common.New(ctx, opts.projectID, opts.clientOptions...)
+	client, err := common.New(ctx, opts.ConnectOptions, opts.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 
 	return &baseLLM{
 		client:         client,
-		Model:          model,
+		Model:          opts.model,
 		EmbeddingModel: opts.embeddingModel,
 
-		Publisher: opts.publisher,
+		Publisher: opts.Publisher,
 	}, nil
 }
 
@@ -74,22 +82,22 @@ func (o *baseLLM) setDefaultCallOptions(opts *llms.CallOptions) {
 	}
 
 	if opts.MaxTokens == 0 {
-		v, _ := schema.DefaultParameters["maxOutputTokens"].(int)
+		v, _ := defaultCallOptions["maxOutputTokens"].(int)
 		opts.MaxTokens = v
 	}
 
 	if opts.Temperature == 0 {
-		v, _ := schema.DefaultParameters["temperature"].(float64)
+		v, _ := defaultCallOptions["temperature"].(float64)
 		opts.Temperature = v
 	}
 
 	if opts.TopP == 0 {
-		v, _ := schema.DefaultParameters["topP"].(float64)
+		v, _ := defaultCallOptions["topP"].(float64)
 		opts.TopP = v
 	}
 
 	if opts.TopK == 0 {
-		v, _ := schema.DefaultParameters["topK"].(int)
+		v, _ := defaultCallOptions["topK"].(int)
 		opts.TopK = v
 	}
 }

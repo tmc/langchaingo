@@ -3,15 +3,14 @@ package genaiclient
 import (
 	"cloud.google.com/go/vertexai/genai"
 	"context"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
-	lcgschema "github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
+	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/option"
 )
 
 const (
-	EmbeddingModelName = "textembedding-gecko"
-	TextModelName      = "gemini-pro"
-	ChatModelName      = "gemini-pro"
+	TextModelName = "gemini-pro"
+	ChatModelName = "gemini-pro"
 )
 
 type GeminiPart struct {
@@ -49,7 +48,7 @@ func New(ctx context.Context, projectID string, location string, option ...optio
 	return gi, nil
 }
 
-func (p GenAIClient) CreateCompletion(ctx context.Context, r *schema.CompletionRequest) ([]*schema.Completion, error) {
+func (p GenAIClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) {
 	model := p.client.GenerativeModel(r.Model)
 
 	model.SetTemperature(float32(r.Temperature))
@@ -61,7 +60,7 @@ func (p GenAIClient) CreateCompletion(ctx context.Context, r *schema.CompletionR
 	// Callers only know how to handle one response per prompt
 	model.SetCandidateCount(1)
 
-	completions := make([]*schema.Completion, len(r.Prompts))
+	completions := make([]*vertexschema.Completion, len(r.Prompts))
 	for i, v := range r.Prompts {
 		content, err := model.GenerateContent(ctx, genai.Text(v))
 		if err != nil {
@@ -71,10 +70,10 @@ func (p GenAIClient) CreateCompletion(ctx context.Context, r *schema.CompletionR
 		result := content.Candidates[0].Content.Parts[0]
 		value, ok := result.(genai.Text)
 		if !ok {
-			return nil, schema.ErrInvalidReturnType
+			return nil, vertexschema.ErrInvalidReturnType
 		}
 
-		completions[i] = &schema.Completion{
+		completions[i] = &vertexschema.Completion{
 			Text: string(value),
 		}
 	}
@@ -83,30 +82,30 @@ func (p GenAIClient) CreateCompletion(ctx context.Context, r *schema.CompletionR
 }
 
 // CreateChat creates chat request.
-func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher string, r *schema.ChatRequest) (*schema.ChatResponse, error) {
+func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
 	model := p.client.GenerativeModel(modelName)
 
 	model.SetTemperature(float32(r.Temperature))
 	model.SetTopP(float32(r.TopP))
 	model.SetTopK(float32(r.TopK))
 
-	model.SetCandidateCount(int32(r.CandidateCount))
+	model.SetCandidateCount(r.CandidateCount)
 
 	chat := model.StartChat()
 	for _, message := range r.Messages {
 		switch message.GetType() {
-		case lcgschema.ChatMessageTypeAI:
+		case schema.ChatMessageTypeAI:
 			chat.History = append(chat.History, &genai.Content{
 				Role:  "model",
 				Parts: []genai.Part{genai.Text(message.Content)},
 			})
-		case lcgschema.ChatMessageTypeHuman:
+		case schema.ChatMessageTypeHuman:
 			chat.History = append(chat.History, &genai.Content{
 				Role:  "user",
 				Parts: []genai.Part{genai.Text(message.Content)},
 			})
 		default:
-			return nil, lcgschema.ErrUnexpectedChatMessageType
+			return nil, schema.ErrUnexpectedChatMessageType
 		}
 	}
 
@@ -118,10 +117,10 @@ func (p GenAIClient) CreateChat(ctx context.Context, modelName string, publisher
 		return nil, err
 	}
 
-	resp := &schema.ChatResponse{Candidates: make([]schema.ChatMessage, 0)}
+	resp := &vertexschema.ChatResponse{Candidates: make([]vertexschema.ChatMessage, 0)}
 	for _, generation := range chatResponse.Candidates {
 		message := generation.Content.Parts[0].(genai.Text)
-		chatMessage := schema.ChatMessage{
+		chatMessage := vertexschema.ChatMessage{
 			Content: string(message),
 			Author:  "bot",
 		}

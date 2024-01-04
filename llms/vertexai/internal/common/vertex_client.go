@@ -5,17 +5,11 @@ import (
 	"fmt"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
 	"github.com/tmc/langchaingo/llms/vertexai/internal/genaiclient"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/schema"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"runtime"
 	"strings"
 
 	"google.golang.org/api/option"
-)
-
-const (
-	defaultAPIEndpoint = "us-central1-aiplatform.googleapis.com:443"
-	defaultLocation    = "us-central1"
-	defaultPublisher   = "google"
 )
 
 const (
@@ -27,48 +21,40 @@ type VertexClient struct {
 	genAIClient  genaiclient.GenAIClient
 	legacyClient aiplatformclient.PalmClient
 
-	projectID string
-	location  string
-	publisher string
-}
-
-type googleClient interface {
-	CreateCompletion(context.Context, *schema.CompletionRequest) ([]*schema.Completion, error)
+	vertexschema.ConnectOptions
 }
 
 // New returns a new Vertex AI API client.
-func New(ctx context.Context, projectID string, opts ...option.ClientOption) (*VertexClient, error) {
+func New(ctx context.Context, opts vertexschema.ConnectOptions, copts ...option.ClientOption) (*VertexClient, error) {
 	numConns := runtime.GOMAXPROCS(0)
 	if numConns > defaultMaxConns {
 		numConns = defaultMaxConns
 	}
 	o := []option.ClientOption{
 		option.WithGRPCConnectionPool(numConns),
-		option.WithEndpoint(defaultAPIEndpoint),
+		option.WithEndpoint(opts.Endpoint),
 	}
-	o = append(o, opts...)
+	o = append(o, copts...)
 
-	client, err := genaiclient.New(ctx, projectID, defaultLocation, o...)
+	client, err := genaiclient.New(ctx, opts.ProjectID, opts.Location, o...)
 	if err != nil {
 		return nil, err
 	}
 
-	legacyClient, err := aiplatformclient.New(ctx, projectID, defaultLocation, o...)
+	legacyClient, err := aiplatformclient.New(ctx, opts.ProjectID, opts.Location, o...)
 	if err != nil {
 		return nil, err
 	}
 
 	return &VertexClient{
-		genAIClient:  client,
-		legacyClient: legacyClient,
-		projectID:    projectID,
-		location:     defaultLocation,
-		publisher:    defaultPublisher,
+		genAIClient:    client,
+		legacyClient:   legacyClient,
+		ConnectOptions: opts,
 	}, nil
 }
 
 // CreateCompletion creates a completion.
-func (c *VertexClient) CreateCompletion(ctx context.Context, r *schema.CompletionRequest) ([]*schema.Completion, error) {
+func (c *VertexClient) CreateCompletion(ctx context.Context, r *vertexschema.CompletionRequest) ([]*vertexschema.Completion, error) {
 	if strings.Contains(r.Model, "bison") || strings.Contains(r.Model, "gecko") {
 		return c.legacyClient.CreateCompletion(ctx, r)
 	}
@@ -97,11 +83,11 @@ func (c *VertexClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest)
 		value := res.GetStructValue().AsMap()
 		embedding, ok := value["embeddings"].(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("%w: %v", schema.ErrMissingValue, "embeddings")
+			return nil, fmt.Errorf("%w: %v", vertexschema.ErrMissingValue, "embeddings")
 		}
 		values, ok := embedding["values"].([]interface{})
 		if !ok {
-			return nil, fmt.Errorf("%w: %v", schema.ErrMissingValue, "values")
+			return nil, fmt.Errorf("%w: %v", vertexschema.ErrMissingValue, "values")
 		}
 		floatValues := []float32{}
 		for _, v := range values {
@@ -109,7 +95,7 @@ func (c *VertexClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest)
 			if !ok {
 				valF64, ok := v.(float64)
 				if !ok {
-					return nil, fmt.Errorf("%w: %v is not a float64 or float32, it is a %T", schema.ErrInvalidValue, "value", v)
+					return nil, fmt.Errorf("%w: %v is not a float64 or float32, it is a %T", vertexschema.ErrInvalidValue, "value", v)
 				}
 				val = float32(valF64)
 			}
@@ -122,10 +108,10 @@ func (c *VertexClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest)
 
 func (c *VertexClient) getModelPath(model string) string {
 	// POST https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/publishers/google/models/gemini-pro:streamGenerateContent
-	return fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models/%s", c.projectID, c.location, c.publisher, model)
+	return fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models/%s", c.ProjectID, c.Location, c.Publisher, model)
 }
 
-func (c *VertexClient) CreateChat(ctx context.Context, model string, publisher string, r *schema.ChatRequest) (*schema.ChatResponse, error) {
+func (c *VertexClient) CreateChat(ctx context.Context, model string, publisher string, r *vertexschema.ChatRequest) (*vertexschema.ChatResponse, error) {
 	if strings.Contains(model, "bison") || strings.Contains(model, "gecko") {
 		return c.legacyClient.CreateChat(ctx, model, publisher, r)
 	}

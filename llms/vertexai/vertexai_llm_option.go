@@ -2,6 +2,7 @@ package vertexai
 
 import (
 	"github.com/tmc/langchaingo/llms/vertexai/internal/aiplatformclient"
+	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexschema"
 	"net/http"
 	"os"
 	"sync"
@@ -19,39 +20,42 @@ var (
 	initOptions sync.Once
 
 	// nolint: gochecknoglobals
-	defaultOptions *options
+	defaultOptions *Options
 )
 
-type options struct {
+type Options struct {
 	model          string
 	chatModel      string
 	embeddingModel string
-	publisher      string
 
-	projectID     string
-	clientOptions []option.ClientOption
+	vertexschema.ConnectOptions
+	ClientOptions []option.ClientOption
 }
 
 // Option is a function that can be passed to NewClient to configure options.
-type Option func(*options)
+type Option func(*Options)
 
 // initOpts initializes defaultOptions with the environment variables.
 func initOpts() {
-	defaultOptions = &options{
+	defaultOptions = &Options{
 		model:          aiplatformclient.TextModelName,
 		chatModel:      aiplatformclient.ChatModelName,
 		embeddingModel: aiplatformclient.EmbeddingModelName,
 
-		publisher: "google",
+		ConnectOptions: vertexschema.ConnectOptions{
+			Publisher: "google",
+			Endpoint:  "us-central1-aiplatform.googleapis.com:443",
+			Location:  "us-central1",
 
-		projectID: os.Getenv(projectIDEnvVarName),
+			ProjectID: os.Getenv(projectIDEnvVarName),
+		},
 	}
 }
 
 // WithModel passes the VertexAI model to the client. If not set, the model
 // will default to the one used by PaLM.  This is to preserve existing behavior.
 func WithModel(model string) Option {
-	return func(opts *options) {
+	return func(opts *Options) {
 		opts.model = model
 	}
 }
@@ -59,8 +63,8 @@ func WithModel(model string) Option {
 // WithProjectID passes the Google Cloud project ID to the client. If not set, the project
 // is read from the GOOGLE_CLOUD_PROJECT environment variable.
 func WithProjectID(projectID string) Option {
-	return func(opts *options) {
-		opts.projectID = projectID
+	return func(opts *Options) {
+		opts.ProjectID = projectID
 	}
 }
 
@@ -85,29 +89,29 @@ func WithCredentialsJSON(json []byte) Option {
 }
 
 func WithGRPCDialOption(opt grpc.DialOption) Option {
-	return func(opts *options) {
-		opts.clientOptions = append(opts.clientOptions, option.WithGRPCDialOption(opt))
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, option.WithGRPCDialOption(opt))
 	}
 }
 
 func WithHTTPClient(client *http.Client) Option {
-	return func(opts *options) {
-		opts.clientOptions = append(opts.clientOptions, option.WithHTTPClient(client))
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, option.WithHTTPClient(client))
 	}
 }
 
 func convertStringOption(fopt func(string) option.ClientOption) func(string) Option {
 	return func(param string) Option {
-		return func(opts *options) {
-			opts.clientOptions = append(opts.clientOptions, fopt(param))
+		return func(opts *Options) {
+			opts.ClientOptions = append(opts.ClientOptions, fopt(param))
 		}
 	}
 }
 
 func convertByteArrayOption(fopt func([]byte) option.ClientOption) func([]byte) Option {
 	return func(param []byte) Option {
-		return func(opts *options) {
-			opts.clientOptions = append(opts.clientOptions, fopt(param))
+		return func(opts *Options) {
+			opts.ClientOptions = append(opts.ClientOptions, fopt(param))
 		}
 	}
 }
