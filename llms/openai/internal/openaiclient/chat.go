@@ -87,6 +87,22 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	return json.Marshal(msg)
 }
 
+func (m *ChatMessage) UnmarshalJSON(data []byte) error {
+	msg := struct {
+		Role         string             `json:"role"`
+		Content      string             `json:"content"`
+		MultiContent []llms.ContentPart `json:"-"` // not expected in response
+		Name         string             `json:"name,omitempty"`
+		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+	}{}
+	err := json.Unmarshal([]byte(data), &msg)
+	if err != nil {
+		return err
+	}
+	*m = ChatMessage(msg)
+	return nil
+}
+
 // ChatChoice is a choice in a chat response.
 type ChatChoice struct {
 	Index        int         `json:"index"`
