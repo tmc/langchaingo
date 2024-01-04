@@ -89,10 +89,6 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens(vertexaiclient.TextModelName, text)
-}
-
 // New returns a new VertexAI PaLM LLM.
 func New(opts ...Option) (*LLM, error) {
 	client, err := newClient(opts...)

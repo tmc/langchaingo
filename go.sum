@@ -65,8 +65,8 @@ github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdko
 github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398/go.mod h1:a1uqRtAwp2Xwc6WNPJEufxJ7fx3npB4UV/JOLmbu5I0=
 github.com/airbrake/gobrake v3.6.1+incompatible/go.mod h1:wM4gu3Cn0W0K7GUuVWnlXZU11AGBXMILnrdOU8Kn00o=
 github.com/ajg/form v1.5.1/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
-github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e h1:RYla80qSHCeP8WL9Hyjfuk9n/KkDcYwzfaYbfc4cqRQ=
-github.com/amikos-tech/chroma-go v0.0.0-20230901221218-d0087270239e/go.mod h1:bPy9xmWK59Ix/nteEqIvPfAI0L07di+uZMb+RiYbles=
+github.com/amikos-tech/chroma-go v0.0.0-20231228181736-e8f5e927093e h1:68YtjXFDWgquXICyGFa0gZ+nqZbs4OURutAyUjH1mYs=
+github.com/amikos-tech/chroma-go v0.0.0-20231228181736-e8f5e927093e/go.mod h1:uJwgGN4rBUTMI88Rn68Xia+cTRogOo0/elcPvJYFtBU=
 github.com/andybalholm/cascadia v1.3.1/go.mod h1:R4bJ1UQfqADjvDa4P6HZHLh/3OxWWEqc0Sk8XGwHqvA=
 github.com/andybalholm/cascadia v1.3.2 h1:3Xi6Dw5lHF15JtdcmAHD3i1+T8plmv7BQ/nsViSLyss=
 github.com/andybalholm/cascadia v1.3.2/go.mod h1:7gtRlve5FxPPgIgX36uWBX58OdBsSS6lUvCFb+h7KvU=
