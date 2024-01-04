@@ -8,10 +8,9 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/nikolalohinski/gonja"
+	"github.com/tmc/langchaingo/prompts/internal/fstring"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
-
-	"github.com/tmc/langchaingo/prompts/internal/fstring"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -24,8 +23,8 @@ type TemplateFormat string
 const (
 	// TemplateFormatGoTemplate is the format for go-template.
 	TemplateFormatGoTemplate TemplateFormat = "go-template"
-	// TemplateFormatJinjia2 is the format for jinja2.
-	TemplateFormatJinjia2 TemplateFormat = "jinja2"
+	// TemplateFormatJinja2 is the format for jinja2.
+	TemplateFormatJinja2 TemplateFormat = "jinja2"
 	// TemplateFormatFString is the format for f-string.
 	TemplateFormatFString TemplateFormat = "f-string"
 )
@@ -36,7 +35,7 @@ type interpolator func(template string, values map[string]any) (string, error)
 // defaultFormatterMapping is the default mapping of TemplateFormat to interpolator.
 var defaultFormatterMapping = map[TemplateFormat]interpolator{ //nolint:gochecknoglobals
 	TemplateFormatGoTemplate: interpolateGoTemplate,
-	TemplateFormatJinjia2:    interpolateJinja2,
+	TemplateFormatJinja2:     interpolateJinja2,
 	TemplateFormatFString:    fstring.Format,
 }
 
@@ -58,7 +57,7 @@ func interpolateGoTemplate(tmpl string, values map[string]any) (string, error) {
 	return sb.String(), nil
 }
 
-// interpolateJinjia2 interpolates the given template with the given values by using
+// interpolateJinja2 interpolates the given template with the given values by using
 // jinja2(impl by https://github.com/NikolaLohinski/gonja).
 func interpolateJinja2(tmpl string, values map[string]any) (string, error) {
 	tpl, err := gonja.FromString(tmpl)

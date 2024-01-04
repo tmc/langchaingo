@@ -6,6 +6,8 @@ import (
 )
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		format string
 		values map[string]any
@@ -21,13 +23,15 @@ func TestFormat(t *testing.T) {
 		{"3", args{"}", map[string]any{}}, "", "single '}' is not allowed"},
 		{"4", args{"}}", map[string]any{}}, "}", ""},
 		{"4", args{"{}", map[string]any{}}, "", "empty expression not allowed"},
-		{"4", args{"{val}", map[string]any{}}, "", "name 'val' is not defined"},
+		{"4", args{"{val}", map[string]any{}}, "", "args not defined"},
 		{"4", args{"a={val}", map[string]any{"val": 1}}, "a=1", ""},
 		{"4", args{"a= {val}", map[string]any{"val": 1}}, "a= 1", ""},
 		{"4", args{"a= { val }", map[string]any{"val": 1}}, "a= 1", ""},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got, err := Format(tt.args.format, tt.args.values)
 			if (err != nil) != (tt.wantErr != "") {
 				t.Errorf("Format() error = %v, wantErr %v", err, tt.wantErr)

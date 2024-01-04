@@ -36,17 +36,14 @@ func (r *parser) parse() error {
 			continue
 		}
 
-		tmp, err = r.scanToRightCurlyBracket()
-		if err != nil {
-			return err
-		}
+		tmp = r.scanToRightCurlyBracket()
 		valName := strings.TrimSpace(string(tmp))
 		if valName == "" {
-			return fmt.Errorf("empty expression not allowed")
+			return ErrEmptyExpression
 		}
 		val, ok := r.values[valName]
 		if !ok {
-			return fmt.Errorf("name '%s' is not defined", valName)
+			return fmt.Errorf("%w: %s", ErrArgsNotDefined, valName)
 		}
 		r.result = append(r.result, []rune(toString(val))...)
 	}
@@ -55,23 +52,20 @@ func (r *parser) parse() error {
 
 func (r *parser) scanToLeftCurlyBracket() (bool, []rune, error) {
 	res := []rune{}
-	exist := false
 	for r.hasMore() {
 		s := r.get()
 		r.idx++
-		if s == '}' {
+		switch s {
+		case '}':
 			if r.hasMore() && r.get() == '}' {
-				res = append(res, '}')
+				res = append(res, '}') // nolint:ineffassign,staticcheck
 				r.idx++
 				continue
 			}
-			return false, nil, fmt.Errorf("single '}' is not allowed")
-		} else if s != '{' {
-			res = append(res, s)
-			continue
-		} else {
+			return false, nil, ErrRightBracketNotClosed
+		case '{':
 			if !r.hasMore() {
-				return false, nil, fmt.Errorf("single '{' is not allowed")
+				return false, nil, ErrLeftBracketNotClosed
 			}
 			if r.get() == '{' {
 				// {{ -> {
@@ -79,14 +73,15 @@ func (r *parser) scanToLeftCurlyBracket() (bool, []rune, error) {
 				res = append(res, '{')
 				continue
 			}
-			exist = true
-			break
+			return true, res, nil
+		default:
+			res = append(res, s)
 		}
 	}
-	return exist, res, nil
+	return false, res, nil
 }
 
-func (r *parser) scanToRightCurlyBracket() ([]rune, error) {
+func (r *parser) scanToRightCurlyBracket() []rune {
 	var res []rune
 	for r.hasMore() {
 		s := r.get()
@@ -99,7 +94,7 @@ func (r *parser) scanToRightCurlyBracket() ([]rune, error) {
 		r.idx++
 		break
 	}
-	return res, nil
+	return res
 }
 
 func (r *parser) hasMore() bool {
@@ -110,6 +105,7 @@ func (r *parser) get() rune {
 	return r.data[r.idx]
 }
 
+// nolint: cyclop
 func toString(val any) string {
 	if val == nil {
 		return "nil" // f'None' -> "None"
@@ -130,7 +126,7 @@ func toString(val any) string {
 	case int32:
 		return strconv.FormatInt(int64(val), 10)
 	case int64:
-		return strconv.FormatInt(int64(val), 10)
+		return strconv.FormatInt(val, 10)
 	case uint:
 		return strconv.FormatUint(uint64(val), 10)
 	case uint8:
@@ -140,11 +136,11 @@ func toString(val any) string {
 	case uint32:
 		return strconv.FormatUint(uint64(val), 10)
 	case uint64:
-		return strconv.FormatUint(uint64(val), 10)
+		return strconv.FormatUint(val, 10)
 	case float32:
 		return strconv.FormatFloat(float64(val), 'f', -1, 32)
 	case float64:
-		return strconv.FormatFloat(float64(val), 'f', -1, 64)
+		return strconv.FormatFloat(val, 'f', -1, 64)
 	case bool:
 		return strconv.FormatBool(val)
 	default:

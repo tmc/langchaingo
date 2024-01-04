@@ -10,16 +10,19 @@ import (
 type LLM interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
-
-	// Get the number of tokens present in the text. Returns -1 if this
-	// functionality is unavailable for the model.
-	GetNumTokens(text string) int
 }
 
 // ChatLLM is a langchaingo LLM that can be used for chatting.
 type ChatLLM interface {
 	Call(ctx context.Context, messages []schema.ChatMessage, options ...CallOption) (*schema.AIChatMessage, error)
 	Generate(ctx context.Context, messages [][]schema.ChatMessage, options ...CallOption) ([]*Generation, error)
+}
+
+// Model is an interface multi-modal models implement.
+// Note: this is an experimental API.
+type Model interface {
+	// GenerateContent asks the model to generate content from parts.
+	GenerateContent(ctx context.Context, parts []ContentPart, options ...CallOption) (*ContentResponse, error)
 }
 
 // Generation is a single generation from a langchaingo LLM.

@@ -73,10 +73,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	return generations, nil
 }
 
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(vertexaiclient.TextModelName, text)
-}
-
 func toClientChatMessage(messages []schema.ChatMessage) []*vertexaiclient.ChatMessage {
 	msgs := make([]*vertexaiclient.ChatMessage, len(messages))
 

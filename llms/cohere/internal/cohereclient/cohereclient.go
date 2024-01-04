@@ -137,8 +137,3 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 
 	return &generation, nil
 }
-
-func (c *Client) GetNumTokens(text string) int {
-	encoded, _ := c.encoder.Encode(text)
-	return len(encoded)
-}

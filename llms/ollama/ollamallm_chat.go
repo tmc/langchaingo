@@ -106,6 +106,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 		err = o.client.GenerateChat(ctx, req, fn)
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return []*llms.Generation{}, err
 		}
 
@@ -176,10 +179,6 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 	}
 
 	return embeddings, nil
-}
-
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(o.options.model, text)
 }
 
 func (o Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {

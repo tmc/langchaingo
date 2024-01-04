@@ -10,11 +10,15 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (
 	defaultChatModel = "gpt-3.5-turbo"
 )
+
+var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
 
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
@@ -45,15 +49,42 @@ type ChatRequest struct {
 // ChatMessage is a message in a chat request.
 type ChatMessage struct {
 	// The role of the author of this message. One of system, user, or assistant.
-	Role string `json:"role"`
+	Role string
 	// The content of the message.
-	Content string `json:"content"`
+	Content string
+
+	MultiContent []llms.ContentPart
+
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
-	Name string `json:"name,omitempty"`
+	Name string
 
 	// FunctionCall represents a function call to be made in the message.
-	FunctionCall *FunctionCall `json:"function_call,omitempty"`
+	FunctionCall *FunctionCall
+}
+
+func (m ChatMessage) MarshalJSON() ([]byte, error) {
+	if m.Content != "" && m.MultiContent != nil {
+		return nil, ErrContentExclusive
+	}
+	if len(m.MultiContent) > 0 {
+		msg := struct {
+			Role         string             `json:"role"`
+			Content      string             `json:"-"`
+			MultiContent []llms.ContentPart `json:"content,omitempty"`
+			Name         string             `json:"name,omitempty"`
+			FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		}(m)
+		return json.Marshal(msg)
+	}
+	msg := struct {
+		Role         string             `json:"role"`
+		Content      string             `json:"content"`
+		MultiContent []llms.ContentPart `json:"-"`
+		Name         string             `json:"name,omitempty"`
+		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+	}(m)
+	return json.Marshal(msg)
 }
 
 // ChatChoice is a choice in a chat response.
@@ -136,6 +167,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		payload.Stream = true
 	}
 	// Build request payload
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err

@@ -4,7 +4,7 @@ go 1.21
 
 toolchain go1.21.4
 
-require github.com/tmc/langchaingo v0.1.2
+require github.com/tmc/langchaingo v0.1.3
 
 require (
 	github.com/cohere-ai/tokenizer v1.1.2 // indirect
