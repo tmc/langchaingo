@@ -84,6 +84,11 @@ func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, op
 		choices[i] = &llms.ContentChoice{
 			Content:    c.Message.Content,
 			StopReason: c.FinishReason,
+			GenerationInfo: map[string]any{
+				"CompletionTokens": result.Usage.CompletionTokens,
+				"PromptTokens":     result.Usage.PromptTokens,
+				"TotalTokens":      result.Usage.TotalTokens,
+			},
 		}
 	}
 
