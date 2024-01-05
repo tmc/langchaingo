@@ -60,6 +60,8 @@ func TestGenerateContent(t *testing.T) {
 	apiKey := os.Getenv("GENAI_API_KEY")
 	if len(apiKey) > 0 {
 		opts = append(opts, option.WithAPIKey(apiKey))
+	} else {
+		t.Skipf("Missing env var: GENAI_API_KEY, skipping test")
 	}
 
 	g, err := New(ctx, opts...)
