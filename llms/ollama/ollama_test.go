@@ -19,7 +19,7 @@ func newChatClient(t *testing.T) *Chat {
 		return nil
 	}
 
-	c, err := NewChat(WithLLMOptions(WithModel(ollamaModel)))
+	c, err := NewChat(WithModel(ollamaModel))
 	require.NoError(t, err)
 	return c
 }
