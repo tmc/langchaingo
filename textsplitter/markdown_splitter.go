@@ -21,6 +21,8 @@ func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 		ChunkSize:      options.ChunkSize,
 		ChunkOverlap:   options.ChunkOverlap,
 		SecondSplitter: options.SecondSplitter,
+		CodeBlocks:     options.CodeBlocks,
+		ReferenceLinks: options.ReferenceLinks,
 	}
 
 	if sp.SecondSplitter == nil {
@@ -42,14 +44,15 @@ var _ TextSplitter = (*MarkdownTextSplitter)(nil)
 
 // MarkdownTextSplitter markdown header text splitter.
 //
-// Now, we support H1/H2/H3/H4/H5/H6, BulletList, OrderedList, Table, Paragraph, Blockquote,
-// other format will be ignored. If your origin document is HTML, you purify and convert to markdown,
+// If your origin document is HTML, you purify and convert to markdown,
 // then split it.
 type MarkdownTextSplitter struct {
 	ChunkSize    int
 	ChunkOverlap int
 	// SecondSplitter splits paragraphs
 	SecondSplitter TextSplitter
+	CodeBlocks     bool
+	ReferenceLinks bool
 }
 
 // SplitText splits a text into multiple text.
@@ -58,12 +61,14 @@ func (sp MarkdownTextSplitter) SplitText(text string) ([]string, error) {
 	tokens := mdParser.Parse([]byte(text))
 
 	mc := &markdownContext{
-		startAt:        0,
-		endAt:          len(tokens),
-		tokens:         tokens,
-		chunkSize:      sp.ChunkSize,
-		chunkOverlap:   sp.ChunkOverlap,
-		secondSplitter: sp.SecondSplitter,
+		startAt:          0,
+		endAt:            len(tokens),
+		tokens:           tokens,
+		chunkSize:        sp.ChunkSize,
+		chunkOverlap:     sp.ChunkOverlap,
+		secondSplitter:   sp.SecondSplitter,
+		renderCodeBlocks: sp.CodeBlocks,
+		useInlineContent: !sp.ReferenceLinks,
 	}
 
 	chunks := mc.splitText()
@@ -106,6 +111,13 @@ type markdownContext struct {
 
 	// secondSplitter re-split markdown single long paragraph into chunks
 	secondSplitter TextSplitter
+
+	// renderCodeBlocks determines whether indented and fenced code blocks should
+	// be rendered
+	renderCodeBlocks bool
+
+	// useInlineContent determines whether the default inline content is rendered
+	useInlineContent bool
 }
 
 // splitText splits Markdown text.
@@ -494,6 +506,10 @@ func (mc *markdownContext) onMDCodeBlock() {
 		mc.startAt += 1
 	}()
 
+	if !mc.renderCodeBlocks {
+		return
+	}
+
 	codeblock, ok := mc.tokens[mc.startAt].(*markdown.CodeBlock)
 	if !ok {
 		return
@@ -512,6 +528,10 @@ func (mc *markdownContext) onMDFence() {
 	defer func() {
 		mc.startAt += 1
 	}()
+
+	if !mc.renderCodeBlocks {
+		return
+	}
 
 	fence, ok := mc.tokens[mc.startAt].(*markdown.Fence)
 	if !ok {
@@ -597,8 +617,7 @@ func (mc *markdownContext) applyToChunks() {
 //
 // format: Link/Image/Text
 func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
-	// I guess this could only happen in case the inline is malformed.
-	if len(inline.Children) == 0 {
+	if len(inline.Children) == 0 || mc.useInlineContent {
 		return inline.Content
 	}
 
