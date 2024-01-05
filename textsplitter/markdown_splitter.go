@@ -625,7 +625,7 @@ func (mc *markdownContext) applyToChunks() {
 //
 // format: Link/Image/Text
 //
-//nolint:funlen,cyclop
+//nolint:cyclop
 func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 	if len(inline.Children) == 0 || mc.useInlineContent {
 		return inline.Content
@@ -646,7 +646,7 @@ func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 	// - Images
 	// - Autolinks
 	for _, child := range inline.Children {
-		switch child.(type) {
+		switch token := child.(type) {
 		case *markdown.Softbreak:
 			content += "\n"
 		case *markdown.Hardbreak:
@@ -660,53 +660,58 @@ func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 			content += "*"
 		case *markdown.StrikethroughOpen, *markdown.StrikethroughClose:
 			content += "~~"
-		default:
-			switch token := child.(type) {
-			case *markdown.Text:
-				content += token.Content
-			case *markdown.HTMLInline:
-				content += token.Content
-			case *markdown.CodeInline:
-				content += fmt.Sprintf("`%s`", token.Content)
-			case *markdown.LinkOpen:
-				content += "["
-				// CommonMark Spec 6.3:
-				// Links may not contain other links, at any level of nesting.
-				// If multiple otherwise valid link definitions appear nested
-				// inside each other, the inner-most definition is used.
-				currentLink = token
-			case *markdown.LinkClose:
-				switch {
-				case currentLink.Href == "":
-					content += "]()"
-				case currentLink.Title != "":
-					content += fmt.Sprintf(`](%s "%s")`, currentLink.Href, currentLink.Title)
-				default:
-					content += fmt.Sprintf(`](%s)`, currentLink.Href)
-				}
-			case *markdown.Image:
-				var label string
-
-				// CommonMark spec 6.4: Images
-				// Though this spec is concerned with parsing, not rendering, it is
-				// recommended that in rendering to HTML, only the plain string content
-				// of the image description be used.
-				for _, token := range token.Tokens {
-					if text, ok := token.(*markdown.Text); ok {
-						label += text.Content
-					}
-				}
-
-				if token.Title == "" {
-					content += fmt.Sprintf(`![%s](%s)`, label, token.Src)
-				} else {
-					content += fmt.Sprintf(`![%s](%s "%s")`, label, token.Src, token.Title)
-				}
-			}
+		case *markdown.Text:
+			content += token.Content
+		case *markdown.HTMLInline:
+			content += token.Content
+		case *markdown.CodeInline:
+			content += fmt.Sprintf("`%s`", token.Content)
+		case *markdown.LinkOpen:
+			content += "["
+			// CommonMark Spec 6.3:
+			// Links may not contain other links, at any level of nesting.
+			// If multiple otherwise valid link definitions appear nested
+			// inside each other, the inner-most definition is used.
+			currentLink = token
+		case *markdown.LinkClose:
+			content += mc.inlineOnLinkClose(currentLink)
+		case *markdown.Image:
+			content += mc.inlineOnImage(token)
 		}
 	}
 
 	return content
+}
+
+func (mc *markdownContext) inlineOnLinkClose(link *markdown.LinkOpen) string {
+	switch {
+	case link.Href == "":
+		return "]()"
+	case link.Title != "":
+		return fmt.Sprintf(`](%s "%s")`, link.Href, link.Title)
+	default:
+		return fmt.Sprintf(`](%s)`, link.Href)
+	}
+}
+
+func (mc *markdownContext) inlineOnImage(image *markdown.Image) string {
+	var label string
+
+	// CommonMark spec 6.4: Images
+	// Though this spec is concerned with parsing, not rendering, it is
+	// recommended that in rendering to HTML, only the plain string content
+	// of the image description be used.
+	for _, token := range image.Tokens {
+		if text, ok := token.(*markdown.Text); ok {
+			label += text.Content
+		}
+	}
+
+	if image.Title == "" {
+		return fmt.Sprintf(`![%s](%s)`, label, image.Src)
+	}
+
+	return fmt.Sprintf(`![%s](%s "%s")`, label, image.Src, image.Title)
 }
 
 // closeTypes represents the close operation type for each open operation type.
