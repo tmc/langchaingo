@@ -13,6 +13,7 @@ import (
 	"google.golang.org/api/option"
 )
 
+// GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
 	client *genai.Client
 }
@@ -29,6 +30,7 @@ const (
 	SAFETY    = "safety"
 )
 
+// New creates a new GoogleAI struct.
 func New(ctx context.Context, options ...option.ClientOption) (*GoogleAI, error) {
 	gi := &GoogleAI{}
 
@@ -41,11 +43,12 @@ func New(ctx context.Context, options ...option.ClientOption) (*GoogleAI, error)
 	return gi, nil
 }
 
+// GenerateContent calls the LLM with the provided parts.
 func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
 	opts := defaultCallOptions
 
 	for _, opt := range options {
-		opt(opts)
+		opt(&opts)
 	}
 
 	model := g.client.GenerativeModel(opts.Model)
@@ -81,6 +84,7 @@ func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart,
 	return &contentResponse, nil
 }
 
+// downloadBytes downloads the content from the given URL and returns it as a *genai.Blob.
 func downloadBytes(url string) (*genai.Blob, error) {
 	resp, err := http.Get(url) //nolint
 	if err != nil {
@@ -98,6 +102,7 @@ func downloadBytes(url string) (*genai.Blob, error) {
 	return &genai.Blob{MIMEType: mimeType, Data: urlData}, nil
 }
 
+// convertPart converts langchain parts to google genai parts.
 func convertPart(part llms.ContentPart) (genai.Part, error) {
 	var out genai.Part
 	var err error
@@ -114,6 +119,7 @@ func convertPart(part llms.ContentPart) (genai.Part, error) {
 	return out, err
 }
 
+// convertCandidate converts a genai.Candidate to a llms.ContentChoice.
 func convertCandidate(candidate *genai.Candidate) (*llms.ContentChoice, error) {
 	buf := strings.Builder{}
 
@@ -134,7 +140,7 @@ func convertCandidate(candidate *genai.Candidate) (*llms.ContentChoice, error) {
 
 	return &llms.ContentChoice{
 		Content:        buf.String(),
-		StopReason:     fmt.Sprintf("%v", candidate.FinishReason),
+		StopReason:     candidate.FinishReason.String(),
 		GenerationInfo: metadata,
 	}, nil
 }

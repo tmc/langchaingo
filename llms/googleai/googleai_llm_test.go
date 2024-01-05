@@ -3,87 +3,63 @@ package googleai
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
-	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/option"
 )
 
-func TestMain(m *testing.M) {
-	// This loads the API key if it is a .env file
-	_ = godotenv.Load()
-	os.Exit(m.Run())
+func newClient(t *testing.T, opts ...option.ClientOption) *GoogleAI {
+	t.Helper()
+
+	genaiKey := os.Getenv("GENAI_API_KEY")
+	if genaiKey == "" {
+		t.Skip("GENAI_API_KEY not set")
+		return nil
+	}
+
+	opts = append(opts, option.WithAPIKey(genaiKey))
+
+	llm, err := New(context.Background(), opts...)
+	require.NoError(t, err)
+	return llm
 }
 
-func TestGenerateContent(t *testing.T) {
+func TestMultiContentText(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name    string
-		parts   []llms.ContentPart
-		opts    []llms.CallOption
-		wantErr bool
-		substr  string
-	}{
-		{
-			name:    "EmptyParts",
-			parts:   []llms.ContentPart{},
-			opts:    []llms.CallOption{},
-			wantErr: true,
-			substr:  "",
-		},
-		{
-			name:    "SinglePart",
-			parts:   []llms.ContentPart{llms.TextContent{Text: "Say the word Panama and nothing else."}},
-			opts:    []llms.CallOption{},
-			wantErr: false,
-			substr:  "Panama",
-		},
-		// Following is disabled because the API throws this error:
-		// googleapi: Error 400: Image input modality is not enabled for models/gemini-pro
-		// {
-		//	name: "ImagePart",
-		//	parts: []llms.ContentPart{
-		//		llms.TextContent{Text: "Does this image contain a cat? Answer with a single word: yes or no."},
-		//		llms.ImageURLContent{URL: "https://cdn2.thecatapi.com/images/cej.jpg"}},
-		//	opts:    []llms.CallOption{},
-		//	wantErr: false,
-		//	substr:  "yes",
-		// },
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "I'm a pomeranian"},
+		llms.TextContent{Text: "What kind of mammal am I?"},
 	}
 
-	ctx := context.Background()
+	rsp, err := llm.GenerateContent(context.Background(), parts)
+	require.NoError(t, err)
 
-	opts := []option.ClientOption{}
-	apiKey := os.Getenv("GENAI_API_KEY")
-	if len(apiKey) > 0 {
-		opts = append(opts, option.WithAPIKey(apiKey))
-	} else {
-		t.Skipf("Missing env var: GENAI_API_KEY, skipping test")
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
+}
+
+func TestMultiContentImage(t *testing.T) {
+	t.Parallel()
+
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.ImageURLContent{URL: "https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
+		llms.TextContent{Text: "describe this image in detail"},
 	}
 
-	g, err := New(ctx, opts...)
-	if err != nil {
-		t.Fatalf("Failed to create GoogleAI: %v", err)
-	}
+	rsp, err := llm.GenerateContent(context.Background(), parts, llms.WithModel("gemini-pro-vision"))
+	require.NoError(t, err)
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			out, err := g.GenerateContent(ctx, tt.parts, tt.opts...)
-			if tt.wantErr {
-				require.Error(t, err)
-				return
-			}
-
-			require.NoError(t, err)
-			if len(tt.substr) > 0 {
-				require.Contains(t, out.Choices[0].Content, tt.substr)
-			}
-		})
-	}
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
 }
