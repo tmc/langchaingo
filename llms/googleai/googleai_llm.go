@@ -23,6 +23,7 @@ var (
 
 	ErrNoContentInResponse   = errors.New("no content in generation response")
 	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType       = errors.New("invalid mime type on content")
 )
 
 const (
@@ -46,7 +47,6 @@ func New(ctx context.Context, options ...option.ClientOption) (*GoogleAI, error)
 // GenerateContent calls the LLM with the provided parts.
 func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
 	opts := defaultCallOptions
-
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -84,8 +84,8 @@ func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart,
 	return &contentResponse, nil
 }
 
-// downloadBytes downloads the content from the given URL and returns it as a *genai.Blob.
-func downloadBytes(url string) (*genai.Blob, error) {
+// downloadImageData downloads the content from the given URL and returns it as a *genai.Blob.
+func downloadImageData(url string) (*genai.Blob, error) {
 	resp, err := http.Get(url) //nolint
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch image from url: %w", err)
@@ -99,7 +99,16 @@ func downloadBytes(url string) (*genai.Blob, error) {
 
 	mimeType := resp.Header.Get("Content-Type")
 
-	return &genai.Blob{MIMEType: mimeType, Data: urlData}, nil
+	// The convenience function genai.ImageData requires just the right part of the mime type, so we need to parse it
+	parts := strings.Split(mimeType, "/")
+
+	if len(parts) != 2 { //nolint
+		return nil, ErrInvalidMimeType
+	}
+
+	blob := genai.ImageData(parts[1], urlData)
+
+	return &blob, nil
 }
 
 // convertPart converts langchain parts to google genai parts.
@@ -113,7 +122,7 @@ func convertPart(part llms.ContentPart) (genai.Part, error) {
 	case llms.BinaryContent:
 		out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 	case llms.ImageURLContent:
-		out, err = downloadBytes(p.URL)
+		out, err = downloadImageData(p.URL)
 	}
 
 	return out, err
