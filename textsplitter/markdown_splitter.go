@@ -127,6 +127,12 @@ func (mc *markdownContext) splitText() []string {
 			mc.onMDOrderedList()
 		case *markdown.ListItemOpen:
 			mc.onMDListItem()
+		case *markdown.CodeBlock:
+			mc.onMDCodeBlock()
+		case *markdown.Fence:
+			mc.onMDFence()
+		case *markdown.Hr:
+			mc.onMDHr()
 		default:
 			mc.startAt = indexOfCloseTag(mc.tokens, idx) + 1
 		}
@@ -480,6 +486,57 @@ func (mc *markdownContext) onTableBody() [][]string {
 		// move to TrClose
 		mc.startAt++
 	}
+}
+
+// onMDCodeBlock splits indented code block
+func (mc *markdownContext) onMDCodeBlock() {
+	defer func() {
+		mc.startAt += 1
+	}()
+
+	codeblock, ok := mc.tokens[mc.startAt].(*markdown.CodeBlock)
+	if !ok {
+		return
+	}
+
+	codeblockMD := "\n" + formatWithIndent(codeblock.Content, strings.Repeat(" ", 4))
+
+	// adding this as a single snippet means that long codeblocks will be split
+	// as text, i.e. they won't be properly wrapped. This is not ideal, but
+	// matches was python langchain does.
+	mc.joinSnippet(codeblockMD)
+}
+
+// onMDFence splits fenced code block
+func (mc *markdownContext) onMDFence() {
+	defer func() {
+		mc.startAt += 1
+	}()
+
+	fence, ok := mc.tokens[mc.startAt].(*markdown.Fence)
+	if !ok {
+		return
+	}
+
+	fenceMD := fmt.Sprintf("\n```%s\n%s```\n", fence.Params, fence.Content)
+
+	// adding this as a single snippet means that long fenced blocks will be split
+	// as text, i.e. they won't be properly wrapped. This is not ideal, but matches
+	// was python langchain does.
+	mc.joinSnippet(fenceMD)
+}
+
+// onMDHr splits thematic break
+func (mc *markdownContext) onMDHr() {
+	defer func() {
+		mc.startAt += 1
+	}()
+
+	if _, ok := mc.tokens[mc.startAt].(*markdown.Hr); !ok {
+		return
+	}
+
+	mc.joinSnippet("\n---")
 }
 
 // joinSnippet join sub snippet to current total snippet.
