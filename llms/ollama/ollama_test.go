@@ -2,7 +2,6 @@ package ollama
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -25,6 +24,7 @@ func newChatClient(t *testing.T) *Chat {
 	return c
 }
 
+//nolint:all
 func TestChatBasic(t *testing.T) {
 	t.Parallel()
 
@@ -35,6 +35,5 @@ func TestChatBasic(t *testing.T) {
 		schema.HumanChatMessage{Content: "Write a very short poem about Donald Knuth"},
 	})
 	require.NoError(t, err)
-	fmt.Println(resp.Content)
 	assert.Regexp(t, "programa|comput|algoritm|libro", strings.ToLower(resp.Content))
 }
