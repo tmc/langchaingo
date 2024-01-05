@@ -3,12 +3,10 @@ package ollama
 import (
 	"context"
 	"fmt"
-	"math"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
-	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -23,8 +21,7 @@ var _ llms.ChatLLM = (*Chat)(nil)
 
 // New creates a new ollama LLM implementation.
 func NewChat(opts ...ChatOption) (*Chat, error) {
-	o := defaultChatOptions()
-
+	o := chatOptions{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -71,7 +68,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		req, err := o.messagesToClientChatMessages(messages)
+		req, err := messagesToChatRequest(messages)
 		if err != nil {
 			return nil, err
 		}
@@ -183,17 +180,14 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 
 func (o Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
-	for _, m := range messageSets {
-		r, _ := o.messagesToClientMessages(m)
-		prompts = append(prompts, r.Prompt)
+	for i := 0; i < len(messageSets); i++ {
+		curPrompt := ""
+		for j := 0; j < len(messageSets[i]); j++ {
+			curPrompt += messageSets[i][j].GetContent()
+		}
+		prompts = append(prompts, curPrompt)
 	}
 	return prompts
-}
-
-// convert chatMessage to ollamaclient.GenrateRequest.
-func (o Chat) messagesToClientChatMessages(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
-	// Use the template if any
-	return messagesToChatRequest(messages)
 }
 
 func messagesToChatRequest(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
@@ -236,78 +230,4 @@ func typeToRole(typ schema.ChatMessageType) string {
 		return "function"
 	}
 	return ""
-}
-
-// convert chatMessage to ollamaclient.GenrateRequest.
-func (o Chat) messagesToClientMessages(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
-	// Use the template if any
-	if o.options.chatTemplate != "" {
-		return messagesToClientMessagesWithChatTemlate(o.options.chatTemplate, messages)
-	}
-	return messagesToGenerateRequestWithoutChatTemplate(messages)
-}
-
-func messagesToGenerateRequestWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) { //nolint:lll
-	var prompt string
-	req := &ollamaclient.GenerateRequest{}
-	for _, m := range messages {
-		typ := m.GetType()
-		switch typ {
-		case schema.ChatMessageTypeSystem:
-			req.System = m.GetContent()
-		case schema.ChatMessageTypeAI:
-			prompt += fmt.Sprintf("%s: %s\n", typ, m.GetContent())
-		case schema.ChatMessageTypeHuman:
-			fallthrough
-		case schema.ChatMessageTypeGeneric:
-			if n, ok := m.(schema.Named); ok {
-				prompt += fmt.Sprintf("%s: %s: %s\n", typ, n.GetName(), m.GetContent())
-			} else {
-				prompt += fmt.Sprintf("%s: %s\n", typ, m.GetContent())
-			}
-		case schema.ChatMessageTypeFunction:
-			// not implemented
-		}
-	}
-	req.Prompt = prompt
-
-	return req, nil
-}
-
-func messagesToClientMessagesWithChatTemlate(template string, messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) { //nolint:lll
-	var err error
-	req := &ollamaclient.GenerateRequest{}
-
-	p := prompts.PromptTemplate{
-		Template:       template,
-		InputVariables: []string{"system", "messagesPair"},
-		TemplateFormat: prompts.TemplateFormatGoTemplate,
-	}
-	// build or vars
-	system := ""
-	messagesPair := make([][2]string, int(math.Ceil(float64(len(messages))/2.0))) //nolint:gomnd
-
-	c := 0
-	for _, m := range messages {
-		typ := m.GetType()
-		switch typ {
-		case schema.ChatMessageTypeSystem:
-			system = m.GetContent()
-		case schema.ChatMessageTypeAI:
-			messagesPair[c][1] = m.GetContent()
-			c++
-		case schema.ChatMessageTypeHuman:
-			fallthrough
-		case schema.ChatMessageTypeGeneric:
-			messagesPair[c][0] = m.GetContent()
-		case schema.ChatMessageTypeFunction:
-			// not implemented
-		}
-	}
-	req.Prompt, err = p.Format(map[string]any{"system": system, "messagesPair": messagesPair})
-	if err != nil {
-		return nil, err
-	}
-	req.Template = "{{.Prompt}}"
-	return req, nil
 }
