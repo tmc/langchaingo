@@ -121,6 +121,8 @@ type markdownContext struct {
 }
 
 // splitText splits Markdown text.
+//
+//nolint:cyclop
 func (mc *markdownContext) splitText() []string {
 	for idx := mc.startAt; idx < mc.endAt; {
 		token := mc.tokens[idx]
@@ -500,10 +502,10 @@ func (mc *markdownContext) onTableBody() [][]string {
 	}
 }
 
-// onMDCodeBlock splits indented code block
+// onMDCodeBlock splits indented code block.
 func (mc *markdownContext) onMDCodeBlock() {
 	defer func() {
-		mc.startAt += 1
+		mc.startAt++
 	}()
 
 	if !mc.renderCodeBlocks {
@@ -515,6 +517,12 @@ func (mc *markdownContext) onMDCodeBlock() {
 		return
 	}
 
+	// CommonMark Spec 4.4: Indented Code Blocks
+	// An indented code block is composed of one or more indented chunks
+	// separated by blank lines. An indented chunk is a sequence of
+	// non-blank lines, each preceded by four or more spaces of indentation.
+
+	//nolint:gomnd
 	codeblockMD := "\n" + formatWithIndent(codeblock.Content, strings.Repeat(" ", 4))
 
 	// adding this as a single snippet means that long codeblocks will be split
@@ -523,10 +531,10 @@ func (mc *markdownContext) onMDCodeBlock() {
 	mc.joinSnippet(codeblockMD)
 }
 
-// onMDFence splits fenced code block
+// onMDFence splits fenced code block.
 func (mc *markdownContext) onMDFence() {
 	defer func() {
-		mc.startAt += 1
+		mc.startAt++
 	}()
 
 	if !mc.renderCodeBlocks {
@@ -546,10 +554,10 @@ func (mc *markdownContext) onMDFence() {
 	mc.joinSnippet(fenceMD)
 }
 
-// onMDHr splits thematic break
+// onMDHr splits thematic break.
 func (mc *markdownContext) onMDHr() {
 	defer func() {
-		mc.startAt += 1
+		mc.startAt++
 	}()
 
 	if _, ok := mc.tokens[mc.startAt].(*markdown.Hr); !ok {
@@ -616,6 +624,8 @@ func (mc *markdownContext) applyToChunks() {
 // splitInline splits inline
 //
 // format: Link/Image/Text
+//
+//nolint:funlen,cyclop
 func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 	if len(inline.Children) == 0 || mc.useInlineContent {
 		return inline.Content
@@ -626,7 +636,6 @@ func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 	var currentLink *markdown.LinkOpen
 
 	// CommonMark Spec 6: Inlines
-	// Inlines include:
 	// - Soft linebreaks
 	// - Hard linebreaks
 	// - Emphasis and strong emphasis
@@ -661,7 +670,7 @@ func (mc *markdownContext) splitInline(inline *markdown.Inline) string {
 				content += fmt.Sprintf("`%s`", token.Content)
 			case *markdown.LinkOpen:
 				content += "["
-				// CommonMark Spec 6.3: Links
+				// CommonMark Spec 6.3:
 				// Links may not contain other links, at any level of nesting.
 				// If multiple otherwise valid link definitions appear nested
 				// inside each other, the inner-most definition is used.
