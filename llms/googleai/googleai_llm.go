@@ -16,10 +16,11 @@ import (
 // GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
 	client *genai.Client
+	opts   options
 }
 
 var (
-	_ llms.Model = GoogleAI{}
+	_ llms.Model = &GoogleAI{}
 
 	ErrNoContentInResponse   = errors.New("no content in generation response")
 	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
@@ -31,11 +32,18 @@ const (
 	SAFETY    = "safety"
 )
 
-// New creates a new GoogleAI struct.
-func New(ctx context.Context, options ...option.ClientOption) (*GoogleAI, error) {
-	gi := &GoogleAI{}
+// NewGoogleAI creates a new GoogleAI struct.
+func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
+	clientOptions := defaultOptions()
+	for _, opt := range opts {
+		opt(&clientOptions)
+	}
 
-	client, err := genai.NewClient(ctx, options...)
+	gi := &GoogleAI{
+		opts: clientOptions,
+	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.apiKey))
 	if err != nil {
 		return gi, err
 	}
@@ -45,8 +53,10 @@ func New(ctx context.Context, options ...option.ClientOption) (*GoogleAI, error)
 }
 
 // GenerateContent calls the LLM with the provided parts.
-func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
-	opts := defaultCallOptions
+func (g *GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
+	opts := llms.CallOptions{
+		Model: g.opts.defaultModel,
+	}
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -84,7 +94,8 @@ func (g GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart,
 	return &contentResponse, nil
 }
 
-// downloadImageData downloads the content from the given URL and returns it as a *genai.Blob.
+// downloadImageData downloads the content from the given URL and returns it as
+// a *genai.Blob.
 func downloadImageData(url string) (*genai.Blob, error) {
 	resp, err := http.Get(url) //nolint
 	if err != nil {
@@ -99,7 +110,8 @@ func downloadImageData(url string) (*genai.Blob, error) {
 
 	mimeType := resp.Header.Get("Content-Type")
 
-	// The convenience function genai.ImageData requires just the right part of the mime type, so we need to parse it
+	// The convenience function genai.ImageData requires just the right part of
+	// the mime type, so we need to parse it
 	parts := strings.Split(mimeType, "/")
 
 	if len(parts) != 2 { //nolint
@@ -153,3 +165,7 @@ func convertCandidate(candidate *genai.Candidate) (*llms.ContentChoice, error) {
 		GenerationInfo: metadata,
 	}, nil
 }
+
+// CreateEmbedding creates embeddings from texts.
+//func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+//}

@@ -9,10 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
-	"google.golang.org/api/option"
 )
 
-func newClient(t *testing.T, opts ...option.ClientOption) *GoogleAI {
+func newClient(t *testing.T) *GoogleAI {
 	t.Helper()
 
 	genaiKey := os.Getenv("GENAI_API_KEY")
@@ -20,10 +19,7 @@ func newClient(t *testing.T, opts ...option.ClientOption) *GoogleAI {
 		t.Skip("GENAI_API_KEY not set")
 		return nil
 	}
-
-	opts = append(opts, option.WithAPIKey(genaiKey))
-
-	llm, err := New(context.Background(), opts...)
+	llm, err := NewGoogleAI(context.Background(), WithAPIKey(genaiKey))
 	require.NoError(t, err)
 	return llm
 }
