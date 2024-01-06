@@ -26,7 +26,6 @@ func newClient(t *testing.T) *GoogleAI {
 
 func TestMultiContentText(t *testing.T) {
 	t.Parallel()
-
 	llm := newClient(t)
 
 	parts := []llms.ContentPart{
@@ -44,7 +43,6 @@ func TestMultiContentText(t *testing.T) {
 
 func TestMultiContentImage(t *testing.T) {
 	t.Parallel()
-
 	llm := newClient(t)
 
 	parts := []llms.ContentPart{
@@ -58,4 +56,17 @@ func TestMultiContentImage(t *testing.T) {
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
+}
+
+func TestEmbeddings(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	texts := []string{"foo", "parrot"}
+	res, err := llm.CreateEmbedding(context.Background(), texts)
+	require.NoError(t, err)
+
+	assert.Equal(t, len(texts), len(res))
+	assert.NotEmpty(t, res[0])
+	assert.NotEmpty(t, res[1])
 }
