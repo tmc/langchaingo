@@ -14,14 +14,14 @@ import (
 type Chat struct {
 	CallbacksHandler callbacks.Handler
 	client           *ollamaclient.Client
-	options          chatOptions
+	options          options
 }
 
 var _ llms.ChatLLM = (*Chat)(nil)
 
 // New creates a new ollama LLM implementation.
-func NewChat(opts ...ChatOption) (*Chat, error) {
-	o := chatOptions{}
+func NewChat(opts ...Option) (*Chat, error) {
+	o := options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
