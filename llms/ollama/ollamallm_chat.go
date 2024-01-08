@@ -121,7 +121,8 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 }
 
 // GenerateContent implements the Model interface.
-func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, goerr113
+// nolint: goerr113
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -209,7 +210,7 @@ func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageConte
 	}
 
 	choices := []*llms.ContentChoice{
-		&llms.ContentChoice{
+		{
 			Content: resp.Message.Content,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
