@@ -55,33 +55,41 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-	store.conn, err = pgx.Connect(ctx, store.postgresConnectionURL)
-	if err != nil {
-		return Store{}, err
+	if store.conn == nil {
+		store.conn, err = pgx.Connect(ctx, store.postgresConnectionURL)
+		if err != nil {
+			return Store{}, err
+		}
 	}
 
 	if err = store.conn.Ping(ctx); err != nil {
 		return Store{}, err
 	}
-
-	if err = store.createVectorExtensionIfNotExists(ctx); err != nil {
-		return Store{}, err
-	}
-	if err = store.createCollectionTableIfNotExists(ctx); err != nil {
-		return Store{}, err
-	}
-	if err = store.createEmbeddingTableIfNotExists(ctx); err != nil {
-		return Store{}, err
-	}
-	if store.preDeleteCollection {
-		if err = store.RemoveCollection(ctx); err != nil {
-			return Store{}, err
-		}
-	}
-	if err = store.createOrGetCollection(ctx); err != nil {
+	if err = store.init(ctx); err != nil {
 		return Store{}, err
 	}
 	return store, nil
+}
+
+func (s *Store) init(ctx context.Context) error {
+	if err := s.createVectorExtensionIfNotExists(ctx); err != nil {
+		return err
+	}
+	if err := s.createCollectionTableIfNotExists(ctx); err != nil {
+		return err
+	}
+	if err := s.createEmbeddingTableIfNotExists(ctx); err != nil {
+		return err
+	}
+	if s.preDeleteCollection {
+		if err := s.RemoveCollection(ctx); err != nil {
+			return err
+		}
+	}
+	if err := s.createOrGetCollection(ctx); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s Store) createVectorExtensionIfNotExists(ctx context.Context) error {
@@ -164,7 +172,8 @@ PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
 
 // AddDocuments adds documents to the Postgres collection associated with 'Store'.
 // and returns the ids of the added documents.
-func (s Store) AddDocuments(ctx context.Context,
+func (s Store) AddDocuments(
+	ctx context.Context,
 	docs []schema.Document,
 	options ...vectorstores.Option,
 ) ([]string, error) {
