@@ -38,23 +38,33 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}, err
 }
 
-func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	msgs := []*ChatMessage{
-		{
-			Role:         "user",
-			MultiContent: parts,
-		},
+	chatMsgs := make([]*ChatMessage, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ChatMessage{MultiContent: mc.Parts}
+		switch mc.Role {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = "system"
+		case schema.ChatMessageTypeAI:
+			msg.Role = "assistant"
+		case schema.ChatMessageTypeHuman:
+			msg.Role = "user"
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = "user"
+		}
+
+		chatMsgs = append(chatMsgs, msg)
 	}
 
 	req := &openaiclient.ChatRequest{
 		Model:                opts.Model,
 		StopWords:            opts.StopWords,
-		Messages:             msgs,
+		Messages:             chatMsgs,
 		StreamingFunc:        opts.StreamingFunc,
 		Temperature:          opts.Temperature,
 		MaxTokens:            opts.MaxTokens,

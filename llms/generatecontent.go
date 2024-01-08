@@ -1,6 +1,20 @@
 package llms
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/tmc/langchaingo/schema"
+)
+
+// MessageContent is the content of a message sent to a LLM. It has a role and a
+// sequence of parts. For example, it can represent one message in a chat
+// session sent by the user, in which case Role will be
+// schema.ChatMessageTypeHuman and Parts will be the sequence of items sent in
+// this specific message.
+type MessageContent struct {
+	Role  schema.ChatMessageType
+	Parts []ContentPart
+}
 
 // ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {

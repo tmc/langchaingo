@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func newChatClient(t *testing.T, opts ...Option) *Chat {
@@ -33,8 +34,14 @@ func TestMultiContentText(t *testing.T) {
 		llms.TextContent{Text: "I'm a pomeranian"},
 		llms.TextContent{Text: "What kind of mammal am I?"},
 	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
 
-	rsp, err := llm.GenerateContent(context.Background(), parts)
+	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -51,8 +58,14 @@ func TestMultiContentImage(t *testing.T) {
 		llms.ImageURLContent{URL: "https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
 		llms.TextContent{Text: "describe this image in detail"},
 	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
 
-	rsp, err := llm.GenerateContent(context.Background(), parts, llms.WithMaxTokens(300))
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithMaxTokens(300))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
