@@ -39,7 +39,8 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}, err
 }
 
-func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
+//nolint:goerr113
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -50,13 +51,15 @@ func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageConte
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
 		case schema.ChatMessageTypeSystem:
-			msg.Role = "system"
+			msg.Role = RoleSystem
 		case schema.ChatMessageTypeAI:
-			msg.Role = "assistant"
+			msg.Role = RoleAssistant
 		case schema.ChatMessageTypeHuman:
-			msg.Role = "user"
+			msg.Role = RoleUser
 		case schema.ChatMessageTypeGeneric:
-			msg.Role = "user"
+			msg.Role = RoleUser
+		case schema.ChatMessageTypeFunction:
+			fallthrough
 		default:
 			return nil, fmt.Errorf("role %v not supported", mc.Role)
 		}

@@ -32,6 +32,8 @@ var (
 const (
 	CITATIONS = "citations"
 	SAFETY    = "safety"
+	RoleModel = "model"
+	RoleUser  = "user"
 )
 
 // NewGoogleAI creates a new GoogleAI struct.
@@ -55,6 +57,8 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 }
 
 // GenerateContent calls the LLM with the provided parts.
+//
+//nolint:goerr113
 func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
 	opts := llms.CallOptions{
 		Model: g.opts.defaultModel,
@@ -71,9 +75,8 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
 		return generateFromSingleMessage(ctx, model, theMessage.Parts)
-	} else {
-		return generateFromMessages(ctx, model, messages)
 	}
+	return generateFromMessages(ctx, model, messages)
 }
 
 // downloadImageData downloads the content from the given URL and returns it as
@@ -178,6 +181,8 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 }
 
 // convertContent converts between a langchain MessageContent and genai content.
+//
+//nolint:goerr113
 func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	parts, err := convertParts(content.Parts)
 	if err != nil {
@@ -192,11 +197,13 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	case schema.ChatMessageTypeSystem:
 		return nil, ErrSystemRoleNotSupported
 	case schema.ChatMessageTypeAI:
-		c.Role = "model"
+		c.Role = RoleModel
 	case schema.ChatMessageTypeHuman:
-		c.Role = "user"
+		c.Role = RoleUser
 	case schema.ChatMessageTypeGeneric:
-		c.Role = "user"
+		c.Role = RoleUser
+	case schema.ChatMessageTypeFunction:
+		fallthrough
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)
 	}
@@ -223,6 +230,7 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 	return convertCandidates(resp.Candidates)
 }
 
+//nolint:goerr113
 func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent) (*llms.ContentResponse, error) { //nolint:lll
 	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
@@ -239,7 +247,7 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 	reqContent := history[n-1]
 	history = history[:n-1]
 
-	if reqContent.Role != "user" {
+	if reqContent.Role != RoleUser {
 		return nil, fmt.Errorf("got %v message role, want user/human", reqContent.Role)
 	}
 
