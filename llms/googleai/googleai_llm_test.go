@@ -48,6 +48,33 @@ func TestMultiContentText(t *testing.T) {
 	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
 }
 
+func TestMultiContentTextChatSequence(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "Name some countries"}},
+		},
+		{
+			Role:  schema.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "Spain and Lesotho"}},
+		},
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "Which if these is larger?"}},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro"))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "spain.*larger", strings.ToLower(c1.Content))
+}
+
 func TestMultiContentImage(t *testing.T) {
 	t.Parallel()
 	llm := newClient(t)
