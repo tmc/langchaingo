@@ -2,6 +2,7 @@ package ollama
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -117,6 +118,108 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 
 	return generations, nil
+}
+
+// GenerateContent implements the Model interface.
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, goerr113
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	// Override LLM model if set as llms.CallOption
+	model := o.options.model
+	if opts.Model != "" {
+		model = opts.Model
+	}
+
+	// Our input is a sequence of MessageContent, each of which potentially has
+	// a sequence of Part that could be text, images etc.
+	// We have to convert it to a format Ollama undestands: ChatRequest, which
+	// has a sequence of Message, each of which has a role and content - single
+	// text + potential images.
+	chatMsgs := make([]*ollamaclient.Message, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
+
+		// Look at all the parts in mc; expect to find a single Text part and
+		// any number of binary parts.
+		var text string
+		foundText := false
+		var images []ollamaclient.ImageData
+
+		for _, p := range mc.Parts {
+			switch pt := p.(type) {
+			case llms.TextContent:
+				if foundText {
+					return nil, errors.New("expecting a single Text content")
+				}
+				foundText = true
+				text = pt.Text
+			case llms.BinaryContent:
+				images = append(images, ollamaclient.ImageData(pt.Data))
+			default:
+				return nil, errors.New("only support Text and BinaryContent parts right now")
+			}
+		}
+
+		msg.Content = text
+		msg.Images = images
+		chatMsgs = append(chatMsgs, msg)
+	}
+
+	// Get our ollamaOptions from llms.CallOptions
+	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
+	req := &ollamaclient.ChatRequest{
+		Model:    model,
+		Messages: chatMsgs,
+		Options:  ollamaOptions,
+		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
+	}
+
+	var fn ollamaclient.ChatResponseFunc
+	streamedResponse := ""
+	var resp ollamaclient.ChatResponse
+
+	fn = func(response ollamaclient.ChatResponse) error {
+		if opts.StreamingFunc != nil && response.Message != nil {
+			if err := opts.StreamingFunc(ctx, []byte(response.Message.Content)); err != nil {
+				return err
+			}
+		}
+		if response.Message != nil {
+			streamedResponse += response.Message.Content
+		}
+		if response.Done {
+			resp = response
+			resp.Message = &ollamaclient.Message{
+				Role:    "assistant",
+				Content: streamedResponse,
+			}
+		}
+		return nil
+	}
+
+	err := o.client.GenerateChat(ctx, req, fn)
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	choices := []*llms.ContentChoice{
+		&llms.ContentChoice{
+			Content: resp.Message.Content,
+			GenerationInfo: map[string]any{
+				"CompletionTokens": resp.EvalCount,
+				"PromptTokens":     resp.PromptEvalCount,
+				"TotalTokesn":      resp.EvalCount + resp.PromptEvalCount,
+			},
+		},
+	}
+
+	return &llms.ContentResponse{Choices: choices}, nil
 }
 
 func makeGenerationFromChatResponse(resp ollamaclient.ChatResponse) *llms.Generation {
