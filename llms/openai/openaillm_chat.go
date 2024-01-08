@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -38,23 +39,38 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}, err
 }
 
-func (o *Chat) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll
+//nolint:goerr113
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	msgs := []*ChatMessage{
-		{
-			Role:         "user",
-			MultiContent: parts,
-		},
+	chatMsgs := make([]*ChatMessage, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ChatMessage{MultiContent: mc.Parts}
+		switch mc.Role {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = RoleSystem
+		case schema.ChatMessageTypeAI:
+			msg.Role = RoleAssistant
+		case schema.ChatMessageTypeHuman:
+			msg.Role = RoleUser
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = RoleUser
+		case schema.ChatMessageTypeFunction:
+			fallthrough
+		default:
+			return nil, fmt.Errorf("role %v not supported", mc.Role)
+		}
+
+		chatMsgs = append(chatMsgs, msg)
 	}
 
 	req := &openaiclient.ChatRequest{
 		Model:                opts.Model,
 		StopWords:            opts.StopWords,
-		Messages:             msgs,
+		Messages:             chatMsgs,
 		StreamingFunc:        opts.StreamingFunc,
 		Temperature:          opts.Temperature,
 		MaxTokens:            opts.MaxTokens,
