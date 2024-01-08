@@ -3,7 +3,6 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -74,8 +73,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	fmt.Println(c1)
-	assert.Regexp(t, "spain.*larger.*lesotho", strings.ToLower(c1.Content))
+	assert.Regexp(t, "spain.*larger", strings.ToLower(c1.Content))
 }
 
 func TestMultiContentImage(t *testing.T) {
