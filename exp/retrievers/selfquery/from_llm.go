@@ -5,7 +5,6 @@ import (
 
 	"github.com/tmc/langchaingo/exp/tools/queryconstrutor"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
@@ -17,7 +16,7 @@ type FromLLMArgs struct {
 	EnableLimit       *bool
 }
 
-func (sqr SelfQueryRetriever) FromLLM(ctx context.Context, query string) ([]schema.Document, error) {
+func FromLLM(ctx context.Context, args FromLLMArgs) (*SelfQueryRetriever, error) {
 
 	return nil, nil
 }

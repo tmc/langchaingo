@@ -50,6 +50,7 @@ type LoadArgs struct {
 
 // Create query construction prompt.
 func Load(args LoadArgs) (*prompts.FewShotPrompt, error) {
+
 	defaultSchema := getDefaultSchema(args.schemaPrompt, args.enableLimit)
 
 	schema, err := prompts.NewPromptTemplate(defaultSchema, []string{

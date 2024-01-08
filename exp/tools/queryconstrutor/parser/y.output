@@ -1,0 +1,135 @@
+
+state 0
+	$accept: .query $end 
+
+	TokenFunctionName  shift 4
+	.  error
+
+	FunctionName  goto 3
+	FunctionCall  goto 2
+	query  goto 1
+
+state 1
+	$accept:  query.$end 
+
+	$end  accept
+	.  error
+
+
+state 2
+	query:  FunctionCall.    (1)
+
+	.  reduce 1 (src line 43)
+
+
+state 3
+	FunctionCall:  FunctionName.LPAREN Args RPAREN 
+
+	LPAREN  shift 5
+	.  error
+
+
+state 4
+	FunctionName:  TokenFunctionName.    (10)
+
+	.  reduce 10 (src line 67)
+
+
+state 5
+	FunctionCall:  FunctionName LPAREN.Args RPAREN 
+
+	ArgString  shift 8
+	ArgBoolean  shift 9
+	ArgFloat  shift 10
+	ArgInt  shift 11
+	TokenFunctionName  shift 4
+	.  error
+
+	FunctionName  goto 3
+	Args  goto 6
+	Expr  goto 7
+	FunctionCall  goto 12
+
+state 6
+	FunctionCall:  FunctionName LPAREN Args.RPAREN 
+	Args:  Args.COMMA Expr 
+
+	RPAREN  shift 13
+	COMMA  shift 14
+	.  error
+
+
+state 7
+	Args:  Expr.    (3)
+
+	.  reduce 3 (src line 55)
+
+
+state 8
+	Expr:  ArgString.    (5)
+
+	.  reduce 5 (src line 59)
+
+
+state 9
+	Expr:  ArgBoolean.    (6)
+
+	.  reduce 6 (src line 61)
+
+
+state 10
+	Expr:  ArgFloat.    (7)
+
+	.  reduce 7 (src line 62)
+
+
+state 11
+	Expr:  ArgInt.    (8)
+
+	.  reduce 8 (src line 63)
+
+
+state 12
+	Expr:  FunctionCall.    (9)
+
+	.  reduce 9 (src line 64)
+
+
+state 13
+	FunctionCall:  FunctionName LPAREN Args RPAREN.    (2)
+
+	.  reduce 2 (src line 49)
+
+
+state 14
+	Args:  Args COMMA.Expr 
+
+	ArgString  shift 8
+	ArgBoolean  shift 9
+	ArgFloat  shift 10
+	ArgInt  shift 11
+	TokenFunctionName  shift 4
+	.  error
+
+	FunctionName  goto 3
+	Expr  goto 15
+	FunctionCall  goto 12
+
+state 15
+	Args:  Args COMMA Expr.    (4)
+
+	.  reduce 4 (src line 56)
+
+
+14 terminals, 6 nonterminals
+11 grammar rules, 16/16000 states
+0 shift/reduce, 0 reduce/reduce conflicts reported
+55 working sets used
+memory: parser 12/240000
+4 extra closures
+14 shift entries, 1 exceptions
+7 goto entries
+3 entries saved by goto default
+Optimizer space used: output 21/240000
+21 table entries, 5 zero
+maximum spread: 11, maximum offset: 14
