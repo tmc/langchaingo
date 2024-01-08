@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/option"
 )
 
@@ -22,9 +23,10 @@ type GoogleAI struct {
 var (
 	_ llms.Model = &GoogleAI{}
 
-	ErrNoContentInResponse   = errors.New("no content in generation response")
-	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType       = errors.New("invalid mime type on content")
+	ErrNoContentInResponse    = errors.New("no content in generation response")
+	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType        = errors.New("invalid mime type on content")
+	ErrSystemRoleNotSupported = errors.New("system roles isn't supporeted yet")
 )
 
 const (
@@ -53,7 +55,7 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 }
 
 // GenerateContent calls the LLM with the provided parts.
-func (g *GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
+func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
 	opts := llms.CallOptions{
 		Model: g.opts.defaultModel,
 	}
@@ -63,35 +65,15 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, parts []llms.ContentPart
 
 	model := g.client.GenerativeModel(opts.Model)
 
-	content := make([]genai.Part, 0, len(parts))
-	for _, part := range parts {
-		c, err := convertPart(part)
-		if err != nil {
-			return nil, err
+	if len(messages) == 1 {
+		theMessage := messages[0]
+		if theMessage.Role != schema.ChatMessageTypeHuman {
+			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-
-		content = append(content, c)
+		return generateFromSingleMessage(ctx, model, theMessage.Parts)
+	} else {
+		return generateFromMessages(ctx, model, messages)
 	}
-
-	resp, err := model.GenerateContent(ctx, content...)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(resp.Candidates) == 0 {
-		return nil, ErrNoContentInResponse
-	}
-
-	var contentResponse llms.ContentResponse
-	for _, candidate := range resp.Candidates {
-		c, err := convertCandidate(candidate)
-		if err != nil {
-			return nil, err
-		}
-		contentResponse.Choices = append(contentResponse.Choices, c)
-	}
-
-	return &contentResponse, nil
 }
 
 // downloadImageData downloads the content from the given URL and returns it as
@@ -123,47 +105,36 @@ func downloadImageData(url string) (*genai.Blob, error) {
 	return &blob, nil
 }
 
-// convertPart converts langchain parts to google genai parts.
-func convertPart(part llms.ContentPart) (genai.Part, error) {
-	var out genai.Part
-	var err error
+// convertCandidates converts a sequence of genai.Candidate to a response.
+func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, error) {
+	var contentResponse llms.ContentResponse
 
-	switch p := part.(type) {
-	case llms.TextContent:
-		out = genai.Text(p.Text)
-	case llms.BinaryContent:
-		out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
-	case llms.ImageURLContent:
-		out, err = downloadImageData(p.URL)
-	}
+	for _, candidate := range candidates {
+		buf := strings.Builder{}
 
-	return out, err
-}
-
-// convertCandidate converts a genai.Candidate to a llms.ContentChoice.
-func convertCandidate(candidate *genai.Candidate) (*llms.ContentChoice, error) {
-	buf := strings.Builder{}
-
-	for _, part := range candidate.Content.Parts {
-		if v, ok := part.(genai.Text); ok {
-			_, err := buf.WriteString(string(v))
-			if err != nil {
-				return nil, err
+		for _, part := range candidate.Content.Parts {
+			if v, ok := part.(genai.Text); ok {
+				_, err := buf.WriteString(string(v))
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, ErrUnknownPartInResponse
 			}
-		} else {
-			return nil, ErrUnknownPartInResponse
 		}
+
+		metadata := make(map[string]any)
+		metadata[CITATIONS] = candidate.CitationMetadata
+		metadata[SAFETY] = candidate.SafetyRatings
+
+		contentResponse.Choices = append(contentResponse.Choices,
+			&llms.ContentChoice{
+				Content:        buf.String(),
+				StopReason:     candidate.FinishReason.String(),
+				GenerationInfo: metadata,
+			})
 	}
-
-	metadata := make(map[string]any)
-	metadata[CITATIONS] = candidate.CitationMetadata
-	metadata[SAFETY] = candidate.SafetyRatings
-
-	return &llms.ContentChoice{
-		Content:        buf.String(),
-		StopReason:     candidate.FinishReason.String(),
-		GenerationInfo: metadata,
-	}, nil
+	return &contentResponse, nil
 }
 
 // CreateEmbedding creates embeddings from texts.
@@ -180,4 +151,108 @@ func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]flo
 	}
 
 	return results, nil
+}
+
+// convertParts converts between a sequence of langchain parts and genai parts.
+func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
+	convertedParts := make([]genai.Part, 0, len(parts))
+	for _, part := range parts {
+		var out genai.Part
+		var err error
+
+		switch p := part.(type) {
+		case llms.TextContent:
+			out = genai.Text(p.Text)
+		case llms.BinaryContent:
+			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
+		case llms.ImageURLContent:
+			out, err = downloadImageData(p.URL)
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		convertedParts = append(convertedParts, out)
+	}
+	return convertedParts, nil
+}
+
+// convertContent converts between a langchain MessageContent and genai content.
+func convertContent(content llms.MessageContent) (*genai.Content, error) {
+	parts, err := convertParts(content.Parts)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &genai.Content{
+		Parts: parts,
+	}
+
+	switch content.Role {
+	case schema.ChatMessageTypeSystem:
+		return nil, ErrSystemRoleNotSupported
+	case schema.ChatMessageTypeAI:
+		c.Role = "model"
+	case schema.ChatMessageTypeHuman:
+		c.Role = "user"
+	case schema.ChatMessageTypeGeneric:
+		c.Role = "user"
+	default:
+		return nil, fmt.Errorf("role %v not supported", content.Role)
+	}
+
+	return c, nil
+}
+
+// generateFromSingleMessage generates content from the parts of a single
+// message.
+func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart) (*llms.ContentResponse, error) { //nolint:lll
+	convertedParts, err := convertParts(parts)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := model.GenerateContent(ctx, convertedParts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Candidates) == 0 {
+		return nil, ErrNoContentInResponse
+	}
+	return convertCandidates(resp.Candidates)
+}
+
+func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent) (*llms.ContentResponse, error) { //nolint:lll
+	history := make([]*genai.Content, 0, len(messages))
+	for _, mc := range messages {
+		content, err := convertContent(mc)
+		if err != nil {
+			return nil, err
+		}
+		history = append(history, content)
+	}
+
+	// Given N total messages, genai's chat expects the first N-1 messages as
+	// history and the last message as the actual request.
+	n := len(history)
+	reqContent := history[n-1]
+	history = history[:n-1]
+
+	if reqContent.Role != "user" {
+		return nil, fmt.Errorf("got %v message role, want user/human", reqContent.Role)
+	}
+
+	session := model.StartChat()
+	session.History = history
+
+	resp, err := session.SendMessage(ctx, reqContent.Parts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Candidates) == 0 {
+		return nil, ErrNoContentInResponse
+	}
+	return convertCandidates(resp.Candidates)
 }

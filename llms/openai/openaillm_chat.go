@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -56,6 +57,8 @@ func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageConte
 			msg.Role = "user"
 		case schema.ChatMessageTypeGeneric:
 			msg.Role = "user"
+		default:
+			return nil, fmt.Errorf("role %v not supported", mc.Role)
 		}
 
 		chatMsgs = append(chatMsgs, msg)
