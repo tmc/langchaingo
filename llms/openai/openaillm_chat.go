@@ -39,6 +39,8 @@ func NewChat(opts ...Option) (*Chat, error) {
 	}, err
 }
 
+// GenerateContent implements the Model interface.
+//
 //nolint:goerr113
 func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop
 	opts := llms.CallOptions{}
