@@ -63,7 +63,7 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 }
 
 // GenerateContent calls the LLM with the provided parts.
-func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
+func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	opts := llms.CallOptions{
 		Model:       g.opts.defaultModel,
 		MaxTokens:   int(g.opts.defaultMaxTokens),
@@ -219,7 +219,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 // generateFromSingleMessage generates content from the parts of a single
 // message.
-func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart, opts *llms.CallOptions) (*llms.ContentResponse, error) { //nolint:lll
+func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
@@ -242,7 +242,7 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) { //nolint:lll
+func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
 		content, err := convertContent(mc)
