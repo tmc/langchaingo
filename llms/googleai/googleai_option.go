@@ -1,3 +1,4 @@
+//nolint:gomnd
 package googleai
 
 // options is a set of options for GoogleAI clients.
@@ -5,6 +6,8 @@ type options struct {
 	apiKey                string
 	defaultModel          string
 	defaultEmbeddingModel string
+	defaultMaxTokens      int32
+	defaultTemperature    float32
 }
 
 func defaultOptions() options {
@@ -12,6 +15,8 @@ func defaultOptions() options {
 		apiKey:                "",
 		defaultModel:          "gemini-pro",
 		defaultEmbeddingModel: "embedding-001",
+		defaultMaxTokens:      256,
+		defaultTemperature:    0.5,
 	}
 }
 
