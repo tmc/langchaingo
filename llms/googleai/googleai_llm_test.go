@@ -48,6 +48,43 @@ func TestMultiContentText(t *testing.T) {
 	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
 }
 
+func TestMultiContentTextStream(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "I'm a pomeranian"},
+		llms.TextContent{Text: "Tell me more about my taxonomy"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	var chunks [][]byte
+	var sb strings.Builder
+	rsp, err := llm.GenerateContent(context.Background(), content,
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			chunks = append(chunks, chunk)
+			sb.Write(chunk)
+			return nil
+		}))
+
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	// Check that the combined response contains what we expect
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
+
+	// Check that multiple chunks were received and they also have words
+	// we expect.
+	assert.GreaterOrEqual(t, len(chunks), 2)
+	assert.Regexp(t, "dog|canid|canine", sb.String())
+}
+
 func TestMultiContentTextChatSequence(t *testing.T) {
 	t.Parallel()
 	llm := newClient(t)
