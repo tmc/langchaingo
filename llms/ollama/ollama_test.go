@@ -25,7 +25,6 @@ func newChatClient(t *testing.T) *Chat {
 	return c
 }
 
-//nolint:all
 func TestChatBasic(t *testing.T) {
 	t.Parallel()
 
@@ -36,11 +35,10 @@ func TestChatBasic(t *testing.T) {
 		schema.HumanChatMessage{Content: "Write a very short poem about Donald Knuth"},
 	})
 	require.NoError(t, err)
-	assert.Regexp(t, "programa|comput|algoritm|libro", strings.ToLower(resp.Content))
+	assert.Regexp(t, "programa|comput|algoritm|libro", strings.ToLower(resp.Content)) //nolint:all
 }
 
-//nolint:all
-func TestWithStreaming(t *testing.T) {
+func TestGenerateContent(t *testing.T) {
 	t.Parallel()
 	llm := newChatClient(t)
 
@@ -62,8 +60,7 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 }
 
-//nolint:all
-func TestGenerateContent(t *testing.T) {
+func TestWithStreaming(t *testing.T) {
 	t.Parallel()
 	llm := newChatClient(t)
 
