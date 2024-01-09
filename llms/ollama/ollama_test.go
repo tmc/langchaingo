@@ -2,12 +2,14 @@ package ollama
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -36,4 +38,29 @@ func TestChatBasic(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Regexp(t, "programa|comput|algoritm|libro", strings.ToLower(resp.Content))
+}
+
+//nolint:all
+func TestGenerateContent(t *testing.T) {
+	t.Parallel()
+
+	llm := newChatClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	fmt.Println(c1)
+	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 }
