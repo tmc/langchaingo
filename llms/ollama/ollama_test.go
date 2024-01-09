@@ -2,7 +2,6 @@ package ollama
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -41,9 +40,8 @@ func TestChatBasic(t *testing.T) {
 }
 
 //nolint:all
-func TestGenerateContent(t *testing.T) {
+func TestWithStreaming(t *testing.T) {
 	t.Parallel()
-
 	llm := newChatClient(t)
 
 	parts := []llms.ContentPart{
@@ -61,6 +59,34 @@ func TestGenerateContent(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	fmt.Println(c1)
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+}
+
+//nolint:all
+func TestGenerateContent(t *testing.T) {
+	t.Parallel()
+	llm := newChatClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	var sb strings.Builder
+	rsp, err := llm.GenerateContent(context.Background(), content,
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			sb.Write(chunk)
+			return nil
+		}))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+	assert.Regexp(t, "feet", strings.ToLower(sb.String()))
 }

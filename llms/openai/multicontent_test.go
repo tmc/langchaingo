@@ -3,7 +3,6 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -127,9 +126,7 @@ func TestWithStreaming(t *testing.T) {
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
-
-	// TODO: check sb string too...
-	fmt.Println(sb.String())
+	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
 func showResponse(rsp any) string { //nolint:golint,unused
