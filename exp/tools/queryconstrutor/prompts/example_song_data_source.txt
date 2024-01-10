@@ -1,19 +1,19 @@
 ```json
-{{
+{
     "content": "Lyrics of a song",
-    "attributes": {{
-        "artist": {{
+    "attributes": {
+        "artist": {
             "type": "string",
             "description": "Name of the song artist"
-        }},
-        "length": {{
+        },
+        "length": {
             "type": "integer",
             "description": "Length of the song in seconds"
-        }},
-        "genre": {{
+        },
+        "genre": {
             "type": "string",
             "description": "The song genre, one of \"pop\", \"rock\" or \"rap\""
-        }}
-    }}
-}}
+        }
+    }
+}
 ```

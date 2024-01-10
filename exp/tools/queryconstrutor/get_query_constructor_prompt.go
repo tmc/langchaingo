@@ -11,14 +11,16 @@ import (
 	"github.com/tmc/langchaingo/prompts"
 )
 
+//go:embed prompts/query.txt
+var _query string //nolint:gochecknoglobals
 //go:embed prompts/default_prefix.txt
 var _defaultPrefixPrompt string //nolint:gochecknoglobals
+//go:embed prompts/default_suffix.txt
+var _defaultSuffixPrompt string //nolint:gochecknoglobals
 //go:embed prompts/default_schema.txt
 var _defaultSchemaPrompt string //nolint:gochecknoglobals
 //go:embed prompts/suffix_without_datasource.txt
 var _suffixWithoutDatasourcePrompt string //nolint:gochecknoglobals
-//go:embed prompts/default_suffix.txt
-var _defaultSuffixPrompt string //nolint:gochecknoglobals
 //go:embed prompts/schema_with_limit.txt
 var _schemaWithLimitPrompt string //nolint:gochecknoglobals
 //go:embed prompts/user_specified_example.txt
@@ -37,59 +39,59 @@ var _examplePrompt string //nolint:gochecknoglobals
 //             variables allowed_comparators and allowed_operators.
 // enableLimit: Whether to enable the limit operator. Defaults to False.
 
-type LoadArgs struct {
-	documentContents   string
-	attributeInfo      []AttributeInfo
-	allowedComparators []Comparator
-	allowedOperators   []Operator
-	inputOuputExamples []InputOuputExample
-	customExamples     []map[string]string
-	schemaPrompt       *string
-	enableLimit        *bool
+type GetQueryConstructorPromptArgs struct {
+	DocumentContents   string
+	AttributeInfo      []AttributeInfo
+	AllowedComparators []Comparator
+	AllowedOperators   []Operator
+	InputOuputExamples []InputOuputExample
+	CustomExamples     []map[string]string
+	SchemaPrompt       *string
+	EnableLimit        *bool
 }
 
 // Create query construction prompt.
-func Load(args LoadArgs) (*prompts.FewShotPrompt, error) {
+func GetQueryConstructorPrompt(args GetQueryConstructorPromptArgs) (*prompts.FewShotPrompt, error) {
 
-	defaultSchema := getDefaultSchema(args.schemaPrompt, args.enableLimit)
+	defaultSchema := getDefaultSchema(args.SchemaPrompt, args.EnableLimit)
 
 	schema, err := prompts.NewPromptTemplate(defaultSchema, []string{
 		"allowed_comparators",
 		"allowed_operators",
 	}).Format(map[string]any{
-		"allowed_comparators": strings.Join(args.allowedComparators, " | "),
-		"allowed_operators":   strings.Join(args.allowedOperators, " | "),
+		"allowed_comparators": strings.Join(args.AllowedComparators, " | "),
+		"allowed_operators":   strings.Join(args.AllowedOperators, " | "),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error formating 'default schema' prompt %w", err)
 	}
 
-	jsonAttributes, err := formatAttribute(args.attributeInfo)
+	jsonAttributes, err := formatAttribute(args.AttributeInfo)
 	if err != nil {
 		return nil, fmt.Errorf("error formating attribute while loading constructor %w", err)
 	}
 
 	outputExample := setExampleOutput{}
 
-	if args.inputOuputExamples != nil && len(args.inputOuputExamples) > 0 {
+	if args.InputOuputExamples != nil && len(args.InputOuputExamples) > 0 {
 		if err := setInputOutputExamples(setInputOutputExamplesInput{
-			examples:         args.inputOuputExamples,
+			examples:         args.InputOuputExamples,
 			schema:           schema,
 			jsonAttributes:   string(jsonAttributes),
-			documentContents: args.documentContents,
-			enableLimit:      args.enableLimit,
+			documentContents: args.DocumentContents,
+			enableLimit:      args.EnableLimit,
 		}, &outputExample); err != nil {
 			return nil, fmt.Errorf("error setting input output example %w", err)
 		}
-	}
-
-	if args.customExamples != nil && len(args.customExamples) > 0 {
-		if err := setCustomExamples(setCustomExamplesInput{
-			examples:         args.customExamples,
+	} else {
+		examples := getDefaultExamples(args.CustomExamples, args.EnableLimit)
+		outputExample.examples = examples
+		if err := setExamples(setExamplesInput{
+			examples:         examples,
 			schema:           schema,
 			jsonAttributes:   string(jsonAttributes),
-			documentContents: args.documentContents,
-			enableLimit:      args.enableLimit,
+			documentContents: args.DocumentContents,
+			enableLimit:      args.EnableLimit,
 		}, &outputExample); err != nil {
 			return nil, fmt.Errorf("error setting custom example %w", err)
 		}
@@ -123,7 +125,7 @@ func getDefaultExamples(customExamples []map[string]string, enableLimit *bool) [
 }
 
 func formatAttribute(attributeInfo []AttributeInfo) ([]byte, error) {
-	var output map[string]map[string]interface{}
+	output := map[string]map[string]interface{}{}
 	for _, ai := range attributeInfo {
 		output[ai.Name] = map[string]interface{}{
 			"description": ai.Description,
@@ -187,10 +189,12 @@ func setInputOutputExamples(input setInputOutputExamplesInput, output *setExampl
 		return fmt.Errorf("error formating 'suffix without data source' prompt %w", err)
 	}
 
+	output.suffix = output.suffix + _query
+
 	return nil
 }
 
-type setCustomExamplesInput struct {
+type setExamplesInput struct {
 	examples         []map[string]string
 	schema           string
 	jsonAttributes   string
@@ -198,10 +202,8 @@ type setCustomExamplesInput struct {
 	enableLimit      *bool
 }
 
-func setCustomExamples(input setCustomExamplesInput, output *setExampleOutput) error {
+func setExamples(input setExamplesInput, output *setExampleOutput) error {
 	var err error
-
-	output.examples = getDefaultExamples(input.examples, input.enableLimit)
 	output.examplePrompt = prompts.NewPromptTemplate(_examplePrompt, []string{
 		"i",
 		"data_source",

@@ -2,10 +2,10 @@
 When responding use a markdown code snippet with a JSON object formatted in the following schema:
 
 ```json
-{{{{
+{
     "query": string \\ text string to compare to document contents
     "filter": string \\ logical condition statement for filtering documents
-}}}}
+}
 ```
 
 The query string should contain only text that is expected to match the contents of documents. Any conditions in the filter should not be mentioned in the query as well.

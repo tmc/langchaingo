@@ -1,5 +1,1 @@
-<< Example {i}. >>
-User Query:
-{{{.query}}}
-
-Structured Request:
+<< Example {{.i}}. >>

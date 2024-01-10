@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	opensearchgo "github.com/opensearch-project/opensearch-go"
+	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"

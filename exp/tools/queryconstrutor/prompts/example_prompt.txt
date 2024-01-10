@@ -1,4 +1,4 @@
-<< Example {i}. >>
+<< Example {{.i}}. >>
 Data Source:
 {{.data_source}}
 

@@ -1,13 +1,8 @@
-<< Example {i}. >>
+<< Example {{.i}}. >>
 Data Source:
 ```json
-{{{{
+{
     "content": "{{.content}}",
     "attributes": {{.attributes}}
-}}}}
+}
 ```
-
-User Query:
-{{{.query}}}
-
-Structured Request:

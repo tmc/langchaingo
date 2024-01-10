@@ -9,8 +9,8 @@ import (
 	"io"
 
 	"github.com/google/uuid"
-	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
+	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"

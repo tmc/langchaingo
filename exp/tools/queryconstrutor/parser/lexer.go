@@ -15,8 +15,6 @@ type Function struct {
 }
 
 func setFunction(functionName string, args []interface{}) Function {
-	fmt.Printf("functionName: %v\n", functionName)
-	fmt.Printf("args: %v\n", args)
 	return Function{
 		functionName: functionName,
 		args:         args,
@@ -24,17 +22,9 @@ func setFunction(functionName string, args []interface{}) Function {
 }
 
 type Lexer struct {
-	input string
-
-	scan *scanner.Scanner
-
+	scan     *scanner.Scanner
 	function Function
-
-	functionName string
-	argString    string
-	argBoolean   bool
-	argFloat     float64
-	argInt       int
+	err      error
 }
 
 func NewLexer(query string) Lexer {
@@ -52,11 +42,7 @@ func NewLexer(query string) Lexer {
 }
 
 func (l *Lexer) Lex(lval *yySymType) int {
-	fmt.Printf("Lex Lex lval: %v\n", lval)
-	pos, tok, lit := l.scan.Scan()
-	fmt.Printf("lit: %v\n", lit)
-	fmt.Printf("tok: %v\n", tok)
-	fmt.Printf("pos: %v\n", pos)
+	_, tok, lit := l.scan.Scan()
 
 	switch {
 	case tok == token.LPAREN:
@@ -85,13 +71,12 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		lval.argInt = intLit
 		return ArgInt
 	case token.SEMICOLON == tok || token.EOF == tok:
+		fallthrough
+	default:
 		return 0
 	}
-
-	return 0
 }
 
 func (l *Lexer) Error(e string) {
-	fmt.Printf("erooooooor: %v\n", e)
-	panic(errors.New(e))
+	l.err = errors.New(e)
 }
