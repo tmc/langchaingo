@@ -92,13 +92,8 @@ func (o *OpenAIFunctionsAgent) Plan(
 		return nil, nil, err
 	}
 
-	result, err := llms.GenerateChatPrompt(
-		ctx,
-		o.LLM,
-		[]schema.PromptValue{prompt},
-		llms.WithFunctions(o.functions()),
-		llms.WithStreamingFunc(stream),
-	)
+	result, err := o.LLM.Generate(ctx, [][]schema.ChatMessage{prompt.Messages()},
+		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -153,21 +148,22 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 	return messages
 }
 
-func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) (
+func (o *OpenAIFunctionsAgent) ParseOutput(generations []*llms.Generation) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
+	msg := generations[0].Message
 	// finish
-	if llmResult.Generations[0][0].Message.FunctionCall == nil {
+	if generations[0].Message.FunctionCall == nil {
 		return nil, &schema.AgentFinish{
 			ReturnValues: map[string]any{
-				"output": llmResult.Generations[0][0].Message.Content,
+				"output": msg.Content,
 			},
-			Log: llmResult.Generations[0][0].Message.Content,
+			Log: msg.Content,
 		}, nil
 	}
 
 	// action
-	functionCall := llmResult.Generations[0][0].Message.FunctionCall
+	functionCall := msg.FunctionCall
 	functionName := functionCall.Name
 	toolInputStr := functionCall.Arguments
 	toolInputMap := make(map[string]any, 0)
@@ -185,8 +181,8 @@ func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) (
 	}
 
 	contentMsg := "\n"
-	if llmResult.Generations[0][0].Message.Content != "" {
-		contentMsg = fmt.Sprintf("responded: %s\n", llmResult.Generations[0][0].Message.Content)
+	if msg.Content != "" {
+		contentMsg = fmt.Sprintf("responded: %s\n", msg.Content)
 	}
 
 	return []schema.AgentAction{
