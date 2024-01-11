@@ -9,6 +9,7 @@ import (
 
 type options struct {
 	ollamaServerURL     *url.URL
+	additionalHeaders   map[string]string
 	model               string
 	ollamaOptions       ollamaclient.Options
 	customModelTemplate string
@@ -49,6 +50,13 @@ func WithServerURL(rawURL string) Option {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+// WithAdditionalHeaders Set the additional Headers.
+func WithAdditionalHeaders(additionalHeaders map[string]string) Option {
+	return func(opts *options) {
+		opts.additionalHeaders = additionalHeaders
 	}
 }
 

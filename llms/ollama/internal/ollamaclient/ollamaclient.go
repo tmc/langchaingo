@@ -16,8 +16,9 @@ import (
 )
 
 type Client struct {
-	base *url.URL
-	http http.Client
+	base              *url.URL
+	http              http.Client
+	additionalHeaders map[string]string
 }
 
 func checkError(resp *http.Response, body []byte) error {
@@ -36,7 +37,7 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
-func NewClient(ourl *url.URL) (*Client, error) {
+func NewClient(ourl *url.URL, ollamaAdditionalHeaders map[string]string) (*Client, error) {
 	if ourl == nil {
 		scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
 		if !ok {
@@ -57,8 +58,14 @@ func NewClient(ourl *url.URL) (*Client, error) {
 		}
 	}
 
+	if len(ollamaAdditionalHeaders) == 0 {
+		envHeaderStr := os.Getenv("OLLAMA_ADDITIONAL_HEADERS")
+		ollamaAdditionalHeaders = parseHeaders(envHeaderStr)
+	}
+
 	client := Client{
-		base: ourl,
+		base:              ourl,
+		additionalHeaders: ollamaAdditionalHeaders,
 	}
 
 	client.http = http.Client{
@@ -68,6 +75,21 @@ func NewClient(ourl *url.URL) (*Client, error) {
 	}
 
 	return &client, nil
+}
+
+func parseHeaders(envString string) map[string]string {
+	headers := make(map[string]string)
+	if envString == "" {
+		return headers
+	}
+	pairs := strings.Split(envString, ",")
+	for _, pair := range pairs {
+		kv := strings.SplitN(pair, ":", 2)
+		if len(kv) == 2 {
+			headers[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+		}
+	}
+	return headers
 }
 
 func (c *Client) do(ctx context.Context, method, path string, reqData, respData any) error {
@@ -92,6 +114,10 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+
+	for key, value := range c.additionalHeaders {
+		request.Header.Set(key, value)
+	}
 
 	respObj, err := c.http.Do(request)
 	if err != nil {
@@ -139,6 +165,10 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 	request.Header.Set("Accept", "application/x-ndjson")
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+
+	for key, value := range c.additionalHeaders {
+		request.Header.Set(key, value)
+	}
 
 	response, err := c.http.Do(request)
 	if err != nil {
