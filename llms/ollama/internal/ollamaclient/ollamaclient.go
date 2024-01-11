@@ -112,14 +112,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 		return err
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
-
-	for key, value := range c.additionalHeaders {
-		request.Header.Set(key, value)
-	}
+	setRequestHeaders(request, c.additionalHeaders)
 
 	respObj, err := c.http.Do(request)
 	if err != nil {
@@ -144,6 +137,17 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	return nil
 }
 
+func setRequestHeaders(request *http.Request, additionalHeaders map[string]string) {
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("User-Agent",
+		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+
+	for key, value := range additionalHeaders {
+		request.Header.Set(key, value)
+	}
+}
+
 const maxBufferSize = 512 * 1000
 
 func (c *Client) stream(ctx context.Context, method, path string, data any, fn func([]byte) error) error {
@@ -163,14 +167,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 		return err
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "application/x-ndjson")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
-
-	for key, value := range c.additionalHeaders {
-		request.Header.Set(key, value)
-	}
+	setRequestHeaders(request, c.additionalHeaders)
 
 	response, err := c.http.Do(request)
 	if err != nil {
