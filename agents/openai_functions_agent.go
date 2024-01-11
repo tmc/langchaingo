@@ -156,11 +156,6 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 func (o *OpenAIFunctionsAgent) ParseOutput(llmResult llms.LLMResult) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
-	if llmResult.Generations[0][0] == nil || llmResult.Generations[0][0].Message == nil {
-		return nil, nil, fmt.Errorf("%w: %s", ErrInvalidLLMGenerationsMessageReturn,
-			"wrong llmResult from OpenAIFunctionsAgent")
-	}
-
 	// finish
 	if llmResult.Generations[0][0].Message.FunctionCall == nil {
 		return nil, &schema.AgentFinish{
