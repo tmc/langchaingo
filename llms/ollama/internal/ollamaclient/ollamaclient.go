@@ -77,6 +77,8 @@ func NewClient(ourl *url.URL, ollamaAdditionalHeaders map[string]string) (*Clien
 	return &client, nil
 }
 
+const expectedKeyValuePairs = 2
+
 func parseHeaders(envString string) map[string]string {
 	headers := make(map[string]string)
 	if envString == "" {
@@ -84,8 +86,8 @@ func parseHeaders(envString string) map[string]string {
 	}
 	pairs := strings.Split(envString, ",")
 	for _, pair := range pairs {
-		kv := strings.SplitN(pair, ":", 2)
-		if len(kv) == 2 {
+		kv := strings.SplitN(pair, ":", expectedKeyValuePairs)
+		if len(kv) == expectedKeyValuePairs {
 			headers[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
 		}
 	}
