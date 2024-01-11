@@ -147,7 +147,3 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 
 	return embeddings, nil
 }
-
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens(o.options.model, text)
-}

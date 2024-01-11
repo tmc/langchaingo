@@ -2,13 +2,12 @@ package ollama
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"math"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
-	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -16,15 +15,14 @@ import (
 type Chat struct {
 	CallbacksHandler callbacks.Handler
 	client           *ollamaclient.Client
-	options          chatOptions
+	options          options
 }
 
 var _ llms.ChatLLM = (*Chat)(nil)
 
 // New creates a new ollama LLM implementation.
-func NewChat(opts ...ChatOption) (*Chat, error) {
-	o := defaultChatOptions()
-
+func NewChat(opts ...Option) (*Chat, error) {
+	o := options{}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -71,7 +69,7 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 	generations := make([]*llms.Generation, 0, len(messageSets))
 	for _, messages := range messageSets {
-		req, err := o.messagesToClientChatMessages(messages)
+		req, err := messagesToChatRequest(messages)
 		if err != nil {
 			return nil, err
 		}
@@ -106,6 +104,9 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 		err = o.client.GenerateChat(ctx, req, fn)
 		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
 			return []*llms.Generation{}, err
 		}
 
@@ -117,6 +118,109 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 
 	return generations, nil
+}
+
+// GenerateContent implements the Model interface.
+// nolint: goerr113
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	// Override LLM model if set as llms.CallOption
+	model := o.options.model
+	if opts.Model != "" {
+		model = opts.Model
+	}
+
+	// Our input is a sequence of MessageContent, each of which potentially has
+	// a sequence of Part that could be text, images etc.
+	// We have to convert it to a format Ollama undestands: ChatRequest, which
+	// has a sequence of Message, each of which has a role and content - single
+	// text + potential images.
+	chatMsgs := make([]*ollamaclient.Message, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
+
+		// Look at all the parts in mc; expect to find a single Text part and
+		// any number of binary parts.
+		var text string
+		foundText := false
+		var images []ollamaclient.ImageData
+
+		for _, p := range mc.Parts {
+			switch pt := p.(type) {
+			case llms.TextContent:
+				if foundText {
+					return nil, errors.New("expecting a single Text content")
+				}
+				foundText = true
+				text = pt.Text
+			case llms.BinaryContent:
+				images = append(images, ollamaclient.ImageData(pt.Data))
+			default:
+				return nil, errors.New("only support Text and BinaryContent parts right now")
+			}
+		}
+
+		msg.Content = text
+		msg.Images = images
+		chatMsgs = append(chatMsgs, msg)
+	}
+
+	// Get our ollamaOptions from llms.CallOptions
+	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
+	req := &ollamaclient.ChatRequest{
+		Model:    model,
+		Messages: chatMsgs,
+		Options:  ollamaOptions,
+		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
+	}
+
+	var fn ollamaclient.ChatResponseFunc
+	streamedResponse := ""
+	var resp ollamaclient.ChatResponse
+
+	fn = func(response ollamaclient.ChatResponse) error {
+		if opts.StreamingFunc != nil && response.Message != nil {
+			if err := opts.StreamingFunc(ctx, []byte(response.Message.Content)); err != nil {
+				return err
+			}
+		}
+		if response.Message != nil {
+			streamedResponse += response.Message.Content
+		}
+		if response.Done {
+			resp = response
+			resp.Message = &ollamaclient.Message{
+				Role:    "assistant",
+				Content: streamedResponse,
+			}
+		}
+		return nil
+	}
+
+	err := o.client.GenerateChat(ctx, req, fn)
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	choices := []*llms.ContentChoice{
+		{
+			Content: resp.Message.Content,
+			GenerationInfo: map[string]any{
+				"CompletionTokens": resp.EvalCount,
+				"PromptTokens":     resp.PromptEvalCount,
+				"TotalTokesn":      resp.EvalCount + resp.PromptEvalCount,
+			},
+		},
+	}
+
+	return &llms.ContentResponse{Choices: choices}, nil
 }
 
 func makeGenerationFromChatResponse(resp ollamaclient.ChatResponse) *llms.Generation {
@@ -178,23 +282,16 @@ func (o *Chat) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]fl
 	return embeddings, nil
 }
 
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(o.options.model, text)
-}
-
 func (o Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
-	for _, m := range messageSets {
-		r, _ := o.messagesToClientMessages(m)
-		prompts = append(prompts, r.Prompt)
+	for i := 0; i < len(messageSets); i++ {
+		curPrompt := ""
+		for j := 0; j < len(messageSets[i]); j++ {
+			curPrompt += messageSets[i][j].GetContent()
+		}
+		prompts = append(prompts, curPrompt)
 	}
 	return prompts
-}
-
-// convert chatMessage to ollamaclient.GenrateRequest.
-func (o Chat) messagesToClientChatMessages(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
-	// Use the template if any
-	return messagesToChatRequest(messages)
 }
 
 func messagesToChatRequest(messages []schema.ChatMessage) (*ollamaclient.ChatRequest, error) {
@@ -237,78 +334,4 @@ func typeToRole(typ schema.ChatMessageType) string {
 		return "function"
 	}
 	return ""
-}
-
-// convert chatMessage to ollamaclient.GenrateRequest.
-func (o Chat) messagesToClientMessages(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) {
-	// Use the template if any
-	if o.options.chatTemplate != "" {
-		return messagesToClientMessagesWithChatTemlate(o.options.chatTemplate, messages)
-	}
-	return messagesToGenerateRequestWithoutChatTemplate(messages)
-}
-
-func messagesToGenerateRequestWithoutChatTemplate(messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) { //nolint:lll
-	var prompt string
-	req := &ollamaclient.GenerateRequest{}
-	for _, m := range messages {
-		typ := m.GetType()
-		switch typ {
-		case schema.ChatMessageTypeSystem:
-			req.System = m.GetContent()
-		case schema.ChatMessageTypeAI:
-			prompt += fmt.Sprintf("%s: %s\n", typ, m.GetContent())
-		case schema.ChatMessageTypeHuman:
-			fallthrough
-		case schema.ChatMessageTypeGeneric:
-			if n, ok := m.(schema.Named); ok {
-				prompt += fmt.Sprintf("%s: %s: %s\n", typ, n.GetName(), m.GetContent())
-			} else {
-				prompt += fmt.Sprintf("%s: %s\n", typ, m.GetContent())
-			}
-		case schema.ChatMessageTypeFunction:
-			// not implemented
-		}
-	}
-	req.Prompt = prompt
-
-	return req, nil
-}
-
-func messagesToClientMessagesWithChatTemlate(template string, messages []schema.ChatMessage) (*ollamaclient.GenerateRequest, error) { //nolint:lll
-	var err error
-	req := &ollamaclient.GenerateRequest{}
-
-	p := prompts.PromptTemplate{
-		Template:       template,
-		InputVariables: []string{"system", "messagesPair"},
-		TemplateFormat: prompts.TemplateFormatGoTemplate,
-	}
-	// build or vars
-	system := ""
-	messagesPair := make([][2]string, int(math.Ceil(float64(len(messages))/2.0))) //nolint:gomnd
-
-	c := 0
-	for _, m := range messages {
-		typ := m.GetType()
-		switch typ {
-		case schema.ChatMessageTypeSystem:
-			system = m.GetContent()
-		case schema.ChatMessageTypeAI:
-			messagesPair[c][1] = m.GetContent()
-			c++
-		case schema.ChatMessageTypeHuman:
-			fallthrough
-		case schema.ChatMessageTypeGeneric:
-			messagesPair[c][0] = m.GetContent()
-		case schema.ChatMessageTypeFunction:
-			// not implemented
-		}
-	}
-	req.Prompt, err = p.Format(map[string]any{"system": system, "messagesPair": messagesPair})
-	if err != nil {
-		return nil, err
-	}
-	req.Template = "{{.Prompt}}"
-	return req, nil
 }

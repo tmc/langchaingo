@@ -91,28 +91,12 @@ func BatchedEmbed(ctx context.Context, embedder EmbedderClient, texts []string, 
 	batchedTexts := BatchTexts(texts, batchSize)
 
 	emb := make([][]float32, 0, len(texts))
-	for _, texts := range batchedTexts {
-		curTextEmbeddings, err := embedder.CreateEmbedding(ctx, texts)
+	for _, batch := range batchedTexts {
+		curBatchEmbeddings, err := embedder.CreateEmbedding(ctx, batch)
 		if err != nil {
 			return nil, err
 		}
-		// If the size of this batch is 1, don't average/combine the vectors.
-		if len(texts) == 1 {
-			emb = append(emb, curTextEmbeddings[0])
-			continue
-		}
-
-		textLengths := make([]int, 0, len(texts))
-		for _, text := range texts {
-			textLengths = append(textLengths, len(text))
-		}
-
-		combined, err := CombineVectors(curTextEmbeddings, textLengths)
-		if err != nil {
-			return nil, err
-		}
-
-		emb = append(emb, combined)
+		emb = append(emb, curBatchEmbeddings...)
 	}
 
 	return emb, nil

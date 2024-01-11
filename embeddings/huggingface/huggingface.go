@@ -36,23 +36,12 @@ func (e *Huggingface) EmbedDocuments(ctx context.Context, texts []string) ([][]f
 	)
 
 	emb := make([][]float32, 0, len(texts))
-	for _, texts := range batchedTexts {
-		curTextEmbeddings, err := e.client.CreateEmbedding(ctx, texts, e.Model, e.Task)
+	for _, batch := range batchedTexts {
+		curBatchEmbeddings, err := e.client.CreateEmbedding(ctx, batch, e.Model, e.Task)
 		if err != nil {
 			return nil, err
 		}
-
-		textLengths := make([]int, 0, len(texts))
-		for _, text := range texts {
-			textLengths = append(textLengths, len(text))
-		}
-
-		combined, err := embeddings.CombineVectors(curTextEmbeddings, textLengths)
-		if err != nil {
-			return nil, err
-		}
-
-		emb = append(emb, combined)
+		emb = append(emb, curBatchEmbeddings...)
 	}
 
 	return emb, nil

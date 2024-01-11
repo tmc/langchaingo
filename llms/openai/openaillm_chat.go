@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -36,6 +37,80 @@ func NewChat(opts ...Option) (*Chat, error) {
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
 	}, err
+}
+
+// GenerateContent implements the Model interface.
+//
+//nolint:goerr113
+func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	chatMsgs := make([]*ChatMessage, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ChatMessage{MultiContent: mc.Parts}
+		switch mc.Role {
+		case schema.ChatMessageTypeSystem:
+			msg.Role = RoleSystem
+		case schema.ChatMessageTypeAI:
+			msg.Role = RoleAssistant
+		case schema.ChatMessageTypeHuman:
+			msg.Role = RoleUser
+		case schema.ChatMessageTypeGeneric:
+			msg.Role = RoleUser
+		case schema.ChatMessageTypeFunction:
+			fallthrough
+		default:
+			return nil, fmt.Errorf("role %v not supported", mc.Role)
+		}
+
+		chatMsgs = append(chatMsgs, msg)
+	}
+
+	req := &openaiclient.ChatRequest{
+		Model:                opts.Model,
+		StopWords:            opts.StopWords,
+		Messages:             chatMsgs,
+		StreamingFunc:        opts.StreamingFunc,
+		Temperature:          opts.Temperature,
+		MaxTokens:            opts.MaxTokens,
+		N:                    opts.N,
+		FrequencyPenalty:     opts.FrequencyPenalty,
+		PresencePenalty:      opts.PresencePenalty,
+		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+	}
+
+	for _, fn := range opts.Functions {
+		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+			Name:        fn.Name,
+			Description: fn.Description,
+			Parameters:  fn.Parameters,
+		})
+	}
+	result, err := o.client.CreateChat(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if len(result.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	choices := make([]*llms.ContentChoice, len(result.Choices))
+	for i, c := range result.Choices {
+		choices[i] = &llms.ContentChoice{
+			Content:    c.Message.Content,
+			StopReason: c.FinishReason,
+			GenerationInfo: map[string]any{
+				"CompletionTokens": result.Usage.CompletionTokens,
+				"PromptTokens":     result.Usage.PromptTokens,
+				"TotalTokens":      result.Usage.TotalTokens,
+			},
+		}
+	}
+
+	return &llms.ContentResponse{Choices: choices}, nil
 }
 
 // Call requests a chat response for the given messages.
@@ -115,10 +190,6 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	}
 
 	return generations, nil
-}
-
-func (o *Chat) GetNumTokens(text string) int {
-	return llms.CountTokens(o.client.Model, text)
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

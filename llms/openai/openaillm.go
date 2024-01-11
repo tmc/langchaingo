@@ -81,10 +81,6 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 	return generations, nil
 }
 
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens(o.client.Model, text)
-}
-
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
