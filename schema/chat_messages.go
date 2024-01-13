@@ -39,6 +39,11 @@ type Named interface {
 	GetName() string
 }
 
+// ContentList is an interface for objects that have a list of content.
+type ContentList interface {
+	GetContentList() []ChatMessageContentPart
+}
+
 // Statically assert that the types implement the interface.
 var (
 	_ ChatMessage = AIChatMessage{}
@@ -46,6 +51,17 @@ var (
 	_ ChatMessage = SystemChatMessage{}
 	_ ChatMessage = GenericChatMessage{}
 	_ ChatMessage = FunctionChatMessage{}
+	_ ChatMessage = CompoundChatMessage{}
+)
+
+// ContentType is the type of content in a message.
+type ContentType string
+
+const (
+	// ContentTypeText is text.
+	ContentTypeText ContentType = "text"
+	// ContentTypeImage is an image.
+	ContentTypeImage ContentType = "image_url"
 )
 
 // AIChatMessage is a message sent by an AI.
