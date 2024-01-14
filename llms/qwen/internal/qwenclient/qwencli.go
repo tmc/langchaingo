@@ -20,14 +20,14 @@ import (
 var ErrEmptyResponse = errors.New("empty response")
 
 type Parameters struct {
-	ResultFormat      *string  `json:"result_format"`
-	Seed              *int     `json:"seed"`
-	MaxTokens         *int     `json:"max_tokens"`
-	TopP              *float64 `json:"top_p"`
-	TopK              *int     `json:"top_k"`
-	Temperature       *float64 `json:"temperature"`
-	EnableSearch      *bool    `json:"enable_search"`
-	IncrementalOutput *bool    `json:"incremental_output"`
+	ResultFormat      string  `json:"result_format,omitempty"`
+	Seed              int     `json:"seed,omitempty"`
+	MaxTokens         int     `json:"max_tokens,omitempty"`
+	TopP              float64 `json:"top_p,omitempty"`
+	TopK              int     `json:"top_k,omitempty"`
+	Temperature       float64 `json:"temperature,omitempty"`
+	EnableSearch      bool    `json:"enable_search,omitempty"`
+	IncrementalOutput bool    `json:"incremental_output,omitempty"`
 }
 
 func NewParameters() Parameters {
@@ -38,49 +38,49 @@ func DefaultParameters() Parameters {
 	q := Parameters{}
 	q.
 		SetResultFormat("message").
-		SetTemperature(0.7).
-		SetIncrementalOutput(true)
+		SetTemperature(0.7)
+		// SetIncrementalOutput(true)
 
 	return q
 }
 
 func (p *Parameters) SetResultFormat(value string) *Parameters {
-	p.ResultFormat = &value
+	p.ResultFormat = value
 	return p
 }
 
 func (p *Parameters) SetSeed(value int) *Parameters {
-	p.Seed = &value
+	p.Seed = value
 	return p
 }
 
 func (p *Parameters) SetMaxTokens(value int) *Parameters {
-	p.MaxTokens = &value
+	p.MaxTokens = value
 	return p
 }
 
 func (p *Parameters) SetTopP(value float64) *Parameters {
-	p.TopP = &value
+	p.TopP = value
 	return p
 }
 
 func (p *Parameters) SetTopK(value int) *Parameters {
-	p.TopK = &value
+	p.TopK = value
 	return p
 }
 
 func (p *Parameters) SetTemperature(value float64) *Parameters {
-	p.Temperature = &value
+	p.Temperature = value
 	return p
 }
 
 func (p *Parameters) SetEnableSearch(value bool) *Parameters {
-	p.EnableSearch = &value
+	p.EnableSearch = value
 	return p
 }
 
 func (p *Parameters) SetIncrementalOutput(value bool) *Parameters {
-	p.IncrementalOutput = &value
+	p.IncrementalOutput = value
 	return p
 }
 
@@ -184,6 +184,14 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 	responseChan := q.AsyncChatStreaming(ctx, payload)
 	outputMessage := QwenOutputMessage{}
 	for rspData := range responseChan {
+		if rspData.Err != nil {
+			return nil, fmt.Errorf("parseStreamingChatResponse err: %v", rspData.Err)
+		}
+		if len(rspData.Output.Output.Choices) == 0 {
+			return nil, ErrEmptyResponse
+			// continue
+		}
+
 		chunk := []byte(rspData.Output.Output.Choices[0].Message.Content)
 
 		if payload.StreamingFunc != nil {
@@ -193,10 +201,16 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 			}
 		}
 
+		// fmt.Printf("11111 %+v\n", rspData.Output.Output.Choices[0])
 		outputMessage.RequestID = rspData.Output.RequestID
 		outputMessage.Usage = rspData.Output.Usage
-		outputMessage.Output = rspData.Output.Output
+		if outputMessage.Output.Choices == nil {
+			outputMessage.Output.Choices = rspData.Output.Output.Choices
+		}
+		outputMessage.Output.Choices[0].FinishReason = rspData.Output.Output.Choices[0].FinishReason
+		outputMessage.Output.Choices[0].Message.Role = rspData.Output.Output.Choices[0].Message.Role
 		outputMessage.Output.Choices[0].Message.Content += rspData.Output.Output.Choices[0].Message.Content
+		fmt.Println("debug... outputMessage.Content: ", outputMessage.Output.Choices[0].Message.Content)
 	}
 
 	return &outputMessage, nil
@@ -204,10 +218,12 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 
 func (q *QwenClient) CreateCompletion(ctx context.Context, payload *QwenRequest) (*QwenOutputMessage, error) {
 	if payload.StreamingFunc != nil {
+		payload.Parameters.SetIncrementalOutput(true)
 		return q.parseStreamingChatResponse(ctx, payload)
 	} else {
 		// TODO: should also support disable SSE streaming
-		panic("unimplementd non-streaming completion")
+		return q.SyncCall(ctx, payload)
+		// panic("unimplementd non-streaming completion")
 	}
 }
 
@@ -247,6 +263,21 @@ func (q *QwenClient) AsyncChatStreaming(ctx context.Context, r *QwenRequest) <-c
 	return _respChunkChannel
 }
 
+func (q *QwenClient) SyncCall(ctx context.Context, r *QwenRequest) (*QwenOutputMessage, error) {
+	// fmt.Println("SyncCall: ", r)
+	withHeader := map[string]string{
+		"Authorization": "Bearer " + q.token,
+	}
+	resp, err := Post[QwenOutputMessage](ctx, q.baseURL, r, 0, withHeader)
+	if err != nil {
+		return nil, err
+	}
+	if len(resp.Output.Choices) == 0 {
+		return nil, ErrEmptyResponse
+	}
+	return &resp, nil
+}
+
 /*
  * combine SSE lines to be a structed response data
  * id: xxxx
@@ -256,7 +287,7 @@ func (q *QwenClient) AsyncChatStreaming(ctx context.Context, r *QwenRequest) <-c
 func (q *QwenClient) _combineStreamingChunk(ctx context.Context, reqBody *QwenRequest, withHeader map[string]string, _respChunkChannel chan QwenResponse) {
 	// fmt.Println("go: combine streaming Chunk...: header: ", withHeader)
 	defer func() {
-		fmt.Println("close channel")
+		// fmt.Println("close channel")
 		close(_respChunkChannel)
 	}()
 	_rawStreamOutChannel := make(chan string, 500)
@@ -288,7 +319,7 @@ func (q *QwenClient) _combineStreamingChunk(ctx context.Context, reqBody *QwenRe
 		}
 	}
 	wg.Wait()
-	fmt.Println("go: stream chat over")
+	// fmt.Println("go: stream chat over")
 }
 
 func (q *QwenClient) parseEvent(line string, output *QwenResponse) error {
@@ -308,6 +339,10 @@ func (q *QwenClient) parseEvent(line string, output *QwenResponse) error {
 		}
 		output.HttpStatus = code
 	case strings.HasPrefix(line, "data:"):
+		if output.Event == "error" {
+			output.Err = errors.New(strings.TrimPrefix(line, "data:"))
+			return nil
+		}
 		dataJson := strings.TrimPrefix(line, "data:")
 		outputData := QwenOutputMessage{}
 		err := json.Unmarshal([]byte(dataJson), &outputData)

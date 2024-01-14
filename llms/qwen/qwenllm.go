@@ -15,8 +15,7 @@ var (
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 
-	// TODO: ???
-	// ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
+	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
 )
 
 type LLM struct {
@@ -67,13 +66,13 @@ func (q *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		model = string(qwen_client.ChoseQwenModel(opts.Model))
 	} else {
 		model = string(q.client.Model)
-
 	}
 
 	for _, prompt := range prompts {
 		req := &qwen_client.QwenRequest{}
 
 		input := qwen_client.Input{
+			// TODO: multiple messages
 			Messages: []qwen_client.Message{
 				{
 					Role:    "user",
@@ -82,6 +81,7 @@ func (q *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			},
 		}
 		params := qwen_client.DefaultParameters()
+
 		params.
 			SetMaxTokens(opts.MaxTokens).
 			SetTemperature(opts.Temperature).
@@ -130,7 +130,7 @@ func (q *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	if len(embeddings) != len(inputTexts) {
-		return nil, ErrUnexpectedResponseLength
+		return nil, ErrIncompleteEmbedding
 	}
 
 	return embeddings, nil

@@ -16,6 +16,7 @@ import (
 type HeaderSetter map[string]string
 
 func PostSSE(ctx context.Context, urll string, body interface{}, sseChan chan string, newHeaders ...HeaderSetter) error {
+	// log.Println("PostSSE: len headers: ", len(newHeaders), newHeaders[0])
 	var headerList []HeaderSetter
 
 	if len(newHeaders) > 0 {
@@ -26,6 +27,7 @@ func PostSSE(ctx context.Context, urll string, body interface{}, sseChan chan st
 }
 
 func Post[T any](ctx context.Context, urll string, body interface{}, timeOut time.Duration, newHeaders ...HeaderSetter) (T, error) {
+	// log.Println("Post: len headers: ", len(newHeaders), newHeaders[0])
 	var headerList []HeaderSetter
 	var result T
 
@@ -99,18 +101,22 @@ func httpInnerSSE(ctx context.Context, method, url string, body interface{}, sse
 
 	rsp, err := httpCli.Do(req)
 	if err != nil {
-		return fmt.Errorf("Http-Req-Err: method:[%v], url:[%v], body:[%v] err:[%v]", method, url, string(bodyJson), err.Error())
+		err = fmt.Errorf("Http-Req-Err: method:[%v], url:[%v], body:[%v] err:[%v]", method, url, string(bodyJson), err.Error())
+		// log.Println(err)
+		return err
 	}
 	defer rsp.Body.Close()
 
 	if rsp.StatusCode >= 300 || rsp.StatusCode < 200 {
 		result, err_io := io.ReadAll(rsp.Body)
 		if err_io != nil {
+			// log.Println("httpInnerSSE: io.ReadAll Err: ", err_io)
 			err = err_io
 			return
 		}
 
 		err = fmt.Errorf("request Failed: code: %v, error_msg: %v", rsp.StatusCode, string(result))
+		// log.Println(err)
 		return
 	}
 
