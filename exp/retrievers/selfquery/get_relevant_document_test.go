@@ -10,7 +10,8 @@ import (
 	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 	"github.com/tmc/langchaingo/exp/retrievers/selfquery"
-	"github.com/tmc/langchaingo/exp/tools/queryconstrutor"
+	selfquery_opensearch "github.com/tmc/langchaingo/exp/retrievers/selfquery/opensearch"
+	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
@@ -97,18 +98,19 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string) vectorstor
 }
 
 func TestParser(t *testing.T) {
-	// opensearchEndpoint, awsProfile := getEnvVariables(t)
+	opensearchEndpoint, awsProfile := getEnvVariables(t)
 	llm := setLLM(t)
 
-	// vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile)
+	vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile)
 	// fmt.Printf("vectorstore: %v\n", vectorstore)
 	enableLimit := true
-
+	store := selfquery_opensearch.New(vectorstore)
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
-		LLM: llm,
+		LLM:   llm,
+		Store: store,
 		// VectorStore:      vectorstore,
 		DocumentContents: "Brief summary of a movie",
-		MetadataFieldInfo: []queryconstrutor.AttributeInfo{
+		MetadataFieldInfo: []queryconstructor.AttributeInfo{
 			{
 				Name:        "genre",
 				Description: "The genre of the movie",
@@ -124,11 +126,16 @@ func TestParser(t *testing.T) {
 				Description: "The name of the movie director",
 				Type:        "string",
 			},
+			{
+				Name:        "rating",
+				Description: "A 1-10 rating for the movie",
+				Type:        "float",
+			},
 		},
 		EnableLimit: &enableLimit,
 	})
 	// fmt.Printf("retriever: %v\n", retriever)
-	documents, err := retriever.GetRelevantDocuments(context.TODO(), "Give me all new romance movies")
+	documents, err := retriever.GetRelevantDocuments(context.TODO(), "Give me all new good movies")
 	if err != nil {
 		panic(err)
 	}

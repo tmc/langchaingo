@@ -10,7 +10,7 @@ import __yyfmt__ "fmt"
 //line grammar.y:8
 type yySymType struct {
 	yys          int
-	function     Function
+	function     StructuredFilter
 	expr         interface{}
 	argString    string
 	argBoolean   bool

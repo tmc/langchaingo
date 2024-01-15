@@ -6,7 +6,7 @@ package queryconstructor_parser
 
 // the union will take those values from grammar file (.y) and put them in yySymType struct
 %union {
-    function Function
+    function StructuredFilter
     expr interface{}
     argString string
     argBoolean bool

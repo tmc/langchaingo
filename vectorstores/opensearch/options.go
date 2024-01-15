@@ -38,6 +38,13 @@ func WithEmbedder(e embeddings.Embedder) Option {
 	}
 }
 
+// WithFilters can set the filter property in search document payload.
+func WithFilters(filters any) vectorstores.Option {
+	return func(p *vectorstores.Options) {
+		p.Filters = filters
+	}
+}
+
 func applyClientOptions(s *Store, opts ...Option) error {
 	for _, opt := range opts {
 		opt(s)

@@ -4,7 +4,7 @@ When responding use a markdown code snippet with a JSON object formatted in the 
 ```json
 {
     "query": string \\ text string to compare to document contents
-    "filter": string \\ logical condition statement for filtering documents
+    "filter": string \\ logical condition statement for filtering documents. Important: make sure that the strings in the filter only use escaped double quote. 
     "limit": int \\ the number of documents to retrieve
 }
 ```
@@ -23,6 +23,7 @@ A logical operation statement takes the form `op(statement1, statement2, ...)`:
 - `statement1`, `statement2`, ... (comparison statements or logical operation statements): one or more statements to apply the operation to
 
 Make sure that you only use the comparators and logical operators listed above and no others.
+Make sure that the strings in the filter only use escaped double quote. 
 Make sure that filters only refer to attributes that exist in the data source.
 Make sure that filters only use the attributed names with its function names if there are functions applied on them.
 Make sure that filters only use format `YYYY-MM-DD` when handling date data typed values.

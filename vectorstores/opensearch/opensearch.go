@@ -101,16 +101,29 @@ func (s Store) SimilaritySearch(
 		return nil, err
 	}
 
+	knnPayload := map[string]interface{}{
+		"contentVector": map[string]interface{}{
+			"vector": queryVector,
+			"k":      numDocuments,
+		},
+	}
+
 	searchPayload := map[string]interface{}{
 		"size": numDocuments,
 		"query": map[string]interface{}{
-			"knn": map[string]interface{}{
-				"contentVector": map[string]interface{}{
-					"vector": queryVector,
-					"k":      numDocuments,
+			"knn": knnPayload,
+		},
+	}
+
+	if opts.Filters != nil {
+		searchPayload["query"] = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"filter": opts.Filters,
+				"should": map[string]interface{}{
+					"knn": knnPayload,
 				},
 			},
-		},
+		}
 	}
 
 	buf := new(bytes.Buffer)

@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/exp/tools/queryconstrutor"
+	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func (sqr SelfQueryRetriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
 
-	prompt, err := queryconstrutor.GetQueryConstructorPrompt(queryconstrutor.GetQueryConstructorPromptArgs{
+	prompt, err := queryconstructor.GetQueryConstructorPrompt(queryconstructor.GetQueryConstructorPromptArgs{
 		DocumentContents: sqr.DocumentContents,
 		AttributeInfo:    sqr.MetadataFieldInfo,
 		EnableLimit:      sqr.EnableLimit,
@@ -21,7 +21,14 @@ func (sqr SelfQueryRetriever) GetRelevantDocuments(ctx context.Context, query st
 		return nil, fmt.Errorf("error load query constructor %w", err)
 	}
 
-	promptChain := *chains.NewLLMChain(sqr.LLM, prompt)
+	promptChain := *chains.NewLLMChain(
+		sqr.LLM,
+		prompt,
+		chains.WithTemperature(0),
+	)
+
+	promptChain.OutputParser = queryconstructor.NewQueryConstructorParser(sqr.Store)
+
 	result, err := promptChain.Call(ctx, map[string]any{
 		"query": query,
 	})
@@ -30,7 +37,7 @@ func (sqr SelfQueryRetriever) GetRelevantDocuments(ctx context.Context, query st
 		fmt.Printf("err: %v\n", err)
 	}
 
-	fmt.Printf("result: %v\n", result)
+	fmt.Printf("result: %v\n", result["text"])
 
 	return nil, nil
 }

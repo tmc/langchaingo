@@ -1,18 +1,17 @@
 package selfquery
 
 import (
-	"github.com/tmc/langchaingo/exp/tools/queryconstrutor"
+	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
 )
 
 var _ schema.Retriever = SelfQueryRetriever{}
 
 type SelfQueryRetriever struct {
-	VectorStore       vectorstores.VectorStore
+	Store             StoreWithQueryTranslator
 	LLM               llms.LLM
 	DocumentContents  string
-	MetadataFieldInfo []queryconstrutor.AttributeInfo
+	MetadataFieldInfo []queryconstructor.AttributeInfo
 	EnableLimit       *bool
 }

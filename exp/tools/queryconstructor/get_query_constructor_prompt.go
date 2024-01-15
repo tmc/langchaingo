@@ -1,4 +1,4 @@
-package queryconstrutor
+package queryconstructor
 
 import (
 	_ "embed"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	queryconstructor_prompts "github.com/tmc/langchaingo/exp/tools/queryconstrutor/prompts"
+	queryconstructor_prompts "github.com/tmc/langchaingo/exp/tools/queryconstructor/prompts"
 	"github.com/tmc/langchaingo/prompts"
 )
 

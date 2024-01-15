@@ -1,4 +1,4 @@
-package queryconstrutor
+package queryconstructor
 
 // Enumerator of the operations.
 type Operator = string

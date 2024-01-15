@@ -1,4 +1,4 @@
-package queryconstrutor
+package queryconstructor
 
 type AttributeInfo struct {
 	Name        string

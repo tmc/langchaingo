@@ -9,21 +9,21 @@ import (
 	"strings"
 )
 
-type Function struct {
-	args         []interface{}
-	functionName string
+type StructuredFilter struct {
+	Args         []interface{}
+	FunctionName string
 }
 
-func setFunction(functionName string, args []interface{}) Function {
-	return Function{
-		functionName: functionName,
-		args:         args,
+func setFunction(functionName string, args []interface{}) StructuredFilter {
+	return StructuredFilter{
+		FunctionName: functionName,
+		Args:         args,
 	}
 }
 
 type Lexer struct {
 	scan     *scanner.Scanner
-	function Function
+	function StructuredFilter
 	err      error
 }
 
