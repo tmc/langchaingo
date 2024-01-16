@@ -41,13 +41,11 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 	responseChan := q.asyncChatStreaming(ctx, payload)
 	outputMessage := QwenOutputMessage{}
 	for rspData := range responseChan {
-		// fmt.Printf("rsp chan-Data: %+v\n", rspData)
 		if rspData.Err != nil {
 			return nil, fmt.Errorf("parseStreamingChatResponse err: %v", rspData.Err)
 		}
 		if len(rspData.Output.Output.Choices) == 0 {
 			return nil, ErrEmptyResponse
-			// continue
 		}
 
 		chunk := []byte(rspData.Output.Output.Choices[0].Message.Content)

@@ -101,9 +101,6 @@ func (q *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 
 func (q *Chat) getPromptsFromMessageSets(messageSets [][]schema.ChatMessage) []string {
 	prompts := make([]string, 0, len(messageSets))
-	// for i,v := range messageSets {
-	// 	prompts[i] = v[len(v)-1].Text
-	// }
 	for i := 0; i < len(messageSets); i++ {
 		curPrompt := ""
 		for j := 0; j < len(messageSets[i]); j++ {

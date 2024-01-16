@@ -53,15 +53,3 @@ func (m *Model) QwenMaxLongContext() Qwen_Model {
 	return QWEN_MAX_LONGCONTEXT
 }
 
-// type Message_Format string
-
-// const MESSAGE Message_Format = "message"
-// const TEXT Message_Format = "text"
-
-// func (m *Message_Format) Message() Message_Format {
-// 	return MESSAGE
-// }
-
-// func (m *Message_Format) Text() Message_Format {
-// 	return TEXT
-// }

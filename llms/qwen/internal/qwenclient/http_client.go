@@ -57,7 +57,6 @@ func withStream() HttpOption {
 	}
 }
 
-// func (c *HttpCli) PostSSE(ctx context.Context, urll string, body interface{}, newHeaders ...HeaderMap) (chan string, error) {
 func (c *HttpCli) PostSSE(ctx context.Context, urll string, body interface{}, options ...HttpOption) (chan string, error) {
 	sseStream := make(chan string, 500)
 	c.sseStream = sseStream
@@ -83,7 +82,6 @@ func (c *HttpCli) PostSSE(ctx context.Context, urll string, body interface{}, op
 	return c.sseStream, nil
 }
 
-// func (c *HttpCli) Post(ctx context.Context, urll string, reqbody interface{}, respbody interface{}, timeOut time.Duration, newHeaders ...HeaderMap) error {
 func (c *HttpCli) Post(ctx context.Context, urll string, reqbody interface{}, respbody interface{}, options ...HttpOption) error {
 
 	resp, err := c.httpInner(ctx, "POST", urll, reqbody, options...)
