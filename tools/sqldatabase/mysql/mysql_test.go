@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 	_ "github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 )
@@ -16,11 +18,23 @@ import (
 func Test(t *testing.T) {
 	t.Parallel()
 
+	mysqlContainer, err := mysql.RunContainer(
+		context.Background(),
+		testcontainers.WithImage("mysql:8"),
+		mysql.WithDatabase("test"),
+		mysql.WithUsername("user"),
+		mysql.WithPassword("p@ssw0rd"),
+		mysql.WithScripts(filepath.Join("..", "testdata", "db.sql")),
+	)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, mysqlContainer.Terminate(context.Background()))
+	}()
+
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
-	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
-	if mysqlURI == "" {
-		t.Skip("LANGCHAINGO_TEST_MYSQL not set")
-	}
+	mysqlURI, err := mysqlContainer.ConnectionString(context.Background())
+	require.NoError(t, err)
+
 	db, err := sqldatabase.NewSQLDatabaseWithDSN("mysql", mysqlURI, nil)
 	require.NoError(t, err)
 
