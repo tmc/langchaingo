@@ -1,20 +1,24 @@
-package qwen_client
+package qwenclient
 
-import "fmt"
+import (
+	"log"
+)
 
-const QWEN_DASHSCOPE_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
+const QwenDashscopeURL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
 
-type Qwen_Model string
+type QwenModel string
 
-const QWEN_TURBO Qwen_Model = "qwen-turbo"
-const QWEN_PLUS Qwen_Model = "qwen-plus"
-const QWEN_MAX Qwen_Model = "qwen-max"
-const QWEN_MAX_1201 Qwen_Model = "qwen-max-1201"
-const QWEN_MAX_LONGCONTEXT Qwen_Model = "qwen-max-longcontext"
+const (
+	QwenTurbo          QwenModel = "qwen-turbo"
+	QwenPlus           QwenModel = "qwen-plus"
+	QwenMax            QwenModel = "qwen-max"
+	QwenMax1201        QwenModel = "qwen-max-1201"
+	QwenMaxLongContext QwenModel = "qwen-max-longcontext"
+)
 
 type Model struct{}
 
-func ChoseQwenModel(model string) Qwen_Model {
+func ChoseQwenModel(model string) QwenModel {
 	m := Model{}
 	switch model {
 	case "qwen-turbo":
@@ -28,28 +32,27 @@ func ChoseQwenModel(model string) Qwen_Model {
 	case "qwen-max-longcontext":
 		return m.QwenMaxLongContext()
 	default:
-		fmt.Println("target model not found, use default model: qwen-turbo")
+		log.Println("target model not found, use default model: qwen-turbo")
 		return m.QwenTurbo()
 	}
 }
 
-func (m *Model) QwenTurbo() Qwen_Model {
-	return QWEN_TURBO
+func (m *Model) QwenTurbo() QwenModel {
+	return QwenTurbo
 }
 
-func (m *Model) QwenPlus() Qwen_Model {
-	return QWEN_PLUS
+func (m *Model) QwenPlus() QwenModel {
+	return QwenPlus
 }
 
-func (m *Model) QwenMax() Qwen_Model {
-	return QWEN_MAX
+func (m *Model) QwenMax() QwenModel {
+	return QwenMax
 }
 
-func (m *Model) QwenMax1201() Qwen_Model {
-	return QWEN_MAX_1201
+func (m *Model) QwenMax1201() QwenModel {
+	return QwenMax1201
 }
 
-func (m *Model) QwenMaxLongContext() Qwen_Model {
-	return QWEN_MAX_LONGCONTEXT
+func (m *Model) QwenMaxLongContext() QwenModel {
+	return QwenMaxLongContext
 }
-

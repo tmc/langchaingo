@@ -1,4 +1,4 @@
-package qwen_client
+package qwenclient
 
 import "context"
 
@@ -17,11 +17,13 @@ func NewParameters() *Parameters {
 	return &Parameters{}
 }
 
+const DefaultTemperature = 1.0
+
 func DefaultParameters() *Parameters {
 	q := Parameters{}
 	q.
 		SetResultFormat("message").
-		SetTemperature(0.7)
+		SetTemperature(DefaultTemperature)
 
 	return &q
 }
@@ -103,7 +105,7 @@ func (q *QwenRequest) SetStreamingFunc(fn func(ctx context.Context, chunk []byte
 	return q
 }
 
-// old version response output
+// old version response output.
 type QwenOutputText struct {
 	Output struct {
 		FinishReason string `json:"finish_reason"`
@@ -120,12 +122,12 @@ type QwenOutputText struct {
 type QwenResponse struct {
 	ID         string            `json:"id"`
 	Event      string            `json:"event"`
-	HttpStatus int               `json:"http_status"`
+	HTTPStatus int               `json:"http_status"`
 	Output     QwenOutputMessage `json:"output"`
 	Err        error             `json:"error"`
 }
 
-// new version response format
+// new version response format.
 type QwenOutput struct {
 	Choices []struct {
 		Message      Message `json:"message"`
@@ -143,4 +145,3 @@ type QwenOutputMessage struct {
 	RequestID string `json:"request_id"`
 	// ErrMsg    string `json:"error_msg"`
 }
-

@@ -1,4 +1,4 @@
-package qwen_client
+package qwenclient
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 func newQwenClient(t *testing.T, model string) *QwenClient {
 	t.Helper()
-	cli := NewQwenClient(model, NewHttpClient())
+	cli := NewQwenClient(model, NewHTTPClient())
 	if cli.token == "" {
 		t.Skip("token is empty")
 	}
@@ -21,16 +21,17 @@ func newQwenClient(t *testing.T, model string) *QwenClient {
 func newMockClient(t *testing.T, model string, ctrl *gomock.Controller, f mockFn) *QwenClient {
 	t.Helper()
 
-	mockHttpCli := NewMockIHttpClient(ctrl)
-	f(mockHttpCli)
+	mockHTTPCli := NewMockIHttpClient(ctrl)
+	f(mockHTTPCli)
 
-	qwenCli := NewQwenClient(model, mockHttpCli)
+	qwenCli := NewQwenClient(model, mockHTTPCli)
 	return qwenCli
 }
 
-type mockFn func(mockHttpCli *MockIHttpClient)
+type mockFn func(mockHTTPCli *MockIHttpClient)
 
 func TestStreamingChunk(t *testing.T) {
+	t.Parallel()
 	ctx := context.TODO()
 
 	cli := newQwenClient(t, "qwen-turbo")
@@ -58,6 +59,7 @@ func TestStreamingChunk(t *testing.T) {
 }
 
 func TestMockStreamingChunk(t *testing.T) {
+	t.Parallel()
 	ctx := context.TODO()
 
 	ctrl := gomock.NewController(t)
@@ -88,6 +90,7 @@ func TestMockStreamingChunk(t *testing.T) {
 }
 
 func TestMockBasic(t *testing.T) {
+	t.Parallel()
 	ctx := context.TODO()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -111,40 +114,87 @@ func TestMockBasic(t *testing.T) {
 	assert.Equal(t, 15, resp.Usage.TotalTokens)
 }
 
-func _mockAsyncFunc(mockHttpCli *MockIHttpClient) {
-	var MOCK_STREAM_DATA = []string{
+func _mockAsyncFunc(mockHTTPCli *MockIHttpClient) {
+	MockStreamData := []string{
 		`id:1`,
 		`event:result`,
 		`:HTTP_STATUS/200`,
-		`data:{"output":{"choices":[{"message":{"content":"Hello! How","role":"assistant"},"finish_reason":"null"}]},"usage":{"total_tokens":9,"input_tokens":6,"output_tokens":3},"request_id":"95bea986-ac55-9fd3-8326-8415cbdf5683"}`,
+		`data:{
+			"output": {
+				"choices": [{
+					"message": {
+						"content": "Hello! How",
+						"role": "assistant"
+					},
+					"finish_reason": "null"
+				}]
+			},
+			"usage": {
+				"total_tokens": 9,
+				"input_tokens": 6,
+				"output_tokens": 3
+			},
+			"request_id": "95bea986-ac55-9fd3-8326-8415cbdf5683"
+		}`,
 		`    `,
 		`id:2`,
 		`event:result`,
 		`:HTTP_STATUS/200`,
-		`data:{"output":{"choices":[{"message":{"content":" can I assist you today?","role":"assistant"},"finish_reason":"null"}]},"usage":{"total_tokens":15,"input_tokens":6,"output_tokens":9},"request_id":"95bea986-ac55-9fd3-8326-8415cbdf5683"}`,
+		`data:{
+			"output": {
+				"choices": [{
+					"message": {
+						"content": " can I assist you today?",
+						"role": "assistant"
+					},
+					"finish_reason": "null"
+				}]
+			},
+			"usage": {
+				"total_tokens": 15,
+				"input_tokens": 6,
+				"output_tokens": 9
+			},
+			"request_id": "95bea986-ac55-9fd3-8326-8415cbdf5683"
+		}`,
 		`    `,
 		`id:3`,
 		`event:result`,
 		`:HTTP_STATUS/200`,
-		`data:{"output":{"choices":[{"message":{"content":"","role":"assistant"},"finish_reason":"stop"}]},"usage":{"total_tokens":15,"input_tokens":6,"output_tokens":9},"request_id":"95bea986-ac55-9fd3-8326-8415cbdf5683"}`,
+		`data:{
+			"output": {
+				"choices": [{
+					"message": {
+						"content": "",
+						"role": "assistant"
+					},
+					"finish_reason": "stop"
+				}]
+			},
+			"usage": {
+				"total_tokens": 15,
+				"input_tokens": 6,
+				"output_tokens": 9
+			},
+			"request_id": "95bea986-ac55-9fd3-8326-8415cbdf5683"
+		}`,
 	}
 
 	ctx := context.TODO()
 
-	var _rawStreamOutChannel = make(chan string, 500)
+	_rawStreamOutChannel := make(chan string, 500)
 
-	mockHttpCli.EXPECT().
+	mockHTTPCli.EXPECT().
 		PostSSE(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(_rawStreamOutChannel, nil)
 	go func() {
-		for _, line := range MOCK_STREAM_DATA {
+		for _, line := range MockStreamData {
 			_rawStreamOutChannel <- line
 		}
 		close(_rawStreamOutChannel)
 	}()
-
 }
 
-func _mockSyncFunc(mockHttpCli *MockIHttpClient) {
+func _mockSyncFunc(mockHTTPCli *MockIHttpClient) {
 	ctx := context.TODO()
 
 	mockResp := QwenOutputMessage{
@@ -173,7 +223,7 @@ func _mockSyncFunc(mockHttpCli *MockIHttpClient) {
 		},
 		RequestID: "mock-ac55-9fd3-8326-8415cbdf5683",
 	}
-	mockHttpCli.EXPECT().
+	mockHTTPCli.EXPECT().
 		Post(ctx, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		SetArg(3, mockResp).
 		Return(nil)

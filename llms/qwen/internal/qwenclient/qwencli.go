@@ -1,4 +1,4 @@
-package qwen_client
+package qwenclient
 
 import (
 	"bytes"
@@ -6,29 +6,27 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
-
 	"strconv"
 	"strings"
-
-	"log"
 )
 
 var ErrEmptyResponse = errors.New("empty response")
 
 type QwenClient struct {
-	Model   Qwen_Model
+	Model   QwenModel
 	baseURL string
 	token   string
 	httpCli IHttpClient
 }
 
 func NewQwenClient(model string, httpCli IHttpClient) *QwenClient {
-	qwen_model := ChoseQwenModel(model)
+	qwenModel := ChoseQwenModel(model)
 
 	return &QwenClient{
-		Model:   qwen_model,
-		baseURL: QWEN_DASHSCOPE_URL,
+		Model:   qwenModel,
+		baseURL: QwenDashscopeURL,
 		token:   os.Getenv("DASHSCOPE_API_KEY"),
 		httpCli: httpCli,
 	}
@@ -42,7 +40,7 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 	outputMessage := QwenOutputMessage{}
 	for rspData := range responseChan {
 		if rspData.Err != nil {
-			return nil, fmt.Errorf("parseStreamingChatResponse err: %v", rspData.Err)
+			return nil, &DashscopeError{Message: "parseStreamingChatResponse failed", Cause: rspData.Err}
 		}
 		if len(rspData.Output.Output.Choices) == 0 {
 			return nil, ErrEmptyResponse
@@ -53,7 +51,7 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 		if payload.StreamingFunc != nil {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
-				return nil, fmt.Errorf("parseStreamingChatResponse err: %v", err)
+				return nil, &DashscopeError{Message: "parseStreamingChatResponse failed", Cause: err}
 			}
 		}
 
@@ -78,9 +76,8 @@ func (q *QwenClient) CreateCompletion(ctx context.Context, payload *QwenRequest)
 	if payload.StreamingFunc != nil {
 		payload.Parameters.SetIncrementalOutput(true)
 		return q.parseStreamingChatResponse(ctx, payload)
-	} else {
-		return q.SyncCall(ctx, payload)
 	}
+	return q.SyncCall(ctx, payload)
 }
 
 func (q *QwenClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
@@ -96,8 +93,8 @@ func (q *QwenClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 	}
 	if len(resp.Output.Embeddings) == 0 {
 		return nil, ErrEmptyResponse
-
 	}
+
 	embeddings := make([][]float32, 0)
 	for i := 0; i < len(resp.Output.Embeddings); i++ {
 		embeddings = append(embeddings, resp.Output.Embeddings[i].Embedding)
@@ -106,12 +103,11 @@ func (q *QwenClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 }
 
 func (q *QwenClient) asyncChatStreaming(ctx context.Context, r *QwenRequest) <-chan QwenResponse {
-	_respChunkChannel := make(chan QwenResponse, 100)
+	chanBuffer := 100
+	_respChunkChannel := make(chan QwenResponse, chanBuffer)
 
 	go func() {
 		withHeader := map[string]string{
-			"Authorization": "Bearer " + q.token,
-			// "X-DashScope-SSE": "enable",
 			"Accept": "text/event-stream",
 		}
 
@@ -121,11 +117,7 @@ func (q *QwenClient) asyncChatStreaming(ctx context.Context, r *QwenRequest) <-c
 }
 
 func (q *QwenClient) SyncCall(ctx context.Context, req *QwenRequest) (*QwenOutputMessage, error) {
-	withHeader := map[string]string{
-		"Authorization": "Bearer " + q.token,
-	}
-
-	headerOpt := WithHeader(withHeader)
+	headerOpt := q.TokenHeaderOption()
 
 	resp := QwenOutputMessage{}
 	err := q.httpCli.Post(ctx, q.baseURL, req, &resp, headerOpt)
@@ -138,27 +130,38 @@ func (q *QwenClient) SyncCall(ctx context.Context, req *QwenRequest) (*QwenOutpu
 	return &resp, nil
 }
 
+func (q *QwenClient) TokenHeaderOption() HTTPOption {
+	return func(c *HTTPCli) {
+		c.req.Header.Set("Authorization", "Bearer "+q.token)
+	}
+}
+
 /*
  * combine SSE streaming lines to be a structed response data
  * id: xxxx
  * event: xxxxx
  * ......
  */
-func (q *QwenClient) _combineStreamingChunk(ctx context.Context, reqBody *QwenRequest, withHeader map[string]string, _respChunkChannel chan QwenResponse) {
+func (q *QwenClient) _combineStreamingChunk(
+	ctx context.Context,
+	reqBody *QwenRequest,
+	withHeader map[string]string,
+	_respChunkChannel chan QwenResponse,
+) {
 	defer close(_respChunkChannel)
 	var _rawStreamOutChannel chan string
 
 	var err error
 	headerOpt := WithHeader(withHeader)
+	tokenOpt := q.TokenHeaderOption()
 
-
-	_rawStreamOutChannel, err = q.httpCli.PostSSE(ctx, q.baseURL, reqBody, headerOpt)
+	_rawStreamOutChannel, err = q.httpCli.PostSSE(ctx, q.baseURL, reqBody, headerOpt, tokenOpt)
 	if err != nil {
 		_respChunkChannel <- QwenResponse{Err: err}
 		return
 	}
 
-	var rsp QwenResponse = QwenResponse{}
+	rsp := QwenResponse{}
 
 	for v := range _rawStreamOutChannel {
 		if strings.TrimSpace(v) == "" {
@@ -166,13 +169,18 @@ func (q *QwenClient) _combineStreamingChunk(ctx context.Context, reqBody *QwenRe
 			_respChunkChannel <- rsp
 			rsp = QwenResponse{}
 			continue
-		} else {
-			q.fillInRespData(v, &rsp)
+		}
+
+		err = q.fillInRespData(v, &rsp)
+		if err != nil {
+			rsp.Err = err
+			_respChunkChannel <- rsp
+			break
 		}
 	}
 }
 
-// filled in response data line by line
+// filled in response data line by line.
 func (q *QwenClient) fillInRespData(line string, output *QwenResponse) error {
 	if strings.TrimSpace(line) == "" {
 		return nil
@@ -186,19 +194,19 @@ func (q *QwenClient) fillInRespData(line string, output *QwenResponse) error {
 	case strings.HasPrefix(line, ":HTTP_STATUS/"):
 		code, err := strconv.Atoi(strings.TrimPrefix(line, ":HTTP_STATUS/"))
 		if err != nil {
-			output.Err = fmt.Errorf("http_status err: strconv.Atoi  %v", err)
+			output.Err = fmt.Errorf("http_status err: strconv.Atoi  %w", err)
 		}
-		output.HttpStatus = code
+		output.HTTPStatus = code
 	case strings.HasPrefix(line, "data:"):
+		dataJSON := strings.TrimPrefix(line, "data:")
 		if output.Event == "error" {
-			output.Err = errors.New(strings.TrimPrefix(line, "data:"))
+			output.Err = &WrapMessageError{Message: dataJSON}
 			return nil
 		}
-		dataJson := strings.TrimPrefix(line, "data:")
 		outputData := QwenOutputMessage{}
-		err := json.Unmarshal([]byte(dataJson), &outputData)
+		err := json.Unmarshal([]byte(dataJSON), &outputData)
 		if err != nil {
-			panic(err)
+			return &WrapMessageError{Message: "unmarshal OutputData Err", Cause: err}
 		}
 
 		output.Output = outputData

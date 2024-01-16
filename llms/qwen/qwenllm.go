@@ -32,7 +32,7 @@ func New(opts ...Option) (*LLM, error) {
 		opt(&o)
 	}
 
-	client := qwen_client.NewQwenClient(o.model, qwen_client.NewHttpClient())
+	client := qwen_client.NewQwenClient(o.model, qwen_client.NewHTTPClient())
 
 	return &LLM{client: client, options: o}, nil
 }

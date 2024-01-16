@@ -1,35 +1,33 @@
-package qwen_client
+package qwenclient
 
 import (
 	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os/exec"
 	"time"
 )
 
-type HttpOption func(c *HttpCli)
+type HTTPOption func(c *HTTPCli)
 
-// unit test: mockgen -destination=http_client_mock.go -package=qwen_client . IHttpClient
+// unit test: mockgen -destination=http_client_mock.go -package=qwen_client . IHttpClient.
 type IHttpClient interface {
-	PostSSE(ctx context.Context, urll string, reqbody interface{}, options ...HttpOption) (chan string, error)
-	Post(ctx context.Context, urll string, reqbody interface{}, resp interface{}, options ...HttpOption) error
+	PostSSE(ctx context.Context, urll string, reqbody interface{}, options ...HTTPOption) (chan string, error)
+	Post(ctx context.Context, urll string, reqbody interface{}, resp interface{}, options ...HTTPOption) error
 }
 
-type HttpCli struct {
+type HTTPCli struct {
 	client http.Client
 	req    *http.Request
 
 	sseStream chan string
 }
 
-func NewHttpClient() *HttpCli {
-	return &HttpCli{
+func NewHTTPClient() *HTTPCli {
+	return &HTTPCli{
 		client:    http.Client{},
 		sseStream: nil,
 	}
@@ -37,37 +35,49 @@ func NewHttpClient() *HttpCli {
 
 type HeaderMap map[string]string
 
-func WithHeader(header HeaderMap) HttpOption {
-	return func(c *HttpCli) {
+func WithHeader(header HeaderMap) HTTPOption {
+	return func(c *HTTPCli) {
 		for k, v := range header {
 			c.req.Header.Set(k, v)
 		}
 	}
 }
 
-func WithTimeout(timeout time.Duration) HttpOption {
-	return func(c *HttpCli) {
+func WithTimeout(timeout time.Duration) HTTPOption {
+	return func(c *HTTPCli) {
 		c.client.Timeout = timeout
 	}
 }
 
-func withStream() HttpOption {
-	return func(c *HttpCli) {
+func withStream() HTTPOption {
+	return func(c *HTTPCli) {
 		c.req.Header.Set("Accept", "text/event-stream")
 	}
 }
 
-func (c *HttpCli) PostSSE(ctx context.Context, urll string, body interface{}, options ...HttpOption) (chan string, error) {
-	sseStream := make(chan string, 500)
-	c.sseStream = sseStream
-
-	options = append(options, withStream())
-
-	resp, err := c.httpInner(ctx, "POST", urll, body, options...)
-	if err != nil {
+// nolint:lll
+func (c *HTTPCli) PostSSE(ctx context.Context, urll string, reqbody interface{}, options ...HTTPOption) (chan string, error) {
+	if reqbody == nil {
+		err := &EmptyRequestBodyError{}
 		return nil, err
 	}
+
+	chanBuffer := 500
+	sseStream := make(chan string, chanBuffer)
+	c.sseStream = sseStream
+
+	options = append(options, withStream(), WithHeader(HeaderMap{"content-type": "application/json"}))
+
+	errChan := make(chan error)
+
 	go func() {
+		resp, err := c.httpInner(ctx, "POST", urll, reqbody, options...)
+		if err != nil {
+			errChan <- err
+		} else {
+			errChan <- nil
+		}
+		defer resp.Body.Close()
 		scanner := bufio.NewScanner(resp.Body)
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -75,14 +85,24 @@ func (c *HttpCli) PostSSE(ctx context.Context, urll string, body interface{}, op
 		}
 
 		close(c.sseStream)
-		resp.Body.Close()
 	}()
 
+	err := <-errChan
+	if err != nil {
+		return nil, err
+	}
 
 	return c.sseStream, nil
 }
 
-func (c *HttpCli) Post(ctx context.Context, urll string, reqbody interface{}, respbody interface{}, options ...HttpOption) error {
+// nolint:lll
+func (c *HTTPCli) Post(ctx context.Context, urll string, reqbody interface{}, respbody interface{}, options ...HTTPOption) error {
+	options = append(options, WithHeader(HeaderMap{"content-type": "application/json"}))
+
+	if reqbody == nil {
+		err := &EmptyRequestBodyError{}
+		return err
+	}
 
 	resp, err := c.httpInner(ctx, "POST", urll, reqbody, options...)
 	if err != nil {
@@ -101,35 +121,40 @@ func (c *HttpCli) Post(ctx context.Context, urll string, reqbody interface{}, re
 
 	err = json.Unmarshal(result, &respbody)
 	if err != nil {
-		return fmt.Errorf("json.Unmarshal Err: %v", err.Error())
+		return &WrapMessageError{Message: "Unmarshal Json failed", Cause: err}
 	}
 
 	return nil
 }
 
-func (c *HttpCli) httpInner(ctx context.Context, method, url string, body interface{}, options ...HttpOption) (*http.Response, error) {
+func (c *HTTPCli) EncodeJSONBody(body interface{}) ([]byte, error) {
 	var err error
 
-	if (method == "POST" || method == "PUT") && body == nil {
-		err := errors.New("POST or PUT Body Cant Be Empty")
-		return nil, err
-	}
-	var bodyJson []byte
+	var bodyJSON []byte
 	if body != nil {
-		options = append(options, WithHeader(HeaderMap{"content-type": "application/json"}))
-
 		switch body := body.(type) {
 		case []byte:
-			bodyJson = body
+			bodyJSON = body
 		default:
-			bodyJson, err = json.Marshal(body)
+			bodyJSON, err = json.Marshal(body)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
+	return bodyJSON, nil
+}
 
-	c.req, err = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(bodyJson))
+// nolint:lll
+func (c *HTTPCli) httpInner(ctx context.Context, method, url string, body interface{}, options ...HTTPOption) (*http.Response, error) {
+	var err error
+
+	bodyJSON, err := c.EncodeJSONBody(body)
+	if err != nil {
+		return nil, err
+	}
+
+	c.req, err = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(bodyJSON))
 	if err != nil {
 		return nil, err
 	}
@@ -144,13 +169,13 @@ func (c *HttpCli) httpInner(ctx context.Context, method, url string, body interf
 	}
 
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		result, err_io := io.ReadAll(resp.Body)
-		if err_io != nil {
-			err = err_io
+		result, errIo := io.ReadAll(resp.Body)
+		if errIo != nil {
+			err = errIo
 			return resp, err
 		}
 
-		err = fmt.Errorf("request Failed: code: %v, error_msg: %v", resp.StatusCode, string(result))
+		err = &DashscopeError{Message: "request Failed: " + string(result), Code: resp.StatusCode}
 		return resp, err
 	}
 
@@ -164,7 +189,7 @@ func NetworkStatus() (bool, error) {
 	cmd := exec.CommandContext(ctx, "ping", "-c", "1", "8.8.8.8")
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		return false, fmt.Errorf("network error")
+		return false, ErrNetwork
 	}
 
 	return true, nil

@@ -5,8 +5,8 @@
 //
 //	mockgen -destination=./mock_http_client.go -package=qwen_client . IHttpClient
 //
-// Package qwen_client is a generated GoMock package.
-package qwen_client
+// package qwenclient is a generated GoMock package.
+package qwenclient
 
 import (
 	context "context"
@@ -39,7 +39,7 @@ func (m *MockIHttpClient) EXPECT() *MockIHttpClientMockRecorder {
 }
 
 // Post mocks base method.
-func (m *MockIHttpClient) Post(arg0 context.Context, arg1 string, arg2, arg3 any, arg4 ...HttpOption) error {
+func (m *MockIHttpClient) Post(arg0 context.Context, arg1 string, arg2, arg3 any, arg4 ...HTTPOption) error {
 	m.ctrl.T.Helper()
 	varargs := []any{arg0, arg1, arg2, arg3}
 	for _, a := range arg4 {
@@ -58,7 +58,7 @@ func (mr *MockIHttpClientMockRecorder) Post(arg0, arg1, arg2, arg3 any, arg4 ...
 }
 
 // PostSSE mocks base method.
-func (m *MockIHttpClient) PostSSE(arg0 context.Context, arg1 string, arg2 any, arg3 ...HttpOption) (chan string, error) {
+func (m *MockIHttpClient) PostSSE(arg0 context.Context, arg1 string, arg2 any, arg3 ...HTTPOption) (chan string, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{arg0, arg1, arg2}
 	for _, a := range arg3 {
