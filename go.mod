@@ -156,6 +156,7 @@ require (
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.3.0
 	github.com/pkoukk/tiktoken-go v0.1.2
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.27.0
 	github.com/weaviate/weaviate v1.19.13
 	github.com/weaviate/weaviate-go-client/v4 v4.8.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
