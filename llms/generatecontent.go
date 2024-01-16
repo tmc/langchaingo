@@ -69,7 +69,14 @@ type ContentResponse struct {
 
 // ContentChoice is one of the response choices returned by GenerateModel calls.
 type ContentChoice struct {
-	Content        string
-	StopReason     string
+	Content string
+
+	// StopReason is the reason the model stopped generating output.
+	StopReason string
+
+	// GenerationInfo is arbitrary information the model adds to the response.
 	GenerationInfo map[string]any
+
+	// FuncCall is non-nil when the model asks to invoke a function/tool.
+	FuncCall *schema.FunctionCall
 }
