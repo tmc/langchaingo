@@ -32,7 +32,7 @@ func New(opts ...Option) (*LLM, error) {
 		opt(&o)
 	}
 
-	client := qwen_client.NewQwenClient(o.model)
+	client := qwen_client.NewQwenClient(o.model, qwen_client.NewHttpClient())
 
 	return &LLM{client: client, options: o}, nil
 }
@@ -72,7 +72,6 @@ func (q *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		req := &qwen_client.QwenRequest{}
 
 		input := qwen_client.Input{
-			// TODO: multiple messages
 			Messages: []qwen_client.Message{
 				{
 					Role:    "user",
@@ -103,6 +102,10 @@ func (q *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 			return nil, err
 		}
 
+		if len(rsp.Output.Choices) == 0 {
+			return generations, nil
+		}
+
 		generations = append(generations, &llms.Generation{
 			Text: rsp.Output.Choices[0].Message.Content,
 		})
@@ -124,7 +127,8 @@ func (q *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	embeddings, err := q.client.CreateEmbedding(ctx,
 		&qwen_client.EmbeddingRequest{
 			Input: input,
-		})
+		},
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -29,7 +29,8 @@ func newQwenLlm(t *testing.T, opts ...Option) *LLM {
 		t.Skip("DASHSCOPE_API_KEY not set")
 		return nil
 	}
-	llm, err := New()
+	modelOption := WithModel("qwen-turbo")
+	llm, err := New(modelOption)
 	require.NoError(t, err)
 	return llm
 
@@ -107,4 +108,19 @@ func TestChatStream(t *testing.T) {
 	resp.Content = strings.ToLower(resp.Content)
 	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(resp.Content))
 	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(sb.String()))
+}
+
+func TestEMbedding(t *testing.T) {
+	t.Parallel()
+	llm := newQwenLlm(t)
+
+	ctx := context.TODO()
+
+	embeddingText := []string{"风急天高猿啸哀", "渚清沙白鸟飞回", "无边落木萧萧下", "不尽长江滚滚来"}
+
+	resp, err := llm.CreateEmbedding(ctx, embeddingText)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp)
+	assert.Len(t, resp, len(embeddingText))
 }

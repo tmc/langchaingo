@@ -10,180 +10,38 @@ import (
 
 	"strconv"
 	"strings"
-	"sync"
 
 	"log"
 )
 
-// request input
-
 var ErrEmptyResponse = errors.New("empty response")
-
-type Parameters struct {
-	ResultFormat      string  `json:"result_format,omitempty"`
-	Seed              int     `json:"seed,omitempty"`
-	MaxTokens         int     `json:"max_tokens,omitempty"`
-	TopP              float64 `json:"top_p,omitempty"`
-	TopK              int     `json:"top_k,omitempty"`
-	Temperature       float64 `json:"temperature,omitempty"`
-	EnableSearch      bool    `json:"enable_search,omitempty"`
-	IncrementalOutput bool    `json:"incremental_output,omitempty"`
-}
-
-func NewParameters() Parameters {
-	return Parameters{}
-}
-
-func DefaultParameters() Parameters {
-	q := Parameters{}
-	q.
-		SetResultFormat("message").
-		SetTemperature(0.7)
-		// SetIncrementalOutput(true)
-
-	return q
-}
-
-func (p *Parameters) SetResultFormat(value string) *Parameters {
-	p.ResultFormat = value
-	return p
-}
-
-func (p *Parameters) SetSeed(value int) *Parameters {
-	p.Seed = value
-	return p
-}
-
-func (p *Parameters) SetMaxTokens(value int) *Parameters {
-	p.MaxTokens = value
-	return p
-}
-
-func (p *Parameters) SetTopP(value float64) *Parameters {
-	p.TopP = value
-	return p
-}
-
-func (p *Parameters) SetTopK(value int) *Parameters {
-	p.TopK = value
-	return p
-}
-
-func (p *Parameters) SetTemperature(value float64) *Parameters {
-	p.Temperature = value
-	return p
-}
-
-func (p *Parameters) SetEnableSearch(value bool) *Parameters {
-	p.EnableSearch = value
-	return p
-}
-
-func (p *Parameters) SetIncrementalOutput(value bool) *Parameters {
-	p.IncrementalOutput = value
-	return p
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type Input struct {
-	Messages []Message `json:"messages"`
-}
-
-type QwenRequest struct {
-	Model      string     `json:"model"`
-	Input      Input      `json:"input"`
-	Parameters Parameters `json:"parameters"`
-
-	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
-}
-
-func (q *QwenRequest) SetModel(value string) *QwenRequest {
-	q.Model = value
-	return q
-}
-
-func (q *QwenRequest) SetInput(value Input) *QwenRequest {
-	q.Input = value
-	return q
-}
-
-func (q *QwenRequest) SetParameters(value Parameters) *QwenRequest {
-	q.Parameters = value
-	return q
-}
-
-func (q *QwenRequest) SetStreamingFunc(fn func(ctx context.Context, chunk []byte) error) *QwenRequest {
-	q.StreamingFunc = fn
-	return q
-}
-
-// old version response output
-type QwenOutputText struct {
-	Output struct {
-		FinishReason string `json:"finish_reason"`
-		Text         string `json:"text"`
-	} `json:"output"`
-	Usage struct {
-		TotalTokens  int `json:"total_tokens"`
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
-	} `json:"usage"`
-	RequestID string `json:"request_id"`
-}
-
-type QwenResponse struct {
-	ID         string            `json:"id"`
-	Event      string            `json:"event"`
-	HttpStatus int               `json:"http_status"`
-	Output     QwenOutputMessage `json:"output"`
-	Err        error             `json:"error"`
-}
-
-// new version response format
-type QwenOutput struct {
-	Choices []struct {
-		Message      Message `json:"message"`
-		FinishReason string  `json:"finish_reason"`
-	} `json:"choices"`
-}
-
-type QwenOutputMessage struct {
-	Output QwenOutput `json:"output"`
-	Usage  struct {
-		TotalTokens  int `json:"total_tokens"`
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
-	} `json:"usage"`
-	RequestID string `json:"request_id"`
-	// ErrMsg    string `json:"error_msg"`
-}
-
-// =======================
 
 type QwenClient struct {
 	Model   Qwen_Model
 	baseURL string
 	token   string
+	httpCli IHttpClient
 }
 
-func NewQwenClient(model string) *QwenClient {
+func NewQwenClient(model string, httpCli IHttpClient) *QwenClient {
 	qwen_model := ChoseQwenModel(model)
 
 	return &QwenClient{
 		Model:   qwen_model,
 		baseURL: QWEN_DASHSCOPE_URL,
 		token:   os.Getenv("DASHSCOPE_API_KEY"),
+		httpCli: httpCli,
 	}
 }
 
 func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *QwenRequest) (*QwenOutputMessage, error) {
-	responseChan := q.AsyncChatStreaming(ctx, payload)
+	if payload.Model == "" {
+		payload.Model = string(q.Model)
+	}
+	responseChan := q.asyncChatStreaming(ctx, payload)
 	outputMessage := QwenOutputMessage{}
 	for rspData := range responseChan {
+		// fmt.Printf("rsp chan-Data: %+v\n", rspData)
 		if rspData.Err != nil {
 			return nil, fmt.Errorf("parseStreamingChatResponse err: %v", rspData.Err)
 		}
@@ -201,29 +59,29 @@ func (q *QwenClient) parseStreamingChatResponse(ctx context.Context, payload *Qw
 			}
 		}
 
-		// fmt.Printf("11111 %+v\n", rspData.Output.Output.Choices[0])
 		outputMessage.RequestID = rspData.Output.RequestID
 		outputMessage.Usage = rspData.Output.Usage
 		if outputMessage.Output.Choices == nil {
 			outputMessage.Output.Choices = rspData.Output.Output.Choices
+		} else {
+			outputMessage.Output.Choices[0].Message.Role = rspData.Output.Output.Choices[0].Message.Role
+			outputMessage.Output.Choices[0].Message.Content += rspData.Output.Output.Choices[0].Message.Content
+			outputMessage.Output.Choices[0].FinishReason = rspData.Output.Output.Choices[0].FinishReason
 		}
-		outputMessage.Output.Choices[0].FinishReason = rspData.Output.Output.Choices[0].FinishReason
-		outputMessage.Output.Choices[0].Message.Role = rspData.Output.Output.Choices[0].Message.Role
-		outputMessage.Output.Choices[0].Message.Content += rspData.Output.Output.Choices[0].Message.Content
-		fmt.Println("debug... outputMessage.Content: ", outputMessage.Output.Choices[0].Message.Content)
 	}
 
 	return &outputMessage, nil
 }
 
 func (q *QwenClient) CreateCompletion(ctx context.Context, payload *QwenRequest) (*QwenOutputMessage, error) {
+	if payload.Parameters == nil {
+		payload.Parameters = DefaultParameters()
+	}
 	if payload.StreamingFunc != nil {
 		payload.Parameters.SetIncrementalOutput(true)
 		return q.parseStreamingChatResponse(ctx, payload)
 	} else {
-		// TODO: should also support disable SSE streaming
 		return q.SyncCall(ctx, payload)
-		// panic("unimplementd non-streaming completion")
 	}
 }
 
@@ -249,13 +107,14 @@ func (q *QwenClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 	return embeddings, nil
 }
 
-func (q *QwenClient) AsyncChatStreaming(ctx context.Context, r *QwenRequest) <-chan QwenResponse {
+func (q *QwenClient) asyncChatStreaming(ctx context.Context, r *QwenRequest) <-chan QwenResponse {
 	_respChunkChannel := make(chan QwenResponse, 100)
 
 	go func() {
 		withHeader := map[string]string{
-			"Authorization":   "Bearer " + q.token,
-			"X-DashScope-SSE": "enable",
+			"Authorization": "Bearer " + q.token,
+			// "X-DashScope-SSE": "enable",
+			"Accept": "text/event-stream",
 		}
 
 		q._combineStreamingChunk(ctx, r, withHeader, _respChunkChannel)
@@ -263,12 +122,15 @@ func (q *QwenClient) AsyncChatStreaming(ctx context.Context, r *QwenRequest) <-c
 	return _respChunkChannel
 }
 
-func (q *QwenClient) SyncCall(ctx context.Context, r *QwenRequest) (*QwenOutputMessage, error) {
-	// fmt.Println("SyncCall: ", r)
+func (q *QwenClient) SyncCall(ctx context.Context, req *QwenRequest) (*QwenOutputMessage, error) {
 	withHeader := map[string]string{
 		"Authorization": "Bearer " + q.token,
 	}
-	resp, err := Post[QwenOutputMessage](ctx, q.baseURL, r, 0, withHeader)
+
+	headerOpt := WithHeader(withHeader)
+
+	resp := QwenOutputMessage{}
+	err := q.httpCli.Post(ctx, q.baseURL, req, &resp, headerOpt)
 	if err != nil {
 		return nil, err
 	}
@@ -279,50 +141,41 @@ func (q *QwenClient) SyncCall(ctx context.Context, r *QwenRequest) (*QwenOutputM
 }
 
 /*
- * combine SSE lines to be a structed response data
+ * combine SSE streaming lines to be a structed response data
  * id: xxxx
  * event: xxxxx
  * ......
  */
 func (q *QwenClient) _combineStreamingChunk(ctx context.Context, reqBody *QwenRequest, withHeader map[string]string, _respChunkChannel chan QwenResponse) {
-	// fmt.Println("go: combine streaming Chunk...: header: ", withHeader)
-	defer func() {
-		// fmt.Println("close channel")
-		close(_respChunkChannel)
-	}()
-	_rawStreamOutChannel := make(chan string, 500)
+	defer close(_respChunkChannel)
+	var _rawStreamOutChannel chan string
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func(header map[string]string) {
-		defer wg.Done()
+	var err error
+	headerOpt := WithHeader(withHeader)
 
-		err := PostSSE(ctx, q.baseURL, reqBody, _rawStreamOutChannel, header)
-		if err != nil {
-			fmt.Println("go: PostSSE err: ", err)
-			_respChunkChannel <- QwenResponse{Err: err}
-			return
-		}
-	}(withHeader)
+
+	_rawStreamOutChannel, err = q.httpCli.PostSSE(ctx, q.baseURL, reqBody, headerOpt)
+	if err != nil {
+		_respChunkChannel <- QwenResponse{Err: err}
+		return
+	}
 
 	var rsp QwenResponse = QwenResponse{}
+
 	for v := range _rawStreamOutChannel {
-		// fmt.Println("go: raw stream: ", v)
 		if strings.TrimSpace(v) == "" {
-			// 发送组合好的 rsp 给调用方
+			// streaming out combined response
 			_respChunkChannel <- rsp
 			rsp = QwenResponse{}
 			continue
 		} else {
-			// 循环给 rsp 中的每个字段赋值
-			q.parseEvent(v, &rsp)
+			q.fillInRespData(v, &rsp)
 		}
 	}
-	wg.Wait()
-	// fmt.Println("go: stream chat over")
 }
 
-func (q *QwenClient) parseEvent(line string, output *QwenResponse) error {
+// filled in response data line by line
+func (q *QwenClient) fillInRespData(line string, output *QwenResponse) error {
 	if strings.TrimSpace(line) == "" {
 		return nil
 	}

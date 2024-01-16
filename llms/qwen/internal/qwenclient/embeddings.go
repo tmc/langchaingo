@@ -4,8 +4,6 @@ import (
 	"context"
 )
 
-// TODO: implement this later
-
 const (
 	embeddingUrl          = "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding"
 	defaultEmbeddingModel = "text-embedding-v1"
@@ -38,12 +36,15 @@ type EmbeddingResponse struct {
 	Output EmbeddingOutput `json:"output"`
 }
 
-func (q *QwenClient) createEmbedding(ctx context.Context, r *EmbeddingRequest) (*EmbeddingResponse, error) {
+func (q *QwenClient) createEmbedding(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 
-	withHeader := map[string]string{
+	header := map[string]string{
 		"Authorization": "Bearer " + q.token,
 	}
-	resp, err := Post[EmbeddingResponse](ctx, embeddingUrl, r, 0, withHeader)
+	resp := EmbeddingResponse{}
+	headerOpt := WithHeader(header)
+
+	err := q.httpCli.Post(ctx, embeddingUrl, req, &resp, headerOpt)
 	if err != nil {
 		return nil, err
 	}
