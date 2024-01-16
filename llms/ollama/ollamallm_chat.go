@@ -123,6 +123,10 @@ func (o *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 // GenerateContent implements the Model interface.
 // nolint: goerr113
 func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -220,7 +224,13 @@ func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageConte
 		},
 	}
 
-	return &llms.ContentResponse{Choices: choices}, nil
+	response := &llms.ContentResponse{Choices: choices}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
+	}
+
+	return response, nil
 }
 
 func makeGenerationFromChatResponse(resp ollamaclient.ChatResponse) *llms.Generation {

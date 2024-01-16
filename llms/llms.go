@@ -24,7 +24,7 @@ type Model interface {
 	// GenerateContent asks the model to generate content from a sequence of
 	// messages. It's the most general interface for LLMs that support chat-like
 	// interactions.
-	GenerateContent(ctx context.Context, parts []MessageContent, options ...CallOption) (*ContentResponse, error)
+	GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error)
 }
 
 // Generation is a single generation from a langchaingo LLM.
