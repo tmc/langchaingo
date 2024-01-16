@@ -8,7 +8,7 @@ import (
 type options struct {
 	token        string
 	model        string
-	dashscopeUrl *url.URL
+	dashscopeURL *url.URL
 }
 
 type Option func(*options)
@@ -25,10 +25,10 @@ func WithModel(model string) Option {
 	}
 }
 
-func WithDashscopeUrl(rawURL string) Option {
+func WithDashscopeURL(rawURL string) Option {
 	return func(opts *options) {
 		var err error
-		opts.dashscopeUrl, err = url.Parse(rawURL)
+		opts.dashscopeURL, err = url.Parse(rawURL)
 		if err != nil {
 			log.Fatal(err)
 		}

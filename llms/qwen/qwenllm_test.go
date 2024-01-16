@@ -12,7 +12,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newQwenChat(t *testing.T, opts ...Option) *Chat {
+func newQwenChat(t *testing.T) *Chat {
 	t.Helper()
 	if dashscopeKey := os.Getenv("DASHSCOPE_API_KEY"); dashscopeKey == "" {
 		t.Skip("DASHSCOPE_API_KEY not set")
@@ -23,7 +23,7 @@ func newQwenChat(t *testing.T, opts ...Option) *Chat {
 	return llm
 }
 
-func newQwenLlm(t *testing.T, opts ...Option) *LLM {
+func newQwenLlm(t *testing.T) *LLM {
 	t.Helper()
 	if dashscopeKey := os.Getenv("DASHSCOPE_API_KEY"); dashscopeKey == "" {
 		t.Skip("DASHSCOPE_API_KEY not set")
@@ -33,7 +33,6 @@ func newQwenLlm(t *testing.T, opts ...Option) *LLM {
 	llm, err := New(modelOption)
 	require.NoError(t, err)
 	return llm
-
 }
 
 func TestChatBasic(t *testing.T) {

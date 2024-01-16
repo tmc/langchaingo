@@ -29,7 +29,7 @@ func NewChat(opts ...Option) (*Chat, error) {
 }
 
 // Call implements llms.ChatLLM.
-func (q *Chat) Call(ctx context.Context, messageSets []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) {
+func (q *Chat) Call(ctx context.Context, messageSets []schema.ChatMessage, options ...llms.CallOption) (*schema.AIChatMessage, error) { //nolint:lll
 	r, err := q.Generate(ctx, [][]schema.ChatMessage{messageSets}, options...)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (q *Chat) Call(ctx context.Context, messageSets []schema.ChatMessage, optio
 }
 
 // Generate implements llms.ChatLLM.
-func (q *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) {
+func (q *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage, options ...llms.CallOption) ([]*llms.Generation, error) { //nolint:lll
 	if q.CallbackHandler != nil {
 		q.CallbackHandler.HandleLLMStart(ctx, q.getPromptsFromMessageSets(messageSets))
 	}
@@ -122,6 +122,7 @@ func messagesToQwenMessages(messages []schema.ChatMessage) []qwen_client.Message
 		qmsg := qwen_client.Message{}
 		mtype := m.GetType()
 
+		// nolint:exhaustive
 		switch mtype {
 		case schema.ChatMessageTypeSystem:
 			qmsg.Role = "system"
@@ -152,7 +153,7 @@ func makeGenerationFromQwenResponse(resp *qwen_client.QwenOutputMessage) *llms.G
 		Message: &schema.AIChatMessage{
 			Content: text,
 		},
-		GenerationInfo: make(map[string]interface{}, 3),
+		GenerationInfo: make(map[string]interface{}),
 	}
 
 	gen.GenerationInfo["CompletionTokens"] = resp.Usage.OutputTokens
