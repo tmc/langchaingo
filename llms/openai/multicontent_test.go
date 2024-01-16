@@ -129,6 +129,7 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+//nolint:lll
 func TestFunctionCall(t *testing.T) {
 	t.Parallel()
 	llm := newChatClient(t)
@@ -143,7 +144,7 @@ func TestFunctionCall(t *testing.T) {
 		},
 	}
 
-	var functions = []llms.FunctionDefinition{
+	functions := []llms.FunctionDefinition{
 		{
 			Name:        "getCurrentWeather",
 			Description: "Get the current weather in a given location",
@@ -157,7 +158,7 @@ func TestFunctionCall(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Equal(t, c1.StopReason, "function_call")
+	assert.Equal(t, "function_call", c1.StopReason)
 	assert.NotNil(t, c1.FuncCall)
 }
 
