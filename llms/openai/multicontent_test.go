@@ -129,6 +129,38 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+func TestFunctionCall(t *testing.T) {
+	t.Parallel()
+	llm := newChatClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "What is the weather like in Boston?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	var functions = []llms.FunctionDefinition{
+		{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters:  json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content,
+		llms.WithFunctions(functions))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Equal(t, c1.StopReason, "function_call")
+	assert.NotNil(t, c1.FuncCall)
+}
+
 func showResponse(rsp any) string { //nolint:golint,unused
 	b, err := json.MarshalIndent(rsp, "", "  ")
 	if err != nil {

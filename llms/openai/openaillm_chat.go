@@ -108,6 +108,13 @@ func (o *Chat) GenerateContent(ctx context.Context, messages []llms.MessageConte
 				"TotalTokens":      result.Usage.TotalTokens,
 			},
 		}
+
+		if c.FinishReason == "function_call" {
+			choices[i].FuncCall = &schema.FunctionCall{
+				Name:      c.Message.FunctionCall.Name,
+				Arguments: c.Message.FunctionCall.Arguments,
+			}
+		}
 	}
 
 	return &llms.ContentResponse{Choices: choices}, nil
