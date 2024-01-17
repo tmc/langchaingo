@@ -8,6 +8,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/zapier/internal"
+	"github.com/tmc/langchaingo/util"
 )
 
 type description struct {
@@ -80,6 +81,7 @@ func (t Tool) Description() string {
 
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 

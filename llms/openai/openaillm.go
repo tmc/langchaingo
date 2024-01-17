@@ -6,6 +6,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/tmc/langchaingo/util"
 )
 
 type LLM struct {
@@ -41,6 +42,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
 	if o.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
 	}
 

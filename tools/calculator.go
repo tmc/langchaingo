@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/util"
 	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )
@@ -32,6 +33,7 @@ func (c Calculator) Name() string {
 // agent the ability to retry.
 func (c Calculator) Call(ctx context.Context, input string) (string, error) {
 	if c.CallbacksHandler != nil {
+		ctx = util.GenNewSubCtx(ctx)
 		c.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
