@@ -15,7 +15,7 @@ type LLM = Model
 // Model is an interface multi-modal models implement.
 // Note: this is an experimental API.
 type Model interface {
-	// Call is a simplified interace for Model, generating a single string
+	// Call is a simplified interface for Model, generating a single string
 	// response from a single string prompt.
 	//
 	// It is here for backwards compatibility only and may be removed in the
