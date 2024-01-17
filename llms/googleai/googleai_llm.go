@@ -293,7 +293,7 @@ DoStream:
 	for {
 		resp, err := iter.Next()
 		if errors.Is(err, iterator.Done) {
-			break
+			break DoStream
 		}
 		if err != nil {
 			log.Fatal(err)
@@ -303,6 +303,10 @@ DoStream:
 			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
 		}
 		respCandidate := resp.Candidates[0]
+
+		if respCandidate.Content == nil {
+			break DoStream
+		}
 		candidate.Content.Parts = append(candidate.Content.Parts, respCandidate.Content.Parts...)
 		candidate.Content.Role = respCandidate.Content.Role
 		candidate.FinishReason = respCandidate.FinishReason
