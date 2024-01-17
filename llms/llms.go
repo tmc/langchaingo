@@ -7,14 +7,21 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// LLM is a langchaingo Large Language Model.
-type LLM interface {
-	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
-}
+// LLM is an alias for model, for backwards compatibility.
+//
+// This alias may be removed in the future; please use Model instead.
+type LLM = Model
 
 // Model is an interface multi-modal models implement.
 // Note: this is an experimental API.
 type Model interface {
+	// Call is a simplified interace for Model, generating a single string
+	// response from a single string prompt.
+	//
+	// It is here for backwards compatibility only and may be removed in the
+	// future; please use GenerateContent instead.
+	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
+
 	// GenerateContent asks the model to generate content from a sequence of
 	// messages. It's the most general interface for LLMs that support chat-like
 	// interactions.
@@ -22,6 +29,7 @@ type Model interface {
 }
 
 // Generation is a single generation from a langchaingo LLM.
+// This type may be removed in the future; please don't use in new code.
 type Generation struct {
 	// Text is the generated text.
 	Text string `json:"text"`
@@ -34,11 +42,14 @@ type Generation struct {
 }
 
 // LLMResult is the class that contains all relevant information for an LLM Result.
+// This type may be removed in the future; please don't use in new code.
 type LLMResult struct {
 	Generations [][]*Generation
 	LLMOutput   map[string]any
 }
 
+// CallLLM is a helper function for implementing Call in terms of
+// GenerateContent. It's aimed to be used by Model providers.
 func CallLLM(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
 	msg := MessageContent{
 		Role:  schema.ChatMessageTypeHuman,
