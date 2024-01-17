@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/iterator"
@@ -22,8 +23,9 @@ import (
 
 // GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
-	client *genai.Client
-	opts   options
+	CallbacksHandler callbacks.Handler
+	client           *genai.Client
+	opts             options
 }
 
 var (
@@ -64,6 +66,10 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 
 // GenerateContent calls the LLM with the provided parts.
 func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if g.CallbacksHandler != nil {
+		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
 	opts := llms.CallOptions{
 		Model:       g.opts.defaultModel,
 		MaxTokens:   int(g.opts.defaultMaxTokens),
@@ -77,14 +83,27 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
 	model.SetTemperature(float32(opts.Temperature))
 
+	var response *llms.ContentResponse
+	var err error
+
 	if len(messages) == 1 {
 		theMessage := messages[0]
 		if theMessage.Role != schema.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-		return generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
+		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
+	} else {
+		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
-	return generateFromMessages(ctx, model, messages, &opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.CallbacksHandler != nil {
+		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
+	}
+
+	return response, nil
 }
 
 // downloadImageData downloads the content from the given URL and returns it as

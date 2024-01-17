@@ -32,6 +32,18 @@ func (l CombiningHandler) HandleLLMEnd(ctx context.Context, output llms.LLMResul
 	}
 }
 
+func (l CombiningHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
+	for _, handle := range l.Callbacks {
+		handle.HandleLLMGenerateContentStart(ctx, ms)
+	}
+}
+
+func (l CombiningHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
+	for _, handle := range l.Callbacks {
+		handle.HandleLLMGenerateContentEnd(ctx, res)
+	}
+}
+
 func (l CombiningHandler) HandleChainStart(ctx context.Context, inputs map[string]any) {
 	for _, handle := range l.Callbacks {
 		handle.HandleChainStart(ctx, inputs)
