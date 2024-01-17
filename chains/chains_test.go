@@ -53,6 +53,11 @@ func (l *testLanguageModel) Call(_ context.Context, prompt string, _ ...llms.Cal
 	return llmResult, nil
 }
 
+func (l *testLanguageModel) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
+	panic("not implemented")
+}
+
 func (l *testLanguageModel) Generate(
 	ctx context.Context, prompts []string, options ...llms.CallOption,
 ) ([]*llms.Generation, error) {

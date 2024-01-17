@@ -25,27 +25,27 @@ var _ llms.LLM = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.CallLLM(ctx, o, prompt, options...)
 }
 
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+
 	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
-		Prompts:       prompts,
+		Prompts:       []string{part.(llms.TextContent).Text},
 		MaxTokens:     opts.MaxTokens,
 		Temperature:   opts.Temperature,
 		StopSequences: opts.StopWords,
@@ -57,17 +57,18 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		return nil, err
 	}
 
-	generations := []*llms.Generation{}
-	for _, r := range results {
-		generations = append(generations, &llms.Generation{
-			Text: r.Text,
-		})
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: results[0].Text,
+			},
+		},
+	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
 
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-	return generations, nil
+	return resp, nil
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

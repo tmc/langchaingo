@@ -64,6 +64,11 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	return gi, nil
 }
 
+// Call Implement the call interface for LLM.
+func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.CallLLM(ctx, g, prompt, options...)
+}
+
 // GenerateContent calls the LLM with the provided parts.
 func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
