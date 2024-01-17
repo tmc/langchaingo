@@ -23,15 +23,52 @@ type LLM struct {
 
 var _ llms.LLM = (*LLM)(nil)
 
+// Call implements the LLM interface.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
+	return llms.CallLLM(ctx, o, prompt, options...)
+}
+
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
+	opts := &llms.CallOptions{Model: defaultModel}
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
+		Model:             o.client.Model,
+		Prompt:            part.(llms.TextContent).Text,
+		Task:              huggingfaceclient.InferenceTaskTextGeneration,
+		Temperature:       opts.Temperature,
+		TopP:              opts.TopP,
+		TopK:              opts.TopK,
+		MinLength:         opts.MinLength,
+		MaxLength:         opts.MaxLength,
+		RepetitionPenalty: opts.RepetitionPenalty,
+		Seed:              opts.Seed,
+	})
 	if err != nil {
-		return "", err
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
 	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
+
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			&llms.ContentChoice{
+				Content: result.Text,
+			},
+		},
 	}
-	return r[0].Text, nil
+	return resp, nil
 }
 
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
