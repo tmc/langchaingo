@@ -22,7 +22,7 @@ type LLM struct {
 	CallbacksHandler callbacks.Handler
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -59,7 +59,6 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
 }
 
-// Call implements llms.LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return llms.CallLLM(ctx, o, prompt, options...)
 }

@@ -22,7 +22,7 @@ type LLM struct {
 	client           *cohereclient.Client
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return llms.CallLLM(ctx, o, prompt, options...)

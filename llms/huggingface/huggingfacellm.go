@@ -21,7 +21,7 @@ type LLM struct {
 	client           *huggingfaceclient.Client
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // Call implements the LLM interface.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {

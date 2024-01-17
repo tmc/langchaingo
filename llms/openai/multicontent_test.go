@@ -13,7 +13,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newTestClient(t *testing.T, opts ...Option) *LLM {
+func newTestClient(t *testing.T, opts ...Option) llms.Model {
 	t.Helper()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
