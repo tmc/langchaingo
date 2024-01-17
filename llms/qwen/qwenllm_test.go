@@ -104,8 +104,76 @@ func TestChatStream(t *testing.T) {
 	))
 	require.NoError(t, err)
 
-	resp.Content = strings.ToLower(resp.Content)
 	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(resp.Content))
+	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(sb.String()))
+}
+
+func TestGenerateContentBasic(t *testing.T) {
+	t.Parallel()
+	llm := newQwenChat(t)
+
+	ctx := context.TODO()
+
+	sysContent := llms.TextContent{
+		Text: "You are a helpful Ai assistant.",
+	}
+
+	userContent := llms.TextContent{
+		Text: "greet me in english.",
+	}
+
+	mc := []llms.MessageContent{
+		{Role: schema.ChatMessageTypeSystem, Parts: []llms.ContentPart{sysContent}},
+		{Role: schema.ChatMessageTypeHuman, Parts: []llms.ContentPart{userContent}},
+	}
+
+	resp, err := llm.GenerateContent(ctx, mc, llms.WithStreamingFunc(
+		func(ctx context.Context, chunk []byte) error {
+			return nil
+		},
+	))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+	c1 := resp.Choices[0]
+
+	c1.Content = strings.ToLower(c1.Content)
+
+	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(c1.Content))
+}
+
+func TestGenerateContentStream(t *testing.T) {
+	t.Parallel()
+	llm := newQwenChat(t)
+
+	ctx := context.TODO()
+	var sb strings.Builder
+
+	sysContent := llms.TextContent{
+		Text: "You are a helpful Ai assistant.",
+	}
+
+	userContent := llms.TextContent{
+		Text: "greet me in english.",
+	}
+
+	mc := []llms.MessageContent{
+		{Role: schema.ChatMessageTypeSystem, Parts: []llms.ContentPart{sysContent}},
+		{Role: schema.ChatMessageTypeHuman, Parts: []llms.ContentPart{userContent}},
+	}
+
+	resp, err := llm.GenerateContent(ctx, mc, llms.WithStreamingFunc(
+		func(ctx context.Context, chunk []byte) error {
+			sb.Write(chunk)
+			return nil
+		},
+	))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+	c1 := resp.Choices[0]
+
+	c1.Content = strings.ToLower(c1.Content)
+
+	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(c1.Content))
 	assert.Regexp(t, "hello|hi|how|moring|good|today|assist", strings.ToLower(sb.String()))
 }
 

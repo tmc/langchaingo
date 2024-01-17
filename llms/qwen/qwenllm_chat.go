@@ -62,7 +62,7 @@ func (q *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 	for _, message := range messageSets {
 		qwenMessages := messagesToQwenMessages(message)
 
-		imput := qwen_client.Input{
+		input := qwen_client.Input{
 			Messages: qwenMessages,
 		}
 
@@ -77,7 +77,7 @@ func (q *Chat) Generate(ctx context.Context, messageSets [][]schema.ChatMessage,
 		req := &qwen_client.QwenRequest{}
 		req.
 			SetModel(model).
-			SetInput(imput).
+			SetInput(input).
 			SetParameters(params).
 			SetStreamingFunc(opts.StreamingFunc)
 
@@ -119,17 +119,7 @@ func messagesToQwenMessages(messages []schema.ChatMessage) []qwen_client.Message
 		qmsg := qwen_client.Message{}
 		mtype := m.GetType()
 
-		// nolint:exhaustive
-		switch mtype {
-		case schema.ChatMessageTypeSystem:
-			qmsg.Role = "system"
-		case schema.ChatMessageTypeAI:
-			qmsg.Role = "assistant"
-		case schema.ChatMessageTypeHuman:
-			qmsg.Role = "user"
-		case schema.ChatMessageTypeGeneric:
-			qmsg.Role = "user"
-		}
+		qmsg.Role = typeToQwenRole(mtype)
 
 		qmsg.Content = m.GetContent()
 
