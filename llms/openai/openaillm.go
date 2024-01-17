@@ -134,48 +134,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return response, nil
 }
 
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
-	}
-
-	opts := llms.CallOptions{}
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	generations := make([]*llms.Generation, 0, len(prompts))
-	for _, prompt := range prompts {
-		result, err := o.client.CreateCompletion(ctx, &openaiclient.CompletionRequest{
-			Model:            opts.Model,
-			Prompt:           prompt,
-			MaxTokens:        opts.MaxTokens,
-			StopWords:        opts.StopWords,
-			Temperature:      opts.Temperature,
-			N:                opts.N,
-			FrequencyPenalty: opts.FrequencyPenalty,
-			PresencePenalty:  opts.PresencePenalty,
-			TopP:             opts.TopP,
-			StreamingFunc:    opts.StreamingFunc,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
-		generations = append(generations, &llms.Generation{
-			Text: result.Text,
-		})
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-
-	return generations, nil
-}
-
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{

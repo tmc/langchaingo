@@ -10,7 +10,6 @@ import (
 // LLM is a langchaingo Large Language Model.
 type LLM interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
-	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
 }
 
 // Model is an interface multi-modal models implement.

@@ -33,14 +33,7 @@ var (
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.CallLLM(ctx, o, prompt, options...)
 }
 
 func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
@@ -108,45 +101,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	return resp, nil
-}
-
-// Generate generates completions using the local LLM binary.
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
-	}
-
-	opts := &llms.CallOptions{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
-	// If o.client.GlobalAsArgs is true
-	if o.client.GlobalAsArgs {
-		// Then add the option to the args in --key=value format
-		o.appendGlobalsToArgs(*opts)
-	}
-
-	generations := make([]*llms.Generation, 0, len(prompts))
-	for _, prompt := range prompts {
-		result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
-			Prompt: prompt,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
-
-		generations = append(generations, &llms.Generation{Text: result.Text})
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-
-	return generations, nil
 }
 
 // New creates a new local LLM implementation.

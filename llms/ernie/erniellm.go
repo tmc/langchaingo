@@ -116,50 +116,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
-// Generate implements llms.LLM.
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
-	}
-
-	opts := llms.CallOptions{}
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	generations := make([]*llms.Generation, 0, len(prompts))
-	for _, prompt := range prompts {
-		result, err := o.client.CreateCompletion(ctx, o.getModelPath(opts), &ernieclient.CompletionRequest{
-			Messages:      []ernieclient.Message{{Role: "user", Content: prompt}},
-			Temperature:   opts.Temperature,
-			TopP:          opts.TopP,
-			PenaltyScore:  opts.RepetitionPenalty,
-			StreamingFunc: opts.StreamingFunc,
-			Stream:        opts.StreamingFunc != nil,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
-		if result.ErrorCode > 0 {
-			err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
-				ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
-
-		generations = append(generations, &llms.Generation{
-			Text: result.Result,
-		})
-	}
-
-	return generations, nil
-}
-
 // CreateEmbedding use ernie Embedding-V1.
 // 1. texts counts less than 16
 // 2. text runes counts less than 384

@@ -72,44 +72,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
-	}
-
-	opts := &llms.CallOptions{Model: defaultModel}
-	for _, opt := range options {
-		opt(opts)
-	}
-	result, err := o.client.RunInference(ctx, &huggingfaceclient.InferenceRequest{
-		Model:             o.client.Model,
-		Prompt:            prompts[0],
-		Task:              huggingfaceclient.InferenceTaskTextGeneration,
-		Temperature:       opts.Temperature,
-		TopP:              opts.TopP,
-		TopK:              opts.TopK,
-		MinLength:         opts.MinLength,
-		MaxLength:         opts.MaxLength,
-		RepetitionPenalty: opts.RepetitionPenalty,
-		Seed:              opts.Seed,
-	})
-	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
-		return nil, err
-	}
-
-	generations := []*llms.Generation{
-		{Text: result.Text},
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-	return generations, nil
-}
-
 func New(opts ...Option) (*LLM, error) {
 	options := &options{
 		token: os.Getenv(tokenEnvVarName),

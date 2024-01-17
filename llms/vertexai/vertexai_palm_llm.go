@@ -71,41 +71,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
-	}
-
-	opts := llms.CallOptions{}
-	for _, opt := range options {
-		opt(&opts)
-	}
-	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
-		Prompts:       prompts,
-		MaxTokens:     opts.MaxTokens,
-		Temperature:   opts.Temperature,
-		StopSequences: opts.StopWords,
-	})
-	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
-		return nil, err
-	}
-
-	generations := []*llms.Generation{}
-	for _, r := range results {
-		generations = append(generations, &llms.Generation{
-			Text: r.Text,
-		})
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-	return generations, nil
-}
-
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
