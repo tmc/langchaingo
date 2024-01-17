@@ -14,7 +14,6 @@ import (
 type Handler interface {
 	HandleText(ctx context.Context, text string)
 	HandleLLMStart(ctx context.Context, prompts []string)
-	HandleLLMEnd(ctx context.Context, output llms.LLMResult)
 	HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent)
 	HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse)
 	HandleLLMError(ctx context.Context, err error)

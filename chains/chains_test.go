@@ -58,20 +58,6 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, _ []llms.MessageC
 	panic("not implemented")
 }
 
-func (l *testLanguageModel) Generate(
-	ctx context.Context, prompts []string, options ...llms.CallOption,
-) ([]*llms.Generation, error) {
-	result, err := l.Call(ctx, prompts[0], options...)
-	if err != nil {
-		return nil, err
-	}
-	return []*llms.Generation{
-		{
-			Text: result,
-		},
-	}, nil
-}
-
 var _ llms.LLM = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
