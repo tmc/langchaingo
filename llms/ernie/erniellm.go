@@ -61,16 +61,58 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 
 // Call implements llms.LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
+	return llms.CallLLM(ctx, o, prompt, options...)
+}
+
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
+	opts := &llms.CallOptions{}
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
+		Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
+		Temperature:   opts.Temperature,
+		TopP:          opts.TopP,
+		PenaltyScore:  opts.RepetitionPenalty,
+		StreamingFunc: opts.StreamingFunc,
+		Stream:        opts.StreamingFunc != nil,
+	})
 	if err != nil {
-		return "", err
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+	if result.ErrorCode > 0 {
+		err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
+			ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
 	}
 
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			&llms.ContentChoice{
+				Content: result.Result,
+			},
+		},
+	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
 
-	return r[0].Text, nil
+	return resp, nil
 }
 
 // Generate implements llms.LLM.
