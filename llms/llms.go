@@ -28,26 +28,6 @@ type Model interface {
 	GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error)
 }
 
-// Generation is a single generation from a langchaingo LLM.
-// This type may be removed in the future; please don't use in new code.
-type Generation struct {
-	// Text is the generated text.
-	Text string `json:"text"`
-	// Message stores the potentially generated message.
-	Message *schema.AIChatMessage `json:"message"`
-	// GenerationInfo is the generation info. This can contain vendor-specific information.
-	GenerationInfo map[string]any `json:"generation_info"`
-	// StopReason is the reason the generation stopped.
-	StopReason string `json:"stop_reason"`
-}
-
-// LLMResult is the class that contains all relevant information for an LLM Result.
-// This type may be removed in the future; please don't use in new code.
-type LLMResult struct {
-	Generations [][]*Generation
-	LLMOutput   map[string]any
-}
-
 // CallLLM is a helper function for implementing Call in terms of
 // GenerateContent. It's aimed to be used by Model providers.
 func CallLLM(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
