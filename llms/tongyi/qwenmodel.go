@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/llms"
-	qwen_client "github.com/tmc/langchaingo/llms/qwen/internal/qwenclient"
+	qwen_client "github.com/tmc/langchaingo/llms/tongyi/internal/qwenclient"
 	"github.com/tmc/langchaingo/schema"
 )
 

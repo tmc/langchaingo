@@ -6,7 +6,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	qwen_client "github.com/tmc/langchaingo/llms/qwen/internal/qwenclient"
+	qwen_client "github.com/tmc/langchaingo/llms/tongyi/internal/qwenclient"
 )
 
 var (
