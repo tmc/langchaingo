@@ -69,6 +69,48 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
 	return o.client.Args
 }
 
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
+	opts := &llms.CallOptions{}
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	// If o.client.GlobalAsArgs is true
+	if o.client.GlobalAsArgs {
+		// Then add the option to the args in --key=value format
+		o.appendGlobalsToArgs(*opts)
+	}
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
+		Prompt: part.(llms.TextContent).Text,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			&llms.ContentChoice{
+				Content: result.Text,
+			},
+		},
+	}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
+
+	return resp, nil
+}
+
 // Generate generates completions using the local LLM binary.
 func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
 	if o.CallbacksHandler != nil {
