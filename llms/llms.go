@@ -9,7 +9,7 @@ import (
 
 // LLM is an alias for model, for backwards compatibility.
 //
-// This alias may be removed in the future; please use Model
+// Deprecated: This alias may be removed in the future; please use Model
 // instead.
 type LLM = Model
 

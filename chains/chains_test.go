@@ -58,7 +58,7 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, _ []llms.MessageC
 	panic("not implemented")
 }
 
-var _ llms.LLM = &testLanguageModel{}
+var _ llms.Model = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
 	t.Parallel()

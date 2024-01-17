@@ -15,7 +15,7 @@ Current conversation:
 Human: {{.input}}
 AI:`
 
-func NewConversation(llm llms.LLM, memory schema.Memory) LLMChain {
+func NewConversation(llm llms.Model, memory schema.Memory) LLMChain {
 	return LLMChain{
 		Prompt: prompts.NewPromptTemplate(
 			_conversationTemplate,

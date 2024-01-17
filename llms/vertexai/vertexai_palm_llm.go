@@ -21,7 +21,7 @@ type LLM struct {
 	client           *vertexaiclient.PaLMClient
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {

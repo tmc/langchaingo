@@ -24,7 +24,7 @@ const (
 	RoleFunction  = "function"
 )
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {

@@ -26,10 +26,7 @@ type LLM struct {
 	client           *localclient.Client
 }
 
-// _ ensures that LLM implements the llms.LLM and language model interface.
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.Model = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
