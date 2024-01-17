@@ -2,6 +2,7 @@ package llms
 
 import (
 	"context"
+	"errors"
 
 	"github.com/tmc/langchaingo/schema"
 )
@@ -43,4 +44,23 @@ type Generation struct {
 type LLMResult struct {
 	Generations [][]*Generation
 	LLMOutput   map[string]any
+}
+
+func CallLLM(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
+	msg := MessageContent{
+		Role:  schema.ChatMessageTypeHuman,
+		Parts: []ContentPart{TextContent{prompt}},
+	}
+
+	resp, err := llm.GenerateContent(ctx, []MessageContent{msg}, options...)
+	if err != nil {
+		return "", err
+	}
+
+	choices := resp.Choices
+	if len(choices) < 1 {
+		return "", errors.New("empty response from model") //nolint:goerr113
+	}
+	c1 := choices[0]
+	return c1.Content, nil
 }

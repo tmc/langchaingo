@@ -40,14 +40,7 @@ func New(opts ...Option) (*LLM, error) {
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.CallLLM(ctx, o, prompt, options...)
 }
 
 // GenerateContent implements the Model interface.
