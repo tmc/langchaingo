@@ -43,7 +43,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return r[0].Text, nil
 }
 
-func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
+func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
 	if opts.Temperature != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", opts.Temperature))
 	}
@@ -65,12 +65,11 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
 	if opts.Seed != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", opts.Seed))
 	}
-
-	return o.client.Args
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -98,7 +97,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
-			&llms.ContentChoice{
+			{
 				Content: result.Text,
 			},
 		},

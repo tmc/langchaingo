@@ -29,7 +29,8 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -49,7 +50,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Temperature:   opts.Temperature,
 		StopSequences: opts.StopWords,
 	})
-
 	if err != nil {
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
@@ -59,7 +59,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
-			&llms.ContentChoice{
+			{
 				Content: results[0].Text,
 			},
 		},
