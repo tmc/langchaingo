@@ -57,7 +57,8 @@ type Store struct {
 	connectionClient *http.Client
 
 	// optional
-	queryAttrs []string
+	queryAttrs       []string
+	additionalFields []string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -273,11 +274,18 @@ func (s Store) createFields() []graphql.Field {
 			Name: attr,
 		})
 	}
+
+	additionalFields := make([]graphql.Field, 0, len(s.additionalFields))
+	for _, attr := range s.additionalFields {
+		additionalFields = append(additionalFields, graphql.Field{
+			Name: attr,
+		})
+	}
+
 	fields = append(fields, graphql.Field{
-		Name: "_additional",
-		Fields: []graphql.Field{
-			{Name: "certainty"},
-		},
+		Name:   "_additional",
+		Fields: additionalFields,
 	})
+
 	return fields
 }
