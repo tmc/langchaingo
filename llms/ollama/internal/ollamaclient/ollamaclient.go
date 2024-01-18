@@ -16,8 +16,8 @@ import (
 )
 
 type Client struct {
-	base *url.URL
-	http http.Client
+	base       *url.URL
+	httpClient *http.Client
 }
 
 func checkError(resp *http.Response, body []byte) error {
@@ -66,8 +66,8 @@ func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
 	}
 
 	client := Client{
-		base: ourl,
-		http: *ohttp,
+		base:       ourl,
+		httpClient: ohttp,
 	}
 
 	return &client, nil
@@ -96,7 +96,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
-	respObj, err := c.http.Do(request)
+	respObj, err := c.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
-	response, err := c.http.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
