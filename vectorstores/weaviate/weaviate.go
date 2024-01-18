@@ -95,6 +95,14 @@ func (s Store) AddDocuments(ctx context.Context,
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
 
+	docs = s.deduplicate(ctx, opts, docs)
+
+	if len(docs) == 0 {
+		// nothing to add (perhaps all documents were duplicates). This is not
+		// an error.
+		return nil, nil
+	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
@@ -249,6 +257,24 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 		docs = append(docs, doc)
 	}
 	return docs, nil
+}
+
+func (s Store) deduplicate(ctx context.Context,
+	opts vectorstores.Options,
+	docs []schema.Document,
+) []schema.Document {
+	if opts.Deduplicater == nil {
+		return docs
+	}
+
+	filtered := make([]schema.Document, 0, len(docs))
+	for _, doc := range docs {
+		if !opts.Deduplicater(ctx, doc) {
+			filtered = append(filtered, doc)
+		}
+	}
+
+	return filtered
 }
 
 func (s Store) getNameSpace(opts vectorstores.Options) string {
