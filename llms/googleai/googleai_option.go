@@ -1,4 +1,3 @@
-//nolint:gomnd
 package googleai
 
 // options is a set of options for GoogleAI clients.
