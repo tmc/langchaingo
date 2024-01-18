@@ -179,6 +179,35 @@ func (s Store) SimilaritySearch(
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
+// MetadataSearch searches weaviate based on metadata rather than based on similarity.
+// Use `vectorstores.WithFilter(*filters.WhereBuilder)` to provide a where condition
+// as an option.
+func (s Store) MetadataSearch(
+	ctx context.Context,
+	numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
+	opts := s.getOptions(options...)
+	nameSpace := s.getNameSpace(opts)
+	filter := s.getFilters(opts)
+	whereBuilder, err := s.createWhereBuilder(nameSpace, filter)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.client.GraphQL().
+		Get().
+		WithWhere(whereBuilder).
+		WithClassName(s.indexName).
+		WithLimit(numDocuments).
+		WithFields(s.createFields()...).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.parseDocumentsByGraphQLResponse(res)
+}
+
 //nolint:cyclop
 func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]schema.Document, error) {
 	if len(res.Errors) > 0 {

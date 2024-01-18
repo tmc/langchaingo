@@ -151,6 +151,51 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 10)
 }
 
+func TestMetadataSearch(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"type"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	})
+	require.NoError(t, err)
+
+	docs, err := store.MetadataSearch(context.Background(), 2,
+		vectorstores.WithFilters(
+			filters.Where().
+				WithPath([]string{"type"}).
+				WithOperator(filters.Equal).
+				WithValueString("city"),
+		))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "city", docs[0].Metadata["type"])
+}
+
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
