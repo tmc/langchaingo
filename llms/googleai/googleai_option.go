@@ -8,6 +8,8 @@ type options struct {
 	defaultEmbeddingModel string
 	defaultMaxTokens      int32
 	defaultTemperature    float32
+	defaultTopK           int32
+	defaultTopP           float32
 }
 
 func defaultOptions() options {
@@ -17,6 +19,8 @@ func defaultOptions() options {
 		defaultEmbeddingModel: "embedding-001",
 		defaultMaxTokens:      256,
 		defaultTemperature:    0.5,
+		defaultTopK:           3,
+		defaultTopP:           0.95,
 	}
 }
 
