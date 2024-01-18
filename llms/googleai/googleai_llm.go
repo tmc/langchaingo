@@ -64,12 +64,12 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	return gi, nil
 }
 
-// Call Implement the call interface for LLM.
+// Call implements the [llms.Model] interface.
 func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return llms.CallLLM(ctx, g, prompt, options...)
 }
 
-// GenerateContent calls the LLM with the provided parts.
+// GenerateContent implements the [llms.Model] interface.
 func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -77,8 +77,10 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 
 	opts := llms.CallOptions{
 		Model:       g.opts.defaultModel,
-		MaxTokens:   int(g.opts.defaultMaxTokens),
-		Temperature: float64(g.opts.defaultTemperature),
+		MaxTokens:   g.opts.defaultMaxTokens,
+		Temperature: g.opts.defaultTemperature,
+		TopP:        g.opts.defaultTopP,
+		TopK:        g.opts.defaultTopK,
 	}
 	for _, opt := range options {
 		opt(&opts)
@@ -87,6 +89,8 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model := g.client.GenerativeModel(opts.Model)
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
 	model.SetTemperature(float32(opts.Temperature))
+	model.SetTopP(float32(opts.TopP))
+	model.SetTopK(int32(opts.TopK))
 
 	var response *llms.ContentResponse
 	var err error
