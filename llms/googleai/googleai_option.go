@@ -6,10 +6,10 @@ type options struct {
 	apiKey                string
 	defaultModel          string
 	defaultEmbeddingModel string
-	defaultMaxTokens      int32
-	defaultTemperature    float32
-	defaultTopK           int32
-	defaultTopP           float32
+	defaultMaxTokens      int
+	defaultTemperature    float64
+	defaultTopK           int
+	defaultTopP           float64
 }
 
 func defaultOptions() options {
