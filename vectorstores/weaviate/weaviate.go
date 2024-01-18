@@ -101,7 +101,7 @@ func (s Store) AddDocuments(ctx context.Context,
 		texts = append(texts, doc.PageContent)
 	}
 
-	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
+	vectors, err := opts.Embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (s Store) SimilaritySearch(
 		return nil, err
 	}
 
-	vector, err := s.embedder.EmbedQuery(ctx, query)
+	vector, err := opts.Embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,11 @@ func (s Store) getFilters(opts vectorstores.Options) any {
 }
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
-	opts := vectorstores.Options{}
+	// use the embedder from the store by default, this can be overwritten by passing
+	// an `vectorstores.WithEmbedder` option.
+	opts := vectorstores.Options{
+		Embedder: s.embedder,
+	}
 	for _, opt := range options {
 		opt(&opts)
 	}
