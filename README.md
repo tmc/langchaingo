@@ -10,7 +10,7 @@
 
 ## 🤔 What is this?
 
-This is the Go language implementation of LangChain.
+This is the Go language implementation of [LangChain](https://github.com/langchain-ai/langchain).
 
 ## 📖 Documentation
 

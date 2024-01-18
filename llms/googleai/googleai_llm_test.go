@@ -77,12 +77,12 @@ func TestMultiContentTextStream(t *testing.T) {
 	assert.NotEmpty(t, rsp.Choices)
 	// Check that the combined response contains what we expect
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
+	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
 
 	// Check that multiple chunks were received and they also have words
 	// we expect.
 	assert.GreaterOrEqual(t, len(chunks), 2)
-	assert.Regexp(t, "dog|canid|canine", sb.String())
+	assert.Regexp(t, "(?i)dog|canid|canine", sb.String())
 }
 
 func TestMultiContentTextChatSequence(t *testing.T) {

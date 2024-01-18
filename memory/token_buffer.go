@@ -10,7 +10,7 @@ import (
 // ConversationTokenBuffer for storing conversation memory.
 type ConversationTokenBuffer struct {
 	ConversationBuffer
-	LLM           llms.LLM
+	LLM           llms.Model
 	MaxTokenLimit int
 }
 
@@ -19,7 +19,7 @@ var _ schema.Memory = &ConversationTokenBuffer{}
 
 // NewConversationTokenBuffer is a function for crating a new token buffer memory.
 func NewConversationTokenBuffer(
-	llm llms.LLM,
+	llm llms.Model,
 	maxTokenLimit int,
 	options ...ConversationBufferOption,
 ) *ConversationTokenBuffer {
