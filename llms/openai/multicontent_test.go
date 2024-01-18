@@ -13,21 +13,21 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newChatClient(t *testing.T, opts ...Option) *Chat {
+func newTestClient(t *testing.T, opts ...Option) llms.Model {
 	t.Helper()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 		return nil
 	}
 
-	llm, err := NewChat(opts...)
+	llm, err := New(opts...)
 	require.NoError(t, err)
 	return llm
 }
 
 func TestMultiContentText(t *testing.T) {
 	t.Parallel()
-	llm := newChatClient(t)
+	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "I'm a pomeranian"},
@@ -50,7 +50,7 @@ func TestMultiContentText(t *testing.T) {
 
 func TestMultiContentTextChatSequence(t *testing.T) {
 	t.Parallel()
-	llm := newChatClient(t)
+	llm := newTestClient(t)
 
 	content := []llms.MessageContent{
 		{
@@ -78,7 +78,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 func TestMultiContentImage(t *testing.T) {
 	t.Parallel()
 
-	llm := newChatClient(t, WithModel("gpt-4-vision-preview"))
+	llm := newTestClient(t, WithModel("gpt-4-vision-preview"))
 
 	parts := []llms.ContentPart{
 		llms.ImageURLContent{URL: "https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"},
@@ -101,7 +101,7 @@ func TestMultiContentImage(t *testing.T) {
 
 func TestWithStreaming(t *testing.T) {
 	t.Parallel()
-	llm := newChatClient(t)
+	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "I'm a pomeranian"},
@@ -127,6 +127,39 @@ func TestWithStreaming(t *testing.T) {
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
+}
+
+//nolint:lll
+func TestFunctionCall(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "What is the weather like in Boston?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	functions := []llms.FunctionDefinition{
+		{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters:  json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content,
+		llms.WithFunctions(functions))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Equal(t, "function_call", c1.StopReason)
+	assert.NotNil(t, c1.FuncCall)
 }
 
 func showResponse(rsp any) string { //nolint:golint,unused

@@ -22,7 +22,7 @@ type LLM struct {
 	CallbacksHandler callbacks.Handler
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -59,62 +59,60 @@ doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNot
 		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
 }
 
-// Call implements llms.LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-
-	return r[0].Text, nil
+	return llms.CallLLM(ctx, o, prompt, options...)
 }
 
-// Generate implements llms.LLM.
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
-	opts := llms.CallOptions{}
+	opts := &llms.CallOptions{}
 	for _, opt := range options {
-		opt(&opts)
+		opt(opts)
 	}
 
-	generations := make([]*llms.Generation, 0, len(prompts))
-	for _, prompt := range prompts {
-		result, err := o.client.CreateCompletion(ctx, o.getModelPath(opts), &ernieclient.CompletionRequest{
-			Messages:      []ernieclient.Message{{Role: "user", Content: prompt}},
-			Temperature:   opts.Temperature,
-			TopP:          opts.TopP,
-			PenaltyScore:  opts.RepetitionPenalty,
-			StreamingFunc: opts.StreamingFunc,
-			Stream:        opts.StreamingFunc != nil,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
+		Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
+		Temperature:   opts.Temperature,
+		TopP:          opts.TopP,
+		PenaltyScore:  opts.RepetitionPenalty,
+		StreamingFunc: opts.StreamingFunc,
+		Stream:        opts.StreamingFunc != nil,
+	})
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
 		}
-		if result.ErrorCode > 0 {
-			err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
-				ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
+		return nil, err
+	}
+	if result.ErrorCode > 0 {
+		err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
+			ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
 		}
-
-		generations = append(generations, &llms.Generation{
-			Text: result.Result,
-		})
+		return nil, err
 	}
 
-	return generations, nil
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: result.Result,
+			},
+		},
+	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
+
+	return resp, nil
 }
 
 // CreateEmbedding use ernie Embedding-V1.

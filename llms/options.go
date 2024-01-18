@@ -5,7 +5,7 @@ import "context"
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
 
-// CallOptions is a set of options for LLM.Call.
+// CallOptions is a set of options for calling models.
 type CallOptions struct {
 	// Model is the model to use.
 	Model string `json:"model"`
@@ -66,42 +66,43 @@ const (
 	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
 )
 
-// WithModel is an option for LLM.Call.
+// WithModel specifies which model name to use.
 func WithModel(model string) CallOption {
 	return func(o *CallOptions) {
 		o.Model = model
 	}
 }
 
-// WithMaxTokens is an option for LLM.Call.
+// WithMaxTokens specifies the max number of tokens to generate.
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxTokens = maxTokens
 	}
 }
 
-// WithTemperature is an option for LLM.Call.
+// WithTemperature specifies the model temperature, a hyperparameter that
+// regulates the randomness, or creativity, of the AI's responses.
 func WithTemperature(temperature float64) CallOption {
 	return func(o *CallOptions) {
 		o.Temperature = temperature
 	}
 }
 
-// WithStopWords is an option for LLM.Call.
+// WithStopWords specifies a list of words to stop generation on.
 func WithStopWords(stopWords []string) CallOption {
 	return func(o *CallOptions) {
 		o.StopWords = stopWords
 	}
 }
 
-// WithOptions is an option for LLM.Call.
+// WithOptions specifies options.
 func WithOptions(options CallOptions) CallOption {
 	return func(o *CallOptions) {
 		(*o) = options
 	}
 }
 
-// WithStreamingFunc is an option for LLM.Call that allows streaming responses.
+// WithStreamingFunc specifies the streaming function to use.
 func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) error) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc

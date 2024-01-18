@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -23,10 +22,6 @@ func (l LogHandler) HandleText(_ context.Context, text string) {
 
 func (l LogHandler) HandleLLMStart(_ context.Context, prompts []string) {
 	fmt.Println("Entering LLM with prompts:", prompts)
-}
-
-func (l LogHandler) HandleLLMEnd(_ context.Context, output llms.LLMResult) {
-	fmt.Println("Exiting LLM with results:", formatLLMResult(output))
 }
 
 func (l LogHandler) HandleLLMError(_ context.Context, err error) {
@@ -80,17 +75,6 @@ func formatChainValues(values map[string]any) string {
 	}
 
 	return output
-}
-
-func formatLLMResult(output llms.LLMResult) string {
-	results := "[ "
-	for i := 0; i < len(output.Generations); i++ {
-		for j := 0; j < len(output.Generations[i]); j++ {
-			results += output.Generations[i][j].Text
-		}
-	}
-
-	return results + " ]"
 }
 
 func formatAgentAction(action schema.AgentAction) string {

@@ -105,6 +105,13 @@ func WithQueryAttrs(queryAttrs []string) Option {
 	}
 }
 
+// WithAdditionalFields is an option for setting additional fields query attributes of the weaviate server.
+func WithAdditionalFields(additionalFields []string) Option {
+	return func(p *Store) {
+		p.additionalFields = additionalFields
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		textKey:      _defaultTextKey,
@@ -143,5 +150,31 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		o.queryAttrs = append(o.queryAttrs, o.nameSpaceKey)
 	}
 
+	// add additional fields
+	defaultAdditionalFields := []string{"certainty"}
+
+	if o.additionalFields == nil {
+		o.additionalFields = defaultAdditionalFields
+	} else {
+		o.additionalFields = mergeValuesAsUnique(defaultAdditionalFields, o.additionalFields)
+	}
+
 	return *o, nil
+}
+
+func mergeValuesAsUnique(collections ...[]string) []string {
+	valueMap := make(map[string]bool)
+
+	for _, collection := range collections {
+		for _, value := range collection {
+			valueMap[value] = true
+		}
+	}
+
+	uniqueValues := make([]string, 0, len(valueMap))
+	for k := range valueMap {
+		uniqueValues = append(uniqueValues, k)
+	}
+
+	return uniqueValues
 }

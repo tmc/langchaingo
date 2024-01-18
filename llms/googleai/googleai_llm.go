@@ -8,12 +8,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/iterator"
@@ -22,8 +21,9 @@ import (
 
 // GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
-	client *genai.Client
-	opts   options
+	CallbacksHandler callbacks.Handler
+	client           *genai.Client
+	opts             options
 }
 
 var (
@@ -62,12 +62,23 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	return gi, nil
 }
 
-// GenerateContent calls the LLM with the provided parts.
+// Call implements the [llms.Model] interface.
+func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.CallLLM(ctx, g, prompt, options...)
+}
+
+// GenerateContent implements the [llms.Model] interface.
 func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if g.CallbacksHandler != nil {
+		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
 	opts := llms.CallOptions{
 		Model:       g.opts.defaultModel,
-		MaxTokens:   int(g.opts.defaultMaxTokens),
-		Temperature: float64(g.opts.defaultTemperature),
+		MaxTokens:   g.opts.defaultMaxTokens,
+		Temperature: g.opts.defaultTemperature,
+		TopP:        g.opts.defaultTopP,
+		TopK:        g.opts.defaultTopK,
 	}
 	for _, opt := range options {
 		opt(&opts)
@@ -76,44 +87,30 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model := g.client.GenerativeModel(opts.Model)
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
 	model.SetTemperature(float32(opts.Temperature))
+	model.SetTopP(float32(opts.TopP))
+	model.SetTopK(int32(opts.TopK))
+
+	var response *llms.ContentResponse
+	var err error
 
 	if len(messages) == 1 {
 		theMessage := messages[0]
 		if theMessage.Role != schema.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-		return generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
+		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
+	} else {
+		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
-	return generateFromMessages(ctx, model, messages, &opts)
-}
-
-// downloadImageData downloads the content from the given URL and returns it as
-// a *genai.Blob.
-func downloadImageData(url string) (*genai.Blob, error) {
-	resp, err := http.Get(url) //nolint
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch image from url: %w", err)
-	}
-	defer resp.Body.Close()
-
-	urlData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read image bytes: %w", err)
+		return nil, err
 	}
 
-	mimeType := resp.Header.Get("Content-Type")
-
-	// The convenience function genai.ImageData requires just the right part of
-	// the mime type, so we need to parse it
-	parts := strings.Split(mimeType, "/")
-
-	if len(parts) != 2 { //nolint
-		return nil, ErrInvalidMimeType
+	if g.CallbacksHandler != nil {
+		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
-	blob := genai.ImageData(parts[1], urlData)
-
-	return &blob, nil
+	return response, nil
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
@@ -169,7 +166,6 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 	convertedParts := make([]genai.Part, 0, len(parts))
 	for _, part := range parts {
 		var out genai.Part
-		var err error
 
 		switch p := part.(type) {
 		case llms.TextContent:
@@ -177,10 +173,11 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 		case llms.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
-			out, err = downloadImageData(p.URL)
-		}
-		if err != nil {
-			return nil, err
+			typ, data, err := downloadImageData(p.URL)
+			if err != nil {
+				return nil, err
+			}
+			out = genai.ImageData(typ, data)
 		}
 
 		convertedParts = append(convertedParts, out)
@@ -293,7 +290,7 @@ DoStream:
 	for {
 		resp, err := iter.Next()
 		if errors.Is(err, iterator.Done) {
-			break
+			break DoStream
 		}
 		if err != nil {
 			log.Fatal(err)
@@ -303,6 +300,10 @@ DoStream:
 			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
 		}
 		respCandidate := resp.Candidates[0]
+
+		if respCandidate.Content == nil {
+			break DoStream
+		}
 		candidate.Content.Parts = append(candidate.Content.Parts, respCandidate.Content.Parts...)
 		candidate.Content.Role = respCandidate.Content.Role
 		candidate.FinishReason = respCandidate.FinishReason

@@ -100,19 +100,3 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 1)
 }
-
-func TestUseLLMAndChatAsEmbedderClient(t *testing.T) {
-	t.Parallel()
-
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-
-	// Shows that we can pass an openai chat value to NewEmbedder
-	chat, err := openai.NewChat()
-	require.NoError(t, err)
-
-	embedderFromChat, err := NewEmbedder(chat)
-	require.NoError(t, err)
-	var _ Embedder = embedderFromChat
-}
