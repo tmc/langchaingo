@@ -5,6 +5,7 @@ type options struct {
 	apiKey                string
 	defaultModel          string
 	defaultEmbeddingModel string
+	defaultCandidateCount int
 	defaultMaxTokens      int
 	defaultTemperature    float64
 	defaultTopK           int
@@ -16,6 +17,7 @@ func defaultOptions() options {
 		apiKey:                "",
 		defaultModel:          "gemini-pro",
 		defaultEmbeddingModel: "embedding-001",
+		defaultCandidateCount: 1,
 		defaultMaxTokens:      256,
 		defaultTemperature:    0.5,
 		defaultTopK:           3,
