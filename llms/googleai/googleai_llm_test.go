@@ -167,7 +167,7 @@ func TestCandidateCountSetting(t *testing.T) {
 			llms.WithCandidateCount(1), llms.WithTemperature(1))
 		require.NoError(t, err)
 
-		assert.Equal(t, 1, len(rsp.Choices))
+		assert.Len(t, rsp.Choices, 1)
 	}
 
 	// TODO: test multiple candidates when the backend supports it
