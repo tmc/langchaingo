@@ -45,7 +45,7 @@ func TestMultiContentText(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "dog|canid|canine", strings.ToLower(c1.Content))
+	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
 }
 
 func TestMultiContentTextStream(t *testing.T) {
@@ -109,7 +109,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "spain.*larger", strings.ToLower(c1.Content))
+	assert.Regexp(t, "(?i)spain.*larger", c1.Content)
 }
 
 func TestMultiContentImage(t *testing.T) {
@@ -132,7 +132,7 @@ func TestMultiContentImage(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
+	assert.Regexp(t, "(?i)parrot", c1.Content)
 }
 
 func TestEmbeddings(t *testing.T) {
@@ -146,4 +146,45 @@ func TestEmbeddings(t *testing.T) {
 	assert.Equal(t, len(texts), len(res))
 	assert.NotEmpty(t, res[0])
 	assert.NotEmpty(t, res[1])
+}
+
+func TestMaxTokensSetting(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "I'm a pomeranian"},
+		llms.TextContent{Text: "Describe my taxonomy, health and care"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	// First, try this with a very low MaxTokens setting for such a query; expect
+	// a stop reason that max of tokens was reached.
+	{
+		rsp, err := llm.GenerateContent(context.Background(), content,
+			llms.WithMaxTokens(16))
+		require.NoError(t, err)
+
+		assert.NotEmpty(t, rsp.Choices)
+		c1 := rsp.Choices[0]
+		assert.Regexp(t, "(?i)MaxTokens", c1.StopReason)
+	}
+
+	// Now, try it again with a much larger MaxTokens setting and expect to
+	// finish successfully and generate a response.
+	{
+		rsp, err := llm.GenerateContent(context.Background(), content,
+			llms.WithMaxTokens(2048))
+		require.NoError(t, err)
+
+		assert.NotEmpty(t, rsp.Choices)
+		c1 := rsp.Choices[0]
+		assert.Regexp(t, "(?i)stop", c1.StopReason)
+		assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+	}
 }
