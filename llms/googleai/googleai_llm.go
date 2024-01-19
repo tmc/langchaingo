@@ -89,6 +89,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model.SetTemperature(float32(opts.Temperature))
 	model.SetTopP(float32(opts.TopP))
 	model.SetTopK(int32(opts.TopK))
+	model.StopSequences = opts.StopWords
 
 	var response *llms.ContentResponse
 	var err error
@@ -120,14 +121,16 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 	for _, candidate := range candidates {
 		buf := strings.Builder{}
 
-		for _, part := range candidate.Content.Parts {
-			if v, ok := part.(genai.Text); ok {
-				_, err := buf.WriteString(string(v))
-				if err != nil {
-					return nil, err
+		if candidate.Content != nil {
+			for _, part := range candidate.Content.Parts {
+				if v, ok := part.(genai.Text); ok {
+					_, err := buf.WriteString(string(v))
+					if err != nil {
+						return nil, err
+					}
+				} else {
+					return nil, ErrUnknownPartInResponse
 				}
-			} else {
-				return nil, ErrUnknownPartInResponse
 			}
 		}
 
