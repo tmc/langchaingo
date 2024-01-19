@@ -20,8 +20,6 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
-	github.com/alecthomas/colour v0.1.0 // indirect
-	github.com/alecthomas/repr v0.0.0-20210801044451-80ca428c5142 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/antchfx/htmlquery v1.3.0 // indirect
 	github.com/antchfx/xmlquery v1.3.17 // indirect
@@ -47,13 +45,14 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -61,23 +60,27 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/milvus-io/milvus-proto/go-api/v2 v2.3.2 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/nlpodyssey/gopickle v0.2.0 // indirect
+	github.com/nlpodyssey/gotokenizers v0.2.0 // indirect
+	github.com/nlpodyssey/spago v1.1.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
-	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -111,7 +114,6 @@ require (
 	cloud.google.com/go/vertexai v0.6.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/alecthomas/assert v1.0.0
 	github.com/amikos-tech/chroma-go v0.0.0-20231228181736-e8f5e927093e
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/go-openapi/strfmt v0.21.3
@@ -126,6 +128,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.2
 	github.com/nikolalohinski/gonja v1.5.3
+	github.com/nlpodyssey/cybertron v0.2.1
 	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.3.0
