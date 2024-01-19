@@ -5,10 +5,13 @@ import "context"
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
 
-// CallOptions is a set of options for calling models.
+// CallOptions is a set of options for calling models. Not all models support
+// all options.
 type CallOptions struct {
 	// Model is the model to use.
 	Model string `json:"model"`
+	// CandidateCount is the number of response candidates to generate.
+	CandidateCount int `json:"candidate_count"`
 	// MaxTokens is the maximum number of tokens to generate.
 	MaxTokens int `json:"max_tokens"`
 	// Temperature is the temperature for sampling, between 0 and 1.
@@ -77,6 +80,13 @@ func WithModel(model string) CallOption {
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxTokens = maxTokens
+	}
+}
+
+// WithCandidateCount specifies the number of response candidates to generate.
+func WithCandidateCount(c int) CallOption {
+	return func(o *CallOptions) {
+		o.CandidateCount = c
 	}
 }
 

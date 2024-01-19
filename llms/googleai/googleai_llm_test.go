@@ -148,6 +148,31 @@ func TestEmbeddings(t *testing.T) {
 	assert.NotEmpty(t, res[1])
 }
 
+func TestCandidateCountSetting(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "Name five countries in Africa"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	{
+		rsp, err := llm.GenerateContent(context.Background(), content,
+			llms.WithCandidateCount(1), llms.WithTemperature(1))
+		require.NoError(t, err)
+
+		assert.Equal(t, 1, len(rsp.Choices))
+	}
+
+	// TODO: test multiple candidates when the backend supports it
+}
+
 func TestMaxTokensSetting(t *testing.T) {
 	t.Parallel()
 	llm := newClient(t)
