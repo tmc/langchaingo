@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/serpapi"
@@ -98,4 +99,42 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	require.NoError(t, err)
 
 	require.True(t, strings.Contains(result, "210"), "correct answer 210 not in response")
+}
+
+func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
+		t.Skip("SERPAPI_API_KEY not set")
+	}
+
+	llm, err := openai.NewChat()
+	require.NoError(t, err)
+
+	searchTool, err := serpapi.New()
+	require.NoError(t, err)
+
+	calculator := tools.Calculator{}
+
+	toolList := []tools.Tool{searchTool, calculator}
+
+	a := agents.NewOpenAIFunctionsAgent(llm,
+		toolList,
+		agents.NewOpenAIOption().WithSystemMessage("you are a helpful assistant"),
+		agents.NewOpenAIOption().WithExtraMessages([]prompts.MessageFormatter{
+			prompts.NewHumanMessagePromptTemplate("please be strict", nil),
+		}),
+	)
+
+	e := agents.NewExecutor(a, toolList)
+	require.NoError(t, err)
+
+	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
+	require.NoError(t, err)
+
+	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
+		"correct answer 47 or 49 not in response")
 }
