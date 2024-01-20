@@ -48,6 +48,17 @@ func TestMultiContentText(t *testing.T) {
 	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
 }
 
+func TestGenerateFromSinglePrompt(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	prompt := "name all the planets in the solar system"
+	rsp, err := llms.GenerateFromSinglePrompt(context.Background(), llm, prompt)
+	require.NoError(t, err)
+
+	assert.Regexp(t, "(?i)jupiter", rsp)
+}
+
 func TestMultiContentTextStream(t *testing.T) {
 	t.Parallel()
 	llm := newClient(t)
