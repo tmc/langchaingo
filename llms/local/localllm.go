@@ -30,7 +30,7 @@ var _ llms.Model = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.CallLLM(ctx, o, prompt, options...)
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
