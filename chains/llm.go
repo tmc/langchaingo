@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -55,7 +56,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("promptValue: %+v\n", promptValue)
 	result, err := llms.GeneratePrompt(
 		ctx,
 		c.LLM,

@@ -97,6 +97,8 @@ func GetQueryConstructorPrompt(args GetQueryConstructorPromptArgs) (*prompts.Few
 		}
 	}
 
+	outputExample.suffix = outputExample.suffix + _query
+
 	return prompts.NewFewShotPrompt(outputExample.examplePrompt, outputExample.examples, nil, outputExample.prefix, outputExample.suffix, []string{"query"}, nil, "", prompts.TemplateFormatGoTemplate, true)
 }
 
@@ -188,8 +190,6 @@ func setInputOutputExamples(input setInputOutputExamplesInput, output *setExampl
 	}); err != nil {
 		return fmt.Errorf("error formating 'suffix without data source' prompt %w", err)
 	}
-
-	output.suffix = output.suffix + _query
 
 	return nil
 }

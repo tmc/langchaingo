@@ -41,7 +41,7 @@ func (sqt SelfQueryOpensearchTranslator) Comparison(comparator string, args []in
 			},
 		}, nil
 	case isString(value):
-		field = fmt.Sprintf("%s.keyword", attribute)
+		field = fmt.Sprintf("%s.keyword", field)
 		fallthrough
 	default:
 		return map[string]interface{}{

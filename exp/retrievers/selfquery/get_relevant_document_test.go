@@ -9,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
+	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/exp/retrievers/selfquery"
 	selfquery_opensearch "github.com/tmc/langchaingo/exp/retrievers/selfquery/opensearch"
 	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
@@ -59,7 +61,7 @@ func setLLM(t *testing.T) *openai.LLM {
 	return llm
 }
 
-func getOpensearchVectorStore(t *testing.T, endpoint, profile string) vectorstores.VectorStore {
+func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderClient embeddings.EmbedderClient) vectorstores.VectorStore {
 	t.Helper()
 	ctx := context.Background()
 
@@ -89,7 +91,13 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string) vectorstor
 		t.Fail()
 	}
 
-	vectorstore, err := opensearch.New(client)
+	e, err := embeddings.NewEmbedder(embedderClient)
+	require.NoError(t, err)
+
+	vectorstore, err := opensearch.New(
+		client,
+		opensearch.WithEmbedder(e),
+	)
 	if err != nil {
 		fmt.Printf("vectorstore creation err: %v\n", err)
 		t.Fail()
@@ -101,14 +109,13 @@ func TestParser(t *testing.T) {
 	opensearchEndpoint, awsProfile := getEnvVariables(t)
 	llm := setLLM(t)
 
-	vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile)
+	vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile, llm)
 	// fmt.Printf("vectorstore: %v\n", vectorstore)
 	enableLimit := true
 	store := selfquery_opensearch.New(vectorstore)
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
-		LLM:   llm,
-		Store: store,
-		// VectorStore:      vectorstore,
+		LLM:              llm,
+		Store:            store,
 		DocumentContents: "Brief summary of a movie",
 		MetadataFieldInfo: []queryconstructor.AttributeInfo{
 			{
@@ -135,7 +142,7 @@ func TestParser(t *testing.T) {
 		EnableLimit: &enableLimit,
 	})
 	// fmt.Printf("retriever: %v\n", retriever)
-	documents, err := retriever.GetRelevantDocuments(context.TODO(), "Give me all new good movies")
+	documents, err := retriever.GetRelevantDocuments(context.TODO(), "I want a list of all recent movies, good ones")
 	if err != nil {
 		panic(err)
 	}

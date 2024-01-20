@@ -10,7 +10,6 @@ import (
 )
 
 func (sqr SelfQueryRetriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
-
 	prompt, err := queryconstructor.GetQueryConstructorPrompt(queryconstructor.GetQueryConstructorPromptArgs{
 		DocumentContents: sqr.DocumentContents,
 		AttributeInfo:    sqr.MetadataFieldInfo,
@@ -39,5 +38,5 @@ func (sqr SelfQueryRetriever) GetRelevantDocuments(ctx context.Context, query st
 
 	fmt.Printf("result: %v\n", result["text"])
 
-	return nil, nil
+	return sqr.Store.Search(ctx, query, result["text"])
 }
