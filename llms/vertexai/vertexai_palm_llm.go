@@ -25,7 +25,7 @@ var _ llms.Model = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.CallLLM(ctx, o, prompt, options...)
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 // GenerateContent implements the Model interface.

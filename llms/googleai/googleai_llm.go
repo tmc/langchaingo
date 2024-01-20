@@ -1,7 +1,7 @@
 // package googleai implements a langchaingo provider for Google AI LLMs.
 // See https://ai.google.dev/ for more details and documetnation.
 //
-//nolint:goerr113, lll
+// nolint: lll
 package googleai
 
 import (
@@ -64,7 +64,7 @@ func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 
 // Call implements the [llms.Model] interface.
 func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.CallLLM(ctx, g, prompt, options...)
+	return llms.GenerateFromSinglePrompt(ctx, g, prompt, options...)
 }
 
 // GenerateContent implements the [llms.Model] interface.
