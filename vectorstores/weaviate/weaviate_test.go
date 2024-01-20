@@ -718,3 +718,58 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 	require.NotEmpty(t, additional["certainty"], "expected the certainty to be present")
 	require.NotEmpty(t, additional["distance"], "expected the distance to be present")
 }
+
+// TestWeaviateWithOptionEmbedder ensures that the embedder provided as an option to either
+// `AddDocuments` or `SimilaritySearch` takes precedence over the one provided when creating
+// the `Store`.
+func TestWeaviateWithOptionEmbedder(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	notme, err := embeddings.NewEmbedder(
+		embeddings.EmbedderClientFunc(func(context.Context, []string) ([][]float32, error) {
+			require.FailNow(t, "wrong embedder was called")
+			return nil, nil
+		}),
+	)
+	require.NoError(t, err)
+
+	butme, err := embeddings.NewEmbedder(
+		embeddings.EmbedderClientFunc(func(ctx context.Context, texts []string) ([][]float32, error) {
+			return llm.CreateEmbedding(ctx, texts)
+		}),
+	)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(notme),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"location"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"country": "japan",
+		}},
+		{PageContent: "potato"},
+	}, vectorstores.WithEmbedder(butme))
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(context.Background(), "japan", 1,
+		vectorstores.WithEmbedder(butme))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "japan", docs[0].Metadata["country"])
+}
