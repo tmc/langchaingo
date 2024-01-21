@@ -57,7 +57,8 @@ type Store struct {
 	connectionClient *http.Client
 
 	// optional
-	queryAttrs []string
+	queryAttrs       []string
+	additionalFields []string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -95,12 +96,20 @@ func (s Store) AddDocuments(ctx context.Context,
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
 
+	docs = s.deduplicate(ctx, opts, docs)
+
+	if len(docs) == 0 {
+		// nothing to add (perhaps all documents were duplicates). This is not
+		// an error.
+		return nil, nil
+	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
 
-	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
+	vectors, err := opts.Embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +166,7 @@ func (s Store) SimilaritySearch(
 		return nil, err
 	}
 
-	vector, err := s.embedder.EmbedQuery(ctx, query)
+	vector, err := opts.Embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -176,6 +185,35 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
+	return s.parseDocumentsByGraphQLResponse(res)
+}
+
+// MetadataSearch searches weaviate based on metadata rather than based on similarity.
+// Use `vectorstores.WithFilter(*filters.WhereBuilder)` to provide a where condition
+// as an option.
+func (s Store) MetadataSearch(
+	ctx context.Context,
+	numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
+	opts := s.getOptions(options...)
+	nameSpace := s.getNameSpace(opts)
+	filter := s.getFilters(opts)
+	whereBuilder, err := s.createWhereBuilder(nameSpace, filter)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.client.GraphQL().
+		Get().
+		WithWhere(whereBuilder).
+		WithClassName(s.indexName).
+		WithLimit(numDocuments).
+		WithFields(s.createFields()...).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
@@ -222,6 +260,24 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 	return docs, nil
 }
 
+func (s Store) deduplicate(ctx context.Context,
+	opts vectorstores.Options,
+	docs []schema.Document,
+) []schema.Document {
+	if opts.Deduplicater == nil {
+		return docs
+	}
+
+	filtered := make([]schema.Document, 0, len(docs))
+	for _, doc := range docs {
+		if !opts.Deduplicater(ctx, doc) {
+			filtered = append(filtered, doc)
+		}
+	}
+
+	return filtered
+}
+
 func (s Store) getNameSpace(opts vectorstores.Options) string {
 	if opts.NameSpace != "" {
 		return opts.NameSpace
@@ -244,7 +300,11 @@ func (s Store) getFilters(opts vectorstores.Options) any {
 }
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
-	opts := vectorstores.Options{}
+	// use the embedder from the store by default, this can be overwritten by passing
+	// an `vectorstores.WithEmbedder` option.
+	opts := vectorstores.Options{
+		Embedder: s.embedder,
+	}
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -273,11 +333,18 @@ func (s Store) createFields() []graphql.Field {
 			Name: attr,
 		})
 	}
+
+	additionalFields := make([]graphql.Field, 0, len(s.additionalFields))
+	for _, attr := range s.additionalFields {
+		additionalFields = append(additionalFields, graphql.Field{
+			Name: attr,
+		})
+	}
+
 	fields = append(fields, graphql.Field{
-		Name: "_additional",
-		Fields: []graphql.Field{
-			{Name: "certainty"},
-		},
+		Name:   "_additional",
+		Fields: additionalFields,
 	})
+
 	return fields
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newChatClient(t *testing.T) *Chat {
+func newTestClient(t *testing.T) *LLM {
 	t.Helper()
 	var ollamaModel string
 	if ollamaModel = os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
@@ -20,27 +20,14 @@ func newChatClient(t *testing.T) *Chat {
 		return nil
 	}
 
-	c, err := NewChat(WithModel(ollamaModel))
+	c, err := New(WithModel(ollamaModel))
 	require.NoError(t, err)
 	return c
 }
 
-func TestChatBasic(t *testing.T) {
-	t.Parallel()
-
-	llm := newChatClient(t)
-
-	resp, err := llm.Call(context.Background(), []schema.ChatMessage{
-		schema.SystemChatMessage{Content: "You are producing poems in Spanish."},
-		schema.HumanChatMessage{Content: "Write a very short poem about Donald Knuth"},
-	})
-	require.NoError(t, err)
-	assert.Regexp(t, "programa|comput|algoritm|libro", strings.ToLower(resp.Content)) //nolint:all
-}
-
 func TestGenerateContent(t *testing.T) {
 	t.Parallel()
-	llm := newChatClient(t)
+	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
@@ -62,7 +49,7 @@ func TestGenerateContent(t *testing.T) {
 
 func TestWithStreaming(t *testing.T) {
 	t.Parallel()
-	llm := newChatClient(t)
+	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},

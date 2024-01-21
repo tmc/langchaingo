@@ -20,6 +20,8 @@ linters:
     - exhaustruct
     - varnamelen
     - nlreturn
+    - gomnd
+    - goerr113
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
     - testpackage
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.

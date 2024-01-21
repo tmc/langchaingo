@@ -92,7 +92,7 @@ Follow Up Input: {{.question}}
 Standalone question:`
 
 // LoadCondenseQuestionGenerator chain is used to generate a new question for the sake of retrieval.
-func LoadCondenseQuestionGenerator(llm llms.LLM) *LLMChain {
+func LoadCondenseQuestionGenerator(llm llms.Model) *LLMChain {
 	condenseQuestionPromptTemplate := prompts.NewPromptTemplate(
 		_defaultCondenseQuestionTemplate,
 		[]string{"chat_history", "question"},
@@ -101,7 +101,7 @@ func LoadCondenseQuestionGenerator(llm llms.LLM) *LLMChain {
 }
 
 // LoadStuffQA loads a StuffDocuments chain with default prompts for the llm chain.
-func LoadStuffQA(llm llms.LLM) StuffDocuments {
+func LoadStuffQA(llm llms.Model) StuffDocuments {
 	defaultQAPromptTemplate := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
@@ -118,7 +118,7 @@ func LoadStuffQA(llm llms.LLM) StuffDocuments {
 
 // LoadRefineQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadRefineQA(llm llms.LLM) RefineDocuments {
+func LoadRefineQA(llm llms.Model) RefineDocuments {
 	questionPrompt := prompts.NewPromptTemplate(
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
@@ -136,7 +136,7 @@ func LoadRefineQA(llm llms.LLM) RefineDocuments {
 
 // LoadMapReduceQA loads a refine documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadMapReduceQA(llm llms.LLM) MapReduceDocuments {
+func LoadMapReduceQA(llm llms.Model) MapReduceDocuments {
 	getInfoPrompt := prompts.NewPromptTemplate(
 		_defaultMapReduceGetInformationQATemplate,
 		[]string{"question", "context"},
@@ -156,7 +156,7 @@ func LoadMapReduceQA(llm llms.LLM) MapReduceDocuments {
 
 // LoadMapRerankQA loads a map rerank documents chain for question answering. Inputs are
 // "question" and "input_documents".
-func LoadMapRerankQA(llm llms.LLM) MapRerankDocuments {
+func LoadMapRerankQA(llm llms.Model) MapRerankDocuments {
 	mapRerankPrompt := prompts.NewPromptTemplate(
 		_defaultMapRerankTemplate,
 		[]string{"context", "question"},

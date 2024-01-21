@@ -151,6 +151,94 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 10)
 }
 
+func TestMetadataSearch(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"type"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	})
+	require.NoError(t, err)
+
+	docs, err := store.MetadataSearch(context.Background(), 2,
+		vectorstores.WithFilters(
+			filters.Where().
+				WithPath([]string{"type"}).
+				WithOperator(filters.Equal).
+				WithValueString("city"),
+		))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "city", docs[0].Metadata["type"])
+}
+
+func TestDeduplicater(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"type"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	}, vectorstores.WithDeduplicater(
+		func(ctx context.Context, doc schema.Document) bool {
+			return doc.PageContent == "tokyo"
+		},
+	))
+	require.NoError(t, err)
+
+	docs, err := store.MetadataSearch(context.Background(), 2)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "potato", docs[0].PageContent)
+	require.Equal(t, "vegetable", docs[0].Metadata["type"])
+}
+
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
@@ -544,4 +632,144 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Contains(t, result, "purple", "expected purple in result")
 	require.NotContains(t, result, "orange", "expected not orange in result")
 	require.NotContains(t, result, "yellow", "expected not yellow in result")
+}
+
+func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Foo"},
+	})
+	require.NoError(t, err)
+
+	// Check if the default additional fields are present in the result
+	docs, err := store.SimilaritySearch(context.Background(),
+		"Foo", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+
+	additional, ok := docs[0].Metadata["_additional"].(map[string]any)
+	require.True(t, ok, "expected '_additional' to be present in the metadata and parsable as 'map[string]any'")
+	require.Len(t, additional, 1)
+
+	certainty, _ := additional["certainty"].(float64)
+	require.InDelta(t, docs[0].Score, float32(certainty), 0, "expect score to be equal to the certainty")
+}
+
+func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(e),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithAdditionalFields([]string{"id", "vector", "certainty", "distance"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Foo"},
+	})
+	require.NoError(t, err)
+
+	// Check if all the additional fields are present in the result
+	docs, err := store.SimilaritySearch(context.Background(),
+		"Foo", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+
+	additional, ok := docs[0].Metadata["_additional"].(map[string]any)
+	require.True(t, ok, "expected '_additional' to be present in the metadata and parsable as 'map[string]any'")
+	require.Len(t, additional, 4)
+
+	require.NotEmpty(t, additional["id"], "expected the id to be present")
+	require.NotEmpty(t, additional["vector"], "expected the vector to be present")
+	require.NotEmpty(t, additional["certainty"], "expected the certainty to be present")
+	require.NotEmpty(t, additional["distance"], "expected the distance to be present")
+}
+
+// TestWeaviateWithOptionEmbedder ensures that the embedder provided as an option to either
+// `AddDocuments` or `SimilaritySearch` takes precedence over the one provided when creating
+// the `Store`.
+func TestWeaviateWithOptionEmbedder(t *testing.T) {
+	t.Parallel()
+
+	scheme, host := getValues(t)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	notme, err := embeddings.NewEmbedder(
+		embeddings.EmbedderClientFunc(func(context.Context, []string) ([][]float32, error) {
+			require.FailNow(t, "wrong embedder was called")
+			return nil, nil
+		}),
+	)
+	require.NoError(t, err)
+
+	butme, err := embeddings.NewEmbedder(
+		embeddings.EmbedderClientFunc(func(ctx context.Context, texts []string) ([][]float32, error) {
+			return llm.CreateEmbedding(ctx, texts)
+		}),
+	)
+	require.NoError(t, err)
+
+	store, err := New(
+		WithScheme(scheme),
+		WithHost(host),
+		WithEmbedder(notme),
+		WithNameSpace(uuid.New().String()),
+		WithIndexName(randomizedCamelCaseClass()),
+		WithQueryAttrs([]string{"location"}),
+	)
+	require.NoError(t, err)
+
+	err = createTestClass(context.Background(), store)
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"country": "japan",
+		}},
+		{PageContent: "potato"},
+	}, vectorstores.WithEmbedder(butme))
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(context.Background(), "japan", 1,
+		vectorstores.WithEmbedder(butme))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "japan", docs[0].Metadata["country"])
 }

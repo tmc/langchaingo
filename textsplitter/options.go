@@ -10,6 +10,8 @@ type Options struct {
 	AllowedSpecial    []string
 	DisallowedSpecial []string
 	SecondSplitter    TextSplitter
+	CodeBlocks        bool
+	ReferenceLinks    bool
 }
 
 // DefaultOptions returns the default options for all text splitter.
@@ -82,5 +84,26 @@ func WithDisallowedSpecial(disallowedSpecial []string) Option {
 func WithSecondSplitter(secondSplitter TextSplitter) Option {
 	return func(o *Options) {
 		o.SecondSplitter = secondSplitter
+	}
+}
+
+// WithCodeBlocks sets whether indented and fenced codeblocks should be included
+// in the output.
+func WithCodeBlocks(renderCode bool) Option {
+	return func(o *Options) {
+		o.CodeBlocks = renderCode
+	}
+}
+
+// WithReferenceLinks sets whether reference links (i.e. `[text][label]`)
+// should be patched with the url and title from their definition. Note that
+// by default reference definitions are dropped from the output.
+//
+// Caution: this also affects how other inline elements are rendered, e.g. all
+// emphasis will use `*` even when another character (e.g. `_`) was used in the
+// input.
+func WithReferenceLinks(referenceLinks bool) Option {
+	return func(o *Options) {
+		o.ReferenceLinks = referenceLinks
 	}
 }

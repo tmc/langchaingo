@@ -16,8 +16,8 @@ import (
 )
 
 type Client struct {
-	base *url.URL
-	http http.Client
+	base       *url.URL
+	httpClient *http.Client
 }
 
 func checkError(resp *http.Response, body []byte) error {
@@ -36,7 +36,7 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
-func NewClient(ourl *url.URL) (*Client, error) {
+func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
 	if ourl == nil {
 		scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
 		if !ok {
@@ -57,14 +57,17 @@ func NewClient(ourl *url.URL) (*Client, error) {
 		}
 	}
 
-	client := Client{
-		base: ourl,
+	if ohttp == nil {
+		ohttp = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+			},
+		}
 	}
 
-	client.http = http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-		},
+	client := Client{
+		base:       ourl,
+		httpClient: ohttp,
 	}
 
 	return &client, nil
@@ -93,7 +96,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
-	respObj, err := c.http.Do(request)
+	respObj, err := c.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -140,7 +143,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 	request.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
-	response, err := c.http.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
