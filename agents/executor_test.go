@@ -111,7 +111,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		t.Skip("SERPAPI_API_KEY not set")
 	}
 
-	llm, err := openai.NewChat()
+	llm, err := openai.New()
 	require.NoError(t, err)
 
 	searchTool, err := serpapi.New()

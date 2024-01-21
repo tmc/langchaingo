@@ -19,7 +19,7 @@ const agentScratchpad = "agent_scratchpad"
 type OpenAIFunctionsAgent struct {
 	// LLM is the llm used to call with the values. The llm should have an
 	// input called "agent_scratchpad" for the agent to put its thoughts in.
-	LLM    llms.ChatLLM
+	LLM    llms.Model
 	Prompt prompts.FormatPrompter
 	// Chain chains.Chain
 	// Tools is a list of the tools the agent can use.
@@ -33,7 +33,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.ChatLLM, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -92,7 +92,19 @@ func (o *OpenAIFunctionsAgent) Plan(
 		return nil, nil, err
 	}
 
-	result, err := o.LLM.Generate(ctx, [][]schema.ChatMessage{prompt.Messages()},
+	mcList := make([]llms.MessageContent, len(prompt.Messages()))
+	for i, msg := range prompt.Messages() {
+		role := msg.GetType()
+		text := msg.GetContent()
+
+		mc := llms.MessageContent{
+			Role:  role,
+			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+		}
+		mcList[i] = mc
+	}
+
+	result, err := o.LLM.GenerateContent(ctx, mcList,
 		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
 	if err != nil {
 		return nil, nil, err
@@ -148,22 +160,23 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 	return messages
 }
 
-func (o *OpenAIFunctionsAgent) ParseOutput(generations []*llms.Generation) (
+func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
-	msg := generations[0].Message
+	choice := contentResp.Choices[0]
+
 	// finish
-	if generations[0].Message.FunctionCall == nil {
+	if choice.FuncCall == nil {
 		return nil, &schema.AgentFinish{
 			ReturnValues: map[string]any{
-				"output": msg.Content,
+				"output": choice.Content,
 			},
-			Log: msg.Content,
+			Log: choice.Content,
 		}, nil
 	}
 
 	// action
-	functionCall := msg.FunctionCall
+	functionCall := choice.FuncCall
 	functionName := functionCall.Name
 	toolInputStr := functionCall.Arguments
 	toolInputMap := make(map[string]any, 0)
@@ -181,8 +194,8 @@ func (o *OpenAIFunctionsAgent) ParseOutput(generations []*llms.Generation) (
 	}
 
 	contentMsg := "\n"
-	if msg.Content != "" {
-		contentMsg = fmt.Sprintf("responded: %s\n", msg.Content)
+	if choice.Content != "" {
+		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
 	}
 
 	return []schema.AgentAction{

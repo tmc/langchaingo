@@ -28,9 +28,11 @@ type Model interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 }
 
-// CallLLM is a helper function for implementing Call in terms of
-// GenerateContent. It's aimed to be used by Model providers.
-func CallLLM(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
+// GenerateFromSingle prompt is a convenience function for calling an LLM with
+// a single string prompt, expecting a single string response. It's useful for
+// simple, string-only interactions and provides a slightly more ergonomic API
+// than the more general [llms.Model.GenerateContent].
+func GenerateFromSinglePrompt(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
 	msg := MessageContent{
 		Role:  schema.ChatMessageTypeHuman,
 		Parts: []ContentPart{TextContent{prompt}},
@@ -43,19 +45,8 @@ func CallLLM(ctx context.Context, llm Model, prompt string, options ...CallOptio
 
 	choices := resp.Choices
 	if len(choices) < 1 {
-		return "", errors.New("empty response from model") //nolint:goerr113
+		return "", errors.New("empty response from model")
 	}
 	c1 := choices[0]
 	return c1.Content, nil
-}
-
-func GenerateChatPrompt(ctx context.Context, l ChatLLM, promptValues []schema.PromptValue, options ...CallOption) (LLMResult, error) { //nolint:lll
-	messages := make([][]schema.ChatMessage, 0, len(promptValues))
-	for _, promptValue := range promptValues {
-		messages = append(messages, promptValue.Messages())
-	}
-	generations, err := l.Generate(ctx, messages, options...)
-	return LLMResult{
-		Generations: [][]*Generation{generations},
-	}, err
 }

@@ -41,7 +41,7 @@ func New(opts ...Option) (*LLM, error) {
 
 // Call Implement the call interface for LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.CallLLM(ctx, o, prompt, options...)
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 // GenerateContent implements the Model interface.
