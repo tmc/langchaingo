@@ -12,16 +12,14 @@ import (
 // Vertex is a type that represents a Vertex AI API client.
 //
 // TODO: This isn't in common code; may need PaLM client for embeddings, etc.
-// Note the deltas: type of topk, candidate count
+// Note the deltas: type of topk, candidate count.
 type Vertex struct {
 	CallbacksHandler callbacks.Handler
 	client           *genai.Client
 	opts             options
 }
 
-var (
-	_ llms.Model = &Vertex{}
-)
+var _ llms.Model = &Vertex{}
 
 // NewVertex creates a new Vertex struct.
 func NewVertex(ctx context.Context, opts ...Option) (*Vertex, error) {
