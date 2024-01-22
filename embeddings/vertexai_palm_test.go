@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/vertexai"
+	"github.com/tmc/langchaingo/llms/googleai/palm"
 )
 
 func newVertexEmbedder(t *testing.T, opts ...Option) *EmbedderImpl {
@@ -17,7 +17,7 @@ func newVertexEmbedder(t *testing.T, opts ...Option) *EmbedderImpl {
 		return nil
 	}
 
-	llm, err := vertexai.New()
+	llm, err := palm.New()
 	require.NoError(t, err)
 
 	embedder, err := NewEmbedder(llm, opts...)

@@ -1,5 +1,6 @@
-// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai_llm.go
 package vertex
+
+// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai_llm.go
 
 import (
 	"context"
