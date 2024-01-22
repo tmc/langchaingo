@@ -18,6 +18,7 @@ linters:
     - tagliatelle # As we're dealing with third parties we must accept snake case.
     - wsl # We don't agree with wsl's style rules
     - exhaustruct
+    - lll
     - varnamelen
     - nlreturn
     - gomnd

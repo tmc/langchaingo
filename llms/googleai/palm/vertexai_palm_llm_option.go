@@ -1,4 +1,4 @@
-package vertexai
+package palm
 
 import (
 	"net/http"
