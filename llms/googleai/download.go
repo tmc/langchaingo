@@ -10,7 +10,7 @@ import (
 // downloadImageData downloads the content from the given URL and returns the
 // image type and data. The image type is the second part of the response's
 // MIME (e.g. "png" from "image/png").
-func downloadImageData(url string) (string, []byte, error) {
+func DownloadImageData(url string) (string, []byte, error) {
 	resp, err := http.Get(url) //nolint
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to fetch image from url: %w", err)
