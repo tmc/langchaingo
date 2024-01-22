@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -18,22 +19,25 @@ import (
 func Test(t *testing.T) {
 	t.Parallel()
 
-	mysqlContainer, err := mysql.RunContainer(
-		context.Background(),
-		testcontainers.WithImage("mysql:8"),
-		mysql.WithDatabase("test"),
-		mysql.WithUsername("user"),
-		mysql.WithPassword("p@ssw0rd"),
-		mysql.WithScripts(filepath.Join("..", "testdata", "db.sql")),
-	)
-	require.NoError(t, err)
-	defer func() {
-		require.NoError(t, mysqlContainer.Terminate(context.Background()))
-	}()
-
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
-	mysqlURI, err := mysqlContainer.ConnectionString(context.Background())
-	require.NoError(t, err)
+	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
+	if mysqlURI == "" {
+		mysqlContainer, err := mysql.RunContainer(
+			context.Background(),
+			testcontainers.WithImage("mysql:8"),
+			mysql.WithDatabase("test"),
+			mysql.WithUsername("user"),
+			mysql.WithPassword("p@ssw0rd"),
+			mysql.WithScripts(filepath.Join("..", "testdata", "db.sql")),
+		)
+		require.NoError(t, err)
+		defer func() {
+			require.NoError(t, mysqlContainer.Terminate(context.Background()))
+		}()
+
+		mysqlURI, err = mysqlContainer.ConnectionString(context.Background())
+		require.NoError(t, err)
+	}
 
 	db, err := sqldatabase.NewSQLDatabaseWithDSN("mysql", mysqlURI, nil)
 	require.NoError(t, err)

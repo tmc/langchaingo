@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -19,25 +20,29 @@ import (
 func Test(t *testing.T) {
 	t.Parallel()
 
-	pgContainer, err := postgres.RunContainer(
-		context.Background(),
-		testcontainers.WithImage("postgres:13"),
-		postgres.WithDatabase("test"),
-		postgres.WithUsername("db_user"),
-		postgres.WithPassword("p@mysecretpassword"),
-		postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second)),
-	)
-	require.NoError(t, err)
-	defer func() {
-		require.NoError(t, pgContainer.Terminate(context.Background()))
-	}()
+	// export LANGCHAINGO_TEST_POSTGRESQL=postgres://db_user:mysecretpassword@localhost:5438/test?sslmode=disable
+	pgURI := os.Getenv("LANGCHAINGO_TEST_POSTGRESQL")
+	if pgURI == "" {
+		pgContainer, err := postgres.RunContainer(
+			context.Background(),
+			testcontainers.WithImage("postgres:13"),
+			postgres.WithDatabase("test"),
+			postgres.WithUsername("db_user"),
+			postgres.WithPassword("p@mysecretpassword"),
+			postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
+			testcontainers.WithWaitStrategy(
+				wait.ForLog("database system is ready to accept connections").
+					WithOccurrence(2).
+					WithStartupTimeout(5*time.Second)),
+		)
+		require.NoError(t, err)
+		defer func() {
+			require.NoError(t, pgContainer.Terminate(context.Background()))
+		}()
 
-	pgURI, err := pgContainer.ConnectionString(context.Background(), "sslmode=disable")
-	require.NoError(t, err)
+		pgURI, err = pgContainer.ConnectionString(context.Background(), "sslmode=disable")
+		require.NoError(t, err)
+	}
 
 	db, err := sqldatabase.NewSQLDatabaseWithDSN("pgx", pgURI, nil)
 	require.NoError(t, err)
