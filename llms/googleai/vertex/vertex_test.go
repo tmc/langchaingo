@@ -2,7 +2,6 @@ package vertex
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -99,7 +98,6 @@ func TestEmbeddings(t *testing.T) {
 	res, err := llm.CreateEmbedding(context.Background(), texts)
 	require.NoError(t, err)
 
-	fmt.Println(res)
 	assert.Equal(t, len(texts), len(res))
 	assert.NotEmpty(t, res[0])
 	assert.NotEmpty(t, res[1])

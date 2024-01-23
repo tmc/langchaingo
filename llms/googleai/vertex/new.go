@@ -37,7 +37,7 @@ func NewVertex(ctx context.Context, opts ...Option) (*Vertex, error) {
 		return nil, err
 	}
 
-	palmClient, err := palmclient.New(clientOptions.cloudProject)
+	palmClient, err := palmclient.New(clientOptions.cloudProject) //nolint:contextcheck
 	if err != nil {
 		return nil, err
 	}
