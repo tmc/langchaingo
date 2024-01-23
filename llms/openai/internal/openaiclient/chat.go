@@ -47,7 +47,7 @@ type ChatRequest struct {
 }
 
 // ChatMessage is a message in a chat request.
-type ChatMessage struct {
+type ChatMessage struct { //nolint:musttag
 	// The role of the author of this message. One of system, user, or assistant.
 	Role string
 	// The content of the message.
@@ -85,6 +85,22 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
 	}(m)
 	return json.Marshal(msg)
+}
+
+func (m *ChatMessage) UnmarshalJSON(data []byte) error {
+	msg := struct {
+		Role         string             `json:"role"`
+		Content      string             `json:"content"`
+		MultiContent []llms.ContentPart `json:"-"` // not expected in response
+		Name         string             `json:"name,omitempty"`
+		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+	}{}
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		return err
+	}
+	*m = ChatMessage(msg)
+	return nil
 }
 
 // ChatChoice is a choice in a chat response.

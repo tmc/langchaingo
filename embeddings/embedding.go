@@ -33,6 +33,15 @@ type EmbedderClient interface {
 	CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error)
 }
 
+// EmbedderClientFunc is an adapter to allow the use of ordinary functions as Embedder Clients. If
+// `f` is a function with the appropriate signature, `EmbedderClientFunc(f)` is an `EmbedderClient`
+// that calls `f`.
+type EmbedderClientFunc func(ctx context.Context, texts []string) ([][]float32, error)
+
+func (e EmbedderClientFunc) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+	return e(ctx, texts)
+}
+
 type EmbedderImpl struct {
 	client EmbedderClient
 

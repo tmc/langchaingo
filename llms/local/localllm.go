@@ -26,24 +26,14 @@ type LLM struct {
 	client           *localclient.Client
 }
 
-// _ ensures that LLM implements the llms.LLM and language model interface.
-var (
-	_ llms.LLM = (*LLM)(nil)
-)
+var _ llms.Model = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
-func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
+func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
 	if opts.Temperature != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", opts.Temperature))
 	}
@@ -65,14 +55,13 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
 	if opts.Seed != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", opts.Seed))
 	}
-
-	return o.client.Args
 }
 
-// Generate generates completions using the local LLM binary.
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
 	opts := &llms.CallOptions{}
@@ -86,26 +75,29 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		o.appendGlobalsToArgs(*opts)
 	}
 
-	generations := make([]*llms.Generation, 0, len(prompts))
-	for _, prompt := range prompts {
-		result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
-			Prompt: prompt,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
+		Prompt: part.(llms.TextContent).Text,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-		generations = append(generations, &llms.Generation{Text: result.Text})
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: result.Text,
+			},
+		},
 	}
 
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
 
-	return generations, nil
+	return resp, nil
 }
 
 // New creates a new local LLM implementation.

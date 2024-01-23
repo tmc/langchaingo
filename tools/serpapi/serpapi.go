@@ -33,7 +33,7 @@ func New() (*Tool, error) {
 }
 
 func (t Tool) Name() string {
-	return "Google Search"
+	return "GoogleSearch"
 }
 
 func (t Tool) Description() string {

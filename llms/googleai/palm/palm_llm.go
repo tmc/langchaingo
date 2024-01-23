@@ -1,4 +1,7 @@
-package vertexai
+// package palm implements a langchaingo provider for Google Vertex AI legacy
+// PaLM models. Use the newer Gemini models via llms/googleai/vertex if
+// possible.
+package palm
 
 import (
 	"context"
@@ -6,7 +9,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
+	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
 )
 
 var (
@@ -18,34 +21,34 @@ var (
 
 type LLM struct {
 	CallbacksHandler callbacks.Handler
-	client           *vertexaiclient.PaLMClient
+	client           *palmclient.PaLMClient
 }
 
-var _ llms.LLM = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 // Call requests a completion for the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
 	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMStart(ctx, prompts)
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
-		Prompts:       prompts,
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+
+	results, err := o.client.CreateCompletion(ctx, &palmclient.CompletionRequest{
+		Prompts:       []string{part.(llms.TextContent).Text},
 		MaxTokens:     opts.MaxTokens,
 		Temperature:   opts.Temperature,
 		StopSequences: opts.StopWords,
@@ -57,22 +60,23 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		return nil, err
 	}
 
-	generations := []*llms.Generation{}
-	for _, r := range results {
-		generations = append(generations, &llms.Generation{
-			Text: r.Text,
-		})
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: results[0].Text,
+			},
+		},
+	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
 
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMEnd(ctx, llms.LLMResult{Generations: [][]*llms.Generation{generations}})
-	}
-	return generations, nil
+	return resp, nil
 }
 
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
-	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
+	embeddings, err := o.client.CreateEmbedding(ctx, &palmclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
 	if err != nil {
@@ -89,13 +93,13 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-// New returns a new VertexAI PaLM LLM.
+// New returns a new palmclient PaLM LLM.
 func New(opts ...Option) (*LLM, error) {
 	client, err := newClient(opts...)
 	return &LLM{client: client}, err
 }
 
-func newClient(opts ...Option) (*vertexaiclient.PaLMClient, error) {
+func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 	// Ensure options are initialized only once.
 	initOptions.Do(initOpts)
 	options := &options{}
@@ -108,5 +112,5 @@ func newClient(opts ...Option) (*vertexaiclient.PaLMClient, error) {
 		return nil, ErrMissingProjectID
 	}
 
-	return vertexaiclient.New(options.projectID, options.clientOptions...)
+	return palmclient.New(options.projectID, options.clientOptions...)
 }

@@ -40,7 +40,7 @@ type ConversationalAgent struct {
 
 var _ Agent = (*ConversationalAgent)(nil)
 
-func NewConversationalAgent(llm llms.LLM, tools []tools.Tool, opts ...CreationOption) *ConversationalAgent {
+func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *ConversationalAgent {
 	options := conversationalDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)

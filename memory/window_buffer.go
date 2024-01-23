@@ -6,8 +6,12 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// defaultConversationWindowSize is the default number of previous conversation.
-const defaultConversationWindowSize = 5
+const (
+	// defaultConversationWindowSize is the default number of previous conversation.
+	defaultConversationWindowSize = 5
+	// defaultMessageSize indicates the length of a complete message, currently consisting of 2 parts: ai and human.
+	defaultMessageSize = 2
+)
 
 // ConversationWindowBuffer for storing conversation memory.
 type ConversationWindowBuffer struct {
@@ -85,8 +89,8 @@ func (wb *ConversationWindowBuffer) SaveContext(
 }
 
 func (wb *ConversationWindowBuffer) cutMessages(message []schema.ChatMessage) ([]schema.ChatMessage, bool) {
-	if len(message) > wb.ConversationWindowSize {
-		return message[len(message)-wb.ConversationWindowSize*2:], true
+	if len(message) > wb.ConversationWindowSize*defaultMessageSize {
+		return message[len(message)-wb.ConversationWindowSize*defaultMessageSize:], true
 	}
 	return message, false
 }

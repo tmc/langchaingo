@@ -23,7 +23,7 @@ const (
 // model, tools, agent type, and options. It returns an Executor or an error
 // if there is any issues during the creation process.
 func Initialize(
-	llm llms.LLM,
+	llm llms.Model,
 	tools []tools.Tool,
 	agentType AgentType,
 	opts ...CreationOption,

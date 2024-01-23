@@ -97,3 +97,104 @@ func TestWindowBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	expected := map[string]any{"history": "Human: bar2\nAI: foo2\nHuman: bar3\nAI: foo3"}
 	assert.Equal(t, expected, result)
 }
+
+func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
+	t.Parallel()
+	type fields struct {
+		ConversationBuffer     ConversationBuffer
+		ConversationWindowSize int
+	}
+	type args struct {
+		message []schema.ChatMessage
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantMessage []schema.ChatMessage
+		isCut       bool
+	}{
+		{
+			name: "empty messages, do not need cut",
+			fields: fields{
+				ConversationBuffer:     *NewConversationBuffer(),
+				ConversationWindowSize: 1,
+			},
+			args: args{
+				message: []schema.ChatMessage{},
+			},
+			wantMessage: []schema.ChatMessage{},
+			isCut:       false,
+		},
+		{
+			name: "message less than buffer size, do not need cut",
+			fields: fields{
+				ConversationBuffer:     *NewConversationBuffer(),
+				ConversationWindowSize: 1,
+			},
+			args: args{
+				message: []schema.ChatMessage{
+					schema.HumanChatMessage{Content: "foo"},
+					schema.AIChatMessage{Content: "bar"},
+				},
+			},
+			wantMessage: []schema.ChatMessage{
+				schema.HumanChatMessage{Content: "foo"},
+				schema.AIChatMessage{Content: "bar"},
+			},
+			isCut: false,
+		},
+		{
+			name: "add human message, will cut",
+			fields: fields{
+				ConversationBuffer:     *NewConversationBuffer(),
+				ConversationWindowSize: 1,
+			},
+			args: args{
+				message: []schema.ChatMessage{
+					schema.HumanChatMessage{Content: "foo"},
+					schema.AIChatMessage{Content: "bar"},
+					schema.HumanChatMessage{Content: "foo1"},
+				},
+			},
+			wantMessage: []schema.ChatMessage{
+				schema.AIChatMessage{Content: "bar"},
+				schema.HumanChatMessage{Content: "foo1"},
+			},
+			isCut: true,
+		},
+		{
+			name: "message more than buffer size, will cut",
+			fields: fields{
+				ConversationBuffer:     *NewConversationBuffer(),
+				ConversationWindowSize: 1,
+			},
+			args: args{
+				message: []schema.ChatMessage{
+					schema.HumanChatMessage{Content: "foo"},
+					schema.AIChatMessage{Content: "bar"},
+					schema.HumanChatMessage{Content: "foo1"},
+					schema.AIChatMessage{Content: "bar1"},
+				},
+			},
+			wantMessage: []schema.ChatMessage{
+				schema.HumanChatMessage{Content: "foo1"},
+				schema.AIChatMessage{Content: "bar1"},
+			},
+			isCut: true,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			wb := &ConversationWindowBuffer{
+				ConversationBuffer:     tt.fields.ConversationBuffer,
+				ConversationWindowSize: tt.fields.ConversationWindowSize,
+			}
+			cut, isCut := wb.cutMessages(tt.args.message)
+			assert.Equalf(t, tt.wantMessage, cut, "cutMessages(%s), want:%v, get:%v", tt.name, tt.wantMessage, cut)
+			assert.Equalf(t, tt.isCut, isCut, "cutMessages(%s), want:%t, get:%t", tt.name, tt.isCut, isCut)
+		})
+	}
+}
