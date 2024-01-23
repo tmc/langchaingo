@@ -30,9 +30,9 @@ func WithModel(model string) Option {
 	}
 }
 
-// WithUrl passes the HuggingFace url to the client. If not set, then will be
+// WithURL passes the HuggingFace url to the client. If not set, then will be
 // used default url.
-func WithUrl(url string) Option {
+func WithURL(url string) Option {
 	return func(opts *options) {
 		opts.url = url
 	}
