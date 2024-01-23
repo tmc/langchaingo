@@ -17,3 +17,4 @@ cover.cov
 vendor/*
 
 embeddings/cybertron/models/*
+examples/cybertron-embedding-example/models/*
