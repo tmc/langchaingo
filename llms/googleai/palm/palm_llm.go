@@ -9,7 +9,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai/palm/internal/palmclient"
+	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
 )
 
 var (
