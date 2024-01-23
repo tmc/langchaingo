@@ -1,8 +1,6 @@
 package selfquery_opensearch
 
 import (
-	"encoding/json"
-
 	queryconstructor_parser "github.com/tmc/langchaingo/exp/tools/queryconstructor/parser"
 )
 
@@ -13,14 +11,6 @@ func (sqt SelfQueryOpensearchTranslator) Translate(structuredFilter queryconstru
 		return nil, err
 	}
 
-	filterBytes, err := json.Marshal(map[string]interface{}{
-		"filter": filters,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return string(filterBytes), nil
+	return filters, nil
 
 }

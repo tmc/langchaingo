@@ -7,12 +7,14 @@ import (
 
 type SelfQueryOpensearchTranslator struct {
 	vectorstore vectorstores.VectorStore
+	indexName   string
 }
 
 var _ selfquery.StoreWithQueryTranslator = SelfQueryOpensearchTranslator{}
 
-func New(vectorstore vectorstores.VectorStore) *SelfQueryOpensearchTranslator {
+func New(vectorstore vectorstores.VectorStore, indexName string) *SelfQueryOpensearchTranslator {
 	return &SelfQueryOpensearchTranslator{
 		vectorstore: vectorstore,
+		indexName:   indexName,
 	}
 }

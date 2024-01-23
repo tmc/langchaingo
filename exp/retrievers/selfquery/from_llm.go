@@ -11,6 +11,7 @@ type FromLLMArgs struct {
 	DocumentContents  string
 	MetadataFieldInfo []queryconstructor.AttributeInfo
 	EnableLimit       *bool
+	DefaultLimit      *int
 }
 
 func FromLLM(args FromLLMArgs) *SelfQueryRetriever {
@@ -21,5 +22,12 @@ func FromLLM(args FromLLMArgs) *SelfQueryRetriever {
 		MetadataFieldInfo: args.MetadataFieldInfo,
 		EnableLimit:       args.EnableLimit,
 	}
+
+	if args.DefaultLimit != nil {
+		retriever.DefaultLimit = *args.DefaultLimit
+	} else {
+		retriever.DefaultLimit = 10
+	}
+
 	return &retriever
 }

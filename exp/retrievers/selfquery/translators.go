@@ -10,5 +10,5 @@ import (
 // SelfQuery needs to translate and search with filters
 type StoreWithQueryTranslator interface {
 	Translate(structuredQuery queryconstructor_parser.StructuredFilter) (any, error)
-	Search(ctx context.Context, query string, filters any) ([]schema.Document, error)
+	Search(ctx context.Context, query string, filters any, k int) ([]schema.Document, error)
 }

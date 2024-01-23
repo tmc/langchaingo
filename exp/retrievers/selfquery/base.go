@@ -14,4 +14,5 @@ type SelfQueryRetriever struct {
 	DocumentContents  string
 	MetadataFieldInfo []queryconstructor.AttributeInfo
 	EnableLimit       *bool
+	DefaultLimit      int
 }

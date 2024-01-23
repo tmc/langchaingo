@@ -27,7 +27,7 @@ func (s *Store) CreateIndex(
 	ctx context.Context,
 	indexName string,
 	opts ...IndexOption,
-) (*opensearchapi.Response, error) {
+) ([]byte, error) {
 	indexSchema := map[string]interface{}{
 		"settings": map[string]interface{}{
 			"index": map[string]interface{}{
@@ -69,5 +69,5 @@ func (s *Store) CreateIndex(
 		Body:  buf,
 	}
 
-	return indice.Do(ctx, s.client)
+	return handleResponse(indice.Do(ctx, s.client))
 }

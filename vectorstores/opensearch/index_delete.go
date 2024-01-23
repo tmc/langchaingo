@@ -10,10 +10,10 @@ import (
 func (s *Store) DeleteIndex(
 	ctx context.Context,
 	indexName string,
-) (*opensearchapi.Response, error) {
+) ([]byte, error) {
 	deleteIndex := opensearchapi.IndicesDeleteRequest{
 		Index: []string{indexName},
 	}
 
-	return deleteIndex.Do(ctx, s.client)
+	return handleResponse(deleteIndex.Do(ctx, s.client))
 }

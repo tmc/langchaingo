@@ -22,7 +22,11 @@ func (s *Store) documentIndexing(
 	text string,
 	vector []float32,
 	metadata map[string]any,
-) (*opensearchapi.Response, error) {
+) ([]byte, error) {
+	fmt.Printf("id: %v\n", id)
+	fmt.Printf("indexName: %v\n", indexName)
+	fmt.Printf("text: %v\n", text)
+	fmt.Printf("metadata: %v\n", metadata)
 	document := document{
 		FieldsContent:       text,
 		FieldsContentVector: vector,
@@ -41,5 +45,5 @@ func (s *Store) documentIndexing(
 		Body:       buf,
 	}
 
-	return indice.Do(ctx, s.client)
+	return handleResponse(indice.Do(ctx, s.client))
 }

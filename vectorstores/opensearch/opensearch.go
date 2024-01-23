@@ -80,6 +80,7 @@ func (s Store) AddDocuments(
 		if err != nil {
 			return ids, err
 		}
+
 		ids = append(ids, id)
 	}
 
@@ -95,10 +96,13 @@ func (s Store) SimilaritySearch(
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
-
-	queryVector, err := s.embedder.EmbedQuery(ctx, query)
-	if err != nil {
-		return nil, err
+	var queryVector []float32
+	var err error
+	if query != "" {
+		queryVector, err = s.embedder.EmbedQuery(ctx, query)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	knnPayload := map[string]interface{}{
@@ -116,16 +120,27 @@ func (s Store) SimilaritySearch(
 	}
 
 	if opts.Filters != nil {
+
 		searchPayload["query"] = map[string]interface{}{
 			"bool": map[string]interface{}{
 				"filter": opts.Filters,
-				"should": map[string]interface{}{
-					"knn": knnPayload,
-				},
+				// "filter": []map[string]interface{}{
+				// 	{
+				// 		"range": map[string]interface{}{
+				// 			"metadata.rating": map[string]interface{}{
+				// 				"gt": 8.5,
+				// 			},
+				// 		},
+				// 	},
+				// },
+				// "must": map[string]interface{}{
+				// 	"knn": knnPayload,
+				// },
 			},
 		}
 	}
 
+	fmt.Printf("searchPayload: %v\n", searchPayload)
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(searchPayload); err != nil {
 		return nil, fmt.Errorf("error encoding index schema to json buffer %w", err)
@@ -145,6 +160,7 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return output, fmt.Errorf("error reading search response body: %w", err)
 	}
+
 	searchResults := searchResults{}
 	if err := json.Unmarshal(body, &searchResults); err != nil {
 		return output, fmt.Errorf("error unmarshalling search response body: %w %s", err, body)
@@ -154,7 +170,7 @@ func (s Store) SimilaritySearch(
 		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > hit.Score {
 			continue
 		}
-
+		// fmt.Printf("hit.Source: %+v\n", hit.Source)
 		output = append(output, schema.Document{
 			PageContent: hit.Source.FieldsContent,
 			Metadata:    hit.Source.FieldsMetadata,

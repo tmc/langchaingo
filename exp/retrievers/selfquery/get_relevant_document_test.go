@@ -15,6 +15,7 @@ import (
 	selfquery_opensearch "github.com/tmc/langchaingo/exp/retrievers/selfquery/opensearch"
 	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
 )
@@ -61,7 +62,61 @@ func setLLM(t *testing.T) *openai.LLM {
 	return llm
 }
 
-func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderClient embeddings.EmbedderClient) vectorstores.VectorStore {
+func setAndFillIndex(
+	t *testing.T,
+	client *opensearch.Store,
+	indexName string,
+) {
+	t.Helper()
+	res, err := client.CreateIndex(context.TODO(), indexName)
+	require.NoError(t, err)
+	fmt.Printf("res: %v\n", res)
+	res2, err := client.AddDocuments(context.TODO(), []schema.Document{
+		{
+			PageContent: "A bunch of scientists bring back dinosaurs and mayhem breaks loose",
+			Metadata: map[string]any{
+				"year": 1993, "rating": 7.7, "genre": "science fiction",
+			},
+		},
+		{
+			PageContent: "Leo DiCaprio gets lost in a dream within a dream within a dream within a ...",
+			Metadata: map[string]any{
+				"year": 2010, "director": "Christopher Nolan", "rating": 8.2,
+			},
+		},
+		{
+			PageContent: "A psychologist / detective gets lost in a series of dreams within dreams within dreams and Inception reused the idea",
+			Metadata: map[string]any{
+				"year": 2006, "director": "Satoshi Kon", "rating": 8.6,
+			},
+		},
+		{
+			PageContent: "A bunch of normal-sized women are supremely wholesome and some men pine after them",
+			Metadata: map[string]any{
+				"year": 2019, "director": "Greta Gerwig", "rating": 8.3,
+			},
+		},
+		{
+			PageContent: "Toys come alive and have a blast doing so",
+			Metadata: map[string]any{
+				"year": 1995, "genre": "animated",
+			},
+		},
+		{
+			PageContent: "Three men walk into the Zone, three men walk out of the Zone",
+			Metadata: map[string]any{
+				"year":     1979,
+				"rating":   9.9,
+				"director": "Andrei Tarkovsky",
+				"genre":    "science fiction",
+			},
+		},
+	}, vectorstores.WithNameSpace(indexName))
+	require.NoError(t, err)
+	fmt.Printf("res2: %v\n", res2)
+}
+
+func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderClient embeddings.EmbedderClient) opensearch.Store {
 	t.Helper()
 	ctx := context.Background()
 
@@ -98,6 +153,7 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderCl
 		client,
 		opensearch.WithEmbedder(e),
 	)
+
 	if err != nil {
 		fmt.Printf("vectorstore creation err: %v\n", err)
 		t.Fail()
@@ -106,13 +162,21 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderCl
 }
 
 func TestParser(t *testing.T) {
+	indexName := "selfquery_test"
 	opensearchEndpoint, awsProfile := getEnvVariables(t)
 	llm := setLLM(t)
 
 	vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile, llm)
 	// fmt.Printf("vectorstore: %v\n", vectorstore)
+	defer func() {
+		_, err := vectorstore.DeleteIndex(context.TODO(), indexName)
+		require.NoError(t, err)
+	}()
+
+	setAndFillIndex(t, &vectorstore, indexName)
+
 	enableLimit := true
-	store := selfquery_opensearch.New(vectorstore)
+	store := selfquery_opensearch.New(vectorstore, indexName)
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
 		LLM:              llm,
 		Store:            store,
@@ -141,12 +205,22 @@ func TestParser(t *testing.T) {
 		},
 		EnableLimit: &enableLimit,
 	})
-	// fmt.Printf("retriever: %v\n", retriever)
-	documents, err := retriever.GetRelevantDocuments(context.TODO(), "I want a list of all recent movies, good ones")
-	if err != nil {
-		panic(err)
+
+	documents, err := retriever.GetRelevantDocuments(context.TODO(), "I want to watch a movie rated higher than 8.5")
+	require.NoError(t, err)
+	if len(documents) != 2 {
+		t.Fail()
 	}
 
-	fmt.Printf("documents: %v\n", documents)
-	t.Fail()
+	documents, err = retriever.GetRelevantDocuments(context.TODO(), "Has Greta Gerwig directed any movies about women")
+	require.NoError(t, err)
+	if len(documents) != 1 {
+		t.Fail()
+	}
+
+	documents, err = retriever.GetRelevantDocuments(context.TODO(), "What's a highly rated (above 8.5) science fiction film?")
+	require.NoError(t, err)
+	if len(documents) != 2 {
+		t.Fail()
+	}
 }
