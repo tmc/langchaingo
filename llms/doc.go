@@ -6,7 +6,7 @@
 // 1. Hugging Face:      llms/huggingface/
 // 2. Local LLM:         llms/local/
 // 3. OpenAI:            llms/openai/
-// 4. Vertex AI:         llms/vertexai/
+// 4. Google AI:         llms/googleai/
 // 5. Cohere:            llms/cohere/
 //
 // Each subpackage includes provider-specific LLM implementations and helper files for communication

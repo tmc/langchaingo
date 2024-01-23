@@ -1,6 +1,6 @@
-// package googleai implements a langchaingo provider for Google AI LLMs.
-// See https://ai.google.dev/ for more details.
-package googleai
+package vertex
+
+// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai_llm.go
 
 import (
 	"context"
@@ -9,24 +9,14 @@ import (
 	"log"
 	"strings"
 
-	"github.com/google/generative-ai-go/genai"
-	"github.com/tmc/langchaingo/callbacks"
+	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 )
 
-// GoogleAI is a type that represents a Google AI API client.
-type GoogleAI struct {
-	CallbacksHandler callbacks.Handler
-	client           *genai.Client
-	opts             options
-}
-
 var (
-	_ llms.Model = &GoogleAI{}
-
 	ErrNoContentInResponse    = errors.New("no content in generation response")
 	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
 	ErrInvalidMimeType        = errors.New("invalid mime type on content")
@@ -40,33 +30,13 @@ const (
 	RoleUser  = "user"
 )
 
-// NewGoogleAI creates a new GoogleAI struct.
-func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
-	clientOptions := defaultOptions()
-	for _, opt := range opts {
-		opt(&clientOptions)
-	}
-
-	gi := &GoogleAI{
-		opts: clientOptions,
-	}
-
-	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.apiKey))
-	if err != nil {
-		return gi, err
-	}
-
-	gi.client = client
-	return gi, nil
-}
-
 // Call implements the [llms.Model] interface.
-func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (g *Vertex) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return llms.GenerateFromSinglePrompt(ctx, g, prompt, options...)
 }
 
 // GenerateContent implements the [llms.Model] interface.
-func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -88,7 +58,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
 	model.SetTemperature(float32(opts.Temperature))
 	model.SetTopP(float32(opts.TopP))
-	model.SetTopK(int32(opts.TopK))
+	model.SetTopK(float32(opts.TopK))
 	model.StopSequences = opts.StopWords
 
 	var response *llms.ContentResponse
@@ -149,19 +119,8 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 }
 
 // CreateEmbedding creates embeddings from texts.
-func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	em := g.client.EmbeddingModel(g.opts.defaultEmbeddingModel)
-
-	results := make([][]float32, 0, len(texts))
-	for _, t := range texts {
-		res, err := em.EmbedContent(ctx, genai.Text(t))
-		if err != nil {
-			return results, err
-		}
-		results = append(results, res.Embedding.Values)
-	}
-
-	return results, nil
+func (g *Vertex) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+	panic("not implemented")
 }
 
 // convertParts converts between a sequence of langchain parts and genai parts.
@@ -176,7 +135,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 		case llms.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
-			typ, data, err := DownloadImageData(p.URL)
+			typ, data, err := googleai.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
 			}
@@ -312,7 +271,6 @@ DoStream:
 		candidate.FinishReason = respCandidate.FinishReason
 		candidate.SafetyRatings = respCandidate.SafetyRatings
 		candidate.CitationMetadata = respCandidate.CitationMetadata
-		candidate.TokenCount += respCandidate.TokenCount
 
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {

@@ -1,4 +1,4 @@
-package vertexaiclient
+package palmclient
 
 import (
 	"context"
