@@ -11,22 +11,20 @@ var (
 	ErrEmptyResponse = errors.New("empty response")
 )
 
-const huggingfaceAPIBaseURL = "https://api-inference.huggingface.co"
-
 type Client struct {
 	Token string
 	Model string
 	url   string
 }
 
-func New(token string, model string) (*Client, error) {
+func New(token, model, url string) (*Client, error) {
 	if token == "" {
 		return nil, ErrInvalidToken
 	}
 	return &Client{
 		Token: token,
 		Model: model,
-		url:   huggingfaceAPIBaseURL,
+		url:   url,
 	}, nil
 }
 
