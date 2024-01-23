@@ -3,6 +3,7 @@ go.work.sum
 
 # Test outputs
 coverage.out
+cover.cov
 
 # macOS Specific
 .DS_Store
@@ -14,3 +15,5 @@ coverage.out
 # dev
 .env
 vendor/*
+
+embeddings/cybertron/models/*
