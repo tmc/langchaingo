@@ -18,8 +18,11 @@ linters:
     - tagliatelle # As we're dealing with third parties we must accept snake case.
     - wsl # We don't agree with wsl's style rules
     - exhaustruct
+    - lll
     - varnamelen
     - nlreturn
+    - gomnd
+    - goerr113
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
     - testpackage
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.

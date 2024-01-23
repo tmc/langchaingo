@@ -34,10 +34,6 @@ func (spv stringPromptValue) Messages() []schema.ChatMessage {
 	return nil
 }
 
-func (l *testLanguageModel) GetNumTokens(_ string) int {
-	return -1
-}
-
 func (l *testLanguageModel) Call(_ context.Context, prompt string, _ ...llms.CallOption) (string, error) {
 	l.recordedPrompt = []schema.PromptValue{
 		stringPromptValue{s: prompt},
@@ -57,21 +53,12 @@ func (l *testLanguageModel) Call(_ context.Context, prompt string, _ ...llms.Cal
 	return llmResult, nil
 }
 
-func (l *testLanguageModel) Generate(
-	ctx context.Context, prompts []string, options ...llms.CallOption,
-) ([]*llms.Generation, error) {
-	result, err := l.Call(ctx, prompts[0], options...)
-	if err != nil {
-		return nil, err
-	}
-	return []*llms.Generation{
-		{
-			Text: result,
-		},
-	}, nil
+func (l *testLanguageModel) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
+	panic("not implemented")
 }
 
-var _ llms.LLM = &testLanguageModel{}
+var _ llms.Model = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
 	t.Parallel()

@@ -2,6 +2,7 @@ package ollama
 
 import (
 	"log"
+	"net/http"
 	"net/url"
 
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
@@ -9,6 +10,7 @@ import (
 
 type options struct {
 	ollamaServerURL     *url.URL
+	httpClient          *http.Client
 	model               string
 	ollamaOptions       ollamaclient.Options
 	customModelTemplate string
@@ -49,6 +51,13 @@ func WithServerURL(rawURL string) Option {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+// WithHTTPClient Set custom http client.
+func WithHTTPClient(client *http.Client) Option {
+	return func(opts *options) {
+		opts.httpClient = client
 	}
 }
 

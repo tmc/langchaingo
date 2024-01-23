@@ -105,7 +105,7 @@ func TestCheckValidTemplate(t *testing.T) {
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
 		require.Error(t, err)
 		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template jinja2]")
+		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [f-string go-template jinja2]")
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {

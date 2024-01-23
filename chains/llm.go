@@ -15,7 +15,7 @@ const _llmChainDefaultOutputKey = "text"
 
 type LLMChain struct {
 	Prompt           prompts.FormatPrompter
-	LLM              llms.LLM
+	LLM              llms.Model
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
 	OutputParser     schema.OutputParser[any]
@@ -29,7 +29,7 @@ var (
 )
 
 // NewLLMChain creates a new LLMChain with an LLM and a prompt.
-func NewLLMChain(llm llms.LLM, prompt prompts.FormatPrompter, opts ...ChainCallOption) *LLMChain {
+func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCallOption) *LLMChain {
 	opt := &chainCallOption{}
 	for _, o := range opts {
 		o(opt)
@@ -56,17 +56,12 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	result, err := llms.GeneratePrompt(
-		ctx,
-		c.LLM,
-		[]schema.PromptValue{promptValue},
-		getLLMCallOptions(options...)...,
-	)
+	result, err := c.LLM.Call(ctx, promptValue.String(), getLLMCallOptions(options...)...)
 	if err != nil {
 		return nil, err
 	}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(result.Generations[0][0].Text, promptValue)
+	finalOutput, err := c.OutputParser.ParseWithPrompt(result, promptValue)
 	if err != nil {
 		return nil, err
 	}

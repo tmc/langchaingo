@@ -50,7 +50,7 @@ type SQLDatabaseChain struct {
 
 // NewSQLDatabaseChain creates a new SQLDatabaseChain.
 // The topK is the max number of results to return.
-func NewSQLDatabaseChain(llm llms.LLM, topK int, database *sqldatabase.SQLDatabase) *SQLDatabaseChain {
+func NewSQLDatabaseChain(llm llms.Model, topK int, database *sqldatabase.SQLDatabase) *SQLDatabaseChain {
 	p := prompts.NewPromptTemplate(_defaultSQLTemplate+_defaultSQLSuffix,
 		[]string{"dialect", "top_k", "table_info", "input"})
 	c := NewLLMChain(llm, p)

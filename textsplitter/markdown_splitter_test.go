@@ -45,12 +45,6 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 				},
 			},
 		},
-		{
-			markdown: "example code:\n```go\nfunc main() {}\n```",
-			expectedDocs: []schema.Document{
-				{PageContent: "example code:", Metadata: map[string]any{}},
-			},
-		},
 	}
 
 	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
@@ -250,5 +244,218 @@ for a review.`, Metadata: map[string]any{},
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
+	}
+}
+
+//nolint:funlen
+func TestMarkdownHeaderTextSplitter_SplitCode(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		name         string
+		options      []Option
+		markdown     string
+		expectedDocs []schema.Document
+	}{
+		{
+			name:     "fence-false",
+			markdown: "example code:\n```go\nfunc main() {}\n```",
+			expectedDocs: []schema.Document{
+				{
+					PageContent: "example code:",
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+		{
+			name: "fence-true",
+			options: []Option{
+				WithCodeBlocks(true),
+			},
+			markdown: "example code:\n```go\nfunc main() {}\n```",
+			expectedDocs: []schema.Document{
+				{
+					PageContent: "example code:\n\n```go\nfunc main() {}\n```\n",
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+		{
+			name: "codeblock-false",
+			markdown: `example code:
+
+    func main() {
+	}
+    `,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `example code:`,
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+		{
+			name: "codeblock-true",
+			options: []Option{
+				WithCodeBlocks(true),
+			},
+			markdown: `example code:
+
+    func main() {
+	}
+    `,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `example code:
+
+    func main() {
+    }
+    `,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "hr",
+			markdown: `example code:
+
+---
+more text
+`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `example code:
+
+---
+more text`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		tc := tc // pin
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			rq := require.New(t)
+
+			splitter := NewMarkdownTextSplitter(append(tc.options,
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+			)...)
+
+			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
+			rq.NoError(err)
+			rq.Equal(tc.expectedDocs, docs)
+		})
+	}
+}
+
+//nolint:funlen
+func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
+	t.Parallel()
+
+	tt := []struct {
+		name         string
+		options      []Option
+		markdown     string
+		expectedDocs []schema.Document
+	}{
+		{
+			name:     "break",
+			markdown: "text with\\\nhard break\nsoft break",
+			expectedDocs: []schema.Document{
+				{
+					PageContent: "text with\\\nhard break\nsoft break",
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+		{
+			name:     "emphasis",
+			markdown: "text with *emphasis*, **strong emphasis** and ~~strikethrough~~",
+			expectedDocs: []schema.Document{
+				{
+					PageContent: "text with *emphasis*, **strong emphasis** and ~~strikethrough~~",
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+		{
+			name: "image",
+			markdown: `images:
+![one](/path/to/one.png)
+![two](/path/to/two.png "two")
+`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `images:
+![one](/path/to/one.png)
+![two](/path/to/two.png "two")`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "link-false",
+			markdown: `links:
+[foo][bar]
+
+[bar]: /url "title"
+
+[regular](/url)
+`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `links:
+[foo][bar]
+[regular](/url)`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "link-true",
+			options: []Option{
+				WithReferenceLinks(true),
+			},
+			markdown: `links:
+[foo][bar]
+
+[bar]: /url "title"
+
+[regular](/url)
+`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `links:
+[foo](/url "title")
+[regular](/url)`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		tc := tc // pin
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			rq := require.New(t)
+
+			splitter := NewMarkdownTextSplitter(append(tc.options,
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+			)...)
+
+			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
+			rq.NoError(err)
+			rq.Equal(tc.expectedDocs, docs)
+		})
 	}
 }

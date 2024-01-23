@@ -12,6 +12,8 @@ var (
 	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
 	ErrInvalidPartialVariableType = errors.New("invalid partial variable type")
+	// ErrNeedChatMessageList is returned when the variable is not a list of chat messages.
+	ErrNeedChatMessageList = errors.New("variable should be a list of chat messages")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
