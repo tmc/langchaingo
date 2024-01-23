@@ -118,11 +118,6 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 	return &contentResponse, nil
 }
 
-// CreateEmbedding creates embeddings from texts.
-func (g *Vertex) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	panic("not implemented")
-}
-
 // convertParts converts between a sequence of langchain parts and genai parts.
 func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 	convertedParts := make([]genai.Part, 0, len(parts))
