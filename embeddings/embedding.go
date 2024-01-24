@@ -3,6 +3,8 @@ package embeddings
 import (
 	"context"
 	"strings"
+
+	"github.com/tmc/langchaingo/internal/util"
 )
 
 // NewEmbedder creates a new Embedder from the given EmbedderClient, with
@@ -83,18 +85,10 @@ func MaybeRemoveNewLines(texts []string, removeNewLines bool) []string {
 
 // BatchTexts splits strings by the length batchSize.
 func BatchTexts(texts []string, batchSize int) [][]string {
-	batchedTexts := make([][]string, len(texts))
-	for i, text := range texts {
-		runeText := []rune(text)
+	batchedTexts := make([][]string, 0, len(texts)/batchSize+1)
 
-		for j := 0; j < len(runeText); j += batchSize {
-			if j+batchSize >= len(runeText) {
-				batchedTexts[i] = append(batchedTexts[i], string(runeText[j:]))
-				break
-			}
-
-			batchedTexts[i] = append(batchedTexts[i], string(runeText[j:j+batchSize]))
-		}
+	for i := 0; i < len(texts); i += batchSize {
+		batchedTexts = append(batchedTexts, texts[i:util.MinInt([]int{i + batchSize, len(texts)})])
 	}
 
 	return batchedTexts
