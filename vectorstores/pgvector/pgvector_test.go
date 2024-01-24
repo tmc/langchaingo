@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -188,6 +189,78 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		vectorstores.WithScoreThreshold(1.8),
 	)
 	require.Error(t, err)
+}
+
+// note, we can also use same llm to show this test, but need imply
+// openai embedding [dimensions](https://platform.openai.com/docs/api-reference/embeddings/create#embeddings-create-dimensions) args.
+func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	preCheckEnvSetting(t)
+	genaiKey := os.Getenv("GENAI_API_KEY")
+	if genaiKey == "" {
+		t.Skip("GENAI_API_KEY not set")
+	}
+	collectionName := makeNewCollectionName()
+
+	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
+	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(googleLLM)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(collectionName),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "Beijing"},
+	})
+	require.NoError(t, err)
+
+	// use openai embedding (now default model is text-embedding-ada-002, with dimensions:1536) to add some data to same collection (same table)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err = embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err = pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(false),
+		pgvector.WithCollectionName(collectionName),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London"},
+		{PageContent: "New York"},
+	})
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(
+		ctx,
+		"Which of these are cities in Japan",
+		5,
+	)
+	require.NoError(t, err)
+	require.Len(t, docs, 5)
 }
 
 func TestPgvectorAsRetriever(t *testing.T) {

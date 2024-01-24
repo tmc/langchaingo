@@ -262,25 +262,35 @@ func (s Store) SimilaritySearch(
 	if len(whereQuery) == 0 {
 		whereQuery = "TRUE"
 	}
-	sql := fmt.Sprintf(`SELECT
+	dims := len(embedderData)
+	sql := fmt.Sprintf(`WITH filtered_embedding_dims AS MATERIALIZED (
+    SELECT
+        *
+    FROM
+        %s
+    WHERE
+        vector_dims (
+                embedding
+        ) = $1
+)
+SELECT
 	data.document,
 	data.cmetadata,
 	data.distance
 FROM (
 	SELECT
-		%s.*,
-		embedding <=> $1 AS distance
+		filtered_embedding_dims.*,
+		embedding <=> $2 AS distance
 	FROM
-		%s
-		JOIN %s ON %s.collection_id=%s.uuid WHERE %s.name='%s') AS data
+		filtered_embedding_dims
+		JOIN %s ON filtered_embedding_dims.collection_id=%s.uuid WHERE %s.name='%s') AS data
 WHERE %s
 ORDER BY
 	data.distance
-LIMIT $2`, s.embeddingTableName,
-		s.embeddingTableName,
-		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
+LIMIT $3`, s.embeddingTableName,
+		s.collectionTableName, s.collectionTableName, s.collectionTableName, collectionName,
 		whereQuery)
-	rows, err := s.conn.Query(ctx, sql, pgvector.NewVector(embedderData), numDocuments)
+	rows, err := s.conn.Query(ctx, sql, dims, pgvector.NewVector(embedderData), numDocuments)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +304,7 @@ LIMIT $2`, s.embeddingTableName,
 		}
 		docs = append(docs, doc)
 	}
-	return docs, nil
+	return docs, rows.Err()
 }
 
 //nolint:cyclop
@@ -340,7 +350,7 @@ LIMIT $1`, s.embeddingTableName,
 		}
 		docs = append(docs, doc)
 	}
-	return docs, nil
+	return docs, rows.Err()
 }
 
 // Close closes the connection.
@@ -410,7 +420,8 @@ func (s Store) getFilters(opts vectorstores.Options) (map[string]any, error) {
 	return map[string]any{}, nil
 }
 
-func (s Store) deduplicate(ctx context.Context,
+func (s Store) deduplicate(
+	ctx context.Context,
 	opts vectorstores.Options,
 	docs []schema.Document,
 ) []schema.Document {
