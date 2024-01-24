@@ -1,4 +1,7 @@
-package vertexai
+// package palm implements a langchaingo provider for Google Vertex AI legacy
+// PaLM models. Use the newer Gemini models via llms/googleai/vertex if
+// possible.
+package palm
 
 import (
 	"context"
@@ -6,7 +9,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/vertexai/internal/vertexaiclient"
+	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
 )
 
 var (
@@ -18,7 +21,7 @@ var (
 
 type LLM struct {
 	CallbacksHandler callbacks.Handler
-	client           *vertexaiclient.PaLMClient
+	client           *palmclient.PaLMClient
 }
 
 var _ llms.Model = (*LLM)(nil)
@@ -44,7 +47,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 
-	results, err := o.client.CreateCompletion(ctx, &vertexaiclient.CompletionRequest{
+	results, err := o.client.CreateCompletion(ctx, &palmclient.CompletionRequest{
 		Prompts:       []string{part.(llms.TextContent).Text},
 		MaxTokens:     opts.MaxTokens,
 		Temperature:   opts.Temperature,
@@ -73,7 +76,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
-	embeddings, err := o.client.CreateEmbedding(ctx, &vertexaiclient.EmbeddingRequest{
+	embeddings, err := o.client.CreateEmbedding(ctx, &palmclient.EmbeddingRequest{
 		Input: inputTexts,
 	})
 	if err != nil {
@@ -90,13 +93,13 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-// New returns a new VertexAI PaLM LLM.
+// New returns a new palmclient PaLM LLM.
 func New(opts ...Option) (*LLM, error) {
 	client, err := newClient(opts...)
 	return &LLM{client: client}, err
 }
 
-func newClient(opts ...Option) (*vertexaiclient.PaLMClient, error) {
+func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 	// Ensure options are initialized only once.
 	initOptions.Do(initOpts)
 	options := &options{}
@@ -109,5 +112,5 @@ func newClient(opts ...Option) (*vertexaiclient.PaLMClient, error) {
 		return nil, ErrMissingProjectID
 	}
 
-	return vertexaiclient.New(options.projectID, options.clientOptions...)
+	return palmclient.New(options.projectID, options.clientOptions...)
 }

@@ -1,5 +1,6 @@
-// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai_llm.go
 package vertex
+
+// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai.go
 
 import (
 	"context"
@@ -115,11 +116,6 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 			})
 	}
 	return &contentResponse, nil
-}
-
-// CreateEmbedding creates embeddings from texts.
-func (g *Vertex) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	panic("not implemented")
 }
 
 // convertParts converts between a sequence of langchain parts and genai parts.
