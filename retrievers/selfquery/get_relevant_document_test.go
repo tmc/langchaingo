@@ -2,7 +2,6 @@ package selfquery_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -11,10 +10,9 @@ import (
 	requestsigner "github.com/opensearch-project/opensearch-go/v2/signer/awsv2"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/exp/retrievers/selfquery"
-	selfquery_opensearch "github.com/tmc/langchaingo/exp/retrievers/selfquery/opensearch"
-	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/retrievers/selfquery"
+	selfqueryopensearch "github.com/tmc/langchaingo/retrievers/selfquery/opensearch"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
@@ -68,10 +66,10 @@ func setAndFillIndex(
 	indexName string,
 ) {
 	t.Helper()
-	res, err := client.CreateIndex(context.TODO(), indexName)
+	_, err := client.CreateIndex(context.TODO(), indexName)
 	require.NoError(t, err)
-	fmt.Printf("res: %v\n", res)
-	res2, err := client.AddDocuments(context.TODO(), []schema.Document{
+
+	_, err = client.AddDocuments(context.TODO(), []schema.Document{
 		{
 			PageContent: "A bunch of scientists bring back dinosaurs and mayhem breaks loose",
 			Metadata: map[string]any{
@@ -113,7 +111,6 @@ func setAndFillIndex(
 		},
 	}, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
-	fmt.Printf("res2: %v\n", res2)
 }
 
 func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderClient embeddings.EmbedderClient) opensearch.Store {
@@ -125,14 +122,12 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderCl
 		config.WithSharedConfigProfile(profile),
 	)
 	if err != nil {
-		fmt.Printf("err loading config: %v\n", err)
 		t.Fail()
 	}
 
 	// Create an AWS request Signer and load AWS configuration using default config folder or env vars.
 	signer, err := requestsigner.NewSignerWithService(awsCfg, "es")
 	if err != nil {
-		fmt.Printf("err setting signer: %v\n", err)
 		t.Fail()
 	}
 
@@ -142,7 +137,6 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderCl
 		Signer:    signer,
 	})
 	if err != nil {
-		fmt.Printf("client creation err: %v\n", err)
 		t.Fail()
 	}
 
@@ -153,15 +147,14 @@ func getOpensearchVectorStore(t *testing.T, endpoint, profile string, embedderCl
 		client,
 		opensearch.WithEmbedder(e),
 	)
-
 	if err != nil {
-		fmt.Printf("vectorstore creation err: %v\n", err)
 		t.Fail()
 	}
 	return vectorstore
 }
 
 func TestParser(t *testing.T) {
+	t.Parallel()
 	indexName := "selfquery_test"
 	opensearchEndpoint, awsProfile := getEnvVariables(t)
 	llm := setLLM(t)
@@ -176,12 +169,12 @@ func TestParser(t *testing.T) {
 	setAndFillIndex(t, &vectorstore, indexName)
 
 	enableLimit := true
-	store := selfquery_opensearch.New(vectorstore, indexName)
+	store := selfqueryopensearch.New(vectorstore, indexName)
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
 		LLM:              llm,
 		Store:            store,
 		DocumentContents: "Brief summary of a movie",
-		MetadataFieldInfo: []queryconstructor.AttributeInfo{
+		MetadataFieldInfo: []schema.AttributeInfo{
 			{
 				Name:        "genre",
 				Description: "The genre of the movie",

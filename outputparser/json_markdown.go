@@ -20,14 +20,13 @@ func (p JSONMarkdown) GetFormatInstructions() string { return "" }
 func (p JSONMarkdown) Parse(text string) (any, error) {
 	output := map[string]interface{}{}
 	r := regexp.MustCompile("(?s)```json(.+)```")
-	fmt.Printf("text: %v\n", text)
+
 	result := r.FindSubmatch([]byte(text))
 	if len(result) < 2 {
 		return nil, errors.New("couldn't find JSON markdown")
 	}
 
 	if err := json.Unmarshal(result[1], &output); err != nil {
-		fmt.Printf("result[1]: %v\n", result[1])
 		return nil, fmt.Errorf("unmarshalling JSON in JSON Markdown output parser %w", err)
 	}
 

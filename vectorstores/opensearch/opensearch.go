@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/google/uuid"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
@@ -120,27 +119,21 @@ func (s Store) SimilaritySearch(
 	}
 
 	if opts.Filters != nil {
+		queryBool := map[string]interface{}{
+			"filter": opts.Filters,
+		}
+
+		if len(queryVector) > 0 {
+			queryBool["must"] = map[string]interface{}{
+				"knn": knnPayload,
+			}
+		}
 
 		searchPayload["query"] = map[string]interface{}{
-			"bool": map[string]interface{}{
-				"filter": opts.Filters,
-				// "filter": []map[string]interface{}{
-				// 	{
-				// 		"range": map[string]interface{}{
-				// 			"metadata.rating": map[string]interface{}{
-				// 				"gt": 8.5,
-				// 			},
-				// 		},
-				// 	},
-				// },
-				// "must": map[string]interface{}{
-				// 	"knn": knnPayload,
-				// },
-			},
+			"bool": queryBool,
 		}
 	}
 
-	fmt.Printf("searchPayload: %v\n", searchPayload)
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(searchPayload); err != nil {
 		return nil, fmt.Errorf("error encoding index schema to json buffer %w", err)
@@ -150,13 +143,13 @@ func (s Store) SimilaritySearch(
 		Index: []string{opts.NameSpace},
 		Body:  buf,
 	}
-	output := []schema.Document{}
-	searchResponse, err := search.Do(ctx, s.client)
-	if err != nil {
-		return output, fmt.Errorf("search.Do err: %w", err)
-	}
+	response, err := search.Do(ctx, s.client)
+	return handleSimilarySearchResponse(response, err, opts)
+}
 
-	body, err := io.ReadAll(searchResponse.Body)
+func handleSimilarySearchResponse(res *opensearchapi.Response, err error, opts vectorstores.Options) ([]schema.Document, error) {
+	output := []schema.Document{}
+	body, err := handleResponse(res, err)
 	if err != nil {
 		return output, fmt.Errorf("error reading search response body: %w", err)
 	}
@@ -170,7 +163,7 @@ func (s Store) SimilaritySearch(
 		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > hit.Score {
 			continue
 		}
-		// fmt.Printf("hit.Source: %+v\n", hit.Source)
+
 		output = append(output, schema.Document{
 			PageContent: hit.Source.FieldsContent,
 			Metadata:    hit.Source.FieldsMetadata,

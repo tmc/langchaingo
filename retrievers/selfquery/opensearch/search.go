@@ -1,4 +1,4 @@
-package selfquery_opensearch
+package selfqueryopensearch
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
 )
 
-func (sqt SelfQueryOpensearchTranslator) Search(ctx context.Context, query string, filters any, k int) ([]schema.Document, error) {
+// trigger the search with filters, interface for vectorstore doesnt have universal way for filters.
+func (sqt Translator) Search(ctx context.Context, query string, filters any, k int) ([]schema.Document, error) {
 	return sqt.vectorstore.SimilaritySearch(ctx, query, k, opensearch.WithFilters(filters), vectorstores.WithNameSpace(sqt.indexName))
 }

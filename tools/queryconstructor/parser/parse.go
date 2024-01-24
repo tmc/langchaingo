@@ -1,5 +1,6 @@
-package queryconstructor_parser
+package queryconstructorparser
 
+// Parse is a helper function to use lexer.
 func Parse(text string) (*StructuredFilter, error) {
 	lexer := NewLexer(text)
 	yyParse(&lexer)

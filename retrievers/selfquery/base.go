@@ -1,18 +1,18 @@
 package selfquery
 
 import (
-	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
-var _ schema.Retriever = SelfQueryRetriever{}
+var _ schema.Retriever = Retriever{}
 
-type SelfQueryRetriever struct {
+// selfquery a database.
+type Retriever struct {
 	Store             StoreWithQueryTranslator
-	LLM               llms.LLM
+	LLM               llms.Model
 	DocumentContents  string
-	MetadataFieldInfo []queryconstructor.AttributeInfo
+	MetadataFieldInfo []schema.AttributeInfo
 	EnableLimit       *bool
 	DefaultLimit      int
 }

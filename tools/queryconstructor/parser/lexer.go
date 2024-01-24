@@ -1,8 +1,7 @@
-package queryconstructor_parser
+package queryconstructorparser
 
 import (
 	"errors"
-	"fmt"
 	"go/scanner"
 	"go/token"
 	"strconv"
@@ -21,26 +20,29 @@ func setFunction(functionName string, args []interface{}) StructuredFilter {
 	}
 }
 
+// lexer is used to define what kind of token are passed.
 type Lexer struct {
 	scan     *scanner.Scanner
 	function StructuredFilter
 	err      error
 }
 
+// pseudo constructor for lexer.
 func NewLexer(query string) Lexer {
 	scan := scanner.Scanner{}
 
 	fset := token.NewFileSet()
 
-	scan.Init(fset.AddFile("query", -1, len(query)), []byte(query), func(pos token.Position, msg string) {
-		fmt.Printf("pos: %v %v", pos, msg)
-	}, scanner.ScanComments)
+	scan.Init(fset.AddFile("query", -1, len(query)), []byte(query), func(pos token.Position, msg string) {}, scanner.ScanComments)
 
 	return Lexer{
 		scan: &scan,
 	}
 }
 
+// Lex is used to understand what kind of token is parsed
+
+//nolint:cyclop
 func (l *Lexer) Lex(lval *yySymType) int {
 	_, tok, lit := l.scan.Scan()
 
@@ -77,6 +79,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	}
 }
 
+// handle error from goyacc parser.
 func (l *Lexer) Error(e string) {
 	l.err = errors.New(e)
 }

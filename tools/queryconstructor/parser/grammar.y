@@ -1,6 +1,6 @@
 
 %{
-package queryconstructor_parser
+package queryconstructorparser
 
 %}
 

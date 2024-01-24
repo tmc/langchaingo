@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	queryconstructor_prompts "github.com/tmc/langchaingo/exp/tools/queryconstructor/prompts"
 	"github.com/tmc/langchaingo/prompts"
+	"github.com/tmc/langchaingo/schema"
+	queryconstructorprompts "github.com/tmc/langchaingo/tools/queryconstructor/prompts"
 )
 
 //go:embed prompts/query.txt
@@ -41,7 +42,7 @@ var _examplePrompt string //nolint:gochecknoglobals
 
 type GetQueryConstructorPromptArgs struct {
 	DocumentContents   string
-	AttributeInfo      []AttributeInfo
+	AttributeInfo      []schema.AttributeInfo
 	AllowedComparators []Comparator
 	AllowedOperators   []Operator
 	InputOuputExamples []InputOuputExample
@@ -52,7 +53,6 @@ type GetQueryConstructorPromptArgs struct {
 
 // Create query construction prompt.
 func GetQueryConstructorPrompt(args GetQueryConstructorPromptArgs) (*prompts.FewShotPrompt, error) {
-
 	defaultSchema := getDefaultSchema(args.SchemaPrompt, args.EnableLimit)
 
 	schema, err := prompts.NewPromptTemplate(defaultSchema, []string{
@@ -97,7 +97,7 @@ func GetQueryConstructorPrompt(args GetQueryConstructorPromptArgs) (*prompts.Few
 		}
 	}
 
-	outputExample.suffix = outputExample.suffix + _query
+	outputExample.suffix += _query
 
 	return prompts.NewFewShotPrompt(outputExample.examplePrompt, outputExample.examples, nil, outputExample.prefix, outputExample.suffix, []string{"query"}, nil, "", prompts.TemplateFormatGoTemplate, true)
 }
@@ -120,13 +120,13 @@ func getDefaultExamples(customExamples []map[string]string, enableLimit *bool) [
 	}
 
 	if enableLimit != nil && *enableLimit {
-		return queryconstructor_prompts.ExamplesWithLimit
+		return queryconstructorprompts.GetExamplesWithLimit()
 	}
 
-	return queryconstructor_prompts.DefaultExamples
+	return queryconstructorprompts.GetDefaultExamples()
 }
 
-func formatAttribute(attributeInfo []AttributeInfo) ([]byte, error) {
+func formatAttribute(attributeInfo []schema.AttributeInfo) ([]byte, error) {
 	output := map[string]map[string]interface{}{}
 	for _, ai := range attributeInfo {
 		output[ai.Name] = map[string]interface{}{
@@ -157,7 +157,7 @@ func setInputOutputExamples(input setInputOutputExamplesInput, output *setExampl
 	formattedExamples := []map[string]string{}
 	var err error
 	for i, e := range input.examples {
-		structuredQuery, err := json.Marshal(e.Ouput)
+		structuredQuery, err := json.Marshal(e.Output)
 		if err != nil {
 			return fmt.Errorf("error marshalling output of example %w", err)
 		}
@@ -167,8 +167,8 @@ func setInputOutputExamples(input setInputOutputExamplesInput, output *setExampl
 			"user_query":       e.Input,
 			"structured_query": string(structuredQuery),
 		})
-
 	}
+
 	output.examples = formattedExamples
 
 	output.examplePrompt = prompts.NewPromptTemplate(_userSpecifiedExample, []string{"i", "user_query", "structured_request"})

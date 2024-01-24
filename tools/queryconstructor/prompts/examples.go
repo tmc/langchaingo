@@ -1,4 +1,4 @@
-package queryconstructor_prompts
+package queryconstructorprompts
 
 import _ "embed"
 
@@ -14,8 +14,9 @@ var _exampleSongDataSource string //nolint:gochecknoglobals
 //go:embed example_with_limit_answer.txt
 var _exampleWithLimitAnswer string //nolint:gochecknoglobals
 
-var (
-	DefaultExamples []map[string]string = []map[string]string{
+// fewshotprompt needs example to define a query (without limit).
+func GetDefaultExamples() []map[string]string {
+	return []map[string]string{
 		{
 			"i":                  "1",
 			"data_source":        _exampleSongDataSource,
@@ -29,8 +30,11 @@ var (
 			"structured_request": _exampleNoFilterAnswer,
 		},
 	}
+}
 
-	ExamplesWithLimit []map[string]string = []map[string]string{
+// fewshotprompt needs example to define a query (with limit).
+func GetExamplesWithLimit() []map[string]string {
+	return []map[string]string{
 		{
 			"i":                  "1",
 			"data_source":        _exampleSongDataSource,
@@ -50,4 +54,4 @@ var (
 			"structured_request": _exampleWithLimitAnswer,
 		},
 	}
-)
+}

@@ -1,15 +1,14 @@
-package selfquery_opensearch
+package selfqueryopensearch
 
 import (
 	"errors"
 	"fmt"
 	"slices"
 
-	"github.com/tmc/langchaingo/exp/tools/queryconstructor"
+	"github.com/tmc/langchaingo/tools/queryconstructor"
 )
 
-func (sqt SelfQueryOpensearchTranslator) Comparison(comparator string, args []interface{}) (interface{}, error) {
-
+func (sqt Translator) comparison(comparator string, args []interface{}) (interface{}, error) {
 	if len(args) != 2 {
 		return nil, errors.New("there should be exactly 2 arguments for a comparison")
 	}
@@ -50,7 +49,6 @@ func (sqt SelfQueryOpensearchTranslator) Comparison(comparator string, args []in
 			},
 		}, nil
 	}
-
 }
 
 func isRange(comparator queryconstructor.Comparator) bool {
@@ -58,7 +56,8 @@ func isRange(comparator queryconstructor.Comparator) bool {
 		queryconstructor.ComparatorLT,
 		queryconstructor.ComparatorLTE,
 		queryconstructor.ComparatorGT,
-		queryconstructor.ComparatorGTE}, comparator)
+		queryconstructor.ComparatorGTE,
+	}, comparator)
 }
 
 func isString(value interface{}) bool {
