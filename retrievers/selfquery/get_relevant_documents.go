@@ -2,6 +2,7 @@ package selfquery
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/tmc/langchaingo/chains"
@@ -37,27 +38,32 @@ func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]
 		return nil, err
 	}
 
-	var json map[string]interface{}
+	var resultBytes []byte
+	var output map[string]interface{}
 	var ok bool
 
-	if json, ok = result["text"].(map[string]interface{}); !ok {
+	if resultBytes, ok = result["text"].([]byte); !ok {
 		return nil, fmt.Errorf("wrong type retuned by json markdown parser")
+	}
+
+	if err = json.Unmarshal(resultBytes, &output); err != nil {
+		return nil, fmt.Errorf("wrong json retuned by json markdown parser")
 	}
 
 	var filters any
 	var queryRefinedPrompt string
 
-	if filter, ok := json["filter"].(string); ok && filter != "NO_FILTER" {
+	if filter, ok := output["filter"].(string); ok && filter != "NO_FILTER" {
 		if filters, err = sqr.parseFilter(filter); err != nil {
 			return nil, err
 		}
 	}
 
-	if refinedPrompt, ok := json["query"].(string); ok {
+	if refinedPrompt, ok := output["query"].(string); ok {
 		queryRefinedPrompt = refinedPrompt
 	}
 
-	limit, _ := json["limit"].(int)
+	limit, _ := output["limit"].(int)
 
 	if limit == 0 {
 		limit = sqr.DefaultLimit
