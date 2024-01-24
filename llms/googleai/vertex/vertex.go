@@ -1,6 +1,6 @@
 package vertex
 
-// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai_llm.go
+// DO NOT EDIT: this code is auto-generated from llms/googleai/googleai.go
 
 import (
 	"context"
