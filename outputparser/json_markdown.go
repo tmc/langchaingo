@@ -16,7 +16,6 @@ var _ schema.OutputParser[any] = JSONMarkdown{}
 
 func (p JSONMarkdown) GetFormatInstructions() string { return "" }
 func (p JSONMarkdown) Parse(text string) (any, error) {
-
 	r := regexp.MustCompile("(?s)```json(.+)```")
 
 	result := r.FindSubmatch([]byte(text))
