@@ -28,30 +28,19 @@ func main() {
 	//},
 	//})
 
+	// TODO: run through goimports
+
 	astutil.Apply(file, nil, func(c *astutil.Cursor) bool {
 		n := c.Node()
 		switch x := n.(type) {
 		case *ast.ImportSpec:
-			if strings.Index(x.Path.Value, "generative-ai-go/genai") > 0 {
-				x.Path.Value = `"cloud.google.com/go/vertexai/genai"`
-			}
-			//id, ok := x.Fun.(*ast.Ident)
-			//if ok {
-			//if id.Name == "pred" {
-			//c.Replace(&ast.UnaryExpr{
-			//Op: token.NOT,
-			//X:  x,
-			//})
-			//}
-			//}
+			rewriteImport(x)
 
 		case *ast.FuncDecl:
 			if x.Recv != nil && len(x.Recv.List) == 1 {
-				recv := x.Recv.List[0]
-				ty := recv.Type.(*ast.StarExpr)
-				tyName := ty.X.(*ast.Ident)
-				tyName.Name = "Vertex"
+				rewriteReceiverName(x)
 			}
+			addCastToTopK(x)
 		}
 
 		return true
@@ -61,4 +50,46 @@ func main() {
 	//printer.Fprint(os.Stdout, fset, file)
 
 	format.Node(os.Stdout, fset, file)
+}
+
+func rewriteImport(x *ast.ImportSpec) {
+	if strings.Index(x.Path.Value, "generative-ai-go/genai") > 0 {
+		x.Path.Value = `"cloud.google.com/go/vertexai/genai"`
+	}
+}
+
+func rewriteReceiverName(fun *ast.FuncDecl) {
+	recv := fun.Recv.List[0]
+	ty := recv.Type.(*ast.StarExpr)
+	tyName := ty.X.(*ast.Ident)
+	tyName.Name = "Vertex"
+}
+
+func addCastToTopK(fun *ast.FuncDecl) {
+	ast.Inspect(fun, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.CallExpr:
+			if getIdentName(x.Fun) == "int32" && len(x.Args) == 1 {
+				arg0 := x.Args[0]
+				if sel, ok := arg0.(*ast.SelectorExpr); ok {
+					if getIdentName(sel.X) == "opts" {
+						if getIdentName(sel.Sel) == "TopK" {
+							funcId := x.Fun.(*ast.Ident)
+							funcId.Name = "float32"
+						}
+					}
+				}
+			}
+		}
+		return true
+	})
+}
+
+// getIdentName returns the identifier name from ast.Ident expressions; for
+// other expressions, returns an empty string.
+func getIdentName(x ast.Expr) string {
+	if id, ok := x.(*ast.Ident); ok {
+		return id.Name
+	}
+	return ""
 }
