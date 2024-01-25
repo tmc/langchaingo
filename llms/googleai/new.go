@@ -1,5 +1,3 @@
-// DO NOT EDIT
-
 // package googleai implements a langchaingo provider for Google AI LLMs.
 // See https://ai.google.dev/ for more details.
 package googleai
@@ -22,7 +20,7 @@ type GoogleAI struct {
 
 var _ llms.Model = &GoogleAI{}
 
-// NewGoogleAI creates a new GoogleAI struct.
+// NewGoogleAI creates a new GoogleAI client.
 func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	clientOptions := defaultOptions()
 	for _, opt := range opts {
