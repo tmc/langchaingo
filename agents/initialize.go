@@ -19,6 +19,7 @@ const (
 	ConversationalReactDescription AgentType = "conversationalReactDescription"
 )
 
+// Deprecated: This may be removed in the future; please use NewExecutor instead.
 // Initialize is a function that creates a new executor with the specified LLM
 // model, tools, agent type, and options. It returns an Executor or an error
 // if there is any issues during the creation process.
@@ -27,7 +28,7 @@ func Initialize(
 	tools []tools.Tool,
 	agentType AgentType,
 	opts ...CreationOption,
-) (Executor, error) {
+) (*Executor, error) {
 	var agent Agent
 	switch agentType {
 	case ZeroShotReactDescription:
@@ -35,7 +36,7 @@ func Initialize(
 	case ConversationalReactDescription:
 		agent = NewConversationalAgent(llm, tools, opts...)
 	default:
-		return Executor{}, ErrUnknownAgentType
+		return &Executor{}, ErrUnknownAgentType
 	}
 	return NewExecutor(agent, tools, opts...), nil
 }
