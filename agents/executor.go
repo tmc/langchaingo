@@ -27,18 +27,18 @@ type Executor struct {
 }
 
 var (
-	_ chains.Chain           = Executor{}
-	_ callbacks.HandlerHaver = Executor{}
+	_ chains.Chain           = &Executor{}
+	_ callbacks.HandlerHaver = &Executor{}
 )
 
 // NewExecutor creates a new agent executor with an agent and the tools the agent can use.
-func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Executor {
+func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) *Executor {
 	options := executorDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
 	}
 
-	return Executor{
+	return &Executor{
 		Agent:                   agent,
 		Tools:                   tools,
 		Memory:                  options.memory,
@@ -49,7 +49,7 @@ func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) Execut
 	}
 }
 
-func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
+func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
 	inputs, err := inputsToString(inputValues)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (e Executor) Call(ctx context.Context, inputValues map[string]any, _ ...cha
 	), ErrNotFinished
 }
 
-func (e Executor) doIteration( // nolint
+func (e *Executor) doIteration( // nolint
 	ctx context.Context,
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
@@ -118,7 +118,7 @@ func (e Executor) doIteration( // nolint
 	return steps, nil, nil
 }
 
-func (e Executor) doAction(
+func (e *Executor) doAction(
 	ctx context.Context,
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
@@ -147,7 +147,7 @@ func (e Executor) doAction(
 	}), nil
 }
 
-func (e Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
+func (e *Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
 	if e.ReturnIntermediateSteps {
 		finish.ReturnValues[_intermediateStepsOutputKey] = steps
 	}
@@ -157,20 +157,20 @@ func (e Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep
 
 // GetInputKeys gets the input keys the agent of the executor expects.
 // Often "input".
-func (e Executor) GetInputKeys() []string {
+func (e *Executor) GetInputKeys() []string {
 	return e.Agent.GetInputKeys()
 }
 
 // GetOutputKeys gets the output keys the agent of the executor returns.
-func (e Executor) GetOutputKeys() []string {
+func (e *Executor) GetOutputKeys() []string {
 	return e.Agent.GetOutputKeys()
 }
 
-func (e Executor) GetMemory() schema.Memory { //nolint:ireturn
+func (e *Executor) GetMemory() schema.Memory { //nolint:ireturn
 	return e.Memory
 }
 
-func (e Executor) GetCallbackHandler() callbacks.Handler { //nolint:ireturn
+func (e *Executor) GetCallbackHandler() callbacks.Handler { //nolint:ireturn
 	return e.CallbacksHandler
 }
 
