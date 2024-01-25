@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"sync"
 	"testing"
@@ -39,7 +40,13 @@ func (l *testLanguageModel) Call(ctx context.Context, prompt string, options ...
 }
 
 func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-	prompt := mc[0].Parts[0].(llms.TextContent).Text
+	part0 := mc[0].Parts[0]
+	var prompt string
+	if tc, ok := part0.(llms.TextContent); ok {
+		prompt = tc.Text
+	} else {
+		return nil, fmt.Errorf("passed non-text part")
+	}
 	l.recordedPrompt = []schema.PromptValue{
 		stringPromptValue{s: prompt},
 	}
@@ -58,7 +65,9 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.Message
 
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
-			&llms.ContentChoice{Content: llmResult}}}, nil
+			{Content: llmResult},
+		},
+	}, nil
 }
 
 var _ llms.Model = &testLanguageModel{}
