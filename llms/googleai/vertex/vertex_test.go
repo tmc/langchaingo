@@ -89,3 +89,16 @@ func TestMultiContentTextStream(t *testing.T) {
 	assert.GreaterOrEqual(t, len(chunks), 2)
 	assert.Regexp(t, "(?i)dog|canid|canine", sb.String())
 }
+
+func TestEmbeddings(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	texts := []string{"foo", "parrot"}
+	res, err := llm.CreateEmbedding(context.Background(), texts)
+	require.NoError(t, err)
+
+	assert.Equal(t, len(texts), len(res))
+	assert.NotEmpty(t, res[0])
+	assert.NotEmpty(t, res[1])
+}
