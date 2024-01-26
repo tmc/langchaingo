@@ -287,7 +287,6 @@ LIMIT $2`, s.embeddingTableName,
 //nolint:cyclop
 func (s Store) Search(
 	ctx context.Context,
-	query string,
 	numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {

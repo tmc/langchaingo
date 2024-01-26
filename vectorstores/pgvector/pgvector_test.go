@@ -442,7 +442,7 @@ func TestDeduplicater(t *testing.T) {
 	))
 	require.NoError(t, err)
 
-	docs, err := store.Search(ctx, "tokyo", 1)
+	docs, err := store.Search(ctx, 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "potato", docs[0].PageContent)
