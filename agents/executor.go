@@ -32,7 +32,7 @@ var (
 )
 
 // NewExecutor creates a new agent executor with an agent and the tools the agent can use.
-func NewExecutor(agent Agent, tools []tools.Tool, opts ...CreationOption) *Executor {
+func NewExecutor(agent Agent, tools []tools.Tool, opts ...Option) *Executor {
 	options := executorDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)

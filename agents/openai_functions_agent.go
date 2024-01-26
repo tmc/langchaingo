@@ -33,7 +33,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)

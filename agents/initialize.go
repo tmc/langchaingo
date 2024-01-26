@@ -27,7 +27,7 @@ func Initialize(
 	llm llms.Model,
 	tools []tools.Tool,
 	agentType AgentType,
-	opts ...CreationOption,
+	opts ...Option,
 ) (*Executor, error) {
 	var agent Agent
 	switch agentType {
