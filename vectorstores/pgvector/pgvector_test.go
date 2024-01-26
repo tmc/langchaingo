@@ -407,3 +407,44 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NotContains(t, result, "orange", "expected not orange in result")
 	require.NotContains(t, result, "yellow", "expected not yellow in result")
 }
+
+func TestDeduplicater(t *testing.T) {
+	t.Parallel()
+	preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	}, vectorstores.WithDeduplicater(
+		func(ctx context.Context, doc schema.Document) bool {
+			return doc.PageContent == "tokyo"
+		},
+	))
+	require.NoError(t, err)
+
+	docs, err := store.Search(ctx, "tokyo", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "potato", docs[0].PageContent)
+	require.Equal(t, "vegetable", docs[0].Metadata["type"])
+}
