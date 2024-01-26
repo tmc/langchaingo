@@ -132,6 +132,7 @@ func (s Store) createCollectionTableIfNotExists(ctx context.Context) error {
 	name varchar,
 	cmetadata json,
 	"uuid" uuid NOT NULL,
+	UNIQUE (name),
 	PRIMARY KEY (uuid))`, s.collectionTableName)
 	if _, err = tx.Exec(ctx, sql); err != nil {
 		return err
