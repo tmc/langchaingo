@@ -138,6 +138,7 @@ require (
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+	golang.org/x/tools v0.14.0
 	google.golang.org/api v0.152.0
 	google.golang.org/grpc v1.60.0
 	google.golang.org/protobuf v1.31.0

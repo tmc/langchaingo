@@ -1,4 +1,4 @@
-package googleai
+package util
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func DownloadImageData(url string) (string, []byte, error) {
 
 	parts := strings.Split(mimeType, "/")
 	if len(parts) != 2 {
-		return "", nil, ErrInvalidMimeType
+		return "", nil, fmt.Errorf("invalid mime type %v", mimeType)
 	}
 
 	return parts[1], urlData, nil
