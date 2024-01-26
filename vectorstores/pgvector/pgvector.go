@@ -314,7 +314,6 @@ WHERE %s.name='%s' AND %s
 LIMIT $1`, s.embeddingTableName,
 		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
 		whereQuery)
-	fmt.Println(sql)
 	rows, err := s.conn.Query(ctx, sql, numDocuments)
 	if err != nil {
 		return nil, err
