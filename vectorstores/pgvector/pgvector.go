@@ -72,31 +72,33 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 }
 
 func (s *Store) init(ctx context.Context) error {
-	if err := s.createVectorExtensionIfNotExists(ctx); err != nil {
-		return err
-	}
-	if err := s.createCollectionTableIfNotExists(ctx); err != nil {
-		return err
-	}
-	if err := s.createEmbeddingTableIfNotExists(ctx); err != nil {
-		return err
-	}
-	if s.preDeleteCollection {
-		if err := s.RemoveCollection(ctx); err != nil {
-			return err
-		}
-	}
-	if err := s.createOrGetCollection(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s Store) createVectorExtensionIfNotExists(ctx context.Context) error {
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
 		return err
 	}
+
+	if err := s.createVectorExtensionIfNotExists(ctx, tx); err != nil {
+		return err
+	}
+	if err := s.createCollectionTableIfNotExists(ctx, tx); err != nil {
+		return err
+	}
+	if err := s.createEmbeddingTableIfNotExists(ctx, tx); err != nil {
+		return err
+	}
+	if s.preDeleteCollection {
+		if err := s.RemoveCollection(ctx, tx); err != nil {
+			return err
+		}
+	}
+	if err := s.createOrGetCollection(ctx, tx); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (s Store) createVectorExtensionIfNotExists(ctx context.Context, tx pgx.Tx) error {
 	// inspired by
 	// https://github.com/langchain-ai/langchain/blob/v0.0.340/libs/langchain/langchain/vectorstores/pgvector.py#L167
 	// The advisor lock fixes issue arising from concurrent
@@ -110,14 +112,10 @@ func (s Store) createVectorExtensionIfNotExists(ctx context.Context) error {
 	if _, err := tx.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector"); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
-func (s Store) createCollectionTableIfNotExists(ctx context.Context) error {
-	tx, err := s.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
+func (s Store) createCollectionTableIfNotExists(ctx context.Context, tx pgx.Tx) error {
 	// inspired by
 	// https://github.com/langchain-ai/langchain/blob/v0.0.340/libs/langchain/langchain/vectorstores/pgvector.py#L167
 	// The advisor lock fixes issue arising from concurrent
@@ -125,7 +123,7 @@ func (s Store) createCollectionTableIfNotExists(ctx context.Context) error {
 	// https://github.com/langchain-ai/langchain/issues/12933
 	// For more information see:
 	// https://www.postgresql.org/docs/16/explicit-locking.html#ADVISORY-LOCKS
-	if _, err = tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDCollectionTable); err != nil {
+	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDCollectionTable); err != nil {
 		return err
 	}
 	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
@@ -133,17 +131,13 @@ func (s Store) createCollectionTableIfNotExists(ctx context.Context) error {
 	cmetadata json,
 	"uuid" uuid NOT NULL,
 	PRIMARY KEY (uuid))`, s.collectionTableName)
-	if _, err = tx.Exec(ctx, sql); err != nil {
+	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
-func (s Store) createEmbeddingTableIfNotExists(ctx context.Context) error {
-	tx, err := s.conn.Begin(ctx)
-	if err != nil {
-		return err
-	}
+func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) error {
 	// inspired by
 	// https://github.com/langchain-ai/langchain/blob/v0.0.340/libs/langchain/langchain/vectorstores/pgvector.py#L167
 	// The advisor lock fixes issue arising from concurrent
@@ -161,13 +155,21 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context) error {
 	cmetadata json,
 	custom_id varchar,
 	"uuid" uuid NOT NULL,
-	CONSTRAINT langchain_pg_embedding_collection_id_fkey 
+	CONSTRAINT langchain_pg_embedding_collection_id_fkey
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
-PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
-	if _, err = tx.Exec(ctx, sql); err != nil {
+	PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
+	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
+	if _, err := tx.Exec(ctx, sql); err != nil {
+		return err
+	}
+	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`, s.embeddingTableName, s.embeddingTableName)
+	if _, err := tx.Exec(ctx, sql); err != nil {
+		return err
+	}
+	return nil
 }
 
 // AddDocuments adds documents to the Postgres collection associated with 'Store'.
@@ -200,6 +202,10 @@ func (s Store) AddDocuments(
 		return nil, ErrEmbedderWrongNumberVectors
 	}
 	customID := uuid.New().String()
+	if opts.CustomID != "" {
+		customID = opts.CustomID
+	}
+
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
 		VALUES($1, $2, $3, $4, $5, $6)`, s.embeddingTableName)
@@ -260,7 +266,7 @@ FROM (
 	FROM
 		%s
 		JOIN %s ON %s.collection_id=%s.uuid WHERE %s.name='%s') AS data
-WHERE %s 
+WHERE %s
 ORDER BY
 	data.distance
 LIMIT $2`, s.embeddingTableName,
@@ -297,19 +303,19 @@ func (s Store) DropTables(ctx context.Context) error {
 	return nil
 }
 
-func (s Store) RemoveCollection(ctx context.Context) error {
-	_, err := s.conn.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE name = $1`, s.collectionTableName), s.collectionName)
+func (s Store) RemoveCollection(ctx context.Context, tx pgx.Tx) error {
+	_, err := tx.Exec(ctx, fmt.Sprintf(`DELETE FROM %s WHERE name = $1`, s.collectionTableName), s.collectionName)
 	return err
 }
 
-func (s *Store) createOrGetCollection(ctx context.Context) error {
+func (s *Store) createOrGetCollection(ctx context.Context, tx pgx.Tx) error {
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, name, cmetadata)
 		VALUES($1, $2, $3) ON CONFLICT DO NOTHING`, s.collectionTableName)
-	if _, err := s.conn.Exec(ctx, sql, uuid.New().String(), s.collectionName, s.collectionMetadata); err != nil {
+	if _, err := tx.Exec(ctx, sql, uuid.New().String(), s.collectionName, s.collectionMetadata); err != nil {
 		return err
 	}
 	sql = fmt.Sprintf(`SELECT uuid FROM %s WHERE name = $1 ORDER BY name limit 1`, s.collectionTableName)
-	return s.conn.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID)
+	return tx.QueryRow(ctx, sql, s.collectionName).Scan(&s.collectionUUID)
 }
 
 // getOptions applies given options to default Options and returns it
