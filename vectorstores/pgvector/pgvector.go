@@ -163,7 +163,15 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context) error {
 	"uuid" uuid NOT NULL,
 	CONSTRAINT langchain_pg_embedding_collection_id_fkey 
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
-PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
+	PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
+	if _, err = tx.Exec(ctx, sql); err != nil {
+		return err
+	}
+	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
+	if _, err = tx.Exec(ctx, sql); err != nil {
+		return err
+	}
+	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`, s.embeddingTableName, s.embeddingTableName)
 	if _, err = tx.Exec(ctx, sql); err != nil {
 		return err
 	}
