@@ -25,7 +25,7 @@ func newClient(t *testing.T) *Vertex {
 		location = "us-central1"
 	}
 
-	llm, err := NewVertex(context.Background(), WithCloudProject(project), WithCloudLocation(location))
+	llm, err := New(context.Background(), WithCloudProject(project), WithCloudLocation(location))
 	require.NoError(t, err)
 	return llm
 }
