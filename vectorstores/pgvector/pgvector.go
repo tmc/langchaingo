@@ -200,6 +200,10 @@ func (s Store) AddDocuments(
 		return nil, ErrEmbedderWrongNumberVectors
 	}
 	customID := uuid.New().String()
+	if opts.CustomID != "" {
+		customID = opts.CustomID
+	}
+
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
 		VALUES($1, $2, $3, $4, $5, $6)`, s.embeddingTableName)
@@ -260,7 +264,7 @@ FROM (
 	FROM
 		%s
 		JOIN %s ON %s.collection_id=%s.uuid WHERE %s.name='%s') AS data
-WHERE %s 
+WHERE %s
 ORDER BY
 	data.distance
 LIMIT $2`, s.embeddingTableName,

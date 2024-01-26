@@ -14,6 +14,7 @@ type Option func(*Options)
 type Options struct {
 	NameSpace      string
 	ScoreThreshold float32
+	CustomID       string
 	Filters        any
 	Embedder       embeddings.Embedder
 	Deduplicater   func(context.Context, schema.Document) bool
@@ -57,5 +58,14 @@ func WithEmbedder(embedder embeddings.Embedder) Option {
 func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Option {
 	return func(o *Options) {
 		o.Deduplicater = fn
+	}
+}
+
+// WithCustomID returns an Option for setting the ID that could be used when
+// adding documents. This is useful to prevent wasting time on creating an embedding
+// when one already exists.
+func WithCustomID(id string) Option {
+	return func(o *Options) {
+		o.CustomID = id
 	}
 }
