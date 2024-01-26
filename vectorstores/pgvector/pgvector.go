@@ -161,7 +161,7 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context) error {
 	cmetadata json,
 	custom_id varchar,
 	"uuid" uuid NOT NULL,
-	CONSTRAINT langchain_pg_embedding_collection_id_fkey 
+	CONSTRAINT langchain_pg_embedding_collection_id_fkey
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
 PRIMARY KEY (uuid))`, s.embeddingTableName, s.collectionTableName)
 	if _, err = tx.Exec(ctx, sql); err != nil {
@@ -262,7 +262,7 @@ FROM (
 	FROM
 		%s
 		JOIN %s ON %s.collection_id=%s.uuid WHERE %s.name='%s') AS data
-WHERE %s 
+WHERE %s
 ORDER BY
 	data.distance
 LIMIT $2`, s.embeddingTableName,
