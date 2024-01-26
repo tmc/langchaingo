@@ -202,9 +202,6 @@ func (s Store) AddDocuments(
 		return nil, ErrEmbedderWrongNumberVectors
 	}
 	customID := uuid.New().String()
-	if opts.CustomID != "" {
-		customID = opts.CustomID
-	}
 
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
