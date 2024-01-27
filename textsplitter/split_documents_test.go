@@ -10,6 +10,8 @@ import (
 )
 
 func TestItSplitsDocumentsRetainingTheCustomIDs(t *testing.T) {
+	t.Parallel()
+
 	docs := []schema.Document{
 		{
 			PageContent: "Item 1",
