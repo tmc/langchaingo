@@ -74,6 +74,10 @@ func WithConn(conn *pgx.Conn) Option {
 	}
 }
 
+// WithCollectionMetadata is an option for specifying the collection metadata.
+// The metadata is stored as a JSONB column in the collection table.
+// The metadata can be used to store additional information about the collection.
+// For example, the metadata can be used to store the collection's language.
 func WithCollectionMetadata(metadata map[string]any) Option {
 	return func(p *Store) {
 		p.collectionMetadata = metadata
