@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -36,7 +37,16 @@ func makeNewCollectionName() string {
 
 func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store) {
 	t.Helper()
-	require.NoError(t, s.RemoveCollection(ctx))
+
+	conn, err := pgx.Connect(ctx, os.Getenv("PGVECTOR_CONNECTION_STRING"))
+	require.NoError(t, err)
+
+	tx, err := conn.Begin(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, s.RemoveCollection(ctx, tx))
+
+	require.NoError(t, tx.Commit(ctx))
 	require.NoError(t, s.Close(ctx))
 }
 
