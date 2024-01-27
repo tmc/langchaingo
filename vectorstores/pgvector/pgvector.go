@@ -273,6 +273,8 @@ LIMIT $2`, s.embeddingTableName,
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	docs := make([]schema.Document, 0)
 	for rows.Next() {
 		doc := schema.Document{}
@@ -318,6 +320,8 @@ LIMIT $1`, s.embeddingTableName,
 		return nil, err
 	}
 	docs := make([]schema.Document, 0)
+	defer rows.Close()
+
 	for rows.Next() {
 		doc := schema.Document{}
 		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.Score); err != nil {
