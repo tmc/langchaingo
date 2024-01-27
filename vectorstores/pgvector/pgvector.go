@@ -162,21 +162,17 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
+	indexesToCreate := []string{
+		`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`,
+		`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`,
+		`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`,
+		`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`,
 	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`, s.embeddingTableName, s.embeddingTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
-	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
-	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`, s.embeddingTableName, s.embeddingTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
+	for _, index := range indexesToCreate {
+		sql = fmt.Sprintf(index, s.embeddingTableName, s.embeddingTableName)
+		if _, err := tx.Exec(ctx, sql); err != nil {
+			return err
+		}
 	}
 	return nil
 }
