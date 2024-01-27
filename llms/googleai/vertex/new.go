@@ -25,8 +25,8 @@ type Vertex struct {
 
 var _ llms.Model = &Vertex{}
 
-// NewVertex creates a new Vertex client.
-func NewVertex(ctx context.Context, opts ...Option) (*Vertex, error) {
+// New creates a new Vertex client.
+func New(ctx context.Context, opts ...Option) (*Vertex, error) {
 	clientOptions := defaultOptions()
 	for _, opt := range opts {
 		opt(&clientOptions)
