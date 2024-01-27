@@ -25,7 +25,7 @@ func newClient(t *testing.T) *Vertex {
 		location = "us-central1"
 	}
 
-	llm, err := NewVertex(context.Background(), WithCloudProject(project), WithCloudLocation(location))
+	llm, err := New(context.Background(), WithCloudProject(project), WithCloudLocation(location))
 	require.NoError(t, err)
 	return llm
 }
@@ -35,8 +35,8 @@ func TestMultiContentText(t *testing.T) {
 	llm := newClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextContent{Text: "I'm a pomeranian"},
-		llms.TextContent{Text: "What kind of mammal am I?"},
+		llms.TextPart("I'm a pomeranian"),
+		llms.TextPart("What kind of mammal am I?"),
 	}
 	content := []llms.MessageContent{
 		{
@@ -58,8 +58,8 @@ func TestMultiContentTextStream(t *testing.T) {
 	llm := newClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextContent{Text: "I'm a pomeranian"},
-		llms.TextContent{Text: "Tell me more about my taxonomy"},
+		llms.TextPart("I'm a pomeranian"),
+		llms.TextPart("Tell me more about my taxonomy"),
 	}
 	content := []llms.MessageContent{
 		{
