@@ -264,6 +264,7 @@ func (s Store) SimilaritySearch(
 	sql := fmt.Sprintf(`SELECT
 	data.document,
 	data.cmetadata,
+	data.custom_id,
 	data.distance
 FROM (
 	SELECT
@@ -286,7 +287,7 @@ LIMIT $2`, s.embeddingTableName,
 	docs := make([]schema.Document, 0)
 	for rows.Next() {
 		doc := schema.Document{}
-		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.Score); err != nil {
+		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.CustomID, &doc.Score); err != nil {
 			return nil, err
 		}
 		docs = append(docs, doc)
