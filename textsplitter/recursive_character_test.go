@@ -96,7 +96,14 @@ Bye!
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
 
-		docs, err := CreateDocuments(splitter, []string{tc.text}, nil, nil)
+		inputDocs := []schema.Document{
+			{
+				PageContent: tc.text,
+				Metadata:    nil,
+			},
+		}
+
+		docs, err := SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}

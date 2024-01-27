@@ -49,7 +49,14 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 
 	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 	for _, tc := range testCases {
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+
+		inputDocs := []schema.Document{
+			{
+				PageContent: tc.markdown,
+			},
+		}
+
+		docs, err := SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
@@ -87,12 +94,19 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+
+		inputDocs := []schema.Document{
+			{
+				PageContent: tc.markdown,
+			},
+		}
+
+		docs, err := SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 
 		splitter = NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-		docs, err = CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+		docs, err = SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
@@ -106,8 +120,14 @@ func TestMarkdownHeaderTextSplitter(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	inputDocs := []schema.Document{
+		{
+			PageContent: string(data),
+		},
+	}
+
 	splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-	docs, err := CreateDocuments(splitter, []string{string(data)}, nil, nil)
+	docs, err := SplitDocuments(splitter, inputDocs)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -181,7 +201,14 @@ func TestMarkdownHeaderTextSplitter_BulletList(t *testing.T) {
 
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+
+		inputDocs := []schema.Document{
+			{
+				PageContent: tc.markdown,
+			},
+		}
+
+		docs, err := SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
@@ -241,7 +268,14 @@ for a review.`, Metadata: map[string]any{},
 
 	for _, tc := range testCases {
 		splitter := NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+
+		inputDocs := []schema.Document{
+			{
+				PageContent: tc.markdown,
+			},
+		}
+
+		docs, err := SplitDocuments(splitter, inputDocs)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
@@ -347,7 +381,13 @@ more text`,
 				WithChunkOverlap(64),
 			)...)
 
-			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+			inputDocs := []schema.Document{
+				{
+					PageContent: tc.markdown,
+				},
+			}
+
+			docs, err := SplitDocuments(splitter, inputDocs)
 			rq.NoError(err)
 			rq.Equal(tc.expectedDocs, docs)
 		})
@@ -453,7 +493,13 @@ func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
 				WithChunkOverlap(64),
 			)...)
 
-			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil, nil)
+			inputDocs := []schema.Document{
+				{
+					PageContent: tc.markdown,
+				},
+			}
+
+			docs, err := SplitDocuments(splitter, inputDocs)
 			rq.NoError(err)
 			rq.Equal(tc.expectedDocs, docs)
 		})
