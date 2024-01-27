@@ -308,7 +308,8 @@ func (s Store) RemoveCollection(ctx context.Context, tx pgx.Tx) error {
 
 func (s *Store) createOrGetCollection(ctx context.Context, tx pgx.Tx) error {
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, name, cmetadata)
-		VALUES($1, $2, $3) ON CONFLICT DO NOTHING`, s.collectionTableName)
+		VALUES($1, $2, $3) ON CONFLICT (name) DO
+		UPDATE SET cmetadata = $3`, s.collectionTableName)
 	if _, err := tx.Exec(ctx, sql, uuid.New().String(), s.collectionName, s.collectionMetadata); err != nil {
 		return err
 	}
