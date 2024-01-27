@@ -20,11 +20,7 @@ func main() {
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
-			{
-				Role:  schema.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart("What is the weather like in Boston?")},
-			},
-		},
+			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Printf("Received chunk: %s\n", chunk)
 			return nil
