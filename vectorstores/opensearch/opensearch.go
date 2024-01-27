@@ -75,7 +75,7 @@ func (s Store) AddDocuments(
 
 	for i, doc := range docs {
 		id := uuid.NewString()
-		_, err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
+		err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata, nil)
 		if err != nil {
 			return ids, err
 		}
@@ -144,19 +144,20 @@ func (s Store) SimilaritySearch(
 		Body:  buf,
 	}
 	response, err := search.Do(ctx, s.client)
-	return handleSimilarySearchResponse(response, err, opts)
-}
-
-func handleSimilarySearchResponse(res *opensearchapi.Response, err error, opts vectorstores.Options) ([]schema.Document, error) {
-	output := []schema.Document{}
-	body, err := handleResponse(res, err)
 	if err != nil {
-		return output, fmt.Errorf("error reading search response body: %w", err)
+		return nil, err
 	}
 
+	output := []schema.Document{}
+
+	return handleSimilarySearchResponse(response, output, opts)
+}
+
+func handleSimilarySearchResponse(res *opensearchapi.Response, output []schema.Document, opts vectorstores.Options) ([]schema.Document, error) {
 	searchResults := searchResults{}
-	if err := json.Unmarshal(body, &searchResults); err != nil {
-		return output, fmt.Errorf("error unmarshalling search response body: %w %s", err, body)
+	err := handleResponse(searchResults, res)
+	if err != nil {
+		return output, fmt.Errorf("error reading search response body: %w", err)
 	}
 
 	for _, hit := range searchResults.Hits.Hits {

@@ -1,0 +1,33 @@
+<< Example 2. >>
+
+File Type: Excel
+Sample Data: 
+Order ID, Product, Quantity, Price
+001, Apples, 10, 1.5
+002, Bananas, 20, 0.75
+
+Response:
+```json
+[
+    {
+        "name": "Order ID",
+        "description": "Unique identifier for the order",
+        "type": "string"
+    },
+    {
+        "name": "Product",
+        "description": "Name of the product",
+        "type": "string"
+    },
+    {
+        "name": "Quantity",
+        "description": "Quantity of the product ordered",
+        "type": "integer"
+    },
+    {
+        "name": "Price",
+        "description": "Price per unit of the product",
+        "type": "float"
+    }
+]
+```

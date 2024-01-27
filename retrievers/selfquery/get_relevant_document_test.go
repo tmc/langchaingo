@@ -66,7 +66,7 @@ func setAndFillIndex(
 	indexName string,
 ) {
 	t.Helper()
-	_, err := client.CreateIndex(context.TODO(), indexName)
+	err := client.CreateIndex(context.TODO(), indexName, nil)
 	require.NoError(t, err)
 
 	_, err = client.AddDocuments(context.TODO(), []schema.Document{
@@ -160,9 +160,9 @@ func TestParser(t *testing.T) {
 	llm := setLLM(t)
 
 	vectorstore := getOpensearchVectorStore(t, opensearchEndpoint, awsProfile, llm)
-	// fmt.Printf("vectorstore: %v\n", vectorstore)
+
 	defer func() {
-		_, err := vectorstore.DeleteIndex(context.TODO(), indexName)
+		err := vectorstore.DeleteIndex(context.TODO(), indexName, nil)
 		require.NoError(t, err)
 	}()
 

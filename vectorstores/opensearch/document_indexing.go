@@ -22,7 +22,8 @@ func (s *Store) documentIndexing(
 	text string,
 	vector []float32,
 	metadata map[string]any,
-) ([]byte, error) {
+	output any,
+) error {
 	document := document{
 		FieldsContent:       text,
 		FieldsContentVector: vector,
@@ -32,7 +33,7 @@ func (s *Store) documentIndexing(
 	buf := new(bytes.Buffer)
 
 	if err := json.NewEncoder(buf).Encode(document); err != nil {
-		return nil, fmt.Errorf("error encoding index schema to json buffer %w", err)
+		return fmt.Errorf("error encoding index schema to json buffer %w", err)
 	}
 
 	indice := opensearchapi.IndexRequest{
@@ -40,6 +41,9 @@ func (s *Store) documentIndexing(
 		DocumentID: id,
 		Body:       buf,
 	}
-
-	return handleResponse(indice.Do(ctx, s.client))
+	res, err := indice.Do(ctx, s.client)
+	if err != nil {
+		return err
+	}
+	return handleResponse(output, res)
 }

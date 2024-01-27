@@ -26,8 +26,9 @@ const (
 func (s *Store) CreateIndex(
 	ctx context.Context,
 	indexName string,
+	output any,
 	opts ...IndexOption,
-) ([]byte, error) {
+) error {
 	indexSchema := map[string]interface{}{
 		"settings": map[string]interface{}{
 			"index": map[string]interface{}{
@@ -61,13 +62,22 @@ func (s *Store) CreateIndex(
 	buf := new(bytes.Buffer)
 
 	if err := json.NewEncoder(buf).Encode(indexSchema); err != nil {
-		return nil, fmt.Errorf("error encoding index schema to json buffer %w", err)
+		return fmt.Errorf("error encoding index schema to json buffer %w", err)
 	}
 
 	indice := opensearchapi.IndicesCreateRequest{
 		Index: indexName,
 		Body:  buf,
 	}
+	res, err := indice.Do(ctx, s.client)
+	if err != nil {
+		return err
+	}
+	return handleResponse(output, res)
+}
 
-	return handleResponse(indice.Do(ctx, s.client))
+func WithMetadata(metadata any) IndexOption {
+	return func(indexMap *map[string]interface{}) {
+		(*indexMap)["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["metadata"] = metadata
+	}
 }
