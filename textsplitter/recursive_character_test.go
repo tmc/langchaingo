@@ -96,7 +96,7 @@ Bye!
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
 
-		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
+		docs, err := CreateDocuments(splitter, []string{tc.text}, nil, nil)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)
 	}

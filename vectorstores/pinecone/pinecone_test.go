@@ -618,3 +618,40 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	require.Contains(t, result, "purple", "expected black in purple")
 }
+
+func TestPineconeAddDocumenttWithId(t *testing.T) {
+	t.Parallel()
+
+	environment, apiKey, indexName, projectName := getValues(t)
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	storer, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithEnvironment(environment),
+		pinecone.WithIndexName(indexName),
+		pinecone.WithProjectName(projectName),
+		pinecone.WithEmbedder(e),
+		pinecone.WithNameSpace(uuid.New().String()),
+	)
+	require.NoError(t, err)
+
+	customID := "test-id"
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo", CustomID: &customID},
+		{PageContent: "Yokohama", CustomID: &customID},
+		{PageContent: "Osaka", CustomID: &customID},
+		{PageContent: "Nagoya", CustomID: &customID},
+		{PageContent: "Sapporo", CustomID: &customID},
+		{PageContent: "Fukuoka", CustomID: &customID},
+		{PageContent: "Dublin", CustomID: &customID},
+		{PageContent: "Paris", CustomID: &customID},
+		{PageContent: "London ", CustomID: &customID},
+		{PageContent: "New York", CustomID: &customID},
+	})
+	require.NoError(t, err)
+}

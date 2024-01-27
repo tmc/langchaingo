@@ -41,7 +41,7 @@ func CreateDocuments(
 		return nil, ErrMismatchMetadatasAndTextAndCustomIDs
 	}
 
-	if len(texts) != len(customIDs) {
+	if customIDs != nil && len(texts) != len(customIDs) {
 		return nil, ErrMismatchMetadatasAndTextAndCustomIDs
 	}
 
@@ -60,10 +60,15 @@ func CreateDocuments(
 				curMetadata[key] = value
 			}
 
+			var customID *string
+			if customIDs != nil {
+				customID = customIDs[i]
+			}
+
 			documents = append(documents, schema.Document{
 				PageContent: chunk,
 				Metadata:    curMetadata,
-				CustomID:    customIDs[i],
+				CustomID:    customID,
 			})
 		}
 	}
