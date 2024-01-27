@@ -16,12 +16,12 @@ func TestItSplitsDocumentsRetainingTheCustomIDs(t *testing.T) {
 		{
 			PageContent: "Item 1",
 			Metadata:    map[string]any{},
-			CustomID:    stringPtr("1"),
+			CustomID:    "1",
 		},
 		{
 			PageContent: "Item 2",
 			Metadata:    map[string]any{},
-			CustomID:    stringPtr("2"),
+			CustomID:    "2",
 		},
 		{
 			PageContent: "Item 2",
@@ -34,8 +34,4 @@ func TestItSplitsDocumentsRetainingTheCustomIDs(t *testing.T) {
 	result, err := textsplitter.SplitDocuments(splitter, docs)
 	require.NoError(t, err)
 	assert.Equal(t, result, docs)
-}
-
-func stringPtr(s string) *string {
-	return &s
 }

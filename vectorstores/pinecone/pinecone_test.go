@@ -642,16 +642,16 @@ func TestPineconeAddDocumenttWithId(t *testing.T) {
 
 	customID := "test-id"
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "Tokyo", CustomID: &customID},
-		{PageContent: "Yokohama", CustomID: &customID},
-		{PageContent: "Osaka", CustomID: &customID},
-		{PageContent: "Nagoya", CustomID: &customID},
-		{PageContent: "Sapporo", CustomID: &customID},
-		{PageContent: "Fukuoka", CustomID: &customID},
-		{PageContent: "Dublin", CustomID: &customID},
-		{PageContent: "Paris", CustomID: &customID},
-		{PageContent: "London ", CustomID: &customID},
-		{PageContent: "New York", CustomID: &customID},
+		{PageContent: "Tokyo", CustomID: customID},
+		{PageContent: "Yokohama", CustomID: customID},
+		{PageContent: "Osaka", CustomID: customID},
+		{PageContent: "Nagoya", CustomID: customID},
+		{PageContent: "Sapporo", CustomID: customID},
+		{PageContent: "Fukuoka", CustomID: customID},
+		{PageContent: "Dublin", CustomID: customID},
+		{PageContent: "Paris", CustomID: customID},
+		{PageContent: "London ", CustomID: customID},
+		{PageContent: "New York", CustomID: customID},
 	})
 	require.NoError(t, err)
 }

@@ -17,7 +17,7 @@ var ErrMismatchMetadatasAndTextAndCustomIDs = errors.New("number of texts, metad
 func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]schema.Document, error) {
 	texts := make([]string, 0)
 	metadatas := make([]map[string]any, 0)
-	customIDs := make([]*string, 0)
+	customIDs := make([]string, 0)
 	for _, document := range documents {
 		texts = append(texts, document.PageContent)
 		metadatas = append(metadatas, document.Metadata)
@@ -31,7 +31,7 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 // the length of the metadatas is zero, the result documents will contain no metadata.
 // Otherwise, the numbers of texts and metadatas must match.
 func CreateDocuments(
-	textSplitter TextSplitter, texts []string, metadatas []map[string]any, customIDs []*string,
+	textSplitter TextSplitter, texts []string, metadatas []map[string]any, customIDs []string,
 ) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
@@ -60,15 +60,10 @@ func CreateDocuments(
 				curMetadata[key] = value
 			}
 
-			var customID *string
-			if customIDs != nil {
-				customID = customIDs[i]
-			}
-
 			documents = append(documents, schema.Document{
 				PageContent: chunk,
 				Metadata:    curMetadata,
-				CustomID:    customID,
+				CustomID:    customIDs[i],
 			})
 		}
 	}

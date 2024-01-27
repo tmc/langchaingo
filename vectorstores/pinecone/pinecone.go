@@ -100,7 +100,7 @@ func (s Store) AddDocuments(ctx context.Context,
 		metadatas = append(metadatas, metadata)
 	}
 
-	customIDs := make([]*string, 0, len(docs))
+	customIDs := make([]string, 0, len(docs))
 	for i, doc := range docs {
 		customIDs[i] = doc.CustomID
 	}

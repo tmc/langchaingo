@@ -46,7 +46,7 @@ func (s Store) grpcUpsert(
 	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
-	customIDs []*string,
+	customIDs []string,
 ) ([]string, error) {
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
 
@@ -57,15 +57,11 @@ func (s Store) grpcUpsert(
 			return nil, err
 		}
 
-		customID := ""
-		if customIDs[i] != nil {
-			customID = *customIDs[i]
-		}
-		ids[i] = customID
+		ids[i] = customIDs[i]
 		pineconeVectors = append(
 			pineconeVectors,
 			&pinecone_grpc.Vector{
-				Id:       customID,
+				Id:       customIDs[i],
 				Values:   vectors[i],
 				Metadata: metadataStruct,
 			},

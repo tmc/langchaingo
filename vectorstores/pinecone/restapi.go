@@ -49,21 +49,17 @@ func (s Store) restUpsert(
 	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
-	customIDs []*string,
+	customIDs []string,
 ) ([]string, error) {
 	v := make([]vector, 0, len(vectors))
 
 	ids := make([]string, len(vectors))
 	for i := 0; i < len(vectors); i++ {
-		customID := ""
-		if customIDs[i] != nil {
-			customID = *customIDs[i]
-		}
-		ids[i] = customID
+		ids[i] = customIDs[i]
 		v = append(v, vector{
 			Values:   vectors[i],
 			Metadata: metadatas[i],
-			ID:       customID,
+			ID:       customIDs[i],
 		})
 	}
 
