@@ -8,7 +8,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-//nolint:dupword
+//nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	t.Parallel()
 	type testCase struct {

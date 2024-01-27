@@ -49,7 +49,6 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 
 	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
 	for _, tc := range testCases {
-
 		inputDocs := []schema.Document{
 			{
 				PageContent: tc.markdown,
