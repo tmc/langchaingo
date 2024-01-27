@@ -1,5 +1,3 @@
-// package googleai implements a langchaingo provider for Google AI LLMs.
-// See https://ai.google.dev/ for more details.
 package googleai
 
 import (
@@ -10,23 +8,13 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
-	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 )
 
-// GoogleAI is a type that represents a Google AI API client.
-type GoogleAI struct {
-	CallbacksHandler callbacks.Handler
-	client           *genai.Client
-	opts             options
-}
-
 var (
-	_ llms.Model = &GoogleAI{}
-
 	ErrNoContentInResponse    = errors.New("no content in generation response")
 	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
 	ErrInvalidMimeType        = errors.New("invalid mime type on content")
@@ -39,26 +27,6 @@ const (
 	RoleModel = "model"
 	RoleUser  = "user"
 )
-
-// NewGoogleAI creates a new GoogleAI struct.
-func NewGoogleAI(ctx context.Context, opts ...Option) (*GoogleAI, error) {
-	clientOptions := defaultOptions()
-	for _, opt := range opts {
-		opt(&clientOptions)
-	}
-
-	gi := &GoogleAI{
-		opts: clientOptions,
-	}
-
-	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.apiKey))
-	if err != nil {
-		return gi, err
-	}
-
-	gi.client = client
-	return gi, nil
-}
 
 // Call implements the [llms.Model] interface.
 func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -148,22 +116,6 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 	return &contentResponse, nil
 }
 
-// CreateEmbedding creates embeddings from texts.
-func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	em := g.client.EmbeddingModel(g.opts.defaultEmbeddingModel)
-
-	results := make([][]float32, 0, len(texts))
-	for _, t := range texts {
-		res, err := em.EmbedContent(ctx, genai.Text(t))
-		if err != nil {
-			return results, err
-		}
-		results = append(results, res.Embedding.Values)
-	}
-
-	return results, nil
-}
-
 // convertParts converts between a sequence of langchain parts and genai parts.
 func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 	convertedParts := make([]genai.Part, 0, len(parts))
@@ -176,7 +128,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 		case llms.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
-			typ, data, err := DownloadImageData(p.URL)
+			typ, data, err := util.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
 			}

@@ -16,6 +16,27 @@ type MessageContent struct {
 	Parts []ContentPart
 }
 
+// TextPart creates TextContent from a given string.
+func TextPart(s string) TextContent {
+	return TextContent{Text: s}
+}
+
+// BinaryPart creates a new BinaryContent from the given MIME type (e.g.
+// "image/png" and binary data).
+func BinaryPart(mime string, data []byte) BinaryContent {
+	return BinaryContent{
+		MIMEType: mime,
+		Data:     data,
+	}
+}
+
+// ImageURLPart creates a new ImageURLContent from the given URL.
+func ImageURLPart(url string) ImageURLContent {
+	return ImageURLContent{
+		URL: url,
+	}
+}
+
 // ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {
 	isPart()
@@ -81,4 +102,17 @@ type ContentChoice struct {
 
 	// FuncCall is non-nil when the model asks to invoke a function/tool.
 	FuncCall *schema.FunctionCall
+}
+
+// TextParts is a helper function to create a MessageContent with a role and a
+// list of text parts.
+func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
+	result := MessageContent{
+		Role:  role,
+		Parts: []ContentPart{},
+	}
+	for _, part := range parts {
+		result.Parts = append(result.Parts, TextPart(part))
+	}
+	return result
 }
