@@ -74,6 +74,12 @@ func WithConn(conn *pgx.Conn) Option {
 	}
 }
 
+func WithCollectionMetadata(metadata map[string]any) Option {
+	return func(p *Store) {
+		p.collectionMetadata = metadata
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		collectionName:      DefaultCollectionName,

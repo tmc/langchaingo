@@ -12,7 +12,7 @@ import (
 func TestHuggingfaceEmbeddings(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); openaiKey == "" {
+	if huggingfaceKey := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); huggingfaceKey == "" {
 		t.Skip("HUGGINGFACEHUB_API_TOKEN not set")
 	}
 	e, err := NewHuggingface()
