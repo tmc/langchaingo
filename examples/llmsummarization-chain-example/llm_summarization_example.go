@@ -8,17 +8,17 @@ import (
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/documentloaders"
-	"github.com/tmc/langchaingo/llms/vertexai"
+	"github.com/tmc/langchaingo/llms/googleai/vertex"
 	"github.com/tmc/langchaingo/textsplitter"
 )
 
 func main() {
-	llm, err := vertexai.New()
+	ctx := context.Background()
+	llm, err := vertex.New(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx := context.Background()
 	llmSummarizationChain := chains.LoadRefineSummarization(llm)
 	doc := `AI applications are summarizing articles, writing stories and 
 	engaging in long conversations — and large language models are doing 
