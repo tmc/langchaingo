@@ -206,10 +206,6 @@ func (s Store) AddDocuments(
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-	customID := uuid.New().String()
-	if opts.CustomID != "" {
-		customID = opts.CustomID
-	}
 
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
@@ -219,7 +215,7 @@ func (s Store) AddDocuments(
 	for docIdx, doc := range docs {
 		id := uuid.New().String()
 		ids[docIdx] = id
-		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, customID, s.collectionUUID)
+		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, &doc.CustomID, s.collectionUUID)
 	}
 	return ids, s.conn.SendBatch(ctx, b).Close()
 }

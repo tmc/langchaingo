@@ -8,33 +8,41 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
+// ErrMismatchMetadatasAndTextAndCustomIDs is returned when the number of texts and metadatas
 // given to CreateDocuments does not match. The function will not error if the
 // length of the metadatas slice is zero.
-var ErrMismatchMetadatasAndText = errors.New("number of texts and metadatas does not match")
+var ErrMismatchMetadatasAndTextAndCustomIDs = errors.New("number of texts, metadatas and custom IDs do not match")
 
 // SplitDocuments splits documents using a textsplitter.
 func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]schema.Document, error) {
 	texts := make([]string, 0)
 	metadatas := make([]map[string]any, 0)
+	customIDs := make([]*string, 0)
 	for _, document := range documents {
 		texts = append(texts, document.PageContent)
 		metadatas = append(metadatas, document.Metadata)
+		customIDs = append(customIDs, document.CustomID)
 	}
 
-	return CreateDocuments(textSplitter, texts, metadatas)
+	return CreateDocuments(textSplitter, texts, metadatas, customIDs)
 }
 
 // CreateDocuments creates documents from texts and metadatas with a text splitter. If
 // the length of the metadatas is zero, the result documents will contain no metadata.
 // Otherwise, the numbers of texts and metadatas must match.
-func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
+func CreateDocuments(
+	textSplitter TextSplitter, texts []string, metadatas []map[string]any, customIDs []*string,
+) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
 	}
 
 	if len(texts) != len(metadatas) {
-		return nil, ErrMismatchMetadatasAndText
+		return nil, ErrMismatchMetadatasAndTextAndCustomIDs
+	}
+
+	if len(texts) != len(customIDs) {
+		return nil, ErrMismatchMetadatasAndTextAndCustomIDs
 	}
 
 	documents := make([]schema.Document, 0)
@@ -55,6 +63,7 @@ func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[
 			documents = append(documents, schema.Document{
 				PageContent: chunk,
 				Metadata:    curMetadata,
+				CustomID:    customIDs[i],
 			})
 		}
 	}

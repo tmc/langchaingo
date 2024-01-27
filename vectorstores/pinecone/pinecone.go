@@ -100,11 +100,16 @@ func (s Store) AddDocuments(ctx context.Context,
 		metadatas = append(metadatas, metadata)
 	}
 
-	if s.useGRPC {
-		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace)
+	customIDs := make([]*string, 0, len(docs))
+	for i, doc := range docs {
+		customIDs[i] = doc.CustomID
 	}
 
-	return s.restUpsert(ctx, vectors, metadatas, nameSpace)
+	if s.useGRPC {
+		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace, customIDs)
+	}
+
+	return s.restUpsert(ctx, vectors, metadatas, nameSpace, customIDs)
 }
 
 // SimilaritySearch creates a vector embedding from the query using the embedder

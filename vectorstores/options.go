@@ -60,12 +60,3 @@ func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Op
 		o.Deduplicater = fn
 	}
 }
-
-// WithCustomID returns an Option for setting the ID that could be used when
-// adding documents. This is useful to prevent wasting time on creating an embedding
-// when one already exists.
-func WithCustomID(id string) Option {
-	return func(o *Options) {
-		o.CustomID = id
-	}
-}
