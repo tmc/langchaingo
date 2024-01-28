@@ -27,18 +27,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
-	opts := &llms.CallOptions{}
-	for _, opt := range options {
-		opt(opts)
-	}
-
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 	prompt := part.(llms.TextContent).Text
 	result, err := o.client.GenerateText(
 		prompt,
-		toWatsonxOptions(opts)...,
+		toWatsonxOptions(options)...,
 	)
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -68,22 +63,57 @@ func New(opts ...wx.ModelOption) (*LLM, error) {
 	}, nil
 }
 
-func toWatsonxOptions(opts *llms.CallOptions) []wx.GenerateOption {
-	wxOpts := []wx.GenerateOption{
-		wx.WithTopP(opts.TopP),
-		wx.WithTopK(uint(opts.TopK)),
-		// wx.WithDecodingMethod(decodingMethod), // not supported
-		// wx.WithLengthPenalty(decayFactor, startIndex), // not supported
-		wx.WithTemperature(opts.Temperature),
-		wx.WithRandomSeed(uint(opts.Seed)),
-		wx.WithRepetitionPenalty(uint(opts.RepetitionPenalty)),
-		wx.WithMinNewTokens(uint(opts.MinLength)),
-		wx.WithMaxNewTokens(uint(opts.MaxTokens)),
-		wx.WithStopSequences(opts.StopWords),
-		// wx.WithTimeLimit(timeLimit), // not supported
-		// wx.WithTruncateInputTokens(truncateInputTokens), // not supported
-		// wx.WithReturnOptions(inputText, generatedTokens, inputTokens, tokenLogProbs, tokenRanks, topNTokens), // not supported
+func getDefaultCallOptions() *llms.CallOptions {
+	return &llms.CallOptions{
+		TopP:              -1,
+		TopK:              -1,
+		Temperature:       -1,
+		Seed:              -1,
+		RepetitionPenalty: -1,
+		MaxTokens:         -1,
+		StopWords:         -1,
+	}
+}
+
+func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
+	opts := getDefaultCallOptions()
+	for _, opt := range *options {
+		opt(opts)
 	}
 
-	return wxOpts
+	o := []wx.GenerateOption{}
+	if opts.TopP != -1 {
+		o = append(o, wx.WithTopP(opts.TopP))
+	}
+	if opts.TopK != -1 {
+		o = append(o, wx.WithTopK(uint(opts.TopK)))
+	}
+	if opts.Temperature != -1 {
+		o = append(o, wx.WithTemperature(opts.Temperature))
+	}
+	if opts.Seed != -1 {
+		o = append(o, wx.WithRandomSeed(uint(opts.Seed)))
+	}
+	if opts.RepetitionPenalty != -1 {
+		o = append(o, wx.WithRepetitionPenalty(uint(opts.RepetitionPenalty)))
+	}
+	if opts.MaxTokens != -1 {
+		o = append(o, wx.WithMaxNewTokens(uint(opts.MaxTokens)))
+	}
+	if len(opts.StopWords) > 0 {
+		o = append(o, wx.WithStopSequences(opts.StopWords))
+	}
+
+	/*
+	   watsonx options not supported:
+
+	   	wx.WithMinNewTokens(minNewTokens)
+	   	wx.WithDecodingMethod(decodingMethod)
+	   	wx.WithLengthPenalty(decayFactor, startIndex)
+	   	wx.WithTimeLimit(timeLimit)
+	   	wx.WithTruncateInputTokens(truncateInputTokens)
+	   	wx.WithReturnOptions(inputText, generatedTokens, inputTokens, tokenLogProbs, tokenRanks, topNTokens)
+	*/
+
+	return o
 }
