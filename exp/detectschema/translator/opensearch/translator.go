@@ -1,7 +1,6 @@
 package detectschemaopensearch
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/tmc/langchaingo/exp/detectschema"
@@ -29,7 +28,13 @@ func (t Translator) TranslateAttributeInfo(attributeInfo []schema.AttributeInfo)
 		switch attribute.Type {
 		case detectschema.AllowedTypeString:
 			output[attribute.Name] = map[string]interface{}{
-				"type": "keyword",
+				"type": "text",
+				"fields": map[string]interface{}{
+					"keyword": map[string]interface{}{
+						"type":         "keyword",
+						"ignore_above": 256,
+					},
+				},
 			}
 		case detectschema.AllowedTypeBool:
 			output[attribute.Name] = map[string]interface{}{
@@ -48,16 +53,4 @@ func (t Translator) TranslateAttributeInfo(attributeInfo []schema.AttributeInfo)
 		}
 	}
 	return output, nil
-}
-
-func (t Translator) GetAttributeInfoByNamespace(ctx context.Context, namespace string) ([]schema.AttributeInfo, error) {
-	output := map[string]interface{}{}
-	if err := t.vectorstore.GetIndex(ctx, namespace, &output); err != nil {
-		return nil, err
-	}
-	fmt.Printf("output: %+v\n", output)
-
-	attributeInfo := []schema.AttributeInfo{}
-
-	return attributeInfo, nil
 }

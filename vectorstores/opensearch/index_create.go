@@ -58,7 +58,7 @@ func (s *Store) CreateIndex(
 	for _, indexOption := range opts {
 		indexOption(&indexSchema)
 	}
-
+	fmt.Printf("indexSchema: %+v\n", indexSchema)
 	buf := new(bytes.Buffer)
 
 	if err := json.NewEncoder(buf).Encode(indexSchema); err != nil {
@@ -78,6 +78,8 @@ func (s *Store) CreateIndex(
 
 func WithMetadata(metadata any) IndexOption {
 	return func(indexMap *map[string]interface{}) {
-		(*indexMap)["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["metadata"] = metadata
+		(*indexMap)["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["metadata"] = map[string]interface{}{
+			"properties": metadata,
+		}
 	}
 }

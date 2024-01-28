@@ -35,7 +35,7 @@ func TestCSVLoaderWithFilteringColumns(t *testing.T) {
 	file, err := os.Open("./testdata/test.csv")
 	require.NoError(t, err)
 
-	loader := NewCSV(file, "city")
+	loader := NewCSV(file, WithColumnFilter("city"))
 
 	docs, err := loader.Load(context.Background())
 	require.NoError(t, err)
