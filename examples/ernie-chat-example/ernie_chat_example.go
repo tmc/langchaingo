@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	llm, err := ernie.NewChat(
+	llm, err := ernie.New(
 		ernie.WithModelName(ernie.ModelNameERNIEBot),
 		// Fill in your AK and SK here.
 		ernie.WithAKSK("ak", "sk"),
@@ -23,14 +23,15 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, []schema.ChatMessage{
-		schema.SystemChatMessage{Content: "Hello, I am a friendly chatbot. I love to talk about movies, books and music. Answer in long form yaml."},
-		schema.HumanChatMessage{Content: "What would be a good company name a company that makes colorful socks?"},
-	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-		log.Println(string(chunk))
+
+	content := []llms.MessageContent{
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
+	}
+	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		fmt.Print(string(chunk))
 		return nil
-	}),
-	)
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}

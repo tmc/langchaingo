@@ -218,8 +218,8 @@ github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXl
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
 github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
-github.com/tmc/langchaingo v0.1.4-0.20240123022810-6f20ee5cf8df h1:cKXaHac3vg9RtpR8piMrtyHcQ5FFyDtiAQFLMK3U/AQ=
-github.com/tmc/langchaingo v0.1.4-0.20240123022810-6f20ee5cf8df/go.mod h1:0GjvzC2Hq+AHKjTIF+5P242+UUA9kmVl7JAj6NU6f5g=
+github.com/tmc/langchaingo v0.1.4-alpha.0 h1:WVu2KgHr9wloHAiMbbeytiv2W76vpkA59uUwf0EUgrQ=
+github.com/tmc/langchaingo v0.1.4-alpha.0/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
 github.com/weaviate/weaviate v1.19.13 h1:Z6wyqVxlPEd7Y46Qvcbo/PRj0D0jT34CtINyrEfS/zw=
 github.com/weaviate/weaviate v1.19.13/go.mod h1:UdjeUh9IfsYWo6/XHmUoLVYBjhrmQ+bDvMbPIcDAh3Y=
 github.com/weaviate/weaviate-go-client/v4 v4.8.1 h1:oYU+tS9cRyjB0OLV55oN7pnu+EGfa+yIndo3SVlpWJs=

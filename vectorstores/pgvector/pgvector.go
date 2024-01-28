@@ -189,6 +189,8 @@ func (s Store) AddDocuments(
 		return nil, ErrUnsupportedOptions
 	}
 
+	docs = s.deduplicate(ctx, opts, docs)
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
@@ -284,10 +286,58 @@ LIMIT $2`, s.embeddingTableName,
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	docs := make([]schema.Document, 0)
 	for rows.Next() {
 		doc := schema.Document{}
 		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.CustomID, &doc.Score); err != nil {
+			return nil, err
+		}
+		docs = append(docs, doc)
+	}
+	return docs, nil
+}
+
+//nolint:cyclop
+func (s Store) Search(
+	ctx context.Context,
+	numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
+	opts := s.getOptions(options...)
+	collectionName := s.getNameSpace(opts)
+	filter, err := s.getFilters(opts)
+	if err != nil {
+		return nil, err
+	}
+	whereQuerys := make([]string, 0)
+	for k, v := range filter {
+		whereQuerys = append(whereQuerys, fmt.Sprintf("(data.cmetadata ->> '%s') = '%s'", k, v))
+	}
+	whereQuery := strings.Join(whereQuerys, " AND ")
+	if len(whereQuery) == 0 {
+		whereQuery = "TRUE"
+	}
+	sql := fmt.Sprintf(`SELECT
+	document,
+	cmetadata
+FROM %s
+JOIN %s ON %s.collection_id=%s.uuid
+WHERE %s.name='%s' AND %s
+LIMIT $1`, s.embeddingTableName,
+		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
+		whereQuery)
+	rows, err := s.conn.Query(ctx, sql, numDocuments)
+	if err != nil {
+		return nil, err
+	}
+	docs := make([]schema.Document, 0)
+	defer rows.Close()
+
+	for rows.Next() {
+		doc := schema.Document{}
+		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.Score); err != nil {
 			return nil, err
 		}
 		docs = append(docs, doc)
@@ -360,4 +410,22 @@ func (s Store) getFilters(opts vectorstores.Options) (map[string]any, error) {
 		return nil, ErrInvalidFilters
 	}
 	return map[string]any{}, nil
+}
+
+func (s Store) deduplicate(ctx context.Context,
+	opts vectorstores.Options,
+	docs []schema.Document,
+) []schema.Document {
+	if opts.Deduplicater == nil {
+		return docs
+	}
+
+	filtered := make([]schema.Document, 0, len(docs))
+	for _, doc := range docs {
+		if !opts.Deduplicater(ctx, doc) {
+			filtered = append(filtered, doc)
+		}
+	}
+
+	return filtered
 }

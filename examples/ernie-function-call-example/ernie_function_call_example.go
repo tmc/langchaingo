@@ -7,13 +7,13 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/llms/ernie"
+	"github.com/tmc/langchaingo/schema"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
-	llm, err := ernie.NewChat(
+	llm, err := ernie.New(
 		ernie.WithModelName(ernie.ModelNameERNIEBot),
 		// Fill in your AK and SK here.
 		ernie.WithAKSK("ak", "sk"),
@@ -23,19 +23,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, []schema.ChatMessage{
-		schema.HumanChatMessage{Content: "What is the weather like in Boston?"},
-	}, llms.WithFunctions(functions))
+	resp, err := llm.GenerateContent(ctx,
+		[]llms.MessageContent{
+			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
+		llms.WithFunctions(functions))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if completion != nil {
-		fmt.Printf("Function call: %v\n", completion.FunctionCall)
+	choice1 := resp.Choices[0]
+	if choice1.FuncCall != nil {
+		fmt.Printf("Function call: %v\n", choice1.FuncCall)
 	}
 }
 

@@ -30,7 +30,7 @@ type Model interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 }
 
-// GenerateFromSingle prompt is a convenience function for calling an LLM with
+// GenerateFromSinglePrompt is a convenience function for calling an LLM with
 // a single string prompt, expecting a single string response. It's useful for
 // simple, string-only interactions and provides a slightly more ergonomic API
 // than the more general [llms.Model.GenerateContent].

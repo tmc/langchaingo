@@ -1,8 +1,6 @@
-module github.com/tmc/langchaingo/examples/ernie-chat-example
+module github.com/tmc/langchaingo/examples/qdrant-vectorstore-example
 
 go 1.21
-
-toolchain go1.21.4
 
 require github.com/tmc/langchaingo v0.1.4-alpha.0
 
