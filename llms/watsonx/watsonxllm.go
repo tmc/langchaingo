@@ -33,7 +33,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	prompt := part.(llms.TextContent).Text
 	result, err := o.client.GenerateText(
 		prompt,
-		toWatsonxOptions(options)...,
+		toWatsonxOptions(&options)...,
 	)
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -71,7 +71,6 @@ func getDefaultCallOptions() *llms.CallOptions {
 		Seed:              -1,
 		RepetitionPenalty: -1,
 		MaxTokens:         -1,
-		StopWords:         -1,
 	}
 }
 
