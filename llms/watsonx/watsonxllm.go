@@ -95,7 +95,7 @@ func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
 		o = append(o, wx.WithRandomSeed(uint(opts.Seed)))
 	}
 	if opts.RepetitionPenalty != -1 {
-		o = append(o, wx.WithRepetitionPenalty(uint(opts.RepetitionPenalty)))
+		o = append(o, wx.WithRepetitionPenalty(opts.RepetitionPenalty))
 	}
 	if opts.MaxTokens != -1 {
 		o = append(o, wx.WithMaxNewTokens(uint(opts.MaxTokens)))
