@@ -419,8 +419,6 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 h1:RtRsiaGvWxcwd8y3BiRZxsylPT8
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0/go.mod h1:TzP6duP4Py2pHLVPPQp42aoYI92+PCrVotyR5e8Vqlk=
 github.com/h0rv/go-watsonx v0.2.0 h1:1hE81Be8IvArb7BJjISpZh6nO+c5KEGkWQ2V4Y+Fhwg=
 github.com/h0rv/go-watsonx v0.2.0/go.mod h1:QHED4UARKVpcbkzZWqfeskcfzkOqkRYepdnIYaHWxZw=
-github.com/h0rv/go-watsonx v1.0.0 h1:B/i4DOeOHo9OdOQlfScQVFtv0EgBM/Vzvh2CEZI9VHQ=
-github.com/h0rv/go-watsonx v1.0.0/go.mod h1:QHED4UARKVpcbkzZWqfeskcfzkOqkRYepdnIYaHWxZw=
 github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=

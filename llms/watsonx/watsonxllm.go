@@ -32,15 +32,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	wxOpts := []wx.GenerateOption{}
-
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 	prompt := part.(llms.TextContent).Text
 	result, err := o.client.GenerateText(
 		prompt,
-		wxOpts...,
+		toWatsonxOptions(opts)...,
 	)
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -68,4 +66,24 @@ func New(opts ...wx.ModelOption) (*LLM, error) {
 	return &LLM{
 		client: c,
 	}, nil
+}
+
+func toWatsonxOptions(opts *llms.CallOptions) []wx.GenerateOption {
+	wxOpts := []wx.GenerateOption{
+		wx.WithTopP(opts.TopP),
+		wx.WithTopK(uint(opts.TopK)),
+		// wx.WithDecodingMethod(decodingMethod), // not supported
+		// wx.WithLengthPenalty(decayFactor, startIndex), // not supported
+		wx.WithTemperature(opts.Temperature),
+		wx.WithRandomSeed(uint(opts.Seed)),
+		wx.WithRepetitionPenalty(uint(opts.RepetitionPenalty)),
+		wx.WithMinNewTokens(uint(opts.MinLength)),
+		wx.WithMaxNewTokens(uint(opts.MaxTokens)),
+		wx.WithStopSequences(opts.StopWords),
+		// wx.WithTimeLimit(timeLimit), // not supported
+		// wx.WithTruncateInputTokens(truncateInputTokens), // not supported
+		// wx.WithReturnOptions(inputText, generatedTokens, inputTokens, tokenLogProbs, tokenRanks, topNTokens), // not supported
+	}
+
+	return wxOpts
 }
