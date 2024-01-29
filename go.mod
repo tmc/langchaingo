@@ -1,6 +1,6 @@
 module github.com/tmc/langchaingo
 
-go 1.21
+go 1.21.2
 
 toolchain go1.21.4
 
