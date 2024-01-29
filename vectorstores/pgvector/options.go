@@ -74,6 +74,7 @@ func WithConn(conn *pgx.Conn) Option {
 	}
 }
 
+// WithCollectionMetadata is an option for specifying the collection metadata.
 func WithCollectionMetadata(metadata map[string]any) Option {
 	return func(p *Store) {
 		p.collectionMetadata = metadata
