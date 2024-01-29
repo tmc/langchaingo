@@ -53,6 +53,17 @@ func TestMultiContentText(t *testing.T) {
 	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
 }
 
+func TestGenerateFromSinglePrompt(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	prompt := "name all the planets in the solar system"
+	rsp, err := llms.GenerateFromSinglePrompt(context.Background(), llm, prompt)
+	require.NoError(t, err)
+
+	assert.Regexp(t, "(?i)jupiter", rsp)
+}
+
 func TestMultiContentTextStream(t *testing.T) {
 	t.Parallel()
 	llm := newClient(t)
@@ -88,6 +99,29 @@ func TestMultiContentTextStream(t *testing.T) {
 	// we expect.
 	assert.GreaterOrEqual(t, len(chunks), 2)
 	assert.Regexp(t, "(?i)dog|canid|canine", sb.String())
+}
+
+func TestMultiContentImage(t *testing.T) {
+	t.Parallel()
+	llm := newClient(t)
+
+	parts := []llms.ContentPart{
+		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		llms.TextPart("describe this image in detail"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro-vision"))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "(?i)parrot", c1.Content)
 }
 
 func TestEmbeddings(t *testing.T) {
