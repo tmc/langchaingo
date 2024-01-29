@@ -2,10 +2,16 @@ package watsonx
 
 import (
 	"context"
+	"errors"
 
 	wx "github.com/h0rv/go-watsonx/models"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
+)
+
+var (
+	ErrInvalidPrompt = errors.New("invalid prompt")
+	ErrEmptyResponse = errors.New("no response")
 )
 
 type LLM struct {
@@ -27,10 +33,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
-	// Assume we get a single text message
-	msg0 := messages[0]
-	part := msg0.Parts[0]
-	prompt := part.(llms.TextContent).Text
+	prompt, err := getPrompt(messages)
+	if err != nil {
+		return nil, err
+	}
+
 	result, err := o.client.GenerateText(
 		prompt,
 		toWatsonxOptions(&options)...,
@@ -40,6 +47,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			o.CallbacksHandler.HandleLLMError(ctx, err)
 		}
 		return nil, err
+	}
+
+	if result.Text == "" {
+		return nil, ErrEmptyResponse
 	}
 
 	resp := &llms.ContentResponse{
@@ -61,6 +72,18 @@ func New(opts ...wx.ModelOption) (*LLM, error) {
 	return &LLM{
 		client: c,
 	}, nil
+}
+
+func getPrompt(messages []llms.MessageContent) (string, error) {
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	prompt, ok := part.(llms.TextContent)
+	if !ok {
+		return "", ErrInvalidPrompt
+	}
+
+	return prompt.Text, nil
 }
 
 func getDefaultCallOptions() *llms.CallOptions {
