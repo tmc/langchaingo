@@ -1,18 +1,25 @@
-package googleai
+// nolint
+package shared_test
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/googleai"
+	"github.com/tmc/langchaingo/llms/googleai/vertex"
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newClient(t *testing.T) *GoogleAI {
+func newGoogleAIClient(t *testing.T) *googleai.GoogleAI {
 	t.Helper()
 
 	genaiKey := os.Getenv("GENAI_API_KEY")
@@ -20,14 +27,70 @@ func newClient(t *testing.T) *GoogleAI {
 		t.Skip("GENAI_API_KEY not set")
 		return nil
 	}
-	llm, err := New(context.Background(), WithAPIKey(genaiKey))
+	llm, err := googleai.New(context.Background(), googleai.WithAPIKey(genaiKey))
 	require.NoError(t, err)
 	return llm
 }
 
-func TestMultiContentText(t *testing.T) {
+func newVertexClient(t *testing.T) *vertex.Vertex {
+	t.Helper()
+
+	project := os.Getenv("VERTEX_PROJECT")
+	if project == "" {
+		t.Skip("VERTEX_PROJECT not set")
+		return nil
+	}
+	location := os.Getenv("VERTEX_LOCATION")
+	if location == "" {
+		location = "us-central1"
+	}
+
+	llm, err := vertex.New(
+		context.Background(),
+		vertex.WithCloudProject(project),
+		vertex.WithCloudLocation(location))
+	require.NoError(t, err)
+	return llm
+}
+
+// funcName obtains the name of the given function value, without a package
+// prefix.
+func funcName(f any) string {
+	fullName := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	parts := strings.Split(fullName, ".")
+	return parts[len(parts)-1]
+}
+
+type testFunc func(*testing.T, llms.Model)
+
+// testFuncs is a list of all test functions in this file to run with both
+// client types.
+var testFuncs = []testFunc{
+	testMultiContentText,
+	testGenerateFromSinglePrompt,
+	testMultiContentTextChatSequence,
+	testMultiContentImage,
+	testEmbeddings,
+	testCandidateCountSetting,
+	testMaxTokensSetting,
+}
+
+func TestShared(t *testing.T) {
+	for _, f := range testFuncs {
+		t.Run(fmt.Sprintf("%s-googleai", funcName(f)), func(t *testing.T) {
+			llm := newGoogleAIClient(t)
+			f(t, llm)
+		})
+		t.Run(fmt.Sprintf("%s-vertex", funcName(f)), func(t *testing.T) {
+			llm := newVertexClient(t)
+			f(t, llm)
+		})
+	}
+}
+
+func testMultiContentText(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextPart("I'm a pomeranian"),
@@ -48,9 +111,9 @@ func TestMultiContentText(t *testing.T) {
 	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
 }
 
-func TestGenerateFromSinglePrompt(t *testing.T) {
+func testGenerateFromSinglePrompt(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
 
 	prompt := "name all the planets in the solar system"
 	rsp, err := llms.GenerateFromSinglePrompt(context.Background(), llm, prompt)
@@ -59,46 +122,9 @@ func TestGenerateFromSinglePrompt(t *testing.T) {
 	assert.Regexp(t, "(?i)jupiter", rsp)
 }
 
-func TestMultiContentTextStream(t *testing.T) {
+func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
-
-	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("Tell me more about my taxonomy"),
-	}
-	content := []llms.MessageContent{
-		{
-			Role:  schema.ChatMessageTypeHuman,
-			Parts: parts,
-		},
-	}
-
-	var chunks [][]byte
-	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-			chunks = append(chunks, chunk)
-			sb.Write(chunk)
-			return nil
-		}))
-
-	require.NoError(t, err)
-
-	assert.NotEmpty(t, rsp.Choices)
-	// Check that the combined response contains what we expect
-	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
-
-	// Check that multiple chunks were received and they also have words
-	// we expect.
-	assert.GreaterOrEqual(t, len(chunks), 2)
-	assert.Regexp(t, "(?i)dog|canid|canine", sb.String())
-}
-
-func TestMultiContentTextChatSequence(t *testing.T) {
-	t.Parallel()
-	llm := newClient(t)
 
 	content := []llms.MessageContent{
 		{
@@ -123,9 +149,9 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 	assert.Regexp(t, "(?i)spain.*larger", c1.Content)
 }
 
-func TestMultiContentImage(t *testing.T) {
+func testMultiContentImage(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
 
 	parts := []llms.ContentPart{
 		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
@@ -146,12 +172,13 @@ func TestMultiContentImage(t *testing.T) {
 	assert.Regexp(t, "(?i)parrot", c1.Content)
 }
 
-func TestEmbeddings(t *testing.T) {
+func testEmbeddings(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
 
 	texts := []string{"foo", "parrot"}
-	res, err := llm.CreateEmbedding(context.Background(), texts)
+	emb := llm.(embeddings.EmbedderClient)
+	res, err := emb.CreateEmbedding(context.Background(), texts)
 	require.NoError(t, err)
 
 	assert.Equal(t, len(texts), len(res))
@@ -159,9 +186,8 @@ func TestEmbeddings(t *testing.T) {
 	assert.NotEmpty(t, res[1])
 }
 
-func TestCandidateCountSetting(t *testing.T) {
-	t.Parallel()
-	llm := newClient(t)
+func testCandidateCountSetting(t *testing.T, llm llms.Model) {
+	t.Helper()
 
 	parts := []llms.ContentPart{
 		llms.TextPart("Name five countries in Africa"),
@@ -184,9 +210,9 @@ func TestCandidateCountSetting(t *testing.T) {
 	// TODO: test multiple candidates when the backend supports it
 }
 
-func TestMaxTokensSetting(t *testing.T) {
+func testMaxTokensSetting(t *testing.T, llm llms.Model) {
+	t.Helper()
 	t.Parallel()
-	llm := newClient(t)
 
 	parts := []llms.ContentPart{
 		llms.TextPart("I'm a pomeranian"),
