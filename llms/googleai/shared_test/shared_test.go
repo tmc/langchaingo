@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
@@ -69,7 +70,8 @@ var testFuncs = []testFunc{
 	testMultiContentText,
 	testGenerateFromSinglePrompt,
 	testMultiContentTextChatSequence,
-	testMultiContentImage,
+	testMultiContentImageLink,
+	testMultiContentImageBinary,
 	testEmbeddings,
 	testCandidateCountSetting,
 	testMaxTokensSetting,
@@ -168,13 +170,41 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 	assert.Regexp(t, "(?i)spain.*larger", c1.Content)
 }
 
-func testMultiContentImage(t *testing.T, llm llms.Model) {
+func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
 	parts := []llms.ContentPart{
 		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
 		llms.TextPart("describe this image in detail"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro-vision"))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "(?i)parrot", c1.Content)
+}
+
+func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	b, err := os.ReadFile(filepath.Join("testdata", "parrot-icon.png"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parts := []llms.ContentPart{
+		llms.BinaryPart("image/png", b),
+		llms.TextPart("what does this image show? please use detail"),
 	}
 	content := []llms.MessageContent{
 		{
@@ -294,6 +324,6 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 		assert.NotEmpty(t, rsp.Choices)
 		c1 := rsp.Choices[0]
 		assert.Regexp(t, "(?i)stop", c1.StopReason)
-		assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+		assert.Regexp(t, "(?i)dog|breed|canid|canine", c1.Content)
 	}
 }
