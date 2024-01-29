@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 18
           cache: yarn
-          cache-dependency-path: 'docs/package-lock.json'
+          cache-dependency-path: "docs/package-lock.json"
 
       - name: Install dependencies
         working-directory: docs
@@ -43,7 +43,12 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
-          path: 'docs/build'
+          path: "docs/build"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+
+      - name: Preview Pages
+        uses: rajyan/preview-pages@v1
+        with:
+          source-dir: "docs/build"
