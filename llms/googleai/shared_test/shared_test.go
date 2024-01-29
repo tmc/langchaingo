@@ -73,6 +73,7 @@ var testFuncs = []testFunc{
 	testEmbeddings,
 	testCandidateCountSetting,
 	testMaxTokensSetting,
+	testWithStreaming,
 }
 
 func TestShared(t *testing.T) {
@@ -104,6 +105,24 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	}
 
 	rsp, err := llm.GenerateContent(context.Background(), content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+}
+
+func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	content := llms.TextParts(
+		schema.ChatMessageTypeHuman,
+		"I'm a pomeranian",
+		"What kind of mammal am I?",
+	)
+
+	rsp, err := llm.GenerateContent(context.Background(), []llms.MessageContent{content})
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -176,7 +195,7 @@ func testEmbeddings(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	texts := []string{"foo", "parrot"}
+	texts := []string{"foo", "parrot", "foo"}
 	emb := llm.(embeddings.EmbedderClient)
 	res, err := emb.CreateEmbedding(context.Background(), texts)
 	require.NoError(t, err)
@@ -184,6 +203,7 @@ func testEmbeddings(t *testing.T, llm llms.Model) {
 	assert.Equal(t, len(texts), len(res))
 	assert.NotEmpty(t, res[0])
 	assert.NotEmpty(t, res[1])
+	assert.Equal(t, res[0], res[2])
 }
 
 func testCandidateCountSetting(t *testing.T, llm llms.Model) {
@@ -208,6 +228,33 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 	}
 
 	// TODO: test multiple candidates when the backend supports it
+}
+
+func testWithStreaming(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	content := llms.TextParts(
+		schema.ChatMessageTypeHuman,
+		"I'm a pomeranian",
+		"Tell me more about my taxonomy",
+	)
+
+	var sb strings.Builder
+	rsp, err := llm.GenerateContent(
+		context.Background(),
+		[]llms.MessageContent{content},
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			sb.Write(chunk)
+			return nil
+		}))
+
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
+	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
