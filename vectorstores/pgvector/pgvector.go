@@ -151,16 +151,21 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 		return err
 	}
 
+	vectorDimensions := ""
+	if s.vectorDimensions > 0 {
+		vectorDimensions = fmt.Sprintf("(%d)", s.vectorDimensions)
+	}
+
 	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
 	collection_id uuid,
-	embedding vector(%d),
+	embedding vector%s,
 	document varchar,
 	cmetadata json,
 	custom_id varchar,
 	"uuid" uuid NOT NULL,
 	CONSTRAINT langchain_pg_embedding_collection_id_fkey
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
-	PRIMARY KEY (uuid))`, s.embeddingTableName, s.vectorDimensions, s.collectionTableName)
+	PRIMARY KEY (uuid))`, s.embeddingTableName, vectorDimensions, s.collectionTableName)
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
