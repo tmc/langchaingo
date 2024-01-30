@@ -7,7 +7,6 @@ toolchain go1.21.4
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.26.3
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
-	github.com/tmc/langchaingo v0.1.3
 )
 
 require (
