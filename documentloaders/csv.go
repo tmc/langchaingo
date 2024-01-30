@@ -103,7 +103,7 @@ func WithColumnFilter(columns ...string) CSVOption {
 	}
 }
 
-// WithRowPropertiesInMetadata defines if row should be added to metadata
+// WithRowPropertiesInMetadata defines if row should be added to metadata.
 func WithRowPropertiesInMetadata() CSVOption {
 	return func(c *CSV) {
 		c.rowPropsInMetadata = true
