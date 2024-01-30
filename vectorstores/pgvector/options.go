@@ -93,7 +93,7 @@ func WithVectorDimensions(size int) Option {
 //
 // m: he max number of connections per layer (16 by default)
 // efConstruction: the size of the dynamic candidate list for constructing the graph (64 by default)
-// distanceFunction: the distance function to use (l2 by default)
+// distanceFunction: the distance function to use (l2 by default).
 func WithHNSWIndex(m int, efConstruction int, distanceFunction string) Option {
 	return func(p *Store) {
 		p.hnswIndex = &HNSWIndex{
