@@ -2,11 +2,10 @@ package detectschema
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	_ "embed"
 
 	"github.com/tmc/langchaingo/chains"
 	detectschemaprompts "github.com/tmc/langchaingo/exp/detectschema/prompts"
@@ -23,7 +22,6 @@ var _exampleTemplate string //nolint:gochecknoglobals
 var _suffix string //nolint:gochecknoglobals
 
 func (d *Detector) GetAttributeInfo(ctx context.Context, fileName string, fileType string, sampleData string) ([]schema.AttributeInfo, error) {
-
 	exampleTemplatePrompt := prompts.NewPromptTemplate(_exampleTemplate, []string{
 		"i",
 		"file_type",
@@ -50,7 +48,6 @@ func (d *Detector) GetAttributeInfo(ctx context.Context, fileName string, fileTy
 		"sample_data": sampleData,
 		"types":       strings.Join([]string{AllowedTypeBool, AllowedTypeFloat, AllowedTypeInt, AllowedTypeString}, ","),
 	})
-
 	if err != nil {
 		return nil, err
 	}

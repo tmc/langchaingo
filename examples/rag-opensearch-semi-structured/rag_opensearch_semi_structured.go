@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
+	_ "embed"
+	"log"
 	"os"
 	"strings"
-
-	_ "embed"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
@@ -14,11 +13,13 @@ import (
 	"github.com/tmc/langchaingo/documentloaders"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/exp/detectschema"
+	detectschemaopensearch "github.com/tmc/langchaingo/exp/detectschema/translator/opensearch"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/retrievers/selfquery"
 	selfqueryopensearch "github.com/tmc/langchaingo/retrievers/selfquery/opensearch"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/opensearch"
 )
 
@@ -31,7 +32,12 @@ func main() {
 	llm := setLLM()
 	indexName := "movies"
 	opensearchVectorstore := getOpensearchVectorStore((os.Getenv("OPENSEARCH_ENDPOINT")), os.Getenv("AWS_PROFILE"), llm)
-	defer opensearchVectorstore.DeleteIndex(ctx, indexName, nil)
+	defer func() {
+		err := opensearchVectorstore.DeleteIndex(ctx, indexName, nil)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	// first we need to create the rag.
 	attributeInfos := ragCreation(ctx, llm, indexName, opensearchVectorstore)
@@ -50,24 +56,21 @@ func ragCreation(ctx context.Context, llm *openai.LLM, indexName string, opensea
 	}
 
 	// let's translate the attribute info to opensearch mapping.
-	// schemadetectoropensearch := detectschemaopensearch.New(opensearchVectorstore)
-	// opensearchAttributes, err := schemadetectoropensearch.TranslateAttributeInfo(attributes)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	schemadetectoropensearch := detectschemaopensearch.New(opensearchVectorstore)
+	opensearchAttributes, err := schemadetectoropensearch.TranslateAttributeInfo(attributes)
+	if err != nil {
+		panic(err)
+	}
 
-	// let's create the index with the schema.
+	// // let's create the index with the schema.
 	if err := opensearchVectorstore.CreateIndex(
 		ctx,
 		indexName,
 		nil,
-		// opensearch.WithMetadata(opensearchAttributes),
+		opensearch.WithMetadata(opensearchAttributes),
 	); err != nil {
 		panic(err)
 	}
-	output := map[string]interface{}{}
-	opensearchVectorstore.GetIndex(ctx, indexName, &output)
-	fmt.Printf("output: %+v\n", output)
 
 	// convert CSV to Documents.
 	splitter := textsplitter.RecursiveCharacter{
@@ -81,10 +84,9 @@ func ragCreation(ctx context.Context, llm *openai.LLM, indexName string, opensea
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("documents: %+v\n", documents)
 
 	// let's index the documents.
-	if _, err := opensearchVectorstore.AddDocuments(ctx, documents); err != nil {
+	if _, err := opensearchVectorstore.AddDocuments(ctx, documents, vectorstores.WithNameSpace(indexName)); err != nil {
 		panic(err)
 	}
 
@@ -92,25 +94,54 @@ func ragCreation(ctx context.Context, llm *openai.LLM, indexName string, opensea
 }
 
 func ragSearch(ctx context.Context, llm *openai.LLM, indexName string, opensearchVectorstore opensearch.Store, attributeInfos []schema.AttributeInfo) {
-
 	// let's search for the documents.
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
 		LLM:               llm,
 		Store:             selfqueryopensearch.New(opensearchVectorstore, indexName),
 		MetadataFieldInfo: attributeInfos,
+		DocumentContents:  "all the properties of a movie",
+		EnableLimit:       true,
+		Debug:             true,
 	})
 
-	result, err := retriever.GetRelevantDocuments(ctx, "give me the 10 best movies")
+	documents, err := retriever.GetRelevantDocuments(ctx, "movies released after 2007 with a audience rating higher than 85")
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("result: %+v\n", result)
+	for _, d := range documents {
+		log.Printf("%s | %s | %s \n", d.Metadata["Film"], d.Metadata["Year"], d.Metadata["Audience score %"])
+	}
 
+	// filter: and(gt("Year", 2007), gt("Audience score %", 85))
+	// result:
+	// A Dangerous Method | 2011 | 89
+	// WALL-E | 2008 | 89
+	// Tangled | 2010 | 88
+
+	documents, err = retriever.GetRelevantDocuments(ctx, "10 movies with rotten tomatoes rating higher than 60")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, d := range documents {
+		log.Printf("%s | %s | %s \n", d.Metadata["Film"], d.Metadata["Year"], d.Metadata["Rotten Tomatoes %"])
+	}
+	// filter: gt("Rotten Tomatoes %", 60)
+	// result:
+	// WALL-E | 2008 | 96
+	// Jane Eyre | 2011 | 85
+	// A Dangerous Method | 2011 | 79
+	// The Curious Case of Benjamin Button | 2008 | 73
+	// Nick and Norah's Infinite Playlist | 2008 | 73
+	// High School Musical 3: Senior Year | 2008 | 65
+	// Zack and Miri Make a Porno | 2008 | 64
+	// Miss Pettigrew Lives for a Day | 2008 | 78
+	// Midnight in Paris | 2011 | 93
+	// Knocked Up | 2007 | 91
 }
 
 func setLLM() *openai.LLM {
-
 	openaiOpts := []openai.Option{}
 
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
@@ -131,7 +162,6 @@ func setLLM() *openai.LLM {
 }
 
 func getOpensearchVectorStore(endpoint, profile string, embedderClient embeddings.EmbedderClient) opensearch.Store {
-
 	ctx := context.Background()
 
 	awsCfg, err := config.LoadDefaultConfig(ctx,

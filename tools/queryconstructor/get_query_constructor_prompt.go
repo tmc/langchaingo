@@ -135,7 +135,7 @@ func formatAttribute(attributeInfo []schema.AttributeInfo) ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(output)
+	return json.MarshalIndent(output, "", "\t")
 }
 
 type setExampleOutput struct {

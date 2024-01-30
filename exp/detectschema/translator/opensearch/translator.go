@@ -22,7 +22,7 @@ func New(vectorstore opensearch.Store) Translator {
 
 func (t Translator) TranslateAttributeInfo(attributeInfo []schema.AttributeInfo) (any, error) {
 	output := map[string]interface{}{}
-	fmt.Printf("attributeInfo: %v\n", attributeInfo)
+
 	for _, attribute := range attributeInfo {
 		output[attribute.Name] = attribute.Type
 		switch attribute.Type {

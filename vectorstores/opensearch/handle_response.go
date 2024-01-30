@@ -21,7 +21,7 @@ func handleResponse(output any, res *opensearchapi.Response) error {
 			return nil
 		}
 
-		return json.Unmarshal(body, &output)
+		return json.Unmarshal(body, output)
 	}
 
 	return fmt.Errorf("status %d | message: %s", res.StatusCode, string(body))

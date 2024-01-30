@@ -10,8 +10,9 @@ type FromLLMArgs struct {
 	Store             StoreWithQueryTranslator
 	DocumentContents  string
 	MetadataFieldInfo []schema.AttributeInfo
-	EnableLimit       *bool
 	DefaultLimit      *int
+	EnableLimit       bool
+	Debug             bool
 }
 
 // create retriever with LLM.
@@ -22,6 +23,7 @@ func FromLLM(args FromLLMArgs) *Retriever {
 		DocumentContents:  args.DocumentContents,
 		MetadataFieldInfo: args.MetadataFieldInfo,
 		EnableLimit:       args.EnableLimit,
+		Debug:             args.Debug,
 	}
 
 	if args.DefaultLimit != nil {

@@ -17,7 +17,6 @@ func getEnvVariables(t *testing.T) {
 	if openaiKey == "" {
 		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
 	}
-
 }
 
 func setLLM(t *testing.T) *openai.LLM {
@@ -57,13 +56,13 @@ func TestGetAttributeInfo(t *testing.T) {
 		t.Fail()
 	}
 
-	if result[0].Type != "integer" ||
-		result[1].Type != "string" ||
-		result[2].Type != "string" ||
-		result[3].Type != "string" ||
-		result[4].Type != "string" ||
-		result[5].Type != "string" ||
-		result[6].Type != "bool" {
+	if result[0].Type != detectschema.AllowedTypeInt ||
+		result[1].Type != detectschema.AllowedTypeString ||
+		result[2].Type != detectschema.AllowedTypeString ||
+		result[3].Type != detectschema.AllowedTypeString ||
+		result[4].Type != detectschema.AllowedTypeString ||
+		result[5].Type != detectschema.AllowedTypeString ||
+		result[6].Type != detectschema.AllowedTypeBool {
 		t.Fail()
 	}
 }

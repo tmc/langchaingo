@@ -13,6 +13,7 @@ type Retriever struct {
 	LLM               llms.Model
 	DocumentContents  string
 	MetadataFieldInfo []schema.AttributeInfo
-	EnableLimit       *bool
+	EnableLimit       bool
 	DefaultLimit      int
+	Debug             bool
 }

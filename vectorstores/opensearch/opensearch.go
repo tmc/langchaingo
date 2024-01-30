@@ -148,14 +148,13 @@ func (s Store) SimilaritySearch(
 		return nil, err
 	}
 
-	output := []schema.Document{}
-
-	return handleSimilarySearchResponse(response, output, opts)
+	return handleSimilarySearchResponse(response, opts)
 }
 
-func handleSimilarySearchResponse(res *opensearchapi.Response, output []schema.Document, opts vectorstores.Options) ([]schema.Document, error) {
+func handleSimilarySearchResponse(res *opensearchapi.Response, opts vectorstores.Options) ([]schema.Document, error) {
 	searchResults := searchResults{}
-	err := handleResponse(searchResults, res)
+	output := []schema.Document{}
+	err := handleResponse(&searchResults, res)
 	if err != nil {
 		return output, fmt.Errorf("error reading search response body: %w", err)
 	}

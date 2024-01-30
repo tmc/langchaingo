@@ -168,7 +168,6 @@ func TestParser(t *testing.T) {
 
 	setAndFillIndex(t, &vectorstore, indexName)
 
-	enableLimit := true
 	store := selfqueryopensearch.New(vectorstore, indexName)
 	retriever := selfquery.FromLLM(selfquery.FromLLMArgs{
 		LLM:              llm,
@@ -196,7 +195,7 @@ func TestParser(t *testing.T) {
 				Type:        "float",
 			},
 		},
-		EnableLimit: &enableLimit,
+		EnableLimit: true,
 	})
 
 	documents, err := retriever.GetRelevantDocuments(context.TODO(), "I want to watch a movie rated higher than 8.5")

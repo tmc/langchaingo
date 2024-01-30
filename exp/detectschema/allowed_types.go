@@ -2,7 +2,7 @@ package detectschema
 
 type AllowedType = string
 
-var (
+const (
 	AllowedTypeString AllowedType = "string"
 	AllowedTypeInt    AllowedType = "integer"
 	AllowedTypeFloat  AllowedType = "float"

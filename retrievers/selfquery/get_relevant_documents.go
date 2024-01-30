@@ -3,7 +3,9 @@ package selfquery
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/outputparser"
@@ -12,12 +14,14 @@ import (
 	queryconstructor_parser "github.com/tmc/langchaingo/tools/queryconstructor/parser"
 )
 
+var ErrEmptyFilter = fmt.Errorf("empty filter")
+
 // main function to retrieve documents with a query prompt.
 func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
 	prompt, err := queryconstructor.GetQueryConstructorPrompt(queryconstructor.GetQueryConstructorPromptArgs{
 		DocumentContents: sqr.DocumentContents,
 		AttributeInfo:    sqr.MetadataFieldInfo,
-		EnableLimit:      sqr.EnableLimit,
+		EnableLimit:      &sqr.EnableLimit,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error load query constructor %w", err)
@@ -50,13 +54,11 @@ func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]
 		return nil, fmt.Errorf("wrong json retuned by json markdown parser")
 	}
 
-	var filters any
 	var queryRefinedPrompt string
 
-	if filter, ok := output["filter"].(string); ok && filter != "NO_FILTER" {
-		if filters, err = sqr.parseFilter(filter); err != nil {
-			return nil, err
-		}
+	filters, err := sqr.parseFilter(output["filter"])
+	if err != nil && !errors.Is(ErrEmptyFilter, err) {
+		return nil, err
 	}
 
 	if refinedPrompt, ok := output["query"].(string); ok {
@@ -69,15 +71,28 @@ func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]
 		limit = sqr.DefaultLimit
 	}
 
+	if sqr.Debug {
+		log.Printf("query refined prompt: %s", queryRefinedPrompt)
+		log.Printf("filters: %s", filters)
+		log.Printf("limit: %d", limit)
+	}
+
 	return sqr.Store.Search(ctx, queryRefinedPrompt, filters, limit)
 }
 
-func (sqr Retriever) parseFilter(filter string) (any, error) {
+func (sqr Retriever) parseFilter(input interface{}) (any, error) {
 	var err error
-	var structuredFilter *queryconstructor_parser.StructuredFilter
-	if structuredFilter, err = queryconstructor_parser.Parse(filter); err != nil {
-		return nil, fmt.Errorf("query constructor couldn't parse query %w", err)
+
+	if filter, ok := input.(string); ok && filter != "NO_FILTER" {
+		if sqr.Debug {
+			log.Printf("filter: %v\n", filter)
+		}
+		var structuredFilter *queryconstructor_parser.StructuredFilter
+		if structuredFilter, err = queryconstructor_parser.Parse(filter); err != nil {
+			return nil, fmt.Errorf("query constructor couldn't parse query %w", err)
+		}
+		return sqr.Store.Translate(*structuredFilter)
 	}
 
-	return sqr.Store.Translate(*structuredFilter)
+	return nil, ErrEmptyFilter
 }
