@@ -27,7 +27,7 @@ import (
 var _moviesCSV string //nolint:gochecknoglobals
 
 func main() {
-	// set OPENAI_API_KEY, OPENAI_BASE_URL, OPENSEARCH_ENDPOINT, AWS_PROFILE
+	// set OPENAI_API_KEY, OPENAI_BASE_URL, OPENSEARCH_ENDPOINT, AWS_PROFILE.
 	ctx := context.TODO()
 	llm := setLLM()
 	indexName := "movies"
