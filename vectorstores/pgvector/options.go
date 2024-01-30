@@ -15,7 +15,6 @@ const (
 	DefaultPreDeleteCollection      = false
 	DefaultEmbeddingStoreTableName  = "langchain_pg_embedding"
 	DefaultCollectionStoreTableName = "langchain_pg_collection"
-	DefaultVectorDimensions         = 1536
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -75,6 +74,7 @@ func WithConn(conn *pgx.Conn) Option {
 	}
 }
 
+// WithCollectionMetadata is an option for specifying the collection metadata.
 func WithCollectionMetadata(metadata map[string]any) Option {
 	return func(p *Store) {
 		p.collectionMetadata = metadata
@@ -110,7 +110,6 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		preDeleteCollection: DefaultPreDeleteCollection,
 		embeddingTableName:  DefaultEmbeddingStoreTableName,
 		collectionTableName: DefaultCollectionStoreTableName,
-		vectorDimensions:    DefaultVectorDimensions,
 	}
 
 	for _, opt := range opts {
