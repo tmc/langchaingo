@@ -76,6 +76,7 @@ func New(opts ...Option) (*LLM, error) {
 	options := &options{
 		token: os.Getenv(tokenEnvVarName),
 		model: defaultModel,
+		url:   defaultURL,
 	}
 
 	for _, opt := range opts {
@@ -86,7 +87,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	c, err := huggingfaceclient.New(options.token, options.model)
+	c, err := huggingfaceclient.New(options.token, options.model, options.url)
 	if err != nil {
 		return nil, err
 	}

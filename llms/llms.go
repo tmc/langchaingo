@@ -23,12 +23,14 @@ type Model interface {
 	// Call is a simplified interface for a text-only Model, generating a single
 	// string response from a single string prompt.
 	//
-	// It is here for backwards compatibility only and may be removed
-	// in the future; please use GenerateContent instead.
+	// Deprecated: this method is retained for backwards compatibility. Use the
+	// more general [GenerateContent] instead. You can also use
+	// the [GenerateFromSinglePrompt] function which provides a similar capability
+	// to Call and is built on top of the new interface.
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 }
 
-// GenerateFromSingle prompt is a convenience function for calling an LLM with
+// GenerateFromSinglePrompt is a convenience function for calling an LLM with
 // a single string prompt, expecting a single string response. It's useful for
 // simple, string-only interactions and provides a slightly more ergonomic API
 // than the more general [llms.Model.GenerateContent].

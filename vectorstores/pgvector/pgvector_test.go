@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -36,7 +37,16 @@ func makeNewCollectionName() string {
 
 func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store) {
 	t.Helper()
-	require.NoError(t, s.RemoveCollection(ctx))
+
+	conn, err := pgx.Connect(ctx, os.Getenv("PGVECTOR_CONNECTION_STRING"))
+	require.NoError(t, err)
+
+	tx, err := conn.Begin(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, s.RemoveCollection(ctx, tx))
+
+	require.NoError(t, tx.Commit(ctx))
 	require.NoError(t, s.Close(ctx))
 }
 
@@ -406,4 +416,45 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Contains(t, result, "purple", "expected purple in result")
 	require.NotContains(t, result, "orange", "expected not orange in result")
 	require.NotContains(t, result, "yellow", "expected not yellow in result")
+}
+
+func TestDeduplicater(t *testing.T) {
+	t.Parallel()
+	preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	}, vectorstores.WithDeduplicater(
+		func(ctx context.Context, doc schema.Document) bool {
+			return doc.PageContent == "tokyo"
+		},
+	))
+	require.NoError(t, err)
+
+	docs, err := store.Search(ctx, 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "potato", docs[0].PageContent)
+	require.Equal(t, "vegetable", docs[0].Metadata["type"])
 }

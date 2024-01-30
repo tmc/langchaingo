@@ -74,6 +74,20 @@ func WithConn(conn *pgx.Conn) Option {
 	}
 }
 
+// WithCollectionMetadata is an option for specifying the collection metadata.
+func WithCollectionMetadata(metadata map[string]any) Option {
+	return func(p *Store) {
+		p.collectionMetadata = metadata
+	}
+}
+
+// WithVectorDimensions is an option for specifying the vector size.
+func WithVectorDimensions(size int) Option {
+	return func(p *Store) {
+		p.vectorDimensions = size
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		collectionName:      DefaultCollectionName,

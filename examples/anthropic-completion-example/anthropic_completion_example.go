@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, "Human: Who was the first man to walk on the moon?\nAssistant:",
+	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, "Human: Who was the first man to walk on the moon?\nAssistant:",
 		llms.WithTemperature(0.8),
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Print(string(chunk))

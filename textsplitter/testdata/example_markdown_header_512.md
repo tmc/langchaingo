@@ -8,11 +8,11 @@ community looks forward to your contributions. 🎉
 ---
 
 # Contributing to langchaingo
-> And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support
+> And if you like the project, but just don’t have time to contribute, that’s fine. There are other easy ways to support
 > the project and show your appreciation, which we would also be very happy about:
 > - Star the project
 > - Tweet about it
-> - Refer this project in your project's readme
+> - Refer this project in your project’s readme
 > - Mention the project at local meetups and tell your friends/colleagues
 
 ---
@@ -69,7 +69,7 @@ If you then still feel the need to ask a question and need clarification, we rec
 ---
 
 ## I Have a Question
-- Provide as much context as you can about what you're running into.
+- Provide as much context as you can about what you’re running into.
 - Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
 We will then take care of the issue as soon as possible.
 
@@ -122,14 +122,14 @@ discussed the issue.
 
 #### How Do I Submit a Good Bug Report?
 > You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue
-> tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <travis.cline@gmail.com>.
-> <!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
+> tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to [travis.cline@gmail.com](mailto:travis.cline@gmail.com).
+> <!– You may add a PGP key to allow the messages to be sent encrypted as well. –>
 
 ---
 
 #### How Do I Submit a Good Bug Report?
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
-- Open an [Issue](https://github.com/tmc/langchaingo/issues/new). (Since we can't be sure at this point whether it is a
+- Open an [Issue](https://github.com/tmc/langchaingo/issues/new). (Since we can’t be sure at this point whether it is a
 bug or not, we ask you not to talk about a bug yet and not to label the issue.)
 - Explain the behavior you would expect and the actual behavior.
 
@@ -176,9 +176,9 @@ it has, add a comment to the existing issue instead of opening a new one.
 ---
 
 #### Before Submitting an Enhancement
-- Find out whether your idea fits with the scope and aims of the project. It's up to you to make a strong case to
-convince the project's developers of the merits of this feature. Keep in mind that we want features that will be
-useful to the majority of our users and not just a small subset. If you're just targeting a minority of users,
+- Find out whether your idea fits with the scope and aims of the project. It’s up to you to make a strong case to
+convince the project’s developers of the merits of this feature. Keep in mind that we want features that will be
+useful to the majority of our users and not just a small subset. If you’re just targeting a minority of users,
 consider writing an add-on/plugin library.
 
 ---
@@ -197,7 +197,7 @@ you can also tell which alternatives do not work for you.
 which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS
 and Windows, and [this tool](https://github.com/colinkeenan/silentcast)
 or [this tool](https://github.com/GNOME/byzanz) on
-Linux. <!-- this should only be included if the project has a GUI -->
+Linux. <!– this should only be included if the project has a GUI –>
 
 ---
 
@@ -242,7 +242,7 @@ for a review.
 ##### Make changes locally
 - Using the command line:
   - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository)
-  so that you can make your changes without affecting the original project until you're ready to merge them.
+  so that you can make your changes without affecting the original project until you’re ready to merge them.
 1. Install or make sure **Golang** is updated.
 2. Create a working branch and start with your changes!
 
@@ -264,13 +264,13 @@ as `memory: added interfaces` or `util: added helpers`)
 #### Pull Request
 - **We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the
 associated concepts in those codebases when introducing a new concept.**
-- Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your
+- Fill the “Ready for review” template so that we can review your PR. This template helps reviewers understand your
 changes as well as the purpose of your pull request.
 
 ---
 
 #### Pull Request
-- Don't forget
+- Don’t forget
 to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue)
 if you are solving one.
 
