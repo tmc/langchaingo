@@ -161,15 +161,10 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	embedding vector%s,
 	document varchar,
 	cmetadata json,
-	custom_id varchar,
 	"uuid" uuid NOT NULL,
 	CONSTRAINT langchain_pg_embedding_collection_id_fkey
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
 	PRIMARY KEY (uuid))`, s.embeddingTableName, vectorDimensions, s.collectionTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
-	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
@@ -211,17 +206,16 @@ func (s Store) AddDocuments(
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-	customID := uuid.New().String()
 
 	b := &pgx.Batch{}
-	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
-		VALUES($1, $2, $3, $4, $5, $6)`, s.embeddingTableName)
+	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, collection_id)
+		VALUES($1, $2, $3, $4, $5)`, s.embeddingTableName)
 
 	ids := make([]string, len(docs))
 	for docIdx, doc := range docs {
 		id := uuid.New().String()
 		ids[docIdx] = id
-		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, customID, s.collectionUUID)
+		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, s.collectionUUID)
 	}
 	return ids, s.conn.SendBatch(ctx, b).Close()
 }
