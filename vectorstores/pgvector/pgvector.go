@@ -46,6 +46,13 @@ type Store struct {
 	collectionMetadata    map[string]any
 	preDeleteCollection   bool
 	vectorDimensions      int
+	hnswIndex             *HNSWIndex
+}
+
+type HNSWIndex struct {
+	m                int
+	efConstruction   int
+	distanceFunction string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -172,6 +179,21 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
+
+	// See this for more details on HNWS indexes: https://github.com/pgvector/pgvector#hnsw
+	if s.hnswIndex != nil {
+		sql = fmt.Sprintf(
+			`CREATE INDEX IF NOT EXISTS %s_embedding_hnsw ON %s USING hnsw (embedding %s)`,
+			s.embeddingTableName, s.embeddingTableName, s.hnswIndex.distanceFunction,
+		)
+		if s.hnswIndex.m > 0 && s.hnswIndex.efConstruction > 0 {
+			sql = fmt.Sprintf("%s WITH (m=%d, ef_construction = %d)", sql, s.hnswIndex.m, s.hnswIndex.efConstruction)
+		}
+		if _, err := tx.Exec(ctx, sql); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
