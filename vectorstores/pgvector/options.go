@@ -88,6 +88,22 @@ func WithVectorDimensions(size int) Option {
 	}
 }
 
+// WithHNSWIndex is an option for specifying the HNSW index parameters.
+// See here for more details: https://github.com/pgvector/pgvector#hnsw
+//
+// m: he max number of connections per layer (16 by default)
+// efConstruction: the size of the dynamic candidate list for constructing the graph (64 by default)
+// distanceFunction: the distance function to use (l2 by default).
+func WithHNSWIndex(m int, efConstruction int, distanceFunction string) Option {
+	return func(p *Store) {
+		p.hnswIndex = &HNSWIndex{
+			m:                m,
+			efConstruction:   efConstruction,
+			distanceFunction: distanceFunction,
+		}
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		collectionName:      DefaultCollectionName,
