@@ -15,7 +15,7 @@ type LogHandler struct{}
 
 var _ Handler = LogHandler{}
 
-func (l LogHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
+func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.MessageContent) {
 	fmt.Println("Entering LLM with messages:")
 	for _, m := range ms {
 		// TODO: Implement logging of other content types
@@ -30,7 +30,7 @@ func (l LogHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms
 	}
 }
 
-func (l LogHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
+func (l LogHandler) HandleLLMGenerateContentEnd(_ context.Context, res *llms.ContentResponse) {
 	fmt.Println("Exiting LLM with response:")
 	for _, c := range res.Choices {
 		if c.Content != "" {
@@ -51,7 +51,7 @@ func (l LogHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.C
 	}
 }
 
-func (l LogHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {
+func (l LogHandler) HandleStreamingFunc(_ context.Context, chunk []byte) {
 	fmt.Println(string(chunk))
 }
 
