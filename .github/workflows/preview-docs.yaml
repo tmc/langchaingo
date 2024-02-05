@@ -28,6 +28,8 @@ jobs:
       - name: Build website
         working-directory: docs
         run: yarn build
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
       - name: Preview Pages
         uses: rajyan/preview-pages@v1
         with:
