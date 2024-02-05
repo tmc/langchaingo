@@ -1,22 +1,15 @@
-name: Deploy to GitHub Pages
+name: Preview Documentation Site
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
+  preview:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -29,21 +22,13 @@ jobs:
           node-version: 18
           cache: yarn
           cache-dependency-path: "docs/package-lock.json"
-
       - name: Install dependencies
         working-directory: docs
         run: yarn install --frozen-lockfile
       - name: Build website
         working-directory: docs
         run: yarn build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: Preview Pages
+        uses: rajyan/preview-pages@v1
         with:
-          # Upload entire repository
-          path: "docs/build"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+          source-dir: "docs/build"
