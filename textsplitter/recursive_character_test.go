@@ -2,6 +2,7 @@ package textsplitter
 
 import (
 	"testing"
+	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,8 +18,20 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 		chunkSize    int
 		separators   []string
 		expectedDocs []schema.Document
+		lenFunc      func(string) int
 	}
 	testCases := []testCase{
+		{
+			text:         "哈里森\n很高兴遇见你\n欢迎你来中国",
+			chunkOverlap: 0,
+			chunkSize:    10,
+			separators:   []string{"\n\n", "\n", " "},
+			lenFunc:      utf8.RuneCountInString,
+			expectedDocs: []schema.Document{
+				{PageContent: "哈里森\n很高兴遇见你", Metadata: map[string]any{}},
+				{PageContent: "欢迎你来中国", Metadata: map[string]any{}},
+			},
+		},
 		{
 			text:         "Hi, Harrison. \nI am glad to meet you",
 			chunkOverlap: 1,
@@ -102,6 +115,9 @@ Bye!
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
 		splitter.Separators = tc.separators
+		if tc.lenFunc != nil {
+			splitter.LenFunc = tc.lenFunc
+		}
 
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		require.NoError(t, err)

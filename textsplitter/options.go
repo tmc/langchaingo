@@ -5,6 +5,7 @@ type Options struct {
 	ChunkSize         int
 	ChunkOverlap      int
 	Separators        []string
+	LenFunc           func(string) int
 	ModelName         string
 	EncodingName      string
 	AllowedSpecial    []string
@@ -20,6 +21,7 @@ func DefaultOptions() Options {
 		ChunkSize:    _defaultTokenChunkSize,
 		ChunkOverlap: _defaultTokenChunkOverlap,
 		Separators:   []string{"\n\n", "\n", " ", ""},
+		LenFunc:      defaultLenFunc,
 
 		ModelName:         _defaultTokenModelName,
 		EncodingName:      _defaultTokenEncoding,
@@ -49,6 +51,13 @@ func WithChunkOverlap(chunkOverlap int) Option {
 func WithSeparators(separators []string) Option {
 	return func(o *Options) {
 		o.Separators = separators
+	}
+}
+
+// WithLenFunc sets the lenfunc for a text splitter.
+func WithLenFunc(lenFunc func(string) int) Option {
+	return func(o *Options) {
+		o.LenFunc = lenFunc
 	}
 }
 
@@ -106,4 +115,8 @@ func WithReferenceLinks(referenceLinks bool) Option {
 	return func(o *Options) {
 		o.ReferenceLinks = referenceLinks
 	}
+}
+
+func defaultLenFunc(s string) int {
+	return len(s)
 }
