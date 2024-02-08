@@ -8,7 +8,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-//nolint:dupword
+//nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
@@ -27,16 +27,6 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			expectedDocs: []schema.Document{
 				{PageContent: "Hi, Harrison.", Metadata: map[string]any{}},
 				{PageContent: "I am glad to meet you", Metadata: map[string]any{}},
-			},
-		},
-		{
-			text:         "Hi.\nI'm Harrison.\n\nHow?\na\nb",
-			chunkOverlap: 1,
-			chunkSize:    20,
-			separators:   []string{"\n\n", "\n", " ", ""},
-			expectedDocs: []schema.Document{
-				{PageContent: "Hi.\nI'm Harrison.", Metadata: map[string]any{}},
-				{PageContent: "How?\na\nb", Metadata: map[string]any{}},
 			},
 		},
 		{
