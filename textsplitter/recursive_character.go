@@ -36,14 +36,11 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 
 	// Find the appropriate separator
 	separator := s.Separators[len(s.Separators)-1]
-	for _, s := range s.Separators {
-		if s == "" {
-			separator = s
-			break
-		}
-
-		if strings.Contains(text, s) {
-			separator = s
+	newSeparators := []string{}
+	for i, c := range s.Separators {
+		if c == "" || strings.Contains(text, c) {
+			separator = c
+			newSeparators = s.Separators[i+1:]
 			break
 		}
 	}
@@ -65,11 +62,15 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 			goodSplits = make([]string, 0)
 		}
 
-		otherInfo, err := s.SplitText(split)
-		if err != nil {
-			return nil, err
+		if len(newSeparators) == 0 {
+			finalChunks = append(finalChunks, split)
+		} else {
+			otherInfo, err := s.SplitText(split)
+			if err != nil {
+				return nil, err
+			}
+			finalChunks = append(finalChunks, otherInfo...)
 		}
-		finalChunks = append(finalChunks, otherInfo...)
 	}
 
 	if len(goodSplits) > 0 {
