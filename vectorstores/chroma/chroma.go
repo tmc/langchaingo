@@ -59,7 +59,7 @@ func New(opts ...Option) (Store, error) {
 	chromaClient := &chromago.Client{
 		ApiClient: chromaopenapi.NewAPIClient(configuration),
 	}
-	if _, errHb := chromaClient.Heartbeat(); errHb != nil {
+	if _, errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
 		return s, errHb
 	}
 	s.client = chromaClient
