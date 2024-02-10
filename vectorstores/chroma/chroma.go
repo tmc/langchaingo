@@ -73,7 +73,7 @@ func New(opts ...Option) (Store, error) {
 		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
 	}
 
-	col, errCc := s.client.CreateCollection(s.nameSpace, map[string]any{}, true,
+	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
 		embeddingFunction, s.distanceFunction)
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
@@ -85,7 +85,7 @@ func New(opts ...Option) (Store, error) {
 
 // AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
 // and returns the ids of the added documents.
-func (s Store) AddDocuments(_ context.Context,
+func (s Store) AddDocuments(ctx context.Context,
 	docs []schema.Document,
 	options ...vectorstores.Option,
 ) ([]string, error) {
@@ -114,13 +114,13 @@ func (s Store) AddDocuments(_ context.Context,
 	}
 
 	col := s.collection
-	if _, addErr := col.Add(nil, metadatas, texts, ids); addErr != nil {
+	if _, addErr := col.Add(ctx, nil, metadatas, texts, ids); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
 	return ids, nil
 }
 
-func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments int,
+func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
@@ -136,7 +136,7 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filter, nil, s.includes)
+	qr, queryErr := s.collection.Query(ctx, []string{query}, int32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -165,7 +165,7 @@ func (s Store) RemoveCollection() error {
 	if s.client == nil || s.collection == nil {
 		return fmt.Errorf("%w: no collection", ErrRemoveCollection)
 	}
-	_, errDc := s.client.DeleteCollection(s.collection.Name)
+	_, errDc := s.client.DeleteCollection(context.Background(), s.collection.Name)
 	if errDc != nil {
 		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name, errDc)
 	}
