@@ -22,14 +22,14 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 	}
 	testCases := []testCase{
 		{
-			text:         "哈里森\n很高兴遇见你\n欢迎你来中国",
+			text:         "哈里森\n很高兴遇见你\n欢迎来中国",
 			chunkOverlap: 0,
 			chunkSize:    10,
 			separators:   []string{"\n\n", "\n", " "},
 			lenFunc:      utf8.RuneCountInString,
 			expectedDocs: []schema.Document{
 				{PageContent: "哈里森\n很高兴遇见你", Metadata: map[string]any{}},
-				{PageContent: "欢迎你来中国", Metadata: map[string]any{}},
+				{PageContent: "欢迎来中国", Metadata: map[string]any{}},
 			},
 		},
 		{
