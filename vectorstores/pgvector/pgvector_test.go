@@ -8,9 +8,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -36,7 +38,16 @@ func makeNewCollectionName() string {
 
 func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store) {
 	t.Helper()
-	require.NoError(t, s.RemoveCollection(ctx))
+
+	conn, err := pgx.Connect(ctx, os.Getenv("PGVECTOR_CONNECTION_STRING"))
+	require.NoError(t, err)
+
+	tx, err := conn.Begin(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, s.RemoveCollection(ctx, tx))
+
+	require.NoError(t, tx.Commit(ctx))
 	require.NoError(t, s.Close(ctx))
 }
 
@@ -178,6 +189,78 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		vectorstores.WithScoreThreshold(1.8),
 	)
 	require.Error(t, err)
+}
+
+// note, we can also use same llm to show this test, but need imply
+// openai embedding [dimensions](https://platform.openai.com/docs/api-reference/embeddings/create#embeddings-create-dimensions) args.
+func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	preCheckEnvSetting(t)
+	genaiKey := os.Getenv("GENAI_API_KEY")
+	if genaiKey == "" {
+		t.Skip("GENAI_API_KEY not set")
+	}
+	collectionName := makeNewCollectionName()
+
+	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
+	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(googleLLM)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(collectionName),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "Beijing"},
+	})
+	require.NoError(t, err)
+
+	// use openai embedding (now default model is text-embedding-ada-002, with dimensions:1536) to add some data to same collection (same table)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err = embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err = pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(false),
+		pgvector.WithCollectionName(collectionName),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "Tokyo"},
+		{PageContent: "Yokohama"},
+		{PageContent: "Osaka"},
+		{PageContent: "Nagoya"},
+		{PageContent: "Sapporo"},
+		{PageContent: "Fukuoka"},
+		{PageContent: "Dublin"},
+		{PageContent: "Paris"},
+		{PageContent: "London"},
+		{PageContent: "New York"},
+	})
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(
+		ctx,
+		"Which of these are cities in Japan",
+		5,
+	)
+	require.NoError(t, err)
+	require.Len(t, docs, 5)
 }
 
 func TestPgvectorAsRetriever(t *testing.T) {
@@ -406,4 +489,45 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Contains(t, result, "purple", "expected purple in result")
 	require.NotContains(t, result, "orange", "expected not orange in result")
 	require.NotContains(t, result, "yellow", "expected not yellow in result")
+}
+
+func TestDeduplicater(t *testing.T) {
+	t.Parallel()
+	preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"type": "city",
+		}},
+		{PageContent: "potato", Metadata: map[string]any{
+			"type": "vegetable",
+		}},
+	}, vectorstores.WithDeduplicater(
+		func(ctx context.Context, doc schema.Document) bool {
+			return doc.PageContent == "tokyo"
+		},
+	))
+	require.NoError(t, err)
+
+	docs, err := store.Search(ctx, 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "potato", docs[0].PageContent)
+	require.Equal(t, "vegetable", docs[0].Metadata["type"])
 }

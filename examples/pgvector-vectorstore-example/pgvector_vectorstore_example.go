@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
-	"log"
 
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -35,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//Add documents to the pgvector store.
+	// Add documents to the pgvector store.
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{
 			PageContent: "Tokyo",

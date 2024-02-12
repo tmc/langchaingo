@@ -13,25 +13,27 @@ import (
 )
 
 func main() {
-	llm, err := openai.NewChat(openai.WithModel("gpt-3.5-turbo-0613"))
+	llm, err := openai.New(openai.WithModel("gpt-3.5-turbo-0613"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, []schema.ChatMessage{
-		schema.HumanChatMessage{Content: "What is the weather going to be like in Boston?"},
-	}, llms.WithFunctions(functions), llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-		fmt.Printf("Received chunk: %s\n", chunk)
-		return nil
-	}))
+	resp, err := llm.GenerateContent(ctx,
+		[]llms.MessageContent{
+			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Printf("Received chunk: %s\n", chunk)
+			return nil
+		}),
+		llms.WithFunctions(functions))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if completion.FunctionCall != nil {
-		fmt.Printf("Function call: %+v\n", completion.FunctionCall)
+	choice1 := resp.Choices[0]
+	if choice1.FuncCall != nil {
+		fmt.Printf("Function call: %v\n", choice1.FuncCall)
 	}
-	fmt.Println(completion.Content)
 }
 
 func getCurrentWeather(location string, unit string) (string, error) {

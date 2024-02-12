@@ -16,7 +16,7 @@ func main() {
 	}
 	ctx := context.Background()
 	input := "The first man to walk on the moon"
-	completion, err := llm.Call(ctx, input)
+	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, input)
 	if err != nil {
 		log.Fatal(err)
 	}
