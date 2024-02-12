@@ -46,6 +46,13 @@ type Store struct {
 	collectionMetadata    map[string]any
 	preDeleteCollection   bool
 	vectorDimensions      int
+	hnswIndex             *HNSWIndex
+}
+
+type HNSWIndex struct {
+	m                int
+	efConstruction   int
+	distanceFunction string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -161,7 +168,6 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	embedding vector%s,
 	document varchar,
 	cmetadata json,
-	custom_id varchar,
 	"uuid" uuid NOT NULL,
 	CONSTRAINT langchain_pg_embedding_collection_id_fkey
 	FOREIGN KEY (collection_id) REFERENCES %s (uuid) ON DELETE CASCADE,
@@ -169,14 +175,25 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
-	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_custom_id ON %s (custom_id)`, s.embeddingTableName, s.embeddingTableName)
-	if _, err := tx.Exec(ctx, sql); err != nil {
-		return err
-	}
 	sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s_collection_id ON %s (collection_id)`, s.embeddingTableName, s.embeddingTableName)
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
+
+	// See this for more details on HNWS indexes: https://github.com/pgvector/pgvector#hnsw
+	if s.hnswIndex != nil {
+		sql = fmt.Sprintf(
+			`CREATE INDEX IF NOT EXISTS %s_embedding_hnsw ON %s USING hnsw (embedding %s)`,
+			s.embeddingTableName, s.embeddingTableName, s.hnswIndex.distanceFunction,
+		)
+		if s.hnswIndex.m > 0 && s.hnswIndex.efConstruction > 0 {
+			sql = fmt.Sprintf("%s WITH (m=%d, ef_construction = %d)", sql, s.hnswIndex.m, s.hnswIndex.efConstruction)
+		}
+		if _, err := tx.Exec(ctx, sql); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -211,17 +228,16 @@ func (s Store) AddDocuments(
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-	customID := uuid.New().String()
 
 	b := &pgx.Batch{}
-	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, custom_id, collection_id)
-		VALUES($1, $2, $3, $4, $5, $6)`, s.embeddingTableName)
+	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, collection_id)
+		VALUES($1, $2, $3, $4, $5)`, s.embeddingTableName)
 
 	ids := make([]string, len(docs))
 	for docIdx, doc := range docs {
 		id := uuid.New().String()
 		ids[docIdx] = id
-		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, customID, s.collectionUUID)
+		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, s.collectionUUID)
 	}
 	return ids, s.conn.SendBatch(ctx, b).Close()
 }
@@ -262,25 +278,35 @@ func (s Store) SimilaritySearch(
 	if len(whereQuery) == 0 {
 		whereQuery = "TRUE"
 	}
-	sql := fmt.Sprintf(`SELECT
+	dims := len(embedderData)
+	sql := fmt.Sprintf(`WITH filtered_embedding_dims AS MATERIALIZED (
+    SELECT
+        *
+    FROM
+        %s
+    WHERE
+        vector_dims (
+                embedding
+        ) = $1
+)
+SELECT
 	data.document,
 	data.cmetadata,
 	data.distance
 FROM (
 	SELECT
-		%s.*,
-		embedding <=> $1 AS distance
+		filtered_embedding_dims.*,
+		embedding <=> $2 AS distance
 	FROM
-		%s
-		JOIN %s ON %s.collection_id=%s.uuid WHERE %s.name='%s') AS data
+		filtered_embedding_dims
+		JOIN %s ON filtered_embedding_dims.collection_id=%s.uuid WHERE %s.name='%s') AS data
 WHERE %s
 ORDER BY
 	data.distance
-LIMIT $2`, s.embeddingTableName,
-		s.embeddingTableName,
-		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
+LIMIT $3`, s.embeddingTableName,
+		s.collectionTableName, s.collectionTableName, s.collectionTableName, collectionName,
 		whereQuery)
-	rows, err := s.conn.Query(ctx, sql, pgvector.NewVector(embedderData), numDocuments)
+	rows, err := s.conn.Query(ctx, sql, dims, pgvector.NewVector(embedderData), numDocuments)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +320,7 @@ LIMIT $2`, s.embeddingTableName,
 		}
 		docs = append(docs, doc)
 	}
-	return docs, nil
+	return docs, rows.Err()
 }
 
 //nolint:cyclop
@@ -340,7 +366,7 @@ LIMIT $1`, s.embeddingTableName,
 		}
 		docs = append(docs, doc)
 	}
-	return docs, nil
+	return docs, rows.Err()
 }
 
 // Close closes the connection.
@@ -410,7 +436,8 @@ func (s Store) getFilters(opts vectorstores.Options) (map[string]any, error) {
 	return map[string]any{}, nil
 }
 
-func (s Store) deduplicate(ctx context.Context,
+func (s Store) deduplicate(
+	ctx context.Context,
 	opts vectorstores.Options,
 	docs []schema.Document,
 ) []schema.Document {
