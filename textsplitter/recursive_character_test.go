@@ -8,29 +8,32 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-//nolint:dupword
+//nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		text         string
 		chunkOverlap int
 		chunkSize    int
+		separators   []string
 		expectedDocs []schema.Document
 	}
 	testCases := []testCase{
 		{
-			text:         "Hi.\nI'm Harrison.\n\nHow?\na\nb",
+			text:         "Hi, Harrison. \nI am glad to meet you",
 			chunkOverlap: 1,
 			chunkSize:    20,
+			separators:   []string{"\n", "$"},
 			expectedDocs: []schema.Document{
-				{PageContent: "Hi.\nI'm Harrison.", Metadata: map[string]any{}},
-				{PageContent: "How?\na\nb", Metadata: map[string]any{}},
+				{PageContent: "Hi, Harrison.", Metadata: map[string]any{}},
+				{PageContent: "I am glad to meet you", Metadata: map[string]any{}},
 			},
 		},
 		{
 			text:         "Hi.\nI'm Harrison.\n\nHow?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb",
 			chunkOverlap: 1,
 			chunkSize:    40,
+			separators:   []string{"\n\n", "\n", " ", ""},
 			expectedDocs: []schema.Document{
 				{PageContent: "Hi.\nI'm Harrison.", Metadata: map[string]any{}},
 				{PageContent: "How?\na\nbHi.\nI'm Harrison.\n\nHow?\na\nb", Metadata: map[string]any{}},
@@ -40,6 +43,7 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 			text:         "name: Harrison\nage: 30",
 			chunkOverlap: 1,
 			chunkSize:    40,
+			separators:   []string{"\n\n", "\n", " ", ""},
 			expectedDocs: []schema.Document{
 				{PageContent: "name: Harrison\nage: 30", Metadata: map[string]any{}},
 			},
@@ -52,6 +56,7 @@ name: Joe
 age: 32`,
 			chunkOverlap: 1,
 			chunkSize:    40,
+			separators:   []string{"\n\n", "\n", " ", ""},
 			expectedDocs: []schema.Document{
 				{PageContent: "name: Harrison\nage: 30", Metadata: map[string]any{}},
 				{PageContent: "name: Joe\nage: 32", Metadata: map[string]any{}},
@@ -70,6 +75,7 @@ Bye!
 -H.`,
 			chunkOverlap: 1,
 			chunkSize:    10,
+			separators:   []string{"\n\n", "\n", " ", ""},
 			expectedDocs: []schema.Document{
 				{PageContent: "Hi.", Metadata: map[string]any{}},
 				{PageContent: "I'm", Metadata: map[string]any{}},
@@ -95,6 +101,7 @@ Bye!
 	for _, tc := range testCases {
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
+		splitter.Separators = tc.separators
 
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		require.NoError(t, err)
