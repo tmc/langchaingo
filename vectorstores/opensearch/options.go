@@ -44,19 +44,3 @@ func WithFilters(filters any) vectorstores.Option {
 		p.Filters = filters
 	}
 }
-
-func applyClientOptions(s *Store, opts ...Option) error {
-	for _, opt := range opts {
-		opt(s)
-	}
-
-	if s.embedder == nil {
-		return ErrMissingEmbedded
-	}
-
-	if s.client == nil {
-		return ErrMissingEmbedded
-	}
-
-	return nil
-}

@@ -40,8 +40,8 @@ func New(client *opensearchgo.Client, opts ...Option) (Store, error) {
 		client: client,
 	}
 
-	if err := applyClientOptions(&s, opts...); err != nil {
-		return s, err
+	for _, opt := range opts {
+		opt(&s)
 	}
 
 	return s, nil

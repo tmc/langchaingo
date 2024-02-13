@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -104,10 +105,12 @@ func ragSearch(ctx context.Context, llm *openai.LLM, indexName string, opensearc
 		Debug:             true,
 	})
 
+	log.Printf("%s\n", "movies released after 2007 with a audience rating higher than 85")
 	documents, err := retriever.GetRelevantDocuments(ctx, "movies released after 2007 with a audience rating higher than 85")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("documents: %v\n", len(documents))
 
 	for _, d := range documents {
 		log.Printf("%s | %s | %s \n", d.Metadata["Film"], d.Metadata["Year"], d.Metadata["Audience score %"])
@@ -119,10 +122,13 @@ func ragSearch(ctx context.Context, llm *openai.LLM, indexName string, opensearc
 	// WALL-E | 2008 | 89
 	// Tangled | 2010 | 88
 
+	log.Printf("%s\n", "10 movies with rotten tomatoes rating higher than 60")
+
 	documents, err = retriever.GetRelevantDocuments(ctx, "10 movies with rotten tomatoes rating higher than 60")
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("documents: %v\n", len(documents))
 
 	for _, d := range documents {
 		log.Printf("%s | %s | %s \n", d.Metadata["Film"], d.Metadata["Year"], d.Metadata["Rotten Tomatoes %"])
