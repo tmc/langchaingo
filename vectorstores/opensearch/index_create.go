@@ -51,6 +51,7 @@ func (s *Store) CreateIndex(
 						},
 					},
 				},
+				"metadata": map[string]interface{}{},
 			},
 		},
 	}
@@ -80,7 +81,9 @@ func WithMetadata(metadata any) IndexOption {
 	return func(indexMap *map[string]interface{}) {
 		if mappings, ok := (*indexMap)["mappings"].(map[string]interface{}); ok {
 			if properties, ok := mappings["properties"].(map[string]interface{}); ok {
-				properties["metadata"] = metadata
+				if metadataMap, ok := properties["metadata"].(map[string]interface{}); ok {
+					metadataMap["properties"] = metadata
+				}
 			}
 		}
 	}
