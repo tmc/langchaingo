@@ -1,0 +1,10 @@
+<< Example {{.i}}. >>
+
+File Type: {{.file_type}}
+Sample Data: 
+{{.sample_data}}
+
+Response:
+```json
+{{.response}}
+```

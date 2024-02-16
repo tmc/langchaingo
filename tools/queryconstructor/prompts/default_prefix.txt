@@ -1,0 +1,3 @@
+Your goal is to structure the user's query to match the request schema provided below.
+
+{{.schema}}

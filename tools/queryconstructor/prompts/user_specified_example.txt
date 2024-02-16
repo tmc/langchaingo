@@ -1,0 +1,8 @@
+<< Example {{.i}}. >>
+User Query:
+{{.user_query}}
+
+Structured Request:
+```json
+{{.structured_request}}
+```
