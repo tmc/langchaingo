@@ -54,6 +54,10 @@ func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]
 		return nil, fmt.Errorf("wrong json retuned by json markdown parser")
 	}
 
+	if sqr.CaptureOutput != nil {
+		(*sqr.CaptureOutput)(output)
+	}
+
 	var queryRefinedPrompt string
 
 	filters, err := sqr.parseFilter(output["filter"])

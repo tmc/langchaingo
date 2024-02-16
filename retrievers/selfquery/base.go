@@ -16,4 +16,5 @@ type Retriever struct {
 	EnableLimit       bool
 	DefaultLimit      int
 	Debug             bool
+	CaptureOutput     *func(map[string]interface{})
 }
