@@ -27,7 +27,8 @@ func main() {
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
-			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
+			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?"),
+		},
 		llms.WithFunctions(functions))
 	if err != nil {
 		log.Fatal(err)

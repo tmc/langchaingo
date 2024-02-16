@@ -17,6 +17,8 @@ import (
 var ErrEmptyFilter = fmt.Errorf("empty filter")
 
 // main function to retrieve documents with a query prompt.
+
+//nolint:cyclop
 func (sqr Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]schema.Document, error) {
 	prompt, err := queryconstructor.GetQueryConstructorPrompt(queryconstructor.GetQueryConstructorPromptArgs{
 		DocumentContents: sqr.DocumentContents,
