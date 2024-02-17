@@ -112,7 +112,28 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	if err != nil {
 		return nil, err
 	}
-	sqlQuery := strings.TrimSpace(out)
+
+	outStrings := strings.Split(out, "\n")
+
+	var sqlQuery string
+	if len(outStrings) == 1 {
+		line := strings.TrimSpace(outStrings[0])
+		sqlQuery = strings.TrimPrefix(line, "SQLQuery:")
+	} else if len(outStrings) > 1 {
+		for _, v := range outStrings {
+			line := strings.TrimSpace(v)
+			if strings.HasPrefix(line, "SQLQuery:") {
+				sqlQuery = strings.TrimPrefix(line, "SQLQuery:")
+				break
+			}
+		}
+	}
+
+	sqlQuery = strings.TrimSpace(sqlQuery)
+
+	if sqlQuery == "" {
+		return nil, fmt.Errorf("no sql query generated")
+	}
 
 	// Execute sql query
 	queryResult, err := s.Database.Query(ctx, sqlQuery)
