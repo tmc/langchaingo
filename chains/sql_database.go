@@ -113,7 +113,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 		return nil, err
 	}
 
-	sqlQuery := extractSqlQuery(out)
+	sqlQuery := extractSQLQuery(out)
 
 	if sqlQuery == "" {
 		return nil, fmt.Errorf("no sql query generated")
@@ -154,39 +154,44 @@ func (s SQLDatabaseChain) GetOutputKeys() []string {
 	return []string{s.OutputKey}
 }
 
-func extractSqlQuery(rawOut string) string {
+// nolint:cyclop
+func extractSQLQuery(rawOut string) string {
 	outStrings := strings.Split(rawOut, "\n")
 
 	var sqlQuery string
-	if len(outStrings) == 1 {
-		line := strings.TrimSpace(outStrings[0])
-		sqlQuery = strings.TrimPrefix(line, "SQLQuery:")
-	} else if len(outStrings) > 1 {
-		for _, v := range outStrings {
-			line := strings.TrimSpace(v)
-			if line == "" {
-				continue
-			}
+	containSQLQuery := strings.Contains(rawOut, "SQLQuery:")
+	findSQLQuery := false
 
-			if strings.HasPrefix(line, "```") {
-				continue
-			}
+	for _, v := range outStrings {
+		line := strings.TrimSpace(v)
 
-			if strings.HasPrefix(line, "SQLResult:") || strings.HasPrefix(line, "Answer:") {
-				break
-			}
-
-			var currentLine string
-			if strings.HasPrefix(line, "SQLQuery:") {
-				currentLine = strings.TrimPrefix(line, "SQLQuery:")
-			} else {
-				currentLine = line
-			}
-			sqlQuery += currentLine + "\n"
+		// filter empty line and markdown symbols
+		if line == "" || strings.HasPrefix(line, "```") {
+			continue
 		}
+
+		// stop when we find SQLResult: or Answer:
+		if strings.HasPrefix(line, "SQLResult:") || strings.HasPrefix(line, "Answer:") {
+			break
+		}
+
+		var currentLine string
+		switch {
+		case containSQLQuery && strings.HasPrefix(line, "SQLQuery:"):
+			findSQLQuery = true
+			currentLine = strings.TrimPrefix(line, "SQLQuery:")
+			if strings.TrimSpace(currentLine) == "" {
+				continue
+			}
+		case containSQLQuery && !findSQLQuery:
+			// filter unwanted text above the SQLQuery:
+			continue
+		default:
+			currentLine = line
+		}
+
+		sqlQuery += currentLine + "\n"
 	}
 
-	sqlQuery = strings.TrimSpace(sqlQuery)
-
-	return sqlQuery
+	return strings.TrimSpace(sqlQuery)
 }
