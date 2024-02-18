@@ -76,6 +76,7 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, chunk []byte) {
 	chunkStr := string(chunk)
 	handler.LastTokens += chunkStr
+	var detectedKeyword string
 
 	// Buffer the last few chunks to match the longest keyword size
 	var longestSize int
@@ -89,6 +90,7 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 	for _, k := range DefaultKeywords {
 		if strings.Contains(handler.LastTokens, k) {
 			handler.KeywordDetected = true
+			detectedKeyword = k
 		}
 	}
 
@@ -98,12 +100,8 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 
 	// Check for colon and set print mode.
 	if handler.KeywordDetected && !handler.PrintOutput {
-		// remove potential spaces and colon from the left contained in beginning of the answer
-		chunkStr = strings.TrimLeft(chunkStr, " ")
-		if strings.HasPrefix(chunkStr, ":") {
-			chunk = []byte(strings.TrimSpace(strings.TrimPrefix(chunkStr, ":")))
-		}
-
+		// remove any other strings before the final answer
+		chunk = []byte(filterFinalString(chunkStr, detectedKeyword))
 		handler.PrintOutput = true
 	}
 
@@ -111,4 +109,18 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 	if handler.PrintOutput {
 		handler.egress <- chunk
 	}
+}
+
+func filterFinalString(chunkStr, keyword string) string {
+	chunkStr = strings.TrimLeft(chunkStr, " ")
+
+	index := strings.Index(chunkStr, keyword)
+	switch {
+	case index != -1:
+		chunkStr = chunkStr[index+len(keyword):]
+	case strings.HasPrefix(chunkStr, ":"):
+		chunkStr = strings.TrimPrefix(chunkStr, ":")
+	}
+
+	return strings.TrimLeft(chunkStr, " ")
 }
