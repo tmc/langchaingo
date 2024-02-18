@@ -78,15 +78,11 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 	handler.LastTokens += chunkStr
 
 	// Buffer the last few chunks to match the longest keyword size
-	longestSize := len(handler.Keywords[0])
+	var longestSize int
 	for _, k := range handler.Keywords {
 		if len(k) > longestSize {
 			longestSize = len(k)
 		}
-	}
-
-	if len(handler.LastTokens) > longestSize {
-		handler.LastTokens = handler.LastTokens[len(handler.LastTokens)-longestSize:]
 	}
 
 	// Check for keywords
@@ -94,6 +90,10 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 		if strings.Contains(handler.LastTokens, k) {
 			handler.KeywordDetected = true
 		}
+	}
+
+	if len(handler.LastTokens) > longestSize {
+		handler.LastTokens = handler.LastTokens[len(handler.LastTokens)-longestSize:]
 	}
 
 	// Check for colon and set print mode.
