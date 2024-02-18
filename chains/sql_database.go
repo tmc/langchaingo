@@ -154,6 +154,10 @@ func (s SQLDatabaseChain) GetOutputKeys() []string {
 	return []string{s.OutputKey}
 }
 
+// sometimes llm model returned result is not only the SQLQuery,
+// it also contains some extra text,
+// which will cause the entire process to fail.
+// this function is used to extract the exact SQLQuery from the result.
 // nolint:cyclop
 func extractSQLQuery(rawOut string) string {
 	outStrings := strings.Split(rawOut, "\n")
