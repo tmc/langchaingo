@@ -97,7 +97,13 @@ func (handler *AgentFinalStreamHandler) HandleStreamingFunc(_ context.Context, c
 	}
 
 	// Check for colon and set print mode.
-	if handler.KeywordDetected && chunkStr != ":" {
+	if handler.KeywordDetected && chunkStr != "" {
+		// remove potential spaces and colon from the left contained in beginning of the answer
+		chunkStr = strings.TrimLeft(chunkStr, " ")
+		if strings.HasPrefix(chunkStr, ":") {
+			chunk = []byte(strings.TrimSpace(strings.TrimPrefix(chunkStr, ":")))
+		}
+
 		handler.PrintOutput = true
 	}
 
