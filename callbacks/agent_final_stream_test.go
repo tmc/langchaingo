@@ -7,23 +7,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type filterFinalStringTestCase struct {
+	inputStr string
+}
+
 func TestFilterFinalString(t *testing.T) {
 	t.Parallel()
 
 	keywork := "Final Answer:"
+
+	// correct final string
 	correctStr := "This is a correct final string."
 
-	mockchunkStr1 := fmt.Sprintf(` some other text.
-	Final Answer: %s`, correctStr)
+	extraStrAbore := fmt.Sprintf(" some other text.\nFinal Answer: %s", correctStr)
+	extraStrBefore := fmt.Sprintf(" another text. Final Answer: %s", correctStr)
+	extraColonWithSpacesBefore := fmt.Sprintf(`   :    %s`, correctStr)
 
-	mockchunkStr2 := fmt.Sprintf(`   :    %s`, correctStr)
+	testCases := []filterFinalStringTestCase{
+		{correctStr},
+		{extraStrAbore},
+		{extraStrBefore},
+		{extraColonWithSpacesBefore},
+	}
 
-	filteredStr := filterFinalString(correctStr, keywork)
-
-	filteredStr1 := filterFinalString(mockchunkStr1, keywork)
-	filteredStr2 := filterFinalString(mockchunkStr2, keywork)
-
-	require.Equal(t, filteredStr, correctStr)
-	require.Equal(t, filteredStr1, correctStr)
-	require.Equal(t, filteredStr2, correctStr)
+	for _, tc := range testCases {
+		filteredStr := filterFinalString(tc.inputStr, keywork)
+		require.Equal(t, filteredStr, correctStr)
+	}
 }
