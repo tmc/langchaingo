@@ -47,29 +47,12 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	t.Log(ret)
 }
 
-func TestExtractSimpleSQLQuery(t *testing.T) {
+func TestExtractSQLQuery(t *testing.T) {
 	t.Parallel()
 
 	// mock single line sql query.
 	simpleSQLQuery := "SELECT * FROM example_table;"
 
-	// returned result is a correct sql query, no other text
-	filteredSimpleQuery := extractSQLQuery(simpleSQLQuery)
-
-	pollutedQuery1, pollutedQuery2, pollutedQuery3 := polluteSQLSyntax(simpleSQLQuery)
-
-	filteredSimpleQuery1 := extractSQLQuery(pollutedQuery1)
-	filteredSimpleQuery2 := extractSQLQuery(pollutedQuery2)
-	filteredSimpleQuery3 := extractSQLQuery(pollutedQuery3)
-
-	require.Equal(t, simpleSQLQuery, filteredSimpleQuery)
-	require.Equal(t, simpleSQLQuery, filteredSimpleQuery1)
-	require.Equal(t, simpleSQLQuery, filteredSimpleQuery2)
-	require.Equal(t, simpleSQLQuery, filteredSimpleQuery3)
-}
-
-func TestExtractMultiLineSQLQuery(t *testing.T) {
-	t.Parallel()
 	// mock multi line sql query.
 	bareMultiLineSQLQuery := `
 SELECT
@@ -85,30 +68,57 @@ ORDER BY
     orders.order_date;
 `
 
-	// extracted result will remove indentation and empty line
-	correctFilteredResult := extractSQLQuery(bareMultiLineSQLQuery)
+	// the same multi line sql query above with no indentation,
+	// this is the expected result after the extract function.
+	bareMultiLineSQLQueryWithNoIndentation := `SELECT
+orders.order_id,
+customers.customer_name,
+orders.order_date
+FROM
+orders
+INNER JOIN customers ON orders.customer_id = customers.customer_id
+WHERE
+orders.order_date >= '2023-01-01'
+ORDER BY
+orders.order_date;`
 
-	pollutedQuery1, pollutedQuery2, pollutedQuery3 := polluteSQLSyntax(bareMultiLineSQLQuery)
+	singleLinePollutedtestCases := polluteSQLSyntaxTestCase(simpleSQLQuery)
+	multiLinePollutedtestCases := polluteSQLSyntaxTestCase(bareMultiLineSQLQuery)
 
-	filteredMultiLineQuery1 := extractSQLQuery(pollutedQuery1)
-	filteredMultiLineQuery2 := extractSQLQuery(pollutedQuery2)
-	filteredMultiLineQuery3 := extractSQLQuery(pollutedQuery3)
+	testCases := []extractMultiLineSQLTestCase{
+		{simpleSQLQuery, simpleSQLQuery},
+		{bareMultiLineSQLQuery, bareMultiLineSQLQueryWithNoIndentation},
+	}
 
-	require.Equal(t, correctFilteredResult, filteredMultiLineQuery1)
-	require.Equal(t, correctFilteredResult, filteredMultiLineQuery2)
-	require.Equal(t, correctFilteredResult, filteredMultiLineQuery3)
+	for _, v := range singleLinePollutedtestCases {
+		testCases = append(testCases, extractMultiLineSQLTestCase{v, simpleSQLQuery})
+	}
+
+	for _, v := range multiLinePollutedtestCases {
+		testCases = append(testCases, extractMultiLineSQLTestCase{v, bareMultiLineSQLQueryWithNoIndentation})
+	}
+
+	for _, tc := range testCases {
+		filteredMultiLineQuery := extractSQLQuery(tc.inputStr)
+		require.Equal(t, tc.expected, filteredMultiLineQuery)
+	}
+}
+
+type extractMultiLineSQLTestCase struct {
+	inputStr string
+	expected string
 }
 
 // different llm model result text format differently.
 // this function is used to pollute the sql query syntax text to simulate the different format.
-func polluteSQLSyntax(sql string) (string, string, string) {
+func polluteSQLSyntaxTestCase(sql string) []string {
 	// simulate the return output formot-1: contain illusion text above and below
 	// some extra text here.
 	// SQLQuery SELECT xxx... ;
 	// SQLResult: 3 (illusion data)
 	// Answer: There are 3 data in the table. (illusion data)
 	taintedOutput1 := `
-I am a stupid llm model
+I am a clumsy llm model
 I just feel good to put some extra text here.
 SQLQuery: %s
 SQLResult: 3 (illusion data)
@@ -137,5 +147,5 @@ Answer: There are 3 data in the table. (illusion data)
 	polluteSQL2 := fmt.Sprintf(taintedOutput2, sql)
 	polluteSQL3 := fmt.Sprintf(taintedOutput3, sql)
 
-	return polluteSQL1, polluteSQL2, polluteSQL3
+	return []string{polluteSQL1, polluteSQL2, polluteSQL3}
 }
