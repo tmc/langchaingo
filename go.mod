@@ -114,7 +114,7 @@ require (
 	cloud.google.com/go/vertexai v0.6.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/amikos-tech/chroma-go v0.0.0-20231228181736-e8f5e927093e
+	github.com/amikos-tech/chroma-go v0.0.0-20240109142503-c8fb49c3e28c
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
