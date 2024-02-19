@@ -1,5 +1,7 @@
 package textsplitter
 
+import "unicode/utf8"
+
 // Options is a struct that contains options for a text splitter.
 type Options struct {
 	ChunkSize         int
@@ -118,5 +120,5 @@ func WithReferenceLinks(referenceLinks bool) Option {
 }
 
 func defaultLenFunc(s string) int {
-	return len(s)
+	return utf8.RuneCountInString(s)
 }
