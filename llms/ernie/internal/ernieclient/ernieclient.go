@@ -57,7 +57,7 @@ type Message struct {
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
 	Messages      []Message                                     `json:"messages"`
-	Temperature   float64                                       `json:"temperature,omitempty"`
+	Temperature   float64                                       `json:"temperature"`
 	TopP          float64                                       `json:"top_p,omitempty"`
 	PenaltyScore  float64                                       `json:"penalty_score,omitempty"`
 	Stream        bool                                          `json:"stream,omitempty"`
