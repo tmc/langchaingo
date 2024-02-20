@@ -23,7 +23,7 @@ func DefaultOptions() Options {
 		ChunkSize:    _defaultTokenChunkSize,
 		ChunkOverlap: _defaultTokenChunkOverlap,
 		Separators:   []string{"\n\n", "\n", " ", ""},
-		LenFunc:      defaultLenFunc,
+		LenFunc:      utf8.RuneCountInString,
 
 		ModelName:         _defaultTokenModelName,
 		EncodingName:      _defaultTokenEncoding,
@@ -117,8 +117,4 @@ func WithReferenceLinks(referenceLinks bool) Option {
 	return func(o *Options) {
 		o.ReferenceLinks = referenceLinks
 	}
-}
-
-func defaultLenFunc(s string) int {
-	return utf8.RuneCountInString(s)
 }
