@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,6 +36,9 @@ func Test(t *testing.T) {
 					WithOccurrence(2).
 					WithStartupTimeout(5*time.Second)),
 		)
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
 		require.NoError(t, err)
 		defer func() {
 			require.NoError(t, pgContainer.Terminate(context.Background()))
