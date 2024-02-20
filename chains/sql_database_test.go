@@ -47,30 +47,73 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	t.Log(ret)
 }
 
+type extractMultiLineSQLTestCase struct {
+	inputStr string
+	expected string
+}
+
 func TestExtractSQLQuery(t *testing.T) {
 	t.Parallel()
 
-	// mock single line sql query.
-	simpleSQLQuery := "SELECT * FROM example_table;"
+	cases := []extractMultiLineSQLTestCase{
+		{
+			inputStr: "SELECT * FROM example_table;",
+			expected: "SELECT * FROM example_table;",
+		},
+		{
+			inputStr: `
+			I am a clumsy llm model
+			I just feel good to put some extra text here.
+
+			SQLQuery: SELECT * FROM example_table;
+			SQLResult: 3 (this is not a real data)
+			Answer: There are 3 data in the table. (this is not a real data)`,
+			expected: "SELECT * FROM example_table;",
+		},
+		{
+			inputStr: `
+			SELECT * FROM example_table;
+			SQLResult: 3 (this is not a real data)
+			Answer: There are 3 data in the table. (this is not a real data)`,
+			expected: "SELECT * FROM example_table;",
+		},
+		{
+			inputStr: "```sql\nSELECT * FROM example_table;\n```\nSQLResult: 3 (this is not a real data)\nAnswer: There are 3 data in the table. (this is not a real data)\n",
+			expected: "SELECT * FROM example_table;",
+		},
+	}
+
+	// similar to the above test cases, but with multi line sql query.
+	multiLineCases := buildMultiLineSQLTestCases()
+	cases = append(cases, multiLineCases...)
+
+	for _, tc := range cases {
+		filterQuerySyntax := extractSQLQuery(tc.inputStr)
+		require.Equal(t, tc.expected, filterQuerySyntax)
+	}
+}
+
+func buildMultiLineSQLTestCases() []extractMultiLineSQLTestCase {
+	cases := []extractMultiLineSQLTestCase{}
 
 	// mock multi line sql query.
 	bareMultiLineSQLQuery := `
-SELECT
-    orders.order_id,
-    customers.customer_name,
-    orders.order_date
-FROM
-    orders
-INNER JOIN customers ON orders.customer_id = customers.customer_id
-WHERE
-    orders.order_date >= '2023-01-01'
-ORDER BY
-    orders.order_date;
-`
+		SELECT
+			orders.order_id,
+			customers.customer_name,
+			orders.order_date
+		FROM
+			orders
+		INNER JOIN customers ON orders.customer_id = customers.customer_id
+		WHERE
+			orders.order_date >= '2023-01-01'
+		ORDER BY
+			orders.order_date;
+		`
 
 	// the same multi line sql query above with no indentation,
 	// this is the expected result after the extract function.
-	bareMultiLineSQLQueryWithNoIndentation := `SELECT
+	expectedQuery := `SELECT
 orders.order_id,
 customers.customer_name,
 orders.order_date
@@ -82,31 +125,13 @@ orders.order_date >= '2023-01-01'
 ORDER BY
 orders.order_date;`
 
-	singleLinePollutedtestCases := polluteSQLSyntaxTestCase(simpleSQLQuery)
-	multiLinePollutedtestCases := polluteSQLSyntaxTestCase(bareMultiLineSQLQuery)
+	multiLineSQLWithPollutedStrings := polluteSQLSyntaxTestCase(bareMultiLineSQLQuery)
 
-	testCases := []extractMultiLineSQLTestCase{
-		{simpleSQLQuery, simpleSQLQuery},
-		{bareMultiLineSQLQuery, bareMultiLineSQLQueryWithNoIndentation},
+	for _, pollutedStr := range multiLineSQLWithPollutedStrings {
+		cases = append(cases, extractMultiLineSQLTestCase{pollutedStr, expectedQuery})
 	}
 
-	for _, v := range singleLinePollutedtestCases {
-		testCases = append(testCases, extractMultiLineSQLTestCase{v, simpleSQLQuery})
-	}
-
-	for _, v := range multiLinePollutedtestCases {
-		testCases = append(testCases, extractMultiLineSQLTestCase{v, bareMultiLineSQLQueryWithNoIndentation})
-	}
-
-	for _, tc := range testCases {
-		filteredMultiLineQuery := extractSQLQuery(tc.inputStr)
-		require.Equal(t, tc.expected, filteredMultiLineQuery)
-	}
-}
-
-type extractMultiLineSQLTestCase struct {
-	inputStr string
-	expected string
+	return cases
 }
 
 // different llm model result text format differently.
