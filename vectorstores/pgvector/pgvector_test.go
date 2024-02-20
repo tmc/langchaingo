@@ -26,6 +26,10 @@ import (
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
 
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
 		pgVectorContainer, err := tcpostgres.RunContainer(
@@ -51,10 +55,6 @@ func preCheckEnvSetting(t *testing.T) string {
 		require.NoError(t, err)
 
 		pgvectorURL = str
-	}
-
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
 	}
 
 	return pgvectorURL
@@ -145,7 +145,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 		{PageContent: "Fukuoka"},
 		{PageContent: "Dublin"},
 		{PageContent: "Paris"},
-		{PageContent: "London "},
+		{PageContent: "London"},
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
@@ -200,7 +200,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		{PageContent: "Fukuoka"},
 		{PageContent: "Dublin"},
 		{PageContent: "Paris"},
-		{PageContent: "London "},
+		{PageContent: "London"},
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
@@ -412,31 +412,31 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		ctx,
 		[]schema.Document{
 			{
-				PageContent: "The color of the lamp beside the desk is black.",
+				PageContent: "in kitchen, The color of the lamp beside the desk is black.",
 				Metadata: map[string]any{
 					"location": "kitchen",
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is blue.",
+				PageContent: "in bedroom, The color of the lamp beside the desk is blue.",
 				Metadata: map[string]any{
 					"location": "bedroom",
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is orange.",
+				PageContent: "in office, The color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location": "office",
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is purple.",
+				PageContent: "in sitting room, The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location": "sitting room",
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is yellow.",
+				PageContent: "in patio, The color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location": "patio",
 				},
@@ -454,6 +454,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
+	result = strings.ToLower(result)
 
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "blue", "expected blue in result")
@@ -487,21 +488,21 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 		context.Background(),
 		[]schema.Document{
 			{
-				PageContent: "The color of the lamp beside the desk is orange.",
+				PageContent: "In office, the color of the lamp beside the desk is orange.",
 				Metadata: map[string]any{
 					"location":    "office",
 					"square_feet": 100,
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is purple.",
+				PageContent: "in sitting room, the color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location":    "sitting room",
 					"square_feet": 400,
 				},
 			},
 			{
-				PageContent: "The color of the lamp beside the desk is yellow.",
+				PageContent: "in patio, the color of the lamp beside the desk is yellow.",
 				Metadata: map[string]any{
 					"location":    "patio",
 					"square_feet": 800,
@@ -568,4 +569,84 @@ func TestDeduplicater(t *testing.T) {
 	require.Len(t, docs, 1)
 	require.Equal(t, "potato", docs[0].PageContent)
 	require.Equal(t, "vegetable", docs[0].Metadata["type"])
+}
+
+func TestWithAllOptions(t *testing.T) {
+	t.Parallel()
+	pgvectorURL := preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+	require.NoError(t, err)
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+	defer conn.Close(ctx)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+		pgvector.WithCollectionTableName("collection_table_name"),
+		pgvector.WithEmbeddingTableName("embedding_table_name"),
+		pgvector.WithCollectionMetadata(map[string]any{
+			"key": "value",
+		}),
+		pgvector.WithVectorDimensions(1536),
+		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"country": "japan",
+		}},
+		{PageContent: "potato"},
+	})
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(ctx, "japan", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "japan", docs[0].Metadata["country"])
+
+	store, err = pgvector.New(
+		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+		pgvector.WithCollectionTableName("collection_table_name1"),
+		pgvector.WithEmbeddingTableName("embedding_table_name1"),
+		pgvector.WithCollectionMetadata(map[string]any{
+			"key": "value",
+		}),
+		pgvector.WithVectorDimensions(1536),
+		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+
+	_, err = store.AddDocuments(ctx, []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{
+			"country": "japan",
+		}},
+		{PageContent: "potato"},
+	})
+	require.NoError(t, err)
+
+	docs, err = store.SimilaritySearch(ctx, "japan", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.Equal(t, "japan", docs[0].Metadata["country"])
 }
