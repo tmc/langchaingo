@@ -1,37 +1,53 @@
 package callbacks
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
-type filterFinalStringTestCase struct {
-	inputStr string
-}
-
 func TestFilterFinalString(t *testing.T) {
 	t.Parallel()
 
-	keywork := "Final Answer:"
-
-	// correct final string
-	correctStr := "This is a correct final string."
-
-	extraStrAbore := fmt.Sprintf(" some other text.\nFinal Answer: %s", correctStr)
-	extraStrBefore := fmt.Sprintf(" another text. Final Answer: %s", correctStr)
-	extraColonWithSpacesBefore := fmt.Sprintf(`   :    %s`, correctStr)
-
-	testCases := []filterFinalStringTestCase{
-		{correctStr},
-		{extraStrAbore},
-		{extraStrBefore},
-		{extraColonWithSpacesBefore},
+	cases := []struct {
+		keyword  string
+		inputStr string
+		expected string
+	}{
+		{
+			keyword:  "Final Answer:",
+			inputStr: "This is a correct final string.",
+			expected: "This is a correct final string.",
+		},
+		{
+			keyword:  "Final Answer:",
+			inputStr: " some other text above.\nFinal Answer: This is a correct final string.",
+			expected: "This is a correct final string.",
+		},
+		{
+			keyword:  "Final Answer:",
+			inputStr: " another text before. Final Answer: This is a correct final string.",
+			expected: "This is a correct final string.",
+		},
+		{
+			keyword:  "Final Answer:",
+			inputStr: `   :    This is a correct final string.`,
+			expected: "This is a correct final string.",
+		},
+		{
+			keyword:  "Customed KeyWord_2:",
+			inputStr: " some other text above.\nSome Customed KeyWord_2: This is a correct final string.",
+			expected: "This is a correct final string.",
+		},
+		{
+			keyword:  "Customed KeyWord_$#@-123:",
+			inputStr: " another text before keyword. Some Customed KeyWord_$#@-123: This is a correct final string.",
+			expected: "This is a correct final string.",
+		},
 	}
 
-	for _, tc := range testCases {
-		filteredStr := filterFinalString(tc.inputStr, keywork)
-		require.Equal(t, filteredStr, correctStr)
+	for _, tc := range cases {
+		filteredStr := filterFinalString(tc.inputStr, tc.keyword)
+		require.Equal(t, tc.expected, filteredStr)
 	}
 }
