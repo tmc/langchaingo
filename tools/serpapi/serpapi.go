@@ -37,11 +37,7 @@ func (t Tool) Name() string {
 }
 
 func (t Tool) Description() string {
-	return `
-	"A wrapper around Google Search. "
-	"Useful for when you need to answer questions about current events. "
-	"Always one of the first options when you need to find information on internet"
-	"Input should be a search query."`
+	return "A search engine. Useful for when you need to answer questions about current events. Input should be a search query."
 }
 
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
