@@ -1,6 +1,9 @@
 package llms
 
-import "context"
+import (
+	"context"
+	"net/http"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
@@ -47,6 +50,9 @@ type CallOptions struct {
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call"`
+
+	// HTTPClient is the HTTP client to use.
+	HTTPClient *http.Client `json:"-"`
 }
 
 // FunctionDefinition is a definition of a function that can be called by the model.
@@ -193,5 +199,12 @@ func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 func WithFunctions(functions []FunctionDefinition) CallOption {
 	return func(o *CallOptions) {
 		o.Functions = functions
+	}
+}
+
+// WithHTTPClient will add an option to set the HTTP client to use.
+func WithHTTPClient(client *http.Client) CallOption {
+	return func(o *CallOptions) {
+		o.HTTPClient = client
 	}
 }
