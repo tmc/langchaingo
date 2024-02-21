@@ -50,6 +50,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	for _, opt := range options {
 		opt(&opts)
 	}
+	g.setCallOptionsDefaults(&opts)
 
 	model := g.client.GenerativeModel(opts.Model)
 	model.SetCandidateCount(int32(opts.CandidateCount))
@@ -80,6 +81,27 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	}
 
 	return response, nil
+}
+
+func (g *GoogleAI) setCallOptionsDefaults(opts *llms.CallOptions) {
+	if opts.Model == "" {
+		opts.Model = g.opts.defaultModel
+	}
+	if opts.CandidateCount == 0 {
+		opts.CandidateCount = g.opts.defaultCandidateCount
+	}
+	if opts.MaxTokens == 0 {
+		opts.MaxTokens = g.opts.defaultMaxTokens
+	}
+	if opts.Temperature == 0 {
+		opts.Temperature = g.opts.defaultTemperature
+	}
+	if opts.TopP == 0 {
+		opts.TopP = g.opts.defaultTopP
+	}
+	if opts.TopK == 0 {
+		opts.TopK = g.opts.defaultTopK
+	}
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
