@@ -29,10 +29,10 @@ func TestGenerateContent(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	parts := []llms.ContentPart{
-		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+	parts := []schema.ContentPart{
+		schema.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -51,10 +51,10 @@ func TestWithStreaming(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	parts := []llms.ContentPart{
-		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+	parts := []schema.ContentPart{
+		schema.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,

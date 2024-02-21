@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -15,13 +14,13 @@ type LogHandler struct{}
 
 var _ Handler = LogHandler{}
 
-func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.MessageContent) {
+func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []schema.MessageContent) {
 	fmt.Println("Entering LLM with messages:")
 	for _, m := range ms {
 		// TODO: Implement logging of other content types
 		var buf strings.Builder
 		for _, t := range m.Parts {
-			if t, ok := t.(llms.TextContent); ok {
+			if t, ok := t.(schema.TextContent); ok {
 				buf.WriteString(t.Text)
 			}
 		}
@@ -30,7 +29,7 @@ func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.M
 	}
 }
 
-func (l LogHandler) HandleLLMGenerateContentEnd(_ context.Context, res *llms.ContentResponse) {
+func (l LogHandler) HandleLLMGenerateContentEnd(_ context.Context, res *schema.ContentResponse) {
 	fmt.Println("Exiting LLM with response:")
 	for _, c := range res.Choices {
 		if c.Content != "" {

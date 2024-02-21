@@ -3,7 +3,6 @@ package callbacks
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -26,13 +25,13 @@ func (l CombiningHandler) HandleLLMStart(ctx context.Context, prompts []string) 
 	}
 }
 
-func (l CombiningHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
+func (l CombiningHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []schema.MessageContent) {
 	for _, handle := range l.Callbacks {
 		handle.HandleLLMGenerateContentStart(ctx, ms)
 	}
 }
 
-func (l CombiningHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
+func (l CombiningHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *schema.ContentResponse) {
 	for _, handle := range l.Callbacks {
 		handle.HandleLLMGenerateContentEnd(ctx, res)
 	}

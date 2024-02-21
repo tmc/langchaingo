@@ -3,7 +3,6 @@ package callbacks
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -14,8 +13,8 @@ import (
 type Handler interface {
 	HandleText(ctx context.Context, text string)
 	HandleLLMStart(ctx context.Context, prompts []string)
-	HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent)
-	HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse)
+	HandleLLMGenerateContentStart(ctx context.Context, ms []schema.MessageContent)
+	HandleLLMGenerateContentEnd(ctx context.Context, res *schema.ContentResponse)
 	HandleLLMError(ctx context.Context, err error)
 	HandleChainStart(ctx context.Context, inputs map[string]any)
 	HandleChainEnd(ctx context.Context, outputs map[string]any)

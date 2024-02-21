@@ -92,14 +92,14 @@ func (o *OpenAIFunctionsAgent) Plan(
 		return nil, nil, err
 	}
 
-	mcList := make([]llms.MessageContent, len(prompt.Messages()))
+	mcList := make([]schema.MessageContent, len(prompt.Messages()))
 	for i, msg := range prompt.Messages() {
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		mc := llms.MessageContent{
+		mc := schema.MessageContent{
 			Role:  role,
-			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+			Parts: []schema.ContentPart{schema.TextContent{Text: text}},
 		}
 		mcList[i] = mc
 	}
@@ -160,7 +160,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 	return messages
 }
 
-func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
+func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *schema.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
 	choice := contentResp.Choices[0]

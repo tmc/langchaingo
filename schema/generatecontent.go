@@ -1,9 +1,7 @@
-package llms
+package schema
 
 import (
 	"encoding/json"
-
-	"github.com/tmc/langchaingo/schema"
 )
 
 // MessageContent is the content of a message sent to a LLM. It has a role and a
@@ -12,7 +10,7 @@ import (
 // schema.ChatMessageTypeHuman and Parts will be the sequence of items sent in
 // this specific message.
 type MessageContent struct {
-	Role  schema.ChatMessageType
+	Role  ChatMessageType
 	Parts []ContentPart
 }
 
@@ -101,12 +99,12 @@ type ContentChoice struct {
 	GenerationInfo map[string]any
 
 	// FuncCall is non-nil when the model asks to invoke a function/tool.
-	FuncCall *schema.FunctionCall
+	FuncCall *FunctionCall
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
-func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
+func TextParts(role ChatMessageType, parts ...string) MessageContent {
 	result := MessageContent{
 		Role:  role,
 		Parts: []ContentPart{},

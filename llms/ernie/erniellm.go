@@ -9,6 +9,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -64,7 +65,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+func (o *LLM) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -79,7 +80,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 	result, err := o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
-		Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
+		Messages:      []ernieclient.Message{{Role: "user", Content: part.(schema.TextContent).Text}},
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
 		PenaltyScore:  opts.RepetitionPenalty,
@@ -101,8 +102,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	resp := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	resp := &schema.ContentResponse{
+		Choices: []*schema.ContentChoice{
 			{
 				Content: result.Result,
 			},

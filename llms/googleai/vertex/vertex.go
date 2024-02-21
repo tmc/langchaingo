@@ -37,7 +37,7 @@ func (g *Vertex) Call(ctx context.Context, prompt string, options ...llms.CallOp
 }
 
 // GenerateContent implements the [llms.Model] interface.
-func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (g *Vertex) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -62,7 +62,7 @@ func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	model.SetTopK(float32(opts.TopK))
 	model.StopSequences = opts.StopWords
 
-	var response *llms.ContentResponse
+	var response *schema.ContentResponse
 	var err error
 
 	if len(messages) == 1 {
@@ -86,8 +86,8 @@ func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageCon
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
-func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, error) {
-	var contentResponse llms.ContentResponse
+func convertCandidates(candidates []*genai.Candidate) (*schema.ContentResponse, error) {
+	var contentResponse schema.ContentResponse
 
 	for _, candidate := range candidates {
 		buf := strings.Builder{}
@@ -110,7 +110,7 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 		metadata[SAFETY] = candidate.SafetyRatings
 
 		contentResponse.Choices = append(contentResponse.Choices,
-			&llms.ContentChoice{
+			&schema.ContentChoice{
 				Content:        buf.String(),
 				StopReason:     candidate.FinishReason.String(),
 				GenerationInfo: metadata,
@@ -120,17 +120,17 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 }
 
 // convertParts converts between a sequence of langchain parts and genai parts.
-func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
+func convertParts(parts []schema.ContentPart) ([]genai.Part, error) {
 	convertedParts := make([]genai.Part, 0, len(parts))
 	for _, part := range parts {
 		var out genai.Part
 
 		switch p := part.(type) {
-		case llms.TextContent:
+		case schema.TextContent:
 			out = genai.Text(p.Text)
-		case llms.BinaryContent:
+		case schema.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
-		case llms.ImageURLContent:
+		case schema.ImageURLContent:
 			typ, data, err := util.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
@@ -144,7 +144,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 }
 
 // convertContent converts between a langchain MessageContent and genai content.
-func convertContent(content llms.MessageContent) (*genai.Content, error) {
+func convertContent(content schema.MessageContent) (*genai.Content, error) {
 	parts, err := convertParts(content.Parts)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 // generateFromSingleMessage generates content from the parts of a single
 // message.
-func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []schema.ContentPart, opts *llms.CallOptions) (*schema.ContentResponse, error) {
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []schema.MessageContent, opts *llms.CallOptions) (*schema.ContentResponse, error) {
 	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
 		content, err := convertContent(mc)
@@ -236,11 +236,11 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 }
 
 // convertAndStreamFromIterator takes an iterator of GenerateContentResponse
-// and produces a llms.ContentResponse reply from it, while streaming the
+// and produces a schema.ContentResponse reply from it, while streaming the
 // resulting text into the opts-provided streaming function.
 // Note that this is tricky in the face of multiple
 // candidates, so this code assumes only a single candidate for now.
-func convertAndStreamFromIterator(ctx context.Context, iter *genai.GenerateContentResponseIterator, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func convertAndStreamFromIterator(ctx context.Context, iter *genai.GenerateContentResponseIterator, opts *llms.CallOptions) (*schema.ContentResponse, error) {
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -32,7 +33,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+func (o *LLM) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -48,7 +49,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	part := msg0.Parts[0]
 
 	results, err := o.client.CreateCompletion(ctx, &palmclient.CompletionRequest{
-		Prompts:       []string{part.(llms.TextContent).Text},
+		Prompts:       []string{part.(schema.TextContent).Text},
 		MaxTokens:     opts.MaxTokens,
 		Temperature:   opts.Temperature,
 		StopSequences: opts.StopWords,
@@ -60,8 +61,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	resp := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	resp := &schema.ContentResponse{
+		Choices: []*schema.ContentChoice{
 			{
 				Content: results[0].Text,
 			},

@@ -8,6 +8,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cohere/internal/cohereclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -29,7 +30,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+func (o *LLM) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -44,7 +45,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 	result, err := o.client.CreateGeneration(ctx, &cohereclient.GenerationRequest{
-		Prompt: part.(llms.TextContent).Text,
+		Prompt: part.(schema.TextContent).Text,
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -53,8 +54,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	resp := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	resp := &schema.ContentResponse{
+		Choices: []*schema.ContentChoice{
 			{
 				Content: result.Text,
 			},

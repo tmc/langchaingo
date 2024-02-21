@@ -39,10 +39,10 @@ func (l *testLanguageModel) Call(ctx context.Context, prompt string, options ...
 	return llms.GenerateFromSinglePrompt(ctx, l, prompt, options...)
 }
 
-func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+func (l *testLanguageModel) GenerateContent(_ context.Context, mc []schema.MessageContent, _ ...llms.CallOption) (*schema.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 	part0 := mc[0].Parts[0]
 	var prompt string
-	if tc, ok := part0.(llms.TextContent); ok {
+	if tc, ok := part0.(schema.TextContent); ok {
 		prompt = tc.Text
 	} else {
 		return nil, fmt.Errorf("passed non-text part")
@@ -63,8 +63,8 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.Message
 		llmResult = prompt
 	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &schema.ContentResponse{
+		Choices: []*schema.ContentChoice{
 			{Content: llmResult},
 		},
 	}, nil

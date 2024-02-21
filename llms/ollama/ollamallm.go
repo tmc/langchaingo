@@ -46,7 +46,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 // GenerateContent implements the Model interface.
 // nolint: goerr113
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
+func (o *LLM) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) { // nolint: lll, cyclop, funlen
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -79,13 +79,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		for _, p := range mc.Parts {
 			switch pt := p.(type) {
-			case llms.TextContent:
+			case schema.TextContent:
 				if foundText {
 					return nil, errors.New("expecting a single Text content")
 				}
 				foundText = true
 				text = pt.Text
-			case llms.BinaryContent:
+			case schema.BinaryContent:
 				images = append(images, ollamaclient.ImageData(pt.Data))
 			default:
 				return nil, errors.New("only support Text and BinaryContent parts right now")
@@ -137,7 +137,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	choices := []*llms.ContentChoice{
+	choices := []*schema.ContentChoice{
 		{
 			Content: resp.Message.Content,
 			GenerationInfo: map[string]any{
@@ -148,7 +148,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		},
 	}
 
-	response := &llms.ContentResponse{Choices: choices}
+	response := &schema.ContentResponse{Choices: choices}
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)

@@ -29,11 +29,11 @@ func TestMultiContentText(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("What kind of mammal am I?"),
+	parts := []schema.ContentPart{
+		schema.TextPart("I'm a pomeranian"),
+		schema.TextPart("What kind of mammal am I?"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -52,18 +52,18 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
+			Parts: []schema.ContentPart{schema.TextPart("Name some countries")},
 		},
 		{
 			Role:  schema.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
+			Parts: []schema.ContentPart{schema.TextPart("Spain and Lesotho")},
 		},
 		{
 			Role:  schema.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
+			Parts: []schema.ContentPart{schema.TextPart("Which if these is larger?")},
 		},
 	}
 
@@ -80,11 +80,11 @@ func TestMultiContentImage(t *testing.T) {
 
 	llm := newTestClient(t, WithModel("gpt-4-vision-preview"))
 
-	parts := []llms.ContentPart{
-		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
-		llms.TextPart("describe this image in detail"),
+	parts := []schema.ContentPart{
+		schema.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		schema.TextPart("describe this image in detail"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -103,11 +103,11 @@ func TestWithStreaming(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("Tell me more about my taxonomy"),
+	parts := []schema.ContentPart{
+		schema.TextPart("I'm a pomeranian"),
+		schema.TextPart("Tell me more about my taxonomy"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -134,10 +134,10 @@ func TestFunctionCall(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
 
-	parts := []llms.ContentPart{
-		llms.TextPart("What is the weather like in Boston?"),
+	parts := []schema.ContentPart{
+		schema.TextPart("What is the weather like in Boston?"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,

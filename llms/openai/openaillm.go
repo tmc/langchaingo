@@ -46,7 +46,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 // GenerateContent implements the Model interface.
 //
 //nolint:goerr113
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop
+func (o *LLM) GenerateContent(ctx context.Context, messages []schema.MessageContent, options ...llms.CallOption) (*schema.ContentResponse, error) { //nolint: lll, cyclop
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -105,9 +105,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, ErrEmptyResponse
 	}
 
-	choices := make([]*llms.ContentChoice, len(result.Choices))
+	choices := make([]*schema.ContentChoice, len(result.Choices))
 	for i, c := range result.Choices {
-		choices[i] = &llms.ContentChoice{
+		choices[i] = &schema.ContentChoice{
 			Content:    c.Message.Content,
 			StopReason: c.FinishReason,
 			GenerationInfo: map[string]any{
@@ -125,7 +125,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
-	response := &llms.ContentResponse{Choices: choices}
+	response := &schema.ContentResponse{Choices: choices}
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)

@@ -17,9 +17,9 @@ func main() {
 	}
 	ctx := context.Background()
 
-	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
-		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
+	content := []schema.MessageContent{
+		schema.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		schema.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
 	}
 	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))

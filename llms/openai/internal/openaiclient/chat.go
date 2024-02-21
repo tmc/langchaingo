@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 const (
@@ -53,7 +53,7 @@ type ChatMessage struct { //nolint:musttag
 	// The content of the message.
 	Content string
 
-	MultiContent []llms.ContentPart
+	MultiContent []schema.ContentPart
 
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
@@ -69,31 +69,31 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	}
 	if len(m.MultiContent) > 0 {
 		msg := struct {
-			Role         string             `json:"role"`
-			Content      string             `json:"-"`
-			MultiContent []llms.ContentPart `json:"content,omitempty"`
-			Name         string             `json:"name,omitempty"`
-			FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+			Role         string               `json:"role"`
+			Content      string               `json:"-"`
+			MultiContent []schema.ContentPart `json:"content,omitempty"`
+			Name         string               `json:"name,omitempty"`
+			FunctionCall *FunctionCall        `json:"function_call,omitempty"`
 		}(m)
 		return json.Marshal(msg)
 	}
 	msg := struct {
-		Role         string             `json:"role"`
-		Content      string             `json:"content"`
-		MultiContent []llms.ContentPart `json:"-"`
-		Name         string             `json:"name,omitempty"`
-		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		Role         string               `json:"role"`
+		Content      string               `json:"content"`
+		MultiContent []schema.ContentPart `json:"-"`
+		Name         string               `json:"name,omitempty"`
+		FunctionCall *FunctionCall        `json:"function_call,omitempty"`
 	}(m)
 	return json.Marshal(msg)
 }
 
 func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 	msg := struct {
-		Role         string             `json:"role"`
-		Content      string             `json:"content"`
-		MultiContent []llms.ContentPart `json:"-"` // not expected in response
-		Name         string             `json:"name,omitempty"`
-		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		Role         string               `json:"role"`
+		Content      string               `json:"content"`
+		MultiContent []schema.ContentPart `json:"-"` // not expected in response
+		Name         string               `json:"name,omitempty"`
+		FunctionCall *FunctionCall        `json:"function_call,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {

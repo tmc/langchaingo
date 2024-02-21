@@ -95,11 +95,11 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("What kind of mammal am I?"),
+	parts := []schema.ContentPart{
+		schema.TextPart("I'm a pomeranian"),
+		schema.TextPart("What kind of mammal am I?"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -118,13 +118,13 @@ func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	content := llms.TextParts(
+	content := schema.TextParts(
 		schema.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"What kind of mammal am I?",
 	)
 
-	rsp, err := llm.GenerateContent(context.Background(), []llms.MessageContent{content})
+	rsp, err := llm.GenerateContent(context.Background(), []schema.MessageContent{content})
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -147,18 +147,18 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
+			Parts: []schema.ContentPart{schema.TextPart("Name some countries")},
 		},
 		{
 			Role:  schema.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
+			Parts: []schema.ContentPart{schema.TextPart("Spain and Lesotho")},
 		},
 		{
 			Role:  schema.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
+			Parts: []schema.ContentPart{schema.TextPart("Which if these is larger?")},
 		},
 	}
 
@@ -174,11 +174,11 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	parts := []llms.ContentPart{
-		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
-		llms.TextPart("describe this image in detail"),
+	parts := []schema.ContentPart{
+		schema.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		schema.TextPart("describe this image in detail"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -202,11 +202,11 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 		t.Fatal(err)
 	}
 
-	parts := []llms.ContentPart{
-		llms.BinaryPart("image/png", b),
-		llms.TextPart("what does this image show? please use detail"),
+	parts := []schema.ContentPart{
+		schema.BinaryPart("image/png", b),
+		schema.TextPart("what does this image show? please use detail"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -239,10 +239,10 @@ func testEmbeddings(t *testing.T, llm llms.Model) {
 func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 	t.Helper()
 
-	parts := []llms.ContentPart{
-		llms.TextPart("Name five countries in Africa"),
+	parts := []schema.ContentPart{
+		schema.TextPart("Name five countries in Africa"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,
@@ -264,7 +264,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	content := llms.TextParts(
+	content := schema.TextParts(
 		schema.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"Tell me more about my taxonomy",
@@ -273,7 +273,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	var sb strings.Builder
 	rsp, err := llm.GenerateContent(
 		context.Background(),
-		[]llms.MessageContent{content},
+		[]schema.MessageContent{content},
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -291,11 +291,11 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("Describe my taxonomy, health and care"),
+	parts := []schema.ContentPart{
+		schema.TextPart("I'm a pomeranian"),
+		schema.TextPart("Describe my taxonomy, health and care"),
 	}
-	content := []llms.MessageContent{
+	content := []schema.MessageContent{
 		{
 			Role:  schema.ChatMessageTypeHuman,
 			Parts: parts,

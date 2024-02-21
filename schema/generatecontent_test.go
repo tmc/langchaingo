@@ -1,16 +1,14 @@
-package llms
+package schema
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/schema"
 )
 
 func TestTextParts(t *testing.T) {
 	t.Parallel()
 	type args struct {
-		role  schema.ChatMessageType
+		role  ChatMessageType
 		parts []string
 	}
 	tests := []struct {
@@ -18,8 +16,8 @@ func TestTextParts(t *testing.T) {
 		args args
 		want MessageContent
 	}{
-		{"basics", args{schema.ChatMessageTypeHuman, []string{"a", "b", "c"}}, MessageContent{
-			Role: schema.ChatMessageTypeHuman,
+		{"basics", args{ChatMessageTypeHuman, []string{"a", "b", "c"}}, MessageContent{
+			Role: ChatMessageTypeHuman,
 			Parts: []ContentPart{
 				TextContent{Text: "a"},
 				TextContent{Text: "b"},
