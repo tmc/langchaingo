@@ -37,7 +37,7 @@ type Model interface {
 func GenerateFromSinglePrompt(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
 	msg := schema.MessageContent{
 		Role:  schema.ChatMessageTypeHuman,
-		Parts: []schema.ContentPart{schema.TextContent{prompt}},
+		Parts: []schema.ContentPart{schema.TextContent{Text: prompt}},
 	}
 
 	resp, err := llm.GenerateContent(ctx, []schema.MessageContent{msg}, options...)
