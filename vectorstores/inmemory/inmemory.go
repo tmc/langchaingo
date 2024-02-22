@@ -3,12 +3,12 @@ package inmemory
 import (
 	"context"
 	"errors"
-	"math"
 	"slices"
 	"strconv"
 	"sync"
 
 	hnsw "github.com/Bithack/go-hnsw"
+	"github.com/chewxy/math32"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -159,7 +159,7 @@ func (s *Store) SimilaritySearch(
 		doc := schema.Document{}
 		doc.PageContent = s.content[id]
 		doc.Metadata = s.meta[id]
-		doc.Score = 1 - item.D
+		doc.Score = 1.0 - item.D // convert distance to similarity
 
 		s.RUnlock()
 
@@ -210,18 +210,22 @@ func (s *Store) deduplicate(
 
 // cosineDistance returns the cosine distance between two vectors.
 func cosineDistance(x, y []float32) float32 {
-	var sum, s1, s2 float64
+	if len(x) != len(y) {
+		panic("vectors must have the same length")
+	}
+
+	var dot, s1, s2 float32
 	for i := 0; i < len(x); i++ {
-		sum += float64(x[i]) * float64(y[i])
-		s1 += math.Pow(float64(x[i]), 2)
-		s2 += math.Pow(float64(y[i]), 2)
+		dot += x[i] * y[i]
+		s1 += math32.Pow(x[i], 2)
+		s2 += math32.Pow(y[i], 2)
 	}
 	if s1 == 0 || s2 == 0 {
 		return 1.0
 	}
-	dist := sum / (math.Sqrt(s1) * math.Sqrt(s2))
 
-	return float32(1.0 - dist)
+	sim := dot / (math32.Sqrt(s1) * math32.Sqrt(s2))
+	return 1.0 - sim
 }
 
 // applyScoreThreshold applies the score threshold to the given slice of documents.
