@@ -36,3 +36,5 @@ require (
 	google.golang.org/grpc v1.60.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
+
+replace github.com/tmc/langchaingo => github.com/devinyf/langchaingo v0.0.0-20240223023505-6ed2e213d744

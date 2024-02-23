@@ -13,3 +13,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 )
+
+replace github.com/tmc/langchaingo => github.com/devinyf/langchaingo v0.0.0-20240223023505-6ed2e213d744

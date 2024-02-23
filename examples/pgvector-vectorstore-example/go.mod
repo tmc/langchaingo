@@ -17,3 +17,5 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
+
+replace github.com/tmc/langchaingo => github.com/devinyf/langchaingo v0.0.0-20240223023505-6ed2e213d744
