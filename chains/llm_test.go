@@ -84,11 +84,6 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 			"country": "France",
 		},
 		WithCallback(callbacks.LogHandler{}),
-		WithModel("gemini-pro"),
-		WithMaxTokens(200),
-		WithStopWords(nil),
-		WithTopK(3),
-		WithTopP(0.95),
 	)
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Paris"))
