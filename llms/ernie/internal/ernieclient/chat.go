@@ -197,7 +197,9 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		defer close(responseChan)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if line == "" {
+			// A colon as the first character of a line is in essence a comment, and is ignored.
+			// ref: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
+			if line == "" || strings.HasPrefix(line, ":") {
 				continue
 			}
 			if !strings.HasPrefix(line, "data:") {
