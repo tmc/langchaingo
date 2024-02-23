@@ -66,5 +66,5 @@ func TestAPI(t *testing.T) {
 	if !ok {
 		t.Fatal("expected answer to be a string")
 	}
-	require.True(t, strings.Contains(answer, "temperature"), `result does not contain the keyword 'temperature'`)
+	require.True(t, strings.Contains(answer, "Munich"), `result does not contain the keyword 'Munich'`)
 }
