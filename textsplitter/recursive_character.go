@@ -10,6 +10,7 @@ type RecursiveCharacter struct {
 	Separators   []string
 	ChunkSize    int
 	ChunkOverlap int
+	LenFunc      func(string) int
 }
 
 // NewRecursiveCharacter creates a new recursive character splitter with default values. By
@@ -25,6 +26,7 @@ func NewRecursiveCharacter(opts ...Option) RecursiveCharacter {
 		Separators:   options.Separators,
 		ChunkSize:    options.ChunkSize,
 		ChunkOverlap: options.ChunkOverlap,
+		LenFunc:      options.LenFunc,
 	}
 
 	return s
@@ -50,13 +52,13 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 
 	// Merge the splits, recursively splitting larger texts.
 	for _, split := range splits {
-		if len(split) < s.ChunkSize {
+		if s.LenFunc(split) < s.ChunkSize {
 			goodSplits = append(goodSplits, split)
 			continue
 		}
 
 		if len(goodSplits) > 0 {
-			mergedText := mergeSplits(goodSplits, separator, s.ChunkSize, s.ChunkOverlap)
+			mergedText := mergeSplits(goodSplits, separator, s.ChunkSize, s.ChunkOverlap, s.LenFunc)
 
 			finalChunks = append(finalChunks, mergedText...)
 			goodSplits = make([]string, 0)
@@ -74,7 +76,7 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 	}
 
 	if len(goodSplits) > 0 {
-		mergedText := mergeSplits(goodSplits, separator, s.ChunkSize, s.ChunkOverlap)
+		mergedText := mergeSplits(goodSplits, separator, s.ChunkSize, s.ChunkOverlap, s.LenFunc)
 		finalChunks = append(finalChunks, mergedText...)
 	}
 

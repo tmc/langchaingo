@@ -77,7 +77,7 @@ var ErrEmptyResponse = errors.New("empty response")
 type CompletionRequest struct {
 	Prompts       []string `json:"prompts"`
 	MaxTokens     int      `json:"max_tokens"`
-	Temperature   float64  `json:"temperature,omitempty"`
+	Temperature   float64  `json:"temperature"`
 	TopP          int      `json:"top_p,omitempty"`
 	TopK          int      `json:"top_k,omitempty"`
 	StopSequences []string `json:"stop_sequences"`
@@ -160,7 +160,7 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 type ChatRequest struct {
 	Context        string         `json:"context"`
 	Messages       []*ChatMessage `json:"messages"`
-	Temperature    float64        `json:"temperature,omitempty"`
+	Temperature    float64        `json:"temperature"`
 	TopP           int            `json:"top_p,omitempty"`
 	TopK           int            `json:"top_k,omitempty"`
 	CandidateCount int            `json:"candidate_count,omitempty"`

@@ -154,7 +154,7 @@ type Options struct {
 	NumKeep          int     `json:"num_keep,omitempty"`
 	Mirostat         int     `json:"mirostat,omitempty"`
 	NumPredict       int     `json:"num_predict,omitempty"`
-	Temperature      float32 `json:"temperature,omitempty"`
+	Temperature      float32 `json:"temperature"`
 	TypicalP         float32 `json:"typical_p,omitempty"`
 	RepeatPenalty    float32 `json:"repeat_penalty,omitempty"`
 	PresencePenalty  float32 `json:"presence_penalty,omitempty"`

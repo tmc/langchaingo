@@ -32,7 +32,7 @@ type InferenceRequest struct {
 	Model             string        `json:"repositoryId"`
 	Prompt            string        `json:"prompt"`
 	Task              InferenceTask `json:"task"`
-	Temperature       float64       `json:"temperature,omitempty"`
+	Temperature       float64       `json:"temperature"`
 	TopP              float64       `json:"top_p,omitempty"`
 	TopK              int           `json:"top_k,omitempty"`
 	MinLength         int           `json:"min_length,omitempty"`
