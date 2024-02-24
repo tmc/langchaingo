@@ -70,7 +70,7 @@ func (c LLMMathChain) processLLMResult(llmOutput string) (string, error) {
 		expression := textMatch[1]
 		output, err := c.evaluateExpression(expression)
 		if err != nil {
-			return "", fmt.Errorf("Error evaluating expression: %w", err)
+			return "", fmt.Errorf("evaluating expression: %w", err)
 		}
 		return output, nil
 	}
