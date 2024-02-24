@@ -32,8 +32,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/tmc/langchaingo v0.1.4-alpha.0 h1:WVu2KgHr9wloHAiMbbeytiv2W76vpkA59uUwf0EUgrQ=
-github.com/tmc/langchaingo v0.1.4-alpha.0/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
+github.com/tmc/langchaingo v0.1.4 h1:skgT2G6D+BzbRFWg8bGE6MQgLPQ10LpyHxQ4vIhD/8k=
+github.com/tmc/langchaingo v0.1.4/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=
 golang.org/x/crypto v0.17.0 h1:r8bRNjWL3GshPW3gkd+RpvzWrZAwPS49OmTGZ/uhM4k=

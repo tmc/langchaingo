@@ -4,7 +4,7 @@ go 1.21
 
 toolchain go1.21.4
 
-require github.com/tmc/langchaingo v0.1.4-alpha.0
+require github.com/tmc/langchaingo v0.1.4
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

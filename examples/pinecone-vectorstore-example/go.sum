@@ -208,8 +208,8 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/tmc/langchaingo v0.1.4-alpha.0 h1:WVu2KgHr9wloHAiMbbeytiv2W76vpkA59uUwf0EUgrQ=
-github.com/tmc/langchaingo v0.1.4-alpha.0/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
+github.com/tmc/langchaingo v0.1.4 h1:skgT2G6D+BzbRFWg8bGE6MQgLPQ10LpyHxQ4vIhD/8k=
+github.com/tmc/langchaingo v0.1.4/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
 github.com/yargevad/filepathx v1.0.0 h1:SYcT+N3tYGi+NvazubCNlvgIPbzAk7i7y2dwg3I5FYc=
 github.com/yargevad/filepathx v1.0.0/go.mod h1:BprfX/gpYNJHJfc35GjRRpVcwWXS89gGulUIU5tK3tA=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
