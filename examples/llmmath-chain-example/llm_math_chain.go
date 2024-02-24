@@ -23,7 +23,7 @@ func run() error {
 	}
 	llmMathChain := chains.NewLLMMathChain(llm)
 	ctx := context.Background()
-	out, err := chains.Run(ctx, llmMathChain, "What is 1024 plus six time 9?")
+	out, err := chains.Run(ctx, llmMathChain, "What is 1024 plus six times 9?")
 	fmt.Println(out)
 	return err
 }
