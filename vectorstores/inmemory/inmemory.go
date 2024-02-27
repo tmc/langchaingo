@@ -217,8 +217,8 @@ func cosineDistance(x, y []float32) float32 {
 	var dot, s1, s2 float32
 	for i := 0; i < len(x); i++ {
 		dot += x[i] * y[i]
-		s1 += math32.Pow(x[i], 2)
-		s2 += math32.Pow(y[i], 2)
+		s1 += x[i] * x[i]
+		s2 += y[i] * y[i]
 	}
 	if s1 == 0 || s2 == 0 {
 		return 1.0
