@@ -3,3 +3,92 @@ sidebar_label: Hugging Face
 ---
 
 # Hugging Face
+
+## Overview
+
+This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and more.
+
+## Prerequisites
+Go programming language installed on your machine (version 1.15 or higher recommended).
+A valid Hugging Face API token. Obtain it by creating an account on the Hugging Face platform and generating a new token
+
+## Installation
+
+```bash
+go get github.com/tmc/langchaingo
+```
+Ensure that your Hugging Face API token is set as an environment variable:
+
+```bash
+export HUGGINGFACEHUB_API_TOKEN='your_hugging_face_api_token'
+```
+
+## Implementation
+Below is the step-by-step guide to implementing the LangchainGo with Hugging Face integration.
+### Importing Required Packages
+Start by creating a new Go file and import the necessary packages:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/huggingface"
+)
+```
+
+### Initializing the Hugging Face Model
+In your `main` function, initialize the Hugging Face model by specifying the desired pre-trained model. In this example, we use "google/gemma-7b":
+```go
+func main() {
+	llm, err := huggingface.New(huggingface.WithModel("google/gemma-7b"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Continue implementation...
+}
+```
+
+### Generating Text from a Prompt
+```go 
+	ctx := context.Background()
+	prompt := "What is Golang?"
+	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(completion)
+```
+
+## Complete Example
+Here is the complete code sample for generating text using LangchainGo integrated with Hugging Face:
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/huggingface"
+)
+
+func main() {
+	llm, err := huggingface.New(huggingface.WithModel("google/gemma"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+	prompt := "What is Golang?"
+	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(completion)
+}
+```
