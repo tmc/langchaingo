@@ -11,6 +11,7 @@ import (
 
 const (
 	OpenAiAPIKeyEnvVarName = "OPENAI_API_KEY" // #nosec G101
+	OpenAiOrgIDEnvVarName  = "OPENAI_ORGANIZATION"
 	ChromaURLKeyEnvVarName = "CHROMA_URL"
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
@@ -68,12 +69,20 @@ func WithOpenAiAPIKey(openAiAPIKey string) Option {
 	}
 }
 
+// WithOpenAiOrganization is an option for setting the OpenAI organization id.
+func WithOpenAiOrganization(openAiOrganization string) Option {
+	return func(p *Store) {
+		p.openaiOrganization = openAiOrganization
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
-		nameSpace:        DefaultNameSpace,
-		nameSpaceKey:     DefaultNameSpaceKey,
-		distanceFunction: DefaultDistanceFunc,
-		openaiAPIKey:     os.Getenv(OpenAiAPIKeyEnvVarName),
+		nameSpace:          DefaultNameSpace,
+		nameSpaceKey:       DefaultNameSpaceKey,
+		distanceFunction:   DefaultDistanceFunc,
+		openaiAPIKey:       os.Getenv(OpenAiAPIKeyEnvVarName),
+		openaiOrganization: os.Getenv(OpenAiOrgIDEnvVarName),
 	}
 
 	for _, opt := range opts {

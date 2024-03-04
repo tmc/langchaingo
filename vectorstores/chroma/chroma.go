@@ -26,11 +26,12 @@ var (
 
 // Store is a wrapper around the chromaGo API and client.
 type Store struct {
-	client           *chromago.Client
-	collection       *chromago.Collection
-	distanceFunction chromago.DistanceFunction
-	chromaURL        string
-	openaiAPIKey     string
+	client             *chromago.Client
+	collection         *chromago.Collection
+	distanceFunction   chromago.DistanceFunction
+	chromaURL          string
+	openaiAPIKey       string
+	openaiOrganization string
 
 	nameSpace    string
 	nameSpaceKey string
@@ -70,7 +71,11 @@ func New(opts ...Option) (Store, error) {
 		embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
 	} else {
 		// otherwise use standard langchaingo OpenAI embedding function
-		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
+		var options []openai.Option
+		if s.openaiOrganization != "" {
+			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
+		}
+		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
 	}
 
 	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
