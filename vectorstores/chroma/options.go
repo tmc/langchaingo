@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	OpenAiAPIKeyEnvVarName = "OPENAI_API_KEY" // #nosec G101
-	OpenAiOrgIDEnvVarName  = "OPENAI_ORGANIZATION"
+	OpenAIAPIKeyEnvVarName = "OPENAI_API_KEY" // #nosec G101
+	OpenAIOrgIDEnvVarName  = "OPENAI_ORGANIZATION"
 	ChromaURLKeyEnvVarName = "CHROMA_URL"
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
@@ -60,17 +60,17 @@ func WithIncludes(includes []chromago.QueryEnum) Option {
 	}
 }
 
-// WithOpenAiAPIKey is an option for setting the OpenAI api key. If the option is not set
+// WithOpenAIAPIKey is an option for setting the OpenAI api key. If the option is not set
 // the api key is read from the OPENAI_API_KEY environment variable. If the
 // variable is not present, an error will be returned.
-func WithOpenAiAPIKey(openAiAPIKey string) Option {
+func WithOpenAIAPIKey(openAiAPIKey string) Option {
 	return func(p *Store) {
 		p.openaiAPIKey = openAiAPIKey
 	}
 }
 
-// WithOpenAiOrganization is an option for setting the OpenAI organization id.
-func WithOpenAiOrganization(openAiOrganization string) Option {
+// WithOpenAIOrganization is an option for setting the OpenAI organization id.
+func WithOpenAIOrganization(openAiOrganization string) Option {
 	return func(p *Store) {
 		p.openaiOrganization = openAiOrganization
 	}
@@ -81,8 +81,8 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		nameSpace:          DefaultNameSpace,
 		nameSpaceKey:       DefaultNameSpaceKey,
 		distanceFunction:   DefaultDistanceFunc,
-		openaiAPIKey:       os.Getenv(OpenAiAPIKeyEnvVarName),
-		openaiOrganization: os.Getenv(OpenAiOrgIDEnvVarName),
+		openaiAPIKey:       os.Getenv(OpenAIAPIKeyEnvVarName),
+		openaiOrganization: os.Getenv(OpenAIOrgIDEnvVarName),
 	}
 
 	for _, opt := range opts {

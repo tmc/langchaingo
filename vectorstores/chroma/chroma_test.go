@@ -40,7 +40,7 @@ func TestChromaGoStoreRest(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -83,7 +83,7 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -132,7 +132,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -177,7 +177,7 @@ func TestChromaAsRetriever(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -219,7 +219,7 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -269,7 +269,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -344,7 +344,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithEmbedder(e),
 	)
@@ -426,7 +426,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -500,7 +500,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -585,9 +585,9 @@ func getValues(t *testing.T) (string, string) {
 		}
 	}
 
-	openaiAPIKey := os.Getenv(chroma.OpenAiAPIKeyEnvVarName)
+	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
-		t.Skipf("Must set %s to run test", chroma.OpenAiAPIKeyEnvVarName)
+		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
 	}
 
 	return chromaURL, openaiAPIKey
