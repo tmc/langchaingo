@@ -164,6 +164,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.0.1
+	github.com/chewxy/math32 v1.10.1
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
