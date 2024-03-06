@@ -336,6 +336,10 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 func getValues(t *testing.T) (string, string, int, string) {
 	t.Helper()
 
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+
 	qdrantURL := os.Getenv("QDRANT_URL")
 	if qdrantURL == "" {
 		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
