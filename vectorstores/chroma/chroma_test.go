@@ -11,6 +11,8 @@ import (
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -568,7 +570,19 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		t.Skipf("Must set %s to run test", chroma.ChromaURLKeyEnvVarName)
+		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.22"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, chromaContainer.Terminate(context.Background()))
+		})
+
+		chromaURL, err = chromaContainer.RESTEndpoint(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get chroma container REST endpoint: %s", err)
+		}
 	}
 
 	openaiAPIKey := os.Getenv(chroma.OpenAiAPIKeyEnvVarName)

@@ -3,11 +3,14 @@ package milvus
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
@@ -35,7 +38,19 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		t.Skip("must set MILVUS_URL to run test")
+		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.3.9"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, milvusContainer.Terminate(context.Background()))
+		})
+
+		url, err = milvusContainer.ConnectionString(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get milvus container endpoint: %s", err)
+		}
 	}
 	config := client.Config{
 		Address: url,
