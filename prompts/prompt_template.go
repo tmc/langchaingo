@@ -30,8 +30,9 @@ type PromptTemplate struct {
 	// OutputParser is a function that parses the output of the prompt template.
 	OutputParser schema.OutputParser[any]
 
-	// PartialVariables represents a map of variable names to values or functions that return values.
-	// If the value is a function, it will be called when the prompt template is rendered.
+	// PartialVariables represents a map of variable names to values or functions
+	// that return values. If the value is a function, it will be called when the
+	// prompt template is rendered.
 	PartialVariables map[string]any
 }
 

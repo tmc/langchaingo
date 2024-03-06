@@ -87,8 +87,8 @@ func callChain(
 	return outputValues, nil
 }
 
-// Run can be used to execute a chain if the chain only expects one input and one
-// string output.
+// Run can be used to execute a chain if the chain only expects one input and
+// one string output.
 func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (string, error) {
 	inputKeys := c.GetInputKeys()
 	memoryKeys := c.GetMemory().MemoryVariables(ctx)
