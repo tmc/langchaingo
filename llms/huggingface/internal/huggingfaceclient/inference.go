@@ -27,7 +27,7 @@ type inferencePayload struct {
 }
 
 type parameters struct {
-	Temperature       float64 `json:"temperature,omitempty"`
+	Temperature       float64 `json:"temperature"`
 	TopP              float64 `json:"top_p,omitempty"`
 	TopK              int     `json:"top_k,omitempty"`
 	MinLength         int     `json:"min_length,omitempty"`
@@ -43,15 +43,13 @@ type (
 	}
 )
 
-const hfInferenceAPI = "https://api-inference.huggingface.co/models/"
-
 func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (inferenceResponsePayload, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
 	body := bytes.NewReader(payloadBytes)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s%s", c.url, payload.Model), body) //nolint:lll
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/models/%s", c.url, payload.Model), body) //nolint:lll
 	if err != nil {
 		return nil, err
 	}

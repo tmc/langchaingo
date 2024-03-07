@@ -44,22 +44,26 @@ func (s Store) getGRPCConn(ctx context.Context) (*grpc.ClientConn, error) {
 
 func (s Store) grpcUpsert(
 	ctx context.Context,
-	vectors [][]float64,
+	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
-) error {
+) ([]string, error) {
 	pineconeVectors := make([]*pinecone_grpc.Vector, 0, len(vectors))
+
+	ids := make([]string, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		metadataStruct, err := structpb.NewStruct(metadatas[i])
 		if err != nil {
-			return err
+			return nil, err
 		}
 
+		id := uuid.New().String()
+		ids[i] = id
 		pineconeVectors = append(
 			pineconeVectors,
 			&pinecone_grpc.Vector{
-				Id:       uuid.New().String(),
-				Values:   float64ToFloat32(vectors[i]),
+				Id:       id,
+				Values:   vectors[i],
 				Metadata: metadataStruct,
 			},
 		)
@@ -70,12 +74,12 @@ func (s Store) grpcUpsert(
 		Namespace: nameSpace,
 	})
 
-	return err
+	return ids, err
 }
 
 func (s Store) grpcQuery(
 	ctx context.Context,
-	vector []float64,
+	vector []float32,
 	numDocs int,
 	nameSpace string,
 ) ([]schema.Document, error) {
@@ -83,7 +87,7 @@ func (s Store) grpcQuery(
 		ctx,
 		&pinecone_grpc.QueryRequest{
 			Queries: []*pinecone_grpc.QueryVector{
-				{Values: float64ToFloat32(vector)},
+				{Values: vector},
 			},
 			TopK:          uint32(numDocs),
 			IncludeValues: false,
@@ -94,13 +98,13 @@ func (s Store) grpcQuery(
 		return nil, err
 	}
 
-	if len(queryResult.Results) == 0 {
+	if len(queryResult.GetResults()) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
 	resultDocuments := make([]schema.Document, 0)
-	for _, match := range queryResult.Results[0].Matches {
-		metadata := match.Metadata.AsMap()
+	for _, match := range queryResult.GetResults()[0].GetMatches() {
+		metadata := match.GetMetadata().AsMap()
 
 		pageContent, ok := metadata[s.textKey].(string)
 		if !ok {
@@ -115,12 +119,4 @@ func (s Store) grpcQuery(
 	}
 
 	return resultDocuments, nil
-}
-
-func float64ToFloat32(input []float64) []float32 {
-	output := make([]float32, len(input))
-	for i, v := range input {
-		output[i] = float32(v)
-	}
-	return output
 }

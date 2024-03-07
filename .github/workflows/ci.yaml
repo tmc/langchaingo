@@ -2,6 +2,8 @@ name: ci
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -18,9 +20,10 @@ jobs:
           cache: false
       - uses: actions/checkout@v3
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3.6.0
+        uses: golangci/golangci-lint-action@v3.7.0
         with:
-          args: --timeout=2m
+          args: --timeout=4m
+          version: v1.55.1
   build-examples:
     runs-on: ubuntu-latest
     steps:

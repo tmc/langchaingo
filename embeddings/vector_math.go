@@ -14,7 +14,7 @@ var (
 	ErrAllTextsLenZero = errors.New("all texts have length 0")
 )
 
-func combineVectors(vectors [][]float64, weights []int) ([]float64, error) {
+func CombineVectors(vectors [][]float32, weights []int) ([]float32, error) {
 	average, err := getAverage(vectors, weights)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func combineVectors(vectors [][]float64, weights []int) ([]float64, error) {
 // getAverage does the following calculation:
 //
 //	avg = sum(vectors * weights) / sum(weights).
-func getAverage(vectors [][]float64, weights []int) ([]float64, error) {
+func getAverage(vectors [][]float32, weights []int) ([]float32, error) {
 	// Check that all vectors are the same size and get that size.
 	vectorLen := -1
 	for _, vector := range vectors {
@@ -46,7 +46,7 @@ func getAverage(vectors [][]float64, weights []int) ([]float64, error) {
 	}
 
 	if vectorLen == -1 {
-		return []float64{}, nil
+		return []float32{}, nil
 	}
 
 	// Get the sum of the weights.
@@ -59,25 +59,25 @@ func getAverage(vectors [][]float64, weights []int) ([]float64, error) {
 		return nil, ErrAllTextsLenZero
 	}
 
-	average := make([]float64, vectorLen)
+	average := make([]float32, vectorLen)
 	for i := 0; i < vectorLen; i++ {
 		for j := 0; j < len(vectors); j++ {
-			average[i] += vectors[j][i] * float64(weights[j])
+			average[i] += vectors[j][i] * float32(weights[j])
 		}
 	}
 
 	for i := 0; i < len(average); i++ {
-		average[i] /= float64(weightSum)
+		average[i] /= float32(weightSum)
 	}
 
 	return average, nil
 }
 
-func getNorm(v []float64) float64 {
-	var sum float64
+func getNorm(v []float32) float32 {
+	var sum float32
 	for i := 0; i < len(v); i++ {
 		sum += v[i] * v[i]
 	}
 
-	return math.Sqrt(sum)
+	return float32(math.Sqrt(float64(sum)))
 }

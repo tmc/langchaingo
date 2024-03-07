@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/schema"
 )
+
+// Key name used to store the intermediate steps in the output, when configured.
+const _intermediateStepsOutputKey = "intermediateSteps"
 
 // Chain is the interface all chains must implement.
 type Chain interface {
@@ -16,20 +20,20 @@ type Chain interface {
 	Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error)
 	// GetMemory gets the memory of the chain.
 	GetMemory() schema.Memory
-	// InputKeys returns the input keys the chain expects.
+	// GetInputKeys returns the input keys the chain expects.
 	GetInputKeys() []string
-	// OutputKeys returns the output keys the chain returns.
+	// GetOutputKeys returns the output keys the chain returns.
 	GetOutputKeys() []string
 }
 
 // Call is the standard function used for executing chains.
-func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
 	}
 
-	newValues, err := c.GetMemory().LoadMemoryVariables(inputValues)
+	newValues, err := c.GetMemory().LoadMemoryVariables(ctx, inputValues)
 	if err != nil {
 		return nil, err
 	}
@@ -38,31 +42,56 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		fullValues[key] = value
 	}
 
+	callbacksHandler := getChainCallbackHandler(c)
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainStart(ctx, inputValues)
+	}
+
+	outputValues, err := callChain(ctx, c, fullValues, options...)
+	if err != nil {
+		if callbacksHandler != nil {
+			callbacksHandler.HandleChainError(ctx, err)
+		}
+		return outputValues, err
+	}
+
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainEnd(ctx, outputValues)
+	}
+
+	if err = c.GetMemory().SaveContext(ctx, inputValues, outputValues); err != nil {
+		return outputValues, err
+	}
+
+	return outputValues, nil
+}
+
+func callChain(
+	ctx context.Context,
+	c Chain,
+	fullValues map[string]any,
+	options ...ChainCallOption,
+) (map[string]any, error) {
 	if err := validateInputs(c, fullValues); err != nil {
 		return nil, err
 	}
 
 	outputValues, err := c.Call(ctx, fullValues, options...)
 	if err != nil {
-		return nil, err
+		return outputValues, err
 	}
 	if err := validateOutputs(c, outputValues); err != nil {
-		return nil, err
-	}
-
-	err = c.GetMemory().SaveContext(inputValues, outputValues)
-	if err != nil {
-		return nil, err
+		return outputValues, err
 	}
 
 	return outputValues, nil
 }
 
-// Run can be used to execute a chain if the chain only expects one input and one
-// string output.
+// Run can be used to execute a chain if the chain only expects one input and
+// one string output.
 func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (string, error) {
 	inputKeys := c.GetInputKeys()
-	memoryKeys := c.GetMemory().MemoryVariables()
+	memoryKeys := c.GetMemory().MemoryVariables(ctx)
 	neededKeys := make([]string, 0, len(inputKeys))
 
 	// Remove keys gotten from the memory.
@@ -219,6 +248,13 @@ func validateOutputs(c Chain, outputValues map[string]any) error {
 		if _, ok := outputValues[k]; !ok {
 			return fmt.Errorf("%w: %v", ErrInvalidOutputValues, k)
 		}
+	}
+	return nil
+}
+
+func getChainCallbackHandler(c Chain) callbacks.Handler {
+	if handlerHaver, ok := c.(callbacks.HandlerHaver); ok {
+		return handlerHaver.GetCallbackHandler()
 	}
 	return nil
 }

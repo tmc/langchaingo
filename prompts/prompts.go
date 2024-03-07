@@ -7,7 +7,8 @@ type Formatter interface {
 	Format(values map[string]any) (string, error)
 }
 
-// Formatter is an interface for formatting a map of values into a list of messages.
+// MessageFormatter is an interface for formatting a map of values into a list
+// of messages.
 type MessageFormatter interface {
 	FormatMessages(values map[string]any) ([]schema.ChatMessage, error)
 	GetInputVariables() []string

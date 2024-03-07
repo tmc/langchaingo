@@ -24,15 +24,22 @@ type TokenSplitter struct {
 	DisallowedSpecial []string
 }
 
-func NewTokenSplitter() TokenSplitter {
-	return TokenSplitter{
-		ChunkSize:         _defaultTokenChunkSize,
-		ChunkOverlap:      _defaultTokenChunkOverlap,
-		ModelName:         _defaultTokenModelName,
-		EncodingName:      _defaultTokenEncoding,
-		AllowedSpecial:    []string{},
-		DisallowedSpecial: []string{"all"},
+func NewTokenSplitter(opts ...Option) TokenSplitter {
+	options := DefaultOptions()
+	for _, o := range opts {
+		o(&options)
 	}
+
+	s := TokenSplitter{
+		ChunkSize:         options.ChunkSize,
+		ChunkOverlap:      options.ChunkOverlap,
+		ModelName:         options.ModelName,
+		EncodingName:      options.EncodingName,
+		AllowedSpecial:    options.AllowedSpecial,
+		DisallowedSpecial: options.DisallowedSpecial,
+	}
+
+	return s
 }
 
 // SplitText splits a text into multiple text.

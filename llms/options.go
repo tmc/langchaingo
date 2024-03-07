@@ -5,10 +5,13 @@ import "context"
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
 
-// CallOptions is a set of options for LLM.Call.
+// CallOptions is a set of options for calling models. Not all models support
+// all options.
 type CallOptions struct {
 	// Model is the model to use.
 	Model string `json:"model"`
+	// CandidateCount is the number of response candidates to generate.
+	CandidateCount int `json:"candidate_count"`
 	// MaxTokens is the maximum number of tokens to generate.
 	MaxTokens int `json:"max_tokens"`
 	// Temperature is the temperature for sampling, between 0 and 1.
@@ -36,44 +39,80 @@ type CallOptions struct {
 	FrequencyPenalty float64 `json:"frequency_penalty"`
 	// PresencePenalty is the presence penalty for sampling.
 	PresencePenalty float64 `json:"presence_penalty"`
+
+	// Function defitions to include in the request.
+	Functions []FunctionDefinition `json:"functions"`
+	// FunctionCallBehavior is the behavior to use when calling functions.
+	//
+	// If a specific function should be invoked, use the format:
+	// `{"name": "my_function"}`
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call"`
 }
 
-// WithModel is an option for LLM.Call.
+// FunctionDefinition is a definition of a function that can be called by the model.
+type FunctionDefinition struct {
+	// Name is the name of the function.
+	Name string `json:"name"`
+	// Description is a description of the function.
+	Description string `json:"description"`
+	// Parameters is a list of parameters for the function.
+	Parameters any `json:"parameters"`
+}
+
+// FunctionCallBehavior is the behavior to use when calling functions.
+type FunctionCallBehavior string
+
+const (
+	// FunctionCallBehaviorNone will not call any functions.
+	FunctionCallBehaviorNone FunctionCallBehavior = "none"
+	// FunctionCallBehaviorAuto will call functions automatically.
+	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
+)
+
+// WithModel specifies which model name to use.
 func WithModel(model string) CallOption {
 	return func(o *CallOptions) {
 		o.Model = model
 	}
 }
 
-// WithMaxTokens is an option for LLM.Call.
+// WithMaxTokens specifies the max number of tokens to generate.
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxTokens = maxTokens
 	}
 }
 
-// WithTemperature is an option for LLM.Call.
+// WithCandidateCount specifies the number of response candidates to generate.
+func WithCandidateCount(c int) CallOption {
+	return func(o *CallOptions) {
+		o.CandidateCount = c
+	}
+}
+
+// WithTemperature specifies the model temperature, a hyperparameter that
+// regulates the randomness, or creativity, of the AI's responses.
 func WithTemperature(temperature float64) CallOption {
 	return func(o *CallOptions) {
 		o.Temperature = temperature
 	}
 }
 
-// WithStopWords is an option for LLM.Call.
+// WithStopWords specifies a list of words to stop generation on.
 func WithStopWords(stopWords []string) CallOption {
 	return func(o *CallOptions) {
 		o.StopWords = stopWords
 	}
 }
 
-// WithOptions is an option for LLM.Call.
+// WithOptions specifies options.
 func WithOptions(options CallOptions) CallOption {
 	return func(o *CallOptions) {
 		(*o) = options
 	}
 }
 
-// WithStreamingFunc is an option for LLM.Call that allows streaming responses.
+// WithStreamingFunc specifies the streaming function to use.
 func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) error) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc
@@ -140,5 +179,19 @@ func WithFrequencyPenalty(frequencyPenalty float64) CallOption {
 func WithPresencePenalty(presencePenalty float64) CallOption {
 	return func(o *CallOptions) {
 		o.PresencePenalty = presencePenalty
+	}
+}
+
+// WithFunctionCallBehavior will add an option to set the behavior to use when calling functions.
+func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
+	return func(o *CallOptions) {
+		o.FunctionCallBehavior = behavior
+	}
+}
+
+// WithFunctions will add an option to set the functions to include in the request.
+func WithFunctions(functions []FunctionDefinition) CallOption {
+	return func(o *CallOptions) {
+		o.Functions = functions
 	}
 }

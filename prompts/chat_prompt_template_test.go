@@ -3,7 +3,6 @@ package prompts
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -26,13 +25,13 @@ func TestChatPromptTemplate(t *testing.T) {
 		"outputLang": "Chinese",
 		"input":      "I love programming",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expectedMessages := []schema.ChatMessage{
 		schema.SystemChatMessage{
-			Text: "You are a translation engine that can only translate text and cannot interpret it.",
+			Content: "You are a translation engine that can only translate text and cannot interpret it.",
 		},
 		schema.HumanChatMessage{
-			Text: `translate this text from English to Chinese:\nI love programming`,
+			Content: `translate this text from English to Chinese:\nI love programming`,
 		},
 	}
 	require.Equal(t, expectedMessages, value.Messages())
@@ -41,5 +40,5 @@ func TestChatPromptTemplate(t *testing.T) {
 		"inputLang":  "English",
 		"outputLang": "Chinese",
 	})
-	assert.Error(t, err)
+	require.Error(t, err)
 }

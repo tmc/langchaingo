@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"context"
+
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -15,18 +17,22 @@ func NewSimple() Simple {
 // Statically assert that Simple implement the memory interface.
 var _ schema.Memory = Simple{}
 
-func (m Simple) MemoryVariables() []string {
+func (m Simple) MemoryVariables(context.Context) []string {
 	return nil
 }
 
-func (m Simple) LoadMemoryVariables(map[string]any) (map[string]any, error) {
-	return make(map[string]any, 0), nil
+func (m Simple) LoadMemoryVariables(context.Context, map[string]any) (map[string]any, error) {
+	return make(map[string]any), nil
 }
 
-func (m Simple) SaveContext(map[string]any, map[string]any) error {
+func (m Simple) SaveContext(context.Context, map[string]any, map[string]any) error {
 	return nil
 }
 
-func (m Simple) Clear() error {
+func (m Simple) Clear(context.Context) error {
 	return nil
+}
+
+func (m Simple) GetMemoryKey(context.Context) string {
+	return ""
 }

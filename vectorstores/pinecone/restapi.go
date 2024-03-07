@@ -35,7 +35,7 @@ func (e APIError) Error() string {
 }
 
 type vector struct {
-	Values   []float64      `json:"values"`
+	Values   []float32      `json:"values"`
 	Metadata map[string]any `json:"metadata"`
 	ID       string         `json:"id"`
 }
@@ -47,16 +47,20 @@ type upsertPayload struct {
 
 func (s Store) restUpsert(
 	ctx context.Context,
-	vectors [][]float64,
+	vectors [][]float32,
 	metadatas []map[string]any,
 	nameSpace string,
-) error {
+) ([]string, error) {
 	v := make([]vector, 0, len(vectors))
+
+	ids := make([]string, len(vectors))
 	for i := 0; i < len(vectors); i++ {
+		id := uuid.New().String()
+		ids[i] = id
 		v = append(v, vector{
 			Values:   vectors[i],
 			Metadata: metadatas[i],
-			ID:       uuid.New().String(),
+			ID:       id,
 		})
 	}
 
@@ -73,26 +77,26 @@ func (s Store) restUpsert(
 		http.MethodPost,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer body.Close()
 
 	if status == http.StatusOK {
-		return nil
+		return ids, nil
 	}
 
-	return newAPIError("upserting vectors", body)
+	return nil, newAPIError("upserting vectors", body)
 }
 
 type sparseValues struct {
 	Indices []int     `json:"indices"`
-	Values  []float64 `json:"values"`
+	Values  []float32 `json:"values"`
 }
 
 type match struct {
 	ID           string         `json:"id"`
-	Score        float64        `json:"score"`
-	Values       []float64      `json:"values"`
+	Score        float32        `json:"score"`
+	Values       []float32      `json:"values"`
 	SparseValues sparseValues   `json:"sparseValues"`
 	Metadata     map[string]any `json:"metadata"`
 }
@@ -105,7 +109,7 @@ type queriesResponse struct {
 type queryPayload struct {
 	IncludeValues   bool      `json:"includeValues"`
 	IncludeMetadata bool      `json:"includeMetadata"`
-	Vector          []float64 `json:"vector"`
+	Vector          []float32 `json:"vector"`
 	TopK            int       `json:"topK"`
 	Namespace       string    `json:"namespace"`
 	Filter          any       `json:"filter"`
@@ -113,10 +117,10 @@ type queryPayload struct {
 
 func (s Store) restQuery(
 	ctx context.Context,
-	vector []float64,
+	vector []float32,
 	numVectors int,
 	nameSpace string,
-	scoreThreshold float64,
+	scoreThreshold float32,
 	filter any,
 ) ([]schema.Document, error) {
 	payload := queryPayload{
@@ -167,6 +171,7 @@ func (s Store) restQuery(
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    match.Metadata,
+			Score:       match.Score,
 		}
 
 		// If scoreThreshold is not 0, we only return matches with a score above the threshold.

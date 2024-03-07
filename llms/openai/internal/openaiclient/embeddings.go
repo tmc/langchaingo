@@ -22,7 +22,7 @@ type embeddingResponsePayload struct {
 	Object string `json:"object"`
 	Data   []struct {
 		Object    string    `json:"object"`
-		Embedding []float64 `json:"embedding"`
+		Embedding []float32 `json:"embedding"`
 		Index     int       `json:"index"`
 	} `json:"data"`
 	Model string `json:"model"`
@@ -39,17 +39,16 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 	if c.baseURL == "" {
-		c.baseURL = "https://api.openai.com"
+		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/embeddings", c.baseURL), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.embeddingsModel), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
+	c.setHeaders(req)
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("send request: %w", err)
 	}

@@ -57,13 +57,17 @@ func (m MySQL) Query(ctx context.Context, query string, args ...any) ([]string, 
 	results := make([][]string, 0)
 	for rows.Next() {
 		row := make([]string, len(cols))
+		rowNullable := make([]sql.NullString, len(cols))
 		rowPtrs := make([]interface{}, len(cols))
 		for i := range row {
-			rowPtrs[i] = &row[i]
+			rowPtrs[i] = &rowNullable[i]
 		}
 		err = rows.Scan(rowPtrs...)
 		if err != nil {
 			return nil, nil, err
+		}
+		for i := range rowNullable {
+			row[i] = rowNullable[i].String
 		}
 		results = append(results, row)
 	}

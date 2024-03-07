@@ -10,17 +10,17 @@ const examplesPath = path.resolve(__dirname, "..", "examples");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "🦜️🔗 Langchain",
+  title: "🦜️🔗 LangchainGo",
   tagline: "LangChain Go Docs",
   favicon: "img/favicon.ico",
   customFields: {
     mendableAnonKey: process.env.MENDABLE_ANON_KEY,
   },
   // Set the production url of your site here
-  url: "https://go.langchain.com",
+  url: "https://tmc.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: "/langchaingo/",
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
@@ -129,7 +129,7 @@ const config = {
       },
       image: "img/parrot-chainlink-icon.png",
       navbar: {
-        title: "🦜️🔗 LangChain",
+        title: "🦜️🔗 LangChainGo",
         items: [
           {
             href: "https://docs.langchain.com/docs/",
@@ -148,7 +148,7 @@ const config = {
           },
           {
             to: "/docs/",
-            label: "GoLang Docs",
+            label: "Go Docs",
             position: "left",
           },
           // Please keep GitHub link to the right for consistency.
@@ -187,7 +187,7 @@ const config = {
                 href: "https://github.com/hwchase17/langchainjs",
               },
               {
-                label: "GoLang",
+                label: "Go",
                 href: "https://github.com/tmc/langchaingo",
               },
             ],

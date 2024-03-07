@@ -30,7 +30,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | Retrieval QA Chain                     | ✅     |
 | Map Reduce Combine Documents Chain     | ✅     |
 | Refine Combine Documents Chain         | ✅     |
-| Map Rerank Combine Documents Chain     | ❌ [#68](https://github.com/tmc/langchaingo/issues/68) |
+| Map Rerank Combine Documents Chain     | ✅     |
 | Chat Vector DB Chain                   | ❌     |
 | Vector DB QA Chain                     | ❌     |
 | Analyze Document Chain                 | ❌     |
@@ -40,7 +40,7 @@ Please note that this page lists the current state of the LangChain Go project, 
 | SQL Database Chain                     | ✅     |
 | API Chain                              | ✅     |
 | Transformation Chain                   | ❌     |
-| Constitutional Chain                   | ❌     |
+| Constitutional Chain                   | ✅     |
 | Conversational Chain                   | ❌     |
 | Graph QA Chain                         | ❌     |
 | HyDE Chain                             | ❌     |
@@ -49,8 +49,8 @@ Please note that this page lists the current state of the LangChain Go project, 
 | PAL Chain                              | ❌     |
 | LLM Requests Chain                     | ❌     |
 | Moderation Chain                       | ❌     |
-| Sequential Chain                       | ❌     |
-| Simple Sequential Chain                | ❌     |
+| Sequential Chain                       | ✅     |
+| Simple Sequential Chain                | ✅     |
 
 ## Agents
 
@@ -80,10 +80,10 @@ Please note that this page lists the current state of the LangChain Go project, 
 | ----------------------------| ------ |
 | Simple                      | ✅     |
 | Structured                  | ✅     |
-| Boolean                     | ❌     |
-| Combining Parsers           | ❌     |
+| Boolean                     | ✅     |
+| Combining Parsers           | ✅     |
 | Regex                       | ✅     |
-| Regex Dictionary            | ❌     |
+| Regex Dictionary            | ✅     |
 | Comma separated list        | ✅     |
 | Parser fixer                | ❌     |
 | Retry                       | ❌     |

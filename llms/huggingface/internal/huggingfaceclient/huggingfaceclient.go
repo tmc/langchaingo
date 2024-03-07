@@ -17,14 +17,14 @@ type Client struct {
 	url   string
 }
 
-func New(token string, model string) (*Client, error) {
+func New(token, model, url string) (*Client, error) {
 	if token == "" {
 		return nil, ErrInvalidToken
 	}
 	return &Client{
 		Token: token,
 		Model: model,
-		url:   hfInferenceAPI,
+		url:   url,
 	}, nil
 }
 
@@ -32,7 +32,7 @@ type InferenceRequest struct {
 	Model             string        `json:"repositoryId"`
 	Prompt            string        `json:"prompt"`
 	Task              InferenceTask `json:"task"`
-	Temperature       float64       `json:"temperature,omitempty"`
+	Temperature       float64       `json:"temperature"`
 	TopP              float64       `json:"top_p,omitempty"`
 	TopK              int           `json:"top_k,omitempty"`
 	MinLength         int           `json:"min_length,omitempty"`
@@ -72,4 +72,32 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 	return &InferenceResponse{
 		Text: text,
 	}, nil
+}
+
+// EmbeddingRequest is a request to create an embedding.
+type EmbeddingRequest struct {
+	Options map[string]any `json:"options"`
+	Inputs  []string       `json:"inputs"`
+}
+
+// CreateEmbedding creates embeddings.
+func (c *Client) CreateEmbedding(
+	ctx context.Context,
+	model string,
+	task string,
+	r *EmbeddingRequest,
+) ([][]float32, error) {
+	resp, err := c.createEmbedding(ctx, model, task, &embeddingPayload{
+		Inputs:  r.Inputs,
+		Options: r.Options,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	return resp, nil
 }

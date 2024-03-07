@@ -81,7 +81,10 @@ func TestPineconeStoreRest(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -95,7 +98,7 @@ func TestPineconeStoreRest(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	})
@@ -104,14 +107,17 @@ func TestPineconeStoreRest(t *testing.T) {
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "tokyo")
+	require.Equal(t, "tokyo", docs[0].PageContent)
 }
 
 func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -125,7 +131,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -158,7 +164,10 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
@@ -172,7 +181,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -201,7 +210,10 @@ func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -216,7 +228,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -225,9 +237,6 @@ func TestPineconeAsRetriever(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	result, err := chains.Run(
@@ -246,7 +255,10 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -261,7 +273,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -272,9 +284,6 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	result, err := chains.Run(
@@ -297,7 +306,10 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -312,7 +324,7 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -348,9 +360,6 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := make(map[string]any)
@@ -376,7 +385,10 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -391,7 +403,7 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -427,9 +439,6 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := make(map[string]any)
@@ -456,7 +465,10 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -471,7 +483,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -509,9 +521,6 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -534,7 +543,10 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
@@ -549,7 +561,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	id := uuid.New().String()
 
-	err = store.AddDocuments(
+	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -576,9 +588,6 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 		},
 		vectorstores.WithNameSpace(id),
 	)
-	require.NoError(t, err)
-
-	llm, err := openai.New()
 	require.NoError(t, err)
 
 	filter := map[string]interface{}{

@@ -57,7 +57,7 @@ func TestAPI(t *testing.T) {
 	chain := NewAPIChain(llm, http.DefaultClient)
 	q := map[string]any{
 		"api_docs": MeteoDocs,
-		"question": "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
+		"input":    "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
 	}
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
@@ -66,5 +66,5 @@ func TestAPI(t *testing.T) {
 	if !ok {
 		t.Fatal("expected answer to be a string")
 	}
-	require.True(t, strings.Contains(answer, "temperature"), `result does not contain the keyword 'temperature'`)
+	require.True(t, strings.Contains(answer, "Munich"), `result does not contain the keyword 'Munich'`)
 }

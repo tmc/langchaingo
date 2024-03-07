@@ -1,11 +1,13 @@
-module basic-llm-example
+module github.com/tmc/langchaingo/examples/local-llm-example
 
-go 1.19
+go 1.21
 
-require github.com/tmc/langchaingo v0.0.0-20230710002755-32d9295eb39d
+toolchain go1.21.4
+
+require github.com/tmc/langchaingo v0.1.4
 
 require (
 	github.com/dlclark/regexp2 v1.8.1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.4.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.2 // indirect
 )

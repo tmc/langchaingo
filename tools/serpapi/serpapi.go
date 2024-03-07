@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/serpapi/internal"
 )
@@ -13,7 +14,8 @@ import (
 var ErrMissingToken = errors.New("missing the serpapi API key, set it in the SERPAPI_API_KEY environment variable")
 
 type Tool struct {
-	client *internal.Client
+	CallbacksHandler callbacks.Handler
+	client           *internal.Client
 }
 
 var _ tools.Tool = Tool{}
@@ -31,7 +33,7 @@ func New() (*Tool, error) {
 }
 
 func (t Tool) Name() string {
-	return "Google Search"
+	return "GoogleSearch"
 }
 
 func (t Tool) Description() string {
@@ -43,13 +45,25 @@ func (t Tool) Description() string {
 }
 
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, input)
+	}
+
 	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good Google Search Results was found", nil
 		}
 
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
+
 		return "", err
+	}
+
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return strings.Join(strings.Fields(result), " "), nil

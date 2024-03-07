@@ -10,18 +10,21 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (
 	defaultChatModel = "gpt-3.5-turbo"
-	defaultBaseURL   = "https://api.openai.com"
 )
 
-// ChatRequest is a request to create an embedding.
+var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
+
+// ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
 	Model            string         `json:"model"`
 	Messages         []*ChatMessage `json:"messages"`
-	Temperature      float64        `json:"temperature,omitempty"`
+	Temperature      float64        `json:"temperature"`
 	TopP             float64        `json:"top_p,omitempty"`
 	MaxTokens        int            `json:"max_tokens,omitempty"`
 	N                int            `json:"n,omitempty"`
@@ -30,20 +33,74 @@ type ChatRequest struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
+	// Function definitions to include in the request.
+	Functions []FunctionDefinition `json:"functions,omitempty"`
+	// FunctionCallBehavior is the behavior to use when calling functions.
+	//
+	// If a specific function should be invoked, use the format:
+	// `{"name": "my_function"}`
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 // ChatMessage is a message in a chat request.
-type ChatMessage struct {
+type ChatMessage struct { //nolint:musttag
 	// The role of the author of this message. One of system, user, or assistant.
-	Role string `json:"role"`
+	Role string
 	// The content of the message.
-	Content string `json:"content"`
+	Content string
+
+	MultiContent []llms.ContentPart
+
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
-	Name string `json:"name,omitempty"`
+	Name string
+
+	// FunctionCall represents a function call to be made in the message.
+	FunctionCall *FunctionCall
+}
+
+func (m ChatMessage) MarshalJSON() ([]byte, error) {
+	if m.Content != "" && m.MultiContent != nil {
+		return nil, ErrContentExclusive
+	}
+	if len(m.MultiContent) > 0 {
+		msg := struct {
+			Role         string             `json:"role"`
+			Content      string             `json:"-"`
+			MultiContent []llms.ContentPart `json:"content,omitempty"`
+			Name         string             `json:"name,omitempty"`
+			FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		}(m)
+		return json.Marshal(msg)
+	}
+	msg := struct {
+		Role         string             `json:"role"`
+		Content      string             `json:"content"`
+		MultiContent []llms.ContentPart `json:"-"`
+		Name         string             `json:"name,omitempty"`
+		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+	}(m)
+	return json.Marshal(msg)
+}
+
+func (m *ChatMessage) UnmarshalJSON(data []byte) error {
+	msg := struct {
+		Role         string             `json:"role"`
+		Content      string             `json:"content"`
+		MultiContent []llms.ContentPart `json:"-"` // not expected in response
+		Name         string             `json:"name,omitempty"`
+		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+	}{}
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		return err
+	}
+	*m = ChatMessage(msg)
+	return nil
 }
 
 // ChatChoice is a choice in a chat response.
@@ -74,8 +131,8 @@ type ChatResponse struct {
 	} `json:"usage,omitempty"`
 }
 
-// StreamedChatRkesponsePayload is a chunk from the stream.
-type StreamedChatRkesponsePayload struct {
+// StreamedChatResponsePayload is a chunk from the stream.
+type StreamedChatResponsePayload struct {
 	ID      string  `json:"id,omitempty"`
 	Created float64 `json:"created,omitempty"`
 	Model   string  `json:"model,omitempty"`
@@ -83,11 +140,42 @@ type StreamedChatRkesponsePayload struct {
 	Choices []struct {
 		Index float64 `json:"index,omitempty"`
 		Delta struct {
-			Role    string `json:"role,omitempty"`
-			Content string `json:"content,omitempty"`
+			Role         string        `json:"role,omitempty"`
+			Content      string        `json:"content,omitempty"`
+			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 		} `json:"delta,omitempty"`
-		FinishReason interface{} `json:"finish_reason,omitempty"`
+		FinishReason string `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
+}
+
+// FunctionDefinition is a definition of a function that can be called by the model.
+type FunctionDefinition struct {
+	// Name is the name of the function.
+	Name string `json:"name"`
+	// Description is a description of the function.
+	Description string `json:"description"`
+	// Parameters is a list of parameters for the function.
+	Parameters any `json:"parameters"`
+}
+
+// FunctionCallBehavior is the behavior to use when calling functions.
+type FunctionCallBehavior string
+
+const (
+	// FunctionCallBehaviorUnspecified is the empty string.
+	FunctionCallBehaviorUnspecified FunctionCallBehavior = ""
+	// FunctionCallBehaviorNone will not call any functions.
+	FunctionCallBehaviorNone FunctionCallBehavior = "none"
+	// FunctionCallBehaviorAuto will call functions automatically.
+	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
+)
+
+// FunctionCall is a call to a function.
+type FunctionCall struct {
+	// Name is the name of the function to call.
+	Name string `json:"name"`
+	// Arguments is the set of arguments to pass to the function.
+	Arguments string `json:"arguments"`
 }
 
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatResponse, error) {
@@ -95,6 +183,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		payload.Stream = true
 	}
 	// Build request payload
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -105,15 +194,15 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v1/chat/completions", c.baseURL), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", c.Model), body)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+c.token)
+
+	c.setHeaders(req)
 
 	// Send request
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -139,9 +228,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	return &response, json.NewDecoder(r.Body).Decode(&response)
 }
 
-func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) {
+func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatResponse, error) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan StreamedChatRkesponsePayload)
+	responseChan := make(chan StreamedChatResponsePayload)
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -156,7 +245,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if data == "[DONE]" {
 				return
 			}
-			var streamPayload StreamedChatRkesponsePayload
+			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
 				log.Fatalf("failed to decode stream payload: %v", err)
@@ -175,10 +264,23 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	}
 
 	for streamResponse := range responseChan {
-		if payload.StreamingFunc != nil {
-			response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		if len(streamResponse.Choices) == 0 {
+			continue
+		}
+		chunk := []byte(streamResponse.Choices[0].Delta.Content)
+		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
+		response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
+		if streamResponse.Choices[0].Delta.FunctionCall != nil {
+			if response.Choices[0].Message.FunctionCall == nil {
+				response.Choices[0].Message.FunctionCall = streamResponse.Choices[0].Delta.FunctionCall
+			} else {
+				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
+			}
+			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
+		}
 
-			err := payload.StreamingFunc(ctx, []byte(streamResponse.Choices[0].Delta.Content))
+		if payload.StreamingFunc != nil {
+			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}

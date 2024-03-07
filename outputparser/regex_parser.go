@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// RegexParser is an output parser used to parse the output of an llm as a map.
+// RegexParser is an output parser used to parse the output of an LLM as a map.
 type RegexParser struct {
 	Expression *regexp.Regexp
 	OutputKeys []string
@@ -25,12 +25,12 @@ func NewRegexParser(expressionStr string) RegexParser {
 }
 
 // Statically assert that RegexParser implements the OutputParser interface.
-var _ schema.OutputParser[map[string]string] = RegexParser{}
+var _ schema.OutputParser[any] = RegexParser{}
 
 // GetFormatInstructions returns instructions on the expected output format.
 func (p RegexParser) GetFormatInstructions() string {
 	instructions := "Your output should be a map of strings. e.g.:\n"
-	instructions += "map[string]string{\"key1\": \"value1\", \"key2\": \"value2\"}\n"
+	instructions += "map[string]string{\"key1\": \"value1\", \"key2\": \"value2\"}"
 
 	return instructions
 }
@@ -57,13 +57,13 @@ func (p RegexParser) parse(text string) (map[string]string, error) {
 	return matches, nil
 }
 
-// Parse parses the output of an llm into a map of strings.
-func (p RegexParser) Parse(text string) (map[string]string, error) {
+// Parse parses the output of an LLM into a map of strings.
+func (p RegexParser) Parse(text string) (any, error) {
 	return p.parse(text)
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p RegexParser) ParseWithPrompt(text string, _ schema.PromptValue) (map[string]string, error) {
+func (p RegexParser) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

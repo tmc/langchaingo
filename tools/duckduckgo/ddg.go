@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/duckduckgo/internal"
 )
@@ -13,7 +14,8 @@ const DefaultUserAgent = "github.com/tmc/langchaingo/tools/duckduckgo"
 
 // Tool defines a tool implementation for the DuckDuckGo Search.
 type Tool struct {
-	client *internal.Client
+	CallbacksHandler callbacks.Handler
+	client           *internal.Client
 }
 
 var _ tools.Tool = Tool{}
@@ -41,12 +43,23 @@ func (t Tool) Description() string {
 
 // Call performs the search and return the result.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, input)
+	}
+
 	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good DuckDuckGo Search Results was found", nil
 		}
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return "", err
+	}
+
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
 
 	return result, nil

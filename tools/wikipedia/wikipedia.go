@@ -3,8 +3,9 @@ package wikipedia
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strconv"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -19,6 +20,7 @@ var ErrUnexpectedAPIResult = errors.New("unexpected result from wikipedia api")
 
 // Tool is an implementation of the tool interface that finds information using the wikipedia api.
 type Tool struct {
+	CallbacksHandler callbacks.Handler
 	// The number of wikipedia pages to include in the result.
 	TopK int
 	// The number of characters to take from each page.
@@ -57,6 +59,26 @@ func (t Tool) Description() string {
 // Call uses the wikipedia api to find the top search results for the input and returns
 // the first part of the documents combined.
 func (t Tool) Call(ctx context.Context, input string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, input)
+	}
+
+	result, err := t.searchWiKi(ctx, input)
+	if err != nil {
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
+		return "", err
+	}
+
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolEnd(ctx, result)
+	}
+
+	return result, nil
+}
+
+func (t Tool) searchWiKi(ctx context.Context, input string) (string, error) {
 	searchResult, err := search(ctx, t.TopK, input, t.LanguageCode, t.UserAgent)
 	if err != nil {
 		return "", err
@@ -74,7 +96,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 			return "", err
 		}
 
-		page, ok := getPageResult.Query.Pages[fmt.Sprintf("%v", search.PageID)]
+		page, ok := getPageResult.Query.Pages[strconv.Itoa(search.PageID)]
 		if !ok {
 			return "", ErrUnexpectedAPIResult
 		}

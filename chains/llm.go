@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/outputparser"
@@ -16,25 +17,33 @@ import (
 const _llmChainDefaultOutputKey = "text"
 
 type LLMChain struct {
-	Prompt       prompts.FormatPrompter
-	LLM          llms.LanguageModel
-	Memory       schema.Memory
-	OutputParser schema.OutputParser[any]
+	Prompt           prompts.FormatPrompter
+	LLM              llms.Model
+	Memory           schema.Memory
+	CallbacksHandler callbacks.Handler
+	OutputParser     schema.OutputParser[any]
 
 	OutputKey string
 }
 
-var _ Chain = &LLMChain{}
+var (
+	_ Chain                  = &LLMChain{}
+	_ callbacks.HandlerHaver = &LLMChain{}
+)
 
-// NewLLMChain creates a new LLMChain with an llm and a prompt.
-func NewLLMChain(llm llms.LanguageModel, prompt prompts.FormatPrompter) *LLMChain {
+// NewLLMChain creates a new LLMChain with an LLM and a prompt.
+func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCallOption) *LLMChain {
+	opt := &chainCallOption{}
+	for _, o := range opts {
+		o(opt)
+	}
 	chain := &LLMChain{
-		Prompt:       prompt,
-		LLM:          llm,
-		OutputParser: outputparser.NewSimple(),
-		Memory:       memory.NewSimple(),
-
-		OutputKey: _llmChainDefaultOutputKey,
+		Prompt:           prompt,
+		LLM:              llm,
+		OutputParser:     outputparser.NewSimple(),
+		Memory:           memory.NewSimple(),
+		OutputKey:        _llmChainDefaultOutputKey,
+		CallbacksHandler: opt.CallbackHandler,
 	}
 
 	return chain
@@ -50,6 +59,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	if jsonData, err := os.ReadFile("/Users/chihiro/Desktop/data.json"); err != nil {
 		return nil, err
 	} else {
@@ -74,11 +84,14 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		[]schema.PromptValue{promptValue},
 		getLLMCallOptions(options...)...,
 	)
+=======
+	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
+>>>>>>> upstream/main
 	if err != nil {
 		return nil, err
 	}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(result.Generations[0][0].Text, promptValue)
+	finalOutput, err := c.OutputParser.ParseWithPrompt(result, promptValue)
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +102,10 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 // GetMemory returns the memory.
 func (c LLMChain) GetMemory() schema.Memory { //nolint:ireturn
 	return c.Memory //nolint:ireturn
+}
+
+func (c LLMChain) GetCallbackHandler() callbacks.Handler { //nolint:ireturn
+	return c.CallbacksHandler
 }
 
 // GetInputKeys returns the expected input keys.

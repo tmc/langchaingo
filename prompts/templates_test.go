@@ -1,6 +1,7 @@
 package prompts
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,11 +52,20 @@ func TestInterpolateGoTemplate(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			t.Run("go/template", func(t *testing.T) {
+				t.Parallel()
 
-			actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
-			require.NoError(t, err)
-			assert.Equal(t, tc.expected, actual)
+				actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
+				require.NoError(t, err)
+				assert.Equal(t, tc.expected, actual)
+			})
+			t.Run("jinja2", func(t *testing.T) {
+				t.Parallel()
+
+				actual, err := interpolateJinja2(strings.ReplaceAll(tc.template, "{{ .", "{{ "), tc.templateValues)
+				require.NoError(t, err)
+				assert.Equal(t, tc.expected, actual)
+			})
 		})
 	}
 
@@ -81,7 +91,7 @@ func TestInterpolateGoTemplate(t *testing.T) {
 
 			_, err := interpolateGoTemplate(tc.template, map[string]any{})
 			require.Error(t, err)
-			assert.EqualError(t, err, tc.errValue)
+			require.EqualError(t, err, tc.errValue)
 		})
 	}
 }
@@ -94,8 +104,8 @@ func TestCheckValidTemplate(t *testing.T) {
 
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		assert.EqualError(t, err, "invalid template format, got: unknown, should be one of [go-template]")
+		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
+		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [f-string go-template jinja2]")
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {
@@ -103,7 +113,7 @@ func TestCheckValidTemplate(t *testing.T) {
 
 		err := CheckValidTemplate("Hello, {{{ test }}", TemplateFormatGoTemplate, []string{"test"})
 		require.Error(t, err)
-		assert.EqualError(t, err, "template: template:1: unexpected \"{\" in command")
+		require.EqualError(t, err, "template: template:1: unexpected \"{\" in command")
 	})
 
 	t.Run("TemplateValid", func(t *testing.T) {
@@ -142,6 +152,6 @@ func TestRenderTemplate(t *testing.T) {
 			},
 		)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrInvalidTemplateFormat)
+		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
 	})
 }

@@ -4,10 +4,13 @@
 export GOPROXY=direct
 export GOWORK=off
 
+syncref="${1:-latest}"
+
 for gm in $(find . -name go.mod); do
   (
   cd $(dirname $gm)
-  go get -u github.com/tmc/langchaingo
+  go get -u github.com/tmc/langchaingo@${syncref}
   go mod tidy
-)
+) &
 done
+wait

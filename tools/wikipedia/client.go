@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -39,7 +40,7 @@ func search(
 	params.Add("action", "query")
 	params.Add("list", "search")
 	params.Add("srsearch", query)
-	params.Add("srlimit", fmt.Sprintf("%v", limit))
+	params.Add("srlimit", strconv.Itoa(limit))
 
 	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseURL, languageCode), params.Encode())
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
@@ -83,7 +84,7 @@ func getPage(ctx context.Context, pageID int, languageCode, userAgent string) (p
 	params.Add("format", "json")
 	params.Add("action", "query")
 	params.Add("prop", "extracts")
-	params.Add("pageids", fmt.Sprintf("%v", (pageID)))
+	params.Add("pageids", strconv.Itoa(pageID))
 
 	reqURL := fmt.Sprintf("%s?%s", fmt.Sprintf(_baseURL, languageCode), params.Encode())
 

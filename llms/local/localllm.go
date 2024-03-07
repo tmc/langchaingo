@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -21,28 +22,18 @@ var (
 
 // LLM is a local LLM implementation.
 type LLM struct {
-	client *localclient.Client
+	CallbacksHandler callbacks.Handler
+	client           *localclient.Client
 }
 
-// _ ensures that LLM implements the llms.LLM and language model interface.
-var (
-	_ llms.LLM           = (*LLM)(nil)
-	_ llms.LanguageModel = (*LLM)(nil)
-)
+var _ llms.Model = (*LLM)(nil)
 
 // Call calls the local LLM binary with the given prompt.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	r, err := o.Generate(ctx, []string{prompt}, options...)
-	if err != nil {
-		return "", err
-	}
-	if len(r) == 0 {
-		return "", ErrEmptyResponse
-	}
-	return r[0].Text, nil
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
-func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
+func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
 	if opts.Temperature != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", opts.Temperature))
 	}
@@ -64,12 +55,15 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) []string {
 	if opts.Seed != 0 {
 		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", opts.Seed))
 	}
-
-	return o.client.Args
 }
 
-// Generate generates completions using the local LLM binary.
-func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.CallOption) ([]*llms.Generation, error) {
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
@@ -81,23 +75,29 @@ func (o *LLM) Generate(ctx context.Context, prompts []string, options ...llms.Ca
 		o.appendGlobalsToArgs(*opts)
 	}
 
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
 	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
-		Prompt: prompts[0],
+		Prompt: part.(llms.TextContent).Text,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return []*llms.Generation{
-		{Text: result.Text},
-	}, nil
-}
 
-func (o *LLM) GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...llms.CallOption) (llms.LLMResult, error) { //nolint:lll
-	return llms.GeneratePrompt(ctx, o, prompts, options...)
-}
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: result.Text,
+			},
+		},
+	}
 
-func (o *LLM) GetNumTokens(text string) int {
-	return llms.CountTokens("gpt2", text)
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
+
+	return resp, nil
 }
 
 // New creates a new local LLM implementation.
@@ -116,7 +116,7 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, errors.Join(ErrMissingBin, err)
 	}
 
-	c, err := localclient.New(path, options.globalAsArgs, options.args)
+	c, err := localclient.New(path, options.globalAsArgs, strings.Split(options.args, " ")...)
 	return &LLM{
 		client: c,
 	}, err

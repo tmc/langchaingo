@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/outputparser"
 )
 
@@ -32,7 +33,7 @@ func TestCommaSeparatedList(t *testing.T) {
 
 	for _, tc := range testCases {
 		output, err := parser.Parse(tc.input)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, tc.expected, output)
 	}
 }

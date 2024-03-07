@@ -29,5 +29,5 @@ func TestStringPromptValueMessages(t *testing.T) {
 	spv = StringPromptValue("test")
 	msgs = spv.Messages()
 	require.Len(t, msgs, 1)
-	assert.Equal(t, "test", msgs[0].GetText())
+	assert.Equal(t, "test", msgs[0].GetContent())
 }

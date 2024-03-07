@@ -11,19 +11,21 @@ import (
 )
 
 func main() {
-	llm, err := openai.NewChat()
+	llm, err := openai.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llm.Call(ctx, []schema.ChatMessage{
-		schema.SystemChatMessage{Text: "Hello, I am a friendly chatbot. I love to talk about movies, books and music. Answer in long form yaml."},
-		schema.HumanChatMessage{Text: "What would be a good company name a company that makes colorful socks?"},
-	}, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+
+	content := []llms.MessageContent{
+		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
+	}
+
+	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))
 		return nil
-	}),
-	)
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}

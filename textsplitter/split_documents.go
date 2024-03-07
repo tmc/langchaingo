@@ -27,7 +27,7 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 
 // CreateDocuments creates documents from texts and metadatas with a text splitter. If
 // the length of the metadatas is zero, the result documents will contain no metadata.
-// Otherwise the numbers of texts and metadatas must match.
+// Otherwise, the numbers of texts and metadatas must match.
 func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[string]any) ([]schema.Document, error) {
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
@@ -68,15 +68,15 @@ func joinDocs(docs []string, separator string) string {
 }
 
 // mergeSplits merges smaller splits into splits that are closer to the chunkSize.
-func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap int) []string {
+func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap int, lenFunc func(string) int) []string { //nolint:cyclop
 	docs := make([]string, 0)
 	currentDoc := make([]string, 0)
 	total := 0
 
 	for _, split := range splits {
-		totalWithSplit := total + len(split)
+		totalWithSplit := total + lenFunc(split)
 		if len(currentDoc) != 0 {
-			totalWithSplit += len(separator)
+			totalWithSplit += lenFunc(separator)
 		}
 
 		maybePrintWarning(total, chunkSize)
@@ -86,20 +86,19 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 				docs = append(docs, doc)
 			}
 
-			for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
-				total -= len(currentDoc[0])
+			for shouldPop(chunkOverlap, chunkSize, total, lenFunc(split), lenFunc(separator), len(currentDoc)) {
+				total -= lenFunc(currentDoc[0]) //nolint:gosec
 				if len(currentDoc) > 1 {
-					total -= len(separator)
+					total -= lenFunc(separator)
 				}
-
-				currentDoc = currentDoc[1:]
+				currentDoc = currentDoc[1:] //nolint:gosec
 			}
 		}
 
 		currentDoc = append(currentDoc, split)
-		total += len(split)
+		total += lenFunc(split)
 		if len(currentDoc) > 1 {
-			total += len(separator)
+			total += lenFunc(separator)
 		}
 	}
 
@@ -122,7 +121,7 @@ func maybePrintWarning(total, chunkSize int) {
 }
 
 // Keep popping if:
-//   - the chunk is larger then the chunk overlap
+//   - the chunk is larger than the chunk overlap
 //   - or if there are any chunks and the length is long
 func shouldPop(chunkOverlap, chunkSize, total, splitLen, separatorLen, currentDocLen int) bool {
 	docsNeededToAddSep := 2

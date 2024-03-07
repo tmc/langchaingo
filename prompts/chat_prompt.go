@@ -22,5 +22,5 @@ func (v ChatPromptValue) String() string {
 
 // Messages returns the ChatMessage slice.
 func (v ChatPromptValue) Messages() []schema.ChatMessage {
-	return []schema.ChatMessage(v)
+	return v
 }

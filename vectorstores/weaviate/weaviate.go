@@ -57,7 +57,8 @@ type Store struct {
 	connectionClient *http.Client
 
 	// optional
-	queryAttrs []string
+	queryAttrs       []string
+	additionalFields []string
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -72,7 +73,7 @@ func New(opts ...Option) (Store, error) {
 	}
 	headers := make(map[string]string)
 	if s.apiKey != nil {
-		headers["Authorization"] = fmt.Sprintf("Authorization: Bearer %s", *s.apiKey)
+		headers["Authorization"] = fmt.Sprintf("Bearer %s", *s.apiKey)
 	}
 	s.client = weaviate.New(weaviate.Config{
 		Scheme:           s.scheme,
@@ -85,22 +86,36 @@ func New(opts ...Option) (Store, error) {
 	return s, nil
 }
 
-func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) error {
+// AddDocuments creates vector embeddings from the documents using the embedder
+// upsert the vectors to the weaviate index.
+// and returns the ids of the added documents.
+func (s Store) AddDocuments(ctx context.Context,
+	docs []schema.Document,
+	options ...vectorstores.Option,
+) ([]string, error) {
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
+
+	docs = s.deduplicate(ctx, opts, docs)
+
+	if len(docs) == 0 {
+		// nothing to add (perhaps all documents were duplicates). This is not
+		// an error.
+		return nil, nil
+	}
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
 
-	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
+	vectors, err := opts.Embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(vectors) != len(docs) {
-		return ErrEmbedderWrongNumberVectors
+		return nil, ErrEmbedderWrongNumberVectors
 	}
 
 	metadatas := make([]map[string]any, 0, len(docs))
@@ -116,18 +131,21 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document, options
 	}
 
 	objects := make([]*models.Object, 0, len(docs))
+	ids := make([]string, len(docs))
 	for i := range docs {
+		id := strfmt.UUID(uuid.New().String())
+		ids[i] = id.String()
 		objects = append(objects, &models.Object{
 			Class:      s.indexName,
-			ID:         strfmt.UUID(uuid.New().String()),
-			Vector:     convertVector(vectors[i]),
+			ID:         id,
+			Vector:     vectors[i],
 			Properties: metadatas[i],
 		})
 	}
 	if _, err := s.client.Batch().ObjectsBatcher().WithObjects(objects...).Do(ctx); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return ids, nil
 }
 
 func (s Store) SimilaritySearch(
@@ -148,7 +166,7 @@ func (s Store) SimilaritySearch(
 		return nil, err
 	}
 
-	vector, err := s.embedder.EmbedQuery(ctx, query)
+	vector, err := opts.Embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +175,7 @@ func (s Store) SimilaritySearch(
 		Get().
 		WithNearVector(s.client.GraphQL().
 			NearVectorArgBuilder().
-			WithVector(convertVector(vector)).
+			WithVector(vector).
 			WithCertainty(scoreThreshold),
 		).
 		WithWhere(whereBuilder).
@@ -170,6 +188,36 @@ func (s Store) SimilaritySearch(
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
+// MetadataSearch searches weaviate based on metadata rather than based on similarity.
+// Use `vectorstores.WithFilter(*filters.WhereBuilder)` to provide a where condition
+// as an option.
+func (s Store) MetadataSearch(
+	ctx context.Context,
+	numDocuments int,
+	options ...vectorstores.Option,
+) ([]schema.Document, error) {
+	opts := s.getOptions(options...)
+	nameSpace := s.getNameSpace(opts)
+	filter := s.getFilters(opts)
+	whereBuilder, err := s.createWhereBuilder(nameSpace, filter)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.client.GraphQL().
+		Get().
+		WithWhere(whereBuilder).
+		WithClassName(s.indexName).
+		WithLimit(numDocuments).
+		WithFields(s.createFields()...).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.parseDocumentsByGraphQLResponse(res)
+}
+
+//nolint:cyclop
 func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]schema.Document, error) {
 	if len(res.Errors) > 0 {
 		messages := make([]string, 0, len(res.Errors))
@@ -197,14 +245,37 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 		if !ok {
 			return nil, ErrMissingTextKey
 		}
+		var score float64
+		if additional, ok := itemMap["_additional"].(map[string]any); ok {
+			score, _ = additional["certainty"].(float64)
+		}
 		delete(itemMap, s.textKey)
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    itemMap,
+			Score:       float32(score),
 		}
 		docs = append(docs, doc)
 	}
 	return docs, nil
+}
+
+func (s Store) deduplicate(ctx context.Context,
+	opts vectorstores.Options,
+	docs []schema.Document,
+) []schema.Document {
+	if opts.Deduplicater == nil {
+		return docs
+	}
+
+	filtered := make([]schema.Document, 0, len(docs))
+	for _, doc := range docs {
+		if !opts.Deduplicater(ctx, doc) {
+			filtered = append(filtered, doc)
+		}
+	}
+
+	return filtered
 }
 
 func (s Store) getNameSpace(opts vectorstores.Options) string {
@@ -218,8 +289,7 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
 		return 0, ErrInvalidScoreThreshold
 	}
-	f32 := float32(opts.ScoreThreshold)
-	return f32, nil
+	return opts.ScoreThreshold, nil
 }
 
 func (s Store) getFilters(opts vectorstores.Options) any {
@@ -230,7 +300,11 @@ func (s Store) getFilters(opts vectorstores.Options) any {
 }
 
 func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
-	opts := vectorstores.Options{}
+	// use the embedder from the store by default, this can be overwritten by passing
+	// an `vectorstores.WithEmbedder` option.
+	opts := vectorstores.Options{
+		Embedder: s.embedder,
+	}
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -259,19 +333,18 @@ func (s Store) createFields() []graphql.Field {
 			Name: attr,
 		})
 	}
-	fields = append(fields, graphql.Field{
-		Name: "_additional",
-		Fields: []graphql.Field{
-			{Name: "certainty"},
-		},
-	})
-	return fields
-}
 
-func convertVector(v []float64) []float32 {
-	v32 := make([]float32, len(v))
-	for i, f := range v {
-		v32[i] = float32(f)
+	additionalFields := make([]graphql.Field, 0, len(s.additionalFields))
+	for _, attr := range s.additionalFields {
+		additionalFields = append(additionalFields, graphql.Field{
+			Name: attr,
+		})
 	}
-	return v32
+
+	fields = append(fields, graphql.Field{
+		Name:   "_additional",
+		Fields: additionalFields,
+	})
+
+	return fields
 }

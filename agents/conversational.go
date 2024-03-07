@@ -2,12 +2,15 @@ package agents
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
@@ -25,26 +28,33 @@ const (
 // able to chat with the user as well.
 type ConversationalAgent struct {
 	// Chain is the chain used to call with the values. The chain should have an
-	// input called "agent_scratchpad" for the agent to put it's thoughts in.
+	// input called "agent_scratchpad" for the agent to put its thoughts in.
 	Chain chains.Chain
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
+	// CallbacksHandler is the handler for callbacks.
+	CallbacksHandler callbacks.Handler
 }
 
 var _ Agent = (*ConversationalAgent)(nil)
 
-func NewConversationalAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...CreationOption) *ConversationalAgent {
+func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *ConversationalAgent {
 	options := conversationalDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
 	}
 
 	return &ConversationalAgent{
-		Chain:     chains.NewLLMChain(llm, options.getConversationalPrompt(tools)),
-		Tools:     tools,
-		OutputKey: options.outputKey,
+		Chain: chains.NewLLMChain(
+			llm,
+			options.getConversationalPrompt(tools),
+			chains.WithCallback(options.callbacksHandler),
+		),
+		Tools:            tools,
+		OutputKey:        options.outputKey,
+		CallbacksHandler: options.callbacksHandler,
 	}
 }
 
@@ -61,11 +71,21 @@ func (a *ConversationalAgent) Plan(
 
 	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
 
+	var stream func(ctx context.Context, chunk []byte) error
+
+	if a.CallbacksHandler != nil {
+		stream = func(ctx context.Context, chunk []byte) error {
+			a.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
+			return nil
+		}
+	}
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
 		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
 		return nil, nil, err
@@ -110,12 +130,14 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	if strings.Contains(output, _conversationalFinalAnswerAction) {
 		splits := strings.Split(output, _conversationalFinalAnswerAction)
 
-		return nil, &schema.AgentFinish{
+		finishAction := &schema.AgentFinish{
 			ReturnValues: map[string]any{
 				a.OutputKey: splits[len(splits)-1],
 			},
 			Log: output,
-		}, nil
+		}
+
+		return nil, finishAction, nil
 	}
 
 	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
@@ -127,4 +149,28 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	return []schema.AgentAction{
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
 	}, nil, nil
+}
+
+//go:embed prompts/conversational_prefix.txt
+var _defaultConversationalPrefix string //nolint:gochecknoglobals
+
+//go:embed prompts/conversational_format_instructions.txt
+var _defaultConversationalFormatInstructions string //nolint:gochecknoglobals
+
+//go:embed prompts/conversational_suffix.txt
+var _defaultConversationalSuffix string //nolint:gochecknoglobals
+
+func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+
+	return prompts.PromptTemplate{
+		Template:       template,
+		TemplateFormat: prompts.TemplateFormatGoTemplate,
+		InputVariables: []string{"input", "agent_scratchpad"},
+		PartialVariables: map[string]any{
+			"tool_names":        toolNames(tools),
+			"tool_descriptions": toolDescriptions(tools),
+			"history":           "",
+		},
+	}
 }

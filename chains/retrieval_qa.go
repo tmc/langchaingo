@@ -16,8 +16,8 @@ const (
 
 // RetrievalQA is a chain used for question-answering against a retriever.
 // First the chain gets documents from the retriever, then the documents
-// and the query is used as input to another chain. Typically that chain
-// combines the documents into a prompt that is sent to an llm.
+// and the query is used as input to another chain. Typically, that chain
+// combines the documents into a prompt that is sent to an LLM.
 type RetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
@@ -50,7 +50,7 @@ func NewRetrievalQA(combineDocumentsChain Chain, retriever schema.Retriever) Ret
 
 // NewRetrievalQAFromLLM loads a question answering combine documents chain
 // from the llm and creates a new retrievalQA chain.
-func NewRetrievalQAFromLLM(llm llms.LanguageModel, retriever schema.Retriever) RetrievalQA {
+func NewRetrievalQAFromLLM(llm llms.Model, retriever schema.Retriever) RetrievalQA {
 	return NewRetrievalQA(
 		LoadStuffQA(llm),
 		retriever,
@@ -59,7 +59,7 @@ func NewRetrievalQAFromLLM(llm llms.LanguageModel, retriever schema.Retriever) R
 
 // Call gets relevant documents from the retriever and gives them to the combine
 // documents chain.
-func (c RetrievalQA) Call(ctx context.Context, values map[string]any, _ ...ChainCallOption) (map[string]any, error) { //nolint: lll
+func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
 	query, ok := values[c.InputKey].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
@@ -73,7 +73,7 @@ func (c RetrievalQA) Call(ctx context.Context, values map[string]any, _ ...Chain
 	result, err := Call(ctx, c.CombineDocumentsChain, map[string]any{
 		"question":        query,
 		"input_documents": docs,
-	})
+	}, options...)
 	if err != nil {
 		return nil, err
 	}

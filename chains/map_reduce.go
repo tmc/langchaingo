@@ -9,8 +9,6 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-const _intermediateStepsOutputKey = "intermediateSteps"
-
 // MapReduceDocuments is a chain that combines documents by mapping a chain over them, then
 // combining the results using another chain.
 type MapReduceDocuments struct {
@@ -38,7 +36,7 @@ type MapReduceDocuments struct {
 	// The input key where the documents to be combined should be.
 	InputKey string
 
-	// Wether or not to add the intermediate steps to the output.
+	// Whether to add the intermediate steps to the output.
 	ReturnIntermediateSteps bool
 }
 

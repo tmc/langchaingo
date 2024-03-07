@@ -1,6 +1,7 @@
 package agents
 
 import (
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -10,12 +11,18 @@ import (
 type CreationOptions struct {
 	prompt                  prompts.PromptTemplate
 	memory                  schema.Memory
+	callbacksHandler        callbacks.Handler
+	errorHandler            *ParserErrorHandler
 	maxIterations           int
 	returnIntermediateSteps bool
 	outputKey               string
 	promptPrefix            string
 	formatInstructions      string
 	promptSuffix            string
+
+	// openai
+	systemMessage string
+	extraMessages []prompts.MessageFormatter
 }
 
 // CreationOption is a function type that can be used to modify the creation of the agents
@@ -45,6 +52,13 @@ func conversationalDefaultOptions() CreationOptions {
 		formatInstructions: _defaultConversationalFormatInstructions,
 		promptSuffix:       _defaultConversationalSuffix,
 		outputKey:          _defaultOutputKey,
+	}
+}
+
+func openAIFunctionsDefaultOptions() CreationOptions {
+	return CreationOptions{
+		systemMessage: "You are a helpful AI assistant.",
+		outputKey:     _defaultOutputKey,
 	}
 }
 
@@ -104,7 +118,7 @@ func WithPromptFormatInstructions(instructions string) CreationOption {
 	}
 }
 
-// WithPromptFormatInstructions is an option for setting the suffix of the prompt used by the agent.
+// WithPromptSuffix is an option for setting the suffix of the prompt used by the agent.
 func WithPromptSuffix(suffix string) CreationOption {
 	return func(co *CreationOptions) {
 		co.promptSuffix = suffix
@@ -126,8 +140,41 @@ func WithReturnIntermediateSteps() CreationOption {
 	}
 }
 
+// WithMemory is an option for setting the memory of the executor.
 func WithMemory(m schema.Memory) CreationOption {
 	return func(co *CreationOptions) {
 		co.memory = m
+	}
+}
+
+// WithCallbacksHandler is an option for setting a callback handler to an executor.
+func WithCallbacksHandler(handler callbacks.Handler) CreationOption {
+	return func(co *CreationOptions) {
+		co.callbacksHandler = handler
+	}
+}
+
+// WithParserErrorHandler is an option for setting a parser error handler to an executor.
+func WithParserErrorHandler(errorHandler *ParserErrorHandler) CreationOption {
+	return func(co *CreationOptions) {
+		co.errorHandler = errorHandler
+	}
+}
+
+type OpenAIOption struct{}
+
+func NewOpenAIOption() OpenAIOption {
+	return OpenAIOption{}
+}
+
+func (o OpenAIOption) WithSystemMessage(msg string) CreationOption {
+	return func(co *CreationOptions) {
+		co.systemMessage = msg
+	}
+}
+
+func (o OpenAIOption) WithExtraMessages(extraMessages []prompts.MessageFormatter) CreationOption {
+	return func(co *CreationOptions) {
+		co.extraMessages = extraMessages
 	}
 }

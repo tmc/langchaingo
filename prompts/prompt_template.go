@@ -12,6 +12,8 @@ var (
 	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when the partial variable is not a string or a function.
 	ErrInvalidPartialVariableType = errors.New("invalid partial variable type")
+	// ErrNeedChatMessageList is returned when the variable is not a list of chat messages.
+	ErrNeedChatMessageList = errors.New("variable should be a list of chat messages")
 )
 
 // PromptTemplate contains common fields for all prompt templates.
@@ -28,8 +30,9 @@ type PromptTemplate struct {
 	// OutputParser is a function that parses the output of the prompt template.
 	OutputParser schema.OutputParser[any]
 
-	// PartialVariables represents a map of variable names to values or functions that return values.
-	// If the value is a function, it will be called when the prompt template is rendered.
+	// PartialVariables represents a map of variable names to values or functions
+	// that return values. If the value is a function, it will be called when the
+	// prompt template is rendered.
 	PartialVariables map[string]any
 }
 

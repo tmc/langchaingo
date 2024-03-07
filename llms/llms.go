@@ -2,64 +2,53 @@ package llms
 
 import (
 	"context"
+	"errors"
 
 	"github.com/tmc/langchaingo/schema"
 )
 
-// LanguageModel is the interface all language models must implement.
-type LanguageModel interface {
-	// Take in a list of prompt values and return an LLMResult.
-	GeneratePrompt(ctx context.Context, prompts []schema.PromptValue, options ...CallOption) (LLMResult, error)
-	// Get the number of tokens present in the text.
-	GetNumTokens(text string) int
-}
+// LLM is an alias for model, for backwards compatibility.
+//
+// Deprecated: This alias may be removed in the future; please use Model
+// instead.
+type LLM = Model
 
-// LLM is a langchaingo Large Language Model.
-type LLM interface {
+// Model is an interface multi-modal models implement.
+type Model interface {
+	// GenerateContent asks the model to generate content from a sequence of
+	// messages. It's the most general interface for multi-modal LLMs that support
+	// chat-like interactions.
+	GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error)
+
+	// Call is a simplified interface for a text-only Model, generating a single
+	// string response from a single string prompt.
+	//
+	// Deprecated: this method is retained for backwards compatibility. Use the
+	// more general [GenerateContent] instead. You can also use
+	// the [GenerateFromSinglePrompt] function which provides a similar capability
+	// to Call and is built on top of the new interface.
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
-	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
 }
 
-// ChatLLM is a langchaingo LLM that can be used for chatting.
-type ChatLLM interface {
-	Call(ctx context.Context, messages []schema.ChatMessage, options ...CallOption) (string, error)
-	Generate(ctx context.Context, messages [][]schema.ChatMessage, options ...CallOption) ([]*Generation, error)
-}
-
-// Generation is a single generation from a langchaingo LLM.
-type Generation struct {
-	// Text is the generated text.
-	Text string `json:"text"`
-	// Message stores the potentially generated message.
-	Message *schema.AIChatMessage `json:"message"`
-	// GenerationInfo is the generation info. This can contain vendor-specific information.
-	GenerationInfo map[string]any `json:"generation_info"`
-}
-
-// LLMResult is the class that contains all relevant information for an LLM Result.
-type LLMResult struct {
-	Generations [][]*Generation
-	LLMOutput   map[string]any
-}
-
-func GeneratePrompt(ctx context.Context, l LLM, promptValues []schema.PromptValue, options ...CallOption) (LLMResult, error) { //nolint:lll
-	prompts := make([]string, 0, len(promptValues))
-	for _, promptValue := range promptValues {
-		prompts = append(prompts, promptValue.String())
+// GenerateFromSinglePrompt is a convenience function for calling an LLM with
+// a single string prompt, expecting a single string response. It's useful for
+// simple, string-only interactions and provides a slightly more ergonomic API
+// than the more general [llms.Model.GenerateContent].
+func GenerateFromSinglePrompt(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
+	msg := MessageContent{
+		Role:  schema.ChatMessageTypeHuman,
+		Parts: []ContentPart{TextContent{prompt}},
 	}
-	generations, err := l.Generate(ctx, prompts, options...)
-	return LLMResult{
-		Generations: [][]*Generation{generations},
-	}, err
-}
 
-func GenerateChatPrompt(ctx context.Context, l ChatLLM, promptValues []schema.PromptValue, options ...CallOption) (LLMResult, error) { //nolint:lll
-	messages := make([][]schema.ChatMessage, 0, len(promptValues))
-	for _, promptValue := range promptValues {
-		messages = append(messages, promptValue.Messages())
+	resp, err := llm.GenerateContent(ctx, []MessageContent{msg}, options...)
+	if err != nil {
+		return "", err
 	}
-	generations, err := l.Generate(ctx, messages, options...)
-	return LLMResult{
-		Generations: [][]*Generation{generations},
-	}, err
+
+	choices := resp.Choices
+	if len(choices) < 1 {
+		return "", errors.New("empty response from model")
+	}
+	c1 := choices[0]
+	return c1.Content, nil
 }

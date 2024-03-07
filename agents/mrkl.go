@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -25,12 +26,14 @@ const (
 // This agent is optimized to be used with LLMs.
 type OneShotZeroAgent struct {
 	// Chain is the chain used to call with the values. The chain should have an
-	// input called "agent_scratchpad" for the agent to put it's thoughts in.
+	// input called "agent_scratchpad" for the agent to put its thoughts in.
 	Chain chains.Chain
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
+	// CallbacksHandler is the handler for callbacks.
+	CallbacksHandler callbacks.Handler
 }
 
 var _ Agent = (*OneShotZeroAgent)(nil)
@@ -38,16 +41,21 @@ var _ Agent = (*OneShotZeroAgent)(nil)
 // NewOneShotAgent creates a new OneShotZeroAgent with the given LLM model, tools,
 // and options. It returns a pointer to the created agent. The opts parameter
 // represents the options for the agent.
-func NewOneShotAgent(llm llms.LanguageModel, tools []tools.Tool, opts ...CreationOption) *OneShotZeroAgent {
+func NewOneShotAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OneShotZeroAgent {
 	options := mrklDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
 	}
 
 	return &OneShotZeroAgent{
-		Chain:     chains.NewLLMChain(llm, options.getMrklPrompt(tools)),
-		Tools:     tools,
-		OutputKey: options.outputKey,
+		Chain: chains.NewLLMChain(
+			llm,
+			options.getMrklPrompt(tools),
+			chains.WithCallback(options.callbacksHandler),
+		),
+		Tools:            tools,
+		OutputKey:        options.outputKey,
+		CallbacksHandler: options.callbacksHandler,
 	}
 }
 
@@ -65,11 +73,21 @@ func (a *OneShotZeroAgent) Plan(
 	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
 	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
+	var stream func(ctx context.Context, chunk []byte) error
+
+	if a.CallbacksHandler != nil {
+		stream = func(ctx context.Context, chunk []byte) error {
+			a.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
+			return nil
+		}
+	}
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
 		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
 		return nil, nil, err
@@ -109,7 +127,7 @@ func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *sc
 		}, nil
 	}
 
-	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s*(.+)`)
+	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s(?s)*(.+)`)
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
