@@ -6,4 +6,32 @@ import DocCardList from "@theme/DocCardList";
 
 # Text Splitters: Examples
 
+Splitters are components or tools used to divide texts into smaller, more manageable parts or specific segments. This division can be necessary for various reasons, such as improving the processing, analysis, or understanding of large or complex texts. Splitters can be simple, like dividing a text into sentences or paragraphs, or more complex, such as splitting based on themes, topics, or specific grammatical structures.
+
+For create spliters can use PDF, Text or HTML
+
+```go
+func main(){
+func textToSplit() []schema.Document {
+
+	f, err := os.Open("./spliters/docs/transcript.txt")
+	if err != nil {
+		fmt.Println("Error opening file: ", err)
+	}
+
+	p := documentloaders.NewText(f)
+
+	split := textsplitter.NewRecursiveCharacter()
+	split.ChunkSize = 300 // size of the chunk is number of characters
+	split.ChunkOverlap = 30 // overlap is the number of characters that the chunks overlap
+	docs, err := p.LoadAndSplit(context.Background(), split)
+
+	if err != nil {
+		fmt.Println("Error loading document: ", err)
+	}
+
+	log.Println("Document loaded: ", len(docs))
+}
 <DocCardList />
+
+
