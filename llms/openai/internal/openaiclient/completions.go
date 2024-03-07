@@ -8,7 +8,7 @@ import (
 type CompletionRequest struct {
 	Model            string   `json:"model"`
 	Prompt           string   `json:"prompt"`
-	Temperature      float64  `json:"temperature,omitempty"`
+	Temperature      float64  `json:"temperature"`
 	MaxTokens        int      `json:"max_tokens,omitempty"`
 	N                int      `json:"n,omitempty"`
 	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`

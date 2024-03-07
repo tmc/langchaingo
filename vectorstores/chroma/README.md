@@ -17,7 +17,7 @@ variable to specify the URL of the Chroma server when creating the client instan
 ## Using OpenAI LLM
 
 To use the OpenAI LLM with Chroma, use either the 
-[`WithOpenAiAPIKey` API](./options.go) or the `OPENAI_API_KEY` environment
+[`WithOpenAIAPIKey` API](./options.go) or the `OPENAI_API_KEY` environment
 variable when creating the client.
 
 ## Running With Docker

@@ -9,6 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -22,13 +24,21 @@ func getValues(t *testing.T) (string, string) {
 	t.Helper()
 
 	scheme := os.Getenv("WEAVIATE_SCHEME")
-	if scheme == "" {
-		t.Skip("Must set WEAVIATE_SCHEME to run test")
-	}
-
 	host := os.Getenv("WEAVIATE_HOST")
-	if host == "" {
-		t.Skip("Must set WEAVIATE_HOST to run test")
+	if scheme == "" || host == "" {
+		weaviateContainer, err := tcweaviate.RunContainer(context.Background(), testcontainers.WithImage("semitechnologies/weaviate:1.23.9"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, weaviateContainer.Terminate(context.Background()))
+		})
+
+		scheme, host, err = weaviateContainer.HttpHostAddress(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get weaviate container endpoint: %s", err)
+		}
 	}
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {

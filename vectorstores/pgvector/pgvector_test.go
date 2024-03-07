@@ -6,10 +6,14 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/googleai"
@@ -19,27 +23,51 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/pgvector"
 )
 
-func preCheckEnvSetting(t *testing.T) {
+func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
-		t.Skip("Must set PGVECTOR_CONNECTION_STRING to run test")
+		pgVectorContainer, err := tcpostgres.RunContainer(
+			context.Background(),
+			testcontainers.WithImage("docker.io/pgvector/pgvector:pg16"),
+			tcpostgres.WithDatabase("db_test"),
+			tcpostgres.WithUsername("user"),
+			tcpostgres.WithPassword("passw0rd!"),
+			testcontainers.WithWaitStrategy(
+				wait.ForLog("database system is ready to accept connections").
+					WithOccurrence(2).
+					WithStartupTimeout(30*time.Second)),
+		)
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
+		})
+
+		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
+		require.NoError(t, err)
+
+		pgvectorURL = str
 	}
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
+
+	return pgvectorURL
 }
 
 func makeNewCollectionName() string {
 	return fmt.Sprintf("test-collection-%s", uuid.New().String())
 }
 
-func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store) {
+func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, pgvectorURL string) {
 	t.Helper()
 
-	conn, err := pgx.Connect(ctx, os.Getenv("PGVECTOR_CONNECTION_STRING"))
+	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
 
 	tx, err := conn.Begin(ctx)
@@ -53,7 +81,7 @@ func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store) {
 
 func TestPgvectorStoreRest(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -63,13 +91,14 @@ func TestPgvectorStoreRest(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -88,7 +117,7 @@ func TestPgvectorStoreRest(t *testing.T) {
 
 func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -98,13 +127,14 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
@@ -142,7 +172,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -152,13 +182,14 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -196,7 +227,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	genaiKey := os.Getenv("GENAI_API_KEY")
 	if genaiKey == "" {
 		t.Skip("GENAI_API_KEY not set")
@@ -211,13 +242,14 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(collectionName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Beijing"},
@@ -232,13 +264,14 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 
 	store, err = pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(false),
 		pgvector.WithCollectionName(collectionName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -265,7 +298,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 
 func TestPgvectorAsRetriever(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -275,13 +308,14 @@ func TestPgvectorAsRetriever(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -307,7 +341,7 @@ func TestPgvectorAsRetriever(t *testing.T) {
 
 func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -317,13 +351,14 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -354,7 +389,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 
 func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -364,13 +399,14 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -428,7 +464,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -438,13 +474,14 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -493,7 +530,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
-	preCheckEnvSetting(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New()
@@ -503,13 +540,14 @@ func TestDeduplicater(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
+		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store)
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
