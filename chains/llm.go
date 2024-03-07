@@ -2,9 +2,6 @@ package chains
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -59,34 +56,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	if jsonData, err := os.ReadFile("/Users/chihiro/Desktop/data.json"); err != nil {
-		return nil, err
-	} else {
-		fmt.Println(jsonData)
-		var queries []QueryOutput
-
-		// Unmarshal the JSON data
-		err = json.Unmarshal(jsonData, &queries)
-		if err != nil {
-		}
-
-		// Print the data
-		for _, q := range queries {
-			fmt.Println("Query: %s, Output: %s\n", q.Query, q.Output)
-		}
-	}
-
-	fmt.Println(promptValue)
-
-	result, err := c.LLM.GeneratePrompt(
-		ctx,
-		[]schema.PromptValue{promptValue},
-		getLLMCallOptions(options...)...,
-	)
-=======
 	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
->>>>>>> upstream/main
 	if err != nil {
 		return nil, err
 	}
