@@ -175,8 +175,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
-github.com/tmc/langchaingo v0.1.4-alpha.0 h1:WVu2KgHr9wloHAiMbbeytiv2W76vpkA59uUwf0EUgrQ=
-github.com/tmc/langchaingo v0.1.4-alpha.0/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
+github.com/tmc/langchaingo v0.1.4 h1:skgT2G6D+BzbRFWg8bGE6MQgLPQ10LpyHxQ4vIhD/8k=
+github.com/tmc/langchaingo v0.1.4/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
 github.com/x-cray/logrus-prefixed-formatter v0.5.2 h1:00txxvfBM9muc0jiLIEAkAcIMJzfthRT6usrui8uGmg=
 github.com/x-cray/logrus-prefixed-formatter v0.5.2/go.mod h1:2duySbKsL6M18s5GU7VPsoEPHyzalCE06qoARUCeBBE=
 github.com/yargevad/filepathx v1.0.0 h1:SYcT+N3tYGi+NvazubCNlvgIPbzAk7i7y2dwg3I5FYc=

@@ -11,6 +11,8 @@ import (
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -38,7 +40,7 @@ func TestChromaGoStoreRest(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -81,7 +83,7 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -130,7 +132,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -175,7 +177,7 @@ func TestChromaAsRetriever(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -217,7 +219,7 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithDistanceFunction(chromago.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
@@ -267,7 +269,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -342,7 +344,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithEmbedder(e),
 	)
@@ -424,7 +426,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -498,7 +500,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -568,12 +570,24 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		t.Skipf("Must set %s to run test", chroma.ChromaURLKeyEnvVarName)
+		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.22"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, chromaContainer.Terminate(context.Background()))
+		})
+
+		chromaURL, err = chromaContainer.RESTEndpoint(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get chroma container REST endpoint: %s", err)
+		}
 	}
 
-	openaiAPIKey := os.Getenv(chroma.OpenAiAPIKeyEnvVarName)
+	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
-		t.Skipf("Must set %s to run test", chroma.OpenAiAPIKeyEnvVarName)
+		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
 	}
 
 	return chromaURL, openaiAPIKey

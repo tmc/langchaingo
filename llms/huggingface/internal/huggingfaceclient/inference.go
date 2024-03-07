@@ -27,7 +27,7 @@ type inferencePayload struct {
 }
 
 type parameters struct {
-	Temperature       float64 `json:"temperature,omitempty"`
+	Temperature       float64 `json:"temperature"`
 	TopP              float64 `json:"top_p,omitempty"`
 	TopK              int     `json:"top_k,omitempty"`
 	MinLength         int     `json:"min_length,omitempty"`

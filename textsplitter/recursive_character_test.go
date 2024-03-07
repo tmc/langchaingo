@@ -20,6 +20,16 @@ func TestRecursiveCharacterSplitter(t *testing.T) {
 	}
 	testCases := []testCase{
 		{
+			text:         "哈里森\n很高兴遇见你\n欢迎来中国",
+			chunkOverlap: 0,
+			chunkSize:    10,
+			separators:   []string{"\n\n", "\n", " "},
+			expectedDocs: []schema.Document{
+				{PageContent: "哈里森\n很高兴遇见你", Metadata: map[string]any{}},
+				{PageContent: "欢迎来中国", Metadata: map[string]any{}},
+			},
+		},
+		{
 			text:         "Hi, Harrison. \nI am glad to meet you",
 			chunkOverlap: 1,
 			chunkSize:    20,

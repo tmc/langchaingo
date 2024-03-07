@@ -68,15 +68,15 @@ func joinDocs(docs []string, separator string) string {
 }
 
 // mergeSplits merges smaller splits into splits that are closer to the chunkSize.
-func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap int) []string { //nolint:cyclop
+func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap int, lenFunc func(string) int) []string { //nolint:cyclop
 	docs := make([]string, 0)
 	currentDoc := make([]string, 0)
 	total := 0
 
 	for _, split := range splits {
-		totalWithSplit := total + len(split)
+		totalWithSplit := total + lenFunc(split)
 		if len(currentDoc) != 0 {
-			totalWithSplit += len(separator)
+			totalWithSplit += lenFunc(separator)
 		}
 
 		maybePrintWarning(total, chunkSize)
@@ -86,19 +86,19 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 				docs = append(docs, doc)
 			}
 
-			for shouldPop(chunkOverlap, chunkSize, total, len(split), len(separator), len(currentDoc)) {
-				total -= len(currentDoc[0]) //nolint:gosec
+			for shouldPop(chunkOverlap, chunkSize, total, lenFunc(split), lenFunc(separator), len(currentDoc)) {
+				total -= lenFunc(currentDoc[0]) //nolint:gosec
 				if len(currentDoc) > 1 {
-					total -= len(separator)
+					total -= lenFunc(separator)
 				}
 				currentDoc = currentDoc[1:] //nolint:gosec
 			}
 		}
 
 		currentDoc = append(currentDoc, split)
-		total += len(split)
+		total += lenFunc(split)
 		if len(currentDoc) > 1 {
-			total += len(separator)
+			total += lenFunc(separator)
 		}
 	}
 

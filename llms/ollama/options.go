@@ -15,6 +15,7 @@ type options struct {
 	ollamaOptions       ollamaclient.Options
 	customModelTemplate string
 	system              string
+	format              string
 }
 
 type Option func(*options)
@@ -23,6 +24,13 @@ type Option func(*options)
 func WithModel(model string) Option {
 	return func(opts *options) {
 		opts.model = model
+	}
+}
+
+// WithFormat Sets the Ollama output format (currently Ollama only supports "json").
+func WithFormat(format string) Option {
+	return func(opts *options) {
+		opts.format = format
 	}
 }
 

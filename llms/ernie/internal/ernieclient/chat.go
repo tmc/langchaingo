@@ -23,7 +23,7 @@ const (
 type ChatRequest struct {
 	Model            string         `json:"model,omitempty"`
 	Messages         []*ChatMessage `json:"messages"`
-	Temperature      float64        `json:"temperature,omitempty"`
+	Temperature      float64        `json:"temperature"`
 	TopP             float64        `json:"top_p,omitempty"`
 	MaxTokens        int            `json:"max_tokens,omitempty"`
 	N                int            `json:"n,omitempty"`

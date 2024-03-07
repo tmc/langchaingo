@@ -19,7 +19,7 @@ const (
 type completionPayload struct {
 	Model       string   `json:"model"`
 	Prompt      string   `json:"prompt"`
-	Temperature float64  `json:"temperature,omitempty"`
+	Temperature float64  `json:"temperature"`
 	MaxTokens   int      `json:"max_tokens_to_sample,omitempty"`
 	TopP        float64  `json:"top_p,omitempty"`
 	StopWords   []string `json:"stop_sequences,omitempty"`
