@@ -10,5 +10,76 @@ import DocCardList from "@theme/DocCardList";
 :::info
 [Conceptual Guide](https://docs.langchain.com/docs/components/indexing/retriever)
 :::
+The concept of a "retriever" within a language or framework, particularly in blockchain contexts, refers to a mechanism designed to extract or fetch data from a designated source. In the realm of blockchain, this could involve retrieving transaction details, block information, or the states of smart contracts from the blockchain's ledger.
+
+## Reasons for Using a Retriever:
+- **Data Accessibility**: Provides a gateway for accessing data stored on the blockchain, crucial for applications needing to present this information to users or leverage it for further processing.
+
+- **Efficiency**: Optimizes the process of fetching data, reducing latency and enhancing the performance of blockchain applications.
+
+- **Abstraction**: Simplifies querying the blockchain by hiding its underlying complexity, offering developers a more straightforward API.
+
+- **Integration**: Enables the seamless incorporation of blockchain data into other applications or services, broadening potential use cases and functionalities.
+
+- **Security**: Allows applications to access blockchain data safely without direct ledger interactions, minimizing exposure to security risks.
+
+## How To
+The implementation of a retriever varies depending on the blockchain platform and the specific data requirements. However, the general process involves the following steps:
+
+You need use a embedder, can you ollama, huggingface ..
+```go
+	llm, err := ollama.New(ollama.WithModel("llama2"))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	embedder, err := embeddings.NewEmbedder(llm)
+	if err != nil {
+		log.Fatal(err)
+	}
+```
+
+After it chose a storage vector like pinecone, postgres, Qdrant, in example I'll use qdraant
+```go
+	url, err := url.Parse("http://localhost:6333")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	store, err := qdrant.New(
+		qdrant.WithURL(*url),
+		qdrant.WithCollectionName("youtube_transcript"),
+		qdrant.WithEmbedder(embedder),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+ 	if docs != nil {
+		_, err = store.AddDocuments(context.Background(), *docs)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}   
+```
+
+Now Create a retriever
+```go
+    searchQuery := "how to make a cake"
+ 	optionsVector := []vectorstores.Option{
+		vectorstores.WithScoreThreshold(0.80),
+	}
+
+	retriever := vectorstores.ToRetriever(store, 10, optionsVector...)
+	// search
+	resDocs, err := retriever.GetRelevantDocuments(context.Background(), searchQuery)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+```
+
+This is a simple example of how to use a retriever, you can use it in a lot of ways, like a chatbot, a search engine, a recommendation system, etc.
 
 <DocCardList />
