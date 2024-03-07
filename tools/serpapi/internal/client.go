@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 const _url = "https://serpapi.com/search"
@@ -30,12 +29,6 @@ func New(apiKey string) *Client {
 }
 
 func (s *Client) Search(ctx context.Context, query string) (string, error) {
-	// prevent exact-match search: trim " symbol when it exists on both the left and right sides
-	// exact-match behaviour cause `No Google Search Results was found` error too frequently
-	if strings.HasPrefix(query, `"`) && strings.HasSuffix(query, `"`) {
-		query = strings.TrimPrefix(strings.TrimSuffix(query, `"`), `"`)
-	}
-
 	params := make(url.Values)
 	params.Add("q", query)
 	params.Add("google_domain", "google.com")

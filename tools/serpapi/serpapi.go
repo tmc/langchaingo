@@ -45,6 +45,12 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
+	// prevent exact-match search: trim " symbol when it exists on both the left and right sides
+	// exact-match behaviour cause `No Google Search Results was found` error too frequently
+	if strings.HasPrefix(input, `"`) && strings.HasSuffix(input, `"`) {
+		input = strings.TrimPrefix(strings.TrimSuffix(input, `"`), `"`)
+	}
+
 	result, err := t.client.Search(ctx, input)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
