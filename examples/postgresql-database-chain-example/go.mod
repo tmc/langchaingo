@@ -4,7 +4,7 @@ go 1.21
 
 toolchain go1.21.4
 
-require github.com/tmc/langchaingo v0.1.4
+require github.com/tmc/langchaingo v0.1.5
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -15,7 +15,7 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
-	github.com/imdario/mergo v0.3.11 // indirect
+	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.4.1 // indirect
