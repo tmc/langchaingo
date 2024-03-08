@@ -56,12 +56,7 @@ After it chose a storage vector like pinecone, postgres, Qdrant, in example I'll
 		log.Fatal(err)
 	}
 
- 	if docs != nil {
-		_, err = store.AddDocuments(context.Background(), *docs)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}   
+
 ```
 
 Now Create a retriever
