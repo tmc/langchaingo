@@ -337,19 +337,19 @@ func (s Store) Search(
 	}
 	whereQuerys := make([]string, 0)
 	for k, v := range filter {
-		whereQuerys = append(whereQuerys, fmt.Sprintf("(data.cmetadata ->> '%s') = '%s'", k, v))
+		whereQuerys = append(whereQuerys, fmt.Sprintf("(%s.cmetadata ->> '%s') = '%s'", s.embeddingTableName, k, v))
 	}
 	whereQuery := strings.Join(whereQuerys, " AND ")
 	if len(whereQuery) == 0 {
 		whereQuery = "TRUE"
 	}
 	sql := fmt.Sprintf(`SELECT
-	document,
-	cmetadata
+	%s.document,
+	%s.cmetadata
 FROM %s
 JOIN %s ON %s.collection_id=%s.uuid
 WHERE %s.name='%s' AND %s
-LIMIT $1`, s.embeddingTableName,
+LIMIT $1`, s.embeddingTableName, s.embeddingTableName, s.embeddingTableName,
 		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
 		whereQuery)
 	rows, err := s.conn.Query(ctx, sql, numDocuments)
@@ -361,7 +361,7 @@ LIMIT $1`, s.embeddingTableName,
 
 	for rows.Next() {
 		doc := schema.Document{}
-		if err := rows.Scan(&doc.PageContent, &doc.Metadata, &doc.Score); err != nil {
+		if err := rows.Scan(&doc.PageContent, &doc.Metadata); err != nil {
 			return nil, err
 		}
 		docs = append(docs, doc)

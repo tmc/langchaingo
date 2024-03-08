@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tmc/langchaingo/embeddings"
@@ -54,14 +53,14 @@ func WithCollectionName(name string) Option {
 // WithEmbeddingTableName is an option for specifying the embedding table name.
 func WithEmbeddingTableName(name string) Option {
 	return func(p *Store) {
-		p.embeddingTableName = tableName(name)
+		p.embeddingTableName = name
 	}
 }
 
 // WithCollectionTableName is an option for specifying the collection table name.
 func WithCollectionTableName(name string) Option {
 	return func(p *Store) {
-		p.collectionTableName = tableName(name)
+		p.collectionTableName = name
 	}
 }
 
@@ -129,11 +128,4 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	}
 
 	return *o, nil
-}
-
-// tableName returns the table name with the schema sanitized.
-func tableName(name string) string {
-	nameParts := strings.Split(name, ".")
-
-	return pgx.Identifier(nameParts).Sanitize()
 }
