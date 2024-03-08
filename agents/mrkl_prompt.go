@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	_defaultMrklPrefix = `Today is {{.today}} and you can use tools to get new information.
-Answer the following questions as best you can using the following tools:
+	_defaultMrklPrefix = `Today is {{.today}}.
+Answer the following questions as best you can. You have access to the following tools:
 
 {{.tool_descriptions}}`
 
