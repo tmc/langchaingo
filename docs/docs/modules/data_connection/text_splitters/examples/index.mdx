@@ -8,13 +8,13 @@ import DocCardList from "@theme/DocCardList";
 
 Splitters are components or tools used to divide texts into smaller, more manageable parts or specific segments. This division can be necessary for various reasons, such as improving the processing, analysis, or understanding of large or complex texts. Splitters can be simple, like dividing a text into sentences or paragraphs, or more complex, such as splitting based on themes, topics, or specific grammatical structures.
 
-For create spliters can use PDF, Text or HTML
+For create splitters can use PDF, Text or HTML
 
 ```go
 func main(){
 func textToSplit() []schema.Document {
 
-	f, err := os.Open("./spliters/docs/transcript.txt")
+	f, err := os.Open("./splitters/docs/transcript.txt")
 	if err != nil {
 		fmt.Println("Error opening file: ", err)
 	}
