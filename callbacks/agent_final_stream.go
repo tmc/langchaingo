@@ -3,6 +3,7 @@ package callbacks
 import (
 	"context"
 	"strings"
+	"sync"
 )
 
 // DefaultKeywords is map of the agents final out prefix keywords.
@@ -54,16 +55,22 @@ func (handler *AgentFinalStreamHandler) GetEgress() chan []byte {
 // The callback function receives two parameters:
 // - ctx: the context.Context object for the egress operation.
 // - chunk: a byte slice representing a chunk of data from the egress channel.
+// returns a pointer to a sync.WaitGroup object that is used to wait from the caller.
 func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	ctx context.Context,
 	callback func(ctx context.Context, chunk []byte),
-) {
+) *sync.WaitGroup {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		defer close(handler.egress)
 		for data := range handler.egress {
 			callback(ctx, data)
 		}
 	}()
+
+	return wg
 }
 
 // HandleStreamingFunc implements the callback interface that handles the streaming
