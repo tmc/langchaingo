@@ -40,7 +40,7 @@ func NewFinalStreamHandler(keywords ...string) *AgentFinalStreamHandler {
 
 	return &AgentFinalStreamHandler{
 		egress:      make(chan []byte),
-		agentFinish: make(chan struct{}, 10),
+		agentFinish: make(chan struct{}, 1),
 		Keywords:    DefaultKeywords,
 	}
 }
