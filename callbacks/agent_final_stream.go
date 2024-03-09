@@ -16,7 +16,7 @@ var DefaultKeywords = []string{"Final Answer:", "Final:", "AI:"}
 type AgentFinalStreamHandler struct {
 	SimpleHandler
 	egress          chan []byte
-	closeEgress     chan struct{}
+	agentFinish     chan struct{}
 	Keywords        []string
 	LastTokens      string
 	KeywordDetected bool
@@ -40,7 +40,7 @@ func NewFinalStreamHandler(keywords ...string) *AgentFinalStreamHandler {
 
 	return &AgentFinalStreamHandler{
 		egress:      make(chan []byte),
-		closeEgress: make(chan struct{}, 10),
+		agentFinish: make(chan struct{}, 10),
 		Keywords:    DefaultKeywords,
 	}
 }
@@ -72,7 +72,7 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	FORLOOP:
 		for {
 			select {
-			case <-handler.closeEgress:
+			case <-handler.agentFinish:
 				break FORLOOP
 			case data := <-handler.egress:
 				callback(ctx, data)
@@ -91,9 +91,9 @@ func (handler *AgentFinalStreamHandler) HandleChainEnd(context.Context, map[stri
 }
 
 // HandleAgentFinish implements the callback interface that handles the end of the agent.
-// send the closeEgress signal to close the egress channel in ReadFromEgress.
+// send the agentFinish signal to close the egress channel in ReadFromEgress.
 func (handler *AgentFinalStreamHandler) HandleAgentFinish(context.Context, schema.AgentFinish) {
-	handler.closeEgress <- struct{}{}
+	handler.agentFinish <- struct{}{}
 }
 
 // HandleStreamingFunc implements the callback interface that handles the streaming
