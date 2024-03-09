@@ -2,7 +2,6 @@ package callbacks
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -68,10 +67,7 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		defer func() {
-			fmt.Println("defer done")
-			wg.Done()
-		}()
+		defer wg.Done()
 
 	FORLOOP:
 		for {
