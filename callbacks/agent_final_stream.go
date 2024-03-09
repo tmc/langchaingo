@@ -2,8 +2,11 @@ package callbacks
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/tmc/langchaingo/schema"
 )
 
 // DefaultKeywords is map of the agents final out prefix keywords.
@@ -14,6 +17,7 @@ var DefaultKeywords = []string{"Final Answer:", "Final:", "AI:"}
 type AgentFinalStreamHandler struct {
 	SimpleHandler
 	egress          chan []byte
+	closeEgress     chan struct{}
 	Keywords        []string
 	LastTokens      string
 	KeywordDetected bool
@@ -36,8 +40,9 @@ func NewFinalStreamHandler(keywords ...string) *AgentFinalStreamHandler {
 	}
 
 	return &AgentFinalStreamHandler{
-		// egress:   make(chan []byte),
-		Keywords: DefaultKeywords,
+		egress:      make(chan []byte),
+		closeEgress: make(chan struct{}, 10),
+		Keywords:    DefaultKeywords,
 	}
 }
 
@@ -63,26 +68,36 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		// TODO: ...
-		// defer close(handler.egress)
-		for data := range handler.egress {
-			callback(ctx, data)
+		defer func() {
+			fmt.Println("defer done")
+			wg.Done()
+		}()
+
+	FORLOOP:
+		for {
+			select {
+			case <-handler.closeEgress:
+				break FORLOOP
+			case data := <-handler.egress:
+				callback(ctx, data)
+			}
 		}
 	}()
 
 	return wg
 }
 
-func (handler *AgentFinalStreamHandler) HandleChainStart(context.Context, map[string]any) {
-	handler.egress = make(chan []byte)
-}
-
+// HandleChainEnd implements the callback interface that handles the end of the chain.
 func (handler *AgentFinalStreamHandler) HandleChainEnd(context.Context, map[string]any) {
-	close(handler.egress)
 	handler.KeywordDetected = false
 	handler.PrintOutput = false
 	handler.LastTokens = ""
+}
+
+// HandleAgentFinish implements the callback interface that handles the end of the agent.
+// send the closeEgress signal to close the egress channel in ReadFromEgress.
+func (handler *AgentFinalStreamHandler) HandleAgentFinish(context.Context, schema.AgentFinish) {
+	handler.closeEgress <- struct{}{}
 }
 
 // HandleStreamingFunc implements the callback interface that handles the streaming
