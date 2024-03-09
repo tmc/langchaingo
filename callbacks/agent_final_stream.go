@@ -36,7 +36,7 @@ func NewFinalStreamHandler(keywords ...string) *AgentFinalStreamHandler {
 	}
 
 	return &AgentFinalStreamHandler{
-		egress:   make(chan []byte),
+		// egress:   make(chan []byte),
 		Keywords: DefaultKeywords,
 	}
 }
@@ -64,13 +64,25 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		defer close(handler.egress)
+		// TODO: ...
+		// defer close(handler.egress)
 		for data := range handler.egress {
 			callback(ctx, data)
 		}
 	}()
 
 	return wg
+}
+
+func (handler *AgentFinalStreamHandler) HandleChainStart(context.Context, map[string]any) {
+	handler.egress = make(chan []byte)
+}
+
+func (handler *AgentFinalStreamHandler) HandleChainEnd(context.Context, map[string]any) {
+	close(handler.egress)
+	handler.KeywordDetected = false
+	handler.PrintOutput = false
+	handler.LastTokens = ""
 }
 
 // HandleStreamingFunc implements the callback interface that handles the streaming
