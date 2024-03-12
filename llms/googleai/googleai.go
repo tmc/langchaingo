@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
@@ -248,7 +247,7 @@ DoStream:
 			break DoStream
 		}
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("error in stream mode: %w", err)
 		}
 
 		if len(resp.Candidates) != 1 {
