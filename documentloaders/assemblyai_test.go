@@ -37,7 +37,11 @@ func TestAssemblyAIAudioTranscriptLoader_Load(t *testing.T) {
 	require.Len(t, docs, 1)
 
 	require.NotEmpty(t, docs[0].PageContent)
-	require.Equal(t, true, docs[0].Metadata["redact_pii"])
+
+	redactPII, ok := docs[0].Metadata["redact_pii"].(bool)
+
+	require.True(t, ok)
+	require.True(t, redactPII)
 }
 
 func TestAssemblyAIAudioTranscriptLoader_toMetadata(t *testing.T) {
