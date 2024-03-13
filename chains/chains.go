@@ -41,8 +41,8 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	for key, value := range newValues {
 		fullValues[key] = value
 	}
-
 	callbacksHandler := getChainCallbackHandler(c)
+
 	if callbacksHandler != nil {
 		callbacksHandler.HandleChainStart(ctx, inputValues)
 	}
