@@ -107,7 +107,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return llms.TextParts(schema.ChatMessageTypeHuman, weather), true
+		return llms.TextParts(schema.ChatMessageTypeSystem, weather), true
 	case "finalResponse":
 		resp, ok := c.Input["response"].(string)
 		if !ok {
