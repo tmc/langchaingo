@@ -112,7 +112,12 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	if err != nil {
 		return nil, err
 	}
-	sqlQuery := strings.TrimSpace(out)
+
+	sqlQuery := extractSQLQuery(out)
+
+	if sqlQuery == "" {
+		return nil, fmt.Errorf("no sql query generated")
+	}
 
 	// Execute sql query
 	queryResult, err := s.Database.Query(ctx, sqlQuery)
@@ -147,4 +152,50 @@ func (s SQLDatabaseChain) GetInputKeys() []string {
 
 func (s SQLDatabaseChain) GetOutputKeys() []string {
 	return []string{s.OutputKey}
+}
+
+// sometimes llm model returned result is not only the SQLQuery,
+// it also contains some extra text,
+// which will cause the entire process to fail.
+// this function is used to extract the exact SQLQuery from the result.
+// nolint:cyclop
+func extractSQLQuery(rawOut string) string {
+	outStrings := strings.Split(rawOut, "\n")
+
+	var sqlQuery string
+	containSQLQuery := strings.Contains(rawOut, "SQLQuery:")
+	findSQLQuery := false
+
+	for _, v := range outStrings {
+		line := strings.TrimSpace(v)
+
+		// filter empty line and markdown symbols
+		if line == "" || strings.HasPrefix(line, "```") {
+			continue
+		}
+
+		// stop when we find SQLResult: or Answer:
+		if strings.HasPrefix(line, "SQLResult:") || strings.HasPrefix(line, "Answer:") {
+			break
+		}
+
+		var currentLine string
+		switch {
+		case containSQLQuery && strings.HasPrefix(line, "SQLQuery:"):
+			findSQLQuery = true
+			currentLine = strings.TrimPrefix(line, "SQLQuery:")
+			if strings.TrimSpace(currentLine) == "" {
+				continue
+			}
+		case containSQLQuery && !findSQLQuery:
+			// filter unwanted text above the SQLQuery:
+			continue
+		default:
+			currentLine = line
+		}
+
+		sqlQuery += currentLine + "\n"
+	}
+
+	return strings.TrimSpace(sqlQuery)
 }
