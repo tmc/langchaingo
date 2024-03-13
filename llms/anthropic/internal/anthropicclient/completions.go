@@ -80,7 +80,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	}
 
 	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
+		c.baseURL = DefaultBaseURL
 	}
 
 	url := fmt.Sprintf("%s/complete", c.baseURL)
