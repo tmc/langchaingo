@@ -41,11 +41,11 @@ func WithHTTPClient(client Doer) Option {
 }
 
 // New returns a new Anthropic client.
-func New(token string, model string, baseUrl string, httpClient Doer, opts ...Option) (*Client, error) {
+func New(token string, model string, baseURL string, httpClient Doer, opts ...Option) (*Client, error) {
 	c := &Client{
 		Model:      model,
 		token:      token,
-		baseURL:    strings.TrimSuffix(baseUrl, "/"),
+		baseURL:    strings.TrimSuffix(baseURL, "/"),
 		httpClient: httpClient,
 	}
 

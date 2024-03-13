@@ -48,7 +48,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model, options.baseUrl, options.httpClient)
+	return anthropicclient.New(options.token, options.model, options.baseURL, options.httpClient)
 }
 
 // Call requests a completion for the given prompt.

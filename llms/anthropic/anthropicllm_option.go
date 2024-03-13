@@ -11,7 +11,7 @@ const (
 type options struct {
 	token      string
 	model      string
-	baseUrl    string
+	baseURL    string
 	httpClient anthropicclient.Doer
 }
 
