@@ -42,7 +42,7 @@ func WithBaseURL(baseURL string) Option {
 
 // WithHTTPClient allows setting a custom HTTP client. If not set, the default value
 // is http.DefaultClient.
-func WithHTTPClient(client openaiclient.Doer) Option {
+func WithHTTPClient(client anthropicclient.Doer) Option {
 	return func(opts *options) {
 		opts.httpClient = client
 	}
