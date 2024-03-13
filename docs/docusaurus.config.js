@@ -132,7 +132,7 @@ const config = {
         title: "🦜️🔗 LangChainGo",
         items: [
           {
-            href: "https://docs.langchain.com/docs/",
+            href: "https://python.langchain.com/docs/get_started/introduction/",
             label: "Concepts",
             position: "left",
           },
