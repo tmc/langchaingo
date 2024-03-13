@@ -45,7 +45,7 @@ func New(token string, model string, baseUrl string, httpClient Doer, opts ...Op
 	c := &Client{
 		Model:      model,
 		token:      token,
-		baseURL:    strings.TrimSuffix(baseURL, "/"),
+		baseURL:    strings.TrimSuffix(baseUrl, "/"),
 		httpClient: httpClient,
 	}
 
