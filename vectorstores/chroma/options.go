@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	chromago "github.com/amikos-tech/chroma-go"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
@@ -15,7 +15,7 @@ const (
 	ChromaURLKeyEnvVarName = "CHROMA_URL"
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
-	DefaultDistanceFunc    = chromago.L2
+	DefaultDistanceFunc    = chromatypes.L2
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -45,16 +45,16 @@ func WithEmbedder(e embeddings.Embedder) Option {
 	}
 }
 
-// WithDistanceFunction specifies the distance function which will be used
-// see: https://github.com/amikos-tech/chroma-go/blob/d0087270239eccdb2f4f03d84b18d875c601ad6b/main.go#L96
-func WithDistanceFunction(distanceFunction chromago.DistanceFunction) Option {
+// WithDistanceFunction specifies the distance function which will be used (default is L2)
+// see: https://github.com/amikos-tech/chroma-go/blob/ab1339d0ee1a863be7d6773bcdedc1cfd08e3d77/types/types.go#L22
+func WithDistanceFunction(distanceFunction chromatypes.DistanceFunction) Option {
 	return func(p *Store) {
 		p.distanceFunction = distanceFunction
 	}
 }
 
 // WithIncludes is an option for setting the includes to query the vectors.
-func WithIncludes(includes []chromago.QueryEnum) Option {
+func WithIncludes(includes []chromatypes.QueryEnum) Option {
 	return func(p *Store) {
 		p.includes = includes
 	}
