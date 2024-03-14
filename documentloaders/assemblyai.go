@@ -15,8 +15,6 @@ import (
 // been set using [WithAudioURL] or [WithAudioReader].
 var ErrMissingAudioSource = errors.New("assemblyai: missing audio source")
 
-var ErrUnsupportedTranscriptFormat = errors.New("assemblyai: unsupported transcript format")
-
 // TranscriptFormat represents the format of the document page content.
 type TranscriptFormat int
 
@@ -63,6 +61,7 @@ type AssemblyAIAudioTranscriptLoader struct {
 
 var _ Loader = &AssemblyAIAudioTranscriptLoader{}
 
+// AssemblyAIOption is an option for the AssemblyAI loader.
 type AssemblyAIOption func(loader *AssemblyAIAudioTranscriptLoader)
 
 // NewAssemblyAIAudioTranscript returns a new instance
