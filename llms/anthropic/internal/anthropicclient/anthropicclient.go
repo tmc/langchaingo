@@ -21,6 +21,9 @@ type Client struct {
 	baseURL string
 
 	httpClient Doer
+	// When true the client will use the legacy text completion API
+	// when false it will use the new messages completion api
+	UseLegacyTextCompletionApi bool
 }
 
 // Option is an option for the Anthropic client.
@@ -41,12 +44,13 @@ func WithHTTPClient(client Doer) Option {
 }
 
 // New returns a new Anthropic client.
-func New(token string, model string, baseURL string, httpClient Doer, opts ...Option) (*Client, error) {
+func New(token string, model string, baseURL string, httpClient Doer, useLegacyTextCompletionApi bool, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:      model,
-		token:      token,
-		baseURL:    strings.TrimSuffix(baseURL, "/"),
-		httpClient: httpClient,
+		Model:                      model,
+		token:                      token,
+		baseURL:                    strings.TrimSuffix(baseURL, "/"),
+		httpClient:                 httpClient,
+		UseLegacyTextCompletionApi: useLegacyTextCompletionApi,
 	}
 
 	for _, opt := range opts {
@@ -58,8 +62,18 @@ func New(token string, model string, baseURL string, httpClient Doer, opts ...Op
 	return c, nil
 }
 
+type MessagesCompletionRequest struct {
+	Model        string         `json:"model"`
+	Messages     []*ChatMessage `json:"messages"`
+	SystemPrompt string         `json:"system,omitempty"`
+	Temperature  float64        `json:"temperature"`
+	MaxTokens    int            `json:"max_tokens,omitempty"`
+	StopWords    []string       `json:"stop_sequences,omitempty"`
+	TopP         float64        `json:"top_p,omitempty"`
+}
+
 // CompletionRequest is a request to create a completion.
-type CompletionRequest struct {
+type LegacyTextCompletionRequest struct {
 	Model       string   `json:"model"`
 	Prompt      string   `json:"prompt"`
 	Temperature float64  `json:"temperature"`
@@ -78,9 +92,24 @@ type Completion struct {
 	Text string `json:"text"`
 }
 
+func (c *Client) CreateMessagesCompletion(ctx context.Context, r *MessagesCompletionRequest) (*MessagesCompletionResponsePayload, error) {
+	resp, err := c.createMessagesCompletion(ctx, &messagesCompletionPayload{
+		Model:       r.Model,
+		Messages:    r.Messages,
+		Temperature: r.Temperature,
+		MaxTokens:   r.MaxTokens,
+		StopWords:   r.StopWords,
+		TopP:        r.TopP,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // CreateCompletion creates a completion.
-func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*Completion, error) {
-	resp, err := c.createCompletion(ctx, &completionPayload{
+func (c *Client) CreateLegacyTextCompletion(ctx context.Context, r *LegacyTextCompletionRequest) (*Completion, error) {
+	resp, err := c.createLegacyTextCompletion(ctx, &legacyTextCompletionPayload{
 		Model:         r.Model,
 		Prompt:        r.Prompt,
 		Temperature:   r.Temperature,

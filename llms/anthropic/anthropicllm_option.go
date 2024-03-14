@@ -9,10 +9,11 @@ const (
 )
 
 type options struct {
-	token      string
-	model      string
-	baseURL    string
-	httpClient anthropicclient.Doer
+	token                      string
+	model                      string
+	baseURL                    string
+	httpClient                 anthropicclient.Doer
+	useLegacyTextCompletionApi bool
 }
 
 type Option func(*options)
@@ -45,5 +46,12 @@ func WithBaseURL(baseURL string) Option {
 func WithHTTPClient(client anthropicclient.Doer) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithMessagesCompletionAPI allows setting the client to use the new messages completion API.
+func WithMessagesCompletionAPI() Option {
+	return func(opts *options) {
+		opts.useLegacyTextCompletionApi = false
 	}
 }

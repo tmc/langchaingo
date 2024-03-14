@@ -16,7 +16,7 @@ const (
 	defaultCompletionModel = "claude-1"
 )
 
-type completionPayload struct {
+type legacyTextCompletionPayload struct {
 	Model       string   `json:"model"`
 	Prompt      string   `json:"prompt"`
 	Temperature float64  `json:"temperature"`
@@ -28,7 +28,7 @@ type completionPayload struct {
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
-type CompletionResponsePayload struct {
+type LegacyTextCompletionResponsePayload struct {
 	Completion string `json:"completion,omitempty"`
 	LogID      string `json:"log_id,omitempty"`
 	Model      string `json:"model,omitempty"`
@@ -43,7 +43,7 @@ type errorMessage struct {
 	} `json:"error"`
 }
 
-func (c *Client) setCompletionDefaults(payload *completionPayload) {
+func (c *Client) setLegacyTextCompletionDefaults(payload *legacyTextCompletionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 256
@@ -70,8 +70,8 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 }
 
 // nolint:lll
-func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*CompletionResponsePayload, error) {
-	c.setCompletionDefaults(payload)
+func (c *Client) createLegacyTextCompletion(ctx context.Context, payload *legacyTextCompletionPayload) (*LegacyTextCompletionResponsePayload, error) {
+	c.setLegacyTextCompletionDefaults(payload)
 
 	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
@@ -113,11 +113,11 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	}
 	if payload.StreamingFunc != nil {
 		// Read chunks
-		return parseStreamingCompletionResponse(ctx, r, payload)
+		return parseStreamingLegacyTextCompletionResponse(ctx, r, payload)
 	}
 
 	// Parse response
-	var response CompletionResponsePayload
+	var response LegacyTextCompletionResponsePayload
 	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
@@ -125,9 +125,9 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	return &response, nil
 }
 
-func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, payload *completionPayload) (*CompletionResponsePayload, error) { // nolint:lll
+func parseStreamingLegacyTextCompletionResponse(ctx context.Context, r *http.Response, payload *legacyTextCompletionPayload) (*LegacyTextCompletionResponsePayload, error) { // nolint:lll
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan *CompletionResponsePayload)
+	responseChan := make(chan *LegacyTextCompletionResponsePayload)
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -139,7 +139,7 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 				continue
 			}
 			data := strings.TrimPrefix(line, "data: ")
-			streamPayload := &CompletionResponsePayload{}
+			streamPayload := &LegacyTextCompletionResponsePayload{}
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
 				log.Fatalf("failed to decode stream payload: %v", err)
@@ -151,9 +151,9 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 		}
 	}()
 	// Parse response
-	response := CompletionResponsePayload{}
+	response := LegacyTextCompletionResponsePayload{}
 
-	var lastResponse *CompletionResponsePayload
+	var lastResponse *LegacyTextCompletionResponsePayload
 	for streamResponse := range responseChan {
 		response.Completion += streamResponse.Completion
 		if payload.StreamingFunc != nil {
