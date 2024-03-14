@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	chromatypes "github.com/amikos-tech/chroma-go/types"
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"

@@ -64,7 +64,6 @@ func TestChromaGoStoreRest(t *testing.T) {
 	country := docs[0].Metadata["country"]
 	require.NoError(t, err)
 	require.Equal(t, "japan", country)
-
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
@@ -475,7 +474,6 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		"What are all the colors of the lamps beside the desk?",
 	)
 	result = strings.ToLower(result)
-	fmt.Printf("result: %s\n", result)
 	require.NoError(t, err)
 
 	require.Contains(t, result, "black", "expected black in result")
