@@ -69,11 +69,10 @@ func (handler *AgentFinalStreamHandler) ReadFromEgress(
 	go func() {
 		defer wg.Done()
 
-	FORLOOP:
 		for {
 			select {
 			case <-handler.agentFinish:
-				break FORLOOP
+				return
 			case data := <-handler.egress:
 				callback(ctx, data)
 			}
