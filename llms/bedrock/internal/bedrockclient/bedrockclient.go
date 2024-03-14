@@ -10,10 +10,17 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+// Client is a Bedrock client.
 type Client struct {
 	client *bedrockruntime.Client
 }
 
+
+// Message is a chunk of text or an data
+// that will be sent to the provider.
+//
+// The provider may then transform the message to its own
+// format before sending it to the LLM model API.
 type Message struct {
 	Role    schema.ChatMessageType
 	Content string
@@ -27,12 +34,17 @@ func getProvider(modelID string) string {
 	return strings.Split(modelID, ".")[0]
 }
 
+
+// NewClient creates a new Bedrock client.
 func NewClient(client *bedrockruntime.Client) *Client {
 	return &Client{
 		client: client,
 	}
 }
 
+
+// CreateCompletion creates a new completion response from the provider
+// after sending the messages to the provider.
 func (c *Client) CreateCompletion(ctx context.Context,
 	modelID string,
 	messages []Message,
@@ -55,6 +67,9 @@ func (c *Client) CreateCompletion(ctx context.Context,
 	}
 }
 
+
+// Helper function to process input text chat
+// messages as a single string.
 func processInputMessagesGeneric(messages []Message) string {
 	var sb strings.Builder
 	var hasRole bool

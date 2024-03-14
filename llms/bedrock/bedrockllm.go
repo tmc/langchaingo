@@ -11,14 +11,17 @@ import (
 	"github.com/tmc/langchaingo/llms/bedrock/internal/bedrockclient"
 )
 
-const defaultModel = "amazon.titan-text-lite-v1"
+const defaultModel = ModelAmazonTitanTextLiteV1
 
+
+// LLM is a Bedrock LLM implementation.
 type LLM struct {
 	modelID          string
 	client           *bedrockclient.Client
 	CallbacksHandler callbacks.Handler
 }
 
+// New creates a new Bedrock LLM implementation.
 func New(opts ...Option) (*LLM, error) {
 	o, c, err := newClient(opts...)
 	if err != nil {
