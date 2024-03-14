@@ -17,7 +17,7 @@ type ChatMessage struct {
 type messagesCompletionPayload struct {
 	Model        string         `json:"model"`
 	Messages     []*ChatMessage `json:"messages"`
-	SystemPrompt string         `json:"system,omitempty"`
+	SystemPrompt string         `json:"system_prompt,omitempty"`
 	Temperature  float64        `json:"temperature"`
 	MaxTokens    int            `json:"max_tokens,omitempty"`
 	TopP         float64        `json:"top_p,omitempty"`
