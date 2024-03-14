@@ -94,12 +94,13 @@ type Completion struct {
 
 func (c *Client) CreateMessagesCompletion(ctx context.Context, r *MessagesCompletionRequest) (*MessagesCompletionResponsePayload, error) {
 	resp, err := c.createMessagesCompletion(ctx, &messagesCompletionPayload{
-		Model:       r.Model,
-		Messages:    r.Messages,
-		Temperature: r.Temperature,
-		MaxTokens:   r.MaxTokens,
-		StopWords:   r.StopWords,
-		TopP:        r.TopP,
+		Model:        r.Model,
+		Messages:     r.Messages,
+		SystemPrompt: r.SystemPrompt,
+		Temperature:  r.Temperature,
+		MaxTokens:    r.MaxTokens,
+		StopWords:    r.StopWords,
+		TopP:         r.TopP,
 	})
 	if err != nil {
 		return nil, err
