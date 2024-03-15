@@ -17,7 +17,7 @@ type options struct {
 // WithModel allows setting a custom modelId.
 //
 // If not set, the default model is used
-// i.e. "amazon.titan-text-lite-v1"
+// i.e. "amazon.titan-text-lite-v1".
 func WithModel(modelID string) Option {
 	return func(o *options) {
 		o.modelID = modelID

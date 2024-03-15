@@ -13,7 +13,6 @@ import (
 
 const defaultModel = ModelAmazonTitanTextLiteV1
 
-
 // LLM is a Bedrock LLM implementation.
 type LLM struct {
 	modelID          string

@@ -15,7 +15,6 @@ type Client struct {
 	client *bedrockruntime.Client
 }
 
-
 // Message is a chunk of text or an data
 // that will be sent to the provider.
 //
@@ -34,14 +33,12 @@ func getProvider(modelID string) string {
 	return strings.Split(modelID, ".")[0]
 }
 
-
 // NewClient creates a new Bedrock client.
 func NewClient(client *bedrockruntime.Client) *Client {
 	return &Client{
 		client: client,
 	}
 }
-
 
 // CreateCompletion creates a new completion response from the provider
 // after sending the messages to the provider.
@@ -66,7 +63,6 @@ func (c *Client) CreateCompletion(ctx context.Context,
 		return nil, errors.New("unsupported provider")
 	}
 }
-
 
 // Helper function to process input text chat
 // messages as a single string.
