@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	chroma_go "github.com/amikos-tech/chroma-go"
+	chroma_go "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
