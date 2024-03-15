@@ -48,7 +48,16 @@ const (
 	//
 	// Max tokens: 200k
 	// Languages: English and multiple other languages.
-	ModelAnthropicClaude3Sonnet20240229V10 = "anthropic.claude-3-sonnet-20240229-v1:0"
+	ModelAnthropicClaudeV3Sonnet = "anthropic.claude-3-sonnet-20240229-v1:0"
+
+	// Claude 3 Haiku is Anthropic's fastest, most compact model for near-instant responsiveness.
+	// It answers simple queries and requests with speed.
+	// Customers will be able to build seamless AI experiences that mimic human interactions.
+	// Claude 3 Haiku can process images and return text outputs, and features a 200K context window.
+	//
+	// Max tokens: 200k
+	// Languages: English and multiple other languages.
+	ModelAnthropicClaudeV3Haiku = "anthropic.claude-3-haiku-20240307-v1:0"
 
 	// An update to Claude 2 that features double the context window, plus improvements
 	// across reliability, hallucination rates, and evidence-based accuracy in long document and RAG contexts.
