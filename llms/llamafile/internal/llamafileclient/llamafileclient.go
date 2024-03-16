@@ -16,10 +16,27 @@ import (
 	"strings"
 )
 
+const maxBufferSize = 512 * 1000
+
 type Client struct {
 	base       *url.URL
 	httpClient *http.Client
 }
+
+type EmbeddingRequest struct {
+	Content []string `json:"content"`
+}
+type EmbeddingResponse struct {
+	Results []EmbeddingData `json:"results"`
+}
+type EmbeddingData struct {
+	Embedding []float64 `json:"embedding"`
+}
+
+type (
+	GenerateResponseFunc func(GenerateResponse) error
+	ChatResponseFunc     func(ChatResponse) error
+)
 
 func checkError(resp *http.Response, body []byte) error {
 	if resp.StatusCode < http.StatusBadRequest {
@@ -120,81 +137,6 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 	return nil
 }
 
-const maxBufferSize = 512 * 1000
-
-// func (c *Client) stream(ctx context.Context, method, path string, data any, fn func([]byte) error) error {
-// 	var buf *bytes.Buffer
-// 	if data != nil {
-// 		bts, err := json.Marshal(data)
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		buf = bytes.NewBuffer(bts)
-// 	}
-
-// 	// show payload
-
-// 	requestURL := c.base.JoinPath(path)
-// 	request, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	request.Header.Set("Content-Type", "application/json")
-// 	request.Header.Set("Accept", "application/x-ndjson")
-// 	request.Header.Set("User-Agent",
-// 		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
-
-// 	response, err := c.httpClient.Do(request)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer response.Body.Close()
-
-// 	scanner := bufio.NewScanner(response.Body)
-// 	// increase the buffer size to avoid running out of space
-// 	scanBuf := make([]byte, 0, maxBufferSize)
-// 	scanner.Buffer(scanBuf, maxBufferSize)
-// 	for scanner.Scan() {
-// 		var errorResponse struct {
-// 			Error string `json:"error,omitempty"`
-// 		}
-
-// 		bts, errBts := ExtractJSONFromBytes(scanner.Bytes())
-// 		if errBts != nil {
-// 			return errBts
-// 		}
-
-// 		// if bts is nil then continue
-// 		if bts == nil {
-// 			continue
-// 		}
-
-// 		if err := json.Unmarshal(bts, &errorResponse); err != nil {
-// 			return err
-// 		}
-
-// 		if errorResponse.Error != "" {
-// 			return errors.New(errorResponse.Error) //nolint
-// 		}
-
-// 		if response.StatusCode >= http.StatusBadRequest {
-// 			return StatusError{
-// 				StatusCode:   response.StatusCode,
-// 				Status:       response.Status,
-// 				ErrorMessage: errorResponse.Error,
-// 			}
-// 		}
-
-// 		if err := fn(bts); err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 // stream manages the streaming and processing of data from an HTTP request.
 func (c *Client) stream(ctx context.Context, method, path string, data any, fn func([]byte) error) error {
 	buf, err := prepareBuffer(data)
@@ -258,7 +200,7 @@ func (c *Client) processResponse(response *http.Response, fn func([]byte) error)
 // processScan handles the scanned bytes from the response body.
 func processScan(bts []byte, response *http.Response, fn func([]byte) error) error {
 	bts, err := ExtractJSONFromBytes(bts)
-	if err != nil {
+	if err != nil && err.Error() != "input is empty" {
 		return err
 	}
 	if bts == nil { // if bts is nil then continue
@@ -284,11 +226,6 @@ func processScan(bts []byte, response *http.Response, fn func([]byte) error) err
 
 	return fn(bts)
 }
-
-type (
-	GenerateResponseFunc func(GenerateResponse) error
-	ChatResponseFunc     func(ChatResponse) error
-)
 
 func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn GenerateResponseFunc) error {
 	return c.stream(ctx, http.MethodPost, "/completion", req, func(bts []byte) error {
@@ -337,16 +274,6 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 	})
 }
 
-type EmbeddingRequest struct {
-	Content []string `json:"content"`
-}
-type EmbeddingResponse struct {
-	Results []EmbeddingData `json:"results"`
-}
-type EmbeddingData struct {
-	Embedding []float64 `json:"embedding"`
-}
-
 func (c *Client) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	req := &EmbeddingRequest{
 		Content: texts,
@@ -366,7 +293,7 @@ func ExtractJSONFromBytes(input []byte) ([]byte, error) {
 	inputStr := string(input)
 
 	if inputStr == "" {
-		return nil, errors.New("input is empty")
+		return nil, errors.New("input is empty") // return error if input is empty but not is trated like error when use stream true the server return empty string in the interval
 	}
 
 	// Trim the prefix "data: " from the string
