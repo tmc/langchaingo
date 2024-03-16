@@ -1,7 +1,9 @@
 package cloudflareclient
 
-const RoleSystem = "system"
-const RoleTypeUser = "user"
-const RoleAssistant = "assistant"
+const (
+	RoleSystem    = "system"
+	RoleTypeUser  = "user"
+	RoleAssistant = "assistant"
+)
 
 type Role string

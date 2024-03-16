@@ -36,9 +36,9 @@ func WithSystemPrompt(p string) Option {
 }
 
 // WithAccountID Set the Account Id of the cloudflare account to use.
-func WithAccountID(accountId string) Option {
+func WithAccountID(accountID string) Option {
 	return func(opts *options) {
-		opts.cloudflareAccountID = accountId
+		opts.cloudflareAccountID = accountID
 	}
 }
 

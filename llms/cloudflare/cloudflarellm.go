@@ -3,16 +3,16 @@ package cloudflare
 import (
 	"context"
 	"errors"
-	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
 	"github.com/tmc/langchaingo/schema"
 )
 
 var (
 	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
+	ErrIncompleteEmbedding = errors.New("no all input got embedded")
 )
 
 // LLM is a cloudflare LLM implementation.

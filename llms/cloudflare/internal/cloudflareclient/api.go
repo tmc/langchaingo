@@ -10,19 +10,17 @@ import (
 )
 
 func (c Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingRequest) (*CreateEmbeddingResponse, error) {
-	url := fmt.Sprintf("%s/accounts/%s/ai/run/%s", c.Url, c.AccountID, c.EmbeddingModelName)
-
 	requestBody, err := json.Marshal(texts)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpointURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	req.Header.Add("Authorization", c.bearerToken)
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
@@ -50,8 +48,6 @@ func (c Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingReque
 }
 
 func (c Client) GenerateContent(ctx context.Context, request *GenerateContentRequest, stream bool) (*GenerateContentResponse, error) {
-	url := fmt.Sprintf("%s/accounts/%s/ai/run/%s", c.Url, c.AccountID, c.ModelName)
-
 	request.Stream = stream
 
 	requestBody, err := json.Marshal(request)
@@ -59,12 +55,12 @@ func (c Client) GenerateContent(ctx context.Context, request *GenerateContentReq
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpointURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	req.Header.Add("Authorization", c.bearerToken)
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
@@ -92,19 +88,17 @@ func (c Client) GenerateContent(ctx context.Context, request *GenerateContentReq
 }
 
 func (c Client) Summarize(ctx context.Context, inputText string, maxLength int) (*SummarizeResponse, error) {
-	url := fmt.Sprintf("%s/accounts/%s/ai/run/%s", c.Url, c.AccountID, c.ModelName)
-
 	requestBody, err := json.Marshal(SummarizeRequest{InputText: inputText, MaxLength: maxLength})
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.endpointURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	req.Header.Add("Authorization", c.bearerToken)
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
