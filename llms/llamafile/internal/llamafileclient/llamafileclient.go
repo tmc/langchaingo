@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -133,7 +134,6 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 	}
 
 	// show payload
-	fmt.Println("PAYLOAD", buf.String())
 
 	requestURL := c.base.JoinPath(path)
 	request, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
@@ -176,7 +176,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 		}
 
 		if errorResponse.Error != "" {
-			return fmt.Errorf(errorResponse.Error) //nolint
+			return errors.New(errorResponse.Error) //nolint
 		}
 
 		if response.StatusCode >= http.StatusBadRequest {
@@ -212,11 +212,11 @@ func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn Generate
 }
 
 func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResponseFunc) error {
-	//parse to json
+
 	prompt := "<s>[INST]"
 	for _, msg := range req.Messages {
 		switch msg.Role {
-		//"system", "user", "assistant"]
+		// "system", "user", "assistant"]
 		case "system":
 			prompt += fmt.Sprintf("<<SYS>> %s <</SYS>>\n", msg.Content)
 		case "user":
@@ -248,11 +248,33 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 	})
 }
 
+type EmbeddingRequest struct {
+	Content []string `json:"content"`
+}
+type EmbeddingResponse struct {
+	Results []EmbeddingData `json:"results"`
+}
+type EmbeddingData struct {
+	Embedding []float64 `json:"embedding"`
+}
+
+func (c *Client) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+	req := &EmbeddingRequest{
+		Content: texts,
+	}
+
+	var resp EmbeddingResponse
+
+	err := c.do(ctx, http.MethodPost, "/embedding", req, &resp)
+
+	embeddings := convertEmbeddingsToFloat32(resp.Results)
+
+	return embeddings, err
+}
+
 func ExtractJsonFromBytes(input []byte) ([]byte, error) {
 	// Convert input byte slice to string
 	inputStr := string(input)
-
-	fmt.Println("inputStr", inputStr)
 
 	if inputStr == "" {
 		return nil, nil
@@ -265,9 +287,29 @@ func ExtractJsonFromBytes(input []byte) ([]byte, error) {
 	// We'll use json.RawMessage for its ability to be a valid JSON component
 	var raw json.RawMessage
 	if err := json.Unmarshal([]byte(trimmedStr), &raw); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		return nil, errors.New("failed to unmarshal JSON: " + err.Error())
 	}
 
 	// Return the cleaned JSON as byte slice
 	return raw, nil
+}
+
+// convertEmbeddingsToFloat32 takes a slice of EmbeddingData (as found in EmbeddingResponse.Results)
+// and converts each embedding into a slice of float32, returning a slice of slices of float32.
+func convertEmbeddingsToFloat32(data []EmbeddingData) [][]float32 {
+	// Preallocate result with the same number of embeddings (outer slice length)
+	result := make([][]float32, 0, len(data))
+
+	// Iterate through each EmbeddingData
+	for _, embeddingData := range data {
+		// Convert embedding from float64 to float32
+		innerSlice := make([]float32, len(embeddingData.Embedding))
+		for i, value := range embeddingData.Embedding {
+			innerSlice[i] = float32(value)
+		}
+
+		// Append the converted embedding to the result
+		result = append(result, innerSlice)
+	}
+	return result
 }

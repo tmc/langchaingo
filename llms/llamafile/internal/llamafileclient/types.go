@@ -80,8 +80,9 @@ type GenerationSettings struct {
 	TopP                   float64       `json:"top_p,omitempty"`
 	TypicalP               float64       `json:"typical_p,omitempty"`
 	UsePenaltyPromptTokens bool          `json:"use_penalty_prompt_tokens,omitempty"`
-	LlamafileServerURL     *url.URL
-	HTTPClient             *http.Client
+	LlamafileServerURL     *url.URL      `json:"-"`
+	HTTPClient             *http.Client  `json:"-"`
+	EmbeddingSize          int           `json:"-"`
 }
 
 type Timings struct {
