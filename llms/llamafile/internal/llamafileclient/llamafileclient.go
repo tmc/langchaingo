@@ -366,7 +366,7 @@ func ExtractJSONFromBytes(input []byte) ([]byte, error) {
 	inputStr := string(input)
 
 	if inputStr == "" {
-		return nil, nil
+		return nil, errors.New("input is empty")
 	}
 
 	// Trim the prefix "data: " from the string
