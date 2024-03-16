@@ -23,6 +23,7 @@ func newTestClient(t *testing.T) *LLM {
 }
 
 func TestGenerateContent(t *testing.T) {
+	t.Skip("llamafile is not available")
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -45,6 +46,7 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
+	t.Skip("llamafile is not available")
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -74,7 +76,7 @@ func TestWithStreaming(t *testing.T) {
 
 func TestCreateEmbedding(t *testing.T) {
 	t.Parallel()
-
+	t.Skip("llamafile is not available")
 	llm := newTestClient(t)
 
 	embeddings, err := llm.CreateEmbedding(context.Background(), []string{"hello", "world"})
