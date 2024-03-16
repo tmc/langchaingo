@@ -2,7 +2,6 @@ package llamafile
 
 import (
 	"context"
-
 	"strings"
 	"testing"
 
