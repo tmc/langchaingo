@@ -161,7 +161,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 			Error string `json:"error,omitempty"`
 		}
 
-		bts, errBts := ExtractJsonFromBytes(scanner.Bytes())
+		bts, errBts := ExtractJSONFromBytes(scanner.Bytes())
 		if errBts != nil {
 			return errBts
 		}
@@ -212,7 +212,6 @@ func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn Generate
 }
 
 func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResponseFunc) error {
-
 	prompt := "<s>[INST]"
 	for _, msg := range req.Messages {
 		switch msg.Role {
@@ -272,7 +271,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, texts []string) ([][]float
 	return embeddings, err
 }
 
-func ExtractJsonFromBytes(input []byte) ([]byte, error) {
+func ExtractJSONFromBytes(input []byte) ([]byte, error) {
 	// Convert input byte slice to string
 	inputStr := string(input)
 
