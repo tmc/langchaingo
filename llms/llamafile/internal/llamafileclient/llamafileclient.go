@@ -214,7 +214,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 // prepareBuffer marshals data to JSON if not nil, returning a buffer.
 func prepareBuffer(data any) (*bytes.Buffer, error) {
 	if data == nil {
-		return nil, nil
+		return nil, errors.New("data is nil")
 	}
 	bts, err := json.Marshal(data)
 	if err != nil {
