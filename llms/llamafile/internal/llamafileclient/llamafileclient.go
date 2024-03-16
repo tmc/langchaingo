@@ -122,77 +122,167 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 
 const maxBufferSize = 512 * 1000
 
+// func (c *Client) stream(ctx context.Context, method, path string, data any, fn func([]byte) error) error {
+// 	var buf *bytes.Buffer
+// 	if data != nil {
+// 		bts, err := json.Marshal(data)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		buf = bytes.NewBuffer(bts)
+// 	}
+
+// 	// show payload
+
+// 	requestURL := c.base.JoinPath(path)
+// 	request, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	request.Header.Set("Content-Type", "application/json")
+// 	request.Header.Set("Accept", "application/x-ndjson")
+// 	request.Header.Set("User-Agent",
+// 		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+
+// 	response, err := c.httpClient.Do(request)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer response.Body.Close()
+
+// 	scanner := bufio.NewScanner(response.Body)
+// 	// increase the buffer size to avoid running out of space
+// 	scanBuf := make([]byte, 0, maxBufferSize)
+// 	scanner.Buffer(scanBuf, maxBufferSize)
+// 	for scanner.Scan() {
+// 		var errorResponse struct {
+// 			Error string `json:"error,omitempty"`
+// 		}
+
+// 		bts, errBts := ExtractJSONFromBytes(scanner.Bytes())
+// 		if errBts != nil {
+// 			return errBts
+// 		}
+
+// 		// if bts is nil then continue
+// 		if bts == nil {
+// 			continue
+// 		}
+
+// 		if err := json.Unmarshal(bts, &errorResponse); err != nil {
+// 			return err
+// 		}
+
+// 		if errorResponse.Error != "" {
+// 			return errors.New(errorResponse.Error) //nolint
+// 		}
+
+// 		if response.StatusCode >= http.StatusBadRequest {
+// 			return StatusError{
+// 				StatusCode:   response.StatusCode,
+// 				Status:       response.Status,
+// 				ErrorMessage: errorResponse.Error,
+// 			}
+// 		}
+
+// 		if err := fn(bts); err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	return nil
+// }
+
+// stream manages the streaming and processing of data from an HTTP request.
 func (c *Client) stream(ctx context.Context, method, path string, data any, fn func([]byte) error) error {
-	var buf *bytes.Buffer
-	if data != nil {
-		bts, err := json.Marshal(data)
-		if err != nil {
-			return err
-		}
-
-		buf = bytes.NewBuffer(bts)
-	}
-
-	// show payload
-
-	requestURL := c.base.JoinPath(path)
-	request, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
+	buf, err := prepareBuffer(data)
 	if err != nil {
 		return err
 	}
 
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "application/x-ndjson")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
-
-	response, err := c.httpClient.Do(request)
+	response, err := c.sendHTTPRequest(ctx, method, path, buf)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
 
+	return c.processResponse(response, fn)
+}
+
+// prepareBuffer marshals data to JSON if not nil, returning a buffer.
+func prepareBuffer(data any) (*bytes.Buffer, error) {
+	if data == nil {
+		return nil, nil
+	}
+	bts, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(bts), nil
+}
+
+// sendHTTPRequest sends an HTTP request and returns the response.
+func (c *Client) sendHTTPRequest(ctx context.Context, method, path string, buf *bytes.Buffer) (*http.Response, error) {
+	requestURL := c.base.JoinPath(path)
+	request, err := http.NewRequestWithContext(ctx, method, requestURL.String(), buf)
+	if err != nil {
+		return nil, err
+	}
+	setRequestHeaders(request)
+
+	return c.httpClient.Do(request)
+}
+
+// setRequestHeaders sets the necessary headers for the HTTP request.
+func setRequestHeaders(request *http.Request) {
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/x-ndjson")
+	request.Header.Set("User-Agent", fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
+}
+
+// processResponse handles the HTTP response, parsing and forwarding JSON data.
+func (c *Client) processResponse(response *http.Response, fn func([]byte) error) error {
 	scanner := bufio.NewScanner(response.Body)
-	// increase the buffer size to avoid running out of space
-	scanBuf := make([]byte, 0, maxBufferSize)
-	scanner.Buffer(scanBuf, maxBufferSize)
+	scanner.Buffer(make([]byte, 0, maxBufferSize), maxBufferSize) // Assume maxBufferSize is defined
+
 	for scanner.Scan() {
-		var errorResponse struct {
-			Error string `json:"error,omitempty"`
-		}
-
-		bts, errBts := ExtractJSONFromBytes(scanner.Bytes())
-		if errBts != nil {
-			return errBts
-		}
-
-		// if bts is nil then continue
-		if bts == nil {
-			continue
-		}
-
-		if err := json.Unmarshal(bts, &errorResponse); err != nil {
-			return err
-		}
-
-		if errorResponse.Error != "" {
-			return errors.New(errorResponse.Error) //nolint
-		}
-
-		if response.StatusCode >= http.StatusBadRequest {
-			return StatusError{
-				StatusCode:   response.StatusCode,
-				Status:       response.Status,
-				ErrorMessage: errorResponse.Error,
-			}
-		}
-
-		if err := fn(bts); err != nil {
+		if err := processScan(scanner.Bytes(), response, fn); err != nil {
 			return err
 		}
 	}
+	return scanner.Err() // Check for scanning errors
+}
 
-	return nil
+// processScan handles the scanned bytes from the response body.
+func processScan(bts []byte, response *http.Response, fn func([]byte) error) error {
+	bts, err := ExtractJSONFromBytes(bts)
+	if err != nil {
+		return err
+	}
+	if bts == nil { // if bts is nil then continue
+		return nil
+	}
+
+	var errorResponse struct {
+		Error string `json:"error,omitempty"`
+	}
+	if err := json.Unmarshal(bts, &errorResponse); err != nil {
+		return err
+	}
+	if errorResponse.Error != "" {
+		return errors.New(errorResponse.Error)
+	}
+	if response.StatusCode >= http.StatusBadRequest {
+		return StatusError{
+			StatusCode:   response.StatusCode,
+			Status:       response.Status,
+			ErrorMessage: errorResponse.Error,
+		}
+	}
+
+	return fn(bts)
 }
 
 type (

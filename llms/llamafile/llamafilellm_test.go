@@ -15,6 +15,7 @@ func newTestClient(t *testing.T) *LLM {
 	t.Helper()
 	options := []Option{
 		WithEmbeddingSize(2048),
+		WithTemperature(0.8),
 	}
 	c, err := New(options...)
 	require.NoError(t, err)
@@ -26,7 +27,7 @@ func TestGenerateContent(t *testing.T) {
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextContent{Text: "Brazil is a country? answer yes or no"},
+		llms.TextContent{Text: "Brazil is a country? the answer should just be yes or no"},
 	}
 	content := []llms.MessageContent{
 		{
