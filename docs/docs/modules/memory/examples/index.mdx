@@ -6,4 +6,82 @@ import DocCardList from "@theme/DocCardList";
 
 # Examples: Memory
 
+## Use Conversation Buffer
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/memory"
+)
+
+func main() {
+	llm, err := ollama.New(ollama.WithModel("llama2"))
+	if err != nil {
+		panic(err)
+	}
+
+	callOptions := []chains.ChainCallOption{
+		chains.WithTemperature(0.7),
+		chains.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}),
+	}
+
+	c := chains.NewConversation(llm, memory.NewConversationBuffer())
+
+	_, err = chains.Run(context.Background(), c, "Hi! I'm Alexandre Evangelista, a Golang developer , I'm 36 years old ")
+	_, err = chains.Run(context.Background(), c, "What is my name?", callOptions...)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+```
+
+## Use Conversation Token Buffer
+When use Conversation Token you set a max token in memory
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/memory"
+)
+
+func main() {
+	llm, err := ollama.New(ollama.WithModel("llama2"))
+	if err != nil {
+		panic(err)
+	}
+
+	callOptions := []chains.ChainCallOption{
+		chains.WithTemperature(0.7),
+		chains.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}),
+	}
+
+	c := chains.NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))
+	_, err = chains.Run(context.Background(), c, "Hi! I'm Alexandre Evangelista, a Golang developer , I'm 36 years old ")
+	_, err = chains.Run(context.Background(), c, "What is my name?", callOptions...)
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+```
 <DocCardList />
