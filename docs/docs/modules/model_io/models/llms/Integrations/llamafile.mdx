@@ -6,6 +6,40 @@ import ExampleLlamafile from "@examples/llamafile-completion-example/llamafile_c
 
 # Llamafile
 
+## Running Server
+first you need have a server running.
 
+```sh 
+./mistral-7b-instruct-v0.2.Q3_K_L.llamafile  --server --nobrowser --embedding
+```
 
+## How To
+
+```go 
+func main() {
+options := []Option{
+		WithTemperature(0.8), // default is 0.7
+	}
+	llm, err := New(options...)
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "Brazil is a country? the answer should just be yes or no"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		fmt.Print(string(chunk))
+		return nil
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = completion
+
+}
+```
 <CodeBlock language="go">{ExampleLlamafile}</CodeBlock>
