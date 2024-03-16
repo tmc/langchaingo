@@ -102,7 +102,6 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
-
 }
 
 func (c *Client) buildURL(suffix string, model string) string {
