@@ -131,6 +131,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	resp, err := o.client.CreateEmbedding(ctx, texts)
+
 	if err != nil {
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
@@ -138,7 +139,12 @@ func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 		return nil, err
 	}
 
-	return resp, nil
+	embeddings := make([][]float32, 0)
+	for i := 0; i < len(resp.Results); i++ {
+		embeddings = append(embeddings, resp.Results[i].Embedding)
+	}
+
+	return embeddings, nil
 }
 
 func typeToRole(typ schema.ChatMessageType) string {

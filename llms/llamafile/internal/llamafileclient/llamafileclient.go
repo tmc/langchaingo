@@ -30,7 +30,7 @@ type EmbeddingResponse struct {
 	Results []EmbeddingData `json:"results"`
 }
 type EmbeddingData struct {
-	Embedding []float64 `json:"embedding"`
+	Embedding []float32 `json:"embedding"`
 }
 
 type (
@@ -274,7 +274,7 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 	})
 }
 
-func (c *Client) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+func (c *Client) CreateEmbedding(ctx context.Context, texts []string) (EmbeddingResponse, error) {
 	req := &EmbeddingRequest{
 		Content: texts,
 	}
@@ -283,9 +283,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, texts []string) ([][]float
 
 	err := c.do(ctx, http.MethodPost, "/embedding", req, &resp)
 
-	embeddings := convertEmbeddingsToFloat32(resp.Results)
-
-	return embeddings, err
+	return resp, err
 }
 
 func ExtractJSONFromBytes(input []byte) ([]byte, error) {
@@ -308,24 +306,4 @@ func ExtractJSONFromBytes(input []byte) ([]byte, error) {
 
 	// Return the cleaned JSON as byte slice
 	return raw, nil
-}
-
-// convertEmbeddingsToFloat32 takes a slice of EmbeddingData (as found in EmbeddingResponse.Results)
-// and converts each embedding into a slice of float32, returning a slice of slices of float32.
-func convertEmbeddingsToFloat32(data []EmbeddingData) [][]float32 {
-	// Preallocate result with the same number of embeddings (outer slice length)
-	result := make([][]float32, 0, len(data))
-
-	// Iterate through each EmbeddingData
-	for _, embeddingData := range data {
-		// Convert embedding from float64 to float32
-		innerSlice := make([]float32, len(embeddingData.Embedding))
-		for i, value := range embeddingData.Embedding {
-			innerSlice[i] = float32(value)
-		}
-
-		// Append the converted embedding to the result
-		result = append(result, innerSlice)
-	}
-	return result
 }
