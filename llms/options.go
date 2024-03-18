@@ -40,6 +40,9 @@ type CallOptions struct {
 	// PresencePenalty is the presence penalty for sampling.
 	PresencePenalty float64 `json:"presence_penalty"`
 
+	// JSONMode is a flag to enable JSON mode.
+	JSONMode bool `json:"json"`
+
 	// Function defitions to include in the request.
 	Functions []FunctionDefinition `json:"functions"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
@@ -193,5 +196,13 @@ func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 func WithFunctions(functions []FunctionDefinition) CallOption {
 	return func(o *CallOptions) {
 		o.Functions = functions
+	}
+}
+
+// WithJSONMode will add an option to set the response format to JSON.
+// This is useful for models that return structured data.
+func WithJSONMode() CallOption {
+	return func(o *CallOptions) {
+		o.JSONMode = true
 	}
 }

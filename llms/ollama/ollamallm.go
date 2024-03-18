@@ -97,11 +97,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 
+	format := o.options.format
+	if opts.JSONMode {
+		format = "json"
+	}
+
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
-		Format:   o.options.format,
+		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
 		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),

@@ -90,6 +90,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 	}
 
+	if opts.JSONMode {
+		req.ResponseFormat = openaiclient.ResponseFormatJSON
+	}
+
 	for _, fn := range opts.Functions {
 		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
 			Name:        fn.Name,

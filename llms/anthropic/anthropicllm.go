@@ -3,6 +3,7 @@ package anthropic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -71,9 +72,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
+	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", part.(llms.TextContent).Text)
 	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
 		Model:         opts.Model,
-		Prompt:        part.(llms.TextContent).Text,
+		Prompt:        prompt,
 		MaxTokens:     opts.MaxTokens,
 		StopWords:     opts.StopWords,
 		Temperature:   opts.Temperature,
