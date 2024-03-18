@@ -131,7 +131,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	resp, err := o.client.CreateEmbedding(ctx, texts)
-
 	if err != nil {
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
