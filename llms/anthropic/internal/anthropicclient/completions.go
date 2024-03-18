@@ -46,7 +46,7 @@ type errorMessage struct {
 func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 1000
+		payload.MaxTokens = 256
 	}
 
 	if len(payload.StopWords) == 0 {
