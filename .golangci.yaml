@@ -30,6 +30,8 @@ linters:
     - ireturn # disabling temporarily
 
 linters-settings:
+  cyclop:
+    max-complexity: 12
   funlen:
     lines: 90
   depguard:
