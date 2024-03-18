@@ -25,7 +25,6 @@ require (
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/longrunning v0.5.4 // indirect
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
@@ -176,6 +175,7 @@ require (
 require (
 	cloud.google.com/go/aiplatform v1.58.0
 	cloud.google.com/go/vertexai v0.6.0
+	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.1.2
@@ -188,6 +188,7 @@ require (
 	github.com/gocolly/colly v1.2.0
 	github.com/google/generative-ai-go v0.5.0
 	github.com/google/go-cmp v0.6.0
+	github.com/h0rv/go-watsonx v1.0.0
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/mattn/go-sqlite3 v1.14.17
