@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/llms/openai"
 )
@@ -16,11 +18,11 @@ var flagBackend = flag.String("backend", "openai", "backend to use")
 
 func main() {
 	flag.Parse()
-	llm, err := initBackend()
+	ctx := context.Background()
+	llm, err := initBackend(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
 	completion, err := llms.GenerateFromSinglePrompt(ctx,
 		llm,
 		"Who was first man to walk on the moon? Respond in json format, include `first_man` in response keys.",
@@ -34,7 +36,7 @@ func main() {
 	fmt.Println(completion)
 }
 
-func initBackend() (llms.Model, error) {
+func initBackend(ctx context.Context) (llms.Model, error) {
 	switch *flagBackend {
 	case "openai":
 		return openai.New()
@@ -42,6 +44,8 @@ func initBackend() (llms.Model, error) {
 		return ollama.New(ollama.WithModel("mistral"))
 	case "anthropic":
 		return anthropic.New(anthropic.WithModel("claude-2.1"))
+	case "googleai":
+		return googleai.New(ctx, googleai.WithAPIKey(os.Getenv("GOOGLE_AI_API_KEY")))
 	default:
 		return nil, fmt.Errorf("unknown backend: %s", *flagBackend)
 	}
