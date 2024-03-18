@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	chroma_go "github.com/amikos-tech/chroma-go"
+	chroma_go "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -18,7 +18,7 @@ func main() {
 	// Create a new Chroma vector store.
 	store, errNs := chroma.New(
 		chroma.WithChromaURL(os.Getenv("CHROMA_URL")),
-		chroma.WithOpenAiAPIKey(os.Getenv("OPENAI_API_KEY")),
+		chroma.WithOpenAIAPIKey(os.Getenv("OPENAI_API_KEY")),
 		chroma.WithDistanceFunction(chroma_go.COSINE),
 		chroma.WithNameSpace(uuid.New().String()),
 	)

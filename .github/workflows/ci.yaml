@@ -44,4 +44,7 @@ jobs:
       - name: Build
         run: go build -v ./...
       - name: Test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
         run: go test -v ./...

@@ -3,6 +3,7 @@ package anthropic
 import (
 	"context"
 	"errors"
+	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -34,7 +35,9 @@ func New(opts ...Option) (*LLM, error) {
 
 func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
-		token: os.Getenv(tokenEnvVarName),
+		token:      os.Getenv(tokenEnvVarName),
+		baseURL:    anthropicclient.DefaultBaseURL,
+		httpClient: http.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -45,7 +48,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model)
+	return anthropicclient.New(options.token, options.model, options.baseURL, options.httpClient)
 }
 
 // Call requests a completion for the given prompt.

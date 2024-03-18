@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 
-	chromago "github.com/amikos-tech/chroma-go"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -38,9 +39,9 @@ func TestChromaGoStoreRest(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromago.COSINE),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -60,15 +61,9 @@ func TestChromaGoStoreRest(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
-
-	rawCountry := fmt.Sprintf("%s", docs[0].Metadata["country"])
-	// TODO (noodnik2): why is the metadata (apparently being) surrounded by quotes??
-	country, err := strconv.Unquote(rawCountry)
+	country := docs[0].Metadata["country"]
 	require.NoError(t, err)
 	require.Equal(t, "japan", country)
-
-	// if the following fails, please revisit the stripping of the quotes (above)
-	require.NotEqual(t, rawCountry, country)
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
@@ -81,9 +76,9 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromago.COSINE),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -130,7 +125,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -175,7 +170,7 @@ func TestChromaAsRetriever(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -217,9 +212,9 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromago.COSINE),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -267,7 +262,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -342,7 +337,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	require.NoError(t, err)
 
 	s, newChromaErr := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithEmbedder(e),
 	)
@@ -424,7 +419,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -476,8 +471,9 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 			llm,
 			vectorstores.ToRetriever(s, 5),
 		),
-		"What color(s) was/were the lamp(s) beside the desk described as?",
+		"What are all the colors of the lamps beside the desk?",
 	)
+	result = strings.ToLower(result)
 	require.NoError(t, err)
 
 	require.Contains(t, result, "black", "expected black in result")
@@ -498,7 +494,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	s, err := chroma.New(
-		chroma.WithOpenAiAPIKey(openaiAPIKey),
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -568,12 +564,24 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		t.Skipf("Must set %s to run test", chroma.ChromaURLKeyEnvVarName)
+		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.24"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, chromaContainer.Terminate(context.Background()))
+		})
+
+		chromaURL, err = chromaContainer.RESTEndpoint(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get chroma container REST endpoint: %s", err)
+		}
 	}
 
-	openaiAPIKey := os.Getenv(chroma.OpenAiAPIKeyEnvVarName)
+	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
-		t.Skipf("Must set %s to run test", chroma.OpenAiAPIKeyEnvVarName)
+		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
 	}
 
 	return chromaURL, openaiAPIKey

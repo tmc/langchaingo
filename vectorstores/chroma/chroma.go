@@ -7,7 +7,7 @@ import (
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
-	chromaopenapi "github.com/amikos-tech/chroma-go/swagger"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -26,16 +26,17 @@ var (
 
 // Store is a wrapper around the chromaGo API and client.
 type Store struct {
-	client           *chromago.Client
-	collection       *chromago.Collection
-	distanceFunction chromago.DistanceFunction
-	chromaURL        string
-	openaiAPIKey     string
+	client             *chromago.Client
+	collection         *chromago.Collection
+	distanceFunction   chromatypes.DistanceFunction
+	chromaURL          string
+	openaiAPIKey       string
+	openaiOrganization string
 
 	nameSpace    string
 	nameSpaceKey string
 	embedder     embeddings.Embedder
-	includes     []chromago.QueryEnum
+	includes     []chromatypes.QueryEnum
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -49,28 +50,30 @@ func New(opts ...Option) (Store, error) {
 	}
 
 	// create the client connection and confirm that we can access the server with it
-	configuration := chromaopenapi.NewConfiguration()
-	configuration.Servers = chromaopenapi.ServerConfigurations{
-		{
-			URL:         s.chromaURL,
-			Description: "Chromadb server url for this store",
-		},
+	chromaClient, err := chromago.NewClient(s.chromaURL)
+	if err != nil {
+		return s, err
 	}
-	chromaClient := &chromago.Client{
-		ApiClient: chromaopenapi.NewAPIClient(configuration),
-	}
+
 	if _, errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
 		return s, errHb
 	}
 	s.client = chromaClient
 
-	var embeddingFunction chromago.EmbeddingFunction
+	var embeddingFunction chromatypes.EmbeddingFunction
 	if s.embedder != nil {
 		// inject user's embedding function, if provided
 		embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
 	} else {
 		// otherwise use standard langchaingo OpenAI embedding function
-		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
+		var options []openai.Option
+		if s.openaiOrganization != "" {
+			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
+		}
+		embeddingFunction, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
+		if err != nil {
+			return s, err
+		}
 	}
 
 	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,

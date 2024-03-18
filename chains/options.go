@@ -205,6 +205,7 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	if opts.repetitionPenaltySet {
 		chainCallOption = append(chainCallOption, llms.WithRepetitionPenalty(opts.RepetitionPenalty))
 	}
+	chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
 
 	return chainCallOption
 }

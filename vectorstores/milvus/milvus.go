@@ -145,7 +145,7 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 		},
 	}
 
-	err := s.client.CreateCollection(ctx, s.schema, s.shardNum)
+	err := s.client.CreateCollection(ctx, s.schema, s.shardNum, client.WithMetricsType(s.metricType))
 	if err != nil {
 		return err
 	}
