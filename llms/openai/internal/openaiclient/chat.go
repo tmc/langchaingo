@@ -53,9 +53,6 @@ type ResponseFormat struct {
 	Type string `json:"type"`
 }
 
-// ResponseFormatJSON is the JSON response format.
-var ResponseFormatJSON = ResponseFormat{Type: "json_object"}
-
 // ChatMessage is a message in a chat request.
 type ChatMessage struct { //nolint:musttag
 	// The role of the author of this message. One of system, user, or assistant.

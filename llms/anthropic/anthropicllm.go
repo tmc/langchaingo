@@ -72,7 +72,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
-	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", part.(llms.TextContent).Text)
+	partText, ok := part.(llms.TextContent)
+	if !ok {
+		return nil, fmt.Errorf("unexpected message type: %T", part)
+	}
+	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
 	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
 		Model:         opts.Model,
 		Prompt:        prompt,

@@ -45,13 +45,11 @@ type options struct {
 // Option is a functional option for the OpenAI client.
 type Option func(*options)
 
-// ResponseFormat is the format of the response.
-type ResponseFormat struct {
-	Type string `json:"type"`
-}
+// ResponseFormat is the response format for the OpenAI client.
+type ResponseFormat = openaiclient.ResponseFormat
 
 // ResponseFormatJSON is the JSON response format.
-var ResponseFormatJSON = ResponseFormat{Type: "json_object"}
+var ResponseFormatJSON = ResponseFormat{Type: "json_object"} //nolint:gochecknoglobals
 
 // WithToken passes the OpenAI API token to the client. If not set, the token
 // is read from the OPENAI_API_KEY environment variable.
