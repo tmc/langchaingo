@@ -104,7 +104,6 @@ func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
 }
 
-func (c *Client) buildURL(suffix string, model string) string {
-	// open ai implement:
+func (c *Client) buildURL(suffix string) string {
 	return fmt.Sprintf("%s%s", c.baseURL, suffix)
 }

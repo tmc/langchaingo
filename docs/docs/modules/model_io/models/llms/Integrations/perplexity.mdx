@@ -1,0 +1,20 @@
+---
+sidebar_label: Perplexity
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExamplePerplexity from "@examples/perplexity-completion-example/perplexity_completion_example.go";
+
+# Perplexity.AI 
+
+For use perplexity ou need set PERPLEXITY_API_KEY or use WithToken 
+
+   ```go
+    model, err := perplexity.New(perplexity.WithToken(apiToken))
+   ```
+
+<CodeBlock language="go">{ExamplePerplexity}</CodeBlock>
+
+
+
+
