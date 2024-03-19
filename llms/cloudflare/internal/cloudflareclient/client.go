@@ -5,8 +5,12 @@ import (
 	"net/http"
 )
 
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type Client struct {
-	httpClient         *http.Client
+	httpClient         httpClient
 	accountID          string
 	token              string
 	baseURL            string
@@ -16,7 +20,7 @@ type Client struct {
 	bearerToken        string
 }
 
-func NewClient(client *http.Client, accountID, baseURL, token, modelName, embeddingModelName string) *Client {
+func NewClient(client httpClient, accountID, baseURL, token, modelName, embeddingModelName string) *Client {
 	if client == nil {
 		client = &http.Client{}
 	}
