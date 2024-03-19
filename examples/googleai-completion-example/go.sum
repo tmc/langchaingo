@@ -82,8 +82,8 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/tmc/langchaingo v0.1.6-alpha.1 h1:rFlsbt5gsfza3Qn6NXQ3uCJ32SNwCcCeVBzWki6lvnI=
-github.com/tmc/langchaingo v0.1.6-alpha.1/go.mod h1:SvaiqXatn+ILC2Wtgpug3qPmfZwJwag8w4jKG+6KUWY=
+github.com/tmc/langchaingo v0.1.6 h1:n7sce0/ougio+wbYCQ84IX1tLuaUC+mKO6WKttPVRWk=
+github.com/tmc/langchaingo v0.1.6/go.mod h1:lPpWPoAud+yQowJNRZhdtRbQCSHKF+jRxd0gU58GDHU=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=

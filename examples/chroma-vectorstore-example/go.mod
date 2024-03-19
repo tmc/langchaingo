@@ -7,7 +7,7 @@ toolchain go1.21.4
 require (
 	github.com/amikos-tech/chroma-go v0.1.2
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.6-alpha.1
+	github.com/tmc/langchaingo v0.1.6
 )
 
 require (

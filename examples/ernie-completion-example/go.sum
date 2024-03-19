@@ -38,8 +38,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/tmc/langchaingo v0.1.6-alpha.1 h1:rFlsbt5gsfza3Qn6NXQ3uCJ32SNwCcCeVBzWki6lvnI=
-github.com/tmc/langchaingo v0.1.6-alpha.1/go.mod h1:SvaiqXatn+ILC2Wtgpug3qPmfZwJwag8w4jKG+6KUWY=
+github.com/tmc/langchaingo v0.1.6 h1:n7sce0/ougio+wbYCQ84IX1tLuaUC+mKO6WKttPVRWk=
+github.com/tmc/langchaingo v0.1.6/go.mod h1:lPpWPoAud+yQowJNRZhdtRbQCSHKF+jRxd0gU58GDHU=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.46.1 h1:SpGay3w+nEwMpfVnbqOLH5gY52/foP8RE8UzTZ1pdSE=
