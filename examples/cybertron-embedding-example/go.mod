@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/chewxy/math32 v1.10.1
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.6
+	github.com/tmc/langchaingo v0.1.7
 )
 
 require (

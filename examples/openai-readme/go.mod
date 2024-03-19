@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/openai-readme
 
 go 1.21
 
-require github.com/tmc/langchaingo v0.1.6
+require github.com/tmc/langchaingo v0.1.7
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

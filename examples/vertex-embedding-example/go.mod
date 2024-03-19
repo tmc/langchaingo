@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/vertex-embedding-example
 
 go 1.21.1
 
-require github.com/tmc/langchaingo v0.1.6
+require github.com/tmc/langchaingo v0.1.7
 
 require (
 	cloud.google.com/go v0.112.0 // indirect
