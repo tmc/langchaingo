@@ -29,6 +29,11 @@ lint-deps:
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.1; \
 	}
 
+.PHONY: docs
+docs:
+	@echo "Generating documentation..."
+	$(MAKE) -C docs build
+
 .PHONY: test-race
 test-race:
 	go run test -race ./...
