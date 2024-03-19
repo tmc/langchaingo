@@ -40,6 +40,8 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
+	// required when use wisper
+	language string
 }
 
 // Option is a functional option for the OpenAI client.
@@ -126,5 +128,12 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WithLanguage allows setting a custom language.
+func WithLanguage(language string) Option {
+	return func(opts *options) {
+		opts.language = language
 	}
 }
