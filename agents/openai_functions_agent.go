@@ -33,7 +33,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -132,7 +132,7 @@ func (o *OpenAIFunctionsAgent) GetOutputKeys() []string {
 	return []string{o.OutputKey}
 }
 
-func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate {
+func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	messageFormatters := []prompts.MessageFormatter{prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil)}
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
