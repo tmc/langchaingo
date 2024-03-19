@@ -44,9 +44,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-//
-//nolint:goerr113
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -76,7 +74,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		chatMsgs = append(chatMsgs, msg)
 	}
-
 	req := &openaiclient.ChatRequest{
 		Model:                opts.Model,
 		StopWords:            opts.StopWords,
@@ -89,7 +86,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		PresencePenalty:      opts.PresencePenalty,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 	}
-
+	if opts.JSONMode {
+		req.ResponseFormat = ResponseFormatJSON
+	}
 	for _, fn := range opts.Functions {
 		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
 			Name:        fn.Name,
