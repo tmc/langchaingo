@@ -33,7 +33,7 @@ type options struct {
 	apiType      APIType
 	httpClient   openaiclient.Doer
 
-	responseFormat ResponseFormat
+	responseFormat *ResponseFormat
 
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion     string
@@ -49,7 +49,7 @@ type Option func(*options)
 type ResponseFormat = openaiclient.ResponseFormat
 
 // ResponseFormatJSON is the JSON response format.
-var ResponseFormatJSON = ResponseFormat{Type: "json_object"} //nolint:gochecknoglobals
+var ResponseFormatJSON = &ResponseFormat{Type: "json_object"} //nolint:gochecknoglobals
 
 // WithToken passes the OpenAI API token to the client. If not set, the token
 // is read from the OPENAI_API_KEY environment variable.
@@ -123,7 +123,7 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 }
 
 // WithResponseFormat allows setting a custom response format.
-func WithResponseFormat(responseFormat ResponseFormat) Option {
+func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
 	}
