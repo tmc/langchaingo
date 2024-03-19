@@ -61,6 +61,7 @@ func WithToken(token string) Option {
 
 // WithModel passes the OpenAI model to the client. If not set, the model
 // is read from the OPENAI_MODEL environment variable.
+// Required when ApiType is Azure.
 func WithModel(model string) Option {
 	return func(opts *options) {
 		opts.model = model
