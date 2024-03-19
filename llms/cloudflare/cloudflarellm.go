@@ -65,11 +65,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// We have to convert it to a format Cloudflare understands: []Message, which
 	// has a sequence of Message, each of which has a role and content - single
 	// text + potential images.
-	chatMsgs := []cloudflareclient.Message{
-		{
+	chatMsgs := []cloudflareclient.Message{}
+
+	if o.options.system != "" {
+		chatMsgs = append(chatMsgs, cloudflareclient.Message{
 			Role:    cloudflareclient.RoleSystem,
 			Content: o.options.system,
-		},
+		})
 	}
 
 	for i := range messages {
@@ -93,8 +95,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				foundText = true
 				text = pt.Text
 			case llms.BinaryContent:
+				return nil, errors.New("only supports Text right now")
 			default:
-				return nil, errors.New("only support Text and BinaryContent parts right now")
+				return nil, errors.New("only supports Text right now")
 			}
 		}
 
@@ -105,8 +108,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	stream := func(b bool) *bool { return &b }(opts.StreamingFunc != nil)
 
 	res, err := o.client.GenerateContent(ctx, &cloudflareclient.GenerateContentRequest{
-		Messages: chatMsgs,
-	}, *stream)
+		Messages:      chatMsgs,
+		Stream:        *stream,
+		StreamingFunc: opts.StreamingFunc,
+	})
 	if err != nil {
 		return nil, err
 	}
