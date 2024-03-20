@@ -40,7 +40,7 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
-	// required when use wisper
+	// required when use whisper model
 	language string
 }
 
@@ -132,6 +132,7 @@ func WithResponseFormat(responseFormat ResponseFormat) Option {
 }
 
 // WithLanguage allows setting a custom language.
+// doc for language: https://platform.openai.com/docs/guides/speech-to-text/supported-languages
 func WithLanguage(language string) Option {
 	return func(opts *options) {
 		opts.language = language
