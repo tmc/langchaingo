@@ -169,6 +169,9 @@ func (c *Client) buildURL(suffix string, model string) string {
 	if IsAzure(c.apiType) {
 		return c.buildAzureURL(suffix, model)
 	}
+	if IsPerplexity(c.apiType) {
+		c.baseURL = "https://api.perplexity.ai"
+	}
 
 	// open ai implement:
 	return fmt.Sprintf("%s%s", c.baseURL, suffix)

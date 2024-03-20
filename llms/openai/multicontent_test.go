@@ -165,9 +165,8 @@ func TestFunctionCall(t *testing.T) {
 func TestWithPerplexity(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t,
-		WithToken("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"),
+		WithToken(os.Getenv("PERPLEXITY_API_KEY")),
 		WithAPIType(APITypePerplexity),
-		WithBaseURL("https://api.perplexity.com"),
 		WithModel("mistral-7b-instruct"))
 
 	parts := []llms.ContentPart{
