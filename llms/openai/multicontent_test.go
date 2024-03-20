@@ -162,6 +162,33 @@ func TestFunctionCall(t *testing.T) {
 	assert.NotNil(t, c1.FuncCall)
 }
 
+func TestWithPerplexity(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t,
+		WithToken("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"),
+		WithAPIType(APITypePerplexity),
+		WithBaseURL("https://api.perplexity.com"),
+		WithModel("mistral-7b-instruct"))
+
+	parts := []llms.ContentPart{
+		llms.TextPart("I'm a pomeranian"),
+		llms.TextPart("What kind of mammal am I?"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
+}
+
 func showResponse(rsp any) string { //nolint:golint,unused
 	b, err := json.MarshalIndent(rsp, "", "  ")
 	if err != nil {
