@@ -7,10 +7,10 @@ import ExamplePerplexity from "@examples/perplexity-completion-example/perplexit
 
 # Perplexity.AI 
 
-For use perplexity ou need set PERPLEXITY_API_KEY or use WithToken 
+For use perplexity ou need use WithToken 
 
    ```go
-    model, err := perplexity.New(perplexity.WithToken(apiToken))
+    model, err := openai.New(openai.WithToken(apiToken),openai.WithAPIType(openai.APITypePerplexity))
    ```
 
 <CodeBlock language="go">{ExamplePerplexity}</CodeBlock>

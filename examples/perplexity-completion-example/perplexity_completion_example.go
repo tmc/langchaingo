@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/perplexity"
+	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main() {
-	llm, err := perplexity.New()
+	llm, err := openai.New(openai.WithAPIType(openai.APITypePerplexity))
 	if err != nil {
 		log.Fatal(err)
 	}
