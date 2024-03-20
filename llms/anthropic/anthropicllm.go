@@ -21,7 +21,8 @@ var (
 )
 
 const (
-	RoleUser = "user"
+	RoleUser      = "user"
+	RoleAssistant = "assistant"
 )
 
 type LLM struct {
@@ -114,6 +115,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			case schema.ChatMessageTypeHuman:
 				chatMessages = append(chatMessages, &anthropicclient.ChatMessage{
 					Role:    RoleUser,
+					Content: msg.Parts[0].(llms.TextContent).Text,
+				})
+			case schema.ChatMessageTypeAI:
+				chatMessages = append(chatMessages, &anthropicclient.ChatMessage{
+					Role:    RoleAssistant,
 					Content: msg.Parts[0].(llms.TextContent).Text,
 				})
 			default:
