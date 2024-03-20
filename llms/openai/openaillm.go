@@ -154,6 +154,8 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 // Transcription is a method of the Client type that performs transcription of an audio file.
 // It takes the execution context, the path of the audio file, and the audio temperature as parameters.
 // It returns the transcription of the audio as a byte array and a possible error if one occurs.
+//
+//	Audio support is not available for OpenAI. https://help.openai.com/en/articles/7031512-whisper-audio-api-faq
 func (o *LLM) TranscribeAudio(ctx context.Context, audioFilePath string, options ...llms.CallOption) ([]byte, error) {
 	opts := llms.CallOptions{}
 	for _, opt := range options {
