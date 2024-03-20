@@ -149,7 +149,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
-				"TotalTokesn":      resp.EvalCount + resp.PromptEvalCount,
+				"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
 			},
 		},
 	}
