@@ -175,6 +175,7 @@ func TestTranscription(t *testing.T) {
 
 	assert.NotEmpty(t, rsp)
 }
+
 func showResponse(rsp any) string { //nolint:golint,unused
 	b, err := json.MarshalIndent(rsp, "", "  ")
 	if err != nil {

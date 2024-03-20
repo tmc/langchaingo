@@ -148,7 +148,6 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 
 // Transcription with audio file
 func (c *Client) Transcription(ctx context.Context, audioFilePath string, temperature float64) ([]byte, error) {
-
 	res, err := c.uploadAudioAndGetTranscription(ctx, audioFilePath, c.language, temperature)
 	if err != nil {
 		return nil, err

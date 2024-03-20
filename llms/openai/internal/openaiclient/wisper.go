@@ -17,7 +17,6 @@ type TranscribeAudioResponse struct {
 }
 
 func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePath, language string, temperature float64) ([]byte, error) {
-
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
 	file, errFile1 := os.Open(audioFilePath)
@@ -48,7 +47,6 @@ func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePa
 
 	client := &http.Client{}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/audio/transcriptions", payload)
-
 	if err != nil {
 		return nil, err
 	}
