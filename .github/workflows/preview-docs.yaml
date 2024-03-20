@@ -2,11 +2,7 @@ name: Preview Documentation Site
 
 on:
   pull_request:
-    paths:
-      - docs/**
   push:
-    paths:
-      - docs/**
     branches:
       - main
 
