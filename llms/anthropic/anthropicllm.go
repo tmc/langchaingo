@@ -44,8 +44,6 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		token:      os.Getenv(tokenEnvVarName),
 		baseURL:    anthropicclient.DefaultBaseURL,
 		httpClient: http.DefaultClient,
-		// This is true to maintain backwards compatibility
-		useLegacyTextCompletionApi: true,
 	}
 
 	for _, opt := range opts {
@@ -124,13 +122,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 
 		result, err := o.client.CreateMessagesCompletion(ctx, &anthropicclient.MessagesCompletionRequest{
-			Model:        opts.Model,
-			Messages:     chatMessages,
-			SystemPrompt: systemPrompt,
-			MaxTokens:    opts.MaxTokens,
-			StopWords:    opts.StopWords,
-			Temperature:  opts.Temperature,
-			TopP:         opts.TopP,
+			Model:         opts.Model,
+			Messages:      chatMessages,
+			SystemPrompt:  systemPrompt,
+			MaxTokens:     opts.MaxTokens,
+			StopWords:     opts.StopWords,
+			Temperature:   opts.Temperature,
+			TopP:          opts.TopP,
+			StreamingFunc: opts.StreamingFunc,
 		})
 		if err != nil {
 			if o.CallbacksHandler != nil {

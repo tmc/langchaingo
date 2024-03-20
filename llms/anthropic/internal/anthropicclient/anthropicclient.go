@@ -70,6 +70,10 @@ type MessagesCompletionRequest struct {
 	MaxTokens    int            `json:"max_tokens,omitempty"`
 	StopWords    []string       `json:"stop_sequences,omitempty"`
 	TopP         float64        `json:"top_p,omitempty"`
+
+	// StreamingFunc is a function to be called for each chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 // CompletionRequest is a request to create a completion.
@@ -94,13 +98,14 @@ type Completion struct {
 
 func (c *Client) CreateMessagesCompletion(ctx context.Context, r *MessagesCompletionRequest) (*MessagesCompletionResponsePayload, error) {
 	resp, err := c.createMessagesCompletion(ctx, &messagesCompletionPayload{
-		Model:        r.Model,
-		Messages:     r.Messages,
-		SystemPrompt: r.SystemPrompt,
-		Temperature:  r.Temperature,
-		MaxTokens:    r.MaxTokens,
-		StopWords:    r.StopWords,
-		TopP:         r.TopP,
+		Model:         r.Model,
+		Messages:      r.Messages,
+		SystemPrompt:  r.SystemPrompt,
+		Temperature:   r.Temperature,
+		MaxTokens:     r.MaxTokens,
+		StopWords:     r.StopWords,
+		TopP:          r.TopP,
+		StreamingFunc: r.StreamingFunc,
 	})
 	if err != nil {
 		return nil, err
@@ -133,4 +138,6 @@ func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("x-api-key", c.token)
 	// TODO: expose version as a option/parameter
 	req.Header.Set("anthropic-version", "2023-06-01")
+	// TODO: should we set this?
+	// req.Header.Set("anthropic-beta", "messages-2023-12-15")
 }

@@ -1,12 +1,15 @@
 package anthropicclient
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 )
 
 type ChatMessage struct {
@@ -22,11 +25,9 @@ type messagesCompletionPayload struct {
 	MaxTokens    int            `json:"max_tokens,omitempty"`
 	TopP         float64        `json:"top_p,omitempty"`
 	StopWords    []string       `json:"stop_sequences,omitempty"`
-	// NOTE: Currently not supported
-	//Stream       bool          `json:"stream,omitempty"`
 
-	// NOTE: Currently not supported
-	//StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	Stream        bool                                          `json:"stream,omitempty"`
+	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 type MessagesCompletionResponsePayload struct {
@@ -46,6 +47,43 @@ type MessagesCompletionResponsePayload struct {
 	} `json:"usage,omitempty"`
 }
 
+type StreamPayload struct {
+	Type         string       `json:"type"`
+	Message      *Message     `json:"message,omitempty"`
+	ContentBlock ContentBlock `json:"content_block,omitempty"`
+	Index        int          `json:"index,omitempty"`
+	Delta        Delta        `json:"delta,omitempty"`
+	Usage        Usage        `json:"usage"`
+}
+
+type Message struct {
+	ID         string   `json:"id"`
+	Type       string   `json:"type"`
+	Role       string   `json:"role"`
+	Content    []string `json:"content"`
+	Model      string   `json:"model"`
+	StopReason string   `json:"stop_reason"`
+	Usage      Usage    `json:"usage"`
+}
+
+type ContentBlock struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+type Delta struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+
+	StopSequence string `json:"stop_sequence,omitempty"`
+	StopReason   string `json:"stop_reason,omitempty"`
+}
+
+type Usage struct {
+	InputTokens  int `json:"input_tokens"`
+	OutputTokens int `json:"output_tokens"`
+}
+
 func (c *Client) setMessagesCompletionDefaults(payload *messagesCompletionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
@@ -59,7 +97,6 @@ func (c *Client) setMessagesCompletionDefaults(payload *messagesCompletionPayloa
 	switch {
 	// Prefer the model specified in the payload.
 	case payload.Model != "":
-
 	// If no model is set in the payload, take the one specified in the client.
 	case c.Model != "":
 		payload.Model = c.Model
@@ -67,10 +104,9 @@ func (c *Client) setMessagesCompletionDefaults(payload *messagesCompletionPayloa
 	default:
 		payload.Model = defaultCompletionModel
 	}
-	// TODO: support streaming
-	// if payload.StreamingFunc != nil {
-	// 	payload.Stream = true
-	// }
+	if payload.StreamingFunc != nil {
+		payload.Stream = true
+	}
 }
 
 // nolint:lll
@@ -115,11 +151,10 @@ func (c *Client) createMessagesCompletion(ctx context.Context, payload *messages
 
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
-	// TODO: Handle streaming
-	// if payload.StreamingFunc != nil {
-	// 	// Read chunks
-	// 	return parseStreamingMessagesCompletionResponse(ctx, r, payload)
-	// }
+	if payload.StreamingFunc != nil {
+		// Read chunks
+		return parseStreamingMessagesCompletionResponse(ctx, r, payload)
+	}
 
 	// Parse response
 	var response MessagesCompletionResponsePayload
@@ -130,49 +165,69 @@ func (c *Client) createMessagesCompletion(ctx context.Context, payload *messages
 	return &response, nil
 }
 
-// TODO: Support streaming
-// func parseStreamingMessagesCompletionResponse(ctx context.Context, r *http.Response, payload *messagesCompletionPayload) (*MessagesCompletionResponsePayload, error) { // nolint:lll
-// 	scanner := bufio.NewScanner(r.Body)
-// 	responseChan := make(chan *MessagesCompletionResponsePayload)
-// 	go func() {
-// 		defer close(responseChan)
-// 		for scanner.Scan() {
-// 			line := scanner.Text()
-// 			if line == "" {
-// 				continue
-// 			}
-// 			if !strings.HasPrefix(line, "data:") {
-// 				continue
-// 			}
-// 			data := strings.TrimPrefix(line, "data: ")
-// 			streamPayload := &MessagesCompletionResponsePayload{}
-// 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
-// 			if err != nil {
-// 				log.Fatalf("failed to decode stream payload: %v", err)
-// 			}
-// 			responseChan <- streamPayload
-// 		}
-// 		if err := scanner.Err(); err != nil {
-// 			log.Println("issue scanning response:", err)
-// 		}
-// 	}()
-// 	// Parse response
-// 	response := MessagesCompletionResponsePayload{}
-//
-// 	var lastResponse *MessagesCompletionResponsePayload
-// 	for streamResponse := range responseChan {
-// 		response.Completion += streamResponse.Completion
-// 		if payload.StreamingFunc != nil {
-// 			err := payload.StreamingFunc(ctx, []byte(streamResponse.Completion))
-// 			if err != nil {
-// 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
-// 			}
-// 		}
-// 		lastResponse = streamResponse
-// 	}
-// 	response.Model = lastResponse.Model
-// 	response.LogID = lastResponse.LogID
-// 	response.Stop = lastResponse.Stop
-// 	response.StopReason = lastResponse.StopReason
-// 	return &response, nil
-// }
+func parseStreamingMessagesCompletionResponse(ctx context.Context, r *http.Response, payload *messagesCompletionPayload) (*MessagesCompletionResponsePayload, error) {
+	scanner := bufio.NewScanner(r.Body)
+	responseChan := make(chan *StreamPayload)
+
+	go func() {
+		defer close(responseChan)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if line == "" {
+				continue
+			}
+			if !strings.HasPrefix(line, "data:") {
+				continue
+			}
+			data := strings.TrimPrefix(line, "data: ")
+			streamPayload := &StreamPayload{}
+			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
+			if err != nil {
+				log.Fatalf("failed to decode stream payload: %v", err)
+			}
+			responseChan <- streamPayload
+		}
+		if err := scanner.Err(); err != nil {
+			log.Println("issue scanning response:", err)
+		}
+	}()
+
+	// Parse response
+	response := MessagesCompletionResponsePayload{}
+	var content string
+	for streamPayload := range responseChan {
+		switch streamPayload.Type {
+		case "message_start":
+			response.Id = streamPayload.Message.ID
+			response.Type = streamPayload.Message.Type
+			response.Role = streamPayload.Message.Role
+			response.Model = streamPayload.Message.Model
+			response.StopReason = streamPayload.Message.StopReason
+			response.Usage.InputTokens = streamPayload.Message.Usage.InputTokens
+		case "content_block_delta":
+			content += streamPayload.Delta.Text
+
+			payload.StreamingFunc(ctx, []byte(streamPayload.Delta.Text))
+		case "message_delta":
+			if streamPayload.Delta.StopReason != "" {
+				response.StopReason = streamPayload.Delta.StopReason
+			}
+			if streamPayload.Usage.OutputTokens != 0 {
+				response.Usage.OutputTokens = streamPayload.Usage.OutputTokens
+			}
+		}
+
+	}
+
+	response.Content = []struct {
+		Type string `json:"type,omitempty"`
+		Text string `json:"text,omitempty"`
+	}{
+		{
+			Type: "text",
+			Text: content,
+		},
+	}
+
+	return &response, nil
+}

@@ -49,9 +49,9 @@ func WithHTTPClient(client anthropicclient.Doer) Option {
 	}
 }
 
-// WithMessagesCompletionAPI allows setting the client to use the new messages completion API.
-func WithMessagesCompletionAPI() Option {
+// WithLegacyCompletionAPI allows setting the client to use the legacy completion API.
+func WithLegacyCompletionAPI() Option {
 	return func(opts *options) {
-		opts.useLegacyTextCompletionApi = false
+		opts.useLegacyTextCompletionApi = true
 	}
 }
