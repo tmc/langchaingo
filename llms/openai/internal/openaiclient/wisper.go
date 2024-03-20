@@ -3,15 +3,20 @@ package openaiclient
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 )
 
-func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePath, model, responseFormat, language string, temperature string) ([]byte, error) {
+type TranscribeAudioResponse struct {
+	Text string `json:"text"`
+}
+
+func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePath, language string, temperature float64) ([]byte, error) {
 
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
@@ -34,7 +39,7 @@ func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePa
 
 	_ = writer.WriteField("model", c.Model)
 	_ = writer.WriteField("response_format", "json")
-	_ = writer.WriteField("temperature", temperature)
+	_ = writer.WriteField("temperature", fmt.Sprintf("%f", temperature))
 	_ = writer.WriteField("language", language)
 	err := writer.Close()
 	if err != nil {
@@ -42,12 +47,12 @@ func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePa
 	}
 
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/audio/transcriptions", c.Model), payload)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.openai.com/v1/audio/transcriptions", payload)
 
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Accept", "application/json")
+	c.setHeaders(req)
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	res, err := client.Do(req)
@@ -56,9 +61,14 @@ func (c *Client) uploadAudioAndGetTranscription(ctx context.Context, audioFilePa
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
-	return body, nil
+	var transcriptionResponse TranscribeAudioResponse
+	err = json.Unmarshal(body, &transcriptionResponse)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(transcriptionResponse.Text), nil
 }

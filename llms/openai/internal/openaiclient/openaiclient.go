@@ -36,6 +36,7 @@ type Client struct {
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion      string
 	embeddingsModel string
+	language        string
 }
 
 // Option is an option for the OpenAI client.
@@ -48,7 +49,7 @@ type Doer interface {
 
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
-	apiType APIType, apiVersion string, httpClient Doer, embeddingsModel string,
+	apiType APIType, apiVersion string, httpClient Doer, embeddingsModel string, language string,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
@@ -60,6 +61,7 @@ func New(token string, model string, baseURL string, organization string,
 		apiType:         apiType,
 		apiVersion:      apiVersion,
 		httpClient:      httpClient,
+		language:        language,
 	}
 
 	for _, opt := range opts {
@@ -142,6 +144,17 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 		return nil, ErrEmptyResponse
 	}
 	return resp, nil
+}
+
+// Transcription with audio file
+func (c *Client) Transcription(ctx context.Context, audioFilePath string, temperature float64) ([]byte, error) {
+
+	res, err := c.uploadAudioAndGetTranscription(ctx, audioFilePath, c.language, temperature)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func IsAzure(apiType APIType) bool {

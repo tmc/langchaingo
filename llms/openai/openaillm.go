@@ -150,3 +150,12 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 	return embeddings, nil
 }
+
+// Transcription with audio file
+func (o *LLM) TranscribeAudio(ctx context.Context, audioFilePath string, options ...llms.CallOption) ([]byte, error) {
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+	return o.client.Transcription(ctx, audioFilePath, opts.Temperature)
+}
