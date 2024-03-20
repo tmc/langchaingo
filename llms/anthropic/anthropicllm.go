@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -17,6 +18,12 @@ var (
 	ErrMissingToken  = errors.New("missing the Anthropic API key, set it in the ANTHROPIC_API_KEY environment variable")
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+)
+
+const (
+	RoleUser      = "user"
+	RoleAssistant = "assistant"
+	RoleSystem    = "system"
 )
 
 type LLM struct {
@@ -36,9 +43,10 @@ func New(opts ...Option) (*LLM, error) {
 
 func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
-		token:      os.Getenv(tokenEnvVarName),
-		baseURL:    anthropicclient.DefaultBaseURL,
-		httpClient: http.DefaultClient,
+		token:             os.Getenv(tokenEnvVarName),
+		baseURL:           anthropicclient.DefaultBaseURL,
+		httpClient:        http.DefaultClient,
+		useCompletionsAPI: true,
 	}
 
 	for _, opt := range opts {
@@ -69,36 +77,93 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	// Assume we get a single text message
-	msg0 := messages[0]
-	part := msg0.Parts[0]
-	partText, ok := part.(llms.TextContent)
-	if !ok {
-		return nil, fmt.Errorf("unexpected message type: %T", part)
-	}
-	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
-	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
-		Model:         opts.Model,
-		Prompt:        prompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
-		StreamingFunc: opts.StreamingFunc,
-	})
-	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
+	if o.client.UseCompletionsAPI {
+		// Assume we get a single text message
+		msg0 := messages[0]
+		part := msg0.Parts[0]
+		partText, ok := part.(llms.TextContent)
+		if !ok {
+			return nil, fmt.Errorf("unexpected message type: %T", part)
 		}
-		return nil, err
-	}
+		prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
+		result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
+			Model:         opts.Model,
+			Prompt:        prompt,
+			MaxTokens:     opts.MaxTokens,
+			StopWords:     opts.StopWords,
+			Temperature:   opts.Temperature,
+			TopP:          opts.TopP,
+			StreamingFunc: opts.StreamingFunc,
+		})
+		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
+			return nil, err
+		}
 
-	resp := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{
-				Content: result.Text,
+		resp := &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{
+				{
+					Content: result.Text,
+				},
 			},
-		},
+		}
+		return resp, nil
+	} else {
+		chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
+		systemPrompt := ""
+		for _, msg := range messages {
+			switch msg.Role {
+			case schema.ChatMessageTypeSystem:
+				systemPrompt += msg.Parts[0].(llms.TextContent).Text
+			case schema.ChatMessageTypeHuman:
+				chatMessages = append(chatMessages, anthropicclient.ChatMessage{
+					Role:    RoleUser,
+					Content: msg.Parts[0].(llms.TextContent).Text,
+				})
+			case schema.ChatMessageTypeAI:
+				chatMessages = append(chatMessages, anthropicclient.ChatMessage{
+					Role:    RoleAssistant,
+					Content: msg.Parts[0].(llms.TextContent).Text,
+				})
+			default:
+				return nil, fmt.Errorf("role %v not supported", msg.Role)
+			}
+		}
+
+		result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
+			Model:         opts.Model,
+			Messages:      chatMessages,
+			System:        systemPrompt,
+			MaxTokens:     opts.MaxTokens,
+			StopWords:     opts.StopWords,
+			Temperature:   opts.Temperature,
+			TopP:          opts.TopP,
+			StreamingFunc: opts.StreamingFunc,
+		})
+		if err != nil {
+			if o.CallbacksHandler != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			}
+			return nil, err
+		}
+
+		choices := make([]*llms.ContentChoice, len(result.Content))
+		for i, content := range result.Content {
+			choices[i] = &llms.ContentChoice{
+				Content:    content.Text,
+				StopReason: result.StopReason,
+				GenerationInfo: map[string]any{
+					"InputTokens":  result.Usage.InputTokens,
+					"OutputTokens": result.Usage.OutputTokens,
+				},
+			}
+		}
+
+		resp := &llms.ContentResponse{
+			Choices: choices,
+		}
+		return resp, nil
 	}
-	return resp, nil
 }

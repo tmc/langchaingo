@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-const (
-	defaultCompletionModel = "claude-1"
-)
-
 type completionPayload struct {
 	Model       string   `json:"model"`
 	Prompt      string   `json:"prompt"`
@@ -34,13 +30,6 @@ type CompletionResponsePayload struct {
 	Model      string `json:"model,omitempty"`
 	Stop       string `json:"stop,omitempty"`
 	StopReason string `json:"stop_reason,omitempty"`
-}
-
-type errorMessage struct {
-	Error struct {
-		Message string `json:"message"`
-		Type    string `json:"type"`
-	} `json:"error"`
 }
 
 func (c *Client) setCompletionDefaults(payload *completionPayload) {
@@ -62,7 +51,7 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultCompletionModel
+		payload.Model = defaultModel
 	}
 	if payload.StreamingFunc != nil {
 		payload.Stream = true
