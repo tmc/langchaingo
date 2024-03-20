@@ -146,7 +146,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 	return resp, nil
 }
 
-// Transcription is a method of the Client type that performs transcription of an audio file.
+// TranscribeAudio is a method of the Client type that performs transcription of an audio file.
 // It takes the execution context, the path of the audio file , and the audio temperature as parameters.
 // It returns the transcription of the audio as a byte array and a possible error if one occurs.
 func (c *Client) Transcription(ctx context.Context, audioFilePath string, temperature float64) ([]byte, error) {

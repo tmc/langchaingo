@@ -151,7 +151,7 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-// Transcription is a method of the Client type that performs transcription of an audio file.
+// TranscribeAudio is a method of the Client type that performs transcription of an audio file.
 // It takes the execution context, the path of the audio file, and the audio temperature as parameters.
 // It returns the transcription of the audio as a byte array and a possible error if one occurs.
 //
