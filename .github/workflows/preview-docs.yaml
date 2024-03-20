@@ -1,12 +1,18 @@
 name: Preview Documentation Site
 
 on:
+  pull_request:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
+permissions:
+  pull-requests: write
+  contents: write
+
+concurrency:
+  group: preview-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   preview:
