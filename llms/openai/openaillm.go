@@ -130,12 +130,22 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		}
 
+		// Deprecated
 		if c.FinishReason == "function_call" {
 			choices[i].FuncCall = &schema.FunctionCall{
 				Name:      c.Message.FunctionCall.Name,
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
+		if c.FinishReason == "tool_calls" {
+			// TODO: we can only handle a single tool call for now.
+			toolCall := c.Message.ToolCalls[0]
+			choices[i].FuncCall = &schema.FunctionCall{
+				Name:      toolCall.Function.Name,
+				Arguments: toolCall.Function.Arguments,
+			}
+		}
+
 	}
 
 	response := &llms.ContentResponse{Choices: choices}

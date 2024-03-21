@@ -81,7 +81,15 @@ type ToolChoice struct {
 
 // ToolFunction is a function to be called in a tool choice.
 type ToolFunction struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
+}
+
+// ToolCall is a call to a tool.
+type ToolCall struct {
+	ID       string       `json:"id,omitempty"`
+	Type     ToolType     `json:"type"`
+	Function ToolFunction `json:"function,omitempty"`
 }
 
 // ResponseFormat is the format of the response.
@@ -102,11 +110,11 @@ type ChatMessage struct { //nolint:musttag
 	// with a maximum length of 64 characters.
 	Name string
 
-	// ToolChoices is a list of tools to use in the message.
-	ToolChoices []ToolChoice `json:"tool_choices,omitempty"`
+	// ToolCalls is a list of tools to use in the message.
+	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
 
 	// FunctionCall represents a function call to be made in the message.
-	// Deprecated: use ToolChoices instead.
+	// Deprecated: use ToolCalls instead.
 	FunctionCall *FunctionCall
 }
 
@@ -120,9 +128,9 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			Content      string             `json:"-"`
 			MultiContent []llms.ContentPart `json:"content,omitempty"`
 			Name         string             `json:"name,omitempty"`
-			ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
+			ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
 
-			// Deprecated: use ToolChoices instead.
+			// Deprecated: use ToolCalls instead.
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 		}(m)
 		return json.Marshal(msg)
@@ -132,9 +140,8 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		Content      string             `json:"content"`
 		MultiContent []llms.ContentPart `json:"-"`
 		Name         string             `json:"name,omitempty"`
-		ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
-
-		// Deprecated: use ToolChoices instead.
+		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
+		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
 	}(m)
 	return json.Marshal(msg)
@@ -146,8 +153,8 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		Content      string             `json:"content"`
 		MultiContent []llms.ContentPart `json:"-"` // not expected in response
 		Name         string             `json:"name,omitempty"`
-		ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
-		// Deprecated: use ToolChoices instead.
+		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
+		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
