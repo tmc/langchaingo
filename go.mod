@@ -176,6 +176,7 @@ require (
 	cloud.google.com/go/aiplatform v1.58.0
 	cloud.google.com/go/vertexai v0.6.0
 	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0
+	github.com/Code-Hex/go-generics-cache v1.3.1
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.1.2
