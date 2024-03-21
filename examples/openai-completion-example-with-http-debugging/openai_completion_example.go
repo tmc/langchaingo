@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http/httputil"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
