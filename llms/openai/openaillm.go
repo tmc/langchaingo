@@ -138,22 +138,18 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			}
 		}
 		if c.FinishReason == "tool_calls" {
-			// TODO: we can only handle a single tool call for now.
+			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
 			toolCall := c.Message.ToolCalls[0]
 			choices[i].FuncCall = &schema.FunctionCall{
 				Name:      toolCall.Function.Name,
 				Arguments: toolCall.Function.Arguments,
 			}
 		}
-
 	}
-
 	response := &llms.ContentResponse{Choices: choices}
-
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
 	return response, nil
 }
 
