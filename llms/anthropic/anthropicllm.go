@@ -66,8 +66,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -78,92 +77,141 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	if o.client.UseCompletionsAPI {
-		// Assume we get a single text message
-		msg0 := messages[0]
-		part := msg0.Parts[0]
-		partText, ok := part.(llms.TextContent)
-		if !ok {
-			return nil, fmt.Errorf("unexpected message type: %T", part)
-		}
-		prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
-		result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
-			Model:         opts.Model,
-			Prompt:        prompt,
-			MaxTokens:     opts.MaxTokens,
-			StopWords:     opts.StopWords,
-			Temperature:   opts.Temperature,
-			TopP:          opts.TopP,
-			StreamingFunc: opts.StreamingFunc,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
+		return generateCompletionsContent(ctx, o, messages, opts)
+	}
+	return generateMessagesContent(ctx, o, messages, opts)
+}
 
-		resp := &llms.ContentResponse{
-			Choices: []*llms.ContentChoice{
-				{
-					Content: result.Text,
-				},
+func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	partText, ok := part.(llms.TextContent)
+	if !ok {
+		return nil, fmt.Errorf("unexpected message type: %T", part)
+	}
+	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
+	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
+		Model:         opts.Model,
+		Prompt:        prompt,
+		MaxTokens:     opts.MaxTokens,
+		StopWords:     opts.StopWords,
+		Temperature:   opts.Temperature,
+		TopP:          opts.TopP,
+		StreamingFunc: opts.StreamingFunc,
+	})
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: result.Text,
+			},
+		},
+	}
+	return resp, nil
+}
+
+func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+	chatMessages, systemPrompt, err := processMessages(messages)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
+		Model:         opts.Model,
+		Messages:      chatMessages,
+		System:        systemPrompt,
+		MaxTokens:     opts.MaxTokens,
+		StopWords:     opts.StopWords,
+		Temperature:   opts.Temperature,
+		TopP:          opts.TopP,
+		StreamingFunc: opts.StreamingFunc,
+	})
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	choices := make([]*llms.ContentChoice, len(result.Content))
+	for i, content := range result.Content {
+		choices[i] = &llms.ContentChoice{
+			Content:    content.Text,
+			StopReason: result.StopReason,
+			GenerationInfo: map[string]any{
+				"InputTokens":  result.Usage.InputTokens,
+				"OutputTokens": result.Usage.OutputTokens,
 			},
 		}
-		return resp, nil
-	} else {
-		chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
-		systemPrompt := ""
-		for _, msg := range messages {
-			switch msg.Role {
-			case schema.ChatMessageTypeSystem:
-				systemPrompt += msg.Parts[0].(llms.TextContent).Text
-			case schema.ChatMessageTypeHuman:
-				chatMessages = append(chatMessages, anthropicclient.ChatMessage{
-					Role:    RoleUser,
-					Content: msg.Parts[0].(llms.TextContent).Text,
-				})
-			case schema.ChatMessageTypeAI:
-				chatMessages = append(chatMessages, anthropicclient.ChatMessage{
-					Role:    RoleAssistant,
-					Content: msg.Parts[0].(llms.TextContent).Text,
-				})
-			default:
-				return nil, fmt.Errorf("role %v not supported", msg.Role)
-			}
-		}
-
-		result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
-			Model:         opts.Model,
-			Messages:      chatMessages,
-			System:        systemPrompt,
-			MaxTokens:     opts.MaxTokens,
-			StopWords:     opts.StopWords,
-			Temperature:   opts.Temperature,
-			TopP:          opts.TopP,
-			StreamingFunc: opts.StreamingFunc,
-		})
-		if err != nil {
-			if o.CallbacksHandler != nil {
-				o.CallbacksHandler.HandleLLMError(ctx, err)
-			}
-			return nil, err
-		}
-
-		choices := make([]*llms.ContentChoice, len(result.Content))
-		for i, content := range result.Content {
-			choices[i] = &llms.ContentChoice{
-				Content:    content.Text,
-				StopReason: result.StopReason,
-				GenerationInfo: map[string]any{
-					"InputTokens":  result.Usage.InputTokens,
-					"OutputTokens": result.Usage.OutputTokens,
-				},
-			}
-		}
-
-		resp := &llms.ContentResponse{
-			Choices: choices,
-		}
-		return resp, nil
 	}
+
+	resp := &llms.ContentResponse{
+		Choices: choices,
+	}
+	return resp, nil
+}
+
+func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
+	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
+	systemPrompt := ""
+	for _, msg := range messages {
+		switch msg.Role {
+		case schema.ChatMessageTypeSystem:
+			content, err := handleSystemMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			systemPrompt += content
+		case schema.ChatMessageTypeHuman:
+			chatMessage, err := handleHumanMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			chatMessages = append(chatMessages, chatMessage)
+		case schema.ChatMessageTypeAI:
+			chatMessage, err := handleAIMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			chatMessages = append(chatMessages, chatMessage)
+		case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeFunction:
+			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
+		default:
+			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
+		}
+	}
+	return chatMessages, systemPrompt, nil
+}
+
+func handleSystemMessage(msg llms.MessageContent) (string, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return textContent.Text, nil
+	}
+	return "", errors.New("invalid content type for system message")
+}
+
+func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return anthropicclient.ChatMessage{
+			Role:    RoleUser,
+			Content: textContent.Text,
+		}, nil
+	}
+	return anthropicclient.ChatMessage{}, errors.New("invalid content type for human message")
+}
+
+func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return anthropicclient.ChatMessage{
+			Role:    RoleAssistant,
+			Content: textContent.Text,
+		}, nil
+	}
+	return anthropicclient.ChatMessage{}, errors.New("invalid content type for AI message")
 }

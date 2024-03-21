@@ -44,7 +44,7 @@ type MessageResponsePayload struct {
 	Usage        struct {
 		InputTokens  int `json:"input_tokens"`
 		OutputTokens int `json:"output_tokens"`
-	}
+	} `json:"usage"`
 }
 
 func (c *Client) setMessageDefaults(payload *messagePayload) {
@@ -76,52 +76,27 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*MessageResponsePayload, error) {
 	c.setMessageDefaults(payload)
 
-	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if c.baseURL == "" {
-		c.baseURL = DefaultBaseURL
-	}
-
-	url := fmt.Sprintf("%s/messages", c.baseURL)
-	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
+	resp, err := c.do(ctx, "/messages", payloadBytes)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, c.decodeError(resp)
 	}
 
-	c.setHeaders(req)
-
-	// Send request
-	r, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
-	}
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
-	}
 	if payload.StreamingFunc != nil {
-		// Read chunks
-		return parseStreamingMessageResponse(ctx, r, payload)
+		return parseStreamingMessageResponse(ctx, resp, payload)
 	}
 
-	// Parse response
 	var response MessageResponsePayload
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
 
@@ -131,84 +106,182 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*M
 func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payload *messagePayload) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan *MessageResponsePayload)
+
 	go func() {
 		defer close(responseChan)
 		var response MessageResponsePayload
 		for scanner.Scan() {
 			line := scanner.Text()
-			if line == "" {
-				continue
-			}
-			if !strings.HasPrefix(line, "data:") {
+			if line == "" || !strings.HasPrefix(line, "data:") {
 				continue
 			}
 			data := strings.TrimPrefix(line, "data: ")
-			var event map[string]interface{}
-			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&event)
+			event, err := parseStreamEvent(data)
 			if err != nil {
-				log.Fatalf("failed to decode stream event: %v", err)
+				log.Fatalf("failed to parse stream event: %v", err)
 			}
-			eventType, ok := event["type"].(string)
-			if !ok {
-				log.Println("missing event type")
-				continue
-			}
-			switch eventType {
-			case "message_start":
-				message := event["message"].(map[string]interface{})
-				response = MessageResponsePayload{
-					ID:    message["id"].(string),
-					Model: message["model"].(string),
-					Role:  message["role"].(string),
-					Type:  message["type"].(string),
-				}
-				response.Usage.InputTokens = int(message["usage"].(map[string]interface{})["input_tokens"].(float64))
-			case "content_block_start":
-				index := int(event["index"].(float64))
-				if len(response.Content) <= index {
-					response.Content = append(response.Content, struct {
-						Text string `json:"text"`
-						Type string `json:"type"`
-					}{})
-				}
-			case "content_block_delta":
-				index := int(event["index"].(float64))
-				delta := event["delta"].(map[string]interface{})
-				if delta["type"] == "text_delta" {
-					response.Content[index].Text += delta["text"].(string)
-				}
-				if payload.StreamingFunc != nil {
-					err := payload.StreamingFunc(ctx, []byte(delta["text"].(string)))
-					if err != nil {
-						return
-					}
-				}
-			case "content_block_stop":
-				// Nothing to do here
-			case "message_delta":
-				delta := event["delta"].(map[string]interface{})
-				if stopReason, ok := delta["stop_reason"]; ok {
-					response.StopReason = stopReason.(string)
-				}
-				usage := event["usage"].(map[string]interface{})
-				if outputTokens, ok := usage["output_tokens"]; ok {
-					response.Usage.OutputTokens = int(outputTokens.(float64))
-				}
-			case "message_stop":
-				responseChan <- &response
-			case "ping":
-				// Nothing to do here
-			default:
-				log.Printf("unknown event type: %s", eventType)
+			response, err = processStreamEvent(ctx, event, payload, response, responseChan)
+			if err != nil {
+				log.Fatalf("failed to process stream event: %v", err)
 			}
 		}
 		if err := scanner.Err(); err != nil {
 			log.Println("issue scanning response:", err)
 		}
 	}()
+
 	var lastResponse *MessageResponsePayload
 	for response := range responseChan {
 		lastResponse = response
 	}
 	return lastResponse, nil
+}
+
+func parseStreamEvent(data string) (map[string]interface{}, error) {
+	var event map[string]interface{}
+	err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&event)
+	return event, err
+}
+
+func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *messagePayload, response MessageResponsePayload, responseChan chan<- *MessageResponsePayload) (MessageResponsePayload, error) {
+	eventType, ok := event["type"].(string)
+	if !ok {
+		return response, errors.New("invalid event type field type")
+	}
+	switch eventType {
+	case "message_start":
+		return handleMessageStartEvent(event, response)
+	case "content_block_start":
+		return handleContentBlockStartEvent(event, response)
+	case "content_block_delta":
+		return handleContentBlockDeltaEvent(ctx, event, response, payload)
+	case "content_block_stop":
+		// Nothing to do here
+	case "message_delta":
+		return handleMessageDeltaEvent(event, response)
+	case "message_stop":
+		responseChan <- &response
+	case "ping":
+		// Nothing to do here
+	default:
+		log.Printf("unknown event type: %s", eventType)
+	}
+	return response, nil
+}
+
+func handleMessageStartEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
+	message, ok := event["message"].(map[string]interface{})
+	if !ok {
+		return response, errors.New("invalid message field type")
+	}
+
+	usage, ok := message["usage"].(map[string]interface{})
+	if !ok {
+		return response, errors.New("invalid usage field type")
+	}
+
+	inputTokens, err := getFloat64(usage, "input_tokens")
+	if err != nil {
+		return response, err
+	}
+
+	response.ID = getString(message, "id")
+	response.Model = getString(message, "model")
+	response.Role = getString(message, "role")
+	response.Type = getString(message, "type")
+	response.Usage.InputTokens = int(inputTokens)
+
+	return response, nil
+}
+
+func handleContentBlockStartEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
+	indexValue, ok := event["index"].(float64)
+	if !ok {
+		return response, errors.New("invalid index field type")
+	}
+	index := int(indexValue)
+
+	if len(response.Content) <= index {
+		response.Content = append(response.Content, struct {
+			Text string `json:"text"`
+			Type string `json:"type"`
+		}{})
+	}
+	return response, nil
+}
+
+func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interface{}, response MessageResponsePayload, payload *messagePayload) (MessageResponsePayload, error) {
+	indexValue, ok := event["index"].(float64)
+	if !ok {
+		return response, errors.New("invalid index field type")
+	}
+	index := int(indexValue)
+
+	delta, ok := event["delta"].(map[string]interface{})
+	if !ok {
+		return response, errors.New("invalid delta field type")
+	}
+	deltaType, ok := delta["type"].(string)
+	if !ok {
+		return response, errors.New("invalid delta type field type")
+	}
+
+	if deltaType == "text_delta" {
+		text, ok := delta["text"].(string)
+		if !ok {
+			return response, errors.New("invalid delta text field type")
+		}
+		if len(response.Content) > index {
+			response.Content[index].Text += text
+		} else {
+			return response, errors.New("content index out of range")
+		}
+	}
+
+	if payload.StreamingFunc != nil {
+		text, ok := delta["text"].(string)
+		if !ok {
+			return response, errors.New("invalid delta text field type")
+		}
+		err := payload.StreamingFunc(ctx, []byte(text))
+		if err != nil {
+			return response, fmt.Errorf("streaming func returned an error: %w", err)
+		}
+	}
+	return response, nil
+}
+
+func handleMessageDeltaEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
+	delta, ok := event["delta"].(map[string]interface{})
+	if !ok {
+		return response, errors.New("invalid delta field type")
+	}
+	if stopReason, ok := delta["stop_reason"].(string); ok {
+		response.StopReason = stopReason
+	}
+
+	usage, ok := event["usage"].(map[string]interface{})
+	if !ok {
+		return response, errors.New("invalid usage field type")
+	}
+	if outputTokens, ok := usage["output_tokens"].(float64); ok {
+		response.Usage.OutputTokens = int(outputTokens)
+	}
+	return response, nil
+}
+
+func getString(m map[string]interface{}, key string) string {
+	value, ok := m[key].(string)
+	if !ok {
+		return ""
+	}
+	return value
+}
+
+func getFloat64(m map[string]interface{}, key string) (float64, error) {
+	value, ok := m[key].(float64)
+	if !ok {
+		return 0, errors.New("invalid field type")
+	}
+	return value, nil
 }

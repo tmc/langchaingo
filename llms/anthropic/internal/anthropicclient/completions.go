@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -62,52 +61,27 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*CompletionResponsePayload, error) {
 	c.setCompletionDefaults(payload)
 
-	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if c.baseURL == "" {
-		c.baseURL = DefaultBaseURL
-	}
-
-	url := fmt.Sprintf("%s/complete", c.baseURL)
-	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
+	resp, err := c.do(ctx, "/complete", payloadBytes)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, fmt.Errorf("failed request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, c.decodeError(resp)
 	}
 
-	c.setHeaders(req)
-
-	// Send request
-	r, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
-	}
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
-	}
 	if payload.StreamingFunc != nil {
-		// Read chunks
-		return parseStreamingCompletionResponse(ctx, r, payload)
+		return parseStreamingCompletionResponse(ctx, resp, payload)
 	}
 
-	// Parse response
 	var response CompletionResponsePayload
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
 

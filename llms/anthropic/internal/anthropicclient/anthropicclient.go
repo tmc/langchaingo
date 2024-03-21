@@ -1,8 +1,11 @@
 package anthropicclient
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -115,7 +118,7 @@ type MessageRequest struct {
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
-// CreateMessage creates message for the messages api
+// CreateMessage creates message for the messages api.
 func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*MessageResponsePayload, error) {
 	resp, err := c.createMessage(ctx, &messagePayload{
 		Model:         r.Model,
@@ -141,9 +144,40 @@ func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("anthropic-version", "2023-06-01")
 }
 
+func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*http.Response, error) {
+	if c.baseURL == "" {
+		c.baseURL = DefaultBaseURL
+	}
+
+	url := c.baseURL + path
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+
+	c.setHeaders(req)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("send request: %w", err)
+	}
+	return resp, nil
+}
+
 type errorMessage struct {
 	Error struct {
 		Message string `json:"message"`
 		Type    string `json:"type"`
 	} `json:"error"`
+}
+
+func (c *Client) decodeError(resp *http.Response) error {
+	msg := fmt.Sprintf("API returned unexpected status code: %d", resp.StatusCode)
+
+	var errResp errorMessage
+	if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
+		return errors.New(msg) // nolint:goerr113
+	}
+	return fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 }
