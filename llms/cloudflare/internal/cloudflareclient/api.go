@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-func (c Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingRequest) (*CreateEmbeddingResponse, error) {
+// CreateEmbedding creates an embedding from the given texts.
+func (c *Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingRequest) (*CreateEmbeddingResponse, error) {
 	requestBody, err := json.Marshal(texts)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,8 @@ func (c Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingReque
 
 const maxBufferSize = 512 * 1000
 
-func (c Client) GenerateContent(ctx context.Context, request *GenerateContentRequest) (*GenerateContentResponse, error) { // nolint:funlen,cyclop
+// GenerateContent generates text based on the given prompts.
+func (c *Client) GenerateContent(ctx context.Context, request *GenerateContentRequest) (*GenerateContentResponse, error) { // nolint:funlen,cyclop
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
@@ -137,7 +139,8 @@ func (c Client) GenerateContent(ctx context.Context, request *GenerateContentReq
 	return &GenerateContentResponse{}, nil
 }
 
-func (c Client) Summarize(ctx context.Context, inputText string, maxLength int) (*SummarizeResponse, error) {
+// Summarize summarizes the given input text.
+func (c *Client) Summarize(ctx context.Context, inputText string, maxLength int) (*SummarizeResponse, error) {
 	requestBody, err := json.Marshal(SummarizeRequest{InputText: inputText, MaxLength: maxLength})
 	if err != nil {
 		return nil, err

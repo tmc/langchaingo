@@ -49,8 +49,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-// nolint: goerr113
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen, goerr113
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -135,6 +134,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return response, nil
 }
 
+// CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	res, err := o.client.CreateEmbedding(ctx, &cloudflareclient.CreateEmbeddingRequest{
 		Text: inputTexts,
