@@ -562,6 +562,11 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
 
+	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
+	if openaiAPIKey == "" {
+		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
+	}
+
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
 		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.24"))
@@ -577,11 +582,6 @@ func getValues(t *testing.T) (string, string) {
 		if err != nil {
 			t.Skipf("Failed to get chroma container REST endpoint: %s", err)
 		}
-	}
-
-	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
-	if openaiAPIKey == "" {
-		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
 	}
 
 	return chromaURL, openaiAPIKey

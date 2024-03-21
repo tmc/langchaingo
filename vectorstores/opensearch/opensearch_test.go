@@ -26,6 +26,11 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 	var osUser string
 	var osPassword string
 
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiKey == "" {
+		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
+	}
+
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
 		openseachContainer, err := tcopensearch.RunContainer(context.Background(), testcontainers.WithImage("opensearchproject/opensearch:2.11.1"))
@@ -61,10 +66,6 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 		if opensearchPassword == "" {
 			t.Skipf("Must set %s to run test", "OPENSEARCH_PASSWORD")
 		}
-	}
-	openaiKey := os.Getenv("OPENAI_API_KEY")
-	if openaiKey == "" {
-		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
 	}
 
 	return opensearchEndpoint, opensearchUser, opensearchPassword
