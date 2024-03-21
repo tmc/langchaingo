@@ -4,7 +4,7 @@ go 1.21
 
 toolchain go1.21.4
 
-require github.com/tmc/langchaingo v0.1.7
+require github.com/tmc/langchaingo v0.1.8-0.20240321002625-491288f2a685
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
