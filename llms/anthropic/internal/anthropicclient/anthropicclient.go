@@ -27,7 +27,8 @@ type Client struct {
 
 	httpClient Doer
 
-	UseCompletionsAPI bool
+	// UseLegacyTextCompletionsAPI is a flag to use the legacy text completions API.
+	UseLegacyTextCompletionsAPI bool
 }
 
 // Option is an option for the Anthropic client.
@@ -47,13 +48,20 @@ func WithHTTPClient(client Doer) Option {
 	}
 }
 
+// WithLegacyTextCompletionsAPI enables the use of the legacy text completions API.
+func WithLegacyTextCompletionsAPI(val bool) Option {
+	return func(opts *Client) error {
+		opts.UseLegacyTextCompletionsAPI = val
+		return nil
+	}
+}
+
 // New returns a new Anthropic client.
-func New(token string, model string, baseURL string, httpClient Doer, opts ...Option) (*Client, error) {
+func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:      model,
-		token:      token,
-		baseURL:    strings.TrimSuffix(baseURL, "/"),
-		httpClient: httpClient,
+		Model:   model,
+		token:   token,
+		baseURL: strings.TrimSuffix(baseURL, "/"),
 	}
 
 	for _, opt := range opts {

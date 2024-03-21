@@ -43,10 +43,9 @@ func New(opts ...Option) (*LLM, error) {
 
 func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
-		token:             os.Getenv(tokenEnvVarName),
-		baseURL:           anthropicclient.DefaultBaseURL,
-		httpClient:        http.DefaultClient,
-		useCompletionsAPI: true,
+		token:      os.Getenv(tokenEnvVarName),
+		baseURL:    anthropicclient.DefaultBaseURL,
+		httpClient: http.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -57,7 +56,10 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model, options.baseURL, options.httpClient)
+	return anthropicclient.New(options.token, options.model, options.baseURL,
+		anthropicclient.WithHTTPClient(options.httpClient),
+		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
+	)
 }
 
 // Call requests a completion for the given prompt.
@@ -76,7 +78,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	if o.client.UseCompletionsAPI {
+	if o.client.UseLegacyTextCompletionsAPI {
 		return generateCompletionsContent(ctx, o, messages, opts)
 	}
 	return generateMessagesContent(ctx, o, messages, opts)
