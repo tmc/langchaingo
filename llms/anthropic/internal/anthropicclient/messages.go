@@ -123,17 +123,17 @@ func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payloa
 			data := strings.TrimPrefix(line, "data: ")
 			event, err := parseStreamEvent(data)
 			if err != nil {
-				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %v", err)}
+				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %w", err)}
 				return
 			}
 			response, err = processStreamEvent(ctx, event, payload, response, eventChan)
 			if err != nil {
-				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to process stream event: %v", err)}
+				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to process stream event: %w", err)}
 				return
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("issue scanning response: %v", err)}
+			eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("issue scanning response: %w", err)}
 		}
 	}()
 
