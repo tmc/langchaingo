@@ -7,7 +7,7 @@ import (
 )
 
 // DebugHTTPClient is an http.Client that logs the request and response with full contents.
-var DebugHTTPClient = &http.Client{
+var DebugHTTPClient = &http.Client{ //nolint:gochecknoglobals
 	Transport: &logTransport{http.DefaultTransport},
 }
 
@@ -15,13 +15,13 @@ type logTransport struct {
 	Transport http.RoundTripper
 }
 
-// RoundTrip logs the request and response with full contents using httputil.DumpRequest and httputil.DumpResponse
+// RoundTrip logs the request and response with full contents using httputil.DumpRequest and httputil.DumpResponse.
 func (t *logTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	dump, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%s\n", dump)
+	fmt.Println(string(dump)) //nolint:forbidigo
 	resp, err := t.Transport.RoundTrip(req)
 	if err != nil {
 		return nil, err
@@ -30,6 +30,6 @@ func (t *logTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%s\n", dump)
+	fmt.Println(string(dump)) //nolint:forbidigo
 	return resp, nil
 }
