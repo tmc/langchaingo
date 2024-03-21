@@ -75,27 +75,41 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
-		Model:                opts.Model,
-		StopWords:            opts.StopWords,
-		Messages:             chatMsgs,
-		StreamingFunc:        opts.StreamingFunc,
-		Temperature:          opts.Temperature,
-		MaxTokens:            opts.MaxTokens,
-		N:                    opts.N,
-		FrequencyPenalty:     opts.FrequencyPenalty,
-		PresencePenalty:      opts.PresencePenalty,
+		Model:            opts.Model,
+		StopWords:        opts.StopWords,
+		Messages:         chatMsgs,
+		StreamingFunc:    opts.StreamingFunc,
+		Temperature:      opts.Temperature,
+		MaxTokens:        opts.MaxTokens,
+		N:                opts.N,
+		FrequencyPenalty: opts.FrequencyPenalty,
+		PresencePenalty:  opts.PresencePenalty,
+
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
 	}
+	// for _, fn := range opts.Functions {
+	// 	req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
+	// 		Name:        fn.Name,
+	// 		Description: fn.Description,
+	// 		Parameters:  fn.Parameters,
+	// 	})
+	// }
+
+	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
-		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
-			Name:        fn.Name,
-			Description: fn.Description,
-			Parameters:  fn.Parameters,
+		req.Tools = append(req.Tools, openaiclient.Tool{
+			Type: "function",
+			Function: openaiclient.FunctionDefinition{
+				Name:        fn.Name,
+				Description: fn.Description,
+				Parameters:  fn.Parameters,
+			},
 		})
 	}
+
 	result, err := o.client.CreateChat(ctx, req)
 	if err != nil {
 		return nil, err
@@ -108,7 +122,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
 			Content:    c.Message.Content,
-			StopReason: c.FinishReason,
+			StopReason: fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
 				"CompletionTokens": result.Usage.CompletionTokens,
 				"PromptTokens":     result.Usage.PromptTokens,

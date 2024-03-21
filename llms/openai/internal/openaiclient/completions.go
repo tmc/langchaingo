@@ -70,7 +70,7 @@ func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 }
 
 // nolint:lll
-func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatResponse, error) {
+func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatCompletionResponse, error) {
 	c.setCompletionDefaults(payload)
 	return c.createChat(ctx, &ChatRequest{
 		Model: payload.Model,

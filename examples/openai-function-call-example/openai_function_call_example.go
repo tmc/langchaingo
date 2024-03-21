@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
-	llm, err := openai.New(openai.WithModel("gpt-3.5-turbo-0613"))
+	llm, err := openai.New(
+		openai.WithModel("gpt-3.5-turbo-0613"),
+		openai.WithHTTPClient(httputil.DebugHTTPClient),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
