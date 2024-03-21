@@ -103,12 +103,17 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*M
 	return &response, nil
 }
 
+type StreamedEvent struct {
+	Response *MessageResponsePayload
+	Err      error
+}
+
 func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payload *messagePayload) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan *MessageResponsePayload)
+	eventChan := make(chan StreamedEvent)
 
 	go func() {
-		defer close(responseChan)
+		defer close(eventChan)
 		var response MessageResponsePayload
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -118,21 +123,26 @@ func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payloa
 			data := strings.TrimPrefix(line, "data: ")
 			event, err := parseStreamEvent(data)
 			if err != nil {
-				log.Fatalf("failed to parse stream event: %v", err)
+				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %v", err)}
+				return
 			}
-			response, err = processStreamEvent(ctx, event, payload, response, responseChan)
+			response, err = processStreamEvent(ctx, event, payload, response, eventChan)
 			if err != nil {
-				log.Fatalf("failed to process stream event: %v", err)
+				eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("failed to process stream event: %v", err)}
+				return
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			log.Println("issue scanning response:", err)
+			eventChan <- StreamedEvent{Response: nil, Err: fmt.Errorf("issue scanning response: %v", err)}
 		}
 	}()
 
 	var lastResponse *MessageResponsePayload
-	for response := range responseChan {
-		lastResponse = response
+	for event := range eventChan {
+		if event.Err != nil {
+			return nil, event.Err
+		}
+		lastResponse = event.Response
 	}
 	return lastResponse, nil
 }
@@ -143,7 +153,7 @@ func parseStreamEvent(data string) (map[string]interface{}, error) {
 	return event, err
 }
 
-func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *messagePayload, response MessageResponsePayload, responseChan chan<- *MessageResponsePayload) (MessageResponsePayload, error) {
+func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *messagePayload, response MessageResponsePayload, eventChan chan<- StreamedEvent) (MessageResponsePayload, error) {
 	eventType, ok := event["type"].(string)
 	if !ok {
 		return response, errors.New("invalid event type field type")
@@ -160,7 +170,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "message_delta":
 		return handleMessageDeltaEvent(event, response)
 	case "message_stop":
-		responseChan <- &response
+		eventChan <- StreamedEvent{Response: &response, Err: nil}
 	case "ping":
 		// Nothing to do here
 	default:
