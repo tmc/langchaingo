@@ -102,7 +102,11 @@ type ChatMessage struct { //nolint:musttag
 	// with a maximum length of 64 characters.
 	Name string
 
+	// ToolChoices is a list of tools to use in the message.
+	ToolChoices []ToolChoice `json:"tool_choices,omitempty"`
+
 	// FunctionCall represents a function call to be made in the message.
+	// Deprecated: use ToolChoices instead.
 	FunctionCall *FunctionCall
 }
 
@@ -116,7 +120,10 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			Content      string             `json:"-"`
 			MultiContent []llms.ContentPart `json:"content,omitempty"`
 			Name         string             `json:"name,omitempty"`
-			FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+			ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
+
+			// Deprecated: use ToolChoices instead.
+			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 		}(m)
 		return json.Marshal(msg)
 	}
@@ -125,7 +132,10 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		Content      string             `json:"content"`
 		MultiContent []llms.ContentPart `json:"-"`
 		Name         string             `json:"name,omitempty"`
-		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
+
+		// Deprecated: use ToolChoices instead.
+		FunctionCall *FunctionCall `json:"function_call,omitempty"`
 	}(m)
 	return json.Marshal(msg)
 }
@@ -136,7 +146,9 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		Content      string             `json:"content"`
 		MultiContent []llms.ContentPart `json:"-"` // not expected in response
 		Name         string             `json:"name,omitempty"`
-		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
+		ToolChoices  []ToolChoice       `json:"tool_choices,omitempty"`
+		// Deprecated: use ToolChoices instead.
+		FunctionCall *FunctionCall `json:"function_call,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
