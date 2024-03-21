@@ -1,11 +1,11 @@
-package bedrockclient
+package awsclient
 
 import (
 	"context"
 	"encoding/json"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -75,7 +75,7 @@ const (
 	Ai21CompletionReasonEndOfText = "endoftext"
 )
 
-func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, modelID string, messages []Message, options llms.CallOptions) (*llms.ContentResponse, error) {
+func createAi21Completion(ctx context.Context, client AwsRuntimeClient, modelID string, messages []Message, options llms.CallOptions) (*llms.ContentResponse, error) {
 	txt := processInputMessagesGeneric(messages)
 	inputContent := ai21TextGenerationInput{
 		Prompt:        txt,
@@ -100,7 +100,7 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 		return nil, err
 	}
 
-	modelInput := bedrockruntime.InvokeModelInput{
+	modelInput := InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Body:        body,
 		Accept:      aws.String("*/*"),

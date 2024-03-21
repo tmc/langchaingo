@@ -1,11 +1,10 @@
-package bedrockclient
+package awsclient
 
 import (
 	"context"
 	"encoding/json"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -45,7 +44,7 @@ const (
 )
 
 func createMetaCompletion(ctx context.Context,
-	client *bedrockruntime.Client,
+	client AwsRuntimeClient,
 	modelID string,
 	messages []Message,
 	options llms.CallOptions,
@@ -64,7 +63,7 @@ func createMetaCompletion(ctx context.Context,
 		return nil, err
 	}
 
-	modelInput := &bedrockruntime.InvokeModelInput{
+	modelInput := &InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Accept:      aws.String("*/*"),
 		ContentType: aws.String("application/json"),

@@ -1,18 +1,22 @@
-package bedrockclient
+package awsclient
 
 import (
 	"context"
 	"errors"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
+type Options interface{}
+type AwsRuntimeClient interface {
+	InvokeModel(ctx context.Context, params *InvokeModelInput, optFns ...func(Options)) (*InvokeModelOutput, error)
+}
+
 // Client is a Bedrock client.
 type Client struct {
-	client *bedrockruntime.Client
+	Client AwsRuntimeClient
 }
 
 // Message is a chunk of text or an data
@@ -34,9 +38,10 @@ func getProvider(modelID string) string {
 }
 
 // NewClient creates a new Bedrock client.
-func NewClient(client *bedrockruntime.Client) *Client {
+func NewClient(client interface{}) *Client {
+	//interface to AwsRuntimeClient
 	return &Client{
-		client: client,
+		Client: client.(AwsRuntimeClient),
 	}
 }
 
@@ -50,15 +55,15 @@ func (c *Client) CreateCompletion(ctx context.Context,
 	provider := getProvider(modelID)
 	switch provider {
 	case "ai21":
-		return createAi21Completion(ctx, c.client, modelID, messages, options)
+		return createAi21Completion(ctx, c.Client, modelID, messages, options)
 	case "amazon":
-		return createAmazonCompletion(ctx, c.client, modelID, messages, options)
+		return createAmazonCompletion(ctx, c.Client, modelID, messages, options)
 	case "anthropic":
-		return createAnthropicCompletion(ctx, c.client, modelID, messages, options)
+		return createAnthropicCompletion(ctx, c.Client, modelID, messages, options)
 	case "cohere":
-		return createCohereCompletion(ctx, c.client, modelID, messages, options)
+		return createCohereCompletion(ctx, c.Client, modelID, messages, options)
 	case "meta":
-		return createMetaCompletion(ctx, c.client, modelID, messages, options)
+		return createMetaCompletion(ctx, c.Client, modelID, messages, options)
 	default:
 		return nil, errors.New("unsupported provider")
 	}
