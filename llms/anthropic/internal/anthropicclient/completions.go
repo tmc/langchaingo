@@ -88,9 +88,14 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	return &response, nil
 }
 
+type CompletionEvent struct {
+	Response *CompletionResponsePayload
+	Err      error
+}
+
 func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, payload *completionPayload) (*CompletionResponsePayload, error) { // nolint:lll
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan *CompletionResponsePayload)
+	responseChan := make(chan CompletionEvent)
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -105,9 +110,10 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 			streamPayload := &CompletionResponsePayload{}
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				log.Fatalf("failed to decode stream payload: %v", err)
+				responseChan <- CompletionEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %w", err)}
+				return
 			}
-			responseChan <- streamPayload
+			responseChan <- CompletionEvent{Response: streamPayload, Err: nil}
 		}
 		if err := scanner.Err(); err != nil {
 			log.Println("issue scanning response:", err)
@@ -118,14 +124,17 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 
 	var lastResponse *CompletionResponsePayload
 	for streamResponse := range responseChan {
-		response.Completion += streamResponse.Completion
+		if streamResponse.Err != nil {
+			return nil, streamResponse.Err
+		}
+		response.Completion += streamResponse.Response.Completion
 		if payload.StreamingFunc != nil {
-			err := payload.StreamingFunc(ctx, []byte(streamResponse.Completion))
+			err := payload.StreamingFunc(ctx, []byte(streamResponse.Response.Completion))
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
-		lastResponse = streamResponse
+		lastResponse = streamResponse.Response
 	}
 	response.Model = lastResponse.Model
 	response.LogID = lastResponse.LogID
