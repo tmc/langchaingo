@@ -218,7 +218,7 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 			}
 			for _, message := range chunk {
 				c := getAnthropicInputContent(message)
-				if c.Type != "text" {
+				if c.Type != AnthropicMessageTypeText {
 					return nil, "", errors.New("system prompt must be text")
 				}
 				systemPrompt += c.Text
@@ -260,12 +260,12 @@ func getAnthropicRole(role schema.ChatMessageType) (string, error) {
 
 func getAnthropicInputContent(message Message) anthropicTextGenerationInputContent {
 	var c anthropicTextGenerationInputContent
-	if message.Type == "text" {
+	if message.Type == AnthropicMessageTypeText {
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
 			Text: message.Content,
 		}
-	} else if message.Type == "image" {
+	} else if message.Type == AnthropicMessageTypeImage {
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
 			Source: &anthropicBinGenerationInputSource{
