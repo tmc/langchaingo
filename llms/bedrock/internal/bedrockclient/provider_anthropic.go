@@ -188,26 +188,51 @@ func createAnthropicCompletion(ctx context.Context,
 // process the input messages to anthropic supported input
 // returns the input content and system prompt.
 func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerationInputMessage, string, error) {
+	chunkedMessages := make([][]Message, 0, len(messages))
+	var currentChunk []Message
+	var lastRole schema.ChatMessageType
+	for _, message := range messages {
+		if message.Role != lastRole {
+			if len(currentChunk) > 0 {
+				chunkedMessages = append(chunkedMessages, currentChunk)
+			}
+			currentChunk = nil
+		}
+		currentChunk = append(currentChunk, message)
+		lastRole = message.Role
+	}
+	if len(currentChunk) > 0 {
+		chunkedMessages = append(chunkedMessages, currentChunk)
+	}
+
 	inputContents := make([]*anthropicTextGenerationInputMessage, 0, len(messages))
 	var systemPrompt string
-	for _, message := range messages {
-		role, err := getAnthropicRole(message.Role)
+	for _, chunk := range chunkedMessages {
+		role, err := getAnthropicRole(chunk[0].Role)
 		if err != nil {
 			return nil, "", err
 		}
-		c := getAnthropicInputContent(message)
-
 		if role == AnthropicSystem {
 			if systemPrompt != "" {
 				return nil, "", errors.New("multiple system prompts")
 			}
-			systemPrompt = c.Text
-		} else {
-			inputContents = append(inputContents, &anthropicTextGenerationInputMessage{
-				Role:    role,
-				Content: []anthropicTextGenerationInputContent{c},
-			})
+			for _, message := range chunk {
+				c := getAnthropicInputContent(message)
+				if c.Type != "text" {
+					return nil, "", errors.New("system prompt must be text")
+				}
+				systemPrompt += c.Text
+			}
+			continue
 		}
+		content := make([]anthropicTextGenerationInputContent, 0, len(chunk))
+		for _, message := range chunk {
+			content = append(content, getAnthropicInputContent(message))
+		}
+		inputContents = append(inputContents, &anthropicTextGenerationInputMessage{
+			Role:    role,
+			Content: content,
+		})
 	}
 	return inputContents, systemPrompt, nil
 }
