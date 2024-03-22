@@ -2,6 +2,7 @@ package bedrockclient
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 
@@ -243,9 +244,9 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
 			Source: &anthropicBinGenerationInputSource{
-				Type:      message.Type,
+				Type:      "base64",
 				MediaType: message.MimeType,
-				Data:      message.Content,
+				Data:      base64.StdEncoding.EncodeToString([]byte(message.Content)),
 			},
 		}
 	}
