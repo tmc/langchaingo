@@ -1,4 +1,4 @@
-package bedrock_test
+package awsai_test
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/bedrock"
+	"github.com/tmc/langchaingo/llms/awsai"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func setUpTest() (*bedrockruntime.Client, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background())
+
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func TestAmazonOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	llm, err := bedrock.New(bedrock.WithClient(client))
+	llm, err := awsai.New(awsai.WithClient(client), awsai.WithApiType(awsai.ApiTypeBedrock))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,19 +55,19 @@ func TestAmazonOutput(t *testing.T) {
 
 	// All the test models.
 	models := []string{
-		bedrock.ModelAi21J2MidV1,
-		bedrock.ModelAi21J2UltraV1,
-		bedrock.ModelAmazonTitanTextLiteV1,
-		bedrock.ModelAmazonTitanTextExpressV1,
-		bedrock.ModelAnthropicClaudeV3Sonnet,
-		bedrock.ModelAnthropicClaudeV3Haiku,
-		bedrock.ModelAnthropicClaudeV21,
-		bedrock.ModelAnthropicClaudeV2,
-		bedrock.ModelAnthropicClaudeInstantV1,
-		bedrock.ModelCohereCommandTextV14,
-		bedrock.ModelCohereCommandLightTextV14,
-		bedrock.ModelMetaLlama213bChatV1,
-		bedrock.ModelMetaLlama270bChatV1,
+		awsai.ModelAi21J2MidV1,
+		awsai.ModelAi21J2UltraV1,
+		awsai.ModelAmazonTitanTextLiteV1,
+		awsai.ModelAmazonTitanTextExpressV1,
+		awsai.ModelAnthropicClaudeV3Sonnet,
+		awsai.ModelAnthropicClaudeV3Haiku,
+		awsai.ModelAnthropicClaudeV21,
+		awsai.ModelAnthropicClaudeV2,
+		awsai.ModelAnthropicClaudeInstantV1,
+		awsai.ModelCohereCommandTextV14,
+		awsai.ModelCohereCommandLightTextV14,
+		awsai.ModelMetaLlama213bChatV1,
+		awsai.ModelMetaLlama270bChatV1,
 	}
 
 	ctx := context.Background()

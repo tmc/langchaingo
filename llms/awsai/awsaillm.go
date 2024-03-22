@@ -1,4 +1,4 @@
-package bedrock
+package awsai
 
 import (
 	"context"
@@ -6,9 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/sagemakerruntime"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/bedrock/internal/bedrockclient"
+	"github.com/tmc/langchaingo/llms/awsai/internal/awsclient"
 )
 
 const defaultModel = ModelAmazonTitanTextLiteV1
@@ -16,7 +17,7 @@ const defaultModel = ModelAmazonTitanTextLiteV1
 // LLM is a Bedrock LLM implementation.
 type LLM struct {
 	modelID          string
-	client           *bedrockclient.Client
+	client           *awsclient.Client
 	CallbacksHandler callbacks.Handler
 }
 
@@ -33,7 +34,7 @@ func New(opts ...Option) (*LLM, error) {
 	}, nil
 }
 
-func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
+func newClient(opts ...Option) (*options, *awsclient.Client, error) {
 	options := &options{
 		modelID: defaultModel,
 	}
@@ -47,10 +48,16 @@ func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
 		if err != nil {
 			return options, nil, err
 		}
-		options.client = bedrockruntime.NewFromConfig(cfg)
+		// apitype
+		switch options.apitype {
+		case ApiTypeSagemaker:
+			options.client = sagemakerruntime.NewFromConfig(cfg)
+		case ApiTypeBedrock:
+			options.client = bedrockruntime.NewFromConfig(cfg)
+		}
 	}
 
-	return options, bedrockclient.NewClient(options.client), nil
+	return options, awsclient.NewClient(options.client), nil
 }
 
 // Call implements llms.Model.
@@ -91,20 +98,20 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return res, nil
 }
 
-func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, error) {
-	bedrockMsgs := make([]bedrockclient.Message, 0, len(messages))
+func processMessages(messages []llms.MessageContent) ([]awsclient.Message, error) {
+	bedrockMsgs := make([]awsclient.Message, 0, len(messages))
 
 	for _, m := range messages {
 		for _, part := range m.Parts {
 			switch part := part.(type) {
 			case llms.TextContent:
-				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+				bedrockMsgs = append(bedrockMsgs, awsclient.Message{
 					Role:    m.Role,
 					Content: part.Text,
 					Type:    "text",
 				})
 			case llms.BinaryContent:
-				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+				bedrockMsgs = append(bedrockMsgs, awsclient.Message{
 					Role:     m.Role,
 					Content:  string(part.Data),
 					MimeType: part.MIMEType,

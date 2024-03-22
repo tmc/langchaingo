@@ -1,4 +1,4 @@
-package bedrock
+package awsai
 
 const (
 	// Jurassic-2 Ultra is AI21’s most powerful model for complex tasks that require

@@ -1,8 +1,13 @@
-package bedrock
+package awsai
 
 import (
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/llms/awsai/internal/awsclient"
+)
+
+const (
+	ApiTypeSagemaker = "sagemaker"
+	ApiTypeBedrock   = "bedrock"
 )
 
 // Option is an option for the Bedrock LLM.
@@ -10,8 +15,16 @@ type Option func(*options)
 
 type options struct {
 	modelID         string
-	client          *bedrockruntime.Client
+	client          interface{}
 	callbackHandler callbacks.Handler
+	apitype         string
+}
+
+// WithApiType allows setting a custom API type.
+func WithApiType(apiType string) Option {
+	return func(o *options) {
+		o.apitype = apiType
+	}
 }
 
 // WithModel allows setting a custom modelId.
@@ -31,9 +44,9 @@ func WithModel(modelID string) Option {
 // such as setting custom credentials, region, endpoint, etc.
 //
 // By default, a new client will be created using the default credentials chain.
-func WithClient(client *bedrockruntime.Client) Option {
+func WithClient(client interface{}) Option {
 	return func(o *options) {
-		o.client = client
+		o.client = client.(awsclient.AwsRuntimeClient)
 	}
 }
 
