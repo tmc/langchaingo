@@ -189,14 +189,14 @@ func createAnthropicCompletion(ctx context.Context,
 // returns the input content and system prompt.
 func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerationInputMessage, string, error) {
 	chunkedMessages := make([][]Message, 0, len(messages))
-	var currentChunk []Message
+	currentChunk := make([]Message, 0, len(messages))
 	var lastRole schema.ChatMessageType
 	for _, message := range messages {
 		if message.Role != lastRole {
 			if len(currentChunk) > 0 {
 				chunkedMessages = append(chunkedMessages, currentChunk)
 			}
-			currentChunk = nil
+			currentChunk = make([]Message, 0, len(messages))
 		}
 		currentChunk = append(currentChunk, message)
 		lastRole = message.Role
