@@ -99,23 +99,30 @@ type ResponseFormat struct {
 
 // ChatMessage is a message in a chat request.
 type ChatMessage struct { //nolint:musttag
-	// The role of the author of this message. One of system, user, or assistant.
+	// The role of the author of this message. One of system, user, assistant, function, or tool.
 	Role string
+
 	// The content of the message.
+	// This field is mutually exclusive with MultiContent.
 	Content string
 
+	// MultiContent is a list of content parts to use in the message.
 	MultiContent []llms.ContentPart
 
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
 	Name string
 
-	// ToolCalls is a list of tools to use in the message.
+	// ToolCalls is a list of tools that were called in the message.
 	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
 
-	// FunctionCall represents a function call to be made in the message.
+	// FunctionCall represents a function call that was made in the message.
 	// Deprecated: use ToolCalls instead.
 	FunctionCall *FunctionCall
+
+	// ToolCallID is the ID of the tool call this message is for.
+	// Only present in tool messages.
+	ToolCallID string `json:"tool_call_id,omitempty"`
 }
 
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
@@ -132,6 +139,10 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 
 			// Deprecated: use ToolCalls instead.
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
+
+			// ToolCallID is the ID of the tool call this message is for.
+			// Only present in tool messages.
+			ToolCallID string `json:"tool_call_id,omitempty"`
 		}(m)
 		return json.Marshal(msg)
 	}
@@ -143,6 +154,10 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
 		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
+
+		// ToolCallID is the ID of the tool call this message is for.
+		// Only present in tool messages.
+		ToolCallID string `json:"tool_call_id,omitempty"`
 	}(m)
 	return json.Marshal(msg)
 }
@@ -156,6 +171,10 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
 		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
+
+		// ToolCallID is the ID of the tool call this message is for.
+		// Only present in tool messages.
+		ToolCallID string `json:"tool_call_id,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {

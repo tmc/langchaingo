@@ -22,6 +22,7 @@ const (
 	RoleAssistant = "assistant"
 	RoleUser      = "user"
 	RoleFunction  = "function"
+	RoleTool      = "tool"
 )
 
 var _ llms.Model = (*LLM)(nil)
@@ -67,7 +68,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		case schema.ChatMessageTypeGeneric:
 			msg.Role = RoleUser
 		case schema.ChatMessageTypeFunction:
-			fallthrough
+			msg.Role = RoleFunction
+		case schema.ChatMessageTypeTool:
+			msg.Role = RoleTool
+
 		default:
 			return nil, fmt.Errorf("role %v not supported", mc.Role)
 		}
@@ -90,13 +94,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
 	}
-	// for _, fn := range opts.Functions {
-	// 	req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
-	// 		Name:        fn.Name,
-	// 		Description: fn.Description,
-	// 		Parameters:  fn.Parameters,
-	// 	})
-	// }
 
 	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
@@ -130,7 +127,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		}
 
-		// Deprecated
+		// Legacy function call handling
 		if c.FinishReason == "function_call" {
 			choices[i].FuncCall = &schema.FunctionCall{
 				Name:      c.Message.FunctionCall.Name,
@@ -139,10 +136,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		if c.FinishReason == "tool_calls" {
 			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
-			toolCall := c.Message.ToolCalls[0]
-			choices[i].FuncCall = &schema.FunctionCall{
-				Name:      toolCall.Function.Name,
-				Arguments: toolCall.Function.Arguments,
+			for _, tool := range c.Message.ToolCalls {
+				choices[i].ToolCalls = append(choices[i].ToolCalls, schema.ToolCall{
+					ID:   tool.ID,
+					Type: string(tool.Type),
+					FunctionCall: &schema.FunctionCall{
+						Name:      tool.Function.Name,
+						Arguments: tool.Function.Arguments,
+					},
+				})
+			}
+			// populate legacy single-function call field for backwards compatibility
+			if len(choices[i].ToolCalls) > 0 {
+				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
 			}
 		}
 	}

@@ -82,6 +82,28 @@ type BinaryContent struct {
 
 func (BinaryContent) isPart() {}
 
+// ToolCall is a call to a tool.
+type ToolCall struct {
+	// ID is the unique identifier of the tool call.
+	ID string `json:"id"`
+	// Type
+	Type string `json:"type"`
+	// FunctionCall is the function call to be executed.
+	FunctionCall *schema.FunctionCall `json:"function,omitempty"`
+}
+
+// ToolCallResponse is the response returned by a tool call.
+type ToolCallResponse struct {
+	// ToolCallID is the ID of the tool call this response is for.
+	ToolCallID string `json:"tool_call_id"`
+	// FunctionName is the name of the tool that was called.
+	Name string `json:"name"`
+	// Content is the textual content of the response.
+	Content string `json:"content"`
+}
+
+func (ToolCallResponse) isPart() {}
+
 // ContentResponse is the response returned by a GenerateContent call.
 // It can potentially return multiple content choices.
 type ContentResponse struct {
@@ -101,7 +123,12 @@ type ContentChoice struct {
 	GenerationInfo map[string]any
 
 	// FuncCall is non-nil when the model asks to invoke a function/tool.
+	// If a model invokes more than one function/tool, this field will only
+	// contain the first one.
 	FuncCall *schema.FunctionCall
+
+	// ToolCalls is a list of tool calls the model asks to invoke.
+	ToolCalls []schema.ToolCall
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
@@ -115,4 +142,18 @@ func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
 		result.Parts = append(result.Parts, TextPart(part))
 	}
 	return result
+}
+
+// ToolResponsePart is a helper function to create a MessageContent with a
+// role and a single tool response part.
+func ToolResponsePart(toolCallID string, response string) MessageContent {
+	return MessageContent{
+		Role: schema.ChatMessageTypeTool,
+		Parts: []ContentPart{
+			ToolCallResponse{
+				ToolCallID: toolCallID,
+				Content:    response,
+			},
+		},
+	}
 }
