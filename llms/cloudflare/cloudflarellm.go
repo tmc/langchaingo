@@ -3,6 +3,7 @@ package cloudflare
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -26,7 +27,10 @@ var _ llms.Model = (*LLM)(nil)
 
 // New creates a new cloudflare LLM implementation.
 func New(opts ...Option) (*LLM, error) {
-	o := options{}
+	o := options{
+		httpClient: http.DefaultClient,
+	}
+
 	for _, opt := range opts {
 		opt(&o)
 	}

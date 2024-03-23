@@ -21,10 +21,6 @@ type Client struct {
 }
 
 func NewClient(client httpClient, accountID, baseURL, token, modelName, embeddingModelName string) *Client {
-	if client == nil {
-		client = &http.Client{}
-	}
-
 	return &Client{
 		httpClient:         client,
 		accountID:          accountID,
