@@ -44,19 +44,19 @@ type CallOptions struct {
 	JSONMode bool `json:"json"`
 
 	// Tools is a list of tools to use. Each tool can be a specific tool or a function.
-	Tools []Tool `json:"tools"`
+	Tools []Tool `json:"tools,omitempty"`
 	// ToolChoice is the choice of tool to use, it can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
 	ToolChoice any `json:"tool_choice"`
 
 	// Function defitions to include in the request.
 	// Deprecated: Use Tools instead.
-	Functions []FunctionDefinition `json:"functions"`
+	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
 	//
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
 	// Deprecated: Use ToolChoice instead.
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call"`
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
