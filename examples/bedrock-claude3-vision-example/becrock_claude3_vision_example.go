@@ -31,6 +31,9 @@ func main() {
 			{
 				Role: schema.ChatMessageTypeHuman,
 				Parts: []llms.ContentPart{
+					// For images, you can use image formats such as image/png, image/jpeg, image/gif, image/webp.
+					// Please change according to the actual byte array to be given.
+					// for more detailes, see this https://docs.anthropic.com/claude/reference/messages_post
 					llms.BinaryPart("image/png", image),
 					llms.TextPart("Please tell me the string on the box."),
 				},
