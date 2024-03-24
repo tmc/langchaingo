@@ -105,7 +105,6 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		Parallelism: s.Parallels,
 		Delay:       time.Duration(s.Delay) * time.Second,
 	})
-
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)
 	}
