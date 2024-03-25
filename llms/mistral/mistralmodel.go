@@ -3,32 +3,57 @@ package mistral
 import (
 	"context"
 	"errors"
+	"os"
 
 	sdk "github.com/gage-technologies/mistral-go"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/mistral/internal/mistralclient"
 	"github.com/tmc/langchaingo/schema"
 )
 
-// LLM is a mistral LLM implementation.
-type LLM struct {
-	CallbacksHandler callbacks.Handler
+// Model encapsulates an instantiated Mistral client, the client options used to instantiate the client, and a callback handler provided by Langchain Go.
+type Model struct {
 	client           *sdk.MistralClient
+	clientOptions    *clientOptions
+	CallbacksHandler callbacks.Handler
 }
 
-// Call implements llms.Model.
-func (m *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	callOptions := resolveDefaultsFromSdk(sdk.DefaultChatRequestParams)
+// Assertion to ensure the Mistral `Model` type conforms to the langchaingo llms.Model interface.
+var _ llms.Model = (*Model)(nil)
+
+// Instantiates a new Mistral Model.
+func New(opts ...Option) (*Model, error) {
+	options := &clientOptions{
+		apiKey:     os.Getenv("MISTRAL_API_KEY"),
+		endpoint:   sdk.Endpoint,
+		maxRetries: sdk.DefaultMaxRetries,
+		timeout:    sdk.DefaultTimeout,
+		model:      sdk.ModelOpenMistral7b,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	return &Model{
+		clientOptions:    options,
+		client:           sdk.NewMistralClient(options.apiKey, options.endpoint, options.maxRetries, options.timeout),
+		CallbacksHandler: callbacks.SimpleHandler{},
+	}, nil
+}
+
+// Call implements the langchaingo llms.Model interface.
+func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
-	chatOpts := chatOptsFromCallOpts(callOptions)
+	mistralChatParams := mistralChatParamsFromCallOptions(callOptions)
 
 	messages := make([]sdk.ChatMessage, 0)
 	messages = append(messages, sdk.ChatMessage{
 		Role:    "user",
 		Content: prompt,
 	})
-	res, err := m.client.Chat("", messages, &chatOpts)
+	res, err := m.client.Chat("", messages, &mistralChatParams)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return "", err
@@ -41,30 +66,39 @@ func (m *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return res.Choices[0].Message.Content, nil
 }
 
-func chatOptsFromCallOpts(callOpts *llms.CallOptions) sdk.ChatRequestParams {
-	chatOpts := sdk.DefaultChatRequestParams
-	chatOpts.MaxTokens = callOpts.MaxTokens
-	chatOpts.Temperature = callOpts.Temperature
-	chatOpts.Tools = make([]sdk.Tool, 0)
-	for _, function := range callOpts.Functions {
-		chatOpts.Tools = append(chatOpts.Tools, sdk.Tool{
-			Type: "function",
-			Function: sdk.Function{
-				Name:        function.Name,
-				Description: function.Description,
-				Parameters:  function.Parameters,
-			}})
+// GenerateContent implements the langchaingo llms.Model interface.
+func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
+	setCallOptions(options, callOptions)
+	m.CallbacksHandler.HandleLLMGenerateContentStart(ctx, langchainMessages)
+
+	chatOpts := mistralChatParamsFromCallOptions(callOptions)
+
+	messages, err := convertToMistralChatMessages(langchainMessages)
+	if err != nil {
+		return nil, err
 	}
-	return chatOpts
+
+	if callOptions.StreamingFunc != nil {
+		return generateStreamingContent(ctx, m, callOptions, messages, chatOpts)
+	}
+	return generateNonStreamingContent(ctx, m, callOptions, messages, chatOpts)
 }
 
-// Supported models: https://docs.mistral.ai/platform/endpoints/
-// TODO: Mistral also supports ResponseType, which, when set to "json", ensures the model's output is strictly a JSON object. Should this be made a part of client config and pulled whenever Call or GenerateContent is called?
-// The following llms.CallOptions are not supported at the moment by mistral SDK:
-// MinLength, MaxLength,N (how many chat completion choices to generate for each input message), RepetitionPenalty, FrequencyPenalty, and PresencePenalty.
-func resolveDefaultsFromSdk(sdkDefaults sdk.ChatRequestParams) *llms.CallOptions {
+func setCallOptions(options []llms.CallOption, callOpts *llms.CallOptions) {
+	for _, opt := range options {
+		opt(callOpts)
+	}
+}
+
+func resolveDefaultOptions(sdkDefaults sdk.ChatRequestParams, c *clientOptions) *llms.CallOptions {
+	// Supported models: https://docs.mistral.ai/platform/endpoints/
+	// TODO: Mistral also supports ResponseType, which, when set to "json", ensures the model's output is strictly a JSON object.
+	// Question: Should `ResponseType` be made a part of llms.CallOptions and pulled whenever Call or GenerateContent is called?
+	// The following llms.CallOptions are not supported at the moment by mistral SDK:
+	// MinLength, MaxLength,N (how many chat completion choices to generate for each input message), RepetitionPenalty, FrequencyPenalty, and PresencePenalty.
 	return &llms.CallOptions{
-		Model: "open-mistral-7b",
+		Model: c.model,
 		// MaxTokens is the maximum number of tokens to generate.
 		MaxTokens: sdkDefaults.MaxTokens,
 		// Temperature is the temperature for sampling, between 0 and 1.
@@ -78,27 +112,27 @@ func resolveDefaultsFromSdk(sdkDefaults sdk.ChatRequestParams) *llms.CallOptions
 	}
 }
 
-func setCallOptions(options []llms.CallOption, callOpts *llms.CallOptions) {
-	for _, opt := range options {
-		opt(callOpts)
+func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatRequestParams {
+	chatOpts := sdk.DefaultChatRequestParams
+	chatOpts.MaxTokens = callOpts.MaxTokens
+	chatOpts.Temperature = callOpts.Temperature
+	chatOpts.Tools = make([]sdk.Tool, 0)
+	for _, function := range callOpts.Functions {
+		chatOpts.Tools = append(chatOpts.Tools, sdk.Tool{
+			Type: "function",
+			Function: sdk.Function{
+				Name:        function.Name,
+				Description: function.Description,
+				Parameters:  function.Parameters,
+			},
+		})
 	}
+	return chatOpts
 }
 
-// GenerateContent implements llms.Model.
-func (m *LLM) GenerateContent(ctx context.Context, langchainMessages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
-	callOptions := resolveDefaultsFromSdk(sdk.DefaultChatRequestParams)
-	setCallOptions(options, callOptions)
-
-	chatOpts := chatOptsFromCallOpts(callOptions)
-
-	messages, err := convertToMistralChatMessages(langchainMessages)
-	if err != nil {
-		return nil, err
-	}
-
-	m.CallbacksHandler.HandleLLMGenerateContentStart(ctx, langchainMessages)
+func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
 	res, err := m.client.Chat(callOptions.Model, messages, &chatOpts)
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil) // TODO: fix
+	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
@@ -110,10 +144,10 @@ func (m *LLM) GenerateContent(ctx context.Context, langchainMessages []llms.Mess
 	}
 
 	langchainContentResponse := &llms.ContentResponse{
-		Choices: make([]*llms.ContentChoice, len(res.Choices)),
+		Choices: make([]*llms.ContentChoice, 0),
 	}
 	for idx, choice := range res.Choices {
-		langchainContentResponse.Choices[idx] = &llms.ContentChoice{
+		langchainContentResponse.Choices = append(langchainContentResponse.Choices, &llms.ContentChoice{
 			Content:    choice.Message.Content,
 			StopReason: string(choice.FinishReason),
 			GenerationInfo: map[string]any{
@@ -121,28 +155,59 @@ func (m *LLM) GenerateContent(ctx context.Context, langchainMessages []llms.Mess
 				"model":   res.Model,
 				"usage":   res.Usage,
 			},
+		})
+		toolCalls := choice.Message.ToolCalls
+		if len(toolCalls) > 0 {
+			langchainContentResponse.Choices[idx].FuncCall = (*schema.FunctionCall)(&toolCalls[0].Function)
 		}
 	}
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
-	// // Example: Using Chat Completions Stream
-	// chatResChan, err := m.client.ChatStream("mistral-tiny", []mistral.ChatMessage{{Content: "Hello, world!", Role: mistral.RoleUser}}, nil)
-	// if err != nil {
-	// 	log.Fatalf("Error getting chat completion stream: %v", err)
-	// }
+	return langchainContentResponse, nil
+}
 
-	// for chatResChunk := range chatResChan {
-	// 	if chatResChunk.Error != nil {
-	// 		log.Fatalf("Error while streaming response: %v", chatResChunk.Error)
-	// 	}
-	// 	log.Printf("Chat completion stream part: %+v\n", chatResChunk)
-	// }
+func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
+	chatResChan, err := m.client.ChatStream(callOptions.Model, messages, &chatOpts)
+	if err != nil {
+		m.CallbacksHandler.HandleLLMError(ctx, err)
+		return nil, err
+	}
+	langchainContentResponse := &llms.ContentResponse{
+		Choices: make([]*llms.ContentChoice, 1),
+	}
+	langchainContentResponse.Choices[0] = &llms.ContentChoice{
+		Content:        "",
+		GenerationInfo: map[string]any{},
+	}
+
+	for chatResChunk := range chatResChan {
+		chunkStr := ""
+		langchainContentResponse.Choices[0].GenerationInfo["created"] = chatResChunk.Created
+		langchainContentResponse.Choices[0].GenerationInfo["model"] = chatResChunk.Model
+		langchainContentResponse.Choices[0].GenerationInfo["usage"] = chatResChunk.Usage
+		if chatResChunk.Error == nil {
+			for _, choice := range chatResChunk.Choices {
+				chunkStr += choice.Delta.Content
+				langchainContentResponse.Choices[0].Content += choice.Delta.Content
+				langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
+				if len(choice.Delta.ToolCalls) > 0 {
+					langchainContentResponse.Choices[0].FuncCall = (*schema.FunctionCall)(&choice.Delta.ToolCalls[0].Function)
+				}
+			}
+			err := callOptions.StreamingFunc(ctx, []byte(chunkStr))
+			if err != nil {
+				return langchainContentResponse, err
+			}
+		} else {
+			return langchainContentResponse, chatResChunk.Error
+		}
+	}
 
 	return langchainContentResponse, nil
 }
 
 func convertToMistralChatMessages(langchainMessages []llms.MessageContent) ([]sdk.ChatMessage, error) {
-	messages := make([]sdk.ChatMessage, len(langchainMessages))
+	messages := make([]sdk.ChatMessage, 0)
 	for _, msg := range langchainMessages {
 		msgText := ""
 		for _, part := range msg.Parts {
@@ -150,31 +215,27 @@ func convertToMistralChatMessages(langchainMessages []llms.MessageContent) ([]sd
 			if !ok {
 				return nil, errors.New("unsupported content type encountered while preparing chat messages to send to mistral platform")
 			}
-			msgText = msgText + textContent.Text
+			msgText += textContent.Text
 		}
 		chatMsg := sdk.ChatMessage{Content: msgText, Role: "user"}
 
-		setRole(&msg, &chatMsg)
-		messages = append(messages, chatMsg)
+		setMistralChatMessageRole(&msg, &chatMsg) // #nosec G601
+		if chatMsg.Content != "" && chatMsg.Role != "" {
+			messages = append(messages, chatMsg)
+		}
 	}
 	return messages, nil
 }
 
-func setRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessage) {
-	if msg.Role == schema.ChatMessageTypeAI {
+func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessage) {
+	switch msg.Role {
+	case schema.ChatMessageTypeAI:
 		chatMsg.Role = "assistant"
-	} else if msg.Role == schema.ChatMessageTypeGeneric || msg.Role == schema.ChatMessageTypeHuman {
+	case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeHuman:
 		chatMsg.Role = "user"
-	} else if msg.Role == schema.ChatMessageTypeFunction {
+	case schema.ChatMessageTypeFunction:
 		chatMsg.Role = "tool"
-	} else if msg.Role == schema.ChatMessageTypeSystem {
+	case schema.ChatMessageTypeSystem:
 		chatMsg.Role = "system"
 	}
-}
-
-var _ llms.Model = (*LLM)(nil)
-
-// New creates a new mistral LLM implementation.
-func New(opts ...mistralclient.Option) *LLM {
-	return &LLM{client: mistralclient.NewClient(opts...), CallbacksHandler: callbacks.SimpleHandler{}}
 }
