@@ -48,5 +48,5 @@ linters-settings:
           - "**/*_test.go"
           - "**/mock/**/*.go"
 run:
-  skip-dirs:
+  exclude-dirs:
     - 'exp'
