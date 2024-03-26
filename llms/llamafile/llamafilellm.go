@@ -158,6 +158,8 @@ func typeToRole(typ schema.ChatMessageType) string {
 		return "user"
 	case schema.ChatMessageTypeFunction:
 		return "function"
+	case schema.ChatMessageTypeTool:
+		return "tool"
 	}
 	return "user"
 }

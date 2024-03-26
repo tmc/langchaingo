@@ -159,7 +159,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 		c.Role = RoleUser
 	case schema.ChatMessageTypeGeneric:
 		c.Role = RoleUser
-	case schema.ChatMessageTypeFunction:
+	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 		fallthrough
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)

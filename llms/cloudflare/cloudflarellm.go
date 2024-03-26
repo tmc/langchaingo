@@ -170,6 +170,8 @@ func typeToRole(typ schema.ChatMessageType) cloudflareclient.Role {
 		return cloudflareclient.RoleTypeUser
 	case schema.ChatMessageTypeFunction:
 		return "function"
+	case schema.ChatMessageTypeTool:
+		return "tool"
 	}
 	return ""
 }

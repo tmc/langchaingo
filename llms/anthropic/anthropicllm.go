@@ -182,7 +182,7 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 				return nil, "", err
 			}
 			chatMessages = append(chatMessages, chatMessage)
-		case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeFunction:
+		case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
 		default:
 			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
