@@ -7,6 +7,7 @@ type Options struct {
 	ChunkSize         int
 	ChunkOverlap      int
 	Separators        []string
+	KeepSeparator     bool
 	LenFunc           func(string) int
 	ModelName         string
 	EncodingName      string
@@ -20,10 +21,11 @@ type Options struct {
 // DefaultOptions returns the default options for all text splitter.
 func DefaultOptions() Options {
 	return Options{
-		ChunkSize:    _defaultTokenChunkSize,
-		ChunkOverlap: _defaultTokenChunkOverlap,
-		Separators:   []string{"\n\n", "\n", " ", ""},
-		LenFunc:      utf8.RuneCountInString,
+		ChunkSize:     _defaultTokenChunkSize,
+		ChunkOverlap:  _defaultTokenChunkOverlap,
+		Separators:    []string{"\n\n", "\n", " ", ""},
+		KeepSeparator: false,
+		LenFunc:       utf8.RuneCountInString,
 
 		ModelName:         _defaultTokenModelName,
 		EncodingName:      _defaultTokenEncoding,
@@ -116,5 +118,12 @@ func WithCodeBlocks(renderCode bool) Option {
 func WithReferenceLinks(referenceLinks bool) Option {
 	return func(o *Options) {
 		o.ReferenceLinks = referenceLinks
+	}
+}
+
+// WithKeepSeparator set the keep_separator for a text splitter
+func WithKeepSeparator(keepSeparator bool) Option {
+	return func(o *Options) {
+		o.KeepSeparator = keepSeparator
 	}
 }
