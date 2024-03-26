@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	chroma_go "github.com/amikos-tech/chroma-go"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/ollama"
@@ -30,7 +29,7 @@ func main() {
 	store, errNs := chroma.New(
 		chroma.WithChromaURL(os.Getenv("CHROMA_URL")),
 		chroma.WithEmbedder(ollamaEmbeder),
-		chroma.WithDistanceFunction(chroma_go.COSINE),
+		chroma.WithDistanceFunction("cosine"),
 		chroma.WithNameSpace(uuid.New().String()),
 	)
 	if errNs != nil {

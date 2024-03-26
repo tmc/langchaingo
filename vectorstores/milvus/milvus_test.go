@@ -36,6 +36,11 @@ func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
+	e, err := getEmbedder(t)
+	if err != nil {
+		return Store{}, err
+	}
+
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
 		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.3.9"))
@@ -54,10 +59,6 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	}
 	config := client.Config{
 		Address: url,
-	}
-	e, err := getEmbedder(t)
-	if err != nil {
-		return Store{}, err
 	}
 	idx, err := entity.NewIndexAUTOINDEX(entity.L2)
 	if err != nil {

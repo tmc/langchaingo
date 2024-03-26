@@ -3,11 +3,14 @@ package anthropic
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
+	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -15,6 +18,12 @@ var (
 	ErrMissingToken  = errors.New("missing the Anthropic API key, set it in the ANTHROPIC_API_KEY environment variable")
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+)
+
+const (
+	RoleUser      = "user"
+	RoleAssistant = "assistant"
+	RoleSystem    = "system"
 )
 
 type LLM struct {
@@ -34,7 +43,9 @@ func New(opts ...Option) (*LLM, error) {
 
 func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
-		token: os.Getenv(tokenEnvVarName),
+		token:      os.Getenv(tokenEnvVarName),
+		baseURL:    anthropicclient.DefaultBaseURL,
+		httpClient: http.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -45,7 +56,10 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model)
+	return anthropicclient.New(options.token, options.model, options.baseURL,
+		anthropicclient.WithHTTPClient(options.httpClient),
+		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
+	)
 }
 
 // Call requests a completion for the given prompt.
@@ -54,8 +68,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -65,12 +78,23 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	// Assume we get a single text message
+	if o.client.UseLegacyTextCompletionsAPI {
+		return generateCompletionsContent(ctx, o, messages, opts)
+	}
+	return generateMessagesContent(ctx, o, messages, opts)
+}
+
+func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	msg0 := messages[0]
 	part := msg0.Parts[0]
+	partText, ok := part.(llms.TextContent)
+	if !ok {
+		return nil, fmt.Errorf("unexpected message type: %T", part)
+	}
+	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
 	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
 		Model:         opts.Model,
-		Prompt:        part.(llms.TextContent).Text,
+		Prompt:        prompt,
 		MaxTokens:     opts.MaxTokens,
 		StopWords:     opts.StopWords,
 		Temperature:   opts.Temperature,
@@ -92,4 +116,104 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		},
 	}
 	return resp, nil
+}
+
+func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+	chatMessages, systemPrompt, err := processMessages(messages)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
+		Model:         opts.Model,
+		Messages:      chatMessages,
+		System:        systemPrompt,
+		MaxTokens:     opts.MaxTokens,
+		StopWords:     opts.StopWords,
+		Temperature:   opts.Temperature,
+		TopP:          opts.TopP,
+		StreamingFunc: opts.StreamingFunc,
+	})
+	if err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	choices := make([]*llms.ContentChoice, len(result.Content))
+	for i, content := range result.Content {
+		choices[i] = &llms.ContentChoice{
+			Content:    content.Text,
+			StopReason: result.StopReason,
+			GenerationInfo: map[string]any{
+				"InputTokens":  result.Usage.InputTokens,
+				"OutputTokens": result.Usage.OutputTokens,
+			},
+		}
+	}
+
+	resp := &llms.ContentResponse{
+		Choices: choices,
+	}
+	return resp, nil
+}
+
+func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
+	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
+	systemPrompt := ""
+	for _, msg := range messages {
+		switch msg.Role {
+		case schema.ChatMessageTypeSystem:
+			content, err := handleSystemMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			systemPrompt += content
+		case schema.ChatMessageTypeHuman:
+			chatMessage, err := handleHumanMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			chatMessages = append(chatMessages, chatMessage)
+		case schema.ChatMessageTypeAI:
+			chatMessage, err := handleAIMessage(msg)
+			if err != nil {
+				return nil, "", err
+			}
+			chatMessages = append(chatMessages, chatMessage)
+		case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeFunction:
+			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
+		default:
+			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
+		}
+	}
+	return chatMessages, systemPrompt, nil
+}
+
+func handleSystemMessage(msg llms.MessageContent) (string, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return textContent.Text, nil
+	}
+	return "", errors.New("invalid content type for system message")
+}
+
+func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return anthropicclient.ChatMessage{
+			Role:    RoleUser,
+			Content: textContent.Text,
+		}, nil
+	}
+	return anthropicclient.ChatMessage{}, errors.New("invalid content type for human message")
+}
+
+func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
+	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+		return anthropicclient.ChatMessage{
+			Role:    RoleAssistant,
+			Content: textContent.Text,
+		}, nil
+	}
+	return anthropicclient.ChatMessage{}, errors.New("invalid content type for AI message")
 }

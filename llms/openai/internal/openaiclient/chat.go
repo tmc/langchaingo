@@ -33,6 +33,8 @@ type ChatRequest struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
 
+	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
+
 	// Function definitions to include in the request.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
@@ -44,6 +46,11 @@ type ChatRequest struct {
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+}
+
+// ResponseFormat is the format of the response.
+type ResponseFormat struct {
+	Type string `json:"type"`
 }
 
 // ChatMessage is a message in a chat request.

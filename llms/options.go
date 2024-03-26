@@ -20,7 +20,7 @@ type CallOptions struct {
 	StopWords []string `json:"stop_words"`
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
-	StreamingFunc func(ctx context.Context, chunk []byte) error
+	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 	// TopK is the number of tokens to consider for top-k sampling.
 	TopK int `json:"top_k"`
 	// TopP is the cumulative probability for top-p sampling.
@@ -39,6 +39,9 @@ type CallOptions struct {
 	FrequencyPenalty float64 `json:"frequency_penalty"`
 	// PresencePenalty is the presence penalty for sampling.
 	PresencePenalty float64 `json:"presence_penalty"`
+
+	// JSONMode is a flag to enable JSON mode.
+	JSONMode bool `json:"json"`
 
 	// Function defitions to include in the request.
 	Functions []FunctionDefinition `json:"functions"`
@@ -193,5 +196,13 @@ func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 func WithFunctions(functions []FunctionDefinition) CallOption {
 	return func(o *CallOptions) {
 		o.Functions = functions
+	}
+}
+
+// WithJSONMode will add an option to set the response format to JSON.
+// This is useful for models that return structured data.
+func WithJSONMode() CallOption {
+	return func(o *CallOptions) {
+		o.JSONMode = true
 	}
 }
