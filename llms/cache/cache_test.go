@@ -11,8 +11,33 @@ import (
 func TestCache_hashKeyForCache(t *testing.T) {
 	t.Parallel()
 
-	rq := require.New(t)
-
+	cases := []struct {
+		name        string
+		v1          []llms.MessageContent
+		v1opt       []llms.CallOption
+		v2          []llms.MessageContent
+		shouldMatch bool
+	}{
+		{
+			name:        "empty",
+			v1:          []llms.MessageContent{},
+			v2:          []llms.MessageContent{},
+			shouldMatch: true,
+		},
+		{
+			name:        "empty vs non-empty",
+			v1:          []llms.MessageContent{},
+			v2:          []llms.MessageContent{{}},
+			shouldMatch: false,
+		},
+		{
+			name:        "different options",
+			v1:          []llms.MessageContent{{}},
+			v1opt:       []llms.CallOption{llms.WithCandidateCount(1)},
+			v2:          []llms.MessageContent{{}},
+			shouldMatch: false,
+		},
+	}
 	mustHashKeyForCache := func(messages []llms.MessageContent, options ...llms.CallOption) string {
 		var opts llms.CallOptions
 		for _, opt := range options {
@@ -26,26 +51,15 @@ func TestCache_hashKeyForCache(t *testing.T) {
 
 		return key
 	}
-
-	rq.Equal(
-		mustHashKeyForCache([]llms.MessageContent{}),
-		mustHashKeyForCache([]llms.MessageContent{}),
-	)
-
-	rq.Equal(
-		mustHashKeyForCache([]llms.MessageContent{}, llms.WithCandidateCount(1)),
-		mustHashKeyForCache([]llms.MessageContent{}, llms.WithCandidateCount(1)),
-	)
-
-	rq.NotEqual(
-		mustHashKeyForCache([]llms.MessageContent{{}}),
-		mustHashKeyForCache([]llms.MessageContent{}),
-	)
-
-	rq.NotEqual(
-		mustHashKeyForCache([]llms.MessageContent{}, llms.WithCandidateCount(1)),
-		mustHashKeyForCache([]llms.MessageContent{}),
-	)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v1hash := mustHashKeyForCache(tc.v1, tc.v1opt...)
+			v2hash := mustHashKeyForCache(tc.v2)
+			if (v1hash == v2hash) != tc.shouldMatch {
+				t.Fatalf("expected %v, got %v", tc.shouldMatch, v1hash == v2hash)
+			}
+		})
+	}
 }
 
 func TestCache_Call(t *testing.T) {
