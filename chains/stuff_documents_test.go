@@ -86,7 +86,6 @@ func TestStuffDocuments_joinDocs(t *testing.T) {
 	chain := NewStuffDocuments(&LLMChain{})
 
 	for _, tc := range testcases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			got := chain.joinDocuments(tc.docs)
