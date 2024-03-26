@@ -67,7 +67,6 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/gage-technologies/mistral-go v1.0.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -185,6 +184,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.4
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.7.1
 	github.com/cohere-ai/tokenizer v1.1.2
+	github.com/gage-technologies/mistral-go v1.0.0
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocolly/colly v1.2.0
