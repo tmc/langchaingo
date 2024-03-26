@@ -39,7 +39,7 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 	return s.splitText(text, s.Separators)
 }
 
-// addSeparatorInSplits adds the separator in each of splits
+// addSeparatorInSplits adds the separator in each of splits.
 func (s RecursiveCharacter) addSeparatorInSplits(splits []string, separator string) []string {
 	splitsWithSeparator := make([]string, 0, len(splits))
 	for i, s := range splits {
@@ -54,7 +54,7 @@ func (s RecursiveCharacter) addSeparatorInSplits(splits []string, separator stri
 func (s RecursiveCharacter) splitText(text string, separators []string) ([]string, error) {
 	finalChunks := make([]string, 0)
 
-	// Find the appropriate separator
+	// Find the appropriate separator.
 	separator := separators[len(separators)-1]
 	newSeparators := []string{}
 	for i, c := range separators {

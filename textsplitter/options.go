@@ -121,7 +121,7 @@ func WithReferenceLinks(referenceLinks bool) Option {
 	}
 }
 
-// WithKeepSeparator set the keep_separator for a text splitter
+// WithKeepSeparator set the keep_separator for a text splitter.
 func WithKeepSeparator(keepSeparator bool) Option {
 	return func(o *Options) {
 		o.KeepSeparator = keepSeparator
