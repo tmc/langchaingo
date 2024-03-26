@@ -97,7 +97,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 						{Role: "user", Content: "userPrompt"},
 					},
 					Stream: true,
-					StreamingFunc: func(ctx context.Context, chunk []byte) error {
+					StreamingFunc: func(_ context.Context, chunk []byte) error {
 						if string(chunk) != `{"result": {"response": "response"}}` {
 							return io.EOF
 						}

@@ -50,7 +50,6 @@ func TestInterpolateGoTemplate(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Run("go/template", func(t *testing.T) {
 				t.Parallel()
@@ -85,7 +84,6 @@ func TestInterpolateGoTemplate(t *testing.T) {
 	}
 
 	for _, tc := range errTestCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
