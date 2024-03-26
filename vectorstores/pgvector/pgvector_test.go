@@ -558,7 +558,7 @@ func TestDeduplicater(t *testing.T) {
 			"type": "vegetable",
 		}},
 	}, vectorstores.WithDeduplicater(
-		func(ctx context.Context, doc schema.Document) bool {
+		func(_ context.Context, doc schema.Document) bool {
 			return doc.PageContent == "tokyo"
 		},
 	))

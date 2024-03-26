@@ -53,6 +53,7 @@ func TestCache_hashKeyForCache(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			v1hash := mustHashKeyForCache(tc.v1, tc.v1opt...)
 			v2hash := mustHashKeyForCache(tc.v2)
 			if (v1hash == v2hash) != tc.shouldMatch {
