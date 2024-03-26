@@ -73,7 +73,7 @@ func main() {
 			weatherCallResponse := llms.MessageContent{
 				Role: schema.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{
-					&llms.ToolCallResponse{
+					llms.ToolCallResponse{
 						ToolCallID: toolCall.ID,
 						Name:       toolCall.FunctionCall.Name,
 						Content:    response,

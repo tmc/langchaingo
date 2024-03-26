@@ -81,9 +81,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			case llms.ToolCallResponse:
 				msg.ToolCallID = p.ToolCallID
 				msg.Content = p.Content
-			case *llms.ToolCallResponse:
-				msg.ToolCallID = p.ToolCallID
-				msg.Content = p.Content
 			default:
 				return nil, fmt.Errorf("expected part of type ToolCallResponse for role %v, got %T", mc.Role, mc.Parts[0])
 			}
