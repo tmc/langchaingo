@@ -13,32 +13,46 @@ import (
 )
 
 func main() {
-	llm, err := openai.New(
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		//openai.WithHTTPClient(httputil.DebugHTTPClient),
-	)
+	llm, err := openai.New(openai.WithModel("gpt-3.5-turbo-0125"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
 
+	ctx := context.Background()
 	messageHistory := []llms.MessageContent{
 		llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
 	}
-	fmt.Println("querying for weather in Boston and Chicago")
-	resp, err := llm.GenerateContent(ctx,
-		messageHistory,
-		llms.WithTools(tools))
+
+	fmt.Println("Querying for weather in Boston and Chicago..")
+	resp := queryLLM(ctx, llm, messageHistory)
+	messageHistory = updateMessageHistory(messageHistory, resp)
+
+	if resp.Choices[0].Content != "" {
+		fmt.Println("Response to weather query:", resp.Choices[0].Content)
+	}
+
+	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
+
+	messageHistory = append(messageHistory, llms.TextParts(schema.ChatMessageTypeHuman, "Can you compare the two?"))
+	fmt.Println("Querying for comparison..")
+	resp = queryLLM(ctx, llm, messageHistory)
+	fmt.Println(resp.Choices[0].Content)
+}
+
+// queryLLM queries the LLM with the given message history and returns the response.
+func queryLLM(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent) *llms.ContentResponse {
+	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(tools))
 	if err != nil {
 		log.Fatal(err)
 	}
+	return resp
+}
 
-	// add the assistant's response to the message history:
-	// (need to convert the response to a MessageContent)
+// updateMessageHistory updates the message history with the assistant's response.
+func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
 	assistantResponse := llms.MessageContent{
 		Role: schema.ChatMessageTypeAI,
 	}
-	// iterate over tool calls and attach ToolCall parts:
 	for _, tc := range resp.Choices[0].ToolCalls {
 		assistantResponse.Parts = append(assistantResponse.Parts, llms.ToolCall{
 			ID:   tc.ID,
@@ -49,12 +63,11 @@ func main() {
 			},
 		})
 	}
-	messageHistory = append(messageHistory, assistantResponse)
+	return append(messageHistory, assistantResponse)
+}
 
-	if resp.Choices[0].Content != "" {
-		fmt.Println("response to weather query:", resp.Choices[0].Content)
-	}
-	// walk the tool calls and execute them:
+// executeToolCalls executes the tool calls in the response and returns the updated message history.
+func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
 	for _, toolCall := range resp.Choices[0].ToolCalls {
 		switch toolCall.FunctionCall.Name {
 		case "getCurrentWeather":
@@ -65,6 +78,7 @@ func main() {
 			if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
 				log.Fatal(err)
 			}
+
 			response, err := getCurrentWeather(args.Location, args.Unit)
 			if err != nil {
 				log.Fatal(err)
@@ -81,24 +95,13 @@ func main() {
 				},
 			}
 			messageHistory = append(messageHistory, weatherCallResponse)
-
-			fmt.Println("response to weather query:", args, response)
+			fmt.Println("Response to weather query:", args, response)
 		default:
-			log.Fatalf("unsupported tool: %s", toolCall.FunctionCall.Name)
+			log.Fatalf("Unsupported tool: %s", toolCall.FunctionCall.Name)
 		}
 	}
 
-	messageHistory = append(messageHistory, llms.TextParts(schema.ChatMessageTypeHuman, "Can you compare the two?"))
-
-	fmt.Println("querying for comparison")
-	resp, err = llm.GenerateContent(ctx,
-		messageHistory,
-		llms.WithTools(tools))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(resp.Choices[0].Content)
+	return messageHistory
 }
 
 func getCurrentWeather(location string, unit string) (string, error) {
@@ -106,10 +109,12 @@ func getCurrentWeather(location string, unit string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("no weather info for %q", location)
 	}
+
 	b, err := json.Marshal(weatherInfo)
 	if err != nil {
 		return "", err
 	}
+
 	return string(b), nil
 }
 
