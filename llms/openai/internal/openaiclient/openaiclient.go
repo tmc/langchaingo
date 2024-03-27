@@ -19,9 +19,10 @@ var ErrEmptyResponse = errors.New("empty response")
 type APIType string
 
 const (
-	APITypeOpenAI  APIType = "OPEN_AI"
-	APITypeAzure   APIType = "AZURE"
-	APITypeAzureAD APIType = "AZURE_AD"
+	APITypeOpenAI     APIType = "OPEN_AI"
+	APITypeAzure      APIType = "AZURE"
+	APITypeAzureAD    APIType = "AZURE_AD"
+	APITypePerplexity APIType = "PERPLEXITY"
 )
 
 // Client is a client for the OpenAI API.
@@ -148,9 +149,13 @@ func IsAzure(apiType APIType) bool {
 	return apiType == APITypeAzure || apiType == APITypeAzureAD
 }
 
+func IsPerplexity(apiType APIType) bool {
+	return apiType == APITypePerplexity
+}
+
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
+	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD || c.apiType == APITypePerplexity {
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	} else {
 		req.Header.Set("api-key", c.token)
@@ -163,6 +168,9 @@ func (c *Client) setHeaders(req *http.Request) {
 func (c *Client) buildURL(suffix string, model string) string {
 	if IsAzure(c.apiType) {
 		return c.buildAzureURL(suffix, model)
+	}
+	if IsPerplexity(c.apiType) && c.baseURL == defaultBaseURL {
+		c.baseURL = "https://api.perplexity.ai"
 	}
 
 	// open ai implement:
