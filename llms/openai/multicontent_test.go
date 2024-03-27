@@ -13,7 +13,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newTestClient(t *testing.T, opts ...Option) llms.Model {
+func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
@@ -160,6 +160,20 @@ func TestFunctionCall(t *testing.T) {
 	c1 := rsp.Choices[0]
 	assert.Equal(t, "function_call", c1.StopReason)
 	assert.NotNil(t, c1.FuncCall)
+}
+
+func TestTranscription(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t, WithModel("whisper-1"))
+
+	audioFilePath := "./sample.mp3"
+	_, err := os.Stat(audioFilePath)
+	require.NoError(t, err)
+
+	rsp, err := llm.TranscribeAudio(context.Background(), audioFilePath)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp)
 }
 
 func showResponse(rsp any) string { //nolint:golint,unused
