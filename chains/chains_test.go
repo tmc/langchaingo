@@ -101,12 +101,16 @@ func TestApplyWithCanceledContext(t *testing.T) {
 	wg.Add(1)
 	c := NewLLMChain(&testLanguageModel{simulateWork: time.Second}, prompts.NewPromptTemplate("test", nil))
 
+	var applyErr error
 	go func() {
 		defer wg.Done()
-		_, err := Apply(ctx, c, inputs, maxWorkers)
-		require.Error(t, err)
+		_, applyErr = Apply(ctx, c, inputs, maxWorkers)
 	}()
 
 	cancelFunc()
 	wg.Wait()
+
+	if applyErr == nil || applyErr.Error() != "context canceled" {
+		t.Fatal("expected context canceled error, got:", applyErr)
+	}
 }

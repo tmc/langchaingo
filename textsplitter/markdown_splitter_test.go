@@ -335,8 +335,6 @@ more text`,
 	}
 
 	for _, tc := range tt {
-		tc := tc // pin
-
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -441,8 +439,6 @@ func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		tc := tc // pin
-
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 

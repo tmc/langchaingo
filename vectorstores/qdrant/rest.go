@@ -27,7 +27,7 @@ func (s Store) upsertPoints(
 
 	payload := upsertBody{
 		Batch: upsertBatch{
-			Ids:      ids,
+			IDs:      ids,
 			Vectors:  vectors,
 			Payloads: payloads,
 		},

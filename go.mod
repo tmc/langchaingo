@@ -1,8 +1,6 @@
 module github.com/tmc/langchaingo
 
-go 1.21.2
-
-toolchain go1.21.4
+go 1.22
 
 require (
 	github.com/google/uuid v1.6.0
@@ -67,6 +65,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/gage-technologies/mistral-go v1.0.0 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -176,6 +175,7 @@ require (
 	cloud.google.com/go/aiplatform v1.58.0
 	cloud.google.com/go/vertexai v0.6.0
 	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0
+	github.com/Code-Hex/go-generics-cache v1.3.1
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.1.2

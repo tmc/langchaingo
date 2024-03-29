@@ -13,6 +13,8 @@ type options struct {
 	model      string
 	baseURL    string
 	httpClient anthropicclient.Doer
+
+	useLegacyTextCompletionsAPI bool
 }
 
 type Option func(*options)
@@ -45,5 +47,12 @@ func WithBaseURL(baseURL string) Option {
 func WithHTTPClient(client anthropicclient.Doer) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithLegacyTextCompletionsAPI enables the use of the legacy text completions API.
+func WithLegacyTextCompletionsAPI() Option {
+	return func(opts *options) {
+		opts.useLegacyTextCompletionsAPI = true
 	}
 }

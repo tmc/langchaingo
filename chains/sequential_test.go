@@ -66,7 +66,6 @@ func TestSimpleSequentialErrors(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			c, err := NewSimpleSequentialChain([]Chain{tc.chain})
@@ -179,7 +178,6 @@ func TestSequentialChainErrors(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			c, err := NewSequentialChain(tc.chains, []string{"input1", "input2"}, []string{"output"}, tc.seqChainOpts...)

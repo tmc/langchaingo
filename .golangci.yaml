@@ -28,6 +28,8 @@ linters:
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
     - depguard # disabling temporarily
     - ireturn # disabling temporarily
+    - perfsprint
+    - musttag
 
 linters-settings:
   cyclop:
@@ -48,5 +50,5 @@ linters-settings:
           - "**/*_test.go"
           - "**/mock/**/*.go"
 run:
-  skip-dirs:
+  exclude-dirs:
     - 'exp'

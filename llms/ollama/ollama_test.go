@@ -94,7 +94,7 @@ func TestWithStreaming(t *testing.T) {
 
 	var sb strings.Builder
 	rsp, err := llm.GenerateContent(context.Background(), content,
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
 		}))

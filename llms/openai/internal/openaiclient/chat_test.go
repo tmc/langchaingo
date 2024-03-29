@@ -21,7 +21,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 	}
 
 	req := &ChatRequest{
-		StreamingFunc: func(ctx context.Context, chunk []byte) error {
+		StreamingFunc: func(_ context.Context, _ []byte) error {
 			return nil
 		},
 	}
