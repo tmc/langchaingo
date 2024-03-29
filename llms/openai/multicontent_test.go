@@ -134,7 +134,6 @@ func TestWithStreamingNVidia(t *testing.T) {
 	opts := []Option{
 		WithModel("meta/llama2-70b"),
 		WithAPIType(APITypeNvidia),
-		WithToken("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"),
 	}
 
 	llm := newTestClient(t, opts...)
