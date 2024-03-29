@@ -129,6 +129,43 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+func TestWithStreamingNVidia(t *testing.T) {
+	t.Parallel()
+	os.Setenv("OPENAI_API_KEY", "ola")
+	opts := []Option{
+		WithModel("meta/llama2-70b"),
+		WithAPIType(APITypeNvidia),
+		WithToken("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"),
+	}
+
+	llm := newTestClient(t, opts...)
+
+	parts := []llms.ContentPart{
+		llms.TextPart("I'm a pomeranian"),
+		llms.TextPart("Tell me more about my taxonomy"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  schema.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	var sb strings.Builder
+	rsp, err := llm.GenerateContent(context.Background(), content,
+		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			sb.Write(chunk)
+			return nil
+		}))
+
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "family can", strings.ToLower(c1.Content))
+	assert.Regexp(t, "family can", strings.ToLower(sb.String()))
+}
+
 //nolint:lll
 func TestFunctionCall(t *testing.T) {
 	t.Parallel()

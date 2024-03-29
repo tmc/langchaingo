@@ -70,6 +70,18 @@ type ChatMessage struct { //nolint:musttag
 	FunctionCall *FunctionCall
 }
 
+type NvidiaMultPayload struct {
+	Model    string `json:"model"`
+	Messages []Messages
+}
+type Messages struct {
+	Role    string `json:"role"`
+	Content []struct {
+		Text string `json:"text"`
+		Type string `json:"type"`
+	} `json:"content"`
+}
+
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	if m.Content != "" && m.MultiContent != nil {
 		return nil, ErrContentExclusive
@@ -190,17 +202,28 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		payload.Stream = true
 	}
 	// Build request payload
+	if c.baseURL == "" {
+		c.baseURL = defaultBaseURL
+	}
+	if c.apiType == APITypeNvidia {
+
+		c.baseURL = defaultNvidiaUrl
+
+		normalisePayloadNvidia(payload)
+
+	}
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
 
+	//test := normalisePayloadNvidia(payload)
+	//fmt.Println("test", test)
+
 	// Build request
 	body := bytes.NewReader(payloadBytes)
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
-	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", c.Model), body)
 	if err != nil {
 		return nil, err
@@ -294,4 +317,30 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		}
 	}
 	return &response, nil
+}
+
+// Check if message has multi content and normalise it
+func normalisePayloadNvidia(payload *ChatRequest) ChatRequest {
+	for _, msg := range payload.Messages {
+		if len(msg.MultiContent) > 0 {
+			var messages Messages
+			payloadString, err := json.Marshal(msg)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = json.Unmarshal(payloadString, &messages)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			msg.Content = ""
+			for _, content := range messages.Content {
+				msg.Content += content.Text + "\n "
+			}
+
+			msg.MultiContent = nil
+
+		}
+	}
+	return *payload
 }

@@ -10,12 +10,20 @@ import (
 )
 
 const (
-	defaultEmbeddingModel = "text-embedding-ada-002"
+	defaultEmbeddingModel       = "text-embedding-ada-002"
+	defaultEmbeddingModelNvidia = "NV-Embed-QA"
 )
 
 type embeddingPayload struct {
-	Model string   `json:"model"`
-	Input []string `json:"input"`
+	Model     string   `json:"model"`
+	Input     []string `json:"input"`
+	InputType string   `json:"input_type,omitempty"`
+}
+
+type embeddingPayloadNvidia struct {
+	Model       string `json:"model"`
+	InputType   string `json:"input_type"`
+	InputNvidia string `json:"input"`
 }
 
 type embeddingResponsePayload struct {
@@ -34,13 +42,24 @@ type embeddingResponsePayload struct {
 
 // nolint:lll
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
+
+	if c.baseURL == "" {
+		c.baseURL = defaultBaseURL
+	}
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
+
+	if c.apiType == APITypeNvidia {
+		payloadNvidia := c.nvidiaEmbedding(payload)
+		payloadBytes, err = json.Marshal(payloadNvidia)
+		if err != nil {
+			return nil, fmt.Errorf("marshal payload: %w", err)
+		}
 	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.embeddingsModel), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -74,4 +93,23 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 	}
 
 	return &response, nil
+}
+
+// nvidiaEmbedding is a helper function to set the correct parameters for the Nvidia API.
+// It sets the correct base URL, model, and input type.
+func (c *Client) nvidiaEmbedding(payload *embeddingPayload) embeddingPayload {
+	payload.Model = payload.Model
+	payload.InputType = "query"
+
+	if c.apiType == APITypeNvidia {
+		c.baseURL = defaultEmbeddingUrlNvidia
+		if c.embeddingsModel == "" {
+			payload.Model = defaultEmbeddingModelNvidia
+		}
+		if c.embeddingsModel != "" {
+			payload.Model = c.embeddingsModel
+		}
+	}
+
+	return *payload
 }

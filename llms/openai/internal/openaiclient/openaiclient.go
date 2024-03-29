@@ -11,6 +11,8 @@ import (
 const (
 	defaultBaseURL              = "https://api.openai.com/v1"
 	defaultFunctionCallBehavior = "auto"
+	defaultNvidiaUrl            = "https://integrate.api.nvidia.com/v1"
+	defaultEmbeddingUrlNvidia   = "https://ai.api.nvidia.com/v1/retrieval/nvidia"
 )
 
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.
@@ -22,6 +24,7 @@ const (
 	APITypeOpenAI  APIType = "OPEN_AI"
 	APITypeAzure   APIType = "AZURE"
 	APITypeAzureAD APIType = "AZURE_AD"
+	APITypeNvidia  APIType = "NVIDIA"
 )
 
 // Client is a client for the OpenAI API.
@@ -150,7 +153,7 @@ func IsAzure(apiType APIType) bool {
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
+	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD || c.apiType == APITypeNvidia {
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	} else {
 		req.Header.Set("api-key", c.token)
