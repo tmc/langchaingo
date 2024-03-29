@@ -7,6 +7,7 @@ import (
 
 const (
 	tokenEnvVarName        = "OPENAI_API_KEY"      //nolint:gosec
+	tokenNvidiaEnvVarName  = "OPENAI_NVAPI_KEY"    //nolint:gosec
 	modelEnvVarName        = "OPENAI_MODEL"        //nolint:gosec
 	baseURLEnvVarName      = "OPENAI_BASE_URL"     //nolint:gosec
 	baseAPIBaseEnvVarName  = "OPENAI_API_BASE"     //nolint:gosec
