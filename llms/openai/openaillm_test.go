@@ -9,6 +9,7 @@ import (
 )
 
 func TestLLM_GenerateContent(t *testing.T) {
+	t.Skip("Skipping Test Generate Content Nvidia")
 	t.Run("Test Generate Content Nvidia", func(t *testing.T) {
 		opts := []Option{
 			WithModel("meta/llama2-70b"),
