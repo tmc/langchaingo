@@ -131,7 +131,6 @@ func TestWithStreaming(t *testing.T) {
 
 func TestWithStreamingNVidia(t *testing.T) {
 	t.Parallel()
-	os.Setenv("OPENAI_API_KEY", "ola")
 	opts := []Option{
 		WithModel("meta/llama2-70b"),
 		WithAPIType(APITypeNvidia),

@@ -11,8 +11,8 @@ import (
 const (
 	defaultBaseURL              = "https://api.openai.com/v1"
 	defaultFunctionCallBehavior = "auto"
-	defaultNvidiaUrl            = "https://integrate.api.nvidia.com/v1"
-	defaultEmbeddingUrlNvidia   = "https://ai.api.nvidia.com/v1/retrieval/nvidia"
+	defaultNvidiaURL            = "https://integrate.api.nvidia.com/v1"
+	defaultEmbeddingURLNvidia   = "https://ai.api.nvidia.com/v1/retrieval/nvidia"
 )
 
 // ErrEmptyResponse is returned when the OpenAI API returns an empty response.

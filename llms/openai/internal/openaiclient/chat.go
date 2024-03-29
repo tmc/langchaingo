@@ -206,11 +206,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		c.baseURL = defaultBaseURL
 	}
 	if c.apiType == APITypeNvidia {
-
-		c.baseURL = defaultNvidiaUrl
+		c.baseURL = defaultNvidiaURL
 
 		normalisePayloadNvidia(payload)
-
 	}
 
 	payloadBytes, err := json.Marshal(payload)
@@ -319,7 +317,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	return &response, nil
 }
 
-// Check if message has multi content and normalise it
+// Check if message has multi content and normalise it.
 func normalisePayloadNvidia(payload *ChatRequest) ChatRequest {
 	for _, msg := range payload.Messages {
 		if len(msg.MultiContent) > 0 {
@@ -339,7 +337,6 @@ func normalisePayloadNvidia(payload *ChatRequest) ChatRequest {
 			}
 
 			msg.MultiContent = nil
-
 		}
 	}
 	return *payload

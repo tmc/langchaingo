@@ -20,12 +20,6 @@ type embeddingPayload struct {
 	InputType string   `json:"input_type,omitempty"`
 }
 
-type embeddingPayloadNvidia struct {
-	Model       string `json:"model"`
-	InputType   string `json:"input_type"`
-	InputNvidia string `json:"input"`
-}
-
 type embeddingResponsePayload struct {
 	Object string `json:"object"`
 	Data   []struct {
@@ -97,11 +91,10 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 // nvidiaEmbedding is a helper function to set the correct parameters for the Nvidia API.
 // It sets the correct base URL, model, and input type.
 func (c *Client) nvidiaEmbedding(payload *embeddingPayload) embeddingPayload {
-	payload.Model = payload.Model
 	payload.InputType = "query"
 
 	if c.apiType == APITypeNvidia {
-		c.baseURL = defaultEmbeddingUrlNvidia
+		c.baseURL = defaultEmbeddingURLNvidia
 		if c.embeddingsModel == "" {
 			payload.Model = defaultEmbeddingModelNvidia
 		}
