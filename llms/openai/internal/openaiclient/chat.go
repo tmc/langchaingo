@@ -218,8 +218,8 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		return nil, err
 	}
 
-	//test := normalisePayloadNvidia(payload)
-	//fmt.Println("test", test)
+	// test := normalisePayloadNvidia(payload)
+	// fmt.Println("test", test)
 
 	// Build request
 	body := bytes.NewReader(payloadBytes)

@@ -2,9 +2,10 @@ package openai
 
 import (
 	"context"
+	"testing"
+
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"testing"
 )
 
 func TestLLM_GenerateContent(t *testing.T) {
@@ -34,7 +35,6 @@ func TestLLM_GenerateContent(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-
 	})
 }
 
@@ -56,6 +56,5 @@ func TestLLM_CreateEmbedding(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-
 	})
 }

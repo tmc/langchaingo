@@ -32,6 +32,7 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 		opt(options)
 	}
 
+	// set of options needed for Nvidia client
 	if options.apiType == APITypeNvidia {
 		options.token = os.Getenv(tokenNvidiaEnvVarName)
 	}

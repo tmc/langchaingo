@@ -42,7 +42,6 @@ type embeddingResponsePayload struct {
 
 // nolint:lll
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
-
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
