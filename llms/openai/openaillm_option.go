@@ -40,8 +40,6 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
-	// required when use whisper model
-	language string
 }
 
 // Option is a functional option for the OpenAI client.
@@ -128,13 +126,5 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
-	}
-}
-
-// WithLanguage allows setting a custom language.
-// doc for language: https://platform.openai.com/docs/guides/speech-to-text/supported-languages
-func WithLanguage(language string) Option {
-	return func(opts *options) {
-		opts.language = language
 	}
 }
