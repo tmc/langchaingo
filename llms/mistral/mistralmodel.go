@@ -116,6 +116,7 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 	chatOpts := sdk.DefaultChatRequestParams
 	chatOpts.MaxTokens = callOpts.MaxTokens
 	chatOpts.Temperature = callOpts.Temperature
+	chatOpts.RandomSeed = callOpts.Seed
 	chatOpts.Tools = make([]sdk.Tool, 0)
 	for _, function := range callOpts.Functions {
 		chatOpts.Tools = append(chatOpts.Tools, sdk.Tool{
