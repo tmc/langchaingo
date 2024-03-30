@@ -19,7 +19,6 @@ func main() {
 	}
 	ctx := context.Background()
 	embedings, err := llm.CreateEmbedding(ctx, []string{"ola", "mundo"})
-
 	if err != nil {
 		log.Fatal(err)
 	}
