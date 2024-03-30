@@ -15,7 +15,7 @@ func TestTranscription(t *testing.T) {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 	t.Run("Test with local file", func(t *testing.T) {
-
+		t.Parallel()
 		audioFilePath := "./sample.mp3"
 		_, err := os.Stat(audioFilePath)
 		require.NoError(t, err)
@@ -28,10 +28,10 @@ func TestTranscription(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp)
-
 	})
 
 	t.Run("Test from url", func(t *testing.T) {
+		t.Parallel()
 		audioURL := "https://github.com/AssemblyAI-Examples/audio-examples/raw/main/20230607_me_canadian_wildfires.mp3"
 
 		opts := []WhisperOpenAIOption{
@@ -43,6 +43,5 @@ func TestTranscription(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp)
-
 	})
 }

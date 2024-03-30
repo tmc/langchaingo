@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
@@ -83,7 +84,6 @@ func WithTemperature(temperature float64) WhisperOpenAIOption {
 }
 
 func (c *WhisperOpenAILoader) Load(ctx context.Context) ([]schema.Document, error) {
-
 	if strings.Contains(c.audioFilePath, "http") {
 		audioFilePath, err := downloadFileFromURL(c.audioFilePath)
 		if err != nil {
@@ -98,8 +98,8 @@ func (c *WhisperOpenAILoader) Load(ctx context.Context) ([]schema.Document, erro
 		return nil, err
 	}
 
-	//create a virtual file
-	tmpOutputFile, err := ioutil.TempFile("", "*.txt")
+	// create a virtual file
+	tmpOutputFile, err := os.CreateTemp("", "*.txt")
 	if err != nil {
 		return nil, fmt.Errorf("erro ao criar arquivo temporário de texto: %w", err)
 	}
@@ -111,7 +111,7 @@ func (c *WhisperOpenAILoader) Load(ctx context.Context) ([]schema.Document, erro
 		return nil, fmt.Errorf("erro ao escrever no arquivo temporário de texto: %w", err)
 	}
 
-	//read file
+	// read file
 	file, err := os.Open(tmpOutputFile.Name())
 	if err != nil {
 		return nil, fmt.Errorf("erro ao ler o arquivo de texto gerado: %w", err)
@@ -119,7 +119,6 @@ func (c *WhisperOpenAILoader) Load(ctx context.Context) ([]schema.Document, erro
 	txtLoader := NewText(file)
 
 	return txtLoader.Load(ctx)
-
 }
 
 func (c *WhisperOpenAILoader) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
@@ -133,22 +132,38 @@ func (c *WhisperOpenAILoader) LoadAndSplit(ctx context.Context, splitter textspl
 
 // downloadFileFromURL downloads a file from the provided URL and saves it to a temporary file.
 // It returns the path to the temporary file and any error encountered.
+//
+// nolint
 func downloadFileFromURL(fileURL string) (string, error) {
-	// Get the data
-	resp, err := http.Get(fileURL)
+	parsedURL, err := url.Parse(fileURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	// Verificação adicional do esquema pode ser realizada aqui, se necessário
+
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return "", fmt.Errorf("URL scheme must be HTTP or HTTPS")
+	}
+
+	// Configuração de um http.Client com timeout
+	netClient := &http.Client{
+		Timeout: time.Second * 10, // Defina o timeout conforme necessário
+	}
+
+	resp, err := netClient.Get(fileURL)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
-	// Create a temporary file
-	tmpFile, err := os.CreateTemp("", "downloaded_audio_*.mp3") // Adjust the pattern to match your file type
+	// Restante do código para manipulação do arquivo...
+	tmpFile, err := os.CreateTemp("", "downloaded_file_*") // Ajuste o padrão conforme o tipo de arquivo
 	if err != nil {
 		return "", err
 	}
 	defer tmpFile.Close()
 
-	// Write the body to file
 	_, err = io.Copy(tmpFile, resp.Body)
 	if err != nil {
 		return "", err
