@@ -233,7 +233,7 @@ func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessag
 		chatMsg.Role = "assistant"
 	case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeHuman:
 		chatMsg.Role = "user"
-	case schema.ChatMessageTypeFunction:
+	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 		chatMsg.Role = "tool"
 	case schema.ChatMessageTypeSystem:
 		chatMsg.Role = "system"

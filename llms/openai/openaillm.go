@@ -22,6 +22,7 @@ const (
 	RoleAssistant = "assistant"
 	RoleUser      = "user"
 	RoleFunction  = "function"
+	RoleTool      = "tool"
 )
 
 var _ llms.Model = (*LLM)(nil)
@@ -67,35 +68,71 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		case schema.ChatMessageTypeGeneric:
 			msg.Role = RoleUser
 		case schema.ChatMessageTypeFunction:
-			fallthrough
+			msg.Role = RoleFunction
+		case schema.ChatMessageTypeTool:
+			msg.Role = RoleTool
+			// Here we extract tool calls from the message and populate the ToolCalls field.
+
+			// parse mc.Parts (which should have one entry of type ToolCallResponse) and populate msg.Content and msg.ToolCallID
+			if len(mc.Parts) != 1 {
+				return nil, fmt.Errorf("expected exactly one part for role %v, got %v", mc.Role, len(mc.Parts))
+			}
+			switch p := mc.Parts[0].(type) {
+			case llms.ToolCallResponse:
+				msg.ToolCallID = p.ToolCallID
+				msg.Content = p.Content
+			default:
+				return nil, fmt.Errorf("expected part of type ToolCallResponse for role %v, got %T", mc.Role, mc.Parts[0])
+			}
+
 		default:
 			return nil, fmt.Errorf("role %v not supported", mc.Role)
 		}
 
+		// Here we extract tool calls from the message and populate the ToolCalls field.
+		newParts, toolCalls := ExtractToolParts(msg)
+		msg.MultiContent = newParts
+		msg.ToolCalls = toolCallsFromToolCalls(toolCalls)
+
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
-		Model:                opts.Model,
-		StopWords:            opts.StopWords,
-		Messages:             chatMsgs,
-		StreamingFunc:        opts.StreamingFunc,
-		Temperature:          opts.Temperature,
-		MaxTokens:            opts.MaxTokens,
-		N:                    opts.N,
-		FrequencyPenalty:     opts.FrequencyPenalty,
-		PresencePenalty:      opts.PresencePenalty,
+		Model:            opts.Model,
+		StopWords:        opts.StopWords,
+		Messages:         chatMsgs,
+		StreamingFunc:    opts.StreamingFunc,
+		Temperature:      opts.Temperature,
+		MaxTokens:        opts.MaxTokens,
+		N:                opts.N,
+		FrequencyPenalty: opts.FrequencyPenalty,
+		PresencePenalty:  opts.PresencePenalty,
+
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
 	}
+
+	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
-		req.Functions = append(req.Functions, openaiclient.FunctionDefinition{
-			Name:        fn.Name,
-			Description: fn.Description,
-			Parameters:  fn.Parameters,
+		req.Tools = append(req.Tools, openaiclient.Tool{
+			Type: "function",
+			Function: openaiclient.FunctionDefinition{
+				Name:        fn.Name,
+				Description: fn.Description,
+				Parameters:  fn.Parameters,
+			},
 		})
 	}
+	// if opts.Tools is not empty, append them to req.Tools
+	for _, tool := range opts.Tools {
+		t, err := toolFromTool(tool)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert llms tool to openai tool: %w", err)
+		}
+		req.Tools = append(req.Tools, t)
+	}
+
 	result, err := o.client.CreateChat(ctx, req)
 	if err != nil {
 		return nil, err
@@ -108,7 +145,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
 			Content:    c.Message.Content,
-			StopReason: c.FinishReason,
+			StopReason: fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
 				"CompletionTokens": result.Usage.CompletionTokens,
 				"PromptTokens":     result.Usage.PromptTokens,
@@ -116,20 +153,35 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		}
 
+		// Legacy function call handling
 		if c.FinishReason == "function_call" {
 			choices[i].FuncCall = &schema.FunctionCall{
 				Name:      c.Message.FunctionCall.Name,
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
+		if c.FinishReason == "tool_calls" {
+			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
+			for _, tool := range c.Message.ToolCalls {
+				choices[i].ToolCalls = append(choices[i].ToolCalls, schema.ToolCall{
+					ID:   tool.ID,
+					Type: string(tool.Type),
+					FunctionCall: &schema.FunctionCall{
+						Name:      tool.Function.Name,
+						Arguments: tool.Function.Arguments,
+					},
+				})
+			}
+			// populate legacy single-function call field for backwards compatibility
+			if len(choices[i].ToolCalls) > 0 {
+				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
+			}
+		}
 	}
-
 	response := &llms.ContentResponse{Choices: choices}
-
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
 	return response, nil
 }
 
@@ -149,4 +201,62 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 		return embeddings, ErrUnexpectedResponseLength
 	}
 	return embeddings, nil
+}
+
+// ExtractToolParts extracts the tool parts from a message.
+func ExtractToolParts(msg *ChatMessage) ([]llms.ContentPart, []llms.ToolCall) {
+	var content []llms.ContentPart
+	var toolCalls []llms.ToolCall
+	for _, part := range msg.MultiContent {
+		switch p := part.(type) {
+		case llms.TextContent:
+			content = append(content, p)
+		case llms.ImageURLContent:
+			content = append(content, p)
+		case llms.BinaryContent:
+			content = append(content, p)
+		case llms.ToolCall:
+			toolCalls = append(toolCalls, p)
+		}
+	}
+	return content, toolCalls
+}
+
+// toolFromTool converts an llms.Tool to a Tool.
+func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
+	tool := openaiclient.Tool{
+		Type: openaiclient.ToolType(t.Type),
+	}
+	switch t.Type {
+	case string(openaiclient.ToolTypeFunction):
+		tool.Function = openaiclient.FunctionDefinition{
+			Name:        t.Function.Name,
+			Description: t.Function.Description,
+			Parameters:  t.Function.Parameters,
+		}
+	default:
+		return openaiclient.Tool{}, fmt.Errorf("tool type %v not supported", t.Type)
+	}
+	return tool, nil
+}
+
+// toolCallsFromToolCalls converts a slice of llms.ToolCall to a slice of ToolCall.
+func toolCallsFromToolCalls(tcs []llms.ToolCall) []openaiclient.ToolCall {
+	toolCalls := make([]openaiclient.ToolCall, len(tcs))
+	for i, tc := range tcs {
+		toolCalls[i] = toolCallFromToolCall(tc)
+	}
+	return toolCalls
+}
+
+// toolCallFromToolCall converts an llms.ToolCall to a ToolCall.
+func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
+	return openaiclient.ToolCall{
+		ID:   tc.ID,
+		Type: openaiclient.ToolType(tc.Type),
+		Function: openaiclient.ToolFunction{
+			Name:      tc.FunctionCall.Name,
+			Arguments: tc.FunctionCall.Arguments,
+		},
+	}
 }
