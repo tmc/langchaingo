@@ -1,8 +1,10 @@
 module github.com/tmc/langchaingo/examples/vertex-completion-example
 
-go 1.21.1
+go 1.22.0
 
-require github.com/tmc/langchaingo v0.1.7
+toolchain go1.22.1
+
+require github.com/tmc/langchaingo v0.1.8
 
 require (
 	cloud.google.com/go v0.112.0 // indirect

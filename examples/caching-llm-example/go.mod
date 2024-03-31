@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/caching-llm-example
 
 require (
 	github.com/mitchellh/go-wordwrap v1.0.1
-	github.com/tmc/langchaingo v0.1.8-0.20240326203120-b6ba6693d314
+	github.com/tmc/langchaingo v0.1.8
 )
 
 require (
@@ -13,6 +13,6 @@ require (
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 )
 
-go 1.22
+go 1.22.0
 
 toolchain go1.22.1

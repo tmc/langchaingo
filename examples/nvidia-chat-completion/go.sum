@@ -10,11 +10,7 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/tmc/langchaingo v0.1.8-0.20240326203120-b6ba6693d314 h1:xs8Vr3B1AKQxBeVlKyQkLvR2apeuvii590JKTjfXfpA=
-github.com/tmc/langchaingo v0.1.8-0.20240326203120-b6ba6693d314/go.mod h1:4qApuN3hOtFHlzy68b0Ld8e6wfiIF1DZnIcTZV0for8=
-github.com/tmc/langchaingo v0.1.8-0.20240331231541-12618779023e h1:F14gwH8WJg6lEXap14dJnTIbDw0njYQIEliqO3P+AT4=
-github.com/tmc/langchaingo v0.1.8-0.20240331231541-12618779023e/go.mod h1:4qApuN3hOtFHlzy68b0Ld8e6wfiIF1DZnIcTZV0for8=
-github.com/tmc/langchaingo v0.1.8-0.20240331232816-b6d3aad8d13c h1:kK9qFimShKhlXKZhITxTW2Eydw/Pb9tImmCJqPq8NSU=
-github.com/tmc/langchaingo v0.1.8-0.20240331232816-b6d3aad8d13c/go.mod h1:4qApuN3hOtFHlzy68b0Ld8e6wfiIF1DZnIcTZV0for8=
+github.com/tmc/langchaingo v0.1.8 h1:nrImgh0aWdu3stJTHz80N60WGwPWY8HXCK10gQny7bA=
+github.com/tmc/langchaingo v0.1.8/go.mod h1:iNBfS9e6jxBKsJSPWnlqNhoVWgdA3D1g5cdFJjbIZNQ=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
