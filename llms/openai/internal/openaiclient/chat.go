@@ -74,6 +74,10 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 	if m.Content != "" && m.MultiContent != nil {
 		return nil, ErrContentExclusive
 	}
+	if text, ok := isSingleTextContent(m.MultiContent); ok {
+		m.Content = text
+		m.MultiContent = nil
+	}
 	if len(m.MultiContent) > 0 {
 		msg := struct {
 			Role         string             `json:"role"`
@@ -92,6 +96,14 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		FunctionCall *FunctionCall      `json:"function_call,omitempty"`
 	}(m)
 	return json.Marshal(msg)
+}
+
+func isSingleTextContent(parts []llms.ContentPart) (string, bool) {
+	if len(parts) != 1 {
+		return "", false
+	}
+	tc, isText := parts[0].(llms.TextContent)
+	return tc.Text, isText
 }
 
 func (m *ChatMessage) UnmarshalJSON(data []byte) error {
