@@ -15,6 +15,7 @@ type CompletionRequest struct {
 	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
 	TopP             float64  `json:"top_p,omitempty"`
 	StopWords        []string `json:"stop,omitempty"`
+	Seed             int      `json:"seed,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
@@ -85,5 +86,6 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		FrequencyPenalty: payload.FrequencyPenalty,
 		PresencePenalty:  payload.PresencePenalty,
 		StreamingFunc:    payload.StreamingFunc,
+		Seed:             payload.Seed,
 	})
 }
