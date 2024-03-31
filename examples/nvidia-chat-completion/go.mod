@@ -1,10 +1,10 @@
 module github.com/tmc/langchaingo/examples/nvidia-chat-completion
 
-go 1.22
+go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.8-0.20240331231541-12618779023e
+require github.com/tmc/langchaingo v0.1.8
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
