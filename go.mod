@@ -188,7 +188,7 @@ require (
 	github.com/gocolly/colly v1.2.0
 	github.com/google/generative-ai-go v0.5.0
 	github.com/google/go-cmp v0.6.0
-	github.com/h0rv/go-watsonx v1.0.0
+	github.com/h0rv/go-watsonx v0.2.1
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/mattn/go-sqlite3 v1.14.17
