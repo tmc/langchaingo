@@ -25,7 +25,7 @@ func Test(t *testing.T) {
 	if mysqlURI == "" {
 		mysqlContainer, err := mysql.RunContainer(
 			context.Background(),
-			testcontainers.WithImage("mysql:8"),
+			testcontainers.WithImage("mysql:8.3.0"),
 			mysql.WithDatabase("test"),
 			mysql.WithUsername("user"),
 			mysql.WithPassword("p@ssw0rd"),
