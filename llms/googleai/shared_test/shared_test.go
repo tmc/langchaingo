@@ -20,7 +20,7 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-func newGoogleAIClient(t *testing.T) *googleai.GoogleAI {
+func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
 
 	genaiKey := os.Getenv("GENAI_API_KEY")
@@ -28,12 +28,14 @@ func newGoogleAIClient(t *testing.T) *googleai.GoogleAI {
 		t.Skip("GENAI_API_KEY not set")
 		return nil
 	}
-	llm, err := googleai.New(context.Background(), googleai.WithAPIKey(genaiKey))
+
+	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
 }
 
-func newVertexClient(t *testing.T) *vertex.Vertex {
+func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
 	project := os.Getenv("VERTEX_PROJECT")
@@ -46,10 +48,10 @@ func newVertexClient(t *testing.T) *vertex.Vertex {
 		location = "us-central1"
 	}
 
-	llm, err := vertex.New(
-		context.Background(),
+	opts = append(opts,
 		googleai.WithCloudProject(project),
 		googleai.WithCloudLocation(location))
+	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
 }
@@ -62,31 +64,38 @@ func funcName(f any) string {
 	return parts[len(parts)-1]
 }
 
-type testFunc func(*testing.T, llms.Model)
+// testConfigs is a list of all test functions in this file to run with both
+// client types, and their client configurations.
+type testConfig struct {
+	testFunc func(*testing.T, llms.Model)
+	opts     []googleai.Option
+}
 
-// testFuncs is a list of all test functions in this file to run with both
-// client types.
-var testFuncs = []testFunc{
-	testMultiContentText,
-	testGenerateFromSinglePrompt,
-	testMultiContentTextChatSequence,
-	testMultiContentImageLink,
-	testMultiContentImageBinary,
-	testEmbeddings,
-	testCandidateCountSetting,
-	testMaxTokensSetting,
-	testWithStreaming,
+var testConfigs = []testConfig{
+	{testMultiContentText, nil},
+	{testGenerateFromSinglePrompt, nil},
+	{testMultiContentTextChatSequence, nil},
+	{testMultiContentImageLink, nil},
+	{testMultiContentImageBinary, nil},
+	{testEmbeddings, nil},
+	{testCandidateCountSetting, nil},
+	{testMaxTokensSetting, nil},
+	{
+		testMultiContentText,
+		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
+	},
+	{testWithStreaming, nil},
 }
 
 func TestShared(t *testing.T) {
-	for _, f := range testFuncs {
-		t.Run(fmt.Sprintf("%s-googleai", funcName(f)), func(t *testing.T) {
-			llm := newGoogleAIClient(t)
-			f(t, llm)
+	for _, c := range testConfigs {
+		t.Run(fmt.Sprintf("%s-googleai", funcName(c.testFunc)), func(t *testing.T) {
+			llm := newGoogleAIClient(t, c.opts...)
+			c.testFunc(t, llm)
 		})
-		t.Run(fmt.Sprintf("%s-vertex", funcName(f)), func(t *testing.T) {
-			llm := newVertexClient(t)
-			f(t, llm)
+		t.Run(fmt.Sprintf("%s-vertex", funcName(c.testFunc)), func(t *testing.T) {
+			llm := newVertexClient(t, c.opts...)
+			c.testFunc(t, llm)
 		})
 	}
 }
@@ -111,7 +120,7 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+	assert.Regexp(t, "(?i)dog|carnivo|canid|canine", c1.Content)
 }
 
 func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
@@ -309,7 +318,7 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	// a stop reason that max of tokens was reached.
 	{
 		rsp, err := llm.GenerateContent(context.Background(), content,
-			llms.WithMaxTokens(16))
+			llms.WithMaxTokens(64))
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp.Choices)

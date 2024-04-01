@@ -57,6 +57,24 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	model.SetTopP(float32(opts.TopP))
 	model.SetTopK(int32(opts.TopK))
 	model.StopSequences = opts.StopWords
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryDangerousContent,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+	}
 
 	var response *llms.ContentResponse
 	var err error
