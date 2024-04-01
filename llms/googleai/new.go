@@ -31,7 +31,7 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		opts: clientOptions,
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.ApiKey))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.APIKey))
 	if err != nil {
 		return gi, err
 	}

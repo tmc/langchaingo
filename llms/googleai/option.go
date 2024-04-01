@@ -2,7 +2,7 @@ package googleai
 
 // Options is a set of options for GoogleAI and Vertex clients.
 type Options struct {
-	ApiKey                string
+	APIKey                string
 	CloudProject          string
 	CloudLocation         string
 	DefaultModel          string
@@ -16,7 +16,7 @@ type Options struct {
 
 func DefaultOptions() Options {
 	return Options{
-		ApiKey:                "",
+		APIKey:                "",
 		CloudProject:          "",
 		CloudLocation:         "",
 		DefaultModel:          "gemini-pro",
@@ -35,7 +35,7 @@ type Option func(*Options)
 // googleai clients.
 func WithAPIKey(apiKey string) Option {
 	return func(opts *Options) {
-		opts.ApiKey = apiKey
+		opts.APIKey = apiKey
 	}
 }
 
