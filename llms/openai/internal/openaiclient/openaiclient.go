@@ -126,16 +126,13 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 }
 
 // CreateChat creates chat request.
-func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
+func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletionResponse, error) {
 	if r.Model == "" {
 		if c.Model == "" {
 			r.Model = defaultChatModel
 		} else {
 			r.Model = c.Model
 		}
-	}
-	if r.FunctionCallBehavior == "" && len(r.Functions) > 0 {
-		r.FunctionCallBehavior = defaultFunctionCallBehavior
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {

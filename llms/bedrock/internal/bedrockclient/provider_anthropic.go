@@ -250,8 +250,7 @@ func getAnthropicRole(role schema.ChatMessageType) (string, error) {
 		fallthrough
 	case schema.ChatMessageTypeHuman:
 		return AnthropicRoleUser, nil
-
-	case schema.ChatMessageTypeFunction:
+	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 		fallthrough
 	default:
 		return "", errors.New("role not supported")

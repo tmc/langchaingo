@@ -193,7 +193,7 @@ func TestFunctionCall(t *testing.T) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Equal(t, "function_call", c1.StopReason)
+	assert.Equal(t, "tool_calls", c1.StopReason)
 	assert.NotNil(t, c1.FuncCall)
 }
 

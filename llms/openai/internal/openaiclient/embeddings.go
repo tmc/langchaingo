@@ -40,6 +40,10 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 		c.baseURL = defaultBaseURL
 	}
 
+	if c.apiType == APITypeOpenAI {
+		payload.Model = c.embeddingsModel
+	}
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
