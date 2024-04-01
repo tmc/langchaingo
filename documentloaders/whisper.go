@@ -140,15 +140,15 @@ func downloadFileFromURL(fileURL string) (string, error) {
 		return "", fmt.Errorf("failed to parse URL: %w", err)
 	}
 
-	// Verificação adicional do esquema pode ser realizada aqui, se necessário
+	// Additional schema verification can be performed here if necessary
 
 	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
 		return "", fmt.Errorf("URL scheme must be HTTP or HTTPS")
 	}
 
-	// Configuração de um http.Client com timeout
+	// Configuring an http.Client with timeout
 	netClient := &http.Client{
-		Timeout: time.Second * 10, // Defina o timeout conforme necessário
+		Timeout: time.Second * 10, // Set the timeout as needed
 	}
 
 	resp, err := netClient.Get(fileURL)
@@ -157,8 +157,8 @@ func downloadFileFromURL(fileURL string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	// Restante do código para manipulação do arquivo...
-	tmpFile, err := os.CreateTemp("", "downloaded_file_*") // Ajuste o padrão conforme o tipo de arquivo
+	// Rest of the code for file manipulation...
+	tmpFile, err := os.CreateTemp("", "downloaded_file_*") // Adjust the default according to the file type
 	if err != nil {
 		return "", err
 	}
