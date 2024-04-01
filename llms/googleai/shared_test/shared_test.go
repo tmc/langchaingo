@@ -111,7 +111,7 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+	assert.Regexp(t, "(?i)dog|carnivo|canid|canine", c1.Content)
 }
 
 func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {

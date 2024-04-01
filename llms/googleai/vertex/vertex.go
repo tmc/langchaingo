@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -61,6 +60,24 @@ func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	model.SetTopP(float32(opts.TopP))
 	model.SetTopK(float32(opts.TopK))
 	model.StopSequences = opts.StopWords
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryDangerousContent,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+	}
 
 	var response *llms.ContentResponse
 	var err error
@@ -163,7 +180,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 		c.Role = RoleUser
 	case schema.ChatMessageTypeGeneric:
 		c.Role = RoleUser
-	case schema.ChatMessageTypeFunction:
+	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 		fallthrough
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)
@@ -251,7 +268,7 @@ DoStream:
 			break DoStream
 		}
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("error in stream mode: %w", err)
 		}
 
 		if len(resp.Candidates) != 1 {

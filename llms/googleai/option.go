@@ -12,6 +12,7 @@ type Options struct {
 	DefaultTemperature    float64
 	DefaultTopK           int
 	DefaultTopP           float64
+	HarmThreshold         HarmBlockThreshold
 }
 
 func DefaultOptions() Options {
@@ -26,6 +27,7 @@ func DefaultOptions() Options {
 		DefaultTemperature:    0.5,
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,
+		HarmThreshold:         HarmBlockOnlyHigh,
 	}
 }
 
@@ -70,3 +72,26 @@ func WithDefaultEmbeddingModel(defaultEmbeddingModel string) Option {
 		opts.DefaultEmbeddingModel = defaultEmbeddingModel
 	}
 }
+
+// WithHarmThreshold sets the safety/harm setting for the model, potentially
+// limiting any harmful content it may generate.
+func WithHarmThreshold(ht HarmBlockThreshold) Option {
+	return func(opts *Options) {
+		opts.HarmThreshold = ht
+	}
+}
+
+type HarmBlockThreshold int32
+
+const (
+	// HarmBlockUnspecified means threshold is unspecified.
+	HarmBlockUnspecified HarmBlockThreshold = 0
+	// HarmBlockLowAndAbove means content with NEGLIGIBLE will be allowed.
+	HarmBlockLowAndAbove HarmBlockThreshold = 1
+	// HarmBlockMediumAndAbove means content with NEGLIGIBLE and LOW will be allowed.
+	HarmBlockMediumAndAbove HarmBlockThreshold = 2
+	// HarmBlockOnlyHigh means content with NEGLIGIBLE, LOW, and MEDIUM will be allowed.
+	HarmBlockOnlyHigh HarmBlockThreshold = 3
+	// HarmBlockNone means all content will be allowed.
+	HarmBlockNone HarmBlockThreshold = 4
+)
