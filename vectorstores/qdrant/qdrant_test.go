@@ -2,6 +2,7 @@ package qdrant_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,14 +24,23 @@ import (
 
 func TestQdrantStore(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
 
-	llm, err := openai.New()
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
+
+	res, err := llm.CreateEmbedding(context.Background(), []string{"japan"})
+	require.NoError(t, err)
+
+	fmt.Println(res)
 
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
@@ -60,7 +70,12 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -110,7 +125,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -156,7 +176,12 @@ func TestQdrantAsRetriever(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -199,7 +224,12 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -246,7 +276,12 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -342,7 +377,7 @@ func getValues(t *testing.T) (string, string, int, string) {
 
 	qdrantURL := os.Getenv("QDRANT_URL")
 	if qdrantURL == "" {
-		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.8.3"))
+		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
