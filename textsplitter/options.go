@@ -125,7 +125,7 @@ func WithReferenceLinks(referenceLinks bool) Option {
 // split text or not. When it is set to True, the separators are included in the
 // resulting split text. When it is set to False, the separators are not included
 // in the resulting split text. The purpose of having this parameter is to provide
-// flexibility in how text splitting is handled.
+// flexibility in how text splitting is handled. Default to False if not specified.
 func WithKeepSeparator(keepSeparator bool) Option {
 	return func(o *Options) {
 		o.KeepSeparator = keepSeparator
