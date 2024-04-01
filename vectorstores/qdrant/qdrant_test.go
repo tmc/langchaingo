@@ -2,7 +2,6 @@ package qdrant_test
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -24,7 +23,7 @@ import (
 
 func TestQdrantStore(t *testing.T) {
 	t.Parallel()
-	
+
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 	opts := []openai.Option{
@@ -36,11 +35,6 @@ func TestQdrantStore(t *testing.T) {
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
-	res, err := llm.CreateEmbedding(context.Background(), []string{"japan"})
-	require.NoError(t, err)
-
-	fmt.Println(res)
 
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
