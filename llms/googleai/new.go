@@ -15,14 +15,14 @@ import (
 type GoogleAI struct {
 	CallbacksHandler callbacks.Handler
 	client           *genai.Client
-	opts             options
+	opts             Options
 }
 
 var _ llms.Model = &GoogleAI{}
 
 // New creates a new GoogleAI client.
 func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
-	clientOptions := defaultOptions()
+	clientOptions := DefaultOptions()
 	for _, opt := range opts {
 		opt(&clientOptions)
 	}
@@ -31,7 +31,7 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		opts: clientOptions,
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.apiKey))
+	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.ApiKey))
 	if err != nil {
 		return gi, err
 	}

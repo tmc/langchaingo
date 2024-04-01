@@ -8,7 +8,7 @@ import (
 
 // CreateEmbedding creates embeddings from texts.
 func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	em := g.client.EmbeddingModel(g.opts.defaultEmbeddingModel)
+	em := g.client.EmbeddingModel(g.opts.DefaultEmbeddingModel)
 
 	results := make([][]float32, 0, len(texts))
 	for _, t := range texts {

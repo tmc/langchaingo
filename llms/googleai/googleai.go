@@ -39,12 +39,12 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 	}
 
 	opts := llms.CallOptions{
-		Model:          g.opts.defaultModel,
-		CandidateCount: g.opts.defaultCandidateCount,
-		MaxTokens:      g.opts.defaultMaxTokens,
-		Temperature:    g.opts.defaultTemperature,
-		TopP:           g.opts.defaultTopP,
-		TopK:           g.opts.defaultTopK,
+		Model:          g.opts.DefaultModel,
+		CandidateCount: g.opts.DefaultCandidateCount,
+		MaxTokens:      g.opts.DefaultMaxTokens,
+		Temperature:    g.opts.DefaultTemperature,
+		TopP:           g.opts.DefaultTopP,
+		TopK:           g.opts.DefaultTopK,
 	}
 	for _, opt := range options {
 		opt(&opts)
