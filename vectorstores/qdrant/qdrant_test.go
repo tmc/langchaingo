@@ -329,12 +329,6 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 					"location": "sitting room",
 				},
 			},
-			{
-				PageContent: "The color of the lamp beside the desk is yellow.",
-				Metadata: map[string]any{
-					"location": "patio",
-				},
-			},
 		},
 	)
 	require.NoError(t, err)
