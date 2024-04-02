@@ -2,6 +2,11 @@ package chains
 
 import (
 	"context"
+	"fmt"
+	z "github.com/getzep/zep-go"
+	zClient "github.com/getzep/zep-go/client"
+	zOption "github.com/getzep/zep-go/option"
+	"github.com/tmc/langchaingo/memory/zep"
 	"os"
 	"strings"
 	"testing"
@@ -21,6 +26,38 @@ func TestConversation(t *testing.T) {
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationBuffer())
+	_, err = Run(context.Background(), c, "Hi! I'm Jim")
+	require.NoError(t, err)
+
+	res, err := Run(context.Background(), c, "What is my name?")
+	require.NoError(t, err)
+	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
+}
+
+func TestConversationWithZepMemory(t *testing.T) {
+	t.Parallel()
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+	}
+	llm, err := openai.New()
+	require.NoError(t, err)
+
+	zc := zClient.NewClient(
+		zOption.WithAPIKey(fmt.Sprintf("Api-Key %s", os.Getenv("ZEP_API_KEY"))),
+	)
+	sessionID := os.Getenv("ZEP_SESSION_ID")
+
+	c := NewConversation(
+		llm,
+		zep.NewMemory(
+			zc,
+			sessionID,
+			zep.WithMemoryType(z.MemoryGetRequestMemoryTypeSummaryRetriever),
+			zep.WithHumanPrefix("Joe"),
+			zep.WithAIPrefix("Robot"),
+		),
+	)
 	_, err = Run(context.Background(), c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
