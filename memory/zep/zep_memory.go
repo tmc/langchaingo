@@ -2,6 +2,7 @@ package zep
 
 import (
 	"context"
+
 	"github.com/getzep/zep-go"
 	zepClient "github.com/getzep/zep-go/client"
 	"github.com/tmc/langchaingo/memory"

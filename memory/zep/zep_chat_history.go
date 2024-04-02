@@ -3,6 +3,7 @@ package zep
 import (
 	"context"
 	"fmt"
+
 	"github.com/getzep/zep-go"
 	zepClient "github.com/getzep/zep-go/client"
 	"github.com/rs/zerolog/log"
@@ -32,7 +33,7 @@ func NewZepChatMessageHistory(zep *zepClient.Client, sessionID string, options .
 func (h *ChatMessageHistory) messagesFromZepMessages(zepMessages []*zep.Message) []schema.ChatMessage {
 	var chatMessages []schema.ChatMessage
 	for _, zepMessage := range zepMessages {
-		switch *zepMessage.RoleType {
+		switch *zepMessage.RoleType { // nolint We do not store other message types in zep memory
 		case zep.ModelsRoleTypeUserRole:
 			chatMessages = append(chatMessages, schema.HumanChatMessage{Content: *zepMessage.Content})
 		case zep.ModelsRoleTypeAssistantRole:
@@ -40,7 +41,7 @@ func (h *ChatMessageHistory) messagesFromZepMessages(zepMessages []*zep.Message)
 		case zep.ModelsRoleTypeFunctionRole:
 			chatMessages = append(chatMessages, schema.ToolChatMessage{Content: *zepMessage.Content})
 		default:
-			log.Err(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
+			log.Print(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
 			continue
 		}
 	}
@@ -48,12 +49,12 @@ func (h *ChatMessageHistory) messagesFromZepMessages(zepMessages []*zep.Message)
 }
 
 func (h *ChatMessageHistory) messagesToZepMessages(messages []schema.ChatMessage) []*zep.Message {
-	var zepMessages []*zep.Message
+	var zepMessages []*zep.Message //nolint We don't know the final size of the messages as some might be skipped due to unsupported role.
 	for _, m := range messages {
 		zepMessage := zep.Message{
 			Content: zep.String(m.GetContent()),
 		}
-		switch m.GetType() {
+		switch m.GetType() { // nolint We only expect to bring these three types into chat history
 		case schema.ChatMessageTypeHuman:
 			zepMessage.RoleType = zep.ModelsRoleTypeUserRole.Ptr()
 			if h.HumanPrefix != "" {
@@ -67,7 +68,7 @@ func (h *ChatMessageHistory) messagesToZepMessages(messages []schema.ChatMessage
 		case schema.ChatMessageTypeFunction:
 			zepMessage.RoleType = zep.ModelsRoleTypeFunctionRole.Ptr()
 		default:
-			log.Err(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
+			log.Print(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
 			continue
 		}
 		zepMessages = append(zepMessages, &zepMessage)
