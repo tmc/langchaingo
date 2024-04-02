@@ -53,7 +53,7 @@ func TestConversationWithZepMemory(t *testing.T) {
 		zep.NewMemory(
 			zc,
 			sessionID,
-			zep.WithMemoryType(z.MemoryGetRequestMemoryTypeSummaryRetriever),
+			zep.WithMemoryType(z.MemoryGetRequestMemoryTypePerpetual),
 			zep.WithHumanPrefix("Joe"),
 			zep.WithAIPrefix("Robot"),
 		),
