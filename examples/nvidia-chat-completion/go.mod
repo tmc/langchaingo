@@ -1,4 +1,4 @@
-module github.com/tmc/langchaingo/examples/anthropic-completion-example
+module github.com/tmc/langchaingo/examples/nvidia-chat-completion
 
 go 1.22.0
 

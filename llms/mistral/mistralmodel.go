@@ -116,6 +116,7 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 	chatOpts := sdk.DefaultChatRequestParams
 	chatOpts.MaxTokens = callOpts.MaxTokens
 	chatOpts.Temperature = callOpts.Temperature
+	chatOpts.RandomSeed = callOpts.Seed
 	chatOpts.Tools = make([]sdk.Tool, 0)
 	for _, function := range callOpts.Functions {
 		chatOpts.Tools = append(chatOpts.Tools, sdk.Tool{
@@ -233,7 +234,7 @@ func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessag
 		chatMsg.Role = "assistant"
 	case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeHuman:
 		chatMsg.Role = "user"
-	case schema.ChatMessageTypeFunction:
+	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
 		chatMsg.Role = "tool"
 	case schema.ChatMessageTypeSystem:
 		chatMsg.Role = "system"
