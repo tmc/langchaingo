@@ -2,7 +2,6 @@ package chains
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -44,7 +43,7 @@ func TestConversationWithZepMemory(t *testing.T) {
 	require.NoError(t, err)
 
 	zc := zClient.NewClient(
-		zOption.WithAPIKey(fmt.Sprintf("Api-Key %s", os.Getenv("ZEP_API_KEY"))),
+		zOption.WithAPIKey(os.Getenv("ZEP_API_KEY")),
 	)
 	sessionID := os.Getenv("ZEP_SESSION_ID")
 
