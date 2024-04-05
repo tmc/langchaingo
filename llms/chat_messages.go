@@ -1,4 +1,4 @@
-package schema
+package llms
 
 import (
 	"encoding/json"
@@ -10,7 +10,8 @@ import (
 // ChatMessageType is the type of chat message.
 type ChatMessageType string
 
-// ErrUnexpectedChatMessageType is returned when a chat message is of an unexpected type.
+// ErrUnexpectedChatMessageType is returned when a chat message is of an
+// unexpected type.
 var ErrUnexpectedChatMessageType = errors.New("unexpected chat message type")
 
 const (
@@ -107,12 +108,6 @@ func (m FunctionChatMessage) GetType() ChatMessageType { return ChatMessageTypeF
 func (m FunctionChatMessage) GetContent() string       { return m.Content }
 func (m FunctionChatMessage) GetName() string          { return m.Name }
 
-// FunctionCall is the name and arguments of a function call.
-type FunctionCall struct {
-	Name      string `json:"name"`
-	Arguments string `json:"arguments"`
-}
-
 // ToolChatMessage is a chat message representing the result of a tool call.
 type ToolChatMessage struct {
 	// ID is the ID of the tool call.
@@ -124,16 +119,6 @@ type ToolChatMessage struct {
 func (m ToolChatMessage) GetType() ChatMessageType { return ChatMessageTypeTool }
 func (m ToolChatMessage) GetContent() string       { return m.Content }
 func (m ToolChatMessage) GetID() string            { return m.ID }
-
-// ToolCall is the name and arguments of a tool call.
-type ToolCall struct {
-	// ID is the ID of the tool call.
-	ID string `json:"id"`
-	// Type is the type of the tool call.
-	Type string `json:"type"`
-	// FunctionCall is the function call of the tool call.
-	FunctionCall *FunctionCall `json:"function_call,omitempty"`
-}
 
 // GetBufferString gets the buffer string of messages.
 func GetBufferString(messages []ChatMessage, humanPrefix string, aiPrefix string) (string, error) {

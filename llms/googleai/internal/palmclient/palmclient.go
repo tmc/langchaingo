@@ -8,7 +8,7 @@ import (
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -175,15 +175,15 @@ type ChatMessage struct {
 }
 
 // Statically assert that the types implement the interface.
-var _ schema.ChatMessage = ChatMessage{}
+var _ llms.ChatMessage = ChatMessage{}
 
 // GetType returns the type of the message.
-func (m ChatMessage) GetType() schema.ChatMessageType {
+func (m ChatMessage) GetType() llms.ChatMessageType {
 	switch m.Author {
 	case "user":
-		return schema.ChatMessageTypeHuman
+		return llms.ChatMessageTypeHuman
 	default:
-		return schema.ChatMessageTypeAI
+		return llms.ChatMessageTypeAI
 	}
 }
 

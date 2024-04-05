@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (
@@ -59,7 +59,7 @@ type ChatMessage struct {
 	Name string `json:"name,omitempty"`
 
 	// FunctionCall represents a function call to be made in the message.
-	FunctionCall *schema.FunctionCall `json:"function_call,omitempty"`
+	FunctionCall *llms.FunctionCall `json:"function_call,omitempty"`
 }
 
 // ChatChoice is a choice in a chat response.

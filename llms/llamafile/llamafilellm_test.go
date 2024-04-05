@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func newTestClient(t *testing.T) *LLM {
@@ -32,7 +31,7 @@ func TestGenerateContent(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -55,7 +54,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}

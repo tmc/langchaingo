@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
@@ -37,7 +36,7 @@ func TestGenerateContent(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -59,7 +58,7 @@ func TestWithFormat(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -71,8 +70,7 @@ func TestWithFormat(t *testing.T) {
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 
-	// as we don't know the schema we get back, just check whether we got
-	// *any* kind of JSON object.
+	// check whether we got *any* kind of JSON object.
 	var result map[string]any
 	err = json.Unmarshal([]byte(c1.Content), &result)
 	require.NoError(t, err)
@@ -87,7 +85,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
