@@ -70,7 +70,7 @@ type Options struct {
 
 	// Name of the model that will be used for inference. Currently, only the "sabia-2-medium" and "sabia-2-small" model is available.
 	Model string `json:"model"`
-	//Default: true
+	// Default: true
 	// If True, the model's generation will be sampled via top-k sampling.
 	// Otherwise, the generation will always select the token with the highest probability.
 	// Using do_sample=False leads to a deterministic result, but with less diversity.
@@ -99,7 +99,7 @@ type Options struct {
 	// List of tokens that, when generated, indicate that the model should stop generating tokens.
 	StoppingTokens []string `json:"stopping_tokens,omitempty"`
 
-	//default: false
+	// default: false
 	// If True, the model will run in streaming mode,
 	// where tokens will be generated and returned to the client as they are produced.
 	// If False, the model will run in batch mode, where all tokens will be generated before being returned to the client.

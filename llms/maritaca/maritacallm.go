@@ -34,7 +34,6 @@ func New(opts ...Option) (*LLM, error) {
 
 	if o.httpClient == nil {
 		o.httpClient = http.DefaultClient
-
 	}
 
 	client, err := maritacaclient.NewClient(o.httpClient)
