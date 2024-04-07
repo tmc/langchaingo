@@ -145,16 +145,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	choices := []*llms.ContentChoice{
-		{
-			Content: resp.Answer,
-			GenerationInfo: map[string]any{
-				"CompletionTokens": resp.Metrics.Usage.CompletionTokens,
-				"PromptTokens":     resp.Metrics.Usage.PromptTokens,
-				"TotalTokens":      resp.Metrics.Usage.TotalTokens,
-			},
-		},
-	}
+	choices := createChoice(resp)
 
 	response := &llms.ContentResponse{Choices: choices}
 
@@ -193,4 +184,18 @@ func makemaritacaOptionsFromOptions(maritacaOptions maritacaclient.Options, opts
 	maritacaOptions.Stream = opts.StreamingFunc != nil
 
 	return maritacaOptions
+}
+
+func createChoice(resp maritacaclient.ChatResponse) []*llms.ContentChoice {
+	return []*llms.ContentChoice{
+		{
+			Content: resp.Answer,
+			GenerationInfo: map[string]any{
+				"CompletionTokens": resp.Metrics.Usage.CompletionTokens,
+				"PromptTokens":     resp.Metrics.Usage.PromptTokens,
+				"TotalTokens":      resp.Metrics.Usage.TotalTokens,
+			},
+		},
+	}
+
 }
