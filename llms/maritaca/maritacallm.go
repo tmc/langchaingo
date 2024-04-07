@@ -197,5 +197,4 @@ func createChoice(resp maritacaclient.ChatResponse) []*llms.ContentChoice {
 			},
 		},
 	}
-
 }

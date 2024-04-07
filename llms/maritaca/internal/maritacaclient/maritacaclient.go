@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var baseUrl = "https://chat.maritaca.ai/api"
+var baseURL = "https://chat.maritaca.ai/api"
 
 type Doer interface {
 	Do(req *http.Request) (*http.Response, error)
@@ -24,7 +24,7 @@ type Client struct {
 
 func NewClient(ohttp Doer) (*Client, error) {
 	client := Client{
-		baseURL:    baseUrl,
+		baseURL:    baseURL,
 		httpClient: ohttp,
 	}
 
