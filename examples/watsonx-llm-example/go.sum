@@ -20,5 +20,7 @@ github.com/tmc/langchaingo v0.1.4-alpha.0 h1:WVu2KgHr9wloHAiMbbeytiv2W76vpkA59uU
 github.com/tmc/langchaingo v0.1.4-alpha.0/go.mod h1:PKtJMXizDxJnT86q7lsVsyzTJqd0P2QKF7wt2jF6Lxk=
 github.com/tmc/langchaingo v0.1.6-alpha.1.0.20240318233729-714924b52066 h1:RmJeC02el7wzAwqoNFq4+rd1dceAjhGQ6QTBRxZYqag=
 github.com/tmc/langchaingo v0.1.6-alpha.1.0.20240318233729-714924b52066/go.mod h1:dbjDj86MKCj0icurOXCYT+QW6fVNfdfxuSUXUn+yhL4=
+github.com/tmc/langchaingo v0.1.9-0.20240403145928-594021b91d0d h1:XgRR1R7zSaBvXmfZWEOKEZPg9dcrXEC6xCr3OzYzcHg=
+github.com/tmc/langchaingo v0.1.9-0.20240403145928-594021b91d0d/go.mod h1:uKbZdnjKcNNmve7BD8OO441YhS4nQwhKtb0ze28DAdI=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

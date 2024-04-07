@@ -1,10 +1,10 @@
 module github.com/tmc/langchaingo/examples/watsonx-llm-example
 
-go 1.21.2
+go 1.22.0
 
-toolchain go1.21.5
+toolchain go1.22.2
 
-require github.com/tmc/langchaingo v0.1.6-alpha.1.0.20240318233729-714924b52066
+require github.com/tmc/langchaingo v0.1.9-0.20240403145928-594021b91d0d
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
