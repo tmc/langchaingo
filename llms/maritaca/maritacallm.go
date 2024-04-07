@@ -129,10 +129,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			streamedResponse += response.Text
 		}
 		if response.Event == "end" {
-			resp = response
 			resp.Answer = streamedResponse
 		}
-
 		if response.Model != "" && response.Text == "" {
 			resp = response
 		}
