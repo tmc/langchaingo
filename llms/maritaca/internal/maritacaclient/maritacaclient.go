@@ -103,6 +103,7 @@ func (c *Client) Generate(ctx context.Context, req *ChatRequest, fn ChatResponse
 		var resp ChatResponse
 		if req.Options.Stream {
 			text, errP := parseData(string(bts))
+			resp.Event = "message"
 			if string(bts) == "event: end" {
 				resp.Event = "end"
 			}
@@ -110,12 +111,15 @@ func (c *Client) Generate(ctx context.Context, req *ChatRequest, fn ChatResponse
 			if errP != nil && resp.Event != "end" {
 				return nil
 			}
+
 			resp.Text = text
 			return fn(resp)
 		}
 		if err := json.Unmarshal(bts, &resp); err != nil {
 			return err
 		}
+
+		resp.Event = "nostream"
 
 		return fn(resp)
 	})

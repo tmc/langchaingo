@@ -125,15 +125,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				return err
 			}
 		}
-		if response.Text != "" {
+		switch response.Event {
+		case "message":
 			streamedResponse += response.Text
-		}
-		if response.Event == "end" {
+		case "end":
 			resp.Answer = streamedResponse
-		}
-		if response.Model != "" && response.Text == "" {
+		case "nostream":
 			resp = response
 		}
+
 		return nil
 	}
 	o.client.Token = o.options.maritacaOptions.Token
