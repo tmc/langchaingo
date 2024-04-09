@@ -444,7 +444,7 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 		}
 
 		for _, t := range streamResponse.Choices[0].Delta.ToolCalls {
-			//if we have arguments append to the last Tool call
+			// if we have arguments append to the last Tool call
 			if t.Type == `` && t.Function.Arguments != `` {
 				lindex := len(response.Choices[0].Message.ToolCalls) - 1
 				if lindex < 0 {
@@ -455,7 +455,7 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 				continue
 			}
 
-			//Otherwise, this is a new tool call, append that to the stack
+			// Otherwise, this is a new tool call, append that to the stack
 			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, t)
 		}
 
