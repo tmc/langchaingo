@@ -459,7 +459,7 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, t)
 		}
 
-		if len(streamResponse.Choices[0].Delta.ToolCalls) > 1 {
+		if len(streamResponse.Choices[0].Delta.ToolCalls) > 0 {
 			chunk, _ = json.Marshal(streamResponse.Choices[0].Delta.ToolCalls) // nolint:errchkjson
 		}
 
