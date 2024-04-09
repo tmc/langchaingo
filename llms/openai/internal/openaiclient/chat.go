@@ -278,7 +278,8 @@ type StreamedChatResponsePayload struct {
 			Role         string        `json:"role,omitempty"`
 			Content      string        `json:"content,omitempty"`
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
-			ToolCalls    []*ToolCall   `json:"tool_calls,omitempty"`
+			// ToolCalls is a list of tools that were called in the message.
+			ToolCalls []*ToolCall `json:"tool_calls,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
@@ -440,6 +441,26 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 				}
 			}
 			chunk, _ = json.Marshal(response.Choices[0].Message.ToolCalls) // nolint:errchkjson
+		}
+
+		for _, t := range streamResponse.Choices[0].Delta.ToolCalls {
+			//if we have arguments append to the last Tool call
+			if t.Type == `` && t.Function.Arguments != `` {
+				lindex := len(response.Choices[0].Message.ToolCalls) - 1
+				if lindex < 0 {
+					continue
+				}
+
+				response.Choices[0].Message.ToolCalls[lindex].Function.Arguments += t.Function.Arguments
+				continue
+			}
+
+			//Otherwise, this is a new tool call, append that to the stack
+			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, t)
+		}
+
+		if len(streamResponse.Choices[0].Delta.ToolCalls) > 1 {
+			chunk, _ = json.Marshal(streamResponse.Choices[0].Delta.ToolCalls) // nolint:errchkjson
 		}
 
 		if payload.StreamingFunc != nil {
