@@ -26,16 +26,15 @@ const (
 
 // Client is a client for the OpenAI API.
 type Client struct {
-	token        string
-	Model        string
-	baseURL      string
-	organization string
-	apiType      APIType
-	httpClient   Doer
-
+	token           string
+	Model           string
+	baseURL         string
+	organization    string
+	apiType         APIType
+	httpClient      Doer
+	EmbeddingsModel string
 	// required when APIType is APITypeAzure or APITypeAzureAD
-	apiVersion      string
-	embeddingsModel string
+	apiVersion string
 }
 
 // Option is an option for the OpenAI client.
@@ -54,7 +53,7 @@ func New(token string, model string, baseURL string, organization string,
 	c := &Client{
 		token:           token,
 		Model:           model,
-		embeddingsModel: embeddingsModel,
+		EmbeddingsModel: embeddingsModel,
 		baseURL:         strings.TrimSuffix(baseURL, "/"),
 		organization:    organization,
 		apiType:         apiType,

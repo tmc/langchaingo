@@ -190,7 +190,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
-		Model: o.client.Model,
+		Model: o.client.EmbeddingsModel,
 	})
 	if err != nil {
 		return nil, err

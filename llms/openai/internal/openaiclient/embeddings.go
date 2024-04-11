@@ -39,7 +39,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 	}
 
 	if c.apiType == APITypeOpenAI {
-		payload.Model = c.embeddingsModel
+		payload.Model = c.EmbeddingsModel
 	}
 
 	payloadBytes, err := json.Marshal(payload)
@@ -47,7 +47,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.embeddingsModel), bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.EmbeddingsModel), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
