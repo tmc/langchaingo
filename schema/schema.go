@@ -5,6 +5,7 @@ type AgentAction struct {
 	Tool      string
 	ToolInput string
 	Log       string
+	ToolId    string
 }
 
 // AgentStep is a step of the agent.

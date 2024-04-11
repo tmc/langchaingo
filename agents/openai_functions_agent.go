@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
+	"regexp"
 )
 
 // agentScratchpad "agent_scratchpad" for the agent to put its thoughts in.
@@ -97,9 +98,34 @@ func (o *OpenAIFunctionsAgent) Plan(
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		mc := llms.MessageContent{
-			Role:  role,
-			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+		mc := llms.MessageContent{}
+
+		switch p := msg.(type) {
+		case schema.ToolChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{
+					ToolCallID: p.ID,
+					Content:    p.Content,
+				}},
+			}
+
+		case schema.AIChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{llms.ToolCall{
+					ID:           p.ToolCalls[0].ID,
+					Type:         p.ToolCalls[0].Type,
+					FunctionCall: p.ToolCalls[0].FunctionCall,
+				},
+				},
+			}
+		default:
+			mc = llms.MessageContent{
+				Role:  role,
+				Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+			}
+
 		}
 		mcList[i] = mc
 	}
@@ -151,8 +177,24 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []s
 
 	messages := make([]schema.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, schema.FunctionChatMessage{
-			Name:    step.Action.Tool,
+		functionCall := step.Action.Log
+		pattern := `\{.*?\}`
+		regex := regexp.MustCompile(pattern)
+		match := regex.FindString(functionCall)
+
+		messages = append(messages, schema.AIChatMessage{
+			ToolCalls: []schema.ToolCall{{
+				ID:   step.Action.ToolId,
+				Type: "function",
+				FunctionCall: &schema.FunctionCall{
+					Name:      step.Action.Tool,
+					Arguments: match,
+				},
+			},
+			},
+		})
+		messages = append(messages, schema.ToolChatMessage{
+			ID:      step.Action.ToolId,
 			Content: step.Observation,
 		})
 	}
@@ -203,6 +245,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			Tool:      functionName,
 			ToolInput: toolInput,
 			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+			ToolId:    choice.ToolCalls[0].ID,
 		},
 	}, nil, nil
 }
