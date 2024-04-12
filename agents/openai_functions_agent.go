@@ -97,7 +97,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		mc := llms.MessageContent{}
+		var mc llms.MessageContent
 
 		switch p := msg.(type) {
 		case schema.ToolChatMessage:
@@ -125,7 +125,6 @@ func (o *OpenAIFunctionsAgent) Plan(
 				Role:  role,
 				Parts: []llms.ContentPart{llms.TextContent{Text: text}},
 			}
-
 		}
 		mcList[i] = mc
 	}
