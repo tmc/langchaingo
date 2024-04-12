@@ -97,9 +97,35 @@ func (o *OpenAIFunctionsAgent) Plan(
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		mc := llms.MessageContent{
-			Role:  role,
-			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+		mc := llms.MessageContent{}
+
+		switch p := msg.(type) {
+		case schema.ToolChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{
+					ToolCallID: p.ID,
+					Content:    p.Content,
+				}},
+			}
+
+		case schema.AIChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{
+					llms.ToolCall{
+						ID:           p.ToolCalls[0].ID,
+						Type:         p.ToolCalls[0].Type,
+						FunctionCall: p.ToolCalls[0].FunctionCall,
+					},
+				},
+			}
+		default:
+			mc = llms.MessageContent{
+				Role:  role,
+				Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+			}
+
 		}
 		mcList[i] = mc
 	}
@@ -203,6 +229,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			Tool:      functionName,
 			ToolInput: toolInput,
 			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+			ToolID:    choice.ToolCalls[0].ID,
 		},
 	}, nil, nil
 }
