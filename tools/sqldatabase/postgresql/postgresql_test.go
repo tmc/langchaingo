@@ -26,7 +26,7 @@ func Test(t *testing.T) {
 	if pgURI == "" {
 		pgContainer, err := postgres.RunContainer(
 			context.Background(),
-			testcontainers.WithImage("postgres:13"),
+			testcontainers.WithImage("postgres:16.2"),
 			postgres.WithDatabase("test"),
 			postgres.WithUsername("db_user"),
 			postgres.WithPassword("p@mysecretpassword"),

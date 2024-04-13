@@ -1,10 +1,10 @@
 module github.com/tmc/langchaingo/examples/prompts-with-partial-func-example
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.4
+toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.7
+require github.com/tmc/langchaingo v0.1.8
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

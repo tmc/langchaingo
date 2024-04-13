@@ -43,13 +43,28 @@ type CallOptions struct {
 	// JSONMode is a flag to enable JSON mode.
 	JSONMode bool `json:"json"`
 
+	// Tools is a list of tools to use. Each tool can be a specific tool or a function.
+	Tools []Tool `json:"tools,omitempty"`
+	// ToolChoice is the choice of tool to use, it can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
+	ToolChoice any `json:"tool_choice"`
+
 	// Function defitions to include in the request.
-	Functions []FunctionDefinition `json:"functions"`
+	// Deprecated: Use Tools instead.
+	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
 	//
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call"`
+	// Deprecated: Use ToolChoice instead.
+	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+}
+
+// Tool is a tool that can be used by the model.
+type Tool struct {
+	// Type is the type of the tool.
+	Type string `json:"type"`
+	// Function is the function to call.
+	Function *FunctionDefinition `json:"function,omitempty"`
 }
 
 // FunctionDefinition is a definition of a function that can be called by the model.
@@ -59,7 +74,21 @@ type FunctionDefinition struct {
 	// Description is a description of the function.
 	Description string `json:"description"`
 	// Parameters is a list of parameters for the function.
-	Parameters any `json:"parameters"`
+	Parameters any `json:"parameters,omitempty"`
+}
+
+// ToolChoice is a specific tool to use.
+type ToolChoice struct {
+	// Type is the type of the tool.
+	Type string `json:"type"`
+	// Function is the function to call (if the tool is a function).
+	Function *FunctionReference `json:"function,omitempty"`
+}
+
+// FunctionReference is a reference to a function.
+type FunctionReference struct {
+	// Name is the name of the function.
+	Name string `json:"name"`
 }
 
 // FunctionCallBehavior is the behavior to use when calling functions.
@@ -186,6 +215,7 @@ func WithPresencePenalty(presencePenalty float64) CallOption {
 }
 
 // WithFunctionCallBehavior will add an option to set the behavior to use when calling functions.
+// Deprecated: Use WithToolChoice instead.
 func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 	return func(o *CallOptions) {
 		o.FunctionCallBehavior = behavior
@@ -193,9 +223,26 @@ func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 }
 
 // WithFunctions will add an option to set the functions to include in the request.
+// Deprecated: Use WithTools instead.
 func WithFunctions(functions []FunctionDefinition) CallOption {
 	return func(o *CallOptions) {
 		o.Functions = functions
+	}
+}
+
+// WithToolChoice will add an option to set the choice of tool to use.
+// It can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
+func WithToolChoice(choice any) CallOption {
+	// TODO: Add type validation for choice.
+	return func(o *CallOptions) {
+		o.ToolChoice = choice
+	}
+}
+
+// WithTools will add an option to set the tools to use.
+func WithTools(tools []Tool) CallOption {
+	return func(o *CallOptions) {
+		o.Tools = tools
 	}
 }
 
