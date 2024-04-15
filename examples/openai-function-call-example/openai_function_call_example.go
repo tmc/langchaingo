@@ -19,13 +19,6 @@ func main() {
 	}
 
 	ctx := context.Background()
-<<<<<<< HEAD
-	resp, err := llm.GenerateContent(ctx,
-		[]llms.MessageContent{
-			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?"),
-		},
-		llms.WithFunctions(functions))
-=======
 	messageHistory := []llms.MessageContent{
 		llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
 	}
@@ -47,7 +40,6 @@ func main() {
 // tools, and returns the response.
 func queryLLM(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, tools []llms.Tool) *llms.ContentResponse {
 	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(tools))
->>>>>>> upstream/main
 	if err != nil {
 		log.Fatal(err)
 	}
