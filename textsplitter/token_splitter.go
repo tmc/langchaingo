@@ -62,20 +62,20 @@ func (s TokenSplitter) SplitText(text string) ([]string, error) {
 
 func (s TokenSplitter) splitText(text string, tk *tiktoken.Tiktoken) []string {
 	splits := make([]string, 0)
-	inputIds := tk.Encode(text, s.AllowedSpecial, s.DisallowedSpecial)
+	inputIDs := tk.Encode(text, s.AllowedSpecial, s.DisallowedSpecial)
 
 	startIdx := 0
-	curIdx := len(inputIds)
+	curIdx := len(inputIDs)
 	if startIdx+s.ChunkSize < curIdx {
 		curIdx = startIdx + s.ChunkSize
 	}
-	for startIdx < len(inputIds) {
-		chunkIds := inputIds[startIdx:curIdx]
-		splits = append(splits, tk.Decode(chunkIds))
+	for startIdx < len(inputIDs) {
+		chunkIDs := inputIDs[startIdx:curIdx]
+		splits = append(splits, tk.Decode(chunkIDs))
 		startIdx += s.ChunkSize - s.ChunkOverlap
 		curIdx = startIdx + s.ChunkSize
-		if curIdx > len(inputIds) {
-			curIdx = len(inputIds)
+		if curIdx > len(inputIDs) {
+			curIdx = len(inputIDs)
 		}
 	}
 	return splits

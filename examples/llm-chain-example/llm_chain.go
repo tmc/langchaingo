@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -30,11 +29,11 @@ func run() error {
 	)
 	llmChain := chains.NewLLMChain(llm, prompt)
 
-	// If a chain only needs one input we can use the run function to execute chain.
+	// If a chain only needs one input we can use Run to execute it.
+	// We can pass callbacks to Run as an option, e.g:
+	//   chains.WithCallback(callbacks.StreamLogHandler{})
 	ctx := context.Background()
-	out, err := chains.Run(ctx, llmChain, "socks",
-		chains.WithCallback(callbacks.StreamLogHandler{}),
-	)
+	out, err := chains.Run(ctx, llmChain, "socks")
 	if err != nil {
 		return err
 	}

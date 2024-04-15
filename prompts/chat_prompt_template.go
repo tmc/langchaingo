@@ -7,8 +7,9 @@ type ChatPromptTemplate struct {
 	// Messages is the list of the messages to be formatted.
 	Messages []MessageFormatter
 
-	// PartialVariables represents a map of variable names to values or functions that return values.
-	// If the value is a function, it will be called when the prompt template is rendered.
+	// PartialVariables represents a map of variable names to values or functions
+	// that return values. If the value is a function, it will be called when the
+	// prompt template is rendered.
 	PartialVariables map[string]any
 }
 

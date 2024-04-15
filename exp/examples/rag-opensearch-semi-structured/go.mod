@@ -1,1 +1,0 @@
-module github.com/tmc/langchaingo/exp/examples/rag-opensearch-semi-structured

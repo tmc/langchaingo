@@ -8,13 +8,14 @@ import (
 type CompletionRequest struct {
 	Model            string   `json:"model"`
 	Prompt           string   `json:"prompt"`
-	Temperature      float64  `json:"temperature,omitempty"`
+	Temperature      float64  `json:"temperature"`
 	MaxTokens        int      `json:"max_tokens,omitempty"`
 	N                int      `json:"n,omitempty"`
 	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
 	TopP             float64  `json:"top_p,omitempty"`
 	StopWords        []string `json:"stop,omitempty"`
+	Seed             int      `json:"seed,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
@@ -70,7 +71,7 @@ func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 }
 
 // nolint:lll
-func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatResponse, error) {
+func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatCompletionResponse, error) {
 	c.setCompletionDefaults(payload)
 	return c.createChat(ctx, &ChatRequest{
 		Model: payload.Model,
@@ -85,5 +86,6 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		FrequencyPenalty: payload.FrequencyPenalty,
 		PresencePenalty:  payload.PresencePenalty,
 		StreamingFunc:    payload.StreamingFunc,
+		Seed:             payload.Seed,
 	})
 }

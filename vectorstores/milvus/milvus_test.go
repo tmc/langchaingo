@@ -3,11 +3,14 @@ package milvus
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
@@ -20,10 +23,10 @@ func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-	url := os.Getenv("OPENAI_BASE_URL")
-	opts := []openai.Option{}
-	if url != "" {
-		opts = append(opts, openai.WithBaseURL(url))
+
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
 
 	llm, err := openai.New(opts...)
@@ -33,16 +36,29 @@ func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
-	url := os.Getenv("MILVUS_URL")
-	if url == "" {
-		t.Skip("must set MILVUS_URL to run test")
-	}
-	config := client.Config{
-		Address: url,
-	}
 	e, err := getEmbedder(t)
 	if err != nil {
 		return Store{}, err
+	}
+
+	url := os.Getenv("MILVUS_URL")
+	if url == "" {
+		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, milvusContainer.Terminate(context.Background()))
+		})
+
+		url, err = milvusContainer.ConnectionString(context.Background())
+		if err != nil {
+			t.Skipf("Failed to get milvus container endpoint: %s", err)
+		}
+	}
+	config := client.Config{
+		Address: url,
 	}
 	idx, err := entity.NewIndexAUTOINDEX(entity.L2)
 	if err != nil {

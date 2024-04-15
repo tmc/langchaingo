@@ -123,6 +123,13 @@ func WithSearchParameters(sp entity.SearchParam) Option {
 	}
 }
 
+// WithMetricType sets the metric type for the collection.
+func WithMetricType(metricType entity.MetricType) Option {
+	return func(p *Store) {
+		p.metricType = metricType
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	s := Store{
 		metricType:       entity.L2,

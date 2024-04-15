@@ -21,7 +21,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 	}
 
 	req := &ChatRequest{
-		StreamingFunc: func(ctx context.Context, chunk []byte) error {
+		StreamingFunc: func(_ context.Context, _ []byte) error {
 			return nil
 		},
 	}
@@ -30,7 +30,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.Equal(t, "stop", resp.Choices[0].FinishReason)
+	assert.Equal(t, FinishReason("stop"), resp.Choices[0].FinishReason)
 }
 
 func TestChatMessage_MarshalUnmarshal(t *testing.T) {

@@ -97,10 +97,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 
+	format := o.options.format
+	if opts.JSONMode {
+		format = "json"
+	}
+
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
+		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
 		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
@@ -143,7 +149,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
-				"TotalTokesn":      resp.EvalCount + resp.PromptEvalCount,
+				"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
 			},
 		},
 	}
@@ -195,6 +201,8 @@ func typeToRole(typ schema.ChatMessageType) string {
 		return "user"
 	case schema.ChatMessageTypeFunction:
 		return "function"
+	case schema.ChatMessageTypeTool:
+		return "tool"
 	}
 	return ""
 }

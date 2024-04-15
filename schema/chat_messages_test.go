@@ -27,14 +27,14 @@ func TestGetBufferString(t *testing.T) {
 		{
 			name: "Mixed messages",
 			messages: []schema.ChatMessage{
+				schema.SystemChatMessage{Content: "Please be polite."},
 				schema.HumanChatMessage{Content: "Hello, how are you?"},
 				schema.AIChatMessage{Content: "I'm doing great!"},
-				schema.SystemChatMessage{Content: "Please be polite."},
 				schema.GenericChatMessage{Role: "Moderator", Content: "Keep the conversation on topic."},
 			},
 			humanPrefix: "Human",
 			aiPrefix:    "AI",
-			expected:    "Human: Hello, how are you?\nAI: I'm doing great!\nSystem: Please be polite.\nModerator: Keep the conversation on topic.", //nolint:lll
+			expected:    "system: Please be polite.\nHuman: Hello, how are you?\nAI: I'm doing great!\nModerator: Keep the conversation on topic.", //nolint:lll
 			expectError: false,
 		},
 		{
@@ -50,7 +50,6 @@ func TestGetBufferString(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			result, err := schema.GetBufferString(tc.messages, tc.humanPrefix, tc.aiPrefix)

@@ -7,7 +7,7 @@ import (
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
-	chromaopenapi "github.com/amikos-tech/chroma-go/swagger"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -26,16 +26,17 @@ var (
 
 // Store is a wrapper around the chromaGo API and client.
 type Store struct {
-	client           *chromago.Client
-	collection       *chromago.Collection
-	distanceFunction chromago.DistanceFunction
-	chromaURL        string
-	openaiAPIKey     string
+	client             *chromago.Client
+	collection         *chromago.Collection
+	distanceFunction   chromatypes.DistanceFunction
+	chromaURL          string
+	openaiAPIKey       string
+	openaiOrganization string
 
 	nameSpace    string
 	nameSpaceKey string
 	embedder     embeddings.Embedder
-	includes     []chromago.QueryEnum
+	includes     []chromatypes.QueryEnum
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -49,31 +50,33 @@ func New(opts ...Option) (Store, error) {
 	}
 
 	// create the client connection and confirm that we can access the server with it
-	configuration := chromaopenapi.NewConfiguration()
-	configuration.Servers = chromaopenapi.ServerConfigurations{
-		{
-			URL:         s.chromaURL,
-			Description: "Chromadb server url for this store",
-		},
+	chromaClient, err := chromago.NewClient(s.chromaURL)
+	if err != nil {
+		return s, err
 	}
-	chromaClient := &chromago.Client{
-		ApiClient: chromaopenapi.NewAPIClient(configuration),
-	}
-	if _, errHb := chromaClient.Heartbeat(); errHb != nil {
+
+	if _, errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
 		return s, errHb
 	}
 	s.client = chromaClient
 
-	var embeddingFunction chromago.EmbeddingFunction
+	var embeddingFunction chromatypes.EmbeddingFunction
 	if s.embedder != nil {
 		// inject user's embedding function, if provided
 		embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
 	} else {
 		// otherwise use standard langchaingo OpenAI embedding function
-		embeddingFunction = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey)
+		var options []openai.Option
+		if s.openaiOrganization != "" {
+			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
+		}
+		embeddingFunction, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
+		if err != nil {
+			return s, err
+		}
 	}
 
-	col, errCc := s.client.CreateCollection(s.nameSpace, map[string]any{}, true,
+	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
 		embeddingFunction, s.distanceFunction)
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
@@ -85,7 +88,7 @@ func New(opts ...Option) (Store, error) {
 
 // AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
 // and returns the ids of the added documents.
-func (s Store) AddDocuments(_ context.Context,
+func (s Store) AddDocuments(ctx context.Context,
 	docs []schema.Document,
 	options ...vectorstores.Option,
 ) ([]string, error) {
@@ -114,13 +117,13 @@ func (s Store) AddDocuments(_ context.Context,
 	}
 
 	col := s.collection
-	if _, addErr := col.Add(nil, metadatas, texts, ids); addErr != nil {
+	if _, addErr := col.Add(ctx, nil, metadatas, texts, ids); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
 	return ids, nil
 }
 
-func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments int,
+func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
@@ -136,7 +139,7 @@ func (s Store) SimilaritySearch(_ context.Context, query string, numDocuments in
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query([]string{query}, int32(numDocuments), filter, nil, s.includes)
+	qr, queryErr := s.collection.Query(ctx, []string{query}, int32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -165,7 +168,7 @@ func (s Store) RemoveCollection() error {
 	if s.client == nil || s.collection == nil {
 		return fmt.Errorf("%w: no collection", ErrRemoveCollection)
 	}
-	_, errDc := s.client.DeleteCollection(s.collection.Name)
+	_, errDc := s.client.DeleteCollection(context.Background(), s.collection.Name)
 	if errDc != nil {
 		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name, errDc)
 	}
