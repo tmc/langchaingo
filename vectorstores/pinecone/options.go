@@ -19,26 +19,10 @@ var ErrInvalidOptions = errors.New("invalid options")
 // Option is a function type that can be used to modify the client.
 type Option func(p *Store)
 
-// WithIndexName is an option for specifying the index name. Must be set.
-func WithIndexName(name string) Option {
+// WithHost is an option for setting the host to use. Must be set.
+func WithHost(host string) Option {
 	return func(p *Store) {
-		p.indexName = name
-	}
-}
-
-// WithEnvironment is an option for specifying the environment. Must be set.
-func WithEnvironment(environment string) Option {
-	return func(p *Store) {
-		p.environment = environment
-	}
-}
-
-// WithProjectName is an option for specifying the project name. Must be set. The
-// project name associated with the api key can be obtained using the whoami
-// operation.
-func WithProjectName(name string) Option {
-	return func(p *Store) {
-		p.projectName = name
+		p.host = host
 	}
 }
 
@@ -90,16 +74,8 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		opt(o)
 	}
 
-	if o.indexName == "" {
-		return Store{}, fmt.Errorf("%w: missing index name", ErrInvalidOptions)
-	}
-
-	if o.environment == "" {
-		return Store{}, fmt.Errorf("%w: missing environment", ErrInvalidOptions)
-	}
-
-	if o.projectName == "" {
-		return Store{}, fmt.Errorf("%w: missing project name", ErrInvalidOptions)
+	if o.host == "" {
+		return Store{}, fmt.Errorf("%w: missing host", ErrInvalidOptions)
 	}
 
 	if o.embedder == nil {
