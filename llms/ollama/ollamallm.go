@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -189,19 +188,19 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-func typeToRole(typ schema.ChatMessageType) string {
+func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return "system"
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return "assistant"
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		fallthrough
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		return "user"
-	case schema.ChatMessageTypeFunction:
+	case llms.ChatMessageTypeFunction:
 		return "function"
-	case schema.ChatMessageTypeTool:
+	case llms.ChatMessageTypeTool:
 		return "tool"
 	}
 	return ""

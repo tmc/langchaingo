@@ -2,17 +2,15 @@ package llms
 
 import (
 	"encoding/json"
-
-	"github.com/tmc/langchaingo/schema"
 )
 
 // MessageContent is the content of a message sent to a LLM. It has a role and a
 // sequence of parts. For example, it can represent one message in a chat
 // session sent by the user, in which case Role will be
-// schema.ChatMessageTypeHuman and Parts will be the sequence of items sent in
+// ChatMessageTypeHuman and Parts will be the sequence of items sent in
 // this specific message.
 type MessageContent struct {
-	Role  schema.ChatMessageType
+	Role  ChatMessageType
 	Parts []ContentPart
 }
 
@@ -82,6 +80,12 @@ type BinaryContent struct {
 
 func (BinaryContent) isPart() {}
 
+// FunctionCall is the name and arguments of a function call.
+type FunctionCall struct {
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
+}
+
 // ToolCall is a call to a tool (as requested by the model) that should be executed.
 type ToolCall struct {
 	// ID is the unique identifier of the tool call.
@@ -89,7 +93,7 @@ type ToolCall struct {
 	// Type is the type of the tool call.
 	Type string `json:"type"`
 	// FunctionCall is the function call to be executed.
-	FunctionCall *schema.FunctionCall `json:"function,omitempty"`
+	FunctionCall *FunctionCall `json:"function,omitempty"`
 }
 
 func (ToolCall) isPart() {}
@@ -127,15 +131,15 @@ type ContentChoice struct {
 	// FuncCall is non-nil when the model asks to invoke a function/tool.
 	// If a model invokes more than one function/tool, this field will only
 	// contain the first one.
-	FuncCall *schema.FunctionCall
+	FuncCall *FunctionCall
 
 	// ToolCalls is a list of tool calls the model asks to invoke.
-	ToolCalls []schema.ToolCall
+	ToolCalls []ToolCall
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
-func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
+func TextParts(role ChatMessageType, parts ...string) MessageContent {
 	result := MessageContent{
 		Role:  role,
 		Parts: []ContentPart{},

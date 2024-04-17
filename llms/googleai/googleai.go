@@ -9,7 +9,6 @@ import (
 	"github.com/google/generative-ai-go/genai"
 	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 	"google.golang.org/api/iterator"
 )
 
@@ -81,7 +80,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 
 	if len(messages) == 1 {
 		theMessage := messages[0]
-		if theMessage.Role != schema.ChatMessageTypeHuman {
+		if theMessage.Role != llms.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
 		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
@@ -169,15 +168,15 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	}
 
 	switch content.Role {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return nil, ErrSystemRoleNotSupported
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		c.Role = RoleUser
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		c.Role = RoleUser
-	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
+	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
 		fallthrough
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)

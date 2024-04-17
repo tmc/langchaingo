@@ -3,6 +3,7 @@ package outputparser
 import (
 	"strings"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -18,7 +19,7 @@ func (p Simple) Parse(text string) (any, error) {
 	return strings.TrimSpace(text), nil
 }
 
-func (p Simple) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
+func (p Simple) ParseWithPrompt(text string, _ llms.PromptValue) (any, error) {
 	return strings.TrimSpace(text), nil
 }
 func (p Simple) Type() string { return "simple_parser" }

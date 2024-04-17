@@ -3,7 +3,7 @@ package prompts
 import (
 	"fmt"
 
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 // SystemMessagePromptTemplate is a message formatter that returns a system message.
@@ -14,9 +14,9 @@ type SystemMessagePromptTemplate struct {
 var _ MessageFormatter = SystemMessagePromptTemplate{}
 
 // FormatMessages formats the message with the values given.
-func (p SystemMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p SystemMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.SystemChatMessage{Content: text}}, err
+	return []llms.ChatMessage{llms.SystemChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -39,9 +39,9 @@ type AIMessagePromptTemplate struct {
 var _ MessageFormatter = AIMessagePromptTemplate{}
 
 // FormatMessages formats the message with the values given.
-func (p AIMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p AIMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.AIChatMessage{Content: text}}, err
+	return []llms.ChatMessage{llms.AIChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -64,9 +64,9 @@ type HumanMessagePromptTemplate struct {
 var _ MessageFormatter = HumanMessagePromptTemplate{}
 
 // FormatMessages formats the message with the values given.
-func (p HumanMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p HumanMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.HumanChatMessage{Content: text}}, err
+	return []llms.ChatMessage{llms.HumanChatMessage{Content: text}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -90,9 +90,9 @@ type GenericMessagePromptTemplate struct {
 var _ MessageFormatter = GenericMessagePromptTemplate{}
 
 // FormatMessages formats the message with the values given.
-func (p GenericMessagePromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p GenericMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []schema.ChatMessage{schema.GenericChatMessage{Content: text, Role: p.Role}}, err
+	return []llms.ChatMessage{llms.GenericChatMessage{Content: text, Role: p.Role}}, err
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -113,12 +113,12 @@ type MessagesPlaceholder struct {
 }
 
 // FormatMessages formats the messages from the values by variable name.
-func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	value, ok := values[p.VariableName]
 	if !ok {
 		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
 	}
-	baseMessages, ok := value.([]schema.ChatMessage)
+	baseMessages, ok := value.([]llms.ChatMessage)
 	if !ok {
 		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
 	}

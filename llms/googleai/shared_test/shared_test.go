@@ -17,7 +17,6 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
@@ -110,7 +109,7 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -128,7 +127,7 @@ func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	content := llms.TextParts(
-		schema.ChatMessageTypeHuman,
+		llms.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"What kind of mammal am I?",
 	)
@@ -158,15 +157,15 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
 		},
 		{
-			Role:  schema.ChatMessageTypeAI,
+			Role:  llms.ChatMessageTypeAI,
 			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
 		},
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
 		},
 	}
@@ -189,7 +188,7 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -217,7 +216,7 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -253,7 +252,7 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -277,7 +276,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	content := llms.TextParts(
-		schema.ChatMessageTypeHuman,
+		llms.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"Tell me more about my taxonomy",
 	)
@@ -309,7 +308,7 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
