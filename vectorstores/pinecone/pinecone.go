@@ -32,13 +32,11 @@ type Store struct {
 	grpcConn *grpc.ClientConn
 	client   pinecone_grpc.VectorServiceClient
 
-	indexName   string
-	projectName string
-	environment string
-	apiKey      string
-	textKey     string
-	nameSpace   string
-	useGRPC     bool
+	host      string
+	apiKey    string
+	textKey   string
+	nameSpace string
+	useGRPC   bool
 }
 
 var _ vectorstores.VectorStore = Store{}
