@@ -19,12 +19,7 @@ func (s Store) getGRPCConn(ctx context.Context) (*grpc.ClientConn, error) {
 		MinVersion: tls.VersionTLS12,
 	}
 
-	target := fmt.Sprintf(
-		"%s-%s.svc.%s.pinecone.io:443",
-		s.indexName,
-		s.projectName,
-		s.environment,
-	)
+	target := s.host
 
 	ctx = metadata.AppendToOutgoingContext(ctx, "api-key", s.apiKey)
 
