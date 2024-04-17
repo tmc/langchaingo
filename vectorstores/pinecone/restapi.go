@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/schema"
@@ -72,7 +71,7 @@ func (s Store) restUpsert(
 	body, status, err := doRequest(
 		ctx,
 		payload,
-		getEndpoint(s.indexName, s.projectName, s.environment)+"/vectors/upsert",
+		s.host+"/vectors/upsert",
 		s.apiKey,
 		http.MethodPost,
 	)
@@ -135,7 +134,7 @@ func (s Store) restQuery(
 	body, statusCode, err := doRequest(
 		ctx,
 		payload,
-		getEndpoint(s.indexName, s.projectName, s.environment)+"/query",
+		s.host+"/query",
 		s.apiKey,
 		http.MethodPost,
 	)
@@ -206,16 +205,4 @@ func doRequest(ctx context.Context, payload any, url, apiKey, method string) (io
 		return nil, 0, err
 	}
 	return r.Body, r.StatusCode, err
-}
-
-func getEndpoint(index, project, environment string) string {
-	urlString := url.QueryEscape(
-		fmt.Sprintf(
-			"%s-%s.svc.%s.pinecone.io",
-			index,
-			project,
-			environment,
-		),
-	)
-	return "https://" + urlString
 }
