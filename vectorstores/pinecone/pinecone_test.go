@@ -41,37 +41,6 @@ func getValues(t *testing.T) (string, string) {
 	return pineconeAPIKey, pineconeHost
 }
 
-/* func TestPineconeStoreGRPC(t *testing.T) {
-	t.Parallel()
-
-	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
-	require.NoError(t, err)
-
-	storer, err := pinecone.New(
-		context.Background(),
-		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
-		pinecone.WithEmbedder(e),
-		pinecone.WithNameSpace(uuid.New().String()),
-		withGrpc(),
-	)
-	require.NoError(t, err)
-
-	err = storer.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "yes"},
-		{PageContent: "no"},
-	})
-	require.NoError(t, err)
-
-	docs, err := storer.SimilaritySearch(context.Background(), "yeah", 1)
-	require.NoError(t, err)
-	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "yes")
-} */
-
 func TestPineconeStoreAddDocuments(t *testing.T) {
 	apiKey, pineconeHost := getValues(t)
 
@@ -160,9 +129,36 @@ func TestPineconeStoreAddDocuments(t *testing.T) {
 				"square_feet": 800,
 			},
 		},
+		{PageContent: "yes"},
+		{PageContent: "no"},
 	})
 	require.NoError(t, err)
 }
+
+/* func TestPineconeStoreGRPC(t *testing.T) {
+	apiKey, host := getValues(t)
+
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
+	require.NoError(t, err)
+
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	store, err := pinecone.New(
+		context.Background(),
+		pinecone.WithAPIKey(apiKey),
+		pinecone.WithHost(host),
+		pinecone.WithEmbedder(e),
+		pinecone.WithNameSpace(id),
+		withGrpc(),
+	)
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(context.Background(), "yeah", 1, vectorstores.WithNameSpace(id))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, docs[0].PageContent, "yes")
+} */
 
 func TestPineconeAsRetriever(t *testing.T) {
 	apiKey, pineconeHost := getValues(t)
@@ -209,7 +205,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	storer, err := pinecone.New(
+	store, err := pinecone.New(
 		context.Background(),
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(pineconeHost),
@@ -219,7 +215,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	// test with a score threshold of 0.8, expected 6 documents
-	docs, err := storer.SimilaritySearch(context.Background(),
+	docs, err := store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan?", 10,
 		vectorstores.WithScoreThreshold(0.8),
 		vectorstores.WithNameSpace(id),
@@ -228,7 +224,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 6)
 
 	// test with a score threshold of 0, expected all 10 documents
-	docs, err = storer.SimilaritySearch(context.Background(),
+	docs, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0),
 		vectorstores.WithNameSpace(id),
@@ -246,7 +242,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	storer, err := pinecone.New(
+	store, err := pinecone.New(
 		context.Background(),
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(pineconeHost),
@@ -255,14 +251,14 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	_, err = storer.SimilaritySearch(context.Background(),
+	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8),
 		vectorstores.WithNameSpace(id),
 	)
 	require.Error(t, err)
 
-	_, err = storer.SimilaritySearch(context.Background(),
+	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8),
 		vectorstores.WithNameSpace(id),
