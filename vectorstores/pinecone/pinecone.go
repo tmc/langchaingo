@@ -137,10 +137,13 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 	defer indexConn.Close()
 
+	var protoFilterStruct *structpb.Struct
 	filters := s.getFilters(opts)
-	protoFilterStruct, err := s.createProtoStructFilter(filters)
-	if err != nil {
-		return nil, err
+	if filters != nil {
+		protoFilterStruct, err = s.createProtoStructFilter(filters)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	scoreThreshold, err := s.getScoreThreshold(opts)
@@ -227,10 +230,6 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 }
 
 func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
-	if filter == nil {
-		return nil, nil
-	}
-
 	filterBytes, err := json.Marshal(filter)
 	if err != nil {
 		return nil, err
