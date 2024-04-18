@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/tmc/langchaingo/schema"
 	"log"
 
 	"github.com/tmc/langchaingo/jsonschema"
@@ -19,7 +20,7 @@ func main() {
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston?"),
+			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?"),
 		},
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Printf("Received chunk: %s\n", chunk)
