@@ -111,6 +111,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
 	}
 
+	keepAlive := o.options.keepAlive
+	if keepAlive != "" {
+		req.KeepAlive = keepAlive
+	}
+
 	var fn ollamaclient.ChatResponseFunc
 	streamedResponse := ""
 	var resp ollamaclient.ChatResponse
@@ -166,10 +171,15 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
-		embedding, err := o.client.CreateEmbedding(ctx, &ollamaclient.EmbeddingRequest{
+		req := &ollamaclient.EmbeddingRequest{
 			Prompt: input,
 			Model:  o.options.model,
-		})
+		}
+		if o.options.keepAlive != "" {
+			req.KeepAlive = o.options.keepAlive
+		}
+
+		embedding, err := o.client.CreateEmbedding(ctx, req)
 		if err != nil {
 			return nil, err
 		}
