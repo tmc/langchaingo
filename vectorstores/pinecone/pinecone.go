@@ -130,20 +130,16 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
-
 	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
 	if err != nil {
 		return nil, err
 	}
 	defer indexConn.Close()
 
-	var protoFilterStruct *structpb.Struct
 	filters := s.getFilters(opts)
-	if filters != nil {
-		protoFilterStruct, err = s.createProtoStructFilter(filters)
-		if err != nil {
-			return nil, err
-		}
+	protoFilterStruct, err := s.createProtoStructFilter(filters)
+	if err != nil {
+		return nil, err
 	}
 
 	scoreThreshold, err := s.getScoreThreshold(opts)
@@ -161,7 +157,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		&pinecone.QueryByVectorValuesRequest{
 			Vector:          vector,
 			TopK:            uint32(numDocuments),
-			Filter:          protoFilterStruct,
+			Filter:          &protoFilterStruct,
 			IncludeMetadata: true,
 			IncludeValues:   true,
 		},
@@ -174,6 +170,10 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return nil, ErrEmptyResponse
 	}
 
+	return s.getDocumentsFromMatches(queryResult, scoreThreshold)
+}
+
+func (s Store) getDocumentsFromMatches(queryResult *pinecone.QueryVectorsResponse, scoreThreshold float32) ([]schema.Document, error) {
 	resultDocuments := make([]schema.Document, 0)
 	for _, match := range queryResult.Matches {
 		metadata := match.Vector.Metadata.AsMap()
@@ -196,7 +196,6 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 			resultDocuments = append(resultDocuments, doc)
 		}
 	}
-
 	return resultDocuments, nil
 }
 
@@ -229,17 +228,21 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
+func (s Store) createProtoStructFilter(filter any) (structpb.Struct, error) {
+	if filter == nil {
+		return structpb.Struct{}, nil
+	}
+
 	filterBytes, err := json.Marshal(filter)
 	if err != nil {
-		return nil, err
+		return structpb.Struct{}, err
 	}
 
 	var filterStruct structpb.Struct
 	err = json.Unmarshal(filterBytes, &filterStruct)
 	if err != nil {
-		return nil, err
+		return structpb.Struct{}, err
 	}
 
-	return &filterStruct, nil
+	return filterStruct, nil
 }
