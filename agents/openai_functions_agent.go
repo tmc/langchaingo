@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"regexp"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -49,7 +48,6 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 	}
 }
 
-// Deprecated: Use tools instead.
 func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
 	res := make([]llms.FunctionDefinition, 0)
 	for _, tool := range o.Tools {
@@ -62,27 +60,6 @@ func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
 				},
 				"required": []string{"__arg1"},
 				"type":     "object",
-			},
-		})
-	}
-	return res
-}
-
-func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
-	res := make([]llms.Tool, 0)
-	for _, tool := range o.Tools {
-		res = append(res, llms.Tool{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name:        tool.Name(),
-				Description: tool.Description(),
-				Parameters: map[string]any{
-					"properties": map[string]any{
-						"__arg1": map[string]string{"title": "__arg1", "type": "string"},
-					},
-					"required": []string{"__arg1"},
-					"type":     "object",
-				},
 			},
 		})
 	}
@@ -120,40 +97,15 @@ func (o *OpenAIFunctionsAgent) Plan(
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		var mc llms.MessageContent
-
-		switch p := msg.(type) {
-		case llms.ToolChatMessage:
-			mc = llms.MessageContent{
-				Role: role,
-				Parts: []llms.ContentPart{llms.ToolCallResponse{
-					ToolCallID: p.ID,
-					Content:    p.Content,
-				}},
-			}
-
-		case llms.AIChatMessage:
-			mc = llms.MessageContent{
-				Role: role,
-				Parts: []llms.ContentPart{
-					llms.ToolCall{
-						ID:           p.ToolCalls[0].ID,
-						Type:         p.ToolCalls[0].Type,
-						FunctionCall: p.ToolCalls[0].FunctionCall,
-					},
-				},
-			}
-		default:
-			mc = llms.MessageContent{
-				Role:  role,
-				Parts: []llms.ContentPart{llms.TextContent{Text: text}},
-			}
+		mc := llms.MessageContent{
+			Role:  role,
+			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
 		}
 		mcList[i] = mc
 	}
 
 	result, err := o.LLM.GenerateContent(ctx, mcList,
-		llms.WithTools(o.tools()), llms.WithStreamingFunc(stream))
+		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -199,25 +151,8 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		functionCall := step.Action.Log
-		pattern := `\{.*?\}`
-		regex := regexp.MustCompile(pattern)
-		match := regex.FindString(functionCall)
-
-		messages = append(messages, llms.AIChatMessage{
-			ToolCalls: []llms.ToolCall{
-				{
-					ID:   step.Action.ToolID,
-					Type: "function",
-					FunctionCall: &llms.FunctionCall{
-						Name:      step.Action.Tool,
-						Arguments: match,
-					},
-				},
-			},
-		})
-		messages = append(messages, llms.ToolChatMessage{
-			ID:      step.Action.ToolID,
+		messages = append(messages, llms.FunctionChatMessage{
+			Name:    step.Action.Tool,
 			Content: step.Observation,
 		})
 	}
@@ -268,7 +203,6 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			Tool:      functionName,
 			ToolInput: toolInput,
 			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-			ToolID:    choice.ToolCalls[0].ID,
 		},
 	}, nil, nil
 }
