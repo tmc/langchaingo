@@ -136,10 +136,13 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 	defer indexConn.Close()
 
+	var protoFilterStruct *structpb.Struct
 	filters := s.getFilters(opts)
-	protoFilterStruct, err := s.createProtoStructFilter(filters)
-	if err != nil {
-		return nil, err
+	if filters != nil {
+		protoFilterStruct, err = s.createProtoStructFilter(filters)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	scoreThreshold, err := s.getScoreThreshold(opts)
@@ -157,7 +160,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		&pinecone.QueryByVectorValuesRequest{
 			Vector:          vector,
 			TopK:            uint32(numDocuments),
-			Filter:          &protoFilterStruct,
+			Filter:          protoFilterStruct,
 			IncludeMetadata: true,
 			IncludeValues:   true,
 		},
@@ -228,21 +231,17 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 	return opts
 }
 
-func (s Store) createProtoStructFilter(filter any) (structpb.Struct, error) {
-	if filter == nil {
-		return structpb.Struct{}, nil
-	}
-
+func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
 	filterBytes, err := json.Marshal(filter)
 	if err != nil {
-		return structpb.Struct{}, err
+		return nil, err
 	}
 
 	var filterStruct structpb.Struct
 	err = json.Unmarshal(filterBytes, &filterStruct)
 	if err != nil {
-		return structpb.Struct{}, err
+		return nil, err
 	}
 
-	return filterStruct, nil
+	return &filterStruct, nil
 }
