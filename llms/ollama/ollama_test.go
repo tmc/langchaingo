@@ -103,3 +103,29 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 	assert.Regexp(t, "feet", strings.ToLower(sb.String()))
 }
+
+func TestWithKeepAlive(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t, WithKeepAlive("1m"))
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	resp, err := llm.GenerateContent(context.Background(), content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, resp.Choices)
+	c1 := resp.Choices[0]
+	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+
+	vector, err := llm.CreateEmbedding(context.Background(), []string{"test embedding with keep_alive"})
+	require.NoError(t, err)
+	assert.NotEmpty(t, vector)
+}

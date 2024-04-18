@@ -16,6 +16,7 @@ type options struct {
 	customModelTemplate string
 	system              string
 	format              string
+	keepAlive           string
 }
 
 type Option func(*options)
@@ -31,6 +32,19 @@ func WithModel(model string) Option {
 func WithFormat(format string) Option {
 	return func(opts *options) {
 		opts.format = format
+	}
+}
+
+// WithKeepAlive controls how long the model will stay loaded into memory following the request (default: 5m)
+// only supported by ollama v0.1.23 and later
+//
+//	If set to a positive duration (e.g. 20m, 1hr or 30), the model will stay loaded for the provided duration
+//	If set to a negative duration (e.g. -1), the model will stay loaded indefinitely
+//	If set to 0, the model will be unloaded immediately once finished
+//	If not set, the model will stay loaded for 5 minutes by default
+func WithKeepAlive(keepAlive string) Option {
+	return func(opts *options) {
+		opts.keepAlive = keepAlive
 	}
 }
 
