@@ -99,10 +99,6 @@ var availableTools = []llms.Tool{
 						"type":        "string",
 						"description": "The city and state, e.g. San Francisco, CA",
 					},
-					"unit": map[string]any{
-						"type": "string",
-						"enum": []string{"fahrenheit", "celsius"},
-					},
 				},
 				"required": []string{"location"},
 			},
