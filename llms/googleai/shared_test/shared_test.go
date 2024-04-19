@@ -301,7 +301,6 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 }
 
 func testTools(t *testing.T, llm llms.Model) {
-	// TODO: this doesn't work on Vertex yet (issue #748)
 	t.Helper()
 	t.Parallel()
 
