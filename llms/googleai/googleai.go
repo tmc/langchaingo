@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
@@ -92,7 +91,6 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 		}
 		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
 	} else {
-		llms.ShowMessageContents(os.Stdout, messages)
 		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
 	if err != nil {
@@ -272,7 +270,6 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 	session.History = history
 
 	if opts.StreamingFunc == nil {
-		showContent(os.Stdout, session.History)
 		resp, err := session.SendMessage(ctx, reqContent.Parts...)
 		if err != nil {
 			return nil, err

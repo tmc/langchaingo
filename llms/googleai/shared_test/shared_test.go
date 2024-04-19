@@ -301,6 +301,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 }
 
 func testTools(t *testing.T, llm llms.Model) {
+	// TODO: this doesn't work on Vertex yet (issue #748)
 	t.Helper()
 	t.Parallel()
 
@@ -324,33 +325,29 @@ func testTools(t *testing.T, llm llms.Model) {
 		},
 	}
 
-	parts := []llms.ContentPart{
-		llms.TextPart("What is the weather like in Chicago?"),
-	}
 	content := []llms.MessageContent{
-		{
-			Role:  llms.ChatMessageTypeHuman,
-			Parts: parts,
-		},
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
 	}
-
-	resp, err := llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
 	require.NoError(t, err)
 	assert.NotEmpty(t, resp.Choices)
 
-	respchoice := resp.Choices[0]
+	c1 := resp.Choices[0]
 
 	// Update chat history with assistant's response, with its tool calls.
 	assistantResp := llms.MessageContent{
 		Role: llms.ChatMessageTypeAI,
 	}
-	for _, tc := range respchoice.ToolCalls {
+	for _, tc := range c1.ToolCalls {
 		assistantResp.Parts = append(assistantResp.Parts, tc)
 	}
 	content = append(content, assistantResp)
 
 	// "Execute" tool calls by calling requested function
-	for _, tc := range respchoice.ToolCalls {
+	for _, tc := range c1.ToolCalls {
 		switch tc.FunctionCall.Name {
 		case "getCurrentWeather":
 			var args struct {
@@ -376,21 +373,12 @@ func testTools(t *testing.T, llm llms.Model) {
 		}
 	}
 
-	//fmt.Println(showResponse(resp))
-	//content = append(content, llms.MessageContent{
-	//Role:  llms.ChatMessageTypeHuman,
-	//Parts: []llms.ContentPart{llms.TextPart("so, what is it?")},
-	//})
-	//fmt.Println("MessageContent passed...")
-	//llms.ShowMessageContents(os.Stdout, content)
-
-	//fmt.Println(showJSON(content))
-
 	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
 	require.NoError(t, err)
 	assert.NotEmpty(t, resp.Choices)
 
-	fmt.Println(showJSON(resp))
+	c1 = resp.Choices[0]
+	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
 }
 
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
