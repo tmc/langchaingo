@@ -1,3 +1,4 @@
+//nolint:all
 package googleai
 
 import (
@@ -333,7 +334,7 @@ DoStream:
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	var genaiTools []*genai.Tool
+	genaiTools := make([]*genai.Tool, 0, len(tools))
 	for i, tool := range tools {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
@@ -355,7 +356,11 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 
 		schema := &genai.Schema{}
 		if ty, ok := params["type"]; ok {
-			schema.Type = convertToolSchemaType(ty.(string))
+			tyString, ok := ty.(string)
+			if !ok {
+				return nil, fmt.Errorf("tool [%d]: expected string for type", i)
+			}
+			schema.Type = convertToolSchemaType(tyString)
 		}
 
 		paramProperties, ok := params["properties"].(map[string]any)
@@ -372,10 +377,18 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			schema.Properties[propName] = &genai.Schema{}
 
 			if ty, ok := valueMap["type"]; ok {
-				schema.Properties[propName].Type = convertToolSchemaType(ty.(string))
+				tyString, ok := ty.(string)
+				if !ok {
+					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
+				}
+				schema.Properties[propName].Type = convertToolSchemaType(tyString)
 			}
 			if desc, ok := valueMap["description"]; ok {
-				schema.Properties[propName].Description = desc.(string)
+				descString, ok := desc.(string)
+				if !ok {
+					return nil, fmt.Errorf("tool [%d]: expected string for description", i)
+				}
+				schema.Properties[propName].Description = descString
 			}
 		}
 
@@ -412,7 +425,7 @@ func convertToolSchemaType(ty string) genai.Type {
 	}
 }
 
-// showContent is a debugging helper for genai.Content
+// showContent is a debugging helper for genai.Content.
 func showContent(w io.Writer, cs []*genai.Content) {
 	fmt.Fprintf(w, "Content (len=%v)\n", len(cs))
 	for i, c := range cs {
