@@ -17,6 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Sending initial message to the model, with a list of available tools.
 	ctx := context.Background()
 	messageHistory := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
@@ -29,9 +30,12 @@ func main() {
 	}
 	messageHistory = updateMessageHistory(messageHistory, resp)
 
+	// Execute tool calls requested by the model
 	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
-
 	messageHistory = append(messageHistory, llms.TextParts(llms.ChatMessageTypeHuman, "Can you compare the two?"))
+
+	// Send query to the model again, this time with a history containing its
+	// request to invoke a tool and our response to the tool call.
 	fmt.Println("Querying with tool response...")
 	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
