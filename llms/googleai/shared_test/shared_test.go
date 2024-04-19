@@ -3,6 +3,7 @@ package shared_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -79,6 +80,7 @@ var testConfigs = []testConfig{
 	{testEmbeddings, nil},
 	{testCandidateCountSetting, nil},
 	{testMaxTokensSetting, nil},
+	{testTools, nil},
 	{
 		testMultiContentText,
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
@@ -298,6 +300,99 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+func testTools(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	var availableTools = []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	parts := []llms.ContentPart{
+		llms.TextPart("What is the weather like in Chicago?"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	resp, err := llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	respchoice := resp.Choices[0]
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range respchoice.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range respchoice.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "getCurrentWeather":
+			var args struct {
+				Location string `json:"location"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(args.Location, "Chicago") {
+				toolResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							Name:    tc.FunctionCall.Name,
+							Content: "64 and sunny",
+						},
+					},
+				}
+				content = append(content, toolResponse)
+			}
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	//fmt.Println(showResponse(resp))
+	//content = append(content, llms.MessageContent{
+	//Role:  llms.ChatMessageTypeHuman,
+	//Parts: []llms.ContentPart{llms.TextPart("so, what is it?")},
+	//})
+	//fmt.Println("MessageContent passed...")
+	//llms.ShowMessageContents(os.Stdout, content)
+
+	//fmt.Println(showJSON(content))
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	fmt.Println(showJSON(resp))
+}
+
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
@@ -337,4 +432,12 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 		assert.Regexp(t, "(?i)stop", c1.StopReason)
 		assert.Regexp(t, "(?i)dog|breed|canid|canine", c1.Content)
 	}
+}
+
+func showJSON(v any) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }

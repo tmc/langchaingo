@@ -2,6 +2,8 @@ package llms
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 )
 
 // MessageContent is the content of a message sent to a LLM. It has a role and a
@@ -148,4 +150,29 @@ func TextParts(role ChatMessageType, parts ...string) MessageContent {
 		result.Parts = append(result.Parts, TextPart(part))
 	}
 	return result
+}
+
+// ShowMessageContents is a debugging helper for MessageContent.
+func ShowMessageContents(w io.Writer, msgs []MessageContent) {
+	fmt.Fprintf(w, "MessageContent (len=%v)\n", len(msgs))
+	for i, mc := range msgs {
+		fmt.Fprintf(w, "[%d]: Role=%s\n", i, mc.Role)
+		for j, p := range mc.Parts {
+			fmt.Fprintf(w, "  Parts[%v]: ", j)
+			switch pp := p.(type) {
+			case TextContent:
+				fmt.Fprintf(w, "TextContent %q\n", pp.Text)
+			case ImageURLContent:
+				fmt.Fprintf(w, "ImageURLPart %q\n", pp.URL)
+			case BinaryContent:
+				fmt.Fprintf(w, "BinaryContent MIME=%q, size=%d\n", pp.MIMEType, len(pp.Data))
+			case ToolCall:
+				fmt.Fprintf(w, "ToolCall ID=%v, Type=%v, Func=%v(%v)\n", pp.ID, pp.Type, pp.FunctionCall.Name, pp.FunctionCall.Arguments)
+			case ToolCallResponse:
+				fmt.Fprintf(w, "ToolCallResponse ID=%v, Name=%v, Content=%v\n", pp.ToolCallID, pp.Name, pp.Content)
+			default:
+				fmt.Fprintf(w, "unknown type %T\n", pp)
+			}
+		}
+	}
 }
