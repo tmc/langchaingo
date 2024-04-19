@@ -12,7 +12,7 @@ import (
 
 var _ embeddings.Embedder = &VoyageAI{}
 
-// VoyageAI is the embedder using the VoyageAI api.
+// VoyageAI is the embedder using the VoyageAI api to create embeddings.
 type VoyageAI struct {
 	baseURL       string
 	token         string
@@ -22,7 +22,7 @@ type VoyageAI struct {
 	BatchSize     int
 }
 
-// NewVoyageAI returns a new embedding client that uses the VoyageAI api.
+// NewVoyageAI returns a new embedder that uses the VoyageAI api.
 // The default model is "voyage-2". Use `WithModel` to change the model.
 func NewVoyageAI(opts ...Option) (*VoyageAI, error) {
 	v, err := applyOptions(opts...)
@@ -44,6 +44,7 @@ type embedDocumentsRequest struct {
 	InputType string   `json:"input_type"`
 }
 
+// EmbedDocuments implements the `embeddings.Embedder` and creates an embedding for each of the texts.
 func (v *VoyageAI) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
 	batchedTexts := embeddings.BatchTexts(
 		embeddings.MaybeRemoveNewLines(texts, v.StripNewLines),
@@ -86,6 +87,7 @@ type embedQueryRequest struct {
 	InputType string `json:"input_type"`
 }
 
+// EmbedQuery implements the `embeddings.Embedder` and creates an embedding for the query text.
 func (v *VoyageAI) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	req := embedQueryRequest{
 		Model:     v.Model,
