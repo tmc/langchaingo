@@ -96,7 +96,7 @@ func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context)
 		return 0, err
 	}
 
-	bufferString, err := schema.GetBufferString(
+	bufferString, err := llms.GetBufferString(
 		messages,
 		tb.ConversationBuffer.HumanPrefix,
 		tb.ConversationBuffer.AIPrefix,

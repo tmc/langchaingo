@@ -16,7 +16,7 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/pinecone"
 )
 
-func getValues(t *testing.T) (string, string, string, string) {
+func getValues(t *testing.T) (string, string) {
 	t.Helper()
 
 	pineconeAPIKey := os.Getenv("PINECONE_API_KEY")
@@ -24,75 +24,32 @@ func getValues(t *testing.T) (string, string, string, string) {
 		t.Skip("Must set PINECONE_API_KEY to run test")
 	}
 
-	environment := os.Getenv("PINECONE_ENVIRONMENT")
-	if environment == "" {
-		t.Skip("Must set PINECONE_ENVIRONMENT to run test")
+	pineconeHost := os.Getenv("PINECONE_HOST")
+	if pineconeHost == "" {
+		t.Skip("Must set PINECONE_HOST to run test")
 	}
 
-	indexName := os.Getenv("PINECONE_INDEX")
-	if environment == "" {
-		t.Skip("Must set PINECONE_INDEX to run test")
+	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+	if openaiAPIKey == "" {
+		t.Skip("Must set OPENAI_API_KEY to run test")
 	}
 
-	projectName := os.Getenv("PINECONE_PROJECT")
-	if environment == "" {
-		t.Skip("Must set PINECONE_INDEX to run test")
-	}
-
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-
-	return environment, pineconeAPIKey, indexName, projectName
+	return pineconeAPIKey, pineconeHost
 }
-
-/* func TestPineconeStoreGRPC(t *testing.T) {
-	t.Parallel()
-
-	environment, apiKey, indexName, projectName := getValues(t)
-	e, err := embeddings.NewOpenAI()
-	require.NoError(t, err)
-
-	storer, err := pinecone.New(
-		context.Background(),
-		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
-		pinecone.WithEmbedder(e),
-		pinecone.WithNameSpace(uuid.New().String()),
-		withGrpc(),
-	)
-	require.NoError(t, err)
-
-	err = storer.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "yes"},
-		{PageContent: "no"},
-	})
-	require.NoError(t, err)
-
-	docs, err := storer.SimilaritySearch(context.Background(), "yeah", 1)
-	require.NoError(t, err)
-	require.Len(t, docs, 1)
-	require.Equal(t, docs[0].PageContent, "yes")
-} */
 
 func TestPineconeStoreRest(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
@@ -113,19 +70,16 @@ func TestPineconeStoreRest(t *testing.T) {
 func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
@@ -163,19 +117,16 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	storer, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
@@ -209,19 +160,16 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -254,19 +202,16 @@ func TestPineconeAsRetriever(t *testing.T) {
 func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -305,19 +250,16 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -384,19 +326,16 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -464,19 +403,16 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
@@ -542,19 +478,16 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
-	environment, apiKey, indexName, projectName := getValues(t)
+	apiKey, host := getValues(t)
 
-	llm, err := openai.New()
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err := pinecone.New(
-		context.Background(),
 		pinecone.WithAPIKey(apiKey),
-		pinecone.WithEnvironment(environment),
-		pinecone.WithIndexName(indexName),
-		pinecone.WithProjectName(projectName),
+		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)

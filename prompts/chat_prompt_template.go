@@ -1,6 +1,6 @@
 package prompts
 
-import "github.com/tmc/langchaingo/schema"
+import "github.com/tmc/langchaingo/llms"
 
 // ChatPromptTemplate is a prompt template for chat messages.
 type ChatPromptTemplate struct {
@@ -20,13 +20,13 @@ var (
 )
 
 // FormatPrompt formats the messages into a chat prompt value.
-func (p ChatPromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
+func (p ChatPromptTemplate) FormatPrompt(values map[string]any) (llms.PromptValue, error) { //nolint:ireturn
 	resolvedValues, err := resolvePartialValues(p.PartialVariables, values)
 	if err != nil {
 		return nil, err
 	}
 
-	formattedMessages := make([]schema.ChatMessage, 0, len(p.Messages))
+	formattedMessages := make([]llms.ChatMessage, 0, len(p.Messages))
 	for _, m := range p.Messages {
 		curFormattedMessages, err := m.FormatMessages(resolvedValues)
 		if err != nil {
@@ -46,7 +46,7 @@ func (p ChatPromptTemplate) Format(values map[string]any) (string, error) {
 }
 
 // FormatMessages formats the messages with the values and returns the formatted messages.
-func (p ChatPromptTemplate) FormatMessages(values map[string]any) ([]schema.ChatMessage, error) {
+func (p ChatPromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	promptValue, err := p.FormatPrompt(values)
 	return promptValue.Messages(), err
 }

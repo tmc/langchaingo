@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type ChatMessage = openaiclient.ChatMessage
@@ -59,17 +58,17 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
-		case schema.ChatMessageTypeSystem:
+		case llms.ChatMessageTypeSystem:
 			msg.Role = RoleSystem
-		case schema.ChatMessageTypeAI:
+		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
-		case schema.ChatMessageTypeHuman:
+		case llms.ChatMessageTypeHuman:
 			msg.Role = RoleUser
-		case schema.ChatMessageTypeGeneric:
+		case llms.ChatMessageTypeGeneric:
 			msg.Role = RoleUser
-		case schema.ChatMessageTypeFunction:
+		case llms.ChatMessageTypeFunction:
 			msg.Role = RoleFunction
-		case schema.ChatMessageTypeTool:
+		case llms.ChatMessageTypeTool:
 			msg.Role = RoleTool
 			// Here we extract tool calls from the message and populate the ToolCalls field.
 
@@ -156,7 +155,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		// Legacy function call handling
 		if c.FinishReason == "function_call" {
-			choices[i].FuncCall = &schema.FunctionCall{
+			choices[i].FuncCall = &llms.FunctionCall{
 				Name:      c.Message.FunctionCall.Name,
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
@@ -164,10 +163,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		if c.FinishReason == "tool_calls" {
 			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
 			for _, tool := range c.Message.ToolCalls {
-				choices[i].ToolCalls = append(choices[i].ToolCalls, schema.ToolCall{
+				choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
 					ID:   tool.ID,
 					Type: string(tool.Type),
-					FunctionCall: &schema.FunctionCall{
+					FunctionCall: &llms.FunctionCall{
 						Name:      tool.Function.Name,
 						Arguments: tool.Function.Arguments,
 					},

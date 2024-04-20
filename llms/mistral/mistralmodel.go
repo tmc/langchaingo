@@ -8,7 +8,6 @@ import (
 	sdk "github.com/gage-technologies/mistral-go"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 // Model encapsulates an instantiated Mistral client, the client options used to instantiate the client, and a callback handler provided by Langchain Go.
@@ -159,7 +158,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		})
 		toolCalls := choice.Message.ToolCalls
 		if len(toolCalls) > 0 {
-			langchainContentResponse.Choices[idx].FuncCall = (*schema.FunctionCall)(&toolCalls[0].Function)
+			langchainContentResponse.Choices[idx].FuncCall = (*llms.FunctionCall)(&toolCalls[0].Function)
 		}
 	}
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
@@ -192,7 +191,7 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 				langchainContentResponse.Choices[0].Content += choice.Delta.Content
 				langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
 				if len(choice.Delta.ToolCalls) > 0 {
-					langchainContentResponse.Choices[0].FuncCall = (*schema.FunctionCall)(&choice.Delta.ToolCalls[0].Function)
+					langchainContentResponse.Choices[0].FuncCall = (*llms.FunctionCall)(&choice.Delta.ToolCalls[0].Function)
 				}
 			}
 			err := callOptions.StreamingFunc(ctx, []byte(chunkStr))
@@ -230,13 +229,13 @@ func convertToMistralChatMessages(langchainMessages []llms.MessageContent) ([]sd
 
 func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessage) {
 	switch msg.Role {
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		chatMsg.Role = "assistant"
-	case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeGeneric, llms.ChatMessageTypeHuman:
 		chatMsg.Role = "user"
-	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
+	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
 		chatMsg.Role = "tool"
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		chatMsg.Role = "system"
 	}
 }
