@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -33,7 +34,7 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 
 	m := NewConversationBuffer()
 	m.ReturnMessages = true
-	expected1 := map[string]any{"history": []schema.ChatMessage{}}
+	expected1 := map[string]any{"history": []llms.ChatMessage{}}
 	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	assert.Equal(t, expected1, result1)
@@ -45,9 +46,9 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar"},
-			schema.AIChatMessage{Content: "foo"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar"},
+			llms.AIChatMessage{Content: "foo"},
 		}),
 	)
 
@@ -61,9 +62,9 @@ func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
 	m := NewConversationBuffer(WithChatHistory(NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar"},
-			schema.AIChatMessage{Content: "foo"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar"},
+			llms.AIChatMessage{Content: "foo"},
 		}),
 	)))
 
@@ -85,7 +86,7 @@ func (t testChatMessageHistory) AddAIMessage(context.Context, string) error {
 	return nil
 }
 
-func (t testChatMessageHistory) AddMessage(context.Context, schema.ChatMessage) error {
+func (t testChatMessageHistory) AddMessage(context.Context, llms.ChatMessage) error {
 	return nil
 }
 
@@ -93,14 +94,14 @@ func (t testChatMessageHistory) Clear(context.Context) error {
 	return nil
 }
 
-func (t testChatMessageHistory) SetMessages(context.Context, []schema.ChatMessage) error {
+func (t testChatMessageHistory) SetMessages(context.Context, []llms.ChatMessage) error {
 	return nil
 }
 
-func (t testChatMessageHistory) Messages(context.Context) ([]schema.ChatMessage, error) {
-	return []schema.ChatMessage{
-		schema.HumanChatMessage{Content: "user message test"},
-		schema.AIChatMessage{Content: "ai message test"},
+func (t testChatMessageHistory) Messages(context.Context) ([]llms.ChatMessage, error) {
+	return []llms.ChatMessage{
+		llms.HumanChatMessage{Content: "user message test"},
+		llms.AIChatMessage{Content: "ai message test"},
 	}, nil
 }
 

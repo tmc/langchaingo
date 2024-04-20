@@ -10,7 +10,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -164,25 +163,25 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 	systemPrompt := ""
 	for _, msg := range messages {
 		switch msg.Role {
-		case schema.ChatMessageTypeSystem:
+		case llms.ChatMessageTypeSystem:
 			content, err := handleSystemMessage(msg)
 			if err != nil {
 				return nil, "", err
 			}
 			systemPrompt += content
-		case schema.ChatMessageTypeHuman:
+		case llms.ChatMessageTypeHuman:
 			chatMessage, err := handleHumanMessage(msg)
 			if err != nil {
 				return nil, "", err
 			}
 			chatMessages = append(chatMessages, chatMessage)
-		case schema.ChatMessageTypeAI:
+		case llms.ChatMessageTypeAI:
 			chatMessage, err := handleAIMessage(msg)
 			if err != nil {
 				return nil, "", err
 			}
 			chatMessages = append(chatMessages, chatMessage)
-		case schema.ChatMessageTypeGeneric, schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
+		case llms.ChatMessageTypeGeneric, llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
 			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)
 		default:
 			return nil, "", fmt.Errorf("unsupported message type: %v", msg.Role)

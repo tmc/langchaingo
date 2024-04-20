@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 func TestChatMessageHistory(t *testing.T) {
@@ -21,15 +21,15 @@ func TestChatMessageHistory(t *testing.T) {
 	messages, err := h.Messages(context.Background())
 	require.NoError(t, err)
 
-	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Content: "foo"},
-		schema.HumanChatMessage{Content: "bar"},
+	assert.Equal(t, []llms.ChatMessage{
+		llms.AIChatMessage{Content: "foo"},
+		llms.HumanChatMessage{Content: "bar"},
 	}, messages)
 
 	h = NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.AIChatMessage{Content: "foo"},
-			schema.SystemChatMessage{Content: "bar"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.AIChatMessage{Content: "foo"},
+			llms.SystemChatMessage{Content: "bar"},
 		}),
 	)
 	err = h.AddUserMessage(context.Background(), "zoo")
@@ -38,9 +38,9 @@ func TestChatMessageHistory(t *testing.T) {
 	messages, err = h.Messages(context.Background())
 	require.NoError(t, err)
 
-	assert.Equal(t, []schema.ChatMessage{
-		schema.AIChatMessage{Content: "foo"},
-		schema.SystemChatMessage{Content: "bar"},
-		schema.HumanChatMessage{Content: "zoo"},
+	assert.Equal(t, []llms.ChatMessage{
+		llms.AIChatMessage{Content: "foo"},
+		llms.SystemChatMessage{Content: "bar"},
+		llms.HumanChatMessage{Content: "zoo"},
 	}, messages)
 }

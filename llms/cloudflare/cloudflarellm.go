@@ -8,7 +8,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -158,19 +157,19 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return res.Result.Data, nil
 }
 
-func typeToRole(typ schema.ChatMessageType) cloudflareclient.Role {
+func typeToRole(typ llms.ChatMessageType) cloudflareclient.Role {
 	switch typ {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return cloudflareclient.RoleSystem
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return cloudflareclient.RoleAssistant
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		fallthrough
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		return cloudflareclient.RoleTypeUser
-	case schema.ChatMessageTypeFunction:
+	case llms.ChatMessageTypeFunction:
 		return "function"
-	case schema.ChatMessageTypeTool:
+	case llms.ChatMessageTypeTool:
 		return "tool"
 	}
 	return ""
