@@ -10,7 +10,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -32,9 +31,9 @@ func main() {
 	var msgs []llms.MessageContent
 
 	// system message defines the available tools.
-	msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeSystem,
+	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeSystem,
 		systemMessage()))
-	msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeHuman,
+	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman,
 		"What's the weather like in Beijing?"))
 
 	ctx := context.Background()
@@ -46,7 +45,7 @@ func main() {
 		}
 
 		choice1 := resp.Choices[0]
-		msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeAI, choice1.Content))
+		msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeAI, choice1.Content))
 
 		if c := unmarshalCall(choice1.Content); c != nil {
 			log.Printf("Call: %v", c.Tool)
@@ -61,7 +60,7 @@ func main() {
 			// Ollama doesn't always respond with a function call, let it try again.
 			log.Printf("Not a call: %v", choice1.Content)
 
-			msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
+			msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
 		}
 	}
 }
@@ -87,7 +86,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 	if !validTool(c.Tool) {
 		log.Printf("invalid function call: %#v", c)
 
-		return llms.TextParts(schema.ChatMessageTypeHuman,
+		return llms.TextParts(llms.ChatMessageTypeHuman,
 			"Tool does not exist, please try again."), true
 	}
 
@@ -107,7 +106,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return llms.TextParts(schema.ChatMessageTypeSystem, weather), true
+		return llms.TextParts(llms.ChatMessageTypeSystem, weather), true
 	case "finalResponse":
 		resp, ok := c.Input["response"].(string)
 		if !ok {
