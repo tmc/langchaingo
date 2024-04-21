@@ -7,7 +7,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -18,8 +17,8 @@ func main() {
 	ctx := context.Background()
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a company branding design wizard."),
-		llms.TextParts(schema.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are a company branding design wizard."),
+		llms.TextParts(llms.ChatMessageTypeHuman, "What would be a good company name a company that makes colorful socks?"),
 	}
 
 	if _, err := llm.GenerateContent(ctx, content,

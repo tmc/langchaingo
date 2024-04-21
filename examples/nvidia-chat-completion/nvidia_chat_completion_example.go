@@ -8,7 +8,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -25,8 +24,8 @@ func main() {
 	ctx := context.Background()
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a golang expert"),
-		llms.TextParts(schema.ChatMessageTypeHuman, "explain why go is a great fit for ai based products"),
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are a golang expert"),
+		llms.TextParts(llms.ChatMessageTypeHuman, "explain why go is a great fit for ai based products"),
 	}
 
 	if _, err = llm.GenerateContent(ctx, content,
