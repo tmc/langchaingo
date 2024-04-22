@@ -9,7 +9,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -18,49 +17,41 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Sending initial message to the model, with a list of available tools.
 	ctx := context.Background()
 	messageHistory := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
 	}
 
 	fmt.Println("Querying for weather in Boston and Chicago..")
-	resp := queryLLM(ctx, llm, messageHistory, availableTools)
-	fmt.Println("Initial response:", showResponse(resp))
-	messageHistory = updateMessageHistory(messageHistory, resp)
-
-	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
-
-	messageHistory = append(messageHistory, llms.TextParts(schema.ChatMessageTypeHuman, "Can you compare the two?"))
-	fmt.Println("Querying with tool response...")
-	resp = queryLLM(ctx, llm, messageHistory, availableTools)
-	fmt.Println(resp.Choices[0].Content)
-}
-
-// queryLLM queries the LLM with the given message history and list of available
-// tools, and returns the response.
-func queryLLM(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, tools []llms.Tool) *llms.ContentResponse {
-	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(tools))
+	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return resp
+	messageHistory = updateMessageHistory(messageHistory, resp)
+
+	// Execute tool calls requested by the model
+	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
+	messageHistory = append(messageHistory, llms.TextParts(llms.ChatMessageTypeHuman, "Can you compare the two?"))
+
+	// Send query to the model again, this time with a history containing its
+	// request to invoke a tool and our response to the tool call.
+	fmt.Println("Querying with tool response...")
+	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp.Choices[0].Content)
 }
 
 // updateMessageHistory updates the message history with the assistant's
-// response, and translates tool calls.
+// response and requested tool calls.
 func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
-	assistantResponse := llms.MessageContent{
-		Role: schema.ChatMessageTypeAI,
-	}
-	for _, tc := range resp.Choices[0].ToolCalls {
-		assistantResponse.Parts = append(assistantResponse.Parts, llms.ToolCall{
-			ID:   tc.ID,
-			Type: tc.Type,
-			FunctionCall: &schema.FunctionCall{
-				Name:      tc.FunctionCall.Name,
-				Arguments: tc.FunctionCall.Arguments,
-			},
-		})
+	respchoice := resp.Choices[0]
+
+	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respchoice.Content)
+	for _, tc := range respchoice.ToolCalls {
+		assistantResponse.Parts = append(assistantResponse.Parts, tc)
 	}
 	return append(messageHistory, assistantResponse)
 }
@@ -85,7 +76,7 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 			}
 
 			weatherCallResponse := llms.MessageContent{
-				Role: schema.ChatMessageTypeTool,
+				Role: llms.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{
 					llms.ToolCallResponse{
 						ToolCallID: toolCall.ID,

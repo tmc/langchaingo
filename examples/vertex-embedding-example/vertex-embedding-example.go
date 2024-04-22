@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	ctx := context.Background()
 	project := os.Getenv("VERTEX_PROJECT")
 	location := os.Getenv("VERTEX_LOCATION")
-	llm, err := vertex.New(ctx, vertex.WithCloudProject(project), vertex.WithCloudLocation(location))
+	llm, err := vertex.New(ctx, googleai.WithCloudProject(project), googleai.WithCloudLocation(location))
 	if err != nil {
 		log.Fatal(err)
 	}
