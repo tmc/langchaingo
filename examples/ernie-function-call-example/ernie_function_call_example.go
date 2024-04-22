@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/llms/ernie"
-	"github.com/tmc/langchaingo/schema"
 
 	"github.com/tmc/langchaingo/llms"
 )
@@ -27,7 +26,8 @@ func main() {
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
-			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
+			llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston?"),
+		},
 		llms.WithFunctions(functions))
 	if err != nil {
 		log.Fatal(err)

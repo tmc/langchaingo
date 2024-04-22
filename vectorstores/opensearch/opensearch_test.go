@@ -10,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcopensearch "github.com/testcontainers/testcontainers-go/modules/opensearch"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -21,23 +23,49 @@ import (
 func getEnvVariables(t *testing.T) (string, string, string) {
 	t.Helper()
 
+	var osUser string
+	var osPassword string
+
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiKey == "" {
+		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
+	}
+
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		t.Skipf("Must set %s to run test", "OPENSEARCH_ENDPOINT")
+		openseachContainer, err := tcopensearch.RunContainer(context.Background(), testcontainers.WithImage("opensearchproject/opensearch:2.11.1"))
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, openseachContainer.Terminate(context.Background()))
+		})
+
+		address, err := openseachContainer.Address(context.Background())
+		if err != nil {
+			t.Skipf("cannot get address of opensearch container: %v\n", err)
+		}
+
+		opensearchEndpoint = address
+		osUser = openseachContainer.User
+		osPassword = openseachContainer.Password
 	}
 
 	opensearchUser := os.Getenv("OPENSEARCH_USER")
 	if opensearchUser == "" {
-		t.Skipf("Must set %s to run test", "OPENSEARCH_USER")
+		opensearchUser = osUser
+		if opensearchUser == "" {
+			t.Skipf("Must set %s to run test", "OPENSEARCH_USER")
+		}
 	}
 
 	opensearchPassword := os.Getenv("OPENSEARCH_PASSWORD")
 	if opensearchPassword == "" {
-		t.Skipf("Must set %s to run test", "OPENSEARCH_PASSWORD")
-	}
-	openaiKey := os.Getenv("OPENAI_API_KEY")
-	if openaiKey == "" {
-		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
+		opensearchPassword = osPassword
+		if opensearchPassword == "" {
+			t.Skipf("Must set %s to run test", "OPENSEARCH_PASSWORD")
+		}
 	}
 
 	return opensearchEndpoint, opensearchUser, opensearchPassword

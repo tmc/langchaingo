@@ -29,7 +29,6 @@ func TestFormat(t *testing.T) {
 		{"4", args{"a= { val }", map[string]any{"val": 1}}, "a= 1", ""},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			got, err := Format(tt.args.format, tt.args.values)

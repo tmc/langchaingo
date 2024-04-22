@@ -12,9 +12,11 @@ import (
 
 func main() {
 	simpleSequentialChainExample()
+	fmt.Println()
 	sequentialChainExample()
 }
 
+// simpleSequentialChainExample demonstrates a chain with a single input.
 func simpleSequentialChainExample() {
 	llm, err := openai.New()
 	if err != nil {
@@ -22,18 +24,18 @@ func simpleSequentialChainExample() {
 	}
 
 	template1 := `
-        You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
-        Title: {{.title}}
-        Playwright: This is a synopsis for the above play:
-    `
+  You are a playwright. Given the title of play, it is your job to write a synopsis for that title.
+  Title: {{.title}}
+  Playwright: This is a synopsis for the above play:
+  `
 	chain1 := chains.NewLLMChain(llm, prompts.NewPromptTemplate(template1, []string{"title"}))
 
 	template2 := `
-        You are a play critic from the New York Times. Given the synopsis of play, it is your job to write a review for that play.
-        Play Synopsis:
-        {{.synopsis}}
-        Review from a New York Times play critic of the above play:
-    `
+  You are a play critic from the New York Times. Given the synopsis of a play, it is your job to write a review for that play.
+  Play Synopsis:
+  {{.synopsis}}
+  Review from a New York Times play critic of the above play:
+  `
 	chain2 := chains.NewLLMChain(llm, prompts.NewPromptTemplate(template2, []string{"synopsis"}))
 
 	simpleSeqChain, err := chains.NewSimpleSequentialChain([]chains.Chain{chain1, chain2})
@@ -41,7 +43,8 @@ func simpleSequentialChainExample() {
 		log.Fatal(err)
 	}
 
-	res, err := chains.Run(context.Background(), simpleSeqChain, "Tragedy at sunset on the beach")
+	title := "Tragedy at sunset on the beach"
+	res, err := chains.Run(context.Background(), simpleSeqChain, title)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,6 +52,7 @@ func simpleSequentialChainExample() {
 	fmt.Println(res)
 }
 
+// sequentialChainExample demonstrates a chain with multiple inputs.
 func sequentialChainExample() {
 	llm, err := openai.New()
 	if err != nil {
@@ -56,20 +60,20 @@ func sequentialChainExample() {
 	}
 
 	template1 := `
-	You are a playwright. Given the title of play and the era it is set in, it is your job to write a synopsis for that title.
-	Title: {{.title}}
-	Era: {{.era}}
-	Playwright: This is a synopsis for the above play:
-	`
+  You are a playwright. Given the title of play and the era it is set in, it is your job to write a synopsis for that title.
+  Title: {{.title}}
+  Era: {{.era}}
+  Playwright: This is a synopsis for the above play:
+  `
 	chain1 := chains.NewLLMChain(llm, prompts.NewPromptTemplate(template1, []string{"title", "era"}))
 	chain1.OutputKey = "synopsis"
 
 	template2 := `
-		You are a play critic from the New York Times. Given the synopsis of play, it is your job to write a review for that play.
-		Play Synopsis:
-		{{.synopsis}}
-		Review from a New York Times play critic of the above play:
-	`
+  You are a play critic from the New York Times. Given the synopsis of a play, it is your job to write a review for that play.
+  Play Synopsis:
+  {{.synopsis}}
+  Review from a New York Times play critic of the above play:
+  `
 	chain2 := chains.NewLLMChain(llm, prompts.NewPromptTemplate(template2, []string{"synopsis"}))
 	chain2.OutputKey = "review"
 
@@ -78,7 +82,11 @@ func sequentialChainExample() {
 		log.Fatal(err)
 	}
 
-	res, err := chains.Call(context.Background(), sequentialChain, map[string]any{"title": "Tragedy at sunset on the beach", "era": "Victorian"})
+	inputs := map[string]any{
+		"title": "Mystery in the haunted mansion",
+		"era":   "1930s in Haiti",
+	}
+	res, err := chains.Call(context.Background(), sequentialChain, inputs)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type testLanguageModel struct {
@@ -20,7 +19,7 @@ type testLanguageModel struct {
 	// simulate work by sleeping for this duration
 	simulateWork time.Duration
 	// record the prompt that was passed to the language model
-	recordedPrompt []schema.PromptValue
+	recordedPrompt []llms.PromptValue
 }
 
 type stringPromptValue struct {
@@ -31,7 +30,7 @@ func (spv stringPromptValue) String() string {
 	return spv.s
 }
 
-func (spv stringPromptValue) Messages() []schema.ChatMessage {
+func (spv stringPromptValue) Messages() []llms.ChatMessage {
 	return nil
 }
 
@@ -47,7 +46,7 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.Message
 	} else {
 		return nil, fmt.Errorf("passed non-text part")
 	}
-	l.recordedPrompt = []schema.PromptValue{
+	l.recordedPrompt = []llms.PromptValue{
 		stringPromptValue{s: prompt},
 	}
 
@@ -101,12 +100,16 @@ func TestApplyWithCanceledContext(t *testing.T) {
 	wg.Add(1)
 	c := NewLLMChain(&testLanguageModel{simulateWork: time.Second}, prompts.NewPromptTemplate("test", nil))
 
+	var applyErr error
 	go func() {
 		defer wg.Done()
-		_, err := Apply(ctx, c, inputs, maxWorkers)
-		require.Error(t, err)
+		_, applyErr = Apply(ctx, c, inputs, maxWorkers)
 	}()
 
 	cancelFunc()
 	wg.Wait()
+
+	if applyErr == nil || applyErr.Error() != "context canceled" {
+		t.Fatal("expected context canceled error, got:", applyErr)
+	}
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
@@ -97,13 +96,24 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 
+	format := o.options.format
+	if opts.JSONMode {
+		format = "json"
+	}
+
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
+		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
 		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
+	}
+
+	keepAlive := o.options.keepAlive
+	if keepAlive != "" {
+		req.KeepAlive = keepAlive
 	}
 
 	var fn ollamaclient.ChatResponseFunc
@@ -143,7 +153,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
-				"TotalTokesn":      resp.EvalCount + resp.PromptEvalCount,
+				"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
 			},
 		},
 	}
@@ -161,10 +171,15 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
-		embedding, err := o.client.CreateEmbedding(ctx, &ollamaclient.EmbeddingRequest{
+		req := &ollamaclient.EmbeddingRequest{
 			Prompt: input,
 			Model:  o.options.model,
-		})
+		}
+		if o.options.keepAlive != "" {
+			req.KeepAlive = o.options.keepAlive
+		}
+
+		embedding, err := o.client.CreateEmbedding(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -183,18 +198,20 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-func typeToRole(typ schema.ChatMessageType) string {
+func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return "system"
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return "assistant"
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		fallthrough
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		return "user"
-	case schema.ChatMessageTypeFunction:
+	case llms.ChatMessageTypeFunction:
 		return "function"
+	case llms.ChatMessageTypeTool:
+		return "tool"
 	}
 	return ""
 }

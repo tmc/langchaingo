@@ -33,7 +33,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -132,7 +132,7 @@ func (o *OpenAIFunctionsAgent) GetOutputKeys() []string {
 	return []string{o.OutputKey}
 }
 
-func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate {
+func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	messageFormatters := []prompts.MessageFormatter{prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil)}
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
@@ -144,14 +144,14 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 	return tmpl
 }
 
-func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []schema.ChatMessage {
+func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []llms.ChatMessage {
 	if len(steps) == 0 {
 		return nil
 	}
 
-	messages := make([]schema.ChatMessage, 0)
+	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, schema.FunctionChatMessage{
+		messages = append(messages, llms.FunctionChatMessage{
 			Name:    step.Action.Tool,
 			Content: step.Observation,
 		})

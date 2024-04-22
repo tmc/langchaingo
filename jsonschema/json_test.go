@@ -172,7 +172,6 @@ func TestDefinition_MarshalJSON(t *testing.T) { //nolint:funlen
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			wantBytes := []byte(tt.want)
@@ -184,7 +183,7 @@ func TestDefinition_MarshalJSON(t *testing.T) { //nolint:funlen
 			}
 
 			got := structToMap(t, tt.def)
-			gotPtr := structToMap(t, &tt.def)
+			gotPtr := structToMap(t, &tt.def) //#nosec G601 -- false positive now that we're on go 1.22+
 
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("MarshalJSON() got = %v, want %v", got, want)

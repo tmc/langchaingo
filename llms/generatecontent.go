@@ -2,17 +2,17 @@ package llms
 
 import (
 	"encoding/json"
-
-	"github.com/tmc/langchaingo/schema"
+	"fmt"
+	"io"
 )
 
 // MessageContent is the content of a message sent to a LLM. It has a role and a
 // sequence of parts. For example, it can represent one message in a chat
 // session sent by the user, in which case Role will be
-// schema.ChatMessageTypeHuman and Parts will be the sequence of items sent in
+// ChatMessageTypeHuman and Parts will be the sequence of items sent in
 // this specific message.
 type MessageContent struct {
-	Role  schema.ChatMessageType
+	Role  ChatMessageType
 	Parts []ContentPart
 }
 
@@ -82,6 +82,36 @@ type BinaryContent struct {
 
 func (BinaryContent) isPart() {}
 
+// FunctionCall is the name and arguments of a function call.
+type FunctionCall struct {
+	Name      string `json:"name"`
+	Arguments string `json:"arguments"`
+}
+
+// ToolCall is a call to a tool (as requested by the model) that should be executed.
+type ToolCall struct {
+	// ID is the unique identifier of the tool call.
+	ID string `json:"id"`
+	// Type is the type of the tool call.
+	Type string `json:"type"`
+	// FunctionCall is the function call to be executed.
+	FunctionCall *FunctionCall `json:"function,omitempty"`
+}
+
+func (ToolCall) isPart() {}
+
+// ToolCallResponse is the response returned by a tool call.
+type ToolCallResponse struct {
+	// ToolCallID is the ID of the tool call this response is for.
+	ToolCallID string `json:"tool_call_id"`
+	// Name is the name of the tool that was called.
+	Name string `json:"name"`
+	// Content is the textual content of the response.
+	Content string `json:"content"`
+}
+
+func (ToolCallResponse) isPart() {}
+
 // ContentResponse is the response returned by a GenerateContent call.
 // It can potentially return multiple content choices.
 type ContentResponse struct {
@@ -101,12 +131,17 @@ type ContentChoice struct {
 	GenerationInfo map[string]any
 
 	// FuncCall is non-nil when the model asks to invoke a function/tool.
-	FuncCall *schema.FunctionCall
+	// If a model invokes more than one function/tool, this field will only
+	// contain the first one.
+	FuncCall *FunctionCall
+
+	// ToolCalls is a list of tool calls the model asks to invoke.
+	ToolCalls []ToolCall
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
-func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
+func TextParts(role ChatMessageType, parts ...string) MessageContent {
 	result := MessageContent{
 		Role:  role,
 		Parts: []ContentPart{},
@@ -115,4 +150,29 @@ func TextParts(role schema.ChatMessageType, parts ...string) MessageContent {
 		result.Parts = append(result.Parts, TextPart(part))
 	}
 	return result
+}
+
+// ShowMessageContents is a debugging helper for MessageContent.
+func ShowMessageContents(w io.Writer, msgs []MessageContent) {
+	fmt.Fprintf(w, "MessageContent (len=%v)\n", len(msgs))
+	for i, mc := range msgs {
+		fmt.Fprintf(w, "[%d]: Role=%s\n", i, mc.Role)
+		for j, p := range mc.Parts {
+			fmt.Fprintf(w, "  Parts[%v]: ", j)
+			switch pp := p.(type) {
+			case TextContent:
+				fmt.Fprintf(w, "TextContent %q\n", pp.Text)
+			case ImageURLContent:
+				fmt.Fprintf(w, "ImageURLPart %q\n", pp.URL)
+			case BinaryContent:
+				fmt.Fprintf(w, "BinaryContent MIME=%q, size=%d\n", pp.MIMEType, len(pp.Data))
+			case ToolCall:
+				fmt.Fprintf(w, "ToolCall ID=%v, Type=%v, Func=%v(%v)\n", pp.ID, pp.Type, pp.FunctionCall.Name, pp.FunctionCall.Arguments)
+			case ToolCallResponse:
+				fmt.Fprintf(w, "ToolCallResponse ID=%v, Name=%v, Content=%v\n", pp.ToolCallID, pp.Name, pp.Content)
+			default:
+				fmt.Fprintf(w, "unknown type %T\n", pp)
+			}
+		}
+	}
 }

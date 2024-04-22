@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -30,8 +31,9 @@ type PromptTemplate struct {
 	// OutputParser is a function that parses the output of the prompt template.
 	OutputParser schema.OutputParser[any]
 
-	// PartialVariables represents a map of variable names to values or functions that return values.
-	// If the value is a function, it will be called when the prompt template is rendered.
+	// PartialVariables represents a map of variable names to values or functions
+	// that return values. If the value is a function, it will be called when the
+	// prompt template is rendered.
 	PartialVariables map[string]any
 }
 
@@ -60,7 +62,7 @@ func (p PromptTemplate) Format(values map[string]any) (string, error) {
 }
 
 // FormatPrompt formats the prompt template and returns a string prompt value.
-func (p PromptTemplate) FormatPrompt(values map[string]any) (schema.PromptValue, error) { //nolint:ireturn
+func (p PromptTemplate) FormatPrompt(values map[string]any) (llms.PromptValue, error) { //nolint:ireturn
 	f, err := p.Format(values)
 	if err != nil {
 		return nil, err

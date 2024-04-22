@@ -27,12 +27,13 @@ func (e StatusError) Error() string {
 }
 
 type GenerateRequest struct {
-	Model    string `json:"model"`
-	Prompt   string `json:"prompt"`
-	System   string `json:"system"`
-	Template string `json:"template"`
-	Context  []int  `json:"context,omitempty"`
-	Stream   *bool  `json:"stream"`
+	Model     string `json:"model"`
+	Prompt    string `json:"prompt"`
+	System    string `json:"system"`
+	Template  string `json:"template"`
+	Context   []int  `json:"context,omitempty"`
+	Stream    *bool  `json:"stream"`
+	KeepAlive string `json:"keep_alive,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -46,10 +47,11 @@ type Message struct {
 }
 
 type ChatRequest struct {
-	Model    string     `json:"model"`
-	Messages []*Message `json:"messages"`
-	Stream   *bool      `json:"stream,omitempty"`
-	Format   string     `json:"format"`
+	Model     string     `json:"model"`
+	Messages  []*Message `json:"messages"`
+	Stream    *bool      `json:"stream,omitempty"`
+	Format    string     `json:"format"`
+	KeepAlive string     `json:"keep_alive,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -64,9 +66,10 @@ type Metrics struct {
 }
 
 type EmbeddingRequest struct {
-	Model   string  `json:"model"`
-	Prompt  string  `json:"prompt"`
-	Options Options `json:"options"`
+	Model     string  `json:"model"`
+	Prompt    string  `json:"prompt"`
+	Options   Options `json:"options"`
+	KeepAlive string  `json:"keep_alive,omitempty"`
 }
 
 type EmbeddingResponse struct {
@@ -154,7 +157,7 @@ type Options struct {
 	NumKeep          int     `json:"num_keep,omitempty"`
 	Mirostat         int     `json:"mirostat,omitempty"`
 	NumPredict       int     `json:"num_predict,omitempty"`
-	Temperature      float32 `json:"temperature,omitempty"`
+	Temperature      float32 `json:"temperature"`
 	TypicalP         float32 `json:"typical_p,omitempty"`
 	RepeatPenalty    float32 `json:"repeat_penalty,omitempty"`
 	PresencePenalty  float32 `json:"presence_penalty,omitempty"`

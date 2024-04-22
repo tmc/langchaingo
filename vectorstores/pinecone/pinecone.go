@@ -2,13 +2,15 @@ package pinecone
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
-	"github.com/pinecone-io/go-pinecone/pinecone_grpc"
+	"github.com/google/uuid"
+	"github.com/pinecone-io/go-pinecone/pinecone"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
@@ -29,37 +31,24 @@ var (
 // Store is a wrapper around the pinecone rest API and grpc client.
 type Store struct {
 	embedder embeddings.Embedder
-	grpcConn *grpc.ClientConn
-	client   pinecone_grpc.VectorServiceClient
+	client   *pinecone.Client
 
-	indexName   string
-	projectName string
-	environment string
-	apiKey      string
-	textKey     string
-	nameSpace   string
-	useGRPC     bool
+	host      string
+	apiKey    string
+	textKey   string
+	nameSpace string
 }
 
-var _ vectorstores.VectorStore = Store{}
-
-// New creates a new Store with options. Options for index name, environment, project name
-// and embedder must be set.
-func New(ctx context.Context, opts ...Option) (Store, error) {
+// New creates a new Store with options. Options for WithAPIKey, WithHost and WithEmbedder must be set.
+func New(opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
 		return Store{}, err
 	}
 
-	if s.useGRPC {
-		conn, err := s.getGRPCConn(ctx)
-		if err != nil {
-			return Store{}, err
-		}
-		s.grpcConn = conn
-
-		client := pinecone_grpc.NewVectorServiceClient(conn)
-		s.client = client
+	s.client, err = pinecone.NewClient(pinecone.NewClientParams{ApiKey: s.apiKey})
+	if err != nil {
+		return Store{}, err
 	}
 
 	return s, nil
@@ -74,6 +63,12 @@ func (s Store) AddDocuments(ctx context.Context,
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
+
+	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
+	if err != nil {
+		return nil, err
+	}
+	defer indexConn.Close()
 
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
@@ -100,11 +95,33 @@ func (s Store) AddDocuments(ctx context.Context,
 		metadatas = append(metadatas, metadata)
 	}
 
-	if s.useGRPC {
-		return s.grpcUpsert(ctx, vectors, metadatas, nameSpace)
+	pineconeVectors := make([]*pinecone.Vector, 0, len(vectors))
+
+	ids := make([]string, len(vectors))
+	for i := 0; i < len(vectors); i++ {
+		metadataStruct, err := structpb.NewStruct(metadatas[i])
+		if err != nil {
+			return nil, err
+		}
+
+		id := uuid.New().String()
+		ids[i] = id
+		pineconeVectors = append(
+			pineconeVectors,
+			&pinecone.Vector{
+				Id:       id,
+				Values:   vectors[i],
+				Metadata: metadataStruct,
+			},
+		)
 	}
 
-	return s.restUpsert(ctx, vectors, metadatas, nameSpace)
+	_, err = indexConn.UpsertVectors(&ctx, pineconeVectors)
+	if err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
@@ -113,8 +130,20 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
+	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
+	if err != nil {
+		return nil, err
+	}
+	defer indexConn.Close()
 
+	var protoFilterStruct *structpb.Struct
 	filters := s.getFilters(opts)
+	if filters != nil {
+		protoFilterStruct, err = s.createProtoStructFilter(filters)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	scoreThreshold, err := s.getScoreThreshold(opts)
 	if err != nil {
@@ -126,17 +155,51 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		return nil, err
 	}
 
-	if s.useGRPC {
-		return s.grpcQuery(ctx, vector, numDocuments, nameSpace)
+	queryResult, err := indexConn.QueryByVectorValues(
+		&ctx,
+		&pinecone.QueryByVectorValuesRequest{
+			Vector:          vector,
+			TopK:            uint32(numDocuments),
+			Filter:          protoFilterStruct,
+			IncludeMetadata: true,
+			IncludeValues:   true,
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	return s.restQuery(ctx, vector, numDocuments, nameSpace, scoreThreshold,
-		filters)
+	if len(queryResult.Matches) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	return s.getDocumentsFromMatches(queryResult, scoreThreshold)
 }
 
-// Close closes the grpc connection.
-func (s Store) Close() error {
-	return s.grpcConn.Close()
+func (s Store) getDocumentsFromMatches(queryResult *pinecone.QueryVectorsResponse, scoreThreshold float32) ([]schema.Document, error) {
+	resultDocuments := make([]schema.Document, 0)
+	for _, match := range queryResult.Matches {
+		metadata := match.Vector.Metadata.AsMap()
+		pageContent, ok := metadata[s.textKey].(string)
+		if !ok {
+			return nil, ErrMissingTextKey
+		}
+		delete(metadata, s.textKey)
+
+		doc := schema.Document{
+			PageContent: pageContent,
+			Metadata:    metadata,
+			Score:       match.Score,
+		}
+
+		// If scoreThreshold is not 0, we only return matches with a score above the threshold.
+		if scoreThreshold != 0 && match.Score >= scoreThreshold {
+			resultDocuments = append(resultDocuments, doc)
+		} else if scoreThreshold == 0 { // If scoreThreshold is 0, we return all matches.
+			resultDocuments = append(resultDocuments, doc)
+		}
+	}
+	return resultDocuments, nil
 }
 
 func (s Store) getNameSpace(opts vectorstores.Options) string {
@@ -157,7 +220,6 @@ func (s Store) getFilters(opts vectorstores.Options) any {
 	if opts.Filters != nil {
 		return opts.Filters
 	}
-
 	return nil
 }
 
@@ -167,4 +229,19 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 		opt(&opts)
 	}
 	return opts
+}
+
+func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
+	filterBytes, err := json.Marshal(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var filterStruct structpb.Struct
+	err = json.Unmarshal(filterBytes, &filterStruct)
+	if err != nil {
+		return nil, err
+	}
+
+	return &filterStruct, nil
 }
