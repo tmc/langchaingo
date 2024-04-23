@@ -29,10 +29,7 @@ func main() {
 
 	// Create a new Pinecone vector store.
 	store, err := pinecone.New(
-		ctx,
-		pinecone.WithProjectName("YOUR_PROJECT_NAME"),
-		pinecone.WithIndexName("YOUR_INDEX_NAME"),
-		pinecone.WithEnvironment("YOUR_ENVIRONMENT"),
+		pinecone.WithHost("https://api.pinecone.io"),
 		pinecone.WithEmbedder(e),
 		pinecone.WithAPIKey("YOUR_API_KEY"),
 		pinecone.WithNameSpace(uuid.New().String()),
