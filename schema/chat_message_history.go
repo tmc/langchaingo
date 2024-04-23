@@ -1,11 +1,15 @@
 package schema
 
-import "context"
+import (
+	"context"
+
+	"github.com/tmc/langchaingo/llms"
+)
 
 // ChatMessageHistory is the interface for chat history in memory/store.
 type ChatMessageHistory interface {
 	// AddMessage adds a message to the store.
-	AddMessage(ctx context.Context, message ChatMessage) error
+	AddMessage(ctx context.Context, message llms.ChatMessage) error
 
 	// AddUserMessage is a convenience method for adding a human message string
 	// to the store.
@@ -19,8 +23,8 @@ type ChatMessageHistory interface {
 	Clear(ctx context.Context) error
 
 	// Messages retrieves all messages from the store
-	Messages(ctx context.Context) ([]ChatMessage, error)
+	Messages(ctx context.Context) ([]llms.ChatMessage, error)
 
 	// SetMessages replaces existing messages in the store
-	SetMessages(ctx context.Context, messages []ChatMessage) error
+	SetMessages(ctx context.Context, messages []llms.ChatMessage) error
 }

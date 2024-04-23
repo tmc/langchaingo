@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/amikos-tech/chroma-go v0.1.2
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.8
+	github.com/tmc/langchaingo v0.1.9
 )
 
 require (
@@ -17,5 +17,3 @@ require (
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 )
-
-replace github.com/tmc/langchaingo => ../../

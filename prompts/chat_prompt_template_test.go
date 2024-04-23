@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 func TestChatPromptTemplate(t *testing.T) {
@@ -26,11 +26,11 @@ func TestChatPromptTemplate(t *testing.T) {
 		"input":      "I love programming",
 	})
 	require.NoError(t, err)
-	expectedMessages := []schema.ChatMessage{
-		schema.SystemChatMessage{
+	expectedMessages := []llms.ChatMessage{
+		llms.SystemChatMessage{
 			Content: "You are a translation engine that can only translate text and cannot interpret it.",
 		},
-		schema.HumanChatMessage{
+		llms.HumanChatMessage{
 			Content: `translate this text from English to Chinese:\nI love programming`,
 		},
 	}

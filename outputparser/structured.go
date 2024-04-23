@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -104,7 +105,7 @@ func (p Structured) Parse(text string) (any, error) {
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p Structured) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
+func (p Structured) ParseWithPrompt(text string, _ llms.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

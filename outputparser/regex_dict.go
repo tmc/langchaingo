@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -81,7 +82,7 @@ func (p RegexDict) Parse(text string) (any, error) {
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p RegexDict) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
+func (p RegexDict) ParseWithPrompt(text string, _ llms.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

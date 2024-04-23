@@ -21,14 +21,21 @@ type Tool struct {
 var _ tools.Tool = Tool{}
 
 // New creates a new serpapi tool to search on internet.
-func New() (*Tool, error) {
-	apiKey := os.Getenv("SERPAPI_API_KEY")
-	if apiKey == "" {
+func New(opts ...Option) (*Tool, error) {
+	options := &options{
+		apiKey: os.Getenv("SERPAPI_API_KEY"),
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if options.apiKey == "" {
 		return nil, ErrMissingToken
 	}
 
 	return &Tool{
-		client: internal.New(apiKey),
+		client: internal.New(options.apiKey),
 	}, nil
 }
 
