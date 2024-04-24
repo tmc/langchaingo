@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
@@ -190,7 +189,7 @@ func createAnthropicCompletion(ctx context.Context,
 func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerationInputMessage, string, error) {
 	chunkedMessages := make([][]Message, 0, len(messages))
 	currentChunk := make([]Message, 0, len(messages))
-	var lastRole schema.ChatMessageType
+	var lastRole llms.ChatMessageType
 	for _, message := range messages {
 		if message.Role != lastRole {
 			if len(currentChunk) > 0 {
@@ -238,19 +237,19 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 }
 
 // process the role of the message to anthropic supported role.
-func getAnthropicRole(role schema.ChatMessageType) (string, error) {
+func getAnthropicRole(role llms.ChatMessageType) (string, error) {
 	switch role {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return AnthropicSystem, nil
 
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return AnthropicRoleAssistant, nil
 
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		fallthrough
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		return AnthropicRoleUser, nil
-	case schema.ChatMessageTypeFunction, schema.ChatMessageTypeTool:
+	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
 		fallthrough
 	default:
 		return "", errors.New("role not supported")

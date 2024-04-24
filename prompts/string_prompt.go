@@ -1,10 +1,8 @@
 package prompts
 
-import (
-	"github.com/tmc/langchaingo/schema"
-)
+import "github.com/tmc/langchaingo/llms"
 
-var _ schema.PromptValue = StringPromptValue("")
+var _ llms.PromptValue = StringPromptValue("")
 
 // StringPromptValue is a prompt value that is a string.
 type StringPromptValue string
@@ -14,8 +12,8 @@ func (v StringPromptValue) String() string {
 }
 
 // Messages returns a single-element ChatMessage slice.
-func (v StringPromptValue) Messages() []schema.ChatMessage {
-	return []schema.ChatMessage{
-		schema.HumanChatMessage{Content: string(v)},
+func (v StringPromptValue) Messages() []llms.ChatMessage {
+	return []llms.ChatMessage{
+		llms.HumanChatMessage{Content: string(v)},
 	}
 }

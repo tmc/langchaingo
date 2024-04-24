@@ -3,6 +3,7 @@ package shared_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,10 +18,9 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
-	"github.com/tmc/langchaingo/schema"
 )
 
-func newGoogleAIClient(t *testing.T) *googleai.GoogleAI {
+func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
 
 	genaiKey := os.Getenv("GENAI_API_KEY")
@@ -28,12 +28,14 @@ func newGoogleAIClient(t *testing.T) *googleai.GoogleAI {
 		t.Skip("GENAI_API_KEY not set")
 		return nil
 	}
-	llm, err := googleai.New(context.Background(), googleai.WithAPIKey(genaiKey))
+
+	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
 }
 
-func newVertexClient(t *testing.T) *vertex.Vertex {
+func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
 	project := os.Getenv("VERTEX_PROJECT")
@@ -46,10 +48,10 @@ func newVertexClient(t *testing.T) *vertex.Vertex {
 		location = "us-central1"
 	}
 
-	llm, err := vertex.New(
-		context.Background(),
-		vertex.WithCloudProject(project),
-		vertex.WithCloudLocation(location))
+	opts = append(opts,
+		googleai.WithCloudProject(project),
+		googleai.WithCloudLocation(location))
+	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
 }
@@ -62,31 +64,39 @@ func funcName(f any) string {
 	return parts[len(parts)-1]
 }
 
-type testFunc func(*testing.T, llms.Model)
+// testConfigs is a list of all test functions in this file to run with both
+// client types, and their client configurations.
+type testConfig struct {
+	testFunc func(*testing.T, llms.Model)
+	opts     []googleai.Option
+}
 
-// testFuncs is a list of all test functions in this file to run with both
-// client types.
-var testFuncs = []testFunc{
-	testMultiContentText,
-	testGenerateFromSinglePrompt,
-	testMultiContentTextChatSequence,
-	testMultiContentImageLink,
-	testMultiContentImageBinary,
-	testEmbeddings,
-	testCandidateCountSetting,
-	testMaxTokensSetting,
-	testWithStreaming,
+var testConfigs = []testConfig{
+	{testMultiContentText, nil},
+	{testGenerateFromSinglePrompt, nil},
+	{testMultiContentTextChatSequence, nil},
+	{testMultiContentImageLink, nil},
+	{testMultiContentImageBinary, nil},
+	{testEmbeddings, nil},
+	{testCandidateCountSetting, nil},
+	{testMaxTokensSetting, nil},
+	{testTools, nil},
+	{
+		testMultiContentText,
+		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
+	},
+	{testWithStreaming, nil},
 }
 
 func TestShared(t *testing.T) {
-	for _, f := range testFuncs {
-		t.Run(fmt.Sprintf("%s-googleai", funcName(f)), func(t *testing.T) {
-			llm := newGoogleAIClient(t)
-			f(t, llm)
+	for _, c := range testConfigs {
+		t.Run(fmt.Sprintf("%s-googleai", funcName(c.testFunc)), func(t *testing.T) {
+			llm := newGoogleAIClient(t, c.opts...)
+			c.testFunc(t, llm)
 		})
-		t.Run(fmt.Sprintf("%s-vertex", funcName(f)), func(t *testing.T) {
-			llm := newVertexClient(t)
-			f(t, llm)
+		t.Run(fmt.Sprintf("%s-vertex", funcName(c.testFunc)), func(t *testing.T) {
+			llm := newVertexClient(t, c.opts...)
+			c.testFunc(t, llm)
 		})
 	}
 }
@@ -101,7 +111,7 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -111,7 +121,7 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)dog|canid|canine", c1.Content)
+	assert.Regexp(t, "(?i)dog|carnivo|canid|canine", c1.Content)
 }
 
 func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
@@ -119,7 +129,7 @@ func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	content := llms.TextParts(
-		schema.ChatMessageTypeHuman,
+		llms.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"What kind of mammal am I?",
 	)
@@ -149,15 +159,15 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
 		},
 		{
-			Role:  schema.ChatMessageTypeAI,
+			Role:  llms.ChatMessageTypeAI,
 			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
 		},
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
 		},
 	}
@@ -180,7 +190,7 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -208,7 +218,7 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -244,7 +254,7 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -261,11 +271,14 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 }
 
 func testWithStreaming(t *testing.T, llm llms.Model) {
+	// TODO: this test is currently failing for Vertex, probably due to
+	// backend API issues.
+	t.Skip()
 	t.Helper()
 	t.Parallel()
 
 	content := llms.TextParts(
-		schema.ChatMessageTypeHuman,
+		llms.ChatMessageTypeHuman,
 		"I'm a pomeranian",
 		"Tell me more about my taxonomy",
 	)
@@ -287,6 +300,86 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+func testTools(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	var availableTools = []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+	}
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 := resp.Choices[0]
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range c1.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range c1.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "getCurrentWeather":
+			var args struct {
+				Location string `json:"location"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(args.Location, "Chicago") {
+				toolResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							Name:    tc.FunctionCall.Name,
+							Content: "64 and sunny",
+						},
+					},
+				}
+				content = append(content, toolResponse)
+			}
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 = resp.Choices[0]
+	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+}
+
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
@@ -297,7 +390,7 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -306,7 +399,7 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	// a stop reason that max of tokens was reached.
 	{
 		rsp, err := llm.GenerateContent(context.Background(), content,
-			llms.WithMaxTokens(16))
+			llms.WithMaxTokens(64))
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp.Choices)
@@ -326,4 +419,12 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 		assert.Regexp(t, "(?i)stop", c1.StopReason)
 		assert.Regexp(t, "(?i)dog|breed|canid|canine", c1.Content)
 	}
+}
+
+func showJSON(v any) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }

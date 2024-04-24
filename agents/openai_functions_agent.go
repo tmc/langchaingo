@@ -144,14 +144,14 @@ func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	return tmpl
 }
 
-func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []schema.ChatMessage {
+func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []llms.ChatMessage {
 	if len(steps) == 0 {
 		return nil
 	}
 
-	messages := make([]schema.ChatMessage, 0)
+	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, schema.FunctionChatMessage{
+		messages = append(messages, llms.FunctionChatMessage{
 			Name:    step.Action.Tool,
 			Content: step.Observation,
 		})
