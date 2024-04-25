@@ -59,7 +59,11 @@ type ChatRequest struct {
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// Deprecated: use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+
+	Kwargs RequestKWARGS
 }
+
+type RequestKWARGS map[string]interface{}
 
 // ToolType is the type of a tool.
 type ToolType string

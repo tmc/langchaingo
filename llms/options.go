@@ -56,7 +56,8 @@ type CallOptions struct {
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
 	// Deprecated: Use ToolChoice instead.
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+	FunctionCallBehavior FunctionCallBehavior   `json:"function_call,omitempty"`
+	Kwargs               map[string]interface{} `json:"kwargs,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -251,5 +252,11 @@ func WithTools(tools []Tool) CallOption {
 func WithJSONMode() CallOption {
 	return func(o *CallOptions) {
 		o.JSONMode = true
+	}
+}
+
+func WithKwargs(kwargs map[string]interface{}) CallOption {
+	return func(o *CallOptions) {
+		o.Kwargs = kwargs
 	}
 }
