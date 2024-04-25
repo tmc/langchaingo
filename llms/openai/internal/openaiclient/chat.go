@@ -60,7 +60,7 @@ type ChatRequest struct {
 	// Deprecated: use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 
-	RequestKWARGS
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 type RequestKWARGS map[string]interface{}

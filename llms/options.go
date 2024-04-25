@@ -57,7 +57,7 @@ type CallOptions struct {
 	// `{"name": "my_function"}`
 	// Deprecated: Use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior   `json:"function_call,omitempty"`
-	Kwargs               map[string]interface{} `json:"kwargs,omitempty"`
+	Metadata             map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -255,8 +255,8 @@ func WithJSONMode() CallOption {
 	}
 }
 
-func WithKwargs(kwargs map[string]interface{}) CallOption {
+func WithMetadata(metadata map[string]interface{}) CallOption {
 	return func(o *CallOptions) {
-		o.Kwargs = kwargs
+		o.Metadata = metadata
 	}
 }
