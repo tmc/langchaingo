@@ -43,10 +43,7 @@ type EmbeddingResponse struct {
 var _ embeddings.Embedder = &Jina{}
 
 func NewJina(opts ...Option) (*Jina, error) {
-	v, err := applyOptions(opts...)
-	if err != nil {
-		return nil, err
-	}
+	v := applyOptions(opts...)
 
 	return v, nil
 }
@@ -93,7 +90,7 @@ func (j *Jina) CreateEmbedding(ctx context.Context, texts []string) ([][]float32
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", j.APIBaseURL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, j.APIBaseURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}

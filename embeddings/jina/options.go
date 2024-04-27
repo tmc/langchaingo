@@ -52,9 +52,8 @@ func WithAPIKey(apiKey string) Option {
 	}
 }
 
-func applyOptions(opts ...Option) (*Jina, error) {
-
-	var _models = map[string]int{
+func applyOptions(opts ...Option) *Jina {
+	_models := map[string]int{
 		"jina-embeddings-v2-small-en": 512,
 		"jina-embeddings-v2-base-en":  768,
 		"jina-embeddings-v2-large-en": 1024,
@@ -77,5 +76,5 @@ func applyOptions(opts ...Option) (*Jina, error) {
 		o.BatchSize = _models[o.Model]
 	}
 
-	return o, nil
+	return o
 }
