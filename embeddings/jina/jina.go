@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/tmc/langchaingo/embeddings"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/embeddings"
 )
 
 type Jina struct {
