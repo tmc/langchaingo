@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func TestTokenBufferMemory(t *testing.T) {
@@ -48,7 +48,7 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	require.NoError(t, err)
 	m := NewConversationTokenBuffer(llm, 2000, WithReturnMessages(true))
 
-	expected1 := map[string]any{"history": []schema.ChatMessage{}}
+	expected1 := map[string]any{"history": []llms.ChatMessage{}}
 	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	assert.Equal(t, expected1, result1)
@@ -60,9 +60,9 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar"},
-			schema.AIChatMessage{Content: "foo"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar"},
+			llms.AIChatMessage{Content: "foo"},
 		}),
 	)
 
@@ -83,9 +83,9 @@ func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	require.NoError(t, err)
 
 	m := NewConversationTokenBuffer(llm, 2000, WithChatHistory(NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar"},
-			schema.AIChatMessage{Content: "foo"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar"},
+			llms.AIChatMessage{Content: "foo"},
 		}),
 	)))
 

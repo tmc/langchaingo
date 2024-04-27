@@ -3,6 +3,7 @@ package outputparser
 import (
 	"strings"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -34,7 +35,7 @@ func (p CommaSeparatedList) Parse(text string) ([]string, error) {
 }
 
 // ParseWithPrompt with prompts does the same as Parse.
-func (p CommaSeparatedList) ParseWithPrompt(text string, _ schema.PromptValue) ([]string, error) {
+func (p CommaSeparatedList) ParseWithPrompt(text string, _ llms.PromptValue) ([]string, error) {
 	return p.Parse(text)
 }
 

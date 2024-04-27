@@ -275,6 +275,7 @@ type StreamedChatResponsePayload struct {
 			Role         string        `json:"role,omitempty"`
 			Content      string        `json:"content,omitempty"`
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
+			ToolCalls    []*ToolCall   `json:"tool_calls,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
@@ -326,7 +327,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", c.Model), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", payload.Model), body)
 	if err != nil {
 		return nil, err
 	}
@@ -388,13 +389,21 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			log.Println("issue scanning response:", err)
 		}
 	}()
-	// Parse response
+	// Combine response
+	return combineStreamingChatResponse(ctx, payload, responseChan)
+}
+
+func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, responseChan chan StreamedChatResponsePayload) (*ChatCompletionResponse, error) {
 	response := ChatCompletionResponse{
 		Choices: []*ChatCompletionChoice{
 			{},
 		},
 	}
 
+	var (
+		currentTool  ToolCall
+		currentIndex = -1
+	)
 	for streamResponse := range responseChan {
 		if len(streamResponse.Choices) == 0 {
 			continue
@@ -409,6 +418,25 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
 			}
 			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
+		}
+		if len(streamResponse.Choices[0].Delta.ToolCalls) > 0 {
+			for _, streamTool := range streamResponse.Choices[0].Delta.ToolCalls {
+				if streamTool.ID != "" {
+					currentTool = ToolCall{
+						ID:   streamTool.ID,
+						Type: streamTool.Type,
+						Function: ToolFunction{
+							Name:      streamTool.Function.Name,
+							Arguments: streamTool.Function.Arguments,
+						},
+					}
+					response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, currentTool)
+					currentIndex++
+				} else {
+					response.Choices[0].Message.ToolCalls[currentIndex].Function.Arguments += streamTool.Function.Arguments
+				}
+			}
+			chunk, _ = json.Marshal(response.Choices[0].Message.ToolCalls) // nolint:errchkjson
 		}
 
 		if payload.StreamingFunc != nil {

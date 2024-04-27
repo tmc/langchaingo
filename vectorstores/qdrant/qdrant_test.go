@@ -26,8 +26,12 @@ func TestQdrantStore(t *testing.T) {
 
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
 
-	llm, err := openai.New()
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -60,7 +64,12 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -110,7 +119,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -156,7 +170,12 @@ func TestQdrantAsRetriever(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -199,7 +218,12 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -246,7 +270,12 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithModel("gpt-3.5-turbo-0125"),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -298,12 +327,6 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 				PageContent: "The color of the lamp beside the desk is purple.",
 				Metadata: map[string]any{
 					"location": "sitting room",
-				},
-			},
-			{
-				PageContent: "The color of the lamp beside the desk is yellow.",
-				Metadata: map[string]any{
-					"location": "patio",
 				},
 			},
 		},

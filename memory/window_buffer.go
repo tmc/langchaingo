@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -57,7 +58,7 @@ func (wb *ConversationWindowBuffer) LoadMemoryVariables(ctx context.Context, _ m
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(messages, wb.HumanPrefix, wb.AIPrefix)
+	bufferString, err := llms.GetBufferString(messages, wb.HumanPrefix, wb.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (wb *ConversationWindowBuffer) SaveContext(
 	return nil
 }
 
-func (wb *ConversationWindowBuffer) cutMessages(message []schema.ChatMessage) ([]schema.ChatMessage, bool) {
+func (wb *ConversationWindowBuffer) cutMessages(message []llms.ChatMessage) ([]llms.ChatMessage, bool) {
 	if len(message) > wb.ConversationWindowSize*defaultMessageSize {
 		return message[len(message)-wb.ConversationWindowSize*defaultMessageSize:], true
 	}
