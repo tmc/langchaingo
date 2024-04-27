@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -113,7 +113,7 @@ func (j *Jina) CreateEmbedding(ctx context.Context, texts []string) ([][]float32
 	}
 
 	var embeddingResponse EmbeddingResponse
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

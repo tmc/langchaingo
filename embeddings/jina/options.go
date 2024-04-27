@@ -1,6 +1,8 @@
 package jina
 
-import "os"
+import (
+	"os"
+)
 
 const (
 	_defaultStripNewLines = true
@@ -11,17 +13,6 @@ const (
 	LargeModel            = "jina-embeddings-v2-large-en"
 	APIBaseURL            = "https://api.jina.ai/v1/embeddings"
 )
-
-/*
-jina-embeddings-v2-small-en: 33 million parameters, 512-dimension embeddings.
-jina-embeddings-v2-base-en: 137 million parameters, 768-dimension embeddings.
-jina-embeddings-v2-large-en: 435 million parameters, 1,024-dimension embeddings.
-*/
-var _models = map[string]int{
-	"jina-embeddings-v2-small-en": 512,
-	"jina-embeddings-v2-base-en":  768,
-	"jina-embeddings-v2-large-en": 1024,
-}
 
 // Option is a function type that can be used to modify the client.
 type Option func(p *Jina)
@@ -62,6 +53,13 @@ func WithAPIKey(apiKey string) Option {
 }
 
 func applyOptions(opts ...Option) (*Jina, error) {
+
+	var _models = map[string]int{
+		"jina-embeddings-v2-small-en": 512,
+		"jina-embeddings-v2-base-en":  768,
+		"jina-embeddings-v2-large-en": 1024,
+	}
+
 	o := &Jina{
 		StripNewLines: _defaultStripNewLines,
 		BatchSize:     _models[_defaultModel],
@@ -72,6 +70,11 @@ func applyOptions(opts ...Option) (*Jina, error) {
 
 	for _, opt := range opts {
 		opt(o)
+	}
+
+	// verify if model exists in the map
+	if _, ok := _models[o.Model]; ok {
+		o.BatchSize = _models[o.Model]
 	}
 
 	return o, nil
