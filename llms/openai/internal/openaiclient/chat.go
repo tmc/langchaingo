@@ -63,8 +63,6 @@ type ChatRequest struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
-type RequestKWARGS map[string]interface{}
-
 // ToolType is the type of a tool.
 type ToolType string
 
