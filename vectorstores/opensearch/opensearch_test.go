@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	opensearchgo "github.com/opensearch-project/opensearch-go"
+	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcopensearch "github.com/testcontainers/testcontainers-go/modules/opensearch"
@@ -73,7 +73,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.CreateIndex(context.TODO(), indexName)
+	err := storer.CreateIndex(context.TODO(), indexName, nil)
 	if err != nil {
 		t.Fatalf("error creating index: %v\n", err)
 	}
@@ -81,7 +81,7 @@ func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 
 func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.DeleteIndex(context.TODO(), indexName)
+	err := storer.DeleteIndex(context.TODO(), indexName, nil)
 	if err != nil {
 		t.Fatalf("error deleting index: %v\n", err)
 	}

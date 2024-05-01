@@ -1,0 +1,3 @@
+AI, I am providing you with a sample of data and specifying the type of file. Based on the sample data, please generate a JSON structure that includes the attribute names, descriptions, and types. 
+
+Possible types: {{.types}}

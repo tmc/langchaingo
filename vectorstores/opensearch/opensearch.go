@@ -6,11 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/google/uuid"
-	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
+	opensearchgo "github.com/opensearch-project/opensearch-go/v2"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -41,8 +40,8 @@ func New(client *opensearchgo.Client, opts ...Option) (Store, error) {
 		client: client,
 	}
 
-	if err := applyClientOptions(&s, opts...); err != nil {
-		return s, err
+	for _, opt := range opts {
+		opt(&s)
 	}
 
 	return s, nil
@@ -76,10 +75,11 @@ func (s Store) AddDocuments(
 
 	for i, doc := range docs {
 		id := uuid.NewString()
-		_, err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
+		err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata, nil)
 		if err != nil {
 			return ids, err
 		}
+
 		ids = append(ids, id)
 	}
 
@@ -95,22 +95,43 @@ func (s Store) SimilaritySearch(
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
+	var queryVector []float32
+	var err error
+	if query != "" {
+		queryVector, err = s.embedder.EmbedQuery(ctx, query)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-	queryVector, err := s.embedder.EmbedQuery(ctx, query)
-	if err != nil {
-		return nil, err
+	knnPayload := map[string]interface{}{
+		"contentVector": map[string]interface{}{
+			"vector": queryVector,
+			"k":      numDocuments,
+		},
 	}
 
 	searchPayload := map[string]interface{}{
 		"size": numDocuments,
 		"query": map[string]interface{}{
-			"knn": map[string]interface{}{
-				"contentVector": map[string]interface{}{
-					"vector": queryVector,
-					"k":      numDocuments,
-				},
-			},
+			"knn": knnPayload,
 		},
+	}
+
+	if opts.Filters != nil {
+		queryBool := map[string]interface{}{
+			"filter": opts.Filters,
+		}
+
+		if len(queryVector) > 0 {
+			queryBool["must"] = map[string]interface{}{
+				"knn": knnPayload,
+			}
+		}
+
+		searchPayload["query"] = map[string]interface{}{
+			"bool": queryBool,
+		}
 	}
 
 	buf := new(bytes.Buffer)
@@ -122,19 +143,20 @@ func (s Store) SimilaritySearch(
 		Index: []string{opts.NameSpace},
 		Body:  buf,
 	}
-	output := []schema.Document{}
-	searchResponse, err := search.Do(ctx, s.client)
+	response, err := search.Do(ctx, s.client)
 	if err != nil {
-		return output, fmt.Errorf("search.Do err: %w", err)
+		return nil, err
 	}
 
-	body, err := io.ReadAll(searchResponse.Body)
+	return handleSimilarySearchResponse(response, opts)
+}
+
+func handleSimilarySearchResponse(res *opensearchapi.Response, opts vectorstores.Options) ([]schema.Document, error) {
+	searchResults := searchResults{}
+	output := []schema.Document{}
+	err := handleResponse(&searchResults, res)
 	if err != nil {
 		return output, fmt.Errorf("error reading search response body: %w", err)
-	}
-	searchResults := searchResults{}
-	if err := json.Unmarshal(body, &searchResults); err != nil {
-		return output, fmt.Errorf("error unmarshalling search response body: %w %s", err, body)
 	}
 
 	for _, hit := range searchResults.Hits.Hits {
