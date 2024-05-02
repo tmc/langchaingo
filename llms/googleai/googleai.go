@@ -23,11 +23,12 @@ var (
 )
 
 const (
-	CITATIONS = "citations"
-	SAFETY    = "safety"
-	RoleModel = "model"
-	RoleUser  = "user"
-	RoleTool  = "tool"
+	CITATIONS  = "citations"
+	SAFETY     = "safety"
+	RoleSystem = "system"
+	RoleModel  = "model"
+	RoleUser   = "user"
+	RoleTool   = "tool"
 )
 
 // Call implements the [llms.Model] interface.
@@ -208,7 +209,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 	switch content.Role {
 	case llms.ChatMessageTypeSystem:
-		return nil, ErrSystemRoleNotSupported
+		c.Role = RoleSystem
 	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel
 	case llms.ChatMessageTypeHuman:
@@ -257,6 +258,10 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 		content, err := convertContent(mc)
 		if err != nil {
 			return nil, err
+		}
+		if mc.Role == RoleSystem {
+			model.SystemInstruction = content
+			continue
 		}
 		history = append(history, content)
 	}
