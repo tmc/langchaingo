@@ -60,7 +60,8 @@ type ChatRequest struct {
 	// Deprecated: use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	// Metadata allows you to specify additional information that will be passed to the model.
+	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 // ToolType is the type of a tool.
