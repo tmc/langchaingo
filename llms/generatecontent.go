@@ -1,6 +1,7 @@
 package llms
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -47,6 +48,10 @@ type TextContent struct {
 	Text string
 }
 
+func (tc TextContent) String() string {
+	return tc.Text
+}
+
 func (tc TextContent) MarshalJSON() ([]byte, error) {
 	m := map[string]string{
 		"type": "text",
@@ -72,12 +77,32 @@ func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+func (iuc ImageURLContent) String() string {
+	return iuc.URL
+}
+
 func (ImageURLContent) isPart() {}
 
 // BinaryContent is content holding some binary data with a MIME type.
 type BinaryContent struct {
 	MIMEType string
 	Data     []byte
+}
+
+func (bc BinaryContent) String() string {
+	base64Encoded := base64.StdEncoding.EncodeToString(bc.Data)
+	return "data:" + bc.MIMEType + ";base64," + base64Encoded
+}
+
+func (bc BinaryContent) MarshalJSON() ([]byte, error) {
+	m := map[string]any{
+		"type": "binary",
+		"binary": map[string]string{
+			"mime_type": bc.MIMEType,
+			"data":      base64.StdEncoding.EncodeToString(bc.Data),
+		},
+	}
+	return json.Marshal(m)
 }
 
 func (BinaryContent) isPart() {}
