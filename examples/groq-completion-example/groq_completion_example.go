@@ -18,15 +18,18 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llms.GenerateFromSinglePrompt(ctx,
+	_, err = llms.GenerateFromSinglePrompt(ctx,
 		llm,
-		"The first man to walk on the moon",
+		"Write a long poem about how golang is a fantastic language.",
 		llms.WithTemperature(0.8),
-		llms.WithStopWords([]string{"Armstrong"}),
+		llms.WithMaxTokens(4096),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}),
 	)
+	fmt.Println()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(completion)
 }
