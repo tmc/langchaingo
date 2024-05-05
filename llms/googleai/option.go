@@ -73,6 +73,41 @@ func WithDefaultEmbeddingModel(defaultEmbeddingModel string) Option {
 	}
 }
 
+// WithDefaultCandidateCount sets the candidate count for the model.
+func WithDefaultCandidateCount(defaultCandidateCount int) Option {
+	return func(opts *Options) {
+		opts.DefaultCandidateCount = defaultCandidateCount
+	}
+}
+
+// WithDefaultMaxTokens sets the maximum token count for the model.
+func WithDefaultMaxTokens(maxTokens int) Option {
+	return func(opts *Options) {
+		opts.DefaultMaxTokens = maxTokens
+	}
+}
+
+// WithDefaultTemperature sets the maximum token count for the model.
+func WithDefaultTemperature(defaultTemperature float64) Option {
+	return func(opts *Options) {
+		opts.DefaultTemperature = defaultTemperature
+	}
+}
+
+// WithDefaultTopK sets the TopK for the model.
+func WithDefaultTopK(defaultTopK int) Option {
+	return func(opts *Options) {
+		opts.DefaultTopK = defaultTopK
+	}
+}
+
+// WithDefaultTopP sets the TopP for the model.
+func WithDefaultTopP(defaultTopP float64) Option {
+	return func(opts *Options) {
+		opts.DefaultTopP = defaultTopP
+	}
+}
+
 // WithHarmThreshold sets the safety/harm setting for the model, potentially
 // limiting any harmful content it may generate.
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
