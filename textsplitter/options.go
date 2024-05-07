@@ -7,6 +7,7 @@ type Options struct {
 	ChunkSize         int
 	ChunkOverlap      int
 	Separators        []string
+	KeepSeparator     bool
 	LenFunc           func(string) int
 	ModelName         string
 	EncodingName      string
@@ -20,10 +21,11 @@ type Options struct {
 // DefaultOptions returns the default options for all text splitter.
 func DefaultOptions() Options {
 	return Options{
-		ChunkSize:    _defaultTokenChunkSize,
-		ChunkOverlap: _defaultTokenChunkOverlap,
-		Separators:   []string{"\n\n", "\n", " ", ""},
-		LenFunc:      utf8.RuneCountInString,
+		ChunkSize:     _defaultTokenChunkSize,
+		ChunkOverlap:  _defaultTokenChunkOverlap,
+		Separators:    []string{"\n\n", "\n", " ", ""},
+		KeepSeparator: false,
+		LenFunc:       utf8.RuneCountInString,
 
 		ModelName:         _defaultTokenModelName,
 		EncodingName:      _defaultTokenEncoding,
@@ -116,5 +118,16 @@ func WithCodeBlocks(renderCode bool) Option {
 func WithReferenceLinks(referenceLinks bool) Option {
 	return func(o *Options) {
 		o.ReferenceLinks = referenceLinks
+	}
+}
+
+// WithKeepSeparator sets whether the separators should be kept in the resulting
+// split text or not. When it is set to True, the separators are included in the
+// resulting split text. When it is set to False, the separators are not included
+// in the resulting split text. The purpose of having this parameter is to provide
+// flexibility in how text splitting is handled. Default to False if not specified.
+func WithKeepSeparator(keepSeparator bool) Option {
+	return func(o *Options) {
+		o.KeepSeparator = keepSeparator
 	}
 }
