@@ -404,64 +404,21 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 		},
 	}
 
-	var (
-		currentTool  ToolCall
-		currentIndex = -1
-	)
 	for streamResponse := range responseChan {
 		if len(streamResponse.Choices) == 0 {
 			continue
 		}
-		chunk := []byte(streamResponse.Choices[0].Delta.Content)
-		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
-		response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
-		if streamResponse.Choices[0].Delta.FunctionCall != nil {
-			if response.Choices[0].Message.FunctionCall == nil {
-				response.Choices[0].Message.FunctionCall = streamResponse.Choices[0].Delta.FunctionCall
-			} else {
-				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
-			}
-			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
-		}
-		if len(streamResponse.Choices[0].Delta.ToolCalls) > 0 {
-			for _, streamTool := range streamResponse.Choices[0].Delta.ToolCalls {
-				if streamTool.ID != "" {
-					currentTool = ToolCall{
-						ID:   streamTool.ID,
-						Type: streamTool.Type,
-						Function: ToolFunction{
-							Name:      streamTool.Function.Name,
-							Arguments: streamTool.Function.Arguments,
-						},
-					}
-					response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, currentTool)
-					currentIndex++
-				} else {
-					response.Choices[0].Message.ToolCalls[currentIndex].Function.Arguments += streamTool.Function.Arguments
-				}
-			}
-			chunk, _ = json.Marshal(response.Choices[0].Message.ToolCalls) // nolint:errchkjson
+		choice := streamResponse.Choices[0]
+		chunk := []byte(choice.Delta.Content)
+		response.Choices[0].Message.Content += choice.Delta.Content
+		response.Choices[0].FinishReason = choice.FinishReason
+
+		if choice.Delta.FunctionCall != nil {
+			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
 		}
 
-		for _, t := range streamResponse.Choices[0].Delta.ToolCalls {
-			// if we have arguments append to the last Tool call
-			if t.Type == `` && t.Function.Arguments != `` {
-				lindex := len(response.Choices[0].Message.ToolCalls) - 1
-				if lindex < 0 {
-					continue
-				}
-
-				response.Choices[0].Message.ToolCalls[lindex].Function.Arguments += t.Function.Arguments
-				continue
-			}
-
-			// Otherwise, this is a new tool call, append that to the stack
-			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, *t)
-		}
-
-		if len(streamResponse.Choices[0].Delta.ToolCalls) > 0 {
-			// walk through the delta and append to the stack
-			chunk, response.Choices[0].Message.ToolCalls = StreamingChatResponseTools(response.Choices[0].Message.ToolCalls, streamResponse.Choices[0].Delta.ToolCalls)
+		if len(choice.Delta.ToolCalls) > 0 {
+			chunk, response.Choices[0].Message.ToolCalls = updateToolCalls(response.Choices[0].Message.ToolCalls, choice.Delta.ToolCalls)
 		}
 
 		if payload.StreamingFunc != nil {
@@ -472,6 +429,41 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 		}
 	}
 	return &response, nil
+}
+
+func updateFunctionCall(message ChatMessage, functionCall *FunctionCall) []byte {
+	if message.FunctionCall == nil {
+		message.FunctionCall = functionCall
+	} else {
+		message.FunctionCall.Arguments += functionCall.Arguments
+	}
+	chunk, _ := json.Marshal(message.FunctionCall) // nolint:errchkjson
+	return chunk
+}
+
+func updateToolCalls(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
+	if len(delta) == 0 {
+		return []byte{}, tools
+	}
+	for _, t := range delta {
+		// if we have arguments append to the last Tool call
+		if t.Type == `` && t.Function.Arguments != `` {
+			lindex := len(tools) - 1
+			if lindex < 0 {
+				continue
+			}
+
+			tools[lindex].Function.Arguments += t.Function.Arguments
+			continue
+		}
+
+		// Otherwise, this is a new tool call, append that to the stack
+		tools = append(tools, *t)
+	}
+
+	chunk, _ := json.Marshal(delta) // nolint:errchkjson
+
+	return chunk, tools
 }
 
 // StreamingChatResponseTools is a helper function to append tool calls to the stack.
