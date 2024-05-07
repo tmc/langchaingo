@@ -5,15 +5,16 @@ go 1.22.0
 require (
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
-	github.com/testcontainers/testcontainers-go v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/chroma v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/milvus v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/mysql v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/opensearch v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/qdrant v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/weaviate v0.29.1
+	github.com/testcontainers/testcontainers-go v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/chroma v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/milvus v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/mysql v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/opensearch v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/qdrant v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/weaviate v0.30.0
 )
 
 require (
@@ -63,7 +64,7 @@ require (
 	github.com/deepmap/oapi-codegen/v2 v2.1.0 // indirect
 	github.com/distribution/reference v0.5.0 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
-	github.com/docker/docker v25.0.3+incompatible // indirect
+	github.com/docker/docker v25.0.5+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -174,7 +175,6 @@ require (
 	google.golang.org/genproto v0.0.0-20240221002015-b0ce06bbee7c // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240401170217-c3f982113cda // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240325203815-454cdb8f5daa // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
@@ -208,8 +208,9 @@ require (
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.4.1
 	github.com/pkoukk/tiktoken-go v0.1.6
-	github.com/weaviate/weaviate v1.23.9
-	github.com/weaviate/weaviate-go-client/v4 v4.12.1
+	github.com/redis/rueidis v1.0.34
+	github.com/weaviate/weaviate v1.24.1
+	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
 	go.mongodb.org/mongo-driver v1.13.1
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
@@ -218,4 +219,5 @@ require (
 	google.golang.org/api v0.172.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
+	gopkg.in/yaml.v3 v3.0.1
 )
