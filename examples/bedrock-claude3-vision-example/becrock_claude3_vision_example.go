@@ -56,6 +56,6 @@ func main() {
 		choices[0].GenerationInfo["output_tokens"],
 	)
 	fmt.Println(choices[0].Content)
-	//Output:
-	//The string on the box in the image is "LGTM".
+	// Output:
+	// The string on the box in the image is "LGTM".
 }

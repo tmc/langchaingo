@@ -304,7 +304,7 @@ func testTools(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
-	var availableTools = []llms.Tool{
+	availableTools := []llms.Tool{
 		{
 			Type: "function",
 			Function: &llms.FunctionDefinition{

@@ -16,7 +16,7 @@ func main() {
 		openai.WithBaseURL("https://integrate.api.nvidia.com/v1/"),
 		openai.WithModel("mistralai/mixtral-8x7b-instruct-v0.1"),
 		openai.WithToken(key),
-		//openai.WithHTTPClient(httputil.DebugHTTPClient),
+		// openai.WithHTTPClient(httputil.DebugHTTPClient),
 	)
 	if err != nil {
 		log.Fatal(err)
