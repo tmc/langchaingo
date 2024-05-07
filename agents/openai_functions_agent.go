@@ -100,7 +100,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 		var mc llms.MessageContent
 
 		switch p := msg.(type) {
-		case schema.ToolChatMessage:
+		case llms.ToolChatMessage:
 			mc = llms.MessageContent{
 				Role: role,
 				Parts: []llms.ContentPart{llms.ToolCallResponse{
@@ -109,7 +109,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 				}},
 			}
 
-		case schema.AIChatMessage:
+		case llms.AIChatMessage:
 			mc = llms.MessageContent{
 				Role: role,
 				Parts: []llms.ContentPart{
