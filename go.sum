@@ -400,8 +400,6 @@ github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsI
 github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
 github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a h1:bbPeKD0xmW/Y25WS6cokEszi5g+S0QxI/d45PkRi7Nk=
 github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
-github.com/jackc/pgx/v5 v5.5.4 h1:Xp2aQS8uXButQdnCMWNmvx6UysWQQC+u1EoizjguY+8=
-github.com/jackc/pgx/v5 v5.5.4/go.mod h1:ez9gk+OAat140fv9ErkZDYFWmXLfV+++K0uAOiwgm1A=
 github.com/jackc/pgx/v5 v5.5.5 h1:amBjrZVmksIdNjxGW/IiIMzxMKZFelXbUoPNb+8sjQw=
 github.com/jackc/pgx/v5 v5.5.5/go.mod h1:ez9gk+OAat140fv9ErkZDYFWmXLfV+++K0uAOiwgm1A=
 github.com/jackc/puddle/v2 v2.2.1 h1:RhxXJtFG022u4ibrCSMSiu5aOq1i77R3OHKNJj77OAk=
@@ -669,6 +667,8 @@ github.com/testcontainers/testcontainers-go/modules/chroma v0.30.0 h1:lwBZ3SRY5b
 github.com/testcontainers/testcontainers-go/modules/chroma v0.30.0/go.mod h1:Slrh6GtR+blKfb+Hi7m2h/l1ClpPrc3qxLtP6VXPfhc=
 github.com/testcontainers/testcontainers-go/modules/milvus v0.30.0 h1:HFWW2HcZO4hyEqfKLkncueMeHjxAVrBRnkLKkzKTU/E=
 github.com/testcontainers/testcontainers-go/modules/milvus v0.30.0/go.mod h1:tOUI+wyWFfk9d4nx8uegIHMJkV4iq5/TghSm5nlKT7E=
+github.com/testcontainers/testcontainers-go/modules/mongodb v0.30.0 h1:brC+Wnoh/Ghs6kQbSMOGGk6wcY5Y6suI5w5FXPOHJ8g=
+github.com/testcontainers/testcontainers-go/modules/mongodb v0.30.0/go.mod h1:Lqhn6PiAPhsZQmfkc1q3nXWXNGPJeChyjl7h/Uh238U=
 github.com/testcontainers/testcontainers-go/modules/mysql v0.30.0 h1:wrePvxfU/2HFALKyBqpNs6VoPPvThzHy9aN+PCxse9g=
 github.com/testcontainers/testcontainers-go/modules/mysql v0.30.0/go.mod h1:Srnlf7wwA7s6K4sKKhjAoBHJcKorRINR/i5dCA4ZyGk=
 github.com/testcontainers/testcontainers-go/modules/opensearch v0.30.0 h1:PIjFio/EL/rVdncYC768nIwIPp8eyppn99NBaqF3to8=
