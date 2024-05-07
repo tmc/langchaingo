@@ -76,7 +76,6 @@ func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, p
 	require.NoError(t, s.RemoveCollection(ctx, tx))
 
 	require.NoError(t, tx.Commit(ctx))
-	require.NoError(t, s.Close(ctx))
 }
 
 func TestPgvectorStoreRest(t *testing.T) {
@@ -84,14 +83,19 @@ func TestPgvectorStoreRest(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -120,14 +124,19 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -175,14 +184,19 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -240,9 +254,12 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	e, err := embeddings.NewEmbedder(googleLLM)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(collectionName),
@@ -257,14 +274,16 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	require.NoError(t, err)
 
 	// use openai embedding (now default model is text-embedding-ada-002, with dimensions:1536) to add some data to same collection (same table)
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err = embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
 	store, err = pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(false),
 		pgvector.WithCollectionName(collectionName),
@@ -301,14 +320,19 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -344,14 +368,19 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -392,14 +421,19 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -468,14 +502,19 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -534,14 +573,19 @@ func TestDeduplicater(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
@@ -576,7 +620,9 @@ func TestWithAllOptions(t *testing.T) {
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
-	llm, err := openai.New()
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -587,7 +633,6 @@ func TestWithAllOptions(t *testing.T) {
 
 	store, err := pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
 		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
@@ -620,7 +665,7 @@ func TestWithAllOptions(t *testing.T) {
 
 	store, err = pgvector.New(
 		ctx,
-		pgvector.WithConnectionURL(pgvectorURL),
+		pgvector.WithConn(conn),
 		pgvector.WithEmbedder(e),
 		pgvector.WithPreDeleteCollection(true),
 		pgvector.WithCollectionName(makeNewCollectionName()),
