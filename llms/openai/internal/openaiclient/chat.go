@@ -456,10 +456,11 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 			}
 
 			// Otherwise, this is a new tool call, append that to the stack
-			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, t)
+			response.Choices[0].Message.ToolCalls = append(response.Choices[0].Message.ToolCalls, *t)
 		}
 
 		if len(streamResponse.Choices[0].Delta.ToolCalls) > 0 {
+			// walk through the delta and append to the stack
 			chunk, response.Choices[0].Message.ToolCalls = StreamingChatResponseTools(response.Choices[0].Message.ToolCalls, streamResponse.Choices[0].Delta.ToolCalls)
 		}
 
@@ -473,7 +474,8 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 	return &response, nil
 }
 
-func StreamingChatResponseTools(tools, delta []ToolCall) ([]byte, []ToolCall) {
+// StreamingChatResponseTools is a helper function to append tool calls to the stack.
+func StreamingChatResponseTools(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
 	if len(delta) == 0 {
 		return []byte{}, tools
 	}
@@ -490,7 +492,7 @@ func StreamingChatResponseTools(tools, delta []ToolCall) ([]byte, []ToolCall) {
 		}
 
 		// Otherwise, this is a new tool call, append that to the stack
-		tools = append(tools, t)
+		tools = append(tools, *t)
 	}
 
 	chunk, _ := json.Marshal(delta) // nolint:errchkjson
