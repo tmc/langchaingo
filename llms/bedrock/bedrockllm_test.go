@@ -66,6 +66,8 @@ func TestAmazonOutput(t *testing.T) {
 		bedrock.ModelCohereCommandLightTextV14,
 		bedrock.ModelMetaLlama213bChatV1,
 		bedrock.ModelMetaLlama270bChatV1,
+		bedrock.ModelMetaLlama38bInstructV1,
+		bedrock.ModelMetaLlama370bInstructV1,
 	}
 
 	ctx := context.Background()

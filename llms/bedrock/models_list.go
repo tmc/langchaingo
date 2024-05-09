@@ -111,4 +111,22 @@ const (
 	// Max tokens: 4096
 	// Languages: English.
 	ModelMetaLlama270bChatV1 = "meta.llama2-70b-chat-v1"
+
+	// Llama 3 is the most capable Llama model yet, which supports a 8K context length that doubles the capacity of Llama 2.
+	// Llama 3 was pretrained on over 15 trillion tokens of data from publicly available source.
+	// This is the 8 billion parameter variant.
+	//
+	// Max tokens: 8k
+	// Languages: English(Over 5% of the Llama 3 pretraining dataset consists of high-quality non-English data that covers over 30 languages.
+	// However, we do not expect the same level of performance in these languages as in English.)
+	ModelMetaLlama38bInstructV1 = "meta.llama3-8b-instruct-v1:0"
+
+	// Llama 3 is the most capable Llama model yet, which supports a 8K context length that doubles the capacity of Llama 2.
+	// Llama 3 was pretrained on over 15 trillion tokens of data from publicly available source.
+	// This is the 70 billion parameter variant.
+	//
+	// Max tokens: 8k
+	// Languages: English(Over 5% of the Llama 3 pretraining dataset consists of high-quality non-English data that covers over 30 languages.
+	// However, we do not expect the same level of performance in these languages as in English.)
+	ModelMetaLlama370bInstructV1 = "meta.llama3-70b-instruct-v1:0"
 )
