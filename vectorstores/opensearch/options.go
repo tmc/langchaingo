@@ -48,7 +48,7 @@ func applyClientOptions(s *Store, opts ...Option) error {
 	}
 
 	if s.client == nil {
-		return ErrMissingEmbedded
+		return ErrMissingOpensearchClient
 	}
 
 	return nil

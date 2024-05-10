@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -112,6 +113,7 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 	var siteData strings.Builder
 	homePageLinks := make(map[string]bool)
 	scrapedLinks := make(map[string]bool)
+	scrapedLinksMutex := sync.RWMutex{}
 
 	c.OnRequest(func(r *colly.Request) {
 		if ctx.Err() != nil {
@@ -123,8 +125,10 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		currentURL := e.Request.URL.String()
 
 		// Only process the page if it hasn't been visited yet
+		scrapedLinksMutex.Lock()
 		if !scrapedLinks[currentURL] {
 			scrapedLinks[currentURL] = true
+			scrapedLinksMutex.Unlock()
 
 			siteData.WriteString("\n\nPage URL: " + currentURL)
 
@@ -157,6 +161,8 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 					}
 				})
 			}
+		} else {
+			scrapedLinksMutex.Unlock()
 		}
 	})
 
@@ -189,11 +195,15 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		}
 
 		// Only visit the page if it hasn't been visited yet
+		scrapedLinksMutex.RLock()
 		if !scrapedLinks[u.String()] {
+			scrapedLinksMutex.RUnlock()
 			err := c.Visit(u.String())
 			if err != nil {
 				siteData.WriteString(fmt.Sprintf("\nError following link %s: %v", link, err))
 			}
+		} else {
+			scrapedLinksMutex.RUnlock()
 		}
 	})
 

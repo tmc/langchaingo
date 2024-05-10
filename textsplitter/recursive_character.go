@@ -7,10 +7,11 @@ import (
 // RecursiveCharacter is a text splitter that will split texts recursively by different
 // characters.
 type RecursiveCharacter struct {
-	Separators   []string
-	ChunkSize    int
-	ChunkOverlap int
-	LenFunc      func(string) int
+	Separators    []string
+	ChunkSize     int
+	ChunkOverlap  int
+	LenFunc       func(string) int
+	KeepSeparator bool
 }
 
 // NewRecursiveCharacter creates a new recursive character splitter with default values. By
@@ -23,10 +24,11 @@ func NewRecursiveCharacter(opts ...Option) RecursiveCharacter {
 	}
 
 	s := RecursiveCharacter{
-		Separators:   options.Separators,
-		ChunkSize:    options.ChunkSize,
-		ChunkOverlap: options.ChunkOverlap,
-		LenFunc:      options.LenFunc,
+		Separators:    options.Separators,
+		ChunkSize:     options.ChunkSize,
+		ChunkOverlap:  options.ChunkOverlap,
+		LenFunc:       options.LenFunc,
+		KeepSeparator: options.KeepSeparator,
 	}
 
 	return s
@@ -34,20 +36,40 @@ func NewRecursiveCharacter(opts ...Option) RecursiveCharacter {
 
 // SplitText splits a text into multiple text.
 func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
+	return s.splitText(text, s.Separators)
+}
+
+// addSeparatorInSplits adds the separator in each of splits.
+func (s RecursiveCharacter) addSeparatorInSplits(splits []string, separator string) []string {
+	splitsWithSeparator := make([]string, 0, len(splits))
+	for i, s := range splits {
+		if i > 0 {
+			s = separator + s
+		}
+		splitsWithSeparator = append(splitsWithSeparator, s)
+	}
+	return splitsWithSeparator
+}
+
+func (s RecursiveCharacter) splitText(text string, separators []string) ([]string, error) {
 	finalChunks := make([]string, 0)
 
-	// Find the appropriate separator
-	separator := s.Separators[len(s.Separators)-1]
+	// Find the appropriate separator.
+	separator := separators[len(separators)-1]
 	newSeparators := []string{}
-	for i, c := range s.Separators {
+	for i, c := range separators {
 		if c == "" || strings.Contains(text, c) {
 			separator = c
-			newSeparators = s.Separators[i+1:]
+			newSeparators = separators[i+1:]
 			break
 		}
 	}
 
 	splits := strings.Split(text, separator)
+	if s.KeepSeparator {
+		splits = s.addSeparatorInSplits(splits, separator)
+		separator = ""
+	}
 	goodSplits := make([]string, 0)
 
 	// Merge the splits, recursively splitting larger texts.
@@ -67,7 +89,7 @@ func (s RecursiveCharacter) SplitText(text string) ([]string, error) {
 		if len(newSeparators) == 0 {
 			finalChunks = append(finalChunks, split)
 		} else {
-			otherInfo, err := s.SplitText(split)
+			otherInfo, err := s.splitText(split, newSeparators)
 			if err != nil {
 				return nil, err
 			}
