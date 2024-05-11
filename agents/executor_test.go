@@ -48,6 +48,10 @@ func (a testAgent) GetOutputKeys() []string {
 	return a.outputKeys
 }
 
+func (a *testAgent) GetTools() []tools.Tool {
+	return nil
+}
+
 func TestExecutorWithErrorHandler(t *testing.T) {
 	t.Parallel()
 
@@ -56,7 +60,6 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 	}
 	executor := agents.NewExecutor(
 		a,
-		nil,
 		agents.WithMaxIterations(3),
 		agents.WithParserErrorHandler(agents.NewParserErrorHandler(nil)),
 	)
@@ -129,7 +132,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		}),
 	)
 
-	e := agents.NewExecutor(a, toolList)
+	e := agents.NewExecutor(a)
 	require.NoError(t, err)
 
 	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
