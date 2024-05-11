@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/google/uuid"
@@ -45,9 +46,14 @@ type PGXConn interface {
 	SendBatch(ctx context.Context, batch *pgx.Batch) pgx.BatchResults
 }
 
+type CloseNoErr interface {
+	Close()
+}
+
 // Store is a wrapper around the pgvector client.
 type Store struct {
 	embedder            embeddings.Embedder
+	connURL             string
 	conn                PGXConn
 	embeddingTableName  string
 	collectionTableName string
@@ -73,6 +79,12 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
+	if store.conn == nil {
+		store.conn, err = pgx.Connect(ctx, store.connURL)
+		if err != nil {
+			return Store{}, err
+		}
+	}
 	if err = store.conn.Ping(ctx); err != nil {
 		return Store{}, err
 	}
@@ -80,6 +92,17 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 		return Store{}, err
 	}
 	return store, nil
+}
+
+// Close closes the connection.
+func (s Store) Close() error {
+	if closer, ok := s.conn.(io.Closer); ok {
+		return closer.Close()
+	}
+	if closer, ok := s.conn.(CloseNoErr); ok {
+		closer.Close()
+	}
+	return nil
 }
 
 func (s *Store) init(ctx context.Context) error {
