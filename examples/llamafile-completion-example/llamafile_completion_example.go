@@ -6,7 +6,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/llamafile"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -26,7 +25,7 @@ func main() {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
