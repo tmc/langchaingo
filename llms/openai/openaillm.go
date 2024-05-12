@@ -162,23 +162,23 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
-		if c.FinishReason == "tool_calls" {
-			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
-			for _, tool := range c.Message.ToolCalls {
-				choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
-					ID:   tool.ID,
-					Type: string(tool.Type),
-					FunctionCall: &llms.FunctionCall{
-						Name:      tool.Function.Name,
-						Arguments: tool.Function.Arguments,
-					},
-				})
-			}
-			// populate legacy single-function call field for backwards compatibility
-			if len(choices[i].ToolCalls) > 0 {
-				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
-			}
+		//if c.FinishReason == "tool_calls" {
+		// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
+		for _, tool := range c.Message.ToolCalls {
+			choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
+				ID:   tool.ID,
+				Type: string(tool.Type),
+				FunctionCall: &llms.FunctionCall{
+					Name:      tool.Function.Name,
+					Arguments: tool.Function.Arguments,
+				},
+			})
 		}
+		// populate legacy single-function call field for backwards compatibility
+		if len(choices[i].ToolCalls) > 0 {
+			choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
+		}
+		//}
 	}
 	response := &llms.ContentResponse{Choices: choices}
 	if o.CallbacksHandler != nil {
