@@ -38,5 +38,5 @@ func Initialize(
 	default:
 		return &Executor{}, ErrUnknownAgentType
 	}
-	return NewExecutor(agent, tools, opts...), nil
+	return NewExecutor(agent, opts...), nil
 }

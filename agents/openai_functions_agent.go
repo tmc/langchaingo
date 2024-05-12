@@ -157,6 +157,10 @@ func (o *OpenAIFunctionsAgent) GetOutputKeys() []string {
 	return []string{o.OutputKey}
 }
 
+func (o *OpenAIFunctionsAgent) GetTools() []tools.Tool {
+	return o.Tools
+}
+
 func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	messageFormatters := []prompts.MessageFormatter{prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil)}
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
