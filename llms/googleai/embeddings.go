@@ -2,6 +2,7 @@ package googleai
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/generative-ai-go/genai"
 )
@@ -11,12 +12,23 @@ func (g *GoogleAI) CreateEmbedding(ctx context.Context, texts []string) ([][]flo
 	em := g.client.EmbeddingModel(g.opts.DefaultEmbeddingModel)
 
 	results := make([][]float32, 0, len(texts))
-	for _, t := range texts {
-		res, err := em.EmbedContent(ctx, genai.Text(t))
-		if err != nil {
-			return results, err
+
+	batch := em.NewBatch()
+	for i, t := range texts {
+		batch = batch.AddContent(genai.Text(t))
+		// The Gemini Embedding Batch API allows up to 100 documents per batch,
+		// so send a request every 100 documents and when we hit the
+		// last document.
+		if (i > 0 && (i+1)%100 == 0) || i == len(texts)-1 {
+			embeddings, err := em.BatchEmbedContents(ctx, batch)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create embeddings: %w", err)
+			}
+			for _, e := range embeddings.Embeddings {
+				results = append(results, e.Values)
+			}
+			batch = em.NewBatch()
 		}
-		results = append(results, res.Embedding.Values)
 	}
 
 	return results, nil
