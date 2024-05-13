@@ -7,4 +7,11 @@ type Tool interface {
 	Name() string
 	Description() string
 	Call(ctx context.Context, input map[string]any) (string, error)
+	Schema() Schema
+}
+
+type Schema struct {
+	Type       string
+	Properties map[string]any
+	Required   []string
 }

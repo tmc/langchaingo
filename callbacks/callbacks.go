@@ -20,7 +20,7 @@ type Handler interface {
 	HandleChainStart(ctx context.Context, inputs map[string]any)
 	HandleChainEnd(ctx context.Context, outputs map[string]any)
 	HandleChainError(ctx context.Context, err error)
-	HandleToolStart(ctx context.Context, input string)
+	HandleToolStart(ctx context.Context, input map[string]any)
 	HandleToolEnd(ctx context.Context, output string)
 	HandleToolError(ctx context.Context, err error)
 	HandleAgentAction(ctx context.Context, action schema.AgentAction)

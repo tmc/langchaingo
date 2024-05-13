@@ -3,6 +3,7 @@ package serpapi
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
@@ -16,6 +17,19 @@ var ErrMissingToken = errors.New("missing the serpapi API key, set it in the SER
 type Tool struct {
 	CallbacksHandler callbacks.Handler
 	client           *internal.Client
+}
+
+func (t Tool) Schema() tools.Schema {
+	return tools.Schema{
+		Type: "object",
+		Properties: map[string]any{
+			"query": map[string]any{
+				"title": "query",
+				"type":  "string",
+			},
+		},
+		Required: []string{"query"},
+	}
 }
 
 var _ tools.Tool = Tool{}
@@ -51,12 +65,17 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
+func (t Tool) Call(ctx context.Context, input map[string]any) (string, error) {
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
 
-	result, err := t.client.Search(ctx, input)
+	query, ok := input["query"].(string)
+	if !ok {
+		return "", fmt.Errorf("could not obtain `query` in %v", input)
+	}
+
+	result, err := t.client.Search(ctx, query)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good Google Search Results was found", nil
