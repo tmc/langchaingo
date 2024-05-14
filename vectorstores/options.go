@@ -1,61 +1,74 @@
-package vectorstores
+package vearch
 
 import (
-	"context"
+	"errors"
+	"fmt"
+	"net/url"
 
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
 )
 
+const (
+	DefaultDbName    = "ts_db"
+	DefaultSpaceName = "ts_space"
+)
+
+// ErrInvalidOptions is returned when the options given are invalid.
+var ErrInvalidOptions = errors.New("invalid options")
+
 // Option is a function that configures an Options.
-type Option func(*Options)
+type Option func(store *Store)
 
-// Options is a set of options for similarity search and add documents.
-type Options struct {
-	NameSpace      string
-	ScoreThreshold float32
-	Filters        any
-	Embedder       embeddings.Embedder
-	Deduplicater   func(context.Context, schema.Document) bool
-}
-
-// WithNameSpace returns an Option for setting the name space.
-func WithNameSpace(nameSpace string) Option {
-	return func(o *Options) {
-		o.NameSpace = nameSpace
-	}
-}
-
-func WithScoreThreshold(scoreThreshold float32) Option {
-	return func(o *Options) {
-		o.ScoreThreshold = scoreThreshold
-	}
-}
-
-// WithFilters searches can be limited based on metadata filters. Searches with  metadata
-// filters retrieve exactly the number of nearest-neighbors results that match the filters. In
-// most cases the search latency will be lower than unfiltered searches
-// See https://docs.pinecone.io/docs/metadata-filtering
-func WithFilters(filters any) Option {
-	return func(o *Options) {
-		o.Filters = filters
-	}
-}
-
-// WithEmbedder returns an Option for setting the embedder that could be used when
-// adding documents or doing similarity search (instead the embedder from the Store context)
-// this is useful when we are using multiple LLMs with single vectorstore.
+// WithEmbedder is an option for setting the embedder to use. Must be set.
 func WithEmbedder(embedder embeddings.Embedder) Option {
-	return func(o *Options) {
-		o.Embedder = embedder
+	return func(store *Store) {
+		store.embedder = embedder
 	}
 }
 
-// WithDeduplicater returns an Option for setting the deduplicater that could be used
-// when adding documents. This is useful to prevent wasting time on creating an embedding
-// when one already exists.
-func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Option {
-	return func(o *Options) {
-		o.Deduplicater = fn
+// WithDbName returns an Option for setting the database name. Required.
+func WithDbName(name string) Option {
+	return func(store *Store) {
+		store.DbName = name
 	}
+}
+
+// WithSpaceName returns an Option for setting the space name. Required.
+func WithSpaceName(name string) Option {
+	return func(store *Store) {
+		store.SpaceName = name
+	}
+}
+
+// WithURL returns an Option for setting the Vearch cluster URL. Required.
+func WithURL(clusterUrl url.URL) Option {
+	return func(store *Store) {
+		store.ClusterUrl = clusterUrl
+	}
+}
+
+func applyClientOptions(opts ...Option) (Store, error) {
+	store := Store{}
+
+	for _, opt := range opts {
+		opt(&store)
+	}
+
+	if store.DbName == "" {
+		return Store{}, fmt.Errorf("%w: missing database name", ErrInvalidOptions)
+	}
+
+	if store.SpaceName == "" {
+		return Store{}, fmt.Errorf("%w: missing space name", ErrInvalidOptions)
+	}
+
+	if store.ClusterUrl == (url.URL{}) {
+		return Store{}, fmt.Errorf("%w: missing cluster URL", ErrInvalidOptions)
+	}
+
+	if store.embedder == nil {
+		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
+	}
+
+	return store, nil
 }
