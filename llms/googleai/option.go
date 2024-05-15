@@ -15,7 +15,7 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
-	HttpClient            *http.Client
+	HTTPClient            *http.Client
 }
 
 func DefaultOptions() Options {
@@ -119,10 +119,10 @@ func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	}
 }
 
-// WithHttpClient passes a custom http client which will be used to communicate with the remote model.
-func WithHttpClient(client *http.Client) Option {
+// WithHTTPClient passes a custom http client which will be used to communicate with the remote model.
+func WithHTTPClient(client *http.Client) Option {
 	return func(opts *Options) {
-		opts.HttpClient = client
+		opts.HTTPClient = client
 	}
 }
 

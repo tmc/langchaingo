@@ -32,8 +32,8 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	}
 
 	initOpts := []option.ClientOption{option.WithAPIKey(clientOptions.APIKey)}
-	if clientOptions.HttpClient != nil {
-		initOpts = append(initOpts, option.WithHTTPClient(clientOptions.HttpClient))
+	if clientOptions.HTTPClient != nil {
+		initOpts = append(initOpts, option.WithHTTPClient(clientOptions.HTTPClient))
 	}
 	client, err := genai.NewClient(ctx, initOpts...)
 	if err != nil {
