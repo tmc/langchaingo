@@ -1,5 +1,7 @@
 package googleai
 
+import "net/http"
+
 // Options is a set of options for GoogleAI and Vertex clients.
 type Options struct {
 	APIKey                string
@@ -13,6 +15,7 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
+	HttpClient            *http.Client
 }
 
 func DefaultOptions() Options {
@@ -113,6 +116,13 @@ func WithDefaultTopP(defaultTopP float64) Option {
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	return func(opts *Options) {
 		opts.HarmThreshold = ht
+	}
+}
+
+// WithHttpClient passes a custom http client which will be used to communicate with the remote model.
+func WithHttpClient(client *http.Client) Option {
+	return func(opts *Options) {
+		opts.HttpClient = client
 	}
 }
 
