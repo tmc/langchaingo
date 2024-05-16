@@ -33,12 +33,16 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		opt(&clientOptions)
 	}
 
-	client, err := genai.NewClient(ctx, clientOptions.CloudProject, clientOptions.CloudLocation)
+	client, err := genai.NewClient(
+		ctx,
+		clientOptions.CloudProject,
+		clientOptions.CloudLocation,
+		clientOptions.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	palmClient, err := palmclient.New(clientOptions.CloudProject) //nolint:contextcheck
+	palmClient, err := palmclient.New(clientOptions.CloudProject, clientOptions.ClientOptions...) //nolint:contextcheck
 	if err != nil {
 		return nil, err
 	}

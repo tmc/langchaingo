@@ -1,8 +1,13 @@
 package googleai
 
+import (
+	"net/http"
+
+	"google.golang.org/api/option"
+)
+
 // Options is a set of options for GoogleAI and Vertex clients.
 type Options struct {
-	APIKey                string
 	CloudProject          string
 	CloudLocation         string
 	DefaultModel          string
@@ -13,11 +18,12 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
+
+	ClientOptions []option.ClientOption
 }
 
 func DefaultOptions() Options {
 	return Options{
-		APIKey:                "",
 		CloudProject:          "",
 		CloudLocation:         "",
 		DefaultModel:          "gemini-pro",
@@ -37,7 +43,39 @@ type Option func(*Options)
 // googleai clients.
 func WithAPIKey(apiKey string) Option {
 	return func(opts *Options) {
-		opts.APIKey = apiKey
+		opts.ClientOptions = append(opts.ClientOptions, option.WithAPIKey(apiKey))
+	}
+}
+
+// WithCredentialsJSON append a ClientOption that authenticates
+// API calls with the given service account or refresh token JSON
+// credentials.
+func WithCredentialsJSON(credentialsJSON []byte) Option {
+	return func(opts *Options) {
+		if len(credentialsJSON) == 0 {
+			return
+		}
+		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsJSON(credentialsJSON))
+	}
+}
+
+// WithCredentialsFile append a ClientOption that authenticates
+// API calls with the given service account or refresh token JSON
+// credentials file.
+func WithCredentialsFile(credentialsFile string) Option {
+	return func(opts *Options) {
+		if credentialsFile == "" {
+			return
+		}
+		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsFile(credentialsFile))
+	}
+}
+
+// WithHTTPClient append a ClientOption that uses the provided HTTP client to
+// make requests.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, option.WithHTTPClient(httpClient))
 	}
 }
 
