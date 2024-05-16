@@ -3,6 +3,7 @@ package googleai
 import (
 	"net/http"
 
+	"cloud.google.com/go/vertexai/genai"
 	"google.golang.org/api/option"
 )
 
@@ -71,8 +72,16 @@ func WithCredentialsFile(credentialsFile string) Option {
 	}
 }
 
+// WithRest configures the client to use the REST API.
+func WithRest() Option {
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, genai.WithREST())
+	}
+}
+
 // WithHTTPClient append a ClientOption that uses the provided HTTP client to
 // make requests.
+// This is useful for vertex clients.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(opts *Options) {
 		opts.ClientOptions = append(opts.ClientOptions, option.WithHTTPClient(httpClient))

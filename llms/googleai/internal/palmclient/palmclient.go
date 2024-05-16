@@ -13,12 +13,6 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-const (
-	defaultAPIEndpoint = "us-central1-aiplatform.googleapis.com:443"
-	defaultLocation    = "us-central1"
-	defaultPublisher   = "google"
-)
-
 var (
 	// ErrMissingValue is returned when a value is missing.
 	ErrMissingValue = errors.New("missing value")
@@ -48,19 +42,20 @@ type PaLMClient struct {
 }
 
 // New returns a new Vertex AI based PaLM API client.
-func New(projectID string, opts ...option.ClientOption) (*PaLMClient, error) {
+func New(ctx context.Context, projectID, location string, opts ...option.ClientOption) (*PaLMClient, error) {
 	numConns := runtime.GOMAXPROCS(0)
 	if numConns > defaultMaxConns {
 		numConns = defaultMaxConns
 	}
 	o := []option.ClientOption{
 		option.WithGRPCConnectionPool(numConns),
-		option.WithEndpoint(defaultAPIEndpoint),
+		option.WithEndpoint(fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)),
 	}
-	o = append(o, opts...)
+	opts = append(o, opts...)
+	// PredictionClient only support GRPC.
+	opts = append(opts, option.WithHTTPClient(nil))
 
-	ctx := context.Background()
-	client, err := aiplatform.NewPredictionClient(ctx, o...)
+	client, err := aiplatform.NewPredictionClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

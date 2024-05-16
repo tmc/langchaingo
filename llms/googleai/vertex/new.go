@@ -42,7 +42,11 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		return nil, err
 	}
 
-	palmClient, err := palmclient.New(clientOptions.CloudProject, clientOptions.ClientOptions...) //nolint:contextcheck
+	palmClient, err := palmclient.New(
+		ctx,
+		clientOptions.CloudProject,
+		clientOptions.CloudLocation,
+		clientOptions.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}

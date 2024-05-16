@@ -2,9 +2,12 @@
 package shared_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -47,10 +50,13 @@ func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	if location == "" {
 		location = "us-central1"
 	}
+	credentials := os.Getenv("VERTEX_CREDENTIALS")
 
 	opts = append(opts,
 		googleai.WithCloudProject(project),
-		googleai.WithCloudLocation(location))
+		googleai.WithCloudLocation(location),
+		googleai.WithCredentialsFile(credentials),
+	)
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
@@ -86,6 +92,7 @@ var testConfigs = []testConfig{
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
 	},
 	{testWithStreaming, nil},
+	{testWithHTTPClient, getHTTPTestClientOptions()},
 }
 
 func TestShared(t *testing.T) {
@@ -185,7 +192,9 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	parts := []llms.ContentPart{
-		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		llms.ImageURLPart(
+			"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true",
+		),
 		llms.TextPart("describe this image in detail"),
 	}
 	content := []llms.MessageContent{
@@ -195,7 +204,11 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro-vision"))
+	rsp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithModel("gemini-pro-vision"),
+	)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -223,7 +236,11 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro-vision"))
+	rsp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithModel("gemini-pro-vision"),
+	)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -271,9 +288,6 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 }
 
 func testWithStreaming(t *testing.T, llm llms.Model) {
-	// TODO: this test is currently failing for Vertex, probably due to
-	// backend API issues.
-	t.Skip()
 	t.Helper()
 	t.Parallel()
 
@@ -419,6 +433,50 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 		assert.Regexp(t, "(?i)stop", c1.StopReason)
 		assert.Regexp(t, "(?i)dog|breed|canid|canine", c1.Content)
 	}
+}
+
+func testWithHTTPClient(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	resp, err := llm.GenerateContent(
+		context.TODO(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "testing")},
+	)
+	require.NoError(t, err)
+	require.EqualValues(t, "test-ok", resp.Choices[0].Content)
+}
+
+func getHTTPTestClientOptions() []googleai.Option {
+	client := &http.Client{Transport: &testRequestInterceptor{}}
+	return []googleai.Option{googleai.WithRest(), googleai.WithHTTPClient(client)}
+}
+
+type testRequestInterceptor struct{}
+
+func (i *testRequestInterceptor) RoundTrip(req *http.Request) (*http.Response, error) {
+	defer req.Body.Close()
+	content := `{
+					"candidates": [{
+						"content": {
+							"parts": [{"text": "test-ok"}]
+						},
+						"finishReason": "STOP"
+					}],
+					"usageMetadata": {
+						"promptTokenCount": 7,
+						"candidatesTokenCount": 7,
+						"totalTokenCount": 14
+					}
+				}`
+
+	resp := &http.Response{
+		StatusCode: http.StatusOK, Request: req,
+		Body:   io.NopCloser(bytes.NewBufferString(content)),
+		Header: http.Header{},
+	}
+	resp.Header.Set("Content-Type", "application/json")
+	return resp, nil
 }
 
 func showJSON(v any) string {
