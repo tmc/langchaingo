@@ -38,8 +38,8 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 	if clientOptions.HTTPClient != nil {
 		initOpts = append(initOpts, option.WithHTTPClient(clientOptions.HTTPClient))
 	}
-	client, err := genai.NewClient(ctx, clientOptions.CloudProject, clientOptions.CloudLocation, initOpts...)
 
+	client, err := genai.NewClient(ctx, clientOptions.CloudProject, clientOptions.CloudLocation, initOpts...)
 	if err != nil {
 		return nil, err
 	}
