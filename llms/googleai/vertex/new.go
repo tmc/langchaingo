@@ -11,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
+	"google.golang.org/api/option"
 )
 
 // Vertex is a type that represents a Vertex AI API client.
@@ -33,12 +34,17 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		opt(&clientOptions)
 	}
 
-	client, err := genai.NewClient(ctx, clientOptions.CloudProject, clientOptions.CloudLocation)
+	initOpts := []option.ClientOption{}
+	if clientOptions.HTTPClient != nil {
+		initOpts = append(initOpts, option.WithHTTPClient(clientOptions.HTTPClient))
+	}
+	client, err := genai.NewClient(ctx, clientOptions.CloudProject, clientOptions.CloudLocation, initOpts...)
+
 	if err != nil {
 		return nil, err
 	}
 
-	palmClient, err := palmclient.New(clientOptions.CloudProject) //nolint:contextcheck
+	palmClient, err := palmclient.New(clientOptions.CloudProject, initOpts...) //nolint:contextcheck
 	if err != nil {
 		return nil, err
 	}

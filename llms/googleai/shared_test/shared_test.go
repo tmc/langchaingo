@@ -2,9 +2,12 @@
 package shared_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -86,6 +89,7 @@ var testConfigs = []testConfig{
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
 	},
 	{testWithStreaming, nil},
+	{testWithHTTPClient, []googleai.Option{getHTTPTestClientOption()}},
 }
 
 func TestShared(t *testing.T) {
@@ -427,4 +431,45 @@ func showJSON(v any) string {
 		panic(err)
 	}
 	return string(b)
+}
+
+func testWithHTTPClient(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	resp, err := llm.GenerateContent(context.TODO(), []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "testing")})
+	require.NoError(t, err)
+	require.EqualValues(t, "test-ok", resp.Choices[0].Content)
+}
+
+func getHTTPTestClientOption() googleai.Option {
+	client := &http.Client{Transport: &testRequestInterceptor{}}
+	return googleai.WithHTTPClient(client)
+}
+
+type testRequestInterceptor struct{}
+
+func (i *testRequestInterceptor) RoundTrip(req *http.Request) (*http.Response, error) {
+	defer req.Body.Close()
+	content := `{
+					"candidates": [{
+						"content": {
+							"parts": [{"text": "test-ok"}]
+						},
+						"finishReason": "STOP"
+					}],
+					"usageMetadata": {
+						"promptTokenCount": 7,
+						"candidatesTokenCount": 7,
+						"totalTokenCount": 14
+					}
+				}`
+
+	resp := &http.Response{
+		StatusCode: http.StatusOK, Request: req,
+		Body:   io.NopCloser(bytes.NewBufferString(content)),
+		Header: http.Header{},
+	}
+	resp.Header.Set("Content-Type", "application/json")
+	return resp, nil
 }
