@@ -54,6 +54,7 @@ func WithTextField(str string) Option {
 }
 
 // WithMetaField sets te name of the meta field in the collection schema.
+// default is 'meta'.
 func WithMetaField(str string) Option {
 	return func(s *Store) {
 		s.metaField = str
