@@ -18,17 +18,14 @@ type logJSONTransport struct {
 }
 
 func (t *logJSONTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	var requestBodyBuffer bytes.Buffer
-	if req.Body != nil {
-		requestBody, err := io.ReadAll(req.Body)
-		if err != nil {
-			return nil, err
-		}
-		requestBodyBuffer.Write(requestBody)
-		req.Body = io.NopCloser(bytes.NewBuffer(requestBody))
+	requestBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
 	}
+	req.Body = io.NopCloser(bytes.NewBuffer(requestBody))
+
 	var requestBodyJSON bytes.Buffer
-	if err := json.Indent(&requestBodyJSON, requestBodyBuffer.Bytes(), "", "  "); err != nil {
+	if err := json.Indent(&requestBodyJSON, requestBody, "", " "); err != nil {
 		return nil, err
 	}
 	color.Blue(requestBodyJSON.String()) //nolint:forbidigo
@@ -38,17 +35,14 @@ func (t *logJSONTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 		return nil, err
 	}
 
-	var responseBodyBuffer bytes.Buffer
-	if resp.Body != nil {
-		responseBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		responseBodyBuffer.Write(responseBody)
-		resp.Body = io.NopCloser(bytes.NewBuffer(responseBody))
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
+	resp.Body = io.NopCloser(bytes.NewBuffer(responseBody))
+
 	var responseBodyJSON bytes.Buffer
-	if err := json.Indent(&responseBodyJSON, responseBodyBuffer.Bytes(), "", "  "); err != nil {
+	if err := json.Indent(&responseBodyJSON, responseBody, "", " "); err != nil {
 		return nil, err
 	}
 	color.Green(responseBodyJSON.String()) //nolint:forbidigo
