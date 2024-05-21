@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/url"
 	"log" 
-        "errors"
-        "fmt"
+    "errors"
+    "fmt"
+	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
     client "github.com/vearch/vearch/v3/sdk/go/vearch"
     "github.com/vearch/vearch/v3/sdk/go/vearch/auth"
-    "github.com/google/uuid"
     "github.com/vearch/vearch/v3/sdk/go/vearch/entities/models"
     "github.com/vearch/vearch/v3/sdk/go/vearch/data"
 )
@@ -20,12 +20,11 @@ type Store struct {
 	DbName     string
 	SpaceName  string
 	ClusterUrl url.URL
-	contentKey     string
 	embedder   embeddings.Embedder
 	
 }
 
-//var _ vectorstores.VectorStore = Store{}
+var _ vectorstores.VectorStore = Store{}
 
 func setupClient(url string) *client.Client {
 	host :=  url// router url
@@ -55,14 +54,17 @@ func (s Store) AddDocuments(
 	options ...vectorstores.Option,
 ) ([]string, error) {
     
-    fmt.Println(s.ClusterUrl.String(),s.DbName,s.SpaceName)
     c := setupClient(s.ClusterUrl.String())
-    
-    vectors := [][]float32{
-		{1.3, 2.4, 1, 4, 5, 6, 7, 78},
-		{9, 2, 436, 768, 8, 4, 3, 2},
-		{2, 3, 5, 6, 3, 6758, 85, 85},
+	texts := make([]string, 0, len(docs))
+	for _, doc := range docs {
+		texts = append(texts, doc.PageContent)
 	}
+    vectors,
+		err := s.embedder.EmbedDocuments(ctx, texts)
+	if err != nil {
+		return nil, err
+	}
+
     if len(vectors) != len(docs) {
 		return nil, errors.New("number of vectors from embedder does not match number of documents")
 	}
@@ -83,11 +85,9 @@ func (s Store) AddDocuments(
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Println(resp.Docs.Data.Total,resp.Docs.Data.DocumentIds)
     doc_ids := make([]string, 0, resp.Docs.Data.Total)
     if resp.Docs.Code == 0{
         for _,id :=range resp.Docs.Data.DocumentIds{
-            
           doc_ids =append(doc_ids,id.ID)
        }
     }
@@ -104,18 +104,12 @@ func (s *Store) SimilaritySearch(
     opts := s.getOptions(options...)
     filters_input := s.getFilters(opts)
     c := setupClient(s.ClusterUrl.String())
-    
-    vectors := []models.Vector{
-		{
-			Field:   "vec",
-			Feature: []float32{0.019698013985649, 0.084701814, 0.059094287, 0.015758477, 0.0137886675, 0.027577335, 0.037426382, 0.07682258},
-		},
+
+	vector,
+		err := s.embedder.EmbedQuery(ctx, query)
+	if err != nil {
+		return nil, err
 	}
-	// vector,
-	// 	err := s.embedder.EmbedQuery(ctx, query)
-	// if err != nil {
-	// 	return nil, err
-	// }
     
     var resp *data.SearchWrapper
     var err error
@@ -124,10 +118,7 @@ func (s *Store) SimilaritySearch(
         for operator, conditions := range filters_input.(map[string]interface{}){
             filters.Operator = operator
             for _, condMap := range conditions.([]map[string]interface{}) {
-                fmt.Println("^^condMap^^^",condMap)
-                fmt.Println("^^condp^^^",condMap["condition"])
                 conditionInterface, ok := condMap["condition"].(map[string]interface{})
-                fmt.Println("^^inter^^^",conditionInterface)
                 if !ok {
                     fmt.Println("Expected condMap['condition'] to be a map[string]interface{}")
                     continue
@@ -137,10 +128,8 @@ func (s *Store) SimilaritySearch(
                     Operator: conditionInterface["Operator"].(string),
                     Value:    conditionInterface["Value"],
                         }
-                fmt.Println("^^^^^",condition)
                 filters.Conditions = append(filters.Conditions, condition)
             }
-        fmt.Println("(((\n",filters)
         }
         
         resp, err = c.Data().Searcher().WithDBName(s.DbName).WithSpaceName(s.SpaceName).WithLimit(numDocuments).WithVectors(vectors).WithFilters(filters).Do(ctx)
