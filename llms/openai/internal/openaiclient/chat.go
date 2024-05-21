@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -283,6 +282,7 @@ type StreamedChatResponsePayload struct {
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
+	Error error `json:"-"` // use for error handling only
 }
 
 // FunctionDefinition is a definition of a function that can be called by the model.
@@ -375,22 +375,24 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if line == "" {
 				continue
 			}
-			if !strings.HasPrefix(line, "data:") {
-				log.Fatalf("unexpected line: %v", line)
-			}
-			data := strings.TrimPrefix(line, "data: ")
+
+			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
+			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
 				return
 			}
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				log.Fatalf("failed to decode stream payload: %v", err)
+				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
+				responseChan <- streamPayload
+				return
 			}
 			responseChan <- streamPayload
 		}
 		if err := scanner.Err(); err != nil {
-			log.Println("issue scanning response:", err)
+			responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}
+			return
 		}
 	}()
 	// Combine response
@@ -405,6 +407,10 @@ func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, res
 	}
 
 	for streamResponse := range responseChan {
+		if streamResponse.Error != nil {
+			return nil, streamResponse.Error
+		}
+
 		if len(streamResponse.Choices) == 0 {
 			continue
 		}
