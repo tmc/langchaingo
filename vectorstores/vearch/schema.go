@@ -20,9 +20,9 @@ type searchResponse struct {
 }
 
 type searchBody struct {
-	Vector         []float32 `json:"vector"`
-	Filter         any       `json:"filter"`
-	Limit          int       `json:"limit"`
-	WithVector     bool      `json:"with_vector"`
-	WithPayload    bool      `json:"with_payload"`
+	Vector      []float32 `json:"vector"`
+	Filter      any       `json:"filter"`
+	Limit       int       `json:"limit"`
+	WithVector  bool      `json:"with_vector"`
+	WithPayload bool      `json:"with_payload"`
 }

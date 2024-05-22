@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+
 	"github.com/tmc/langchaingo/embeddings"
 )
 
@@ -39,7 +40,6 @@ func WithSpaceName(name string) Option {
 	}
 }
 
-
 // WithURL returns an Option for setting the Vearch cluster URL. Required.
 func WithURL(clusterUrl url.URL) Option {
 	return func(store *Store) {
@@ -49,7 +49,7 @@ func WithURL(clusterUrl url.URL) Option {
 
 func applyClientOptions(opts ...Option) (Store, error) {
 
-        store := &Store{
+	store := &Store{
 		contentKey: DefaultContentKey,
 	}
 	for _, opt := range opts {

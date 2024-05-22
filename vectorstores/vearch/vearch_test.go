@@ -2,6 +2,7 @@ package vearch_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,12 +12,12 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/vearch"
 )
 
-
 func TestVearchStoreRest(t *testing.T) {
 	t.Parallel()
-
-	apiKey, host := getValues(t)
-
+	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
+	if openaiAPIKey == "" {
+		t.Skip("Must set OPENAI_API_KEY to run test")
+	}
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
