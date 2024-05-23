@@ -6,5 +6,8 @@ import "context"
 type Tool interface {
 	Name() string
 	Description() string
-	Call(ctx context.Context, input string) (string, error)
+	Call(ctx context.Context, input map[string]any) (string, error)
+
+	// Schema returns the schema for the tool.
+	Schema() map[string]any
 }
