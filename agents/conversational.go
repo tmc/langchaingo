@@ -63,6 +63,7 @@ func (a *ConversationalAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
@@ -80,12 +81,14 @@ func (a *ConversationalAgent) Plan(
 		}
 	}
 
+	options = append(options, chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}))
+	options = append(options, chains.WithStreamingFunc(stream))
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
-		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
-		chains.WithStreamingFunc(stream),
+		options...,
 	)
 	if err != nil {
 		return nil, nil, err
