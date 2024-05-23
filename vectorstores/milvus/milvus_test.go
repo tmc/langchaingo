@@ -42,7 +42,6 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	if ollamaURL == "" {
 		t.Skip("OLLAMA_HOST not set")
 	}
-	
 	_, e := getEmbedding("gemma:2b")
 
 	url := os.Getenv("MILVUS_URL")
