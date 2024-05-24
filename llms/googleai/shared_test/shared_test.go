@@ -50,13 +50,18 @@ func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	if location == "" {
 		location = "us-central1"
 	}
-	credentials := os.Getenv("VERTEX_CREDENTIALS")
 
 	opts = append(opts,
 		googleai.WithCloudProject(project),
 		googleai.WithCloudLocation(location),
-		googleai.WithCredentialsFile(credentials),
 	)
+
+	// If credentials are set, use them.
+	credentials := os.Getenv("VERTEX_CREDENTIALS")
+	if credentials != "" {
+		opts = append(opts, googleai.WithCredentialsFile(credentials))
+	}
+
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
