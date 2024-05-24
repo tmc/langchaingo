@@ -8,6 +8,7 @@ import (
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
@@ -80,7 +81,7 @@ func TestMilvusConnection(t *testing.T) {
 	storer, err := getNewStore(t, WithDropOld())
 	require.NoError(t, err)
 
-	_, err = storer.AddDocuments(context.Background(), []schema.Document{
+	ids, err := storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -92,6 +93,7 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "London "},
 		{PageContent: "New York"},
 	})
+	assert.Len(t, ids, 10)
 	require.NoError(t, err)
 	// test with a score threshold of 0.8, expected 6 documents
 	japanRes, err := storer.SimilaritySearch(context.Background(),

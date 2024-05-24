@@ -219,12 +219,23 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	textCol := entity.NewColumnVarChar(s.textField, texts)
 	metaCol := entity.NewColumnVarChar(s.metaField, metadatas)
 	vectorCol := entity.NewColumnFloatVector(s.vectorField, len(vectors[0]), vectors)
-	_, err = s.client.Insert(ctx, s.collectionName, s.partitionName, vectorCol, metaCol, textCol)
+	column, err := s.client.Insert(ctx, s.collectionName, s.partitionName, vectorCol, metaCol, textCol)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	col, ok := column.(*entity.ColumnInt64)
+	if !ok {
+		return nil, fmt.Errorf("%w: invalid id column", ErrColumnNotFound)
+	}
+
+	data := col.Data()
+	ids := make([]string, 0, len(data))
+	for _, v := range data {
+		ids = append(ids, strconv.FormatInt(v, 10))
+	}
+
+	return ids, nil
 }
 
 func (s *Store) getSearchFields() []string {
