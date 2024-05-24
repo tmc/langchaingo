@@ -11,6 +11,8 @@ The outputparser package includes the following parsers:
   - Combining: a parser that combines the output of multiple parsers into a single parser.
   - CommaSeparatedList: a parser that takes a string with comma-separated values
     and returns them as a string slice.
+  - Defined: a parser that takes a struct with fields (tagged with the 'describe:' key).
+    It returns a struct of the same type it accepted, however this time with the field values.
   - RegexParser: a parser that takes a string, compiles it into a regular expression,
     and returns map[string]string of the regex groups.
   - RegexDict: a parser that searches a string for values in a dictionary format,
