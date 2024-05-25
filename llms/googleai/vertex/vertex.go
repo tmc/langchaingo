@@ -61,7 +61,7 @@ func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
 	model.SetTemperature(float32(opts.Temperature))
 	model.SetTopP(float32(opts.TopP))
-	model.SetTopK(float32(opts.TopK))
+	model.SetTopK(int32(opts.TopK))
 	model.StopSequences = opts.StopWords
 	model.SafetySettings = []*genai.SafetySetting{
 		{
