@@ -6,6 +6,7 @@ import (
 )
 
 func TestDefinedNonStruct(t *testing.T) {
+	t.Parallel()
 	var arr []struct{}
 
 	if _, err := NewDefined(arr); err == nil {
@@ -14,6 +15,7 @@ func TestDefinedNonStruct(t *testing.T) {
 }
 
 func TestDefinedInvalidStructs(t *testing.T) {
+	t.Parallel()
 	tests := map[string]any{
 		"empty struct":       struct{}{},
 		"no fields with tag": struct{ Field string }{},
@@ -26,6 +28,7 @@ func TestDefinedInvalidStructs(t *testing.T) {
 }
 
 func TestDefined(t *testing.T) {
+	t.Parallel()
 	type Shape struct {
 		Name     string `json:"shapeName" describe:"shape name"`
 		NumSides int    `json:"numSides" describe:"number of sides"`
@@ -99,6 +102,7 @@ interface Foods {
 }
 
 func TestDefinedParse(t *testing.T) {
+	t.Parallel()
 	var book struct {
 		Chapters []struct {
 			Title string `json:"title" describe:"chapter title"`

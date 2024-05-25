@@ -41,7 +41,7 @@ func NewDefined[T any](source T) (Defined[T], error) {
 	}
 
 	var result bytes.Buffer
-	switch sourceType.Kind() {
+	switch sourceType.Kind() { // nolint:exhaustive
 	case reflect.Struct:
 		data, err := marshalStruct(sourceType, "_Root")
 		if err != nil {
@@ -72,12 +72,12 @@ func (p Defined[T]) Parse(text string) (T, error) {
 	}
 	parseableJSON := text[len(opening) : len(text)-len(closing)]
 	if err := json.Unmarshal([]byte(parseableJSON), &target); err != nil {
-		return target, fmt.Errorf("could not parse generated JSON: %v", err)
+		return target, fmt.Errorf("could not parse generated JSON: %w", err)
 	}
 	return target, nil
 }
 
-// ParseWithPrompt is equivalent to Parse
+// ParseWithPrompt is equivalent to Parse.
 func (p Defined[T]) ParseWithPrompt(text string, _ llms.PromptValue) (T, error) {
 	return p.Parse(text)
 }
@@ -86,12 +86,14 @@ func (p Defined[T]) Type() string {
 	return "defined_parser"
 }
 
-func marshalStruct(vType reflect.Type, name string) ([]byte, error) {
+const numStructs = 8 // ~5 struct-interfaces per schema in a medium-complexity case
+
+func marshalStruct(vType reflect.Type, name string) ([]byte, error) { // nolint:funlen,cyclop
 	var b bytes.Buffer
 	b.WriteString("interface ")
 	b.WriteString(name)
 	b.WriteString(" {\n")
-	moreStructs := make([][]byte, 0, 5)
+	moreStructs := make([][]byte, 0, numStructs)
 	for i := 0; i < vType.NumField(); i++ {
 		field := vType.Field(i)
 		b.WriteString("\t")
@@ -105,7 +107,7 @@ func marshalStruct(vType reflect.Type, name string) ([]byte, error) {
 		if typeName == "" {
 			typeName = field.Name
 		}
-		switch field.Type.Kind() {
+		switch field.Type.Kind() { // nolint:exhaustive
 		case reflect.Struct:
 			marshaled, err := marshalStruct(field.Type, typeName)
 			if err != nil {
@@ -115,7 +117,7 @@ func marshalStruct(vType reflect.Type, name string) ([]byte, error) {
 			b.WriteString(typeName)
 		case reflect.Array, reflect.Slice:
 			elemType := field.Type.Elem()
-			switch elemType.Kind() {
+			switch elemType.Kind() { // nolint:exhaustive
 			case reflect.Struct:
 				marshaled, err := marshalStruct(elemType, typeName)
 				if err != nil {
