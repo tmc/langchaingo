@@ -152,6 +152,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 	for i, c := range result.Choices {
+		llmMessage, err := messageFromMessage(c.Message)
+		if err != nil {
+			return nil, err
+		}
 		choices[i] = &llms.ContentChoice{
 			Content:    c.Message.Content,
 			StopReason: fmt.Sprint(c.FinishReason),
@@ -161,6 +165,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"TotalTokens":      result.Usage.TotalTokens,
 				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
 			},
+			ChatMessage: llmMessage,
 		}
 
 		// Legacy function call handling
@@ -170,19 +175,21 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
-		for _, tool := range c.Message.ToolCalls {
-			choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
-				ID:   tool.ID,
-				Type: string(tool.Type),
-				FunctionCall: &llms.FunctionCall{
-					Name:      tool.Function.Name,
-					Arguments: tool.Function.Arguments,
-				},
-			})
-		}
-		// populate legacy single-function call field for backwards compatibility
-		if len(choices[i].ToolCalls) > 0 {
-			choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
+		if c.FinishReason == "tool_calls" {
+			for _, tool := range c.Message.ToolCalls {
+				choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
+					ID:   tool.ID,
+					Type: string(tool.Type),
+					FunctionCall: &llms.FunctionCall{
+						Name:      tool.Function.Name,
+						Arguments: tool.Function.Arguments,
+					},
+				})
+			}
+			// populate legacy single-function call field for backwards compatibility
+			if len(choices[i].ToolCalls) > 0 {
+				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
+			}
 		}
 	}
 	response := &llms.ContentResponse{Choices: choices}
@@ -246,6 +253,31 @@ func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
 		return openaiclient.Tool{}, fmt.Errorf("tool type %v not supported", t.Type)
 	}
 	return tool, nil
+}
+
+// messageFromMessage converts a openAI ChatMessage to llms.ChatMessage to pass in next iteration for agentic flow.
+func messageFromMessage(c ChatMessage) (llms.ChatMessage, error) {
+	//TODO need to support only returned assistant tool_calls message for now
+	switch c.Role {
+	case "assistant":
+		var llmToolCalls []llms.ToolCall
+		for _, toolCall := range c.ToolCalls {
+			llmToolCalls = append(llmToolCalls, llms.ToolCall{
+				ID:   toolCall.ID,
+				Type: string(toolCall.Type),
+				FunctionCall: &llms.FunctionCall{
+					Name:      toolCall.Function.Name,
+					Arguments: toolCall.Function.Arguments,
+				},
+			})
+		}
+		return llms.AIChatMessage{
+			Content:   c.Content,
+			ToolCalls: llmToolCalls,
+		}, nil
+	default:
+		return nil, fmt.Errorf("message role %v not supported", c.Role)
+	}
 }
 
 // toolCallsFromToolCalls converts a slice of llms.ToolCall to a slice of ToolCall.

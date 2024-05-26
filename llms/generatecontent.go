@@ -143,6 +143,9 @@ type ContentChoice struct {
 
 	// ToolCalls is a list of tool calls the model asks to invoke.
 	ToolCalls []ToolCall
+
+	// ChatMessage is a tool_calls message from llm that needs to be sent in next agent executor iteration for llm context
+	ChatMessage ChatMessage
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
