@@ -199,7 +199,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(intermediateMessages []llms.C
 			for _, step := range steps {
 				toolCallID := step.Action.ToolID
 				if ok := toolIDSet[toolCallID]; !ok {
-					//don't add tool messages that were not there in previous function call
+					// don't add tool messages that were not there in previous function call
 					continue
 				}
 				messages = append(messages, llms.ToolChatMessage{
@@ -217,7 +217,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error,
 ) {
 	var agentActions []schema.AgentAction
-	var intermediateMessages []llms.ChatMessage
+	var intermediateMessages = make([]llms.ChatMessage, 0)
 	for _, choice := range contentResp.Choices {
 		// finish
 		if len(choice.ToolCalls) == 0 {
