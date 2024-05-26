@@ -66,17 +66,39 @@ func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
 	return res
 }
 
+func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
+	res := make([]llms.Tool, 0)
+	for _, tool := range o.Tools {
+		res = append(res, llms.Tool{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        tool.Name(),
+				Description: tool.Description(),
+				Parameters: map[string]any{
+					"properties": map[string]any{
+						"__arg1": map[string]string{"title": "__arg1", "type": "string"},
+					},
+					"required": []string{"__arg1"},
+					"type":     "object",
+				},
+			},
+		})
+	}
+	return res
+}
+
 // Plan decides what action to take or returns the final result of the input.
 func (o *OpenAIFunctionsAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
-) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	intermediateMessages []llms.ChatMessage,
+) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
 		fullInputs[key] = value
 	}
-	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateSteps)
+	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateMessages, intermediateSteps)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -89,7 +111,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 
 	prompt, err := o.Prompt.FormatPrompt(fullInputs)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	mcList := make([]llms.MessageContent, len(prompt.Messages()))
@@ -112,14 +134,17 @@ func (o *OpenAIFunctionsAgent) Plan(
 		case llms.AIChatMessage:
 			mc = llms.MessageContent{
 				Role: role,
-				Parts: []llms.ContentPart{
-					llms.ToolCall{
-						ID:           p.ToolCalls[0].ID,
-						Type:         p.ToolCalls[0].Type,
-						FunctionCall: p.ToolCalls[0].FunctionCall,
-					},
-				},
 			}
+			var contentParts []llms.ContentPart
+			for _, toolCall := range p.ToolCalls {
+				contentParts = append(contentParts, llms.ToolCall{
+					ID:           toolCall.ID,
+					Type:         toolCall.Type,
+					FunctionCall: toolCall.FunctionCall,
+				})
+			}
+			mc.Parts = contentParts
+
 		default:
 			mc = llms.MessageContent{
 				Role:  role,
@@ -130,9 +155,9 @@ func (o *OpenAIFunctionsAgent) Plan(
 	}
 
 	result, err := o.LLM.GenerateContent(ctx, mcList,
-		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
+		llms.WithTools(o.tools()), llms.WithStreamingFunc(stream))
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	return o.ParseOutput(result)
@@ -173,66 +198,82 @@ func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	return tmpl
 }
 
-func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []llms.ChatMessage {
+func (o *OpenAIFunctionsAgent) constructScratchPad(intermediateMessages []llms.ChatMessage, steps []schema.AgentStep) []llms.ChatMessage {
 	if len(steps) == 0 {
 		return nil
 	}
 
 	messages := make([]llms.ChatMessage, 0)
-	for _, step := range steps {
-		messages = append(messages, llms.FunctionChatMessage{
-			Name:    step.Action.Tool,
-			Content: step.Observation,
-		})
+
+	var toolCalls []llms.ToolCall
+	for _, message := range intermediateMessages {
+		toolIDSet := make(map[string]bool)
+		for _, toolCall := range message.(llms.AIChatMessage).ToolCalls {
+			toolIDSet[toolCall.ID] = true
+			toolCalls = append(toolCalls, toolCall)
+		}
+		messages = append(messages, message)
+
+		for _, step := range steps {
+			toolCallID := step.Action.ToolID
+			if ok := toolIDSet[toolCallID]; !ok {
+				//don't add tool messages that were not there in previous function call
+				continue
+			}
+			messages = append(messages, llms.ToolChatMessage{
+				ID:      toolCallID,
+				Content: step.Observation,
+			})
+		}
 	}
 
 	return messages
 }
 
 func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
-	[]schema.AgentAction, *schema.AgentFinish, error,
+	[]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error,
 ) {
-	choice := contentResp.Choices[0]
-
-	// finish
-	if choice.FuncCall == nil {
-		return nil, &schema.AgentFinish{
-			ReturnValues: map[string]any{
-				"output": choice.Content,
-			},
-			Log: choice.Content,
-		}, nil
-	}
-
-	// action
-	functionCall := choice.FuncCall
-	functionName := functionCall.Name
-	toolInputStr := functionCall.Arguments
-	toolInputMap := make(map[string]any, 0)
-	err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	toolInput := toolInputStr
-	if arg1, ok := toolInputMap["__arg1"]; ok {
-		toolInputCheck, ok := arg1.(string)
-		if ok {
-			toolInput = toolInputCheck
+	var agentActions []schema.AgentAction
+	var intermediateMessages []llms.ChatMessage
+	for _, choice := range contentResp.Choices {
+		// finish
+		if len(choice.ToolCalls) == 0 {
+			return nil, &schema.AgentFinish{
+				ReturnValues: map[string]any{
+					"output": choice.Content,
+				},
+				Log: choice.Content,
+			}, nil, nil
 		}
+		for _, toolCall := range choice.ToolCalls {
+			functionName := toolCall.FunctionCall.Name
+			toolInputMap := make(map[string]any)
+			toolInputStr := toolCall.FunctionCall.Arguments
+			err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+
+			toolInput := toolInputStr
+			if arg1, ok := toolInputMap["__arg1"]; ok {
+				toolInputCheck, ok := arg1.(string)
+				if ok {
+					toolInput = toolInputCheck
+				}
+			}
+			contentMsg := "\n"
+			if choice.Content != "" {
+				contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+			}
+			agentActions = append(agentActions, schema.AgentAction{
+				Tool:      functionName,
+				ToolInput: toolInput,
+				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:    toolCall.ID,
+			})
+		}
+		intermediateMessages = append(intermediateMessages, choice.ChatMessage)
 	}
 
-	contentMsg := "\n"
-	if choice.Content != "" {
-		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
-	}
-
-	return []schema.AgentAction{
-		{
-			Tool:      functionName,
-			ToolInput: toolInput,
-			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-			ToolID:    choice.ToolCalls[0].ID,
-		},
-	}, nil, nil
+	return agentActions, nil, intermediateMessages, nil
 }

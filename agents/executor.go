@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tmc/langchaingo/llms"
 	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -55,9 +56,10 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...ch
 	nameToTool := getNameToTool(e.Agent.GetTools())
 
 	steps := make([]schema.AgentStep, 0)
+	var intermediateMessages []llms.ChatMessage
 	for i := 0; i < e.MaxIterations; i++ {
 		var finish map[string]any
-		steps, finish, err = e.doIteration(ctx, steps, nameToTool, inputs)
+		steps, finish, intermediateMessages, err = e.doIteration(ctx, steps, nameToTool, inputs, intermediateMessages)
 		if finish != nil || err != nil {
 			return finish, err
 		}
@@ -79,8 +81,12 @@ func (e *Executor) doIteration( // nolint
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
 	inputs map[string]string,
-) ([]schema.AgentStep, map[string]any, error) {
-	actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
+	intermediateMessages []llms.ChatMessage,
+) ([]schema.AgentStep, map[string]any, []llms.ChatMessage, error) {
+	actions, finish, newIntermediateMessages, err := e.Agent.Plan(ctx, steps, inputs, intermediateMessages)
+	if len(intermediateMessages) > 0 || len(newIntermediateMessages) > 0 {
+		intermediateMessages = append(intermediateMessages, newIntermediateMessages...)
+	}
 	if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
 		formattedObservation := err.Error()
 		if e.ErrorHandler.Formatter != nil {
@@ -89,31 +95,31 @@ func (e *Executor) doIteration( // nolint
 		steps = append(steps, schema.AgentStep{
 			Observation: formattedObservation,
 		})
-		return steps, nil, nil
+		return steps, nil, intermediateMessages, nil
 	}
 	if err != nil {
-		return steps, nil, err
+		return steps, nil, intermediateMessages, err
 	}
 
 	if len(actions) == 0 && finish == nil {
-		return steps, nil, ErrAgentNoReturn
+		return steps, nil, intermediateMessages, ErrAgentNoReturn
 	}
 
 	if finish != nil {
 		if e.CallbacksHandler != nil {
 			e.CallbacksHandler.HandleAgentFinish(ctx, *finish)
 		}
-		return steps, e.getReturn(finish, steps), nil
+		return steps, e.getReturn(finish, steps), intermediateMessages, nil
 	}
 
 	for _, action := range actions {
 		steps, err = e.doAction(ctx, steps, nameToTool, action)
 		if err != nil {
-			return steps, nil, err
+			return steps, nil, intermediateMessages, err
 		}
 	}
 
-	return steps, nil, nil
+	return steps, nil, intermediateMessages, nil
 }
 
 func (e *Executor) doAction(

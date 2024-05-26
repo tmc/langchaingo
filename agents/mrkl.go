@@ -64,7 +64,8 @@ func (a *OneShotZeroAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
-) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	intermediateMessages []llms.ChatMessage,
+) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
 		fullInputs[key] = value
@@ -90,7 +91,7 @@ func (a *OneShotZeroAgent) Plan(
 		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	return a.parseOutput(output)
@@ -119,7 +120,7 @@ func (a *OneShotZeroAgent) GetTools() []tools.Tool {
 	return a.Tools
 }
 
-func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
+func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	if strings.Contains(output, _finalAnswerAction) {
 		splits := strings.Split(output, _finalAnswerAction)
 
@@ -128,16 +129,16 @@ func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *sc
 				a.OutputKey: splits[len(splits)-1],
 			},
 			Log: output,
-		}, nil
+		}, nil, nil
 	}
 
 	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s(?s)*(.+)`)
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
-		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
+		return nil, nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
 	}
 
 	return []schema.AgentAction{
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
-	}, nil, nil
+	}, nil, nil, nil
 }
