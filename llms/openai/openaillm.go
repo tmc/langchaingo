@@ -247,7 +247,7 @@ func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
 
 // messageFromMessage converts a openAI ChatMessage to llms.ChatMessage to pass in next iteration for agentic flow.
 func messageFromMessage(c ChatMessage) (llms.ChatMessage, error) {
-	//TODO need to support only returned assistant tool_calls message for now
+	// TODO need to support only returned assistant tool_calls message for now
 	switch c.Role {
 	case "assistant":
 		var llmToolCalls []llms.ToolCall

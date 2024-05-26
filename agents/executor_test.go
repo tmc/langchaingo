@@ -2,6 +2,7 @@ package agents_test
 
 import (
 	"context"
+	"github.com/tmc/langchaingo/llms"
 	"os"
 	"strings"
 	"testing"
@@ -31,20 +32,20 @@ type testAgent struct {
 func (a *testAgent) Plan(
 	_ context.Context,
 	intermediateSteps []schema.AgentStep,
-	inputs map[string]string,
-) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	inputs map[string]string, _ []llms.ChatMessage,
+) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	a.recordedIntermediateSteps = intermediateSteps
 	a.recordedInputs = inputs
 	a.numPlanCalls++
 
-	return a.actions, a.finish, a.err
+	return a.actions, a.finish, nil, a.err
 }
 
-func (a testAgent) GetInputKeys() []string {
+func (a *testAgent) GetInputKeys() []string {
 	return a.inputKeys
 }
 
-func (a testAgent) GetOutputKeys() []string {
+func (a *testAgent) GetOutputKeys() []string {
 	return a.outputKeys
 }
 

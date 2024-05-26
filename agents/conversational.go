@@ -63,7 +63,7 @@ func (a *ConversationalAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
-	intermediateMessages []llms.ChatMessage,
+	_ []llms.ChatMessage,
 ) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
