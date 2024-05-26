@@ -2,19 +2,18 @@ package agents_test
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/llms"
-	"os"
-	"strings"
-	"testing"
-
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 	"github.com/tmc/langchaingo/tools/serpapi"
+	"os"
+	"strings"
+	"testing"
 )
 
 type testAgent struct {
