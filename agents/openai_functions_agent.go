@@ -48,24 +48,6 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 	}
 }
 
-func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
-	res := make([]llms.FunctionDefinition, 0)
-	for _, tool := range o.Tools {
-		res = append(res, llms.FunctionDefinition{
-			Name:        tool.Name(),
-			Description: tool.Description(),
-			Parameters: map[string]any{
-				"properties": map[string]any{
-					"__arg1": map[string]string{"title": "__arg1", "type": "string"},
-				},
-				"required": []string{"__arg1"},
-				"type":     "object",
-			},
-		})
-	}
-	return res
-}
-
 func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
 	res := make([]llms.Tool, 0)
 	for _, tool := range o.Tools {
@@ -205,25 +187,26 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(intermediateMessages []llms.C
 
 	messages := make([]llms.ChatMessage, 0)
 
-	var toolCalls []llms.ToolCall
 	for _, message := range intermediateMessages {
 		toolIDSet := make(map[string]bool)
-		for _, toolCall := range message.(llms.AIChatMessage).ToolCalls {
-			toolIDSet[toolCall.ID] = true
-			toolCalls = append(toolCalls, toolCall)
-		}
-		messages = append(messages, message)
-
-		for _, step := range steps {
-			toolCallID := step.Action.ToolID
-			if ok := toolIDSet[toolCallID]; !ok {
-				//don't add tool messages that were not there in previous function call
-				continue
+		aiChatMessage, ok := message.(llms.AIChatMessage)
+		if ok {
+			for _, toolCall := range aiChatMessage.ToolCalls {
+				toolIDSet[toolCall.ID] = true
 			}
-			messages = append(messages, llms.ToolChatMessage{
-				ID:      toolCallID,
-				Content: step.Observation,
-			})
+			messages = append(messages, message)
+
+			for _, step := range steps {
+				toolCallID := step.Action.ToolID
+				if ok := toolIDSet[toolCallID]; !ok {
+					//don't add tool messages that were not there in previous function call
+					continue
+				}
+				messages = append(messages, llms.ToolChatMessage{
+					ID:      toolCallID,
+					Content: step.Observation,
+				})
+			}
 		}
 	}
 
