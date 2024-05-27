@@ -25,14 +25,14 @@ type testAgent struct {
 	outputKeys []string
 
 	recordedIntermediateSteps []schema.AgentStep
-	recordedInputs            map[string]string
+	recordedInputs            map[string]any
 	numPlanCalls              int
 }
 
 func (a *testAgent) Plan(
 	_ context.Context,
 	intermediateSteps []schema.AgentStep,
-	inputs map[string]string, _ []llms.ChatMessage,
+	inputs map[string]any, _ []llms.ChatMessage,
 ) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	a.recordedIntermediateSteps = intermediateSteps
 	a.recordedInputs = inputs

@@ -49,17 +49,18 @@ func NewExecutor(agent Agent, opts ...Option) *Executor {
 }
 
 func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
-	inputs, err := inputsToString(inputValues)
-	if err != nil {
-		return nil, err
-	}
+	// inputs, err := inputsToString(inputValues)
+	// if err != nil {
+	//	return nil, err
+	//}
 	nameToTool := getNameToTool(e.Agent.GetTools())
 
 	steps := make([]schema.AgentStep, 0)
 	var intermediateMessages []llms.ChatMessage
+	var err error
 	for i := 0; i < e.MaxIterations; i++ {
 		var finish map[string]any
-		steps, finish, intermediateMessages, err = e.doIteration(ctx, steps, nameToTool, inputs, intermediateMessages)
+		steps, finish, intermediateMessages, err = e.doIteration(ctx, steps, nameToTool, inputValues, intermediateMessages)
 		if finish != nil || err != nil {
 			return finish, err
 		}
@@ -80,7 +81,7 @@ func (e *Executor) doIteration( // nolint
 	ctx context.Context,
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
-	inputs map[string]string,
+	inputs map[string]any,
 	intermediateMessages []llms.ChatMessage,
 ) ([]schema.AgentStep, map[string]any, []llms.ChatMessage, error) {
 	actions, finish, newIntermediateMessages, err := e.Agent.Plan(ctx, steps, inputs, intermediateMessages)
@@ -178,19 +179,19 @@ func (e *Executor) GetCallbackHandler() callbacks.Handler { //nolint:ireturn
 	return e.CallbacksHandler
 }
 
-func inputsToString(inputValues map[string]any) (map[string]string, error) {
-	inputs := make(map[string]string, len(inputValues))
-	for key, value := range inputValues {
-		valueStr, ok := value.(string)
-		if !ok {
-			return nil, fmt.Errorf("%w: %s", ErrExecutorInputNotString, key)
-		}
-
-		inputs[key] = valueStr
-	}
-
-	return inputs, nil
-}
+// func inputsToString(inputValues map[string]any) (map[string]string, error) {
+//	inputs := make(map[string]string, len(inputValues))
+//	for key, value := range inputValues {
+//		valueStr, ok := value.(string)
+//		if !ok {
+//			return nil, fmt.Errorf("%w: %s", ErrExecutorInputNotString, key)
+//		}
+//
+//		inputs[key] = valueStr
+//	}
+//
+//	return inputs, nil
+//}
 
 func getNameToTool(t []tools.Tool) map[string]tools.Tool {
 	if len(t) == 0 {
