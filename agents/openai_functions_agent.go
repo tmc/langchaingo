@@ -73,7 +73,7 @@ func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
 func (o *OpenAIFunctionsAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
-	inputs map[string]string,
+	inputs map[string]any,
 	intermediateMessages []llms.ChatMessage,
 ) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	fullInputs := make(map[string]any, len(inputs))
@@ -124,6 +124,9 @@ func (o *OpenAIFunctionsAgent) Plan(
 					Type:         toolCall.Type,
 					FunctionCall: toolCall.FunctionCall,
 				})
+			}
+			if len(text) > 0 {
+				contentParts = append(contentParts, llms.TextContent{Text: text})
 			}
 			mc.Parts = contentParts
 
