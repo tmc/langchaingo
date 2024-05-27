@@ -188,24 +188,28 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(intermediateMessages []llms.C
 	messages := make([]llms.ChatMessage, 0)
 
 	for _, message := range intermediateMessages {
-		toolIDSet := make(map[string]bool)
+		var messageToolCalls []llms.ToolCall
 		aiChatMessage, ok := message.(llms.AIChatMessage)
 		if ok {
 			for _, toolCall := range aiChatMessage.ToolCalls {
-				toolIDSet[toolCall.ID] = true
+				messageToolCalls = append(messageToolCalls, toolCall)
 			}
 			messages = append(messages, message)
-
-			for _, step := range steps {
-				toolCallID := step.Action.ToolID
-				if ok := toolIDSet[toolCallID]; !ok {
-					// don't add tool messages that were not there in previous function call
-					continue
+			for _, toolCall := range messageToolCalls {
+				for _, step := range steps {
+					toolCallID := step.Action.ToolID
+					functionName := step.Action.Tool
+					arguments := step.Action.ToolInputOriginalArguments
+					if toolCallID != toolCall.ID || functionName != toolCall.FunctionCall.Name ||
+						arguments != toolCall.FunctionCall.Arguments {
+						// add tool call messages only for previous assistant message
+						continue
+					}
+					messages = append(messages, llms.ToolChatMessage{
+						ID:      toolCallID,
+						Content: step.Observation,
+					})
 				}
-				messages = append(messages, llms.ToolChatMessage{
-					ID:      toolCallID,
-					Content: step.Observation,
-				})
 			}
 		}
 	}
@@ -249,10 +253,11 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 				contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
 			}
 			agentActions = append(agentActions, schema.AgentAction{
-				Tool:      functionName,
-				ToolInput: toolInput,
-				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-				ToolID:    toolCall.ID,
+				Tool:                       functionName,
+				ToolInput:                  toolInput,
+				Log:                        fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:                     toolCall.ID,
+				ToolInputOriginalArguments: toolInputStr,
 			})
 		}
 		intermediateMessages = append(intermediateMessages, choice.ChatMessage)
