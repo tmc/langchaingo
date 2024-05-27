@@ -20,3 +20,9 @@ type AgentFinish struct {
 	ReturnValues map[string]any
 	Log          string
 }
+
+// AgentStepWithError combines AgentStep with Error for concurrent execution.
+type AgentStepWithError struct {
+	AgentStep
+	Error error
+}
