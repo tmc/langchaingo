@@ -191,9 +191,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(intermediateMessages []llms.C
 		var messageToolCalls []llms.ToolCall
 		aiChatMessage, ok := message.(llms.AIChatMessage)
 		if ok {
-			for _, toolCall := range aiChatMessage.ToolCalls {
-				messageToolCalls = append(messageToolCalls, toolCall)
-			}
+			messageToolCalls = append(messageToolCalls, aiChatMessage.ToolCalls...)
 			messages = append(messages, message)
 			for _, toolCall := range messageToolCalls {
 				for _, step := range steps {
