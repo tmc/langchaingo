@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
@@ -216,7 +217,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error,
 ) {
 	var agentActions []schema.AgentAction
-	var intermediateMessages = make([]llms.ChatMessage, 0)
+	intermediateMessages := make([]llms.ChatMessage, 0)
 	for _, choice := range contentResp.Choices {
 		// finish
 		if len(choice.ToolCalls) == 0 {
