@@ -84,7 +84,7 @@ func (e *Executor) doIteration( // nolint
 	intermediateMessages []llms.ChatMessage,
 ) ([]schema.AgentStep, map[string]any, []llms.ChatMessage, error) {
 	actions, finish, newIntermediateMessages, err := e.Agent.Plan(ctx, steps, inputs, intermediateMessages)
-	if len(intermediateMessages) > 0 || len(newIntermediateMessages) > 0 {
+	if len(newIntermediateMessages) > 0 {
 		intermediateMessages = append(intermediateMessages, newIntermediateMessages...)
 	}
 	if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
