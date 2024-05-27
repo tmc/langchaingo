@@ -113,11 +113,16 @@ func (e *Executor) doIteration( // nolint
 		return steps, e.getReturn(finish, steps), intermediateMessages, nil
 	}
 
-	for _, action := range actions {
-		steps, err = e.doAction(ctx, steps, nameToTool, action)
-		if err != nil {
-			return steps, nil, intermediateMessages, err
+	stepStreams := make([]<-chan schema.AgentStepWithError, len(actions))
+	for index, action := range actions {
+		stepStreams[index] = e.doAction(ctx, nameToTool, action)
+	}
+	for _, stepStream := range stepStreams {
+		agentStepWithError := <-stepStream
+		if agentStepWithError.Error != nil {
+			return steps, nil, intermediateMessages, agentStepWithError.Error
 		}
+		steps = append(steps, agentStepWithError.AgentStep)
 	}
 
 	return steps, nil, intermediateMessages, nil
@@ -125,31 +130,45 @@ func (e *Executor) doIteration( // nolint
 
 func (e *Executor) doAction(
 	ctx context.Context,
-	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
 	action schema.AgentAction,
-) ([]schema.AgentStep, error) {
-	if e.CallbacksHandler != nil {
-		e.CallbacksHandler.HandleAgentAction(ctx, action)
-	}
+) <-chan schema.AgentStepWithError {
+	agentStepStream := make(chan schema.AgentStepWithError)
+	go func() {
+		defer close(agentStepStream)
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleAgentAction(ctx, action)
+		}
 
-	tool, ok := nameToTool[strings.ToUpper(action.Tool)]
-	if !ok {
-		return append(steps, schema.AgentStep{
-			Action:      action,
-			Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
-		}), nil
-	}
+		tool, ok := nameToTool[strings.ToUpper(action.Tool)]
+		if !ok {
+			agentStepStream <- schema.AgentStepWithError{
+				AgentStep: schema.AgentStep{
+					Action:      action,
+					Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
+				},
+				Error: nil,
+			}
+			return
+		}
 
-	observation, err := tool.Call(ctx, action.ToolInput)
-	if err != nil {
-		return nil, err
-	}
+		observation, err := tool.Call(ctx, action.ToolInput)
+		if err != nil {
+			agentStepStream <- schema.AgentStepWithError{
+				AgentStep: schema.AgentStep{}, Error: err,
+			}
+			return
+		}
 
-	return append(steps, schema.AgentStep{
-		Action:      action,
-		Observation: observation,
-	}), nil
+		agentStepStream <- schema.AgentStepWithError{
+			AgentStep: schema.AgentStep{
+				Action:      action,
+				Observation: observation,
+			},
+			Error: nil,
+		}
+	}()
+	return agentStepStream
 }
 
 func (e *Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
