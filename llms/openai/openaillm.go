@@ -43,17 +43,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
-// GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
-	}
-
-	opts := llms.CallOptions{}
-	for _, opt := range options {
-		opt(&opts)
-	}
-
+func buildMessagesForRequestFromContent(messages []llms.MessageContent) ([]*ChatMessage, error) {
 	chatMsgs := make([]*ChatMessage, 0, len(messages))
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
@@ -94,6 +84,24 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		msg.ToolCalls = toolCallsFromToolCalls(toolCalls)
 
 		chatMsgs = append(chatMsgs, msg)
+	}
+	return chatMsgs, nil
+}
+
+// GenerateContent implements the Model interface.
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	chatMsgs, err := buildMessagesForRequestFromContent(messages)
+	if err != nil {
+		return nil, err
 	}
 	req := &openaiclient.ChatRequest{
 		Model:            opts.Model,
