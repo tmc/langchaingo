@@ -97,9 +97,9 @@ func (bc BinaryContent) String() string {
 func (bc BinaryContent) MarshalJSON() ([]byte, error) {
 	m := map[string]any{
 		"type": "binary",
-		"binary": map[string]string{
+		"binary": map[string]any{
 			"mime_type": bc.MIMEType,
-			"data":      base64.StdEncoding.EncodeToString(bc.Data),
+			"data":      bc.Data,
 		},
 	}
 	return json.Marshal(m)
@@ -125,6 +125,23 @@ type ToolCall struct {
 
 func (ToolCall) isPart() {}
 
+func (bc ToolCall) MarshalJSON() ([]byte, error) {
+	fc, err := json.Marshal(bc.FunctionCall)
+	if err != nil {
+		return nil, err
+	}
+
+	m := map[string]any{
+		"type": "tool_call",
+		"tool_call": map[string]any{
+			"id":   bc.ID,
+			"type": bc.Type,
+			"fc":   json.RawMessage(fc),
+		},
+	}
+	return json.Marshal(m)
+}
+
 // ToolCallResponse is the response returned by a tool call.
 type ToolCallResponse struct {
 	// ToolCallID is the ID of the tool call this response is for.
@@ -133,6 +150,18 @@ type ToolCallResponse struct {
 	Name string `json:"name"`
 	// Content is the textual content of the response.
 	Content string `json:"content"`
+}
+
+func (tc ToolCallResponse) MarshalJSON() ([]byte, error) {
+	m := map[string]any{
+		"type": "tool_response",
+		"tool_response": map[string]string{
+			"tool_call_id": tc.ToolCallID,
+			"name":         tc.Name,
+			"content":      tc.Content,
+		},
+	}
+	return json.Marshal(m)
 }
 
 func (ToolCallResponse) isPart() {}
@@ -200,4 +229,61 @@ func ShowMessageContents(w io.Writer, msgs []MessageContent) {
 			}
 		}
 	}
+}
+
+// UnmarshalJSON for MessageContent.
+func (mc *MessageContent) UnmarshalJSON(data []byte) error {
+	var m struct {
+		Role  ChatMessageType `json:"role"`
+		Parts []struct {
+			Type     string `json:"type"`
+			Text     string `json:"text"`
+			ImageURL struct {
+				URL string `json:"url"`
+			} `json:"image_url"`
+			Binary struct {
+				MIMEType string `json:"mime_type"`
+				Data     []byte `json:"data"`
+			} `json:"binary"`
+			ToolCall struct {
+				ID       string        `json:"id"`
+				Type     string        `json:"type"`
+				FuncCall *FunctionCall `json:"fc"`
+			} `json:"tool_call"`
+			ToolResp json.RawMessage `json:"tool_response"`
+		} `json:"parts"`
+	}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+
+	mc.Role = m.Role
+	mc.Parts = make([]ContentPart, len(m.Parts))
+
+	for i, p := range m.Parts {
+		switch p.Type {
+		case "text":
+			mc.Parts[i] = TextContent{Text: p.Text}
+		case "image_url":
+			mc.Parts[i] = ImageURLContent{URL: p.ImageURL.URL}
+		case "binary":
+			mc.Parts[i] = BinaryPart(p.Binary.MIMEType, p.Binary.Data)
+		case "tool_call":
+			mc.Parts[i] = ToolCall{
+				ID:           p.ToolCall.ID,
+				Type:         p.ToolCall.Type,
+				FunctionCall: p.ToolCall.FuncCall,
+			}
+		case "tool_response":
+			var tr ToolCallResponse
+			if err := json.Unmarshal(p.ToolResp, &tr); err != nil {
+				return err
+			}
+			mc.Parts[i] = tr
+		default:
+			return fmt.Errorf("unknown part type: %s", p.Type)
+		}
+	}
+
+	return nil
 }
