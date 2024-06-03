@@ -34,9 +34,6 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	// set of options needed for Azure client
 	if openaiclient.IsAzure(openaiclient.APIType(options.apiType)) && options.apiVersion == "" {
 		options.apiVersion = DefaultAPIVersion
-		if options.embeddingModel == "" {
-			return options, nil, ErrMissingAzureEmbeddingModel
-		}
 	}
 
 	if len(options.token) == 0 {

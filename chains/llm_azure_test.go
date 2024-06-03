@@ -26,8 +26,6 @@ func TestLLMChainAzure(t *testing.T) {
 		openai.WithAPIType(openai.APITypeAzure),
 		// Azure deployment that uses desired model, the name depends on what we define in the Azure deployment section
 		openai.WithModel("model-name"),
-		// Azure deployment that uses embeddings model, the name depends on what we define in the Azure deployment section
-		openai.WithEmbeddingModel("embeddings-model-name"),
 	)
 	require.NoError(t, err)
 
