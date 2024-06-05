@@ -2,7 +2,6 @@ package tencentvectordb
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var (
@@ -36,24 +34,48 @@ const (
 	fieldMetadata = "metadata"
 )
 
+// MetaField is a field in the metadata of a document.
+type MetaField struct {
+	Name        string
+	Description string
+	DataType    string
+	Index       bool
+}
+
+func (m MetaField) getFieldType() tcvectordb.FieldType {
+	switch m.DataType {
+	case "string":
+		return tcvectordb.String
+	case "uint64":
+		return tcvectordb.Uint64
+	case "array":
+		return tcvectordb.Array
+	case "vector":
+		return tcvectordb.Vector
+	default:
+		panic("unsupported data type")
+	}
+}
+
 // Store is a wrapper around the tencentvectordb rest API and grpc client.
 type Store struct {
-	embedder   embeddings.Embedder
-	client     *tcvectordb.Client
-	collection *tcvectordb.Collection
-	userOption *tcvectordb.ClientOption
-	url        string
-	apiKey     string
-	userName   string
+	embedder    embeddings.Embedder
+	database    *tcvectordb.Database
+	collections map[string]*tcvectordb.Collection
+	userOption  *tcvectordb.ClientOption
+	url         string
+	apiKey      string
+	userName    string
 
-	database              string
+	databaseName          string
 	collectionName        string
 	shardNum, replicasNum uint32
-	dimension             int
+	dimension             uint32
 	indexType             string
 	metricType            string
 	collectionDescription string
-	vdbEmbedding          string
+	embeddingModel        string
+	metaFields            []MetaField
 }
 
 // New creates a new Store with options. Options for WithAPIKey, WithHost and WithEmbedder must be set.
@@ -62,59 +84,176 @@ func New(opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-
-	s.client, err = tcvectordb.NewClient(s.url, s.userName, s.apiKey, s.userOption)
+	client, err := tcvectordb.NewClient(s.url, s.userName, s.apiKey, s.userOption)
 	if err != nil {
 		return Store{}, err
 	}
-	db, err := s.getDatabase(context.Background())
+	s.database, err = s.getDatabase(context.Background(), client)
 	if err != nil {
 		return Store{}, err
 	}
-	s.collection, err = s.getCollection(context.Background(), db)
+	s.collections = make(map[string]*tcvectordb.Collection)
+	s.collections[s.collectionName], err = s.getDbCollection(context.Background(), s.database, s.collectionName)
 	if err != nil {
 		return Store{}, err
 	}
 	return s, nil
 }
+func (s Store) getIndexType() tcvectordb.IndexType {
+	switch s.indexType {
+	case "FLAT":
+		return tcvectordb.FLAT
+	case "HNSW":
+		return tcvectordb.HNSW
+	case "IVF_FLAT":
+		return tcvectordb.IVF_FLAT
+	case "IVF_PQ":
+		return tcvectordb.IVF_PQ
+	case "IVF_SQ4":
+		return tcvectordb.IVF_SQ4
+	case "IVF_SQ8":
+		return tcvectordb.IVF_SQ8
+	case "IVF_SQ16":
+		return tcvectordb.IVF_SQ16
+	default:
+		panic("unsupported index_type")
+	}
+}
+func (s Store) getMetricType() tcvectordb.MetricType {
 
-func (s Store) getDatabase(ctx context.Context) (*tcvectordb.Database, error) {
-	listDatabaseRsp, err := s.client.ListDatabase(ctx)
+	switch s.metricType {
+	case "L2":
+		return tcvectordb.L2
+	case "IP":
+		return tcvectordb.IP
+	case "COSINE":
+		return tcvectordb.COSINE
+	default:
+		panic("unsupported metric_type")
+	}
+}
+func (s Store) getEmbeddingModel() tcvectordb.EmbeddingModel {
+	switch s.embeddingModel {
+	case "M3E_BASE":
+		return tcvectordb.M3E_BASE
+	case "BGE_BASE_ZH":
+		return tcvectordb.BGE_BASE_ZH
+	case "BGE_LARGE_ZH":
+		return tcvectordb.BGE_LARGE_ZH
+	case "MULTILINGUAL_E5_BASE":
+		return tcvectordb.MULTILINGUAL_E5_BASE
+	case "E5_LARGE_V2":
+		return tcvectordb.E5_LARGE_V2
+	case "TEXT2VEC_LARGE_CHINESE":
+		return tcvectordb.TEXT2VEC_LARGE_CHINESE
+	default:
+		panic("unsupported embedding model")
+	}
+}
+func (s Store) getDatabase(ctx context.Context, client *tcvectordb.Client) (*tcvectordb.Database, error) {
+	listDatabaseRsp, err := client.ListDatabase(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list database: %w", err)
 	}
 	for _, db := range listDatabaseRsp.Databases {
-		if db.DatabaseName == s.database {
+		if db.DatabaseName == s.databaseName {
 			return &db, nil
 		}
 	}
 	//create database
-	createdDb, err := s.client.CreateDatabase(ctx, s.database)
+	createdDb, err := client.CreateDatabase(ctx, s.databaseName)
 	if err != nil {
 		return nil, fmt.Errorf("create database: %w", err)
 	}
 	return &createdDb.Database, nil
 }
-func (s Store) getCollection(ctx context.Context, db *tcvectordb.Database) (*tcvectordb.Collection, error) {
+func (s Store) getCollection(ctx context.Context, collectionName string) (*tcvectordb.Collection, error) {
+	if len(collectionName) == 0 {
+		collectionName = s.collectionName
+	}
+	if coll, ok := s.collections[collectionName]; ok {
+		return coll, nil
+	}
+	coll, err := s.getDbCollection(ctx, s.database, collectionName)
+	if err != nil {
+		return nil, err
+	}
+	s.collections[collectionName] = coll
+	return coll, nil
+}
+
+func (s Store) getDbCollection(ctx context.Context, db *tcvectordb.Database, collectionName string) (*tcvectordb.Collection, error) {
 	colls, err := db.ListCollection(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list collection: %w", err)
 
 	}
 	for _, coll := range colls.Collections {
-		if coll.CollectionName == s.collectionName {
+		if coll.CollectionName == collectionName {
 			return coll, nil
 		}
 	}
 	//create collection
-	return s.createCollection(ctx, db)
+	return s.createCollection(ctx, db, collectionName)
 }
-func (s Store) createCollection(ctx context.Context, db *tcvectordb.Database) (*tcvectordb.Collection, error) {
-	//TODO : index
-	index := tcvectordb.Indexes{}
-	ebd := &tcvectordb.Embedding{VectorField: "vector", Field: "text", Model: tcvectordb.BGE_BASE_ZH}
-	//TODO: Embedding
-	return db.CreateCollection(ctx, s.collectionName, s.shardNum, s.replicasNum, s.collectionDescription, index,
+func (s Store) DropCollection(ctx context.Context, collectionName string) error {
+	_, err := s.database.DropCollection(ctx, collectionName)
+	delete(s.collections, collectionName)
+	return err
+}
+
+func (s Store) createCollection(ctx context.Context, db *tcvectordb.Database, collectionName string) (*tcvectordb.Collection, error) {
+	//define index
+	dim := uint32(0)
+	if s.embedder != nil {
+		dim = s.dimension
+	}
+	index := tcvectordb.Indexes{
+		VectorIndex: []tcvectordb.VectorIndex{
+			{
+				FilterIndex: tcvectordb.FilterIndex{
+					FieldName: fieldVector,
+					FieldType: tcvectordb.Vector,
+					IndexType: s.getIndexType(),
+				},
+				Dimension:  dim,
+				MetricType: s.getMetricType(),
+				Params: &tcvectordb.HNSWParam{
+					M:              16,
+					EfConstruction: 200,
+				},
+			},
+		},
+
+		FilterIndex: []tcvectordb.FilterIndex{
+			{
+				FieldName: fieldId,
+				FieldType: tcvectordb.String,
+				IndexType: tcvectordb.PRIMARY,
+			},
+			{
+				FieldName: fieldText,
+				FieldType: tcvectordb.String,
+				IndexType: tcvectordb.FILTER,
+			},
+		},
+	}
+	// Add metadata indexes
+	for _, metaField := range s.metaFields {
+		if metaField.Index {
+			index.FilterIndex = append(index.FilterIndex, tcvectordb.FilterIndex{
+				FieldName: metaField.Name,
+				FieldType: metaField.getFieldType(),
+				IndexType: tcvectordb.FILTER,
+			})
+		}
+	}
+	if s.embedder != nil {
+		return db.CreateCollection(ctx, collectionName, s.shardNum, s.replicasNum, s.collectionDescription, index)
+	}
+	//use vectordb Embedding
+	ebd := &tcvectordb.Embedding{VectorField: fieldVector, Field: fieldText, Model: s.getEmbeddingModel()}
+	return db.CreateCollection(ctx, collectionName, s.shardNum, s.replicasNum, s.collectionDescription, index,
 		&tcvectordb.CreateCollectionParams{
 			Embedding: ebd,
 		})
@@ -127,109 +266,113 @@ func (s Store) AddDocuments(ctx context.Context,
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
-
-	nameSpace := s.getNameSpace(opts)
-
-	indexConn, err := s.client.IndexWithNamespace(s.url, nameSpace)
+	if len(docs) == 0 {
+		return nil, nil
+	}
+	collection, err := s.getCollection(ctx, opts.NameSpace)
 	if err != nil {
 		return nil, err
 	}
-	defer indexConn.Close()
-
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
-	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
-	if err != nil {
-		return nil, err
+	//embed documents
+	embedder := s.embedder
+	if opts.Embedder != nil {
+		embedder = opts.Embedder
 	}
-
-	if len(vectors) != len(docs) {
-		return nil, ErrEmbedderWrongNumberVectors
-	}
-
-	metadatas := make([]map[string]any, 0, len(docs))
-	for i := 0; i < len(docs); i++ {
-		metadata := make(map[string]any, len(docs[i].Metadata))
-		for key, value := range docs[i].Metadata {
-			metadata[key] = value
-		}
-		metadata[s.textKey] = texts[i]
-
-		metadatas = append(metadatas, metadata)
-	}
-
-	tcvDocs := make([]tcvectordb.Document, 0, len(vectors))
-
-	ids := make([]string, len(vectors))
-	for i := 0; i < len(vectors); i++ {
-		metadataStruct, err := structpb.NewStruct(metadatas[i])
+	vectors := make([][]float32, 0, len(docs))
+	if embedder != nil {
+		vectors, err = embedder.EmbedDocuments(ctx, texts)
 		if err != nil {
 			return nil, err
 		}
-
+		if len(vectors) != len(docs) {
+			return nil, ErrEmbedderWrongNumberVectors
+		}
+	}
+	//convert documents to tcvectordb.Document
+	tcvDocs := make([]tcvectordb.Document, 0, len(docs))
+	ids := make([]string, len(docs))
+	for i, doc := range docs {
+		fields := convert(doc)
 		id := uuid.New().String()
 		ids[i] = id
-		tcvDocs = append(
-			tcvDocs,
-			tcvectordb.Document{
-				Id:     id,
-				Vector: vectors[i],
-				Fields: metadataStruct,
-			},
-		)
+		tcvDoc := tcvectordb.Document{
+			Id:     id,
+			Fields: fields,
+		}
+		if embedder != nil {
+			tcvDoc.Vector = vectors[i]
+		}
+		tcvDocs = append(tcvDocs, tcvDoc)
 	}
-
-	_, err = s.collection.Upsert(ctx, tcvDocs)
+	//upsert documents
+	_, err = collection.Upsert(ctx, tcvDocs)
 	if err != nil {
 		return nil, err
 	}
 
 	return ids, nil
 }
+func convert(doc schema.Document) map[string]tcvectordb.Field {
+	metadata := make(map[string]tcvectordb.Field, len(doc.Metadata))
+	for key, value := range doc.Metadata {
+		metadata[key] = tcvectordb.Field{Val: value}
+	}
+	metadata[fieldText] = tcvectordb.Field{Val: doc.PageContent}
+	return metadata
+}
+func convertField(fields map[string]tcvectordb.Field) schema.Document {
+	doc := schema.Document{
+		PageContent: fields[fieldText].Val.(string),
+	}
+	metaData := make(map[string]any)
+	for key, value := range fields {
+		if key == fieldText {
+			continue
+		}
+		metaData[key] = value.Val
+	}
+	doc.Metadata = metaData
+	return doc
+}
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
-func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
+func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) (
+	[]schema.Document, error) {
 	opts := s.getOptions(options...)
-
-	nameSpace := s.getNameSpace(opts)
-	indexConn, err := s.client.IndexWithNamespace(s.url, nameSpace)
-	if err != nil {
-		return nil, err
-	}
-	defer indexConn.Close()
-
-	var protoFilterStruct *structpb.Struct
-	filters := s.getFilters(opts)
-	if filters != nil {
-		protoFilterStruct, err = s.createProtoStructFilter(filters)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	scoreThreshold, err := s.getScoreThreshold(opts)
 	if err != nil {
 		return nil, err
 	}
+	collection, err := s.getCollection(ctx, opts.NameSpace)
+	if err != nil {
+		return nil, err
+	}
+	searchParams := &tcvectordb.SearchDocumentParams{
+		Params:         &tcvectordb.SearchDocParams{Ef: 100},
+		RetrieveVector: false,
+		Limit:          int64(numDocuments),
+	}
 	var result *tcvectordb.SearchDocumentResult
+	embedder := s.embedder
+	if opts.Embedder != nil {
+		embedder = opts.Embedder
+	}
 	//search by text
-	if s.embedder == nil {
-		result, err = s.collection.SearchByText(ctx, query, uint32(numDocuments), protoFilterStruct, true, true)
+	if embedder == nil {
+		result, err = collection.SearchByText(ctx, map[string][]string{fieldText: {query}}, searchParams)
+
 	} else {
 		//search by vector
-		vector, err := s.embedder.EmbedQuery(ctx, query)
+		vector, err := embedder.EmbedQuery(ctx, query)
 		if err != nil {
 			return nil, err
 		}
-		result, err = s.collection.Search(ctx, [][]float32{vector}, &tcvectordb.SearchDocumentParams{
-			Params:         &tcvectordb.SearchDocParams{Ef: 100}, // 若使用HNSW索引，则需要指定参数ef，ef越大，召回率越高，但也会影响检索速度
-			RetrieveVector: false,                                // 是否需要返回向量字段，False：不返回，True：返回
-			Limit:          10,                                   // 指定 Top K 的 K 值
-		})
+		result, err = collection.Search(ctx, [][]float32{vector}, searchParams)
 	}
 	if err != nil {
 		return nil, err
@@ -242,17 +385,16 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	return s.getDocumentsFromMatches(result, scoreThreshold)
 }
 
-func (s Store) getDocumentsFromMatches(queryResult *tcvectordb.SearchDocumentResult, scoreThreshold float32) ([]schema.Document, error) {
+func (s Store) getDocumentsFromMatches(queryResult *tcvectordb.SearchDocumentResult, scoreThreshold float32) (
+	[]schema.Document, error) {
 	resultDocuments := make([]schema.Document, 0)
 	for _, item := range queryResult.Documents {
 		for _, d := range item {
-
-			doc := schema.Document{
-				PageContent: d.Fields[s.textKey].Val.(string),
-				Metadata:    d.Fields[s.metadataKey].Val.(map[string]any),
-				Score:       d.Score,
+			if scoreThreshold == 0 || d.Score >= scoreThreshold {
+				doc := convertField(d.Fields)
+				doc.Score = d.Score
+				resultDocuments = append(resultDocuments, doc)
 			}
-			resultDocuments = append(resultDocuments, doc)
 		}
 	}
 	return resultDocuments, nil
@@ -278,19 +420,4 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 		opt(&opts)
 	}
 	return opts
-}
-
-func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
-	filterBytes, err := json.Marshal(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	var filterStruct structpb.Struct
-	err = json.Unmarshal(filterBytes, &filterStruct)
-	if err != nil {
-		return nil, err
-	}
-
-	return &filterStruct, nil
 }
