@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got emmbedded")
+	ErrIncompleteEmbedding = errors.New("not all input got embedded")
 )
 
 // LLM is a llamafile LLM implementation.
