@@ -22,15 +22,17 @@ var (
 	ErrNoContentInResponse    = errors.New("no content in generation response")
 	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
 	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemRoleNotSupported = errors.New("system role isn't supporeted yet")
+	ErrSystemJustSupportsText = errors.New("system role just supports text")
+	ErrSystemMoreThanOne      = errors.New("more than one system prompt isn't supported")
 )
 
 const (
-	CITATIONS = "citations"
-	SAFETY    = "safety"
-	RoleModel = "model"
-	RoleUser  = "user"
-	RoleTool  = "tool"
+	CITATIONS  = "citations"
+	SAFETY     = "safety"
+	RoleModel  = "model"
+	RoleUser   = "user"
+	RoleSystem = "system"
+	RoleTool   = "tool"
 )
 
 // Call implements the [llms.Model] interface.
@@ -97,10 +99,10 @@ func (g *Vertex) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	} else {
 		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
+
 	if err != nil {
 		return nil, err
 	}
-
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
@@ -211,7 +213,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 	switch content.Role {
 	case llms.ChatMessageTypeSystem:
-		return nil, ErrSystemRoleNotSupported
+		return convertSystemContent(c, content)
 	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel
 	case llms.ChatMessageTypeHuman:
@@ -225,6 +227,23 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)
 	}
+
+	return c, nil
+}
+
+func convertSystemContent(c *genai.Content, content llms.MessageContent) (*genai.Content, error) {
+	var mergedSystemPrompt []string
+	for _, part := range content.Parts {
+		prompt, ok := part.(llms.TextContent)
+		if !ok {
+			return nil, ErrSystemJustSupportsText
+		}
+		mergedSystemPrompt = append(mergedSystemPrompt, prompt.Text)
+	}
+
+	c.Role = RoleSystem
+	merged := genai.Text(strings.Join(mergedSystemPrompt, ".\n"))
+	c.Parts = []genai.Part{merged}
 
 	return c, nil
 }
@@ -256,12 +275,25 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 
 func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	history := make([]*genai.Content, 0, len(messages))
+	systemPrompts := 0
 	for _, mc := range messages {
 		content, err := convertContent(mc)
 		if err != nil {
 			return nil, err
 		}
+		if content.Role == RoleSystem {
+			content.Role = RoleUser
+			model.SystemInstruction = content
+			systemPrompts++
+			continue
+		}
+
 		history = append(history, content)
+	}
+
+	// convert content just supports 1 system prompt
+	if systemPrompts > 1 {
+		return nil, ErrSystemMoreThanOne
 	}
 
 	// Given N total messages, genai's chat expects the first N-1 messages as
