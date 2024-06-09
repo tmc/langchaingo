@@ -231,6 +231,8 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	return c, nil
 }
 
+// convertSystemContent merges the system message array in just one
+// after this function the system will send data in unique system instruction
 func convertSystemContent(c *genai.Content, content llms.MessageContent) (*genai.Content, error) {
 	var mergedSystemPrompt []string
 	for _, part := range content.Parts {
