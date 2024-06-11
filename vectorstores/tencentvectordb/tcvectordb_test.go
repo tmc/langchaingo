@@ -21,7 +21,6 @@ import (
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
-
 	tencentvectordbAPIKey := os.Getenv("TENCENTVECTORDB_API_KEY")
 	if tencentvectordbAPIKey == "" {
 		t.Skip("Must set TENCENTVECTORDB_API_KEY to run test")
@@ -37,7 +36,7 @@ func getValues(t *testing.T) (string, string) {
 
 func getLLM(t *testing.T) LLMModel {
 	t.Helper()
-	openaiKey := os.Getenv("OPENAI_API_KEY1")
+	openaiKey := os.Getenv("OPENAI_API_KEY")
 	if openaiKey == "" {
 		t.Logf("OPENAI_API_KEY not set, using mock LLM model")
 		return newMockLLMModel()

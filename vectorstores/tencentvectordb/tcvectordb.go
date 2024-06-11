@@ -373,8 +373,7 @@ func (s Store) convertField2Document(fields map[string]tcvectordb.Field) schema.
 
 // SimilaritySearch creates a vector embedding from the query using the embedder
 // and queries to find the most similar documents.
-func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
-	options ...vectorstores.Option) ([]schema.Document, error) {
+func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) {
 	// get options
 	opts := s.getOptions(options...)
 	scoreThreshold, err := s.getScoreThreshold(opts)
@@ -418,8 +417,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 }
 
 // getDocumentsFromMatches filter by scoreThreshold and convert tcvectordb.Document to schema.Document.
-func (s Store) getDocumentsFromMatches(queryResult *tcvectordb.SearchDocumentResult, scoreThreshold float32) (
-	[]schema.Document, error) {
+func (s Store) getDocumentsFromMatches(queryResult *tcvectordb.SearchDocumentResult, scoreThreshold float32) ([]schema.Document, error) {
 	resultDocuments := make([]schema.Document, 0)
 	for _, item := range queryResult.Documents {
 		for _, d := range item {
