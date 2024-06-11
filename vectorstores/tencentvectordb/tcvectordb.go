@@ -2,6 +2,7 @@ package tencentvectordb
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -38,8 +39,9 @@ const (
 type MetaField struct {
 	Name        string
 	Description string
-	DataType    string
-	Index       bool
+	//DataType enum: string, uint64, array, vector
+	DataType string
+	Index    bool
 }
 
 func (m MetaField) getFieldType() tcvectordb.FieldType {
@@ -59,13 +61,13 @@ func (m MetaField) getFieldType() tcvectordb.FieldType {
 
 // Store is a wrapper around the tencentvectordb rest API and grpc client.
 type Store struct {
-	embedder    embeddings.Embedder
-	database    *tcvectordb.Database
-	collections map[string]*tcvectordb.Collection
-	userOption  *tcvectordb.ClientOption
-	url         string
-	apiKey      string
-	userName    string
+	embedder   embeddings.Embedder
+	database   *tcvectordb.Database
+	collection *tcvectordb.Collection
+	userOption *tcvectordb.ClientOption
+	url        string
+	apiKey     string
+	userName   string
 
 	databaseName          string
 	collectionName        string
@@ -92,8 +94,7 @@ func New(opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-	s.collections = make(map[string]*tcvectordb.Collection)
-	s.collections[s.collectionName], err = s.getDbCollection(context.Background(), s.database, s.collectionName)
+	s.collection, err = s.getDbCollection(context.Background(), s.database, s.collectionName)
 	if err != nil {
 		return Store{}, err
 	}
@@ -167,20 +168,6 @@ func (s Store) getDatabase(ctx context.Context, client *tcvectordb.Client) (*tcv
 	}
 	return &createdDb.Database, nil
 }
-func (s Store) getCollection(ctx context.Context, collectionName string) (*tcvectordb.Collection, error) {
-	if len(collectionName) == 0 {
-		collectionName = s.collectionName
-	}
-	if coll, ok := s.collections[collectionName]; ok {
-		return coll, nil
-	}
-	coll, err := s.getDbCollection(ctx, s.database, collectionName)
-	if err != nil {
-		return nil, err
-	}
-	s.collections[collectionName] = coll
-	return coll, nil
-}
 
 func (s Store) getDbCollection(ctx context.Context, db *tcvectordb.Database, collectionName string) (*tcvectordb.Collection, error) {
 	colls, err := db.ListCollection(ctx)
@@ -196,17 +183,23 @@ func (s Store) getDbCollection(ctx context.Context, db *tcvectordb.Database, col
 	//create collection
 	return s.createCollection(ctx, db, collectionName)
 }
+
+// DropCollection drops the collection from the database.
 func (s Store) DropCollection(ctx context.Context, collectionName string) error {
 	_, err := s.database.DropCollection(ctx, collectionName)
-	delete(s.collections, collectionName)
 	return err
 }
 
 func (s Store) createCollection(ctx context.Context, db *tcvectordb.Database, collectionName string) (*tcvectordb.Collection, error) {
 	//define index
-	dim := uint32(0)
-	if s.embedder != nil {
-		dim = s.dimension
+	dim := s.dimension
+	if dim == 0 && s.embedder != nil {
+		//get dimension from embedder
+		v, err := s.embedder.EmbedQuery(ctx, "test")
+		if err != nil {
+			return nil, err
+		}
+		dim = uint32(len(v))
 	}
 	index := tcvectordb.Indexes{
 		VectorIndex: []tcvectordb.VectorIndex{
@@ -239,14 +232,23 @@ func (s Store) createCollection(ctx context.Context, db *tcvectordb.Database, co
 		},
 	}
 	// Add metadata indexes
-	for _, metaField := range s.metaFields {
-		if metaField.Index {
-			index.FilterIndex = append(index.FilterIndex, tcvectordb.FilterIndex{
-				FieldName: metaField.Name,
-				FieldType: metaField.getFieldType(),
-				IndexType: tcvectordb.FILTER,
-			})
+	if len(s.metaFields) > 0 {
+		for _, metaField := range s.metaFields {
+			if metaField.Index {
+				index.FilterIndex = append(index.FilterIndex, tcvectordb.FilterIndex{
+					FieldName: metaField.Name,
+					FieldType: metaField.getFieldType(),
+					IndexType: tcvectordb.FILTER,
+				})
+			}
 		}
+	} else {
+		index.FilterIndex = append(index.FilterIndex, tcvectordb.FilterIndex{
+			FieldName: fieldMetadata,
+			FieldType: tcvectordb.String,
+			IndexType: tcvectordb.FILTER,
+		})
+
 	}
 	if s.embedder != nil {
 		return db.CreateCollection(ctx, collectionName, s.shardNum, s.replicasNum, s.collectionDescription, index)
@@ -257,6 +259,24 @@ func (s Store) createCollection(ctx context.Context, db *tcvectordb.Database, co
 		&tcvectordb.CreateCollectionParams{
 			Embedding: ebd,
 		})
+}
+func (s Store) getMeta(result map[string]tcvectordb.Field) map[string]any {
+	if len(s.metaFields) > 0 {
+		meta := make(map[string]any)
+		for _, field := range s.metaFields {
+			meta[field.Name] = result[field.Name]
+		}
+		return meta
+	}
+	rawMeta, ok := result[fieldMetadata]
+	if ok {
+		if rawMetaStr, ok := rawMeta.Val.(string); ok {
+			meta := make(map[string]any)
+			json.Unmarshal([]byte(rawMetaStr), &meta)
+			return meta
+		}
+	}
+	return map[string]any{}
 }
 
 // AddDocuments creates vector embeddings from the documents using the embedder
@@ -269,10 +289,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	if len(docs) == 0 {
 		return nil, nil
 	}
-	collection, err := s.getCollection(ctx, opts.NameSpace)
-	if err != nil {
-		return nil, err
-	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
@@ -282,12 +299,14 @@ func (s Store) AddDocuments(ctx context.Context,
 	if opts.Embedder != nil {
 		embedder = opts.Embedder
 	}
+	var err error
 	vectors := make([][]float32, 0, len(docs))
 	if embedder != nil {
 		vectors, err = embedder.EmbedDocuments(ctx, texts)
 		if err != nil {
 			return nil, err
 		}
+
 		if len(vectors) != len(docs) {
 			return nil, ErrEmbedderWrongNumberVectors
 		}
@@ -296,7 +315,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	tcvDocs := make([]tcvectordb.Document, 0, len(docs))
 	ids := make([]string, len(docs))
 	for i, doc := range docs {
-		fields := convert(doc)
+		fields := s.convertDocument2Field(doc)
 		id := uuid.New().String()
 		ids[i] = id
 		tcvDoc := tcvectordb.Document{
@@ -309,14 +328,14 @@ func (s Store) AddDocuments(ctx context.Context,
 		tcvDocs = append(tcvDocs, tcvDoc)
 	}
 	//upsert documents
-	_, err = collection.Upsert(ctx, tcvDocs)
+	_, err = s.collection.Upsert(ctx, tcvDocs)
 	if err != nil {
 		return nil, err
 	}
 
 	return ids, nil
 }
-func convert(doc schema.Document) map[string]tcvectordb.Field {
+func (s Store) convertDocument2Field(doc schema.Document) map[string]tcvectordb.Field {
 	metadata := make(map[string]tcvectordb.Field, len(doc.Metadata))
 	for key, value := range doc.Metadata {
 		metadata[key] = tcvectordb.Field{Val: value}
@@ -324,13 +343,17 @@ func convert(doc schema.Document) map[string]tcvectordb.Field {
 	metadata[fieldText] = tcvectordb.Field{Val: doc.PageContent}
 	return metadata
 }
-func convertField(fields map[string]tcvectordb.Field) schema.Document {
+func (s Store) convertField2Document(fields map[string]tcvectordb.Field) schema.Document {
 	doc := schema.Document{
 		PageContent: fields[fieldText].Val.(string),
 	}
 	metaData := make(map[string]any)
 	for key, value := range fields {
 		if key == fieldText {
+			continue
+		}
+		if key == fieldMetadata {
+			metaData = s.getMeta(fields)
 			continue
 		}
 		metaData[key] = value.Val
@@ -348,14 +371,17 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if err != nil {
 		return nil, err
 	}
-	collection, err := s.getCollection(ctx, opts.NameSpace)
-	if err != nil {
-		return nil, err
+
+	//filter
+	var filter *tcvectordb.Filter
+	if opts.Filters != nil {
+		filter = tcvectordb.NewFilter((opts.Filters).(string))
 	}
 	searchParams := &tcvectordb.SearchDocumentParams{
 		Params:         &tcvectordb.SearchDocParams{Ef: 100},
 		RetrieveVector: false,
 		Limit:          int64(numDocuments),
+		Filter:         filter,
 	}
 	var result *tcvectordb.SearchDocumentResult
 	embedder := s.embedder
@@ -364,15 +390,15 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 	//search by text
 	if embedder == nil {
-		result, err = collection.SearchByText(ctx, map[string][]string{fieldText: {query}}, searchParams)
+		result, err = s.collection.SearchByText(ctx, map[string][]string{fieldText: {query}}, searchParams)
 
 	} else {
 		//search by vector
-		vector, err := embedder.EmbedQuery(ctx, query)
-		if err != nil {
-			return nil, err
+		vector, err1 := embedder.EmbedQuery(ctx, query)
+		if err1 != nil {
+			return nil, err1
 		}
-		result, err = collection.Search(ctx, [][]float32{vector}, searchParams)
+		result, err = s.collection.Search(ctx, [][]float32{vector}, searchParams)
 	}
 	if err != nil {
 		return nil, err
@@ -391,7 +417,7 @@ func (s Store) getDocumentsFromMatches(queryResult *tcvectordb.SearchDocumentRes
 	for _, item := range queryResult.Documents {
 		for _, d := range item {
 			if scoreThreshold == 0 || d.Score >= scoreThreshold {
-				doc := convertField(d.Fields)
+				doc := s.convertField2Document(d.Fields)
 				doc.Score = d.Score
 				resultDocuments = append(resultDocuments, doc)
 			}

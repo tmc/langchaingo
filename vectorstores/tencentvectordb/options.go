@@ -18,8 +18,7 @@ const (
 	_defaultCollection          = "LangChainCollection"
 	_defaultEmbeddingModel      = "BGE_BASE_ZH"
 	_defaultIndexType           = "HNSW"
-	_defaultMetricType          = "COSINE"
-	_defaultDimension           = 1536 // 1536 is the default dimension for OpenAI embedding
+	_defaultMetricType          = "L2"
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -86,26 +85,45 @@ func WithCollectionName(collectionName string) Option {
 	}
 }
 
+// WithEmbeddingModel is an option for setting the embedding model to use. Default is "BGE_BASE_ZH".
 func WithEmbeddingModel(embeddingModel string) Option {
 	return func(p *Store) {
 		p.embeddingModel = embeddingModel
 	}
 }
 
+// WithIndexType is an option for setting the index type to use. Default is "HNSW".
 func WithIndexType(indexType string) Option {
 	return func(p *Store) {
 		p.indexType = indexType
 	}
 }
 
+// WithMetricType is an option for setting the metric type to use. Default is "COSINE".
 func WithMetricType(metricType string) Option {
 	return func(p *Store) {
 		p.metricType = metricType
 	}
 }
+
+// WithDimension is an option for setting the dimension to use. Default is 0.
 func WithDimension(dimension uint32) Option {
 	return func(p *Store) {
 		p.dimension = dimension
+	}
+}
+
+// WithShardNum is an option for setting the shard number to use. Default is 1.
+func WithShardNum(shardNum uint32) Option {
+	return func(p *Store) {
+		p.shardNum = shardNum
+	}
+}
+
+// WithReplicasNum is an option for setting the replicas number to use. Default is 0.
+func WithReplicasNum(replicasNum uint32) Option {
+	return func(p *Store) {
+		p.replicasNum = replicasNum
 	}
 }
 
@@ -119,7 +137,7 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		indexType:      _defaultIndexType,
 		metricType:     _defaultMetricType,
 		embeddingModel: _defaultEmbeddingModel,
-		dimension:      _defaultDimension,
+		dimension:      0, // 0 means the default dimension of the embedding model
 	}
 
 	for _, opt := range opts {
