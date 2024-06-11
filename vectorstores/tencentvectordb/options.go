@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	_tencentvectordbEnvVrApiKey = "TENCENTVECTORDB_API_KEY"
-	_tencentvectordbEnvVrUrl    = "TENCENTVECTORDB_URL"
+	_tencentvectordbEnvVrAPIKey = "TENCENTVECTORDB_API_KEY" //nolint:gosec
+	_tencentvectordbEnvVrURL    = "TENCENTVECTORDB_URL"
 	_defaultUserName            = "root"
 	_defaultDatabase            = "LangChainDatabase"
 	_defaultCollection          = "LangChainCollection"
@@ -27,8 +27,8 @@ var ErrInvalidOptions = errors.New("invalid options")
 // Option is a function type that can be used to modify the client.
 type Option func(p *Store)
 
-// WithHost is an option for setting the url to use. Must be set.
-func WithUrl(url string) Option {
+// WithURL is an option for setting the url to use. Must be set.
+func WithURL(url string) Option {
 	return func(p *Store) {
 		p.url = strings.TrimSpace(url)
 	}
@@ -144,22 +144,22 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		opt(o)
 	}
 	if o.apiKey == "" {
-		o.apiKey = os.Getenv(_tencentvectordbEnvVrApiKey)
+		o.apiKey = os.Getenv(_tencentvectordbEnvVrAPIKey)
 		if o.apiKey == "" {
 			return Store{}, fmt.Errorf(
 				"%w: missing api key. Pass it as an option or set the %s environment variable",
 				ErrInvalidOptions,
-				_tencentvectordbEnvVrApiKey,
+				_tencentvectordbEnvVrAPIKey,
 			)
 		}
 	}
 	if o.url == "" {
-		o.url = os.Getenv(_tencentvectordbEnvVrUrl)
+		o.url = os.Getenv(_tencentvectordbEnvVrURL)
 		if o.url == "" {
 			return Store{}, fmt.Errorf(
 				"%w: missing URL. Pass it as an option or set the %s environment variable",
 				ErrInvalidOptions,
-				_tencentvectordbEnvVrUrl,
+				_tencentvectordbEnvVrURL,
 			)
 		}
 	}
