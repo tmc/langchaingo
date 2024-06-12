@@ -399,7 +399,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	return combineStreamingChatResponse(ctx, payload, responseChan)
 }
 
-func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, responseChan chan StreamedChatResponsePayload) (*ChatCompletionResponse, error) {
+func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, responseChan <-chan StreamedChatResponsePayload) (*ChatCompletionResponse, error) {
 	response := ChatCompletionResponse{
 		Choices: []*ChatCompletionChoice{
 			{},
