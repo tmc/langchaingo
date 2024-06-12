@@ -123,6 +123,23 @@ type ToolCall struct {
 	FunctionCall *FunctionCall `json:"function,omitempty"`
 }
 
+func (bc ToolCall) MarshalJSON() ([]byte, error) {
+	fc, err := json.Marshal(bc.FunctionCall)
+	if err != nil {
+		return nil, err
+	}
+
+	m := map[string]any{
+		"type": "tool_call",
+		"tool_call": map[string]any{
+			"id":   bc.ID,
+			"type": bc.Type,
+			"fc":   json.RawMessage(fc),
+		},
+	}
+	return json.Marshal(m)
+}
+
 func (ToolCall) isPart() {}
 
 // ToolCallResponse is the response returned by a tool call.
@@ -133,6 +150,18 @@ type ToolCallResponse struct {
 	Name string `json:"name"`
 	// Content is the textual content of the response.
 	Content string `json:"content"`
+}
+
+func (tc ToolCallResponse) MarshalJSON() ([]byte, error) {
+	m := map[string]any{
+		"type": "tool_response",
+		"tool_response": map[string]string{
+			"tool_call_id": tc.ToolCallID,
+			"name":         tc.Name,
+			"content":      tc.Content,
+		},
+	}
+	return json.Marshal(m)
 }
 
 func (ToolCallResponse) isPart() {}

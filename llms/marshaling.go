@@ -2,6 +2,7 @@ package llms
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -62,6 +63,65 @@ func (mc *MessageContent) UnmarshalYAML(unmarshal func(interface{}) error) error
 	return nil
 }
 
+func (mc *MessageContent) UnmarshalJSON(data []byte) error {
+	var m struct {
+		Role  ChatMessageType `json:"role"`
+		Text  string          `json:"text"`
+		Parts []struct {
+			Type     string `json:"type"`
+			Text     string `json:"text"`
+			ImageURL struct {
+				URL string `json:"url"`
+			} `json:"image_url"`
+			Binary struct {
+				MIMEType string `json:"mime_type"`
+				Data     []byte `json:"data"`
+			} `json:"binary"`
+			ToolCall struct {
+				ID       string        `json:"id"`
+				Type     string        `json:"type"`
+				FuncCall *FunctionCall `json:"fc"`
+			} `json:"tool_call"`
+			ToolResp json.RawMessage `json:"tool_response"`
+		} `json:"parts"`
+	}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	mc.Role = m.Role
+	mc.Parts = make([]ContentPart, len(m.Parts))
+
+	for i, part := range m.Parts {
+		switch part.Type {
+		case "text":
+			mc.Parts[i] = TextContent{Text: part.Text}
+		case "image_url":
+			mc.Parts[i] = ImageURLContent{URL: part.ImageURL.URL}
+		case "binary":
+			mc.Parts[i] = BinaryContent{MIMEType: part.Binary.MIMEType, Data: part.Binary.Data}
+		case "tool_call":
+			mc.Parts[i] = ToolCall{
+				ID:           part.ToolCall.ID,
+				Type:         part.ToolCall.Type,
+				FunctionCall: part.ToolCall.FuncCall,
+			}
+		case "tool_response":
+			var tr ToolCallResponse
+			if err := json.Unmarshal(part.ToolResp, &tr); err != nil {
+				return err
+			}
+			mc.Parts[i] = tr
+		default:
+			return fmt.Errorf("unknown content type: %s", part.Type)
+		}
+	}
+	// Special case: handle single text part directly:
+	if len(mc.Parts) == 0 && m.Text != "" {
+		mc.Parts = []ContentPart{TextContent{Text: m.Text}}
+	}
+	return nil
+}
+
 // MarshalYAML custom marshaling logic for MessageContent.
 func (mc MessageContent) MarshalYAML() (interface{}, error) {
 	// Special case: handle single text part directly
@@ -101,8 +161,28 @@ func (mc MessageContent) MarshalYAML() (interface{}, error) {
 	raw := make(map[string]interface{})
 	raw["role"] = mc.Role
 	raw["parts"] = parts
-
 	return raw, nil
+}
+
+func (mc MessageContent) MarshalJSON() ([]byte, error) {
+	hasSingleTextPart := false
+	if len(mc.Parts) == 1 {
+		_, hasSingleTextPart = mc.Parts[0].(TextContent)
+	}
+	if hasSingleTextPart {
+		tp, _ := mc.Parts[0].(TextContent)
+		return json.Marshal(struct {
+			Role ChatMessageType `json:"role"`
+			Text string          `json:"text"`
+		}{Role: mc.Role, Text: tp.Text})
+	}
+	return json.Marshal(struct {
+		Role  ChatMessageType `json:"role"`
+		Parts []ContentPart   `json:"parts"`
+	}{
+		Role:  mc.Role,
+		Parts: mc.Parts,
+	})
 }
 
 // Helper function to map raw data to struct.
