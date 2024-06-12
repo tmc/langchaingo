@@ -2,6 +2,7 @@ package zep
 
 import (
 	"context"
+	"github.com/tmc/langchaingo/llms"
 
 	"github.com/getzep/zep-go"
 	zepClient "github.com/getzep/zep-go/client"
@@ -65,7 +66,7 @@ func (m *Memory) LoadMemoryVariables(
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
+	bufferString, err := llms.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
