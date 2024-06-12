@@ -8,7 +8,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
-	"github.com/tmc/langchaingo/schema"
 )
 
 //go:embed image.png
@@ -29,7 +28,7 @@ func main() {
 		ctx,
 		[]llms.MessageContent{
 			{
-				Role: schema.ChatMessageTypeHuman,
+				Role: llms.ChatMessageTypeHuman,
 				Parts: []llms.ContentPart{
 					// For images, you can use image formats such as image/png, image/jpeg, image/gif, image/webp.
 					// Please change according to the actual byte array to be given.
@@ -57,6 +56,6 @@ func main() {
 		choices[0].GenerationInfo["output_tokens"],
 	)
 	fmt.Println(choices[0].Content)
-	//Output:
-	//The string on the box in the image is "LGTM".
+	// Output:
+	// The string on the box in the image is "LGTM".
 }

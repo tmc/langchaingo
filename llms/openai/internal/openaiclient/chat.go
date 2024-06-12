@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -59,6 +58,9 @@ type ChatRequest struct {
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// Deprecated: use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+
+	// Metadata allows you to specify additional information that will be passed to the model.
+	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
 // ToolType is the type of a tool.
@@ -275,9 +277,12 @@ type StreamedChatResponsePayload struct {
 			Role         string        `json:"role,omitempty"`
 			Content      string        `json:"content,omitempty"`
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
+			// ToolCalls is a list of tools that were called in the message.
+			ToolCalls []*ToolCall `json:"tool_calls,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
+	Error error `json:"-"` // use for error handling only
 }
 
 // FunctionDefinition is a definition of a function that can be called by the model.
@@ -326,7 +331,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", c.Model), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", payload.Model), body)
 	if err != nil {
 		return nil, err
 	}
@@ -370,25 +375,31 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if line == "" {
 				continue
 			}
-			if !strings.HasPrefix(line, "data:") {
-				log.Fatalf("unexpected line: %v", line)
-			}
-			data := strings.TrimPrefix(line, "data: ")
+
+			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
+			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
 				return
 			}
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				log.Fatalf("failed to decode stream payload: %v", err)
+				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
+				responseChan <- streamPayload
+				return
 			}
 			responseChan <- streamPayload
 		}
 		if err := scanner.Err(); err != nil {
-			log.Println("issue scanning response:", err)
+			responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}
+			return
 		}
 	}()
-	// Parse response
+	// Combine response
+	return combineStreamingChatResponse(ctx, payload, responseChan)
+}
+
+func combineStreamingChatResponse(ctx context.Context, payload *ChatRequest, responseChan chan StreamedChatResponsePayload) (*ChatCompletionResponse, error) {
 	response := ChatCompletionResponse{
 		Choices: []*ChatCompletionChoice{
 			{},
@@ -396,19 +407,24 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	}
 
 	for streamResponse := range responseChan {
+		if streamResponse.Error != nil {
+			return nil, streamResponse.Error
+		}
+
 		if len(streamResponse.Choices) == 0 {
 			continue
 		}
-		chunk := []byte(streamResponse.Choices[0].Delta.Content)
-		response.Choices[0].Message.Content += streamResponse.Choices[0].Delta.Content
-		response.Choices[0].FinishReason = streamResponse.Choices[0].FinishReason
-		if streamResponse.Choices[0].Delta.FunctionCall != nil {
-			if response.Choices[0].Message.FunctionCall == nil {
-				response.Choices[0].Message.FunctionCall = streamResponse.Choices[0].Delta.FunctionCall
-			} else {
-				response.Choices[0].Message.FunctionCall.Arguments += streamResponse.Choices[0].Delta.FunctionCall.Arguments
-			}
-			chunk, _ = json.Marshal(response.Choices[0].Message.FunctionCall) // nolint:errchkjson
+		choice := streamResponse.Choices[0]
+		chunk := []byte(choice.Delta.Content)
+		response.Choices[0].Message.Content += choice.Delta.Content
+		response.Choices[0].FinishReason = choice.FinishReason
+
+		if choice.Delta.FunctionCall != nil {
+			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
+		}
+
+		if len(choice.Delta.ToolCalls) > 0 {
+			chunk, response.Choices[0].Message.ToolCalls = updateToolCalls(response.Choices[0].Message.ToolCalls, choice.Delta.ToolCalls)
 		}
 
 		if payload.StreamingFunc != nil {
@@ -419,4 +435,65 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		}
 	}
 	return &response, nil
+}
+
+func updateFunctionCall(message ChatMessage, functionCall *FunctionCall) []byte {
+	if message.FunctionCall == nil {
+		message.FunctionCall = functionCall
+	} else {
+		message.FunctionCall.Arguments += functionCall.Arguments
+	}
+	chunk, _ := json.Marshal(message.FunctionCall) // nolint:errchkjson
+	return chunk
+}
+
+func updateToolCalls(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
+	if len(delta) == 0 {
+		return []byte{}, tools
+	}
+	for _, t := range delta {
+		// if we have arguments append to the last Tool call
+		if t.Type == `` && t.Function.Arguments != `` {
+			lindex := len(tools) - 1
+			if lindex < 0 {
+				continue
+			}
+
+			tools[lindex].Function.Arguments += t.Function.Arguments
+			continue
+		}
+
+		// Otherwise, this is a new tool call, append that to the stack
+		tools = append(tools, *t)
+	}
+
+	chunk, _ := json.Marshal(delta) // nolint:errchkjson
+
+	return chunk, tools
+}
+
+// StreamingChatResponseTools is a helper function to append tool calls to the stack.
+func StreamingChatResponseTools(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
+	if len(delta) == 0 {
+		return []byte{}, tools
+	}
+	for _, t := range delta {
+		// if we have arguments append to the last Tool call
+		if t.Type == `` && t.Function.Arguments != `` {
+			lindex := len(tools) - 1
+			if lindex < 0 {
+				continue
+			}
+
+			tools[lindex].Function.Arguments += t.Function.Arguments
+			continue
+		}
+
+		// Otherwise, this is a new tool call, append that to the stack
+		tools = append(tools, *t)
+	}
+
+	chunk, _ := json.Marshal(delta) // nolint:errchkjson
+
+	return chunk, tools
 }

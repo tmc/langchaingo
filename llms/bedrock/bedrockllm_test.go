@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func setUpTest() (*bedrockruntime.Client, error) {
@@ -39,13 +38,13 @@ func TestAmazonOutput(t *testing.T) {
 
 	msgs := []llms.MessageContent{
 		{
-			Role: schema.ChatMessageTypeSystem,
+			Role: llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{
 				llms.TextPart("You know all about AI."),
 			},
 		},
 		{
-			Role: schema.ChatMessageTypeHuman,
+			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
 				llms.TextPart("Explain AI in 10 words or less."),
 			},
@@ -67,6 +66,8 @@ func TestAmazonOutput(t *testing.T) {
 		bedrock.ModelCohereCommandLightTextV14,
 		bedrock.ModelMetaLlama213bChatV1,
 		bedrock.ModelMetaLlama270bChatV1,
+		bedrock.ModelMetaLlama38bInstructV1,
+		bedrock.ModelMetaLlama370bInstructV1,
 	}
 
 	ctx := context.Background()

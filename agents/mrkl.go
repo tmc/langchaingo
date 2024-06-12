@@ -115,6 +115,10 @@ func (a *OneShotZeroAgent) GetOutputKeys() []string {
 	return []string{a.OutputKey}
 }
 
+func (a *OneShotZeroAgent) GetTools() []tools.Tool {
+	return a.Tools
+}
+
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	if strings.Contains(output, _finalAnswerAction) {
 		splits := strings.Split(output, _finalAnswerAction)

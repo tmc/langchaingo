@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
@@ -35,7 +34,7 @@ func TestMultiContentText(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -54,15 +53,15 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
 		},
 		{
-			Role:  schema.ChatMessageTypeAI,
+			Role:  llms.ChatMessageTypeAI,
 			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
 		},
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
 		},
 	}
@@ -86,7 +85,7 @@ func TestMultiContentImage(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -109,7 +108,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}
@@ -139,7 +138,7 @@ func TestFunctionCall(t *testing.T) {
 	}
 	content := []llms.MessageContent{
 		{
-			Role:  schema.ChatMessageTypeHuman,
+			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,
 		},
 	}

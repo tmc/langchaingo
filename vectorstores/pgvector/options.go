@@ -3,9 +3,7 @@ package pgvector
 import (
 	"errors"
 	"fmt"
-	"os"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
@@ -26,13 +24,6 @@ type Option func(p *Store)
 func WithEmbedder(e embeddings.Embedder) Option {
 	return func(p *Store) {
 		p.embedder = e
-	}
-}
-
-// WithConnectionURL is an option for specifying the Postgres connection URL. Must be set.
-func WithConnectionURL(connectionURL string) Option {
-	return func(p *Store) {
-		p.postgresConnectionURL = connectionURL
 	}
 }
 
@@ -64,10 +55,18 @@ func WithCollectionTableName(name string) Option {
 	}
 }
 
+// WithConnectionURL is an option for specifying the Postgres connection URL. Either this
+// or WithConn must be used.
+func WithConnectionURL(connectionURL string) Option {
+	return func(p *Store) {
+		p.connURL = connectionURL
+	}
+}
+
 // WithConn is an option for specifying the Postgres connection.
 // From pgx doc: it is not safe for concurrent usage.Use a connection pool to manage access
 // to multiple database connections from multiple goroutines.
-func WithConn(conn *pgx.Conn) Option {
+func WithConn(conn PGXConn) Option {
 	return func(p *Store) {
 		p.conn = conn
 	}
@@ -115,12 +114,8 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		opt(o)
 	}
 
-	if o.postgresConnectionURL == "" {
-		o.postgresConnectionURL = os.Getenv("PGVECTOR_CONNECTION_STRING")
-	}
-
-	if o.postgresConnectionURL == "" && o.conn == nil {
-		return Store{}, fmt.Errorf("%w: missing postgresConnectionURL", ErrInvalidOptions)
+	if o.conn == nil && o.connURL == "" {
+		return Store{}, fmt.Errorf("%w: missing postgres connection", ErrInvalidOptions)
 	}
 
 	if o.embedder == nil {

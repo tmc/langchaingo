@@ -8,7 +8,6 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
@@ -17,7 +16,7 @@ func main() {
 		openai.WithBaseURL("https://integrate.api.nvidia.com/v1/"),
 		openai.WithModel("mistralai/mixtral-8x7b-instruct-v0.1"),
 		openai.WithToken(key),
-		//openai.WithHTTPClient(httputil.DebugHTTPClient),
+		// openai.WithHTTPClient(httputil.DebugHTTPClient),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -25,8 +24,8 @@ func main() {
 	ctx := context.Background()
 
 	content := []llms.MessageContent{
-		llms.TextParts(schema.ChatMessageTypeSystem, "You are a golang expert"),
-		llms.TextParts(schema.ChatMessageTypeHuman, "explain why go is a great fit for ai based products"),
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are a golang expert"),
+		llms.TextParts(llms.ChatMessageTypeHuman, "explain why go is a great fit for ai based products"),
 	}
 
 	if _, err = llm.GenerateContent(ctx, content,
