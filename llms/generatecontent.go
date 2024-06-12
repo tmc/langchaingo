@@ -77,6 +77,27 @@ func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+func (iuc *ImageURLContent) UnmarshalJSON(data []byte) error {
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	_, ok := m["type"].(string)
+	if !ok {
+		return fmt.Errorf(`missing "type" field in ImageURLContent`)
+	}
+	imageURL, ok := m["image_url"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid image_url field in ImageURLContent")
+	}
+	url, ok := imageURL["url"].(string)
+	if !ok {
+		return fmt.Errorf("invalid url field in ImageURLContent")
+	}
+	iuc.URL = url
+	return nil
+}
+
 func (iuc ImageURLContent) String() string {
 	return iuc.URL
 }
@@ -105,11 +126,42 @@ func (bc BinaryContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+func (bc *BinaryContent) UnmarshalJSON(data []byte) error {
+	var m map[string]interface{}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if m["type"] != "binary" {
+		return fmt.Errorf("invalid type for BinaryContent: %v", m["type"])
+	}
+	binary, ok := m["binary"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid binary field in BinaryContent")
+	}
+	mimeType, ok := binary["mime_type"].(string)
+	if !ok {
+		return fmt.Errorf("invalid mime_type field in BinaryContent")
+	}
+	encodedData, ok := binary["data"].(string)
+	if !ok {
+		return fmt.Errorf("invalid data field in BinaryContent")
+	}
+	enc, err := base64.StdEncoding.DecodeString(encodedData)
+	if err != nil {
+		return fmt.Errorf("error decoding data: %v", err)
+	}
+	bc.MIMEType = mimeType
+	bc.Data = enc
+	return nil
+}
+
 func (BinaryContent) isPart() {}
 
 // FunctionCall is the name and arguments of a function call.
 type FunctionCall struct {
-	Name      string `json:"name"`
+	// The name of the function to call.
+	Name string `json:"name"`
+	// The arguments to pass to the function, as a JSON string.
 	Arguments string `json:"arguments"`
 }
 
@@ -117,14 +169,14 @@ type FunctionCall struct {
 type ToolCall struct {
 	// ID is the unique identifier of the tool call.
 	ID string `json:"id"`
-	// Type is the type of the tool call.
+	// Type is the type of the tool call. Typically, this would be "function".
 	Type string `json:"type"`
 	// FunctionCall is the function call to be executed.
 	FunctionCall *FunctionCall `json:"function,omitempty"`
 }
 
-func (bc ToolCall) MarshalJSON() ([]byte, error) {
-	fc, err := json.Marshal(bc.FunctionCall)
+func (tc ToolCall) MarshalJSON() ([]byte, error) {
+	fc, err := json.Marshal(tc.FunctionCall)
 	if err != nil {
 		return nil, err
 	}
@@ -132,12 +184,47 @@ func (bc ToolCall) MarshalJSON() ([]byte, error) {
 	m := map[string]any{
 		"type": "tool_call",
 		"tool_call": map[string]any{
-			"id":   bc.ID,
-			"type": bc.Type,
-			"fc":   json.RawMessage(fc),
+			"id":       tc.ID,
+			"type":     tc.Type,
+			"function": json.RawMessage(fc),
 		},
 	}
 	return json.Marshal(m)
+}
+
+func (tc *ToolCall) UnmarshalJSON(data []byte) error {
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	_, ok := m["type"].(string)
+	if !ok {
+		return fmt.Errorf(`missing "type" field in ToolCall`)
+	}
+	toolCall, ok := m["tool_call"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid tool_call field in ToolCall")
+	}
+	fmt.Println("Dec tC:", toolCall)
+	id, ok := toolCall["id"].(string)
+	if !ok {
+		return fmt.Errorf("invalid id field in ToolCall")
+	}
+	typ, ok := toolCall["type"].(string)
+	if !ok {
+		return fmt.Errorf("invalid type field in ToolCall")
+	}
+	var fc FunctionCall
+	fcData, ok := toolCall["function"].(json.RawMessage)
+	if ok {
+		if err := json.Unmarshal(fcData, &fc); err != nil {
+			return fmt.Errorf("error unmarshalling function call: %v", err)
+		}
+	}
+	tc.ID = id
+	tc.Type = typ
+	tc.FunctionCall = &fc
+	return nil
 }
 
 func (ToolCall) isPart() {}

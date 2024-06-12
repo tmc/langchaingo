@@ -42,9 +42,7 @@ func (mc *MessageContent) UnmarshalYAML(unmarshal func(interface{}) error) error
 			mc.Parts = append(mc.Parts, content)
 		case "image_url":
 			var content ImageURLContent
-			if err := mapToStruct(part, &content); err != nil {
-				return err
-			}
+			content.URL, _ = part["url"].(string)
 			mc.Parts = append(mc.Parts, content)
 		case "binary":
 			var content BinaryContent
@@ -54,6 +52,26 @@ func (mc *MessageContent) UnmarshalYAML(unmarshal func(interface{}) error) error
 			}
 			content.MIMEType, _ = part["mime_type"].(string)
 			content.Data = data
+			mc.Parts = append(mc.Parts, content)
+		case "tool_call":
+			var content ToolCall
+			tc, ok := part["tool_call"].(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("tool_call part is not a map")
+			}
+			if err := mapToStruct(tc, &content); err != nil {
+				return err
+			}
+			mc.Parts = append(mc.Parts, content)
+		case "tool_response":
+			var content ToolCallResponse
+			tr, ok := part["tool_response"].(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("tool_response part is not a map")
+			}
+			if err := mapToStruct(tr, &content); err != nil {
+				return err
+			}
 			mc.Parts = append(mc.Parts, content)
 		default:
 			return fmt.Errorf("unknown content type: %s", part["type"])
@@ -69,48 +87,56 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 		Text  string          `json:"text"`
 		Parts []struct {
 			Type     string `json:"type"`
-			Text     string `json:"text"`
+			Text     string `json:"text,omitempty"`
 			ImageURL struct {
 				URL string `json:"url"`
-			} `json:"image_url"`
+			} `json:"image_url,omitempty"`
 			Binary struct {
+				Data     string `json:"data"`
 				MIMEType string `json:"mime_type"`
-				Data     []byte `json:"data"`
-			} `json:"binary"`
+			} `json:"binary,omitempty"`
+			ID       string `json:"id"`
 			ToolCall struct {
-				ID       string        `json:"id"`
-				Type     string        `json:"type"`
-				FuncCall *FunctionCall `json:"fc"`
+				ID           string        `json:"id"`
+				Type         string        `json:"type"`
+				FunctionCall *FunctionCall `json:"function"`
 			} `json:"tool_call"`
-			ToolResp json.RawMessage `json:"tool_response"`
+			ToolResponse struct {
+				ToolCallID string `json:"tool_call_id"`
+				Name       string `json:"name"`
+				Content    string `json:"content"`
+			} `json:"tool_response"`
 		} `json:"parts"`
 	}
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
 	mc.Role = m.Role
-	mc.Parts = make([]ContentPart, len(m.Parts))
 
-	for i, part := range m.Parts {
+	for _, part := range m.Parts {
 		switch part.Type {
 		case "text":
-			mc.Parts[i] = TextContent{Text: part.Text}
+			mc.Parts = append(mc.Parts, TextContent{Text: part.Text})
 		case "image_url":
-			mc.Parts[i] = ImageURLContent{URL: part.ImageURL.URL}
+			mc.Parts = append(mc.Parts, ImageURLContent{URL: part.ImageURL.URL})
 		case "binary":
-			mc.Parts[i] = BinaryContent{MIMEType: part.Binary.MIMEType, Data: part.Binary.Data}
+			decoded, err := base64.StdEncoding.DecodeString(part.Binary.Data)
+			if err != nil {
+				return fmt.Errorf("failed to decode binary data: %w", err)
+			}
+			mc.Parts = append(mc.Parts, BinaryContent{MIMEType: part.Binary.MIMEType, Data: decoded})
 		case "tool_call":
-			mc.Parts[i] = ToolCall{
+			mc.Parts = append(mc.Parts, ToolCall{
 				ID:           part.ToolCall.ID,
 				Type:         part.ToolCall.Type,
-				FunctionCall: part.ToolCall.FuncCall,
-			}
+				FunctionCall: part.ToolCall.FunctionCall,
+			})
 		case "tool_response":
-			var tr ToolCallResponse
-			if err := json.Unmarshal(part.ToolResp, &tr); err != nil {
-				return err
-			}
-			mc.Parts[i] = tr
+			mc.Parts = append(mc.Parts, ToolCallResponse{
+				ToolCallID: part.ToolResponse.ToolCallID,
+				Name:       part.ToolResponse.Name,
+				Content:    string(part.ToolResponse.Content),
+			})
 		default:
 			return fmt.Errorf("unknown content type: %s", part.Type)
 		}
@@ -153,8 +179,18 @@ func (mc MessageContent) MarshalYAML() (interface{}, error) {
 				"mime_type": content.MIMEType,
 				"data":      base64.StdEncoding.EncodeToString(content.Data),
 			})
+		case ToolCall:
+			parts = append(parts, map[string]interface{}{
+				"type":      "tool_call",
+				"tool_call": content,
+			})
+		case ToolCallResponse:
+			parts = append(parts, map[string]interface{}{
+				"type":          "tool_response",
+				"tool_response": content,
+			})
 		default:
-			return nil, fmt.Errorf("unknown content type")
+			return nil, fmt.Errorf("unknown content type: %T", content)
 		}
 	}
 
@@ -176,6 +212,7 @@ func (mc MessageContent) MarshalJSON() ([]byte, error) {
 			Text string          `json:"text"`
 		}{Role: mc.Role, Text: tp.Text})
 	}
+
 	return json.Marshal(struct {
 		Role  ChatMessageType `json:"role"`
 		Parts []ContentPart   `json:"parts"`
