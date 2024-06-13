@@ -123,6 +123,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		return nil, err
 	}
 
+	tools := toolsToTools(opts.Tools)
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
 		Messages:      chatMessages,
@@ -131,6 +132,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		StopWords:     opts.StopWords,
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
+		Tools:         tools,
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
@@ -157,6 +159,19 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 	return resp, nil
 }
+
+func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
+	toolReq := make([]anthropicclient.Tool, len(tools))
+	for i, tool := range tools {
+		toolReq[i] = anthropicclient.Tool{
+			Name:        tool.Function.Name,
+			Description: tool.Function.Description,
+			InputSchema: tool.Function.Parameters,
+		}
+	}
+	return toolReq
+}
+
 
 func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
 	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
