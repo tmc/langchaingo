@@ -419,6 +419,13 @@ func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
 			}
 			schema.Properties[propName].Description = descString
 		}
+		if desc, ok := valueMap["enum"]; ok {
+			enumList, ok := desc.([]string)
+			if !ok {
+				return nil, fmt.Errorf("tool: function[%s]: expected string list for enum", tool.Function.Name)
+			}
+			schema.Properties[propName].Enum = enumList
+		}
 	}
 
 	if required, ok := params["required"]; ok {
