@@ -59,35 +59,40 @@ func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.Conte
 // executeToolCalls executes the tool calls in the response and returns the
 // updated message history.
 func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
-	for _, toolCall := range resp.Choices[0].ToolCalls {
-		switch toolCall.FunctionCall.Name {
-		case "getCurrentWeather":
-			var args struct {
-				Location string `json:"location"`
-				Unit     string `json:"unit"`
-			}
-			if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
-				log.Fatal(err)
-			}
+	for _, choice := range resp.Choices {
+		for _, toolCall := range choice.ToolCalls {
+			switch toolCall.FunctionCall.Name {
+			case "getCurrentWeather":
+				var args struct {
+					Location string `json:"location"`
+					Unit     string `json:"unit"`
+				}
+				if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
+					log.Fatal(err)
+				}
 
-			response, err := getCurrentWeather(args.Location, args.Unit)
-			if err != nil {
-				log.Fatal(err)
-			}
+				response, err := getCurrentWeather(args.Location, args.Unit)
+				if err != nil {
+					fmt.Printf("error: %v\n", err)
+					log.Fatal(err)
+				}
 
-			weatherCallResponse := llms.MessageContent{
-				Role: llms.ChatMessageTypeTool,
-				Parts: []llms.ContentPart{
-					llms.ToolCallResponse{
-						ToolCallID: toolCall.ID,
-						Name:       toolCall.FunctionCall.Name,
-						Content:    response,
+				fmt.Printf("Weather of %s is %s\n", args.Location, response)
+
+				weatherCallResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							ToolCallID: toolCall.ID,
+							Name:       toolCall.FunctionCall.Name,
+							Content:    response,
+						},
 					},
-				},
+				}
+				messageHistory = append(messageHistory, weatherCallResponse)
+			default:
+				log.Fatalf("Unsupported tool: %s", toolCall.FunctionCall.Name)
 			}
-			messageHistory = append(messageHistory, weatherCallResponse)
-		default:
-			log.Fatalf("Unsupported tool: %s", toolCall.FunctionCall.Name)
 		}
 	}
 
@@ -100,8 +105,19 @@ func getCurrentWeather(location string, unit string) (string, error) {
 		"chicago": "65 and windy",
 	}
 
-	weatherInfo, ok := weatherResponses[strings.ToLower(location)]
-	if !ok {
+	loweredLocation := strings.ToLower(location)
+
+	var weatherInfo string
+	found := false
+	for key, value := range weatherResponses {
+		if strings.Contains(loweredLocation, key) {
+			weatherInfo = value
+			found = true
+			break
+		}
+	}
+
+	if !found {
 		return "", fmt.Errorf("no weather info for %q", location)
 	}
 
