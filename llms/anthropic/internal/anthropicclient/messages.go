@@ -144,10 +144,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	}
 }
 
-func (c *Client) createMessage(
-	ctx context.Context,
-	payload *messagePayload,
-) (*MessageResponsePayload, error) {
+func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*MessageResponsePayload, error) {
 	c.setMessageDefaults(payload)
 
 	payloadBytes, err := json.Marshal(payload)
@@ -182,11 +179,7 @@ type MessageEvent struct {
 	Err      error
 }
 
-func parseStreamingMessageResponse(
-	ctx context.Context,
-	r *http.Response,
-	payload *messagePayload,
-) (*MessageResponsePayload, error) {
+func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payload *messagePayload) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
 	eventChan := make(chan MessageEvent)
 
@@ -231,13 +224,7 @@ func parseStreamEvent(data string) (map[string]interface{}, error) {
 	return event, err
 }
 
-func processStreamEvent(
-	ctx context.Context,
-	event map[string]interface{},
-	payload *messagePayload,
-	response MessageResponsePayload,
-	eventChan chan<- MessageEvent,
-) (MessageResponsePayload, error) {
+func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *messagePayload, response MessageResponsePayload, eventChan chan<- MessageEvent) (MessageResponsePayload, error) {
 	eventType, ok := event["type"].(string)
 	if !ok {
 		return response, errors.New("invalid event type field type")
@@ -263,10 +250,7 @@ func processStreamEvent(
 	return response, nil
 }
 
-func handleMessageStartEvent(
-	event map[string]interface{},
-	response MessageResponsePayload,
-) (MessageResponsePayload, error) {
+func handleMessageStartEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
 	message, ok := event["message"].(map[string]interface{})
 	if !ok {
 		return response, errors.New("invalid message field type")
@@ -291,10 +275,7 @@ func handleMessageStartEvent(
 	return response, nil
 }
 
-func handleContentBlockStartEvent(
-	event map[string]interface{},
-	response MessageResponsePayload,
-) (MessageResponsePayload, error) {
+func handleContentBlockStartEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
 	indexValue, ok := event["index"].(float64)
 	if !ok {
 		return response, errors.New("invalid index field type")
@@ -307,12 +288,7 @@ func handleContentBlockStartEvent(
 	return response, nil
 }
 
-func handleContentBlockDeltaEvent(
-	ctx context.Context,
-	event map[string]interface{},
-	response MessageResponsePayload,
-	payload *messagePayload,
-) (MessageResponsePayload, error) {
+func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interface{}, response MessageResponsePayload, payload *messagePayload) (MessageResponsePayload, error) {
 	indexValue, ok := event["index"].(float64)
 	if !ok {
 		return response, errors.New("invalid index field type")
@@ -359,10 +335,7 @@ func handleContentBlockDeltaEvent(
 	return response, nil
 }
 
-func handleMessageDeltaEvent(
-	event map[string]interface{},
-	response MessageResponsePayload,
-) (MessageResponsePayload, error) {
+func handleMessageDeltaEvent(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
 	delta, ok := event["delta"].(map[string]interface{})
 	if !ok {
 		return response, errors.New("invalid delta field type")

@@ -60,8 +60,6 @@ func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.Conte
 // updated message history.
 func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
 	for _, toolCall := range resp.Choices[0].ToolCalls {
-		fmt.Printf("Executing tool call: %s\n", toolCall.FunctionCall.Name)
-
 		switch toolCall.FunctionCall.Name {
 		case "getCurrentWeather":
 			var args struct {
