@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	messageHistory = updateMessageHistory(messageHistory, resp)
 
 	// Execute tool calls requested by the model
 	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
@@ -44,29 +43,19 @@ func main() {
 	fmt.Println(resp.Choices[0].Content)
 }
 
-// updateMessageHistory updates the message history with the assistant's
-// response and requested tool calls.
-func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
-
-	// TODO Remove hardcode
-
-	// choice1 := resp.Choices[0]
-	choice := resp.Choices[1]
-
-	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI)
-	for _, tc := range choice.ToolCalls {
-		assistantResponse.Parts = append(assistantResponse.Parts, tc)
-	}
-	messageHistory = append(messageHistory, assistantResponse)
-
-	return messageHistory
-}
-
 // executeToolCalls executes the tool calls in the response and returns the
 // updated message history.
 func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
 	for _, choice := range resp.Choices {
 		for _, toolCall := range choice.ToolCalls {
+
+			// Append tool_use to messageHistory
+			assistantResponse := llms.TextParts(llms.ChatMessageTypeAI)
+			for _, tc := range choice.ToolCalls {
+				assistantResponse.Parts = append(assistantResponse.Parts, tc)
+			}
+			messageHistory = append(messageHistory, assistantResponse)
+
 			switch toolCall.FunctionCall.Name {
 			case "getCurrentWeather":
 				var args struct {
@@ -77,11 +66,13 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 					log.Fatal(err)
 				}
 
+				// Perform Function Calling
 				response, err := getCurrentWeather(args.Location, args.Unit)
 				if err != nil {
 					log.Fatal(err)
 				}
 
+				// Append tool_result to messageHistory
 				weatherCallResponse := llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
 					Parts: []llms.ContentPart{
@@ -154,12 +145,4 @@ var availableTools = []llms.Tool{
 			},
 		},
 	},
-}
-
-func showResponse(resp *llms.ContentResponse) string {
-	b, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(b)
 }
