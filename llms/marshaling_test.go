@@ -202,7 +202,6 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 			want: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
-
 					TextContent{Text: "Hello, world!"},
 				},
 			},
@@ -243,7 +242,8 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 					ToolCall{
 						ID:           "t42",
 						Type:         "function",
-						FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`}},
+						FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`},
+					},
 				},
 			},
 			wantErr: false,
@@ -263,7 +263,7 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 			var mc MessageContent
 			err := mc.UnmarshalJSON([]byte(tt.input))
 			if (err != nil) != tt.wantErr {
@@ -343,16 +343,15 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 	}
 }
 
-// Test roundtripping for both JSON and YAML
-
-func TestRoundtripping(t *testing.T) {
-	//t.Parallel()
+// Test roundtripping for both JSON and YAML representations.
+func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception given the number of test cases.
+	t.Parallel()
 	tests := []struct {
 		name string
 		in   any
 	}{
 		{
-			name: "Single text part",
+			name: "single text part",
 			in: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -361,7 +360,7 @@ func TestRoundtripping(t *testing.T) {
 			},
 		},
 		{
-			name: "Multiple parts",
+			name: "multiple parts",
 			in: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -383,7 +382,6 @@ func TestRoundtripping(t *testing.T) {
 				},
 			},
 		},
-		// multiple tool uses:
 		{
 			name: "multiple tool uses",
 			in: MessageContent{
@@ -408,7 +406,6 @@ func TestRoundtripping(t *testing.T) {
 			in: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
-
 					ToolCall{Type: "hammer", FunctionCall: &FunctionCall{Name: "hit", Arguments: `{ "force": 10, "direction": "down" }`}},
 				},
 			},
@@ -442,12 +439,10 @@ func TestRoundtripping(t *testing.T) {
 			},
 		},
 		{
-
 			name: "multi-tool response with arguments",
 			in: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
-
 					ToolCallResponse{ToolCallID: "123", Name: "hammer", Content: "hit"},
 					ToolCallResponse{ToolCallID: "456", Name: "screwdriver", Content: "turn"},
 				},
@@ -455,10 +450,10 @@ func TestRoundtripping(t *testing.T) {
 		},
 	}
 
-	// round-trip both JSON and YAML:
+	// Round-trip both JSON and YAML:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 			// JSON
 			jsonBytes, err := json.Marshal(tt.in)
 			if err != nil {
