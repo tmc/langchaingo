@@ -38,21 +38,84 @@ type Tool struct {
 	InputSchema any    `json:"input_schema,omitempty"`
 }
 
+// Content can be TextContent or ToolUseContent depending on the type
+type Content interface {
+	GetType() string
+}
+
+type TextContent struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
+}
+
+func (tc TextContent) GetType() string {
+	return tc.Type
+}
+
+type ToolUseContent struct {
+	Type  string                 `json:"type"`
+	ID    string                 `json:"id"`
+	Name  string                 `json:"name"`
+	Input map[string]interface{} `json:"input"`
+}
+
+func (tuc ToolUseContent) GetType() string {
+	return tuc.Type
+}
+
 type MessageResponsePayload struct {
-	Content []struct {
-		Text string `json:"text"`
-		Type string `json:"type"`
-	} `json:"content"`
-	ID           string `json:"id"`
-	Model        string `json:"model"`
-	Role         string `json:"role"`
-	StopReason   string `json:"stop_reason"`
-	StopSequence string `json:"stop_sequence"`
-	Type         string `json:"type"`
+	Content      []Content `json:"content"`
+	ID           string    `json:"id"`
+	Model        string    `json:"model"`
+	Role         string    `json:"role"`
+	StopReason   string    `json:"stop_reason"`
+	StopSequence string    `json:"stop_sequence"`
+	Type         string    `json:"type"`
 	Usage        struct {
 		InputTokens  int `json:"input_tokens"`
 		OutputTokens int `json:"output_tokens"`
 	} `json:"usage"`
+}
+
+func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
+	type Alias MessageResponsePayload
+	aux := &struct {
+		Content []json.RawMessage `json:"content"`
+		*Alias
+	}{
+		Alias: (*Alias)(m),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	for _, raw := range aux.Content {
+		var typeStruct struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(raw, &typeStruct); err != nil {
+			return err
+		}
+
+		switch typeStruct.Type {
+		case "text":
+			var tc TextContent
+			if err := json.Unmarshal(raw, &tc); err != nil {
+				return err
+			}
+			m.Content = append(m.Content, tc)
+		case "tool_use":
+			var tuc ToolUseContent
+			if err := json.Unmarshal(raw, &tuc); err != nil {
+				return err
+			}
+			m.Content = append(m.Content, tuc)
+		default:
+			return fmt.Errorf("unknown content type: %s", typeStruct.Type)
+		}
+	}
+
+	return nil
 }
 
 func (c *Client) setMessageDefaults(payload *messagePayload) {
@@ -239,10 +302,7 @@ func handleContentBlockStartEvent(
 	index := int(indexValue)
 
 	if len(response.Content) <= index {
-		response.Content = append(response.Content, struct {
-			Text string `json:"text"`
-			Type string `json:"type"`
-		}{})
+		response.Content = append(response.Content, TextContent{})
 	}
 	return response, nil
 }
@@ -274,7 +334,13 @@ func handleContentBlockDeltaEvent(
 			return response, errors.New("invalid delta text field type")
 		}
 		if len(response.Content) > index {
-			response.Content[index].Text += text
+			if response.Content[index].GetType() == "text" {
+				if textContent, ok := response.Content[index].(*TextContent); ok {
+					textContent.Text += text
+				} else {
+					return response, errors.New("content at index is not of type TextContent")
+				}
+			}
 		} else {
 			return response, errors.New("content index out of range")
 		}

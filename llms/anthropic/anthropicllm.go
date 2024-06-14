@@ -2,6 +2,7 @@ package anthropic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -144,13 +145,40 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	choices := make([]*llms.ContentChoice, len(result.Content))
 	for i, content := range result.Content {
-		choices[i] = &llms.ContentChoice{
-			Content:    content.Text,
-			StopReason: result.StopReason,
-			GenerationInfo: map[string]any{
-				"InputTokens":  result.Usage.InputTokens,
-				"OutputTokens": result.Usage.OutputTokens,
-			},
+		if content.GetType() == "text" {
+			textContent := content.(anthropicclient.TextContent)
+			choices[i] = &llms.ContentChoice{
+				Content:    textContent.Text,
+				StopReason: result.StopReason,
+				GenerationInfo: map[string]any{
+					"InputTokens":  result.Usage.InputTokens,
+					"OutputTokens": result.Usage.OutputTokens,
+				},
+			}
+		} else if content.GetType() == "tool_use" {
+			toolUseContent := content.(anthropicclient.ToolUseContent)
+			argumentsJson, err := json.Marshal(toolUseContent.Input)
+			if err != nil {
+				return nil, err
+			}
+			choices[i] = &llms.ContentChoice{
+				ToolCalls: []llms.ToolCall{
+					{
+						ID: toolUseContent.ID,
+						FunctionCall: &llms.FunctionCall{
+							Name:      toolUseContent.Name,
+							Arguments: string(argumentsJson),
+						},
+					},
+				},
+				StopReason: result.StopReason,
+				GenerationInfo: map[string]any{
+					"InputTokens":  result.Usage.InputTokens,
+					"OutputTokens": result.Usage.OutputTokens,
+				},
+			}
+		} else {
+			return nil, fmt.Errorf("unsupported content type: %v", content.GetType())
 		}
 	}
 
@@ -171,7 +199,6 @@ func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
 	}
 	return toolReq
 }
-
 
 func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
 	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
