@@ -31,14 +31,14 @@ type messagePayload struct {
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
-// Tool used for the request message payload
+// Tool used for the request message payload.
 type Tool struct {
 	Name        string `json:"name"`
 	Description string `json:"description,omitempty"`
 	InputSchema any    `json:"input_schema,omitempty"`
 }
 
-// Content can be TextContent or ToolUseContent depending on the type
+// Content can be TextContent or ToolUseContent depending on the type.
 type Content interface {
 	GetType() string
 }
@@ -309,17 +309,17 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		if !ok {
 			return response, errors.New("invalid delta text field type")
 		}
-		if len(response.Content) > index {
-			if response.Content[index].GetType() == "text" {
-				if textContent, ok := response.Content[index].(*TextContent); ok {
-					textContent.Text += text
-				} else {
-					return response, errors.New("content at index is not of type TextContent")
-				}
-			}
-		} else {
+		if len(response.Content) <= index {
 			return response, errors.New("content index out of range")
 		}
+		if response.Content[index].GetType() != "text" {
+			return response, errors.New("invalid content type")
+		}
+		textContent, ok := response.Content[index].(*TextContent)
+		if !ok {
+			return response, errors.New("failed to cast content to TextContent")
+		}
+		textContent.Text += text
 	}
 
 	if payload.StreamingFunc != nil {
