@@ -20,10 +20,10 @@ func main() {
 	// Sending initial message to the model, with a list of available tools.
 	ctx := context.Background()
 	messageHistory := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston?"),
 	}
 
-	fmt.Println("Querying for weather in Boston and Chicago..")
+	fmt.Println("Querying for weather in Boston..")
 	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +32,7 @@ func main() {
 
 	// Execute tool calls requested by the model
 	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
-	messageHistory = append(messageHistory, llms.TextParts(llms.ChatMessageTypeHuman, "Can you compare the two?"))
+	// messageHistory = append(messageHistory, llms.TextParts(llms.ChatMessageTypeHuman, "Can you compare the two?"))
 
 	// Send query to the model again, this time with a history containing its
 	// request to invoke a tool and our response to the tool call.
@@ -47,13 +47,19 @@ func main() {
 // updateMessageHistory updates the message history with the assistant's
 // response and requested tool calls.
 func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
-	respchoice := resp.Choices[0]
 
-	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respchoice.Content)
-	for _, tc := range respchoice.ToolCalls {
+	// TODO Remove hardcode
+
+	// choice1 := resp.Choices[0]
+	choice := resp.Choices[1]
+
+	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI)
+	for _, tc := range choice.ToolCalls {
 		assistantResponse.Parts = append(assistantResponse.Parts, tc)
 	}
-	return append(messageHistory, assistantResponse)
+	messageHistory = append(messageHistory, assistantResponse)
+
+	return messageHistory
 }
 
 // executeToolCalls executes the tool calls in the response and returns the
@@ -73,11 +79,8 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 
 				response, err := getCurrentWeather(args.Location, args.Unit)
 				if err != nil {
-					fmt.Printf("error: %v\n", err)
 					log.Fatal(err)
 				}
-
-				fmt.Printf("Weather of %s is %s\n", args.Location, response)
 
 				weatherCallResponse := llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
