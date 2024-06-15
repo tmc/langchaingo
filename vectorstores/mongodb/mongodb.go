@@ -19,9 +19,9 @@ import (
 // Store is a wrapper around the mongodb client.
 // We want to wrap mongo's client options all in 1
 type Store struct {
-	client *mongo.Client
-	connectionUri string
-	clientOptions *options.ClientOptions
+	Client *mongo.Client
+	ConnectionUri string
+	ClientOptions *options.ClientOptions
 }
 
 // New creates a new Store with options. 
@@ -30,7 +30,7 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-	s.client, err = mongo.Connect(ctx, s.clientOptions)
+	s.Client, err = mongo.Connect(ctx, s.ClientOptions)
 	if err != nil {
 		return Store{}, err
 	}

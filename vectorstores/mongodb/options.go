@@ -13,9 +13,9 @@ var serverAPI = options.ServerAPI(options.ServerAPIVersion1)
 
 type Option func(p *Store)
 
-func WithConnectionString(connectionUri string) Option {
+func WithConnectionUri(connectionUri string) Option {
 	return func(p *Store) {
-		p.connectionUri = connectionUri
+		p.ConnectionUri = connectionUri
 	}
 }
 
@@ -24,10 +24,10 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	for _, opt := range opts {
 		opt(o)
 	}
-	if o.connectionUri == "" {
+	if o.ConnectionUri == "" {
 		return Store{}, fmt.Errorf("%w: missing mongodb connection string", ErrInvalidOptions)
 	}
-	o.clientOptions = options.Client().ApplyURI(o.connectionUri).SetServerAPIOptions(serverAPI)
+	o.ClientOptions = options.Client().ApplyURI(o.ConnectionUri).SetServerAPIOptions(serverAPI)
 	return *o, nil
 }
 
