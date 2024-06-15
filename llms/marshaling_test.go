@@ -371,14 +371,26 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 				Role: "user",
 				Parts: []ContentPart{
 					TextContent{Text: "Hello!, world!"},
-					ImageURLContent{URL: "http://example.com/image.png"},
+					ImageURLContent{URL: "http://example.com/image.png", Detail: "low"},
 					BinaryContent{
 						MIMEType: "application/octet-stream",
 						Data:     []byte("Hello, world!"),
 					},
 				},
 			},
-			assertedYAML: "parts:\n- text: Hello!, world!\n  type: text\n- image_url:\n    url: http://example.com/image.png\n  type: image_url\n- binary:\n    data: SGVsbG8sIHdvcmxkIQ==\n    mime_type: application/octet-stream\n  type: binary\nrole: user\n",
+			assertedYAML: `parts:
+- text: Hello!, world!
+  type: text
+- image_url:
+    detail: low
+    url: http://example.com/image.png
+  type: image_url
+- binary:
+    data: SGVsbG8sIHdvcmxkIQ==
+    mime_type: application/octet-stream
+  type: binary
+role: user
+`,
 		},
 		{
 			name: "tool use",
