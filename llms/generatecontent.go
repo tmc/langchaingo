@@ -37,6 +37,14 @@ func ImageURLPart(url string) ImageURLContent {
 	}
 }
 
+// ImageURLWithDetailPart creates a new ImageURLContent from the given URL and detail.
+func ImageURLWithDetailPart(url string, detail string) ImageURLContent {
+	return ImageURLContent{
+		URL:    url,
+		Detail: detail,
+	}
+}
+
 // ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {
 	isPart()
@@ -55,7 +63,8 @@ func (TextContent) isPart() {}
 
 // ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
-	URL string `json:"url" yaml:"url"`
+	URL    string `json:"url"`
+	Detail string `json:"detail,omitempty"` // Detail is the detail of the image, e.g. "low", "high".
 }
 
 func (iuc ImageURLContent) String() string {
