@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 type unknownContent struct{}
@@ -21,9 +21,8 @@ func TestUnmarshalYAML(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Single text part",
-			input: `
-role: user
+			name: "single text part",
+			input: `role: user
 text: Hello, world!
 `,
 			want: MessageContent{
@@ -35,18 +34,24 @@ text: Hello, world!
 			wantErr: false,
 		},
 		{
-			name: "Multiple parts",
+			name: "multiple parts",
 			input: `role: user
 parts:
 - type: text
   text: Hello!, world!
 - type: image_url
-  url: http://example.com/image.png
+  image_url:
+    url: http://example.com/image.png
+- type: image_url
+  image_url:
+    url: http://example.com/image.png
+    detail: high
 - type: binary
-  mime_type: application/octet-stream
-  data: SGVsbG8sIHdvcmxkIQ==
+  binary:
+    mime_type: application/octet-stream
+    data: SGVsbG8sIHdvcmxkIQ==
 - tool_response:
-    toolcallid: "123"
+    tool_call_id: "123"
     name: hammer
     content: hit
   type: tool_response
@@ -55,6 +60,7 @@ parts:
 				Role: "user",
 				Parts: []ContentPart{
 					TextContent{Text: "Hello!, world!"},
+					ImageURLContent{URL: "http://example.com/image.png"},
 					ImageURLContent{URL: "http://example.com/image.png"},
 					BinaryContent{
 						MIMEType: "application/octet-stream",
@@ -87,6 +93,7 @@ parts:
 			err := yaml.Unmarshal([]byte(tt.input), &mc)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UnmarshalYAML() error = %v, wantErr %v", err, tt.wantErr)
+				t.Log("in:", tt.input)
 				return
 			}
 			if diff := cmp.Diff(tt.want, mc); diff != "" {
@@ -105,7 +112,7 @@ func TestMarshalYAML(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Single text part",
+			name: "single text part",
 			input: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -118,7 +125,7 @@ text: Hello, world!
 			wantErr: false,
 		},
 		{
-			name: "Multiple parts",
+			name: "multiple parts",
 			input: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -136,53 +143,46 @@ text: Hello, world!
 				},
 			},
 			want: `parts:
-    - text: Hello, world!
-      type: text
-    - type: image_url
-      url: http://example.com/image.png
-    - data: SGVsbG8sIHdvcmxkIQ==
-      mime_type: application/octet-stream
-      type: binary
-    - tool_response:
-        toolcallid: "123"
-        name: hammer
-        content: hit
-      type: tool_response
+- text: Hello, world!
+  type: text
+- image_url:
+    url: http://example.com/image.png
+  type: image_url
+- binary:
+    data: SGVsbG8sIHdvcmxkIQ==
+    mime_type: application/octet-stream
+  type: binary
+- tool_response:
+    content: hit
+    name: hammer
+    tool_call_id: "123"
+  type: tool_response
 role: user
 `,
 			wantErr: false,
 		},
 		{
-			name: "Unknown content type",
+			name: "unknown content type",
 			input: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
 					unknownContent{},
 				},
 			},
-			want:    "",
-			wantErr: true,
+			want: "parts:\n- {}\nrole: user\n",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := tt.input.MarshalYAML()
+			got, err := yaml.Marshal(tt.input)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MarshalYAML() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if err == nil {
-				gotBytes, err := yaml.Marshal(got)
-				if err != nil {
-					t.Errorf("yaml.Marshal() error = %v", err)
-					return
-				}
-				gotStr := string(gotBytes)
-				if diff := cmp.Diff(tt.want, gotStr); diff != "" {
-					t.Errorf("MarshalYAML() mismatch (-want +got):\n%s", diff)
-				}
+			if diff := cmp.Diff(tt.want, string(got)); diff != "" {
+				t.Errorf("MarshalYAML() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -197,7 +197,7 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:  "Single text part",
+			name:  "single text part",
 			input: `{"role":"user","text":"Hello, world!"}`,
 			want: MessageContent{
 				Role: "user",
@@ -209,12 +209,12 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "Multiple parts",
-			input: `{"role":"user","parts":[{"type":"text","text":"Hello!, world!"},{"type":"image_url","image_url":{"url":"http://example.com/image.png"}},{"type":"binary","binary":{"mime_type":"application/octet-stream","data":"SGVsbG8sIHdvcmxkIQ=="}}]}`,
+			name:  "multiple parts",
+			input: `{"role":"user","parts":[{"text":"Hello, world!","type":"text"},{"type":"image_url","image_url":{"url":"http://example.com/image.png"}},{"type":"binary","binary":{"data":"SGVsbG8sIHdvcmxkIQ==","mime_type":"application/octet-stream"}}]}`,
 			want: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
-					TextContent{Text: "Hello!, world!"},
+					TextContent{Text: "Hello, world!"},
 					ImageURLContent{URL: "http://example.com/image.png"},
 					BinaryContent{
 						MIMEType: "application/octet-stream",
@@ -286,7 +286,7 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Single text part",
+			name: "single text part",
 			input: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -297,7 +297,7 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Multiple parts",
+			name: "multiple parts",
 			input: MessageContent{
 				Role: "user",
 				Parts: []ContentPart{
@@ -309,7 +309,7 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 					},
 				},
 			},
-			want:    `{"role":"user","parts":[{"text":"Hello, world!","type":"text"},{"image_url":{"url":"http://example.com/image.png"},"type":"image_url"},{"binary":{"data":"SGVsbG8sIHdvcmxkIQ==","mime_type":"application/octet-stream"},"type":"binary"}]}`,
+			want:    `{"role":"user","parts":[{"text":"Hello, world!","type":"text"},{"type":"image_url","image_url":{"url":"http://example.com/image.png"}},{"type":"binary","binary":{"data":"SGVsbG8sIHdvcmxkIQ==","mime_type":"application/octet-stream"}}]}`,
 			wantErr: false,
 		},
 		{
@@ -328,16 +328,18 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := tt.input.MarshalJSON()
+			got, err := json.Marshal(tt.input)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if err == nil {
-				gotStr := string(got)
-				if diff := cmp.Diff(tt.want, gotStr); diff != "" {
-					t.Errorf("MarshalJSON() mismatch (-want +got):\n%s", diff)
-				}
+			if err != nil {
+				t.Errorf("MarshalJSON() error = %v", err)
+			}
+			gotStr := string(got)
+			if diff := cmp.Diff(tt.want, gotStr); diff != "" {
+				t.Errorf("MarshalJSON() mismatch (-want +got):\n%s", diff)
+				t.Log("got:", gotStr)
 			}
 		})
 	}
@@ -347,8 +349,10 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception given the number of test cases.
 	t.Parallel()
 	tests := []struct {
-		name string
-		in   any
+		name         string
+		in           MessageContent
+		assertedJSON string
+		assertedYAML string
 	}{
 		{
 			name: "single text part",
@@ -358,6 +362,8 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 					TextContent{Text: "Hello, world!"},
 				},
 			},
+			assertedJSON: `{"role":"user","text":"Hello, world!"}`,
+			assertedYAML: "role: user\ntext: Hello, world!\n",
 		},
 		{
 			name: "multiple parts",
@@ -372,6 +378,7 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 					},
 				},
 			},
+			assertedYAML: "parts:\n- text: Hello!, world!\n  type: text\n- image_url:\n    url: http://example.com/image.png\n  type: image_url\n- binary:\n    data: SGVsbG8sIHdvcmxkIQ==\n    mime_type: application/octet-stream\n  type: binary\nrole: user\n",
 		},
 		{
 			name: "tool use",
@@ -387,10 +394,28 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 			in: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
-					ToolCall{Type: "function", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`}},
-					ToolCall{Type: "function", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "Berlin" }`}},
+					ToolCall{Type: "function", ID: "tc01", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`}},
+					ToolCall{Type: "function", ID: "tc02", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "Berlin" }`}},
 				},
 			},
+			assertedJSON: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"get_current_weather","arguments":"{ \"location\": \"New York\" }"},"id":"tc01","type":"function"}},{"type":"tool_call","tool_call":{"function":{"name":"get_current_weather","arguments":"{ \"location\": \"Berlin\" }"},"id":"tc02","type":"function"}}]}`,
+			assertedYAML: `parts:
+- tool_call:
+    function:
+      arguments: '{ "location": "New York" }'
+      name: get_current_weather
+    id: tc01
+    type: function
+  type: tool_call
+- tool_call:
+    function:
+      arguments: '{ "location": "Berlin" }'
+      name: get_current_weather
+    id: tc02
+    type: function
+  type: tool_call
+role: assistant
+`,
 		},
 		{
 			name: "tool use with arguments",
@@ -460,6 +485,9 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 				t.Errorf("MarshalJSON() error = %v", err)
 				return
 			}
+			if diff := cmp.Diff(tt.assertedJSON, string(jsonBytes)); diff != "" && tt.assertedJSON != "" {
+				t.Errorf("JSON mismatch (-want +got):\n%s", diff)
+			}
 			var mc MessageContent
 			err = mc.UnmarshalJSON(jsonBytes)
 			if err != nil {
@@ -476,6 +504,10 @@ func TestRoundtripping(t *testing.T) { // nolint:funlen // We make an exception 
 			if err != nil {
 				t.Errorf("MarshalYAML() error = %v", err)
 				return
+			}
+			if diff := cmp.Diff(tt.assertedYAML, string(yamlBytes)); diff != "" && tt.assertedYAML != "" {
+				t.Errorf("YAML mismatch (-want +got):\n%s", diff)
+				t.Log("got:", string(yamlBytes))
 			}
 			mc = MessageContent{}
 			err = yaml.Unmarshal(yamlBytes, &mc)
