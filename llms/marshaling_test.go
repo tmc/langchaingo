@@ -61,7 +61,7 @@ parts:
 				Parts: []ContentPart{
 					TextContent{Text: "Hello!, world!"},
 					ImageURLContent{URL: "http://example.com/image.png"},
-					ImageURLContent{URL: "http://example.com/image.png"},
+					ImageURLContent{URL: "http://example.com/image.png", Detail: "high"},
 					BinaryContent{
 						MIMEType: "application/octet-stream",
 						Data:     []byte("Hello, world!"),

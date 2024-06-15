@@ -38,7 +38,7 @@ func ImageURLPart(url string) ImageURLContent {
 }
 
 // ImageURLWithDetailPart creates a new ImageURLContent from the given URL and detail.
-func ImageURLWithDetailPart(url string, detail ImageURLContentDetailType) ImageURLContent {
+func ImageURLWithDetailPart(url string, detail string) ImageURLContent {
 	return ImageURLContent{
 		URL:    url,
 		Detail: detail,
@@ -61,20 +61,10 @@ func (tc TextContent) String() string {
 
 func (TextContent) isPart() {}
 
-// ImageURLContentDetailType is the type of detail to use for an image URL. so far, only openai supports it.
-type ImageURLContentDetailType string
-
-const (
-	ImageURLContentDetailTypeDefault ImageURLContentDetailType = ""
-	ImageURLContentDetailTypeAuto    ImageURLContentDetailType = "auto"
-	ImageURLContentDetailTypeLow     ImageURLContentDetailType = "low"
-	ImageURLContentDetailTypeHigh    ImageURLContentDetailType = "high"
-)
-
 // ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
-	URL    string                    `json:"url"`
-	Detail ImageURLContentDetailType `json:"detail,omitempty"`
+	URL    string `json:"url"`
+	Detail string `json:"detail,omitempty"` // Detail is the detail of the image, e.g. "low", "high".
 }
 
 func (iuc ImageURLContent) String() string {
