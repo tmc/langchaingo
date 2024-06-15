@@ -36,7 +36,8 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 			Type     string `json:"type"`
 			Text     string `json:"text,omitempty"`
 			ImageURL struct {
-				URL string `json:"url"`
+				URL    string `json:"url"`
+				Detail string `json:"detail,omitempty"`
 			} `json:"image_url,omitempty"`
 			Binary struct {
 				Data     string `json:"data"`
@@ -66,7 +67,8 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 			mc.Parts = append(mc.Parts, TextContent{Text: part.Text})
 		case "image_url":
 			mc.Parts = append(mc.Parts, ImageURLContent{
-				URL: part.ImageURL.URL,
+				URL:    part.ImageURL.URL,
+				Detail: part.ImageURL.Detail,
 			})
 		case "binary":
 			decoded, err := base64.StdEncoding.DecodeString(part.Binary.Data)
@@ -127,6 +129,9 @@ func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
 			"url": iuc.URL,
 		},
 	}
+	if iuc.Detail != "" {
+		r.ImageURL["detail"] = iuc.Detail
+	}
 	return json.Marshal(r)
 }
 
@@ -146,6 +151,10 @@ func (iuc *ImageURLContent) UnmarshalJSON(data []byte) error {
 	url, ok := imageURL["url"].(string)
 	if !ok {
 		return fmt.Errorf("invalid url field in ImageURLContent")
+	}
+	detail, ok := imageURL["detail"].(string)
+	if ok {
+		iuc.Detail = detail
 	}
 	iuc.URL = url
 	return nil
