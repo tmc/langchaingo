@@ -135,7 +135,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
@@ -195,6 +194,7 @@ require (
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/fatih/color v1.17.0
 	github.com/gage-technologies/mistral-go v1.0.0
+	github.com/getzep/zep-go v1.0.4
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocolly/colly v1.2.0
@@ -214,6 +214,7 @@ require (
 	github.com/pinecone-io/go-pinecone v0.4.1
 	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/redis/rueidis v1.0.34
+	github.com/rs/zerolog v1.31.0
 	github.com/weaviate/weaviate v1.24.1
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
