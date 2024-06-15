@@ -4,69 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-
-	"gopkg.in/yaml.v3"
 )
-
-const (
-	partTypeText       = "text"
-	partTypeImageURL   = "image_url"
-	partTypeBinary     = "binary"
-	partTypeToolCall   = "tool_call"
-	partTypeToolResult = "tool_response"
-)
-
-// MarshalYAML custom marshaling logic for MessageContent.
-func (mc MessageContent) MarshalYAML() (interface{}, error) {
-	// Special case: handle single text part directly
-	if len(mc.Parts) == 1 {
-		if content, ok := mc.Parts[0].(TextContent); ok {
-			return map[string]interface{}{
-				"role": mc.Role,
-				"text": content.Text,
-			}, nil
-		}
-	}
-
-	var parts []map[string]interface{}
-	for _, part := range mc.Parts {
-		switch content := part.(type) {
-		case TextContent:
-			parts = append(parts, map[string]interface{}{
-				"type": partTypeText,
-				"text": content.Text,
-			})
-		case ImageURLContent:
-			parts = append(parts, map[string]interface{}{
-				"type": partTypeImageURL,
-				"url":  content.URL,
-			})
-		case BinaryContent:
-			parts = append(parts, map[string]interface{}{
-				"type":      partTypeBinary,
-				"mime_type": content.MIMEType,
-				"data":      base64.StdEncoding.EncodeToString(content.Data),
-			})
-		case ToolCall:
-			parts = append(parts, map[string]interface{}{
-				"type":      partTypeToolCall,
-				"tool_call": content,
-			})
-		case ToolCallResponse:
-			parts = append(parts, map[string]interface{}{
-				"type":          partTypeToolResult,
-				"tool_response": content,
-			})
-		default:
-			return nil, fmt.Errorf("unknown content type: %T", content)
-		}
-	}
-
-	raw := make(map[string]interface{})
-	raw["role"] = mc.Role
-	raw["parts"] = parts
-	return raw, nil
-}
 
 func (mc MessageContent) MarshalJSON() ([]byte, error) {
 	hasSingleTextPart := false
@@ -88,81 +26,6 @@ func (mc MessageContent) MarshalJSON() ([]byte, error) {
 		Role:  mc.Role,
 		Parts: mc.Parts,
 	})
-}
-
-// UnmarshalYAML custom unmarshaling logic for MessageContent.
-// Single-part text parts are handled as a special case.
-func (mc *MessageContent) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var singleText struct {
-		Role ChatMessageType `yaml:"role"`
-		Text string          `yaml:"text"`
-	}
-	if err := unmarshal(&singleText); err == nil && singleText.Text != "" {
-		mc.Role = singleText.Role
-		mc.Parts = []ContentPart{TextContent{Text: singleText.Text}}
-		return nil
-	}
-	var raw struct {
-		Role  ChatMessageType          `yaml:"role"`
-		Parts []map[string]interface{} `yaml:"parts"`
-	}
-	if err := unmarshal(&raw); err != nil {
-		return err
-	}
-	mc.Role = raw.Role
-	if err := mc.unmarshalParts(raw.Parts); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (mc *MessageContent) unmarshalParts(parts []map[string]interface{}) error { //nolint:cyclop
-	for _, part := range parts {
-		switch part["type"] {
-		case partTypeText, nil:
-			var content TextContent
-			if err := mapToStruct(part, &content); err != nil {
-				return err
-			}
-			mc.Parts = append(mc.Parts, content)
-		case partTypeImageURL:
-			var content ImageURLContent
-			content.URL, _ = part["url"].(string)
-			mc.Parts = append(mc.Parts, content)
-		case partTypeBinary:
-			var content BinaryContent
-			data, err := base64.StdEncoding.DecodeString(part["data"].(string))
-			if err != nil {
-				return err
-			}
-			content.MIMEType, _ = part["mime_type"].(string)
-			content.Data = data
-			mc.Parts = append(mc.Parts, content)
-		case partTypeToolCall:
-			var content ToolCall
-			tc, ok := part["tool_call"].(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("tool_call part is not a map")
-			}
-			if err := mapToStruct(tc, &content); err != nil {
-				return err
-			}
-			mc.Parts = append(mc.Parts, content)
-		case partTypeToolResult:
-			var content ToolCallResponse
-			tr, ok := part["tool_response"].(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("tool_response part is not a map")
-			}
-			if err := mapToStruct(tr, &content); err != nil {
-				return err
-			}
-			mc.Parts = append(mc.Parts, content)
-		default:
-			return fmt.Errorf("unknown content type: %s", part["type"])
-		}
-	}
-	return nil
 }
 
 func (mc *MessageContent) UnmarshalJSON(data []byte) error {
@@ -202,7 +65,9 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 		case "text":
 			mc.Parts = append(mc.Parts, TextContent{Text: part.Text})
 		case "image_url":
-			mc.Parts = append(mc.Parts, ImageURLContent{URL: part.ImageURL.URL})
+			mc.Parts = append(mc.Parts, ImageURLContent{
+				URL: part.ImageURL.URL,
+			})
 		case "binary":
 			decoded, err := base64.StdEncoding.DecodeString(part.Binary.Data)
 			if err != nil {
@@ -232,15 +97,6 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Helper function to map raw data to struct.
-func mapToStruct(data map[string]interface{}, target interface{}) error {
-	bytes, err := yaml.Marshal(data)
-	if err != nil {
-		return err
-	}
-	return yaml.Unmarshal(bytes, target)
-}
-
 func (tc TextContent) MarshalJSON() ([]byte, error) {
 	m := map[string]string{
 		"type": "text",
@@ -249,14 +105,29 @@ func (tc TextContent) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m)
 }
 
+func (tc *TextContent) UnmarshalJSON(data []byte) error {
+	var m map[string]string
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if m["type"] != "text" {
+		return fmt.Errorf("invalid type for TextContent: %v", m["type"])
+	}
+	tc.Text = m["text"]
+	return nil
+}
+
 func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"type": "image_url",
-		"image_url": map[string]string{
+	r := struct {
+		Type     string            `json:"type"`
+		ImageURL map[string]string `json:"image_url"`
+	}{
+		Type: "image_url",
+		ImageURL: map[string]string{
 			"url": iuc.URL,
 		},
 	}
-	return json.Marshal(m)
+	return json.Marshal(r)
 }
 
 func (iuc *ImageURLContent) UnmarshalJSON(data []byte) error {
@@ -281,9 +152,12 @@ func (iuc *ImageURLContent) UnmarshalJSON(data []byte) error {
 }
 
 func (bc BinaryContent) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"type": "binary",
-		"binary": map[string]string{
+	m := struct {
+		Type   string            `json:"type"`
+		Binary map[string]string `json:"binary"`
+	}{
+		Type: "binary",
+		Binary: map[string]string{
 			"mime_type": bc.MIMEType,
 			"data":      base64.StdEncoding.EncodeToString(bc.Data),
 		},
@@ -325,10 +199,12 @@ func (tc ToolCall) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	m := map[string]any{
-		"type": "tool_call",
-		"tool_call": map[string]any{
+	m := struct {
+		Type     string         `json:"type"`
+		ToolCall map[string]any `json:"tool_call"`
+	}{
+		Type: "tool_call",
+		ToolCall: map[string]any{
 			"id":       tc.ID,
 			"type":     tc.Type,
 			"function": json.RawMessage(fc),
@@ -372,13 +248,46 @@ func (tc *ToolCall) UnmarshalJSON(data []byte) error {
 }
 
 func (tc ToolCallResponse) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"type": "tool_response",
-		"tool_response": map[string]string{
+	m := struct {
+		Type         string            `json:"type"`
+		ToolResponse map[string]string `json:"tool_response"`
+	}{
+		Type: "tool_response",
+		ToolResponse: map[string]string{
 			"tool_call_id": tc.ToolCallID,
 			"name":         tc.Name,
 			"content":      tc.Content,
 		},
 	}
 	return json.Marshal(m)
+}
+
+func (tc *ToolCallResponse) UnmarshalJSON(data []byte) error {
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+	if m["type"] != "tool_response" {
+		return fmt.Errorf("invalid type for ToolCallResponse: %v", m["type"])
+	}
+	tr, ok := m["tool_response"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid tool_response field in ToolCallResponse")
+	}
+	toolCallID, ok := tr["tool_call_id"].(string)
+	if !ok {
+		return fmt.Errorf("invalid tool_call_id field in ToolCallResponse")
+	}
+	name, ok := tr["name"].(string)
+	if !ok {
+		return fmt.Errorf("invalid name field in ToolCallResponse")
+	}
+	content, ok := tr["content"].(string)
+	if !ok {
+		return fmt.Errorf("invalid content field in ToolCallResponse")
+	}
+	tc.ToolCallID = toolCallID
+	tc.Name = name
+	tc.Content = content
+	return nil
 }

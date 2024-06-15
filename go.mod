@@ -69,7 +69,6 @@ require (
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
@@ -177,6 +176,8 @@ require (
 	google.golang.org/genproto v0.0.0-20240401170217-c3f982113cda // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
@@ -192,6 +193,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.4
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.7.1
 	github.com/cohere-ai/tokenizer v1.1.2
+	github.com/fatih/color v1.17.0
 	github.com/gage-technologies/mistral-go v1.0.0
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
@@ -222,5 +224,5 @@ require (
 	google.golang.org/api v0.180.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.1
-	gopkg.in/yaml.v3 v3.0.1
+	sigs.k8s.io/yaml v1.3.0
 )

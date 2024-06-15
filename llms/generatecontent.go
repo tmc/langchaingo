@@ -55,7 +55,7 @@ func (TextContent) isPart() {}
 
 // ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
-	URL string
+	URL string `json:"url" yaml:"url"`
 }
 
 func (iuc ImageURLContent) String() string {
