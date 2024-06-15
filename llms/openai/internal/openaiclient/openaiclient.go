@@ -33,9 +33,9 @@ type Client struct {
 	apiType      APIType
 	httpClient   Doer
 
+	EmbeddingModel string
 	// required when APIType is APITypeAzure or APITypeAzureAD
-	apiVersion      string
-	embeddingsModel string
+	apiVersion string
 }
 
 // Option is an option for the OpenAI client.
@@ -48,18 +48,18 @@ type Doer interface {
 
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
-	apiType APIType, apiVersion string, httpClient Doer, embeddingsModel string,
+	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:           token,
-		Model:           model,
-		embeddingsModel: embeddingsModel,
-		baseURL:         strings.TrimSuffix(baseURL, "/"),
-		organization:    organization,
-		apiType:         apiType,
-		apiVersion:      apiVersion,
-		httpClient:      httpClient,
+		token:          token,
+		Model:          model,
+		EmbeddingModel: embeddingModel,
+		baseURL:        strings.TrimSuffix(baseURL, "/"),
+		organization:   organization,
+		apiType:        apiType,
+		apiVersion:     apiVersion,
+		httpClient:     httpClient,
 	}
 
 	for _, opt := range opts {

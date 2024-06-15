@@ -451,6 +451,8 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
+	case "array":
+		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
 	}

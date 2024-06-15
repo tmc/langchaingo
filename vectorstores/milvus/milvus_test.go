@@ -2,6 +2,7 @@ package milvus
 
 import (
 	"context"
+	"log"
 	"os"
 	"strings"
 	"testing"
@@ -12,34 +13,36 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func getEmbedder(t *testing.T) (embeddings.Embedder, error) {
-	t.Helper()
-
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
+	opts := []ollama.Option{ollama.WithModel(model)}
+	if len(connectionStr) > 0 {
+		opts = append(opts, ollama.WithServerURL(connectionStr[0]))
+	}
+	llm, err := ollama.New(opts...)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	e, err := embeddings.NewEmbedder(llm)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	return embeddings.NewEmbedder(llm)
+	return llms.Model(llm), e
 }
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
-	e, err := getEmbedder(t)
-	if err != nil {
-		return Store{}, err
+	ollamaURL := os.Getenv("OLLAMA_HOST")
+	if ollamaURL == "" {
+		t.Skip("OLLAMA_HOST not set")
 	}
+	_, e := getEmbedding("gemma:2b")
 
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
@@ -77,34 +80,40 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 
 func TestMilvusConnection(t *testing.T) {
 	t.Parallel()
-	storer, err := getNewStore(t, WithDropOld())
+	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
 
-	_, err = storer.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "Tokyo"},
-		{PageContent: "Yokohama"},
-		{PageContent: "Osaka"},
-		{PageContent: "Nagoya"},
-		{PageContent: "Sapporo"},
-		{PageContent: "Fukuoka"},
-		{PageContent: "Dublin"},
-		{PageContent: "Paris"},
-		{PageContent: "London "},
-		{PageContent: "New York"},
-	})
-	require.NoError(t, err)
-	// test with a score threshold of 0.8, expected 6 documents
-	japanRes, err := storer.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0.3))
-	require.NoError(t, err)
-	require.Len(t, japanRes, 6)
+	data := []schema.Document{
+		{PageContent: "Tokyo", Metadata: map[string]any{"population": 9.7, "area": 622}},
+		{PageContent: "Kyoto", Metadata: map[string]any{"population": 1.46, "area": 828}},
+		{PageContent: "Hiroshima", Metadata: map[string]any{"population": 1.2, "area": 905}},
+		{PageContent: "Kazuno", Metadata: map[string]any{"population": 0.04, "area": 707}},
+		{PageContent: "Nagoya", Metadata: map[string]any{"population": 2.3, "area": 326}},
+		{PageContent: "Toyota", Metadata: map[string]any{"population": 0.42, "area": 918}},
+		{PageContent: "Fukuoka", Metadata: map[string]any{"population": 1.59, "area": 341}},
+		{PageContent: "Paris", Metadata: map[string]any{"population": 11, "area": 105}},
+		{PageContent: "London", Metadata: map[string]any{"population": 9.5, "area": 1572}},
+		{PageContent: "Santiago", Metadata: map[string]any{"population": 6.9, "area": 641}},
+		{PageContent: "Buenos Aires", Metadata: map[string]any{"population": 15.5, "area": 203}},
+		{PageContent: "Rio de Janeiro", Metadata: map[string]any{"population": 13.7, "area": 1200}},
+		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
+	}
 
-	// test with a score threshold of 0, expected all 10 documents
-	euRes, err := storer.SimilaritySearch(context.Background(),
-		"Which of these are cities are located in Europe?", 10,
-		vectorstores.WithScoreThreshold(1),
+	_, err = storer.AddDocuments(context.Background(), data)
+	require.NoError(t, err)
+
+	// search docs with filter
+	filterRes, err := storer.SimilaritySearch(context.Background(),
+		"Tokyo", 10,
+		vectorstores.WithFilters("meta['area']==622"),
 	)
+
 	require.NoError(t, err)
-	require.Len(t, euRes, 10)
+	require.Len(t, filterRes, 1)
+
+	japanRes, err := storer.SimilaritySearch(context.Background(),
+		"Tokyo", 2,
+		vectorstores.WithScoreThreshold(0.5))
+	require.NoError(t, err)
+	require.Len(t, japanRes, 1)
 }
