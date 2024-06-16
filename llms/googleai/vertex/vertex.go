@@ -440,10 +440,11 @@ func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	functionTool := genai.Tool{
+	var genaiTools []*genai.Tool
+	functionTool := &genai.Tool{
 		FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 	}
-	genaiTools := []*genai.Tool{&functionTool}
+
 	for i, tool := range tools {
 		switch tool.Type {
 		case "function":
@@ -455,6 +456,9 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		default:
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
 		}
+	}
+	if len(functionTool.FunctionDeclarations) > 0 {
+		genaiTools = append([]*genai.Tool{functionTool}, genaiTools...)
 	}
 
 	return genaiTools, nil
