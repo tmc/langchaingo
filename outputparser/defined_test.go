@@ -25,9 +25,12 @@ func TestDefined(t *testing.T) {
 			input:   struct{}{},
 			wantErr: true,
 		},
-		"no fields with tag": {
-			input:   struct{ Field string }{},
-			wantErr: true,
+		"not tagged with describe": {
+			input: struct {
+				Color string
+				Size  int `json:"size"`
+			}{},
+			expected: "interface _Root {\n\tColor: string;\n\tsize: int;\n}",
 		},
 		"string field": {
 			input: struct {
@@ -89,7 +92,7 @@ interface Foods {
 		} else if !test.wantErr && err != nil {
 			t.Errorf("%s: %v", name, err)
 		} else if output.schema != test.expected {
-			t.Errorf("got '%s'; want '%s'", output, test.expected)
+			t.Errorf("got '%s'; want '%s'", output.schema, test.expected)
 		}
 	}
 }

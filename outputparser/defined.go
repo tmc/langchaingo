@@ -11,15 +11,18 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-// Defined parses JSON output from an LLM into Go structs. A properly tagged
-// struct can generate TypeScript interfaces to help LLMs generate responses
-// that follow the desired JSON structure.
+// Defined parses JSON output from an LLM into Go structs. By providing
+// the NewDefined constructor with a struct, one or more TypeScript interfaces
+// are generated to help LLMs format responses with the desired JSON structure.
 type Defined[T any] struct {
 	schema string
 }
 
 // NewDefined creates an output parser that structures data according to
-// a given schema, as defined by tagged structs.
+// a given schema, as defined by struct field names and types. Tagging the
+// field with "json" will explicitly use that value as the field name. Tagging
+// with "describe" will add a line comment for the LLM to understand how to
+// generate data, helpful when the field's name is insufficient.
 func NewDefined[T any](source T) (Defined[T], error) {
 	var empty Defined[T]
 
@@ -30,16 +33,6 @@ func NewDefined[T any](source T) (Defined[T], error) {
 	numFields := sourceType.NumField()
 	if numFields == 0 {
 		return empty, errors.New("schema source has no fields")
-	}
-
-	numTaggedFields := 0
-	for i := 0; i < numFields; i++ {
-		if _, ok := sourceType.Field(i).Tag.Lookup("describe"); ok {
-			numTaggedFields++
-		}
-	}
-	if numTaggedFields == 0 {
-		return empty, errors.New("requires at least 1 field with the struct tag 'describe'")
 	}
 
 	var result bytes.Buffer
