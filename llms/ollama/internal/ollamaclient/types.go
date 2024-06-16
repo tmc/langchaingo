@@ -49,7 +49,7 @@ type Message struct {
 type ChatRequest struct {
 	Model     string     `json:"model"`
 	Messages  []*Message `json:"messages"`
-	Stream    *bool      `json:"stream,omitempty"`
+	Stream    bool       `json:"stream,omitempty"`
 	Format    string     `json:"format"`
 	KeepAlive string     `json:"keep_alive,omitempty"`
 
