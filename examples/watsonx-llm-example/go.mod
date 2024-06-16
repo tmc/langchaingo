@@ -6,7 +6,7 @@ toolchain go1.22.2
 
 require (
 	github.com/h0rv/go-watsonx v0.2.1
-	github.com/tmc/langchaingo v0.1.9-0.20240403145928-594021b91d0d
+	github.com/tmc/langchaingo v0.1.11-alpha.0
 )
 
 require (
