@@ -35,22 +35,22 @@ func TestDefined(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		Input    any
-		Expected string
+		input    any
+		expected string
 	}{
 		"string": {
-			Input: struct {
+			input: struct {
 				Color string `json:"color" describe:"shape color"`
 			}{},
-			Expected: "interface _Root {\n\tcolor: string; // shape color\n}",
+			expected: "interface _Root {\n\tcolor: string; // shape color\n}",
 		},
 		"anonymous struct": {
-			Input: struct {
+			input: struct {
 				Shape struct {
 					Color string `describe:"color"` // json tag omitted
 				} `json:"shape" describe:"most common 4 sided shape"`
 			}{},
-			Expected: `interface _Root {
+			expected: `interface _Root {
 	shape: Shape; // most common 4 sided shape
 }
 interface Shape {
@@ -58,10 +58,10 @@ interface Shape {
 }`,
 		},
 		"named struct": {
-			Input: struct {
+			input: struct {
 				Shape Shape `json:"shape" describe:"most common 4 sided shape"`
 			}{},
-			Expected: `interface _Root {
+			expected: `interface _Root {
 	shape: Shape; // most common 4 sided shape
 }
 interface Shape {
@@ -70,19 +70,19 @@ interface Shape {
 }`,
 		},
 		"string array": {
-			Input: struct {
+			input: struct {
 				Foods []string `json:"foods" describe:"top 5 foods in the world"`
 			}{},
-			Expected: "interface _Root {\n\tfoods: string[]; // top 5 foods in the world\n}",
+			expected: "interface _Root {\n\tfoods: string[]; // top 5 foods in the world\n}",
 		},
 		"array of structs": {
-			Input: struct {
+			input: struct {
 				Foods []struct {
 					Name string `json:"name"`
 					Temp int    `json:"temp" describe:"temperature usually served at"`
 				} `json:"foods" describe:"top 5 foods in the world"`
 			}{},
-			Expected: `interface _Root {
+			expected: `interface _Root {
 	foods: Foods[]; // top 5 foods in the world
 }
 interface Foods {
@@ -93,10 +93,10 @@ interface Foods {
 	}
 
 	for name, test := range tests {
-		if output, err := NewDefined(test.Input); err != nil {
+		if output, err := NewDefined(test.input); err != nil {
 			t.Errorf("%s: %v", name, err)
-		} else if output.schema != test.Expected {
-			t.Errorf("got '%s'; want '%s'", output, test.Expected)
+		} else if output.schema != test.expected {
+			t.Errorf("got '%s'; want '%s'", output, test.expected)
 		}
 	}
 }
