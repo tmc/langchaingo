@@ -129,7 +129,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		if response.Message != nil {
 			streamedResponse += response.Message.Content
 		}
-		if response.Done {
+		if !*req.Stream || response.Done {
 			resp = response
 			resp.Message = &ollamaclient.Message{
 				Role:    "assistant",
