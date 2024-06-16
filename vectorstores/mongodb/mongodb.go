@@ -3,11 +3,12 @@ package mongodb
 import (
 	"context"
 
+	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/vectorstores"
 	"go.mongodb.org/mongo-driver/mongo"
+
 	// "encoding/json"
 	// "errors"
-	// "github.com/google/uuid"
-	// "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo/readpref"
 	// "github.com/tmc/langchaingo/embeddings"
@@ -17,28 +18,38 @@ import (
 )
 
 // Store is a wrapper around the mongodb client.
-// We want to wrap mongo's client options all in 1
 type Store struct {
-	Client *mongo.Client
-	ConnectionUri string
-	ClientOptions *options.ClientOptions
+	client           *mongo.Client
+	connectionUri    string
+	database         string
+	collection       string
+	indexName        string
+	textKey          string
+	relevanceScoreFn string
+	embeddingKey     string
+	embedding        embeddings.Embedder
+	clientOptions    *options.ClientOptions
 }
 
-// New creates a new Store with options. 
+// New creates a new Store with options.
 func New(ctx context.Context, opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
 		return Store{}, err
 	}
-	s.Client, err = mongo.Connect(ctx, s.ClientOptions)
+	s.client, err = mongo.Connect(ctx, s.clientOptions)
 	if err != nil {
 		return Store{}, err
 	}
 	return s, nil
-}	
+}
 
+func (s *Store) AddDocuments(ctx context.Context, docs []interface{}) error {
+	return nil
+}
 
-
+func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]interface{}, error) {
+	return nil, nil
+}
 
 //mongodb+srv://langchaingotest:PVgzJSoESmj0Hzpv@langchaingotest.us7qrm4.mongodb.net/?retryWrites=true&w=majority&appName=langchaingotest
-
