@@ -5,28 +5,6 @@ import (
 	"testing"
 )
 
-func TestDefinedNonStruct(t *testing.T) {
-	t.Parallel()
-	var arr []struct{}
-
-	if _, err := NewDefined(arr); err == nil {
-		t.Error("schema source can only be a struct")
-	}
-}
-
-func TestDefinedInvalidStructs(t *testing.T) {
-	t.Parallel()
-	tests := map[string]any{
-		"empty struct":       struct{}{},
-		"no fields with tag": struct{ Field string }{},
-	}
-	for name, input := range tests {
-		if _, err := NewDefined(input); err == nil {
-			t.Errorf("expected error for %s", name)
-		}
-	}
-}
-
 func TestDefined(t *testing.T) {
 	t.Parallel()
 	type Shape struct {
@@ -37,14 +15,27 @@ func TestDefined(t *testing.T) {
 	tests := map[string]struct {
 		input    any
 		expected string
+		wantErr  bool
 	}{
-		"string": {
+		"non-struct": {
+			input:   []struct{}{},
+			wantErr: true,
+		},
+		"empty struct": {
+			input:   struct{}{},
+			wantErr: true,
+		},
+		"no fields with tag": {
+			input:   struct{ Field string }{},
+			wantErr: true,
+		},
+		"string field": {
 			input: struct {
 				Color string `json:"color" describe:"shape color"`
 			}{},
 			expected: "interface _Root {\n\tcolor: string; // shape color\n}",
 		},
-		"anonymous struct": {
+		"anonymous struct field": {
 			input: struct {
 				Shape struct {
 					Color string `describe:"color"` // json tag omitted
@@ -57,7 +48,7 @@ interface Shape {
 	Color: string; // color
 }`,
 		},
-		"named struct": {
+		"named struct field": {
 			input: struct {
 				Shape Shape `json:"shape" describe:"most common 4 sided shape"`
 			}{},
@@ -69,13 +60,13 @@ interface Shape {
 	numSides: int; // number of sides
 }`,
 		},
-		"string array": {
+		"string array field": {
 			input: struct {
 				Foods []string `json:"foods" describe:"top 5 foods in the world"`
 			}{},
 			expected: "interface _Root {\n\tfoods: string[]; // top 5 foods in the world\n}",
 		},
-		"array of structs": {
+		"array-of-structs field": {
 			input: struct {
 				Foods []struct {
 					Name string `json:"name"`
@@ -93,7 +84,9 @@ interface Foods {
 	}
 
 	for name, test := range tests {
-		if output, err := NewDefined(test.input); err != nil {
+		if output, err := NewDefined(test.input); test.wantErr && err == nil {
+			t.Errorf("%s: missing expected error", name)
+		} else if !test.wantErr && err != nil {
 			t.Errorf("%s: %v", name, err)
 		} else if output.schema != test.expected {
 			t.Errorf("got '%s'; want '%s'", output, test.expected)
