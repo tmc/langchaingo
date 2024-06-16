@@ -48,6 +48,9 @@ func (p ChatPromptTemplate) Format(values map[string]any) (string, error) {
 // FormatMessages formats the messages with the values and returns the formatted messages.
 func (p ChatPromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	promptValue, err := p.FormatPrompt(values)
+	if promptValue == nil {
+		return nil, err
+	}
 	return promptValue.Messages(), err
 }
 

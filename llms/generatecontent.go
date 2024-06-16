@@ -2,7 +2,6 @@ package llms
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 )
@@ -38,6 +37,14 @@ func ImageURLPart(url string) ImageURLContent {
 	}
 }
 
+// ImageURLWithDetailPart creates a new ImageURLContent from the given URL and detail.
+func ImageURLWithDetailPart(url string, detail string) ImageURLContent {
+	return ImageURLContent{
+		URL:    url,
+		Detail: detail,
+	}
+}
+
 // ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {
 	isPart()
@@ -52,29 +59,12 @@ func (tc TextContent) String() string {
 	return tc.Text
 }
 
-func (tc TextContent) MarshalJSON() ([]byte, error) {
-	m := map[string]string{
-		"type": "text",
-		"text": tc.Text,
-	}
-	return json.Marshal(m)
-}
-
 func (TextContent) isPart() {}
 
 // ImageURLContent is content with an URL pointing to an image.
 type ImageURLContent struct {
-	URL string
-}
-
-func (iuc ImageURLContent) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"type": "image_url",
-		"image_url": map[string]string{
-			"url": iuc.URL,
-		},
-	}
-	return json.Marshal(m)
+	URL    string `json:"url"`
+	Detail string `json:"detail,omitempty"` // Detail is the detail of the image, e.g. "low", "high".
 }
 
 func (iuc ImageURLContent) String() string {
@@ -94,22 +84,13 @@ func (bc BinaryContent) String() string {
 	return "data:" + bc.MIMEType + ";base64," + base64Encoded
 }
 
-func (bc BinaryContent) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"type": "binary",
-		"binary": map[string]string{
-			"mime_type": bc.MIMEType,
-			"data":      base64.StdEncoding.EncodeToString(bc.Data),
-		},
-	}
-	return json.Marshal(m)
-}
-
 func (BinaryContent) isPart() {}
 
 // FunctionCall is the name and arguments of a function call.
 type FunctionCall struct {
-	Name      string `json:"name"`
+	// The name of the function to call.
+	Name string `json:"name"`
+	// The arguments to pass to the function, as a JSON string.
 	Arguments string `json:"arguments"`
 }
 
@@ -117,7 +98,7 @@ type FunctionCall struct {
 type ToolCall struct {
 	// ID is the unique identifier of the tool call.
 	ID string `json:"id"`
-	// Type is the type of the tool call.
+	// Type is the type of the tool call. Typically, this would be "function".
 	Type string `json:"type"`
 	// FunctionCall is the function call to be executed.
 	FunctionCall *FunctionCall `json:"function,omitempty"`

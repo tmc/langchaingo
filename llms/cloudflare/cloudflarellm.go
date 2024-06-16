@@ -12,7 +12,7 @@ import (
 
 var (
 	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("no all input got embedded")
+	ErrIncompleteEmbedding = errors.New("not all input got embedded")
 )
 
 // LLM is a cloudflare LLM implementation.

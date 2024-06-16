@@ -59,6 +59,7 @@ func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.Conte
 // executeToolCalls executes the tool calls in the response and returns the
 // updated message history.
 func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
+	fmt.Println("Executing", len(resp.Choices[0].ToolCalls), "tool calls")
 	for _, toolCall := range resp.Choices[0].ToolCalls {
 		switch toolCall.FunctionCall.Name {
 		case "getCurrentWeather":

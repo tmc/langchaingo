@@ -2,6 +2,7 @@ package embeddings
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/tmc/langchaingo/internal/util"
@@ -59,7 +60,7 @@ func (ei *EmbedderImpl) EmbedQuery(ctx context.Context, text string) ([]float32,
 
 	emb, err := ei.client.CreateEmbedding(ctx, []string{text})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error embedding query: %w", err)
 	}
 
 	return emb[0], nil
@@ -103,7 +104,7 @@ func BatchedEmbed(ctx context.Context, embedder EmbedderClient, texts []string, 
 	for _, batch := range batchedTexts {
 		curBatchEmbeddings, err := embedder.CreateEmbedding(ctx, batch)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error embedding batch: %w", err)
 		}
 		emb = append(emb, curBatchEmbeddings...)
 	}
