@@ -263,17 +263,19 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 }
 
 type ToolUse struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Type  string `json:"type"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Input string `json:"input"`
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
 		toolUse := ToolUse{
-			Type: "tool_use",
-			ID:   toolCall.ID,
-			Name: toolCall.FunctionCall.Name,
+			Type:  "tool_use",
+			ID:    toolCall.ID,
+			Name:  toolCall.FunctionCall.Name,
+			Input: toolCall.FunctionCall.Arguments,
 		}
 
 		toolUseJSON, err := json.Marshal(toolUse)
