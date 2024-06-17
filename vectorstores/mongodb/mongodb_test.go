@@ -26,6 +26,20 @@ func getOAIKey(t *testing.T) string {
 	return openaiAPIKey
 }
 
+/*
+* Vector Search Index Schema
+  - {
+    "fields": [
+    "type": "vector",
+    "path": "embeddings",
+    "numDimensions": 1536,
+    "similarity": "cosine"
+    }
+    ]
+    }
+
+*
+*/
 func TestMongoDBStore(t *testing.T) {
 	t.Parallel()
 

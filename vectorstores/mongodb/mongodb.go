@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -22,6 +23,7 @@ var (
 	)
 )
 
+// Document comes from https://www.mongodb.com/developer/products/mongodb/doc-modeling-vector-search/
 type Document struct {
 	Text      string                 `bson:"text"`
 	Embedding []float32              `bson:"embedding"`
@@ -42,7 +44,6 @@ type Store struct {
 	clientOptions    *options.ClientOptions
 }
 
-// New creates a new Store with options.
 func New(ctx context.Context, opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
@@ -89,8 +90,51 @@ func (s *Store) AddDocuments(ctx context.Context, docs []Document) (interface{},
 	return result.InsertedIDs, nil
 }
 
+// TODO: https://github.com/langchain-ai/langchain/blob/892bd4c29be34c0cc095ed178be6d60c6858e2ec/libs/partners/mongodb/langchain_mongodb/vectorstores.py#L187
 func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]interface{}, error) {
+	opts := s.getOptions(options...)
+
+	// specify the collection to query from
+	coll := s.client.Database(s.databaseName).Collection(s.collectionName)
+
+	scoreThreshold, err := s.getScoreThreshold(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	vector, err := s.embedder.EmbedQuery(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	queryResult, err := coll.Aggregate() //TODO
+	if err != nil {
+		return nil, err
+	}
+	if queryResult == nil {
+		return []interface{}{}, nil
+	}
+
+	var doc Document
+	err = queryResult.Decode(&doc)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
-//mongodb+srv://langchaingotest:PVgzJSoESmj0Hzpv@langchaingotest.us7qrm4.mongodb.net/?retryWrites=true&w=majority&appName=langchaingotest
+func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
+	opts := vectorstores.Options{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+	return opts
+}
+
+func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
+	if opts.ScoreThreshold < 0 || opts.ScoreThreshold > 1 {
+		return 0, error(fmt.Errorf("score threshold must be between 0 and 1"))
+	}
+	return opts.ScoreThreshold, nil
+}
