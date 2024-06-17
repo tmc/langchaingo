@@ -64,13 +64,35 @@ func (tool *LinksSearch) Description() string {
 	Input should be the url string for which you would like to find similar links`
 }
 
+func (tool *LinksSearch) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"url": map[string]any{
+				"type":        "string",
+				"description": "Link URL.",
+			},
+		},
+		"required": []string{"url"},
+	}
+}
+
+func (tool *LinksSearch) Call(ctx context.Context, input any) (string, error) {
+	url, ok := input.(map[string]any)["url"].(string)
+	if !ok {
+		return "", errors.New("could not parse input")
+	}
+
+	return tool.call(ctx, url)
+}
+
 // Call searches for similar links using the LinksSearch tool.
 //
 // ctx - the context in which the function is called.
 // input - the string input used to find similar links, i.e. the url.
 // Returns a string containing the formatted links and an error if any occurred.
-func (tool *LinksSearch) Call(ctx context.Context, input string) (string, error) {
-	links, err := tool.client.FindSimilar(ctx, input, tool.options...)
+func (tool *LinksSearch) call(ctx context.Context, url string) (string, error) {
+	links, err := tool.client.FindSimilar(ctx, url, tool.options...)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoLinksFound) {
 			return "Metaphor Links Search didn't return any results", nil

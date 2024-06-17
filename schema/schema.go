@@ -3,7 +3,7 @@ package schema
 // AgentAction is the agent's action to take.
 type AgentAction struct {
 	Tool      string
-	ToolInput string
+	ToolInput map[string]any
 	Log       string
 	ToolID    string
 }

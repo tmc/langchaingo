@@ -69,12 +69,34 @@ func (tool *Search) Description() string {
 	`
 }
 
+func (tool *Search) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"query": map[string]any{
+				"type":        "string",
+				"description": "Calculator query to execute.",
+			},
+		},
+		"required": []string{"query"},
+	}
+}
+
 // Call performs a search using the Search client.
 //
 // It takes a context.Context and a search query as string input as parameters.
 // It returns a string and an error.
-func (tool *Search) Call(ctx context.Context, input string) (string, error) {
-	response, err := tool.client.Search(ctx, input, tool.options...)
+func (tool *Search) Call(ctx context.Context, input any) (string, error) {
+	query, ok := input.(map[string]any)["query"].(string)
+	if !ok {
+		return "", errors.New("could not parse input")
+	}
+
+	return tool.call(ctx, query)
+}
+
+func (tool *Search) call(ctx context.Context, query string) (string, error) {
+	response, err := tool.client.Search(ctx, query, tool.options...)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoSearchResults) {
 			return "Metaphor Search didn't return any results", nil

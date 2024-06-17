@@ -1,6 +1,8 @@
 package llms
 
-import "context"
+import (
+	"context"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)

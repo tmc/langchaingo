@@ -3,6 +3,7 @@ package zapier
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"text/template"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -78,12 +79,35 @@ func (t Tool) Description() string {
 	return t.description
 }
 
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
-	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(ctx, input)
+// Schema returns OpenAPI schema for the tool.
+func (t Tool) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"instructions": map[string]any{
+				"type":        "string",
+				"description": "Instructions to execute.",
+			},
+		},
+		"required": []string{"instructions"},
+	}
+}
+
+func (t Tool) Call(ctx context.Context, input any) (string, error) {
+	instructions, ok := input.(map[string]any)["instructions"].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid input: %v", input)
 	}
 
-	result, err := t.client.ExecuteAsString(ctx, t.actionID, input, t.params)
+	return t.call(ctx, instructions)
+}
+
+func (t Tool) call(ctx context.Context, instructions string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, instructions)
+	}
+
+	result, err := t.client.ExecuteAsString(ctx, t.actionID, instructions, t.params)
 	if err != nil {
 		if t.CallbacksHandler != nil {
 			t.CallbacksHandler.HandleToolError(ctx, err)

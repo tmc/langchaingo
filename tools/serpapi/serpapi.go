@@ -18,6 +18,19 @@ type Tool struct {
 	client           *internal.Client
 }
 
+func (t Tool) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"query": map[string]any{
+				"type":        "string",
+				"description": "Search query.",
+			},
+		},
+		"required": []string{"query"},
+	}
+}
+
 var _ tools.Tool = Tool{}
 
 // New creates a new serpapi tool to search on internet.
@@ -51,12 +64,21 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
-	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(ctx, input)
+func (t Tool) Call(ctx context.Context, input any) (string, error) {
+	query, ok := input.(map[string]any)["query"].(string)
+	if !ok {
+		return "", errors.New("missing query")
 	}
 
-	result, err := t.client.Search(ctx, input)
+	return t.call(ctx, query)
+}
+
+func (t Tool) call(ctx context.Context, query string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, query)
+	}
+
+	result, err := t.client.Search(ctx, query)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good Google Search Results was found", nil

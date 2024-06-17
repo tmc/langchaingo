@@ -151,7 +151,7 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 	}
 
 	return []schema.AgentAction{
-		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
+		{Tool: strings.TrimSpace(matches[1]), ToolInput: map[string]any{"prediction": strings.TrimSpace(matches[2])}, Log: output},
 	}, nil, nil
 }
 

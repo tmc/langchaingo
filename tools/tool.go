@@ -6,5 +6,6 @@ import "context"
 type Tool interface {
 	Name() string
 	Description() string
-	Call(ctx context.Context, input string) (string, error)
+	Schema() any
+	Call(ctx context.Context, input any) (string, error)
 }

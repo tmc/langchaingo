@@ -54,13 +54,7 @@ func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
 		res = append(res, llms.FunctionDefinition{
 			Name:        tool.Name(),
 			Description: tool.Description(),
-			Parameters: map[string]any{
-				"properties": map[string]any{
-					"__arg1": map[string]string{"title": "__arg1", "type": "string"},
-				},
-				"required": []string{"__arg1"},
-				"type":     "object",
-			},
+			Parameters:  tool.Schema(),
 		})
 	}
 	return res
@@ -214,14 +208,6 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 		return nil, nil, err
 	}
 
-	toolInput := toolInputStr
-	if arg1, ok := toolInputMap["__arg1"]; ok {
-		toolInputCheck, ok := arg1.(string)
-		if ok {
-			toolInput = toolInputCheck
-		}
-	}
-
 	contentMsg := "\n"
 	if choice.Content != "" {
 		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
@@ -230,7 +216,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	return []schema.AgentAction{
 		{
 			Tool:      functionName,
-			ToolInput: toolInput,
+			ToolInput: toolInputMap,
 			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
 			ToolID:    choice.ToolCalls[0].ID,
 		},

@@ -556,7 +556,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	require.Contains(t, result, "purple", "expected black in purple")
+	require.Contains(t, strings.ToLower(result), "purple", "expected black in purple")
 }
 
 func getValues(t *testing.T) (string, string) {

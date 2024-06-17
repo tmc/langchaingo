@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/metaphorsystems/metaphor-go"
 	"github.com/tmc/langchaingo/tools"
@@ -66,17 +65,37 @@ func (tool *Documents) Description() string {
 	"8U71IlQ5DUTdsherhhYA,9segZCZGNjjQB2yD2uyK,..."`
 }
 
+func (tool *Documents) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"input": map[string]any{
+				"type":        "array",
+				"description": "List of IDs.",
+				"items": map[string]any{
+					"type": "string",
+				},
+			},
+		},
+		"required": []string{"input"},
+	}
+}
+
+func (tool *Documents) Call(ctx context.Context, input any) (string, error) {
+	ids, ok := input.(map[string]any)["input"].([]string)
+	if !ok {
+		return "", errors.New("invalid input")
+	}
+
+	return tool.call(ctx, ids)
+}
+
 // Call calls the Documents API with the given input and returns the formatted contents.
 //
 // The input is a string that contains a comma-separated list of IDs.
 //
 // It returns a string which represents the formatted contents and an error if any.
-func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
-	ids := strings.Split(input, ",")
-	for i, id := range ids {
-		ids[i] = strings.TrimSpace(id)
-	}
-
+func (tool *Documents) call(ctx context.Context, ids []string) (string, error) {
 	contents, err := tool.client.GetContents(ctx, ids)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoContentExtracted) {

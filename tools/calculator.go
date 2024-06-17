@@ -27,15 +27,39 @@ func (c Calculator) Name() string {
 	return "calculator"
 }
 
-// Call evaluates the input using a starlak evaluator and returns the result as a
-// string. If the evaluator errors the error is given in the result to give the
-// agent the ability to retry.
-func (c Calculator) Call(ctx context.Context, input string) (string, error) {
-	if c.CallbacksHandler != nil {
-		c.CallbacksHandler.HandleToolStart(ctx, input)
+// Schema returns OpenAPI schema for the calculator tool.
+func (c Calculator) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"query": map[string]any{
+				"type":        "string",
+				"description": "Calculator query to execute.",
+			},
+		},
+		"required": []string{"query"},
+	}
+}
+
+// Call validates the input returned by the LLM and calls the calculator tool.
+func (c Calculator) Call(ctx context.Context, input any) (string, error) {
+	query, ok := input.(map[string]any)["query"].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid input: %v", input)
 	}
 
-	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", input, math.Module.Members)
+	return c.call(ctx, query)
+}
+
+// call evaluates the input using a starlark evaluator and returns the result as a
+// string. If the evaluator errors the error is given in the result to give the
+// agent the ability to retry.
+func (c Calculator) call(ctx context.Context, query string) (string, error) {
+	if c.CallbacksHandler != nil {
+		c.CallbacksHandler.HandleToolStart(ctx, query)
+	}
+
+	v, err := starlark.Eval(&starlark.Thread{Name: "main"}, "input", query, math.Module.Members)
 	if err != nil {
 		return fmt.Sprintf("error from evaluator: %s", err.Error()), nil //nolint:nilerr
 	}

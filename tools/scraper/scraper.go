@@ -83,6 +83,28 @@ func (s Scraper) Description() string {
 	`
 }
 
+func (s Scraper) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"url": map[string]any{
+				"type":        "string",
+				"description": "Url to scrape.",
+			},
+		},
+		"required": []string{"url"},
+	}
+}
+
+func (s Scraper) Call(ctx context.Context, input any) (string, error) {
+	urlStr, ok := input.(map[string]any)["url"].(string)
+	if !ok {
+		return "", errors.New("could not parse input")
+	}
+
+	return s.call(ctx, urlStr)
+}
+
 // Call scrapes a website and returns the site data.
 //
 // The function takes a context.Context object for managing the execution
@@ -90,7 +112,7 @@ func (s Scraper) Description() string {
 // It returns a string containing the scraped data and an error if any.
 //
 //nolint:all
-func (s Scraper) Call(ctx context.Context, input string) (string, error) {
+func (s Scraper) call(ctx context.Context, input string) (string, error) {
 	_, err := url.ParseRequestURI(input)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)

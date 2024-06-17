@@ -41,13 +41,36 @@ func (t Tool) Description() string {
 	"Input should be a search query."`
 }
 
+// Schema returns a OpenAPI schema for the tool.
+func (t Tool) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"query": map[string]any{
+				"type":        "string",
+				"description": "Search query.",
+			},
+		},
+		"required": []string{"query"},
+	}
+}
+
 // Call performs the search and return the result.
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
-	if t.CallbacksHandler != nil {
-		t.CallbacksHandler.HandleToolStart(ctx, input)
+func (t Tool) Call(ctx context.Context, input any) (string, error) {
+	query, ok := input.(map[string]any)["query"].(string)
+	if !ok {
+		return "", errors.New("could not parse input")
 	}
 
-	result, err := t.client.Search(ctx, input)
+	return t.call(ctx, query)
+}
+
+func (t Tool) call(ctx context.Context, query string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, query)
+	}
+
+	result, err := t.client.Search(ctx, query)
 	if err != nil {
 		if errors.Is(err, internal.ErrNoGoodResult) {
 			return "No good DuckDuckGo Search Results was found", nil

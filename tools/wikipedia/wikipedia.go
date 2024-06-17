@@ -56,9 +56,31 @@ func (t Tool) Description() string {
 	Input should be a search query.`
 }
 
+func (t Tool) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"url": map[string]any{
+				"type":        "string",
+				"description": "Calculator query to execute.",
+			},
+		},
+		"required": []string{"url"},
+	}
+}
+
+func (t Tool) Call(ctx context.Context, input any) (string, error) {
+	query, ok := input.(map[string]any)["query"].(string)
+	if !ok {
+		return "", errors.New("could not parse input")
+	}
+
+	return t.call(ctx, query)
+}
+
 // Call uses the wikipedia api to find the top search results for the input and returns
 // the first part of the documents combined.
-func (t Tool) Call(ctx context.Context, input string) (string, error) {
+func (t Tool) call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}

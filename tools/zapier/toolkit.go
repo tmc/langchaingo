@@ -48,7 +48,7 @@ func Toolkit(ctx context.Context, opts ToolkitOpts) ([]tools.Tool, error) {
 		return nil, err
 	}
 
-	tools := make([]tools.Tool, len(listResponse))
+	toolkitTools := make([]tools.Tool, len(listResponse))
 
 	for i, result := range listResponse {
 		tool, err := New(ToolOptions{
@@ -64,8 +64,8 @@ func Toolkit(ctx context.Context, opts ToolkitOpts) ([]tools.Tool, error) {
 			return nil, err
 		}
 
-		tools[i] = tool
+		toolkitTools[i] = tool
 	}
 
-	return tools, nil
+	return toolkitTools, nil
 }

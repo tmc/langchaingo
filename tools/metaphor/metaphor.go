@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/metaphorsystems/metaphor-go"
@@ -148,6 +147,19 @@ func (tool *API) Description() string {
 			An array of document IDs obtained from either /search or /findSimilar endpoints.`
 }
 
+func (tool *API) Schema() any {
+	return map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"json_string": map[string]any{
+				"type":        "string",
+				"description": "JSON as string.",
+			},
+		},
+		"required": []string{"json_string"},
+	}
+}
+
 // Call is a function that takes a context and an input string and returns a string and an error.
 //
 // The function expects a JSON string as input and unmarshals it into a ToolInput struct.
@@ -163,13 +175,19 @@ func (tool *API) Description() string {
 //
 // The function returns the result of the respective operation or an empty string and nil
 // if the Operation is not supported.
-func (tool *API) Call(ctx context.Context, input string) (string, error) {
+func (tool *API) Call(ctx context.Context, input any) (string, error) {
+	jsonStr, ok := input.(map[string]any)["json_string"].(string)
+	if !ok {
+		return "", errors.New("invalid input")
+	}
+
+	return tool.call(ctx, jsonStr)
+}
+
+func (tool *API) call(ctx context.Context, jsonStr string) (string, error) {
 	var toolInput ToolInput
 
-	re := regexp.MustCompile(`(?s)\{.*\}`)
-	jsonString := re.FindString(input)
-
-	err := json.Unmarshal([]byte(jsonString), &toolInput)
+	err := json.Unmarshal([]byte(jsonStr), &toolInput)
 	if err != nil {
 		return "", err
 	}
