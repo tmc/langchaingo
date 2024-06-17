@@ -16,10 +16,9 @@ import (
 )
 
 var (
-	ErrNoContentInResponse    = errors.New("no content in generation response")
-	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemRoleNotSupported = errors.New("system role isn't supporeted yet")
+	ErrNoContentInResponse   = errors.New("no content in generation response")
+	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType       = errors.New("invalid mime type on content")
 )
 
 const (
@@ -37,7 +36,11 @@ func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.Call
 }
 
 // GenerateContent implements the [llms.Model] interface.
-func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (g *GoogleAI) GenerateContent(
+	ctx context.Context,
+	messages []llms.MessageContent,
+	options ...llms.CallOption,
+) (*llms.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -229,7 +232,12 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 // generateFromSingleMessage generates content from the parts of a single
 // message.
-func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromSingleMessage(
+	ctx context.Context,
+	model *genai.GenerativeModel,
+	parts []llms.ContentPart,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
@@ -252,7 +260,12 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromMessages(
+	ctx context.Context,
+	model *genai.GenerativeModel,
+	messages []llms.MessageContent,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
 		content, err := convertContent(mc)
@@ -295,7 +308,11 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 // resulting text into the opts-provided streaming function.
 // Note that this is tricky in the face of multiple
 // candidates, so this code assumes only a single candidate for now.
-func convertAndStreamFromIterator(ctx context.Context, iter *genai.GenerateContentResponseIterator, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func convertAndStreamFromIterator(
+	ctx context.Context,
+	iter *genai.GenerateContentResponseIterator,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}
@@ -398,7 +415,15 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 
 		if required, ok := params["required"]; ok {
-			rs := required.([]string)
+			ri := required.([]interface{})
+			rs := make([]string, 0, len(ri))
+			for _, r := range ri {
+				rString, ok := r.(string)
+				if !ok {
+					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+				}
+				rs = append(rs, rString)
+			}
 			schema.Required = rs
 		}
 		genaiFuncDecl.Parameters = schema
@@ -425,6 +450,8 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
+	case "array":
+		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
 	}
