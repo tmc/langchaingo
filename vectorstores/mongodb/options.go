@@ -27,15 +27,15 @@ func WithConnectionUri(connectionUri string) Option {
 	}
 }
 
-func WithDatabase(database string) Option {
+func WithDatabaseName(database string) Option {
 	return func(p *Store) {
-		p.database = database
+		p.databaseName = database
 	}
 }
 
-func WithCollection(collection string) Option {
+func WithCollectionName(collection string) Option {
 	return func(p *Store) {
-		p.collection = collection
+		p.collectionName = collection
 	}
 }
 
@@ -65,7 +65,7 @@ func WithEmbeddingKey(embeddingKey string) Option {
 
 func WithEmbedder(embedder embeddings.Embedder) Option {
 	return func(p *Store) {
-		p.embedding = embedder
+		p.embedder = embedder
 	}
 }
 
@@ -77,11 +77,11 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	if o.connectionUri == "" {
 		return Store{}, fmt.Errorf("%w: missing mongodb connection string", ErrInvalidOptions)
 	}
-	if o.database == "" {
+	if o.databaseName == "" {
 		return Store{}, fmt.Errorf("%w: missing mongodb database", ErrInvalidOptions)
 	}
-	if o.collection == "" {
-		return Store{}, fmt.Errorf("%w: missing mongodb collection", ErrInvalidOptions)
+	if o.collectionName == "" {
+		return Store{}, fmt.Errorf("%w: missing mongodb collection name", ErrInvalidOptions)
 	}
 	if o.indexName == "" {
 		o.indexName = DefaultIndexName
@@ -95,7 +95,7 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	if o.textKey == "" {
 		o.textKey = DefaultTextKey
 	}
-	if o.embedding == nil {
+	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedding model", ErrInvalidOptions)
 	}
 	o.clientOptions = options.Client().ApplyURI(o.connectionUri).SetServerAPIOptions(serverAPI)
