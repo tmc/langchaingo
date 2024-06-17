@@ -415,16 +415,7 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 
 		if required, ok := params["required"]; ok {
-			ri := required.([]interface{})
-			rs := make([]string, 0, len(ri))
-			for _, r := range ri {
-				rString, ok := r.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-				}
-				rs = append(rs, rString)
-			}
-			schema.Required = rs
+			schema.Required = required.([]string)
 		}
 		genaiFuncDecl.Parameters = schema
 
