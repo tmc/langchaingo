@@ -186,6 +186,7 @@ require (
 	cloud.google.com/go/vertexai v0.10.0
 	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0
 	github.com/Code-Hex/go-generics-cache v1.3.1
+	github.com/IBM/watsonx-go v1.0.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.1.2
@@ -201,7 +202,6 @@ require (
 	github.com/gocolly/colly v1.2.0
 	github.com/google/generative-ai-go v0.12.0
 	github.com/google/go-cmp v0.6.0
-	github.com/h0rv/go-watsonx v0.2.1
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/mattn/go-sqlite3 v1.14.17
