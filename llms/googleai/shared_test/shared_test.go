@@ -100,12 +100,17 @@ var testConfigs = []testConfig{
 	{testWithHTTPClient, getHTTPTestClientOptions()},
 }
 
-func TestShared(t *testing.T) {
+func TestGoogleAIShared(t *testing.T) {
 	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-googleai", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newGoogleAIClient(t, c.opts...)
 			c.testFunc(t, llm)
 		})
+	}
+}
+
+func TestVertexShared(t *testing.T) {
+	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-vertex", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newVertexClient(t, c.opts...)
 			c.testFunc(t, llm)
@@ -341,10 +346,30 @@ func testTools(t *testing.T, llm llms.Model) {
 							"description": "The city and state, e.g. San Francisco, CA",
 						},
 					},
-					"required": []string{"location"},
+					// json.Unmarshal() may return []interface{} instead of []string
+					"required": []interface{}{"location"},
 				},
 			},
 		},
+		// don't test this one, gemini doesn't support multiple tools
+		//{
+		//	Type: "function",
+		//	Function: &llms.FunctionDefinition{
+		//		Name:        "getIpInfo",
+		//		Description: "Get information about an IP address",
+		//		Parameters: map[string]any{
+		//			"type": "object",
+		//			"properties": map[string]any{
+		//				"ip": map[string]any{
+		//					"type":        "string",
+		//					"description": "The IP address to look up",
+		//				},
+		//			},
+		//			// json.Unmarshal() may return []interface{} instead of []string
+		//			"required": []string{"ip"},
+		//		},
+		//	},
+		//},
 	}
 
 	content := []llms.MessageContent{
@@ -403,6 +428,8 @@ func testTools(t *testing.T, llm llms.Model) {
 
 	c1 = resp.Choices[0]
 	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
 
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
