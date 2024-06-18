@@ -134,6 +134,8 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "(?i)dog|carnivo|canid|canine", c1.Content)
+	assert.Contains(t, c1.GenerationInfo, "output_tokens")
+	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 }
 
 func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
@@ -317,6 +319,8 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
+	assert.Contains(t, c1.GenerationInfo, "output_tokens")
+	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 }
 
 func testTools(t *testing.T, llm llms.Model) {
@@ -354,6 +358,8 @@ func testTools(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, resp.Choices)
 
 	c1 := resp.Choices[0]
+	assert.Contains(t, c1.GenerationInfo, "output_tokens")
+	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 
 	// Update chat history with assistant's response, with its tool calls.
 	assistantResp := llms.MessageContent{
