@@ -1,0 +1,89 @@
+---
+sidebar_label: Groq
+---
+
+# Groq
+
+## Overview
+
+This documentation provides a detailed overview and technical guidance for integrating Groq's machine learning models with the Langchaingo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and more.
+
+## Prerequisites
+
+- Go programming language installed on your machine (version 1.22.0 or higher recommended).
+-  A valid Groq API key. Obtain it by creating an account on the Groq platform and generating a new token.
+
+## Installation
+
+To install the Groq package in your Go project, run the following command:
+
+```bash
+go get github.com/tmc/langchaingo
+```
+
+Ensure that your Groq API key is set as an environment variable:
+    
+    ```bash
+    export GROQ_API_KEY=your-api-key
+    ```
+
+You can use .env file to store the API key and load it in your Go application.
+
+.env file:
+
+    ```bash
+    GROQ_API_KEY=your-api-key
+    ```
+but you not need use godotenv package to load the .env file.
+
+
+## Usage
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/openai"
+)
+
+func main() {
+    // Load the Groq API key from the .env file if you use it
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	apiKey := os.Getenv("GROQ_API_KEY")
+
+	llm, err := openai.New(
+		openai.WithModel("llama3-8b-8192"),
+		openai.WithBaseURL("https://api.groq.com/openai/v1"),
+		openai.WithToken(apiKey),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+	_, err = llms.GenerateFromSinglePrompt(ctx,
+		llm,
+		"Write a long poem about how golang is a fantastic language.",
+		llms.WithTemperature(0.8),
+		llms.WithMaxTokens(4096),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}),
+	)
+	fmt.Println()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+``` 
