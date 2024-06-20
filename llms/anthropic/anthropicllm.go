@@ -262,36 +262,34 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 	return anthropicclient.ChatMessage{}, errors.New("invalid content type for human message")
 }
 
-type ToolUse struct {
-	Type  string `json:"type"`
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Input string `json:"input"`
-}
-
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
-		toolUse := ToolUse{
+		var inputStruct map[string]interface{}
+		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &inputStruct)
+		if err != nil {
+			return anthropicclient.ChatMessage{
+				Role: RoleAssistant,
+			}, err
+		}
+		toolUse := anthropicclient.ToolUseContent{
 			Type:  "tool_use",
 			ID:    toolCall.ID,
 			Name:  toolCall.FunctionCall.Name,
-			Input: toolCall.FunctionCall.Arguments,
-		}
-
-		toolUseJSON, err := json.Marshal(toolUse)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, err
+			Input: inputStruct,
 		}
 
 		return anthropicclient.ChatMessage{
 			Role:    RoleAssistant,
-			Content: string(toolUseJSON),
+			Content: []anthropicclient.Content{toolUse},
 		}, nil
 	}
 	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
 		return anthropicclient.ChatMessage{
-			Role:    RoleAssistant,
-			Content: textContent.Text,
+			Role: RoleAssistant,
+			Content: []anthropicclient.Content{anthropicclient.TextContent{
+				Type: "text",
+				Text: textContent.Text,
+			}},
 		}, nil
 	}
 	return anthropicclient.ChatMessage{}, errors.New("invalid content type for AI message")
@@ -305,20 +303,15 @@ type ToolResult struct {
 
 func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	if toolCallResponse, ok := msg.Parts[0].(llms.ToolCallResponse); ok {
-		toolContent := ToolResult{
+		toolContent := anthropicclient.ToolResultContent{
 			Type:      "tool_result",
 			ToolUseID: toolCallResponse.ToolCallID,
 			Content:   toolCallResponse.Content,
 		}
 
-		toolContentJSON, err := json.Marshal(toolContent)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, err
-		}
-
 		return anthropicclient.ChatMessage{
 			Role:    RoleUser,
-			Content: string(toolContentJSON),
+			Content: []anthropicclient.Content{toolContent},
 		}, nil
 	}
 	return anthropicclient.ChatMessage{}, errors.New("invalid content type for tool message")

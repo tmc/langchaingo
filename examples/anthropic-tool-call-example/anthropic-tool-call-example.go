@@ -41,6 +41,54 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(resp.Choices[0].Content)
+
+	// populate ai response
+	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content)
+	messageHistory = append(messageHistory, assistantResponse)
+
+	fmt.Println("asking again...")
+	// Human asks again
+	humanQuestion := llms.TextParts(llms.ChatMessageTypeHuman, "How about the weather in chicago?")
+	messageHistory = append(messageHistory, humanQuestion)
+
+	// Send Request
+	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Perform Tool call
+	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
+	fmt.Println("Querying with tool response...")
+	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp.Choices[0].Content)
+
+	// populate ai response
+	assistantResponse = llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content)
+	messageHistory = append(messageHistory, assistantResponse)
+
+	fmt.Println("asking again... and again")
+	// Human asks again
+	humanQuestion = llms.TextParts(llms.ChatMessageTypeHuman, "How about the weather in chicago?")
+	messageHistory = append(messageHistory, humanQuestion)
+
+	// Send Request
+	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Perform Tool call
+	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
+	fmt.Println("Querying with tool response...")
+	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp.Choices[0].Content)
+
 }
 
 // executeToolCalls executes the tool calls in the response and returns the
@@ -50,9 +98,18 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 		for _, toolCall := range choice.ToolCalls {
 
 			// Append tool_use to messageHistory
-			assistantResponse := llms.TextParts(llms.ChatMessageTypeAI)
-			for _, tc := range choice.ToolCalls {
-				assistantResponse.Parts = append(assistantResponse.Parts, tc)
+			assistantResponse := llms.MessageContent{
+				Role: llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{
+					llms.ToolCall{
+						ID:   toolCall.ID,
+						Type: toolCall.Type,
+						FunctionCall: &llms.FunctionCall{
+							Name:      toolCall.FunctionCall.Name,
+							Arguments: toolCall.FunctionCall.Arguments,
+						},
+					},
+				},
 			}
 			messageHistory = append(messageHistory, assistantResponse)
 
