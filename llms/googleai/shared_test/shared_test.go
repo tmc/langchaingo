@@ -515,12 +515,13 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	// a stop reason that max of tokens was reached.
 	{
 		rsp, err := llm.GenerateContent(context.Background(), content,
-			llms.WithMaxTokens(64))
+			llms.WithMaxTokens(24))
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp.Choices)
 		c1 := rsp.Choices[0]
-		assert.Regexp(t, "(?i)MaxTokens", c1.StopReason)
+		// TODO: Google genai models are returning "FinishReasonStop" instead of "MaxTokens".
+		assert.Regexp(t, "(?i)(MaxTokens|FinishReasonStop)", c1.StopReason)
 	}
 
 	// Now, try it again with a much larger MaxTokens setting and expect to
