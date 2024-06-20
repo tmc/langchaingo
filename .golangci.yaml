@@ -30,6 +30,7 @@ linters:
     - ireturn # disabling temporarily
     - perfsprint
     - musttag
+    - tagalign # Impractical for schema-defined output parser, which relies heavily on struct tagging.
 
 linters-settings:
   cyclop:
