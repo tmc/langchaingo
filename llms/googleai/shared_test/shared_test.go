@@ -92,6 +92,7 @@ var testConfigs = []testConfig{
 	{testCandidateCountSetting, nil},
 	{testMaxTokensSetting, nil},
 	{testTools, nil},
+	{testToolsWithInterfaceRequired, nil},
 	{
 		testMultiContentText,
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
@@ -100,12 +101,17 @@ var testConfigs = []testConfig{
 	{testWithHTTPClient, getHTTPTestClientOptions()},
 }
 
-func TestShared(t *testing.T) {
+func TestGoogleAIShared(t *testing.T) {
 	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-googleai", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newGoogleAIClient(t, c.opts...)
 			c.testFunc(t, llm)
 		})
+	}
+}
+
+func TestVertexShared(t *testing.T) {
+	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-vertex", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newVertexClient(t, c.opts...)
 			c.testFunc(t, llm)
@@ -358,6 +364,89 @@ func testTools(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, resp.Choices)
 
 	c1 := resp.Choices[0]
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range c1.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range c1.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "getCurrentWeather":
+			var args struct {
+				Location string `json:"location"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(args.Location, "Chicago") {
+				toolResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							Name:    tc.FunctionCall.Name,
+							Content: "64 and sunny",
+						},
+					},
+				}
+				content = append(content, toolResponse)
+			}
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 = resp.Choices[0]
+	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
+}
+
+func testToolsWithInterfaceRequired(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	availableTools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					// json.Unmarshal() may return []interface{} instead of []string
+					"required": []interface{}{"location"},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+	}
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 := resp.Choices[0]
 	assert.Contains(t, c1.GenerationInfo, "output_tokens")
 	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 
@@ -403,6 +492,8 @@ func testTools(t *testing.T, llm llms.Model) {
 
 	c1 = resp.Choices[0]
 	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
 
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
