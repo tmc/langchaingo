@@ -18,11 +18,12 @@ func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 	}
 
 	sp := &MarkdownTextSplitter{
-		ChunkSize:      options.ChunkSize,
-		ChunkOverlap:   options.ChunkOverlap,
-		SecondSplitter: options.SecondSplitter,
-		CodeBlocks:     options.CodeBlocks,
-		ReferenceLinks: options.ReferenceLinks,
+		ChunkSize:        options.ChunkSize,
+		ChunkOverlap:     options.ChunkOverlap,
+		SecondSplitter:   options.SecondSplitter,
+		CodeBlocks:       options.CodeBlocks,
+		ReferenceLinks:   options.ReferenceLinks,
+		HeadingHierarchy: options.KeepHeadingHierarchy,
 	}
 
 	if sp.SecondSplitter == nil {
@@ -50,9 +51,10 @@ type MarkdownTextSplitter struct {
 	ChunkSize    int
 	ChunkOverlap int
 	// SecondSplitter splits paragraphs
-	SecondSplitter TextSplitter
-	CodeBlocks     bool
-	ReferenceLinks bool
+	SecondSplitter   TextSplitter
+	CodeBlocks       bool
+	ReferenceLinks   bool
+	HeadingHierarchy bool
 }
 
 // SplitText splits a text into multiple text.
@@ -61,14 +63,16 @@ func (sp MarkdownTextSplitter) SplitText(text string) ([]string, error) {
 	tokens := mdParser.Parse([]byte(text))
 
 	mc := &markdownContext{
-		startAt:          0,
-		endAt:            len(tokens),
-		tokens:           tokens,
-		chunkSize:        sp.ChunkSize,
-		chunkOverlap:     sp.ChunkOverlap,
-		secondSplitter:   sp.SecondSplitter,
-		renderCodeBlocks: sp.CodeBlocks,
-		useInlineContent: !sp.ReferenceLinks,
+		startAt:                0,
+		endAt:                  len(tokens),
+		tokens:                 tokens,
+		chunkSize:              sp.ChunkSize,
+		chunkOverlap:           sp.ChunkOverlap,
+		secondSplitter:         sp.SecondSplitter,
+		renderCodeBlocks:       sp.CodeBlocks,
+		useInlineContent:       !sp.ReferenceLinks,
+		hTitleStack:            []string{},
+		hTitlePrependHierarchy: sp.HeadingHierarchy,
 	}
 
 	chunks := mc.splitText()
@@ -87,8 +91,12 @@ type markdownContext struct {
 
 	// hTitle represents the current header(H1、H2 etc.) content
 	hTitle string
+	// hTitleStack represents the hierarchy of headers
+	hTitleStack []string
 	// hTitlePrepended represents whether hTitle has been appended to chunks
 	hTitlePrepended bool
+	// hTitlePrependHierarchy represents whether hTitle should contain the title hierarchy or only the last title
+	hTitlePrependHierarchy bool
 
 	// orderedList represents whether current list is ordered list
 	orderedList bool
@@ -167,6 +175,7 @@ func (mc *markdownContext) clone(startAt, endAt int) *markdownContext {
 		tokens: subTokens,
 
 		hTitle:          mc.hTitle,
+		hTitleStack:     mc.hTitleStack,
 		hTitlePrepended: mc.hTitlePrepended,
 
 		orderedList: mc.orderedList,
@@ -204,6 +213,24 @@ func (mc *markdownContext) onMDHeader() {
 
 	hm := repeatString(header.HLevel, "#")
 	mc.hTitle = fmt.Sprintf("%s %s", hm, inline.Content)
+
+	// fill titlestack with empty strings up to the current level
+	for len(mc.hTitleStack) < header.HLevel {
+		mc.hTitleStack = append(mc.hTitleStack, "")
+	}
+
+	if mc.hTitlePrependHierarchy {
+		// Build the new title from the title stack, joined by newlines, while ignoring empty entries
+		mc.hTitleStack = append(mc.hTitleStack[:header.HLevel-1], mc.hTitle)
+		mc.hTitle = ""
+		for _, t := range mc.hTitleStack {
+			if t != "" {
+				mc.hTitle = strings.Join([]string{mc.hTitle, t}, "\n")
+			}
+		}
+		mc.hTitle = strings.TrimLeft(mc.hTitle, "\n")
+	}
+
 	mc.hTitlePrepended = false
 }
 
