@@ -13,8 +13,8 @@ import (
 )
 
 type ChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	Role    string      `json:"role"`
+	Content interface{} `json:"content"`
 }
 
 type messagePayload struct {
@@ -61,6 +61,16 @@ type ToolUseContent struct {
 
 func (tuc ToolUseContent) GetType() string {
 	return tuc.Type
+}
+
+type ToolResultContent struct {
+	Type      string `json:"type"`
+	ToolUseID string `json:"tool_use_id"`
+	Content   string `json:"content"`
+}
+
+func (trc ToolResultContent) GetType() string {
+	return trc.Type
 }
 
 type MessageResponsePayload struct {
