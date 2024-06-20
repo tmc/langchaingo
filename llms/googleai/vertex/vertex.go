@@ -113,7 +113,7 @@ func (g *Vertex) GenerateContent(
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
-func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, error) {
+func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
 	var toolCalls []llms.ToolCall
 
@@ -149,6 +149,11 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 		metadata := make(map[string]any)
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
+		if usage != nil {
+			metadata["input_tokens"] = usage.PromptTokenCount
+			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["total_tokens"] = usage.TotalTokenCount
+		}
 
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
@@ -257,7 +262,7 @@ func generateFromSingleMessage(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := model.GenerateContentStream(ctx, convertedParts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
@@ -296,7 +301,7 @@ func generateFromMessages(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := session.SendMessageStream(ctx, reqContent.Parts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
@@ -315,6 +320,7 @@ func convertAndStreamFromIterator(
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}
+	var usage *genai.UsageMetadata
 DoStream:
 	for {
 		resp, err := iter.Next()
@@ -339,6 +345,10 @@ DoStream:
 		candidate.SafetyRatings = respCandidate.SafetyRatings
 		candidate.CitationMetadata = respCandidate.CitationMetadata
 
+		if resp.UsageMetadata != nil {
+			usage = resp.UsageMetadata
+		}
+
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
 				if opts.StreamingFunc(ctx, []byte(text)) != nil {
@@ -348,7 +358,7 @@ DoStream:
 		}
 	}
 
-	return convertCandidates([]*genai.Candidate{candidate})
+	return convertCandidates([]*genai.Candidate{candidate}, usage)
 }
 
 // convertTools converts from a list of langchaingo tools to a list of genai
