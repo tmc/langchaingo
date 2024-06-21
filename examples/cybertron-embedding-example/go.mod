@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/chewxy/math32 v1.10.1
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.11
+	github.com/tmc/langchaingo v0.1.12-pre.0
 )
 
 require (
@@ -47,7 +47,7 @@ require (
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240509183442-62759503f434 // indirect
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

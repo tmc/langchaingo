@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/redis-vectorstore-example
 
 go 1.22.2
 
-require github.com/tmc/langchaingo v0.1.11
+require github.com/tmc/langchaingo v0.1.12-pre.0
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
