@@ -1,3 +1,5 @@
+Here's a cheerful and helpful markdown readme explaining what this example does:
+
 # Ollama Streaming Example with LangChain Go
 
 👋 Hello, Go enthusiasts and AI adventurers! Welcome to this exciting example that showcases how to use LangChain Go with Ollama for streaming AI-generated content. Let's dive in and see what this cool code does! 🚀
