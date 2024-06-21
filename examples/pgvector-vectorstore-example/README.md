@@ -1,23 +1,3 @@
-# pgvector store with OpenAI embeddings
-
-Start Postgres:
-
-```shell
-docker-compose up -d
-```
-
-`postgres.Dockerfile` extends the official Postgres image and installs the pgvector extension.
-
-`create_extension.sql` enables the pgvector extension and should run automatically when the container starts for the
-first time.
-
-Run the example:
-
-```shell
-export OPENAI_API_KEY=<your key>
-go run pgvector_vectorstore_example.go
-```
-
 # PGVector Store with OpenAI Embeddings Example
 
 This example demonstrates how to use pgvector, a PostgreSQL extension for vector similarity search, with OpenAI embeddings in a Go application. It showcases the integration of langchain-go, OpenAI's API, and pgvector to create a powerful vector database for similarity searches.
