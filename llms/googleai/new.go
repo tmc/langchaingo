@@ -25,6 +25,7 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	for _, opt := range opts {
 		opt(&clientOptions)
 	}
+	clientOptions.EnsureAuthPresent()
 
 	gi := &GoogleAI{
 		opts: clientOptions,
