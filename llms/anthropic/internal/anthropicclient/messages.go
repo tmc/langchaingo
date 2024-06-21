@@ -123,14 +123,14 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 
 		switch typeStruct.Type {
 		case "text":
-			var tc TextContent
-			if err := json.Unmarshal(raw, &tc); err != nil {
+			tc := &TextContent{}
+			if err := json.Unmarshal(raw, tc); err != nil {
 				return err
 			}
 			m.Content = append(m.Content, tc)
 		case "tool_use":
-			var tuc ToolUseContent
-			if err := json.Unmarshal(raw, &tuc); err != nil {
+			tuc := &ToolUseContent{}
+			if err := json.Unmarshal(raw, tuc); err != nil {
 				return err
 			}
 			m.Content = append(m.Content, tuc)
