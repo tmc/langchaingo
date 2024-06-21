@@ -70,9 +70,8 @@ func main() {
 	assistantResponse = llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content)
 	messageHistory = append(messageHistory, assistantResponse)
 
-	fmt.Println("asking again... and again")
-	// Human asks again
-	humanQuestion = llms.TextParts(llms.ChatMessageTypeHuman, "How about the weather in chicago?")
+	// Compare responsses
+	humanQuestion = llms.TextParts(llms.ChatMessageTypeHuman, "How do these compare?")
 	messageHistory = append(messageHistory, humanQuestion)
 
 	// Send Request
@@ -82,7 +81,7 @@ func main() {
 	}
 	// Perform Tool call
 	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
-	fmt.Println("Querying with tool response...")
+	fmt.Println("Asking for comparison...")
 	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
 		log.Fatal(err)
