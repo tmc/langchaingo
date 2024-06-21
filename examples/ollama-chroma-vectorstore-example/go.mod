@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.11
+	github.com/tmc/langchaingo v0.1.12-pre.0
 )
 
 require (

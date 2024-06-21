@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/milvus-io/milvus-sdk-go/v2 v2.3.6
-	github.com/tmc/langchaingo v0.1.11
+	github.com/tmc/langchaingo v0.1.12-pre.0
 )
 
 require (
@@ -31,7 +31,7 @@ require (
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240509183442-62759503f434 // indirect
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 )

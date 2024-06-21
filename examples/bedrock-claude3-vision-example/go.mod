@@ -4,7 +4,7 @@ go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.11
+require github.com/tmc/langchaingo v0.1.12-pre.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.26.1 // indirect
