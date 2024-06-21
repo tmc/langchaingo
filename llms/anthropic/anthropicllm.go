@@ -147,7 +147,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	for i, content := range result.Content {
 		switch content.GetType() {
 		case "text":
-			if textContent, ok := content.(anthropicclient.TextContent); ok {
+			if textContent, ok := content.(*anthropicclient.TextContent); ok {
 				choices[i] = &llms.ContentChoice{
 					Content:    textContent.Text,
 					StopReason: result.StopReason,
@@ -160,7 +160,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 				return nil, errors.New("invalid content type for text message")
 			}
 		case "tool_use":
-			if toolUseContent, ok := content.(anthropicclient.ToolUseContent); ok {
+			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
 				argumentsJSON, err := json.Marshal(toolUseContent.Input)
 				if err != nil {
 					return nil, err
