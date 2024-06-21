@@ -63,7 +63,7 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 
 	for _, part := range m.Parts {
 		switch part.Type {
-		case "text":
+		case "text", "":
 			mc.Parts = append(mc.Parts, TextContent{Text: part.Text})
 		case "image_url":
 			mc.Parts = append(mc.Parts, ImageURLContent{
@@ -89,7 +89,7 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 				Content:    part.ToolResponse.Content,
 			})
 		default:
-			return fmt.Errorf("unknown content type: %s", part.Type)
+			return fmt.Errorf("unknown content type: '%s'", part.Type)
 		}
 	}
 	// Special case: handle single text part directly:
