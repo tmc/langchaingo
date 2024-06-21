@@ -1,5 +1,3 @@
-Here's a cheerful and helpful README.md for this example:
-
 # 🚀 Google AI Streaming Example with LangChain Go
 
 Hello there, Go enthusiasts and AI adventurers! 👋 Welcome to this exciting example that showcases how to use Google AI's Gemini model with streaming capabilities using LangChain Go!
