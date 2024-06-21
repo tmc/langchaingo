@@ -32,7 +32,7 @@ func DefaultOptions() Options {
 		DefaultModel:          "gemini-pro",
 		DefaultEmbeddingModel: "embedding-001",
 		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      1024,
+		DefaultMaxTokens:      2048,
 		DefaultTemperature:    0.5,
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,

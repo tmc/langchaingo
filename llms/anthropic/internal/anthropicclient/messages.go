@@ -145,7 +145,7 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 func (c *Client) setMessageDefaults(payload *messagePayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 256
+		payload.MaxTokens = 2048
 	}
 
 	if len(payload.StopWords) == 0 {
