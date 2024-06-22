@@ -10,8 +10,7 @@ import (
 )
 
 var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got embedded")
+	ErrEmptyResponse = errors.New("no response")
 )
 
 // LLM is a ollama LLM implementation.
@@ -192,7 +191,7 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	if len(inputTexts) != len(embeddings) {
-		return embeddings, ErrIncompleteEmbedding
+		return embeddings, llms.ErrIncompleteEmbedding
 	}
 
 	return embeddings, nil
