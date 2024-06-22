@@ -37,7 +37,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, texts *CreateEmbeddingRequ
 		return nil, err
 	}
 
-	if resp.StatusCode > 299 {
+	if resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("error: %s", body)
 	}
 
@@ -81,7 +81,7 @@ func (c *Client) GenerateContent(ctx context.Context, request *GenerateContentRe
 			return nil, err
 		}
 
-		if response.StatusCode > 299 {
+		if response.StatusCode >= http.StatusMultipleChoices {
 			return nil, fmt.Errorf("error: %s", body)
 		}
 
@@ -165,7 +165,7 @@ func (c *Client) Summarize(ctx context.Context, inputText string, maxLength int)
 		return nil, err
 	}
 
-	if resp.StatusCode > 299 {
+	if resp.StatusCode >= http.StatusMultipleChoices {
 		return nil, fmt.Errorf("error: %s", body)
 	}
 
