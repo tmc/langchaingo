@@ -148,10 +148,10 @@ func (c *Client) setHeaders(req *http.Request) {
 	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	} else {
-		req.Header.Set("api-key", c.token)
+		req.Header.Set("Api-Key", c.token)
 	}
 	if c.organization != "" {
-		req.Header.Set("OpenAI-Organization", c.organization)
+		req.Header.Set("Openai-Organization", c.organization)
 	}
 }
 
