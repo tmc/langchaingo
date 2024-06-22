@@ -11,7 +11,6 @@ import (
 
 var (
 	ErrInvalidPrompt = errors.New("invalid prompt")
-	ErrEmptyResponse = errors.New("no response")
 )
 
 type LLM struct {
@@ -53,7 +52,7 @@ func (wx *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConte
 	}
 
 	if result.Text == "" {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	resp := &llms.ContentResponse{

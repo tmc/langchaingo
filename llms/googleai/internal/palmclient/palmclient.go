@@ -65,9 +65,6 @@ func New(ctx context.Context, projectID, location string, opts ...option.ClientO
 	}, nil
 }
 
-// ErrEmptyResponse is returned when the OpenAI API returns an empty response.
-var ErrEmptyResponse = errors.New("empty response")
-
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
 	Prompts       []string `json:"prompts"`
@@ -290,7 +287,7 @@ func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []s
 		return nil, err
 	}
 	if len(resp.GetPredictions()) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp.GetPredictions(), nil
 }
@@ -329,7 +326,7 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 		return nil, err
 	}
 	if len(resp.GetPredictions()) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp.GetPredictions(), nil
 }

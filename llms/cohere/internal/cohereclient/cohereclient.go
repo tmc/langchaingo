@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	ErrEmptyResponse = errors.New("empty response")
 	ErrModelNotFound = errors.New("model not found")
 )
 
@@ -129,7 +128,7 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		if strings.HasPrefix(response.Message, "model not found") {
 			return nil, ErrModelNotFound
 		}
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	var generation Generation

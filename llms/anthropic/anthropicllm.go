@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	ErrEmptyResponse            = errors.New("no response")
 	ErrMissingToken             = errors.New("missing the Anthropic API key, set it in the ANTHROPIC_API_KEY environment variable")
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 	ErrInvalidContentType       = errors.New("invalid content type")
@@ -91,7 +90,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	if len(messages) == 0 || len(messages[0].Parts) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	msg0 := messages[0]

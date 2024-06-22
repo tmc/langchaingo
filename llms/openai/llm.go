@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	ErrEmptyResponse              = errors.New("no response")
 	ErrMissingToken               = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable") //nolint:lll
 	ErrMissingAzureModel          = errors.New("model needs to be provided when using Azure API")
 	ErrMissingAzureEmbeddingModel = errors.New("embeddings model needs to be provided when using Azure API")

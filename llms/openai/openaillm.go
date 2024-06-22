@@ -140,7 +140,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 	if len(result.Choices) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	choices := make([]*llms.ContentChoice, len(result.Choices))
@@ -194,7 +194,7 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 		return nil, fmt.Errorf("failed to create openai embeddings: %w", err)
 	}
 	if len(embeddings) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	if len(inputTexts) != len(embeddings) {
 		return embeddings, ErrUnexpectedResponseLength
