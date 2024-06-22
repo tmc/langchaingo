@@ -54,11 +54,15 @@ func mockServer(t *testing.T) *httptest.Server {
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
+		if err != nil {
+			t.Error(err)
+		}
 
 		var infReq inferencePayload
 		err = json.Unmarshal(b, &infReq)
-		require.NoError(t, err)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if infReq.Parameters.TopK == -1 {
 			w.WriteHeader(http.StatusBadRequest)
