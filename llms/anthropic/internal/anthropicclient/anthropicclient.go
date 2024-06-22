@@ -146,9 +146,9 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", c.token)
+	req.Header.Set("X-Api-Key", c.token)
 	// TODO: expose version as a option/parameter
-	req.Header.Set("anthropic-version", "2023-06-01")
+	req.Header.Set("Anthropic-Version", "2023-06-01")
 }
 
 func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*http.Response, error) {
