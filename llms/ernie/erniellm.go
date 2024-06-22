@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	ErrEmptyResponse = errors.New("no response")
-	ErrCodeResponse  = errors.New("has error code")
+	ErrCodeResponse = errors.New("has error code")
 )
 
 type LLM struct {

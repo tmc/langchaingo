@@ -2,11 +2,7 @@ package localclient
 
 import (
 	"context"
-	"errors"
 )
-
-// ErrEmptyResponse is returned when the OpenAI API returns an empty response.
-var ErrEmptyResponse = errors.New("empty response")
 
 // Client is a client for a local LLM.
 type Client struct {
