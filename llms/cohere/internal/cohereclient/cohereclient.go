@@ -109,8 +109,8 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", "bearer "+c.token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "bearer "+c.token)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
