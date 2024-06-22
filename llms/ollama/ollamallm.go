@@ -9,11 +9,6 @@ import (
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 )
 
-var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got embedded")
-)
-
 // LLM is a ollama LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler
@@ -185,14 +180,14 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 		}
 
 		if len(embedding.Embedding) == 0 {
-			return nil, ErrEmptyResponse
+			return nil, llms.ErrEmptyResponse
 		}
 
 		embeddings = append(embeddings, embedding.Embedding)
 	}
 
 	if len(inputTexts) != len(embeddings) {
-		return embeddings, ErrIncompleteEmbedding
+		return embeddings, llms.ErrIncompleteEmbedding
 	}
 
 	return embeddings, nil

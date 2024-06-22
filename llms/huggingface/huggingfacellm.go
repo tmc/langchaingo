@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	ErrEmptyResponse            = errors.New("empty response")
 	ErrMissingToken             = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
@@ -115,7 +114,7 @@ func (o *LLM) CreateEmbedding(
 		return nil, err
 	}
 	if len(embeddings) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	if len(inputTexts) != len(embeddings) {
 		return embeddings, ErrUnexpectedResponseLength

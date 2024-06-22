@@ -134,7 +134,7 @@ func createAnthropicCompletion(ctx context.Context,
 
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
-		MaxTokens:        getMaxTokens(options.MaxTokens, 2048),
+		MaxTokens:        getMaxTokens(options.MaxTokens, DefaultMaxTokenLength2048),
 		System:           systemPrompt,
 		Messages:         inputContents,
 		Temperature:      options.Temperature,

@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 var (
@@ -18,7 +20,6 @@ var (
 	ErrCompletionCode  = errors.New("completion API returned unexpected status code")
 	ErrAccessTokenCode = errors.New("get access_token API returned unexpected status code")
 	ErrEmbeddingCode   = errors.New("embedding API returned unexpected status code")
-	ErrEmptyResponse   = errors.New("empty response")
 )
 
 // Client is a client for the ERNIE API.
@@ -285,7 +286,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse,
 	}
 
 	if resp.Result == "" && resp.FunctionCall == nil {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	return resp, nil
