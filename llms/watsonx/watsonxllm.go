@@ -9,9 +9,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrInvalidPrompt = errors.New("invalid prompt")
-)
+var ErrInvalidPrompt = errors.New("invalid prompt")
 
 type LLM struct {
 	CallbacksHandler callbacks.Handler

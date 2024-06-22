@@ -13,9 +13,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrModelNotFound = errors.New("model not found")
-)
+var ErrModelNotFound = errors.New("model not found")
 
 type Client struct {
 	token      string

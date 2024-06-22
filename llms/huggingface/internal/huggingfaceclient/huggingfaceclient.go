@@ -8,9 +8,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrInvalidToken = errors.New("invalid token")
-)
+var ErrInvalidToken = errors.New("invalid token")
 
 type Client struct {
 	Token string
