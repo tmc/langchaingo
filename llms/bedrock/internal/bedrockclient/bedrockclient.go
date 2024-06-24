@@ -3,9 +3,11 @@ package bedrockclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -60,6 +62,71 @@ func (c *Client) CreateCompletion(ctx context.Context,
 		return createMetaCompletion(ctx, c.client, modelID, messages, options)
 	default:
 		return nil, errors.New("unsupported provider")
+	}
+}
+
+// Converse converses with the model.
+func (c *Client) Converse(ctx context.Context,
+	modelID string,
+	llmsMessages []llms.MessageContent,
+	options *llms.CallOptions,
+) (*llms.ContentResponse, error) {
+	system, messages, err := processInputMessagesBedrock(llmsMessages)
+	if err != nil {
+		return nil, err
+	}
+	temperature := float32(options.Temperature)
+	inferenceConfig := &types.InferenceConfiguration{
+		StopSequences: options.StopWords,
+		Temperature:   &temperature,
+	}
+	if options.MaxTokens > 0 {
+		maxTokens := int32(options.MaxTokens)
+		inferenceConfig.MaxTokens = &maxTokens
+	}
+	if options.TopP > 0 {
+		topP := float32(options.TopP)
+		inferenceConfig.TopP = &topP
+	}
+	var toolConfig *types.ToolConfiguration
+
+	if len(options.Tools) > 0 {
+		tools, err := convertTools(options.Tools)
+		if err != nil {
+			return nil, err
+		}
+		toolConfig = &types.ToolConfiguration{
+			Tools: tools,
+		}
+		if options.ToolChoice != nil {
+			toolChoice, err := convertToolChoice(options.ToolChoice)
+			if err != nil {
+				return nil, err
+			}
+			toolConfig.ToolChoice = toolChoice
+		}
+	}
+
+	if options.StreamingFunc != nil {
+		input := &bedrockruntime.ConverseStreamInput{
+			Messages:        messages,
+			ModelId:         &modelID,
+			System:          system,
+			InferenceConfig: inferenceConfig,
+			ToolConfig:      toolConfig,
+		}
+		output, err := c.client.ConverseStream(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := handleConverseStreamEvents(ctx, output, options)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	} else {
+		// TODO implement
+		return nil, fmt.Errorf("converse without streaming not implemented")
 	}
 }
 

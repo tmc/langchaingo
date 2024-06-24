@@ -59,9 +59,10 @@ const (
 	// Languages: English and multiple other languages.
 	ModelAnthropicClaudeV3Haiku = "anthropic.claude-3-haiku-20240307-v1:0"
 
-	// ModelAnthropicClaudeV35Haiku
-	// See more model info: https://docs.anthropic.com/en/docs/about-claude/models
-	ModelAnthropicClaudeV35Haiku = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+	// See more anthropic model info from https://docs.anthropic.com/en/docs/about-claude/models
+
+	ModelAnthropicClaudeV35Sonnet = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+	ModelAnthropicClaudeV3Opus    = "anthropic.claude-3-opus-20240229-v1:0"
 
 	// An update to Claude 2 that features double the context window, plus improvements
 	// across reliability, hallucination rates, and evidence-based accuracy in long document and RAG contexts.
