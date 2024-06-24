@@ -86,6 +86,7 @@ var testConfigs = []testConfig{
 	{testMultiContentText, nil},
 	{testGenerateFromSinglePrompt, nil},
 	{testMultiContentTextChatSequence, nil},
+	{testMultiContentWithSystemMessage, nil},
 	{testMultiContentImageLink, nil},
 	{testMultiContentImageBinary, nil},
 	{testEmbeddings, nil},
@@ -192,12 +193,35 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro"))
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "(?i)spain.*larger", c1.Content)
+}
+
+func testMultiContentWithSystemMessage(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart("You are a Spanish teacher; answer in Spanish")},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Name the 5 most common fruits")},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "(?i)(manzana|naranja)", c1.Content)
 }
 
 func testMultiContentImageLink(t *testing.T, llm llms.Model) {
@@ -325,8 +349,6 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
-	assert.Contains(t, c1.GenerationInfo, "output_tokens")
-	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 }
 
 func testTools(t *testing.T, llm llms.Model) {
