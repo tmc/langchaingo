@@ -194,7 +194,6 @@ func updateToolUse(
 			tools[len(tools)-1].FunctionCall = &llms.FunctionCall{
 				Name: *start.Value.Name,
 			}
-
 		}
 	}
 	if delta != nil && len(*delta.Input) > 0 {
@@ -205,7 +204,7 @@ func updateToolUse(
 }
 
 // handleConverseStreamEvents handles the stream events and returns the content response.
-// TODO: support multiple content choices
+// TODO: support multiple content choices.
 func handleConverseStreamEvents(
 	ctx context.Context,
 	streamOutput *bedrockruntime.ConverseStreamOutput,
@@ -252,7 +251,11 @@ func handleConverseStreamEvents(
 				}
 				contentChoices[0].Content += delta.Value
 			case *types.ContentBlockDeltaMemberToolUse:
+				var err error
 				_, tools, err = updateToolUse(tools, &delta.Value, nil)
+				if err != nil {
+					return nil, err
+				}
 			default:
 				slog.WarnContext(ctx, "tool use not supported", "value", delta)
 			}
@@ -267,7 +270,7 @@ func handleConverseStreamEvents(
 	return &llms.ContentResponse{Choices: contentChoices}, nil
 }
 
-func convertTools(tools []llms.Tool) ([]types.Tool, error) {
+func convertTools(tools []llms.Tool) []types.Tool {
 	convertedTools := make([]types.Tool, 0, len(tools))
 	for _, tool := range tools {
 		convertedTools = append(convertedTools, &types.ToolMemberToolSpec{
@@ -280,7 +283,7 @@ func convertTools(tools []llms.Tool) ([]types.Tool, error) {
 			},
 		})
 	}
-	return convertedTools, nil
+	return convertedTools
 }
 
 func convertToolChoice(toolChoice any) (types.ToolChoice, error) {

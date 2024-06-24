@@ -27,6 +27,7 @@ func (t *testArgs) Validate() error {
 	return nil
 }
 
+// nolint: gochecknoglobals
 var (
 	converseWithSystem = testArgs{
 		messages: []llms.MessageContent{
@@ -55,15 +56,6 @@ var (
 						"Which countries consume more than 1000 TWh from hydropower? Think step by step and look at all regions. Output in JSON.",
 					),
 				},
-			},
-		},
-	}
-
-	converseWithTools = testArgs{
-		messages: []llms.MessageContent{
-			{
-				Role:  llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
 			},
 		},
 	}

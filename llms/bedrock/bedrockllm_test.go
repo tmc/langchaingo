@@ -23,7 +23,6 @@ func setUpTest() (*bedrockruntime.Client, error) {
 }
 
 func TestAmazonOutput(t *testing.T) {
-
 	if os.Getenv("TEST_AWS") != "true" {
 		t.Skip("Skipping test, requires AWS access")
 	}
@@ -96,7 +95,7 @@ func TestAmazonOutput(t *testing.T) {
 }
 
 func TestBedrockConverseStream(t *testing.T) {
-
+	t.Parallel()
 	if os.Getenv("TEST_AWS") != "true" {
 		t.Skip("Skipping test, requires AWS access")
 	}
@@ -150,8 +149,8 @@ func TestBedrockConverseStream(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	streamFunc := func(ctx context.Context, chunk []byte) error {
-		//t.Logf("Stream chunk: %s", string(chunk))
+	streamFunc := func(_ context.Context, _ []byte) error {
+		// t.Logf("Stream chunk: %s", string(chunk))
 		return nil
 	}
 

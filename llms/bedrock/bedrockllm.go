@@ -77,7 +77,7 @@ func (l *LLM) GenerateContent(
 	}
 
 	var res *llms.ContentResponse
-	if strings.HasPrefix(opts.Model, "anthropic") && opts.StreamingFunc != nil {
+	if strings.HasPrefix(opts.Model, "anthropic") && opts.StreamingFunc != nil { // nolint: nestif
 		var err error
 		res, err = l.client.Converse(ctx, opts.Model, messages, &opts)
 		if err != nil {

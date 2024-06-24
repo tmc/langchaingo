@@ -13,6 +13,7 @@ import (
 	"github.com/tmc/langchaingo/llms/bedrock"
 )
 
+// nolint:gochecknoglobals
 var (
 	defaultBedrockClient llms.Model
 	usEast1BedrockClient llms.Model
@@ -40,7 +41,7 @@ func getDefaultBedrockClient(t *testing.T) llms.Model {
 	return llm
 }
 
-// As of June 2024, only the us-east-1 region supports bedrock.ModelAnthropicClaudeV35Sonnet model
+// As of June 2024, only the us-east-1 region supports bedrock.ModelAnthropicClaudeV35Sonnet model.
 func getUsEast1BedrockClient(t *testing.T) llms.Model {
 	t.Helper()
 	if os.Getenv("TEST_AWS") != "true" {
@@ -71,6 +72,7 @@ type bedrockTestCase struct {
 }
 
 func runBedrockTestCase(t *testing.T, test *bedrockTestCase, arg testArgs) {
+	t.Helper()
 	var client llms.Model
 	if test.client == nil {
 		client = getDefaultBedrockClient(t)
@@ -143,9 +145,10 @@ func getDefaultBedrockClaude3TestCases(t *testing.T) []bedrockTestCase {
 }
 
 func TestBedrockStreamMessages(t *testing.T) {
-	modelList := getDefaultBedrockClaude3TestCases(t)
 	t.Parallel()
+	modelList := getDefaultBedrockClaude3TestCases(t)
 	for _, test := range modelList {
+		t.Parallel()
 		t.Run(test.model, func(t *testing.T) {
 			runBedrockTestCase(t, &test, converseWithSystem)
 		})
@@ -153,9 +156,10 @@ func TestBedrockStreamMessages(t *testing.T) {
 }
 
 func TestBedrockStreamMessagesWithImage(t *testing.T) {
-	modelList := getDefaultBedrockClaude3TestCases(t)
 	t.Parallel()
+	modelList := getDefaultBedrockClaude3TestCases(t)
 	for _, test := range modelList {
+		t.Parallel()
 		t.Run(test.model, func(t *testing.T) {
 			runBedrockTestCase(t, &test, converseWithImage)
 		})
@@ -167,6 +171,7 @@ func TestBedrockStreamMessagesWithImageAndTools(t *testing.T) {
 	t.Parallel()
 	for _, test := range modelList {
 		t.Run(test.model, func(t *testing.T) {
+			t.Parallel()
 			runBedrockTestCase(t, &test, converseImageWithTools)
 		})
 	}

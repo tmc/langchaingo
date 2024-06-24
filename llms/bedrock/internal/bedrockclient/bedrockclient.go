@@ -91,12 +91,8 @@ func (c *Client) Converse(ctx context.Context,
 	var toolConfig *types.ToolConfiguration
 
 	if len(options.Tools) > 0 {
-		tools, err := convertTools(options.Tools)
-		if err != nil {
-			return nil, err
-		}
 		toolConfig = &types.ToolConfiguration{
-			Tools: tools,
+			Tools: convertTools(options.Tools),
 		}
 		if options.ToolChoice != nil {
 			toolChoice, err := convertToolChoice(options.ToolChoice)

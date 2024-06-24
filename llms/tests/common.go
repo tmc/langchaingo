@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 	"testing"
 
@@ -13,7 +12,7 @@ type streamRecv struct {
 	Content string
 }
 
-func (s *streamRecv) streamFunc(ctx context.Context, chunk []byte) error {
+func (s *streamRecv) streamFunc(_ context.Context, chunk []byte) error {
 	s.Content += string(chunk)
 	return nil
 }
@@ -21,12 +20,14 @@ func (s *streamRecv) streamFunc(ctx context.Context, chunk []byte) error {
 func newStreamRecv() *streamRecv {
 	return &streamRecv{}
 }
-func printStack() {
+
+func printStack(t *testing.T) { // nolint: unused
+	t.Helper()
 	buf := make([]byte, 1024)
 	for {
 		n := runtime.Stack(buf, false)
 		if n < len(buf) {
-			fmt.Printf("Stack trace:\n%s", buf[:n])
+			t.Logf("Stack trace:\n%s", buf[:n])
 			return
 		}
 		buf = make([]byte, 2*len(buf))

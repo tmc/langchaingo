@@ -3,11 +3,12 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tmc/langchaingo/llms"
 	"strings"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
-func getCurrentWeather(location string, unit string) (string, error) {
+func getCurrentWeather(location string, _ string) (string, error) {
 	weatherResponses := map[string]string{
 		"boston":   "29℃ and sunny",
 		"chicago":  "15℃ and windy",
@@ -25,7 +26,7 @@ func getCurrentWeather(location string, unit string) (string, error) {
 	return "", fmt.Errorf("no weather info for %q", location)
 }
 
-func getIpLocation(ip string) (string, error) {
+func getIPLocation(ip string) (string, error) {
 	locationResponses := map[string]string{
 		"8.8.8.0":   "United States, California, Mountain View",
 		"127.0.0.1": "local host",
@@ -45,7 +46,7 @@ func getIpLocation(ip string) (string, error) {
 }
 
 // availableTools simulates the tools/functions we're making available for the model.
-var availableTools = []llms.Tool{
+var availableTools = []llms.Tool{ // nolint: gochecknoglobals
 	{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
@@ -70,7 +71,7 @@ var availableTools = []llms.Tool{
 	{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
-			Name:        "getIpLocation",
+			Name:        "getIPLocation",
 			Description: "Get the location of an IP address",
 			Parameters: map[string]any{
 				"type": "object",
@@ -111,13 +112,13 @@ func callFunction(toolCall llms.ToolCall) (*llms.ToolCallResponse, error) {
 			return resp, fmt.Errorf("invalid unit")
 		}
 		result, err = getCurrentWeather(location, unit)
-	case "getIpLocation":
+	case "getIPLocation":
 		ip, ok := args["ip"].(string)
 		if !ok {
 			resp.Content = "invalid ip"
 			return resp, fmt.Errorf("invalid ip")
 		}
-		result, err = getIpLocation(ip)
+		result, err = getIPLocation(ip)
 	default:
 		return nil, fmt.Errorf("unsupported function: %s", toolCall.FunctionCall.Name)
 	}
