@@ -22,7 +22,7 @@ linters:
     - varnamelen
     - nlreturn
     - gomnd
-    - goerr113
+    - err113
     - wrapcheck # TODO: we should probably enable this one (at least for new code).
     - testpackage
     - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
@@ -31,6 +31,10 @@ linters:
     - perfsprint
     - musttag
     - tagalign # Impractical for schema-defined output parser, which relies heavily on struct tagging.
+    - mnd
+    - canonicalheader
+    - intrange
+    - testifylint
 
 linters-settings:
   cyclop:
