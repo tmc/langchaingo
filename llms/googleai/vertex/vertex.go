@@ -19,18 +19,18 @@ import (
 )
 
 var (
-	ErrNoContentInResponse    = errors.New("no content in generation response")
-	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemRoleNotSupported = errors.New("system role isn't supported yet")
+	ErrNoContentInResponse   = errors.New("no content in generation response")
+	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType       = errors.New("invalid mime type on content")
 )
 
 const (
-	CITATIONS = "citations"
-	SAFETY    = "safety"
-	RoleModel = "model"
-	RoleUser  = "user"
-	RoleTool  = "tool"
+	CITATIONS  = "citations"
+	SAFETY     = "safety"
+	RoleSystem = "system"
+	RoleModel  = "model"
+	RoleUser   = "user"
+	RoleTool   = "tool"
 )
 
 // Call implements the [llms.Model] interface.
@@ -149,6 +149,7 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 		metadata := make(map[string]any)
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
+
 		if usage != nil {
 			metadata["input_tokens"] = usage.PromptTokenCount
 			metadata["output_tokens"] = usage.CandidatesTokenCount
@@ -220,7 +221,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 	switch content.Role {
 	case llms.ChatMessageTypeSystem:
-		return nil, ErrSystemRoleNotSupported
+		c.Role = RoleSystem
 	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel
 	case llms.ChatMessageTypeHuman:
@@ -280,6 +281,10 @@ func generateFromMessages(
 		if err != nil {
 			return nil, err
 		}
+		if mc.Role == RoleSystem {
+			model.SystemInstruction = content
+			continue
+		}
 		history = append(history, content)
 	}
 
@@ -320,7 +325,6 @@ func convertAndStreamFromIterator(
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}
-	var usage *genai.UsageMetadata
 DoStream:
 	for {
 		resp, err := iter.Next()
@@ -345,10 +349,6 @@ DoStream:
 		candidate.SafetyRatings = respCandidate.SafetyRatings
 		candidate.CitationMetadata = respCandidate.CitationMetadata
 
-		if resp.UsageMetadata != nil {
-			usage = resp.UsageMetadata
-		}
-
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
 				if opts.StreamingFunc(ctx, []byte(text)) != nil {
@@ -357,8 +357,8 @@ DoStream:
 			}
 		}
 	}
-
-	return convertCandidates([]*genai.Candidate{candidate}, usage)
+	mresp := iter.MergedResponse()
+	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
 // convertTools converts from a list of langchaingo tools to a list of genai
@@ -463,6 +463,8 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
+	case "array":
+		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
 	}
