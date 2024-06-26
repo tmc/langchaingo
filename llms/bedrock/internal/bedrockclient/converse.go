@@ -177,30 +177,40 @@ func updateToolUse(
 	delta *types.ToolUseBlockDelta,
 	start *types.ContentBlockStartMemberToolUse,
 ) ([]byte, []llms.ToolCall, error) {
-	// TODO handle bytes
-	if len(tools) == 0 {
-		tools = append(tools, llms.ToolCall{})
-	}
+	var chunkToolCalls []*llms.ToolCall
 	if start != nil {
-		if tools[len(tools)-1].ID != "" && tools[len(tools)-1].ID != *start.Value.ToolUseId {
-			tools = append(tools, llms.ToolCall{
-				ID: *start.Value.ToolUseId,
+		// if the tool is not the same as the last tool, add a new tool call
+		if len(tools) == 0 || (tools[len(tools)-1].ID != "" && tools[len(tools)-1].ID != *start.Value.ToolUseId) {
+			toolCall := llms.ToolCall{
+				ID:   *start.Value.ToolUseId,
+				Type: "function",
 				FunctionCall: &llms.FunctionCall{
 					Name: *start.Value.Name,
 				},
-			})
-		} else {
-			tools[len(tools)-1].ID = *start.Value.ToolUseId
-			tools[len(tools)-1].FunctionCall = &llms.FunctionCall{
-				Name: *start.Value.Name,
 			}
+			tools = append(tools, toolCall)
+			chunkToolCalls = append(chunkToolCalls, &toolCall)
 		}
 	}
 	if delta != nil && len(*delta.Input) > 0 {
 		tools[len(tools)-1].FunctionCall.Arguments += *delta.Input
+		if len(chunkToolCalls) == 0 {
+			chunkToolCalls = append(chunkToolCalls, &llms.ToolCall{
+				ID:   "",
+				Type: "",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "",
+					Arguments: *delta.Input,
+				},
+			})
+		}
 	}
 
-	return nil, tools, nil
+	chunk, err := json.Marshal(chunkToolCalls)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal tool calls: %w", err)
+	}
+	return chunk, tools, nil
 }
 
 // handleConverseStreamEvents handles the stream events and returns the content response.
@@ -227,13 +237,18 @@ func handleConverseStreamEvents(
 		if err = stream.Err(); err != nil {
 			return nil, err
 		}
-
+		var chunk []byte
 		switch event := e.(type) {
 		case *types.ConverseStreamOutputMemberContentBlockStart:
 			switch start := event.Value.Start.(type) {
 			case *types.ContentBlockStartMemberToolUse:
-				// TODO handle bytes stream
-				_, tools, err = updateToolUse(tools, nil, start)
+				chunk, tools, err = updateToolUse(tools, nil, start)
+				if err != nil {
+					return nil, err
+				}
+				if err = options.StreamingFunc(ctx, chunk); err != nil {
+					return nil, err
+				}
 			default:
 				slog.WarnContext(ctx, "content block start not supported", "value", event.Value)
 			}
@@ -251,9 +266,11 @@ func handleConverseStreamEvents(
 				}
 				contentChoices[0].Content += delta.Value
 			case *types.ContentBlockDeltaMemberToolUse:
-				var err error
-				_, tools, err = updateToolUse(tools, &delta.Value, nil)
+				chunk, tools, err = updateToolUse(tools, &delta.Value, nil)
 				if err != nil {
+					return nil, err
+				}
+				if err = options.StreamingFunc(ctx, chunk); err != nil {
 					return nil, err
 				}
 			default:
