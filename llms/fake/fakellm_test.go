@@ -9,14 +9,9 @@ import (
 	"github.com/tmc/langchaingo/memory"
 )
 
-var responses = []string{
-	"Resposta 1",
-	"Resposta 2",
-	"Resposta 3",
-}
-
 func TestFakeLLM_CallMethod(t *testing.T) {
 	t.Parallel()
+	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -40,6 +35,7 @@ func TestFakeLLM_CallMethod(t *testing.T) {
 
 func TestFakeLLM_GenerateContentMethod(t *testing.T) {
 	t.Parallel()
+	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 	msg := llms.MessageContent{
@@ -74,6 +70,7 @@ func TestFakeLLM_GenerateContentMethod(t *testing.T) {
 
 func TestFakeLLM_ResetMethod(t *testing.T) {
 	t.Parallel()
+	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -84,6 +81,8 @@ func TestFakeLLM_ResetMethod(t *testing.T) {
 }
 
 func TestFakeLLM_AddResponseMethod(t *testing.T) {
+	t.Parallel()
+	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -109,6 +108,7 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 
 func TestFakeLLM_WithChain(t *testing.T) {
 	t.Parallel()
+	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -123,6 +123,14 @@ func TestFakeLLM_WithChain(t *testing.T) {
 
 	if out != "My name is Alexandre" {
 		t.Errorf("Expected 'My name is Alexandre', got '%s'", out)
+	}
+}
+
+func setupResponses() []string {
+	return []string{
+		"Resposta 1",
+		"Resposta 2",
+		"Resposta 3",
 	}
 }
 

@@ -20,7 +20,7 @@ func NewFakeLLM(responses []string) *LLM {
 }
 
 // GenerateContent generate fake content.
-func (f *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (f *LLM) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) {
 	if len(f.responses) == 0 {
 		return nil, errors.New("no responses configured")
 	}
