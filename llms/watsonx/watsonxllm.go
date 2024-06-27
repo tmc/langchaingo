@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	wx "github.com/h0rv/go-watsonx/models"
+	wx "github.com/IBM/watsonx-go/pkg/models"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -16,21 +16,23 @@ var (
 
 type LLM struct {
 	CallbacksHandler callbacks.Handler
-	client           *wx.Model
+	client           *wx.Client
+
+	modelID string
 }
 
 var _ llms.Model = (*LLM)(nil)
 
 // Call implements the LLM interface.
-func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
+func (wx *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.GenerateFromSinglePrompt(ctx, wx, prompt, options...)
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+func (wx *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	if wx.CallbacksHandler != nil {
+		wx.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
 	prompt, err := getPrompt(messages)
@@ -38,13 +40,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	result, err := o.client.GenerateText(
+	result, err := wx.client.GenerateText(
+		wx.modelID,
 		prompt,
 		toWatsonxOptions(&options)...,
 	)
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
+		if wx.CallbacksHandler != nil {
+			wx.CallbacksHandler.HandleLLMError(ctx, err)
 		}
 		return nil, err
 	}
@@ -63,14 +66,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
-func New(opts ...wx.ModelOption) (*LLM, error) {
-	c, err := wx.NewModel(opts...)
+func New(modelID string, opts ...wx.ClientOption) (*LLM, error) {
+	c, err := wx.NewClient(opts...)
 	if err != nil {
 		return nil, err
 	}
 
 	return &LLM{
-		client: c,
+		client:  c,
+		modelID: modelID,
 	}, nil
 }
 

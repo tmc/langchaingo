@@ -34,7 +34,6 @@ func main() {
 			if x.Recv != nil && len(x.Recv.List) == 1 {
 				rewriteReceiverName(x)
 			}
-			addCastToTopK(x)
 			removeTokenCount(x)
 		}
 

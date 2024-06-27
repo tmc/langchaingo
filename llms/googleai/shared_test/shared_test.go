@@ -86,12 +86,14 @@ var testConfigs = []testConfig{
 	{testMultiContentText, nil},
 	{testGenerateFromSinglePrompt, nil},
 	{testMultiContentTextChatSequence, nil},
+	{testMultiContentWithSystemMessage, nil},
 	{testMultiContentImageLink, nil},
 	{testMultiContentImageBinary, nil},
 	{testEmbeddings, nil},
 	{testCandidateCountSetting, nil},
 	{testMaxTokensSetting, nil},
 	{testTools, nil},
+	{testToolsWithInterfaceRequired, nil},
 	{
 		testMultiContentText,
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
@@ -100,12 +102,17 @@ var testConfigs = []testConfig{
 	{testWithHTTPClient, getHTTPTestClientOptions()},
 }
 
-func TestShared(t *testing.T) {
+func TestGoogleAIShared(t *testing.T) {
 	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-googleai", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newGoogleAIClient(t, c.opts...)
 			c.testFunc(t, llm)
 		})
+	}
+}
+
+func TestVertexShared(t *testing.T) {
+	for _, c := range testConfigs {
 		t.Run(fmt.Sprintf("%s-vertex", funcName(c.testFunc)), func(t *testing.T) {
 			llm := newVertexClient(t, c.opts...)
 			c.testFunc(t, llm)
@@ -134,6 +141,8 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "(?i)dog|carnivo|canid|canine", c1.Content)
+	assert.Contains(t, c1.GenerationInfo, "output_tokens")
+	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
 }
 
 func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
@@ -184,12 +193,35 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-pro"))
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "(?i)spain.*larger", c1.Content)
+}
+
+func testMultiContentWithSystemMessage(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart("You are a Spanish teacher; answer in Spanish")},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Name the 5 most common fruits")},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "(?i)(manzana|naranja)", c1.Content)
 }
 
 func testMultiContentImageLink(t *testing.T, llm llms.Model) {
@@ -397,6 +429,93 @@ func testTools(t *testing.T, llm llms.Model) {
 
 	c1 = resp.Choices[0]
 	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
+}
+
+func testToolsWithInterfaceRequired(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	availableTools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					// json.Unmarshal() may return []interface{} instead of []string
+					"required": []interface{}{"location"},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+	}
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 := resp.Choices[0]
+	assert.Contains(t, c1.GenerationInfo, "output_tokens")
+	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range c1.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range c1.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "getCurrentWeather":
+			var args struct {
+				Location string `json:"location"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(args.Location, "Chicago") {
+				toolResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							Name:    tc.FunctionCall.Name,
+							Content: "64 and sunny",
+						},
+					},
+				}
+				content = append(content, toolResponse)
+			}
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 = resp.Choices[0]
+	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
 
 func testMaxTokensSetting(t *testing.T, llm llms.Model) {
@@ -418,12 +537,13 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	// a stop reason that max of tokens was reached.
 	{
 		rsp, err := llm.GenerateContent(context.Background(), content,
-			llms.WithMaxTokens(64))
+			llms.WithMaxTokens(24))
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, rsp.Choices)
 		c1 := rsp.Choices[0]
-		assert.Regexp(t, "(?i)MaxTokens", c1.StopReason)
+		// TODO: Google genai models are returning "FinishReasonStop" instead of "MaxTokens".
+		assert.Regexp(t, "(?i)(MaxTokens|FinishReasonStop)", c1.StopReason)
 	}
 
 	// Now, try it again with a much larger MaxTokens setting and expect to

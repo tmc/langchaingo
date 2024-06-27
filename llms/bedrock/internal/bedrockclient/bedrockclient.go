@@ -85,3 +85,10 @@ func processInputMessagesGeneric(messages []Message) string {
 	}
 	return sb.String()
 }
+
+func getMaxTokens(maxTokens, defaultValue int) int {
+	if maxTokens <= 0 {
+		return defaultValue
+	}
+	return maxTokens
+}

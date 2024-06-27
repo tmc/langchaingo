@@ -5,17 +5,16 @@ import (
 	"fmt"
 	"log"
 
-	wx "github.com/h0rv/go-watsonx/models"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/watsonx"
 )
 
 func main() {
 	llm, err := watsonx.New(
-		// Optional parameters:
-		// wx.WithIBMCloudAPIKey("YOUR IBM CLOUD API KEY"),
+		"meta-llama/llama-3-70b-instruct",
+		//// Optional parameters:
+		// wx.WithWatsonxAPIKey("YOUR WATSONX API KEY"),
 		// wx.WithWatsonxProjectID("YOUR WATSONX PROJECT ID"),
-		wx.WithModel(wx.LLAMA_2_70B_CHAT),
 	)
 	if err != nil {
 		log.Fatal(err)

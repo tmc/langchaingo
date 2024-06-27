@@ -13,7 +13,7 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	defaultModel = "claude-1.3"
+	defaultModel = "claude-3-5-sonnet-20240620"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.
