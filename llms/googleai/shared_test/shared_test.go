@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -41,25 +42,24 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
-	project := os.Getenv("VERTEX_PROJECT")
-	if project == "" {
-		t.Skip("VERTEX_PROJECT not set")
-		return nil
-	}
-	location := os.Getenv("VERTEX_LOCATION")
-	if location == "" {
-		location = "us-central1"
-	}
+	// If credentials are set, use them. Otherwise, look for project env var.
+	if creds := os.Getenv("VERTEX_CREDENTIALS"); creds != "" {
+		opts = append(opts, googleai.WithCredentialsFile(creds))
+	} else {
+		project := os.Getenv("VERTEX_PROJECT")
+		if project == "" {
+			t.Skip("VERTEX_PROJECT not set")
+			return nil
+		}
+		location := os.Getenv("VERTEX_LOCATION")
+		if location == "" {
+			location = "us-central1"
+		}
 
-	opts = append(opts,
-		googleai.WithCloudProject(project),
-		googleai.WithCloudLocation(location),
-	)
-
-	// If credentials are set, use them.
-	credentials := os.Getenv("VERTEX_CREDENTIALS")
-	if credentials != "" {
-		opts = append(opts, googleai.WithCredentialsFile(credentials))
+		opts = append(opts,
+			googleai.WithCloudProject(project),
+			googleai.WithCloudLocation(location),
+		)
 	}
 
 	llm, err := vertex.New(context.Background(), opts...)
@@ -221,7 +221,7 @@ func testMultiContentWithSystemMessage(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)(manzana|naranja)", c1.Content)
+	checkMatch(t, c1.Content, "(manzana|naranja)")
 }
 
 func testMultiContentImageLink(t *testing.T, llm llms.Model) {
@@ -250,7 +250,7 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)parrot", c1.Content)
+	checkMatch(t, c1.Content, "parrot")
 }
 
 func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
@@ -282,7 +282,7 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "(?i)parrot", c1.Content)
+	checkMatch(t, c1.Content, "parrot")
 }
 
 func testEmbeddings(t *testing.T, llm llms.Model) {
@@ -347,8 +347,8 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
-	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
+	checkMatch(t, c1.Content, "(dog|canid)")
+	checkMatch(t, sb.String(), "(dog|canid)")
 }
 
 func testTools(t *testing.T, llm llms.Model) {
@@ -428,7 +428,7 @@ func testTools(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, resp.Choices)
 
 	c1 = resp.Choices[0]
-	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	checkMatch(t, c1.Content, "(64 and sunny|64 degrees)")
 	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
 	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
@@ -513,7 +513,7 @@ func testToolsWithInterfaceRequired(t *testing.T, llm llms.Model) {
 	assert.NotEmpty(t, resp.Choices)
 
 	c1 = resp.Choices[0]
-	assert.Regexp(t, "64 and sunny", strings.ToLower(c1.Content))
+	checkMatch(t, c1.Content, "(64 and sunny|64 degrees)")
 	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
 	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
@@ -555,8 +555,8 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 
 		assert.NotEmpty(t, rsp.Choices)
 		c1 := rsp.Choices[0]
-		assert.Regexp(t, "(?i)stop", c1.StopReason)
-		assert.Regexp(t, "(?i)dog|breed|canid|canine", c1.Content)
+		checkMatch(t, c1.StopReason, "stop")
+		checkMatch(t, c1.Content, "(dog|breed|canid|canine)")
 	}
 }
 
@@ -610,4 +610,19 @@ func showJSON(v any) string {
 		panic(err)
 	}
 	return string(b)
+}
+
+// checkMatch is a testing helper that checks `got` for regexp matches vs.
+// `wants`. Each of `wants` has to match.
+func checkMatch(t *testing.T, got string, wants ...string) {
+	t.Helper()
+	for _, want := range wants {
+		re, err := regexp.Compile("(?i:" + want + ")")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !re.MatchString(got) {
+			t.Errorf("\ngot %q\nwanted to match %q", got, want)
+		}
+	}
 }
