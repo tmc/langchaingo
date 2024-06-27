@@ -16,7 +16,6 @@ var responses = []string{
 }
 
 func TestFakeLLM_CallMethod(t *testing.T) {
-
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -39,7 +38,6 @@ func TestFakeLLM_CallMethod(t *testing.T) {
 }
 
 func TestFakeLLM_GenerateContentMethod(t *testing.T) {
-
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 	msg := llms.MessageContent{
@@ -73,7 +71,6 @@ func TestFakeLLM_GenerateContentMethod(t *testing.T) {
 }
 
 func TestFakeLLM_ResetMethod(t *testing.T) {
-
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -84,7 +81,6 @@ func TestFakeLLM_ResetMethod(t *testing.T) {
 }
 
 func TestFakeLLM_AddResponseMethod(t *testing.T) {
-
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -99,7 +95,6 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 	_, err = fakeLLM.Call(ctx, "Teste") // Descarta responses[2]
-
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -110,7 +105,6 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 }
 
 func TestFakeLLM_WithChain(t *testing.T) {
-
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -128,7 +122,6 @@ func TestFakeLLM_WithChain(t *testing.T) {
 	}
 }
 
-// jump some responses
 func NextToResponse(fakeLLM *LLM, n int) {
 	for i := 1; i < n; i++ {
 		_, err := fakeLLM.Call(context.Background(), "Teste")
