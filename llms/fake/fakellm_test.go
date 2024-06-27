@@ -13,27 +13,27 @@ func TestFakeLLM(t *testing.T) {
 	responses := []string{
 		"Resposta 1",
 		"Resposta 2",
-		"Resposta 3",
+		"Respostaq 3",
 	}
 
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
 	t.Run("Test Call Method", func(t *testing.T) {
-		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 1" {
+		if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[0] {
 			t.Errorf("Expected 'Resposta 1', got '%s'", output)
 		}
 
-		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 2" {
+		if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[1] {
 			t.Errorf("Expected 'Resposta 2', got '%s'", output)
 		}
 
-		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 3" {
+		if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[2] {
 			t.Errorf("Expected 'Resposta 3', got '%s'", output)
 		}
 
 		// Testa reinicialização automática
-		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 1" {
+		if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[0] {
 			t.Errorf("Expected 'Resposta 1', got '%s'", output)
 		}
 	})
@@ -48,7 +48,7 @@ func TestFakeLLM(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
-		if len(resp.Choices) < 1 || resp.Choices[0].Content != "Resposta 2" {
+		if len(resp.Choices) < 1 || resp.Choices[0].Content != responses[1] {
 			t.Errorf("Expected 'Resposta 2', got '%s'", resp.Choices[0].Content)
 		}
 
@@ -56,7 +56,7 @@ func TestFakeLLM(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
-		if len(resp.Choices) < 1 || resp.Choices[0].Content != "Resposta 3" {
+		if len(resp.Choices) < 1 || resp.Choices[0].Content != responses[2] {
 			t.Errorf("Expected 'Resposta 3', got '%s'", resp.Choices[0].Content)
 		}
 
@@ -64,14 +64,14 @@ func TestFakeLLM(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
-		if len(resp.Choices) < 1 || resp.Choices[0].Content != "Resposta 1" {
+		if len(resp.Choices) < 1 || resp.Choices[0].Content != responses[0] {
 			t.Errorf("Expected 'Resposta 1', got '%s'", resp.Choices[0].Content)
 		}
 	})
 
 	t.Run("Test Reset Method", func(t *testing.T) {
 		fakeLLM.Reset()
-		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 1" {
+		if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[0] {
 			t.Errorf("Expected 'Resposta 1', got '%s'", output)
 		}
 	})
@@ -79,9 +79,20 @@ func TestFakeLLM(t *testing.T) {
 	t.Run("Test AddResponse Method", func(t *testing.T) {
 		fakeLLM.AddResponse("Resposta 4")
 		fakeLLM.Reset()
-		fakeLLM.Call(ctx, "Teste") // Descartar "Resposta 1"
-		fakeLLM.Call(ctx, "Teste") // Descartar "Resposta 2"
-		fakeLLM.Call(ctx, "Teste") // Descartar "Resposta 3"
+		_, err := fakeLLM.Call(ctx, "Teste") // Descartar responses[0]
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+		_, err = fakeLLM.Call(ctx, "Teste") // Descartar responses[1]
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+		_, err = fakeLLM.Call(ctx, "Teste") // Descartar responses[2]
+
+		if err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
 		if output, _ := fakeLLM.Call(ctx, "Teste"); output != "Resposta 4" {
 			t.Errorf("Expected 'Resposta 4', got '%s'", output)
 		}
