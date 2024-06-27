@@ -8,11 +8,9 @@ import (
 	"log/slog"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
-
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/internal/util"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -102,17 +100,14 @@ func getBedrockContentBlock(parts []llms.ContentPart) ([]types.ContentBlock, err
 	return convertedParts, nil
 }
 
-// process the input messages to anthropic supported input
-// returns the input content and system prompt.
-func processInputMessagesBedrock(messages []llms.MessageContent) ([]types.SystemContentBlock, []types.Message, error) {
-	// merge messages with the same role
+func mergeSameRoleMessages(messages []llms.MessageContent) ([][]llms.MessageContent, error) {
 	chunkedMessages := make([][]llms.MessageContent, 0, len(messages))
 	currentChunk := make([]llms.MessageContent, 0, len(messages))
 	var lastRole string
 	for _, message := range messages {
 		role, err := getAnthropicRole(message.Role)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		if role != lastRole {
 			if len(currentChunk) > 0 {
@@ -127,10 +122,19 @@ func processInputMessagesBedrock(messages []llms.MessageContent) ([]types.System
 	if len(currentChunk) > 0 {
 		chunkedMessages = append(chunkedMessages, currentChunk)
 	}
+	return chunkedMessages, nil
+}
 
+// process the input messages to anthropic supported input
+// returns the input content and system prompt.
+func processInputMessagesBedrock(messages []llms.MessageContent) ([]types.SystemContentBlock, []types.Message, error) {
+	mergedMessages, err := mergeSameRoleMessages(messages)
+	if err != nil {
+		return nil, nil, err
+	}
 	inputContents := make([]types.Message, 0, len(messages))
 	systemContents := make([]types.SystemContentBlock, 0)
-	for _, chunk := range chunkedMessages {
+	for _, chunk := range mergedMessages {
 		role, err := getAnthropicRole(chunk[0].Role)
 		if err != nil {
 			return nil, nil, err
@@ -205,6 +209,9 @@ func updateToolUse(
 			})
 		}
 	}
+	if len(chunkToolCalls) == 0 {
+		return []byte(""), tools, nil
+	}
 
 	chunk, err := json.Marshal(chunkToolCalls)
 	if err != nil {
@@ -215,6 +222,7 @@ func updateToolUse(
 
 // handleConverseStreamEvents handles the stream events and returns the content response.
 // TODO: support multiple content choices.
+// nolint: funlen,gocognit,cyclop
 func handleConverseStreamEvents(
 	ctx context.Context,
 	streamOutput *bedrockruntime.ConverseStreamOutput,
@@ -284,6 +292,52 @@ func handleConverseStreamEvents(
 		}
 	}
 	contentChoices[0].ToolCalls = tools
+	return &llms.ContentResponse{Choices: contentChoices}, nil
+}
+
+func handleConverseOutput(
+	_ context.Context,
+	output *bedrockruntime.ConverseOutput,
+) (*llms.ContentResponse, error) {
+	if output == nil {
+		return nil, errors.New("no output")
+	}
+	if output.Output == nil {
+		return nil, errors.New("no output content")
+	}
+
+	contentChoices := []*llms.ContentChoice{{GenerationInfo: make(map[string]any)}}
+	if val, ok := output.Output.(*types.ConverseOutputMemberMessage); ok {
+		tools := make([]llms.ToolCall, 0)
+		for _, part := range val.Value.Content {
+			switch p := part.(type) {
+			case *types.ContentBlockMemberText:
+				contentChoices[0].Content += p.Value
+			case *types.ContentBlockMemberToolUse:
+				data, err := p.Value.Input.MarshalSmithyDocument()
+				if err != nil {
+					return nil, err
+				}
+				tools = append(tools, llms.ToolCall{
+					ID:   *p.Value.ToolUseId,
+					Type: "tool_call",
+					FunctionCall: &llms.FunctionCall{
+						Name:      *p.Value.Name,
+						Arguments: string(data),
+					},
+				})
+			default:
+				return nil, errors.New("unsupported content part")
+			}
+		}
+		contentChoices[0].ToolCalls = tools
+	}
+
+	contentChoices[0].StopReason = string(output.StopReason)
+	contentChoices[0].GenerationInfo["input_tokens"] = output.Usage.InputTokens
+	contentChoices[0].GenerationInfo["output_tokens"] = output.Usage.OutputTokens
+	contentChoices[0].GenerationInfo["total_tokens"] = output.Usage.TotalTokens
+	contentChoices[0].GenerationInfo["latency_ms"] = output.Metrics.LatencyMs
 	return &llms.ContentResponse{Choices: contentChoices}, nil
 }
 

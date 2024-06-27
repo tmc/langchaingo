@@ -23,10 +23,10 @@ func setUpTest() (*bedrockruntime.Client, error) {
 }
 
 func TestAmazonOutput(t *testing.T) {
+	t.Parallel()
 	if os.Getenv("TEST_AWS") != "true" {
 		t.Skip("Skipping test, requires AWS access")
 	}
-
 	client, err := setUpTest()
 	if err != nil {
 		t.Fatal(err)

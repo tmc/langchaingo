@@ -3,7 +3,6 @@ package bedrockclient
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -108,6 +107,7 @@ func (c *Client) Converse(ctx context.Context,
 			Messages:        messages,
 			ModelId:         &modelID,
 			System:          system,
+			GuardrailConfig: nil,
 			InferenceConfig: inferenceConfig,
 			ToolConfig:      toolConfig,
 		}
@@ -120,10 +120,21 @@ func (c *Client) Converse(ctx context.Context,
 			return nil, err
 		}
 		return resp, nil
-	} else {
-		// TODO implement
-		return nil, fmt.Errorf("converse without streaming not implemented")
 	}
+
+	input := &bedrockruntime.ConverseInput{
+		Messages:        messages,
+		ModelId:         &modelID,
+		GuardrailConfig: nil,
+		InferenceConfig: inferenceConfig,
+		System:          system,
+		ToolConfig:      toolConfig,
+	}
+	output, err := c.client.Converse(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return handleConverseOutput(ctx, output)
 }
 
 // Helper function to process input text chat

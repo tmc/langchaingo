@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
@@ -67,8 +66,9 @@ func getUsEast1BedrockClient(t *testing.T) llms.Model {
 }
 
 type bedrockTestCase struct {
-	model  string
-	client llms.Model
+	model     string
+	client    llms.Model
+	useStream bool
 }
 
 func runBedrockTestCase(t *testing.T, test *bedrockTestCase, arg testArgs) {
@@ -80,13 +80,18 @@ func runBedrockTestCase(t *testing.T, test *bedrockTestCase, arg testArgs) {
 		client = test.client
 	}
 	recv := newStreamRecv()
+	options := []llms.CallOption{
+		llms.WithModel(test.model),
+		llms.WithTools(arg.tools),
+		llms.WithToolChoice(arg.toolChoice),
+	}
+	if test.useStream {
+		options = append(options, llms.WithStreamingFunc(recv.streamFunc))
+	}
 	resp, err := client.GenerateContent(
 		context.Background(),
 		arg.messages,
-		llms.WithModel(test.model),
-		llms.WithStreamingFunc(recv.streamFunc),
-		llms.WithTools(arg.tools),
-		llms.WithToolChoice(arg.toolChoice),
+		options...,
 	)
 	if err != nil {
 		t.Fatalf("%+v", err)
@@ -118,13 +123,19 @@ func runBedrockTestCase(t *testing.T, test *bedrockTestCase, arg testArgs) {
 				Parts: []llms.ContentPart{*part},
 			})
 		}
-		resp, err = client.GenerateContent(
-			context.Background(),
-			messages,
+		recv := newStreamRecv()
+		options := []llms.CallOption{
 			llms.WithModel(test.model),
-			llms.WithStreamingFunc(recv.streamFunc),
 			llms.WithTools(arg.tools),
 			llms.WithToolChoice(arg.toolChoice),
+		}
+		if test.useStream {
+			options = append(options, llms.WithStreamingFunc(recv.streamFunc))
+		}
+		resp, err := client.GenerateContent(
+			context.Background(),
+			messages,
+			options...,
 		)
 		if err != nil {
 			t.Fatalf("%+v", err)
@@ -144,12 +155,33 @@ func getDefaultBedrockClaude3TestCases(t *testing.T) []bedrockTestCase {
 	}
 }
 
+func getDefaultBedrockClaude3NoStreamTestCases(t *testing.T) []bedrockTestCase {
+	t.Helper()
+	return []bedrockTestCase{
+		{model: bedrock.ModelAnthropicClaudeV3Haiku, useStream: true},
+		{model: bedrock.ModelAnthropicClaudeV35Sonnet, client: getUsEast1BedrockClient(t), useStream: true},
+		{model: bedrock.ModelAnthropicClaudeV3Sonnet, useStream: true},
+		{model: bedrock.ModelAnthropicClaudeV3Opus, useStream: true},
+	}
+}
+
 func TestBedrockStreamMessages(t *testing.T) {
 	t.Parallel()
 	modelList := getDefaultBedrockClaude3TestCases(t)
 	for _, test := range modelList {
-		t.Parallel()
 		t.Run(test.model, func(t *testing.T) {
+			t.Parallel()
+			runBedrockTestCase(t, &test, converseWithSystem)
+		})
+	}
+}
+
+func TestBedrockMessages(t *testing.T) {
+	t.Parallel()
+	modelList := getDefaultBedrockClaude3NoStreamTestCases(t)
+	for _, test := range modelList {
+		t.Run(test.model, func(t *testing.T) {
+			t.Parallel()
 			runBedrockTestCase(t, &test, converseWithSystem)
 		})
 	}
@@ -159,14 +191,25 @@ func TestBedrockStreamMessagesWithImage(t *testing.T) {
 	t.Parallel()
 	modelList := getDefaultBedrockClaude3TestCases(t)
 	for _, test := range modelList {
-		t.Parallel()
 		t.Run(test.model, func(t *testing.T) {
+			t.Parallel()
 			runBedrockTestCase(t, &test, converseWithImage)
 		})
 	}
 }
 
 func TestBedrockStreamMessagesWithImageAndTools(t *testing.T) {
+	modelList := getDefaultBedrockClaude3TestCases(t)
+	t.Parallel()
+	for _, test := range modelList {
+		t.Run(test.model, func(t *testing.T) {
+			t.Parallel()
+			runBedrockTestCase(t, &test, converseImageWithTools)
+		})
+	}
+}
+
+func TestBedrockMessagesWithImageAndTools(t *testing.T) {
 	modelList := getDefaultBedrockClaude3TestCases(t)
 	t.Parallel()
 	for _, test := range modelList {
