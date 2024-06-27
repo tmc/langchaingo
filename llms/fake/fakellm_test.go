@@ -16,6 +16,7 @@ var responses = []string{
 }
 
 func TestFakeLLM_CallMethod(t *testing.T) {
+	t.Parallel()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -38,6 +39,7 @@ func TestFakeLLM_CallMethod(t *testing.T) {
 }
 
 func TestFakeLLM_GenerateContentMethod(t *testing.T) {
+	t.Parallel()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 	msg := llms.MessageContent{
@@ -71,6 +73,7 @@ func TestFakeLLM_GenerateContentMethod(t *testing.T) {
 }
 
 func TestFakeLLM_ResetMethod(t *testing.T) {
+	t.Parallel()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
@@ -86,15 +89,15 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 
 	fakeLLM.AddResponse("Resposta 4")
 	fakeLLM.Reset()
-	_, err := fakeLLM.Call(ctx, "Teste") // Descarta responses[0]
+	_, err := fakeLLM.Call(ctx, "Teste")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
-	_, err = fakeLLM.Call(ctx, "Teste") // Descarta responses[1]
+	_, err = fakeLLM.Call(ctx, "Teste")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
-	_, err = fakeLLM.Call(ctx, "Teste") // Descarta responses[2]
+	_, err = fakeLLM.Call(ctx, "Teste")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -105,6 +108,7 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 }
 
 func TestFakeLLM_WithChain(t *testing.T) {
+	t.Parallel()
 	fakeLLM := NewFakeLLM(responses)
 	ctx := context.Background()
 
