@@ -19,18 +19,18 @@ import (
 )
 
 var (
-	ErrNoContentInResponse    = errors.New("no content in generation response")
-	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemRoleNotSupported = errors.New("system role isn't supported yet")
+	ErrNoContentInResponse   = errors.New("no content in generation response")
+	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType       = errors.New("invalid mime type on content")
 )
 
 const (
-	CITATIONS = "citations"
-	SAFETY    = "safety"
-	RoleModel = "model"
-	RoleUser  = "user"
-	RoleTool  = "tool"
+	CITATIONS  = "citations"
+	SAFETY     = "safety"
+	RoleSystem = "system"
+	RoleModel  = "model"
+	RoleUser   = "user"
+	RoleTool   = "tool"
 )
 
 // Call implements the [llms.Model] interface.
@@ -113,7 +113,7 @@ func (g *Vertex) GenerateContent(
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
-func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, error) {
+func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
 	var toolCalls []llms.ToolCall
 
@@ -149,6 +149,12 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 		metadata := make(map[string]any)
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
+
+		if usage != nil {
+			metadata["input_tokens"] = usage.PromptTokenCount
+			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["total_tokens"] = usage.TotalTokenCount
+		}
 
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
@@ -215,7 +221,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 	switch content.Role {
 	case llms.ChatMessageTypeSystem:
-		return nil, ErrSystemRoleNotSupported
+		c.Role = RoleSystem
 	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel
 	case llms.ChatMessageTypeHuman:
@@ -257,7 +263,7 @@ func generateFromSingleMessage(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := model.GenerateContentStream(ctx, convertedParts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
@@ -274,6 +280,10 @@ func generateFromMessages(
 		content, err := convertContent(mc)
 		if err != nil {
 			return nil, err
+		}
+		if mc.Role == RoleSystem {
+			model.SystemInstruction = content
+			continue
 		}
 		history = append(history, content)
 	}
@@ -296,7 +306,7 @@ func generateFromMessages(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := session.SendMessageStream(ctx, reqContent.Parts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
@@ -347,8 +357,8 @@ DoStream:
 			}
 		}
 	}
-
-	return convertCandidates([]*genai.Candidate{candidate})
+	mresp := iter.MergedResponse()
+	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
 // convertTools converts from a list of langchaingo tools to a list of genai
@@ -413,16 +423,21 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 
 		if required, ok := params["required"]; ok {
-			ri := required.([]interface{})
-			rs := make([]string, 0, len(ri))
-			for _, r := range ri {
-				rString, ok := r.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+			if rs, ok := required.([]string); ok {
+				schema.Required = rs
+			} else if ri, ok := required.([]interface{}); ok {
+				rs := make([]string, 0, len(ri))
+				for _, r := range ri {
+					rString, ok := r.(string)
+					if !ok {
+						return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+					}
+					rs = append(rs, rString)
 				}
-				rs = append(rs, rString)
+				schema.Required = rs
+			} else {
+				return nil, fmt.Errorf("tool [%d]: expected string for required", i)
 			}
-			schema.Required = rs
 		}
 		genaiFuncDecl.Parameters = schema
 
@@ -448,6 +463,8 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
+	case "array":
+		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
 	}

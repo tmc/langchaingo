@@ -2,6 +2,8 @@ package googleai
 
 import (
 	"net/http"
+	"os"
+	"reflect"
 
 	"cloud.google.com/go/vertexai/genai"
 	"google.golang.org/api/option"
@@ -30,11 +32,20 @@ func DefaultOptions() Options {
 		DefaultModel:          "gemini-pro",
 		DefaultEmbeddingModel: "embedding-001",
 		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      1024,
+		DefaultMaxTokens:      2048,
 		DefaultTemperature:    0.5,
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,
 		HarmThreshold:         HarmBlockOnlyHigh,
+	}
+}
+
+// EnsureAuthPresent attempts to ensure that the client has authentication information. If it does not, it will attempt to use the GOOGLE_API_KEY environment variable.
+func (o *Options) EnsureAuthPresent() {
+	if !hasAuthOptions(o.ClientOptions) {
+		if key := os.Getenv("GOOGLE_API_KEY"); key != "" {
+			WithAPIKey(key)(o)
+		}
 	}
 }
 
@@ -177,3 +188,23 @@ const (
 	// HarmBlockNone means all content will be allowed.
 	HarmBlockNone HarmBlockThreshold = 4
 )
+
+// helper to inspect incoming client options for auth options.
+func hasAuthOptions(opts []option.ClientOption) bool {
+	for _, opt := range opts {
+		v := reflect.ValueOf(opt)
+		ts := v.Type().String()
+
+		switch ts {
+		case "option.withAPIKey":
+			return v.String() != ""
+
+		case "option.withHTTPClient",
+			"option.withTokenSource",
+			"option.withCredentialsFile",
+			"option.withCredentialsJSON":
+			return true
+		}
+	}
+	return false
+}

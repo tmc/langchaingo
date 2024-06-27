@@ -13,9 +13,9 @@ import (
 )
 
 func main() {
-	genaiKey := os.Getenv("GENAI_API_KEY")
+	genaiKey := os.Getenv("GOOGLE_API_KEY")
 	if genaiKey == "" {
-		log.Fatal("please set GENAI_API_KEY")
+		log.Fatal("please set GOOGLE_API_KEY")
 	}
 
 	ctx := context.Background()
