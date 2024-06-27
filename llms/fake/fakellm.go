@@ -25,7 +25,7 @@ func (f *LLM) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...l
 		return nil, errors.New("no responses configured")
 	}
 	if f.index >= len(f.responses) {
-		f.index = 0 // Reinicia o índice se ultrapassar o número de respostas.
+		f.index = 0 // reset index
 	}
 	response := f.responses[f.index]
 	f.index++
@@ -34,7 +34,7 @@ func (f *LLM) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...l
 	}, nil
 }
 
-// Call chama o modelo com uma única string de prompt.
+// Call  the model with a prompt.
 func (f *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	resp, err := f.GenerateContent(ctx, []llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextContent{Text: prompt}}}}, options...)
 	if err != nil {
