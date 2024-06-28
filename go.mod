@@ -19,7 +19,7 @@ require (
 
 require (
 	cloud.google.com/go v0.114.0 // indirect
-	cloud.google.com/go/ai v0.6.0 // indirect
+	cloud.google.com/go/ai v0.7.0 // indirect
 	cloud.google.com/go/auth v0.5.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
@@ -200,7 +200,7 @@ require (
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocolly/colly v1.2.0
-	github.com/google/generative-ai-go v0.14.0
+	github.com/google/generative-ai-go v0.15.1
 	github.com/google/go-cmp v0.6.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
