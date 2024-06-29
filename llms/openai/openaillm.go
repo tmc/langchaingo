@@ -106,6 +106,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FrequencyPenalty: opts.FrequencyPenalty,
 		PresencePenalty:  opts.PresencePenalty,
 
+		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
@@ -161,22 +162,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
-		if c.FinishReason == "tool_calls" {
-			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
-			for _, tool := range c.Message.ToolCalls {
-				choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
-					ID:   tool.ID,
-					Type: string(tool.Type),
-					FunctionCall: &llms.FunctionCall{
-						Name:      tool.Function.Name,
-						Arguments: tool.Function.Arguments,
-					},
-				})
-			}
-			// populate legacy single-function call field for backwards compatibility
-			if len(choices[i].ToolCalls) > 0 {
-				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
-			}
+		for _, tool := range c.Message.ToolCalls {
+			choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
+				ID:   tool.ID,
+				Type: string(tool.Type),
+				FunctionCall: &llms.FunctionCall{
+					Name:      tool.Function.Name,
+					Arguments: tool.Function.Arguments,
+				},
+			})
+		}
+		// populate legacy single-function call field for backwards compatibility
+		if len(choices[i].ToolCalls) > 0 {
+			choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
 		}
 	}
 	response := &llms.ContentResponse{Choices: choices}
@@ -190,10 +188,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
-		Model: o.client.Model,
+		Model: o.client.EmbeddingModel,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create openai embeddings: %w", err)
 	}
 	if len(embeddings) == 0 {
 		return nil, ErrEmptyResponse

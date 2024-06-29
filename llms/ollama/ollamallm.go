@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
+	ErrIncompleteEmbedding = errors.New("not all input got embedded")
 )
 
 // LLM is a ollama LLM implementation.
@@ -108,7 +108,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
-		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
+		Stream:   opts.StreamingFunc != nil,
 	}
 
 	keepAlive := o.options.keepAlive
@@ -129,7 +129,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		if response.Message != nil {
 			streamedResponse += response.Message.Content
 		}
-		if response.Done {
+		if !req.Stream || response.Done {
 			resp = response
 			resp.Message = &ollamaclient.Message{
 				Role:    "assistant",

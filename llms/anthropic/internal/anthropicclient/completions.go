@@ -34,7 +34,7 @@ type CompletionResponsePayload struct {
 func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 256
+		payload.MaxTokens = 2048
 	}
 
 	if len(payload.StopWords) == 0 {

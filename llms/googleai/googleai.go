@@ -16,10 +16,9 @@ import (
 )
 
 var (
-	ErrNoContentInResponse    = errors.New("no content in generation response")
-	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemRoleNotSupported = errors.New("system role isn't supporeted yet")
+	ErrNoContentInResponse   = errors.New("no content in generation response")
+	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType       = errors.New("invalid mime type on content")
 )
 
 const (
@@ -37,7 +36,11 @@ func (g *GoogleAI) Call(ctx context.Context, prompt string, options ...llms.Call
 }
 
 // GenerateContent implements the [llms.Model] interface.
-func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (g *GoogleAI) GenerateContent(
+	ctx context.Context,
+	messages []llms.MessageContent,
+	options ...llms.CallOption,
+) (*llms.ContentResponse, error) {
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -107,7 +110,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
-func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, error) {
+func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
 	var toolCalls []llms.ToolCall
 
@@ -143,6 +146,12 @@ func convertCandidates(candidates []*genai.Candidate) (*llms.ContentResponse, er
 		metadata := make(map[string]any)
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
+
+		if usage != nil {
+			metadata["input_tokens"] = usage.PromptTokenCount
+			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["total_tokens"] = usage.TotalTokenCount
+		}
 
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
@@ -229,7 +238,12 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 // generateFromSingleMessage generates content from the parts of a single
 // message.
-func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel, parts []llms.ContentPart, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromSingleMessage(
+	ctx context.Context,
+	model *genai.GenerativeModel,
+	parts []llms.ContentPart,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
@@ -246,13 +260,18 @@ func generateFromSingleMessage(ctx context.Context, model *genai.GenerativeModel
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := model.GenerateContentStream(ctx, convertedParts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func generateFromMessages(
+	ctx context.Context,
+	model *genai.GenerativeModel,
+	messages []llms.MessageContent,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
 		content, err := convertContent(mc)
@@ -284,7 +303,7 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
 	iter := session.SendMessageStream(ctx, reqContent.Parts...)
 	return convertAndStreamFromIterator(ctx, iter, opts)
@@ -295,7 +314,11 @@ func generateFromMessages(ctx context.Context, model *genai.GenerativeModel, mes
 // resulting text into the opts-provided streaming function.
 // Note that this is tricky in the face of multiple
 // candidates, so this code assumes only a single candidate for now.
-func convertAndStreamFromIterator(ctx context.Context, iter *genai.GenerateContentResponseIterator, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+func convertAndStreamFromIterator(
+	ctx context.Context,
+	iter *genai.GenerateContentResponseIterator,
+	opts *llms.CallOptions,
+) (*llms.ContentResponse, error) {
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}
@@ -332,8 +355,8 @@ DoStream:
 			}
 		}
 	}
-
-	return convertCandidates([]*genai.Candidate{candidate})
+	mresp := iter.MergedResponse()
+	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
 // convertTools converts from a list of langchaingo tools to a list of genai
@@ -398,8 +421,21 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 
 		if required, ok := params["required"]; ok {
-			rs := required.([]string)
-			schema.Required = rs
+			if rs, ok := required.([]string); ok {
+				schema.Required = rs
+			} else if ri, ok := required.([]interface{}); ok {
+				rs := make([]string, 0, len(ri))
+				for _, r := range ri {
+					rString, ok := r.(string)
+					if !ok {
+						return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+					}
+					rs = append(rs, rString)
+				}
+				schema.Required = rs
+			} else {
+				return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+			}
 		}
 		genaiFuncDecl.Parameters = schema
 
@@ -425,6 +461,8 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
+	case "array":
+		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
 	}

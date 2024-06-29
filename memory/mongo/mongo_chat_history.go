@@ -1,4 +1,4 @@
-package memory
+package mongo
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const (
 	mongoSessionIDKey = "SessionId"
 )
 
-type MongoDBChatMessageHistory struct {
+type ChatMessageHistory struct {
 	url            string
 	sessionID      string
 	databaseName   string
@@ -32,10 +32,10 @@ type chatMessageModel struct {
 }
 
 // Statically assert that MongoDBChatMessageHistory implement the chat message history interface.
-var _ schema.ChatMessageHistory = &MongoDBChatMessageHistory{}
+var _ schema.ChatMessageHistory = &ChatMessageHistory{}
 
 // NewMongoDBChatMessageHistory creates a new MongoDBChatMessageHistory using chat message options.
-func NewMongoDBChatMessageHistory(ctx context.Context, options ...MongoDBChatMessageHistoryOption) (*MongoDBChatMessageHistory, error) {
+func NewMongoDBChatMessageHistory(ctx context.Context, options ...ChatMessageHistoryOption) (*ChatMessageHistory, error) {
 	h, err := applyMongoDBChatOptions(options...)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func NewMongoDBChatMessageHistory(ctx context.Context, options ...MongoDBChatMes
 }
 
 // Messages returns all messages stored.
-func (h *MongoDBChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, error) {
+func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, error) {
 	messages := []llms.ChatMessage{}
 	filter := bson.M{mongoSessionIDKey: h.sessionID}
 	cursor, err := h.collection.Find(ctx, filter)
@@ -82,24 +82,24 @@ func (h *MongoDBChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMe
 }
 
 // AddAIMessage adds an AIMessage to the chat message history.
-func (h *MongoDBChatMessageHistory) AddAIMessage(ctx context.Context, text string) error {
+func (h *ChatMessageHistory) AddAIMessage(ctx context.Context, text string) error {
 	return h.AddMessage(ctx, llms.AIChatMessage{Content: text})
 }
 
 // AddUserMessage adds a user to the chat message history.
-func (h *MongoDBChatMessageHistory) AddUserMessage(ctx context.Context, text string) error {
+func (h *ChatMessageHistory) AddUserMessage(ctx context.Context, text string) error {
 	return h.AddMessage(ctx, llms.HumanChatMessage{Content: text})
 }
 
 // Clear clear session memory from MongoDB.
-func (h *MongoDBChatMessageHistory) Clear(ctx context.Context) error {
+func (h *ChatMessageHistory) Clear(ctx context.Context) error {
 	filter := bson.M{mongoSessionIDKey: h.sessionID}
 	_, err := h.collection.DeleteMany(ctx, filter)
 	return err
 }
 
 // AddMessage adds a message to the store.
-func (h *MongoDBChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMessage) error {
+func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMessage) error {
 	_message, err := json.Marshal(llms.ConvertChatMessageToModel(message))
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func (h *MongoDBChatMessageHistory) AddMessage(ctx context.Context, message llms
 }
 
 // SetMessages replaces existing messages in the store.
-func (h *MongoDBChatMessageHistory) SetMessages(ctx context.Context, messages []llms.ChatMessage) error {
+func (h *ChatMessageHistory) SetMessages(ctx context.Context, messages []llms.ChatMessage) error {
 	_messages := []interface{}{}
 	for _, message := range messages {
 		_message, err := json.Marshal(llms.ConvertChatMessageToModel(message))
