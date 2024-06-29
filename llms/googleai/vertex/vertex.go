@@ -376,6 +376,10 @@ func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
 		Description: tool.Function.Description,
 	}
 
+	if tool.Function.Parameters == nil {
+		return genaiFuncDecl, nil
+	}
+
 	// Expect the Parameters field to be a map[string]any, from which we will
 	// extract properties to populate the schema.
 	params, ok := tool.Function.Parameters.(map[string]any)
