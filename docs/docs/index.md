@@ -29,7 +29,9 @@ These modules are, in increasing order of complexity:
 
 - [Models](./modules/model_io/models/): This includes integrations with a variety of LLMs, Chat Models and Embeddings models.
 
-- [Prompts](./modules/model_io/prompts/): This includes prompt Templates and functionality to work with prompts like Output Parsers and Example Selectors
+- [Prompts](./modules/model_io/prompts/): This includes prompt Templates and functionality to work with prompts like Output Parsers and Example Selectors.
+
+- [Callbacks](./modules/callbacks/): This includes functionality for callbacks, which are functions that are called when a certain event happens (e.g., when a model or chain gets called). Handy for telemetry, logging, and more.
 
 <!-- - [Data connection](./modules/data_connection/): This includes patterns and functionality for working with your own data, and making it ready to interact with language models (including document loaders, vectorstores, text splitters and retrievers). -->
 

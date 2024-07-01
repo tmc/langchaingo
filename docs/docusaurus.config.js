@@ -137,7 +137,7 @@ const config = {
             position: "left",
           },
           {
-            href: "https://python.langchain.com/en/latest/",
+            href: "https://python.langchain.com/docs/",
             label: "Python Docs",
             position: "left",
           },
