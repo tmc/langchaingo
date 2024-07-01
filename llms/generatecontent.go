@@ -122,6 +122,16 @@ func (ToolCallResponse) isPart() {}
 // It can potentially return multiple content choices.
 type ContentResponse struct {
 	Choices []*ContentChoice
+
+	// Usage is the usage information of the model.
+	Usage *Usage
+}
+
+// Usage encapsulates model usage by way of token counts
+type Usage struct {
+	PromptTokens     int
+	CompletionTokens int
+	TotalTokens      int
 }
 
 // ContentChoice is one of the response choices returned by GenerateContent

@@ -15,6 +15,25 @@ type LogHandler struct{}
 
 var _ Handler = LogHandler{}
 
+func (l LogHandler) HandleLLM(ctx context.Context, messages []llms.MessageContent, info llms.CallOptions, next func(ctx context.Context) (*llms.ContentResponse, error)) (*llms.ContentResponse, error) {
+	fmt.Println("ModelInfo:", info)
+	res, err := next(ctx)
+	fmt.Println("UsageInfo:")
+	if res.Usage != nil {
+		fmt.Printf("%s: %d\n", "PromptTokens", res.Usage.TotalTokens)
+		fmt.Printf("%s: %d\n", "ContentTokens", res.Usage.CompletionTokens)
+		fmt.Printf("%s: %d\n", "TotalTokens", res.Usage.PromptTokens)
+	}
+	return res, err
+}
+
+func (l LogHandler) HandleChain(ctx context.Context, inputs map[string]any, info schema.ChainInfo, next func(ctx context.Context) (map[string]any, error)) (map[string]any, error) {
+	fmt.Println("Entering chain with Inputs:", formatChainValues(inputs))
+	outputs, err := next(ctx)
+	fmt.Println("Exiting chain with Outputs:", formatChainValues(outputs))
+	return outputs, err
+}
+
 func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.MessageContent) {
 	fmt.Println("Entering LLM with messages:")
 	for _, m := range ms {

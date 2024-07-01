@@ -20,6 +20,35 @@ func (l CombiningHandler) HandleText(ctx context.Context, text string) {
 	}
 }
 
+func (l CombiningHandler) HandleLLM(ctx context.Context, messages []llms.MessageContent, info llms.CallOptions, next func(ctx context.Context) (*llms.ContentResponse, error)) (*llms.ContentResponse, error) {
+	for _, handle := range l.Callbacks {
+		return handle.HandleLLM(ctx, messages, info, next)
+	}
+	return nil, nil
+}
+
+func (l CombiningHandler) HandleChain(ctx context.Context, inputs map[string]any, info schema.ChainInfo, next func(ctx context.Context) (map[string]any, error)) (map[string]any, error) {
+	// let's say 3 `HandleChain` callbacks are registered
+	// A, B, C
+	// We need to implement logic that results in this on the stackframe: A -> B -> C -> next
+	// This is a bit tricky because we need to pass the next function to the next callback in the chain
+	// We can do this by creating a new function that calls the next function and passing that to the next callback
+
+	type nextFn func(ctx context.Context) (map[string]any, error)
+
+	var nextFunc nextFn = next
+	for i := len(l.Callbacks) - 1; i >= 0; i-- {
+		type handleWrapper = func(nextFunc nextFn, h Handler) nextFn
+		var wrap handleWrapper = func(nextFunc nextFn, h Handler) nextFn {
+			return func(ctx context.Context) (map[string]any, error) {
+				return h.HandleChain(ctx, inputs, info, nextFunc)
+			}
+		}
+		nextFunc = wrap(nextFunc, l.Callbacks[i])
+	}
+	return nextFunc(ctx)
+}
+
 func (l CombiningHandler) HandleLLMStart(ctx context.Context, prompts []string) {
 	for _, handle := range l.Callbacks {
 		handle.HandleLLMStart(ctx, prompts)
