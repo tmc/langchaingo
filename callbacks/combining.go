@@ -20,6 +20,36 @@ func (l CombiningHandler) HandleText(ctx context.Context, text string) {
 	}
 }
 
+func (l CombiningHandler) HandleLLM(ctx context.Context, messages []llms.MessageContent, info llms.CallOptions, next func(ctx context.Context) (*llms.ContentResponse, error)) (*llms.ContentResponse, error) {
+	type nextFn func(ctx context.Context) (*llms.ContentResponse, error)
+	var nextFunc nextFn = next
+	for i := len(l.Callbacks) - 1; i >= 0; i-- {
+		// wrapper is a closure that wraps the next function with the current handler.
+		wrapper := func(nextFunc nextFn, h Handler) nextFn {
+			return func(ctx context.Context) (*llms.ContentResponse, error) {
+				return h.HandleLLM(ctx, messages, info, nextFunc)
+			}
+		}
+		nextFunc = wrapper(nextFunc, l.Callbacks[i])
+	}
+	return nextFunc(ctx)
+}
+
+func (l CombiningHandler) HandleChain(ctx context.Context, inputs map[string]any, info schema.ChainInfo, next func(ctx context.Context) (map[string]any, error)) (map[string]any, error) {
+	type nextFn func(ctx context.Context) (map[string]any, error)
+	var nextFunc nextFn = next
+	for i := len(l.Callbacks) - 1; i >= 0; i-- {
+		// wrapper is a closure that wraps the next function with the current handler.
+		wrapper := func(nextFunc nextFn, h Handler) nextFn {
+			return func(ctx context.Context) (map[string]any, error) {
+				return h.HandleChain(ctx, inputs, info, nextFunc)
+			}
+		}
+		nextFunc = wrapper(nextFunc, l.Callbacks[i])
+	}
+	return nextFunc(ctx)
+}
+
 func (l CombiningHandler) HandleLLMStart(ctx context.Context, prompts []string) {
 	for _, handle := range l.Callbacks {
 		handle.HandleLLMStart(ctx, prompts)

@@ -12,7 +12,14 @@ type SimpleHandler struct{}
 
 var _ Handler = SimpleHandler{}
 
-func (SimpleHandler) HandleText(context.Context, string)                                   {}
+func (SimpleHandler) HandleText(context.Context, string) {}
+func (SimpleHandler) HandleLLM(ctx context.Context, _ []llms.MessageContent, _ llms.CallOptions, next func(context.Context) (*llms.ContentResponse, error)) (*llms.ContentResponse, error) {
+	return next(ctx)
+}
+
+func (SimpleHandler) HandleChain(ctx context.Context, _ map[string]any, _ schema.ChainInfo, next func(context.Context) (map[string]any, error)) (map[string]any, error) {
+	return next(ctx)
+}
 func (SimpleHandler) HandleLLMStart(context.Context, []string)                             {}
 func (SimpleHandler) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {}
 func (SimpleHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse)   {}

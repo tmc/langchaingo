@@ -10,6 +10,9 @@ type CallOption func(*CallOptions)
 type CallOptions struct {
 	// Model is the model to use.
 	Model string `json:"model"`
+	// Vendor is the vendor of the model.
+	Vendor string `json:"vendor,omitempty"`
+
 	// CandidateCount is the number of response candidates to generate.
 	CandidateCount int `json:"candidate_count"`
 	// MaxTokens is the maximum number of tokens to generate.
@@ -109,6 +112,13 @@ const (
 func WithModel(model string) CallOption {
 	return func(o *CallOptions) {
 		o.Model = model
+	}
+}
+
+// WithVendor specifies which vendor to use.
+func WithVendor(vendor string) CallOption {
+	return func(o *CallOptions) {
+		o.Vendor = vendor
 	}
 }
 

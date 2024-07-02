@@ -13,6 +13,8 @@ import (
 //nolint:all
 type Handler interface {
 	HandleText(ctx context.Context, text string)
+	HandleLLM(ctx context.Context, messages []llms.MessageContent, info llms.CallOptions, next func(ctx context.Context) (*llms.ContentResponse, error)) (*llms.ContentResponse, error)
+	HandleChain(ctx context.Context, inputs map[string]any, info schema.ChainInfo, next func(ctx context.Context) (map[string]any, error)) (map[string]any, error)
 	HandleLLMStart(ctx context.Context, prompts []string)
 	HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent)
 	HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse)
