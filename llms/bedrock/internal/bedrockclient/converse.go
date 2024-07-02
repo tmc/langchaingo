@@ -43,6 +43,23 @@ func getConverseMessageImageType(typ string) (types.ImageFormat, error) {
 	}
 }
 
+func getConverseApiRole(role llms.ChatMessageType) (string, error) {
+	switch role {
+	case llms.ChatMessageTypeSystem:
+		return AnthropicSystem, nil
+	case llms.ChatMessageTypeAI:
+		return AnthropicRoleAssistant, nil
+	case llms.ChatMessageTypeGeneric:
+		return "", errors.New("generic role not supported")
+	case llms.ChatMessageTypeHuman:
+		return AnthropicRoleUser, nil
+	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
+		return AnthropicRoleUser, nil
+	default:
+		return "", errors.New("role not supported")
+	}
+}
+
 func getBedrockContentBlock(parts []llms.ContentPart) ([]types.ContentBlock, error) {
 	convertedParts := make([]types.ContentBlock, 0, len(parts))
 	for _, part := range parts {
@@ -105,7 +122,7 @@ func mergeSameRoleMessages(messages []llms.MessageContent) ([][]llms.MessageCont
 	currentChunk := make([]llms.MessageContent, 0, len(messages))
 	var lastRole string
 	for _, message := range messages {
-		role, err := getAnthropicRole(message.Role)
+		role, err := getConverseApiRole(message.Role)
 		if err != nil {
 			return nil, err
 		}
@@ -135,7 +152,7 @@ func processInputMessagesBedrock(messages []llms.MessageContent) ([]types.System
 	inputContents := make([]types.Message, 0, len(messages))
 	systemContents := make([]types.SystemContentBlock, 0)
 	for _, chunk := range mergedMessages {
-		role, err := getAnthropicRole(chunk[0].Role)
+		role, err := getConverseApiRole(chunk[0].Role)
 		if err != nil {
 			return nil, nil, err
 		}

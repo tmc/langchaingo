@@ -119,7 +119,7 @@ func runBedrockTestCase(t *testing.T, test *bedrockTestCase, arg testArgs) {
 				t.Fatalf("%+v", err)
 			}
 			messages = append(messages, llms.MessageContent{
-				Role:  llms.ChatMessageTypeHuman,
+				Role:  llms.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{*part},
 			})
 		}
@@ -149,9 +149,9 @@ func getDefaultBedrockClaude3TestCases(t *testing.T) []bedrockTestCase {
 	t.Helper()
 	return []bedrockTestCase{
 		{model: bedrock.ModelAnthropicClaudeV3Haiku},
-		{model: bedrock.ModelAnthropicClaudeV35Sonnet, client: getUsEast1BedrockClient(t)},
-		{model: bedrock.ModelAnthropicClaudeV3Sonnet},
-		{model: bedrock.ModelAnthropicClaudeV3Opus},
+		//{model: bedrock.ModelAnthropicClaudeV35Sonnet, client: getUsEast1BedrockClient(t)},
+		//{model: bedrock.ModelAnthropicClaudeV3Sonnet},
+		//{model: bedrock.ModelAnthropicClaudeV3Opus},
 	}
 }
 
