@@ -131,7 +131,8 @@ func parseData(input string) (string, error) {
 	}
 
 	parts := strings.SplitAfter(input, "data:")
-	if len(parts) < 2 {
+	const expectedPartsLength = 2
+	if len(parts) < expectedPartsLength {
 		return "", nil
 	}
 
