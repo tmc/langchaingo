@@ -85,11 +85,17 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	if o.client.UseLegacyTextCompletionsAPI {
 		resp, err := generateCompletionsContent(ctx, o, messages, opts)
+		if err != nil {
+			return nil, err
+		}
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 		return resp, err
 	}
 
 	resp, err := generateMessagesContent(ctx, o, messages, opts)
+	if err != nil {
+		return nil, err
+	}
 	o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	return resp, err
 }
