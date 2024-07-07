@@ -28,6 +28,11 @@ var (
 	ErrInvalidFieldType           = fmt.Errorf("invalid field type")
 )
 
+const (
+	EventTypeText    = "text"
+	EventTypeToolUse = "tool_use"
+)
+
 type ChatMessage struct {
 	Role    string      `json:"role"`
 	Content interface{} `json:"content"`
@@ -88,8 +93,8 @@ type ToolUseContent struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	// Input is a JSON string for internal use. Unlike OpenAI, Anthropics input is an object,
-	// but the content returned in streaming format is a JSON string. Therefore, we must
-	// preserve the Input as a string to receive the complete parameters in a streaming tool use,
+	// but the content returned in streaming format is a JSON string. Therefore,
+	// we must preserve the Input as a string to receive the complete parameters in a streaming tool use,
 	// and then convert it to an object during actual serialization.
 	Input       string `json:"-"`
 	InputObject any    `json:"input"`
@@ -187,13 +192,13 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 		}
 
 		switch typeStruct.Type {
-		case "text":
+		case EventTypeText:
 			tc := &TextContent{}
 			if err := json.Unmarshal(raw, tc); err != nil {
 				return err
 			}
 			m.Content = append(m.Content, tc)
-		case "tool_use":
+		case EventTypeToolUse:
 			tuc := &ToolUseContent{}
 			if err := json.Unmarshal(raw, tuc); err != nil {
 				return err
@@ -378,31 +383,33 @@ func handleContentBlockStartEvent(ctx context.Context, event map[string]interfac
 		eventType = typ
 	}
 
-	if len(response.Content) <= index {
-		if eventType == "text" {
-			response.Content = append(response.Content, &TextContent{
-				Type: eventType,
-			})
-		} else if eventType == "tool_use" {
-			id, ok := contentBlock["id"].(string)
-			if !ok {
-				return response, ErrInvalidDeltaToolUseField
-			}
-			name, ok := contentBlock["name"].(string)
-			if !ok {
-				return response, ErrInvalidDeltaToolUseField
-			}
-			response.Content = append(response.Content, &ToolUseContent{
-				Type: eventType,
-				ID:   id,
-				Name: name,
-			})
+	if len(response.Content) > index {
+		return response, ErrContentIndexOutOfRange
+	}
+
+	if eventType == EventTypeText {
+		response.Content = append(response.Content, &TextContent{
+			Type: eventType,
+		})
+	} else if eventType == EventTypeToolUse {
+		id, ok := contentBlock["id"].(string)
+		if !ok {
+			return response, ErrInvalidDeltaToolUseField
 		}
+		name, ok := contentBlock["name"].(string)
+		if !ok {
+			return response, ErrInvalidDeltaToolUseField
+		}
+		response.Content = append(response.Content, &ToolUseContent{
+			Type: eventType,
+			ID:   id,
+			Name: name,
+		})
 	}
 
 	if payload.StreamingFunc != nil {
 		// we should send content start event to the streaming func so that callback handler can process the tool call body
-		if contentBlock["type"] == "tool_use" {
+		if contentBlock["type"] == EventTypeToolUse {
 			chunk, _ := json.Marshal(contentBlock)
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {

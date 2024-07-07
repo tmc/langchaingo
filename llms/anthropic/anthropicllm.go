@@ -155,7 +155,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	choices := make([]*llms.ContentChoice, len(result.Content))
 	for i, content := range result.Content {
 		switch content.GetType() {
-		case "text":
+		case anthropicclient.EventTypeText:
 			if textContent, ok := content.(*anthropicclient.TextContent); ok {
 				choices[i] = &llms.ContentChoice{
 					Content:    textContent.Text,
@@ -168,7 +168,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			} else {
 				return nil, fmt.Errorf("anthropic: %w for text message", ErrInvalidContentType)
 			}
-		case "tool_use":
+		case anthropicclient.EventTypeToolUse:
 			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
 				choices[i] = &llms.ContentChoice{
 					ToolCalls: []llms.ToolCall{
