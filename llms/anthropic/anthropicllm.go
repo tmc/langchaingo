@@ -73,12 +73,9 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) {
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
-		defer func() {
-			o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
-		}()
 	}
 
 	opts := &llms.CallOptions{}
@@ -87,9 +84,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	if o.client.UseLegacyTextCompletionsAPI {
-		return generateCompletionsContent(ctx, o, messages, opts)
+		resp, err := generateCompletionsContent(ctx, o, messages, opts)
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+		return resp, err
 	}
-	return generateMessagesContent(ctx, o, messages, opts)
+
+	resp, err := generateMessagesContent(ctx, o, messages, opts)
+	o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	return resp, err
 }
 
 func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
