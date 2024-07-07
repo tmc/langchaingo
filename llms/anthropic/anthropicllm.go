@@ -2,11 +2,11 @@ package anthropic
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -170,17 +170,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			}
 		case "tool_use":
 			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
-				argumentsJSON, err := json.Marshal(toolUseContent.Input)
-				if err != nil {
-					return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
-				}
 				choices[i] = &llms.ContentChoice{
 					ToolCalls: []llms.ToolCall{
 						{
 							ID: toolUseContent.ID,
 							FunctionCall: &llms.FunctionCall{
 								Name:      toolUseContent.Name,
-								Arguments: string(argumentsJSON),
+								Arguments: toolUseContent.Input,
 							},
 						},
 					},
@@ -262,27 +258,60 @@ func handleSystemMessage(msg llms.MessageContent) (string, error) {
 }
 
 func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return anthropicclient.ChatMessage{
-			Role:    RoleUser,
-			Content: textContent.Text,
-		}, nil
+	if len(msg.Parts) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for human message", ErrInvalidContentType)
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for human message", ErrInvalidContentType)
+
+	contentParts := []anthropicclient.Content{}
+	for _, part := range msg.Parts {
+		switch content := part.(type) {
+		case llms.TextContent:
+			contentParts = append(contentParts, anthropicclient.TextContent{
+				Type: "text",
+				Text: content.Text,
+			})
+		case llms.ImageURLContent:
+			data, mediaType, err := parseBase64URI(content.URL)
+			if err != nil {
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for human message", err)
+			}
+			contentParts = append(contentParts, anthropicclient.ImageContent{
+				Type: "image",
+				Source: anthropicclient.ImageContentSource{
+					Type:      "base64",
+					MediaType: mediaType,
+					Data:      data,
+				},
+			})
+		default:
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for human message", ErrInvalidContentType)
+		}
+	}
+	return anthropicclient.ChatMessage{
+		Role:    RoleUser,
+		Content: contentParts,
+	}, nil
+}
+
+func parseBase64URI(uri string) (data string, mediaType string, err error) {
+	re := regexp.MustCompile(`^data:(.*?);base64,(.*)$`)
+	matches := re.FindStringSubmatch(uri)
+	if len(matches) != 3 {
+		return "", "", errors.New("invalid base64 URI")
+	}
+
+	mediaType = matches[1]
+	data = matches[2]
+	return data, mediaType, nil
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
-		var inputStruct map[string]interface{}
-		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &inputStruct)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
-		}
 		toolUse := anthropicclient.ToolUseContent{
 			Type:  "tool_use",
 			ID:    toolCall.ID,
 			Name:  toolCall.FunctionCall.Name,
-			Input: inputStruct,
+			Input: toolCall.FunctionCall.Arguments,
 		}
 
 		return anthropicclient.ChatMessage{
