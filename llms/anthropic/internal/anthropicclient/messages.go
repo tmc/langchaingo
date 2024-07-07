@@ -34,8 +34,8 @@ const (
 )
 
 type ChatMessage struct {
-	Role    string      `json:"role"`
-	Content interface{} `json:"content"`
+	Role    string    `json:"role"`
+	Content []Content `json:"content"`
 }
 
 type messagePayload struct {
