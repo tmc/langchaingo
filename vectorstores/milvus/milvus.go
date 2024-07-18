@@ -195,6 +195,10 @@ func (s *Store) load(ctx context.Context) error {
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	_ ...vectorstores.Option,
 ) ([]string, error) {
+	if len(docs) == 0 {
+		return nil, nil
+	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
