@@ -20,8 +20,8 @@ var _ Handler = (*StackHandler)(nil)
 //
 //	  h := NewStackHandler(
 //		&SimpleHandler{},
-//	    &LogHandler{},
-//	    &MyCustomHandler{},
+//		&LogHandler{},
+//		&MyCustomHandler{},
 //	  )
 //
 //	  h.HandleText(ctx, "Hello, world!")
