@@ -8,8 +8,8 @@ import (
 
 const (
 	// nolint:gosec
-	_defaultTokenModelName    = "gpt-3.5-turbo"
-	_defaultTokenEncoding     = "cl100k_base"
+	_defaultTokenModelName    = "gpt-4o-mini"
+	_defaultTokenEncoding     = "o200k_base"
 	_defaultTokenChunkSize    = 512
 	_defaultTokenChunkOverlap = 100
 )
