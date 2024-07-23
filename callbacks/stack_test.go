@@ -35,7 +35,7 @@ func (m *MyCustomHandler) HandleLLMGenerateContentStart(context.Context, []llms.
 	m.ch <- fmt.Sprintf("[HandleLLMGenerateContentStart] %s", m.name)
 }
 
-func (m *MyCustomHandler) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
+func (m *MyCustomHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
 	m.ch <- fmt.Sprintf("[HandleLLMGenerateContentEnd] %s", m.name)
 }
 
@@ -71,11 +71,11 @@ func (m *MyCustomHandler) HandleAgentAction(context.Context, schema.AgentAction)
 	m.ch <- fmt.Sprintf("[HandleAgentAction] %s", m.name)
 }
 
-func (m *MyCustomHandler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {
+func (m *MyCustomHandler) HandleAgentFinish(context.Context, schema.AgentFinish) {
 	m.ch <- fmt.Sprintf("[HandleAgentFinish] %s", m.name)
 }
 
-func (m *MyCustomHandler) HandleRetrieverStart(ctx context.Context, query string) {
+func (m *MyCustomHandler) HandleRetrieverStart(context.Context, string) {
 	m.ch <- fmt.Sprintf("[HandleRetrieverStart] %s", m.name)
 }
 
@@ -87,7 +87,7 @@ func (m *MyCustomHandler) HandleStreamingFunc(context.Context, []byte) {
 	m.ch <- fmt.Sprintf("[HandleStreamingFunc] %s", m.name)
 }
 
-func TestStackHandler(t *testing.T) {
+func TestStackHandler(t *testing.T) { //nolint:paralleltest
 	ch := make(chan string, 2)
 	defer close(ch)
 
@@ -119,6 +119,7 @@ func TestStackHandler(t *testing.T) {
 		{"HandleStreamingFunc", func() { h.HandleStreamingFunc(context.Background(), nil) }},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.fn()
