@@ -87,11 +87,11 @@ func (m *MyCustomHandler) HandleStreamingFunc(context.Context, []byte) {
 	m.ch <- fmt.Sprintf("[HandleStreamingFunc] %s", m.name)
 }
 
-func TestStackHandler(t *testing.T) { //nolint:paralleltest
+func TestCombiningHandler(t *testing.T) { //nolint:paralleltest
 	ch := make(chan string, 2)
 	defer close(ch)
 
-	h := NewStackHandler(
+	h := NewCombiningHandler(
 		&SimpleHandler{},
 		NewMyCustomHandler("my-custom-handler-1", ch),
 		NewMyCustomHandler("my-custom-handler-2", ch),
