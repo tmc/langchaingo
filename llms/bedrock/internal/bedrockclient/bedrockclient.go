@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -61,6 +62,79 @@ func (c *Client) CreateCompletion(ctx context.Context,
 	default:
 		return nil, errors.New("unsupported provider")
 	}
+}
+
+// Converse converses with the model.
+func (c *Client) Converse(ctx context.Context,
+	modelID string,
+	llmsMessages []llms.MessageContent,
+	options *llms.CallOptions,
+) (*llms.ContentResponse, error) {
+	system, messages, err := processInputMessagesBedrock(llmsMessages)
+	if err != nil {
+		return nil, err
+	}
+	temperature := float32(options.Temperature)
+	inferenceConfig := &types.InferenceConfiguration{
+		StopSequences: options.StopWords,
+		Temperature:   &temperature,
+	}
+	if options.MaxTokens > 0 {
+		maxTokens := int32(options.MaxTokens)
+		inferenceConfig.MaxTokens = &maxTokens
+	}
+	if options.TopP > 0 {
+		topP := float32(options.TopP)
+		inferenceConfig.TopP = &topP
+	}
+	var toolConfig *types.ToolConfiguration
+
+	if len(options.Tools) > 0 {
+		toolConfig = &types.ToolConfiguration{
+			Tools: convertTools(options.Tools),
+		}
+		if options.ToolChoice != nil {
+			toolChoice, err := convertToolChoice(options.ToolChoice)
+			if err != nil {
+				return nil, err
+			}
+			toolConfig.ToolChoice = toolChoice
+		}
+	}
+
+	if options.StreamingFunc != nil {
+		input := &bedrockruntime.ConverseStreamInput{
+			Messages:        messages,
+			ModelId:         &modelID,
+			System:          system,
+			GuardrailConfig: nil,
+			InferenceConfig: inferenceConfig,
+			ToolConfig:      toolConfig,
+		}
+		output, err := c.client.ConverseStream(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := handleConverseStreamEvents(ctx, output, options)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	}
+
+	input := &bedrockruntime.ConverseInput{
+		Messages:        messages,
+		ModelId:         &modelID,
+		GuardrailConfig: nil,
+		InferenceConfig: inferenceConfig,
+		System:          system,
+		ToolConfig:      toolConfig,
+	}
+	output, err := c.client.Converse(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return handleConverseOutput(ctx, output)
 }
 
 // Helper function to process input text chat
