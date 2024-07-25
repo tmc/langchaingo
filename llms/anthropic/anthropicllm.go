@@ -64,6 +64,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	return anthropicclient.New(options.token, options.model, options.baseURL,
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
+		anthropicclient.WithAnthropicBetaHeader(options.anthropicBetaHeader),
 	)
 }
 
