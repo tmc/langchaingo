@@ -22,5 +22,7 @@ type OutputParser[T any] interface {
 	ParseWithPrompt(text string, prompt PromptValue) (T, error)
 	// GetFormatInstructions returns a string describing the format of the output.
 	GetFormatInstructions() string
+	// Type returns the string type key uniquely identifying this class of parser
+	Type() string
 }
 ```
