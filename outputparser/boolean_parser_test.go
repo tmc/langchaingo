@@ -24,6 +24,7 @@ func TestBooleanParser(t *testing.T) {
 		},
 		{
 			input:    "YESNO",
+			err:      outputparser.ParseError{},
 			expected: false,
 		},
 		{
@@ -31,18 +32,51 @@ func TestBooleanParser(t *testing.T) {
 			err:      outputparser.ParseError{},
 			expected: false,
 		},
+		{
+			input:    "true",
+			expected: true,
+		},
+		{
+			input:    "false",
+			expected: false,
+		},
+		{
+			input:    "True",
+			expected: true,
+		},
+		{
+			input:    "False",
+			expected: false,
+		},
+		{
+			input:    "TRUE",
+			expected: true,
+		},
+		{
+			input:    "FALSE",
+			expected: false,
+		},
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		parser := outputparser.NewBooleanParser()
 
-		actual, err := parser.Parse(tc.input)
-		if tc.err != nil && err == nil {
-			t.Errorf("Expected error %v, got nil", tc.err)
-		}
+		t.Run(tc.input, func(t *testing.T) {
+			t.Parallel()
 
-		if actual != tc.expected {
-			t.Errorf("Expected %v, got %v", tc.expected, actual)
-		}
+			result, err := parser.Parse(tc.input)
+			if err != nil && tc.err == nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if err == nil && tc.err != nil {
+				t.Errorf("Expected error %v, got nil", tc.err)
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v, but got %v", tc.expected, result)
+			}
+		})
 	}
 }
