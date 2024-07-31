@@ -115,6 +115,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		req.ResponseFormat = ResponseFormatJSON
 	}
 
+
 	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
 		req.Tools = append(req.Tools, openaiclient.Tool{
