@@ -28,7 +28,7 @@ Final Answer: the final answer to the original input question`
 	_defaultMrklSuffix = `Begin!
 
 Question: {{.input}}
-Thought:{{.agent_scratchpad}}`
+{{.agent_scratchpad}}`
 )
 
 func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
