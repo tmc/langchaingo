@@ -33,7 +33,6 @@ func (p BooleanParser) GetFormatInstructions() string {
 
 func (p BooleanParser) parse(text string) (bool, error) {
 	text = normalize(text)
-	booleanStrings := append(p.TrueStrings, p.FalseStrings...)
 
 	if slices.Contains(p.TrueStrings, text) {
 		return true, nil
@@ -45,12 +44,13 @@ func (p BooleanParser) parse(text string) (bool, error) {
 
 	return false, ParseError{
 		Text:   text,
-		Reason: fmt.Sprintf("Expected output to one of %v, received %s", booleanStrings, text),
+		Reason: fmt.Sprintf("Expected output to one of %v, received %s", append(p.TrueStrings, p.FalseStrings...), text),
 	}
 }
 
 func normalize(text string) string {
 	text = strings.TrimSpace(text)
+	text = strings.Trim(text, "'\"`")
 	text = strings.ToUpper(text)
 
 	return text

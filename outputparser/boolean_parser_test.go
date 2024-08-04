@@ -56,6 +56,18 @@ func TestBooleanParser(t *testing.T) {
 			input:    "FALSE",
 			expected: false,
 		},
+		{
+			input:    "'TRUE'",
+			expected: true,
+		},
+		{
+			input:    "`TRUE`",
+			expected: true,
+		},
+		{
+			input:    "'TRUE`",
+			expected: true,
+		},
 	}
 
 	for _, tc := range testCases {
