@@ -53,7 +53,7 @@ var _ schema.OutputParser[any] = Defined[any]{}
 
 // GetFormatInstructions returns a string describing the format of the output.
 func (p Defined[T]) GetFormatInstructions() string {
-	const instructions = "Your output should be in JSON, structured according to this TypeScript:\n```typescript\n%s\n```"
+	const instructions = "Your output should be in JSON, structured according to this schema:\n```json\n%s\n```"
 	return fmt.Sprintf(instructions, p.schema)
 }
 
