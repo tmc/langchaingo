@@ -95,14 +95,25 @@ Some content below h1>h2>h4.`,
 }
 
 // TestMarkdownHeaderTextSplitter_Table markdown always split by line.
+//
+//nolint:funlen
 func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 	t.Parallel()
+
 	type testCase struct {
+		name         string
 		markdown     string
+		options      []Option
 		expectedDocs []schema.Document
 	}
+
 	testCases := []testCase{
 		{
+			name: "size(64)-overlap(32)",
+			options: []Option{
+				WithChunkSize(64),
+				WithChunkOverlap(32),
+			},
 			markdown: `| Syntax      | Description |
 | ----------- | ----------- |
 | Header      | Title       |
@@ -122,18 +133,92 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "size(512)-overlap(64)",
+			options: []Option{
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "big-tables-overflow",
+			options: []Option{
+				WithChunkSize(64),
+				WithChunkOverlap(32),
+				WithJoinTableRows(true),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "big-tables",
+			options: []Option{
+				WithChunkSize(128),
+				WithChunkOverlap(32),
+				WithJoinTableRows(true),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		require.NoError(t, err)
-		assert.Equal(t, tc.expectedDocs, docs)
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		splitter = NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-		docs, err = CreateDocuments(splitter, []string{tc.markdown}, nil)
-		require.NoError(t, err)
-		assert.Equal(t, tc.expectedDocs, docs)
+			rq := require.New(t)
+
+			splitter := NewMarkdownTextSplitter(tc.options...)
+
+			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
+			rq.NoError(err)
+			rq.Equal(tc.expectedDocs, docs)
+		})
 	}
 }
 
