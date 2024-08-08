@@ -106,9 +106,24 @@ type ToolCall struct {
 	Function ToolFunction `json:"function,omitempty"`
 }
 
+type ResponseFormatJSONSchemaProperty struct {
+	Type                 string                                       `json:"type"`
+	Items                *ResponseFormatJSONSchemaProperty            `json:"items,omitempty"`
+	Properties           map[string]*ResponseFormatJSONSchemaProperty `json:"properties,omitempty"`
+	AdditionalProperties bool                                         `json:"additionalProperties"`
+	Required             []string                                     `json:"required,omitempty"`
+}
+
+type ResponseFormatJSONSchema struct {
+	Name   string                            `json:"name"`
+	Strict bool                              `json:"strict"`
+	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
+}
+
 // ResponseFormat is the format of the response.
 type ResponseFormat struct {
-	Type string `json:"type"`
+	Type       string                    `json:"type"`
+	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
 // ChatMessage is a message in a chat request.

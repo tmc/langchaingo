@@ -33,6 +33,8 @@ type Client struct {
 	apiType      APIType
 	httpClient   Doer
 
+	ResponseFormat *ResponseFormat
+
 	EmbeddingModel string
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion string
@@ -49,6 +51,7 @@ type Doer interface {
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
+	responseFormat *ResponseFormat,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
@@ -60,6 +63,7 @@ func New(token string, model string, baseURL string, organization string,
 		apiType:        apiType,
 		apiVersion:     apiVersion,
 		httpClient:     httpClient,
+		ResponseFormat: responseFormat,
 	}
 
 	for _, opt := range opts {
@@ -130,6 +134,9 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletio
 		} else {
 			r.Model = c.Model
 		}
+	}
+	if c.ResponseFormat != nil {
+		r.ResponseFormat = c.ResponseFormat
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {
