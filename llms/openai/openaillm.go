@@ -123,6 +123,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Name:        fn.Name,
 				Description: fn.Description,
 				Parameters:  fn.Parameters,
+				Strict:      fn.Strict,
 			},
 		})
 	}
@@ -133,6 +134,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			return nil, fmt.Errorf("failed to convert llms tool to openai tool: %w", err)
 		}
 		req.Tools = append(req.Tools, t)
+	}
+
+	// if o.client.ResponseFormat is set, use it for the request
+	if o.client.ResponseFormat != nil {
+		req.ResponseFormat = o.client.ResponseFormat
 	}
 
 	result, err := o.client.CreateChat(ctx, req)
@@ -232,6 +238,7 @@ func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
 			Name:        t.Function.Name,
 			Description: t.Function.Description,
 			Parameters:  t.Function.Parameters,
+			Strict:      t.Function.Strict,
 		}
 	default:
 		return openaiclient.Tool{}, fmt.Errorf("tool type %v not supported", t.Type)
