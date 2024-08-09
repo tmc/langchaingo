@@ -272,7 +272,7 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 }
 
 // WithResponseMIMEType will add an option to set the ResponseMIMEType
-// Currently only supported by googleai llms
+// Currently only supported by googleai llms.
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
