@@ -15,7 +15,7 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 	responseFormat := &ResponseFormat{
 		Type: "json_schema",
 		JSONSchema: &ResponseFormatJSONSchema{
-			Name: "math_schema",
+			Name:   "math_schema",
 			Strict: true,
 			Schema: &ResponseFormatJSONSchemaProperty{
 				Type: "object",
@@ -25,7 +25,7 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 					},
 				},
 				AdditionalProperties: false,
-				Required: []string{"final_answer"},
+				Required:             []string{"final_answer"},
 			},
 		},
 	}
@@ -37,11 +37,11 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 
 	content := []llms.MessageContent{
 		{
-			Role: llms.ChatMessageTypeSystem,
+			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "You are a student taking a math exam."}},
 		},
 		{
-			Role: llms.ChatMessageTypeGeneric,
+			Role:  llms.ChatMessageTypeGeneric,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "Solve 2 + 2"}},
 		},
 	}
@@ -59,7 +59,7 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 	responseFormat := &ResponseFormat{
 		Type: "json_schema",
 		JSONSchema: &ResponseFormatJSONSchema{
-			Name: "math_schema",
+			Name:   "math_schema",
 			Strict: true,
 			Schema: &ResponseFormatJSONSchemaProperty{
 				Type: "object",
@@ -75,7 +75,7 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 					},
 				},
 				AdditionalProperties: false,
-				Required: []string{"final_answer", "steps"},
+				Required:             []string{"final_answer", "steps"},
 			},
 		},
 	}
@@ -87,11 +87,11 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 
 	content := []llms.MessageContent{
 		{
-			Role: llms.ChatMessageTypeSystem,
+			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "You are a student taking a math exam."}},
 		},
 		{
-			Role: llms.ChatMessageTypeGeneric,
+			Role:  llms.ChatMessageTypeGeneric,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "Solve 2 + 2"}},
 		},
 	}
