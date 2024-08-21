@@ -267,6 +267,9 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			}
 		}
 	}
+	if err = stream.Err(); err != nil {
+		return nil, err
+	}
 
 	return &llms.ContentResponse{
 		Choices: contentchoices,
