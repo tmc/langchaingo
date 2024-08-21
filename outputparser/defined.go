@@ -62,12 +62,22 @@ func (p Defined[T]) Parse(text string) (T, error) {
 	var target T
 
 	// Removes '```json' and '```' from the start and end of the text.
-	const opening = "```json"
-	const closing = "```"
-	if text[:len(opening)] != opening || text[len(text)-len(closing):] != closing {
-		return target, fmt.Errorf("input text should start with %s and end with %s", opening, closing)
+	const opening1 = "```json"
+	const opening2 = "```"
+	switch {
+	case len(text) >= len(opening1) && text[:len(opening1)] == opening1:
+		text = text[len(opening1):]
+	case len(text) >= len(opening2) && text[:len(opening2)] == opening2:
+		text = text[len(opening2):]
+	default:
+		return target, errors.New("input text should start with '```json' or '```'")
 	}
-	parseableJSON := text[len(opening) : len(text)-len(closing)]
+
+	const closing = "```"
+	if len(text) >= len(closing) && text[len(text)-len(closing):] != closing {
+		return target, fmt.Errorf("input text should end with %s", closing)
+	}
+	parseableJSON := text[:len(text)-len(closing)]
 	if err := json.Unmarshal([]byte(parseableJSON), &target); err != nil {
 		return target, fmt.Errorf("could not parse generated JSON: %w", err)
 	}
