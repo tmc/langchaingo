@@ -71,7 +71,8 @@ type ChatRequest struct {
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 
 	// Metadata allows you to specify additional information that will be passed to the model.
-	Metadata map[string]any `json:"metadata,omitempty"`
+	Metadata     map[string]any    `json:"metadata,omitempty"`
+	ExtraHeaders map[string]string `json:"extra_headers,omitempty"`
 }
 
 // ToolType is the type of a tool.

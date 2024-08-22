@@ -61,6 +61,8 @@ type CallOptions struct {
 	// Metadata is a map of metadata to include in the request.
 	// The meaning of this field is specific to the backend in use.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
+
+	ExtraHeaders map[string]string `json:"extra_headers,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -263,5 +265,11 @@ func WithJSONMode() CallOption {
 func WithMetadata(metadata map[string]interface{}) CallOption {
 	return func(o *CallOptions) {
 		o.Metadata = metadata
+	}
+}
+
+func WithExtraHeaders(headers map[string]string) CallOption {
+	return func(o *CallOptions) {
+		o.ExtraHeaders = headers
 	}
 }
