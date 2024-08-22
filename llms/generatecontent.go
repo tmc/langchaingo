@@ -17,7 +17,10 @@ type MessageContent struct {
 }
 
 // TextPart creates TextContent from a given string.
-func TextPart(s string) TextContent {
+func TextPart(s string, isCacheable bool) TextContent {
+	if isCacheable {
+		return TextContent{Text: s, CacheControl: CacheControl{Type: "ephemeral"}}
+	}
 	return TextContent{Text: s}
 }
 
@@ -52,7 +55,12 @@ type ContentPart interface {
 
 // TextContent is content with some text.
 type TextContent struct {
-	Text string
+	Text         string
+	CacheControl CacheControl `json:"cache_control"`
+}
+
+type CacheControl struct {
+	Type string `json:"type"`
 }
 
 func (tc TextContent) String() string {
