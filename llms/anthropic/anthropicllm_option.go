@@ -8,6 +8,10 @@ const (
 	tokenEnvVarName = "ANTHROPIC_API_KEY" //nolint:gosec
 )
 
+// MaxTokensAnthropicSonnet35 is the header value for specifying the maximum number of tokens
+// when using the Anthropic Sonnet 3.5 model.
+const MaxTokensAnthropicSonnet35 = "max-tokens-3-5-sonnet-2024-07-15" //nolint:gosec // This is not a sensitive value.
+
 type options struct {
 	token      string
 	model      string
@@ -15,6 +19,9 @@ type options struct {
 	httpClient anthropicclient.Doer
 
 	useLegacyTextCompletionsAPI bool
+
+	// If supplied, the 'anthropic-beta' header will be added to the request with the given value.
+	anthropicBetaHeader string
 }
 
 type Option func(*options)
@@ -54,5 +61,12 @@ func WithHTTPClient(client anthropicclient.Doer) Option {
 func WithLegacyTextCompletionsAPI() Option {
 	return func(opts *options) {
 		opts.useLegacyTextCompletionsAPI = true
+	}
+}
+
+// WithAnthropicBetaHeader adds the Anthropic Beta header to support extended options.
+func WithAnthropicBetaHeader(value string) Option {
+	return func(opts *options) {
+		opts.anthropicBetaHeader = value
 	}
 }
