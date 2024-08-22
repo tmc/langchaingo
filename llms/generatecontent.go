@@ -155,13 +155,13 @@ type ContentChoice struct {
 
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
-func TextParts(role ChatMessageType, parts ...string) MessageContent {
+func TextParts(role ChatMessageType, isCacheable bool, parts ...string) MessageContent {
 	result := MessageContent{
 		Role:  role,
 		Parts: []ContentPart{},
 	}
 	for _, part := range parts {
-		result.Parts = append(result.Parts, TextPart(part))
+		result.Parts = append(result.Parts, TextPart(part, isCacheable))
 	}
 	return result
 }
