@@ -9,14 +9,11 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/i18n"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
-)
-
-const (
-	_conversationalFinalAnswerAction = "AI:"
 )
 
 // ConversationalAgent is a struct that represents an agent responsible for deciding
@@ -33,7 +30,9 @@ type ConversationalAgent struct {
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
-	OutputKey string
+	OutputKey   string
+	FinalAnswer string
+	Language    i18n.Lang
 	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
 }
@@ -45,6 +44,7 @@ func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) 
 	for _, opt := range opts {
 		opt(&options)
 	}
+	options.loadConversationalTranslatable()
 
 	return &ConversationalAgent{
 		Chain: chains.NewLLMChain(
@@ -54,6 +54,8 @@ func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) 
 		),
 		Tools:            tools,
 		OutputKey:        options.outputKey,
+		FinalAnswer:      i18n.AgentsMustPhrase(options.lang, "conversational final answer"),
+		Language:         options.lang,
 		CallbacksHandler: options.callbacksHandler,
 	}
 }
@@ -69,7 +71,7 @@ func (a *ConversationalAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
+	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps, a.Language)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -84,7 +86,10 @@ func (a *ConversationalAgent) Plan(
 		ctx,
 		a.Chain,
 		fullInputs,
-		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStopWords([]string{
+			fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(a.Language, "observation")),
+			fmt.Sprintf("\n\t%s", i18n.AgentsMustPhrase(a.Language, "observation")),
+		}),
 		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
@@ -117,22 +122,22 @@ func (a *ConversationalAgent) GetTools() []tools.Tool {
 	return a.Tools
 }
 
-func constructScratchPad(steps []schema.AgentStep) string {
+func constructScratchPad(steps []schema.AgentStep, language i18n.Lang) string {
 	var scratchPad string
 	if len(steps) > 0 {
 		for _, step := range steps {
 			scratchPad += step.Action.Log
-			scratchPad += "\nObservation: " + step.Observation
+			scratchPad += fmt.Sprintf("\n%s %s", i18n.AgentsMustPhrase(language, "observation"), step.Observation)
 		}
-		scratchPad += "\n" + "Thought:"
+		scratchPad += fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(language, "thought"))
 	}
 
 	return scratchPad
 }
 
 func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
-	if strings.Contains(output, _conversationalFinalAnswerAction) {
-		splits := strings.Split(output, _conversationalFinalAnswerAction)
+	if strings.Contains(output, a.FinalAnswer) {
+		splits := strings.Split(output, a.FinalAnswer)
 
 		finishAction := &schema.AgentFinish{
 			ReturnValues: map[string]any{
@@ -144,7 +149,10 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		return nil, finishAction, nil
 	}
 
-	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
+	action, actionInput :=
+		i18n.AgentsMustPhrase(a.Language, "action"),
+		i18n.AgentsMustPhrase(a.Language, "action input")
+	r := regexp.MustCompile(fmt.Sprintf(`%s (.*?)[\n]*%s (.*)`, action, actionInput))
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
@@ -154,15 +162,6 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
 	}, nil, nil
 }
-
-//go:embed prompts/conversational_prefix.txt
-var _defaultConversationalPrefix string //nolint:gochecknoglobals
-
-//go:embed prompts/conversational_format_instructions.txt
-var _defaultConversationalFormatInstructions string //nolint:gochecknoglobals
-
-//go:embed prompts/conversational_suffix.txt
-var _defaultConversationalSuffix string //nolint:gochecknoglobals
 
 func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
 	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")

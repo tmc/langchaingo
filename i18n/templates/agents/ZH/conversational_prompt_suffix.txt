@@ -1,0 +1,8 @@
+开始吧！
+
+对话历史:
+{{.history}}
+
+最新输入: {{.input}}
+
+思考: {{.agent_scratchpad}}

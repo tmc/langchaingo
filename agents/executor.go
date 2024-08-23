@@ -36,6 +36,7 @@ func NewExecutor(agent Agent, opts ...Option) *Executor {
 	for _, opt := range opts {
 		opt(&options)
 	}
+	options.loadExecutorTranslatable()
 
 	return &Executor{
 		Agent:                   agent,
