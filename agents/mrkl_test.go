@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/i18n"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -38,7 +39,11 @@ func TestMRKLOutputParser(t *testing.T) {
 		},
 	}
 
-	a := OneShotZeroAgent{}
+	lang := i18n.EN
+	a := OneShotZeroAgent{
+		FinalAnswer: i18n.AgentsMustPhrase(lang, "mrkl final answer"),
+		Lang:        lang,
+	}
 	for _, tc := range testCases {
 		actions, finish, err := a.parseOutput(tc.input)
 		require.ErrorIs(t, tc.expectedErr, err)

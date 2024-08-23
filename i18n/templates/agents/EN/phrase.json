@@ -1,0 +1,11 @@
+{
+  "thought": "Thought:",
+  "action": "Action:",
+  "action input": "Action Input:",
+  "observation": "Observation:",
+  "output key": "Output:",
+  "system message": "You are a helpful AI assistant.",
+  "today format": "January 02, 2006",
+  "mrkl final answer": "Final Answer:",
+  "conversational final answer": "AI:"
+}
