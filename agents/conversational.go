@@ -2,7 +2,6 @@ package agents
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"regexp"
 	"strings"
