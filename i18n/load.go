@@ -6,12 +6,11 @@ import (
 	"log"
 )
 
-var langFolderMap = map[Lang]string{
-	EN: "EN",
-	ZH: "ZH",
-}
-
 func mustLoad(lang Lang, kindFolder, filename string) string {
+	langFolderMap := map[Lang]string{
+		EN: "EN",
+		ZH: "ZH",
+	}
 	langFolder, ok := langFolderMap[lang]
 	if !ok {
 		log.Panic("unknown language: ", lang)

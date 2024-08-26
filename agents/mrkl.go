@@ -135,8 +135,7 @@ func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *sc
 		}, nil
 	}
 
-	action, actionInput, observation :=
-		i18n.AgentsMustPhrase(a.Lang, "action"),
+	action, actionInput, observation := i18n.AgentsMustPhrase(a.Lang, "action"),
 		i18n.AgentsMustPhrase(a.Lang, "action input"),
 		i18n.AgentsMustPhrase(a.Lang, "observation")
 	r := regexp.MustCompile(fmt.Sprintf(`%s\s*(.+)\s*%s\s(?s)*([^%s]+)`, action, actionInput, observation))

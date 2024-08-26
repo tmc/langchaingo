@@ -6,6 +6,7 @@ import (
 )
 
 func Test_mustLoad(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		lang       Lang
 		kindFolder string
@@ -59,11 +60,14 @@ func Test_mustLoad(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if tt.wantPanic {
 				defer func() {
 					if r := recover(); r == nil {
-						t.Errorf("want panic, but did not happend")
-					} else if !strings.Contains(r.(string), tt.wantPanicLike) {
+						t.Errorf("want panic, but did not happen")
+					} else if s, ok := r.(string); !ok {
+						t.Errorf("unexpected panic type")
+					} else if !strings.Contains(s, tt.wantPanicLike) {
 						t.Errorf("panic = %v, want %v", r, tt.wantPanicLike)
 					}
 				}()

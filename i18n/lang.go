@@ -5,6 +5,6 @@ type Lang int
 const (
 	EN Lang = iota
 	ZH
-)
 
-var DefaultLang = EN
+	DefaultLang = EN
+)

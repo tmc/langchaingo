@@ -149,8 +149,7 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		return nil, finishAction, nil
 	}
 
-	action, actionInput :=
-		i18n.AgentsMustPhrase(a.Language, "action"),
+	action, actionInput := i18n.AgentsMustPhrase(a.Language, "action"),
 		i18n.AgentsMustPhrase(a.Language, "action input")
 	r := regexp.MustCompile(fmt.Sprintf(`%s (.*?)[\n]*%s (.*)`, action, actionInput))
 	matches := r.FindStringSubmatch(output)

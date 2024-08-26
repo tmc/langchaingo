@@ -13,13 +13,17 @@ func AgentsMustLoad(lang Lang, filename string) string {
 	return mustLoad(lang, "agents", filename)
 }
 
-var agentsPhraseMap map[string]string
-var agentsPhraseInit bool
+var (
+	// nolint:gochecknoglobals
+	agentsPhraseMap map[string]string
+	// nolint:gochecknoglobals
+	agentsPhraseInit bool
+)
 
 func AgentsMustPhrase(lang Lang, key string) string {
 	if !agentsPhraseInit {
 		s := AgentsMustLoad(lang, "phrase.json")
-		agentsPhraseMap = make(map[string]string, 4)
+		agentsPhraseMap = make(map[string]string)
 		if err := json.Unmarshal([]byte(s), &agentsPhraseMap); err != nil {
 			log.Panic("unmarshal phrase failed:", err)
 		}
