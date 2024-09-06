@@ -188,7 +188,7 @@ func TestStore_AddDocuments(t *testing.T) {
 
 type simSearchTest struct {
 	ctx          context.Context
-	docSet       map[string]float32
+	seed         []schema.Document
 	numDocuments int                   // Number of documents to return
 	options      []vectorstores.Option // Search query options
 	want         []schema.Document
@@ -199,8 +199,8 @@ func runSimilaritySearchTest(t *testing.T, test simSearchTest) {
 	t.Helper()
 
 	store, emb := setupTest(t, testSearchIndexDimensions, testSearchIndexName)
-	for pageConent, score := range test.docSet {
-		emb.addDocument(pageConent, score)
+	for _, doc := range test.seed {
+		emb.addDocument(doc)
 	}
 
 	err := emb.flush(context.Background(), store)
@@ -235,18 +235,18 @@ func runSimilaritySearchTest(t *testing.T, test simSearchTest) {
 }
 
 func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
-	docSet := map[string]float32{
-		"v1":    1,
-		"v090":  0.90,
-		"v051":  0.51,
-		"v0001": 0.001,
+	seed := []schema.Document{
+		{PageContent: "v1", Score: 1},
+		{PageContent: "v090", Score: 0.90},
+		{PageContent: "v051", Score: 0.51},
+		{PageContent: "v0001", Score: 0.001},
 	}
 
 	t.Run("numDocuments=1 of 4", func(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 1,
-				docSet:       docSet,
+				seed:         seed,
 				want: []schema.Document{
 					{PageContent: "v1", Score: 1},
 				},
@@ -257,7 +257,7 @@ func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 3,
-				docSet:       docSet,
+				seed:         seed,
 				want: []schema.Document{
 					{PageContent: "v1", Score: 1},
 					{PageContent: "v090", Score: 0.90},
@@ -268,17 +268,17 @@ func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 }
 
 func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
-	docSet := map[string]float32{
-		"v090":  0.90,
-		"v051":  0.51,
-		"v0001": 0.001,
+	seed := []schema.Document{
+		{PageContent: "v090", Score: 0.90},
+		{PageContent: "v051", Score: 0.51},
+		{PageContent: "v0001", Score: 0.001},
 	}
 
 	t.Run("numDocuments=1 of 3", func(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 1,
-				docSet:       docSet,
+				seed:         seed,
 				want: []schema.Document{
 					{PageContent: "v090", Score: 0.90},
 				},
@@ -289,7 +289,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 3,
-				docSet:       docSet,
+				seed:         seed,
 				want: []schema.Document{
 					{PageContent: "v090", Score: 0.90},
 					{PageContent: "v051", Score: 0.51},
@@ -302,7 +302,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 3,
-				docSet:       docSet,
+				seed:         seed,
 				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
 				want: []schema.Document{
 					{PageContent: "v090", Score: 0.90},
@@ -315,7 +315,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 		runSimilaritySearchTest(t,
 			simSearchTest{
 				numDocuments: 3,
-				docSet:       docSet,
+				seed:         seed,
 				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
 				wantErr:      ErrInvalidScoreThreshold,
 			})

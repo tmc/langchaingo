@@ -16,7 +16,7 @@ type mockEmbedder struct {
 	dim           int
 	query         string // query that will be used in the search
 	queryVector   []float32
-	docSet        map[string]float32 // pageContent to expected score
+	docSet        map[string]schema.Document // pageContent to expected doc
 	flushedDocSet map[string][]float32
 }
 
@@ -26,7 +26,7 @@ func newMockEmbedder(dim int, query string) *mockEmbedder {
 	emb := &mockEmbedder{
 		dim:    dim,
 		query:  query,
-		docSet: make(map[string]float32),
+		docSet: make(map[string]schema.Document),
 	}
 
 	return emb
@@ -34,12 +34,12 @@ func newMockEmbedder(dim int, query string) *mockEmbedder {
 
 // Store a document that will be returned by a similarity search on the provided
 // query with the specific score.
-func (emb *mockEmbedder) addDocument(pageContent string, score float32) error {
+func (emb *mockEmbedder) addDocument(doc schema.Document) error {
 	if emb.flushedDocSet != nil {
 		return fmt.Errorf("cannot make new queries after flushing")
 	}
 
-	emb.docSet[pageContent] = score
+	emb.docSet[doc.PageContent] = doc
 
 	return nil
 }
@@ -56,12 +56,12 @@ func (emb *mockEmbedder) flush(ctx context.Context, store Store) error {
 	// a final element so that it's dot product with queryVector is 2S - 1
 	// where S is the desired simlarity score.
 	emb.flushedDocSet = make(map[string][]float32)
-	docs := []schema.Document{}
+	docs := make([]schema.Document, 0, len(emb.docSet))
 
 	count := 0
-	for pageContent, score := range emb.docSet {
-		emb.flushedDocSet[pageContent] = makeScoreVector(score, emb.queryVector, vectors[count])
-		docs = append(docs, schema.Document{PageContent: pageContent})
+	for pageContent, doc := range emb.docSet {
+		emb.flushedDocSet[pageContent] = makeScoreVector(doc.Score, emb.queryVector, vectors[count])
+		docs = append(docs, doc)
 
 		count++
 	}
