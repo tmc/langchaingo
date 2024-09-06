@@ -17,10 +17,13 @@ import (
 )
 
 const (
-	testDB                    = "langchaingo-test"
-	testColl                  = "vstore"
-	testSearchIndexName       = "vector_index_dotProduct_1536"
-	testSearchIndexDimensions = 1536
+	testDB                   = "langchaingo-test"
+	testColl                 = "vstore"
+	testIndexDP1536          = "vector_index_dotProduct_1536"
+	testIndexDP1536NoFilters = "vector_index_dotProduct_1536_no_filters"
+	testIndexSize1536        = 1536
+	testIndexDP3             = "vector_index_dotProduct_3"
+	testIndexSize3           = 3
 )
 
 func TestNew(t *testing.T) {
@@ -58,12 +61,10 @@ func TestNew(t *testing.T) {
 			name: "all custom options",
 			opts: []Option{
 				WithIndex("custom_vector_index"),
-				WithPageContentName("custom_text"),
 				WithPath("custom_plot_embedding"),
 			},
-			wantIndex:           "custom_vector_index",
-			wantPageContentName: "custom_text",
-			wantPath:            "custom_plot_embedding",
+			wantIndex: "custom_vector_index",
+			wantPath:  "custom_plot_embedding",
 		},
 	}
 
@@ -79,7 +80,6 @@ func TestNew(t *testing.T) {
 			store := New(mongo.Collection{}, embedder, test.opts...)
 
 			assert.Equal(t, test.wantIndex, store.index)
-			assert.Equal(t, test.wantPageContentName, store.pageContentName)
 			assert.Equal(t, test.wantPath, store.path)
 		})
 	}
@@ -113,7 +113,7 @@ func setupTest(t *testing.T, dim int, index string) (Store, *mockEmbedder) {
 	assert.NoError(t, err, "failed to create collection")
 
 	coll := client.Database(testDB).Collection(testColl)
-	resetVectorStore(t, *coll, defaultPageContentName)
+	resetVectorStore(t, *coll, pageContentName)
 
 	emb := newMockEmbedder(dim, "")
 	store := New(*coll, emb, WithIndex(index))
@@ -122,7 +122,7 @@ func setupTest(t *testing.T, dim int, index string) (Store, *mockEmbedder) {
 }
 
 func TestStore_AddDocuments(t *testing.T) {
-	store, _ := setupTest(t, 0, testSearchIndexName)
+	store, _ := setupTest(t, 0, testIndexDP1536)
 
 	tests := []struct {
 		name    string
@@ -164,7 +164,7 @@ func TestStore_AddDocuments(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			resetVectorStore(t, store.coll, defaultPageContentName)
+			resetVectorStore(t, store.coll, pageContentName)
 
 			ids, err := store.AddDocuments(context.Background(), test.docs, test.options...)
 			if len(test.wantErr) > 0 {
@@ -192,13 +192,13 @@ type simSearchTest struct {
 	numDocuments int                   // Number of documents to return
 	options      []vectorstores.Option // Search query options
 	want         []schema.Document
-	wantErr      error
+	wantErr      string
 }
 
 func runSimilaritySearchTest(t *testing.T, test simSearchTest) {
 	t.Helper()
 
-	store, emb := setupTest(t, testSearchIndexDimensions, testSearchIndexName)
+	store, emb := setupTest(t, testIndexSize1536, testIndexDP1536)
 	for _, doc := range test.seed {
 		emb.addDocument(doc)
 	}
@@ -206,14 +206,25 @@ func runSimilaritySearchTest(t *testing.T, test simSearchTest) {
 	err := emb.flush(context.Background(), store)
 	require.NoError(t, err)
 
-	test.options = append(test.options, vectorstores.WithEmbedder(emb))
+	// Merge options
+	opts := vectorstores.Options{}
+	for _, opt := range test.options {
+		opt(&opts)
+	}
+
+	if opts.Embedder != nil {
+		err = opts.Embedder.(*mockEmbedder).flush(context.Background(), store)
+		require.NoError(t, err, "failed to flush custom embedder")
+	} else {
+		test.options = append(test.options, vectorstores.WithEmbedder(emb))
+	}
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
-	if test.wantErr != nil {
+	if test.wantErr != "" {
 		assert.Error(t, err)
-		assert.ErrorIs(t, err, test.wantErr)
+		assert.ErrorContains(t, err, test.wantErr)
 	} else {
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	assert.Len(t, raw, len(test.want))
@@ -230,7 +241,7 @@ func runSimilaritySearchTest(t *testing.T, test simSearchTest) {
 		}
 
 		assert.Equal(t, w.PageContent, got.PageContent, "page contents differ")
-		assert.ElementsMatch(t, w.Metadata, got.Metadata, "metadata differs")
+		assert.Equal(t, w.Metadata, got.Metadata, "metadata differs")
 	}
 }
 
@@ -279,9 +290,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 			simSearchTest{
 				numDocuments: 1,
 				seed:         seed,
-				want: []schema.Document{
-					{PageContent: "v090", Score: 0.90},
-				},
+				want:         seed[:1],
 			})
 	})
 
@@ -290,11 +299,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 			simSearchTest{
 				numDocuments: 3,
 				seed:         seed,
-				want: []schema.Document{
-					{PageContent: "v090", Score: 0.90},
-					{PageContent: "v051", Score: 0.51},
-					{PageContent: "v0001", Score: 0.001},
-				},
+				want:         seed,
 			})
 	})
 
@@ -304,10 +309,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 				numDocuments: 3,
 				seed:         seed,
 				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
-				want: []schema.Document{
-					{PageContent: "v090", Score: 0.90},
-					{PageContent: "v051", Score: 0.51},
-				},
+				want:         seed[:2],
 			})
 	})
 
@@ -317,7 +319,104 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 				numDocuments: 3,
 				seed:         seed,
 				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
-				wantErr:      ErrInvalidScoreThreshold,
+				wantErr:      ErrInvalidScoreThreshold.Error(),
+			})
+	})
+
+	metadataSeed := []schema.Document{
+		{PageContent: "v090", Score: 0.90},
+		{PageContent: "v051", Score: 0.51, Metadata: map[string]any{"pi": 3.14}},
+		{PageContent: "v0001", Score: 0.001},
+	}
+
+	t.Run("with metadata", func(t *testing.T) {
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 3,
+				seed:         metadataSeed,
+				want:         metadataSeed,
+			})
+	})
+
+	t.Run("with metadata and score threshold", func(t *testing.T) {
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 3,
+				seed:         metadataSeed,
+				want:         metadataSeed[:2],
+				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
+			})
+	})
+
+	t.Run("with namespace", func(t *testing.T) {
+		emb := newMockEmbedder(testIndexSize3, "")
+
+		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
+		emb.addDocument(doc)
+
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 1,
+				seed:         []schema.Document{doc},
+				want:         []schema.Document{doc},
+				options: []vectorstores.Option{
+					vectorstores.WithNameSpace(testIndexDP3),
+					vectorstores.WithEmbedder(emb),
+				},
+			})
+	})
+
+	t.Run("with non-existant namespace", func(t *testing.T) {
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 1,
+				seed:         metadataSeed,
+				options: []vectorstores.Option{
+					vectorstores.WithNameSpace("some-nonexistant-index-name"),
+				},
+			})
+	})
+
+	t.Run("with filter", func(t *testing.T) {
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 1,
+				seed:         metadataSeed,
+				want:         metadataSeed[len(metadataSeed)-1:],
+				options: []vectorstores.Option{
+					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
+				},
+			})
+	})
+
+	t.Run("with non-tokenized filter", func(t *testing.T) {
+		emb := newMockEmbedder(testIndexSize1536, "")
+
+		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
+		emb.addDocument(doc)
+
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 1,
+				seed:         metadataSeed,
+				options: []vectorstores.Option{
+					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
+					vectorstores.WithNameSpace(testIndexDP1536NoFilters),
+					vectorstores.WithEmbedder(emb),
+				},
+				wantErr: "'pageContent' needs to be indexed as token",
+			})
+	})
+
+	t.Run("with deduplicator", func(t *testing.T) {
+		runSimilaritySearchTest(t,
+			simSearchTest{
+				numDocuments: 1,
+				seed:         metadataSeed,
+				options: []vectorstores.Option{
+					vectorstores.WithDeduplicater(func(ctx context.Context, doc schema.Document) bool { return true }),
+				},
+				wantErr: ErrUnsupportedOptions.Error(),
 			})
 	})
 }

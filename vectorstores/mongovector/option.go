@@ -13,9 +13,3 @@ func WithPath(path string) Option {
 		p.path = path
 	}
 }
-
-func WithPageContentName(pageContentKey string) Option {
-	return func(p *Store) {
-		p.pageContentName = pageContentKey
-	}
-}
