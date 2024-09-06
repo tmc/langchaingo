@@ -26,6 +26,8 @@ var (
 	ErrInvalidScoreThreshold      = errors.New("score threshold must be between 0 and 1")
 )
 
+// Store wraps a Mongo collection for writing to and searching an Atlas
+// vector database.
 type Store struct {
 	coll     mongo.Collection
 	embedder embeddings.Embedder
@@ -35,6 +37,7 @@ type Store struct {
 
 var _ vectorstores.VectorStore = &Store{}
 
+// New returns a Store that can read and write to the vector store.
 func New(coll mongo.Collection, embedder embeddings.Embedder, opts ...Option) Store {
 	store := Store{
 		coll:     coll,
@@ -50,6 +53,8 @@ func New(coll mongo.Collection, embedder embeddings.Embedder, opts ...Option) St
 	return store
 }
 
+// AddDocuments will create embeddings for the given documents using the
+// user-specified embedding model, then insert that data into a vector store.
 func (store *Store) AddDocuments(
 	ctx context.Context,
 	docs []schema.Document,
@@ -113,8 +118,8 @@ func (store *Store) AddDocuments(
 	return ids, nil
 }
 
-// SimilaritySearch creates a vector embedding from the query using the embedder
-// and queries to find the most similar documents.
+// SimilaritySearch searches a vector store from the vector transformed from the
+// query by the user-specified embedding model.
 //
 // This method searches the store-wrapped collection with an optionally
 // provided index at instantiation, with a default index of "vector_index".
