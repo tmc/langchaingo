@@ -104,6 +104,7 @@ func flushEmbedder(ctx context.Context, store Store, emb *mockEmbedder) error {
 }
 
 // newNormalizedFloat32 will generate a random float32 in [-1, 1].
+// nolint:mnd
 func newNormalizedFloat32() (float32, error) {
 	max := big.NewInt(1 << 24)
 
@@ -116,12 +117,14 @@ func newNormalizedFloat32() (float32, error) {
 }
 
 // dotProduct will return the dot product between two slices of f32.
-func dotProduct(v1, v2 []float32) (sum float32) {
+func dotProduct(v1, v2 []float32) float32 {
+	var sum float32
+
 	for i := range v1 {
 		sum += v1[i] * v2[i]
 	}
 
-	return
+	return sum
 }
 
 // linearlyIndependent true if the vectors are linearly independent.
@@ -185,7 +188,7 @@ func dotProductNormFn(score float32, qvector, basis []float32) []float32 {
 	var sum float32
 
 	// Populate v2 upto dim-1.
-	for i := 0; i < len(qvector)-1; i++ {
+	for i := range qvector[:len(qvector)-1] {
 		sum += qvector[i] * basis[i]
 	}
 

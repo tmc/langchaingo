@@ -13,11 +13,12 @@ import (
 )
 
 const (
-	defaultIndex    = "vector_index"
-	pageContentName = "pageContent"
-	defaultPath     = "plot_embedding"
-	metadataName    = "metadata"
-	scoreName       = "score"
+	defaultIndex               = "vector_index"
+	pageContentName            = "pageContent"
+	defaultPath                = "plot_embedding"
+	metadataName               = "metadata"
+	scoreName                  = "score"
+	defaultNumCandidatesScalar = 10
 )
 
 var (
@@ -29,10 +30,11 @@ var (
 // Store wraps a Mongo collection for writing to and searching an Atlas
 // vector database.
 type Store struct {
-	coll     *mongo.Collection
-	embedder embeddings.Embedder
-	index    string
-	path     string
+	coll          *mongo.Collection
+	embedder      embeddings.Embedder
+	index         string
+	path          string
+	numCandidates int
 }
 
 var _ vectorstores.VectorStore = &Store{}
@@ -102,7 +104,7 @@ func (store *Store) AddDocuments(
 	}
 
 	bdocs := []bson.D{}
-	for i := 0; i < len(vectors); i++ {
+	for i := range vectors {
 		bdocs = append(bdocs, bson.D{
 			{Key: pageContentName, Value: docs[i].PageContent},
 			{Key: store.path, Value: vectors[i]},
@@ -119,7 +121,12 @@ func (store *Store) AddDocuments(
 	// be primitive objects.
 	ids := make([]string, 0, len(docs))
 	for _, id := range res.InsertedIDs {
-		ids = append(ids, id.(bson.ObjectID).String())
+		id, ok := id.(fmt.Stringer)
+		if !ok {
+			return nil, fmt.Errorf("expected id for embedding to be a stringer")
+		}
+
+		ids = append(ids, id.String())
 	}
 
 	return ids, nil
@@ -187,6 +194,11 @@ func (store *Store) SimilaritySearch(
 		return nil, err
 	}
 
+	numCandidates := defaultNumCandidatesScalar * numDocuments
+	if store.numCandidates == 0 {
+		numCandidates = numDocuments
+	}
+
 	// Create the pipeline for performing the similarity search.
 	stage := struct {
 		Index         string    `bson:"index"`         // Name of Atlas Vector Search Index tied to Collection
@@ -199,7 +211,7 @@ func (store *Store) SimilaritySearch(
 		Index:         cfg.NameSpace,
 		Path:          store.path,
 		QueryVector:   vector,
-		NumCandidates: 150,
+		NumCandidates: numCandidates,
 		Limit:         numDocuments,
 		Filter:        cfg.Filters,
 	}

@@ -20,6 +20,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+// Run the test without setting up the test space.
+//
+//nolint:gochecknoglobals
 var testWithoutSetup = flag.Bool("no-atlas-setup", false, "don't create required indexes")
 
 const (
@@ -105,13 +108,11 @@ func TestNew(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		test := test // Capture the range variable.
-
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
 			embedder, err := embeddings.NewEmbedder(&mockLLM{})
-			assert.NoError(t, err, "failed to construct embedder")
+			require.NoError(t, err, "failed to construct embedder")
 
 			store := New(&mongo.Collection{}, embedder, test.opts...)
 
@@ -134,6 +135,8 @@ func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 // setupTest will prepare the Atlas vector search for adding to and searching
 // a vector space.
 func setupTest(t *testing.T, dim int, index string) Store {
+	t.Helper()
+
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
 		t.Skip("Must set MONGODB_URI to run test")
@@ -146,7 +149,7 @@ func setupTest(t *testing.T, dim int, index string) Store {
 
 	// Create the vectorstore collection
 	err = client.Database(testDB).CreateCollection(context.Background(), testColl)
-	assert.NoError(t, err, "failed to create collection")
+	require.NoError(t, err, "failed to create collection")
 
 	coll := client.Database(testDB).Collection(testColl)
 	resetVectorStore(t, coll)
@@ -157,6 +160,7 @@ func setupTest(t *testing.T, dim int, index string) Store {
 	return store
 }
 
+//nolint:paralleltest
 func TestStore_AddDocuments(t *testing.T) {
 	store := setupTest(t, testIndexSize1536, testIndexDP1536)
 
@@ -213,7 +217,7 @@ func TestStore_AddDocuments(t *testing.T) {
 
 				t.Errorf("expected error %q to contain of %v", err.Error(), test.wantErr)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 
 			assert.Equal(t, len(test.docs), len(ids))
@@ -222,7 +226,7 @@ func TestStore_AddDocuments(t *testing.T) {
 }
 
 type simSearchTest struct {
-	ctx          context.Context
+	ctx          context.Context //nolint:containedctx
 	seed         []schema.Document
 	numDocuments int                   // Number of documents to return
 	options      []vectorstores.Option // Search query options
@@ -243,9 +247,15 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 
 	var emb *mockEmbedder
 	if opts.Embedder != nil {
-		emb = opts.Embedder.(*mockEmbedder)
+		var ok bool
+
+		emb, ok = opts.Embedder.(*mockEmbedder)
+		require.True(t, ok)
 	} else {
-		emb = newMockEmbedder(len(store.embedder.(*mockEmbedder).queryVector))
+		semb, ok := store.embedder.(*mockEmbedder)
+		require.True(t, ok)
+
+		emb = newMockEmbedder(len(semb.queryVector))
 		emb.mockDocuments(test.seed...)
 
 		test.options = append(test.options, vectorstores.WithEmbedder(emb))
@@ -256,8 +266,8 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
 	if test.wantErr != "" {
-		assert.Error(t, err)
-		assert.ErrorContains(t, err, test.wantErr)
+		require.Error(t, err)
+		require.ErrorContains(t, err, test.wantErr)
 	} else {
 		require.NoError(t, err)
 	}
@@ -280,6 +290,7 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	}
 }
 
+//nolint:paralleltest
 func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 	store := setupTest(t, testIndexSize3, testIndexDP3)
 
@@ -315,7 +326,7 @@ func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 	})
 }
 
-//nolint:funlen
+//nolint:funlen,paralleltest
 func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 	store := setupTest(t, testIndexSize1536, testIndexDP1536)
 
@@ -555,15 +566,15 @@ func resetForE2E(ctx context.Context, idx string, dim int, filters []string) err
 
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %v", err)
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 
-	defer func() { _ = client.Disconnect(context.Background()) }()
+	defer func() { _ = client.Disconnect(ctx) }()
 
 	// Create the vectorstore collection
 	err = client.Database(testDB).CreateCollection(ctx, testColl)
 	if err != nil {
-		return fmt.Errorf("failed to create vector store collection: %v", err)
+		return fmt.Errorf("failed to create vector store collection: %w", err)
 	}
 
 	coll := client.Database(testDB).Collection(testColl)
@@ -588,7 +599,7 @@ func resetForE2E(ctx context.Context, idx string, dim int, filters []string) err
 
 	_, err = createVectorSearchIndex(ctx, coll, idx, fields...)
 	if err != nil {
-		return fmt.Errorf("faield to create index: %v", err)
+		return fmt.Errorf("faield to create index: %w", err)
 	}
 
 	return nil
