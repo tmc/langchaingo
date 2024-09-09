@@ -17,7 +17,7 @@ var _ embeddings.EmbedderClient = &mockLLM{}
 
 // createEmbedding will return vector embeddings for the mock LLM, maintaining
 // consitency.
-func (emb *mockLLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
+func (emb *mockLLM) CreateEmbedding(_ context.Context, texts []string) ([][]float32, error) {
 	if emb.seen == nil {
 		emb.seen = map[string][]float32{}
 	}
@@ -30,7 +30,7 @@ func (emb *mockLLM) CreateEmbedding(ctx context.Context, texts []string) ([][]fl
 			continue
 		}
 
-		vectors[i] = makeVector(emb.dim)
+		vectors[i] = newNormalizedVector(emb.dim)
 		emb.seen[text] = vectors[i] // ensure consistency
 	}
 

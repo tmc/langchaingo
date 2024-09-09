@@ -13,86 +13,94 @@ import (
 )
 
 type mockEmbedder struct {
-	dim           int
-	query         string // query that will be used in the search
-	queryVector   []float32
-	docSet        map[string]schema.Document // pageContent to expected doc
-	flushedDocSet map[string][]float32
+	queryVector []float32
+	docs        map[string]schema.Document
+	docVectors  map[string][]float32
 }
 
 var _ embeddings.Embedder = &mockEmbedder{}
 
-func newMockEmbedder(dim int, query string) *mockEmbedder {
+func newMockEmbedder(dim int) *mockEmbedder {
 	emb := &mockEmbedder{
-		dim:    dim,
-		query:  query,
-		docSet: make(map[string]schema.Document),
+		queryVector: newNormalizedVector(dim),
+		docs:        make(map[string]schema.Document),
+		docVectors:  make(map[string][]float32),
 	}
 
 	return emb
 }
 
-// Store a document that will be returned by a similarity search on the provided
-// query with the specific score.
-func (emb *mockEmbedder) addDocument(doc schema.Document) error {
-	if emb.flushedDocSet != nil {
-		return fmt.Errorf("cannot make new queries after flushing")
+// mockDocuments will add the given documents to the embedder, assigning each
+// a vector such that similarity score = 0.5 * ( 1 + vector * queryVector).
+func (emb *mockEmbedder) mockDocuments(doc ...schema.Document) {
+	for _, d := range doc {
+		emb.docs[d.PageContent] = d
 	}
-
-	emb.docSet[doc.PageContent] = doc
-
-	return nil
 }
 
-func (emb *mockEmbedder) flush(ctx context.Context, store Store) error {
-	// Create a vector for each document such that all vectors are linearly
-	// independent. Leave one space at teh end for scaling.
-	vectors := makeLinearlyIndependentVectors(len(emb.docSet), emb.dim)
-
-	// Create a linearly independent query vector.
-	emb.queryVector = makeOrthogonalVector(emb.dim, vectors...)
-
-	// For each pageContent + score combo, update the corresponding vector with
-	// a final element so that it's dot product with queryVector is 2S - 1
-	// where S is the desired simlarity score.
-	emb.flushedDocSet = make(map[string][]float32)
-	docs := make([]schema.Document, 0, len(emb.docSet))
-
-	count := 0
-	for pageContent, doc := range emb.docSet {
-		emb.flushedDocSet[pageContent] = makeScoreVector(doc.Score, emb.queryVector, vectors[count])
-		docs = append(docs, doc)
-
-		count++
+// existingVectors returns all the vectors that have been added to the embedder.
+// The query vector is included in the list to maintian orthogonality.
+func (emb *mockEmbedder) existingVectors() [][]float32 {
+	vectors := make([][]float32, 0, len(emb.docs)+1)
+	for _, vec := range emb.docVectors {
+		vectors = append(vectors, vec)
 	}
 
-	_, err := store.AddDocuments(ctx, docs, vectorstores.WithEmbedder(emb))
-	if err != nil {
-		return fmt.Errorf("failed to add documents: %w", err)
-	}
-
-	// The read consistency for vector search isn't automatic.
-	time.Sleep(1 * time.Second)
-
-	return nil
+	return append(vectors, emb.queryVector)
 }
 
-func (emb *mockEmbedder) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
+// EmbedDocuments will return the embedded vectors for the given texts. If the
+// text does not exist in the document set, a zero vector will be returned.
+func (emb *mockEmbedder) EmbedDocuments(_ context.Context, texts []string) ([][]float32, error) {
 	vectors := make([][]float32, len(texts))
 	for i := range vectors {
-		var ok bool
-
-		vectors[i], ok = emb.flushedDocSet[texts[i]]
+		// If the text does not exist in the document set, return a zero vector.
+		doc, ok := emb.docs[texts[i]]
 		if !ok {
-			vectors[i] = makeVector(emb.dim)
+			vectors[i] = make([]float32, len(emb.queryVector))
 		}
+
+		// If the vector exists, use it.
+		existing, ok := emb.docVectors[texts[i]]
+		if ok {
+			vectors[i] = existing
+
+			continue
+		}
+
+		// If it does not exist, make a linearly independent vector.
+		newVectorBasis := newOrthogonalVector(len(emb.queryVector), emb.existingVectors()...)
+
+		// Update the newVector to be scaled by the score.
+		newVector := dotProductNormFn(doc.Score, emb.queryVector, newVectorBasis)
+
+		vectors[i] = newVector
+		emb.docVectors[texts[i]] = newVector
 	}
 
 	return vectors, nil
 }
 
-func (emb *mockEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
+// EmbedQuery returns the query vector.
+func (emb *mockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, error) {
 	return emb.queryVector, nil
+}
+
+func flushEmbedder(ctx context.Context, store Store, emb *mockEmbedder) error {
+	docs := make([]schema.Document, 0, len(emb.docs))
+	for _, doc := range emb.docs {
+		docs = append(docs, doc)
+	}
+
+	_, err := store.AddDocuments(ctx, docs, vectorstores.WithEmbedder(emb))
+	if err != nil {
+		return err
+	}
+
+	// Consistency on indexes is not synchronous.
+	time.Sleep(1 * time.Second)
+
+	return nil
 }
 
 // newNormalizedFloat32 will generate a random float32 in [-1, 1].
@@ -116,7 +124,7 @@ func dotProduct(v1, v2 []float32) (sum float32) {
 	return
 }
 
-// linearlyIndependent true if the vectors are linearly independent
+// linearlyIndependent true if the vectors are linearly independent.
 func linearlyIndependent(v1, v2 []float32) bool {
 	var ratio float32
 
@@ -146,7 +154,7 @@ func linearlyIndependent(v1, v2 []float32) bool {
 }
 
 // Update the basis vector such that qvector * basis = 2S - 1.
-func makeScoreVector(S float32, qvector []float32, basis []float32) []float32 {
+func newScoreVector(score float32, qvector []float32, basis []float32) []float32 {
 	var sum float32
 
 	// Populate v2 upto dim-1.
@@ -155,20 +163,19 @@ func makeScoreVector(S float32, qvector []float32, basis []float32) []float32 {
 	}
 
 	// Calculate v_{2, dim} such that v1 * v2 = 2S - 1:
-	basis[len(basis)-1] = (2*S - 1 - sum) / qvector[len(qvector)-1]
+	basis[len(basis)-1] = (2*score - 1 - sum) / qvector[len(qvector)-1]
 
 	// If the vectors are linearly independent, regenerate the dim-1 elements
 	// of v2.
 	if !linearlyIndependent(qvector, basis) {
-		return makeScoreVector(S, qvector, basis)
+		return newScoreVector(score, qvector, basis)
 	}
 
 	return basis
 }
 
-// makeVector will create a vector of values beween [-1, 1] of the specified
-// size.
-func makeVector(dim int) []float32 {
+// Create a vector of values beween [-1, 1] of the specified size.
+func newNormalizedVector(dim int) []float32 {
 	vector := make([]float32, dim)
 	for i := range vector {
 		vector[i], _ = newNormalizedFloat32()
@@ -179,8 +186,8 @@ func makeVector(dim int) []float32 {
 
 // Use Gram Schmidt to return a vector orthogonal to the basis, so long as
 // the vectors in the basis are linearly independent.
-func makeOrthogonalVector(dim int, basis ...[]float32) []float32 {
-	candidate := makeVector(dim)
+func newOrthogonalVector(dim int, basis ...[]float32) []float32 {
+	candidate := newNormalizedVector(dim)
 
 	for _, b := range basis {
 		dp := dotProduct(candidate, b)
@@ -195,14 +202,35 @@ func makeOrthogonalVector(dim int, basis ...[]float32) []float32 {
 }
 
 // Make n linearly independent vectors of size dim.
-func makeLinearlyIndependentVectors(n int, dim int) [][]float32 {
+func newinearlyIndependentVectors(n int, dim int) [][]float32 {
 	vectors := [][]float32{}
 
 	for i := 0; i < n; i++ {
-		v := makeOrthogonalVector(dim, vectors...)
+		v := newOrthogonalVector(dim, vectors...)
 
 		vectors = append(vectors, v)
 	}
 
 	return vectors
+}
+
+// return a new vector such that v1 * v2 = 2S - 1.
+func dotProductNormFn(S float32, qvector, basis []float32) []float32 {
+	var sum float32
+
+	// Populate v2 upto dim-1.
+	for i := 0; i < len(qvector)-1; i++ {
+		sum += qvector[i] * basis[i]
+	}
+
+	// Calculate v_{2, dim} such that v1 * v2 = 2S - 1:
+	basis[len(basis)-1] = (2*S - 1 - sum) / qvector[len(qvector)-1]
+
+	// If the vectors are linearly independent, regenerate the dim-1 elements
+	// of v2.
+	if !linearlyIndependent(qvector, basis) {
+		return dotProductNormFn(S, qvector, basis)
+	}
+
+	return basis
 }

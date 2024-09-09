@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	// Create the requires vector search indexes for the tests.
+	// Create the required vector search indexes for the tests.
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
@@ -113,7 +113,7 @@ func TestNew(t *testing.T) {
 			embedder, err := embeddings.NewEmbedder(&mockLLM{})
 			assert.NoError(t, err, "failed to construct embedder")
 
-			store := New(mongo.Collection{}, embedder, test.opts...)
+			store := New(&mongo.Collection{}, embedder, test.opts...)
 
 			assert.Equal(t, test.wantIndex, store.index)
 			assert.Equal(t, test.wantPath, store.path)
@@ -122,7 +122,7 @@ func TestNew(t *testing.T) {
 }
 
 // resetVectorStore will reset the vector space defined by the given collection.
-func resetVectorStore(t *testing.T, coll mongo.Collection) {
+func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 	t.Helper()
 
 	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
@@ -149,10 +149,10 @@ func setupTest(t *testing.T, dim int, index string) Store {
 	assert.NoError(t, err, "failed to create collection")
 
 	coll := client.Database(testDB).Collection(testColl)
-	resetVectorStore(t, *coll)
+	resetVectorStore(t, coll)
 
-	emb := newMockEmbedder(dim, "")
-	store := New(*coll, emb, WithIndex(index))
+	emb := newMockEmbedder(dim)
+	store := New(coll, emb, WithIndex(index))
 
 	return store
 }
@@ -236,28 +236,24 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 
 	resetVectorStore(t, store.coll)
 
-	semb := store.embedder.(*mockEmbedder)
-
-	emb := newMockEmbedder(semb.dim, semb.query)
-	for _, doc := range test.seed {
-		emb.addDocument(doc)
-	}
-
-	err := emb.flush(context.Background(), store)
-	require.NoError(t, err)
-
 	// Merge options
 	opts := vectorstores.Options{}
 	for _, opt := range test.options {
 		opt(&opts)
 	}
 
+	var emb *mockEmbedder
 	if opts.Embedder != nil {
-		err = opts.Embedder.(*mockEmbedder).flush(context.Background(), store)
-		require.NoError(t, err, "failed to flush custom embedder")
+		emb = opts.Embedder.(*mockEmbedder)
 	} else {
+		emb = newMockEmbedder(len(store.embedder.(*mockEmbedder).queryVector))
+		emb.mockDocuments(test.seed...)
+
 		test.options = append(test.options, vectorstores.WithEmbedder(emb))
 	}
+
+	err := flushEmbedder(context.Background(), store, emb)
+	require.NoError(t, err, "failed to flush mock embedder")
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
 	if test.wantErr != "" {
@@ -285,8 +281,9 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	}
 }
 
+//nolint:funlen
 func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
-	store := setupTest(t, testIndexSize1536, testIndexDP1536)
+	store := setupTest(t, testIndexSize3, testIndexDP3)
 
 	seed := []schema.Document{
 		{PageContent: "v1", Score: 1},
@@ -393,10 +390,10 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 	})
 
 	t.Run("with namespace", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize3, "")
+		emb := newMockEmbedder(testIndexSize3)
 
 		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.addDocument(doc)
+		emb.mockDocuments(doc)
 
 		runSimilaritySearchTest(t, store,
 			simSearchTest{
@@ -435,10 +432,10 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 	})
 
 	t.Run("with non-tokenized filter", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize1536, "")
+		emb := newMockEmbedder(testIndexSize1536)
 
 		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.addDocument(doc)
+		emb.mockDocuments(doc)
 
 		runSimilaritySearchTest(t, store,
 			simSearchTest{
@@ -458,7 +455,7 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 				numDocuments: 1,
 				seed:         metadataSeed,
 				options: []vectorstores.Option{
-					vectorstores.WithDeduplicater(func(ctx context.Context, doc schema.Document) bool { return true }),
+					vectorstores.WithDeduplicater(func(context.Context, schema.Document) bool { return true }),
 				},
 				wantErr: ErrUnsupportedOptions.Error(),
 			})
@@ -488,9 +485,9 @@ func dropVectorSearchIndex(ctx context.Context, coll *mongo.Collection, idxName 
 
 		if !cursor.Next(ctx) {
 			break
-		} else {
-			time.Sleep(5 * time.Second)
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	return nil
