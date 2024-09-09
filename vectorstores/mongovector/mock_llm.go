@@ -16,7 +16,7 @@ type mockLLM struct {
 var _ embeddings.EmbedderClient = &mockLLM{}
 
 // createEmbedding will return vector embeddings for the mock LLM, maintaining
-// consitency.
+// consistency.
 func (emb *mockLLM) CreateEmbedding(_ context.Context, texts []string) ([][]float32, error) {
 	if emb.seen == nil {
 		emb.seen = map[string][]float32{}

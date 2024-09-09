@@ -219,7 +219,6 @@ func TestStore_AddDocuments(t *testing.T) {
 			assert.Equal(t, len(test.docs), len(ids))
 		})
 	}
-
 }
 
 type simSearchTest struct {
@@ -281,7 +280,6 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	}
 }
 
-//nolint:funlen
 func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 	store := setupTest(t, testIndexSize3, testIndexDP3)
 
@@ -317,6 +315,7 @@ func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 	})
 }
 
+//nolint:funlen
 func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 	store := setupTest(t, testIndexSize1536, testIndexDP1536)
 
@@ -407,13 +406,13 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 			})
 	})
 
-	t.Run("with non-existant namespace", func(t *testing.T) {
+	t.Run("with non-existent namespace", func(t *testing.T) {
 		runSimilaritySearchTest(t, store,
 			simSearchTest{
 				numDocuments: 1,
 				seed:         metadataSeed,
 				options: []vectorstores.Option{
-					vectorstores.WithNameSpace("some-nonexistant-index-name"),
+					vectorstores.WithNameSpace("some-non-existent-index-name"),
 				},
 			})
 	})

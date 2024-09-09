@@ -39,7 +39,7 @@ func (emb *mockEmbedder) mockDocuments(doc ...schema.Document) {
 }
 
 // existingVectors returns all the vectors that have been added to the embedder.
-// The query vector is included in the list to maintian orthogonality.
+// The query vector is included in the list to maintain orthogonality.
 func (emb *mockEmbedder) existingVectors() [][]float32 {
 	vectors := make([][]float32, 0, len(emb.docs)+1)
 	for _, vec := range emb.docVectors {
@@ -82,7 +82,7 @@ func (emb *mockEmbedder) EmbedDocuments(_ context.Context, texts []string) ([][]
 }
 
 // EmbedQuery returns the query vector.
-func (emb *mockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, error) {
+func (emb *mockEmbedder) EmbedQuery(context.Context, string) ([]float32, error) {
 	return emb.queryVector, nil
 }
 
@@ -153,28 +153,7 @@ func linearlyIndependent(v1, v2 []float32) bool {
 	return false
 }
 
-// Update the basis vector such that qvector * basis = 2S - 1.
-func newScoreVector(score float32, qvector []float32, basis []float32) []float32 {
-	var sum float32
-
-	// Populate v2 upto dim-1.
-	for i := 0; i < len(qvector)-1; i++ {
-		sum += qvector[i] * basis[i]
-	}
-
-	// Calculate v_{2, dim} such that v1 * v2 = 2S - 1:
-	basis[len(basis)-1] = (2*score - 1 - sum) / qvector[len(qvector)-1]
-
-	// If the vectors are linearly independent, regenerate the dim-1 elements
-	// of v2.
-	if !linearlyIndependent(qvector, basis) {
-		return newScoreVector(score, qvector, basis)
-	}
-
-	return basis
-}
-
-// Create a vector of values beween [-1, 1] of the specified size.
+// Create a vector of values between [-1, 1] of the specified size.
 func newNormalizedVector(dim int) []float32 {
 	vector := make([]float32, dim)
 	for i := range vector {
@@ -201,21 +180,8 @@ func newOrthogonalVector(dim int, basis ...[]float32) []float32 {
 	return candidate
 }
 
-// Make n linearly independent vectors of size dim.
-func newinearlyIndependentVectors(n int, dim int) [][]float32 {
-	vectors := [][]float32{}
-
-	for i := 0; i < n; i++ {
-		v := newOrthogonalVector(dim, vectors...)
-
-		vectors = append(vectors, v)
-	}
-
-	return vectors
-}
-
 // return a new vector such that v1 * v2 = 2S - 1.
-func dotProductNormFn(S float32, qvector, basis []float32) []float32 {
+func dotProductNormFn(score float32, qvector, basis []float32) []float32 {
 	var sum float32
 
 	// Populate v2 upto dim-1.
@@ -224,12 +190,12 @@ func dotProductNormFn(S float32, qvector, basis []float32) []float32 {
 	}
 
 	// Calculate v_{2, dim} such that v1 * v2 = 2S - 1:
-	basis[len(basis)-1] = (2*S - 1 - sum) / qvector[len(qvector)-1]
+	basis[len(basis)-1] = (2*score - 1 - sum) / qvector[len(qvector)-1]
 
 	// If the vectors are linearly independent, regenerate the dim-1 elements
 	// of v2.
 	if !linearlyIndependent(qvector, basis) {
-		return dotProductNormFn(S, qvector, basis)
+		return dotProductNormFn(score, qvector, basis)
 	}
 
 	return basis
