@@ -261,7 +261,7 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 		test.options = append(test.options, vectorstores.WithEmbedder(emb))
 	}
 
-	err := flushEmbedder(context.Background(), store, emb)
+	err := flushMockDocuments(context.Background(), store, emb)
 	require.NoError(t, err, "failed to flush mock embedder")
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
@@ -472,37 +472,6 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 	})
 }
 
-// dropVectorSearchIndex will attempt to drop the search index by name, awaiting
-// that it has been dropped. This function blocks until the index has been
-// dropped.
-func dropVectorSearchIndex(ctx context.Context, coll *mongo.Collection, idxName string) error {
-	if coll == nil {
-		return fmt.Errorf("collection must not be nil")
-	}
-
-	view := coll.SearchIndexes()
-
-	if err := view.DropOne(ctx, idxName); err != nil {
-		return fmt.Errorf("failed to drop index: %w", err)
-	}
-
-	// Await the drop of the index.
-	for {
-		cursor, err := view.List(ctx, options.SearchIndexes().SetName(idxName))
-		if err != nil {
-			return fmt.Errorf("failed to list search indexes: %w", err)
-		}
-
-		if !cursor.Next(ctx) {
-			break
-		}
-
-		time.Sleep(5 * time.Second)
-	}
-
-	return nil
-}
-
 // vectorField defines the fields of an index used for vector search.
 type vectorField struct {
 	Type          string `bson:"type,omitempty"`
@@ -558,6 +527,21 @@ func createVectorSearchIndex(
 	return searchName, nil
 }
 
+func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) (bool, error) {
+	view := coll.SearchIndexes()
+
+	siOpts := options.SearchIndexes().SetName(idx).SetType("vectorSearch")
+	cursor, err := view.List(ctx, siOpts)
+	if err != nil {
+		return false, fmt.Errorf("failed to list search indexes: %w", err)
+	}
+
+	name := cursor.Current.Lookup("name").StringValue()
+	queryable := cursor.Current.Lookup("queryable").Boolean()
+
+	return name == idx && queryable, nil
+}
+
 func resetForE2E(ctx context.Context, idx string, dim int, filters []string) error {
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
@@ -579,7 +563,9 @@ func resetForE2E(ctx context.Context, idx string, dim int, filters []string) err
 
 	coll := client.Database(testDB).Collection(testColl)
 
-	_ = dropVectorSearchIndex(ctx, coll, idx)
+	if ok, _ := searchIndexExists(ctx, coll, idx); ok {
+		return nil
+	}
 
 	fields := []vectorField{}
 

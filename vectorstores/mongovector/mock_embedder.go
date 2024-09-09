@@ -86,7 +86,8 @@ func (emb *mockEmbedder) EmbedQuery(context.Context, string) ([]float32, error) 
 	return emb.queryVector, nil
 }
 
-func flushEmbedder(ctx context.Context, store Store, emb *mockEmbedder) error {
+// Insert all of the mock documents collected by the embedder.
+func flushMockDocuments(ctx context.Context, store Store, emb *mockEmbedder) error {
 	docs := make([]schema.Document, 0, len(emb.docs))
 	for _, doc := range emb.docs {
 		docs = append(docs, doc)
@@ -98,7 +99,8 @@ func flushEmbedder(ctx context.Context, store Store, emb *mockEmbedder) error {
 	}
 
 	// Consistency on indexes is not synchronous.
-	time.Sleep(1 * time.Second)
+	// nolint:mnd
+	time.Sleep(10 * time.Second)
 
 	return nil
 }
