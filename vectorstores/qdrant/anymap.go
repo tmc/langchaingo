@@ -7,7 +7,6 @@ import (
 )
 
 // Converts a map of string to *grpc.Value back to a map of string to any.
-// Returns an error if the conversion fails.
 func NewAnyMap(valueMap map[string]*qc.Value) (map[string]interface{}, error) {
 	inverseMap := make(map[string]interface{})
 	for key, val := range valueMap {
