@@ -2,7 +2,6 @@ package qdrant_test
 
 import (
 	"context"
-	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	qc "github.com/qdrant/go-client/qdrant"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcqdrant "github.com/testcontainers/testcontainers-go/modules/qdrant"
@@ -21,14 +21,19 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/qdrant"
 )
 
+const (
+	dimensions = 1536
+	distance   = qc.Distance_Cosine
+)
+
 func TestQdrantStore(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithModel("gpt-4o"),
+		openai.WithEmbeddingModel("text-embedding-3-small"),
 	}
 
 	llm, err := openai.New(opts...)
@@ -40,7 +45,6 @@ func TestQdrantStore(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -61,8 +65,8 @@ func TestQdrantStore(t *testing.T) {
 func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
@@ -78,7 +82,6 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -116,8 +119,8 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
@@ -133,7 +136,6 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -167,8 +169,8 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestQdrantAsRetriever(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
@@ -184,7 +186,6 @@ func TestQdrantAsRetriever(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -215,8 +216,8 @@ func TestQdrantAsRetriever(t *testing.T) {
 func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
@@ -232,7 +233,6 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -267,8 +267,8 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 func TestQdrantRetrieverFilter(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
+	qdrantURL := getValues(t)
+	collectionName := setupCollection(t, qdrantURL)
 
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
@@ -284,7 +284,6 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 	require.NoError(t, err)
 	store, err := qdrant.New(
 		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
 	)
@@ -333,14 +332,9 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	filter := map[string]interface{}{
-		"must": []map[string]interface{}{
-			{
-				"key": "location",
-				"match": map[string]interface{}{
-					"value": "patio",
-				},
-			},
+	filter := &qc.Filter{
+		Must: []*qc.Condition{
+			qc.NewMatch("location", "office"),
 		},
 	}
 
@@ -350,76 +344,60 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 			llm,
 			vectorstores.ToRetriever(store, 5, vectorstores.WithFilters(filter)),
 		),
-		"What colors is the lamp?",
+		"What color is the lamp?",
 	)
 	require.NoError(t, err)
-	require.Contains(t, result, "yellow", "expected yellow in result")
+	require.Contains(t, result, "orange", "expected orange in result")
 }
 
-func getValues(t *testing.T) (string, string, int, string) {
+func getValues(t *testing.T) string {
 	t.Helper()
 
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	qdrantURL := os.Getenv("QDRANT_URL")
-	if qdrantURL == "" {
-		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
-		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
-			t.Skip("Docker not available")
-		}
-		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, qdrantContainer.Terminate(context.Background()))
-		})
+	qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.11.3"))
+	if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+		t.Skip("Docker not available")
+	}
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, qdrantContainer.Terminate(context.Background()))
+	})
 
-		qdrantURL, err = qdrantContainer.RESTEndpoint(context.Background())
-		if err != nil {
-			t.Skipf("Failed to get qdrant container endpoint: %s", err)
-		}
+	qdrantURL, err := qdrantContainer.GRPCEndpoint(context.Background())
+	if err != nil {
+		t.Skipf("Failed to get qdrant container endpoint: %s", err)
 	}
 
-	// Can be empty if using a local Qdrant deployment
-	apiKey := os.Getenv("QDRANT_API_KEY")
-
-	// Reference: https://qdrant.tech/documentation/concepts/search/#metrics
-	distance := os.Getenv("QDRANT_DISTANCE_METRIC")
-	if distance == "" {
-		distance = "Cosine"
-	}
-	embeddingDimension, err := strconv.Atoi(os.Getenv("QDRANT_EMBEDDING_DIMENSION"))
-	if err != nil || embeddingDimension == 0 {
-		embeddingDimension = 1536
-	}
-	return qdrantURL, apiKey, embeddingDimension, distance
+	return "http://" + qdrantURL
 }
 
-func setupCollection(t *testing.T, qdrantURL, apiKey string, dimension int, distance string) string {
+func setupCollection(t *testing.T, qdrantURL string) string {
 	t.Helper()
 	collectionName := uuid.NewString()
-
-	collectionConfig := map[string]interface{}{
-		"vectors": map[string]interface{}{
-			"size":     dimension,
-			"distance": distance,
-		},
-	}
 
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 
-	url = url.JoinPath("collections", collectionName)
-	_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodPut, collectionConfig)
-
-	require.Equal(t, http.StatusOK, status)
+	port, err := strconv.Atoi(url.Port())
 	require.NoError(t, err)
 
-	t.Cleanup(func() {
-		_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodDelete, nil)
-
-		require.Equal(t, http.StatusOK, status)
-		require.NoError(t, err)
+	client, errr := qc.NewClient(&qc.Config{
+		Host: url.Hostname(),
+		Port: port,
 	})
+	require.NoError(t, errr)
+
+	err = client.CreateCollection(context.Background(), &qc.CreateCollection{
+		CollectionName: collectionName,
+		VectorsConfig: qc.NewVectorsConfig(&qc.VectorParams{
+			Distance: distance,
+			Size:     dimensions,
+		}),
+	})
+	require.NoError(t, err)
+
 	return collectionName
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/url"
 
+	qc "github.com/qdrant/go-client/qdrant"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -16,6 +17,7 @@ type Store struct {
 	qdrantURL      url.URL
 	apiKey         string
 	contentKey     string
+	client         *qc.Client
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -48,7 +50,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	}
 
 	metadatas := make([]map[string]interface{}, 0, len(docs))
-	for i := 0; i < len(docs); i++ {
+	for i := range docs {
 		metadata := make(map[string]interface{}, len(docs[i].Metadata))
 		for key, value := range docs[i].Metadata {
 			metadata[key] = value
@@ -58,7 +60,7 @@ func (s Store) AddDocuments(ctx context.Context,
 		metadatas = append(metadatas, metadata)
 	}
 
-	return s.upsertPoints(ctx, &s.qdrantURL, vectors, metadatas)
+	return s.upsertPoints(ctx, vectors, metadatas)
 }
 
 func (s Store) SimilaritySearch(ctx context.Context,
@@ -81,7 +83,7 @@ func (s Store) SimilaritySearch(ctx context.Context,
 		return nil, err
 	}
 
-	return s.searchPoints(ctx, &s.qdrantURL, vector, numDocuments, scoreThreshold, filters)
+	return s.searchPoints(ctx, vector, numDocuments, scoreThreshold, filters)
 }
 
 func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
