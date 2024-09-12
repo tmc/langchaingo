@@ -29,17 +29,19 @@ type StreamOptions struct {
 
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
-	Model            string         `json:"model"`
-	Messages         []*ChatMessage `json:"messages"`
-	Temperature      float64        `json:"temperature"`
-	TopP             float64        `json:"top_p,omitempty"`
-	MaxTokens        int            `json:"max_tokens,omitempty"`
-	N                int            `json:"n,omitempty"`
-	StopWords        []string       `json:"stop,omitempty"`
-	Stream           bool           `json:"stream,omitempty"`
-	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
-	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
-	Seed             int            `json:"seed,omitempty"`
+	Model       string         `json:"model"`
+	Messages    []*ChatMessage `json:"messages"`
+	Temperature float64        `json:"temperature"`
+	TopP        float64        `json:"top_p,omitempty"`
+	// Deprecated: Use MaxCompletionTokens
+	MaxTokens           int      `json:"-,omitempty"`
+	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
+	N                   int      `json:"n,omitempty"`
+	StopWords           []string `json:"stop,omitempty"`
+	Stream              bool     `json:"stream,omitempty"`
+	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
+	Seed                int      `json:"seed,omitempty"`
 
 	// ResponseFormat is the format of the response.
 	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
