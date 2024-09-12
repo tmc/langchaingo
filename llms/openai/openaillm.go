@@ -101,10 +101,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Messages:         chatMsgs,
 		StreamingFunc:    opts.StreamingFunc,
 		Temperature:      opts.Temperature,
-		MaxTokens:        opts.MaxTokens,
 		N:                opts.N,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		PresencePenalty:  opts.PresencePenalty,
+
+		MaxCompletionTokens: opts.MaxTokens,
 
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
