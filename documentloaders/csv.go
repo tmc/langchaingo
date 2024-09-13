@@ -51,8 +51,7 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 
 		var content []string
 		for i, value := range row {
-			if c.columns != nil &&
-				len(c.columns) > 0 &&
+			if len(c.columns) > 0 &&
 				!slices.Contains(c.columns, header[i]) {
 				continue
 			}
