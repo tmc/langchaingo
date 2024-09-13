@@ -22,11 +22,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	ctx := context.Background()
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, `
 I want to build a Go app that takes user questions and looks them up in a 
-database where they are mapped to answers. If there ia close match, it retrieves 
+database where they are mapped to answers. If there is a close match, it retrieves
 the matched answer. If there isn't, it asks the user to provide an answer and 
 stores the question/answer pair in the database. Make a plan for the directory 
 structure you'll need, then return each file in full. Only supply your reasoning 
