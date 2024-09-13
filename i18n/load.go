@@ -12,8 +12,8 @@ var tpls embed.FS
 
 func mustLoad(lang Lang, kindFolder, filename string) string {
 	langFolderMap := map[Lang]string{
-		EN: "EN",
-		ZH: "ZH",
+		EN: "en",
+		ZH: "zh",
 	}
 	langFolder, ok := langFolderMap[lang]
 	if !ok {

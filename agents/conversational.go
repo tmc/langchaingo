@@ -29,9 +29,11 @@ type ConversationalAgent struct {
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
-	OutputKey   string
+	OutputKey string
+	// FinalAnswer is the final answer in various languages.
 	FinalAnswer string
-	Language    i18n.Lang
+	// Lang is the language the prompt will use.
+	Lang i18n.Lang
 	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
 }
@@ -54,7 +56,7 @@ func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) 
 		Tools:            tools,
 		OutputKey:        options.outputKey,
 		FinalAnswer:      i18n.AgentsMustPhrase(options.lang, "conversational final answer"),
-		Language:         options.lang,
+		Lang:             options.lang,
 		CallbacksHandler: options.callbacksHandler,
 	}
 }
@@ -70,7 +72,7 @@ func (a *ConversationalAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps, a.Language)
+	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps, a.Lang)
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -86,8 +88,8 @@ func (a *ConversationalAgent) Plan(
 		a.Chain,
 		fullInputs,
 		chains.WithStopWords([]string{
-			fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(a.Language, "observation")),
-			fmt.Sprintf("\n\t%s", i18n.AgentsMustPhrase(a.Language, "observation")),
+			fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(a.Lang, "observation")),
+			fmt.Sprintf("\n\t%s", i18n.AgentsMustPhrase(a.Lang, "observation")),
 		}),
 		chains.WithStreamingFunc(stream),
 	)
@@ -148,8 +150,8 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		return nil, finishAction, nil
 	}
 
-	action, actionInput := i18n.AgentsMustPhrase(a.Language, "action"),
-		i18n.AgentsMustPhrase(a.Language, "action input")
+	action, actionInput := i18n.AgentsMustPhrase(a.Lang, "action"),
+		i18n.AgentsMustPhrase(a.Lang, "action input")
 	r := regexp.MustCompile(fmt.Sprintf(`%s (.*?)[\n]*%s (.*)`, action, actionInput))
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {

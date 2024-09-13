@@ -27,9 +27,11 @@ type OneShotZeroAgent struct {
 	// Tools is a list of the tools the agent can use.
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
-	OutputKey   string
+	OutputKey string
+	// FinalAnswer is the final answer in various languages.
 	FinalAnswer string
-	Lang        i18n.Lang
+	// Lang is the language the prompt will use.
+	Lang i18n.Lang
 	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
 }

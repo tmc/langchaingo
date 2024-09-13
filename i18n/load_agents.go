@@ -6,6 +6,9 @@ import (
 	"sync"
 )
 
+// AgentsMustLoad loads file of agents by the given language and filename.
+// Will panic if any problem occurs, including unsupported language,
+// unknown filename and other problems.
 func AgentsMustLoad(lang Lang, filename string) string {
 	return mustLoad(lang, "agents", filename)
 }
@@ -13,6 +16,9 @@ func AgentsMustLoad(lang Lang, filename string) string {
 // nolint:gochecknoglobals
 var langAgentsPhraseMap sync.Map
 
+// AgentsMustPhrase loads phrase of agents by the given language and key.
+// Will panic if any problem occurs, including unsupported language,
+// unknown key and other problems.
 func AgentsMustPhrase(lang Lang, key string) string {
 	var agentsPhraseMap map[string]string
 	valAny, ok := langAgentsPhraseMap.Load(lang)
