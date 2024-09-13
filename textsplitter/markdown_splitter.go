@@ -24,6 +24,7 @@ func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 		CodeBlocks:       options.CodeBlocks,
 		ReferenceLinks:   options.ReferenceLinks,
 		HeadingHierarchy: options.KeepHeadingHierarchy,
+		JoinTableRows:    options.JoinTableRows,
 	}
 
 	if sp.SecondSplitter == nil {
@@ -55,6 +56,7 @@ type MarkdownTextSplitter struct {
 	CodeBlocks       bool
 	ReferenceLinks   bool
 	HeadingHierarchy bool
+	JoinTableRows    bool
 }
 
 // SplitText splits a text into multiple text.
@@ -71,6 +73,7 @@ func (sp MarkdownTextSplitter) SplitText(text string) ([]string, error) {
 		secondSplitter:         sp.SecondSplitter,
 		renderCodeBlocks:       sp.CodeBlocks,
 		useInlineContent:       !sp.ReferenceLinks,
+		joinTableRows:          sp.JoinTableRows,
 		hTitleStack:            []string{},
 		hTitlePrependHierarchy: sp.HeadingHierarchy,
 	}
@@ -126,6 +129,10 @@ type markdownContext struct {
 
 	// useInlineContent determines whether the default inline content is rendered
 	useInlineContent bool
+
+	// joinTableRows determines whether a chunk should contain multiple table rows,
+	// or if each row in a table should be split into a separate chunk.
+	joinTableRows bool
 }
 
 // splitText splits Markdown text.
@@ -425,14 +432,22 @@ func (mc *markdownContext) splitTableRows(header []string, bodies [][]string) {
 		return
 	}
 
-	// append table header
 	for _, row := range bodies {
 		line := tableRowInMarkdown(row)
 
-		mc.joinSnippet(fmt.Sprintf("%s\n%s", headerMD, line))
+		// If we're at the start of the current snippet, or adding the current line would
+		// overflow the chunk size, prepend the header to the line (so that the new chunk
+		// will include the table header).
+		if len(mc.curSnippet) == 0 || utf8.RuneCountInString(mc.curSnippet)+utf8.RuneCountInString(line) >= mc.chunkSize {
+			line = fmt.Sprintf("%s\n%s", headerMD, line)
+		}
 
-		// keep every row in a single Document
-		mc.applyToChunks()
+		mc.joinSnippet(line)
+
+		// If we're not joining table rows, create a new chunk.
+		if !mc.joinTableRows {
+			mc.applyToChunks()
+		}
 	}
 }
 

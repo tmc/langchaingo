@@ -17,6 +17,7 @@ type Options struct {
 	CodeBlocks           bool
 	ReferenceLinks       bool
 	KeepHeadingHierarchy bool // Persist hierarchy of markdown headers in each chunk
+	JoinTableRows        bool
 }
 
 // DefaultOptions returns the default options for all text splitter.
@@ -143,5 +144,16 @@ func WithKeepSeparator(keepSeparator bool) Option {
 func WithHeadingHierarchy(trackHeadingHierarchy bool) Option {
 	return func(o *Options) {
 		o.KeepHeadingHierarchy = trackHeadingHierarchy
+	}
+}
+
+// WithJoinTableRows sets whether tables should be split by row or not. When it is set to True,
+// table rows are joined until the chunksize. When it is set to False (the default), tables are
+// split by row.
+//
+// The default behavior is to split tables by row, so that each row is in a separate chunk.
+func WithJoinTableRows(join bool) Option {
+	return func(o *Options) {
+		o.JoinTableRows = join
 	}
 }

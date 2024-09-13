@@ -73,7 +73,7 @@ func (a *OneShotZeroAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps, a.Lang)
+	fullInputs["agent_scratchpad"] = constructMrklScratchPad(intermediateSteps, a.Lang)
 	fullInputs["today"] = time.Now().Format(i18n.AgentsMustPhrase(a.Lang, "today format"))
 
 	var stream func(ctx context.Context, chunk []byte) error
@@ -123,6 +123,18 @@ func (a *OneShotZeroAgent) GetOutputKeys() []string {
 
 func (a *OneShotZeroAgent) GetTools() []tools.Tool {
 	return a.Tools
+}
+
+func constructMrklScratchPad(steps []schema.AgentStep, lang i18n.Lang) string {
+	var scratchPad string
+	if len(steps) > 0 {
+		for _, step := range steps {
+			scratchPad += "\n" + step.Action.Log
+			scratchPad += fmt.Sprintf("\n%s %s\n", i18n.AgentsMustPhrase(lang, "observation"), step.Observation)
+		}
+	}
+
+	return scratchPad
 }
 
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
