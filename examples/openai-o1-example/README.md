@@ -1,29 +1,36 @@
-# OpenAI Chat Example 🧦🌈
+# OpenAI O1 Example
 
-Hello there, sock enthusiast! 👋 Welcome to this fun little Go program that uses OpenAI's chat model to come up with a fantastic company name for a colorful sock business. How exciting!
+This example demonstrates how to use the OpenAI O1 model with the LangChain Go library to generate content based on a prompt.
 
-## What Does This Example Do? 🤔
+## What This Example Does
 
-This nifty program does the following:
+- Initializes an OpenAI language model client, specifying the "o1-preview" model
+- Sets up a prompt asking for ideas to build a Go app for question answering using a database
+- Generates content from the model based on the prompt
+- Prints the generated content and some metadata about the generation
 
-1. 🤖 It sets up a chat with an AI that thinks it's a company branding design wizard. How cool is that?
+## Key Features
 
-2. 🎨 It asks the AI a very important question: "What would be a good company name for a company that makes colorful socks?"
+- Uses the OpenAI O1 preview model
+- Demonstrates setting custom parameters like max tokens and temperature
+- Shows how to extract and print generation metadata
 
-3. 🖨️ As the AI comes up with ideas, it prints them out in real-time. It's like watching creativity happen before your very eyes!
+## How to Run
 
-## How It Works 🛠️
+1. Ensure you have Go installed and your OpenAI API credentials set up
+2. Run the example:
 
-1. First, we create a new OpenAI language model instance.
+```
+go run openai_o1_chat_example.go
+```
 
-2. We set up our chat by giving the AI its role (a branding wizard) and asking our burning sock-related question.
+3. Optionally use the `-model` flag to specify a different model, e.g.:
 
-3. We then generate content from the AI, setting a max token limit of 1024 (that's plenty for naming socks!).
+```
+go run openai_o1_chat_example.go -model o1-mini
+```
 
-4. As the AI responds, we print each chunk of its response immediately. It's almost like having a conversation!
+## Learn More
 
-## Running the Example 🏃‍♀️
-
-To run this example, make sure you have your OpenAI API key set up properly. Then, just run the program and watch as the AI suggests creative and colorful names for your hypothetical sock company!
-
-So, are you ready to dive into the world of AI-generated sock company names? Let's go! 🚀🧦
+- [LangChain Go Documentation](https://github.com/tmc/langchaingo)
+- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)

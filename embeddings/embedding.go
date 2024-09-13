@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/internal/util"
+	"github.com/tmc/langchaingo/internal/sliceutil"
 )
 
 // NewEmbedder creates a new Embedder from the given EmbedderClient, with
@@ -89,7 +89,7 @@ func BatchTexts(texts []string, batchSize int) [][]string {
 	batchedTexts := make([][]string, 0, len(texts)/batchSize+1)
 
 	for i := 0; i < len(texts); i += batchSize {
-		batchedTexts = append(batchedTexts, texts[i:util.MinInt([]int{i + batchSize, len(texts)})])
+		batchedTexts = append(batchedTexts, texts[i:sliceutil.MinInt([]int{i + batchSize, len(texts)})])
 	}
 
 	return batchedTexts

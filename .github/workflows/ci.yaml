@@ -1,5 +1,5 @@
-name: ci
-
+# GitHub Actions CI workflow for Go project
+name: CI
 on:
   push:
     branches:
@@ -7,40 +7,38 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
-          # Cache is managed by golangci-lint
-          # https://github.com/actions/setup-go#caching-dependency-files-and-build-outputs
-          cache: false
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.0.1
+          go-version-file: go.mod
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          args: --timeout=4m
-          version: v1.59.1
+          version: v1.61
+          args: --timeout=5m
   build-examples:
+    name: Build Examples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: stable
-          cache: false
-      - uses: actions/checkout@v3
       - name: Build examples
         run: make build-examples
   build-test:
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: actions/checkout@v3
       - name: Build
         run: go build -v ./...
       - name: Test
@@ -48,3 +46,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
         run: go test -v ./...
+
