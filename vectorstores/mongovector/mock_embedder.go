@@ -105,17 +105,13 @@ func flushMockDocuments(ctx context.Context, store Store, emb *mockEmbedder) err
 	return nil
 }
 
-// newNormalizedFloat32 will generate a random float32 in [-1, 1].
-// nolint:mnd
 func newNormalizedFloat32() (float32, error) {
-	max := big.NewInt(1 << 24)
-
-	n, err := rand.Int(rand.Reader, max)
+	maxInt := big.NewInt(1 << 24)
+	n, err := rand.Int(rand.Reader, maxInt)
 	if err != nil {
 		return 0.0, fmt.Errorf("failed to normalize float32")
 	}
-
-	return 2.0*(float32(n.Int64())/float32(1<<24)) - 1.0, nil
+	return 2.0*(float32(n.Int64())/float32(maxInt.Int64())) - 1.0, nil
 }
 
 // dotProduct will return the dot product between two slices of f32.

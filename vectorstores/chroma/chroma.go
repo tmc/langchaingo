@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
@@ -140,7 +139,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query(ctx, []string{query}, int32(max(0, min(numDocuments, math.MaxInt32))), filter, nil, s.includes)
+	qr, queryErr := s.collection.Query(ctx, []string{query}, safeIntToInt32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -214,16 +213,6 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+func safeIntToInt32(n int) int32 {
+	return int32(max(0, n))
 }

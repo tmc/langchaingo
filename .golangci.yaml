@@ -13,6 +13,8 @@ linters:
     - style
     - test
     - unused
+  enable:
+    - forbidigo
   disable:
     - gci # We don't use gci.
     - godox # We allow TODO lines.
@@ -55,6 +57,12 @@ linters-settings:
         ignore-file-rules:
           - "**/*_test.go"
           - "**/mock/**/*.go"
+  forbidigo:
+    forbid:
+      - 'import "[^"]+/(util|common|helpers)"'
+  gosec:
+    excludes:
+    - G115 # https://github.com/securego/gosec/issues/1212
 run:
   exclude-dirs:
     - 'exp'

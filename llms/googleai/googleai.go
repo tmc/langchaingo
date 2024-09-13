@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
-	"github.com/tmc/langchaingo/internal/util"
+	"github.com/tmc/langchaingo/internal/imageutil"
 	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/iterator"
 )
@@ -187,7 +187,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 		case llms.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
-			typ, data, err := util.DownloadImageData(p.URL)
+			typ, data, err := imageutil.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
 			}
