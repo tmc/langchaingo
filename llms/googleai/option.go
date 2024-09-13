@@ -25,18 +25,31 @@ type Options struct {
 	ClientOptions []option.ClientOption
 }
 
+const (
+	CloudProject          = ""
+	CloudLocation         = ""
+	DefaultModel          = "gemini-pro"
+	DefaultEmbeddingModel = "embedding-001"
+	DefaultCandidateCount = 1
+	DefaultMaxTokens      = 2048
+	DefaultTemperature    = 0.5
+	DefaultTopK           = 3
+	DefaultTopP           = 0.95
+	DefaultHarmThreshold  = HarmBlockOnlyHigh
+)
+
 func DefaultOptions() Options {
 	return Options{
-		CloudProject:          "",
-		CloudLocation:         "",
-		DefaultModel:          "gemini-pro",
-		DefaultEmbeddingModel: "embedding-001",
-		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      2048,
-		DefaultTemperature:    0.5,
-		DefaultTopK:           3,
-		DefaultTopP:           0.95,
-		HarmThreshold:         HarmBlockOnlyHigh,
+		CloudProject:          CloudProject,
+		CloudLocation:         CloudLocation,
+		DefaultModel:          DefaultModel,
+		DefaultEmbeddingModel: DefaultEmbeddingModel,
+		DefaultCandidateCount: DefaultCandidateCount,
+		DefaultMaxTokens:      DefaultMaxTokens,
+		DefaultTemperature:    DefaultTemperature,
+		DefaultTopK:           DefaultTopK,
+		DefaultTopP:           DefaultTopP,
+		HarmThreshold:         DefaultHarmThreshold,
 	}
 }
 
