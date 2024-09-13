@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	qc "github.com/qdrant/go-client/qdrant"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	tcqdrant "github.com/testcontainers/testcontainers-go/modules/qdrant"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -357,7 +356,7 @@ func getValues(t *testing.T) string {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.11.3"))
+	qdrantContainer, err := tcqdrant.Run(context.Background(), "qdrant/qdrant:v1.11.3")
 	if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 		t.Skip("Docker not available")
 	}

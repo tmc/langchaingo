@@ -8,15 +8,15 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.33.0
-	github.com/testcontainers/testcontainers-go/modules/chroma v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/milvus v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/mysql v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/opensearch v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/qdrant v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/redis v0.31.0
-	github.com/testcontainers/testcontainers-go/modules/weaviate v0.31.0
+	github.com/testcontainers/testcontainers-go/modules/chroma v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/milvus v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/mysql v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/opensearch v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/qdrant v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.33.0
+	github.com/testcontainers/testcontainers-go/modules/weaviate v0.33.0
 )
 
 require (
