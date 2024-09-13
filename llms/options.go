@@ -84,6 +84,8 @@ type FunctionDefinition struct {
 	Description string `json:"description"`
 	// Parameters is a list of parameters for the function.
 	Parameters any `json:"parameters,omitempty"`
+	// Strict is a flag to indicate if the function should be called strictly. Only used for openai llm structured output.
+	Strict bool `json:"strict,omitempty"`
 }
 
 // ToolChoice is a specific tool to use.
