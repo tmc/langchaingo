@@ -2,11 +2,19 @@ package agents
 
 import (
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/i18n"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
+
+type translatable struct {
+	promptPrefix       string
+	formatInstructions string
+	promptSuffix       string
+	outputKey          string
+}
 
 type Options struct {
 	prompt                  prompts.PromptTemplate
@@ -15,10 +23,8 @@ type Options struct {
 	errorHandler            *ParserErrorHandler
 	maxIterations           int
 	returnIntermediateSteps bool
-	outputKey               string
-	promptPrefix            string
-	formatInstructions      string
-	promptSuffix            string
+	lang                    i18n.Lang
+	translatable
 
 	// openai
 	systemMessage string
@@ -29,40 +35,55 @@ type Options struct {
 // and executors.
 type Option func(*Options)
 
-func executorDefaultOptions() Options {
+func defaultOptions() Options {
 	return Options{
-		maxIterations: _defaultMaxIterations,
-		outputKey:     _defaultOutputKey,
-		memory:        memory.NewSimple(),
+		lang: i18n.DefaultLang,
 	}
+}
+
+func executorDefaultOptions() Options {
+	options := defaultOptions()
+	options.maxIterations = _defaultMaxIterations
+	options.memory = memory.NewSimple()
+	return options
 }
 
 func mrklDefaultOptions() Options {
-	return Options{
-		promptPrefix:       _defaultMrklPrefix,
-		formatInstructions: _defaultMrklFormatInstructions,
-		promptSuffix:       _defaultMrklSuffix,
-		outputKey:          _defaultOutputKey,
-	}
+	return defaultOptions()
 }
 
 func conversationalDefaultOptions() Options {
-	return Options{
-		promptPrefix:       _defaultConversationalPrefix,
-		formatInstructions: _defaultConversationalFormatInstructions,
-		promptSuffix:       _defaultConversationalSuffix,
-		outputKey:          _defaultOutputKey,
-	}
+	return defaultOptions()
 }
 
 func openAIFunctionsDefaultOptions() Options {
-	return Options{
-		systemMessage: "You are a helpful AI assistant.",
-		outputKey:     _defaultOutputKey,
-	}
+	return defaultOptions()
 }
 
-func (co Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
+func (co *Options) loadExecutorTranslatable() {
+	co.outputKey = i18n.AgentsMustPhrase(co.lang, "output key")
+}
+
+func (co *Options) loadMrklTranslatable() {
+	co.promptPrefix = i18n.AgentsMustLoad(co.lang, "mrkl_prompt_prefix.txt")
+	co.formatInstructions = i18n.AgentsMustLoad(co.lang, "mrkl_prompt_format_instructions.txt")
+	co.promptSuffix = i18n.AgentsMustLoad(co.lang, "mrkl_prompt_suffix.txt")
+	co.outputKey = i18n.AgentsMustPhrase(co.lang, "output key")
+}
+
+func (co *Options) loadConversationalTranslatable() {
+	co.promptPrefix = i18n.AgentsMustLoad(co.lang, "conversational_prompt_prefix.txt")
+	co.formatInstructions = i18n.AgentsMustLoad(co.lang, "conversational_prompt_format_instructions.txt")
+	co.promptSuffix = i18n.AgentsMustLoad(co.lang, "conversational_prompt_suffix.txt")
+	co.outputKey = i18n.AgentsMustPhrase(co.lang, "output key")
+}
+
+func (co *Options) loadOpenAIFunctionsTranslatable() {
+	co.systemMessage = i18n.AgentsMustPhrase(co.lang, "system message")
+	co.outputKey = i18n.AgentsMustPhrase(co.lang, "output key")
+}
+
+func (co *Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
 	if co.prompt.Template != "" {
 		return co.prompt
 	}
@@ -75,7 +96,7 @@ func (co Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
 	)
 }
 
-func (co Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemplate {
+func (co *Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemplate {
 	if co.prompt.Template != "" {
 		return co.prompt
 	}
@@ -158,6 +179,13 @@ func WithCallbacksHandler(handler callbacks.Handler) Option {
 func WithParserErrorHandler(errorHandler *ParserErrorHandler) Option {
 	return func(co *Options) {
 		co.errorHandler = errorHandler
+	}
+}
+
+// WithLang is an option for setting language the prompt will use.
+func WithLang(lang i18n.Lang) Option {
+	return func(co *Options) {
+		co.lang = lang
 	}
 }
 
