@@ -14,6 +14,7 @@ linters:
     - test
     - unused
   disable:
+    - gci # We don't use gci.
     - godox # We allow TODO lines.
     - tagliatelle # As we're dealing with third parties we must accept snake case.
     - wsl # We don't agree with wsl's style rules

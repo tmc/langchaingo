@@ -42,7 +42,7 @@ func WithDB(db *sql.DB) SqliteChatMessageHistoryOption {
 // to use a context internally when running Schema.
 func WithContext(ctx context.Context) SqliteChatMessageHistoryOption {
 	return func(m *SqliteChatMessageHistory) {
-		m.Ctx = ctx
+		m.Ctx = ctx //nolint:fatcontext
 	}
 }
 
