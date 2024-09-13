@@ -112,19 +112,19 @@ func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
 		o = append(o, wx.WithTopP(opts.TopP))
 	}
 	if opts.TopK != -1 {
-		o = append(o, wx.WithTopK(uint(opts.TopK)))
+		o = append(o, wx.WithTopK(uint(max(0, opts.TopK))))
 	}
 	if opts.Temperature != -1 {
 		o = append(o, wx.WithTemperature(opts.Temperature))
 	}
 	if opts.Seed != -1 {
-		o = append(o, wx.WithRandomSeed(uint(opts.Seed)))
+		o = append(o, wx.WithRandomSeed(uint(max(0, opts.Seed))))
 	}
 	if opts.RepetitionPenalty != -1 {
 		o = append(o, wx.WithRepetitionPenalty(opts.RepetitionPenalty))
 	}
 	if opts.MaxTokens != -1 {
-		o = append(o, wx.WithMaxNewTokens(uint(opts.MaxTokens)))
+		o = append(o, wx.WithMaxNewTokens(uint(max(0, opts.MaxTokens))))
 	}
 	if len(opts.StopWords) > 0 {
 		o = append(o, wx.WithStopSequences(opts.StopWords))
@@ -142,4 +142,11 @@ func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
 	*/
 
 	return o
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
