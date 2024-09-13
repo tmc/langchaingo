@@ -151,6 +151,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
+	if result == nil {
+		return nil, ErrEmptyResponse
+	}
 
 	choices := make([]*llms.ContentChoice, len(result.Content))
 	for i, content := range result.Content {
