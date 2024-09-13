@@ -63,17 +63,15 @@ var _ schema.OutputParser[any] = Structured{}
 func (p Structured) parse(text string) (map[string]string, error) {
 	// Remove the ```json that should be at the start of the text, and the ```
 	// that should be at the end of the text.
-	withoutJSONStart := strings.Split(text, "```json")
-	if !(len(withoutJSONStart) > 1) {
+	_, withoutJSONStart, ok := strings.Cut(text, "```json")
+	if !ok {
 		return nil, ParseError{Text: text, Reason: "no ```json at start of output"}
 	}
 
-	withoutJSONEnd := strings.Split(withoutJSONStart[1], "```")
-	if len(withoutJSONEnd) < 1 {
+	jsonString, _, ok := strings.Cut(withoutJSONStart, "```")
+	if !ok {
 		return nil, ParseError{Text: text, Reason: "no ``` at end of output"}
 	}
-
-	jsonString := withoutJSONEnd[0]
 
 	var parsed map[string]string
 	err := json.Unmarshal([]byte(jsonString), &parsed)
