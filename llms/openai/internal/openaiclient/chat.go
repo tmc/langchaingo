@@ -29,17 +29,19 @@ type StreamOptions struct {
 
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
-	Model            string         `json:"model"`
-	Messages         []*ChatMessage `json:"messages"`
-	Temperature      float64        `json:"temperature"`
-	TopP             float64        `json:"top_p,omitempty"`
-	MaxTokens        int            `json:"max_tokens,omitempty"`
-	N                int            `json:"n,omitempty"`
-	StopWords        []string       `json:"stop,omitempty"`
-	Stream           bool           `json:"stream,omitempty"`
-	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
-	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
-	Seed             int            `json:"seed,omitempty"`
+	Model       string         `json:"model"`
+	Messages    []*ChatMessage `json:"messages"`
+	Temperature float64        `json:"temperature"`
+	TopP        float64        `json:"top_p,omitempty"`
+	// Deprecated: Use MaxCompletionTokens
+	MaxTokens           int      `json:"-,omitempty"`
+	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
+	N                   int      `json:"n,omitempty"`
+	StopWords           []string `json:"stop,omitempty"`
+	Stream              bool     `json:"stream,omitempty"`
+	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
+	Seed                int      `json:"seed,omitempty"`
 
 	// ResponseFormat is the format of the response.
 	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
@@ -106,9 +108,27 @@ type ToolCall struct {
 	Function ToolFunction `json:"function,omitempty"`
 }
 
+type ResponseFormatJSONSchemaProperty struct {
+	Type                 string                                       `json:"type"`
+	Description          string                                       `json:"description,omitempty"`
+	Enum                 []interface{}                                `json:"enum,omitempty"`
+	Items                *ResponseFormatJSONSchemaProperty            `json:"items,omitempty"`
+	Properties           map[string]*ResponseFormatJSONSchemaProperty `json:"properties,omitempty"`
+	AdditionalProperties bool                                         `json:"additionalProperties"`
+	Required             []string                                     `json:"required,omitempty"`
+	Ref                  string                                       `json:"$ref,omitempty"`
+}
+
+type ResponseFormatJSONSchema struct {
+	Name   string                            `json:"name"`
+	Strict bool                              `json:"strict"`
+	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
+}
+
 // ResponseFormat is the format of the response.
 type ResponseFormat struct {
-	Type string `json:"type"`
+	Type       string                    `json:"type"`
+	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
 // ChatMessage is a message in a chat request.
@@ -260,9 +280,12 @@ type ChatCompletionChoice struct {
 
 // ChatUsage is the usage of a chat completion request.
 type ChatUsage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens            int `json:"prompt_tokens"`
+	CompletionTokens        int `json:"completion_tokens"`
+	TotalTokens             int `json:"total_tokens"`
+	CompletionTokensDetails struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 // ChatCompletionResponse is a response to a chat request.
@@ -277,9 +300,12 @@ type ChatCompletionResponse struct {
 }
 
 type Usage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens            int `json:"prompt_tokens"`
+	CompletionTokens        int `json:"completion_tokens"`
+	TotalTokens             int `json:"total_tokens"`
+	CompletionTokensDetails struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 // StreamedChatResponsePayload is a chunk from the stream.
@@ -315,6 +341,8 @@ type FunctionDefinition struct {
 	Description string `json:"description,omitempty"`
 	// Parameters is a list of parameters for the function.
 	Parameters any `json:"parameters"`
+	// Strict is a flag to enable structured output mode.
+	Strict bool `json:"strict,omitempty"`
 }
 
 // FunctionCallBehavior is the behavior to use when calling functions.
@@ -446,6 +474,7 @@ func combineStreamingChatResponse(
 			response.Usage.CompletionTokens = streamResponse.Usage.CompletionTokens
 			response.Usage.PromptTokens = streamResponse.Usage.PromptTokens
 			response.Usage.TotalTokens = streamResponse.Usage.TotalTokens
+			response.Usage.CompletionTokensDetails.ReasoningTokens = streamResponse.Usage.CompletionTokensDetails.ReasoningTokens
 		}
 
 		if len(streamResponse.Choices) == 0 {
