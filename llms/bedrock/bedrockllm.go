@@ -3,6 +3,7 @@ package bedrock
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -59,7 +60,11 @@ func (l *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements llms.Model.
-func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (l *LLM) GenerateContent(
+	ctx context.Context,
+	messages []llms.MessageContent,
+	options ...llms.CallOption,
+) (*llms.ContentResponse, error) {
 	if l.CallbacksHandler != nil {
 		l.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -71,17 +76,28 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
-	m, err := processMessages(messages)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := l.client.CreateCompletion(ctx, opts.Model, m, opts)
-	if err != nil {
-		if l.CallbacksHandler != nil {
-			l.CallbacksHandler.HandleLLMError(ctx, err)
+	var res *llms.ContentResponse
+	if strings.HasPrefix(opts.Model, "anthropic") { // nolint: nestif
+		var err error
+		res, err = l.client.Converse(ctx, opts.Model, messages, &opts)
+		if err != nil {
+			if l.CallbacksHandler != nil {
+				l.CallbacksHandler.HandleLLMError(ctx, err)
+			}
+			return nil, err
 		}
-		return nil, err
+	} else {
+		m, err := processMessages(messages)
+		if err != nil {
+			return nil, err
+		}
+		res, err = l.client.CreateCompletion(ctx, opts.Model, m, opts)
+		if err != nil {
+			if l.CallbacksHandler != nil {
+				l.CallbacksHandler.HandleLLMError(ctx, err)
+			}
+			return nil, err
+		}
 	}
 
 	if l.CallbacksHandler != nil {
