@@ -22,13 +22,16 @@ const (
 )
 
 var (
+	// ErrEmbedderWrongNumberVectors is returned when the number of vectors from the embedder does not match the number of documents.
 	ErrEmbedderWrongNumberVectors = errors.New("number of vectors from embedder does not match number of documents")
-	ErrUnsupportedOptions         = errors.New("unsupported options")
-	ErrInvalidScoreThreshold      = errors.New("score threshold must be between 0 and 1")
+	// ErrUnsupportedOptions is returned when unsupported options are provided.
+	ErrUnsupportedOptions = errors.New("unsupported options")
+	// ErrInvalidScoreThreshold is returned when an invalid score threshold is provided.
+	ErrInvalidScoreThreshold = errors.New("score threshold must be between 0 and 1")
 )
 
-// Store wraps a Mongo collection for writing to and searching an Atlas
-// vector database.
+// Store represents a MongoDB-based vector store. It wraps a MongoDB collection
+// for storing and searching vector embeddings.
 type Store struct {
 	coll          *mongo.Collection
 	embedder      embeddings.Embedder
@@ -39,7 +42,8 @@ type Store struct {
 
 var _ vectorstores.VectorStore = &Store{}
 
-// New returns a Store that can read and write to the vector store.
+// New creates a new MongoDB-based vector store with the given collection, embedder, and options.
+// It initializes the store with default settings which can be overridden using the provided options.
 func New(coll *mongo.Collection, embedder embeddings.Embedder, opts ...Option) Store {
 	store := Store{
 		coll:     coll,
@@ -55,40 +59,15 @@ func New(coll *mongo.Collection, embedder embeddings.Embedder, opts ...Option) S
 	return store
 }
 
-func mergeAddOpts(store *Store, opts ...vectorstores.Option) (*vectorstores.Options, error) {
-	mopts := &vectorstores.Options{}
-	for _, set := range opts {
-		set(mopts)
-	}
-
-	if mopts.ScoreThreshold != 0 || mopts.Filters != nil || mopts.NameSpace != "" || mopts.Deduplicater != nil {
-		return nil, ErrUnsupportedOptions
-	}
-
-	if mopts.Embedder == nil {
-		mopts.Embedder = store.embedder
-	}
-
-	if mopts.Embedder == nil {
-		return nil, fmt.Errorf("embedder is unset")
-	}
-
-	return mopts, nil
-}
-
-// AddDocuments will create embeddings for the given documents using the
-// user-specified embedding model, then insert that data into a vector store.
-func (store *Store) AddDocuments(
-	ctx context.Context,
-	docs []schema.Document,
-	opts ...vectorstores.Option,
-) ([]string, error) {
-	cfg, err := mergeAddOpts(store, opts...)
+// AddDocuments creates embeddings for the given documents using the specified
+// embedding model, then inserts the documents and their embeddings into the MongoDB collection.
+// It returns the IDs of the added documents.
+func (s *Store) AddDocuments(ctx context.Context, docs []schema.Document, opts ...vectorstores.Option) ([]string, error) {
+	cfg, err := s.mergeAddOpts(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Collect the page contents for embedding.
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
@@ -103,22 +82,20 @@ func (store *Store) AddDocuments(
 		return nil, ErrEmbedderWrongNumberVectors
 	}
 
-	bdocs := []bson.D{}
+	bdocs := make([]interface{}, len(docs))
 	for i := range vectors {
-		bdocs = append(bdocs, bson.D{
+		bdocs[i] = bson.D{
 			{Key: pageContentName, Value: docs[i].PageContent},
-			{Key: store.path, Value: vectors[i]},
+			{Key: s.path, Value: vectors[i]},
 			{Key: metadataName, Value: docs[i].Metadata},
-		})
+		}
 	}
 
-	res, err := store.coll.InsertMany(ctx, bdocs)
+	res, err := s.coll.InsertMany(ctx, bdocs)
 	if err != nil {
 		return nil, err
 	}
 
-	// Since we don't allow user-defined ids, the InsertedIDs list will always
-	// be primitive objects.
 	ids := make([]string, 0, len(docs))
 	for _, id := range res.InsertedIDs {
 		id, ok := id.(fmt.Stringer)
@@ -132,44 +109,6 @@ func (store *Store) AddDocuments(
 	return ids, nil
 }
 
-func mergeSearchOpts(store *Store, opts ...vectorstores.Option) (*vectorstores.Options, error) {
-	mopts := &vectorstores.Options{}
-	for _, set := range opts {
-		set(mopts)
-	}
-
-	// Validate that the score threshold is in [0, 1]
-	if mopts.ScoreThreshold > 1 || mopts.ScoreThreshold < 0 {
-		return nil, ErrInvalidScoreThreshold
-	}
-
-	if mopts.Deduplicater != nil {
-		return nil, ErrUnsupportedOptions
-	}
-
-	// Created an llm-specific-n-dimensional vector for searching the vector
-	// space
-	if mopts.Embedder == nil {
-		mopts.Embedder = store.embedder
-	}
-
-	if mopts.Embedder == nil {
-		return nil, fmt.Errorf("embedder is unset")
-	}
-
-	// If the user provides a method-level index, update.
-	if mopts.NameSpace == "" {
-		mopts.NameSpace = store.index
-	}
-
-	// If filters are unset, use an empty document.
-	if mopts.Filters == nil {
-		mopts.Filters = bson.D{}
-	}
-
-	return mopts, nil
-}
-
 // SimilaritySearch searches a vector store from the vector transformed from the
 // query by the user-specified embedding model.
 //
@@ -178,13 +117,8 @@ func mergeSearchOpts(store *Store, opts ...vectorstores.Option) (*vectorstores.O
 // Since multiple indexes can be defined for a collection, the options.NameSpace
 // value can be used here to change the search index. The priority is
 // options.NameSpace > Store.index > defaultIndex.
-func (store *Store) SimilaritySearch(
-	ctx context.Context,
-	query string,
-	numDocuments int,
-	opts ...vectorstores.Option,
-) ([]schema.Document, error) {
-	cfg, err := mergeSearchOpts(store, opts...)
+func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, opts ...vectorstores.Option) ([]schema.Document, error) {
+	cfg, err := s.mergeSearchOpts(opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -195,21 +129,20 @@ func (store *Store) SimilaritySearch(
 	}
 
 	numCandidates := defaultNumCandidatesScalar * numDocuments
-	if store.numCandidates == 0 {
-		numCandidates = numDocuments
+	if s.numCandidates > 0 {
+		numCandidates = s.numCandidates
 	}
 
-	// Create the pipeline for performing the similarity search.
 	stage := struct {
 		Index         string    `bson:"index"`         // Name of Atlas Vector Search Index tied to Collection
 		Path          string    `bson:"path"`          // Field in Collection containing embedding vectors
 		QueryVector   []float32 `bson:"queryVector"`   // Query as vector
 		NumCandidates int       `bson:"numCandidates"` // Number of nearest neighbors to use during the search.
-		Limit         int       `bson:"limit"`         // Number of docments to return
+		Limit         int       `bson:"limit"`         // Number of documents to return
 		Filter        any       `bson:"filter"`        // MQL matching expression
 	}{
 		Index:         cfg.NameSpace,
-		Path:          store.path,
+		Path:          s.path,
 		QueryVector:   vector,
 		NumCandidates: numCandidates,
 		Limit:         numDocuments,
@@ -217,25 +150,20 @@ func (store *Store) SimilaritySearch(
 	}
 
 	pipeline := mongo.Pipeline{
-		bson.D{
-			{Key: "$vectorSearch", Value: stage},
-		},
-		bson.D{
-			{Key: "$set", Value: bson.D{{Key: scoreName, Value: bson.D{{Key: "$meta", Value: "vectorSearchScore"}}}}},
-		},
+		{{Key: "$vectorSearch", Value: stage}},
+		{{Key: "$set", Value: bson.D{{Key: scoreName, Value: bson.D{{Key: "$meta", Value: "vectorSearchScore"}}}}}},
 	}
 
-	// Execute the aggregation.
-	cur, err := store.coll.Aggregate(ctx, pipeline)
+	cur, err := s.coll.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
 	found := []schema.Document{}
 	for cur.Next(ctx) {
-		doc := schema.Document{}
-		err := cur.Decode(&doc)
-		if err != nil {
+		var doc schema.Document
+		if err := cur.Decode(&doc); err != nil {
 			return nil, err
 		}
 
@@ -246,5 +174,63 @@ func (store *Store) SimilaritySearch(
 		found = append(found, doc)
 	}
 
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
 	return found, nil
+}
+
+func (s *Store) mergeAddOpts(opts ...vectorstores.Option) (*vectorstores.Options, error) {
+	mopts := &vectorstores.Options{}
+	for _, set := range opts {
+		set(mopts)
+	}
+
+	if mopts.ScoreThreshold != 0 || mopts.Filters != nil || mopts.NameSpace != "" || mopts.Deduplicater != nil {
+		return nil, ErrUnsupportedOptions
+	}
+
+	if mopts.Embedder == nil {
+		mopts.Embedder = s.embedder
+	}
+
+	if mopts.Embedder == nil {
+		return nil, fmt.Errorf("embedder is unset")
+	}
+
+	return mopts, nil
+}
+
+func (s *Store) mergeSearchOpts(opts ...vectorstores.Option) (*vectorstores.Options, error) {
+	mopts := &vectorstores.Options{}
+	for _, set := range opts {
+		set(mopts)
+	}
+
+	if mopts.ScoreThreshold < 0 || mopts.ScoreThreshold > 1 {
+		return nil, ErrInvalidScoreThreshold
+	}
+
+	if mopts.Deduplicater != nil {
+		return nil, ErrUnsupportedOptions
+	}
+
+	if mopts.Embedder == nil {
+		mopts.Embedder = s.embedder
+	}
+
+	if mopts.Embedder == nil {
+		return nil, fmt.Errorf("embedder is unset")
+	}
+
+	if mopts.NameSpace == "" {
+		mopts.NameSpace = s.index
+	}
+
+	if mopts.Filters == nil {
+		mopts.Filters = bson.D{}
+	}
+
+	return mopts, nil
 }

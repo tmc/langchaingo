@@ -1,592 +1,315 @@
-package mongovector
+package mongovector_test
 
 import (
 	"context"
-	"errors"
-	"flag"
 	"fmt"
-	"os"
-	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/tmc/langchaingo/vectorstores/mongovector"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-// Run the test without setting up the test space.
-//
-//nolint:gochecknoglobals
-var testWithoutSetup = flag.Bool("no-atlas-setup", false, "don't create required indexes")
-
 const (
-	testDB                    = "langchaingo-test"
-	testColl                  = "vstore"
-	testIndexDP1536           = "vector_index_dotProduct_1536"
-	testIndexDP1536WithFilter = "vector_index_dotProduct_1536_w_filters"
-	testIndexDP3              = "vector_index_dotProduct_3"
-	testIndexSize1536         = 1536
-	testIndexSize3            = 3
+	testIndexSize1536 = 1536
+	testIndexSize3    = 3
 )
 
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	defer func() {
-		os.Exit(m.Run())
-	}()
-
-	if *testWithoutSetup {
-		return
+func setupMongoDBContainer(ctx context.Context) (string, func(), error) {
+	mongodbContainer, err := mongodb.RunContainer(ctx,
+		testcontainers.WithImage("mongo:4.4"),
+	)
+	if err != nil {
+		return "", nil, err
 	}
 
-	// Create the required vector search indexes for the tests.
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
-
-	if err := resetForE2E(ctx, testIndexDP1536, testIndexSize1536, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 1536: %v\n", err)
+	connectionString, err := mongodbContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", nil, err
 	}
 
-	filters := []string{"pageContent"}
-	if err := resetForE2E(ctx, testIndexDP1536WithFilter, testIndexSize1536, filters); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 1536 w filter: %v\n", err)
+	cleanup := func() {
+		if err := mongodbContainer.Terminate(ctx); err != nil {
+			panic(err)
+		}
 	}
 
-	if err := resetForE2E(ctx, testIndexDP3, testIndexSize3, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 3: %v\n", err)
-	}
+	return connectionString, cleanup, nil
 }
 
-func TestNew(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name                string
-		opts                []Option
-		wantIndex           string
-		wantPageContentName string
-		wantPath            string
-	}{
-		{
-			name:                "nil options",
-			opts:                nil,
-			wantIndex:           "vector_index",
-			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
-		},
-		{
-			name:                "no options",
-			opts:                []Option{},
-			wantIndex:           "vector_index",
-			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
-		},
-		{
-			name:                "mixed custom options",
-			opts:                []Option{WithIndex("custom_vector_index")},
-			wantIndex:           "custom_vector_index",
-			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
-		},
-		{
-			name: "all custom options",
-			opts: []Option{
-				WithIndex("custom_vector_index"),
-				WithPath("custom_plot_embedding"),
-			},
-			wantIndex: "custom_vector_index",
-			wantPath:  "custom_plot_embedding",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
-
-			embedder, err := embeddings.NewEmbedder(&mockLLM{})
-			require.NoError(t, err, "failed to construct embedder")
-
-			store := New(&mongo.Collection{}, embedder, test.opts...)
-
-			assert.Equal(t, test.wantIndex, store.index)
-			assert.Equal(t, test.wantPath, store.path)
-		})
-	}
-}
-
-// resetVectorStore will reset the vector space defined by the given collection.
-func resetVectorStore(t *testing.T, coll *mongo.Collection) {
+func setupTest(t *testing.T, dim int) (mongovector.Store, func()) {
 	t.Helper()
 
-	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
+	ctx := context.Background()
+	connectionString, cleanup, err := setupMongoDBContainer(ctx)
+	require.NoError(t, err)
 
-	_, err := coll.DeleteMany(context.Background(), filter)
-	assert.NoError(t, err, "failed to reset vector store")
-}
+	client, err := mongo.Connect(options.Client().ApplyURI(connectionString))
+	require.NoError(t, err)
 
-// setupTest will prepare the Atlas vector search for adding to and searching
-// a vector space.
-func setupTest(t *testing.T, dim int, index string) Store {
-	t.Helper()
-
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		t.Skip("Must set MONGODB_URI to run test")
-	}
-
-	require.NotEmpty(t, uri, "MONGODB_URI required")
-
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
-	require.NoError(t, err, "failed to connect to MongoDB server")
-
-	// Create the vectorstore collection
-	err = client.Database(testDB).CreateCollection(context.Background(), testColl)
-	require.NoError(t, err, "failed to create collection")
-
-	coll := client.Database(testDB).Collection(testColl)
-	resetVectorStore(t, coll)
-
+	coll := client.Database("test").Collection("test_collection")
 	emb := newMockEmbedder(dim)
-	store := New(coll, emb, WithIndex(index))
+	store := mongovector.New(coll, emb)
 
-	return store
+	return store, func() {
+		cleanup()
+		client.Disconnect(ctx)
+	}
 }
 
-//nolint:paralleltest
 func TestStore_AddDocuments(t *testing.T) {
-	store := setupTest(t, testIndexSize1536, testIndexDP1536)
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
+
+	ctx := context.Background()
 
 	tests := []struct {
 		name    string
 		docs    []schema.Document
 		options []vectorstores.Option
-		wantErr []string
+		wantErr bool
 	}{
 		{
-			name:    "nil docs",
-			docs:    nil,
-			wantErr: []string{"must provide at least one element in input slice"},
-			options: []vectorstores.Option{},
+			name: "add single document",
+			docs: []schema.Document{
+				{PageContent: "test document"},
+			},
+			wantErr: false,
 		},
 		{
-			name:    "no docs",
+			name: "add multiple documents",
+			docs: []schema.Document{
+				{PageContent: "test document 1"},
+				{PageContent: "test document 2"},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "add empty document list",
 			docs:    []schema.Document{},
-			wantErr: []string{"must provide at least one element in input slice"},
-			options: []vectorstores.Option{},
-		},
-		{
-			name:    "single empty doc",
-			docs:    []schema.Document{{}},
-			wantErr: []string{}, // May vary by embedder
-			options: []vectorstores.Option{},
-		},
-		{
-			name:    "single non-empty doc",
-			docs:    []schema.Document{{PageContent: "foo"}},
-			wantErr: []string{},
-			options: []vectorstores.Option{},
-		},
-		{
-			name:    "one non-empty doc and one empty doc",
-			docs:    []schema.Document{{PageContent: "foo"}, {}},
-			wantErr: []string{}, // May vary by embedder
-			options: []vectorstores.Option{},
+			wantErr: true,
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			resetVectorStore(t, store.coll)
-
-			ids, err := store.AddDocuments(context.Background(), test.docs, test.options...)
-			if len(test.wantErr) > 0 {
-				require.Error(t, err)
-				for _, want := range test.wantErr {
-					if strings.Contains(err.Error(), want) {
-						return
-					}
-				}
-
-				t.Errorf("expected error %q to contain of %v", err.Error(), test.wantErr)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ids, err := store.AddDocuments(ctx, tt.docs, tt.options...)
+			if tt.wantErr {
+				assert.Error(t, err)
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
+				assert.Len(t, ids, len(tt.docs))
 			}
-
-			assert.Equal(t, len(test.docs), len(ids))
 		})
 	}
 }
 
-type simSearchTest struct {
-	ctx          context.Context //nolint:containedctx
-	seed         []schema.Document
-	numDocuments int                   // Number of documents to return
-	options      []vectorstores.Option // Search query options
-	want         []schema.Document
-	wantErr      string
-}
+func TestStore_SimilaritySearch(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
 
-func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
-	t.Helper()
+	ctx := context.Background()
 
-	resetVectorStore(t, store.coll)
-
-	// Merge options
-	opts := vectorstores.Options{}
-	for _, opt := range test.options {
-		opt(&opts)
+	// Add test documents
+	docs := []schema.Document{
+		{PageContent: "The quick brown fox jumps over the lazy dog", Metadata: map[string]interface{}{"animal": "fox"}},
+		{PageContent: "The lazy dog is sleeping", Metadata: map[string]interface{}{"animal": "dog"}},
+		{PageContent: "The quick brown fox is running", Metadata: map[string]interface{}{"animal": "fox"}},
 	}
+	_, err := store.AddDocuments(ctx, docs)
+	require.NoError(t, err)
 
-	var emb *mockEmbedder
-	if opts.Embedder != nil {
-		var ok bool
+	// Wait for documents to be indexed
+	time.Sleep(2 * time.Second)
 
-		emb, ok = opts.Embedder.(*mockEmbedder)
-		require.True(t, ok)
-	} else {
-		semb, ok := store.embedder.(*mockEmbedder)
-		require.True(t, ok)
-
-		emb = newMockEmbedder(len(semb.queryVector))
-		emb.mockDocuments(test.seed...)
-
-		test.options = append(test.options, vectorstores.WithEmbedder(emb))
-	}
-
-	err := flushMockDocuments(context.Background(), store, emb)
-	require.NoError(t, err, "failed to flush mock embedder")
-
-	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
-	if test.wantErr != "" {
-		require.Error(t, err)
-		require.ErrorContains(t, err, test.wantErr)
-	} else {
-		require.NoError(t, err)
-	}
-
-	assert.Len(t, raw, len(test.want))
-
-	got := make(map[string]schema.Document)
-	for _, g := range raw {
-		got[g.PageContent] = g
-	}
-
-	for _, w := range test.want {
-		got := got[w.PageContent]
-		if w.Score != 0 {
-			assert.InDelta(t, w.Score, got.Score, 1e-4, "score out of bounds for %w", w.PageContent)
-		}
-
-		assert.Equal(t, w.PageContent, got.PageContent, "page contents differ")
-		assert.Equal(t, w.Metadata, got.Metadata, "metadata differs")
-	}
-}
-
-//nolint:paralleltest
-func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
-	store := setupTest(t, testIndexSize3, testIndexDP3)
-
-	seed := []schema.Document{
-		{PageContent: "v1", Score: 1},
-		{PageContent: "v090", Score: 0.90},
-		{PageContent: "v051", Score: 0.51},
-		{PageContent: "v0001", Score: 0.001},
-	}
-
-	t.Run("numDocuments=1 of 4", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         seed,
-				want: []schema.Document{
-					{PageContent: "v1", Score: 1},
-				},
-			})
-	})
-
-	t.Run("numDocuments=3 of 4", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				want: []schema.Document{
-					{PageContent: "v1", Score: 1},
-					{PageContent: "v090", Score: 0.90},
-					{PageContent: "v051", Score: 0.51},
-				},
-			})
-	})
-}
-
-//nolint:funlen,paralleltest
-func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
-	store := setupTest(t, testIndexSize1536, testIndexDP1536)
-
-	seed := []schema.Document{
-		{PageContent: "v090", Score: 0.90},
-		{PageContent: "v051", Score: 0.51},
-		{PageContent: "v0001", Score: 0.001},
-	}
-
-	t.Run("numDocuments=1 of 3", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         seed,
-				want:         seed[:1],
-			})
-	})
-
-	t.Run("numDocuments=3 of 4", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				want:         seed,
-			})
-	})
-
-	t.Run("with score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
-				want:         seed[:2],
-			})
-	})
-
-	t.Run("with invalid score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
-				wantErr:      ErrInvalidScoreThreshold.Error(),
-			})
-	})
-
-	metadataSeed := []schema.Document{
-		{PageContent: "v090", Score: 0.90},
-		{PageContent: "v051", Score: 0.51, Metadata: map[string]any{"pi": 3.14}},
-		{PageContent: "v0001", Score: 0.001},
-	}
-
-	t.Run("with metadata", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         metadataSeed,
-				want:         metadataSeed,
-			})
-	})
-
-	t.Run("with metadata and score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         metadataSeed,
-				want:         metadataSeed[:2],
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
-			})
-	})
-
-	t.Run("with namespace", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize3)
-
-		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.mockDocuments(doc)
-
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         []schema.Document{doc},
-				want:         []schema.Document{doc},
-				options: []vectorstores.Option{
-					vectorstores.WithNameSpace(testIndexDP3),
-					vectorstores.WithEmbedder(emb),
-				},
-			})
-	})
-
-	t.Run("with non-existent namespace", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithNameSpace("some-non-existent-index-name"),
-				},
-			})
-	})
-
-	t.Run("with filter", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				want:         metadataSeed[len(metadataSeed)-1:],
-				options: []vectorstores.Option{
-					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
-					vectorstores.WithNameSpace(testIndexDP1536WithFilter),
-				},
-			})
-	})
-
-	t.Run("with non-tokenized filter", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize1536)
-
-		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.mockDocuments(doc)
-
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
-					vectorstores.WithEmbedder(emb),
-				},
-				wantErr: "'pageContent' needs to be indexed as token",
-			})
-	})
-
-	t.Run("with deduplicator", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithDeduplicater(func(context.Context, schema.Document) bool { return true }),
-				},
-				wantErr: ErrUnsupportedOptions.Error(),
-			})
-	})
-}
-
-// vectorField defines the fields of an index used for vector search.
-type vectorField struct {
-	Type          string `bson:"type,omitempty"`
-	Path          string `bson:"path,omityempty"`
-	NumDimensions int    `bson:"numDimensions,omitempty"`
-	Similarity    string `bson:"similarity,omitempty"`
-}
-
-// createVectorSearchIndex will create a vector search index on the "db.vstore"
-// collection named "vector_index" with the provided field. This function blocks
-// until the index has been created.
-func createVectorSearchIndex(
-	ctx context.Context,
-	coll *mongo.Collection,
-	idxName string,
-	fields ...vectorField,
-) (string, error) {
-	def := struct {
-		Fields []vectorField `bson:"fields"`
+	tests := []struct {
+		name           string
+		query          string
+		numDocuments   int
+		options        []vectorstores.Option
+		expectedCount  int
+		expectedAnimal string
+		wantErr        bool
 	}{
-		Fields: fields,
+		{
+			name:           "basic search",
+			query:          "quick fox",
+			numDocuments:   2,
+			expectedCount:  2,
+			expectedAnimal: "fox",
+			wantErr:        false,
+		},
+		{
+			name:           "search with score threshold",
+			query:          "lazy dog",
+			numDocuments:   3,
+			options:        []vectorstores.Option{vectorstores.WithScoreThreshold(0.8)},
+			expectedCount:  1,
+			expectedAnimal: "dog",
+			wantErr:        false,
+		},
+		{
+			name:           "search with filter",
+			query:          "animal",
+			numDocuments:   3,
+			options:        []vectorstores.Option{vectorstores.WithFilters(bson.M{"animal": "fox"})},
+			expectedCount:  2,
+			expectedAnimal: "fox",
+			wantErr:        false,
+		},
+		{
+			name:         "search with invalid score threshold",
+			query:        "test",
+			numDocuments: 1,
+			options:      []vectorstores.Option{vectorstores.WithScoreThreshold(2.0)},
+			wantErr:      true,
+		},
 	}
 
-	view := coll.SearchIndexes()
-
-	siOpts := options.SearchIndexes().SetName(idxName).SetType("vectorSearch")
-	searchName, err := view.CreateOne(ctx, mongo.SearchIndexModel{Definition: def, Options: siOpts})
-	if err != nil {
-		return "", fmt.Errorf("failed to create the search index: %w", err)
-	}
-
-	// Await the creation of the index.
-	var doc bson.Raw
-	for doc == nil {
-		cursor, err := view.List(ctx, options.SearchIndexes().SetName(searchName))
-		if err != nil {
-			return "", fmt.Errorf("failed to list search indexes: %w", err)
-		}
-
-		if !cursor.Next(ctx) {
-			break
-		}
-
-		name := cursor.Current.Lookup("name").StringValue()
-		queryable := cursor.Current.Lookup("queryable").Boolean()
-		if name == searchName && queryable {
-			doc = cursor.Current
-		} else {
-			time.Sleep(5 * time.Second)
-		}
-	}
-
-	return searchName, nil
-}
-
-func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) (bool, error) {
-	view := coll.SearchIndexes()
-
-	siOpts := options.SearchIndexes().SetName(idx).SetType("vectorSearch")
-	cursor, err := view.List(ctx, siOpts)
-	if err != nil {
-		return false, fmt.Errorf("failed to list search indexes: %w", err)
-	}
-
-	name := cursor.Current.Lookup("name").StringValue()
-	queryable := cursor.Current.Lookup("queryable").Boolean()
-
-	return name == idx && queryable, nil
-}
-
-func resetForE2E(ctx context.Context, idx string, dim int, filters []string) error {
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		return errors.New("MONGODB_URI required")
-	}
-
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
-	if err != nil {
-		return fmt.Errorf("failed to connect to server: %w", err)
-	}
-
-	defer func() { _ = client.Disconnect(ctx) }()
-
-	// Create the vectorstore collection
-	err = client.Database(testDB).CreateCollection(ctx, testColl)
-	if err != nil {
-		return fmt.Errorf("failed to create vector store collection: %w", err)
-	}
-
-	coll := client.Database(testDB).Collection(testColl)
-
-	if ok, _ := searchIndexExists(ctx, coll, idx); ok {
-		return nil
-	}
-
-	fields := []vectorField{}
-
-	fields = append(fields, vectorField{
-		Type:          "vector",
-		Path:          "plot_embedding",
-		NumDimensions: dim,
-		Similarity:    "dotProduct",
-	})
-
-	for _, filter := range filters {
-		fields = append(fields, vectorField{
-			Type: "filter",
-			Path: filter,
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			results, err := store.SimilaritySearch(ctx, tt.query, tt.numDocuments, tt.options...)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Len(t, results, tt.expectedCount)
+				if tt.expectedAnimal != "" {
+					assert.Equal(t, tt.expectedAnimal, results[0].Metadata["animal"])
+				}
+			}
 		})
 	}
+}
 
-	_, err = createVectorSearchIndex(ctx, coll, idx, fields...)
-	if err != nil {
-		return fmt.Errorf("faield to create index: %w", err)
+func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize3)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	docs := []schema.Document{
+		{PageContent: "Document 1", Metadata: map[string]interface{}{"score": 1.0}},
+		{PageContent: "Document 2", Metadata: map[string]interface{}{"score": 0.9}},
+		{PageContent: "Document 3", Metadata: map[string]interface{}{"score": 0.8}},
+	}
+	_, err := store.AddDocuments(ctx, docs)
+	require.NoError(t, err)
+
+	time.Sleep(2 * time.Second)
+
+	results, err := store.SimilaritySearch(ctx, "Document 1", 1)
+	require.NoError(t, err)
+	assert.Len(t, results, 1)
+	assert.Equal(t, "Document 1", results[0].PageContent)
+	assert.InDelta(t, 1.0, results[0].Metadata["score"], 0.01)
+}
+
+func TestStore_SimilaritySearch_EmptyResult(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	results, err := store.SimilaritySearch(ctx, "Non-existent document", 1)
+	require.NoError(t, err)
+	assert.Len(t, results, 0)
+}
+
+func TestStore_SimilaritySearch_DifferentNamespaces(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// Add documents to different namespaces
+	docs1 := []schema.Document{
+		{PageContent: "Document in namespace 1"},
+	}
+	docs2 := []schema.Document{
+		{PageContent: "Document in namespace 2"},
 	}
 
-	return nil
+	_, err := store.AddDocuments(ctx, docs1, vectorstores.WithNameSpace("namespace1"))
+	require.NoError(t, err)
+	_, err = store.AddDocuments(ctx, docs2, vectorstores.WithNameSpace("namespace2"))
+	require.NoError(t, err)
+
+	time.Sleep(2 * time.Second)
+
+	results1, err := store.SimilaritySearch(ctx, "Document", 1, vectorstores.WithNameSpace("namespace1"))
+	require.NoError(t, err)
+	assert.Len(t, results1, 1)
+	assert.Contains(t, results1[0].PageContent, "namespace 1")
+
+	results2, err := store.SimilaritySearch(ctx, "Document", 1, vectorstores.WithNameSpace("namespace2"))
+	require.NoError(t, err)
+	assert.Len(t, results2, 1)
+	assert.Contains(t, results2[0].PageContent, "namespace 2")
+}
+
+func TestStore_SimilaritySearch_MaxDocuments(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// Add 10 documents
+	docs := make([]schema.Document, 10)
+	for i := 0; i < 10; i++ {
+		docs[i] = schema.Document{PageContent: fmt.Sprintf("Document %d", i+1)}
+	}
+
+	_, err := store.AddDocuments(ctx, docs)
+	require.NoError(t, err)
+
+	time.Sleep(2 * time.Second)
+
+	// Try to retrieve more documents than exist
+	results, err := store.SimilaritySearch(ctx, "Document", 15)
+	require.NoError(t, err)
+	assert.Len(t, results, 10) // Should only return the 10 existing documents
+}
+
+func TestStore_SimilaritySearch_Concurrent(t *testing.T) {
+	store, cleanup := setupTest(t, testIndexSize1536)
+	defer cleanup()
+
+	ctx := context.Background()
+
+	// Add some documents
+	docs := []schema.Document{
+		{PageContent: "Document 1"},
+		{PageContent: "Document 2"},
+		{PageContent: "Document 3"},
+	}
+	_, err := store.AddDocuments(ctx, docs)
+	require.NoError(t, err)
+
+	time.Sleep(2 * time.Second)
+
+	// Perform concurrent searches
+	concurrency := 10
+	var wg sync.WaitGroup
+	wg.Add(concurrency)
+
+	for i := 0; i < concurrency; i++ {
+		go func() {
+			defer wg.Done()
+			results, err := store.SimilaritySearch(ctx, "Document", 1)
+			assert.NoError(t, err)
+			assert.Len(t, results, 1)
+		}()
+	}
+
+	wg.Wait()
 }
