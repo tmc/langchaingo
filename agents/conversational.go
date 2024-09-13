@@ -123,14 +123,14 @@ func (a *ConversationalAgent) GetTools() []tools.Tool {
 	return a.Tools
 }
 
-func constructScratchPad(steps []schema.AgentStep, language i18n.Lang) string {
+func constructScratchPad(steps []schema.AgentStep, lang i18n.Lang) string {
 	var scratchPad string
 	if len(steps) > 0 {
 		for _, step := range steps {
 			scratchPad += step.Action.Log
-			scratchPad += fmt.Sprintf("\n%s %s", i18n.AgentsMustPhrase(language, "observation"), step.Observation)
+			scratchPad += fmt.Sprintf("\n%s %s", i18n.AgentsMustPhrase(lang, "observation"), step.Observation)
 		}
-		scratchPad += fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(language, "thought"))
+		scratchPad += fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(lang, "thought"))
 	}
 
 	return scratchPad

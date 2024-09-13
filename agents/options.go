@@ -182,10 +182,10 @@ func WithParserErrorHandler(errorHandler *ParserErrorHandler) Option {
 	}
 }
 
-// WithLanguage is an option for setting language the prompt will use.
-func WithLanguage(language i18n.Lang) Option {
+// WithLang is an option for setting language the prompt will use.
+func WithLang(lang i18n.Lang) Option {
 	return func(co *Options) {
-		co.lang = language
+		co.lang = lang
 	}
 }
 
