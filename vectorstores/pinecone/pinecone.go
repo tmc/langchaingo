@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"math"
 
 	"github.com/google/uuid"
 	"github.com/pinecone-io/go-pinecone/pinecone"
@@ -160,7 +159,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 		&ctx,
 		&pinecone.QueryByVectorValuesRequest{
 			Vector:          vector,
-			TopK:            uint32(max(0, min(numDocuments, math.MaxUint32))),
+			TopK:            uint32(numDocuments),
 			Filter:          protoFilterStruct,
 			IncludeMetadata: true,
 			IncludeValues:   true,
@@ -245,18 +244,4 @@ func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
 	}
 
 	return &filterStruct, nil
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

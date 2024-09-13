@@ -3,7 +3,6 @@ package llamafile
 import (
 	"context"
 	"errors"
-	"math"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -168,33 +167,19 @@ func makeLlamaOptionsFromOptions(input *llamafileclient.ChatRequest, opts llms.C
 	// Initialize llamaOptions with values from opts
 	streamValue := opts.StreamingFunc != nil
 
-	input.FrequencyPenalty = opts.FrequencyPenalty              // Assuming FrequencyPenalty correlates to FrequencyPenalty; adjust if necessary
-	input.MinP = float64(opts.MinLength)                        // Assuming there's a direct correlation; adjust if necessary
-	input.Model = opts.Model                                    // Assuming Model correlates to Model; adjust if necessary
-	input.NCtx = opts.N                                         // Assuming N corresponds to NCtx; if not, adjust.
-	input.NPredict = opts.MaxTokens                             // Assuming MaxTokens correlates to NPredict;
-	input.PresencePenalty = opts.PresencePenalty                // Assuming PresencePenalty correlates to PresencePenalty;
-	input.RepeatPenalty = opts.RepetitionPenalty                // Assuming RepetitionPenalty correlates to RepeatPenalty;
-	input.Seed = uint32(max(0, min(opts.Seed, math.MaxUint32))) // Convert int to uint32
-	input.Stop = opts.StopWords                                 // Assuming StopWords correlates to Stop;
-	input.Stream = &streamValue                                 // True if StreamingFunc provided; adjust logic as needed.
-	input.Temperature = opts.Temperature                        // Assuming Temperature correlates to Temperature for precision;
-	input.TopK = opts.TopK                                      // Assuming TopK correlates to TopK;
-	input.TopP = opts.TopP                                      // Assuming TopP correlates to TopP;
+	input.FrequencyPenalty = opts.FrequencyPenalty // Assuming FrequencyPenalty correlates to FrequencyPenalty; adjust if necessary
+	input.MinP = float64(opts.MinLength)           // Assuming there's a direct correlation; adjust if necessary
+	input.Model = opts.Model                       // Assuming Model correlates to Model; adjust if necessary
+	input.NCtx = opts.N                            // Assuming N corresponds to NCtx; if not, adjust.
+	input.NPredict = opts.MaxTokens                // Assuming MaxTokens correlates to NPredict;
+	input.PresencePenalty = opts.PresencePenalty   // Assuming PresencePenalty correlates to PresencePenalty;
+	input.RepeatPenalty = opts.RepetitionPenalty   // Assuming RepetitionPenalty correlates to RepeatPenalty;
+	input.Seed = uint32(opts.Seed)                 // Convert int to uint32
+	input.Stop = opts.StopWords                    // Assuming StopWords correlates to Stop;
+	input.Stream = &streamValue                    // True if StreamingFunc provided; adjust logic as needed.
+	input.Temperature = opts.Temperature           // Assuming Temperature correlates to Temperature for precision;
+	input.TopK = opts.TopK                         // Assuming TopK correlates to TopK;
+	input.TopP = opts.TopP                         // Assuming TopP correlates to TopP;
 
 	return input
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
