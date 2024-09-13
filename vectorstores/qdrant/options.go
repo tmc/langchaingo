@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 
+	qc "github.com/qdrant/go-client/qdrant"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
@@ -76,6 +78,21 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
+
+	port, err := strconv.Atoi(o.qdrantURL.Port())
+	if err != nil {
+		return Store{}, fmt.Errorf("failed to convert port to int: %w", err)
+	}
+	client, err := qc.NewClient(&qc.Config{
+		Host:   o.qdrantURL.Hostname(),
+		Port:   port,
+		UseTLS: o.qdrantURL.Scheme == "https",
+	})
+	if err != nil {
+		return Store{}, fmt.Errorf("failed to create Qdrant client: %w", err)
+	}
+
+	o.client = client
 
 	return *o, nil
 }

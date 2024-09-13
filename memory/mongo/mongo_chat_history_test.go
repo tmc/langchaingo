@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -14,9 +13,9 @@ import (
 func runTestContainer() (string, error) {
 	ctx := context.Background()
 
-	mongoContainer, err := mongodb.RunContainer(
+	mongoContainer, err := mongodb.Run(
 		ctx,
-		testcontainers.WithImage("mongo:7.0.8"),
+		"mongo:7.0.8",
 		mongodb.WithUsername("test"),
 		mongodb.WithPassword("test"),
 	)
