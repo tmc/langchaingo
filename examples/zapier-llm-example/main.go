@@ -37,15 +37,10 @@ func main() {
 	agentTools = append(agentTools, tks...)
 
 	// Initialize the agent
-	executor, err := agents.Initialize(
-		llm,
+	agent := agents.NewOneShotAgent(llm,
 		agentTools,
-		agents.ZeroShotReactDescription,
-		agents.WithMaxIterations(3),
-	)
-	if err != nil {
-		panic(err)
-	}
+		agents.WithMaxIterations(3))
+	executor := agents.NewExecutor(agent)
 
 	// run a chain with the executor and defined input
 	input := "Get the last email from noreply@github.com"
