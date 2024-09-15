@@ -180,8 +180,20 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, llms.FunctionChatMessage{
-			Name:    step.Action.Tool,
+		messages = append(messages, llms.AIChatMessage{
+			ToolCalls: []llms.ToolCall{
+				{
+					ID:   step.Action.ToolID,
+					Type: "function",
+					FunctionCall: &llms.FunctionCall{
+						Name:      step.Action.Tool,
+						Arguments: step.Action.ToolInput,
+					},
+				},
+			},
+		})
+		messages = append(messages, llms.ToolChatMessage{
+			ID:      step.Action.ToolID,
 			Content: step.Observation,
 		})
 	}
