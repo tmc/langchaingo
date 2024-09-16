@@ -1,6 +1,6 @@
 // Package mongovector implements a vector store using MongoDB as the backend.
 //
-// Notice: this packge uses the 2.0.0-beta release of the MongoDB Go Driver.
+// Notice: this package uses the 2.0.0-beta release of the MongoDB Go Driver.
 //
 // The mongovector package provides a way to store and retrieve document embeddings
 // using MongoDB's vector search capabilities. It implements the VectorStore
