@@ -2,8 +2,9 @@ package mongovector
 
 import (
 	"context"
-	"flag"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -20,11 +21,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
-
-// Run the test without setting up the test space.
-//
-//nolint:gochecknoglobals
-var testWithoutSetup = flag.Bool("no-atlas-setup", false, "don't create required indexes")
 
 const (
 	testURI                   = "MONGODB_VECTOR_TEST_URI"
@@ -73,7 +69,16 @@ func setupAtlas(ctx context.Context) (*atlasContainer, error) {
 		return atlasC, err
 	}
 
-	atlasC.URI = fmt.Sprintf("mongodb://%s:%s/?directConnection=true", ip, mappedPort.Port())
+	uri := &url.URL{
+		Scheme:   "mongodb",
+		Host:     net.JoinHostPort(ip, mappedPort.Port()),
+		Path:     "/",
+		RawQuery: "directConnection=true",
+	}
+
+	fmt.Println(uri.String())
+
+	atlasC.URI = uri.String()
 
 	return atlasC, nil
 }
