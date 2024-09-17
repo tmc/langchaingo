@@ -49,7 +49,6 @@ func setupAtlas(ctx context.Context) (*atlasContainer, error) {
 		ContainerRequest: req,
 		Started:          true,
 	})
-
 	if err != nil {
 		return nil, err
 	}
