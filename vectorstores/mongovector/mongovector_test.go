@@ -118,7 +118,6 @@ func setupTest(t *testing.T, dim int, index string) Store {
 	defer cancel()
 
 	err = client.Ping(ctx, nil)
-
 	require.NoError(t, err, "failed to ping server")
 
 	time.Sleep(5 * time.Second) // Let the container warm up
