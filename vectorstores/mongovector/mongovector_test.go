@@ -75,8 +75,6 @@ func setupAtlas(ctx context.Context) (*atlasContainer, error) {
 		RawQuery: "directConnection=true",
 	}
 
-	fmt.Println(uri.String())
-
 	atlasC.URI = uri.String()
 
 	return atlasC, nil
