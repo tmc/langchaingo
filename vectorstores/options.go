@@ -17,6 +17,7 @@ type Options struct {
 	Filters        any
 	Embedder       embeddings.Embedder
 	Deduplicater   func(context.Context, schema.Document) bool
+	Replacement    bool
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -57,5 +58,11 @@ func WithEmbedder(embedder embeddings.Embedder) Option {
 func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Option {
 	return func(o *Options) {
 		o.Deduplicater = fn
+	}
+}
+
+func WithReplacement(replacement bool) Option {
+	return func(o *Options) {
+		o.Replacement = replacement
 	}
 }

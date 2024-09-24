@@ -256,6 +256,14 @@ func (s Store) AddDocuments(
 	}
 
 	b := &pgx.Batch{}
+
+	if opts.Replacement {
+		replaceSql := fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND cmetadata::jsonb = $2::jsonb`, s.embeddingTableName)
+		for _, doc := range docs {
+			b.Queue(replaceSql, s.collectionUUID, doc.Metadata)
+		}
+	}
+
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, collection_id)
 		VALUES($1, $2, $3, $4, $5)`, s.embeddingTableName)
 
