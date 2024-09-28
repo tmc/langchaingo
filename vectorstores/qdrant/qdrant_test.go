@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,8 @@ func TestQdrantStore(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
 
@@ -81,6 +84,8 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
 
@@ -136,6 +141,8 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
 
@@ -187,6 +194,8 @@ func TestQdrantAsRetriever(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
 
@@ -235,6 +244,8 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
 
@@ -287,9 +298,10 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 		qdrant.WithAPIKey(apiKey),
 		qdrant.WithCollectionName(collectionName),
 		qdrant.WithEmbedder(e),
+		qdrant.WithTimeout(30*time.Second),
+		qdrant.WithRetry(3),
 	)
 	require.NoError(t, err)
-
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
