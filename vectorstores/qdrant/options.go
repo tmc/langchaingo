@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/tmc/langchaingo/embeddings"
 )
@@ -53,6 +54,20 @@ func WithAPIKey(apiKey string) Option {
 func WithContentKey(contentKey string) Option {
 	return func(p *Store) {
 		p.contentKey = contentKey
+	}
+}
+
+// WithTimout returns an Optin for setting the timeout for the Qdrant requests. Optional.
+func WithTimeout(timeout time.Duration) Option {
+	return func(p *Store) {
+		p.timeout = timeout
+	}
+}
+
+// WithRetry returns an Option for setting the number of retries for the Qdrant requests. Optional.
+func WithRetry(retries int) Option {
+	return func(p *Store) {
+		p.retries = retries
 	}
 }
 
