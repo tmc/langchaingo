@@ -89,10 +89,12 @@ func (co Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemp
 }
 
 // WithMaxIterations is an option for setting the max number of iterations the executor
-// will complete.
+// will complete.It must be a positive integer.
 func WithMaxIterations(iterations int) Option {
 	return func(co *Options) {
-		co.maxIterations = iterations
+		if iterations > 0 {
+			co.maxIterations = iterations
+		}
 	}
 }
 
@@ -157,7 +159,9 @@ func WithCallbacksHandler(handler callbacks.Handler) Option {
 // WithParserErrorHandler is an option for setting a parser error handler to an executor.
 func WithParserErrorHandler(errorHandler *ParserErrorHandler) Option {
 	return func(co *Options) {
-		co.errorHandler = errorHandler
+		if errorHandler != nil {
+			co.errorHandler = errorHandler
+		}
 	}
 }
 
