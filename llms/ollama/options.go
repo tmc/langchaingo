@@ -4,19 +4,18 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-
-	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
+	"time"
 )
 
 type options struct {
 	ollamaServerURL     *url.URL
 	httpClient          *http.Client
 	model               string
-	ollamaOptions       ollamaclient.Options
+	ollamaOptions       map[string]any
 	customModelTemplate string
 	system              string
 	format              string
-	keepAlive           string
+	keepAlive           *time.Duration
 }
 
 type Option func(*options)
@@ -44,7 +43,11 @@ func WithFormat(format string) Option {
 //	If not set, the model will stay loaded for 5 minutes by default
 func WithKeepAlive(keepAlive string) Option {
 	return func(opts *options) {
-		opts.keepAlive = keepAlive
+		duration, err := time.ParseDuration(keepAlive)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opts.keepAlive = &duration
 	}
 }
 
@@ -83,17 +86,10 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-// WithBackendUseNUMA Use NUMA optimization on certain systems.
-func WithRunnerUseNUMA(numa bool) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.UseNUMA = numa
-	}
-}
-
 // WithRunnerNumCtx Sets the size of the context window used to generate the next token (Default: 2048).
 func WithRunnerNumCtx(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.NumCtx = num
+		opts.ollamaOptions["num_ctx"] = num
 	}
 }
 
@@ -101,28 +97,21 @@ func WithRunnerNumCtx(num int) Option {
 // its internal context.
 func WithRunnerNumKeep(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.NumKeep = num
+		opts.ollamaOptions["num_keep"] = num
 	}
 }
 
 // WithRunnerNumBatch Set the batch size for prompt processing (default: 512).
 func WithRunnerNumBatch(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.NumBatch = num
+		opts.ollamaOptions["num_batch"] = num
 	}
 }
 
 // WithRunnerNumThread Set the number of threads to use during computation (default: auto).
 func WithRunnerNumThread(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.NumThread = num
-	}
-}
-
-// WithRunnerNumGQA The number of GQA groups in the transformer layer. Required for some models.
-func WithRunnerNumGQA(num int) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.NumGQA = num
+		opts.ollamaOptions["num_thread"] = num
 	}
 }
 
@@ -130,7 +119,7 @@ func WithRunnerNumGQA(num int) Option {
 // On macOS it defaults to 1 to enable metal support, 0 to disable.
 func WithRunnerNumGPU(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.NumGPU = num
+		opts.ollamaOptions["num_gpu"] = num
 	}
 }
 
@@ -140,7 +129,7 @@ func WithRunnerNumGPU(num int) Option {
 // By default GPU 0 is used.
 func WithRunnerMainGPU(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.MainGPU = num
+		opts.ollamaOptions["main_gpu"] = num
 	}
 }
 
@@ -148,28 +137,28 @@ func WithRunnerMainGPU(num int) Option {
 // Reduces VRAM usage at the cost of performance, particularly prompt processing speed.
 func WithRunnerLowVRAM(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.LowVRAM = val
+		opts.ollamaOptions["low_vram"] = val
 	}
 }
 
 // WithRunnerF16KV If set to falsem, use 32-bit floats instead of 16-bit floats for memory key+value.
 func WithRunnerF16KV(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.F16KV = val
+		opts.ollamaOptions["f16_kv"] = val
 	}
 }
 
 // WithRunnerLogitsAll Return logits for all tokens, not just the last token.
 func WithRunnerLogitsAll(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.LogitsAll = val
+		opts.ollamaOptions["logits_all"] = val
 	}
 }
 
 // WithRunnerVocabOnly Only load the vocabulary, no weights.
 func WithRunnerVocabOnly(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.VocabOnly = val
+		opts.ollamaOptions["vocab_only"] = val
 	}
 }
 
@@ -178,35 +167,14 @@ func WithRunnerVocabOnly(val bool) Option {
 // of the model as needed.
 func WithRunnerUseMMap(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.UseMMap = val
+		opts.ollamaOptions["use_mmap"] = &val
 	}
 }
 
 // WithRunnerUseMLock Force system to keep model in RAM.
 func WithRunnerUseMLock(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.UseMLock = val
-	}
-}
-
-// WithRunnerEmbeddingOnly Only return the embbeding.
-func WithRunnerEmbeddingOnly(val bool) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.EmbeddingOnly = val
-	}
-}
-
-// WithRunnerRopeFrequencyBase RoPE base frequency (default: loaded from model).
-func WithRunnerRopeFrequencyBase(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.RopeFrequencyBase = val
-	}
-}
-
-// WithRunnerRopeFrequencyScale Rope frequency scaling factor (default: loaded from model).
-func WithRunnerRopeFrequencyScale(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.RopeFrequencyScale = val
+		opts.ollamaOptions["use_mlock"] = val
 	}
 }
 
@@ -214,14 +182,14 @@ func WithRunnerRopeFrequencyScale(val float32) Option {
 // A higher value (e.g., 2.0) will reduce the impact more, while a value of 1.0 disables this setting (default: 1).
 func WithPredictTFSZ(val float32) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.TFSZ = val
+		opts.ollamaOptions["tfs_z"] = val
 	}
 }
 
 // WithPredictTypicalP Enable locally typical sampling with parameter p (default: 1.0, 1.0 = disabled).
 func WithPredictTypicalP(val float32) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.TypicalP = val
+		opts.ollamaOptions["typical_p"] = val
 	}
 }
 
@@ -229,7 +197,7 @@ func WithPredictTypicalP(val float32) Option {
 // (Default: 64, 0 = disabled, -1 = num_ctx).
 func WithPredictRepeatLastN(val int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.RepeatLastN = val
+		opts.ollamaOptions["repeat_last_n"] = val
 	}
 }
 
@@ -237,7 +205,7 @@ func WithPredictRepeatLastN(val int) Option {
 // (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0).
 func WithPredictMirostat(val int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.Mirostat = val
+		opts.ollamaOptions["mirostat"] = val
 	}
 }
 
@@ -245,7 +213,7 @@ func WithPredictMirostat(val int) Option {
 // A lower value will result in more focused and coherent text (Default: 5.0).
 func WithPredictMirostatTau(val float32) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.MirostatTau = val
+		opts.ollamaOptions["mirostat_tau"] = val
 	}
 }
 
@@ -254,13 +222,13 @@ func WithPredictMirostatTau(val float32) Option {
 // algorithm more responsive (Default: 0.1).
 func WithPredictMirostatEta(val float32) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.MirostatEta = val
+		opts.ollamaOptions["mirostat_eta"] = val
 	}
 }
 
 // WithPredictPenalizeNewline Penalize newline tokens when applying the repeat penalty (default: true).
 func WithPredictPenalizeNewline(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.PenalizeNewline = val
+		opts.ollamaOptions["penalize_newline"] = val
 	}
 }
