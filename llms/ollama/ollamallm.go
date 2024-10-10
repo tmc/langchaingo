@@ -251,15 +251,33 @@ func typeToRole(typ llms.ChatMessageType) string {
 }
 
 func makeOllamaOptionsFromOptions(ollamaOptions map[string]any, opts llms.CallOptions) map[string]any {
-	ollamaOptions["num_predict"] = opts.MaxTokens
-	ollamaOptions["seed"] = opts.Seed
-	ollamaOptions["top_k"] = opts.TopK
-	ollamaOptions["top_p"] = opts.TopP
-	ollamaOptions["temperature"] = opts.Temperature
-	ollamaOptions["repeat_penalty"] = opts.RepetitionPenalty
-	ollamaOptions["presence_penalty"] = opts.PresencePenalty
-	ollamaOptions["frequency_penalty"] = opts.FrequencyPenalty
-	ollamaOptions["stop"] = opts.StopWords
+	if opts.MaxTokensSet {
+		ollamaOptions["num_predict"] = opts.MaxTokens
+	}
+	if opts.SeedSet {
+		ollamaOptions["seed"] = opts.Seed
+	}
+	if opts.TopKSet {
+		ollamaOptions["top_k"] = opts.TopK
+	}
+	if opts.TopPSet {
+		ollamaOptions["top_p"] = opts.TopP
+	}
+	if opts.TemperatureSet {
+		ollamaOptions["temperature"] = opts.Temperature
+	}
+	if opts.RepetitionPenaltySet {
+		ollamaOptions["repeat_penalty"] = opts.RepetitionPenalty
+	}
+	if opts.PresencePenaltySet {
+		ollamaOptions["presence_penalty"] = opts.PresencePenalty
+	}
+	if opts.FrequencyPenaltySet {
+		ollamaOptions["frequency_penalty"] = opts.FrequencyPenalty
+	}
+	if opts.StopWordsSet {
+		ollamaOptions["stop"] = opts.StopWords
+	}
 
 	return ollamaOptions
 }
