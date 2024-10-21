@@ -8,7 +8,6 @@ import (
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
-	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -106,7 +105,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
+		ids[docIdx] = opts.GenerateDoumentID(ctx, doc, ids)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
 		maps.Copy(mc, doc.Metadata)

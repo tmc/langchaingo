@@ -2,7 +2,10 @@ package vectorstores
 
 import (
 	"context"
+	"log/slog"
+	"slices"
 
+	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -12,11 +15,12 @@ type Option func(*Options)
 
 // Options is a set of options for similarity search and add documents.
 type Options struct {
-	NameSpace      string
-	ScoreThreshold float32
-	Filters        any
-	Embedder       embeddings.Embedder
-	Deduplicater   func(context.Context, schema.Document) bool
+	NameSpace           string
+	ScoreThreshold      float32
+	Filters             any
+	Embedder            embeddings.Embedder
+	Deduplicater        func(context.Context, schema.Document) bool
+	DocumentIDGenerater func(context.Context, schema.Document) string
 }
 
 // WithNameSpace returns an Option for setting the name space.
@@ -58,4 +62,33 @@ func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Op
 	return func(o *Options) {
 		o.Deduplicater = fn
 	}
+}
+
+// WithIDGenerater returns an Option for setting to generate the IDS
+func WithIDGenerater(fn func(ctx context.Context, doc schema.Document) string) Option {
+	return func(o *Options) {
+		o.DocumentIDGenerater = fn
+	}
+}
+
+// generateDummyDoumentID generates a UUID
+func (o Options) generateDummyDoumentID(_ context.Context) string {
+	return uuid.NewString()
+}
+
+// GenerateDoumentID calls the provided ID generator or creates a new UUID if not provided or the generated ID is not unique
+func (o Options) GenerateDoumentID(ctx context.Context, doc schema.Document, ids []string) string {
+	if o.DocumentIDGenerater == nil {
+		return o.generateDummyDoumentID(ctx)
+	}
+	id := o.DocumentIDGenerater(ctx, doc)
+	if len(id) < 1 {
+		slog.Warn("Document ID generator did not generate an id", "id", id)
+		return o.generateDummyDoumentID(ctx)
+	}
+	if slices.Contains(ids, id) {
+		slog.Warn("Document ID generator generated a non unique id", "id", id)
+		return o.generateDummyDoumentID(ctx)
+	}
+	return id
 }
