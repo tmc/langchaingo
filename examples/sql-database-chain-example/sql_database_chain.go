@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools/sqldatabase"
-	_ "github.com/tmc/langchaingo/tools/sqldatabase/sqlite3"
+	"github.com/starmvp/langchaingo/chains"
+	"github.com/starmvp/langchaingo/llms/openai"
+	"github.com/starmvp/langchaingo/tools/sqldatabase"
+	_ "github.com/starmvp/langchaingo/tools/sqldatabase/sqlite3"
 )
 
 func main() {

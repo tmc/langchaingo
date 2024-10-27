@@ -9,11 +9,11 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/embeddings/cybertron"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/weaviate"
+	"github.com/starmvp/langchaingo/embeddings"
+	"github.com/starmvp/langchaingo/embeddings/cybertron"
+	"github.com/starmvp/langchaingo/schema"
+	"github.com/starmvp/langchaingo/vectorstores"
+	"github.com/starmvp/langchaingo/vectorstores/weaviate"
 )
 
 func cosineSimilarity(x, y []float32) float32 {

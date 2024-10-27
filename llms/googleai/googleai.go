@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
-	"github.com/tmc/langchaingo/internal/imageutil"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/starmvp/langchaingo/internal/imageutil"
+	"github.com/starmvp/langchaingo/llms"
 	"google.golang.org/api/iterator"
 )
 

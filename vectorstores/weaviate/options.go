@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/starmvp/langchaingo/embeddings"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/auth"
 	"golang.org/x/exp/slices"
 )

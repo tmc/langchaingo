@@ -3,9 +3,9 @@ package agents
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/schema"
+	"github.com/starmvp/langchaingo/tools"
 )
 
 // Agent is the interface all agents must implement.

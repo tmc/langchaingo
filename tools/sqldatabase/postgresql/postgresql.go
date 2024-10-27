@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // postgresql driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	"github.com/starmvp/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "pgx"
