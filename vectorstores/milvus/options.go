@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/starmvp/langchaingo/embeddings"
 )
 
 const (

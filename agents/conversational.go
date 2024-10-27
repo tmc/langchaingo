@@ -7,12 +7,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/starmvp/langchaingo/callbacks"
+	"github.com/starmvp/langchaingo/chains"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/prompts"
+	"github.com/starmvp/langchaingo/schema"
+	"github.com/starmvp/langchaingo/tools"
 )
 
 const (

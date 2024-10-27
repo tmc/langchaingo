@@ -11,9 +11,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/googleai/vertex"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/llms/googleai"
+	"github.com/starmvp/langchaingo/llms/googleai/vertex"
 )
 
 func main() {

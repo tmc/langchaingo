@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/internal/maputil"
-	"github.com/tmc/langchaingo/internal/setutil"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/starmvp/langchaingo/internal/maputil"
+	"github.com/starmvp/langchaingo/internal/setutil"
+	"github.com/starmvp/langchaingo/memory"
+	"github.com/starmvp/langchaingo/schema"
 )
 
 const delimiter = ","

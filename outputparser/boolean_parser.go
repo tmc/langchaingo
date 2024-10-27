@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/schema"
 	"golang.org/x/exp/slices"
 )
 

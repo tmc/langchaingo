@@ -1,4 +1,4 @@
-module github.com/tmc/langchaingo
+module github.com/starmvp/langchaingo
 
 go 1.22.0
 

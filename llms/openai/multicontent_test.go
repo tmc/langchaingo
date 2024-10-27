@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/starmvp/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
@@ -80,7 +80,7 @@ func TestMultiContentImage(t *testing.T) {
 	llm := newTestClient(t, WithModel("gpt-4-vision-preview"))
 
 	parts := []llms.ContentPart{
-		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		llms.ImageURLPart("https://github.com/starmvp/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
 		llms.TextPart("describe this image in detail"),
 	}
 	content := []llms.MessageContent{

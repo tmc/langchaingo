@@ -8,7 +8,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/nikolalohinski/gonja"
-	"github.com/tmc/langchaingo/prompts/internal/fstring"
+	"github.com/starmvp/langchaingo/prompts/internal/fstring"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/schema"
 )
 
 // Defined parses JSON output from an LLM into Go structs. By providing

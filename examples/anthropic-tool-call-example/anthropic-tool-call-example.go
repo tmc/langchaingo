@@ -7,8 +7,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/anthropic"
+	"github.com/starmvp/langchaingo/llms"
+	"github.com/starmvp/langchaingo/llms/anthropic"
 )
 
 func main() {

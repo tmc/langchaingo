@@ -8,7 +8,7 @@ import (
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/starmvp/langchaingo/llms"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 )

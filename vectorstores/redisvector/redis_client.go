@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/redis/rueidis"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/starmvp/langchaingo/schema"
 	"golang.org/x/exp/maps"
 )
 
