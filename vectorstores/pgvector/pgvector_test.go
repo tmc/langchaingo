@@ -179,6 +179,51 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 10)
 }
 
+func TestPgvectorStoreSimilarityScore(t *testing.T) {
+	t.Parallel()
+	pgvectorURL := preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+	)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithConn(conn),
+		pgvector.WithEmbedder(e),
+		pgvector.WithPreDeleteCollection(true),
+		pgvector.WithCollectionName(makeNewCollectionName()),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Tokyo is the capital city of Japan."},
+		{PageContent: "Paris is the city of love."},
+		{PageContent: "I like to visit London."},
+	})
+	require.NoError(t, err)
+
+	// test with a score threshold of 0.8, expected 6 documents
+	docs, err := store.SimilaritySearch(
+		ctx,
+		"What is the capital city of Japan?",
+		3,
+		vectorstores.WithScoreThreshold(0.8),
+	)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.True(t, docs[0].Score > 0.9)
+}
+
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
