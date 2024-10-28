@@ -487,27 +487,27 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 	return llms.Model(llm), e
 }
 
-/**
-func runOllamaTestContainer(model string) (*tcollama.OllamaContainer, string) {
-	ctx := context.Background()
+// /**
+// func runOllamaTestContainer(model string) (*tcollama.OllamaContainer, string) {
+// 	ctx := context.Background()
 
-	ollamaContainer, err := tcollama.RunContainer(
-		ctx,
-		testcontainers.WithImage("ollama/ollama:0.1.31"),
-	)
-	if err != nil {
-		log.Fatalf("failed to start container: %s", err)
-	}
+// 	ollamaContainer, err := tcollama.Run(
+// 		ctx,
+// 		"ollama/ollama:0.1.31",
+// 	)
+// 	if err != nil {
+// 		log.Fatalf("failed to start container: %s", err)
+// 	}
 
-	_, _, err = ollamaContainer.Exec(ctx, []string{"ollama", "pull", model})
-	if err != nil {
-		log.Fatalf("failed to pull model %s: %s", model, err)
-	}
+// 	_, _, err = ollamaContainer.Exec(ctx, []string{"ollama", "pull", model})
+// 	if err != nil {
+// 		log.Fatalf("failed to pull model %s: %s", model, err)
+// 	}
 
-	connectionStr, err := ollamaContainer.ConnectionString(ctx)
-	if err != nil {
-		log.Fatalf("failed to get connection string: %s", err) // nolint:gocritic
-	}
-	return ollamaContainer, connectionStr
-}
-*/
+// 	connectionStr, err := ollamaContainer.ConnectionString(ctx)
+// 	if err != nil {
+// 		log.Fatalf("failed to get connection string: %s", err) // nolint:gocritic
+// 	}
+// 	return ollamaContainer, connectionStr
+// }
+// */
