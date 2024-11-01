@@ -114,9 +114,8 @@ func (s Store) AddDocuments(ctx context.Context,
 			metadatas[docIdx][s.nameSpaceKey] = nameSpace
 		}
 	}
-
 	col := s.collection
-	if _, addErr := col.Add(ctx, nil, metadatas, texts, ids); addErr != nil {
+	if _, addErr := col.Upsert(ctx, nil, metadatas, texts, ids); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
 	return ids, nil
