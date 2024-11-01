@@ -105,7 +105,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = opts.GenerateDoumentID(ctx, doc, ids)
+		ids[docIdx] = opts.GenerateDocumentID(ctx, doc, ids)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
 		maps.Copy(mc, doc.Metadata)

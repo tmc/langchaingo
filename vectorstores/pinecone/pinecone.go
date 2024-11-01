@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/pinecone-io/go-pinecone/pinecone"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -104,7 +103,7 @@ func (s Store) AddDocuments(ctx context.Context,
 			return nil, err
 		}
 
-		id := uuid.New().String()
+		id := opts.GenerateDocumentID(ctx, docs[i], ids)
 		ids[i] = id
 		pineconeVectors = append(
 			pineconeVectors,

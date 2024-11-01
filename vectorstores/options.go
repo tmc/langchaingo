@@ -76,8 +76,8 @@ func (o Options) generateDummyDoumentID(_ context.Context) string {
 	return uuid.NewString()
 }
 
-// GenerateDoumentID calls the provided ID generator or creates a new UUID if not provided or the generated ID is not unique
-func (o Options) GenerateDoumentID(ctx context.Context, doc schema.Document, ids []string) string {
+// GenerateDocumentID calls the provided ID generator or creates a new UUID if not provided or the generated ID is not unique
+func (o Options) GenerateDocumentID(ctx context.Context, doc schema.Document, ids []string) string {
 	if o.DocumentIDGenerater == nil {
 		return o.generateDummyDoumentID(ctx)
 	}
