@@ -105,6 +105,11 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
+		if opts.Deduplicater != nil {
+			if opts.Deduplicater(ctx, doc) {
+				continue
+			}
+		}
 		ids[docIdx] = opts.GenerateDocumentID(ctx, doc, ids)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
