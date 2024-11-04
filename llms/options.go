@@ -62,6 +62,12 @@ type CallOptions struct {
 	// The meaning of this field is specific to the backend in use.
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 
+	// ResponseMIMEType MIME type of the generated candidate text.
+	// Supported MIME types are: text/plain: (default) Text output.
+	// application/json: JSON response in the response candidates.
+	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// ExtraHeaders is a map of extra headers to include in the request.
 	ExtraHeaders map[string]string `json:"extra_headers,omitempty"`
 }
 
@@ -81,6 +87,8 @@ type FunctionDefinition struct {
 	Description string `json:"description"`
 	// Parameters is a list of parameters for the function.
 	Parameters any `json:"parameters,omitempty"`
+	// Strict is a flag to indicate if the function should be called strictly. Only used for openai llm structured output.
+	Strict bool `json:"strict,omitempty"`
 }
 
 // ToolChoice is a specific tool to use.
@@ -265,11 +273,5 @@ func WithJSONMode() CallOption {
 func WithMetadata(metadata map[string]interface{}) CallOption {
 	return func(o *CallOptions) {
 		o.Metadata = metadata
-	}
-}
-
-func WithExtraHeaders(headers map[string]string) CallOption {
-	return func(o *CallOptions) {
-		o.ExtraHeaders = headers
 	}
 }
