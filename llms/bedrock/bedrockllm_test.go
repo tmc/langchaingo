@@ -40,13 +40,13 @@ func TestAmazonOutput(t *testing.T) {
 		{
 			Role: llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{
-				llms.TextPart("You know all about AI."),
+				llms.TextPart("You know all about AI.", false),
 			},
 		},
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
-				llms.TextPart("Explain AI in 10 words or less."),
+				llms.TextPart("Explain AI in 10 words or less.", false),
 			},
 		},
 	}
