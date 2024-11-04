@@ -29,8 +29,8 @@ func TestMultiContentText(t *testing.T) {
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("What kind of mammal am I?"),
+		llms.TextPart("I'm a pomeranian", false),
+		llms.TextPart("What kind of mammal am I?", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -54,15 +54,15 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
+			Parts: []llms.ContentPart{llms.TextPart("Name some countries", false)},
 		},
 		{
 			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
+			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho", false)},
 		},
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
+			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?", false)},
 		},
 	}
 
@@ -81,7 +81,7 @@ func TestMultiContentImage(t *testing.T) {
 
 	parts := []llms.ContentPart{
 		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
-		llms.TextPart("describe this image in detail"),
+		llms.TextPart("describe this image in detail", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -103,8 +103,8 @@ func TestWithStreaming(t *testing.T) {
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("Tell me more about my taxonomy"),
+		llms.TextPart("I'm a pomeranian", false),
+		llms.TextPart("Tell me more about my taxonomy", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -134,7 +134,7 @@ func TestFunctionCall(t *testing.T) {
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
-		llms.TextPart("What is the weather like in Boston?"),
+		llms.TextPart("What is the weather like in Boston?", false),
 	}
 	content := []llms.MessageContent{
 		{
