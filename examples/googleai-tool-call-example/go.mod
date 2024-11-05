@@ -1,8 +1,8 @@
-module github.com/tmc/langchaingo/examples/googleai-tool-call-example
+module github.com/starmvp/langchaingo/examples/googleai-tool-call-example
 
 go 1.22.2
 
-require github.com/tmc/langchaingo v0.1.13-pre.0
+require github.com/starmvp/langchaingo v0.1.13-pre.0.0.20241027060057-c3d8225eda69
 
 require (
 	cloud.google.com/go v0.114.0 // indirect

@@ -1,10 +1,10 @@
-module github.com/tmc/langchaingo/examples/mistral-summarization-example
+module github.com/starmvp/langchaingo/examples/mistral-summarization-example
 
 go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.13-pre.0
+require github.com/starmvp/langchaingo v0.1.13-pre.0.0.20241027060057-c3d8225eda69
 
 require (
 	github.com/AssemblyAI/assemblyai-go-sdk v1.3.0 // indirect
@@ -52,5 +52,5 @@ require (
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	nhooyr.io/websocket v1.8.7 // indirect
+	github.com/coder/websocket v1.8.12 // indirect
 )

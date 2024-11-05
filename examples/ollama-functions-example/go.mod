@@ -1,8 +1,8 @@
-module github.com/tmc/langchaingo/examples/ollama-functions-example
+module github.com/starmvp/langchaingo/examples/ollama-functions-example
 
 go 1.22.0
 
-require github.com/tmc/langchaingo v0.1.13-pre.0
+require github.com/starmvp/langchaingo v0.1.13-pre.0.0.20241027060057-c3d8225eda69
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

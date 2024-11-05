@@ -1,10 +1,10 @@
-module github.com/tmc/langchaingo/examples/openai-completion-example
+module github.com/starmvp/langchaingo/examples/openai-completion-example
 
 go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.13-pre.0
+require github.com/starmvp/langchaingo v0.1.13-pre.0.0.20241027060057-c3d8225eda69
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

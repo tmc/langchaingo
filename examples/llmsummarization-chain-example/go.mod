@@ -1,10 +1,10 @@
-module github.com/tmc/langchaingo/examples/llmsummarization-chain-example
+module github.com/starmvp/langchaingo/examples/llmsummarization-chain-example
 
 go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.13-pre.0
+require github.com/starmvp/langchaingo v0.1.13-pre.0.0.20241027060057-c3d8225eda69
 
 require (
 	cloud.google.com/go v0.114.0 // indirect
@@ -84,5 +84,5 @@ require (
 	google.golang.org/grpc v1.64.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	nhooyr.io/websocket v1.8.7 // indirect
+	github.com/coder/websocket v1.8.12 // indirect
 )
