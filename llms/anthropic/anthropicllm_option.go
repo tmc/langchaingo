@@ -6,6 +6,7 @@ import (
 
 const (
 	tokenEnvVarName = "ANTHROPIC_API_KEY" //nolint:gosec
+	modelEnvVarName = "ANTHROPIC_MODEL"   //nolint:gosec
 )
 
 // MaxTokensAnthropicSonnet35 is the header value for specifying the maximum number of tokens
@@ -34,7 +35,9 @@ func WithToken(token string) Option {
 	}
 }
 
-// WithModel passes the Anthropic model to the client.
+// WithModel passes the Anthropic model to the client. If not set, the model
+// is read from the ANTHROPIC_MODEL environment variable. If that is not set,
+// `defaultModel` in the anthropicclient package is used.
 func WithModel(model string) Option {
 	return func(opts *options) {
 		opts.model = model

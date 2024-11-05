@@ -46,8 +46,8 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	case payload.Model != "":
 
 	// If no model is set in the payload, take the one specified in the client.
-	case c.Model != "":
-		payload.Model = c.Model
+	case c.model != "":
+		payload.Model = c.model
 	// Fallback: use the default model
 	default:
 		payload.Model = defaultModel
