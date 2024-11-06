@@ -77,7 +77,7 @@ func (m *ConversationBuffer) SaveContext(
 	inputValues map[string]any,
 	outputValues map[string]any,
 ) error {
-	userInputValue, err := getInputValue(inputValues, m.InputKey)
+	userInputValue, err := GetInputValue(inputValues, m.InputKey)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (m *ConversationBuffer) SaveContext(
 		return err
 	}
 
-	aiOutputValue, err := getInputValue(outputValues, m.OutputKey)
+	aiOutputValue, err := GetInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func (m *ConversationBuffer) GetMemoryKey(context.Context) string {
 	return m.MemoryKey
 }
 
-func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
+func GetInputValue(inputValues map[string]any, inputKey string) (string, error) {
 	// If the input key is set, return the value in the inputValues with the input key.
 	if inputKey != "" {
 		inputValue, ok := inputValues[inputKey]

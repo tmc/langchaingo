@@ -50,7 +50,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 		return err
 	}
 
-	token := fmt.Sprintf("key %v", c.Token)
+	token := fmt.Sprintf("Key %v", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
 	request.Header.Set("Authorization", token)

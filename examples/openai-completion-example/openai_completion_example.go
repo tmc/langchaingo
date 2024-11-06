@@ -25,5 +25,6 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("The first man to walk on the moon:")
 	fmt.Println(completion)
 }

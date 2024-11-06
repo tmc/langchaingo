@@ -15,6 +15,7 @@ import (
 var (
 	ErrEmptyResponse            = errors.New("no response")
 	ErrMissingProjectID         = errors.New("missing the GCP Project ID, set it in the GOOGLE_CLOUD_PROJECT environment variable") //nolint:lll
+	ErrMissingLocation          = errors.New("missing the GCP Location, set it in the GOOGLE_CLOUD_LOCATION environment variable")  //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 	ErrNotImplemented           = errors.New("not implemented")
 )
@@ -111,6 +112,9 @@ func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 	if len(options.projectID) == 0 {
 		return nil, ErrMissingProjectID
 	}
+	if len(options.location) == 0 {
+		return nil, ErrMissingLocation
+	}
 
-	return palmclient.New(options.projectID, options.clientOptions...)
+	return palmclient.New(context.TODO(), options.projectID, options.location, options.clientOptions...)
 }
