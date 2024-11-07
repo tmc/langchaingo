@@ -61,6 +61,10 @@ func WithDeduplicater(fn func(ctx context.Context, doc schema.Document) bool) Op
 	}
 }
 
+// WithReplacement returns an Option for setting the replacement flag that could be used
+// when adding documents. If set to true, the existing document with the **Metadata** will
+// be replaced with the new document. If set to false(default case), the new document will
+// be added to the store and the existing document will be kept.
 func WithReplacement(replacement bool) Option {
 	return func(o *Options) {
 		o.Replacement = replacement
