@@ -258,9 +258,9 @@ func (s Store) AddDocuments(
 	b := &pgx.Batch{}
 
 	if opts.Replacement {
-		replaceSql := fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND cmetadata::jsonb = $2::jsonb`, s.embeddingTableName)
+		replaceSQL := fmt.Sprintf(`DELETE FROM %s WHERE collection_id = $1 AND cmetadata::jsonb = $2::jsonb`, s.embeddingTableName)
 		for _, doc := range docs {
-			b.Queue(replaceSql, s.collectionUUID, doc.Metadata)
+			b.Queue(replaceSQL, s.collectionUUID, doc.Metadata)
 		}
 	}
 
