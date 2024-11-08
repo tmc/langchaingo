@@ -32,6 +32,6 @@ For more information on getting started with MongoDB Atlas, visit the [MongoDB A
    export MONGODB_URI=<your_mongodb_uri>
    export OPENAI_API_KEY=<your_openai_api_key>
   
-2. If you want to run this using docker-compose.yml, `MONGODB_URI` should be `localhost:27017`: `docker-compose up -d`
+2. If you want to run this using docker-compose.yml, `MONGODB_URI` should be `mongodb://localhost:27017/?directConnection=true`: `docker-compose up -d`
 
-3. Run the program: `go run main.go`
+3. Run the program: `go run mongovector_vectorstore_example.go`

@@ -61,11 +61,19 @@ func main() {
 			Similarity:    similarityAlgorithm,
 		})
 
+		// Create the vectorstore collection
+		err = client.Database(databaseName).CreateCollection(context.Background(), collectionName)
+		if err != nil {
+			log.Fatalf("failed to create vector store collection: %w", err)
+		}
+
 		_, err = createVectorSearchIndex(context.Background(), coll, indexDP1536, fields...)
 		if err != nil {
 			log.Fatalf("faield to create index: %v", err)
 		}
 	}
+
+	return
 
 	// Create an embeddings client using the OpenAI API. Requires environment
 	// variable OPENAI_API_KEY to be set.
@@ -233,6 +241,10 @@ func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) 
 	cursor, err := view.List(ctx, siOpts)
 	if err != nil {
 		return false, fmt.Errorf("failed to list search indexes: %w", err)
+	}
+
+	if cursor == nil || cursor.Current == nil {
+		return false, nil
 	}
 
 	name := cursor.Current.Lookup("name").StringValue()
