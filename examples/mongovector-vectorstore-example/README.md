@@ -23,10 +23,7 @@ For more information on getting started with MongoDB Atlas, visit the [MongoDB A
    - Each document contains information such as the city name, population, and area.
 
 5. **Executing Similarity Searches:**
-   - Demonstrates various types of similarity searches, including:
-     a. A basic search for documents related to "japan".
-     b. A search for cities in South America that meet a specified score threshold.
-     c. A search that combines score thresholds with metadata filtering.
+   - Demonstrates various types of similarity searches.
 
 ## Running the Example
 
