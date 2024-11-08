@@ -73,8 +73,6 @@ func main() {
 		}
 	}
 
-	return
-
 	// Create an embeddings client using the OpenAI API. Requires environment
 	// variable OPENAI_API_KEY to be set.
 	llm, err := openai.New(openai.WithEmbeddingModel(openAIEmbeddingModel))
