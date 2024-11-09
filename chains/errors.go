@@ -23,7 +23,7 @@ var (
 
 	// ErrMultipleInputsInRun is returned in the run function if the chain expects
 	// more then one input values.
-	ErrMultipleInputsInRun = errors.New("run not supported in chain with more then one expected input")
+	ErrMultipleInputsInRun = errors.New("run not supported in chain with zero or more than one expected input")
 	// ErrMultipleOutputsInRun is returned in the run function if the chain expects
 	// more then one output values.
 	ErrMultipleOutputsInRun = errors.New("run not supported in chain with more then one expected output")
