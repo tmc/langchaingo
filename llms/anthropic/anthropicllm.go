@@ -64,6 +64,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	return anthropicclient.New(options.token, options.model, options.baseURL,
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
+		anthropicclient.WithAnthropicBetaHeader(options.anthropicBetaHeader),
 	)
 }
 
@@ -150,6 +151,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			o.CallbacksHandler.HandleLLMError(ctx, err)
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
+	}
+	if result == nil {
+		return nil, ErrEmptyResponse
 	}
 
 	choices := make([]*llms.ContentChoice, len(result.Content))

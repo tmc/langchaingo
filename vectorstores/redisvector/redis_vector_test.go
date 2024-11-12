@@ -303,8 +303,8 @@ func TestSimilaritySearch(t *testing.T) {
 	assert.Len(t, docs[0].Metadata, 3)
 
 	// search with score threshold
-	docs, err = store.SimilaritySearch(ctx, "Tokyo", 2,
-		vectorstores.WithScoreThreshold(0.5),
+	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
+		vectorstores.WithScoreThreshold(0.8),
 	)
 	require.NoError(t, err)
 	assert.Len(t, docs, 2)
