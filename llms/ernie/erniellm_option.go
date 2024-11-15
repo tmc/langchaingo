@@ -11,7 +11,6 @@ type ModelName string
 
 const (
 	ModelNameERNIEBot       = "ERNIE-Bot"
-	ModelNameERNIEBot8K     = "ERNIE-Bot-8K"
 	ModelNameERNIEBotTurbo  = "ERNIE-Bot-turbo"
 	ModelNameERNIEBotPro    = "ERNIE-Bot-pro"
 	ModelNameBloomz7B       = "BLOOMZ-7B"

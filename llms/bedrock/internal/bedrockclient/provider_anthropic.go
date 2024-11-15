@@ -1,6 +1,7 @@
 package bedrockclient
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -132,7 +134,7 @@ func createAnthropicCompletion(ctx context.Context,
 
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
-		MaxTokens:        options.MaxTokens | 200, // this is a required field
+		MaxTokens:        getMaxTokens(options.MaxTokens, 2048),
 		System:           systemPrompt,
 		Messages:         inputContents,
 		Temperature:      options.Temperature,
@@ -144,6 +146,16 @@ func createAnthropicCompletion(ctx context.Context,
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
+	}
+
+	if options.StreamingFunc != nil {
+		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
+			ModelId:     aws.String(modelID),
+			Accept:      aws.String("*/*"),
+			ContentType: aws.String("application/json"),
+			Body:        body,
+		}
+		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
 	}
 
 	modelInput := &bedrockruntime.InvokeModelInput{
@@ -181,6 +193,86 @@ func createAnthropicCompletion(ctx context.Context,
 	}
 	return &llms.ContentResponse{
 		Choices: Contentchoices,
+	}, nil
+}
+
+type streamingCompletionResponseChunk struct {
+	Type  string `json:"type"`
+	Index int    `json:"index"`
+	Delta struct {
+		Type         string `json:"type"`
+		Text         string `json:"text"`
+		StopReason   string `json:"stop_reason"`
+		StopSequence any    `json:"stop_sequence"`
+	} `json:"delta"`
+	AmazonBedrockInvocationMetrics struct {
+		InputTokenCount   int `json:"inputTokenCount"`
+		OutputTokenCount  int `json:"outputTokenCount"`
+		InvocationLatency int `json:"invocationLatency"`
+		FirstByteLatency  int `json:"firstByteLatency"`
+	} `json:"amazon-bedrock-invocationMetrics"`
+	Usage struct {
+		OutputTokens int `json:"output_tokens"`
+	} `json:"usage"`
+	Message struct {
+		ID           string `json:"id"`
+		Type         string `json:"type"`
+		Role         string `json:"role"`
+		Content      []any  `json:"content"`
+		Model        string `json:"model"`
+		StopReason   any    `json:"stop_reason"`
+		StopSequence any    `json:"stop_sequence"`
+		Usage        struct {
+			InputTokens  int `json:"input_tokens"`
+			OutputTokens int `json:"output_tokens"`
+		} `json:"usage"`
+	} `json:"message"`
+}
+
+func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
+	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
+	if err != nil {
+		return nil, err
+	}
+	stream := output.GetStream()
+	if stream == nil {
+		return nil, errors.New("no stream")
+	}
+	defer stream.Close()
+
+	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]interface{}{}}}
+	for e := range stream.Events() {
+		if err = stream.Err(); err != nil {
+			return nil, err
+		}
+
+		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
+			var resp streamingCompletionResponseChunk
+			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
+			if err != nil {
+				return nil, err
+			}
+
+			switch resp.Type {
+			case "message_start":
+				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+			case "content_block_delta":
+				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
+					return nil, err
+				}
+				contentchoices[0].Content += resp.Delta.Text
+			case "message_delta":
+				contentchoices[0].StopReason = resp.Delta.StopReason
+				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+			}
+		}
+	}
+	if err = stream.Err(); err != nil {
+		return nil, err
+	}
+
+	return &llms.ContentResponse{
+		Choices: contentchoices,
 	}, nil
 }
 

@@ -11,7 +11,7 @@ import (
 
 func main() {
 	llm, err := anthropic.New(
-		anthropic.WithModel("claude-3-opus-20240229"),
+		anthropic.WithModel("claude-3-5-sonnet-20240620"),
 	)
 	if err != nil {
 		log.Fatal(err)

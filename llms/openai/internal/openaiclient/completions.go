@@ -6,16 +6,18 @@ import (
 
 // CompletionRequest is a request to complete a completion.
 type CompletionRequest struct {
-	Model            string   `json:"model"`
-	Prompt           string   `json:"prompt"`
-	Temperature      float64  `json:"temperature"`
-	MaxTokens        int      `json:"max_tokens,omitempty"`
-	N                int      `json:"n,omitempty"`
-	FrequencyPenalty float64  `json:"frequency_penalty,omitempty"`
-	PresencePenalty  float64  `json:"presence_penalty,omitempty"`
-	TopP             float64  `json:"top_p,omitempty"`
-	StopWords        []string `json:"stop,omitempty"`
-	Seed             int      `json:"seed,omitempty"`
+	Model       string  `json:"model"`
+	Prompt      string  `json:"prompt"`
+	Temperature float64 `json:"temperature"`
+	// Deprecated: Use MaxCompletionTokens
+	MaxTokens           int      `json:"-,omitempty"`
+	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
+	N                   int      `json:"n,omitempty"`
+	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
+	TopP                float64  `json:"top_p,omitempty"`
+	StopWords           []string `json:"stop,omitempty"`
+	Seed                int      `json:"seed,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
@@ -50,7 +52,7 @@ type errorMessage struct {
 func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 256
+		payload.MaxTokens = 2048
 	}
 
 	if len(payload.StopWords) == 0 {
@@ -78,14 +80,14 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		Messages: []*ChatMessage{
 			{Role: "user", Content: payload.Prompt},
 		},
-		Temperature:      payload.Temperature,
-		TopP:             payload.TopP,
-		MaxTokens:        payload.MaxTokens,
-		N:                payload.N,
-		StopWords:        payload.StopWords,
-		FrequencyPenalty: payload.FrequencyPenalty,
-		PresencePenalty:  payload.PresencePenalty,
-		StreamingFunc:    payload.StreamingFunc,
-		Seed:             payload.Seed,
+		Temperature:         payload.Temperature,
+		TopP:                payload.TopP,
+		MaxCompletionTokens: payload.MaxTokens,
+		N:                   payload.N,
+		StopWords:           payload.StopWords,
+		FrequencyPenalty:    payload.FrequencyPenalty,
+		PresencePenalty:     payload.PresencePenalty,
+		StreamingFunc:       payload.StreamingFunc,
+		Seed:                payload.Seed,
 	})
 }

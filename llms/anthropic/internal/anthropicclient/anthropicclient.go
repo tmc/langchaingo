@@ -13,7 +13,7 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	defaultModel = "claude-1.3"
+	defaultModel = "claude-3-5-sonnet-20240620"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.
@@ -26,6 +26,8 @@ type Client struct {
 	baseURL string
 
 	httpClient Doer
+
+	anthropicBetaHeader string
 
 	// UseLegacyTextCompletionsAPI is a flag to use the legacy text completions API.
 	UseLegacyTextCompletionsAPI bool
@@ -52,6 +54,14 @@ func WithHTTPClient(client Doer) Option {
 func WithLegacyTextCompletionsAPI(val bool) Option {
 	return func(opts *Client) error {
 		opts.UseLegacyTextCompletionsAPI = val
+		return nil
+	}
+}
+
+// WithAnthropicBetaHeader sets the anthropic-beta header.
+func WithAnthropicBetaHeader(val string) Option {
+	return func(opts *Client) error {
+		opts.anthropicBetaHeader = val
 		return nil
 	}
 }
@@ -120,6 +130,7 @@ type MessageRequest struct {
 	Temperature float64       `json:"temperature"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
+	Tools       []Tool        `json:"tools,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
 
@@ -136,6 +147,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		MaxTokens:     r.MaxTokens,
 		StopWords:     r.StopWords,
 		TopP:          r.TopP,
+		Tools:         r.Tools,
 		Stream:        r.Stream,
 		StreamingFunc: r.StreamingFunc,
 	})
@@ -147,9 +159,14 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 
 func (c *Client) setHeaders(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", c.token)
-	// TODO: expose version as a option/parameter
-	req.Header.Set("anthropic-version", "2023-06-01")
+	req.Header.Set("x-api-key", c.token) //nolint:canonicalheader
+
+	// This is necessary as per https://docs.anthropic.com/en/api/versioning
+	// If this changes frequently enough we should expose it as an option..
+	req.Header.Set("anthropic-version", "2023-06-01") // nolint:canonicalheader
+	if c.anthropicBetaHeader != "" {
+		req.Header.Set("anthropic-beta", c.anthropicBetaHeader) // nolint:canonicalheader
+	}
 }
 
 func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*http.Response, error) {

@@ -113,6 +113,10 @@ func (a *ConversationalAgent) GetOutputKeys() []string {
 	return []string{a.OutputKey}
 }
 
+func (a *ConversationalAgent) GetTools() []tools.Tool {
+	return a.Tools
+}
+
 func constructScratchPad(steps []schema.AgentStep) string {
 	var scratchPad string
 	if len(steps) > 0 {

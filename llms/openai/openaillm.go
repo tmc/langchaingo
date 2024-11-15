@@ -101,13 +101,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Messages:         chatMsgs,
 		StreamingFunc:    opts.StreamingFunc,
 		Temperature:      opts.Temperature,
-		MaxTokens:        opts.MaxTokens,
 		N:                opts.N,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		PresencePenalty:  opts.PresencePenalty,
 
+		MaxCompletionTokens: opts.MaxTokens,
+
+		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
+		Metadata:             opts.Metadata,
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
@@ -121,6 +124,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Name:        fn.Name,
 				Description: fn.Description,
 				Parameters:  fn.Parameters,
+				Strict:      fn.Strict,
 			},
 		})
 	}
@@ -131,6 +135,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			return nil, fmt.Errorf("failed to convert llms tool to openai tool: %w", err)
 		}
 		req.Tools = append(req.Tools, t)
+	}
+
+	// if o.client.ResponseFormat is set, use it for the request
+	if o.client.ResponseFormat != nil {
+		req.ResponseFormat = o.client.ResponseFormat
 	}
 
 	result, err := o.client.CreateChat(ctx, req)
@@ -150,6 +159,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"CompletionTokens": result.Usage.CompletionTokens,
 				"PromptTokens":     result.Usage.PromptTokens,
 				"TotalTokens":      result.Usage.TotalTokens,
+				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
 			},
 		}
 
@@ -160,22 +170,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				Arguments: c.Message.FunctionCall.Arguments,
 			}
 		}
-		if c.FinishReason == "tool_calls" {
-			// TODO: we can only handle a single tool call for now, we need to evolve the API to handle multiple tool calls.
-			for _, tool := range c.Message.ToolCalls {
-				choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
-					ID:   tool.ID,
-					Type: string(tool.Type),
-					FunctionCall: &llms.FunctionCall{
-						Name:      tool.Function.Name,
-						Arguments: tool.Function.Arguments,
-					},
-				})
-			}
-			// populate legacy single-function call field for backwards compatibility
-			if len(choices[i].ToolCalls) > 0 {
-				choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
-			}
+		for _, tool := range c.Message.ToolCalls {
+			choices[i].ToolCalls = append(choices[i].ToolCalls, llms.ToolCall{
+				ID:   tool.ID,
+				Type: string(tool.Type),
+				FunctionCall: &llms.FunctionCall{
+					Name:      tool.Function.Name,
+					Arguments: tool.Function.Arguments,
+				},
+			})
+		}
+		// populate legacy single-function call field for backwards compatibility
+		if len(choices[i].ToolCalls) > 0 {
+			choices[i].FuncCall = choices[i].ToolCalls[0].FunctionCall
 		}
 	}
 	response := &llms.ContentResponse{Choices: choices}
@@ -189,10 +196,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
 		Input: inputTexts,
-		Model: o.client.Model,
+		Model: o.client.EmbeddingModel,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create openai embeddings: %w", err)
 	}
 	if len(embeddings) == 0 {
 		return nil, ErrEmptyResponse
@@ -233,6 +240,7 @@ func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
 			Name:        t.Function.Name,
 			Description: t.Function.Description,
 			Parameters:  t.Function.Parameters,
+			Strict:      t.Function.Strict,
 		}
 	default:
 		return openaiclient.Tool{}, fmt.Errorf("tool type %v not supported", t.Type)

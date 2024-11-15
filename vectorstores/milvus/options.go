@@ -54,6 +54,7 @@ func WithTextField(str string) Option {
 }
 
 // WithMetaField sets te name of the meta field in the collection schema.
+// default is 'meta'.
 func WithMetaField(str string) Option {
 	return func(s *Store) {
 		s.metaField = str
@@ -127,6 +128,13 @@ func WithSearchParameters(sp entity.SearchParam) Option {
 func WithMetricType(metricType entity.MetricType) Option {
 	return func(p *Store) {
 		p.metricType = metricType
+	}
+}
+
+// WithSkipFlushOnWrite disables flushing on write.
+func WithSkipFlushOnWrite() Option {
+	return func(s *Store) {
+		s.skipFlushOnWrite = true
 	}
 }
 
