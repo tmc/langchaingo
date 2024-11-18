@@ -98,13 +98,11 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 }
 
 func (loader Office) loadExcel() ([]schema.Document, error) {
-	// Create a temporary buffer to store the Excel file
 	buf := bytes.NewBuffer(make([]byte, 0, loader.size))
 	if _, err := io.Copy(buf, io.NewSectionReader(loader.reader, 0, loader.size)); err != nil {
 		return nil, fmt.Errorf("failed to copy Excel content: %w", err)
 	}
 
-	// Use tealeg/xlsx to read the Excel file
 	xlFile, err := xlsx.OpenBinary(buf.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to read Excel file: %w", err)
@@ -141,7 +139,6 @@ func (loader Office) loadPPT() ([]schema.Document, error) {
 
 	var text strings.Builder
 	for entry, err := doc.Next(); err == nil; entry, err = doc.Next() {
-		// PPT text is typically in streams named "PowerPoint Document"
 		if entry.Name == "PowerPoint Document" {
 			buf := make([]byte, entry.Size)
 			i, err := doc.Read(buf)
@@ -220,13 +217,11 @@ func (loader Office) loadPPTX() ([]schema.Document, error) {
 }
 
 func (loader Office) loadDocx() ([]schema.Document, error) {
-	// First read into buffer
 	buf := bytes.NewBuffer(make([]byte, 0, loader.size))
 	if _, err := io.Copy(buf, io.NewSectionReader(loader.reader, 0, loader.size)); err != nil {
 		return nil, fmt.Errorf("failed to copy content: %w", err)
 	}
 
-	// Create zip reader from buffer
 	zipReader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), loader.size)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read DOCX file as ZIP: %w", err)
