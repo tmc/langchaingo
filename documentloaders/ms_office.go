@@ -1,8 +1,6 @@
 package documentloaders
 
 import (
-	// "archive/zip"
-	// "bytes"
 	"archive/zip"
 	"bytes"
 	"context"
@@ -11,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	// "github.com/richardlehane/mscfb"
-	// "github.com/tealeg/xlsx"
 	"github.com/richardlehane/mscfb"
 	"github.com/tealeg/xlsx"
 	"github.com/tmc/langchaingo/schema"
