@@ -17,12 +17,14 @@ import (
 
 var _ Loader = Office{}
 
+// Office loads text data from an io.Reader.
 type Office struct {
 	reader   io.ReaderAt
 	size     int64
 	fileType string
 }
 
+// NewOffice creates a new text loader with an io.Reader, filename and file size.
 func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 	return Office{
 		reader:   reader,
@@ -31,6 +33,7 @@ func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 	}
 }
 
+// Load reads from the io.Reader for the MS Office data and returns the raw document data.
 func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
 	switch loader.fileType {
 	case ".doc":
@@ -48,6 +51,8 @@ func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
 	}
 }
 
+// LoadAndSplit reads from the io.Reader for the MS Office data and returns the raw document data
+// and splits it into multiple documents using a text splitter.
 func (loader Office) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
 	docs, err := loader.Load(ctx)
 	if err != nil {
