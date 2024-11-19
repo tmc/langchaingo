@@ -34,6 +34,7 @@ func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 }
 
 // Load reads from the io.Reader for the MS Office data and returns the raw document data.
+// nolint
 func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
 	switch loader.fileType {
 	case ".doc":
@@ -43,7 +44,8 @@ func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
 	case ".xls", ".xlsx":
 		return loader.loadExcel()
 	case ".ppt":
-		return loader.loadPPT()
+		// parsing for old PPTs is same as for old DOCs
+		return loader.loadDoc()
 	case ".pptx":
 		return loader.loadPPTX()
 	default:
@@ -70,6 +72,7 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 
 	var text strings.Builder
 	for entry, err := doc.Next(); err == nil; entry, err = doc.Next() {
+		// nolint
 		if entry.Name == "WordDocument" {
 			buf := make([]byte, entry.Size)
 			i, err := doc.Read(buf)
@@ -113,7 +116,7 @@ func (loader Office) loadExcel() ([]schema.Document, error) {
 		return nil, fmt.Errorf("failed to read Excel file: %w", err)
 	}
 
-	var docs []schema.Document
+	docs := make([]schema.Document, 0, len(xlFile.Sheets))
 	for i, sheet := range xlFile.Sheets {
 		var text strings.Builder
 		for _, row := range sheet.Rows {
@@ -134,46 +137,6 @@ func (loader Office) loadExcel() ([]schema.Document, error) {
 	}
 
 	return docs, nil
-}
-
-func (loader Office) loadPPT() ([]schema.Document, error) {
-	doc, err := mscfb.New(io.NewSectionReader(loader.reader, 0, loader.size))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read PPT file: %w", err)
-	}
-
-	var text strings.Builder
-	for entry, err := doc.Next(); err == nil; entry, err = doc.Next() {
-		if entry.Name == "PowerPoint Document" {
-			buf := make([]byte, entry.Size)
-			i, err := doc.Read(buf)
-			if err != nil {
-				return nil, fmt.Errorf("error reading PowerPoint stream: %w", err)
-			}
-			if i > 0 {
-				// Process the binary content
-				for j := 0; j < i; j++ {
-					// Extract readable ASCII text
-					if buf[j] >= 32 && buf[j] <= 126 {
-						text.WriteByte(buf[j])
-					} else if buf[j] == 13 || buf[j] == 10 {
-						text.WriteByte('\n')
-					}
-				}
-			}
-		}
-	}
-
-	documents := []schema.Document{
-		{
-			PageContent: text.String(),
-			Metadata: map[string]interface{}{
-				"fileType": loader.fileType,
-			},
-		},
-	}
-
-	return documents, nil
 }
 
 func (loader Office) loadPPTX() ([]schema.Document, error) {
