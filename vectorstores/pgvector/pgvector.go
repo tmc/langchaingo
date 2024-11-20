@@ -318,7 +318,7 @@ func (s Store) SimilaritySearch(
 SELECT
 	data.document,
 	data.cmetadata,
-	data.distance
+	(1 - data.distance) AS score
 FROM (
 	SELECT
 		filtered_embedding_dims.*,
