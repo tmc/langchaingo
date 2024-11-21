@@ -97,37 +97,112 @@ interface Foods {
 	}
 }
 
-func TestDefinedParse(t *testing.T) {
-	t.Parallel()
-	var book struct {
-		Chapters []struct {
-			Title string `json:"title" describe:"chapter title"`
-		} `json:"chapters" describe:"chapters"`
-	}
-	parser, newErr := NewDefined(book)
-	if newErr != nil {
-		t.Error(newErr)
-	}
+type book struct {
+	Chapters []struct {
+		Title string `json:"title" describe:"chapter title"`
+	} `json:"chapters" describe:"chapters"`
+}
 
+func getParseTests() map[string]struct {
+	input    string
+	expected *book
+	wantErr  bool
+} {
 	titles := []string{
 		"A Hello There",
 		"The Meaty Middle",
 		"The Grand Finale",
 	}
 
-	output, parseErr := parser.Parse(fmt.Sprintf("```json\n%s\n```", fmt.Sprintf(
-		`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
-	)))
-	if parseErr != nil {
-		t.Error(parseErr)
+	return map[string]struct {
+		input    string
+		expected *book
+		wantErr  bool
+	}{
+		"empty": {
+			input:    "",
+			wantErr:  true,
+			expected: nil,
+		},
+		"invalid": {
+			input:    "invalid",
+			wantErr:  true,
+			expected: nil,
+		},
+		"valid": {
+			input: fmt.Sprintf("```json\n%s\n```", fmt.Sprintf(
+				`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
+			)),
+			wantErr: false,
+			expected: &book{
+				Chapters: []struct {
+					Title string `json:"title" describe:"chapter title"`
+				}{
+					{Title: titles[0]},
+					{Title: titles[1]},
+					{Title: titles[2]},
+				},
+			},
+		},
+		"valid-without-json-tag": {
+			input: fmt.Sprintf("```\n%s\n```", fmt.Sprintf(
+				`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
+			)),
+			wantErr: false,
+			expected: &book{
+				Chapters: []struct {
+					Title string `json:"title" describe:"chapter title"`
+				}{
+					{Title: titles[0]},
+					{Title: titles[1]},
+					{Title: titles[2]},
+				},
+			},
+		},
+		"valid-without-tags": {
+			input: fmt.Sprintf("\n%s\n", fmt.Sprintf(
+				`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
+			)),
+			wantErr: false,
+			expected: &book{
+				Chapters: []struct {
+					Title string `json:"title" describe:"chapter title"`
+				}{
+					{Title: titles[0]},
+					{Title: titles[1]},
+					{Title: titles[2]},
+				},
+			},
+		},
 	}
-	if count := len(output.Chapters); count != 3 {
-		t.Errorf("got %d chapters; want 3", count)
-	}
-	for i, chapter := range output.Chapters {
-		title := titles[i]
-		if chapter.Title != titles[i] {
-			t.Errorf("got '%s'; want '%s'", chapter.Title, title)
-		}
+}
+
+func TestDefinedParse(t *testing.T) {
+	t.Parallel()
+	for name, test := range getParseTests() {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			parser, newErr := NewDefined(book{})
+			if newErr != nil {
+				t.Error(newErr)
+			}
+			output, parseErr := parser.Parse(test.input)
+			switch {
+			case parseErr != nil && !test.wantErr:
+				t.Errorf("%s: unexpected error: %v", name, parseErr)
+			case parseErr == nil && test.wantErr:
+				t.Errorf("%s: expected error", name)
+			case parseErr == nil && test.expected != nil:
+				if count := len(output.Chapters); count != len(test.expected.Chapters) {
+					t.Errorf("%s: got %d chapters; want %d", name, count, len(test.expected.Chapters))
+				}
+				for i, chapter := range output.Chapters {
+					title := test.expected.Chapters[i].Title
+					if chapter.Title != title {
+						t.Errorf("%s: got '%s'; want '%s'", name, chapter.Title, title)
+					}
+				}
+			}
+		})
 	}
 }
