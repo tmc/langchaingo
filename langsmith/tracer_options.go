@@ -34,9 +34,9 @@ func WithProjectName(projectName string) LangChainTracerOption {
 	})
 }
 
-func WithRunId(runId string) LangChainTracerOption {
+func WithRunID(runID string) LangChainTracerOption {
 	return langChainTracerOptionFunc(func(t *LangChainTracer) {
-		t.runId = runId
+		t.runID = runID
 	})
 }
 

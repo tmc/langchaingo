@@ -85,8 +85,8 @@ func (t *RunTree) SetExtra(extra KVMap) *RunTree {
 	return t
 }
 
-func (t *RunTree) SetError(error string) *RunTree {
-	t.Error = error
+func (t *RunTree) SetError(err string) *RunTree {
+	t.Error = err
 	return t
 }
 
@@ -98,9 +98,6 @@ func (t *RunTree) SetSerialized(serialized KVMap) *RunTree {
 func (t *RunTree) SetInputs(inputs KVMap) *RunTree {
 	t.Inputs = inputs
 
-
-
-	
 	return t
 }
 
@@ -124,17 +121,17 @@ func (t *RunTree) SetRunType(runType string) *RunTree {
 	return t
 }
 
-func (r *RunTree) CreateChild() *RunTree {
+func (t *RunTree) CreateChild() *RunTree {
 	return NewRunTree(uuid.New().String()).
-		SetParent(r).
-		SetProjectName(r.ProjectName).
-		SetClient(r.Client).
-		SetExecutionOrder(r.ChildExecutionOrder + 1).
-		SetChildExecutionOrder(r.ChildExecutionOrder + 1)
+		SetParent(t).
+		SetProjectName(t.ProjectName).
+		SetClient(t.Client).
+		SetExecutionOrder(t.ChildExecutionOrder + 1).
+		SetChildExecutionOrder(t.ChildExecutionOrder + 1)
 }
 
-func (r *RunTree) AppendChild(child *RunTree) {
-	r.ChildRuns = append(r.ChildRuns, child)
+func (t *RunTree) AppendChild(child *RunTree) {
+	t.ChildRuns = append(t.ChildRuns, child)
 }
 
 func (t *RunTree) GetChild(childName string) *RunTree {
@@ -146,20 +143,21 @@ func (t *RunTree) GetChild(childName string) *RunTree {
 	return nil
 }
 
-func (r *RunTree) End(outputs KVMap, error string, endTime time.Time) {
-	r.Outputs = outputs
-	r.Error = error
-	r.EndTime = endTime
+func (t *RunTree) End(outputs KVMap, err string, endTime time.Time) {
+	t.Outputs = outputs
+	t.Error = err
+	t.EndTime = endTime
 
-	if r.ParentRun != nil {
-		r.ParentRun.ChildExecutionOrder = max(
-			r.ParentRun.ChildExecutionOrder,
-			r.ChildExecutionOrder,
+	if t.ParentRun != nil {
+		t.ParentRun.ChildExecutionOrder = max(
+			t.ParentRun.ChildExecutionOrder,
+			t.ChildExecutionOrder,
 		)
 	}
 }
-func (r *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
-	runExtra := r.Extra
+
+func (t *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
+	runExtra := t.Extra
 	if runExtra == nil {
 		runExtra = make(KVMap)
 	}
@@ -168,8 +166,10 @@ func (r *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 	if v := runExtra["runtime"]; v == nil {
 		runExtraRuntime = make(KVMap)
 		runExtra["runtime"] = runExtraRuntime
+	} else if runExtraRuntimeCast, ok := v.(KVMap); ok {
+		runExtraRuntime = runExtraRuntimeCast
 	} else {
-		runExtraRuntime = v.(KVMap)
+		return nil, fmt.Errorf("extra must be a map")
 	}
 
 	runExtraRuntime["library"] = "langsmith-go"
@@ -178,7 +178,7 @@ func (r *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 	var childRuns []*RunCreate
 	var parentRunID *string
 	if !excludeChildRuns {
-		for _, childRun := range r.ChildRuns {
+		for _, childRun := range t.ChildRuns {
 			childRunCreate, err := childRun.convertToCreate(excludeChildRuns)
 			if err != nil {
 				return nil, err
@@ -187,48 +187,48 @@ func (r *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 		}
 		parentRunID = nil
 	} else {
-		if r.ParentRun != nil {
-			parentRunID = &r.ParentRun.ID
+		if t.ParentRun != nil {
+			parentRunID = &t.ParentRun.ID
 		}
 		childRuns = []*RunCreate{}
 	}
 
 	persistedRun := &RunCreate{
 		BaseRun: BaseRun{
-			ID:                 r.ID,
-			Name:               r.Name,
-			StartTime:          timeToMillisecondsPtr(r.StartTime),
-			EndTime:            timeToMillisecondsPtr(r.EndTime),
-			RunType:            r.RunType,
-			ReferenceExampleID: r.ReferenceExampleID,
+			ID:                 t.ID,
+			Name:               t.Name,
+			StartTime:          timeToMillisecondsPtr(t.StartTime),
+			EndTime:            timeToMillisecondsPtr(t.EndTime),
+			RunType:            t.RunType,
+			ReferenceExampleID: t.ReferenceExampleID,
 			Extra:              runExtra,
-			ExecutionOrder:     r.ExecutionOrder,
-			Serialized:         r.Serialized,
-			Error:              r.Error,
-			Inputs:             r.Inputs,
-			Outputs:            r.Outputs,
+			ExecutionOrder:     t.ExecutionOrder,
+			Serialized:         t.Serialized,
+			Error:              t.Error,
+			Inputs:             t.Inputs,
+			Outputs:            t.Outputs,
 			ParentRunID:        parentRunID,
 		},
-		SessionName: &r.ProjectName,
+		SessionName: &t.ProjectName,
 		ChildRuns:   childRuns,
 	}
 	return persistedRun, nil
 }
 
-// postRun will start the run or the child run
-func (r *RunTree) postRun(ctx context.Context, excludeChildRuns bool) error {
-	runCreate, err := r.convertToCreate(true)
+// postRun will start the run or the child run.
+func (t *RunTree) postRun(ctx context.Context, excludeChildRuns bool) error {
+	runCreate, err := t.convertToCreate(true)
 	if err != nil {
 		return err
 	}
 
-	err = r.Client.CreateRun(ctx, runCreate)
+	err = t.Client.CreateRun(ctx, runCreate)
 	if err != nil {
 		return err
 	}
 
 	if !excludeChildRuns {
-		for _, childRun := range r.ChildRuns {
+		for _, childRun := range t.ChildRuns {
 			err = childRun.postRun(ctx, excludeChildRuns)
 			if err != nil {
 				return fmt.Errorf("post child: %w", err)
@@ -240,24 +240,24 @@ func (r *RunTree) postRun(ctx context.Context, excludeChildRuns bool) error {
 }
 
 // patchRun will close the run or the child run of a run tree that
-// was started with the postRun
-func (r *RunTree) patchRun(ctx context.Context) error {
+// was started with the postRun.
+func (t *RunTree) patchRun(ctx context.Context) error {
 	var parentRunID *string
-	if r.ParentRun != nil {
-		parentRunID = valueIfSetOtherwiseNil(r.ParentRun.ID)
+	if t.ParentRun != nil {
+		parentRunID = valueIfSetOtherwiseNil(t.ParentRun.ID)
 	}
 
 	runUpdate := &RunUpdate{
-		EndTime:            timeToMillisecondsPtr(r.EndTime),
-		Error:              valueIfSetOtherwiseNil(r.Error),
-		Outputs:            r.Outputs,
+		EndTime:            timeToMillisecondsPtr(t.EndTime),
+		Error:              valueIfSetOtherwiseNil(t.Error),
+		Outputs:            t.Outputs,
 		ParentRunID:        parentRunID,
-		ReferenceExampleID: r.ReferenceExampleID,
-		Extra:              r.Extra,
-		Events:             r.Events,
+		ReferenceExampleID: t.ReferenceExampleID,
+		Extra:              t.Extra,
+		Events:             t.Events,
 	}
 
-	err := r.Client.UpdateRun(ctx, r.ID, runUpdate)
+	err := t.Client.UpdateRun(ctx, t.ID, runUpdate)
 	if err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func getGitCommit() string {
 		panic("we should have been able to retrieve info from 'runtime/debug#ReadBuildInfo'")
 	}
 
-	findSetting := func(key string, settings []debug.BuildSetting) (value string) {
+	findSetting := func(key string, settings []debug.BuildSetting) string {
 		for _, setting := range settings {
 			if setting.Key == key {
 				return setting.Value

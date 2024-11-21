@@ -15,8 +15,10 @@ import (
 	"github.com/tmc/langchaingo/prompts"
 )
 
-var flagLangchainApiKey = flag.String("langchain-api-key", "", "sets langchain API Key, if value not set will check LANGCHAIN_API_KEY")
-var flagLangchainProject = flag.String("langchain-project", "langchain_go_example", "sets langchain  project, if value not set will check LANGCHAIN_PROJECT")
+var (
+	flagLangchainApiKey  = flag.String("langchain-api-key", "", "sets langchain API Key, if value not set will check LANGCHAIN_API_KEY")
+	flagLangchainProject = flag.String("langchain-project", "langchain_go_example", "sets langchain  project, if value not set will check LANGCHAIN_PROJECT")
+)
 
 func main() {
 	ctx := context.Background()
@@ -52,7 +54,7 @@ func main() {
 		langsmith.WithLogger(logger),
 		langsmith.WithProjectName(langchainProject),
 		langsmith.WithClient(langsmithClient),
-		langsmith.WithRunId(uuid.NewString()),
+		langsmith.WithRunID(uuid.NewString()),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -93,8 +95,7 @@ func getFlagOrEnv(flagValue *string, envName string) string {
 	return *flagValue
 }
 
-type logger struct {
-}
+type logger struct{}
 
 func (l *logger) Debugf(format string, v ...interface{}) {
 	fmt.Printf("[DEBUG] "+format, v...)
@@ -102,12 +103,10 @@ func (l *logger) Debugf(format string, v ...interface{}) {
 
 func (l *logger) Errorf(format string, v ...interface{}) {
 	fmt.Printf("[ERROR] "+format, v...)
-
 }
 
 func (l *logger) Infof(format string, v ...interface{}) {
 	fmt.Printf("[INFO] "+format, v...)
-
 }
 
 func (l *logger) Warnf(format string, v ...interface{}) {

@@ -4,6 +4,7 @@ import "context"
 
 type contextKeyType int
 
+// nolint: gochecknoglobals
 var callbackHandlerKey = contextKeyType(0)
 
 func CallbackHandler(ctx context.Context) Handler {

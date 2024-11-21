@@ -8,6 +8,7 @@ import (
 )
 
 func TestCallbackHandler(t *testing.T) {
+	t.Parallel()
 	// Test case 1: Context with handler
 	handler := &SimpleHandler{}
 	ctx := WithCallback(context.Background(), handler)

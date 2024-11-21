@@ -28,7 +28,6 @@ type Chain interface {
 
 // Call is the standard function used for executing chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
-
 	ctx = setupChainCallbackHandler(ctx, c, options)
 
 	fullValues := make(map[string]any, 0)

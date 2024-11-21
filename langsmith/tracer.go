@@ -18,20 +18,18 @@ type LangChainTracer struct {
 	projectName string
 	client      *Client
 
-	runId      string
+	runID      string
 	activeTree *RunTree
 	extras     KVMap
 	logger     LeveledLoggerInterface
 }
-
-func (t *LangChainTracer) HandleLLMStart(ctx context.Context, prompts []string) {}
 
 func NewTracer(opts ...LangChainTracerOption) (*LangChainTracer, error) {
 	tracer := &LangChainTracer{
 		name:        "langchain_tracer",
 		projectName: "default",
 		client:      nil,
-		runId:       uuid.New().String(),
+		runID:       uuid.New().String(),
 		logger:      &NopLogger{},
 	}
 
@@ -51,7 +49,7 @@ func NewTracer(opts ...LangChainTracerOption) (*LangChainTracer, error) {
 }
 
 func (t *LangChainTracer) GetRunID() string {
-	return t.runId
+	return t.runID
 }
 
 func (t *LangChainTracer) resetActiveTree() {
@@ -59,7 +57,7 @@ func (t *LangChainTracer) resetActiveTree() {
 }
 
 // HandleText implements callbacks.Handler.
-func (t *LangChainTracer) HandleText(ctx context.Context, text string) {
+func (t *LangChainTracer) HandleText(_ context.Context, _ string) {
 }
 
 func (t *LangChainTracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
@@ -124,7 +122,7 @@ func (t *LangChainTracer) HandleLLMError(ctx context.Context, err error) {
 
 // HandleChainStart implements callbacks.Handler.
 func (t *LangChainTracer) HandleChainStart(ctx context.Context, inputs map[string]any) {
-	t.activeTree = NewRunTree(t.runId).
+	t.activeTree = NewRunTree(t.runID).
 		SetName("RunnableSequence").
 		SetClient(t.client).
 		SetProjectName(t.projectName).
@@ -165,43 +163,42 @@ func (t *LangChainTracer) HandleChainError(ctx context.Context, err error) {
 }
 
 // HandleToolStart implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolStart(ctx context.Context, input string) {
+func (t *LangChainTracer) HandleToolStart(_ context.Context, input string) {
 	t.logger.Debugf("handle tool start: input: %s", input)
 }
 
 // HandleToolEnd implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolEnd(ctx context.Context, output string) {
+func (t *LangChainTracer) HandleToolEnd(_ context.Context, output string) {
 	t.logger.Debugf("handle tool end: output: %s", output)
 }
 
 // HandleToolError implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolError(ctx context.Context, err error) {
+func (t *LangChainTracer) HandleToolError(_ context.Context, err error) {
 	t.logger.Warnf("handle tool error: %s", err)
 }
 
 // HandleAgentAction implements callbacks.Handler.
-func (t *LangChainTracer) HandleAgentAction(ctx context.Context, action schema.AgentAction) {
+func (t *LangChainTracer) HandleAgentAction(_ context.Context, action schema.AgentAction) {
 	t.logger.Debugf("handle agent action, action: %v", action)
 }
 
 // HandleAgentFinish implements callbacks.Handler.
-func (t *LangChainTracer) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {
+func (t *LangChainTracer) HandleAgentFinish(_ context.Context, finish schema.AgentFinish) {
 	t.logger.Debugf("handle agent finish, finish: %v", finish)
-
 }
 
 // HandleRetrieverStart implements callbacks.Handler.
-func (t *LangChainTracer) HandleRetrieverStart(ctx context.Context, query string) {
+func (t *LangChainTracer) HandleRetrieverStart(_ context.Context, query string) {
 	t.logger.Debugf("handle retriever start, query: %s, documents: %v", query)
 }
 
 // HandleRetrieverEnd implements callbacks.Handler.
-func (t *LangChainTracer) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
+func (t *LangChainTracer) HandleRetrieverEnd(_ context.Context, query string, documents []schema.Document) {
 	t.logger.Debugf("handle retriever end, query: %s, documents: %v", query, documents)
 }
 
 // HandleStreamingFunc implements callbacks.Handler.
-func (t *LangChainTracer) HandleStreamingFunc(ctx context.Context, chunk []byte) {
+func (t *LangChainTracer) HandleStreamingFunc(_ context.Context, _ []byte) {
 	// do nothing
 }
 

@@ -133,24 +133,3 @@ func (c *Client) executeHTTPRequest(ctx context.Context, method string, path str
 
 	return nil
 }
-
-func (c *Client) getHostURL() string {
-	if c.webURL != nil {
-		return *c.webURL
-	}
-
-	if isLocalhost(c.apiURL) {
-		return "http://localhost"
-	}
-
-	if strings.Contains(c.apiURL, "/api") {
-		return strings.Replace(c.apiURL, "/api", "", -1)
-	}
-
-	if strings.Contains(strings.Split(c.apiURL, ".")[0], "dev") {
-		return "https://dev.smith.langchain.com"
-	}
-
-	return "https://smith.langchain.com"
-
-}

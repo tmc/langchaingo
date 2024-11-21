@@ -25,10 +25,12 @@ type TracerSessionResult struct {
 	RunFacets           *[]KVMap
 }
 
-type RunType string
-type ScoreType interface{}
-type ValueType interface{}
-type DataType string
+type (
+	RunType   string
+	ScoreType interface{}
+	ValueType interface{}
+	DataType  string
+)
 
 type BaseExample struct {
 	DatasetID string

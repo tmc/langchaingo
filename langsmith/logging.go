@@ -11,18 +11,14 @@ var _ LeveledLoggerInterface = &NopLogger{}
 
 type NopLogger struct{}
 
-func (n *NopLogger) Debugf(format string, v ...interface{}) {
-	return
+func (n *NopLogger) Debugf(_ string, _ ...interface{}) {
 }
 
-func (n *NopLogger) Errorf(format string, v ...interface{}) {
-	return
+func (n *NopLogger) Errorf(_ string, _ ...interface{}) {
 }
 
-func (n *NopLogger) Infof(format string, v ...interface{}) {
-	return
+func (n *NopLogger) Infof(_ string, _ ...interface{}) {
 }
 
-func (n *NopLogger) Warnf(format string, v ...interface{}) {
-	return
+func (n *NopLogger) Warnf(_ string, _ ...interface{}) {
 }

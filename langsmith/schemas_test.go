@@ -10,6 +10,7 @@ import (
 )
 
 func TestRunCreate_AsJson(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		data *RunCreate
@@ -32,6 +33,7 @@ func TestRunCreate_AsJson(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			out, err := json.Marshal(tt.data)
 			require.NoError(t, err)
 

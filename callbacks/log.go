@@ -59,7 +59,6 @@ func (l LogHandler) HandleText(_ context.Context, text string) {
 	fmt.Println(text)
 }
 
-
 func (l LogHandler) HandleLLMError(_ context.Context, err error) {
 	fmt.Println("Exiting LLM with error:", err)
 }
