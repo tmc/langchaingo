@@ -23,6 +23,7 @@ type Client struct {
 	hideOutputs bool
 
 	httpClient *http.Client
+	logger     LeveledLoggerInterface
 }
 
 func NewClient(options ...ClientOption) (*Client, error) {
@@ -112,6 +113,8 @@ func (c *Client) executeHTTPRequest(ctx context.Context, method string, path str
 	if err != nil {
 		return err
 	}
+
+	c.logger.Debugf("[REQUEST] %s [%s] %s\n", callURL, method, body.Bytes())
 
 	req.Header.Set("Content-Type", "application/json")
 	if c.apiKey != "" {
