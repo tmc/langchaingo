@@ -209,3 +209,11 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 
 	return chainCallOption
 }
+
+func getChainCallCallbackHandler(options []ChainCallOption) callbacks.Handler {
+	opts := &chainCallOption{}
+	for _, option := range options {
+		option(opts)
+	}
+	return opts.CallbackHandler
+}
