@@ -69,16 +69,13 @@ func (p Defined[T]) Parse(text string) (T, error) {
 		text = text[len(opening1):]
 	case len(text) >= len(opening2) && text[:len(opening2)] == opening2:
 		text = text[len(opening2):]
-	default:
-		return target, errors.New("input text should start with '```json' or '```'")
 	}
 
 	const closing = "```"
-	if len(text) >= len(closing) && text[len(text)-len(closing):] != closing {
-		return target, fmt.Errorf("input text should end with %s", closing)
+	if len(text) >= len(closing) && text[len(text)-len(closing):] == closing {
+		text = text[:len(text)-len(closing)]
 	}
-	parseableJSON := text[:len(text)-len(closing)]
-	if err := json.Unmarshal([]byte(parseableJSON), &target); err != nil {
+	if err := json.Unmarshal([]byte(text), &target); err != nil {
 		return target, fmt.Errorf("could not parse generated JSON: %w", err)
 	}
 	return target, nil
