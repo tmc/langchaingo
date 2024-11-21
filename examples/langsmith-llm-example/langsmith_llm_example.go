@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/langsmith"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -51,7 +52,7 @@ func main() {
 		langsmith.WithLogger(logger),
 		langsmith.WithProjectName(langchainProject),
 		langsmith.WithClient(langsmithClient),
-		langsmith.WithRunId("04eacea5-d680-4bf3-98a0-a9e9a13f8515"),
+		langsmith.WithRunId(uuid.NewString()),
 	)
 	if err != nil {
 		log.Fatal(err)
