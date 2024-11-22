@@ -60,6 +60,10 @@ func (l *Llama31) FormatPayload(_ context.Context, messages []llms.MessageConten
 		Stop:             opts.StopWords, // Add stop sequences if needed
 	}
 
+	if opts.StreamingFunc != nil {
+		payload.Streaming = true
+	}
+
 	// Serialize to JSON
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {

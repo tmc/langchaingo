@@ -23,6 +23,7 @@ type LlamaPayload struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"` // Penalizes new tokens based on frequency
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`  // Penalizes tokens based on presence
 	Stop             []string       `json:"stop,omitempty"`              // List of stop sequences to end generation
+	Streaming        bool           `json:"streaming,omitempty"`         // Enable token-by-token streaming
 }
 
 type LlamaResponse struct {
