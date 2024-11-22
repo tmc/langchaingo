@@ -24,7 +24,7 @@ type LLMChain struct {
 	CallbacksHandler callbacks.Handler
 	OutputParser     schema.OutputParser[any]
 	// When enabled usesMultiplePrompts will not 'flatten' the prompt into a single message.
-	UseMultiPrompt bool
+	useMultiPrompt bool
 
 	OutputKey string
 }
@@ -47,14 +47,14 @@ func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCal
 		Memory:           memory.NewSimple(),
 		OutputKey:        _llmChainDefaultOutputKey,
 		CallbacksHandler: opt.CallbackHandler,
-		UseMultiPrompt:   false,
+		useMultiPrompt:   false,
 	}
 
 	return chain
 }
 
 func (c *LLMChain) EnableMultiPrompt() {
-	c.UseMultiPrompt = true
+	c.useMultiPrompt = true
 	c.OutputKey = _llmChainMultiPromptOutputKey
 }
 
@@ -70,7 +70,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 
 	llmsOptions := getLLMCallOptions(options...)
 	var llmOutput any
-	if c.UseMultiPrompt {
+	if c.useMultiPrompt {
 		llmsReponse, err := c.LLM.GenerateContent(ctx, chatMessagesToLLmMessageContent(promptValue.Messages()), llmsOptions...)
 		if err != nil {
 			return nil, fmt.Errorf("llm generate content: %w", err)
