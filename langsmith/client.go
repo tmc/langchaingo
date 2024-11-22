@@ -33,6 +33,7 @@ func NewClient(options ...ClientOption) (*Client, error) {
 		hideInputs:  envOr("LANGCHAIN_HIDE_INPUTS", "false") == "true",
 		hideOutputs: envOr("LANGCHAIN_HIDE_OUTPUTS", "false") == "true",
 		webURL:      nil,
+		logger:      &NopLogger{},
 
 		httpClient: &http.Client{
 			Timeout: 4 * time.Second,
