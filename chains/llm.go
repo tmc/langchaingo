@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -11,7 +12,10 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-const _llmChainDefaultOutputKey = "text"
+const (
+	_llmChainDefaultOutputKey     = "text"
+	_llmChainMultiPromptOutputKey = "choices"
+)
 
 type LLMChain struct {
 	Prompt           prompts.FormatPrompter
@@ -49,6 +53,11 @@ func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCal
 	return chain
 }
 
+func (c *LLMChain) EnableMultiPrompt() {
+	c.UseMultiPrompt = true
+	c.OutputKey = _llmChainMultiPromptOutputKey
+}
+
 // Call formats the prompts with the input values, generates using the llm, and parses
 // the output from the llm with the output parser. This function should not be called
 // directly, use rather the Call or Run function if the prompt only requires one input
@@ -59,22 +68,27 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	var output string
+	llmsOptions := getLLMCallOptions(options...)
+	var llmOutput any
 	if c.UseMultiPrompt {
-		output, err = llms.GenerateFromMultiPrompt(ctx, c.LLM, chatMessagesToLLmMessageContent(promptValue.Messages()), getLLMCallOptions(options...)...)
+		llmsReponse, err := c.LLM.GenerateContent(ctx, chatMessagesToLLmMessageContent(promptValue.Messages()), llmsOptions...)
+		if err != nil {
+			return nil, fmt.Errorf("llm generate content: %w", err)
+		}
+
+		llmOutput = llmsReponse.Choices
 	} else {
-		output, err = llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
-	}
-	if err != nil {
-		return nil, err
-	}
+		resp, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), llmsOptions...)
+		if err != nil {
+			return nil, err
+		}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(output, promptValue)
-	if err != nil {
-		return nil, err
+		llmOutput, err = c.OutputParser.ParseWithPrompt(resp, promptValue)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	return map[string]any{c.OutputKey: finalOutput}, nil
+	return map[string]any{c.OutputKey: llmOutput}, nil
 }
 
 // GetMemory returns the memory.
