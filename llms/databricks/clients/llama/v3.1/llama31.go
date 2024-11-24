@@ -1,6 +1,7 @@
 package databricksclientsllama31
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -61,7 +62,7 @@ func (l *Llama31) FormatPayload(_ context.Context, messages []llms.MessageConten
 	}
 
 	if opts.StreamingFunc != nil {
-		payload.Streaming = true
+		payload.Stream = true
 	}
 
 	// Serialize to JSON
@@ -75,17 +76,32 @@ func (l *Llama31) FormatPayload(_ context.Context, messages []llms.MessageConten
 
 // FormatResponse parses the LlamaResponse JSON and converts it to a ContentResponse structure.
 func (l *Llama31) FormatResponse(_ context.Context, response []byte) (*llms.ContentResponse, error) {
-	return formatResponse(response)
+	return formatResponse[LlamaChoice](response)
 }
 
 // FormatStreamResponse parses the LlamaResponse JSON and converts it to a ContentResponse structure.
 func (l *Llama31) FormatStreamResponse(_ context.Context, response []byte) (*llms.ContentResponse, error) {
-	return formatResponse(response)
+	// The "data:" prefix is commonly used in Server-Sent Events (SSE) or streaming APIs
+	// to delimit individual chunks of data being sent from the server. It indicates
+	// that the following text is a data payload. Before parsing the JSON, we remove
+	// this prefix to work with the raw JSON payload.
+	response = bytes.TrimPrefix(response, []byte("data: "))
+
+	if string(response) == "[DONE]" || len(response) == 0 {
+		return &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{{
+				Content: "",
+			}},
+		}, nil
+	}
+	return formatResponse[LlamaChoiceDelta](response)
 }
 
-func formatResponse(response []byte) (*llms.ContentResponse, error) {
+func formatResponse[T LlamaChoiceDelta | LlamaChoice](response []byte) (*llms.ContentResponse, error) {
+	fmt.Printf("response: %+v\n", string(response))
+
 	// Parse the LlamaResponse JSON
-	var llamaResp LlamaResponse
+	var llamaResp LlamaResponse[T]
 	err := json.Unmarshal(response, &llamaResp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal LlamaResponse: %w", err)
@@ -96,32 +112,47 @@ func formatResponse(response []byte) (*llms.ContentResponse, error) {
 		Choices: []*llms.ContentChoice{},
 	}
 
+	fmt.Printf("llamaResp: %+v\n", llamaResp)
+
 	// Map LlamaResponse choices to ContentChoice
 	for _, llamaChoice := range llamaResp.Choices {
-		contentChoice := &llms.ContentChoice{
-			Content:    llamaChoice.Message.Content,
-			StopReason: llamaChoice.FinishReason,
-			GenerationInfo: map[string]any{
-				"index": llamaChoice.Index,
-			},
-		}
-
-		// If the LlamaMessage indicates a function/tool call, populate FuncCall or ToolCalls
-		if llamaChoice.Message.Role == RoleIPython {
-			funcCall := &llms.FunctionCall{
-				Name:      "tool_function_name",        // Replace with actual function name if included in response
-				Arguments: llamaChoice.Message.Content, // Replace with parsed arguments if available
+		var contentChoice *llms.ContentChoice
+		switch choice := any(llamaChoice).(type) {
+		case LlamaChoice:
+			contentChoice = &llms.ContentChoice{
+				Content:    choice.Message.Content,
+				StopReason: choice.FinishReason,
+				GenerationInfo: map[string]any{
+					"index": choice.Index,
+				},
 			}
-			contentChoice.FuncCall = funcCall
-			contentChoice.ToolCalls = []llms.ToolCall{
-				{
-					ID:           fmt.Sprintf("tool-call-%d", llamaChoice.Index),
-					Type:         "function",
-					FunctionCall: funcCall,
+
+			// If the LlamaMessage indicates a function/tool call, populate FuncCall or ToolCalls
+			if choice.Message.Role == RoleIPython {
+				funcCall := &llms.FunctionCall{
+					Name:      "tool_function_name",   // Replace with actual function name if included in response
+					Arguments: choice.Message.Content, // Replace with parsed arguments if available
+				}
+				contentChoice.FuncCall = funcCall
+				contentChoice.ToolCalls = []llms.ToolCall{
+					{
+						ID:           fmt.Sprintf("tool-call-%d", choice.Index),
+						Type:         "function",
+						FunctionCall: funcCall,
+					},
+				}
+			}
+		case LlamaChoiceDelta:
+			contentChoice = &llms.ContentChoice{
+				Content:    choice.Delta.Content,
+				StopReason: choice.FinishReason,
+				GenerationInfo: map[string]any{
+					"index": choice.Index,
 				},
 			}
 		}
 
+		// Append the ContentChoice to the ContentResponse
 		contentResponse.Choices = append(contentResponse.Choices, contentChoice)
 	}
 

@@ -1,6 +1,7 @@
 package databricksclientsmistralv1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -81,6 +82,10 @@ func (l *Mistral1) FormatPayload(_ context.Context, messages []llms.MessageConte
 		RandomSeed:  opts.Seed,
 	}
 
+	if opts.StreamingFunc != nil {
+		payload.Stream = true
+	}
+
 	// Marshal the payload to JSON
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -104,6 +109,20 @@ func (l *Mistral1) FormatResponse(_ context.Context, response []byte) (*llms.Con
 
 // Refactored FormatStreamResponse.
 func (l *Mistral1) FormatStreamResponse(_ context.Context, response []byte) (*llms.ContentResponse, error) {
+	// The "data:" prefix is commonly used in Server-Sent Events (SSE) or streaming APIs
+	// to delimit individual chunks of data being sent from the server. It indicates
+	// that the following text is a data payload. Before parsing the JSON, we remove
+	// this prefix to work with the raw JSON payload.
+	response = bytes.TrimPrefix(response, []byte("data: "))
+
+	if string(response) == "[DONE]" || len(response) == 0 {
+		return &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{{
+				Content: "",
+			}},
+		}, nil
+	}
+
 	var streamResp ChatCompletionStreamResponse
 	if err := json.Unmarshal(response, &streamResp); err != nil {
 		return nil, fmt.Errorf("failed to parse streaming response: %w", err)

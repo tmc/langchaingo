@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 )
@@ -80,44 +81,79 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 	defer resp.Body.Close()
 
-	// Create a buffer to save a copy of the body
-	var buffer bytes.Buffer
-	teeReader := io.TeeReader(resp.Body, &buffer)
-
-	if err := o.stream(ctx, &buffer, opts); err != nil {
-		return nil, err
+	if opts.StreamingFunc != nil {
+		return o.stream(ctx, resp.Body, opts)
 	}
 
-	bodyBytes, err := io.ReadAll(teeReader)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("bodyBytes: %v\n", string(bodyBytes))
+	// fmt.Printf("bodyBytes: %v\n", string(bodyBytes))
 	return o.model.FormatResponse(ctx, bodyBytes)
 }
 
-func (o *LLM) stream(ctx context.Context, resp io.Reader, opts llms.CallOptions) error {
-	if opts.StreamingFunc == nil {
-		return nil
-	}
+func (o *LLM) stream(ctx context.Context, body io.Reader, opts llms.CallOptions) (*llms.ContentResponse, error) {
+	fullChoiceContent := []strings.Builder{}
+	scanner := bufio.NewScanner(body)
+	finalResponse := &llms.ContentResponse{}
 
-	scanner := bufio.NewScanner(resp)
 	for scanner.Scan() {
-		contentResponse, err := o.model.FormatResponse(ctx, scanner.Bytes())
-		if err != nil {
-			return err
+		scannedBytes := scanner.Bytes()
+		if len(scannedBytes) == 0 {
+			continue
 		}
 
-		fmt.Printf("contentResponse: %v\n", *contentResponse)
+		contentResponse, err := o.model.FormatStreamResponse(ctx, scannedBytes)
+		if err != nil {
+			return nil, err
+		}
 
 		if len(contentResponse.Choices) == 0 {
 			continue
 		}
 
-		if err := opts.StreamingFunc(ctx, []byte(contentResponse.Choices[0].Content)); err != nil {
-			return err
+		index, err := concatenateAnswers(contentResponse.Choices, &fullChoiceContent)
+		if err != nil {
+			return nil, err
+		}
+
+		if index == nil {
+			continue
+		}
+
+		if err := opts.StreamingFunc(ctx, []byte(fullChoiceContent[*index].String())); err != nil {
+			return nil, err
+		}
+
+		finalResponse = contentResponse
+	}
+
+	for index := range finalResponse.Choices {
+		finalResponse.Choices[index].Content = fullChoiceContent[index].String()
+	}
+
+	return finalResponse, nil
+}
+
+func concatenateAnswers(choices []*llms.ContentChoice, fullChoiceContent *[]strings.Builder) (*int, error) {
+	var lastModifiedIndex *int
+
+	for choiceIndex := range choices {
+		if len(*fullChoiceContent) <= choiceIndex {
+			*fullChoiceContent = append(*fullChoiceContent, strings.Builder{})
+		}
+
+		if choices[choiceIndex].Content == "" {
+			continue
+		}
+
+		lastModifiedIndex = &choiceIndex
+
+		if _, err := (*fullChoiceContent)[choiceIndex].WriteString(choices[choiceIndex].Content); err != nil {
+			return lastModifiedIndex, err
 		}
 	}
 
-	return scanner.Err()
+	return lastModifiedIndex, nil
 }

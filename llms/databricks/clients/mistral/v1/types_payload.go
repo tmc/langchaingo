@@ -12,4 +12,5 @@ type ChatCompletionPayload struct {
 	Tools          []Tool         `json:"tools,omitempty"`
 	ToolChoice     string         `json:"tool_choice,omitempty"`
 	ResponseFormat ResponseFormat `json:"response_format,omitempty"`
+	Stream         bool           `json:"stream,omitempty"` // Enable token-by-token streaming
 }

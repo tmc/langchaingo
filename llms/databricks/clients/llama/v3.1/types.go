@@ -14,6 +14,10 @@ type LlamaMessage struct {
 	Content string `json:"content"` // The content of the message
 }
 
+type LlamaMessageDelta struct {
+	Content string `json:"content"` // The content of the message
+}
+
 type LlamaPayload struct {
 	Model            string         `json:"model"`                       // Model to use (e.g., "llama-3.1")
 	Messages         []LlamaMessage `json:"messages"`                    // List of structured messages
@@ -23,22 +27,28 @@ type LlamaPayload struct {
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"` // Penalizes new tokens based on frequency
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`  // Penalizes tokens based on presence
 	Stop             []string       `json:"stop,omitempty"`              // List of stop sequences to end generation
-	Streaming        bool           `json:"streaming,omitempty"`         // Enable token-by-token streaming
+	Stream           bool           `json:"stream,omitempty"`            // Enable token-by-token streaming
 }
 
-type LlamaResponse struct {
-	ID      string        `json:"id"`      // Unique ID of the response
-	Object  string        `json:"object"`  // Type of response (e.g., "chat.completion")
-	Created int64         `json:"created"` // Timestamp of creation
-	Model   string        `json:"model"`   // Model used (e.g., "llama-3.1")
-	Choices []LlamaChoice `json:"choices"` // List of response choices
-	Usage   LlamaUsage    `json:"usage"`   // Token usage details
+type LlamaResponse[T LlamaChoice | LlamaChoiceDelta] struct {
+	ID      string     `json:"id"`      // Unique ID of the response
+	Object  string     `json:"object"`  // Type of response (e.g., "chat.completion")
+	Created int64      `json:"created"` // Timestamp of creation
+	Model   string     `json:"model"`   // Model used (e.g., "llama-3.1")
+	Choices []T        `json:"choices"` // List of response choices
+	Usage   LlamaUsage `json:"usage"`   // Token usage details
 }
 
 type LlamaChoice struct {
 	Index        int          `json:"index"`         // Index of the choice
 	Message      LlamaMessage `json:"message"`       // The message content
 	FinishReason string       `json:"finish_reason"` // Why the response stopped (e.g., "stop")
+}
+
+type LlamaChoiceDelta struct {
+	Index        int               `json:"index"`         // Index of the choice
+	Delta        LlamaMessageDelta `json:"delta"`         // The message content
+	FinishReason string            `json:"finish_reason"` // Why the response stopped (e.g., "stop")
 }
 
 type LlamaUsage struct {
