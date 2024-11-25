@@ -70,7 +70,7 @@ func (a *OneShotZeroAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
+	fullInputs["agent_scratchpad"] = constructMrklScratchPad(intermediateSteps)
 	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
 	var stream func(ctx context.Context, chunk []byte) error
@@ -117,6 +117,18 @@ func (a *OneShotZeroAgent) GetOutputKeys() []string {
 
 func (a *OneShotZeroAgent) GetTools() []tools.Tool {
 	return a.Tools
+}
+
+func constructMrklScratchPad(steps []schema.AgentStep) string {
+	var scratchPad string
+	if len(steps) > 0 {
+		for _, step := range steps {
+			scratchPad += "\n" + step.Action.Log
+			scratchPad += "\nObservation: " + step.Observation + "\n"
+		}
+	}
+
+	return scratchPad
 }
 
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
