@@ -1,7 +1,9 @@
 package databricksclientsmistralv1
 
+// Role the role of the chat message.
 type Role string
 
+// Role the role of the chat message.
 const (
 	RoleUser      Role = "user"
 	RoleAssistant Role = "assistant"
@@ -12,6 +14,7 @@ const (
 // FinishReason the reason that a chat message was finished.
 type FinishReason string
 
+// FinishReason the reason that a chat message was finished.
 const (
 	FinishReasonStop   FinishReason = "stop"
 	FinishReasonLength FinishReason = "length"
@@ -21,6 +24,7 @@ const (
 // ResponseFormat the format that the response must adhere to.
 type ResponseFormat string
 
+// ResponseFormat the format that the response must adhere to.
 const (
 	ResponseFormatText       ResponseFormat = "text"
 	ResponseFormatJSONObject ResponseFormat = "json_object"
@@ -29,6 +33,7 @@ const (
 // ToolType type of tool defined for the llm.
 type ToolType string
 
+// ToolType type of tool defined for the llm.
 const (
 	ToolTypeFunction ToolType = "function"
 )
@@ -36,6 +41,7 @@ const (
 // ToolChoice the choice of tool to use.
 type ToolChoice string
 
+// ToolChoice the choice of tool to use.
 const (
 	ToolChoiceAny  ToolChoice = "any"
 	ToolChoiceAuto ToolChoice = "auto"

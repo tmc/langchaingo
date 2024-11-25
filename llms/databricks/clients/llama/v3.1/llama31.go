@@ -11,14 +11,17 @@ import (
 	"github.com/tmc/langchaingo/llms/databricks"
 )
 
+// LlamaPayload represents the payload structure for the Llama model.
 type Llama31 struct{}
 
 var _ databricks.Model = (*Llama31)(nil)
 
+// NewLlama31 creates a new Llama31 instance.
 func NewLlama31() *Llama31 {
 	return &Llama31{}
 }
 
+// FormatPayload implements databricks.Model to convert langchaingo llms.MessageContent to llama payload.
 func (l *Llama31) FormatPayload(_ context.Context, messages []llms.MessageContent, options ...llms.CallOption) ([]byte, error) {
 	// Initialize payload options with defaults
 	opts := llms.CallOptions{}

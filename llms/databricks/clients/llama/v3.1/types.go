@@ -9,15 +9,18 @@ const (
 	RoleIPython   Role = "ipython"   // The ipython role represents responses from the model
 )
 
+// LlamaMessage represents a message in the LLM.
 type LlamaMessage struct {
 	Role    Role   `json:"role"`    // Role of the message sender (e.g., "system", "user", "assistant")
 	Content string `json:"content"` // The content of the message
 }
 
+// LlamaMessageDelta represents a message streamed by the LLM.
 type LlamaMessageDelta struct {
 	Content string `json:"content"` // The content of the message
 }
 
+// LlamaPayload represents the payload structure for the Llama model.
 type LlamaPayload struct {
 	Model            string         `json:"model"`                       // Model to use (e.g., "llama-3.1")
 	Messages         []LlamaMessage `json:"messages"`                    // List of structured messages
@@ -30,6 +33,7 @@ type LlamaPayload struct {
 	Stream           bool           `json:"stream,omitempty"`            // Enable token-by-token streaming
 }
 
+// LlamaResponse represents the response structure for the Llama model. (full answer or streamed one)
 type LlamaResponse[T LlamaChoice | LlamaChoiceDelta] struct {
 	ID      string     `json:"id"`      // Unique ID of the response
 	Object  string     `json:"object"`  // Type of response (e.g., "chat.completion")
@@ -39,18 +43,21 @@ type LlamaResponse[T LlamaChoice | LlamaChoiceDelta] struct {
 	Usage   LlamaUsage `json:"usage"`   // Token usage details
 }
 
+// LlamaChoice represents a choice in the Llama response.
 type LlamaChoice struct {
 	Index        int          `json:"index"`         // Index of the choice
 	Message      LlamaMessage `json:"message"`       // The message content
 	FinishReason string       `json:"finish_reason"` // Why the response stopped (e.g., "stop")
 }
 
+// LlamaChoiceDelta represents a choice in the Llama response.
 type LlamaChoiceDelta struct {
 	Index        int               `json:"index"`         // Index of the choice
 	Delta        LlamaMessageDelta `json:"delta"`         // The message content
 	FinishReason string            `json:"finish_reason"` // Why the response stopped (e.g., "stop")
 }
 
+// LlamaUsage represents the token usage details of a response.
 type LlamaUsage struct {
 	PromptTokens     int `json:"prompt_tokens"`     // Tokens used for the prompt
 	CompletionTokens int `json:"completion_tokens"` // Tokens used for the completion

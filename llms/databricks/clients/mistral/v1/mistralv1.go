@@ -10,18 +10,21 @@ import (
 	"github.com/tmc/langchaingo/llms/databricks"
 )
 
+// Mistral1 represents the payload structure for the Mistral model.
 type Mistral1 struct {
 	Model string `json:"model"`
 }
 
 var _ databricks.Model = (*Mistral1)(nil)
 
+// NewMistral1 creates a new Mistral1 instance.
 func NewMistral1(model string) *Mistral1 {
 	return &Mistral1{
 		Model: model,
 	}
 }
 
+// FormatPayload implements databricks.Model to convert langchaingo llms.MessageContent to llama payload.
 func (l *Mistral1) FormatPayload(_ context.Context, messages []llms.MessageContent, options ...llms.CallOption) ([]byte, error) {
 	// Initialize payload options with defaults
 	opts := llms.CallOptions{}
