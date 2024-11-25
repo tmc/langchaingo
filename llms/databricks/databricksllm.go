@@ -122,7 +122,7 @@ func (o *LLM) stream(ctx context.Context, body io.Reader, opts llms.CallOptions)
 			continue
 		}
 
-		if err := opts.StreamingFunc(ctx, []byte(fullChoiceContent[*index].String())); err != nil {
+		if err := opts.StreamingFunc(ctx, []byte(contentResponse.Choices[*index].Content)); err != nil {
 			return nil, err
 		}
 
