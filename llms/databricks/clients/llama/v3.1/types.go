@@ -33,7 +33,7 @@ type LlamaPayload struct {
 	Stream           bool           `json:"stream,omitempty"`            // Enable token-by-token streaming
 }
 
-// LlamaResponse represents the response structure for the Llama model. (full answer or streamed one)
+// LlamaResponse represents the response structure for the Llama model. (full answer or streamed one).
 type LlamaResponse[T LlamaChoice | LlamaChoiceDelta] struct {
 	ID      string     `json:"id"`      // Unique ID of the response
 	Object  string     `json:"object"`  // Type of response (e.g., "chat.completion")
