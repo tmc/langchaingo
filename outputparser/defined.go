@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -64,16 +65,19 @@ func (p Defined[T]) Parse(text string) (T, error) {
 	// Removes '```json' and '```' from the start and end of the text.
 	const opening1 = "```json"
 	const opening2 = "```"
-	switch {
-	case len(text) >= len(opening1) && text[:len(opening1)] == opening1:
-		text = text[len(opening1):]
-	case len(text) >= len(opening2) && text[:len(opening2)] == opening2:
-		text = text[len(opening2):]
+
+	opening1Index := strings.Index(text, opening1)
+	opening2Index := strings.Index(text, opening2)
+	if opening1Index != -1 {
+		text = text[opening1Index+len(opening1):]
+	} else if opening2Index != -1 {
+		text = text[opening2Index+len(opening2):]
 	}
 
 	const closing = "```"
-	if len(text) >= len(closing) && text[len(text)-len(closing):] == closing {
-		text = text[:len(text)-len(closing)]
+	closingIndex := strings.Index(text, closing)
+	if closingIndex != -1 {
+		text = text[:closingIndex]
 	}
 	if err := json.Unmarshal([]byte(text), &target); err != nil {
 		return target, fmt.Errorf("could not parse generated JSON: %w", err)
