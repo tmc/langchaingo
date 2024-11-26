@@ -62,23 +62,13 @@ func (p Defined[T]) GetFormatInstructions() string {
 func (p Defined[T]) Parse(text string) (T, error) {
 	var target T
 
-	// Removes '```json' and '```' from the start and end of the text.
-	const opening1 = "```json"
-	const opening2 = "```"
-
-	opening1Index := strings.Index(text, opening1)
-	opening2Index := strings.Index(text, opening2)
-	if opening1Index != -1 {
-		text = text[opening1Index+len(opening1):]
-	} else if opening2Index != -1 {
-		text = text[opening2Index+len(opening2):]
+	startIndex := strings.Index(text, "{")
+	endIndex := strings.LastIndex(text, "}")
+	if startIndex == -1 || endIndex == -1 {
+		return target, fmt.Errorf("could not find start or end of JSON object")
 	}
+	text = text[startIndex : endIndex+1]
 
-	const closing = "```"
-	closingIndex := strings.Index(text, closing)
-	if closingIndex != -1 {
-		text = text[:closingIndex]
-	}
 	if err := json.Unmarshal([]byte(text), &target); err != nil {
 		return target, fmt.Errorf("could not parse generated JSON: %w", err)
 	}

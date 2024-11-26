@@ -174,8 +174,23 @@ func getParseTests() map[string]struct {
 				},
 			},
 		},
-		"llm-explanation-and-valid": {
+		"llm-explanation-and-tags": {
 			input: fmt.Sprintf("Sure! Here's the JSON:\n\n```json\n%s\n```\n\nLet me know if you need anything else.", fmt.Sprintf(
+				`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
+			)),
+			wantErr: false,
+			expected: &book{
+				Chapters: []struct {
+					Title string `json:"title" describe:"chapter title"`
+				}{
+					{Title: titles[0]},
+					{Title: titles[1]},
+					{Title: titles[2]},
+				},
+			},
+		},
+		"llm-explanation-and-valid": {
+			input: fmt.Sprintf("Sure! Here's the JSON:\n\n%s\n\nLet me know if you need anything else.", fmt.Sprintf(
 				`{"chapters": [{"title": "%s"}, {"title": "%s"}, {"title": "%s"}]}`, titles[0], titles[1], titles[2],
 			)),
 			wantErr: false,
