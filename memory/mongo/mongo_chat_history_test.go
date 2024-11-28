@@ -11,15 +11,18 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-func runTestContainer() (string, error) {
+func runTestContainer(t *testing.T) (string, error) {
+	t.Helper()
+
 	ctx := context.Background()
 
-	mongoContainer, err := mongodb.RunContainer(
+	mongoContainer, err := mongodb.Run(
 		ctx,
-		testcontainers.WithImage("mongo:7.0.8"),
+		"mongo:7.0.8",
 		mongodb.WithUsername("test"),
 		mongodb.WithPassword("test"),
 	)
+	testcontainers.CleanupContainer(t, mongoContainer)
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +37,7 @@ func runTestContainer() (string, error) {
 func TestMongoDBChatMessageHistory(t *testing.T) {
 	t.Parallel()
 
-	url, err := runTestContainer()
+	url, err := runTestContainer(t)
 	require.NoError(t, err)
 
 	ctx := context.Background()

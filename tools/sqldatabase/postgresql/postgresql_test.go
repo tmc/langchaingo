@@ -24,9 +24,9 @@ func Test(t *testing.T) {
 	// export LANGCHAINGO_TEST_POSTGRESQL=postgres://db_user:mysecretpassword@localhost:5438/test?sslmode=disable
 	pgURI := os.Getenv("LANGCHAINGO_TEST_POSTGRESQL")
 	if pgURI == "" {
-		pgContainer, err := postgres.RunContainer(
+		pgContainer, err := postgres.Run(
 			context.Background(),
-			testcontainers.WithImage("postgres:16.2"),
+			"postgres:16.2",
 			postgres.WithDatabase("test"),
 			postgres.WithUsername("db_user"),
 			postgres.WithPassword("p@mysecretpassword"),
@@ -36,6 +36,7 @@ func Test(t *testing.T) {
 					WithOccurrence(2).
 					WithStartupTimeout(5*time.Second)),
 		)
+		testcontainers.CleanupContainer(t, pgContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
