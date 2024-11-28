@@ -233,11 +233,10 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 	}
 	items, ok := data.([]any)
 
-	var docs []schema.Document
+	docs := make([]schema.Document, 0, len(items))
 	if !ok || len(items) == 0 {
 		return docs, nil
 	}
-	docs = make([]schema.Document, 0, len(items))
 	for _, item := range items {
 		itemMap, ok := item.(map[string]any)
 		if !ok {
