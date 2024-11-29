@@ -10,9 +10,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -20,7 +23,45 @@ import (
 	"github.com/weaviate/weaviate/entities/models"
 )
 
-func getValues(t *testing.T) (string, string) {
+const (
+	ollamaVersion  string = "0.3.13"
+	llamaModel     string = "llama3.2"
+	llamaTag       string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaTag
+
+	// ollamaImage is the Docker image to use for the test container.
+	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaTag
+)
+
+func runOllama(t *testing.T) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// the Ollama container is reused across tests, that's why it defines a fixed container name and reuses it.
+	ollamaContainer, err := tcollama.RunContainer(
+		ctx,
+		testcontainers.WithImage(ollamaImage),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "ollama-model-weaviate",
+			},
+			Reuse: true,
+		},
+		))
+	if err != nil {
+		return "", err
+	}
+
+	url, err := ollamaContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
+
+func getValues(t *testing.T) (string, string, embeddings.EmbedderClient, llms.Model) {
 	t.Helper()
 
 	scheme := os.Getenv("WEAVIATE_SCHEME")
@@ -41,11 +82,30 @@ func getValues(t *testing.T) (string, string) {
 		}
 	}
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	var llmEmbedderClient embeddings.EmbedderClient
+	var llmModel llms.Model
+
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey != "" {
+		openaillm, err := openai.New()
+		require.NoError(t, err)
+		llmEmbedderClient = openaillm
+		llmModel = openaillm
+	} else {
+		ollamaURL, err := runOllama(t)
+		if err != nil {
+			t.Skip("OPENAI_API_KEY not set")
+		}
+
+		ollamallm, err := ollama.New(ollama.WithModel(llamaModelName), ollama.WithServerURL(ollamaURL))
+		if err != nil {
+			t.Fatalf("new ollama with model and serverURL: %v", err)
+		}
+
+		llmEmbedderClient = ollamallm
+		llmModel = ollamallm
 	}
 
-	return scheme, host
+	return scheme, host, llmEmbedderClient, llmModel
 }
 
 func randomizedCamelCaseClass() string {
@@ -75,11 +135,9 @@ func createTestClass(ctx context.Context, s Store) error {
 func TestWeaviateStoreRest(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -113,11 +171,9 @@ func TestWeaviateStoreRest(t *testing.T) {
 func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -165,10 +221,9 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 func TestMetadataSearch(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
+
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -210,10 +265,9 @@ func TestMetadataSearch(t *testing.T) {
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
+
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -253,10 +307,9 @@ func TestDeduplicater(t *testing.T) {
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
+
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -299,11 +352,9 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestWeaviateAsRetriever(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, llmModel := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -334,7 +385,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
-			llm,
+			llmModel,
 			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(nameSpace)),
 		),
 		"What color is the desk?",
@@ -346,11 +397,9 @@ func TestWeaviateAsRetriever(t *testing.T) {
 func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, llmModel := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -382,7 +431,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
-			llm,
+			llmModel,
 			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
 				nameSpace), vectorstores.WithScoreThreshold(0.8)),
 		),
@@ -398,11 +447,9 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, llmModel := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -466,7 +513,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
-			llm,
+			llmModel,
 			vectorstores.ToRetriever(store,
 				5,
 				vectorstores.WithNameSpace(nameSpace),
@@ -486,11 +533,9 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, llmModel := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -549,7 +594,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
-			llm,
+			llmModel,
 			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(nameSpace)),
 		),
 		"What color is the lamp in each room?",
@@ -566,11 +611,9 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, llmModel := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -631,7 +674,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
-			llm,
+			llmModel,
 			vectorstores.ToRetriever(store,
 				5,
 				vectorstores.WithFilters(filter),
@@ -648,11 +691,9 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -689,11 +730,9 @@ func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+	e, err := embeddings.NewEmbedder(llmEmbedderClient)
 	require.NoError(t, err)
 
 	store, err := New(
@@ -736,10 +775,7 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 func TestWeaviateWithOptionEmbedder(t *testing.T) {
 	t.Parallel()
 
-	scheme, host := getValues(t)
-
-	llm, err := openai.New()
-	require.NoError(t, err)
+	scheme, host, llmEmbedderClient, _ := getValues(t)
 
 	notme, err := embeddings.NewEmbedder(
 		embeddings.EmbedderClientFunc(func(context.Context, []string) ([][]float32, error) {
@@ -751,7 +787,7 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 
 	butme, err := embeddings.NewEmbedder(
 		embeddings.EmbedderClientFunc(func(ctx context.Context, texts []string) ([][]float32, error) {
-			return llm.CreateEmbedding(ctx, texts)
+			return llmEmbedderClient.CreateEmbedding(ctx, texts)
 		}),
 	)
 	require.NoError(t, err)
