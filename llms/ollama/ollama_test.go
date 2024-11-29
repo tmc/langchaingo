@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
@@ -89,9 +88,9 @@ func TestGenerateContent(t *testing.T) {
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, rsp.Choices)
+	require.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+	require.Regexp(t, "feet", strings.ToLower(c1.Content))
 }
 
 func TestWithFormat(t *testing.T) {
@@ -117,9 +116,9 @@ How many feet are in a nautical mile?`},
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, rsp.Choices)
+	require.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+	require.Regexp(t, "feet", strings.ToLower(c1.Content))
 
 	// check whether we got *any* kind of JSON object.
 	var result map[string]any
@@ -127,8 +126,8 @@ How many feet are in a nautical mile?`},
 	require.NoError(t, err)
 
 	// Verify the response contains the expected fields
-	assert.Contains(t, result, "feet", "Response should contain 'feet' field")
-	assert.Contains(t, result, "explanation", "Response should contain 'explanation' field")
+	require.Contains(t, result, "feet", "Response should contain 'feet' field")
+	require.Contains(t, result, "explanation", "Response should contain 'explanation' field")
 }
 
 func TestWithStreaming(t *testing.T) {
@@ -153,10 +152,10 @@ func TestWithStreaming(t *testing.T) {
 		}))
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, rsp.Choices)
+	require.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
-	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
-	assert.Regexp(t, "feet", strings.ToLower(sb.String()))
+	require.Regexp(t, "feet", strings.ToLower(c1.Content))
+	require.Regexp(t, "feet", strings.ToLower(sb.String()))
 }
 
 func TestWithKeepAlive(t *testing.T) {
@@ -176,11 +175,11 @@ func TestWithKeepAlive(t *testing.T) {
 	resp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, resp.Choices)
+	require.NotEmpty(t, resp.Choices)
 	c1 := resp.Choices[0]
-	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
+	require.Regexp(t, "feet", strings.ToLower(c1.Content))
 
 	vector, err := llm.CreateEmbedding(context.Background(), []string{"test embedding with keep_alive"})
 	require.NoError(t, err)
-	assert.NotEmpty(t, vector)
+	require.NotEmpty(t, vector)
 }

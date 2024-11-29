@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
@@ -85,26 +84,26 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "invalid options: missing index name", err.Error())
+	require.Equal(t, "invalid options: missing index name", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 	)
-	assert.Equal(t, "invalid options: missing embedder", err.Error())
+	require.Equal(t, "invalid options: missing embedder", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis: invalid URL scheme: ", err.Error())
+	require.Equal(t, "redis: invalid URL scheme: ", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -119,7 +118,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithEmbedder(e),
 		redisvector.WithIndexSchema(redisvector.YAMLSchemaFormat, "./testdata/not_exists.yml", nil),
 	)
-	assert.Equal(t, "open ./testdata/not_exists.yml: no such file or directory", err.Error())
+	require.Equal(t, "open ./testdata/not_exists.yml: no such file or directory", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -127,7 +126,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithEmbedder(e),
 		redisvector.WithIndexSchema(redisvector.YAMLSchemaFormat, "", nil),
 	)
-	assert.Equal(t, redisvector.ErrEmptySchemaContent, err)
+	require.Equal(t, redisvector.ErrEmptySchemaContent, err)
 
 	// create redis vector with file
 	_, err = redisvector.New(ctx,
@@ -180,7 +179,7 @@ func TestAddDocuments(t *testing.T) {
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	vector, err := redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -190,7 +189,7 @@ func TestAddDocuments(t *testing.T) {
 	require.NoError(t, err)
 
 	err = vector.DropIndex(ctx, index, false)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	//nolint: dupl
 	data := []schema.Document{
@@ -211,8 +210,8 @@ func TestAddDocuments(t *testing.T) {
 	// create redis vector with not existed index, creating index when adding docs
 	docIDs, err := vector.AddDocuments(ctx, data)
 	require.NoError(t, err)
-	assert.Equal(t, len(data), len(docIDs))
-	assert.True(t, strings.HasPrefix(docIDs[0], prefix+index))
+	require.Equal(t, len(data), len(docIDs))
+	require.True(t, strings.HasPrefix(docIDs[0], prefix+index))
 
 	// create data with ids or keys
 	dataWithIDOrKeys := []schema.Document{
@@ -222,9 +221,9 @@ func TestAddDocuments(t *testing.T) {
 
 	docIDs, err = vector.AddDocuments(ctx, dataWithIDOrKeys)
 	require.NoError(t, err)
-	assert.Equal(t, len(dataWithIDOrKeys), len(docIDs))
-	assert.Equal(t, prefix+index+":id1", docIDs[0])
-	assert.Equal(t, prefix+index+":key1", docIDs[1])
+	require.Equal(t, len(dataWithIDOrKeys), len(docIDs))
+	require.Equal(t, prefix+index+":id1", docIDs[0])
+	require.Equal(t, prefix+index+":key1", docIDs[1])
 
 	// create vector with existed index & index schema, will not create new index
 	_, err = redisvector.New(ctx,
@@ -287,7 +286,7 @@ func TestSimilaritySearch(t *testing.T) {
 	// create index and add test data
 	docIDs, err := store.AddDocuments(ctx, data)
 	require.NoError(t, err)
-	assert.Equal(t, len(data), len(docIDs))
+	require.Equal(t, len(data), len(docIDs))
 
 	// create vector with existed index
 	store, err = redisvector.New(ctx,
@@ -299,32 +298,32 @@ func TestSimilaritySearch(t *testing.T) {
 
 	docs, err := store.SimilaritySearch(ctx, "Tokyo", 5)
 	require.NoError(t, err)
-	assert.Len(t, docs, 5)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 5)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with score threshold
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithScoreThreshold(0.8),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 2)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 2)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter area>1000 or area < 300
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithFilters("(@area:[(1000 +inf] | @area:[-inf (300])"),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 5)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 5)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter area=622
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithFilters("(@area:[622 622])"),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 1)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 1)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter & score threshold
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 2,
@@ -332,8 +331,8 @@ func TestSimilaritySearch(t *testing.T) {
 		vectorstores.WithScoreThreshold(0.5),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 2)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 2)
+	require.Len(t, docs[0].Metadata, 3)
 
 	t.Cleanup(func() {
 		err = store.DropIndex(ctx, index, true)
