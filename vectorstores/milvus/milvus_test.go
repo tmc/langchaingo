@@ -12,12 +12,51 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
+	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
+
+const (
+	ollamaVersion  string = "0.3.13"
+	llamaModel     string = "llama3.2"
+	llamaTag       string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaTag
+
+	// ollamaImage is the Docker image to use for the test container.
+	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaTag
+)
+
+func runOllama(t *testing.T) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// the Ollama container is reused across tests, that's why it defines a fixed container name and reuses it.
+	ollamaContainer, err := tcollama.RunContainer(
+		ctx,
+		testcontainers.WithImage(ollamaImage),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "ollama-model-milvus",
+			},
+			Reuse: true,
+		},
+		))
+	if err != nil {
+		return "", err
+	}
+
+	url, err := ollamaContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
 
 func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
 	opts := []ollama.Option{ollama.WithModel(model)}
@@ -40,9 +79,15 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
 	ollamaURL := os.Getenv("OLLAMA_HOST")
 	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
+		address, err := runOllama(t)
+		if err != nil {
+			t.Skip("OLLAMA_HOST not set")
+			return Store{}, err
+		}
+
+		ollamaURL = address
 	}
-	_, e := getEmbedding("gemma:2b")
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
