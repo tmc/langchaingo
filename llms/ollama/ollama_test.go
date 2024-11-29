@@ -9,15 +9,60 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	"github.com/tmc/langchaingo/llms"
 )
+
+const (
+	ollamaVersion  string = "0.3.13"
+	llamaModel     string = "llama3.2"
+	llamaTag       string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaTag
+
+	// ollamaImage is the Docker image to use for the test container.
+	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaTag
+)
+
+func runOllama(t *testing.T) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// the Ollama container is reused across tests, that's why it defines a fixed container name and reuses it.
+	ollamaContainer, err := tcollama.RunContainer(
+		ctx,
+		testcontainers.WithImage(ollamaImage),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "ollama-model",
+			},
+			Reuse: true,
+		},
+		))
+	if err != nil {
+		return "", err
+	}
+
+	url, err := ollamaContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
 	var ollamaModel string
 	if ollamaModel = os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
-		t.Skip("OLLAMA_TEST_MODEL not set")
-		return nil
+		address, err := runOllama(t)
+		if err != nil {
+			t.Skip("OLLAMA_TEST_MODEL not set")
+			return nil
+		}
+		ollamaModel = llamaModelName
+		opts = append(opts, WithServerURL(address))
 	}
 
 	opts = append([]Option{WithModel(ollamaModel)}, opts...)
