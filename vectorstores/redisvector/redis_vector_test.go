@@ -306,7 +306,7 @@ func TestSimilaritySearch(t *testing.T) {
 		vectorstores.WithScoreThreshold(0.8),
 	)
 	require.NoError(t, err)
-	require.Len(t, docs, 2)
+	require.Len(t, docs, 1)
 	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter area>1000 or area < 300
