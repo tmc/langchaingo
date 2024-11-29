@@ -54,7 +54,13 @@ func TestWithFormat(t *testing.T) {
 	llm := newTestClient(t, WithFormat("json"))
 
 	parts := []llms.ContentPart{
-		llms.TextContent{Text: "How many feet are in a nautical mile?"},
+		llms.TextContent{Text: `Please respond with a JSON object in this format:
+{
+    "feet": <number>,
+    "explanation": "<string explaining the conversion>"
+}
+
+How many feet are in a nautical mile?`},
 	}
 	content := []llms.MessageContent{
 		{
@@ -74,6 +80,10 @@ func TestWithFormat(t *testing.T) {
 	var result map[string]any
 	err = json.Unmarshal([]byte(c1.Content), &result)
 	require.NoError(t, err)
+
+	// Verify the response contains the expected fields
+	assert.Contains(t, result, "feet", "Response should contain 'feet' field")
+	assert.Contains(t, result, "explanation", "Response should contain 'explanation' field")
 }
 
 func TestWithStreaming(t *testing.T) {
