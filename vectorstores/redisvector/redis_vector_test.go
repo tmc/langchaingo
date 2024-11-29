@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
@@ -21,7 +22,43 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/redisvector"
 )
 
-const ollamaModel = "gemma:2b"
+const (
+	ollamaVersion  string = "0.3.13"
+	llamaModel     string = "llama3.2"
+	llamaTag       string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaTag
+
+	// ollamaImage is the Docker image to use for the test container.
+	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaTag
+)
+
+func runOllama(t *testing.T) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// the Ollama container is reused across tests, that's why it defines a fixed container name and reuses it.
+	ollamaContainer, err := tcollama.RunContainer(
+		ctx,
+		testcontainers.WithImage(ollamaImage),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "ollama-model-redis",
+			},
+			Reuse: true,
+		},
+		))
+	if err != nil {
+		return "", err
+	}
+
+	url, err := ollamaContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
@@ -29,7 +66,11 @@ func getValues(t *testing.T) (string, string) {
 	// export OLLAMA_HOST="http://127.0.0.1:11434"
 	ollamaURL := os.Getenv("OLLAMA_HOST")
 	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
+		address, err := runOllama(t)
+		if err != nil {
+			t.Skip("OLLAMA_HOST not set")
+		}
+		ollamaURL = address
 	}
 
 	uri := os.Getenv("REDIS_URL")
@@ -76,7 +117,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_case1"
 
@@ -167,7 +208,7 @@ func TestAddDocuments(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 
 	ctx := context.Background()
 
@@ -255,7 +296,7 @@ func TestSimilaritySearch(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 
 	index := "test_similarity_search"
@@ -344,7 +385,7 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	llm, e := getEmbedding(ollamaModel, ollamaURL)
+	llm, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_redis_vector_as_retriever"
 
@@ -402,7 +443,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	llm, e := getEmbedding(ollamaModel, ollamaURL)
+	llm, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 
