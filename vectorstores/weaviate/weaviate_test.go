@@ -761,7 +761,7 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 		WithEmbedder(notme),
 		WithNameSpace(uuid.New().String()),
 		WithIndexName(randomizedCamelCaseClass()),
-		WithQueryAttrs([]string{"location"}),
+		WithQueryAttrs([]string{"country"}),
 	)
 	require.NoError(t, err)
 
