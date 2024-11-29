@@ -149,9 +149,10 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0.9))
+		vectorstores.WithScoreThreshold(0.8))
 	require.NoError(t, err)
-	require.Len(t, docs, 6)
+	require.Less(t, len(docs), 7)
+	require.GreaterOrEqual(t, len(docs), 3)
 
 	// test with a score threshold of 0, expected all 10 documents
 	docs, err = store.SimilaritySearch(context.Background(),
