@@ -25,12 +25,12 @@ import (
 const (
 	ollamaVersion  string = "0.3.13"
 	llamaModel     string = "llama3.2"
-	llamaTag       string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
-	llamaModelName string = llamaModel + ":" + llamaTag
+	llamaModelTag  string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaModelTag
 
 	// ollamaImage is the Docker image to use for the test container.
 	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
-	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaTag
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaModelTag
 )
 
 func runOllama(t *testing.T) (string, error) {
