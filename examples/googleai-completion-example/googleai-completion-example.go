@@ -1,4 +1,4 @@
-// Set the API_KEY env var to your API key taken from ai.google.dev
+// Set the GOOGLE_API_KEY env var to your API key taken from ai.google.dev
 package main
 
 import (
@@ -13,7 +13,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	apiKey := os.Getenv("API_KEY")
+	apiKey := os.Getenv("GOOGLE_API_KEY")
 	llm, err := googleai.New(ctx, googleai.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatal(err)

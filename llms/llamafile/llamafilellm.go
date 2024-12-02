@@ -7,12 +7,11 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/llamafile/internal/llamafileclient"
-	"github.com/tmc/langchaingo/schema"
 )
 
 var (
 	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("no all input got emmbedded")
+	ErrIncompleteEmbedding = errors.New("not all input got embedded")
 )
 
 // LLM is a llamafile LLM implementation.
@@ -146,18 +145,20 @@ func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 	return embeddings, nil
 }
 
-func typeToRole(typ schema.ChatMessageType) string {
+func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
-	case schema.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return "system"
-	case schema.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return "assistant"
-	case schema.ChatMessageTypeHuman:
+	case llms.ChatMessageTypeHuman:
 		fallthrough
-	case schema.ChatMessageTypeGeneric:
+	case llms.ChatMessageTypeGeneric:
 		return "user"
-	case schema.ChatMessageTypeFunction:
+	case llms.ChatMessageTypeFunction:
 		return "function"
+	case llms.ChatMessageTypeTool:
+		return "tool"
 	}
 	return "user"
 }

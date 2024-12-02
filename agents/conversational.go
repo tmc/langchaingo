@@ -40,7 +40,7 @@ type ConversationalAgent struct {
 
 var _ Agent = (*ConversationalAgent)(nil)
 
-func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *ConversationalAgent {
+func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *ConversationalAgent {
 	options := conversationalDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -111,6 +111,10 @@ func (a *ConversationalAgent) GetInputKeys() []string {
 
 func (a *ConversationalAgent) GetOutputKeys() []string {
 	return []string{a.OutputKey}
+}
+
+func (a *ConversationalAgent) GetTools() []tools.Tool {
+	return a.Tools
 }
 
 func constructScratchPad(steps []schema.AgentStep) string {

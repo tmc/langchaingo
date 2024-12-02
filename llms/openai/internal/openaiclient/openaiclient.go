@@ -33,9 +33,11 @@ type Client struct {
 	apiType      APIType
 	httpClient   Doer
 
+	EmbeddingModel string
 	// required when APIType is APITypeAzure or APITypeAzureAD
-	apiVersion      string
-	embeddingsModel string
+	apiVersion string
+
+	ResponseFormat *ResponseFormat
 }
 
 // Option is an option for the OpenAI client.
@@ -48,18 +50,20 @@ type Doer interface {
 
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
-	apiType APIType, apiVersion string, httpClient Doer, embeddingsModel string,
+	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
+	responseFormat *ResponseFormat,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:           token,
-		Model:           model,
-		embeddingsModel: embeddingsModel,
-		baseURL:         strings.TrimSuffix(baseURL, "/"),
-		organization:    organization,
-		apiType:         apiType,
-		apiVersion:      apiVersion,
-		httpClient:      httpClient,
+		token:          token,
+		Model:          model,
+		EmbeddingModel: embeddingModel,
+		baseURL:        strings.TrimSuffix(baseURL, "/"),
+		organization:   organization,
+		apiType:        apiType,
+		apiVersion:     apiVersion,
+		httpClient:     httpClient,
+		ResponseFormat: responseFormat,
 	}
 
 	for _, opt := range opts {
@@ -123,16 +127,13 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 }
 
 // CreateChat creates chat request.
-func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatResponse, error) {
+func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletionResponse, error) {
 	if r.Model == "" {
 		if c.Model == "" {
 			r.Model = defaultChatModel
 		} else {
 			r.Model = c.Model
 		}
-	}
-	if r.FunctionCallBehavior == "" && len(r.Functions) > 0 {
-		r.FunctionCallBehavior = defaultFunctionCallBehavior
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {

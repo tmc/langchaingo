@@ -32,15 +32,12 @@ func run() error {
 		tools.Calculator{},
 		search,
 	}
-	executor, err := agents.Initialize(
-		llm,
+
+	agent := agents.NewOneShotAgent(llm,
 		agentTools,
-		agents.ZeroShotReactDescription,
-		agents.WithMaxIterations(3),
-	)
-	if err != nil {
-		return err
-	}
+		agents.WithMaxIterations(3))
+	executor := agents.NewExecutor(agent)
+
 	question := "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
 	answer, err := chains.Run(context.Background(), executor, question)
 	fmt.Println(answer)

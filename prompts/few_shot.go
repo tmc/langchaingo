@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 var (
@@ -170,7 +170,7 @@ func getMapKeys(inputMap map[string]any) []string {
 	return keys
 }
 
-func (p *FewShotPrompt) FormatPrompt(values map[string]any) (schema.PromptValue, error) {
+func (p *FewShotPrompt) FormatPrompt(values map[string]any) (llms.PromptValue, error) {
 	f, err := p.Format(values)
 	if err != nil {
 		return nil, err

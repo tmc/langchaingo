@@ -11,12 +11,13 @@ import (
 var (
 	ErrEmptyResponse              = errors.New("no response")
 	ErrMissingToken               = errors.New("missing the OpenAI API key, set it in the OPENAI_API_KEY environment variable") //nolint:lll
+	ErrMissingAzureModel          = errors.New("model needs to be provided when using Azure API")
 	ErrMissingAzureEmbeddingModel = errors.New("embeddings model needs to be provided when using Azure API")
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
-// newClient is wrapper for openaiclient internal package.
+// newClient creates an instance of the internal client.
 func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	options := &options{
 		token:        os.Getenv(tokenEnvVarName),
@@ -34,6 +35,9 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	// set of options needed for Azure client
 	if openaiclient.IsAzure(openaiclient.APIType(options.apiType)) && options.apiVersion == "" {
 		options.apiVersion = DefaultAPIVersion
+		if options.model == "" {
+			return options, nil, ErrMissingAzureModel
+		}
 		if options.embeddingModel == "" {
 			return options, nil, ErrMissingAzureEmbeddingModel
 		}
@@ -44,7 +48,9 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	}
 
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
-		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel)
+		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel,
+		options.responseFormat,
+	)
 	return options, cli, err
 }
 

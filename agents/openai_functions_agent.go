@@ -33,7 +33,7 @@ type OpenAIFunctionsAgent struct {
 var _ Agent = (*OpenAIFunctionsAgent)(nil)
 
 // NewOpenAIFunctionsAgent creates a new OpenAIFunctionsAgent.
-func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...CreationOption) *OpenAIFunctionsAgent {
+func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OpenAIFunctionsAgent {
 	options := openAIFunctionsDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -97,9 +97,34 @@ func (o *OpenAIFunctionsAgent) Plan(
 		role := msg.GetType()
 		text := msg.GetContent()
 
-		mc := llms.MessageContent{
-			Role:  role,
-			Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+		var mc llms.MessageContent
+
+		switch p := msg.(type) {
+		case llms.ToolChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{
+					ToolCallID: p.ID,
+					Content:    p.Content,
+				}},
+			}
+
+		case llms.AIChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{
+					llms.ToolCall{
+						ID:           p.ToolCalls[0].ID,
+						Type:         p.ToolCalls[0].Type,
+						FunctionCall: p.ToolCalls[0].FunctionCall,
+					},
+				},
+			}
+		default:
+			mc = llms.MessageContent{
+				Role:  role,
+				Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+			}
 		}
 		mcList[i] = mc
 	}
@@ -132,7 +157,11 @@ func (o *OpenAIFunctionsAgent) GetOutputKeys() []string {
 	return []string{o.OutputKey}
 }
 
-func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate {
+func (o *OpenAIFunctionsAgent) GetTools() []tools.Tool {
+	return o.Tools
+}
+
+func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	messageFormatters := []prompts.MessageFormatter{prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil)}
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
@@ -144,14 +173,14 @@ func createOpenAIFunctionPrompt(opts CreationOptions) prompts.ChatPromptTemplate
 	return tmpl
 }
 
-func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []schema.ChatMessage {
+func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []llms.ChatMessage {
 	if len(steps) == 0 {
 		return nil
 	}
 
-	messages := make([]schema.ChatMessage, 0)
+	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, schema.FunctionChatMessage{
+		messages = append(messages, llms.FunctionChatMessage{
 			Name:    step.Action.Tool,
 			Content: step.Observation,
 		})
@@ -203,6 +232,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			Tool:      functionName,
 			ToolInput: toolInput,
 			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+			ToolID:    choice.ToolCalls[0].ID,
 		},
 	}, nil, nil
 }

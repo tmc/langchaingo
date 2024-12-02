@@ -35,7 +35,6 @@ func TestRunInference(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			client, err := New("token", "model", server.URL)

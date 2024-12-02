@@ -1,0 +1,54 @@
+{
+    "numeric": [
+        {
+            "name": "age",
+            "no_index": false,
+            "sortable": false
+        }
+    ],
+    "text": [
+        {
+            "name": "user",
+            "no_index": false,
+            "no_stem": false,
+            "sortable": false,
+            "weight": 1,
+            "withsuffixtrie": false
+        },
+        {
+            "name": "job",
+            "no_index": false,
+            "no_stem": false,
+            "sortable": false,
+            "weight": 1,
+            "withsuffixtrie": false
+        },
+        {
+            "name": "credit_score",
+            "no_index": false,
+            "no_stem": false,
+            "sortable": false,
+            "weight": 1,
+            "withsuffixtrie": false
+        },
+        {
+            "name": "content",
+            "no_index": false,
+            "no_stem": false,
+            "sortable": false,
+            "weight": 1,
+            "withsuffixtrie": false
+        }
+    ],
+    "vector": [
+        {
+            "algorithm": "FLAT",
+            "block_size": 1000,
+            "datatype": "FLOAT32",
+            "dims": 1536,
+            "distance_metric": "COSINE",
+            "initial_cap": 20000,
+            "name": "content_vector"
+        }
+    ]
+}

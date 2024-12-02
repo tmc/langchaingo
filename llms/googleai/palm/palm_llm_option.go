@@ -23,6 +23,7 @@ var (
 
 type options struct {
 	projectID     string
+	location      string
 	clientOptions []option.ClientOption
 }
 
@@ -41,6 +42,13 @@ func initOpts() {
 func WithProjectID(projectID string) Option {
 	return func(opts *options) {
 		opts.projectID = projectID
+	}
+}
+
+// WithLocation passes the Google Cloud location to the client.
+func WithLocation(location string) Option {
+	return func(opts *options) {
+		opts.location = location
 	}
 }
 

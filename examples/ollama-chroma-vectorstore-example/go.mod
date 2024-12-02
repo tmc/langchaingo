@@ -1,12 +1,12 @@
 module github.com/tmc/langchaingo/examples/ollama-chroma-vectorstore-example
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.4
+toolchain go1.22.1
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.6
+	github.com/tmc/langchaingo v0.1.13-pre.0
 )
 
 require (

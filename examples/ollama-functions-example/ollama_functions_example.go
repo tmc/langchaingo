@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,13 +11,15 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
 )
 
+var flagVerbose = flag.Bool("v", false, "verbose mode")
+
 func main() {
+	flag.Parse()
 	// allow specifying your own model via OLLAMA_TEST_MODEL
 	// (same as the Ollama unit tests).
-	model := "mistral:instruct"
+	model := "llama3"
 	if v := os.Getenv("OLLAMA_TEST_MODEL"); v != "" {
 		model = v
 	}
@@ -32,36 +35,38 @@ func main() {
 	var msgs []llms.MessageContent
 
 	// system message defines the available tools.
-	msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeSystem,
-		systemMessage()))
-	msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeHuman,
-		"What's the weather like in Beijing?"))
+	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeSystem, systemMessage()))
+	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather like in Beijing?"))
 
 	ctx := context.Background()
 
-	for {
+	for retries := 3; retries > 0; retries = retries - 1 {
 		resp, err := llm.GenerateContent(ctx, msgs)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		choice1 := resp.Choices[0]
-		msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeAI, choice1.Content))
+		msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeAI, choice1.Content))
 
 		if c := unmarshalCall(choice1.Content); c != nil {
 			log.Printf("Call: %v", c.Tool)
-
+			if *flagVerbose {
+				log.Printf("Call: %v (raw: %v)", c.Tool, choice1.Content)
+			}
 			msg, cont := dispatchCall(c)
 			if !cont {
 				break
 			}
-
 			msgs = append(msgs, msg)
 		} else {
 			// Ollama doesn't always respond with a function call, let it try again.
 			log.Printf("Not a call: %v", choice1.Content)
+			msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
+		}
 
-			msgs = append(msgs, llms.TextParts(schema.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
+		if retries == 0 {
+			log.Fatal("retries exhausted")
 		}
 	}
 }
@@ -73,11 +78,9 @@ type Call struct {
 
 func unmarshalCall(input string) *Call {
 	var c Call
-
 	if err := json.Unmarshal([]byte(input), &c); err == nil && c.Tool != "" {
 		return &c
 	}
-
 	return nil
 }
 
@@ -85,9 +88,8 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 	// ollama doesn't always respond with a *valid* function call. As we're using prompt
 	// engineering to inject the tools, it may hallucinate.
 	if !validTool(c.Tool) {
-		log.Printf("invalid function call: %#v", c)
-
-		return llms.TextParts(schema.ChatMessageTypeHuman,
+		log.Printf("invalid function call: %#v, prompting model to try again", c)
+		return llms.TextParts(llms.ChatMessageTypeHuman,
 			"Tool does not exist, please try again."), true
 	}
 
@@ -107,7 +109,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return llms.TextParts(schema.ChatMessageTypeSystem, weather), true
+		return llms.TextParts(llms.ChatMessageTypeHuman, weather), true
 	case "finalResponse":
 		resp, ok := c.Input["response"].(string)
 		if !ok {
@@ -125,11 +127,9 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 
 func validTool(name string) bool {
 	var valid []string
-
 	for _, v := range functions {
 		valid = append(valid, v.Name)
 	}
-
 	return slices.Contains(valid, name)
 }
 

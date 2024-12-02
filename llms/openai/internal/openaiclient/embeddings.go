@@ -34,18 +34,25 @@ type embeddingResponsePayload struct {
 
 // nolint:lll
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
+	if c.baseURL == "" {
+		c.baseURL = defaultBaseURL
+	}
+	if c.Model == "" {
+		payload.Model = c.EmbeddingModel
+	}
+	if payload.Model == "" {
+		payload.Model = defaultEmbeddingModel
+	}
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.embeddingsModel), bytes.NewReader(payloadBytes))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/embeddings", c.EmbeddingModel), bytes.NewReader(payloadBytes))
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
-
 	c.setHeaders(req)
 
 	r, err := c.httpClient.Do(req)

@@ -3,8 +3,6 @@ package llms
 import (
 	"context"
 	"errors"
-
-	"github.com/tmc/langchaingo/schema"
 )
 
 // LLM is an alias for model, for backwards compatibility.
@@ -36,8 +34,8 @@ type Model interface {
 // than the more general [llms.Model.GenerateContent].
 func GenerateFromSinglePrompt(ctx context.Context, llm Model, prompt string, options ...CallOption) (string, error) {
 	msg := MessageContent{
-		Role:  schema.ChatMessageTypeHuman,
-		Parts: []ContentPart{TextContent{prompt}},
+		Role:  ChatMessageTypeHuman,
+		Parts: []ContentPart{TextContent{Text: prompt}},
 	}
 
 	resp, err := llm.GenerateContent(ctx, []MessageContent{msg}, options...)
