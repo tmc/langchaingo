@@ -1,3 +1,0 @@
-package pgvector
-
-// add connection
