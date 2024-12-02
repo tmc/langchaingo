@@ -20,6 +20,7 @@ type testLanguageModel struct {
 	simulateWork time.Duration
 	// record the prompt that was passed to the language model
 	recordedPrompt []llms.PromptValue
+	mu             sync.Mutex
 }
 
 type stringPromptValue struct {
@@ -46,9 +47,11 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.Message
 	} else {
 		return nil, fmt.Errorf("passed non-text part")
 	}
+	l.mu.Lock()
 	l.recordedPrompt = []llms.PromptValue{
 		stringPromptValue{s: prompt},
 	}
+	l.mu.Unlock()
 
 	if l.simulateWork > 0 {
 		time.Sleep(l.simulateWork)
