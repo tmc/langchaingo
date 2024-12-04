@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -61,24 +62,14 @@ func (p Defined[T]) GetFormatInstructions() string {
 func (p Defined[T]) Parse(text string) (T, error) {
 	var target T
 
-	// Removes '```json' and '```' from the start and end of the text.
-	const opening1 = "```json"
-	const opening2 = "```"
-	switch {
-	case len(text) >= len(opening1) && text[:len(opening1)] == opening1:
-		text = text[len(opening1):]
-	case len(text) >= len(opening2) && text[:len(opening2)] == opening2:
-		text = text[len(opening2):]
-	default:
-		return target, errors.New("input text should start with '```json' or '```'")
+	startIndex := strings.Index(text, "{")
+	endIndex := strings.LastIndex(text, "}")
+	if startIndex == -1 || endIndex == -1 {
+		return target, fmt.Errorf("could not find start or end of JSON object")
 	}
+	text = text[startIndex : endIndex+1]
 
-	const closing = "```"
-	if len(text) >= len(closing) && text[len(text)-len(closing):] != closing {
-		return target, fmt.Errorf("input text should end with %s", closing)
-	}
-	parseableJSON := text[:len(text)-len(closing)]
-	if err := json.Unmarshal([]byte(parseableJSON), &target); err != nil {
+	if err := json.Unmarshal([]byte(text), &target); err != nil {
 		return target, fmt.Errorf("could not parse generated JSON: %w", err)
 	}
 	return target, nil
