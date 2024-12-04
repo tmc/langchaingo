@@ -39,6 +39,27 @@ const (
 	// Languages: English (GA), Multilingual in 100+ languages (Preview).
 	ModelAmazonTitanTextExpressV1 = "amazon.titan-text-express-v1"
 
+	// Amazon Nova Micro is a text - text understanding foundation model.
+	// It is multilingual and can reason over text.
+	//
+	// Max tokens: 128k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaMicroV1 = "amazon.nova-micro-v1:0"
+
+	// Amazon Nova Lite is a is a multimodal understanding foundation model.
+	// It is multilingual and can reason over text, images and videos.
+	//
+	// Max tokens: 300k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaLiteV1 = "amazon.nova-lite-v1:0"
+
+	// Amazon Nova Pro is a multimodal understanding foundation model.
+	// It is multilingual and can reason over text, images and videos.
+	//
+	// Max tokens: 300k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaProV1 = "amazon.nova-pro-v1:0"
+
 	// Claude 3 Sonnet by Anthropic strikes the ideal balance between intelligence and
 	// speed—particularly for enterprise workloads. It offers maximum utility at a lower
 	// price than competitors, and is engineered to be the dependable, high-endurance
