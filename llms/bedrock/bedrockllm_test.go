@@ -22,6 +22,7 @@ func setUpTest() (*bedrockruntime.Client, error) {
 	return client, nil
 }
 
+
 func TestAmazonOutput(t *testing.T) {
 	ctx := context.Background()
 
@@ -66,21 +67,21 @@ func TestAmazonOutput(t *testing.T) {
 
 	// All the test models.
 	models := []string{
-		// bedrock.ModelAi21J2MidV1,
-		// bedrock.ModelAi21J2UltraV1,
-		// bedrock.ModelAmazonTitanTextLiteV1,
-		// bedrock.ModelAmazonTitanTextExpressV1,
-		// bedrock.ModelAnthropicClaudeV3Sonnet,
-		// bedrock.ModelAnthropicClaudeV3Haiku,
-		// bedrock.ModelAnthropicClaudeV21,
-		// bedrock.ModelAnthropicClaudeV2,
-		// bedrock.ModelAnthropicClaudeInstantV1,
-		// bedrock.ModelCohereCommandTextV14,
-		// bedrock.ModelCohereCommandLightTextV14,
-		// bedrock.ModelMetaLlama213bChatV1,
-		// bedrock.ModelMetaLlama270bChatV1,
-		// bedrock.ModelMetaLlama38bInstructV1,
-		// bedrock.ModelMetaLlama370bInstructV1,
+		bedrock.ModelAi21J2MidV1,
+		bedrock.ModelAi21J2UltraV1,
+		bedrock.ModelAmazonTitanTextLiteV1,
+		bedrock.ModelAmazonTitanTextExpressV1,
+		bedrock.ModelAnthropicClaudeV3Sonnet,
+		bedrock.ModelAnthropicClaudeV3Haiku,
+		bedrock.ModelAnthropicClaudeV21,
+		bedrock.ModelAnthropicClaudeV2,
+		bedrock.ModelAnthropicClaudeInstantV1,
+		bedrock.ModelCohereCommandTextV14,
+		bedrock.ModelCohereCommandLightTextV14,
+		bedrock.ModelMetaLlama213bChatV1,
+		bedrock.ModelMetaLlama270bChatV1,
+		bedrock.ModelMetaLlama38bInstructV1,
+		bedrock.ModelMetaLlama370bInstructV1,
 		bedrock.ModelAmazonNovaMicroV1,
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaProV1,
@@ -90,7 +91,6 @@ func TestAmazonOutput(t *testing.T) {
 		t.Logf("Model output for %s:-", model)
 
 		resp, err := llm.GenerateContent(ctx, msgs, llms.WithModel(model), llms.WithMaxTokens(512))
-		t.Logf("resp: %+v\n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -101,11 +101,20 @@ func TestAmazonOutput(t *testing.T) {
 }
 
 func TestAmazonNova(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
 
-	if os.Getenv("TEST_AWS") != "true" {
-		t.Skip("Skipping test, requires AWS access")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
+
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	client, err := setUpTest()
 	if err != nil {
@@ -141,7 +150,7 @@ func TestAmazonNova(t *testing.T) {
 	ctx := context.Background()
 
 	for _, model := range models {
-		llms.ShowMessageContents(os.Stdout, msgs)
+		t.Logf("Model output for %s:-", model)
 
 		resp, err := llm.GenerateContent(ctx, msgs, llms.WithModel(model), llms.WithMaxTokens(4096))
 		if err != nil {
@@ -154,11 +163,20 @@ func TestAmazonNova(t *testing.T) {
 }
 
 func TestAnthropicNovaImage(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
 
-	if os.Getenv("TEST_AWS") != "true" {
-		t.Skip("Skipping test, requires AWS access")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
+
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	client, err := setUpTest()
 	if err != nil {
@@ -201,10 +219,9 @@ func TestAnthropicNovaImage(t *testing.T) {
 	ctx := context.Background()
 
 	for _, model := range models {
-		llms.ShowMessageContents(os.Stdout, msgs)
+		t.Logf("Model output for %s:-", model)
 
 		resp, err := llm.GenerateContent(ctx, msgs, llms.WithModel(model), llms.WithMaxTokens(4096))
-		t.Logf("resp: %+v\n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
