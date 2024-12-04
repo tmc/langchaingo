@@ -1,28 +1,39 @@
 package bedrockclient
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
 )
 
+// Ref: https://boto3.amazonaws.com/v1/documentation/api/1.35.8/reference/services/bedrock-runtime/client/converse.html
+// This was the reference for the input and output types.
+
+// Ref: https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html
+// This was the reference for the model parameters.
+
 // novaBinGenerationInputSource is the source of the content.
+// It is used for sending binary content such as images to the model.
 type novaBinGenerationInputSource struct {
+	// The bytes of the content. Required if type is "image"
 	Bytes []byte `json:"bytes,omitempty"`
 }
 
+// novaImageInput is the input for the image content.
 type novaImageInput struct {
-	Format string                        `json:"format,omitempty"`
-	Source *novaBinGenerationInputSource `json:"source,omitempty"`
+	// The format of the image. Required if type is "image"
+	// One of: ["jpeg", "png", "webp", "gif"]
+	Format string `json:"format,omitempty"`
+	// The source of the content. Required if type is "image"
+	Source novaBinGenerationInputSource `json:"source,omitempty"`
 }
 
-// anthropicTextGenerationInputContent is a single message in the input.
+// novaTextGenerationInputContent is the content of a single input message.
+// It can be either a text or an image.
 type novaTextGenerationInputContent struct {
 	// The text content. Required if type is "text"
 	Text string `json:"text,omitempty"`
@@ -30,6 +41,7 @@ type novaTextGenerationInputContent struct {
 	Image *novaImageInput `json:"image,omitempty"`
 }
 
+// novaTextGenerationInputMessage is a single message in the input.
 type novaTextGenerationInputMessage struct {
 	// The role of the message. Required
 	// One of: ["user", "assistant"]
@@ -39,11 +51,13 @@ type novaTextGenerationInputMessage struct {
 	Content []novaTextGenerationInputContent `json:"content"`
 }
 
+// novaSystemPrompt is the system prompt for the input.
+// It is used to provide instructions to the model.
 type novaSystemPrompt struct {
 	Text string `json:"text,omitempty"`
 }
 
-// novaTextGenerationConfigInput is the input for the text generation configuration for Amazon Models.
+// novaInferenceConfigInput is the input for the text generation configuration for Amazon Nova Models.
 type novaInferenceConfigInput struct {
 	// The maximum number of tokens to generate per result. Optional, default = 512
 	MaxTokens int `json:"maxTokens,omitempty"`
@@ -55,12 +69,18 @@ type novaInferenceConfigInput struct {
 	// Currently only supports: ["|", "User:"]
 	StopSequences []string `json:"stopSequences,omitempty"`
 }
+
+// novaTextGenerationInput is the input for the text generation for Amazon Nova Models.
 type novaTextGenerationInput struct {
-	Messages        []*novaTextGenerationInputMessage `json:"messages"`
-	InferenceConfig novaInferenceConfigInput          `json:"inferenceConfig"`
-	System          []*novaSystemPrompt               `json:"system,omitempty"`
+	// The messages to send to the model. Required
+	Messages []*novaTextGenerationInputMessage `json:"messages"`
+	// The configuration for the text generation. Required
+	InferenceConfig novaInferenceConfigInput `json:"inferenceConfig"`
+	// The system prompt for the input. Optional
+	System []*novaSystemPrompt `json:"system,omitempty"`
 }
 
+// novaTextGenerationOutput is the output for the text generation for Amazon Nova Models.
 type novaTextGenerationOutput struct {
 	Output struct {
 		Message struct {
@@ -83,7 +103,6 @@ type novaTextGenerationOutput struct {
 // Finish reason for the completion of the generation.
 const (
 	NovaCompletionReasonEndTurn      = "end_turn"
-	NovaCompletionReasonMaxTokens    = "max_tokens"
 	NovaCompletionReasonStopSequence = "stop_sequence"
 )
 
@@ -137,13 +156,7 @@ func createNovaCompletion(ctx context.Context,
 	}
 
 	if options.StreamingFunc != nil {
-		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
-			ModelId:     aws.String(modelID),
-			Accept:      aws.String("*/*"),
-			ContentType: aws.String("application/json"),
-			Body:        body,
-		}
-		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
+		return nil, errors.New("streaming not implemented for nova")
 	}
 
 	modelInput := &bedrockruntime.InvokeModelInput{
@@ -181,86 +194,6 @@ func createNovaCompletion(ctx context.Context,
 	}
 	return &llms.ContentResponse{
 		Choices: Contentchoices,
-	}, nil
-}
-
-type novaStreamingCompletionResponseChunk struct {
-	Type  string `json:"type"`
-	Index int    `json:"index"`
-	Delta struct {
-		Type         string `json:"type"`
-		Text         string `json:"text"`
-		StopReason   string `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-	} `json:"delta"`
-	AmazonBedrockInvocationMetrics struct {
-		InputTokenCount   int `json:"inputTokenCount"`
-		OutputTokenCount  int `json:"outputTokenCount"`
-		InvocationLatency int `json:"invocationLatency"`
-		FirstByteLatency  int `json:"firstByteLatency"`
-	} `json:"amazon-bedrock-invocationMetrics"`
-	Usage struct {
-		OutputTokens int `json:"output_tokens"`
-	} `json:"usage"`
-	Message struct {
-		ID           string `json:"id"`
-		Type         string `json:"type"`
-		Role         string `json:"role"`
-		Content      []any  `json:"content"`
-		Model        string `json:"model"`
-		StopReason   any    `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-		Usage        struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
-		} `json:"usage"`
-	} `json:"message"`
-}
-
-func parseNovaStreamingCompletionResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
-	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
-	if err != nil {
-		return nil, err
-	}
-	stream := output.GetStream()
-	if stream == nil {
-		return nil, errors.New("no stream")
-	}
-	defer stream.Close()
-
-	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]interface{}{}}}
-	for e := range stream.Events() {
-		if err = stream.Err(); err != nil {
-			return nil, err
-		}
-
-		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
-			var resp novaStreamingCompletionResponseChunk
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
-				return nil, err
-			}
-
-			switch resp.Type {
-			case "message_start":
-				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
-			case "content_block_delta":
-				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
-					return nil, err
-				}
-				contentchoices[0].Content += resp.Delta.Text
-			case "message_delta":
-				contentchoices[0].StopReason = resp.Delta.StopReason
-				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
-			}
-		}
-	}
-	if err = stream.Err(); err != nil {
-		return nil, err
-	}
-
-	return &llms.ContentResponse{
-		Choices: contentchoices,
 	}, nil
 }
 
@@ -343,7 +276,7 @@ func getNovaInputContent(message Message) novaTextGenerationInputContent {
 		c = novaTextGenerationInputContent{}
 		c.Image = &novaImageInput{
 			Format: mimeTypeToFormat(message.MimeType),
-			Source: &novaBinGenerationInputSource{
+			Source: novaBinGenerationInputSource{
 				Bytes: []byte(message.Content),
 			},
 		}
@@ -359,6 +292,8 @@ func mimeTypeToFormat(mimeType string) string {
 		return "png"
 	case "image/webp":
 		return "webp"
+	case "image/gif":
+		return "gif"
 	default:
 		return ""
 	}
