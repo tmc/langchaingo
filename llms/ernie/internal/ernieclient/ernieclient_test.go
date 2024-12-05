@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-type mockHttpClient struct{}
+type mockHTTPClient struct{}
 
-// implement ernieclient.Doer interface
-func (m *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
+// implement ernieclient.Doer interface.
+func (m *mockHTTPClient) Do(_ *http.Request) (*http.Response, error) {
 	authResponse := &authResponse{
 		AccessToken: "test",
 	}
@@ -56,7 +56,7 @@ func TestClient_buildURL(t *testing.T) {
 			fields: fields{
 				apiKey:     "test",
 				secretKey:  "test",
-				httpClient: &mockHttpClient{},
+				httpClient: &mockHTTPClient{},
 			},
 			args: args{modelpath: "eb-instant"},
 			want: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=test",
