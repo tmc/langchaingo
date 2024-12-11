@@ -7,6 +7,8 @@ import (
 )
 
 func TestGetUser(t *testing.T) {
+	t.Parallel()
+
 	testServiceAccount := "test-service-account-email@test.com"
 	// Mock EmailRetriever function for testing
 	var mockEmailRetrevier = func(ctx context.Context) (string, error) {
@@ -54,25 +56,26 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			username, usingIAMAuth, err := getUser(context.Background(), tt.engineConfig)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			username, usingIAMAuth, err := getUser(context.Background(), tc.engineConfig)
 
 			// Check if the error matches the expected error
-			if err != nil && err.Error() != tt.expectedErr {
-				t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+			if err != nil && err.Error() != tc.expectedErr {
+				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}
 			// If error was expected and matched, go to next test
-			if tt.expectedErr != "" {
+			if tc.expectedErr != "" {
 				return
 			}
 			// Validate if the username matches the expected username
-			if username != tt.expectedUserName {
-				t.Errorf("expected user %s, got %s", tt.expectedUserName, tt.engineConfig.user)
+			if username != tc.expectedUserName {
+				t.Errorf("expected user %s, got %s", tc.expectedUserName, tc.engineConfig.user)
 			}
 			// Validate if IamAuth was expected
-			if usingIAMAuth != tt.expectedIamAuth {
-				t.Errorf("expected user %s, got %s", tt.expectedUserName, tt.engineConfig.user)
+			if usingIAMAuth != tc.expectedIamAuth {
+				t.Errorf("expected user %s, got %s", tc.expectedUserName, tc.engineConfig.user)
 			}
 		})
 	}

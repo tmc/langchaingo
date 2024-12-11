@@ -16,8 +16,6 @@ import (
 
 type EmailRetreiver func(context.Context) (string, error)
 
-var _ EmailRetreiver = getServiceAccountEmail
-
 type PostgresEngine struct {
 	conn *pgxpool.Pool
 }
@@ -66,11 +64,12 @@ func createConnection(ctx context.Context, cfg engineConfig) (*pgxpool.Pool, err
 		return nil, fmt.Errorf("failed to initialize connection: %w", err)
 	}
 
+	instanceAddress := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", cfg.projectID, cfg.region, cfg.cluster, cfg.instance)
 	// Create the connection
-	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, instance string) (net.Conn, error) {
-		return d.Dial(ctx, "projects/<PROJECT>/locations/<REGION>/clusters/<CLUSTER>/instances/<INSTANCE>")
+	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, instanceAddr string) (net.Conn, error) {
+		return d.Dial(ctx, instanceAddress)
 	}
-	conn, err := pgxpool.NewWithConfig(context.Background(), config)
+	conn, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
 	}
@@ -90,11 +89,11 @@ func (p *PostgresEngine) Close() error {
 func getUser(ctx context.Context, config engineConfig) (username string, usingIAMAuth bool, err error) {
 	// If neither user nor password are provided, retrieve IAM email.
 	if config.user == "" && config.password == "" {
-		username, err := config.emailRetreiver(ctx)
+		serviceAccountEmail, err := config.emailRetreiver(ctx)
 		if err != nil {
 			return "", false, fmt.Errorf("unable to retrieve service account email: %w", err)
 		}
-		return username, true, nil
+		return serviceAccountEmail, true, nil
 	} else if config.user != "" && config.password != "" {
 		// If both username and password are provided use default username.
 		return config.user, false, nil
@@ -110,7 +109,7 @@ func getServiceAccountEmail(ctx context.Context) (string, error) {
 	// Get credentials using email scope
 	credentials, err := google.FindDefaultCredentials(ctx, scopes...)
 	if err != nil {
-		return "", fmt.Errorf("unable to get default credentials: %s", err)
+		return "", fmt.Errorf("unable to get default credentials: %w", err)
 	}
 
 	// Verify valid TokenSource.
@@ -120,13 +119,13 @@ func getServiceAccountEmail(ctx context.Context) (string, error) {
 
 	oauth2Service, err := oauth2.NewService(ctx, option.WithTokenSource(credentials.TokenSource))
 	if err != nil {
-		return "", fmt.Errorf("failed to create new service: %v", err)
+		return "", fmt.Errorf("failed to create new service: %w", err)
 	}
 
 	// Fetch IAM principal email.
 	userInfo, err := oauth2Service.Userinfo.Get().Do()
 	if err != nil {
-		return "", fmt.Errorf("failed to get user info: %v", err)
+		return "", fmt.Errorf("failed to get user info: %w", err)
 	}
 	return userInfo.Email, nil
 }

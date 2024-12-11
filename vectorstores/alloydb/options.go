@@ -22,84 +22,84 @@ type engineConfig struct {
 	emailRetreiver  EmailRetreiver
 }
 
-// WithProjectID sets the ProjectId field
+// WithProjectID sets the ProjectId field.
 func WithProjectID(projectID string) Option {
 	return func(p *engineConfig) {
 		p.projectID = projectID
 	}
 }
 
-// WithRegion sets the Region field
+// WithRegion sets the Region field.
 func WithRegion(region string) Option {
 	return func(p *engineConfig) {
 		p.region = region
 	}
 }
 
-// WithCluster sets the Cluster field
+// WithCluster sets the Cluster field.
 func WithCluster(cluster string) Option {
 	return func(p *engineConfig) {
 		p.cluster = cluster
 	}
 }
 
-// WithInstance sets the Instance field
+// WithInstance sets the Instance field.
 func WithInstance(instance string) Option {
 	return func(p *engineConfig) {
 		p.instance = instance
 	}
 }
 
-// WithHost sets the Host field
+// WithHost sets the Host field.
 func WithHost(host string) Option {
 	return func(p *engineConfig) {
 		p.host = host
 	}
 }
 
-// WithPort sets the Port field
+// WithPort sets the Port field.
 func WithPort(port int) Option {
 	return func(p *engineConfig) {
 		p.port = port
 	}
 }
 
-// WithDatabase sets the Database field
+// WithDatabase sets the Database field.
 func WithDatabase(database string) Option {
 	return func(p *engineConfig) {
 		p.database = database
 	}
 }
 
-// WithUser sets the User field
+// WithUser sets the User field.
 func WithUser(user string) Option {
 	return func(p *engineConfig) {
 		p.user = user
 	}
 }
 
-// WithPassword sets the Password field
+// WithPassword sets the Password field.
 func WithPassword(password string) Option {
 	return func(p *engineConfig) {
 		p.password = password
 	}
 }
 
-// WithIpType sets the IpType field
-func WithIpType(ipType string) Option {
+// WithIPType sets the IpType field.
+func WithIPType(ipType string) Option {
 	return func(p *engineConfig) {
 		p.ipType = ipType
 	}
 }
 
-// WithIAMAccountEmail sets the IAMAccountEmail field
+// WithIAMAccountEmail sets the IAMAccountEmail field.
 func WithIAMAccountEmail(email string) Option {
 	return func(p *engineConfig) {
 		p.iAmAccountEmail = email
 	}
 }
 
-// WithServiceAccountRetriever sets the ServiceAccountRetriever field
+// WithServiceAccountRetriever sets the ServiceAccountRetriever field.
 func WithServiceAccountRetriever(emailRetriever func(context.Context) (string, error)) Option {
 	return func(p *engineConfig) {
 		p.emailRetreiver = emailRetriever
