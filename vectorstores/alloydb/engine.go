@@ -17,20 +17,17 @@ import (
 type EmailRetreiver func(context.Context) (string, error)
 
 type PostgresEngine struct {
-	conn *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
 // NewPostgresEngine creates a new PostgresEngine.
 func NewPostgresEngine(ctx context.Context, opts ...Option) (*PostgresEngine, error) {
 	pgEngine := new(PostgresEngine)
-	cfg := &engineConfig{
-		port:           defaultPort,
-		emailRetreiver: getServiceAccountEmail,
+	cfg, err := applyClientOptions(opts...)
+	if err != nil {
+		return nil, err
 	}
-	for _, opt := range opts {
-		opt(cfg)
-	}
-	username, usingIAMAuth, err := getUser(ctx, *cfg)
+	username, usingIAMAuth, err := getUser(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("error assigning user. Err: %w", err)
 	}
@@ -41,16 +38,24 @@ func NewPostgresEngine(ctx context.Context, opts ...Option) (*PostgresEngine, er
 		}
 		cfg.password = token
 	}
-	connPool, err := createConnection(ctx, *cfg)
-	if err != nil {
-		return &PostgresEngine{}, err
+	if cfg.connPool == nil {
+		cfg.connPool, err = createConnection(ctx, cfg)
+		if err != nil {
+			return &PostgresEngine{}, err
+		}
 	}
-	pgEngine.conn = connPool
+	pgEngine.pool = cfg.connPool
 	return pgEngine, nil
 }
 
 // createConnection creates a connection pool to the PostgreSQL database.
 func createConnection(ctx context.Context, cfg engineConfig) (*pgxpool.Pool, error) {
+	// Create a new dialer with any options
+	d, err := alloydbconn.NewDialer(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize connection: %w", err)
+	}
+
 	// Configure the driver to connect to the database
 	dsn := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", cfg.user, cfg.password, cfg.database)
 	config, err := pgxpool.ParseConfig(dsn)
@@ -58,32 +63,24 @@ func createConnection(ctx context.Context, cfg engineConfig) (*pgxpool.Pool, err
 		return nil, fmt.Errorf("failed to parse connection config: %w", err)
 	}
 
-	// Create a new dialer with any options
-	d, err := alloydbconn.NewDialer(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize connection: %w", err)
-	}
-
-	instanceAddress := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", cfg.projectID, cfg.region, cfg.cluster, cfg.instance)
+	instanceURI := fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", cfg.projectID, cfg.region, cfg.cluster, cfg.instance)
 	// Create the connection
-	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, instanceAddr string) (net.Conn, error) {
-		return d.Dial(ctx, instanceAddress)
+	config.ConnConfig.DialFunc = func(ctx context.Context, _ string, _ string) (net.Conn, error) {
+		return d.Dial(ctx, instanceURI)
 	}
-	conn, err := pgxpool.NewWithConfig(ctx, config)
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
 	}
-	return conn, nil
+	return pool, nil
 }
 
 // Close closes the connection.
-func (p *PostgresEngine) Close() error {
-	if p.conn != nil {
+func (p *PostgresEngine) Close() {
+	if p.pool != nil {
 		// Close the connection pool.
-		p.conn.Close()
-		return nil
+		p.pool.Close()
 	}
-	return fmt.Errorf("connection is nil, cannot close")
 }
 
 func getUser(ctx context.Context, config engineConfig) (username string, usingIAMAuth bool, err error) {

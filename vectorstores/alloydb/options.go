@@ -1,8 +1,11 @@
 package alloydb
 
-import "context"
+import (
+	"context"
+	"errors"
 
-const defaultPort = 5432 // default PostgreSQL port
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 // Option is a function type that can be used to modify the Engine.
 type Option func(p *engineConfig)
@@ -12,8 +15,7 @@ type engineConfig struct {
 	region          string
 	cluster         string
 	instance        string
-	host            string
-	port            int
+	connPool        *pgxpool.Pool
 	database        string
 	user            string
 	password        string
@@ -22,45 +24,20 @@ type engineConfig struct {
 	emailRetreiver  EmailRetreiver
 }
 
-// WithProjectID sets the ProjectId field.
-func WithProjectID(projectID string) Option {
+// WithAlloyDBInstance sets the project, region, cluster, and instance fields.
+func WithAlloyDBInstance(projectID, region, cluster, instance string) Option {
 	return func(p *engineConfig) {
 		p.projectID = projectID
-	}
-}
-
-// WithRegion sets the Region field.
-func WithRegion(region string) Option {
-	return func(p *engineConfig) {
 		p.region = region
-	}
-}
-
-// WithCluster sets the Cluster field.
-func WithCluster(cluster string) Option {
-	return func(p *engineConfig) {
 		p.cluster = cluster
-	}
-}
-
-// WithInstance sets the Instance field.
-func WithInstance(instance string) Option {
-	return func(p *engineConfig) {
 		p.instance = instance
 	}
 }
 
-// WithHost sets the Host field.
-func WithHost(host string) Option {
+// WithPool sets the Port field.
+func WithPool(pool *pgxpool.Pool) Option {
 	return func(p *engineConfig) {
-		p.host = host
-	}
-}
-
-// WithPort sets the Port field.
-func WithPort(port int) Option {
-	return func(p *engineConfig) {
-		p.port = port
+		p.connPool = pool
 	}
 }
 
@@ -99,9 +76,23 @@ func WithIAMAccountEmail(email string) Option {
 	}
 }
 
-// WithServiceAccountRetriever sets the ServiceAccountRetriever field.
-func WithServiceAccountRetriever(emailRetriever func(context.Context) (string, error)) Option {
+// withServiceAccountRetriever sets the ServiceAccountRetriever field.
+func withServiceAccountRetriever(emailRetriever func(context.Context) (string, error)) Option {
 	return func(p *engineConfig) {
 		p.emailRetreiver = emailRetriever
 	}
+}
+
+func applyClientOptions(opts ...Option) (engineConfig, error) {
+	cfg := &engineConfig{
+		emailRetreiver: getServiceAccountEmail,
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	if cfg.connPool == nil && cfg.projectID == "" && cfg.region == "" && cfg.cluster == "" && cfg.instance == "" {
+		return engineConfig{}, errors.New("missing connection: provide a connection pool or connection fields")
+	}
+
+	return *cfg, nil
 }
