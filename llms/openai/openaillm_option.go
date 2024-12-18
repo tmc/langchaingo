@@ -40,6 +40,8 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
+
+	useLegacyMaxTokens bool
 }
 
 // Option is a functional option for the OpenAI client.
@@ -87,6 +89,16 @@ func WithEmbeddingModel(embeddingModel string) Option {
 func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
 		opts.baseURL = baseURL
+	}
+}
+
+// WithUseLegacyMaxTokens is an option that configures whether to use legacy max tokens behavior.
+// When set to true, it uses the older max tokens field of "max_tokens", vs "max_completion_tokens".
+// This is primarily used for backwards compatibility with older OpenAI API versions which some
+// inference systems use.
+func WithUseLegacyMaxTokens(useLegacyMaxTokens bool) Option {
+	return func(opts *options) {
+		opts.useLegacyMaxTokens = useLegacyMaxTokens
 	}
 }
 

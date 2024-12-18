@@ -33,8 +33,8 @@ type ChatRequest struct {
 	Messages    []*ChatMessage `json:"messages"`
 	Temperature float64        `json:"temperature"`
 	TopP        float64        `json:"top_p,omitempty"`
-	// Deprecated: Use MaxCompletionTokens
-	MaxTokens           int      `json:"-,omitempty"`
+	// note: the WithUseLegacyMaxTokens option will populate and send this field instead.
+	MaxTokens           int      `json:"max_tokens,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	StopWords           []string `json:"stop,omitempty"`

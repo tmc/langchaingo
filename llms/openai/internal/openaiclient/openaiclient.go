@@ -38,6 +38,9 @@ type Client struct {
 	apiVersion string
 
 	ResponseFormat *ResponseFormat
+
+	// If true, sends the 'max_tokens' field instead of 'max_completion_tokens'.
+	UseLegacyMaxTokens bool
 }
 
 // Option is an option for the OpenAI client.
@@ -52,18 +55,20 @@ type Doer interface {
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
 	responseFormat *ResponseFormat,
+	useLegacyMaxTokens bool,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:          token,
-		Model:          model,
-		EmbeddingModel: embeddingModel,
-		baseURL:        strings.TrimSuffix(baseURL, "/"),
-		organization:   organization,
-		apiType:        apiType,
-		apiVersion:     apiVersion,
-		httpClient:     httpClient,
-		ResponseFormat: responseFormat,
+		token:              token,
+		Model:              model,
+		EmbeddingModel:     embeddingModel,
+		baseURL:            strings.TrimSuffix(baseURL, "/"),
+		organization:       organization,
+		apiType:            apiType,
+		apiVersion:         apiVersion,
+		httpClient:         httpClient,
+		ResponseFormat:     responseFormat,
+		UseLegacyMaxTokens: useLegacyMaxTokens,
 	}
 
 	for _, opt := range opts {

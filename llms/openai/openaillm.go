@@ -112,6 +112,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
 	}
+
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
 	}
@@ -140,6 +141,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// if o.client.ResponseFormat is set, use it for the request
 	if o.client.ResponseFormat != nil {
 		req.ResponseFormat = o.client.ResponseFormat
+	}
+	if o.client.UseLegacyMaxTokens {
+		req.MaxTokens = req.MaxCompletionTokens
+		req.MaxCompletionTokens = 0
 	}
 
 	result, err := o.client.CreateChat(ctx, req)

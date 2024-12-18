@@ -10,7 +10,8 @@ type CompletionRequest struct {
 	Prompt      string  `json:"prompt"`
 	Temperature float64 `json:"temperature"`
 	// Deprecated: Use MaxCompletionTokens
-	MaxTokens           int      `json:"-,omitempty"`
+	// note: the WithUseLegacyMaxTokens option will populate and send this field instead.
+	MaxTokens           int      `json:"max_tokens,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
@@ -75,7 +76,7 @@ func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 // nolint:lll
 func (c *Client) createCompletion(ctx context.Context, payload *CompletionRequest) (*ChatCompletionResponse, error) {
 	c.setCompletionDefaults(payload)
-	return c.createChat(ctx, &ChatRequest{
+	r := &ChatRequest{
 		Model: payload.Model,
 		Messages: []*ChatMessage{
 			{Role: "user", Content: payload.Prompt},
@@ -89,5 +90,10 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		PresencePenalty:     payload.PresencePenalty,
 		StreamingFunc:       payload.StreamingFunc,
 		Seed:                payload.Seed,
-	})
+	}
+	if c.UseLegacyMaxTokens {
+		r.MaxTokens = payload.MaxCompletionTokens
+		r.MaxCompletionTokens = 0
+	}
+	return c.createChat(ctx, r)
 }
