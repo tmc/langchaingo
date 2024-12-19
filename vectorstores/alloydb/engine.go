@@ -32,6 +32,7 @@ func NewPostgresEngine(ctx context.Context, opts ...Option) (*PostgresEngine, er
 		return nil, fmt.Errorf("error assigning user. Err: %w", err)
 	}
 	if usingIAMAuth {
+		cfg.user = username
 		token, err := getIAMToken(ctx, username)
 		if err != nil {
 			return nil, err
@@ -83,7 +84,9 @@ func (p *PostgresEngine) Close() {
 	}
 }
 
-func getUser(ctx context.Context, config engineConfig) (username string, usingIAMAuth bool, err error) {
+// getUser retrieves the username, a flag indicating if IAM authentication
+// will be used and an error.
+func getUser(ctx context.Context, config engineConfig) (string, bool, error) {
 	// If neither user nor password are provided, retrieve IAM email.
 	if config.user == "" && config.password == "" {
 		serviceAccountEmail, err := config.emailRetreiver(ctx)
