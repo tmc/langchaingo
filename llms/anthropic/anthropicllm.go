@@ -103,10 +103,15 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 	}
 	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
 	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
-		Model:         opts.Model,
-		Prompt:        prompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
+		Model:     opts.Model,
+		Prompt:    prompt,
+		MaxTokens: opts.MaxTokens,
+		StopWords: func() []string {
+			if len(opts.StopSequences) > 0 {
+				return opts.StopSequences
+			}
+			return opts.StopWords
+		}(),
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
 		StreamingFunc: opts.StreamingFunc,
@@ -136,11 +141,16 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	tools := toolsToTools(opts.Tools)
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
-		Model:         opts.Model,
-		Messages:      chatMessages,
-		System:        systemPrompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
+		Model:     opts.Model,
+		Messages:  chatMessages,
+		System:    systemPrompt,
+		MaxTokens: opts.MaxTokens,
+		StopWords: func() []string {
+			if len(opts.StopSequences) > 0 {
+				return opts.StopSequences
+			}
+			return opts.StopWords
+		}(),
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
 		Tools:         tools,

@@ -220,7 +220,12 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	// Load back CallOptions as ollamaOptions
 	ollamaOptions.NumPredict = opts.MaxTokens
 	ollamaOptions.Temperature = float32(opts.Temperature)
-	ollamaOptions.Stop = opts.StopWords
+	ollamaOptions.Stop = func() []string {
+		if len(opts.StopSequences) > 0 {
+			return opts.StopSequences
+		}
+		return opts.StopWords
+	}()
 	ollamaOptions.TopK = opts.TopK
 	ollamaOptions.TopP = float32(opts.TopP)
 	ollamaOptions.Seed = opts.Seed

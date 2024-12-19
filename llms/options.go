@@ -17,7 +17,11 @@ type CallOptions struct {
 	// Temperature is the temperature for sampling, between 0 and 1.
 	Temperature float64 `json:"temperature"`
 	// StopWords is a list of words to stop on.
+	// Deprecated: Use StopSequences instead.
 	StopWords []string `json:"stop_words"`
+	// StopSequences is a list of sequences to stop on.
+	// If both StopWords and StopSequences are provided, StopSequences takes precedence.
+	StopSequences []string `json:"stop_sequences,omitempty"`
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
@@ -145,6 +149,13 @@ func WithTemperature(temperature float64) CallOption {
 func WithStopWords(stopWords []string) CallOption {
 	return func(o *CallOptions) {
 		o.StopWords = stopWords
+	}
+}
+
+// WithStopSequences specifies a list of sequences to stop generation on.
+func WithStopSequences(sequences []string) CallOption {
+	return func(o *CallOptions) {
+		o.StopSequences = sequences
 	}
 }
 
