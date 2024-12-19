@@ -134,13 +134,40 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 }
 
 func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
+	// Process messages and handle errors
 	chatMessages, systemPrompt, err := processMessages(messages)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
 	}
 
+	// Create message and handle errors
+	result, err := createMessage(ctx, o, chatMessages, systemPrompt, opts)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, ErrEmptyResponse
+	}
+
+	// Process content choices
+	choices := make([]*llms.ContentChoice, len(result.Content))
+	for i, content := range result.Content {
+		choice, err := processContent(content, result)
+		if err != nil {
+			return nil, fmt.Errorf("anthropic: failed to process content: %w", err)
+		}
+		choices[i] = choice
+	}
+
+	return &llms.ContentResponse{
+		Choices: choices,
+	}, nil
+}
+
+// Helper function to create message
+func createMessage(ctx context.Context, o *LLM, chatMessages []*anthropicclient.ChatMessage, systemPrompt string, opts *llms.CallOptions) (*anthropicclient.MessageResponsePayload, error) {
 	tools := toolsToTools(opts.Tools)
-	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
+	result, err := o.client.CreateMessage(ctx, &anthropicclient.messagePayload{
 		Model:     opts.Model,
 		Messages:  chatMessages,
 		System:    systemPrompt,
@@ -162,60 +189,63 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	if result == nil {
-		return nil, ErrEmptyResponse
-	}
+	return result, nil
+}
 
-	choices := make([]*llms.ContentChoice, len(result.Content))
-	for i, content := range result.Content {
-		switch content.GetType() {
-		case "text":
-			if textContent, ok := content.(*anthropicclient.TextContent); ok {
-				choices[i] = &llms.ContentChoice{
-					Content:    textContent.Text,
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for text message", ErrInvalidContentType)
-			}
-		case "tool_use":
-			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
-				argumentsJSON, err := json.Marshal(toolUseContent.Input)
-				if err != nil {
-					return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
-				}
-				choices[i] = &llms.ContentChoice{
-					ToolCalls: []llms.ToolCall{
-						{
-							ID: toolUseContent.ID,
-							FunctionCall: &llms.FunctionCall{
-								Name:      toolUseContent.Name,
-								Arguments: string(argumentsJSON),
-							},
-						},
-					},
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message", ErrInvalidContentType)
-			}
-		default:
-			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
-		}
+// Helper function to process content
+func processContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
+	switch content.GetType() {
+	case "text":
+		return processTextContent(content, result)
+	case "tool_use":
+		return processToolUseContent(content, result)
+	default:
+		return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
 	}
+}
 
-	resp := &llms.ContentResponse{
-		Choices: choices,
+// Helper function to process text content
+func processTextContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
+	textContent, ok := content.(*anthropicclient.TextContent)
+	if !ok {
+		return nil, fmt.Errorf("anthropic: %w for text message", ErrInvalidContentType)
 	}
-	return resp, nil
+	return &llms.ContentChoice{
+		Content:    textContent.Text,
+		StopReason: result.StopReason,
+		GenerationInfo: map[string]any{
+			"InputTokens":  result.Usage.InputTokens,
+			"OutputTokens": result.Usage.OutputTokens,
+		},
+	}, nil
+}
+
+// Helper function to process tool use content
+func processToolUseContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
+	toolUseContent, ok := content.(*anthropicclient.ToolUseContent)
+	if !ok {
+		return nil, fmt.Errorf("anthropic: %w for tool use message", ErrInvalidContentType)
+	}
+	argumentsJSON, err := json.Marshal(toolUseContent.Input)
+	if err != nil {
+		return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
+	}
+	return &llms.ContentChoice{
+		ToolCalls: []llms.ToolCall{
+			{
+				ID: toolUseContent.ID,
+				FunctionCall: &llms.FunctionCall{
+					Name:      toolUseContent.Name,
+					Arguments: string(argumentsJSON),
+				},
+			},
+		},
+		StopReason: result.StopReason,
+		GenerationInfo: map[string]any{
+			"InputTokens":  result.Usage.InputTokens,
+			"OutputTokens": result.Usage.OutputTokens,
+		},
+	}, nil
 }
 
 func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
@@ -230,8 +260,8 @@ func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
 	return toolReq
 }
 
-func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
-	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
+func processMessages(messages []llms.MessageContent) ([]*anthropicclient.ChatMessage, string, error) {
+	chatMessages := make([]*anthropicclient.ChatMessage, 0, len(messages))
 	systemPrompt := ""
 	for _, msg := range messages {
 		switch msg.Role {
@@ -246,19 +276,19 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 			if err != nil {
 				return nil, "", fmt.Errorf("anthropic: failed to handle human message: %w", err)
 			}
-			chatMessages = append(chatMessages, chatMessage)
+			chatMessages = append(chatMessages, &chatMessage)
 		case llms.ChatMessageTypeAI:
 			chatMessage, err := handleAIMessage(msg)
 			if err != nil {
 				return nil, "", fmt.Errorf("anthropic: failed to handle AI message: %w", err)
 			}
-			chatMessages = append(chatMessages, chatMessage)
+			chatMessages = append(chatMessages, &chatMessage)
 		case llms.ChatMessageTypeTool:
 			chatMessage, err := handleToolMessage(msg)
 			if err != nil {
 				return nil, "", fmt.Errorf("anthropic: failed to handle tool message: %w", err)
 			}
-			chatMessages = append(chatMessages, chatMessage)
+			chatMessages = append(chatMessages, &chatMessage)
 		case llms.ChatMessageTypeGeneric, llms.ChatMessageTypeFunction:
 			return nil, "", fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
 		default:

@@ -14,7 +14,7 @@ type mockModel struct {
 	content       string
 }
 
-func (m *mockModel) GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
+func (m *mockModel) GenerateContent(_ context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
 	opts := &CallOptions{}
 	for _, opt := range options {
 		opt(opts)
@@ -31,6 +31,7 @@ func (m *mockModel) GenerateContent(ctx context.Context, messages []MessageConte
 }
 
 func TestStopSequences(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name          string
 		stopWords     []string
@@ -69,7 +70,9 @@ func TestStopSequences(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			model := &mockModel{content: tt.content}
 			messages := []MessageContent{
 				{
@@ -88,7 +91,6 @@ func TestStopSequences(t *testing.T) {
 			_, err := model.GenerateContent(context.Background(), messages, opts...)
 			assert.NoError(t, err)
 
-			// Verify that the correct stop sequences were used
 			if tt.stopSequences != nil {
 				assert.Equal(t, tt.want, model.stopSequences)
 			} else {
@@ -99,6 +101,7 @@ func TestStopSequences(t *testing.T) {
 }
 
 func TestStopSequencesStreaming(t *testing.T) {
+	t.Parallel()
 	model := &mockModel{content: "test content"}
 	messages := []MessageContent{
 		{
@@ -110,7 +113,7 @@ func TestStopSequencesStreaming(t *testing.T) {
 	}
 
 	streamingContent := ""
-	streamingFunc := func(ctx context.Context, chunk []byte) error {
+	streamingFunc := func(_ context.Context, chunk []byte) error {
 		streamingContent += string(chunk)
 		return nil
 	}
