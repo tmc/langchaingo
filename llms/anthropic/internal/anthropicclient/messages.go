@@ -142,7 +142,7 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *Client) setMessageDefaults(payload *messagePayload) {
+func (c *Client) setMessageDefaults(payload *MessageRequest) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 2048
@@ -168,7 +168,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	}
 }
 
-func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*MessageResponsePayload, error) {
+func (c *Client) createMessage(ctx context.Context, payload *MessageRequest) (*MessageResponsePayload, error) {
 	c.setMessageDefaults(payload)
 
 	payloadBytes, err := json.Marshal(payload)
@@ -203,7 +203,7 @@ type MessageEvent struct {
 	Err      error
 }
 
-func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payload *messagePayload) (*MessageResponsePayload, error) {
+func parseStreamingMessageResponse(ctx context.Context, r *http.Response, payload *MessageRequest) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
 	eventChan := make(chan MessageEvent)
 
@@ -248,7 +248,7 @@ func parseStreamEvent(data string) (map[string]interface{}, error) {
 	return event, err
 }
 
-func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *messagePayload, response MessageResponsePayload, eventChan chan<- MessageEvent) (MessageResponsePayload, error) {
+func processStreamEvent(ctx context.Context, event map[string]interface{}, payload *MessageRequest, response MessageResponsePayload, eventChan chan<- MessageEvent) (MessageResponsePayload, error) {
 	eventType, ok := event["type"].(string)
 	if !ok {
 		return response, ErrInvalidEventType
@@ -322,7 +322,7 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	return response, nil
 }
 
-func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interface{}, response MessageResponsePayload, payload *messagePayload) (MessageResponsePayload, error) {
+func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interface{}, response MessageResponsePayload, payload *MessageRequest) (MessageResponsePayload, error) {
 	indexValue, ok := event["index"].(float64)
 	if !ok {
 		return response, ErrInvalidIndexField
