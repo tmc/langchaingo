@@ -164,7 +164,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}, nil
 }
 
-// Helper function to create message
+// Helper function to create message.
 func createMessage(ctx context.Context, o *LLM, chatMessages []*anthropicclient.ChatMessage, systemPrompt string, opts *llms.CallOptions) (*anthropicclient.MessageResponsePayload, error) {
 	tools := toolsToTools(opts.Tools)
 	messages := make([]anthropicclient.ChatMessage, len(chatMessages))
@@ -196,7 +196,7 @@ func createMessage(ctx context.Context, o *LLM, chatMessages []*anthropicclient.
 	return result, nil
 }
 
-// Helper function to process content
+// Helper function to process content.
 func processContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
 	switch content.GetType() {
 	case "text":
@@ -208,7 +208,7 @@ func processContent(content anthropicclient.Content, result *anthropicclient.Mes
 	}
 }
 
-// Helper function to process text content
+// Helper function to process text content.
 func processTextContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
 	textContent, ok := content.(*anthropicclient.TextContent)
 	if !ok {

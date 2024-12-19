@@ -14,13 +14,24 @@ type mockModel struct {
 	content       string
 }
 
-func (m *mockModel) GenerateContent(_ context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
+func (m *mockModel) GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
 	opts := &CallOptions{}
 	for _, opt := range options {
 		opt(opts)
 	}
 	m.stopSequences = opts.StopSequences
 	m.stopWords = opts.StopWords
+
+	// Use messages to generate content
+	var prompt string
+	for _, msg := range messages {
+		for _, part := range msg.Parts {
+			if text, ok := part.(TextContent); ok {
+				prompt += text.Text
+			}
+		}
+	}
+
 	return &ContentResponse{
 		Choices: []*ContentChoice{
 			{
@@ -69,11 +80,11 @@ func TestStopSequences(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
+	for i := range tests {
+		test := tests[i]
+		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			model := &mockModel{content: tt.content}
+			model := &mockModel{content: test.content}
 			messages := []MessageContent{
 				{
 					Role: ChatMessageTypeHuman,
@@ -84,17 +95,17 @@ func TestStopSequences(t *testing.T) {
 			}
 
 			opts := []CallOption{
-				WithStopWords(tt.stopWords),
-				WithStopSequences(tt.stopSequences),
+				WithStopWords(test.stopWords),
+				WithStopSequences(test.stopSequences),
 			}
 
 			_, err := model.GenerateContent(context.Background(), messages, opts...)
 			assert.NoError(t, err)
 
-			if tt.stopSequences != nil {
-				assert.Equal(t, tt.want, model.stopSequences)
+			if test.stopSequences != nil {
+				assert.Equal(t, test.want, model.stopSequences)
 			} else {
-				assert.Equal(t, tt.want, model.stopWords)
+				assert.Equal(t, test.want, model.stopWords)
 			}
 		})
 	}
