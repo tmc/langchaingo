@@ -224,7 +224,7 @@ func processTextContent(content anthropicclient.Content, result *anthropicclient
 	}, nil
 }
 
-// Helper function to process tool use content
+// Helper function to process tool use content.
 func processToolUseContent(content anthropicclient.Content, result *anthropicclient.MessageResponsePayload) (*llms.ContentChoice, error) {
 	toolUseContent, ok := content.(*anthropicclient.ToolUseContent)
 	if !ok {

@@ -14,7 +14,7 @@ type mockModel struct {
 	content       string
 }
 
-func (m *mockModel) GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
+func (m *mockModel) GenerateContent(_ context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
 	opts := &CallOptions{}
 	for _, opt := range options {
 		opt(opts)
