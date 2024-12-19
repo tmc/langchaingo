@@ -31,7 +31,7 @@ type ChatMessage struct {
 	Content interface{} `json:"content"`
 }
 
-type messagePayload struct {
+type MessagePayload struct {
 	Model       string        `json:"model"`
 	Messages    []ChatMessage `json:"messages"`
 	System      string        `json:"system,omitempty"`

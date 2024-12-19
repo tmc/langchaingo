@@ -167,9 +167,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 // Helper function to create message
 func createMessage(ctx context.Context, o *LLM, chatMessages []*anthropicclient.ChatMessage, systemPrompt string, opts *llms.CallOptions) (*anthropicclient.MessageResponsePayload, error) {
 	tools := toolsToTools(opts.Tools)
-	result, err := o.client.CreateMessage(ctx, &anthropicclient.messagePayload{
+	messages := make([]anthropicclient.ChatMessage, len(chatMessages))
+	for i, msg := range chatMessages {
+		messages[i] = *msg
+	}
+	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:     opts.Model,
-		Messages:  chatMessages,
+		Messages:  messages,
 		System:    systemPrompt,
 		MaxTokens: opts.MaxTokens,
 		StopWords: func() []string {
