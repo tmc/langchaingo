@@ -23,7 +23,7 @@ func (m *Model) CreateEmbedding(_ context.Context, inputTexts []string) ([][]flo
 	if err != nil {
 		return nil, errors.New("failed to create embeddings: " + err.Error())
 	}
-	var allEmbds = make([][]float32, len(embsRes.Data))
+	allEmbds := make([][]float32, len(embsRes.Data))
 	for i, embs := range embsRes.Data {
 		if len(embs.Embedding) == 0 {
 			return nil, errors.New("empty embeddings")

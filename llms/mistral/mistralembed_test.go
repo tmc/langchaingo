@@ -75,21 +75,19 @@ func TestMistralEmbed(t *testing.T) {
 	}
 
 	e, err := embeddings.NewEmbedder(model)
-
 	if err != nil {
 		panic(err)
 	}
 
-	aaa, err := e.EmbedDocuments(context.Background(), []string{"Hello world"})
+	docEmbeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world"})
 	if err != nil {
 		panic(err)
 	}
-	t.Logf("aaa EQ: %v\n", aaa)
+	t.Logf("Document embeddings: %v\n", docEmbeddings)
 
-	bbb, err := e.EmbedQuery(context.Background(), "Hello world")
+	queryEmbedding, err := e.EmbedQuery(context.Background(), "Hello world")
 	if err != nil {
 		panic(err)
 	}
-
-	t.Logf("bbb EQ: %v\n", bbb)
+	t.Logf("Query embedding: %v\n", queryEmbedding)
 }
