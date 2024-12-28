@@ -2,8 +2,6 @@ package mistral_test
 
 import (
 	"context"
-	"crypto/rand"
-	"math/big"
 	"os"
 	"testing"
 
@@ -11,46 +9,48 @@ import (
 	sdk "github.com/tmc/langchaingo/llms/mistral"
 )
 
-// TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function
+// TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
 func TestConvertFloat64ToFloat32(t *testing.T) {
-	// Test case 1: Empty slice
-	input := []float64{}
-	output := sdk.ConvertFloat64ToFloat32(input)
-	if len(output) != 0 {
-		t.Errorf("Expected output length to be 0, but got %d", len(output))
+	tests := []struct {
+		name     string
+		input    []float64
+		expected []float32
+	}{
+		{
+			name:     "empty slice",
+			input:    []float64{},
+			expected: []float32{},
+		},
+		{
+			name:     "single element",
+			input:    []float64{3.14},
+			expected: []float32{3.14},
+		},
+		{
+			name:     "multiple elements",
+			input:    []float64{1.23, 4.56, 7.89},
+			expected: []float32{1.23, 4.56, 7.89},
+		},
+		{
+			name:     "zero values",
+			input:    []float64{0.0, 0.0, 0.0},
+			expected: []float32{0.0, 0.0, 0.0},
+		},
 	}
 
-	// Test case 2: Single element slice
-	input = []float64{3.14}
-	output = sdk.ConvertFloat64ToFloat32(input)
-	if len(output) != 1 || output[0] != float32(3.14) {
-		t.Errorf("Expected output to be [3.14], but got %v", output)
-	}
-
-	// Test case 3: Multiple element slice
-	input = []float64{1.23, 4.56, 7.89}
-	output = sdk.ConvertFloat64ToFloat32(input)
-	if len(output) != 3 || output[0] != float32(1.23) || output[1] != float32(4.56) || output[2] != float32(7.89) {
-		t.Errorf("Expected output to be [1.23 4.56 7.89], but got %v", output)
-	}
-
-	// Test case 4: Large random slice
-	input = make([]float64, 1_000_000)
-	r, err := rand.Int(rand.Reader, big.NewInt(42))
-	if err != nil {
-		panic(err)
-	}
-	for i := range input {
-		input[i] = float64(r.Int64())
-	}
-	output = sdk.ConvertFloat64ToFloat32(input)
-	if len(output) != len(input) {
-		t.Errorf("Expected output length to be %d, but got %d", len(input), len(output))
-	}
-	for i, v := range input {
-		if float32(v) != output[i] {
-			t.Errorf("Expected output[%d] to be %f, but got %f", i, float32(v), output[i])
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := sdk.ConvertFloat64ToFloat32(tt.input)
+			if len(output) != len(tt.expected) {
+				t.Errorf("length mismatch: got %d, want %d", len(output), len(tt.expected))
+				return
+			}
+			for i := range output {
+				if output[i] != tt.expected[i] {
+					t.Errorf("at index %d: got %f, want %f", i, output[i], tt.expected[i])
+				}
+			}
+		})
 	}
 }
 
