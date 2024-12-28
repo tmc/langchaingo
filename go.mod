@@ -1,10 +1,6 @@
-module github.com/mathiasb/langchaingo
+module github.com/tmc/langchaingo
 
 go 1.22.0
-
-require github.com/tmc/langchaingo v0.12.1
-
-replace github.com/tmc/langchaingo => ./
 
 require (
 	github.com/google/uuid v1.6.0
