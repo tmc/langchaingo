@@ -11,8 +11,8 @@ import (
 	sdk "github.com/tmc/langchaingo/llms/mistral"
 )
 
+// TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function
 func TestConvertFloat64ToFloat32(t *testing.T) {
-
 	// Test case 1: Empty slice
 	input := []float64{}
 	output := sdk.ConvertFloat64ToFloat32(input)
@@ -55,6 +55,7 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 }
 
 func TestMistralEmbed(t *testing.T) {
+	t.Parallel()
 	envVar := "MISTRAL_API_KEY"
 
 	// Get the value of the environment variable
