@@ -2,7 +2,8 @@ package mistral_test
 
 import (
 	"context"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"testing"
 
@@ -34,10 +35,13 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 	}
 
 	// Test case 4: Large random slice
-	input = make([]float64, 1000)
-	r := rand.New(rand.NewSource(0))
+	input = make([]float64, 1_000_000)
+	r, err := rand.Int(rand.Reader, big.NewInt(42))
+	if err != nil {
+		panic(err)
+	}
 	for i := range input {
-		input[i] = r.Float64()
+		input[i] = float64(r.Int64())
 	}
 	output = sdk.ConvertFloat64ToFloat32(input)
 	if len(output) != len(input) {
