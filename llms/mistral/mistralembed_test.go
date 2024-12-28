@@ -11,6 +11,7 @@ import (
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
 func TestConvertFloat64ToFloat32(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    []float64
@@ -40,6 +41,7 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			output := sdk.ConvertFloat64ToFloat32(tt.input)
 			if len(output) != len(tt.expected) {
 				t.Errorf("length mismatch: got %d, want %d", len(output), len(tt.expected))
