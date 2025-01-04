@@ -65,6 +65,9 @@ func New(token string, model string, baseURL string, organization string,
 		httpClient:     httpClient,
 		ResponseFormat: responseFormat,
 	}
+	if c.baseURL == "" {
+		c.baseURL = defaultBaseURL
+	}
 
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
