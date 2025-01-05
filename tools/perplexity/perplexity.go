@@ -18,29 +18,55 @@ const (
 	ModelLlamaSonarHuge  Model = "llama-3.1-sonar-huge-128k-online"
 )
 
+type Option func(*options)
+
+type options struct {
+	apiKey string
+	model  Model
+}
+
+func WithAPIKey(apiKey string) Option {
+	return func(o *options) {
+		o.apiKey = apiKey
+	}
+}
+
+func WithModel(model Model) Option {
+	return func(o *options) {
+		o.model = model
+	}
+}
+
 type Perplexity struct {
 	llm *openai.LLM
 }
 
-func NewPerplexity(model Model) (*Perplexity, error) {
-	perplexity := &Perplexity{}
-	var err error
-
-	apiKey := os.Getenv("PERPLEXITY_API_KEY")
-	if apiKey == "" {
-		return nil, fmt.Errorf("PERPLEXITY_API_KEY not set")
+func NewPerplexity(opts ...Option) (*Perplexity, error) {
+	options := &options{
+		apiKey: os.Getenv("PERPLEXITY_API_KEY"),
+		model:  ModelLlamaSonarSmall, // Default model
 	}
 
-	perplexity.llm, err = openai.New(
-		openai.WithModel(string(model)),
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if options.apiKey == "" {
+		return nil, fmt.Errorf("Perplexity API key not set")
+	}
+
+	llm, err := openai.New(
+		openai.WithModel(string(options.model)),
 		openai.WithBaseURL("https://api.perplexity.ai"),
-		openai.WithToken(apiKey),
+		openai.WithToken(options.apiKey),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return perplexity, nil
+	return &Perplexity{
+		llm: llm,
+	}, nil
 }
 
 func (p *Perplexity) Name() string {
