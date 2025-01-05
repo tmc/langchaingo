@@ -16,7 +16,7 @@
 //	}
 //
 //	// Create a new Perplexity instance
-//	perpl, err := perplexity.NewPerplexity(
+//	perpl, err := perplexity.New(
 //		perplexity.WithModel(perplexity.ModelLlamaSonarSmall),
 //		perplexity.WithAPIKey("your-api-key"), // Optional: defaults to PERPLEXITY_API_KEY env var
 //	)
@@ -30,11 +30,11 @@
 //	}
 //
 //	// Create and use the agent
-//	agent := agents.NewOneShotAgent(llm,
+//	toolAgent := agents.NewOneShotAgent(llm,
 //		agentTools,
 //		agents.WithMaxIterations(2),
 //	)
-//	executor := agents.NewExecutor(agent)
+//	executor := agents.NewExecutor(toolAgent)
 //
 //	answer, err := chains.Run(context.Background(), executor, "your question here")
 package perplexity
