@@ -7,6 +7,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/tools"
 )
 
 type Model string
@@ -37,11 +38,13 @@ func WithModel(model Model) Option {
 	}
 }
 
-type Perplexity struct {
+type Tool struct {
 	llm *openai.LLM
 }
 
-func NewPerplexity(opts ...Option) (*Perplexity, error) {
+var _ tools.Tool = (*Tool)(nil)
+
+func New(opts ...Option) (*Tool, error) {
 	options := &options{
 		apiKey: os.Getenv("PERPLEXITY_API_KEY"),
 		model:  ModelLlamaSonarSmall, // Default model
@@ -52,7 +55,7 @@ func NewPerplexity(opts ...Option) (*Perplexity, error) {
 	}
 
 	if options.apiKey == "" {
-		return nil, fmt.Errorf("Perplexity API key not set")
+		return nil, fmt.Errorf("PERPLEXITY_API_KEY key not set")
 	}
 
 	llm, err := openai.New(
@@ -64,26 +67,26 @@ func NewPerplexity(opts ...Option) (*Perplexity, error) {
 		return nil, err
 	}
 
-	return &Perplexity{
+	return &Tool{
 		llm: llm,
 	}, nil
 }
 
-func (p *Perplexity) Name() string {
+func (t *Tool) Name() string {
 	return "PerplexityAI"
 }
 
-func (p *Perplexity) Description() string {
+func (t *Tool) Description() string {
 	return "Perplexity AI has access to a wide range of information, as it functions as an AI-powered search engine that indexes, analyzes, and summarizes content from across the internet."
 }
 
-func (p *Perplexity) Call(ctx context.Context, input string) (string, error) {
+func (t *Tool) Call(ctx context.Context, input string) (string, error) {
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, input),
 	}
 
 	var generatedText string
-	_, err := p.llm.GenerateContent(ctx, content,
+	_, err := t.llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			generatedText += string(chunk)
 			return nil
