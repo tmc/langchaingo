@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/tools"
@@ -47,7 +48,8 @@ func WithModel(model Model) Option {
 
 // Tool implements the Perplexity AI integration
 type Tool struct {
-	llm *openai.LLM
+	llm              *openai.LLM
+	CallbacksHandler callbacks.Handler
 }
 
 var _ tools.Tool = (*Tool)(nil)
@@ -93,6 +95,10 @@ func (t *Tool) Description() string {
 
 // Call executes a query against the Perplexity AI model and returns the response
 func (t *Tool) Call(ctx context.Context, input string) (string, error) {
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolStart(ctx, input)
+	}
+
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, input),
 	}
@@ -104,7 +110,14 @@ func (t *Tool) Call(ctx context.Context, input string) (string, error) {
 			return nil
 		}))
 	if err != nil {
+		if t.CallbacksHandler != nil {
+			t.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return "", err
+	}
+
+	if t.CallbacksHandler != nil {
+		t.CallbacksHandler.HandleToolEnd(ctx, generatedText)
 	}
 
 	return generatedText, nil
