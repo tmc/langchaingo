@@ -9,36 +9,48 @@ type CallOption func(*CallOptions)
 // all options.
 type CallOptions struct {
 	// Model is the model to use.
-	Model string `json:"model"`
+	Model    string `json:"model"`
+	ModelSet bool   `json:"-"`
 	// CandidateCount is the number of response candidates to generate.
 	CandidateCount int `json:"candidate_count"`
 	// MaxTokens is the maximum number of tokens to generate.
-	MaxTokens int `json:"max_tokens"`
+	MaxTokens    int  `json:"max_tokens"`
+	MaxTokensSet bool `json:"-"`
 	// Temperature is the temperature for sampling, between 0 and 1.
-	Temperature float64 `json:"temperature"`
+	Temperature    float64 `json:"temperature"`
+	TemperatureSet bool    `json:"-"`
 	// StopWords is a list of words to stop on.
-	StopWords []string `json:"stop_words"`
+	StopWords    []string `json:"stop_words"`
+	StopWordsSet bool     `json:"-"`
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 	// TopK is the number of tokens to consider for top-k sampling.
-	TopK int `json:"top_k"`
+	TopK    int  `json:"top_k"`
+	TopKSet bool `json:"-"`
 	// TopP is the cumulative probability for top-p sampling.
-	TopP float64 `json:"top_p"`
+	TopP    float64 `json:"top_p"`
+	TopPSet bool    `json:"-"`
 	// Seed is a seed for deterministic sampling.
-	Seed int `json:"seed"`
+	Seed    int  `json:"seed"`
+	SeedSet bool `json:"-"`
 	// MinLength is the minimum length of the generated text.
-	MinLength int `json:"min_length"`
+	MinLength    int  `json:"min_length"`
+	MinLengthSet bool `json:"-"`
 	// MaxLength is the maximum length of the generated text.
-	MaxLength int `json:"max_length"`
+	MaxLength    int  `json:"max_length"`
+	MaxLengthSet bool `json:"-"`
 	// N is how many chat completion choices to generate for each input message.
 	N int `json:"n"`
 	// RepetitionPenalty is the repetition penalty for sampling.
-	RepetitionPenalty float64 `json:"repetition_penalty"`
+	RepetitionPenalty    float64 `json:"repetition_penalty"`
+	RepetitionPenaltySet bool    `json:"-"`
 	// FrequencyPenalty is the frequency penalty for sampling.
-	FrequencyPenalty float64 `json:"frequency_penalty"`
+	FrequencyPenalty    float64 `json:"frequency_penalty"`
+	FrequencyPenaltySet bool    `json:"-"`
 	// PresencePenalty is the presence penalty for sampling.
-	PresencePenalty float64 `json:"presence_penalty"`
+	PresencePenalty    float64 `json:"presence_penalty"`
+	PresencePenaltySet bool    `json:"-"`
 
 	// JSONMode is a flag to enable JSON mode.
 	JSONMode bool `json:"json"`
@@ -116,6 +128,7 @@ const (
 func WithModel(model string) CallOption {
 	return func(o *CallOptions) {
 		o.Model = model
+		o.ModelSet = true
 	}
 }
 
@@ -123,6 +136,7 @@ func WithModel(model string) CallOption {
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxTokens = maxTokens
+		o.MaxTokensSet = true
 	}
 }
 
@@ -138,6 +152,7 @@ func WithCandidateCount(c int) CallOption {
 func WithTemperature(temperature float64) CallOption {
 	return func(o *CallOptions) {
 		o.Temperature = temperature
+		o.TemperatureSet = true
 	}
 }
 
@@ -145,6 +160,7 @@ func WithTemperature(temperature float64) CallOption {
 func WithStopWords(stopWords []string) CallOption {
 	return func(o *CallOptions) {
 		o.StopWords = stopWords
+		o.StopWordsSet = true
 	}
 }
 
@@ -166,6 +182,7 @@ func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) err
 func WithTopK(topK int) CallOption {
 	return func(o *CallOptions) {
 		o.TopK = topK
+		o.TopKSet = true
 	}
 }
 
@@ -173,6 +190,7 @@ func WithTopK(topK int) CallOption {
 func WithTopP(topP float64) CallOption {
 	return func(o *CallOptions) {
 		o.TopP = topP
+		o.TopPSet = true
 	}
 }
 
@@ -180,6 +198,7 @@ func WithTopP(topP float64) CallOption {
 func WithSeed(seed int) CallOption {
 	return func(o *CallOptions) {
 		o.Seed = seed
+		o.SeedSet = true
 	}
 }
 
@@ -187,6 +206,7 @@ func WithSeed(seed int) CallOption {
 func WithMinLength(minLength int) CallOption {
 	return func(o *CallOptions) {
 		o.MinLength = minLength
+		o.MinLengthSet = true
 	}
 }
 
@@ -194,6 +214,7 @@ func WithMinLength(minLength int) CallOption {
 func WithMaxLength(maxLength int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxLength = maxLength
+		o.MaxLengthSet = true
 	}
 }
 
@@ -208,6 +229,7 @@ func WithN(n int) CallOption {
 func WithRepetitionPenalty(repetitionPenalty float64) CallOption {
 	return func(o *CallOptions) {
 		o.RepetitionPenalty = repetitionPenalty
+		o.RepetitionPenaltySet = true
 	}
 }
 
@@ -215,6 +237,7 @@ func WithRepetitionPenalty(repetitionPenalty float64) CallOption {
 func WithFrequencyPenalty(frequencyPenalty float64) CallOption {
 	return func(o *CallOptions) {
 		o.FrequencyPenalty = frequencyPenalty
+		o.FrequencyPenaltySet = true
 	}
 }
 
@@ -222,6 +245,7 @@ func WithFrequencyPenalty(frequencyPenalty float64) CallOption {
 func WithPresencePenalty(presencePenalty float64) CallOption {
 	return func(o *CallOptions) {
 		o.PresencePenalty = presencePenalty
+		o.PresencePenaltySet = true
 	}
 }
 
