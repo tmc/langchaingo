@@ -43,10 +43,17 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
+func (o *LLM) getCallbackHandler(ctx context.Context) callbacks.Handler {
+	if callbacksHandler := callbacks.CallbackHandler(ctx); callbacksHandler != nil {
+		return callbacksHandler
+	}
+	return o.CallbacksHandler
+}
+
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	if callbacksHandler := o.getCallbackHandler(ctx); callbacksHandler != nil {
+		callbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
 	opts := llms.CallOptions{}
@@ -186,8 +193,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 	response := &llms.ContentResponse{Choices: choices}
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
+
+	if callbacksHandler := o.getCallbackHandler(ctx); callbacksHandler != nil {
+		callbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 	return response, nil
 }

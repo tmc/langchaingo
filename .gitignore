@@ -14,8 +14,10 @@ cover.cov
 
 # dev
 .env
+.envrc
 vendor/*
 service-account.json
 
 embeddings/cybertron/models/*
 examples/cybertron-embedding-example/models/*
+

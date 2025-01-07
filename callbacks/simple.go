@@ -13,7 +13,6 @@ type SimpleHandler struct{}
 var _ Handler = SimpleHandler{}
 
 func (SimpleHandler) HandleText(context.Context, string)                                   {}
-func (SimpleHandler) HandleLLMStart(context.Context, []string)                             {}
 func (SimpleHandler) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {}
 func (SimpleHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse)   {}
 func (SimpleHandler) HandleLLMError(context.Context, error)                                {}
