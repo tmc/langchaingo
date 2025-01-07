@@ -14,6 +14,7 @@ type ChatMessage = openaiclient.ChatMessage
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *openaiclient.Client
+	opts             *options
 }
 
 const (
@@ -35,6 +36,7 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
+		opts:             opt,
 	}, err
 }
 
@@ -96,17 +98,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
-		Model:               opts.Model,
-		StopWords:           opts.StopWords,
-		Messages:            chatMsgs,
-		StreamingFunc:       opts.StreamingFunc,
-		Temperature:         opts.Temperature,
-		N:                   opts.N,
-		FrequencyPenalty:    opts.FrequencyPenalty,
-		PresencePenalty:     opts.PresencePenalty,
-		MaxTokens:           opts.MaxTokens,
-		MaxCompletionTokens: opts.MaxTokens,
-
+		Model:                opts.Model,
+		StopWords:            opts.StopWords,
+		Messages:             chatMsgs,
+		StreamingFunc:        opts.StreamingFunc,
+		Temperature:          opts.Temperature,
+		N:                    opts.N,
+		FrequencyPenalty:     opts.FrequencyPenalty,
+		PresencePenalty:      opts.PresencePenalty,
+		MaxTokens:            opts.MaxTokens,
+		MaxCompletionTokens:  opts.MaxCompletionTokens,
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
