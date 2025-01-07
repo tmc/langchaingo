@@ -1,0 +1,11 @@
+{
+  "thought": "思考:",
+  "action": "工具:",
+  "action input": "工具参数:",
+  "observation": "结果:",
+  "output key": "输出:",
+  "system message": "你是一个牛逼的AI助手。",
+  "today format": "2006年01月02日",
+  "mrkl final answer": "最终答案:",
+  "conversational final answer": "AI:"
+}
