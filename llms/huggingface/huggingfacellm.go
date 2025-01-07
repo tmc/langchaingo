@@ -106,10 +106,6 @@ func (o *LLM) CreateEmbedding(
 ) ([][]float32, error) {
 	embeddings, err := o.client.CreateEmbedding(ctx, model, task, &huggingfaceclient.EmbeddingRequest{
 		Inputs: inputTexts,
-		Options: map[string]any{
-			"use_gpu":        false,
-			"wait_for_model": true,
-		},
 	})
 	if err != nil {
 		return nil, err

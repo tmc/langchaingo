@@ -55,6 +55,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 	}
 	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-wait-for-model", "true")
 
 	// debug print the http request with httputil:
 

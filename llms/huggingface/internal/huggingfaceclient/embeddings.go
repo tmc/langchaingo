@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -32,6 +33,7 @@ func (c *Client) createEmbedding(ctx context.Context, model string, task string,
 	}
 	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-wait-for-model", "true")
 
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -41,8 +43,10 @@ func (c *Client) createEmbedding(ctx context.Context, model string, task string,
 
 	if r.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
+		b, _ := io.ReadAll(r.Body)
 
-		return nil, fmt.Errorf("%s: %s", msg, "unable to create embeddings") // nolint:goerr113
+		return nil, fmt.Errorf("%s: %s: %s",
+			msg, "unable to create embeddings", string(b)) // nolint:goerr113
 	}
 
 	var response [][]float32
