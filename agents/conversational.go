@@ -62,8 +62,9 @@ func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) 
 func (a *ConversationalAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
-	inputs map[string]string,
-) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	inputs map[string]any,
+	_ []llms.ChatMessage,
+) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
 		fullInputs[key] = value
@@ -88,7 +89,7 @@ func (a *ConversationalAgent) Plan(
 		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	return a.parseOutput(output)
@@ -130,7 +131,7 @@ func constructScratchPad(steps []schema.AgentStep) string {
 	return scratchPad
 }
 
-func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
+func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	if strings.Contains(output, _conversationalFinalAnswerAction) {
 		splits := strings.Split(output, _conversationalFinalAnswerAction)
 
@@ -141,18 +142,18 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 			Log: output,
 		}
 
-		return nil, finishAction, nil
+		return nil, finishAction, nil, nil
 	}
 
 	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
-		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
+		return nil, nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
 	}
 
 	return []schema.AgentAction{
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
-	}, nil, nil
+	}, nil, nil, nil
 }
 
 //go:embed prompts/conversational_prefix.txt

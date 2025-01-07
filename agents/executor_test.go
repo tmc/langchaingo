@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -24,27 +25,27 @@ type testAgent struct {
 	outputKeys []string
 
 	recordedIntermediateSteps []schema.AgentStep
-	recordedInputs            map[string]string
+	recordedInputs            map[string]any
 	numPlanCalls              int
 }
 
 func (a *testAgent) Plan(
 	_ context.Context,
 	intermediateSteps []schema.AgentStep,
-	inputs map[string]string,
-) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	inputs map[string]any, _ []llms.ChatMessage,
+) ([]schema.AgentAction, *schema.AgentFinish, []llms.ChatMessage, error) {
 	a.recordedIntermediateSteps = intermediateSteps
 	a.recordedInputs = inputs
 	a.numPlanCalls++
 
-	return a.actions, a.finish, a.err
+	return a.actions, a.finish, nil, a.err
 }
 
-func (a testAgent) GetInputKeys() []string {
+func (a *testAgent) GetInputKeys() []string {
 	return a.inputKeys
 }
 
-func (a testAgent) GetOutputKeys() []string {
+func (a *testAgent) GetOutputKeys() []string {
 	return a.outputKeys
 }
 
