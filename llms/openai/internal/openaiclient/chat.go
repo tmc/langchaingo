@@ -381,9 +381,6 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 
 	// Build request
 	body := bytes.NewReader(payloadBytes)
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
-	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", payload.Model), body)
 	if err != nil {
 		return nil, err
