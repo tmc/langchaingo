@@ -140,7 +140,7 @@ func (s Store) createVectorExtensionIfNotExists(ctx context.Context, tx pgx.Tx) 
 	// https://github.com/langchain-ai/langchain/issues/12933
 	// For more information see:
 	// https://www.postgresql.org/docs/16/explicit-locking.html#ADVISORY-LOCKS
-	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDExtension); err != nil {
+	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", int64(pgLockIDExtension)); err != nil {
 		return err
 	}
 	if _, err := tx.Exec(ctx, "CREATE EXTENSION IF NOT EXISTS vector"); err != nil {
@@ -157,7 +157,7 @@ func (s Store) createCollectionTableIfNotExists(ctx context.Context, tx pgx.Tx) 
 	// https://github.com/langchain-ai/langchain/issues/12933
 	// For more information see:
 	// https://www.postgresql.org/docs/16/explicit-locking.html#ADVISORY-LOCKS
-	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDCollectionTable); err != nil {
+	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", int64(pgLockIDCollectionTable)); err != nil {
 		return err
 	}
 	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
@@ -180,7 +180,7 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	// https://github.com/langchain-ai/langchain/issues/12933
 	// For more information see:
 	// https://www.postgresql.org/docs/16/explicit-locking.html#ADVISORY-LOCKS
-	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDEmbeddingTable); err != nil {
+	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", int64(pgLockIDEmbeddingTable)); err != nil {
 		return err
 	}
 
