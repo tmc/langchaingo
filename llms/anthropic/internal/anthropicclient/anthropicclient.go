@@ -139,18 +139,7 @@ type MessageRequest struct {
 
 // CreateMessage creates message for the messages api.
 func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*MessageResponsePayload, error) {
-	resp, err := c.createMessage(ctx, &messagePayload{
-		Model:         r.Model,
-		Messages:      r.Messages,
-		System:        r.System,
-		Temperature:   r.Temperature,
-		MaxTokens:     r.MaxTokens,
-		StopWords:     r.StopWords,
-		TopP:          r.TopP,
-		Tools:         r.Tools,
-		Stream:        r.Stream,
-		StreamingFunc: r.StreamingFunc,
-	})
+	resp, err := c.createMessage(ctx, r)
 	if err != nil {
 		return nil, err
 	}

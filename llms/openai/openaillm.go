@@ -96,8 +96,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
-		Model:            opts.Model,
-		StopWords:        opts.StopWords,
+		Model: opts.Model,
+		StopWords: func() []string {
+			if len(opts.StopSequences) > 0 {
+				return opts.StopSequences
+			}
+			return opts.StopWords
+		}(),
 		Messages:         chatMsgs,
 		StreamingFunc:    opts.StreamingFunc,
 		Temperature:      opts.Temperature,
