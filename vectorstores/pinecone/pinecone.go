@@ -170,7 +170,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	if len(queryResult.Matches) == 0 {
-		return nil, ErrEmptyResponse
+		return []schema.Document{}, nil
 	}
 
 	return s.getDocumentsFromMatches(queryResult, scoreThreshold)
