@@ -33,14 +33,12 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		openseachContainer, err := tcopensearch.RunContainer(context.Background(), testcontainers.WithImage("opensearchproject/opensearch:2.11.1"))
+		openseachContainer, err := tcopensearch.Run(context.Background(), "opensearchproject/opensearch:2.11.1")
+		testcontainers.CleanupContainer(t, openseachContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, openseachContainer.Terminate(context.Background()))
-		})
 
 		address, err := openseachContainer.Address(context.Background())
 		if err != nil {

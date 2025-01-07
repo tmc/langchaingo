@@ -26,14 +26,12 @@ func getValues(t *testing.T) (string, string) {
 	scheme := os.Getenv("WEAVIATE_SCHEME")
 	host := os.Getenv("WEAVIATE_HOST")
 	if scheme == "" || host == "" {
-		weaviateContainer, err := tcweaviate.RunContainer(context.Background(), testcontainers.WithImage("semitechnologies/weaviate:1.25.4"))
+		weaviateContainer, err := tcweaviate.Run(context.Background(), "semitechnologies/weaviate:1.25.4")
+		testcontainers.CleanupContainer(t, weaviateContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, weaviateContainer.Terminate(context.Background()))
-		})
 
 		scheme, host, err = weaviateContainer.HttpHostAddress(context.Background())
 		if err != nil {

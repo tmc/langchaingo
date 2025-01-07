@@ -32,9 +32,9 @@ func preCheckEnvSetting(t *testing.T) string {
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
-		pgVectorContainer, err := tcpostgres.RunContainer(
+		pgVectorContainer, err := tcpostgres.Run(
 			context.Background(),
-			testcontainers.WithImage("docker.io/pgvector/pgvector:pg16"),
+			"docker.io/pgvector/pgvector:pg16",
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
 			tcpostgres.WithPassword("passw0rd!"),
@@ -43,13 +43,11 @@ func preCheckEnvSetting(t *testing.T) string {
 					WithOccurrence(2).
 					WithStartupTimeout(30*time.Second)),
 		)
+		testcontainers.CleanupContainer(t, pgVectorContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
-		})
 
 		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
 		require.NoError(t, err)

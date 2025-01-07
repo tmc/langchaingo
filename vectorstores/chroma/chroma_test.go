@@ -569,7 +569,8 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.24"))
+		chromaContainer, err := tcchroma.Run(context.Background(), "chromadb/chroma:0.4.24")
+		testcontainers.CleanupContainer(t, chromaContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}

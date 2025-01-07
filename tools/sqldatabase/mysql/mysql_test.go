@@ -23,14 +23,15 @@ func Test(t *testing.T) {
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
-		mysqlContainer, err := mysql.RunContainer(
+		mysqlContainer, err := mysql.Run(
 			context.Background(),
-			testcontainers.WithImage("mysql:8.3.0"),
+			"mysql:8.3.0",
 			mysql.WithDatabase("test"),
 			mysql.WithUsername("user"),
 			mysql.WithPassword("p@ssw0rd"),
 			mysql.WithScripts(filepath.Join("..", "testdata", "db.sql")),
 		)
+		testcontainers.CleanupContainer(t, mysqlContainer)
 		// if error is no docker socket available, skip the test
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")

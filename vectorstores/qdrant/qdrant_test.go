@@ -365,14 +365,12 @@ func getValues(t *testing.T) (string, string, int, string) {
 
 	qdrantURL := os.Getenv("QDRANT_URL")
 	if qdrantURL == "" {
-		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
+		qdrantContainer, err := tcqdrant.Run(context.Background(), "qdrant/qdrant:v1.7.4")
+		testcontainers.CleanupContainer(t, qdrantContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, qdrantContainer.Terminate(context.Background()))
-		})
 
 		qdrantURL, err = qdrantContainer.RESTEndpoint(context.Background())
 		if err != nil {

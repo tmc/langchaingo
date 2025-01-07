@@ -46,14 +46,12 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
+		milvusContainer, err := tcmilvus.Run(context.Background(), "milvusdb/milvus:v2.4.0-rc.1-latest")
+		testcontainers.CleanupContainer(t, milvusContainer)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, milvusContainer.Terminate(context.Background()))
-		})
 
 		url, err = milvusContainer.ConnectionString(context.Background())
 		if err != nil {
