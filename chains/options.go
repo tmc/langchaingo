@@ -27,6 +27,10 @@ type chainCallOption struct {
 	MaxTokens    int
 	maxTokensSet bool
 
+	// MaxCompletionTokens is the maximum number of tokens to generate - used in the current openai API
+	MaxCompletionTokens    int
+	maxCompletionTokensSet bool
+
 	// Temperature is the temperature for sampling to use in an LLM call, between 0 and 1.
 	Temperature    float64
 	temperatureSet bool
@@ -80,6 +84,14 @@ func WithMaxTokens(maxTokens int) ChainCallOption {
 	return func(o *chainCallOption) {
 		o.MaxTokens = maxTokens
 		o.maxTokensSet = true
+	}
+}
+
+// WithMaxCompletionTokens is an option for LLM.Call.
+func WithMaxCompletionTokens(maxCompletionTokens int) ChainCallOption {
+	return func(o *chainCallOption) {
+		o.MaxCompletionTokens = maxCompletionTokens
+		o.maxCompletionTokensSet = true
 	}
 }
 
@@ -181,6 +193,9 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	if opts.maxTokensSet {
 		chainCallOption = append(chainCallOption, llms.WithMaxTokens(opts.MaxTokens))
 	}
+	if opts.maxCompletionTokensSet {
+		chainCallOption = append(chainCallOption, llms.WithMaxCompletionTokens(opts.MaxCompletionTokens))
+	}
 	if opts.temperatureSet {
 		chainCallOption = append(chainCallOption, llms.WithTemperature(opts.Temperature))
 	}
@@ -208,4 +223,8 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
 
 	return chainCallOption
+}
+
+func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption {
+	return getLLMCallOptions(options...)
 }

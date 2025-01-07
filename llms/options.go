@@ -14,6 +14,8 @@ type CallOptions struct {
 	CandidateCount int `json:"candidate_count"`
 	// MaxTokens is the maximum number of tokens to generate.
 	MaxTokens int `json:"max_tokens"`
+	// MaxCompletionTokens is the maximum number of tokens to generate - used in the current openai API
+	MaxCompletionTokens int `json:"max_completion_tokens"`
 	// Temperature is the temperature for sampling, between 0 and 1.
 	Temperature float64 `json:"temperature"`
 	// StopWords is a list of words to stop on.
@@ -123,6 +125,13 @@ func WithModel(model string) CallOption {
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
 		o.MaxTokens = maxTokens
+	}
+}
+
+// WithMaxCompletionTokens specifies the max number of tokens to generate - used in the current openai API
+func WithMaxCompletionTokens(maxCompletionTokens int) CallOption {
+	return func(o *CallOptions) {
+		o.MaxCompletionTokens = maxCompletionTokens
 	}
 }
 
