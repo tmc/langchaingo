@@ -66,6 +66,9 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// User is the user to use for the request. This is used for LiteLLM's end_user tracking.
+	User string `json:"user,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.

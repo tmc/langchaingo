@@ -74,6 +74,9 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// User is the user to use for the request. This is used for LiteLLM's end_user tracking.
+	User string `json:"user,omitempty"`
 }
 
 // ToolType is the type of a tool.
