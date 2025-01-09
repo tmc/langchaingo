@@ -40,18 +40,38 @@ type GenerateRequest struct {
 
 type ImageData []byte
 
+type ToolCall struct {
+	Function ToolCallFunction `json:"function"`
+}
+
+type ToolCallFunction struct {
+	Name      string                    `json:"name"`
+	Arguments ToolCallFunctionArguments `json:"arguments"`
+}
+
+type ToolCallFunctionArguments struct {
+	Content string
+}
+
+func (a *ToolCallFunctionArguments) UnmarshalJSON(b []byte) error {
+	a.Content = string(b)
+	return nil
+}
+
 type Message struct {
-	Role    string      `json:"role"` // one of ["system", "user", "assistant"]
-	Content string      `json:"content"`
-	Images  []ImageData `json:"images,omitempty"`
+	Role      string      `json:"role"` // one of ["system", "user", "assistant"]
+	Content   string      `json:"content"`
+	Images    []ImageData `json:"images,omitempty"`
+	ToolCalls []ToolCall  `json:"tool_calls,omitempty"`
 }
 
 type ChatRequest struct {
 	Model     string     `json:"model"`
 	Messages  []*Message `json:"messages"`
-	Stream    bool       `json:"stream,omitempty"`
+	Stream    bool       `json:"stream"`
 	Format    string     `json:"format"`
 	KeepAlive string     `json:"keep_alive,omitempty"`
+	Tools     []Tool     `json:"tools,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -167,4 +187,15 @@ type Options struct {
 	MirostatEta      float32 `json:"mirostat_eta,omitempty"`
 	TopP             float32 `json:"top_p,omitempty"`
 	PenalizeNewline  bool    `json:"penalize_newline,omitempty"`
+}
+
+type Tool struct {
+	Type     string       `json:"type"`
+	Function ToolFunction `json:"function"`
+}
+
+type ToolFunction struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Parameters  any    `json:"parameters"`
 }
