@@ -5,7 +5,11 @@ import (
 	"errors"
 )
 
-func ConvertFloat64ToFloat32(input []float64) []float32 {
+var (
+	ErrEmptyEmbeddings = errors.New("empty embeddings")
+)
+
+func convertFloat64ToFloat32(input []float64) []float32 {
 	// Create a slice with the same length as the input.
 	output := make([]float32, len(input))
 
@@ -26,9 +30,9 @@ func (m *Model) CreateEmbedding(_ context.Context, inputTexts []string) ([][]flo
 	allEmbds := make([][]float32, len(embsRes.Data))
 	for i, embs := range embsRes.Data {
 		if len(embs.Embedding) == 0 {
-			return nil, errors.New("empty embeddings")
+			return nil, ErrEmptyEmbeddings
 		}
-		allEmbds[i] = ConvertFloat64ToFloat32(embs.Embedding)
+		allEmbds[i] = convertFloat64ToFloat32(embs.Embedding)
 	}
 	return allEmbds, nil
 }

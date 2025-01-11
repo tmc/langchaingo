@@ -1,12 +1,12 @@
-package mistral_test
+package mistral
 
 import (
 	"context"
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
-	sdk "github.com/tmc/langchaingo/llms/mistral"
 )
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
@@ -42,15 +42,11 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			output := sdk.ConvertFloat64ToFloat32(tt.input)
-			if len(output) != len(tt.expected) {
-				t.Errorf("length mismatch: got %d, want %d", len(output), len(tt.expected))
-				return
-			}
+			output := convertFloat64ToFloat32(tt.input)
+
+			require.Equal(t, len(tt.expected), len(output), "length mismatch")
 			for i := range output {
-				if output[i] != tt.expected[i] {
-					t.Errorf("at index %d: got %f, want %f", i, output[i], tt.expected[i])
-				}
+				require.Equal(t, tt.expected[i], output[i], "at index %d", i)
 			}
 		})
 	}
@@ -65,29 +61,22 @@ func TestMistralEmbed(t *testing.T) {
 
 	// Check if it is set (non-empty)
 	if value == "" {
-		t.Logf("Environment variable %s is not set, so skipping the test", envVar)
+		t.Skipf("Environment variable %s is not set, so skipping the test", envVar)
 		return
 	}
 
-	model, err := sdk.New()
+	model, err := New()
 	if err != nil {
 		panic(err)
 	}
 
 	e, err := embeddings.NewEmbedder(model)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
-	docEmbeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world"})
-	if err != nil {
-		panic(err)
-	}
-	t.Logf("Document embeddings: %v\n", docEmbeddings)
+	_, err = e.EmbedDocuments(context.Background(), []string{"Hello world"})
+	require.NoError(t, err)
 
-	queryEmbedding, err := e.EmbedQuery(context.Background(), "Hello world")
-	if err != nil {
-		panic(err)
-	}
-	t.Logf("Query embedding: %v\n", queryEmbedding)
+	_, err = e.EmbedQuery(context.Background(), "Hello world")
+	require.NoError(t, err)
+
 }
