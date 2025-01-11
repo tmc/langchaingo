@@ -66,9 +66,7 @@ func TestMistralEmbed(t *testing.T) {
 	}
 
 	model, err := New()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	e, err := embeddings.NewEmbedder(model)
 	require.NoError(t, err)
