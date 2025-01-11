@@ -76,5 +76,4 @@ func TestMistralEmbed(t *testing.T) {
 
 	_, err = e.EmbedQuery(context.Background(), "Hello world")
 	require.NoError(t, err)
-
 }

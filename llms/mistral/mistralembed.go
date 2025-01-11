@@ -5,9 +5,7 @@ import (
 	"errors"
 )
 
-var (
-	ErrEmptyEmbeddings = errors.New("empty embeddings")
-)
+var ErrEmptyEmbeddings = errors.New("empty embeddings")
 
 func convertFloat64ToFloat32(input []float64) []float32 {
 	// Create a slice with the same length as the input.
