@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
@@ -37,22 +36,11 @@ func getValues(t *testing.T) (string, string) {
 	if uri == "" {
 		ctx := context.Background()
 
-		genericContainerReq := testcontainers.GenericContainerRequest{
-			ContainerRequest: testcontainers.ContainerRequest{
-				Image:        "docker.io/redis/redis-stack:7.2.0-v10",
-				ExposedPorts: []string{"6379/tcp"},
-				WaitingFor:   wait.ForLog("* Ready to accept connections"),
-			},
-			Started: true,
-		}
-
-		container, err := testcontainers.GenericContainer(ctx, genericContainerReq)
+		redisContainer, err := tcredis.RunContainer(ctx, testcontainers.WithImage("redis/redis-stack:7.2.0-v10"))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
-
-		redisContainer := &tcredis.RedisContainer{Container: container}
 		t.Cleanup(func() {
 			require.NoError(t, redisContainer.Terminate(context.Background()))
 		})
