@@ -52,14 +52,22 @@ func main() {
 	coll := client.Database(databaseName).Collection(collectionName)
 
 	if ok, _ := searchIndexExists(context.Background(), coll, indexDP1536); !ok {
-		fields := []vectorField{}
-
-		fields = append(fields, vectorField{
-			Type:          "vector",
-			Path:          "plot_embedding", // Default path
-			NumDimensions: openAIEmbeddingDim,
-			Similarity:    similarityAlgorithm,
-		})
+		fields := []vectorField{
+			{
+				Type:          "vector",
+				Path:          "plot_embedding", // Default path
+				NumDimensions: openAIEmbeddingDim,
+				Similarity:    similarityAlgorithm,
+			},
+			{
+				Type: "filter",
+				Path: "metadata.area",
+			},
+			{
+				Type: "filter",
+				Path: "metadata.population",
+			},
+		}
 
 		// Create the vectorstore collection
 		err = client.Database(databaseName).CreateCollection(context.Background(), collectionName)
@@ -69,7 +77,7 @@ func main() {
 
 		_, err = createVectorSearchIndex(context.Background(), coll, indexDP1536, fields...)
 		if err != nil {
-			log.Fatalf("faield to create index: %v", err)
+			log.Fatalf("failed to create index: %v", err)
 		}
 	}
 
@@ -150,28 +158,28 @@ func main() {
 	fmt.Println(docs)
 
 	// Search for similar documents using score threshold.
-	docs, err = store.SimilaritySearch(context.Background(), "only cities in south america", 10,
-		vectorstores.WithScoreThreshold(0.80))
+	docs, err = store.SimilaritySearch(context.Background(), "South American cities", 4,
+		vectorstores.WithScoreThreshold(0.7))
 	fmt.Println(docs)
 
 	// Search for similar documents using score threshold and metadata filter.
 	filter := map[string]interface{}{
 		"$and": []map[string]interface{}{
 			{
-				"area": map[string]interface{}{
-					"$gte": 1000,
+				"metadata.area": map[string]interface{}{
+					"$gte": 100,
 				},
 			},
 			{
-				"population": map[string]interface{}{
-					"$gte": 15.5,
+				"metadata.population": map[string]interface{}{
+					"$gte": 15,
 				},
 			},
 		},
 	}
 
-	docs, err = store.SimilaritySearch(context.Background(), "only cities in south america", 10,
-		vectorstores.WithScoreThreshold(0.80),
+	docs, err = store.SimilaritySearch(context.Background(), "South American cities", 2,
+		vectorstores.WithScoreThreshold(0.40),
 		vectorstores.WithFilters(filter))
 	fmt.Println(docs)
 }
@@ -241,8 +249,14 @@ func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) 
 		return false, fmt.Errorf("failed to list search indexes: %w", err)
 	}
 
-	if cursor == nil || cursor.Current == nil {
+	if cursor == nil {
 		return false, nil
+	}
+
+	if cursor.Current == nil {
+		if ok := cursor.Next(ctx); !ok {
+			return false, nil
+		}
 	}
 
 	name := cursor.Current.Lookup("name").StringValue()
