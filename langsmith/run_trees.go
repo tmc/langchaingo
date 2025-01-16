@@ -31,13 +31,13 @@ type runTree struct {
 }
 
 func newRunTree(id string) *runTree {
-	return &runTree{
+	r := runTree{
 		ID:                  id,
 		ProjectName:         envOr("LANGCHAIN_PROJECT", "default"),
 		ExecutionOrder:      1,
 		ChildExecutionOrder: 1,
-		StartTime:           time.Now(),
 	}
+	return r.setStartTime(time.Now())
 }
 
 func (t *runTree) setParent(parent *runTree) *runTree {
@@ -90,11 +90,6 @@ func (t *runTree) setError(err string) *runTree {
 	return t
 }
 
-func (t *runTree) setSerialized(serialized KVMap) *runTree {
-	t.Serialized = serialized
-	return t
-}
-
 func (t *runTree) setInputs(inputs KVMap) *runTree {
 	t.Inputs = inputs
 
@@ -103,16 +98,6 @@ func (t *runTree) setInputs(inputs KVMap) *runTree {
 
 func (t *runTree) setOutputs(outputs KVMap) *runTree {
 	t.Outputs = outputs
-	return t
-}
-
-func (t *runTree) setReferenceExampleID(id string) *runTree {
-	t.ReferenceExampleID = &id
-	return t
-}
-
-func (t *runTree) setEvents(events []KVMap) *runTree {
-	t.Events = events
 	return t
 }
 
@@ -141,19 +126,6 @@ func (t *runTree) getChild(childName string) *runTree {
 		}
 	}
 	return nil
-}
-
-func (t *runTree) end(outputs KVMap, err string, endTime time.Time) {
-	t.Outputs = outputs
-	t.Error = err
-	t.EndTime = endTime
-
-	if t.ParentRun != nil {
-		t.ParentRun.ChildExecutionOrder = max(
-			t.ParentRun.ChildExecutionOrder,
-			t.ChildExecutionOrder,
-		)
-	}
 }
 
 func (t *runTree) convertToCreate(excludeChildRuns bool) (*runCreate, error) {

@@ -40,14 +40,14 @@ func WithHTTPClient(httpClient *http.Client) ClientOption {
 	})
 }
 
-// WithHideInputs sets whether to hide input instrumentation
+// WithHideInputs sets whether to hide input instrumentation.
 func WithHideInputs(hide bool) ClientOption {
 	return clientOptionFunc(func(c *Client) {
 		c.hideInputs = hide
 	})
 }
 
-// WithHideOutputs sets whether to hide output instrumentation
+// WithHideOutputs sets whether to hide output instrumentation.
 func WithHideOutputs(hide bool) ClientOption {
 	return clientOptionFunc(func(c *Client) {
 		c.hideOutputs = hide

@@ -57,7 +57,6 @@ func (t *Tracer) resetActiveTree() {
 	t.activeTree = nil
 }
 
-
 func (t *Tracer) HandleText(_ context.Context, _ string) {
 }
 

@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-var ErrInvalidUUID = errors.New("invalid UUID")
-var ErrMissingAPIKey = errors.New("the LangSmith API key was not defined, define LANGCHAIN_API_KEY environment variable or configure your client with WithAPIKey()")
+var (
+	ErrInvalidUUID   = errors.New("invalid UUID")
+	ErrMissingAPIKey = errors.New("the LangSmith API key was not defined, define LANGCHAIN_API_KEY environment variable or configure your client with WithAPIKey()")
+)
 
 type LangSmitAPIError struct {
 	StatusCode int

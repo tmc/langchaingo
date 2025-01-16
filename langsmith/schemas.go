@@ -56,24 +56,6 @@ type baseRun struct {
 	Tags               []string `json:"tags,omitempty"`
 }
 
-type run struct {
-	baseRun
-	SessionID        *string  `json:"session_id,omitempty"`
-	ChildRunIDs      []string `json:"child_run_ids,omitempty"`
-	ChildRuns        []run    `json:"child_runs,omitempty"`
-	FeedbackStats    KVMap    `json:"feedback_stats,omitempty"`
-	AppPath          *string  `json:"app_path,omitempty"`
-	ManifestID       *string  `json:"manifest_id,omitempty"`
-	Status           *string  `json:"status,omitempty"`
-	PromptTokens     *int     `json:"prompt_tokens,omitempty"`
-	CompletionTokens *int     `json:"completion_tokens,omitempty"`
-	TotalTokens      *int     `json:"total_tokens,omitempty"`
-	FirstTokenTime   *int64   `json:"first_token_time,omitempty"`
-	ParentRunIDs     []string `json:"parent_run_ids,omitempty"`
-	TraceID          *string  `json:"trace_id,omitempty"`
-	DottedOrder      *string  `json:"dotted_order,omitempty"`
-}
-
 type runCreate struct {
 	baseRun
 	ChildRuns   []*runCreate `json:"child_runs,omitempty"`
@@ -90,89 +72,4 @@ type runUpdate struct {
 	ReferenceExampleID *string `json:"reference_example_id,omitempty"`
 	Events             []KVMap `json:"events,omitempty"`
 	SessionID          *string `json:"session_id,omitempty"`
-}
-
-type exampleCreate struct {
-	BaseExample
-	ID        *string
-	CreatedAt string
-}
-
-type example struct {
-	BaseExample
-	ID          string
-	CreatedAt   string
-	ModifiedAt  string
-	SourceRunID *string
-	Runs        []run
-}
-
-type exampleUpdate struct {
-	DatasetID *string
-	Inputs    *KVMap
-	Outputs   *KVMap
-}
-
-type baseDataset struct {
-	Name     string
-	Desc     string
-	TenantID string
-	DataType *DataType
-}
-
-type dataset struct {
-	baseDataset
-	ID                   string
-	CreatedAt            string
-	ModifiedAt           string
-	ExampleCount         *int
-	SessionCount         *int
-	LastSessionStartTime *int64
-}
-
-type datasetShareSchema struct {
-	DatasetID  string
-	ShareToken string
-	URL        string
-}
-
-type feedbackSourceBase struct {
-	Type     string
-	Metadata *KVMap
-}
-
-type apiFeedbackSource struct {
-	feedbackSourceBase
-}
-
-type modelFeedbackSource struct {
-	feedbackSourceBase
-}
-
-type feedbackBase struct {
-	CreatedAt      time.Time
-	ModifiedAt     time.Time
-	RunID          string
-	Key            string
-	Score          ScoreType
-	Value          ValueType
-	Comment        *string
-	Correction     *interface{}
-	FeedbackSource *feedbackSourceBase
-}
-
-type feedbackCreate struct {
-	feedbackBase
-	ID string
-}
-
-type feedback struct {
-	feedbackBase
-	ID string
-}
-
-type langChainBaseMessage struct {
-	GetType          func() string
-	Content          string
-	AdditionalKwargs *KVMap
 }
