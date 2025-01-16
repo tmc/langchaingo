@@ -101,7 +101,6 @@ func (l *Llama31) FormatStreamResponse(_ context.Context, response []byte) (*llm
 }
 
 func formatResponse[T LlamaChoiceDelta | LlamaChoice](response []byte) (*llms.ContentResponse, error) {
-
 	// Parse the LlamaResponse JSON
 	var llamaResp LlamaResponse[T]
 	err := json.Unmarshal(response, &llamaResp)
