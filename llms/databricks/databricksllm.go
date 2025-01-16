@@ -68,8 +68,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
-	fmt.Printf("payload: %v\n", string(payload))
-
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, o.url, bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -89,7 +87,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if err != nil {
 		return nil, err
 	}
-	// fmt.Printf("bodyBytes: %v\n", string(bodyBytes))
 	return o.model.FormatResponse(ctx, bodyBytes)
 }
 

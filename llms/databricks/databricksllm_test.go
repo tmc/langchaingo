@@ -5,6 +5,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/databricks"
 	databricksclientsllama31 "github.com/tmc/langchaingo/llms/databricks/clients/llama/v3.1"
@@ -20,32 +23,31 @@ func testModelStream(t *testing.T, model databricks.Model, url string) {
 		t.Skipf("%s not set", envVarToken)
 	}
 
-	dbllm, err := databricks.New(model, databricks.WithFullURL(url), databricks.WithToken(os.Getenv(envVarToken)))
-	if err != nil {
-		t.Fatalf("failed to create databricks LLM: %v", err)
-	}
+	dbllm, err := databricks.New(
+		model,
+		databricks.WithFullURL(url),
+		databricks.WithToken(os.Getenv(envVarToken)),
+	)
+	require.NoError(t, err, "failed to create databricks LLM")
 
 	ctx := context.Background()
-	resp, err := dbllm.GenerateContent(ctx, []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{Text: "Brazil is a country?"},
+	resp, err := dbllm.GenerateContent(ctx,
+		[]llms.MessageContent{
+			{
+				Role: llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{
+					llms.TextContent{Text: "Brazil is a country?"},
+				},
 			},
 		},
-	}, llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
-		if len(chunk) == 0 {
-			t.Fatalf("empty chunk")
-		}
-		return nil
-	}))
-	if err != nil {
-		t.Fatalf("failed to generate content: %v", err)
-	}
+		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			require.NotEmpty(t, chunk, "unexpected empty chunk in streaming response")
+			return nil
+		}),
+	)
+	require.NoError(t, err, "failed to generate content")
 
-	if len(resp.Choices) < 1 {
-		t.Fatalf("empty response from model")
-	}
+	assert.NotEmpty(t, resp.Choices, "expected at least one choice from model")
 }
 
 func testModel(t *testing.T, model databricks.Model, url string) {
@@ -57,47 +59,44 @@ func testModel(t *testing.T, model databricks.Model, url string) {
 		t.Skipf("%s not set", envVarToken)
 	}
 
-	dbllm, err := databricks.New(model, databricks.WithFullURL(url), databricks.WithToken(os.Getenv(envVarToken)))
-	if err != nil {
-		t.Fatalf("failed to create databricks LLM: %v", err)
-	}
+	dbllm, err := databricks.New(
+		model,
+		databricks.WithFullURL(url),
+		databricks.WithToken(os.Getenv(envVarToken)),
+	)
+	require.NoError(t, err, "failed to create databricks LLM")
 
 	ctx := context.Background()
-	resp, err := dbllm.GenerateContent(ctx, []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{Text: "Brazil is a country?"},
+	resp, err := dbllm.GenerateContent(ctx,
+		[]llms.MessageContent{
+			{
+				Role: llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{
+					llms.TextContent{Text: "Brazil is a country?"},
+				},
 			},
 		},
-	})
-	if err != nil {
-		t.Fatalf("failed to generate content: %v", err)
-	}
+	)
+	require.NoError(t, err, "failed to generate content")
 
-	if len(resp.Choices) < 1 {
-		t.Fatalf("empty response from model")
-	}
+	assert.NotEmpty(t, resp.Choices, "expected at least one choice from model")
 }
 
 func TestDatabricksLlama31(t *testing.T) {
 	t.Parallel()
 
 	const envVar = "DATABRICKS_LLAMA31_URL"
-
 	url := os.Getenv(envVar)
-
 	if url == "" {
 		t.Skipf("%s not set", envVar)
 	}
 
 	llama31 := databricksclientsllama31.NewLlama31()
-
 	testModelStream(t, llama31, url)
 	testModel(t, llama31, url)
 }
 
-func TestDatabricksMistal1(t *testing.T) {
+func TestDatabricksMistral1(t *testing.T) {
 	t.Parallel()
 
 	const envVarURL = "DATABRICKS_MISTAL1_URL"
@@ -109,13 +108,11 @@ func TestDatabricksMistal1(t *testing.T) {
 	if url == "" {
 		t.Skipf("%s not set", envVarURL)
 	}
-
 	if model == "" {
 		t.Skipf("%s not set", envVarModel)
 	}
 
 	mistral1 := databricksclientsmistralv1.NewMistral1(model)
-
 	testModelStream(t, mistral1, url)
 	testModel(t, mistral1, url)
 }

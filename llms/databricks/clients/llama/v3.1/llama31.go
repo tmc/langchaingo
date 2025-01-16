@@ -101,7 +101,6 @@ func (l *Llama31) FormatStreamResponse(_ context.Context, response []byte) (*llm
 }
 
 func formatResponse[T LlamaChoiceDelta | LlamaChoice](response []byte) (*llms.ContentResponse, error) {
-	fmt.Printf("response: %+v\n", string(response))
 
 	// Parse the LlamaResponse JSON
 	var llamaResp LlamaResponse[T]
@@ -114,8 +113,6 @@ func formatResponse[T LlamaChoiceDelta | LlamaChoice](response []byte) (*llms.Co
 	contentResponse := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{},
 	}
-
-	fmt.Printf("llamaResp: %+v\n", llamaResp)
 
 	// Map LlamaResponse choices to ContentChoice
 	for _, llamaChoice := range llamaResp.Choices {
