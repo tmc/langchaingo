@@ -28,6 +28,8 @@ type Chain interface {
 
 // Call is the standard function used for executing chains.
 func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...ChainCallOption) (map[string]any, error) { // nolint: lll
+	ctx = setupChainCallbackHandler(ctx, c, options)
+
 	fullValues := make(map[string]any, 0)
 	for key, value := range inputValues {
 		fullValues[key] = value
@@ -42,21 +44,22 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		fullValues[key] = value
 	}
 
-	callbacksHandler := getChainCallbackHandler(c)
-	if callbacksHandler != nil {
-		callbacksHandler.HandleChainStart(ctx, inputValues)
+	chainCallbackHandlers := callbacks.GetHandlerFromContext(ctx)
+
+	if chainCallbackHandlers != nil {
+		chainCallbackHandlers.HandleChainStart(ctx, inputValues)
 	}
 
 	outputValues, err := callChain(ctx, c, fullValues, options...)
 	if err != nil {
-		if callbacksHandler != nil {
-			callbacksHandler.HandleChainError(ctx, err)
+		if chainCallbackHandlers != nil {
+			chainCallbackHandlers.HandleChainError(ctx, err)
 		}
 		return outputValues, err
 	}
 
-	if callbacksHandler != nil {
-		callbacksHandler.HandleChainEnd(ctx, outputValues)
+	if chainCallbackHandlers != nil {
+		chainCallbackHandlers.HandleChainEnd(ctx, outputValues) // Call the chain end
 	}
 
 	if err = c.GetMemory().SaveContext(ctx, inputValues, outputValues); err != nil {
@@ -64,6 +67,20 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	}
 
 	return outputValues, nil
+}
+
+// setupChainCallbackHandler sets up the chain callback handler in the context, which will be passed down to Chain calls.
+// we will prioritize a callback handler set in the options, and fallback to a chain specific if set.
+func setupChainCallbackHandler(ctx context.Context, c Chain, options []ChainCallOption) context.Context {
+	// if callback handler is set in options, prioritize that
+	if handler := getChainCallCallbackHandler(options); handler != nil {
+		return callbacks.SetHandlerInContext(ctx, handler)
+	}
+
+	if handler := getChainCallbackHandler(c); handler != nil {
+		return callbacks.SetHandlerInContext(ctx, handler)
+	}
+	return ctx
 }
 
 func callChain(
