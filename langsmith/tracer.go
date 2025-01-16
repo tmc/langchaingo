@@ -11,9 +11,9 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-var _ callbacks.Handler = (*LangChainTracer)(nil)
+var _ callbacks.Handler = (*Tracer)(nil)
 
-type LangChainTracer struct {
+type Tracer struct {
 	name        string
 	projectName string
 	client      *Client
@@ -21,11 +21,11 @@ type LangChainTracer struct {
 	runID      string
 	activeTree *RunTree
 	extras     KVMap
-	logger     LeveledLoggerInterface
+	logger     LeveledLogger
 }
 
-func NewTracer(opts ...LangChainTracerOption) (*LangChainTracer, error) {
-	tracer := &LangChainTracer{
+func NewTracer(opts ...LangChainTracerOption) (*Tracer, error) {
+	tracer := &Tracer{
 		name:        "langchain_tracer",
 		projectName: "default",
 		client:      nil,
@@ -48,19 +48,19 @@ func NewTracer(opts ...LangChainTracerOption) (*LangChainTracer, error) {
 	return tracer, nil
 }
 
-func (t *LangChainTracer) GetRunID() string {
+func (t *Tracer) GetRunID() string {
 	return t.runID
 }
 
-func (t *LangChainTracer) resetActiveTree() {
+func (t *Tracer) resetActiveTree() {
 	t.activeTree = nil
 }
 
 // HandleText implements callbacks.Handler.
-func (t *LangChainTracer) HandleText(_ context.Context, _ string) {
+func (t *Tracer) HandleText(_ context.Context, _ string) {
 }
 
-func (t *LangChainTracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
+func (t *Tracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
 	childTree := t.activeTree.CreateChild()
 
 	inputs := []struct {
@@ -94,7 +94,7 @@ func (t *LangChainTracer) HandleLLMGenerateContentStart(ctx context.Context, ms 
 	}
 }
 
-func (t *LangChainTracer) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
+func (t *Tracer) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
 	childTree := t.activeTree.GetChild("LLMGenerateContent")
 
 	childTree.SetName("LLMGenerateContent").SetRunType("llm").SetOutputs(KVMap{
@@ -109,7 +109,7 @@ func (t *LangChainTracer) HandleLLMGenerateContentEnd(ctx context.Context, res *
 }
 
 // HandleLLMError implements callbacks.Handler.
-func (t *LangChainTracer) HandleLLMError(ctx context.Context, err error) {
+func (t *Tracer) HandleLLMError(ctx context.Context, err error) {
 	t.activeTree.SetError(err.Error()).SetEndTime(time.Now())
 
 	if err := t.activeTree.patchRun(ctx); err != nil {
@@ -121,7 +121,7 @@ func (t *LangChainTracer) HandleLLMError(ctx context.Context, err error) {
 }
 
 // HandleChainStart implements callbacks.Handler.
-func (t *LangChainTracer) HandleChainStart(ctx context.Context, inputs map[string]any) {
+func (t *Tracer) HandleChainStart(ctx context.Context, inputs map[string]any) {
 	t.activeTree = NewRunTree(t.runID).
 		SetName("RunnableSequence").
 		SetClient(t.client).
@@ -137,7 +137,7 @@ func (t *LangChainTracer) HandleChainStart(ctx context.Context, inputs map[strin
 }
 
 // HandleChainEnd implements callbacks.Handler.
-func (t *LangChainTracer) HandleChainEnd(ctx context.Context, outputs map[string]any) {
+func (t *Tracer) HandleChainEnd(ctx context.Context, outputs map[string]any) {
 	t.activeTree.
 		SetOutputs(outputs).
 		SetEndTime(time.Now())
@@ -151,7 +151,7 @@ func (t *LangChainTracer) HandleChainEnd(ctx context.Context, outputs map[string
 }
 
 // HandleChainError implements callbacks.Handler.
-func (t *LangChainTracer) HandleChainError(ctx context.Context, err error) {
+func (t *Tracer) HandleChainError(ctx context.Context, err error) {
 	t.activeTree.SetError(err.Error()).SetEndTime(time.Now())
 
 	if err := t.activeTree.patchRun(ctx); err != nil {
@@ -163,45 +163,45 @@ func (t *LangChainTracer) HandleChainError(ctx context.Context, err error) {
 }
 
 // HandleToolStart implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolStart(_ context.Context, input string) {
+func (t *Tracer) HandleToolStart(_ context.Context, input string) {
 	t.logger.Debugf("handle tool start: input: %s", input)
 }
 
 // HandleToolEnd implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolEnd(_ context.Context, output string) {
+func (t *Tracer) HandleToolEnd(_ context.Context, output string) {
 	t.logger.Debugf("handle tool end: output: %s", output)
 }
 
 // HandleToolError implements callbacks.Handler.
-func (t *LangChainTracer) HandleToolError(_ context.Context, err error) {
+func (t *Tracer) HandleToolError(_ context.Context, err error) {
 	t.logger.Warnf("handle tool error: %s", err)
 }
 
 // HandleAgentAction implements callbacks.Handler.
-func (t *LangChainTracer) HandleAgentAction(_ context.Context, action schema.AgentAction) {
+func (t *Tracer) HandleAgentAction(_ context.Context, action schema.AgentAction) {
 	t.logger.Debugf("handle agent action, action: %v", action)
 }
 
 // HandleAgentFinish implements callbacks.Handler.
-func (t *LangChainTracer) HandleAgentFinish(_ context.Context, finish schema.AgentFinish) {
+func (t *Tracer) HandleAgentFinish(_ context.Context, finish schema.AgentFinish) {
 	t.logger.Debugf("handle agent finish, finish: %v", finish)
 }
 
 // HandleRetrieverStart implements callbacks.Handler.
-func (t *LangChainTracer) HandleRetrieverStart(_ context.Context, query string) {
+func (t *Tracer) HandleRetrieverStart(_ context.Context, query string) {
 	t.logger.Debugf("handle retriever start, query: %s, documents: %v", query)
 }
 
 // HandleRetrieverEnd implements callbacks.Handler.
-func (t *LangChainTracer) HandleRetrieverEnd(_ context.Context, query string, documents []schema.Document) {
+func (t *Tracer) HandleRetrieverEnd(_ context.Context, query string, documents []schema.Document) {
 	t.logger.Debugf("handle retriever end, query: %s, documents: %v", query, documents)
 }
 
 // HandleStreamingFunc implements callbacks.Handler.
-func (t *LangChainTracer) HandleStreamingFunc(_ context.Context, _ []byte) {
+func (t *Tracer) HandleStreamingFunc(_ context.Context, _ []byte) {
 	// do nothing
 }
 
-func (t *LangChainTracer) logLangSmithError(handlerName string, tag string, err error) {
+func (t *Tracer) logLangSmithError(handlerName string, tag string, err error) {
 	t.logger.Debugf("we were not able to %s to LangSmith server via handler %q: %s", handlerName, tag, err)
 }

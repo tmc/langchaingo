@@ -48,7 +48,7 @@ func WithHideOutputs(hide bool) ClientOption {
 	})
 }
 
-func WithClientLogger(logger LeveledLoggerInterface) ClientOption {
+func WithClientLogger(logger LeveledLogger) ClientOption {
 	return clientOptionFunc(func(c *Client) {
 		c.logger = logger
 	})

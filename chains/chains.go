@@ -44,7 +44,7 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		fullValues[key] = value
 	}
 
-	chainCallbackHandlers := callbacks.CallbackHandler(ctx)
+	chainCallbackHandlers := callbacks.GetHandlerFromContext(ctx)
 
 	if chainCallbackHandlers != nil {
 		chainCallbackHandlers.HandleChainStart(ctx, inputValues)
@@ -74,11 +74,11 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 func setupChainCallbackHandler(ctx context.Context, c Chain, options []ChainCallOption) context.Context {
 	// if callback handler is set in options, prioritize that
 	if handler := getChainCallCallbackHandler(options); handler != nil {
-		return callbacks.WithCallback(ctx, handler)
+		return callbacks.SetHandlerInContext(ctx, handler)
 	}
 
 	if handler := getChainCallbackHandler(c); handler != nil {
-		return callbacks.WithCallback(ctx, handler)
+		return callbacks.SetHandlerInContext(ctx, handler)
 	}
 	return ctx
 }

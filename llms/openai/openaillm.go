@@ -44,7 +44,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) getCallbackHandler(ctx context.Context) callbacks.Handler {
-	if callbacksHandler := callbacks.CallbackHandler(ctx); callbacksHandler != nil {
+	if callbacksHandler := callbacks.GetHandlerFromContext(ctx); callbacksHandler != nil {
 		return callbacksHandler
 	}
 	return o.CallbacksHandler

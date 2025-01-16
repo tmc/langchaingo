@@ -1,13 +1,13 @@
 package langsmith
 
-type LeveledLoggerInterface interface {
+type LeveledLogger interface {
 	Debugf(format string, v ...interface{})
 	Errorf(format string, v ...interface{})
 	Infof(format string, v ...interface{})
 	Warnf(format string, v ...interface{})
 }
 
-var _ LeveledLoggerInterface = &NopLogger{}
+var _ LeveledLogger = &NopLogger{}
 
 type NopLogger struct{}
 

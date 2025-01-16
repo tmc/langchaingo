@@ -23,7 +23,7 @@ type Client struct {
 	hideOutputs bool
 
 	httpClient *http.Client
-	logger     LeveledLoggerInterface
+	logger     LeveledLogger
 }
 
 func NewClient(options ...ClientOption) (*Client, error) {
