@@ -26,6 +26,7 @@ type Client struct {
 	logger     LeveledLogger
 }
 
+// NewClient insantiate a new LangSmith client. Use options to customize the client.
 func NewClient(options ...ClientOption) (*Client, error) {
 	c := &Client{
 		apiKey:      os.Getenv("LANGCHAIN_API_KEY"),
@@ -55,7 +56,7 @@ func NewClient(options ...ClientOption) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) CreateRun(ctx context.Context, run *RunCreate) error {
+func (c *Client) CreateRun(ctx context.Context, run *runCreate) error {
 	// FIXME: Add back getRuntimeEnv logic, for now we assume RunCreate will have populated the fields correctly
 
 	if c.hideInputs {
@@ -74,7 +75,7 @@ func (c *Client) CreateRun(ctx context.Context, run *RunCreate) error {
 	return c.executeHTTPRequest(ctx, "POST", "/runs", nil, bytes.NewBuffer(body))
 }
 
-func (c *Client) UpdateRun(ctx context.Context, runID string, run *RunUpdate) error {
+func (c *Client) UpdateRun(ctx context.Context, runID string, run *runUpdate) error {
 	if !isValidUUID(runID) {
 		return ErrInvalidUUID
 	}
@@ -129,7 +130,7 @@ func (c *Client) executeHTTPRequest(ctx context.Context, method string, path str
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return NewLangSmitAPIErrorFromHTTP(req, resp)
+		return newLangSmitAPIErrorFromHTTP(req, resp)
 	}
 
 	return nil

@@ -19,7 +19,7 @@ type Tracer struct {
 	client      *Client
 
 	runID      string
-	activeTree *RunTree
+	activeTree *runTree
 	extras     KVMap
 	logger     LeveledLogger
 }
@@ -48,6 +48,7 @@ func NewTracer(opts ...LangChainTracerOption) (*Tracer, error) {
 	return tracer, nil
 }
 
+// GetRunID returns the run ID of the tracer.
 func (t *Tracer) GetRunID() string {
 	return t.runID
 }
@@ -56,12 +57,13 @@ func (t *Tracer) resetActiveTree() {
 	t.activeTree = nil
 }
 
-// HandleText implements callbacks.Handler.
+
 func (t *Tracer) HandleText(_ context.Context, _ string) {
 }
 
+// HandleLLMStart implements callbacks.Handler.
 func (t *Tracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
-	childTree := t.activeTree.CreateChild()
+	childTree := t.activeTree.createChild()
 
 	inputs := []struct {
 		Role    string             `json:"role"`
@@ -79,13 +81,13 @@ func (t *Tracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.Me
 	}
 
 	childTree.
-		SetName("LLMGenerateContent").
-		SetRunType("llm").
-		SetInputs(KVMap{
+		setName("LLMGenerateContent").
+		setRunType("llm").
+		setInputs(KVMap{
 			"messages": inputs,
 		})
 
-	t.activeTree.AppendChild(childTree)
+	t.activeTree.appendChild(childTree)
 
 	// Start the run
 	if err := childTree.postRun(ctx, true); err != nil {
@@ -94,10 +96,11 @@ func (t *Tracer) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.Me
 	}
 }
 
+// HandleLLMGenerateContentEnd implements callbacks.Handler.
 func (t *Tracer) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.ContentResponse) {
-	childTree := t.activeTree.GetChild("LLMGenerateContent")
+	childTree := t.activeTree.getChild("LLMGenerateContent")
 
-	childTree.SetName("LLMGenerateContent").SetRunType("llm").SetOutputs(KVMap{
+	childTree.setName("LLMGenerateContent").setRunType("llm").setOutputs(KVMap{
 		"res_content": res,
 	})
 
@@ -110,7 +113,7 @@ func (t *Tracer) HandleLLMGenerateContentEnd(ctx context.Context, res *llms.Cont
 
 // HandleLLMError implements callbacks.Handler.
 func (t *Tracer) HandleLLMError(ctx context.Context, err error) {
-	t.activeTree.SetError(err.Error()).SetEndTime(time.Now())
+	t.activeTree.setError(err.Error()).setEndTime(time.Now())
 
 	if err := t.activeTree.patchRun(ctx); err != nil {
 		t.logLangSmithError("llm_error", "patch run", err)
@@ -122,13 +125,13 @@ func (t *Tracer) HandleLLMError(ctx context.Context, err error) {
 
 // HandleChainStart implements callbacks.Handler.
 func (t *Tracer) HandleChainStart(ctx context.Context, inputs map[string]any) {
-	t.activeTree = NewRunTree(t.runID).
-		SetName("RunnableSequence").
-		SetClient(t.client).
-		SetProjectName(t.projectName).
-		SetRunType("chain").
-		SetInputs(inputs).
-		SetExtra(t.extras)
+	t.activeTree = newRunTree(t.runID).
+		setName("RunnableSequence").
+		setClient(t.client).
+		setProjectName(t.projectName).
+		setRunType("chain").
+		setInputs(inputs).
+		setExtra(t.extras)
 
 	if err := t.activeTree.postRun(ctx, true); err != nil {
 		t.logLangSmithError("handle_chain_start", "post run", err)
@@ -139,8 +142,8 @@ func (t *Tracer) HandleChainStart(ctx context.Context, inputs map[string]any) {
 // HandleChainEnd implements callbacks.Handler.
 func (t *Tracer) HandleChainEnd(ctx context.Context, outputs map[string]any) {
 	t.activeTree.
-		SetOutputs(outputs).
-		SetEndTime(time.Now())
+		setOutputs(outputs).
+		setEndTime(time.Now())
 
 	if err := t.activeTree.patchRun(ctx); err != nil {
 		t.logLangSmithError("handle_chain_end", "patch run", err)
@@ -152,7 +155,7 @@ func (t *Tracer) HandleChainEnd(ctx context.Context, outputs map[string]any) {
 
 // HandleChainError implements callbacks.Handler.
 func (t *Tracer) HandleChainError(ctx context.Context, err error) {
-	t.activeTree.SetError(err.Error()).SetEndTime(time.Now())
+	t.activeTree.setError(err.Error()).setEndTime(time.Now())
 
 	if err := t.activeTree.patchRun(ctx); err != nil {
 		t.logLangSmithError("handle_chain_error", "patch run", err)

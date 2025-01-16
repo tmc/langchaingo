@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type RunTree struct {
+type runTree struct {
 	ID                  string
 	Name                string
 	RunType             string
 	ProjectName         string
-	ParentRun           *RunTree
-	ChildRuns           []*RunTree
+	ParentRun           *runTree
+	ChildRuns           []*runTree
 	ExecutionOrder      int
 	ChildExecutionOrder int
 	StartTime           time.Time
@@ -30,8 +30,8 @@ type RunTree struct {
 	Events              []KVMap
 }
 
-func NewRunTree(id string) *RunTree {
-	return &RunTree{
+func newRunTree(id string) *runTree {
+	return &runTree{
 		ID:                  id,
 		ProjectName:         envOr("LANGCHAIN_PROJECT", "default"),
 		ExecutionOrder:      1,
@@ -40,101 +40,101 @@ func NewRunTree(id string) *RunTree {
 	}
 }
 
-func (t *RunTree) SetParent(parent *RunTree) *RunTree {
+func (t *runTree) setParent(parent *runTree) *runTree {
 	t.ParentRun = parent
 	return t
 }
 
-func (t *RunTree) SetName(name string) *RunTree {
+func (t *runTree) setName(name string) *runTree {
 	t.Name = name
 	return t
 }
 
-func (t *RunTree) SetProjectName(name string) *RunTree {
+func (t *runTree) setProjectName(name string) *runTree {
 	t.ProjectName = name
 	return t
 }
 
-func (t *RunTree) SetClient(client *Client) *RunTree {
+func (t *runTree) setClient(client *Client) *runTree {
 	t.Client = client
 	return t
 }
 
-func (t *RunTree) SetExecutionOrder(order int) *RunTree {
+func (t *runTree) setExecutionOrder(order int) *runTree {
 	t.ExecutionOrder = order
 	return t
 }
 
-func (t *RunTree) SetChildExecutionOrder(order int) *RunTree {
+func (t *runTree) setChildExecutionOrder(order int) *runTree {
 	t.ChildExecutionOrder = order
 	return t
 }
 
-func (t *RunTree) SetStartTime(startTime time.Time) *RunTree {
+func (t *runTree) setStartTime(startTime time.Time) *runTree {
 	t.StartTime = startTime
 	return t
 }
 
-func (t *RunTree) SetEndTime(endTime time.Time) *RunTree {
+func (t *runTree) setEndTime(endTime time.Time) *runTree {
 	t.EndTime = endTime
 	return t
 }
 
-func (t *RunTree) SetExtra(extra KVMap) *RunTree {
+func (t *runTree) setExtra(extra KVMap) *runTree {
 	t.Extra = extra
 	return t
 }
 
-func (t *RunTree) SetError(err string) *RunTree {
+func (t *runTree) setError(err string) *runTree {
 	t.Error = err
 	return t
 }
 
-func (t *RunTree) SetSerialized(serialized KVMap) *RunTree {
+func (t *runTree) setSerialized(serialized KVMap) *runTree {
 	t.Serialized = serialized
 	return t
 }
 
-func (t *RunTree) SetInputs(inputs KVMap) *RunTree {
+func (t *runTree) setInputs(inputs KVMap) *runTree {
 	t.Inputs = inputs
 
 	return t
 }
 
-func (t *RunTree) SetOutputs(outputs KVMap) *RunTree {
+func (t *runTree) setOutputs(outputs KVMap) *runTree {
 	t.Outputs = outputs
 	return t
 }
 
-func (t *RunTree) SetReferenceExampleID(id string) *RunTree {
+func (t *runTree) setReferenceExampleID(id string) *runTree {
 	t.ReferenceExampleID = &id
 	return t
 }
 
-func (t *RunTree) SetEvents(events []KVMap) *RunTree {
+func (t *runTree) setEvents(events []KVMap) *runTree {
 	t.Events = events
 	return t
 }
 
-func (t *RunTree) SetRunType(runType string) *RunTree {
+func (t *runTree) setRunType(runType string) *runTree {
 	t.RunType = runType
 	return t
 }
 
-func (t *RunTree) CreateChild() *RunTree {
-	return NewRunTree(uuid.New().String()).
-		SetParent(t).
-		SetProjectName(t.ProjectName).
-		SetClient(t.Client).
-		SetExecutionOrder(t.ChildExecutionOrder + 1).
-		SetChildExecutionOrder(t.ChildExecutionOrder + 1)
+func (t *runTree) createChild() *runTree {
+	return newRunTree(uuid.New().String()).
+		setParent(t).
+		setProjectName(t.ProjectName).
+		setClient(t.Client).
+		setExecutionOrder(t.ChildExecutionOrder + 1).
+		setChildExecutionOrder(t.ChildExecutionOrder + 1)
 }
 
-func (t *RunTree) AppendChild(child *RunTree) {
+func (t *runTree) appendChild(child *runTree) {
 	t.ChildRuns = append(t.ChildRuns, child)
 }
 
-func (t *RunTree) GetChild(childName string) *RunTree {
+func (t *runTree) getChild(childName string) *runTree {
 	for _, child := range t.ChildRuns {
 		if child.Name == childName {
 			return child
@@ -143,7 +143,7 @@ func (t *RunTree) GetChild(childName string) *RunTree {
 	return nil
 }
 
-func (t *RunTree) End(outputs KVMap, err string, endTime time.Time) {
+func (t *runTree) end(outputs KVMap, err string, endTime time.Time) {
 	t.Outputs = outputs
 	t.Error = err
 	t.EndTime = endTime
@@ -156,7 +156,7 @@ func (t *RunTree) End(outputs KVMap, err string, endTime time.Time) {
 	}
 }
 
-func (t *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
+func (t *runTree) convertToCreate(excludeChildRuns bool) (*runCreate, error) {
 	runExtra := t.Extra
 	if runExtra == nil {
 		runExtra = make(KVMap)
@@ -175,7 +175,7 @@ func (t *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 	runExtraRuntime["library"] = "langsmith-go"
 	runExtraRuntime["commit"] = getGitCommit()
 
-	var childRuns []*RunCreate
+	var childRuns []*runCreate
 	var parentRunID *string
 	if !excludeChildRuns {
 		for _, childRun := range t.ChildRuns {
@@ -190,11 +190,11 @@ func (t *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 		if t.ParentRun != nil {
 			parentRunID = &t.ParentRun.ID
 		}
-		childRuns = []*RunCreate{}
+		childRuns = []*runCreate{}
 	}
 
-	persistedRun := &RunCreate{
-		BaseRun: BaseRun{
+	persistedRun := &runCreate{
+		baseRun: baseRun{
 			ID:                 t.ID,
 			Name:               t.Name,
 			StartTime:          timeToMillisecondsPtr(t.StartTime),
@@ -216,7 +216,7 @@ func (t *RunTree) convertToCreate(excludeChildRuns bool) (*RunCreate, error) {
 }
 
 // postRun will start the run or the child run.
-func (t *RunTree) postRun(ctx context.Context, excludeChildRuns bool) error {
+func (t *runTree) postRun(ctx context.Context, excludeChildRuns bool) error {
 	runCreate, err := t.convertToCreate(true)
 	if err != nil {
 		return err
@@ -241,13 +241,13 @@ func (t *RunTree) postRun(ctx context.Context, excludeChildRuns bool) error {
 
 // patchRun will close the run or the child run of a run tree that
 // was started with the postRun.
-func (t *RunTree) patchRun(ctx context.Context) error {
+func (t *runTree) patchRun(ctx context.Context) error {
 	var parentRunID *string
 	if t.ParentRun != nil {
 		parentRunID = valueIfSetOtherwiseNil(t.ParentRun.ID)
 	}
 
-	runUpdate := &RunUpdate{
+	runUpdate := &runUpdate{
 		EndTime:            timeToMillisecondsPtr(t.EndTime),
 		Error:              valueIfSetOtherwiseNil(t.Error),
 		Outputs:            t.Outputs,

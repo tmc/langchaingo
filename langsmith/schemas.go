@@ -38,7 +38,7 @@ type BaseExample struct {
 	Outputs   *KVMap
 }
 
-type BaseRun struct {
+type baseRun struct {
 	ID                 string   `json:"id,omitempty"`
 	Name               string   `json:"name,omitempty"`
 	ExecutionOrder     int      `json:"execution_order,omitempty"`
@@ -56,11 +56,11 @@ type BaseRun struct {
 	Tags               []string `json:"tags,omitempty"`
 }
 
-type Run struct {
-	BaseRun
+type run struct {
+	baseRun
 	SessionID        *string  `json:"session_id,omitempty"`
 	ChildRunIDs      []string `json:"child_run_ids,omitempty"`
-	ChildRuns        []Run    `json:"child_runs,omitempty"`
+	ChildRuns        []run    `json:"child_runs,omitempty"`
 	FeedbackStats    KVMap    `json:"feedback_stats,omitempty"`
 	AppPath          *string  `json:"app_path,omitempty"`
 	ManifestID       *string  `json:"manifest_id,omitempty"`
@@ -74,13 +74,13 @@ type Run struct {
 	DottedOrder      *string  `json:"dotted_order,omitempty"`
 }
 
-type RunCreate struct {
-	BaseRun
-	ChildRuns   []*RunCreate `json:"child_runs,omitempty"`
+type runCreate struct {
+	baseRun
+	ChildRuns   []*runCreate `json:"child_runs,omitempty"`
 	SessionName *string      `json:"session_name,omitempty"`
 }
 
-type RunUpdate struct {
+type runUpdate struct {
 	EndTime            *int64  `json:"end_time,omitempty"`
 	Extra              KVMap   `json:"extra,omitempty"`
 	Error              *string `json:"error,omitempty"`
@@ -92,36 +92,36 @@ type RunUpdate struct {
 	SessionID          *string `json:"session_id,omitempty"`
 }
 
-type ExampleCreate struct {
+type exampleCreate struct {
 	BaseExample
 	ID        *string
 	CreatedAt string
 }
 
-type Example struct {
+type example struct {
 	BaseExample
 	ID          string
 	CreatedAt   string
 	ModifiedAt  string
 	SourceRunID *string
-	Runs        []Run
+	Runs        []run
 }
 
-type ExampleUpdate struct {
+type exampleUpdate struct {
 	DatasetID *string
 	Inputs    *KVMap
 	Outputs   *KVMap
 }
 
-type BaseDataset struct {
+type baseDataset struct {
 	Name     string
 	Desc     string
 	TenantID string
 	DataType *DataType
 }
 
-type Dataset struct {
-	BaseDataset
+type dataset struct {
+	baseDataset
 	ID                   string
 	CreatedAt            string
 	ModifiedAt           string
@@ -130,26 +130,26 @@ type Dataset struct {
 	LastSessionStartTime *int64
 }
 
-type DatasetShareSchema struct {
+type datasetShareSchema struct {
 	DatasetID  string
 	ShareToken string
 	URL        string
 }
 
-type FeedbackSourceBase struct {
+type feedbackSourceBase struct {
 	Type     string
 	Metadata *KVMap
 }
 
-type APIFeedbackSource struct {
-	FeedbackSourceBase
+type apiFeedbackSource struct {
+	feedbackSourceBase
 }
 
-type ModelFeedbackSource struct {
-	FeedbackSourceBase
+type modelFeedbackSource struct {
+	feedbackSourceBase
 }
 
-type FeedbackBase struct {
+type feedbackBase struct {
 	CreatedAt      time.Time
 	ModifiedAt     time.Time
 	RunID          string
@@ -158,20 +158,20 @@ type FeedbackBase struct {
 	Value          ValueType
 	Comment        *string
 	Correction     *interface{}
-	FeedbackSource *FeedbackSourceBase
+	FeedbackSource *feedbackSourceBase
 }
 
-type FeedbackCreate struct {
-	FeedbackBase
+type feedbackCreate struct {
+	feedbackBase
 	ID string
 }
 
-type Feedback struct {
-	FeedbackBase
+type feedback struct {
+	feedbackBase
 	ID string
 }
 
-type LangChainBaseMessage struct {
+type langChainBaseMessage struct {
 	GetType          func() string
 	Content          string
 	AdditionalKwargs *KVMap

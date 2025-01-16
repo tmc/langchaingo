@@ -9,6 +9,7 @@ type LeveledLogger interface {
 
 var _ LeveledLogger = &NopLogger{}
 
+// NopLogger is a logger that does nothing. Set as the default logger for the client, which can be overridden via options.
 type NopLogger struct{}
 
 func (n *NopLogger) Debugf(_ string, _ ...interface{}) {

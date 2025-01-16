@@ -8,7 +8,6 @@ import (
 )
 
 var ErrInvalidUUID = errors.New("invalid UUID")
-
 var ErrMissingAPIKey = errors.New("the LangSmith API key was not defined, define LANGCHAIN_API_KEY environment variable or configure your client with WithAPIKey()")
 
 type LangSmitAPIError struct {
@@ -17,7 +16,7 @@ type LangSmitAPIError struct {
 	Body       []byte
 }
 
-func NewLangSmitAPIErrorFromHTTP(req *http.Request, resp *http.Response) *LangSmitAPIError {
+func newLangSmitAPIErrorFromHTTP(req *http.Request, resp *http.Response) *LangSmitAPIError {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		body = []byte(fmt.Sprintf("<We were unable to read HTTP body, got error %q>", err))

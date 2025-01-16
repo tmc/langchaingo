@@ -13,18 +13,18 @@ func TestRunCreate_AsJson(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name string
-		data *RunCreate
+		data *runCreate
 		want string
 	}{
 		{
 			"base",
-			&RunCreate{},
+			&runCreate{},
 			`{}`,
 		},
 		{
 			"start time",
-			&RunCreate{
-				BaseRun: BaseRun{
+			&runCreate{
+				baseRun: baseRun{
 					StartTime: timeToMillisecondsPtr(time.UnixMilli(1234567890)),
 				},
 			},
