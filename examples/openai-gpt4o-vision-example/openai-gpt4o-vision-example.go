@@ -22,10 +22,15 @@ func main() {
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
 				llms.ImageURLContent{
-					URL:    "https://upload.wikimedia.org/wikipedia/commons/3/39/Brown-Falcon%2C-Vic%2C-3.1.2008.jpg",
-					Detail: "low",
+					URL: "https://upload.wikimedia.org/wikipedia/commons/3/39/Brown-Falcon%2C-Vic%2C-3.1.2008.jpg",
+					// OpenAI GPT Vision API detail parameter explanation:
+					// - Controls the fidelity of image understanding: "low," "high," or "auto".
+					// - "auto" (default): Chooses between "low" and "high" based on input image size.
+					// - "low": Processes a 512x512 low-res image with 85 tokens for faster responses and fewer input tokens.
+					// - "high": Analyzes the low-res image (85 tokens) and adds detailed crops (170 tokens per tile) for higher fidelity.
+					Detail: "auto",
 				},
-				llms.TextPart("describe this image in detail, what bird is it?"),
+				llms.TextPart("what bird is it?"),
 			},
 		},
 	}
