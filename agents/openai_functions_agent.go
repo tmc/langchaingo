@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -67,10 +68,12 @@ func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
 }
 
 // Plan decides what action to take or returns the final result of the input.
+// TODO(fix): add {options ...chains.ChainCallOption} to llm request.
 func (o *OpenAIFunctionsAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	_ ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
