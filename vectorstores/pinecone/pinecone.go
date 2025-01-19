@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/pinecone-io/go-pinecone/pinecone"
+	"github.com/pinecone-io/go-pinecone/v2/pinecone"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -65,7 +65,12 @@ func (s Store) AddDocuments(ctx context.Context,
 
 	nameSpace := s.getNameSpace(opts)
 
-	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
+	indexConn, err := s.client.Index(
+		pinecone.NewIndexConnParams{
+			Host:      s.host,
+			Namespace: nameSpace,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +122,7 @@ func (s Store) AddDocuments(ctx context.Context,
 		)
 	}
 
-	_, err = indexConn.UpsertVectors(&ctx, pineconeVectors)
+	_, err = indexConn.UpsertVectors(ctx, pineconeVectors)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +136,12 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	opts := s.getOptions(options...)
 
 	nameSpace := s.getNameSpace(opts)
-	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
+	indexConn, err := s.client.Index(
+		pinecone.NewIndexConnParams{
+			Host:      s.host,
+			Namespace: nameSpace,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -157,11 +167,11 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	queryResult, err := indexConn.QueryByVectorValues(
-		&ctx,
+		ctx,
 		&pinecone.QueryByVectorValuesRequest{
 			Vector:          vector,
 			TopK:            uint32(numDocuments),
-			Filter:          protoFilterStruct,
+			MetadataFilter:  protoFilterStruct,
 			IncludeMetadata: true,
 			IncludeValues:   true,
 		},
