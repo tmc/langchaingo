@@ -66,6 +66,9 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// ExtraHeaders is a map of extra headers to include in the request.
+	ExtraHeaders map[string]string `json:"extra_headers,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -270,13 +273,5 @@ func WithJSONMode() CallOption {
 func WithMetadata(metadata map[string]interface{}) CallOption {
 	return func(o *CallOptions) {
 		o.Metadata = metadata
-	}
-}
-
-// WithResponseMIMEType will add an option to set the ResponseMIMEType
-// Currently only supported by googleai llms.
-func WithResponseMIMEType(responseMIMEType string) CallOption {
-	return func(o *CallOptions) {
-		o.ResponseMIMEType = responseMIMEType
 	}
 }
