@@ -22,6 +22,7 @@ var (
 	ErrEmbedderWrongNumberVectors = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
+	// Deprecated: ErrEmptyResponse is not used anymore and will be removed in the future.
 	// ErrEmptyResponse is returned if the API gives an empty response.
 	ErrEmptyResponse         = errors.New("empty response")
 	ErrInvalidScoreThreshold = errors.New(
@@ -170,7 +171,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	if len(queryResult.Matches) == 0 {
-		return nil, ErrEmptyResponse
+		return []schema.Document{}, nil
 	}
 
 	return s.getDocumentsFromMatches(queryResult, scoreThreshold)
