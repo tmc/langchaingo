@@ -75,7 +75,7 @@ func New(opts ...Option) (Store, error) {
 	if s.apiKey != nil {
 		headers["Authorization"] = fmt.Sprintf("Bearer %s", *s.apiKey)
 	}
-	s.client = weaviate.New(weaviate.Config{
+	s.client, err = weaviate.NewClient(weaviate.Config{
 		Scheme:           s.scheme,
 		Host:             s.host,
 		Headers:          headers,
@@ -83,7 +83,7 @@ func New(opts ...Option) (Store, error) {
 		ConnectionClient: s.connectionClient,
 	})
 
-	return s, nil
+	return s, err
 }
 
 // AddDocuments creates vector embeddings from the documents using the embedder
