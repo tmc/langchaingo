@@ -1,27 +1,19 @@
 package tools
-
-import (
-	"context"
-	"testing"
-)
-
-type SomeTool struct {
-}
-
-func (st *SomeTool) Name() string {
-	return "An awesome tool"
-}
-func (st *SomeTool) Description() string {
-	return "This tool is awesome"
-}
-func (st *SomeTool) Call(ctx context.Context, input string) (string, error) {
+// The 'input' parameter in the Call method is unused, so we will rename it to '_'
+// to indicate that it is intentionally ignored.
+func (st *SomeTool) Call(ctx context.Context, _ string) (string, error) {
 	if ctx.Err() != nil {
 		return "", ctx.Err()
 	}
 	return "test", nil
 }
+
+// Additionally, we will modify the TestTool function to run tests in parallel
 func TestTool(t *testing.T) {
+	t.Parallel() // Call to method parallel
+
 	t.Run("Tool Exists in Kit", func(t *testing.T) {
+		t.Parallel() // Call to method parallel in the test run
 		kit := Kit{
 			&SomeTool{},
 		}
@@ -30,7 +22,9 @@ func TestTool(t *testing.T) {
 			t.Errorf("Error using tool: %v", err)
 		}
 	})
+
 	t.Run("Tool Does Not Exist in Kit", func(t *testing.T) {
+		t.Parallel() // Call to method parallel in the test run
 		kit := Kit{
 			&SomeTool{},
 		}
@@ -39,4 +33,3 @@ func TestTool(t *testing.T) {
 			t.Errorf("Expected error, got nil")
 		}
 	})
-}
