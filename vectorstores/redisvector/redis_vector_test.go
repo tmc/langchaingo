@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tcollama "github.com/testcontainers/testcontainers-go/modules/ollama"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
@@ -22,7 +22,43 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/redisvector"
 )
 
-const ollamaModel = "gemma:2b"
+const (
+	ollamaVersion  string = "0.3.13"
+	llamaModel     string = "llama3.2"
+	llamaModelTag  string = "1b" // the 1b model is the smallest model, that fits in CPUs instead of GPUs.
+	llamaModelName string = llamaModel + ":" + llamaModelTag
+
+	// ollamaImage is the Docker image to use for the test container.
+	// See https://hub.docker.com/r/mdelapenya/llama3.2/tags
+	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaModelTag
+)
+
+func runOllama(t *testing.T) (string, error) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// the Ollama container is reused across tests, that's why it defines a fixed container name and reuses it.
+	ollamaContainer, err := tcollama.RunContainer(
+		ctx,
+		testcontainers.WithImage(ollamaImage),
+		testcontainers.CustomizeRequest(testcontainers.GenericContainerRequest{
+			ContainerRequest: testcontainers.ContainerRequest{
+				Name: "ollama-model-redis",
+			},
+			Reuse: true,
+		},
+		))
+	if err != nil {
+		return "", err
+	}
+
+	url, err := ollamaContainer.ConnectionString(ctx)
+	if err != nil {
+		return "", err
+	}
+	return url, nil
+}
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
@@ -30,7 +66,11 @@ func getValues(t *testing.T) (string, string) {
 	// export OLLAMA_HOST="http://127.0.0.1:11434"
 	ollamaURL := os.Getenv("OLLAMA_HOST")
 	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
+		address, err := runOllama(t)
+		if err != nil {
+			t.Skip("OLLAMA_HOST not set")
+		}
+		ollamaURL = address
 	}
 
 	uri := os.Getenv("REDIS_URL")
@@ -77,7 +117,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_case1"
 
@@ -85,26 +125,26 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "invalid options: missing index name", err.Error())
+	require.Equal(t, "invalid options: missing index name", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 	)
-	assert.Equal(t, "invalid options: missing embedder", err.Error())
+	require.Equal(t, "invalid options: missing embedder", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis: invalid URL scheme: ", err.Error())
+	require.Equal(t, "redis: invalid URL scheme: ", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -119,7 +159,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithEmbedder(e),
 		redisvector.WithIndexSchema(redisvector.YAMLSchemaFormat, "./testdata/not_exists.yml", nil),
 	)
-	assert.Equal(t, "open ./testdata/not_exists.yml: no such file or directory", err.Error())
+	require.Equal(t, "open ./testdata/not_exists.yml: no such file or directory", err.Error())
 
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -127,7 +167,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 		redisvector.WithEmbedder(e),
 		redisvector.WithIndexSchema(redisvector.YAMLSchemaFormat, "", nil),
 	)
-	assert.Equal(t, redisvector.ErrEmptySchemaContent, err)
+	require.Equal(t, redisvector.ErrEmptySchemaContent, err)
 
 	// create redis vector with file
 	_, err = redisvector.New(ctx,
@@ -168,7 +208,7 @@ func TestAddDocuments(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 
 	ctx := context.Background()
 
@@ -180,7 +220,7 @@ func TestAddDocuments(t *testing.T) {
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	vector, err := redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
@@ -190,7 +230,7 @@ func TestAddDocuments(t *testing.T) {
 	require.NoError(t, err)
 
 	err = vector.DropIndex(ctx, index, false)
-	assert.Equal(t, "redis index name does not exist", err.Error())
+	require.Equal(t, "redis index name does not exist", err.Error())
 
 	//nolint: dupl
 	data := []schema.Document{
@@ -211,8 +251,8 @@ func TestAddDocuments(t *testing.T) {
 	// create redis vector with not existed index, creating index when adding docs
 	docIDs, err := vector.AddDocuments(ctx, data)
 	require.NoError(t, err)
-	assert.Equal(t, len(data), len(docIDs))
-	assert.True(t, strings.HasPrefix(docIDs[0], prefix+index))
+	require.Equal(t, len(data), len(docIDs))
+	require.True(t, strings.HasPrefix(docIDs[0], prefix+index))
 
 	// create data with ids or keys
 	dataWithIDOrKeys := []schema.Document{
@@ -222,9 +262,9 @@ func TestAddDocuments(t *testing.T) {
 
 	docIDs, err = vector.AddDocuments(ctx, dataWithIDOrKeys)
 	require.NoError(t, err)
-	assert.Equal(t, len(dataWithIDOrKeys), len(docIDs))
-	assert.Equal(t, prefix+index+":id1", docIDs[0])
-	assert.Equal(t, prefix+index+":key1", docIDs[1])
+	require.Equal(t, len(dataWithIDOrKeys), len(docIDs))
+	require.Equal(t, prefix+index+":id1", docIDs[0])
+	require.Equal(t, prefix+index+":key1", docIDs[1])
 
 	// create vector with existed index & index schema, will not create new index
 	_, err = redisvector.New(ctx,
@@ -256,7 +296,7 @@ func TestSimilaritySearch(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	_, e := getEmbedding(ollamaModel, ollamaURL)
+	_, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 
 	index := "test_similarity_search"
@@ -287,7 +327,7 @@ func TestSimilaritySearch(t *testing.T) {
 	// create index and add test data
 	docIDs, err := store.AddDocuments(ctx, data)
 	require.NoError(t, err)
-	assert.Equal(t, len(data), len(docIDs))
+	require.Equal(t, len(data), len(docIDs))
 
 	// create vector with existed index
 	store, err = redisvector.New(ctx,
@@ -299,32 +339,32 @@ func TestSimilaritySearch(t *testing.T) {
 
 	docs, err := store.SimilaritySearch(ctx, "Tokyo", 5)
 	require.NoError(t, err)
-	assert.Len(t, docs, 5)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 5)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with score threshold
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithScoreThreshold(0.8),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 2)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 1)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter area>1000 or area < 300
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithFilters("(@area:[(1000 +inf] | @area:[-inf (300])"),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 5)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 5)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter area=622
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 10,
 		vectorstores.WithFilters("(@area:[622 622])"),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 1)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 1)
+	require.Len(t, docs[0].Metadata, 3)
 
 	// search with filter & score threshold
 	docs, err = store.SimilaritySearch(ctx, "Tokyo", 2,
@@ -332,8 +372,8 @@ func TestSimilaritySearch(t *testing.T) {
 		vectorstores.WithScoreThreshold(0.5),
 	)
 	require.NoError(t, err)
-	assert.Len(t, docs, 2)
-	assert.Len(t, docs[0].Metadata, 3)
+	require.Len(t, docs, 2)
+	require.Len(t, docs[0].Metadata, 3)
 
 	t.Cleanup(func() {
 		err = store.DropIndex(ctx, index, true)
@@ -345,7 +385,7 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	llm, e := getEmbedding(ollamaModel, ollamaURL)
+	llm, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_redis_vector_as_retriever"
 
@@ -403,7 +443,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	redisURL, ollamaURL := getValues(t)
-	llm, e := getEmbedding(ollamaModel, ollamaURL)
+	llm, e := getEmbedding(llamaModelName, ollamaURL)
 	ctx := context.Background()
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 
