@@ -21,6 +21,7 @@ func (st *SomeTool) Call(ctx context.Context, _ string) (string, error) {
 	return "test", nil
 }
 func TestTool(t *testing.T) {
+	t.Parallel()
 	t.Run("Tool Exists in Kit", func(t *testing.T) {
 		t.Parallel()
 		kit := Kit{
