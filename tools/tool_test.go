@@ -15,12 +15,13 @@ func (st *SomeTool) Description() string {
 	return "This tool is awesome"
 }
 func (st *SomeTool) Call(ctx context.Context, input string) (string, error) {
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
 	return "test", nil
 }
 func TestTool(t *testing.T) {
-
 	t.Run("Tool Exists in Kit", func(t *testing.T) {
-
 		kit := Kit{
 			&SomeTool{},
 		}
@@ -29,9 +30,7 @@ func TestTool(t *testing.T) {
 			t.Errorf("Error using tool: %v", err)
 		}
 	})
-
 	t.Run("Tool Does Not Exist in Kit", func(t *testing.T) {
-
 		kit := Kit{
 			&SomeTool{},
 		}
@@ -40,5 +39,4 @@ func TestTool(t *testing.T) {
 			t.Errorf("Expected error, got nil")
 		}
 	})
-
 }
