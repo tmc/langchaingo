@@ -5,8 +5,7 @@ import (
 	"testing"
 )
 
-type SomeTool struct {
-}
+type SomeTool struct{}
 
 func (st *SomeTool) Name() string {
 	return "An awesome tool"
