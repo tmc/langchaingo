@@ -10,15 +10,18 @@ type SomeTool struct{}
 func (st *SomeTool) Name() string {
 	return "An awesome tool"
 }
+
 func (st *SomeTool) Description() string {
 	return "This tool is awesome"
 }
+
 func (st *SomeTool) Call(ctx context.Context, _ string) (string, error) {
 	if ctx.Err() != nil {
 		return "", ctx.Err()
 	}
 	return "test", nil
 }
+
 func TestTool(t *testing.T) {
 	t.Parallel()
 	t.Run("Tool Exists in Kit", func(t *testing.T) {

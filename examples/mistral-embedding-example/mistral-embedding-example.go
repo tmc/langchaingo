@@ -24,7 +24,6 @@ func main() {
 	}
 
 	e, err := embeddings.NewEmbedder(model)
-
 	if err != nil {
 		panic(err)
 	}
