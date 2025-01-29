@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
-
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
+	"log"
 )
 
 type User struct {

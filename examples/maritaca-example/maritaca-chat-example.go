@@ -16,6 +16,7 @@ func main() {
 		maritaca.WithModel("sabia-2-medium"),
 	}
 	llm, err := maritaca.New(opts...)
+
 	if err != nil {
 		panic(err)
 	}
@@ -27,4 +28,5 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(resp)
+
 }

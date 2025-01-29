@@ -87,6 +87,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(resp.Choices[0].Content)
+
 }
 
 // executeToolCalls executes the tool calls in the response and returns the
