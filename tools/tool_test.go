@@ -3,45 +3,44 @@ package tools
 import (
 	"context"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type SomeTool struct{}
+type someTool struct{}
 
-func (st *SomeTool) Name() string {
+func (st *someTool) Name() string {
 	return "An awesome tool"
 }
 
-func (st *SomeTool) Description() string {
+func (st *someTool) Description() string {
 	return "This tool is awesome"
 }
 
-func (st *SomeTool) Call(ctx context.Context, _ string) (string, error) {
+func (st *someTool) Call(ctx context.Context, _ string) (string, error) {
 	if ctx.Err() != nil {
 		return "", ctx.Err()
 	}
 	return "test", nil
 }
 
-func TestTool(t *testing.T) {
+func TestToolWithTestify(t *testing.T) {
 	t.Parallel()
+	kit := Kit{
+		&someTool{},
+	}
+
+	// Test when the tool exists
 	t.Run("Tool Exists in Kit", func(t *testing.T) {
-		t.Parallel()
-		kit := Kit{
-			&SomeTool{},
-		}
-		_, err := kit.UseTool(context.Background(), "An awesome tool", "test")
-		if err != nil {
-			t.Errorf("Error using tool: %v", err)
-		}
+		result, err := kit.UseTool(context.Background(), "An awesome tool", "test")
+		assert.NoError(t, err)
+		assert.Equal(t, "test", result)
 	})
+
+	// Test when the tool does not exist
 	t.Run("Tool Does Not Exist in Kit", func(t *testing.T) {
-		t.Parallel()
-		kit := Kit{
-			&SomeTool{},
-		}
 		_, err := kit.UseTool(context.Background(), "A tool that does not exist", "test")
-		if err == nil {
-			t.Errorf("Expected error, got nil")
-		}
+		assert.Error(t, err)
+		assert.Equal(t, ErrInvalidTool, err.Error())
 	})
 }

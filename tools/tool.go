@@ -2,8 +2,10 @@ package tools
 
 import (
 	"context"
-	"fmt"
+	"errors"
 )
+
+const ErrInvalidTool = "invalid_tool"
 
 // Tool is a tool for the llm agent to interact with different applications.
 type Tool interface {
@@ -20,5 +22,5 @@ func (tb *Kit) UseTool(ctx context.Context, toolName string, toolArgs string) (s
 			return tool.Call(ctx, toolArgs)
 		}
 	}
-	return "", fmt.Errorf("invalid tool %v", toolName)
+	return "", errors.New(ErrInvalidTool)
 }
