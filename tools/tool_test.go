@@ -32,6 +32,7 @@ func TestToolWithTestify(t *testing.T) {
 
 	// Test when the tool exists
 	t.Run("Tool Exists in Kit", func(t *testing.T) {
+		t.Parallel()
 		result, err := kit.UseTool(context.Background(), "An awesome tool", "test")
 		assert.NoError(t, err)
 		assert.Equal(t, "test", result)
@@ -39,6 +40,7 @@ func TestToolWithTestify(t *testing.T) {
 
 	// Test when the tool does not exist
 	t.Run("Tool Does Not Exist in Kit", func(t *testing.T) {
+		t.Parallel()
 		_, err := kit.UseTool(context.Background(), "A tool that does not exist", "test")
 		assert.Error(t, err)
 		assert.Equal(t, ErrInvalidTool, err.Error())
