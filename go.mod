@@ -195,7 +195,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.8.1
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/fatih/color v1.17.0
-	github.com/gage-technologies/mistral-go v1.0.0
+	github.com/gage-technologies/mistral-go v1.1.0
 	github.com/getzep/zep-go v1.0.4
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-sql-driver/mysql v1.7.1
