@@ -2,6 +2,7 @@ package milvus
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -102,6 +103,15 @@ func TestMilvusConnection(t *testing.T) {
 	_, err = storer.AddDocuments(context.Background(), data)
 	require.NoError(t, err)
 
+	unusedData := []schema.Document{
+		{PageContent: "MockCity", Metadata: map[string]any{"population": 100, "area": 100}},
+	}
+
+	embedderM := &mockEmbedder{}
+
+	_, err = storer.AddDocuments(context.Background(), unusedData, vectorstores.WithEmbedder(embedderM))
+	require.ErrorIs(t, err, errEmbeddingDocuments)
+
 	// search docs with filter
 	filterRes, err := storer.SimilaritySearch(context.Background(),
 		"Tokyo", 10,
@@ -117,3 +127,18 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, japanRes, 1)
 }
+
+type mockEmbedder struct{}
+
+func (m *mockEmbedder) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
+	return nil, errEmbeddingDocuments
+}
+
+func (m *mockEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
+	return nil, errEmbeddingQuery
+}
+
+var (
+	errEmbeddingDocuments = errors.New("error embedding documents")
+	errEmbeddingQuery     = errors.New("error embedding query")
+)
