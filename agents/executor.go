@@ -8,6 +8,7 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
 )
@@ -48,16 +49,18 @@ func NewExecutor(agent Agent, opts ...Option) *Executor {
 }
 
 func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
-	inputs, err := inputsToString(inputValues)
-	if err != nil {
-		return nil, err
-	}
+	// inputs, err := inputsToString(inputValues)
+	// if err != nil {
+	//	return nil, err
+	//}
 	nameToTool := getNameToTool(e.Agent.GetTools())
 
 	steps := make([]schema.AgentStep, 0)
+	var intermediateMessages []llms.ChatMessage
+	var err error
 	for i := 0; i < e.MaxIterations; i++ {
 		var finish map[string]any
-		steps, finish, err = e.doIteration(ctx, steps, nameToTool, inputs)
+		steps, finish, intermediateMessages, err = e.doIteration(ctx, steps, nameToTool, inputValues, intermediateMessages)
 		if finish != nil || err != nil {
 			return finish, err
 		}
@@ -78,9 +81,13 @@ func (e *Executor) doIteration( // nolint
 	ctx context.Context,
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
-	inputs map[string]string,
-) ([]schema.AgentStep, map[string]any, error) {
-	actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
+	inputs map[string]any,
+	intermediateMessages []llms.ChatMessage,
+) ([]schema.AgentStep, map[string]any, []llms.ChatMessage, error) {
+	actions, finish, newIntermediateMessages, err := e.Agent.Plan(ctx, steps, inputs, intermediateMessages)
+	if len(newIntermediateMessages) > 0 {
+		intermediateMessages = append(intermediateMessages, newIntermediateMessages...)
+	}
 	if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
 		formattedObservation := err.Error()
 		if e.ErrorHandler.Formatter != nil {
@@ -89,60 +96,79 @@ func (e *Executor) doIteration( // nolint
 		steps = append(steps, schema.AgentStep{
 			Observation: formattedObservation,
 		})
-		return steps, nil, nil
+		return steps, nil, intermediateMessages, nil
 	}
 	if err != nil {
-		return steps, nil, err
+		return steps, nil, intermediateMessages, err
 	}
 
 	if len(actions) == 0 && finish == nil {
-		return steps, nil, ErrAgentNoReturn
+		return steps, nil, intermediateMessages, ErrAgentNoReturn
 	}
 
 	if finish != nil {
 		if e.CallbacksHandler != nil {
 			e.CallbacksHandler.HandleAgentFinish(ctx, *finish)
 		}
-		return steps, e.getReturn(finish, steps), nil
+		return steps, e.getReturn(finish, steps), intermediateMessages, nil
 	}
 
-	for _, action := range actions {
-		steps, err = e.doAction(ctx, steps, nameToTool, action)
-		if err != nil {
-			return steps, nil, err
+	stepStreams := make([]<-chan schema.AgentStepWithError, len(actions))
+	for index, action := range actions {
+		stepStreams[index] = e.doAction(ctx, nameToTool, action)
+	}
+	for _, stepStream := range stepStreams {
+		agentStepWithError := <-stepStream
+		if agentStepWithError.Error != nil {
+			return steps, nil, intermediateMessages, agentStepWithError.Error
 		}
+		steps = append(steps, agentStepWithError.AgentStep)
 	}
 
-	return steps, nil, nil
+	return steps, nil, intermediateMessages, nil
 }
 
 func (e *Executor) doAction(
 	ctx context.Context,
-	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
 	action schema.AgentAction,
-) ([]schema.AgentStep, error) {
-	if e.CallbacksHandler != nil {
-		e.CallbacksHandler.HandleAgentAction(ctx, action)
-	}
+) <-chan schema.AgentStepWithError {
+	agentStepStream := make(chan schema.AgentStepWithError)
+	go func() {
+		defer close(agentStepStream)
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleAgentAction(ctx, action)
+		}
 
-	tool, ok := nameToTool[strings.ToUpper(action.Tool)]
-	if !ok {
-		return append(steps, schema.AgentStep{
-			Action:      action,
-			Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
-		}), nil
-	}
+		tool, ok := nameToTool[strings.ToUpper(action.Tool)]
+		if !ok {
+			agentStepStream <- schema.AgentStepWithError{
+				AgentStep: schema.AgentStep{
+					Action:      action,
+					Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
+				},
+				Error: nil,
+			}
+			return
+		}
 
-	observation, err := tool.Call(ctx, action.ToolInput)
-	if err != nil {
-		return nil, err
-	}
+		observation, err := tool.Call(ctx, action.ToolInput)
+		if err != nil {
+			agentStepStream <- schema.AgentStepWithError{
+				AgentStep: schema.AgentStep{}, Error: err,
+			}
+			return
+		}
 
-	return append(steps, schema.AgentStep{
-		Action:      action,
-		Observation: observation,
-	}), nil
+		agentStepStream <- schema.AgentStepWithError{
+			AgentStep: schema.AgentStep{
+				Action:      action,
+				Observation: observation,
+			},
+			Error: nil,
+		}
+	}()
+	return agentStepStream
 }
 
 func (e *Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentStep) map[string]any {
@@ -172,19 +198,19 @@ func (e *Executor) GetCallbackHandler() callbacks.Handler { //nolint:ireturn
 	return e.CallbacksHandler
 }
 
-func inputsToString(inputValues map[string]any) (map[string]string, error) {
-	inputs := make(map[string]string, len(inputValues))
-	for key, value := range inputValues {
-		valueStr, ok := value.(string)
-		if !ok {
-			return nil, fmt.Errorf("%w: %s", ErrExecutorInputNotString, key)
-		}
-
-		inputs[key] = valueStr
-	}
-
-	return inputs, nil
-}
+// func inputsToString(inputValues map[string]any) (map[string]string, error) {
+//	inputs := make(map[string]string, len(inputValues))
+//	for key, value := range inputValues {
+//		valueStr, ok := value.(string)
+//		if !ok {
+//			return nil, fmt.Errorf("%w: %s", ErrExecutorInputNotString, key)
+//		}
+//
+//		inputs[key] = valueStr
+//	}
+//
+//	return inputs, nil
+//}
 
 func getNameToTool(t []tools.Tool) map[string]tools.Tool {
 	if len(t) == 0 {
