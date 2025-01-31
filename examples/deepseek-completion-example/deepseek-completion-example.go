@@ -13,8 +13,6 @@ func main() {
 	// Initialize the OpenAI client with Deepseek model
 	llm, err := openai.New(
 		openai.WithModel("deepseek-reasoner"),
-		// If you have a custom API endpoint for Deepseek, you can set it like this:
-		// openai.WithBaseURL("https://your-deepseek-endpoint"),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -48,12 +46,5 @@ func main() {
 		choice := completion.Choices[0]
 		fmt.Printf("\n\nReasoning Process:\n%s\n", choice.ReasoningContent)
 		fmt.Printf("\nFinal Answer:\n%s\n", choice.Content)
-
-		// Print token usage information
-		fmt.Printf("\nToken Usage:\n")
-		fmt.Printf("- Prompt Tokens: %d\n", completion.Usage.PromptTokens)
-		fmt.Printf("- Completion Tokens: %d\n", completion.Usage.CompletionTokens)
-		fmt.Printf("- Reasoning Tokens: %d\n", completion.Usage.CompletionTokensDetails.ReasoningTokens)
-		fmt.Printf("- Total Tokens: %d\n", completion.Usage.TotalTokens)
 	}
 }
