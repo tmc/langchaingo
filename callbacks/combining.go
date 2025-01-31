@@ -20,12 +20,6 @@ func (l CombiningHandler) HandleText(ctx context.Context, text string) {
 	}
 }
 
-func (l CombiningHandler) HandleLLMStart(ctx context.Context, prompts []string) {
-	for _, handle := range l.Callbacks {
-		handle.HandleLLMStart(ctx, prompts)
-	}
-}
-
 func (l CombiningHandler) HandleLLMGenerateContentStart(ctx context.Context, ms []llms.MessageContent) {
 	for _, handle := range l.Callbacks {
 		handle.HandleLLMGenerateContentStart(ctx, ms)
