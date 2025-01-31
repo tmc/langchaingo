@@ -63,6 +63,10 @@ type AIChatMessage struct {
 
 	// ToolCalls represents the model choosing to call tools.
 	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
+
+	// This field only used for 'deepseek-reasoner' model.
+	// The reasoning contents of the assistant message, before the final answer.
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 func (m AIChatMessage) GetType() ChatMessageType       { return ChatMessageTypeAI }

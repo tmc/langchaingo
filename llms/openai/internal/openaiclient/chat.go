@@ -157,6 +157,12 @@ type ChatMessage struct { //nolint:musttag
 	// ToolCallID is the ID of the tool call this message is for.
 	// Only present in tool messages.
 	ToolCallID string `json:"tool_call_id,omitempty"`
+
+	// ReasoningContent contains the step-by-step reasoning process used by the model.
+	// This field is only used with the deepseek-reasoner model and represents
+	// the reasoning contents of the assistant message before the final answer.
+	// The field is nullable.
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
@@ -181,6 +187,12 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			// ToolCallID is the ID of the tool call this message is for.
 			// Only present in tool messages.
 			ToolCallID string `json:"tool_call_id,omitempty"`
+
+			// ReasoningContent contains the step-by-step reasoning process used by the model.
+			// This field is only used with the deepseek-reasoner model and represents
+			// the reasoning contents of the assistant message before the final answer.
+			// The field is nullable.
+			ReasoningContent string `json:"reasoning_content,omitempty"`
 		}(m)
 		return json.Marshal(msg)
 	}
@@ -196,6 +208,12 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
+
+		// ReasoningContent contains the step-by-step reasoning process used by the model.
+		// This field is only used with the deepseek-reasoner model and represents
+		// the reasoning contents of the assistant message before the final answer.
+		// The field is nullable.
+		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}(m)
 	return json.Marshal(msg)
 }
@@ -221,6 +239,12 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
+
+		// ReasoningContent contains the step-by-step reasoning process used by the model.
+		// This field is only used with the deepseek-reasoner model and represents
+		// the reasoning contents of the assistant message before the final answer.
+		// The field is nullable.
+		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -322,6 +346,9 @@ type StreamedChatResponsePayload struct {
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 			// ToolCalls is a list of tools that were called in the message.
 			ToolCalls []*ToolCall `json:"tool_calls,omitempty"`
+			// This field only used for 'deepseek-reasoner' model.
+			// The reasoning contents of the assistant message, before the final answer.
+			ReasoningContent string `json:"reasoning_content,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
