@@ -9,14 +9,10 @@ import (
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/i18n"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/tools"
-)
-
-const (
-	_finalAnswerAction = "Final Answer:"
-	_defaultOutputKey  = "output"
 )
 
 // OneShotZeroAgent is a struct that represents an agent responsible for deciding
@@ -32,6 +28,10 @@ type OneShotZeroAgent struct {
 	Tools []tools.Tool
 	// Output key is the key where the final output is placed.
 	OutputKey string
+	// FinalAnswer is the final answer in various languages.
+	FinalAnswer string
+	// Lang is the language the prompt will use.
+	Lang i18n.Lang
 	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
 }
@@ -46,6 +46,7 @@ func NewOneShotAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OneSho
 	for _, opt := range opts {
 		opt(&options)
 	}
+	options.loadMrklTranslatable()
 
 	return &OneShotZeroAgent{
 		Chain: chains.NewLLMChain(
@@ -55,6 +56,8 @@ func NewOneShotAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *OneSho
 		),
 		Tools:            tools,
 		OutputKey:        options.outputKey,
+		FinalAnswer:      i18n.AgentsMustPhrase(options.lang, "mrkl final answer"),
+		Lang:             options.lang,
 		CallbacksHandler: options.callbacksHandler,
 	}
 }
@@ -70,8 +73,8 @@ func (a *OneShotZeroAgent) Plan(
 		fullInputs[key] = value
 	}
 
-	fullInputs["agent_scratchpad"] = constructMrklScratchPad(intermediateSteps)
-	fullInputs["today"] = time.Now().Format("January 02, 2006")
+	fullInputs["agent_scratchpad"] = constructMrklScratchPad(intermediateSteps, a.Lang)
+	fullInputs["today"] = time.Now().Format(i18n.AgentsMustPhrase(a.Lang, "today format"))
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -86,7 +89,10 @@ func (a *OneShotZeroAgent) Plan(
 		ctx,
 		a.Chain,
 		fullInputs,
-		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStopWords([]string{
+			fmt.Sprintf("\n%s", i18n.AgentsMustPhrase(a.Lang, "observation")),
+			fmt.Sprintf("\n\t%s", i18n.AgentsMustPhrase(a.Lang, "observation")),
+		}),
 		chains.WithStreamingFunc(stream),
 	)
 	if err != nil {
@@ -119,12 +125,12 @@ func (a *OneShotZeroAgent) GetTools() []tools.Tool {
 	return a.Tools
 }
 
-func constructMrklScratchPad(steps []schema.AgentStep) string {
+func constructMrklScratchPad(steps []schema.AgentStep, lang i18n.Lang) string {
 	var scratchPad string
 	if len(steps) > 0 {
 		for _, step := range steps {
 			scratchPad += "\n" + step.Action.Log
-			scratchPad += "\nObservation: " + step.Observation + "\n"
+			scratchPad += fmt.Sprintf("\n%s %s\n", i18n.AgentsMustPhrase(lang, "observation"), step.Observation)
 		}
 	}
 
@@ -132,8 +138,8 @@ func constructMrklScratchPad(steps []schema.AgentStep) string {
 }
 
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
-	if strings.Contains(output, _finalAnswerAction) {
-		splits := strings.Split(output, _finalAnswerAction)
+	if strings.Contains(output, a.FinalAnswer) {
+		splits := strings.Split(output, a.FinalAnswer)
 
 		return nil, &schema.AgentFinish{
 			ReturnValues: map[string]any{
@@ -143,7 +149,15 @@ func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *sc
 		}, nil
 	}
 
-	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s(?s)*(.+)`)
+	action, actionInput, observation := i18n.AgentsMustPhrase(a.Lang, "action"),
+		i18n.AgentsMustPhrase(a.Lang, "action input"),
+		i18n.AgentsMustPhrase(a.Lang, "observation")
+	var r *regexp.Regexp
+	if strings.Contains(output, observation) {
+		r = regexp.MustCompile(fmt.Sprintf(`%s\s*(.+)\s*%s\s(?s)*(.+)%s`, action, actionInput, observation))
+	} else {
+		r = regexp.MustCompile(fmt.Sprintf(`%s\s*(.+)\s*%s\s(?s)*(.+)`, action, actionInput))
+	}
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
