@@ -11,10 +11,7 @@ import (
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 )
 
-var (
-	ErrEmptyResponse = errors.New("no response")
-	ErrCodeResponse  = errors.New("has error code")
-)
+var ErrCodeResponse = errors.New("has error code")
 
 type LLM struct {
 	client           *ernieclient.Client
