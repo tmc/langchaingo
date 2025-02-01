@@ -144,10 +144,7 @@ type ContentChoice struct {
 	// ToolCalls is a list of tool calls the model asks to invoke.
 	ToolCalls []ToolCall
 
-	// ReasoningContent contains the step-by-step reasoning process used by the model.
-	// This field is only used with the deepseek-reasoner model and represents
-	// the reasoning contents of the assistant message before the final answer.
-	// The field is nullable.
+	// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 	ReasoningContent string
 }
 
