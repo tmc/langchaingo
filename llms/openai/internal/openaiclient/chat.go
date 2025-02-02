@@ -385,6 +385,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		if payload.StreamOptions == nil {
 			payload.StreamOptions = &StreamOptions{IncludeUsage: true}
 		}
+		// Azure OpenAI does not support stream options yet: https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#chat-completions
+		if c.apiType == APITypeAzure || c.apiType == APITypeAzureAD {
+			payload.StreamOptions = nil
+		}
 	}
 	// Build request payload
 
