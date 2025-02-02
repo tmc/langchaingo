@@ -43,6 +43,39 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
+// Create Text to Speech
+func (o *LLM) GenerateTTS(ctx context.Context, input string, options ...llms.CallOption) ([]byte, error) {
+
+	if input == "" {
+		return nil, fmt.Errorf("input is empty")
+	}
+
+	opts := llms.CallOptions{}
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	req := &openaiclient.TTSRequest{
+		Input:          input,
+		Model:          opts.Model,
+		Voice:          opts.Voice,
+		ResponseFormat: opts.ResponseFormat,
+		Speed:          opts.Speed,
+	}
+
+	if req.Model != string(openaiclient.TTS1) && req.Model != string(openaiclient.TTS1HD) {
+		req.Model = string(openaiclient.TTS1)
+	}
+
+	result, err := o.client.CreateTTS(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+
+}
+
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
 	if o.CallbacksHandler != nil {
