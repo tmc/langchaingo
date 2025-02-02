@@ -67,7 +67,7 @@ type CallOptions struct {
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
 
-	//TTS options
+	//TTS options.
 	Voice          string  `json:"voice,omitempty"`
 	Speed          float64 `json:"speed,omitempty"`
 	ResponseFormat string  `json:"response_format,omitempty"`
@@ -286,21 +286,21 @@ func WithResponseMIMEType(responseMIMEType string) CallOption {
 	}
 }
 
-// WithVoice will add an option to set the voice to use
+// WithVoice will add an option to set the voice to use.
 func WithVoice(voice string) CallOption {
 	return func(o *CallOptions) {
 		o.Voice = voice
 	}
 }
 
-// WithSpeed will add an option to set the speed of the voice
+// WithSpeed will add an option to set the speed of the voice.
 func WithSpeed(speed float64) CallOption {
 	return func(o *CallOptions) {
 		o.Speed = speed
 	}
 }
 
-// WithResponseFormat will add an option to set the response format
+// WithResponseFormat will add an option to set the response format.
 func WithResponseFormat(responseFormat string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseFormat = responseFormat
