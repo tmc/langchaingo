@@ -67,7 +67,7 @@ type CallOptions struct {
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
 
-	//TTS options.
+	// TTS options.
 	Voice          string  `json:"voice,omitempty"`
 	Speed          float64 `json:"speed,omitempty"`
 	ResponseFormat string  `json:"response_format,omitempty"`

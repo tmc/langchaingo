@@ -43,7 +43,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
-// Create Text to Speech
+// Create Text to Speech.
 func (o *LLM) GenerateTTS(ctx context.Context, input string, options ...llms.CallOption) ([]byte, error) {
 	if input == "" {
 		return nil, fmt.Errorf("input is empty")
