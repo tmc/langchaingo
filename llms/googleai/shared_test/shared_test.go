@@ -125,8 +125,8 @@ func testMultiContentText(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("What kind of mammal am I?"),
+		llms.TextPart("I'm a pomeranian", false),
+		llms.TextPart("What kind of mammal am I?", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -151,6 +151,7 @@ func testMultiContentTextUsingTextParts(t *testing.T, llm llms.Model) {
 
 	content := llms.TextParts(
 		llms.ChatMessageTypeHuman,
+		false,
 		"I'm a pomeranian",
 		"What kind of mammal am I?",
 	)
@@ -181,15 +182,15 @@ func testMultiContentTextChatSequence(t *testing.T, llm llms.Model) {
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
+			Parts: []llms.ContentPart{llms.TextPart("Name some countries", false)},
 		},
 		{
 			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
+			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho", false)},
 		},
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
+			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?", false)},
 		},
 	}
 
@@ -208,11 +209,11 @@ func testMultiContentWithSystemMessage(t *testing.T, llm llms.Model) {
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeSystem,
-			Parts: []llms.ContentPart{llms.TextPart("You are a Spanish teacher; answer in Spanish")},
+			Parts: []llms.ContentPart{llms.TextPart("You are a Spanish teacher; answer in Spanish", false)},
 		},
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("Name the 5 most common fruits")},
+			Parts: []llms.ContentPart{llms.TextPart("Name the 5 most common fruits", false)},
 		},
 	}
 
@@ -232,7 +233,7 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 		llms.ImageURLPart(
 			"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true",
 		),
-		llms.TextPart("describe this image in detail"),
+		llms.TextPart("describe this image in detail", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -264,7 +265,7 @@ func testMultiContentImageBinary(t *testing.T, llm llms.Model) {
 
 	parts := []llms.ContentPart{
 		llms.BinaryPart("image/png", b),
-		llms.TextPart("what does this image show? please use detail"),
+		llms.TextPart("what does this image show? please use detail", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -304,7 +305,7 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 	t.Helper()
 
 	parts := []llms.ContentPart{
-		llms.TextPart("Name five countries in Africa"),
+		llms.TextPart("Name five countries in Africa", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -330,6 +331,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 
 	content := llms.TextParts(
 		llms.ChatMessageTypeHuman,
+		false,
 		"I'm a pomeranian",
 		"Tell me more about my taxonomy",
 	)
@@ -376,7 +378,7 @@ func testTools(t *testing.T, llm llms.Model) {
 	}
 
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+		llms.TextParts(llms.ChatMessageTypeHuman, false, "What is the weather like in Chicago?"),
 	}
 	resp, err := llm.GenerateContent(
 		context.Background(),
@@ -459,7 +461,7 @@ func testToolsWithInterfaceRequired(t *testing.T, llm llms.Model) {
 	}
 
 	content := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+		llms.TextParts(llms.ChatMessageTypeHuman, false, "What is the weather like in Chicago?"),
 	}
 	resp, err := llm.GenerateContent(
 		context.Background(),
@@ -523,8 +525,8 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 	t.Parallel()
 
 	parts := []llms.ContentPart{
-		llms.TextPart("I'm a pomeranian"),
-		llms.TextPart("Describe my taxonomy, health and care"),
+		llms.TextPart("I'm a pomeranian", false),
+		llms.TextPart("Describe my taxonomy, health and care", false),
 	}
 	content := []llms.MessageContent{
 		{
@@ -566,7 +568,7 @@ func testWithHTTPClient(t *testing.T, llm llms.Model) {
 
 	resp, err := llm.GenerateContent(
 		context.TODO(),
-		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "testing")},
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, false, "testing")},
 	)
 	require.NoError(t, err)
 	require.EqualValues(t, "test-ok", resp.Choices[0].Content)

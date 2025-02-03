@@ -17,7 +17,10 @@ type MessageContent struct {
 }
 
 // TextPart creates TextContent from a given string.
-func TextPart(s string) TextContent {
+func TextPart(s string, isCacheable bool) TextContent {
+	if isCacheable {
+		return TextContent{Text: s, CacheControl: CacheControl{Type: "ephemeral"}}
+	}
 	return TextContent{Text: s}
 }
 
@@ -52,7 +55,12 @@ type ContentPart interface {
 
 // TextContent is content with some text.
 type TextContent struct {
-	Text string
+	Text         string
+	CacheControl CacheControl `json:"cache_control"`
+}
+
+type CacheControl struct {
+	Type string `json:"type"`
 }
 
 func (tc TextContent) String() string {
@@ -150,13 +158,13 @@ type ContentChoice struct {
 
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
-func TextParts(role ChatMessageType, parts ...string) MessageContent {
+func TextParts(role ChatMessageType, isCacheable bool, parts ...string) MessageContent {
 	result := MessageContent{
 		Role:  role,
 		Parts: []ContentPart{},
 	}
 	for _, part := range parts {
-		result.Parts = append(result.Parts, TextPart(part))
+		result.Parts = append(result.Parts, TextPart(part, isCacheable))
 	}
 	return result
 }
