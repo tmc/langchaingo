@@ -100,7 +100,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		StopWords:        opts.StopWords,
 		Messages:         chatMsgs,
 		StreamingFunc:    opts.StreamingFunc,
-		Temperature:      opts.Temperature,
+		Temperature:      &opts.Temperature,
 		N:                opts.N,
 		FrequencyPenalty: opts.FrequencyPenalty,
 		PresencePenalty:  opts.PresencePenalty,
@@ -112,6 +112,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
 		ReasoningEffort:      openaiclient.ReasoningEffort(opts.ReasoningEffort),
+	}
+	// openai does not support temperature for reasoning models
+	if req.ReasoningEffort != "" {
+		req.Temperature = nil
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
