@@ -6,9 +6,9 @@ import (
 
 // CompletionRequest is a request to complete a completion.
 type CompletionRequest struct {
-	Model       string  `json:"model"`
-	Prompt      string  `json:"prompt"`
-	Temperature float64 `json:"temperature"`
+	Model       string   `json:"model"`
+	Prompt      string   `json:"prompt"`
+	Temperature *float64 `json:"temperature,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
 	MaxTokens           int      `json:"-,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
