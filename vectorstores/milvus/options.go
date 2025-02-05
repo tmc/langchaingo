@@ -131,6 +131,13 @@ func WithMetricType(metricType entity.MetricType) Option {
 	}
 }
 
+// WithSkipFlushOnWrite disables flushing on write.
+func WithSkipFlushOnWrite() Option {
+	return func(s *Store) {
+		s.skipFlushOnWrite = true
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	s := Store{
 		metricType:       entity.L2,
