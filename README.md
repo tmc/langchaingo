@@ -1,4 +1,4 @@
-> 🎉 **Join our new official Discord community!** Connect with other LangChain Go developers and get help: [Join Discord](https://discord.gg/t9UbBQs2rG)
+> 🎉 **Join our new official Discord community!** Connect with other LangChain Go developers, get help and contribute: [Join Discord](https://discord.gg/t9UbBQs2rG)
 
 # 🦜️🔗 LangChain Go
 
