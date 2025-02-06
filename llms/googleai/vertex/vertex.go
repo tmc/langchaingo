@@ -19,18 +19,20 @@ import (
 )
 
 var (
-	ErrNoContentInResponse   = errors.New("no content in generation response")
-	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType       = errors.New("invalid mime type on content")
+	ErrNoContentInResponse    = errors.New("no content in generation response")
+	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
+	ErrInvalidMimeType        = errors.New("invalid mime type on content")
+	ErrSystemJustSupportsText = errors.New("system role just supports text")
+	ErrSystemMoreThanOne      = errors.New("more than one system prompt isn't supported")
 )
 
 const (
-	CITATIONS            = "citations"
-	SAFETY               = "safety"
-	RoleSystem           = "system"
-	RoleModel            = "model"
-	RoleUser             = "user"
-	RoleTool             = "tool"
+	CITATIONS  = "citations"
+	SAFETY     = "safety"
+	RoleModel  = "model"
+	RoleUser   = "user"
+	RoleSystem = "system"
+	RoleTool   = "tool"
 	ResponseMIMETypeJson = "application/json"
 )
 
@@ -112,10 +114,10 @@ func (g *Vertex) GenerateContent(
 	} else {
 		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
+
 	if err != nil {
 		return nil, err
 	}
-
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
@@ -372,98 +374,115 @@ DoStream:
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
+// convertFunction converts a llms.Tool function a genai.FunctionDeclaration
+func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
+	// We have a llms.FunctionDefinition in tool.Function, and we have to
+	// convert it to genai.FunctionDeclaration
+	genaiFuncDecl := &genai.FunctionDeclaration{
+		Name:        tool.Function.Name,
+		Description: tool.Function.Description,
+	}
+
+	if tool.Function.Parameters == nil {
+		return genaiFuncDecl, nil
+	}
+
+	// Expect the Parameters field to be a map[string]any, from which we will
+	// extract properties to populate the schema.
+	params, ok := tool.Function.Parameters.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("tool: function[%s]: unsupported type %T of Parameters", tool.Function.Name, tool.Function.Parameters)
+	}
+
+	schema := &genai.Schema{}
+	if ty, ok := params["type"]; ok {
+		tyString, ok := ty.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool: function[%s]: expected string for type", tool.Function.Name)
+		}
+		schema.Type = convertToolSchemaType(tyString)
+	}
+
+	paramProperties, ok := params["properties"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("tool: function[%s]: expected to find a map of properties", tool.Function.Name)
+	}
+
+	schema.Properties = make(map[string]*genai.Schema)
+	for propName, propValue := range paramProperties {
+		valueMap, ok := propValue.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("tool: function[%s]: property [%v]: expect to find a value map", tool.Function.Name, propName)
+		}
+		schema.Properties[propName] = &genai.Schema{}
+
+		if ty, ok := valueMap["type"]; ok {
+			tyString, ok := ty.(string)
+			if !ok {
+				return nil, fmt.Errorf("tool: function[%s]: expected string for type", tool.Function.Name)
+			}
+			schema.Properties[propName].Type = convertToolSchemaType(tyString)
+		}
+		if desc, ok := valueMap["description"]; ok {
+			descString, ok := desc.(string)
+			if !ok {
+				return nil, fmt.Errorf("tool: function[%s]: expected string for description", tool.Function.Name)
+			}
+			schema.Properties[propName].Description = descString
+		}
+		if desc, ok := valueMap["enum"]; ok {
+			enumList, ok := desc.([]string)
+			if !ok {
+				return nil, fmt.Errorf("tool: function[%s]: expected string list for enum", tool.Function.Name)
+			}
+			schema.Properties[propName].Enum = enumList
+		}
+	}
+
+	if required, ok := params["required"]; ok {
+		if rs, ok := required.([]string); ok {
+			schema.Required = rs
+		} else if ri, ok := required.([]interface{}); ok {
+			rs := make([]string, 0, len(ri))
+			for _, r := range ri {
+				rString, ok := r.(string)
+				if !ok {
+					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+				}
+				rs = append(rs, rString)
+			}
+			schema.Required = rs
+		} else {
+			return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+		}
+	}
+	genaiFuncDecl.Parameters = schema
+
+	return genaiFuncDecl, nil
+}
+
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	genaiTools := make([]*genai.Tool, 0, len(tools))
+	var genaiTools []*genai.Tool
+	functionTool := &genai.Tool{
+		FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+	}
+
 	for i, tool := range tools {
-		if tool.Type != "function" {
+		switch tool.Type {
+		case "function":
+			convertedTool, err := convertFunction(&tool)
+			if err != nil {
+				return nil, fmt.Errorf("tool [%d]: %w", i, err)
+			}
+			functionTool.FunctionDeclarations = append(functionTool.FunctionDeclarations, convertedTool)
+		default:
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
 		}
-
-		// We have a llms.FunctionDefinition in tool.Function, and we have to
-		// convert it to genai.FunctionDeclaration
-		genaiFuncDecl := &genai.FunctionDeclaration{
-			Name:        tool.Function.Name,
-			Description: tool.Function.Description,
-		}
-
-		if tool.Function.Parameters != nil {
-			// Expect the Parameters field to be a map[string]any, from which we will
-			// extract properties to populate the schema.
-			params, ok := tool.Function.Parameters.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
-			}
-
-			schema := &genai.Schema{}
-			if ty, ok := params["type"]; ok {
-				tyString, ok := ty.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-				}
-				schema.Type = convertToolSchemaType(tyString)
-			}
-
-			paramProperties, ok := params["properties"].(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
-			}
-
-			schema.Properties = make(map[string]*genai.Schema)
-			for propName, propValue := range paramProperties {
-				valueMap, ok := propValue.(map[string]any)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
-				}
-				schema.Properties[propName] = &genai.Schema{}
-
-				if ty, ok := valueMap["type"]; ok {
-					tyString, ok := ty.(string)
-					if !ok {
-						return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-					}
-					schema.Properties[propName].Type = convertToolSchemaType(tyString)
-				}
-				if desc, ok := valueMap["description"]; ok {
-					descString, ok := desc.(string)
-					if !ok {
-						return nil, fmt.Errorf("tool [%d]: expected string for description", i)
-					}
-					schema.Properties[propName].Description = descString
-				}
-				if desc, ok := valueMap["enum"]; ok {
-					enumList, ok := desc.([]string)
-					if !ok {
-						return nil, fmt.Errorf("tool [%s]: expected string list for enum", tool.Function.Name)
-					}
-					schema.Properties[propName].Enum = enumList
-				}
-			}
-
-			if required, ok := params["required"]; ok {
-				if rs, ok := required.([]string); ok {
-					schema.Required = rs
-				} else if ri, ok := required.([]interface{}); ok {
-					rs := make([]string, 0, len(ri))
-					for _, r := range ri {
-						rString, ok := r.(string)
-						if !ok {
-							return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-						}
-						rs = append(rs, rString)
-					}
-					schema.Required = rs
-				} else {
-					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-				}
-			}
-			genaiFuncDecl.Parameters = schema
-		}
-
-		genaiTools = append(genaiTools, &genai.Tool{
-			FunctionDeclarations: []*genai.FunctionDeclaration{genaiFuncDecl},
-		})
+	}
+	if len(functionTool.FunctionDeclarations) > 0 {
+		genaiTools = append([]*genai.Tool{functionTool}, genaiTools...)
 	}
 
 	return genaiTools, nil

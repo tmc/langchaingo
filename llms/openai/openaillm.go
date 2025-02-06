@@ -73,9 +73,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			// Here we extract tool calls from the message and populate the ToolCalls field.
 
 			// parse mc.Parts (which should have one entry of type ToolCallResponse) and populate msg.Content and msg.ToolCallID
-			if len(mc.Parts) != 1 {
-				return nil, fmt.Errorf("expected exactly one part for role %v, got %v", mc.Role, len(mc.Parts))
-			}
+			//if len(mc.Parts) != 1 {
+			//	return nil, fmt.Errorf("expected exactly one part for role %v, got %v", mc.Role, len(mc.Parts))
+			//}
 			switch p := mc.Parts[0].(type) {
 			case llms.ToolCallResponse:
 				msg.ToolCallID = p.ToolCallID
