@@ -1,10 +1,10 @@
-> 🎉 **Join our new official Discord community!** Connect with other LangChain Go developers and get help: [Join Discord](https://discord.gg/A9BEHHnZ)
+> 🎉 **Join our new official Discord community!** Connect with other LangChain Go developers and get help: [Join Discord](https://discord.gg/t9UbBQs2rG)
 
 # 🦜️🔗 LangChain Go
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/tmc/langchaingo)
 [![scorecard](https://goreportcard.com/badge/github.com/tmc/langchaingo)](https://goreportcard.com/report/github.com/tmc/langchaingo)
-[![](https://dcbadge.vercel.app/api/server/A9BEHHnZ?compact=true&style=flat)](https://discord.gg/A9BEHHnZ)
+[![](https://dcbadge.vercel.app/api/server/t9UbBQs2rG?compact=true&style=flat)](https://discord.gg/t9UbBQs2rG)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/tmc/langchaingo)
 [<img src="https://github.com/codespaces/badge.svg" title="Open in Github Codespace" width="150" height="20">](https://codespaces.new/tmc/langchaingo)
 
