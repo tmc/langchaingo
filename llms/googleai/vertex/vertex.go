@@ -19,11 +19,9 @@ import (
 )
 
 var (
-	ErrNoContentInResponse    = errors.New("no content in generation response")
-	ErrUnknownPartInResponse  = errors.New("unknown part type in generation response")
-	ErrInvalidMimeType        = errors.New("invalid mime type on content")
-	ErrSystemJustSupportsText = errors.New("system role just supports text")
-	ErrSystemMoreThanOne      = errors.New("more than one system prompt isn't supported")
+	ErrNoContentInResponse   = errors.New("no content in generation response")
+	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
+	ErrSystemMoreThanOne     = errors.New("more than one system prompt isn't supported")
 )
 
 const (
