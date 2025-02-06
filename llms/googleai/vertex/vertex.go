@@ -27,12 +27,12 @@ var (
 )
 
 const (
-	CITATIONS  = "citations"
-	SAFETY     = "safety"
-	RoleModel  = "model"
-	RoleUser   = "user"
-	RoleSystem = "system"
-	RoleTool   = "tool"
+	CITATIONS            = "citations"
+	SAFETY               = "safety"
+	RoleModel            = "model"
+	RoleUser             = "user"
+	RoleSystem           = "system"
+	RoleTool             = "tool"
 	ResponseMIMETypeJson = "application/json"
 )
 
@@ -398,42 +398,42 @@ func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
 	if ty, ok := params["type"]; ok {
 		tyString, ok := ty.(string)
 		if !ok {
-			return nil, fmt.Errorf("tool: function[%s]: expected string for type", tool.Function.Name)
+			return nil, fmt.Errorf("tool: function [%s]: expected string for type", tool.Function.Name)
 		}
 		schema.Type = convertToolSchemaType(tyString)
 	}
 
 	paramProperties, ok := params["properties"].(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("tool: function[%s]: expected to find a map of properties", tool.Function.Name)
+		return nil, fmt.Errorf("tool: function [%s]: expected to find a map of properties", tool.Function.Name)
 	}
 
 	schema.Properties = make(map[string]*genai.Schema)
 	for propName, propValue := range paramProperties {
 		valueMap, ok := propValue.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("tool: function[%s]: property [%v]: expect to find a value map", tool.Function.Name, propName)
+			return nil, fmt.Errorf("function [%s]: property [%v]: expect to find a value map", tool.Function.Name, propName)
 		}
 		schema.Properties[propName] = &genai.Schema{}
 
 		if ty, ok := valueMap["type"]; ok {
 			tyString, ok := ty.(string)
 			if !ok {
-				return nil, fmt.Errorf("tool: function[%s]: expected string for type", tool.Function.Name)
+				return nil, fmt.Errorf("function [%s]: expected string for type", tool.Function.Name)
 			}
 			schema.Properties[propName].Type = convertToolSchemaType(tyString)
 		}
 		if desc, ok := valueMap["description"]; ok {
 			descString, ok := desc.(string)
 			if !ok {
-				return nil, fmt.Errorf("tool: function[%s]: expected string for description", tool.Function.Name)
+				return nil, fmt.Errorf("function [%s]: expected string for description", tool.Function.Name)
 			}
 			schema.Properties[propName].Description = descString
 		}
 		if desc, ok := valueMap["enum"]; ok {
 			enumList, ok := desc.([]string)
 			if !ok {
-				return nil, fmt.Errorf("tool: function[%s]: expected string list for enum", tool.Function.Name)
+				return nil, fmt.Errorf("function [%s]: expected string list for enum", tool.Function.Name)
 			}
 			schema.Properties[propName].Enum = enumList
 		}
@@ -447,13 +447,13 @@ func convertFunction(tool *llms.Tool) (*genai.FunctionDeclaration, error) {
 			for _, r := range ri {
 				rString, ok := r.(string)
 				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+					return nil, fmt.Errorf("function [%s]: expected string for required", tool.Function.Name)
 				}
 				rs = append(rs, rString)
 			}
 			schema.Required = rs
 		} else {
-			return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+			return nil, fmt.Errorf("function [%s]: expected string for required", tool.Function.Name)
 		}
 	}
 	genaiFuncDecl.Parameters = schema
