@@ -31,6 +31,14 @@ func BinaryPart(mime string, data []byte) BinaryContent {
 	}
 }
 
+func OpenAIFilePart(mime string, data []byte) BinaryContent {
+	return BinaryContent{
+		MIMEType: mime,
+		Data:     data,
+		dataType: "file",
+	}
+}
+
 // ImageURLPart creates a new ImageURLContent from the given URL.
 func ImageURLPart(url string) ImageURLContent {
 	return ImageURLContent{
