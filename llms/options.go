@@ -66,6 +66,9 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// ReasoningEffort constrains effort on reasoning for reasoning models
+	ReasoningEffort ReasoningEffort `json:"reasoning_effort,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -110,6 +113,16 @@ const (
 	FunctionCallBehaviorNone FunctionCallBehavior = "none"
 	// FunctionCallBehaviorAuto will call functions automatically.
 	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
+)
+
+// ReasoningEffort is the reasoning effort to use for the model.
+// Defaults to "medium".
+type ReasoningEffort string
+
+const (
+	ReasoningEffortLow    ReasoningEffort = "low"
+	ReasoningEffortMedium ReasoningEffort = "medium"
+	ReasoningEffortHigh   ReasoningEffort = "high"
 )
 
 // WithModel specifies which model name to use.
@@ -278,5 +291,13 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
+	}
+}
+
+// WithReasoningEffort sets the reasoning effort for the model, if it supports it.
+// Currently only supported by openai llms.
+func WithReasoningEffort(reasoningEffort ReasoningEffort) CallOption {
+	return func(o *CallOptions) {
+		o.ReasoningEffort = reasoningEffort
 	}
 }

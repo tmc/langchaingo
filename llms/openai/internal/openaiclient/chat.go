@@ -31,7 +31,7 @@ type StreamOptions struct {
 type ChatRequest struct {
 	Model       string         `json:"model"`
 	Messages    []*ChatMessage `json:"messages"`
-	Temperature float64        `json:"temperature"`
+	Temperature *float64       `json:"temperature,omitempty"`
 	TopP        float64        `json:"top_p,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
 	MaxTokens           int      `json:"-,omitempty"`
@@ -74,6 +74,9 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// ReasoningEffort constrains effort on reasoning for reasoning models
+	ReasoningEffort ReasoningEffort `json:"reasoning_effort,omitempty"`
 }
 
 // ToolType is the type of a tool.
@@ -378,6 +381,16 @@ type FunctionCall struct {
 	// Arguments is the set of arguments to pass to the function.
 	Arguments string `json:"arguments"`
 }
+
+// ReasoningEffort is the reasoning effort to use for the model.
+// Defaults to "medium".
+type ReasoningEffort string
+
+const (
+	ReasoningEffortLow    ReasoningEffort = "low"
+	ReasoningEffortMedium ReasoningEffort = "medium"
+	ReasoningEffortHigh   ReasoningEffort = "high"
+)
 
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCompletionResponse, error) {
 	if payload.StreamingFunc != nil {
