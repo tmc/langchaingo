@@ -21,6 +21,9 @@ type CallOptions struct {
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	// StreamingReasoningFunc is a function to be called for each chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 	// TopK is the number of tokens to consider for top-k sampling.
 	TopK int `json:"top_k"`
 	// TopP is the cumulative probability for top-p sampling.
@@ -159,6 +162,13 @@ func WithOptions(options CallOptions) CallOption {
 func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) error) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc
+	}
+}
+
+// WithStreamingReasoningFunc specifies the streaming reasoning function to use.
+func WithStreamingReasoningFunc(streamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error) CallOption {
+	return func(o *CallOptions) {
+		o.StreamingReasoningFunc = streamingReasoningFunc
 	}
 }
 
