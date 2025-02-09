@@ -266,13 +266,37 @@ func handleSystemMessage(msg llms.MessageContent) (string, error) {
 }
 
 func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return anthropicclient.ChatMessage{
-			Role:    RoleUser,
-			Content: textContent.Text,
-		}, nil
+	var contents []anthropicclient.Content
+
+	for _, part := range msg.Parts {
+		switch p := part.(type) {
+		case llms.TextContent:
+			contents = append(contents, &anthropicclient.TextContent{
+				Type: "text",
+				Text: p.Text,
+			})
+		case llms.BinaryContent:
+			contents = append(contents, &anthropicclient.ImageContent{
+				Type: "image",
+				Source: anthropicclient.ImageSource{
+					Type:      "base64",
+					MediaType: p.MIMEType,
+					Data:      string(p.Data),
+				},
+			})
+		default:
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported human message part type: %T", part)
+		}
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for human message", ErrInvalidContentType)
+
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: no valid content in human message")
+	}
+
+	return anthropicclient.ChatMessage{
+		Role:    RoleUser,
+		Content: contents,
+	}, nil
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
