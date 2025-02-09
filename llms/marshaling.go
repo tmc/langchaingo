@@ -165,7 +165,7 @@ func (bc BinaryContent) MarshalJSON() ([]byte, error) {
 		Type   string            `json:"type"`
 		Binary map[string]string `json:"binary"`
 	}{
-		Type: "binary",
+		Type: bc.dataType,
 		Binary: map[string]string{
 			"mime_type": bc.MIMEType,
 			"data":      base64.StdEncoding.EncodeToString(bc.Data),

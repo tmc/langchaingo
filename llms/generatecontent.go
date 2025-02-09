@@ -27,6 +27,15 @@ func BinaryPart(mime string, data []byte) BinaryContent {
 	return BinaryContent{
 		MIMEType: mime,
 		Data:     data,
+		dataType: "binary",
+	}
+}
+
+func OpenAIFilePart(mime string, data []byte) BinaryContent {
+	return BinaryContent{
+		MIMEType: mime,
+		Data:     data,
+		dataType: "file",
 	}
 }
 
@@ -77,6 +86,7 @@ func (ImageURLContent) isPart() {}
 type BinaryContent struct {
 	MIMEType string
 	Data     []byte
+	dataType string //default binary
 }
 
 func (bc BinaryContent) String() string {
