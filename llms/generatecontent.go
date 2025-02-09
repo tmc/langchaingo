@@ -89,10 +89,6 @@ type BinaryContent struct {
 	dataType string //default binary
 }
 
-func (bc *BinaryContent) SetType(t string) {
-	bc.dataType = t
-}
-
 func (bc BinaryContent) String() string {
 	base64Encoded := base64.StdEncoding.EncodeToString(bc.Data)
 	return "data:" + bc.MIMEType + ";base64," + base64Encoded
