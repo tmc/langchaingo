@@ -29,7 +29,20 @@ type Message struct {
 }
 
 func getProvider(modelID string) string {
-	return strings.Split(modelID, ".")[0]
+	switch {
+	case strings.Contains(modelID, "ai21"):
+		return "ai21"
+	case strings.Contains(modelID, "amazon"):
+		return "amazon"
+	case strings.Contains(modelID, "anthropic"):
+		return "anthropic"
+	case strings.Contains(modelID, "cohere"):
+		return "cohere"
+	case strings.Contains(modelID, "meta"):
+		return "meta"
+	default:
+		return ""
+	}
 }
 
 // NewClient creates a new Bedrock client.
