@@ -94,6 +94,7 @@ var testConfigs = []testConfig{
 	{testMaxTokensSetting, nil},
 	{testTools, nil},
 	{testToolsWithInterfaceRequired, nil},
+	{testToolsWithDeeplyNestedToolStructures, nil},
 	{
 		testMultiContentText,
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
@@ -429,6 +430,112 @@ func testTools(t *testing.T, llm llms.Model) {
 
 	c1 = resp.Choices[0]
 	checkMatch(t, c1.Content, "(64 and sunny|64 degrees)")
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
+}
+
+func testToolsWithDeeplyNestedToolStructures(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	availableTools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "BookCalendarSchedule",
+				Description: "Useful when user want you to add event to calendar.\\nAdd event to USER'S CALENDAR by sending email.\\nOnly use this function when user EXPLICITLY ask you to add event to calendar.",
+				Parameters: map[string]any{
+					"type":     "object",
+					"required": []string{"events"},
+					"properties": map[string]any{
+						"events": map[string]any{
+							"type": "array",
+							"items": map[string]any{
+								"type":     "object",
+								"required": []string{"summary", "start", "end"},
+								"properties": map[string]any{
+									"end": map[string]any{
+										"type":        "string",
+										"description": "Event end time\\nFormat: 2023-10-03 23:10:03",
+									},
+									"start": map[string]any{
+										"type":        "string",
+										"description": "Event start time\\nFormat: 2023-10-03 23:10:03",
+									},
+									"summary": map[string]any{
+										"type": "string",
+									},
+									"location": map[string]any{
+										"type": "string",
+									},
+									"description": map[string]any{
+										"type": "string",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "remind me to play games at 21:00"),
+	}
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 := resp.Choices[0]
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range c1.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range c1.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "BookCalendarSchedule":
+			var args struct {
+				Events []struct {
+					Summary string `json:"summary"`
+					Start   string `json:"start"`
+					End     string `json:"end"`
+				} `json:"events"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			toolResponse := llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						Name:    tc.FunctionCall.Name,
+						Content: "The event has been add to your calendar that will remind you to play games at 21:00",
+					},
+				},
+			}
+			content = append(content, toolResponse)
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 = resp.Choices[0]
+	//checkMatch(t, c1.Content, "(64 and sunny|64 degrees)")
 	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
 	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
 }
