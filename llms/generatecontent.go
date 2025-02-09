@@ -27,6 +27,7 @@ func BinaryPart(mime string, data []byte) BinaryContent {
 	return BinaryContent{
 		MIMEType: mime,
 		Data:     data,
+		dataType: "binary",
 	}
 }
 
@@ -77,6 +78,11 @@ func (ImageURLContent) isPart() {}
 type BinaryContent struct {
 	MIMEType string
 	Data     []byte
+	dataType string //default binary
+}
+
+func (bc *BinaryContent) SetType(t string) {
+	bc.dataType = t
 }
 
 func (bc BinaryContent) String() string {
