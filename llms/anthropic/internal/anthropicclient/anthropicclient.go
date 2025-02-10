@@ -22,8 +22,8 @@ var ErrEmptyResponse = errors.New("empty response")
 // Client is a client for the Anthropic API.
 type Client struct {
 	token   string
-	Model   string
 	baseURL string
+	model   string
 
 	httpClient Doer
 
@@ -69,9 +69,9 @@ func WithAnthropicBetaHeader(val string) Option {
 // New returns a new Anthropic client.
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:   model,
 		token:   token,
 		baseURL: strings.TrimSuffix(baseURL, "/"),
+		model:   model,
 	}
 
 	for _, opt := range opts {
