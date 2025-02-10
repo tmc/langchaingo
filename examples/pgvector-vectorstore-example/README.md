@@ -30,7 +30,7 @@ This example demonstrates how to use pgvector, a PostgreSQL extension for vector
 
 1. Start the PostgreSQL database:
    ```
-   docker-compose up -d
+   docker compose up -d
    ```
 
 2. Set your OpenAI API key:

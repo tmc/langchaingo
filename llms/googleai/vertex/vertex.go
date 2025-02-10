@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
-	"github.com/tmc/langchaingo/internal/util"
+	"github.com/tmc/langchaingo/internal/imageutil"
 	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/iterator"
 )
@@ -25,12 +25,13 @@ var (
 )
 
 const (
-	CITATIONS  = "citations"
-	SAFETY     = "safety"
-	RoleSystem = "system"
-	RoleModel  = "model"
-	RoleUser   = "user"
-	RoleTool   = "tool"
+	CITATIONS            = "citations"
+	SAFETY               = "safety"
+	RoleSystem           = "system"
+	RoleModel            = "model"
+	RoleUser             = "user"
+	RoleTool             = "tool"
+	ResponseMIMETypeJson = "application/json"
 )
 
 // Call implements the [llms.Model] interface.
@@ -88,6 +89,16 @@ func (g *Vertex) GenerateContent(
 	var err error
 	if model.Tools, err = convertTools(opts.Tools); err != nil {
 		return nil, err
+	}
+
+	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
+	switch {
+	case opts.ResponseMIMEType != "" && opts.JSONMode:
+		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
+	case opts.ResponseMIMEType != "" && !opts.JSONMode:
+		model.ResponseMIMEType = opts.ResponseMIMEType
+	case opts.ResponseMIMEType == "" && opts.JSONMode:
+		model.ResponseMIMEType = ResponseMIMETypeJson
 	}
 
 	var response *llms.ContentResponse
@@ -179,7 +190,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 		case llms.BinaryContent:
 			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
-			typ, data, err := util.DownloadImageData(p.URL)
+			typ, data, err := imageutil.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
 			}
