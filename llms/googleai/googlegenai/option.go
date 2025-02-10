@@ -35,7 +35,7 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
-	ApiBackend            APIBackend
+	APIBackend            APIBackend
 	ClientOptions         []option.ClientOption
 	HTTPClient            *http.Client
 	HTTPOPtions           *HTTPOptions
@@ -53,7 +53,7 @@ func DefaultOptions() Options {
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,
 		HarmThreshold:         HarmBlockOnlyHigh,
-		ApiBackend:            APIGeminiBackend,
+		APIBackend:            APIGeminiBackend,
 	}
 }
 
@@ -169,7 +169,7 @@ func WithDefaultTemperature(defaultTemperature float64) Option {
 // WithDefaultTemperature sets the maximum token count for the model.
 func WithAPIBackend(backend APIBackend) Option {
 	return func(opts *Options) {
-		opts.ApiBackend = backend
+		opts.APIBackend = backend
 	}
 }
 

@@ -64,7 +64,7 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 
 	cfg := &genai.ClientConfig{
 		Credentials: googleCredentials,
-		Backend:     genai.Backend(clientOptions.ApiBackend),
+		Backend:     genai.Backend(clientOptions.APIBackend),
 		Project:     clientOptions.CloudProject,
 		Location:    clientOptions.CloudLocation,
 		APIKey:      clientOptions.Credentials.APIKey,
