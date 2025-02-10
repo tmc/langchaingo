@@ -21,8 +21,24 @@ import (
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
+	"github.com/tmc/langchaingo/llms/googleai/googlegenai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
 )
+
+func newGoogleGenAIClient(t *testing.T, opts ...googlegenai.Option) *googlegenai.GoogleAI {
+	t.Helper()
+
+	genaiKey := os.Getenv("GENAI_API_KEY")
+	if genaiKey == "" {
+		t.Skip("GENAI_API_KEY not set")
+		return nil
+	}
+
+	opts = append(opts, googlegenai.WithAPIKey(genaiKey), googlegenai.WithApiBackend(googlegenai.GEMINI_BACKEND))
+	llm, err := googlegenai.New(context.Background(), opts...)
+	require.NoError(t, err)
+	return llm
+}
 
 func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
@@ -78,28 +94,38 @@ func funcName(f any) string {
 // testConfigs is a list of all test functions in this file to run with both
 // client types, and their client configurations.
 type testConfig struct {
-	testFunc func(*testing.T, llms.Model)
-	opts     []googleai.Option
+	testFunc  func(*testing.T, llms.Model)
+	opts      []googleai.Option
+	genAIOpts []googlegenai.Option
 }
 
 var testConfigs = []testConfig{
-	{testMultiContentText, nil},
-	{testGenerateFromSinglePrompt, nil},
-	{testMultiContentTextChatSequence, nil},
-	{testMultiContentWithSystemMessage, nil},
-	{testMultiContentImageLink, nil},
-	{testMultiContentImageBinary, nil},
-	{testEmbeddings, nil},
-	{testCandidateCountSetting, nil},
-	{testMaxTokensSetting, nil},
-	{testTools, nil},
-	{testToolsWithInterfaceRequired, nil},
+	{testFunc: testMultiContentText},
+	{testFunc: testGenerateFromSinglePrompt},
+	{testFunc: testMultiContentTextChatSequence},
+	{testFunc: testMultiContentWithSystemMessage},
+	{testFunc: testMultiContentImageLink},
+	{testFunc: testMultiContentImageBinary},
+	{testFunc: testEmbeddings},
+	{testFunc: testCandidateCountSetting},
+	{testFunc: testMaxTokensSetting},
+	{testFunc: testTools},
+	{testFunc: testToolsWithInterfaceRequired},
 	{
-		testMultiContentText,
-		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
+		testFunc:  testMultiContentText,
+		genAIOpts: []googlegenai.Option{googlegenai.WithHarmThreshold(googlegenai.HarmBlockMediumAndAbove)},
 	},
-	{testWithStreaming, nil},
-	{testWithHTTPClient, getHTTPTestClientOptions()},
+	{testFunc: testWithStreaming},
+	{testFunc: testWithHTTPClient, opts: getHTTPTestClientOptions()},
+}
+
+func TestGoogleGenAIShared(t *testing.T) {
+	for _, c := range testConfigs {
+		t.Run(fmt.Sprintf("%s-googlegenai", funcName(c.testFunc)), func(t *testing.T) {
+			llm := newGoogleGenAIClient(t, c.genAIOpts...)
+			c.testFunc(t, llm)
+		})
+	}
 }
 
 func TestGoogleAIShared(t *testing.T) {
