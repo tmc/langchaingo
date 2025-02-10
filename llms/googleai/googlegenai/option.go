@@ -195,19 +195,19 @@ func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	}
 }
 
-type HarmBlockThreshold int32
+type HarmBlockThreshold string
 
 const (
 	// HarmBlockUnspecified means threshold is unspecified.
-	HarmBlockUnspecified HarmBlockThreshold = 0
+	HarmBlockUnspecified HarmBlockThreshold = HarmBlockThreshold(genai.HarmBlockThresholdUnspecified)
 	// HarmBlockLowAndAbove means content with NEGLIGIBLE will be allowed.
-	HarmBlockLowAndAbove HarmBlockThreshold = 1
+	HarmBlockLowAndAbove HarmBlockThreshold = HarmBlockThreshold(genai.HarmBlockThresholdBlockLowAndAbove)
 	// HarmBlockMediumAndAbove means content with NEGLIGIBLE and LOW will be allowed.
-	HarmBlockMediumAndAbove HarmBlockThreshold = 2
+	HarmBlockMediumAndAbove HarmBlockThreshold = HarmBlockThreshold(genai.HarmBlockThresholdBlockMediumAndAbove)
 	// HarmBlockOnlyHigh means content with NEGLIGIBLE, LOW, and MEDIUM will be allowed.
-	HarmBlockOnlyHigh HarmBlockThreshold = 3
+	HarmBlockOnlyHigh HarmBlockThreshold = HarmBlockThreshold(genai.HarmBlockThresholdBlockOnlyHigh)
 	// HarmBlockNone means all content will be allowed.
-	HarmBlockNone HarmBlockThreshold = 4
+	HarmBlockNone HarmBlockThreshold = HarmBlockThreshold(genai.HarmBlockThresholdBlockNone)
 )
 
 // helper to inspect incoming client options for auth options.

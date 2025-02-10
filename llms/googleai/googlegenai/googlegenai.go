@@ -119,9 +119,6 @@ func (g *GoogleAI) GenerateContent(
 
 	if len(messages) == 1 {
 		theMessage := messages[0]
-		if theMessage.Role != llms.ChatMessageTypeHuman {
-			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
-		}
 		response, err = generateFromSingleMessage(ctx, g.client.Models, theMessage.Parts, opts, config)
 	} else {
 		response, err = generateFromMessages(ctx, g.client.Models, messages, &opts, config)
@@ -324,7 +321,6 @@ func generateFromSingleMessage(
 	if llmOpts.StreamingFunc == nil {
 		// When no streaming is requested, just call GenerateContent and return
 		// the complete response with a list of candidates.
-
 		resp, err := model.GenerateContent(ctx, llmOpts.Model, contents, opts)
 		if err != nil {
 			return nil, err
