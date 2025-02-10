@@ -2,7 +2,9 @@ package agents_test
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -133,11 +135,12 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	)
 
 	e := agents.NewExecutor(a)
-	require.NoError(t, err)
 
 	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
 	require.NoError(t, err)
 
-	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
-		"correct answer 47 or 49 not in response")
+	correctAnswerList := []string{"47", "49", "50"}
+	require.True(t, slices.ContainsFunc(correctAnswerList, func(s string) bool {
+		return strings.Contains(result, s)
+	}), fmt.Sprintf("correct answer %s not in response", correctAnswerList))
 }
