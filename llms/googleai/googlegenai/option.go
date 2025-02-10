@@ -9,17 +9,17 @@ import (
 	"google.golang.org/genai"
 )
 
-type ApiBackend genai.Backend
+type APIBackend genai.Backend
 
 const (
-	VERTEX_BACKEND = ApiBackend(genai.BackendVertexAI)
-	GEMINI_BACKEND = ApiBackend(genai.BackendGeminiAPI)
+	APIVertexBackend = APIBackend(genai.BackendVertexAI)
+	APIGeminiBackend = APIBackend(genai.BackendGeminiAPI)
 )
 
 type GoogleCredentials struct {
 	Scopes          []string
-	CredentialsJson []byte
-	ApiKey          string
+	CredentialsJSON []byte
+	APIKey          string
 }
 
 // Options is a set of options for GoogleAI and Vertex clients.
@@ -35,10 +35,10 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
-	ApiBackend            ApiBackend
+	ApiBackend            APIBackend
 	ClientOptions         []option.ClientOption
-	HttpClient            *http.Client
-	HttpOptions           *HTTPOptions
+	HTTPClient            *http.Client
+	HTTPOPtions           *HTTPOptions
 }
 
 func DefaultOptions() Options {
@@ -53,7 +53,7 @@ func DefaultOptions() Options {
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,
 		HarmThreshold:         HarmBlockOnlyHigh,
-		ApiBackend:            GEMINI_BACKEND,
+		ApiBackend:            APIGeminiBackend,
 	}
 }
 
@@ -72,7 +72,7 @@ type Option func(*Options)
 // googleai clients.
 func WithAPIKey(apiKey string) Option {
 	return func(opts *Options) {
-		opts.Credentials.ApiKey = apiKey
+		opts.Credentials.APIKey = apiKey
 	}
 }
 
@@ -86,7 +86,7 @@ func WithCredentialsJSON(credentialsJSON []byte, scopes []string) Option {
 		}
 		opts.Credentials = GoogleCredentials{
 			Scopes:          scopes,
-			CredentialsJson: credentialsJSON,
+			CredentialsJSON: credentialsJSON,
 		}
 	}
 }
@@ -99,7 +99,7 @@ func WithCredentialsFile(credentialsFile []byte, scopes []string) Option {
 		if credentialsFile == nil {
 			return
 		}
-		opts.Credentials.CredentialsJson = credentialsFile
+		opts.Credentials.CredentialsJSON = credentialsFile
 		opts.Credentials.Scopes = scopes
 	}
 }
@@ -109,7 +109,7 @@ func WithCredentialsFile(credentialsFile []byte, scopes []string) Option {
 // This is useful for vertex clients.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(opts *Options) {
-		opts.HttpClient = httpClient
+		opts.HTTPClient = httpClient
 	}
 }
 
@@ -167,7 +167,7 @@ func WithDefaultTemperature(defaultTemperature float64) Option {
 }
 
 // WithDefaultTemperature sets the maximum token count for the model.
-func WithApiBackend(backend ApiBackend) Option {
+func WithAPIBackend(backend APIBackend) Option {
 	return func(opts *Options) {
 		opts.ApiBackend = backend
 	}

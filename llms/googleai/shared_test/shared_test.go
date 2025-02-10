@@ -34,7 +34,7 @@ func newGoogleGenAIClient(t *testing.T, opts ...googlegenai.Option) *googlegenai
 		return nil
 	}
 
-	opts = append(opts, googlegenai.WithAPIKey(genaiKey), googlegenai.WithApiBackend(googlegenai.GEMINI_BACKEND))
+	opts = append(opts, googlegenai.WithAPIKey(genaiKey), googlegenai.WithAPIBackend(googlegenai.APIGeminiBackend))
 	llm, err := googlegenai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm

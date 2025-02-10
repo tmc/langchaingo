@@ -45,18 +45,20 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	}
 
 	var googleCredentials *google.Credentials
-	if clientOptions.Credentials.CredentialsJson != nil {
+	if clientOptions.Credentials.CredentialsJSON != nil {
 		var err error
-		googleCredentials, err = google.CredentialsFromJSON(ctx, clientOptions.Credentials.CredentialsJson, clientOptions.Credentials.Scopes...)
-		return nil, err
+		googleCredentials, err = google.CredentialsFromJSON(ctx, clientOptions.Credentials.CredentialsJSON, clientOptions.Credentials.Scopes...)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var httpOptions genai.HTTPOptions
-	if clientOptions.HttpOptions != nil {
+	if clientOptions.HTTPOPtions != nil {
 		httpOptions = genai.HTTPOptions{
-			BaseURL:    clientOptions.HttpOptions.BaseURL,
-			APIVersion: clientOptions.HttpOptions.APIVersion,
-			Timeout:    clientOptions.HttpOptions.Timeout,
+			BaseURL:    clientOptions.HTTPOPtions.BaseURL,
+			APIVersion: clientOptions.HTTPOPtions.APIVersion,
+			Timeout:    clientOptions.HTTPOPtions.Timeout,
 		}
 	}
 
@@ -65,8 +67,8 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		Backend:     genai.Backend(clientOptions.ApiBackend),
 		Project:     clientOptions.CloudProject,
 		Location:    clientOptions.CloudLocation,
-		APIKey:      clientOptions.Credentials.ApiKey,
-		HTTPClient:  clientOptions.HttpClient,
+		APIKey:      clientOptions.Credentials.APIKey,
+		HTTPClient:  clientOptions.HTTPClient,
 		HTTPOptions: httpOptions,
 	}
 	client, err := genai.NewClient(ctx, cfg)
