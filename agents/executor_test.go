@@ -32,6 +32,7 @@ func (a *testAgent) Plan(
 	_ context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	_ ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	a.recordedIntermediateSteps = intermediateSteps
 	a.recordedInputs = inputs
@@ -90,15 +91,11 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
-
-	a, err := agents.Initialize(
-		llm,
-		[]tools.Tool{searchTool, calculator},
-		agents.ZeroShotReactDescription,
+	executor := agents.NewExecutor(
+		agents.NewOneShotAgent(llm, []tools.Tool{searchTool, calculator}),
 	)
-	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), a, "If a person lived three times as long as Jacklyn Zeman, how long would they live") //nolint:lll
+	result, err := chains.Run(context.Background(), executor, "If a person lived three times as long as Jacklyn Zeman, how long would they live") //nolint:lll
 	require.NoError(t, err)
 
 	require.True(t, strings.Contains(result, "210"), "correct answer 210 not in response")
