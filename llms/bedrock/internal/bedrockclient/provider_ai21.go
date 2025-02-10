@@ -81,7 +81,7 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 		Prompt:        txt,
 		Temperature:   options.Temperature,
 		TopP:          options.TopP,
-		MaxTokens:     getMaxTokens(options.MaxTokens, 2048),
+		MaxTokens:     getMaxTokens(options.MaxTokens, DefaultMaxTokenLength2048),
 		StopSequences: options.StopWords,
 		CountPenalty: struct {
 			Scale float64 `json:"scale"`

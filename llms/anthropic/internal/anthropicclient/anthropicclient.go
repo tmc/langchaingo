@@ -16,9 +16,6 @@ const (
 	defaultModel = "claude-3-5-sonnet-20240620"
 )
 
-// ErrEmptyResponse is returned when the Anthropic API returns an empty response.
-var ErrEmptyResponse = errors.New("empty response")
-
 // Client is a client for the Anthropic API.
 type Client struct {
 	token   string

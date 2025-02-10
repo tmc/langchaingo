@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrInvalidToken  = errors.New("invalid token")
-	ErrEmptyResponse = errors.New("empty response")
-)
+var ErrInvalidToken = errors.New("invalid token")
 
 type Client struct {
 	Token string
@@ -64,7 +63,7 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		return nil, fmt.Errorf("failed to run inference: %w", err)
 	}
 	if len(resp) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	text := resp[0].Text
 	// TODO: Add response cleaning based on Model.
@@ -96,7 +95,7 @@ func (c *Client) CreateEmbedding(
 	}
 
 	if len(resp) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	return resp, nil
