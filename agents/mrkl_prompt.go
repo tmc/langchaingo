@@ -8,29 +8,6 @@ import (
 	"github.com/tmc/langchaingo/tools"
 )
 
-const (
-	_defaultMrklPrefix = `Today is {{.today}}.
-Answer the following questions as best you can. You have access to the following tools:
-
-{{.tool_descriptions}}`
-
-	_defaultMrklFormatInstructions = `Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [ {{.tool_names}} ]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question`
-
-	_defaultMrklSuffix = `Begin!
-
-Question: {{.input}}
-{{.agent_scratchpad}}`
-)
-
 func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
 	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
 
