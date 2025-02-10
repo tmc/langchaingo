@@ -660,6 +660,66 @@ func TestDeduplicater(t *testing.T) {
 	require.Equal(t, "vegetable", docs[0].Metadata["type"])
 }
 
+func TestReplacement(t *testing.T) {
+	t.Parallel()
+	pgvectorURL := preCheckEnvSetting(t)
+	ctx := context.Background()
+
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	conn, err := pgx.Connect(ctx, pgvectorURL)
+	require.NoError(t, err)
+
+	store, err := pgvector.New(
+		ctx,
+		pgvector.WithConn(conn),
+		pgvector.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Math", Metadata: map[string]any{
+			"courseID": "foo",
+		}},
+		{PageContent: "Physics", Metadata: map[string]any{
+			"courseID": "bar",
+		}},
+	})
+	require.NoError(t, err)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Discrete Math", Metadata: map[string]any{
+			"courseID": "foo",
+		}},
+	}, vectorstores.WithReplacement(true))
+	require.NoError(t, err)
+
+	docs, err := store.Search(ctx, 2, vectorstores.WithFilters(map[string]any{
+		"courseID": "foo",
+	}))
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "Discrete Math", docs[0].PageContent)
+
+	_, err = store.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "Calculus", Metadata: map[string]any{
+			"courseID": "foo",
+		}},
+	}, vectorstores.WithReplacement(false))
+	require.NoError(t, err)
+
+	docs, err = store.Search(ctx, 2, vectorstores.WithFilters(map[string]any{
+		"courseID": "foo",
+	}))
+	require.NoError(t, err)
+	require.Len(t, docs, 2)
+}
+
 func TestWithAllOptions(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
