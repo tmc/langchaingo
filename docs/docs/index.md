@@ -12,6 +12,10 @@ LangChain is a framework for developing applications powered by language models.
 
 The LangChain framework is designed with the above principles in mind.
 
+## Installation 
+
+Add the module to your project using `go get github.com/tmc/langchaingo` 
+
 ## Getting Started
 
 _**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo). For documentation on [the Python version](https://github.com/langchain-ai/langchain), [head here](https://python.langchain.com/docs)._
