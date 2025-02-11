@@ -2,6 +2,7 @@ package anthropic
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -281,7 +282,7 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 				Source: anthropicclient.ImageSource{
 					Type:      "base64",
 					MediaType: p.MIMEType,
-					Data:      string(p.Data),
+					Data:      base64.StdEncoding.EncodeToString(p.Data),
 				},
 			})
 		default:

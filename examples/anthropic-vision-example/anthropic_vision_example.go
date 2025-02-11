@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	_ "embed"
-	"encoding/base64"
 	"fmt"
 	"log"
 
@@ -31,7 +30,7 @@ func main() {
 					// For images, you can use image formats such as image/png, image/jpeg, image/gif, image/webp.
 					// Please change according to the actual byte array to be given.
 					// for more detailes, see this https://docs.anthropic.com/claude/reference/messages_post
-					llms.BinaryPart("image/png", []byte(base64.StdEncoding.EncodeToString(image))),
+					llms.BinaryPart("image/png", image),
 					llms.TextPart("Please tell me the string on the box."),
 				},
 			},
