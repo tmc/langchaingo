@@ -75,9 +75,8 @@ func (t *runTree) setStartTime(startTime time.Time) *runTree {
 	return t
 }
 
-func (t *runTree) setEndTime(endTime time.Time) *runTree {
+func (t *runTree) setEndTime(endTime time.Time) {
 	t.EndTime = endTime
-	return t
 }
 
 func (t *runTree) setExtra(extra KVMap) *runTree {
