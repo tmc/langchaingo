@@ -29,17 +29,19 @@ type StreamOptions struct {
 
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
-	Model            string         `json:"model"`
-	Messages         []*ChatMessage `json:"messages"`
-	Temperature      float64        `json:"temperature"`
-	TopP             float64        `json:"top_p,omitempty"`
-	MaxTokens        int            `json:"max_tokens,omitempty"`
-	N                int            `json:"n,omitempty"`
-	StopWords        []string       `json:"stop,omitempty"`
-	Stream           bool           `json:"stream,omitempty"`
-	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
-	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
-	Seed             int            `json:"seed,omitempty"`
+	Model       string         `json:"model"`
+	Messages    []*ChatMessage `json:"messages"`
+	Temperature float64        `json:"temperature"`
+	TopP        float64        `json:"top_p,omitempty"`
+	// Deprecated: Use MaxCompletionTokens
+	MaxTokens           int      `json:"-,omitempty"`
+	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
+	N                   int      `json:"n,omitempty"`
+	StopWords           []string `json:"stop,omitempty"`
+	Stream              bool     `json:"stream,omitempty"`
+	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
+	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
+	Seed                int      `json:"seed,omitempty"`
 
 	// ResponseFormat is the format of the response.
 	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
@@ -106,9 +108,27 @@ type ToolCall struct {
 	Function ToolFunction `json:"function,omitempty"`
 }
 
+type ResponseFormatJSONSchemaProperty struct {
+	Type                 string                                       `json:"type"`
+	Description          string                                       `json:"description,omitempty"`
+	Enum                 []interface{}                                `json:"enum,omitempty"`
+	Items                *ResponseFormatJSONSchemaProperty            `json:"items,omitempty"`
+	Properties           map[string]*ResponseFormatJSONSchemaProperty `json:"properties,omitempty"`
+	AdditionalProperties bool                                         `json:"additionalProperties"`
+	Required             []string                                     `json:"required,omitempty"`
+	Ref                  string                                       `json:"$ref,omitempty"`
+}
+
+type ResponseFormatJSONSchema struct {
+	Name   string                            `json:"name"`
+	Strict bool                              `json:"strict"`
+	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
+}
+
 // ResponseFormat is the format of the response.
 type ResponseFormat struct {
-	Type string `json:"type"`
+	Type       string                    `json:"type"`
+	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
 // ChatMessage is a message in a chat request.
@@ -137,6 +157,9 @@ type ChatMessage struct { //nolint:musttag
 	// ToolCallID is the ID of the tool call this message is for.
 	// Only present in tool messages.
 	ToolCallID string `json:"tool_call_id,omitempty"`
+
+	// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
+	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
 
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
@@ -161,6 +184,9 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			// ToolCallID is the ID of the tool call this message is for.
 			// Only present in tool messages.
 			ToolCallID string `json:"tool_call_id,omitempty"`
+
+			// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
+			ReasoningContent string `json:"reasoning_content,omitempty"`
 		}(m)
 		return json.Marshal(msg)
 	}
@@ -176,6 +202,9 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
+
+		// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
+		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}(m)
 	return json.Marshal(msg)
 }
@@ -201,6 +230,9 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
+
+		// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
+		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -260,9 +292,12 @@ type ChatCompletionChoice struct {
 
 // ChatUsage is the usage of a chat completion request.
 type ChatUsage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens            int `json:"prompt_tokens"`
+	CompletionTokens        int `json:"completion_tokens"`
+	TotalTokens             int `json:"total_tokens"`
+	CompletionTokensDetails struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 // ChatCompletionResponse is a response to a chat request.
@@ -277,9 +312,12 @@ type ChatCompletionResponse struct {
 }
 
 type Usage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens            int `json:"prompt_tokens"`
+	CompletionTokens        int `json:"completion_tokens"`
+	TotalTokens             int `json:"total_tokens"`
+	CompletionTokensDetails struct {
+		ReasoningTokens int `json:"reasoning_tokens"`
+	} `json:"completion_tokens_details"`
 }
 
 // StreamedChatResponsePayload is a chunk from the stream.
@@ -296,6 +334,8 @@ type StreamedChatResponsePayload struct {
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
 			// ToolCalls is a list of tools that were called in the message.
 			ToolCalls []*ToolCall `json:"tool_calls,omitempty"`
+			// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
+			ReasoningContent string `json:"reasoning_content,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
@@ -315,6 +355,8 @@ type FunctionDefinition struct {
 	Description string `json:"description,omitempty"`
 	// Parameters is a list of parameters for the function.
 	Parameters any `json:"parameters"`
+	// Strict is a flag to enable structured output mode.
+	Strict bool `json:"strict,omitempty"`
 }
 
 // FunctionCallBehavior is the behavior to use when calling functions.
@@ -353,9 +395,6 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 
 	// Build request
 	body := bytes.NewReader(payloadBytes)
-	if c.baseURL == "" {
-		c.baseURL = defaultBaseURL
-	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", payload.Model), body)
 	if err != nil {
 		return nil, err
@@ -446,6 +485,7 @@ func combineStreamingChatResponse(
 			response.Usage.CompletionTokens = streamResponse.Usage.CompletionTokens
 			response.Usage.PromptTokens = streamResponse.Usage.PromptTokens
 			response.Usage.TotalTokens = streamResponse.Usage.TotalTokens
+			response.Usage.CompletionTokensDetails.ReasoningTokens = streamResponse.Usage.CompletionTokensDetails.ReasoningTokens
 		}
 
 		if len(streamResponse.Choices) == 0 {
@@ -455,6 +495,7 @@ func combineStreamingChatResponse(
 		chunk := []byte(choice.Delta.Content)
 		response.Choices[0].Message.Content += choice.Delta.Content
 		response.Choices[0].FinishReason = choice.FinishReason
+		response.Choices[0].Message.ReasoningContent = choice.Delta.ReasoningContent
 
 		if choice.Delta.FunctionCall != nil {
 			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
