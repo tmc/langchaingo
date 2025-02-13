@@ -67,6 +67,10 @@ type ChatRequest struct {
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 
+	// StreamingReasoningFunc is a function to be called for each reasoning and content chunk of a streaming response.
+	// Return an error to stop streaming early.
+	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
+
 	// Deprecated: use Tools instead.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// Deprecated: use ToolChoice instead.
@@ -380,7 +384,7 @@ type FunctionCall struct {
 }
 
 func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCompletionResponse, error) {
-	if payload.StreamingFunc != nil {
+	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		payload.Stream = true
 		if payload.StreamOptions == nil {
 			payload.StreamOptions = &StreamOptions{IncludeUsage: true}
@@ -421,7 +425,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
-	if payload.StreamingFunc != nil {
+	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)
 	}
 	// Parse response
@@ -493,9 +497,10 @@ func combineStreamingChatResponse(
 		}
 		choice := streamResponse.Choices[0]
 		chunk := []byte(choice.Delta.Content)
+		reasoningChunk := []byte(choice.Delta.ReasoningContent) // TODO: not sure if there will be any reasoning related to function call later, so just pass it here
 		response.Choices[0].Message.Content += choice.Delta.Content
 		response.Choices[0].FinishReason = choice.FinishReason
-		response.Choices[0].Message.ReasoningContent = choice.Delta.ReasoningContent
+		response.Choices[0].Message.ReasoningContent += choice.Delta.ReasoningContent
 
 		if choice.Delta.FunctionCall != nil {
 			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
@@ -510,6 +515,12 @@ func combineStreamingChatResponse(
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
+			}
+		}
+		if payload.StreamingReasoningFunc != nil {
+			err := payload.StreamingReasoningFunc(ctx, reasoningChunk, chunk)
+			if err != nil {
+				return nil, fmt.Errorf("streaming reasoning func returned an error: %w", err)
 			}
 		}
 	}
