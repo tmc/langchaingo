@@ -395,61 +395,11 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
 		}
 
-		schema := &genai.Schema{}
-		if ty, ok := params["type"]; ok {
-			tyString, ok := ty.(string)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-			}
-			schema.Type = convertToolSchemaType(tyString)
+		schema, err := convertToSchema(params, fmt.Sprintf("tool [%d]", i))
+		if err != nil {
+			return nil, err
 		}
 
-		paramProperties, ok := params["properties"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
-		}
-
-		schema.Properties = make(map[string]*genai.Schema)
-		for propName, propValue := range paramProperties {
-			valueMap, ok := propValue.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
-			}
-			schema.Properties[propName] = &genai.Schema{}
-
-			if ty, ok := valueMap["type"]; ok {
-				tyString, ok := ty.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-				}
-				schema.Properties[propName].Type = convertToolSchemaType(tyString)
-			}
-			if desc, ok := valueMap["description"]; ok {
-				descString, ok := desc.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for description", i)
-				}
-				schema.Properties[propName].Description = descString
-			}
-		}
-
-		if required, ok := params["required"]; ok {
-			if rs, ok := required.([]string); ok {
-				schema.Required = rs
-			} else if ri, ok := required.([]interface{}); ok {
-				rs := make([]string, 0, len(ri))
-				for _, r := range ri {
-					rString, ok := r.(string)
-					if !ok {
-						return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-					}
-					rs = append(rs, rString)
-				}
-				schema.Required = rs
-			} else {
-				return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-			}
-		}
 		genaiFuncDecl.Parameters = schema
 
 		genaiTools = append(genaiTools, &genai.Tool{
@@ -458,6 +408,114 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 	}
 
 	return genaiTools, nil
+}
+
+// schemaWorkItem represents a work item in the schema conversion process
+type schemaWorkItem struct {
+	schemaMap map[string]any
+	schema    *genai.Schema
+	errPrefix string
+}
+
+// convertToSchema converts a map[string]any to a genai.Schema using iteration
+func convertToSchema(schemaMap map[string]any, errPrefix string) (*genai.Schema, error) {
+	rootSchema := &genai.Schema{}
+
+	workQueue := []schemaWorkItem{{
+		schemaMap: schemaMap,
+		schema:    rootSchema,
+		errPrefix: errPrefix,
+	}}
+
+	for len(workQueue) > 0 {
+		item := workQueue[0]
+		workQueue = workQueue[1:]
+
+		if ty, ok := item.schemaMap["type"]; ok {
+			tyString, ok := ty.(string)
+			if !ok {
+				return nil, fmt.Errorf("%s: expected string for type", item.errPrefix)
+			}
+			item.schema.Type = convertToolSchemaType(tyString)
+		}
+
+		// Handle properties if type is object
+		if props, ok := item.schemaMap["properties"].(map[string]any); ok && item.schema.Type == genai.TypeObject {
+			item.schema.Properties = make(map[string]*genai.Schema)
+			for propName, propValue := range props {
+				valueMap, ok := propValue.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("%s, property [%v]: expect to find a value map", item.errPrefix, propName)
+				}
+
+				// Create new schema for property
+				propSchema := &genai.Schema{}
+				item.schema.Properties[propName] = propSchema
+
+				// Add to work queue
+				workQueue = append(workQueue, schemaWorkItem{
+					schemaMap: valueMap,
+					schema:    propSchema,
+					errPrefix: fmt.Sprintf("%s, property [%v]", item.errPrefix, propName),
+				})
+			}
+		}
+
+		// Handle items if type is array
+		if items, ok := item.schemaMap["items"].(map[string]any); ok && item.schema.Type == genai.TypeArray {
+			itemSchema := &genai.Schema{}
+			item.schema.Items = itemSchema
+
+			workQueue = append(workQueue, schemaWorkItem{
+				schemaMap: items,
+				schema:    itemSchema,
+				errPrefix: fmt.Sprintf("%s, items", item.errPrefix),
+			})
+		}
+
+		// Handle required fields
+		if required, ok := item.schemaMap["required"]; ok {
+			if rs, ok := required.([]string); ok {
+				item.schema.Required = rs
+			} else if ri, ok := required.([]interface{}); ok {
+				rs := make([]string, 0, len(ri))
+				for _, r := range ri {
+					rString, ok := r.(string)
+					if !ok {
+						return nil, fmt.Errorf("%s: expected string for required", item.errPrefix)
+					}
+					rs = append(rs, rString)
+				}
+				item.schema.Required = rs
+			} else {
+				return nil, fmt.Errorf("%s: expected []string or []interface{} for required", item.errPrefix)
+			}
+		}
+
+		// Handle description
+		if desc, ok := item.schemaMap["description"]; ok {
+			descString, ok := desc.(string)
+			if !ok {
+				return nil, fmt.Errorf("%s: expected string for description", item.errPrefix)
+			}
+			item.schema.Description = descString
+		}
+
+		// Handle enum
+		if enum, ok := item.schemaMap["enum"].([]interface{}); ok {
+			enumValues := make([]string, 0, len(enum))
+			for _, e := range enum {
+				eString, ok := e.(string)
+				if !ok {
+					return nil, fmt.Errorf("%s: expected string for enum value", item.errPrefix)
+				}
+				enumValues = append(enumValues, eString)
+			}
+			item.schema.Enum = enumValues
+		}
+	}
+
+	return rootSchema, nil
 }
 
 // convertToolSchemaType converts a tool's schema type from its langchaingo
