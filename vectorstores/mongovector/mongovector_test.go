@@ -2,9 +2,9 @@ package mongovector
 
 import (
 	"context"
-	"errors"
-	"flag"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -12,6 +12,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -20,12 +22,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-// Run the test without setting up the test space.
-//
-//nolint:gochecknoglobals
-var testWithoutSetup = flag.Bool("no-atlas-setup", false, "don't create required indexes")
-
 const (
+	testURI                   = "MONGODB_VECTOR_TEST_URI"
 	testDB                    = "langchaingo-test"
 	testColl                  = "vstore"
 	testIndexDP1536           = "vector_index_dotProduct_1536"
@@ -35,34 +33,117 @@ const (
 	testIndexSize3            = 3
 )
 
-func TestMain(m *testing.M) {
-	flag.Parse()
+type atlasContainer struct {
+	testcontainers.Container
+	URI string
+}
 
-	defer func() {
-		os.Exit(m.Run())
-	}()
-
-	if *testWithoutSetup {
-		return
+func setupAtlas(ctx context.Context) (*atlasContainer, error) {
+	req := testcontainers.ContainerRequest{
+		Image:        "mongodb/mongodb-atlas-local",
+		ExposedPorts: []string{"27017/tcp"},
+		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(1 * time.Second),
 	}
 
-	// Create the required vector search indexes for the tests.
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	var atlasC *atlasContainer
+	if container != nil {
+		atlasC = &atlasContainer{Container: container}
+	}
+
+	ip, err := container.Host(ctx)
+	if err != nil {
+		return atlasC, err
+	}
+
+	mappedPort, err := container.MappedPort(ctx, "27017")
+	if err != nil {
+		return atlasC, err
+	}
+
+	uri := &url.URL{
+		Scheme:   "mongodb",
+		Host:     net.JoinHostPort(ip, mappedPort.Port()),
+		Path:     "/",
+		RawQuery: "directConnection=true",
+	}
+
+	atlasC.URI = uri.String()
+
+	return atlasC, nil
+}
+
+// resetVectorStore will reset the vector space defined by the given collection.
+func resetVectorStore(t *testing.T, coll *mongo.Collection) {
+	t.Helper()
+
+	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
+
+	_, err := coll.DeleteMany(context.Background(), filter)
+	assert.NoError(t, err, "failed to reset vector store")
+}
+
+// setupTest will prepare the Atlas vector search for adding to and searching
+// a vector space.
+func setupTest(t *testing.T, dim int, index string) Store {
+	t.Helper()
+
+	uri := os.Getenv(testURI)
+	if uri == "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		container, err := setupAtlas(ctx)
+		require.NoError(t, err)
+
+		uri = container.URI
+		os.Setenv(testURI, uri)
+	}
+
+	require.NotEmpty(t, uri, "URI required")
+
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
+	require.NoError(t, err, "failed to connect to MongoDB server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := resetForE2E(ctx, testIndexDP1536, testIndexSize1536, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 1536: %v\n", err)
-	}
+	err = client.Ping(ctx, nil)
+	require.NoError(t, err, "failed to ping server")
+
+	time.Sleep(10 * time.Second) // Let the container warm up
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	err = resetForE2E(ctx, client, testIndexDP1536, testIndexSize1536, nil)
+	require.NoError(t, err)
 
 	filters := []string{"pageContent"}
-	if err := resetForE2E(ctx, testIndexDP1536WithFilter, testIndexSize1536, filters); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 1536 w filter: %v\n", err)
-	}
+	err = resetForE2E(ctx, client, testIndexDP1536WithFilter, testIndexSize1536, filters)
+	require.NoError(t, err)
 
-	if err := resetForE2E(ctx, testIndexDP3, testIndexSize3, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "setup failed for 3: %v\n", err)
-	}
+	err = resetForE2E(ctx, client, testIndexDP3, testIndexSize3, nil)
+	require.NoError(t, err)
+
+	// Create the vectorstore collection
+	err = client.Database(testDB).CreateCollection(context.Background(), testColl)
+	require.NoError(t, err, "failed to create collection")
+
+	coll := client.Database(testDB).Collection(testColl)
+	resetVectorStore(t, coll)
+
+	emb := newMockEmbedder(dim)
+	store := New(coll, emb, WithIndex(index))
+
+	return store
 }
 
 func TestNew(t *testing.T) {
@@ -120,44 +201,6 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, test.wantPath, store.path)
 		})
 	}
-}
-
-// resetVectorStore will reset the vector space defined by the given collection.
-func resetVectorStore(t *testing.T, coll *mongo.Collection) {
-	t.Helper()
-
-	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
-
-	_, err := coll.DeleteMany(context.Background(), filter)
-	assert.NoError(t, err, "failed to reset vector store")
-}
-
-// setupTest will prepare the Atlas vector search for adding to and searching
-// a vector space.
-func setupTest(t *testing.T, dim int, index string) Store {
-	t.Helper()
-
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		t.Skip("Must set MONGODB_URI to run test")
-	}
-
-	require.NotEmpty(t, uri, "MONGODB_URI required")
-
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
-	require.NoError(t, err, "failed to connect to MongoDB server")
-
-	// Create the vectorstore collection
-	err = client.Database(testDB).CreateCollection(context.Background(), testColl)
-	require.NoError(t, err, "failed to create collection")
-
-	coll := client.Database(testDB).Collection(testColl)
-	resetVectorStore(t, coll)
-
-	emb := newMockEmbedder(dim)
-	store := New(coll, emb, WithIndex(index))
-
-	return store
 }
 
 //nolint:paralleltest
@@ -536,27 +579,19 @@ func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) 
 		return false, fmt.Errorf("failed to list search indexes: %w", err)
 	}
 
+	if cursor == nil || cursor.Current == nil {
+		return false, nil
+	}
+
 	name := cursor.Current.Lookup("name").StringValue()
 	queryable := cursor.Current.Lookup("queryable").Boolean()
 
 	return name == idx && queryable, nil
 }
 
-func resetForE2E(ctx context.Context, idx string, dim int, filters []string) error {
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		return errors.New("MONGODB_URI required")
-	}
-
-	client, err := mongo.Connect(options.Client().ApplyURI(uri))
-	if err != nil {
-		return fmt.Errorf("failed to connect to server: %w", err)
-	}
-
-	defer func() { _ = client.Disconnect(ctx) }()
-
+func resetForE2E(ctx context.Context, client *mongo.Client, idx string, dim int, filters []string) error {
 	// Create the vectorstore collection
-	err = client.Database(testDB).CreateCollection(ctx, testColl)
+	err := client.Database(testDB).CreateCollection(ctx, testColl)
 	if err != nil {
 		return fmt.Errorf("failed to create vector store collection: %w", err)
 	}
@@ -585,7 +620,7 @@ func resetForE2E(ctx context.Context, idx string, dim int, filters []string) err
 
 	_, err = createVectorSearchIndex(ctx, coll, idx, fields...)
 	if err != nil {
-		return fmt.Errorf("faield to create index: %w", err)
+		return fmt.Errorf("failed to create index: %w", err)
 	}
 
 	return nil
