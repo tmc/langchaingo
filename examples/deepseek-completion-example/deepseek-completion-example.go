@@ -32,13 +32,8 @@ func main() {
 		content,
 		llms.WithMaxTokens(2000),
 		llms.WithTemperature(0.7),
-		llms.WithStreamingReasoningFunc(func(ctx context.Context, reasoningChunk []byte, chunk []byte) error {
-			if len(reasoningChunk) > 0 {
-				fmt.Printf("Streaming Reasoning: %s\n", string(reasoningChunk))
-			}
-			if len(chunk) > 0 {
-				fmt.Printf("Streaming Content: %s\n", string(chunk))
-			}
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
 			return nil
 		}),
 	)
