@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -26,7 +25,7 @@ func getValues(t *testing.T) (string, string) {
 	scheme := os.Getenv("WEAVIATE_SCHEME")
 	host := os.Getenv("WEAVIATE_HOST")
 	if scheme == "" || host == "" {
-		weaviateContainer, err := tcweaviate.RunContainer(context.Background(), testcontainers.WithImage("semitechnologies/weaviate:1.25.4"))
+		weaviateContainer, err := tcweaviate.Run(context.Background(), "semitechnologies/weaviate:1.25.4")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}

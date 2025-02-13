@@ -1,27 +1,252 @@
-package pgvector_test
+package dolt_test
 
 import (
+	"bytes"
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
+	"io"
+	"net"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/tmc/langchaingo/vectorstores"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	"github.com/tmc/langchaingo/vectorstores/dolt"
 )
+
+var (
+	//nolint:gochecknoglobals
+	doltExec string
+	//nolint:gochecknoglobals
+	doltExecOnce sync.Once
+)
+
+type testDoltServer struct {
+	t              *testing.T
+	Cmd            *exec.Cmd
+	db             *sql.DB
+	Stdout         io.ReadCloser
+	Stderr         io.ReadCloser
+	Name           string
+	StderrString   string
+	StderrCaptured chan (bool)
+	WaitError      error
+	Waited         chan (bool)
+	CmdDir         string
+	Host           string
+	Port           string
+	Password       string
+}
+
+func newTestDoltServer(t *testing.T) *testDoltServer {
+	t.Helper()
+	return &testDoltServer{
+		t:              t,
+		Waited:         make(chan bool),
+		StderrCaptured: make(chan bool),
+		Name:           "vectorstore_dolt_test",
+	}
+}
+
+func mustGetDoltExec(t *testing.T) string {
+	t.Helper()
+
+	doltCommand := "dolt"
+	if runtime.GOOS == "windows" {
+		doltCommand = "dolt.exe"
+	}
+
+	doltExecOnce.Do(func() {
+		arg := os.Getenv("DOLT_BIN")
+		if arg != "" {
+			if filepath.IsAbs(arg) {
+				doltExec = arg
+				return
+			}
+			wd, _ := os.Getwd()
+			doltExec = filepath.Join(wd, arg)
+			return
+		}
+		de, err := exec.LookPath(doltCommand)
+		if err != nil {
+			t.Skip("Dolt binary not available")
+		}
+		doltExec = de
+	})
+	return doltExec
+}
+
+func (di *testDoltServer) ConnectionString() string {
+	return fmt.Sprintf("%s:%s@(%s:%s)/%s?parseTime=true&multiStatements=true", "root", di.Password, di.Host, di.Port, di.Name)
+}
+
+//nolint:funlen
+func (di *testDoltServer) Start() error {
+	tmpDir, err := os.MkdirTemp("", "dolt-vectorstore-tests*")
+	require.NoError(di.t, err)
+
+	di.CmdDir = tmpDir
+
+	doltInit := exec.Command(mustGetDoltExec(di.t), "init") //nolint:gosec
+	doltInit.Env = os.Environ()
+	doltInit.Dir = tmpDir
+	doltInit.Stdout = os.Stdout
+	doltInit.Stderr = os.Stderr
+	err = doltInit.Run()
+	require.NoError(di.t, err)
+
+	createDB := exec.Command(mustGetDoltExec(di.t), "sql", "-q", fmt.Sprintf("CREATE DATABASE %s;", di.Name)) //nolint:gosec
+	createDB.Env = os.Environ()
+	createDB.Dir = tmpDir
+	createDB.Stdout = os.Stdout
+	createDB.Stderr = os.Stderr
+	err = createDB.Run()
+	require.NoError(di.t, err)
+
+	port, err := getFreePort()
+	require.NoError(di.t, err)
+
+	di.Host = "0.0.0.0"
+	di.Port = port
+	di.Password = ""
+
+	di.Cmd = exec.Command( //nolint:gosec
+		mustGetDoltExec(di.t),
+		"sql-server",
+		"--host", di.Host,
+		"--port", di.Port,
+	)
+
+	di.Cmd.Env = di.Cmd.Environ()
+	di.Cmd.Dir = di.CmdDir
+
+	di.Stdout, err = di.Cmd.StdoutPipe()
+	require.NoError(di.t, err)
+	di.Stderr, err = di.Cmd.StderrPipe()
+	require.NoError(di.t, err)
+
+	err = di.Cmd.Start()
+	require.NoError(di.t, err)
+	go func() {
+		di.WaitError = di.Cmd.Wait()
+		close(di.Waited)
+	}()
+
+	go func() {
+		var buffer bytes.Buffer
+		_, err := buffer.ReadFrom(di.Stderr)
+		if err != nil {
+			panic(err)
+		}
+		di.StderrString = buffer.String()
+		close(di.StderrCaptured)
+	}()
+
+	dbChan := make(chan *sql.DB)
+	go func() {
+		for i := 0; i < 50; i++ {
+			db, err := sql.Open("mysql", di.ConnectionString())
+			if err == nil {
+				err = db.Ping()
+				if err == nil {
+					dbChan <- db
+					return
+				}
+			}
+			select {
+			case <-di.Waited:
+				close(dbChan)
+				return
+			default:
+				time.Sleep(100 * time.Millisecond)
+			}
+		}
+		err = di.Shutdown()
+		if err != nil {
+			panic(err)
+		}
+		close(dbChan)
+	}()
+	di.db = <-dbChan
+
+	return nil
+}
+
+func (di *testDoltServer) IsRunning() bool {
+	return di.Cmd.Process != nil && di.Cmd.ProcessState == nil && di.db != nil && di.db.Ping() == nil
+}
+
+func (di *testDoltServer) Shutdown() error {
+	defer os.RemoveAll(di.CmdDir)
+
+	killed := false
+	if runtime.GOOS == "windows" {
+		kill := exec.Command("taskkill", "/T", "/F", "/PID", strconv.Itoa(di.Cmd.Process.Pid)) //nolint:gosec
+		kill.Stdout = os.Stdout
+		kill.Stderr = os.Stderr
+		err := kill.Run()
+		if err != nil {
+			return err
+		}
+		killed = true
+	} else {
+		err := di.Cmd.Process.Signal(os.Interrupt)
+		if err != nil {
+			return err
+		}
+	}
+	<-di.Waited
+	<-di.StderrCaptured
+	if killed && di.WaitError != nil {
+		return nil
+	}
+	return di.WaitError
+}
+
+func (di *testDoltServer) ErrorMessage() string {
+	return di.StderrString
+}
+
+func (di *testDoltServer) DB() (*sql.DB, error) {
+	if !di.IsRunning() {
+		return nil, errors.New("dolt server is not running")
+	}
+	return di.db, nil
+}
+
+func getFreePort() (string, error) {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return "", err
+	}
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return "", err
+	}
+	defer l.Close()
+	addr, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		return "", errors.New("failed to get port")
+	}
+	return fmt.Sprintf("%d", addr.Port), nil
+}
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
@@ -30,57 +255,44 @@ func preCheckEnvSetting(t *testing.T) string {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
-	if pgvectorURL == "" {
-		pgVectorContainer, err := tcpostgres.Run(
-			context.Background(),
-			"docker.io/pgvector/pgvector:pg16",
-			tcpostgres.WithDatabase("db_test"),
-			tcpostgres.WithUsername("user"),
-			tcpostgres.WithPassword("passw0rd!"),
-			testcontainers.WithWaitStrategy(
-				wait.ForLog("database system is ready to accept connections").
-					WithOccurrence(2).
-					WithStartupTimeout(30*time.Second)),
-		)
+	doltURL := os.Getenv("DOLT_CONNECTION_STRING")
+	if doltURL == "" {
+		di := newTestDoltServer(t)
+		err := di.Start()
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
+			require.NoError(t, di.Shutdown())
 		})
-
-		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
-		require.NoError(t, err)
-
-		pgvectorURL = str
+		doltURL = di.ConnectionString()
 	}
 
-	return pgvectorURL
+	return doltURL
 }
 
-func makeNewCollectionName() string {
-	return fmt.Sprintf("test-collection-%s", uuid.New().String())
+func makeNewDatabaseName() string {
+	return fmt.Sprintf("test-database-%s", uuid.New().String())
 }
 
-func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, pgvectorURL string) {
+func cleanupTestArtifacts(ctx context.Context, t *testing.T, s dolt.Store, doltURL string) {
 	t.Helper()
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	tx, err := conn.Begin(ctx)
+	tx, err := db.BeginTx(ctx, nil)
 	require.NoError(t, err)
 
-	require.NoError(t, s.RemoveCollection(ctx, tx))
+	require.NoError(t, s.RemoveDatabase(ctx, tx))
 
-	require.NoError(t, tx.Commit(ctx))
+	require.NoError(t, tx.Commit())
 }
 
-func TestPgvectorStoreRest(t *testing.T) {
+func TestDoltStoreRest(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -90,19 +302,19 @@ func TestPgvectorStoreRest(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -119,9 +331,9 @@ func TestPgvectorStoreRest(t *testing.T) {
 	require.Equal(t, "japan", docs[0].Metadata["country"])
 }
 
-func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
+func TestDoltStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -131,19 +343,19 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
@@ -164,7 +376,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 		ctx,
 		"Which of these are cities in Japan",
 		10,
-		vectorstores.WithScoreThreshold(0.8),
+		vectorstores.WithScoreThreshold(0.6), // Dolt uses euclidean squared distance
 	)
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
@@ -179,9 +391,9 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 10)
 }
 
-func TestPgvectorStoreSimilarityScore(t *testing.T) {
+func TestDoltStoreSimilarityScore(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -191,19 +403,19 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo is the capital city of Japan."},
@@ -212,21 +424,22 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	// test with a score threshold of 0.8, expected 6 documents
+	// Dolt uses euclidean squared distance
+	// test with a score threshold of 0.6, expected 6 documents
 	docs, err := store.SimilaritySearch(
 		ctx,
 		"What is the capital city of Japan?",
 		3,
-		vectorstores.WithScoreThreshold(0.8),
+		vectorstores.WithScoreThreshold(0.6),
 	)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-	require.True(t, docs[0].Score > 0.9)
+	require.True(t, docs[0].Score > 0.8)
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -236,19 +449,19 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -286,12 +499,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	genaiKey := os.Getenv("GENAI_API_KEY")
 	if genaiKey == "" {
 		t.Skip("GENAI_API_KEY not set")
 	}
-	collectionName := makeNewCollectionName()
+	databaseName := makeNewDatabaseName()
 
 	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
 	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
@@ -299,19 +512,19 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	e, err := embeddings.NewEmbedder(googleLLM)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(collectionName),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(databaseName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Beijing"},
@@ -326,16 +539,16 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	e, err = embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	store, err = pgvector.New(
+	store, err = dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(false),
-		pgvector.WithCollectionName(collectionName),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(false),
+		dolt.WithDatabaseName(databaseName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -360,9 +573,9 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	require.Len(t, docs, 5)
 }
 
-func TestPgvectorAsRetriever(t *testing.T) {
+func TestDoltAsRetriever(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -372,19 +585,19 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -408,9 +621,9 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
 }
 
-func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
+func TestDoltAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -420,19 +633,19 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -450,7 +663,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithScoreThreshold(0.8)),
+			vectorstores.ToRetriever(store, 5, vectorstores.WithScoreThreshold(0.7)),
 		),
 		"What colors is each piece of furniture next to the desk?",
 	)
@@ -461,9 +674,9 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.Contains(t, result, "beige", "expected beige in result")
 }
 
-func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
+func TestDoltAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -473,19 +686,19 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -542,9 +755,9 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.Contains(t, result, "yellow", "expected yellow in result")
 }
 
-func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
+func TestDoltAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -554,19 +767,19 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -615,7 +828,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -625,19 +838,19 @@ func TestDeduplicater(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -662,7 +875,7 @@ func TestDeduplicater(t *testing.T) {
 
 func TestWithAllOptions(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	doltURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -672,27 +885,27 @@ func TestWithAllOptions(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 	require.NoError(t, err)
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", doltURL)
 	require.NoError(t, err)
-	defer conn.Close(ctx)
+	defer db.Close()
 
-	store, err := pgvector.New(
+	store, err := dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
-		pgvector.WithCollectionTableName("collection_table_name"),
-		pgvector.WithEmbeddingTableName("embedding_table_name"),
-		pgvector.WithCollectionMetadata(map[string]any{
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
+		dolt.WithCollectionTableName("collection_table_name"),
+		dolt.WithEmbeddingTableName("embedding_table_name"),
+		dolt.WithDatabaseMetadata(map[string]any{
 			"key": "value",
 		}),
-		pgvector.WithVectorDimensions(1536),
-		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+		dolt.WithVectorDimensions(1536),
+		dolt.WithCreateEmbeddingIndexAfterAddDocuments(true),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -708,23 +921,23 @@ func TestWithAllOptions(t *testing.T) {
 	require.Equal(t, "tokyo", docs[0].PageContent)
 	require.Equal(t, "japan", docs[0].Metadata["country"])
 
-	store, err = pgvector.New(
+	store, err = dolt.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
-		pgvector.WithCollectionTableName("collection_table_name1"),
-		pgvector.WithEmbeddingTableName("embedding_table_name1"),
-		pgvector.WithCollectionMetadata(map[string]any{
+		dolt.WithDB(db),
+		dolt.WithEmbedder(e),
+		dolt.WithPreDeleteDatabase(true),
+		dolt.WithDatabaseName(makeNewDatabaseName()),
+		dolt.WithCollectionTableName("collection_table_name1"),
+		dolt.WithEmbeddingTableName("embedding_table_name1"),
+		dolt.WithDatabaseMetadata(map[string]any{
 			"key": "value",
 		}),
-		pgvector.WithVectorDimensions(1536),
-		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+		dolt.WithVectorDimensions(1536),
+		dolt.WithCreateEmbeddingIndexAfterAddDocuments(true),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, doltURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
