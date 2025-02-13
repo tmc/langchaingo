@@ -4,7 +4,7 @@ go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.12
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 replace github.com/tmc/langchaingo => ../../
 

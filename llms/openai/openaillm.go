@@ -91,14 +91,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
-		Model:            opts.Model,
-		StopWords:        opts.StopWords,
-		Messages:         chatMsgs,
-		StreamingFunc:    opts.StreamingFunc,
-		Temperature:      opts.Temperature,
-		N:                opts.N,
-		FrequencyPenalty: opts.FrequencyPenalty,
-		PresencePenalty:  opts.PresencePenalty,
+		Model:                  opts.Model,
+		StopWords:              opts.StopWords,
+		Messages:               chatMsgs,
+		StreamingFunc:          opts.StreamingFunc,
+		StreamingReasoningFunc: opts.StreamingReasoningFunc,
+		Temperature:            opts.Temperature,
+		N:                      opts.N,
+		FrequencyPenalty:       opts.FrequencyPenalty,
+		PresencePenalty:        opts.PresencePenalty,
 
 		MaxCompletionTokens: opts.MaxTokens,
 

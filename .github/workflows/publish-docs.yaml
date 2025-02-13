@@ -1,49 +1,77 @@
 name: Deploy to GitHub Pages
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/publish-docs.yaml'
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: write
 
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'github-pages' || 'preview' }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: yarn
-          cache-dependency-path: 'docs/package-lock.json'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
 
-      - name: Install dependencies
+      - name: Build docs
         working-directory: docs
-        run: yarn install --frozen-lockfile
-      - name: Build website
-        working-directory: docs
-        run: yarn build
+        run: |
+          npm ci
+          npm run build
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: 'docs/build'
-      - name: Deploy to GitHub Pages
+          path: docs/build
+          name: github-pages
+
+      - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v2
+        if: |
+          github.ref == 'refs/heads/main' ||
+          github.ref == 'refs/heads/docs-test' ||
+          startsWith(github.ref, 'refs/heads/docs/')
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
+          preview: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Comment PR
+        if: |
+          github.event_name == 'pull_request' &&
+          (github.ref == 'refs/heads/docs-test' ||
+           startsWith(github.ref, 'refs/heads/docs/'))
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deployment.outputs.page_url }}';
+            const message = `📚 Documentation preview available at: ${url}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
