@@ -31,13 +31,23 @@ Question: {{.input}}
 {{.agent_scratchpad}}`
 )
 
-func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
-	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+type mrklTemplateBase struct {
+	Template       string
+	InputVariables []string
+}
 
+func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix mrklTemplateBase) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix.Template, instructions.Template, suffix.Template}, "\n\n")
+	inputVariables := make([]string, 0, len(prefix.InputVariables)+
+		len(instructions.InputVariables)+
+		len(suffix.InputVariables))
+	inputVariables = append(inputVariables, prefix.InputVariables...)
+	inputVariables = append(inputVariables, instructions.InputVariables...)
+	inputVariables = append(inputVariables, suffix.InputVariables...)
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "agent_scratchpad", "today"},
+		InputVariables: inputVariables,
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),
