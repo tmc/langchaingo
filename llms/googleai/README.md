@@ -1,8 +1,10 @@
 This directory contains langchaingo provider for Google's models.
 
-* In the main `googleai` directory: provider for Google AI
+* In the main `googlegenai` directory: provider for Google AI, supports (Vertex & Gemini)
   (https://ai.google.dev/)
-* In the `vertex` directory: provider for GCP Vertex AI
+* In the main `googleai` directory: provider for LEGACY Google AI
+  (https://ai.google.dev/)
+* In the `vertex` directory: provider for GCP LEGACY Vertex AI
   (https://cloud.google.com/vertex-ai/)
 * In the `palm` directory: provider for the legacy PaLM models.
 
