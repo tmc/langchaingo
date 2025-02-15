@@ -1,7 +1,6 @@
 package agents
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
@@ -70,7 +69,6 @@ func TestGetMrklPromptVars(t *testing.T) {
 		}
 
 		temp := opt.getMrklPrompt([]tools.Tool{})
-		fmt.Println("%%%####@@@@", temp.Template)
 		require.Equal(t, temp.Template, tc.expectPromptTemplate.Template)
 		tempVariables := make(map[string]struct{})
 		for _, v := range opt.promptPrefixInputVariables {
