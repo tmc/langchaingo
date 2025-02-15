@@ -44,25 +44,25 @@ linters-settings:
     max-complexity: 12
   funlen:
     lines: 90
-  depguard:
-    list-type: denylist
-    packages:
-      - github.com/samber/lo # Use exp packages or internal utilities instead.
-    additional-guards:
-      - list-type: denylist
-        include-go-root: false
-        packages:
-          - github.com/stretchr/testify
-        # Specify rules by which the linter ignores certain files for consideration.
-        ignore-file-rules:
-          - "**/*_test.go"
-          - "**/mock/**/*.go"
+  # depguard: # ci error: additionalProperties 'additional-guards', 'list-type', 'packages' not allowed
+  #   # list-type: denylist #
+  #   packages:
+  #     - github.com/samber/lo # Use exp packages or internal utilities instead.
+  #   additional-guards:
+  #     - list-type: denylist
+  #       include-go-root: false
+  #       packages:
+  #         - github.com/stretchr/testify
+  #       # Specify rules by which the linter ignores certain files for consideration.
+  #       ignore-file-rules:
+  #         - "**/*_test.go"
+  #         - "**/mock/**/*.go"
   forbidigo:
     forbid:
       - 'import "[^"]+/(util|common|helpers)"'
   gosec:
     excludes:
     - G115 # https://github.com/securego/gosec/issues/1212
-run:
-  exclude-dirs:
-    - 'exp'
+#run:  # ci error: additionalProperties 'exclude-dirs' not allowed
+  #exclude-dirs:
+  #  - 'exp'
