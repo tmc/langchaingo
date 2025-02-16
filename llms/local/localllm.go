@@ -100,6 +100,48 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
+func (o *LLM) GenerateStreamContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+	}
+
+	opts := &llms.CallOptions{}
+	for _, opt := range options {
+		opt(opts)
+	}
+
+	// If o.client.GlobalAsArgs is true
+	if o.client.GlobalAsArgs {
+		// Then add the option to the args in --key=value format
+		o.appendGlobalsToArgs(*opts)
+	}
+
+	// Assume we get a single text message
+	msg0 := messages[0]
+	part := msg0.Parts[0]
+	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
+		Prompt: part.(llms.TextContent).Text,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				Content: result.Text,
+			},
+		},
+	}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
+
+	return resp, nil
+}
+
 // New creates a new local LLM implementation.
 func New(opts ...Option) (*LLM, error) {
 	options := &options{
