@@ -3,7 +3,9 @@ package agents
 import (
 	"context"
 	_ "embed"
+	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -166,7 +168,9 @@ var _defaultConversationalSuffix string //nolint:gochecknoglobals
 
 func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
 	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
-
+	if err := checkConversationalTemplate(template); err != nil {
+		log.Println(err.Error())
+	}
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
@@ -177,4 +181,21 @@ func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix
 			"history":           "",
 		},
 	}
+}
+
+// checkConversationalPrompt check ConversationalPrompt of Options
+func checkConversationalTemplate(template string) error {
+	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
+	matches := re.FindAllStringSubmatch(template, -1)
+	matchesMap := make(map[string]struct{})
+	for _, match := range matches {
+		matchesMap[match[1]] = struct{}{}
+	}
+	mustMatches := []string{"tool_names", "tool_descriptions", "history"}
+	for _, v := range mustMatches {
+		if _, ok := matchesMap[v]; !ok {
+			return errors.New(v + " is not contained in option template")
+		}
+	}
+	return nil
 }

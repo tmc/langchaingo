@@ -1,7 +1,10 @@
 package agents
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"regexp"
 	"strings"
 
 	"github.com/tmc/langchaingo/prompts"
@@ -44,6 +47,11 @@ func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix mrklTempl
 	inputVariables = append(inputVariables, prefix.InputVariables...)
 	inputVariables = append(inputVariables, instructions.InputVariables...)
 	inputVariables = append(inputVariables, suffix.InputVariables...)
+
+	if err := checkMrklTemplate(template); err != nil {
+		log.Println(err.Error())
+	}
+
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
@@ -53,6 +61,23 @@ func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix mrklTempl
 			"tool_descriptions": toolDescriptions(tools),
 		},
 	}
+}
+
+// checkMrklPrompt check Prompt for PartialVariables
+func checkMrklTemplate(template string) error {
+	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
+	matches := re.FindAllStringSubmatch(template, -1)
+	matchesMap := make(map[string]struct{})
+	for _, match := range matches {
+		matchesMap[match[1]] = struct{}{}
+	}
+	mustMatches := []string{"tool_names", "tool_descriptions"}
+	for _, v := range mustMatches {
+		if _, ok := matchesMap[v]; !ok {
+			return errors.New(v + " is not contained in option template")
+		}
+	}
+	return nil
 }
 
 func toolNames(tools []tools.Tool) string {

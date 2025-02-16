@@ -1,6 +1,7 @@
 package agents
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
@@ -86,5 +87,14 @@ func TestGetMrklPromptVars(t *testing.T) {
 			}
 		}
 	}
+
+}
+func TestGetConversationPrompt(t *testing.T) {
+	opt := conversationalDefaultOptions()
+	WithPromptFormatInstructions("aaa{{.tool_names}}")(&opt)
+	WithPromptPrefix("bbb{{.tool_descriptions}}")(&opt)
+	WithPromptSuffix("ccc{{.history}}")(&opt)
+	temp := opt.getConversationalPrompt([]tools.Tool{})
+	fmt.Println(temp.Format(map[string]any{}))
 
 }

@@ -72,6 +72,7 @@ func (co Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
 	if co.prompt.Template != "" {
 		return co.prompt
 	}
+
 	return createMRKLPrompt(
 		tools,
 		mrklTemplateBase{co.promptPrefix, co.promptPrefixInputVariables},
