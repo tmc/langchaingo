@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (
@@ -28,6 +29,7 @@ func TestRunInference(t *testing.T) {
 		wantErr  string
 	}{
 		{"ok", &InferenceRequest{}, &InferenceResponse{Text: goodResponse}, ""},
+		{"stream ok", &InferenceRequest{Stream: true}, &InferenceResponse{Text: goodResponse}, ""},
 		{"not ok", &InferenceRequest{TopK: -1}, nil, errMsg},
 	}
 
@@ -39,9 +41,17 @@ func TestRunInference(t *testing.T) {
 			t.Parallel()
 			client, err := New("token", "model", server.URL)
 			require.NoError(t, err)
-
-			resp, err := client.RunInference(context.TODO(), tc.req)
+			var streamResponse string
+			resp, err := client.RunInference(context.TODO(), tc.req, &llms.CallOptions{
+				StreamingFunc: func(_ context.Context, chunk []byte) error {
+					streamResponse += string(chunk)
+					return nil
+				},
+			})
 			assert.Equal(t, tc.expected, resp)
+			if tc.req.Stream {
+				assert.Equal(t, tc.expected.Text, streamResponse)
+			}
 			if tc.wantErr != "" {
 				require.ErrorContains(t, err, tc.wantErr)
 			}
@@ -60,10 +70,26 @@ func mockServer(t *testing.T) *httptest.Server {
 		err = json.Unmarshal(b, &infReq)
 		require.NoError(t, err)
 
-		if infReq.Parameters.TopK == -1 {
+		switch {
+		case infReq.Parameters.TopK == -1:
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = w.Write([]byte(fmt.Sprintf(`{"error":["%s"]}`, errMsg)))
-		} else {
+		case infReq.Stream:
+			// set Content-Type text/event-stream
+			w.Header().Set("Content-Type", "text/event-stream")
+			w.Header().Set("Cache-Control", "no-cache")
+			w.Header().Set("Connection", "keep-alive")
+
+			flusher, ok := w.(http.Flusher)
+			if !ok {
+				http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprintf(w, `data: {"index":6,"token":{"id":27121,"text":"I hug, you hug, ","logprob":-0.023592351,"special":false},"generated_text":null,"details":null}`+"\n\n")
+			flusher.Flush()
+			fmt.Fprintf(w, `data: {"index":6,"token":{"id":27121,"text":"we all hug!","logprob":-0.023592351,"special":false},"generated_text":"%s","details":null}`+"\n\n", goodResponse)
+			flusher.Flush()
+		default:
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(fmt.Sprintf(`[{"generated_text":"%s"}]`, goodResponse)))
 		}

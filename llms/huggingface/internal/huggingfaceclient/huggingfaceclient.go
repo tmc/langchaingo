@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 var (
@@ -39,16 +41,19 @@ type InferenceRequest struct {
 	MaxLength         int           `json:"max_length,omitempty"`
 	RepetitionPenalty float64       `json:"repetition_penalty,omitempty"`
 	Seed              int           `json:"seed,omitempty"`
+	Stream            bool          `json:"stream,omitempty"`
+	StopWords         []string      `json:"stop_words,omitempty"`
 }
 
 type InferenceResponse struct {
 	Text string `json:"generated_text"`
 }
 
-func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
+func (c *Client) RunInference(ctx context.Context, request *InferenceRequest, options ...*llms.CallOptions) (*InferenceResponse, error) {
 	payload := &inferencePayload{
 		Model:  request.Model,
 		Inputs: request.Prompt,
+		Stream: request.Stream,
 		Parameters: parameters{
 			Temperature:       request.Temperature,
 			TopP:              request.TopP,
@@ -57,9 +62,10 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 			MaxLength:         request.MaxLength,
 			RepetitionPenalty: request.RepetitionPenalty,
 			Seed:              request.Seed,
+			Stop:              request.StopWords,
 		},
 	}
-	resp, err := c.runInference(ctx, payload)
+	resp, err := c.runInference(ctx, payload, options...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run inference: %w", err)
 	}
