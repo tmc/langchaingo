@@ -1,9 +1,12 @@
 // Package mongovector implements a vector store using MongoDB as the backend.
 //
-// The mongovector package provides a way to store and retrieve document embeddings
-// using MongoDB's vector search capabilities. It implements the VectorStore
-// interface from the vectorstores package, allowing it to be used interchangeably
-// with other vector store implementations.
+// The mongovector package provide a way for users to read and write to a
+// MongoDB Atlas Database as a vector store using the MongoDB Go Driver and a
+// supported embedding service.
+//
+// Project goals:
+//   - Allows users to embed data using various services, including OpenAI, Ollama, Mistral, and others.
+//   - Implement the VectorStore interface, providing methods to add documents and perform similarity searches.
 //
 // Key features:
 //   - Store document embeddings in MongoDB
@@ -14,6 +17,10 @@
 // Main types:
 //   - Store: The main type that implements the VectorStore interface
 //   - Option: A function type for configuring the Store
+//
+// Installation:
+//
+//	go get github.com/tmc/langchaingo/vectorstores/mongovector@v0.1.13-pre.0
 //
 // Usage:
 //
