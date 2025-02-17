@@ -436,8 +436,6 @@ func testTools(t *testing.T, llm llms.Model) {
 
 func testToolsWithDeeplyNestedToolStructures(t *testing.T, llm llms.Model) {
 	t.Helper()
-	t.Parallel()
-
 	availableTools := []llms.Tool{
 		{
 			Type: "function",
