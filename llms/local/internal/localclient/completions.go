@@ -31,19 +31,18 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	}, nil
 }
 
-func (c *Client) createStreamCompletion(ctx context.Context, payload *completionPayload) (chan string, chan bool, error) {
-	ch := make(chan string)
-	bch := make(chan bool)
+func (c *Client) createStreamCompletion(ctx context.Context, payload *completionPayload) error {
 	c.Args = append(c.Args, payload.Prompt)
 
-	cmd := exec.CommandContext(ctx, c.BinPath, c.Args...)
+	//cmd := exec.CommandContext(ctx, c.BinPath, c.Args...)
+	cmd := exec.Command(c.BinPath, c.Args...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return ch, bch, errors.New(fmt.Sprintf("Error creating stdout: %s", err))
+		c.ErrCh <- errors.New(fmt.Sprintf("Error creating stdout: %s", err))
 	}
 
 	if err := cmd.Start(); err != nil {
-		return ch, bch, errors.New(fmt.Sprintf("Error starting command: %s", err))
+		c.ErrCh <- errors.New(fmt.Sprintf("Error starting command: %s", err))
 	}
 
 	reader := bufio.NewReader(stdout)
@@ -52,18 +51,18 @@ func (c *Client) createStreamCompletion(ctx context.Context, payload *completion
 	for {
 		_, err := reader.Read(buf)
 		if err != nil {
-			break // Exit loop on error or EOF
+			c.ErrCh <- err
+			break
 		}
-		ch <- string(buf)
+		c.OutCh <- string(buf)
 	}
 
 	//receiver is polling for messages on channel so cant just return
 	if err := cmd.Wait(); err != nil {
-		bch <- true
-		return ch, bch, errors.New(fmt.Sprintf("Error waiting for command:", err))
+		c.ErrCh <- errors.New(fmt.Sprintf("Error waiting for command: %s", err))
 	}
 
 	//exit as normal
-	bch <- true
-	return ch, bch, nil
+	c.DoneCh <- true
+	return nil
 }

@@ -203,6 +203,7 @@ require (
 	github.com/google/generative-ai-go v0.15.1
 	github.com/google/go-cmp v0.6.0
 	github.com/jackc/pgx/v5 v5.5.5
+	github.com/joho/godotenv v1.5.1
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/metaphorsystems/metaphor-go v0.0.0-20230816231421-43794c04824e
@@ -215,6 +216,7 @@ require (
 	github.com/pinecone-io/go-pinecone v0.4.1
 	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/redis/rueidis v1.0.34
+	github.com/tmc/langchaingo v0.0.0-00010101000000-000000000000
 	github.com/weaviate/weaviate v1.24.1
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
@@ -228,3 +230,7 @@ require (
 	google.golang.org/protobuf v1.34.1
 	sigs.k8s.io/yaml v1.3.0
 )
+
+replace nhooyr.io/websocket => github.com/coder/websocket v1.8.7
+
+replace github.com/tmc/langchaingo => github.com/Irooniam/langchaingo v0.1.13

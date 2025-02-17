@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/Irooniam/langchaingo/llms/local/internal/localclient"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/local/internal/localclient"
 )
 
 var (
@@ -100,8 +100,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	return resp, nil
 }
 
-func (o *LLM) GenerateStreamContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
+// client is not exported but we need access to channels
+func (o *LLM) Channels() (chan string, chan error, chan bool) {
+	return o.client.OutCh, o.client.ErrCh, o.client.DoneCh
+}
 
+// you have to run this as separate goroutine otherwise channels will deadlock
+func (o *LLM) GenerateStreamContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) error {
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -120,26 +125,12 @@ func (o *LLM) GenerateStreamContent(ctx context.Context, messages []llms.Message
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
-	result, err := o.client.CreateCompletion(ctx, &localclient.CompletionRequest{
+
+	err := o.client.CreateStreamCompletion(ctx, &localclient.CompletionRequest{
 		Prompt: part.(llms.TextContent).Text,
 	})
-	if err != nil {
-		return nil, err
-	}
 
-	resp := &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{
-				Content: result.Text,
-			},
-		},
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
-	}
-
-	return resp, nil
+	return err
 }
 
 // New creates a new local LLM implementation.
