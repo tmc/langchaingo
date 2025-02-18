@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 )
 
@@ -46,11 +47,16 @@ func (c *Client) createStreamCompletion(ctx context.Context, payload *completion
 	}
 
 	reader := bufio.NewReader(stdout)
-	buf := make([]byte, 1) // Read one byte at a time
+	buf := make([]byte, 1) // read one at a time
 
 	for {
 		_, err := reader.Read(buf)
 		if err != nil {
+			//treat eof different error
+			if err == io.EOF {
+				c.DoneCh <- true
+				break
+			}
 			c.ErrCh <- err
 			break
 		}

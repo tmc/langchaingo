@@ -8,11 +8,11 @@ import (
 	"github.com/Irooniam/langchaingo/llms/local/internal/localclient"
 )
 
-func TestBadPath(t *testing.T) {
+func TestBadBinPath(t *testing.T) {
 	var wg sync.WaitGroup
 	var err error
 	var prompt string = "ABCDEF012345"
-	c, err := localclient.New("/bin/echo", true)
+	c, err := localclient.New("/bin/ech", true)
 	if err != nil {
 		t.Errorf("was expecting no errors for new but got: %s", err)
 	}
@@ -29,6 +29,7 @@ loop:
 			t.Logf("Got error %s but it was expected", err)
 			break loop
 		case <-c.DoneCh:
+			break loop
 		}
 	}
 
@@ -43,8 +44,8 @@ func TestHappyPath(t *testing.T) {
 	var wg sync.WaitGroup
 	var prompt string = "ABCDEF012345"
 	c, err := localclient.New("/bin/echo", true)
-	if err == nil {
-		t.Errorf("was expecting errors but got: %s", err)
+	if err != nil {
+		t.Fatalf("was not expecting errors but got: %s", err)
 	}
 
 	r := localclient.CompletionRequest{Prompt: prompt}
@@ -59,7 +60,7 @@ loop:
 			msg += response
 
 		case err := <-c.ErrCh:
-			t.Logf("wasnt expecting error for executing path but got: %s", err)
+			t.Fatalf("wasnt expecting error from err channel for executing path but got: %s", err)
 			break loop
 		case <-c.DoneCh:
 			break loop
@@ -71,6 +72,7 @@ loop:
 		t.Errorf("expected respone to be '%s' but got '%s'", prompt, msg)
 	}
 
+	t.Logf("prompt %s matches response %s", prompt[:12], msg[:12])
 	wg.Done()
 
 }
