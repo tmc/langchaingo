@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"os"
 )
 
 // UploadToMongo upload the processed / enriched documents to MongoDB.
@@ -20,12 +21,12 @@ func UploadToMongo(dataType []CompanyDataEnriched) error {
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		return fmt.Errorf("error connecting to MongoDB: %v", err)
+		return fmt.Errorf("error connecting to MongoDB: %w", err)
 	}
 	defer func(client *mongo.Client, ctx context.Context) {
 		mongoErr := client.Disconnect(ctx)
 		if mongoErr != nil {
-			log.Printf("error disconnecting from MongoDB: %v\n", mongoErr)
+			_ = fmt.Errorf("error disconnecting from MongoDB: %w", mongoErr)
 		}
 	}(client, context.TODO())
 
@@ -44,10 +45,10 @@ func UploadToMongo(dataType []CompanyDataEnriched) error {
 	// Delete all documents in the collection
 	_, err = collection.DeleteMany(context.TODO(), bson.D{})
 	if err != nil {
-		return fmt.Errorf("error deleting documents: %v", err)
+		return fmt.Errorf("error deleting documents: %w", err)
 	}
 
-	var documents []interface{}
+	documents := make([]interface{}, 0, len(dataType))
 	for _, someDoc := range dataType {
 		documents = append(documents, someDoc)
 	}
@@ -55,14 +56,14 @@ func UploadToMongo(dataType []CompanyDataEnriched) error {
 	// Insert the new documents
 	_, err = collection.InsertMany(context.TODO(), documents)
 	if err != nil {
-		return fmt.Errorf("error inserting documents: %v", err)
+		return fmt.Errorf("error inserting documents: %w", err)
 	}
 
 	log.Println("Successfully deleted and uploaded to MongoDB")
 	return nil
 }
 
-// FetchDocumentsFromMongo fetches the unprocessed documents from MongoDB
+// FetchDocumentsFromMongo fetches the unprocessed documents from MongoDB.
 func FetchDocumentsFromMongo(client *mongo.Client) ([]CompanyDataOld, error) {
 	databaseName := os.Getenv("MONGO_DB")
 	if databaseName == "" {
@@ -78,10 +79,10 @@ func FetchDocumentsFromMongo(client *mongo.Client) ([]CompanyDataOld, error) {
 
 	cursor, err := collection.Find(context.TODO(), bson.M{})
 	if err != nil {
-		return nil, fmt.Errorf("error inserting documents: %v", err)
+		return nil, fmt.Errorf("error inserting documents: %w", err)
 	}
 
-	var results []interface{}
+	var results []CompanyDataOld
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		log.Panic(err)
 	}

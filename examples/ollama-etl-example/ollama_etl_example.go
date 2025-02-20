@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/joho/godotenv"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 func main() {
@@ -59,7 +60,12 @@ func startETL() {
 	if err != nil {
 		log.Panicf("error connecting to MongoDB: %v", err)
 	}
-	defer client.Disconnect(context.TODO())
+	defer func(client *mongo.Client, ctx context.Context) {
+		dbErr := client.Disconnect(ctx)
+		if dbErr != nil {
+			log.Panicf("error disconnecting from MongoDB: %v", dbErr)
+		}
+	}(client, context.TODO())
 
 	rawCompanies, _ := FetchDocumentsFromMongo(client)
 
@@ -74,7 +80,7 @@ func startETL() {
 		log.Printf("Company: %s Response: %s", company, response)
 	}
 
-	var enrichedCompanyData []CompanyDataEnriched
+	enrichedCompanyData := make([]CompanyDataEnriched, 0, len(rawCompanies))
 	for _, item := range enrichedCompanyData {
 		website := companyToWebsiteMap[item.Company]
 		if website == "" {
@@ -106,14 +112,14 @@ func startETL() {
 func writeJSONFile(filename string, data []CompanyDataEnriched) error {
 	file, err := os.Create(filepath.Clean(filename))
 	if err != nil {
-		return fmt.Errorf("error creating file: %v", err)
+		return fmt.Errorf("error creating file: %w", err)
 	}
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(data); err != nil {
-		return fmt.Errorf("error encoding JSON: %v", err)
+		return fmt.Errorf("error encoding JSON: %w", err)
 	}
 	return nil
 }
