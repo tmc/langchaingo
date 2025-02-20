@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -16,6 +17,30 @@ import (
 func main() {
 	// Start ETL process
 	startETL()
+}
+
+func startModelReturnResponse(modelName, prompt string) string {
+	llm, err := ollama.New(ollama.WithModel(modelName))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+
+	agentSettings := "You are a machine matching brand names with their respective websites incapable of outputting human-language. " +
+		"Only return a single string which is equal to the website we are trying to find. Don't add any human-language to your response, " +
+		"you're a machine, remember. All website should be starting with https://www."
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, agentSettings),
+		llms.TextParts(llms.ChatMessageTypeHuman, prompt),
+	}
+
+	completion, err := llm.GenerateContent(ctx, content, llms.WithTemperature(0.60))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return completion.Choices[0].Content
 }
 
 func startETL() {
