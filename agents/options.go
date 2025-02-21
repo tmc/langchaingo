@@ -54,10 +54,13 @@ func mrklDefaultOptions() Options {
 
 func conversationalDefaultOptions() Options {
 	return Options{
-		promptPrefix:       _defaultConversationalPrefix,
-		formatInstructions: _defaultConversationalFormatInstructions,
-		promptSuffix:       _defaultConversationalSuffix,
-		outputKey:          _defaultOutputKey,
+		promptPrefix:                     _defaultConversationalPrefix,
+		formatInstructions:               _defaultConversationalFormatInstructions,
+		promptSuffix:                     _defaultConversationalSuffix,
+		outputKey:                        _defaultOutputKey,
+		promptPrefixInputVariables:       []string{},
+		formatInstructionsInputVariables: []string{},
+		promptSuffixInputVariables:       []string{"agent_scratchpad", "input"},
 	}
 }
 
@@ -88,9 +91,9 @@ func (co Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemp
 
 	return createConversationalPrompt(
 		tools,
-		co.promptPrefix,
-		co.formatInstructions,
-		co.promptSuffix,
+		conversationalTemplateBase{co.promptPrefix, co.promptPrefixInputVariables},
+		conversationalTemplateBase{co.formatInstructions, co.formatInstructionsInputVariables},
+		conversationalTemplateBase{co.promptSuffix, co.promptSuffixInputVariables},
 	)
 }
 

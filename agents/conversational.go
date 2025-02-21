@@ -40,6 +40,11 @@ type ConversationalAgent struct {
 	CallbacksHandler callbacks.Handler
 }
 
+type conversationalTemplateBase struct {
+	Template       string
+	InputVariables []string
+}
+
 var _ Agent = (*ConversationalAgent)(nil)
 
 func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) *ConversationalAgent {
@@ -166,15 +171,22 @@ var _defaultConversationalFormatInstructions string //nolint:gochecknoglobals
 //go:embed prompts/conversational_suffix.txt
 var _defaultConversationalSuffix string //nolint:gochecknoglobals
 
-func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
-	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix conversationalTemplateBase) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix.Template, instructions.Template, suffix.Template}, "\n\n")
+	inputVariables := make([]string, 0, len(prefix.InputVariables)+
+		len(instructions.InputVariables)+
+		len(suffix.InputVariables))
+	inputVariables = append(inputVariables, prefix.InputVariables...)
+	inputVariables = append(inputVariables, instructions.InputVariables...)
+	inputVariables = append(inputVariables, suffix.InputVariables...)
 	if err := checkConversationalTemplate(template); err != nil {
 		log.Println(err.Error())
 	}
+
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "agent_scratchpad"},
+		InputVariables: inputVariables,
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),
