@@ -9,6 +9,7 @@ import (
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
+
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -223,7 +224,7 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 		colsData = append(colsData, docMap)
 	}
 
-	_, err = s.client.InsertRows(ctx, s.collectionName, s.partitionName, colsData)
+	column, err := s.client.InsertRows(ctx, s.collectionName, s.partitionName, colsData)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +233,18 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 			return nil, err
 		}
 	}
-	return nil, nil
+
+	col, ok := column.(*entity.ColumnInt64)
+	if !ok {
+		return nil, fmt.Errorf("%w: invalid id column", ErrColumnNotFound)
+	}
+
+	data := col.Data()
+	ids := make([]string, 0, len(data))
+	for _, v := range data {
+		ids = append(ids, strconv.FormatInt(v, 10))
+	}
+	return ids, nil
 }
 
 func (s *Store) getSearchFields() []string {
