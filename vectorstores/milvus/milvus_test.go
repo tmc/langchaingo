@@ -9,9 +9,11 @@ import (
 
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
+
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
@@ -99,7 +101,8 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
 
-	_, err = storer.AddDocuments(context.Background(), data)
+	ids, err := storer.AddDocuments(context.Background(), data)
+	assert.Len(t, ids, 13)
 	require.NoError(t, err)
 
 	// search docs with filter
