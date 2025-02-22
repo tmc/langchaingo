@@ -26,6 +26,7 @@ var (
 	ErrEmptyResponse         = errors.New("empty response")
 	ErrInvalidScoreThreshold = errors.New(
 		"score threshold must be between 0 and 1")
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // Store is a wrapper around the pinecone rest API and grpc client.
@@ -61,6 +62,10 @@ func (s Store) AddDocuments(ctx context.Context,
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
 
 	nameSpace := s.getNameSpace(opts)
 

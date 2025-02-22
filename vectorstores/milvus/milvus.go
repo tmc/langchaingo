@@ -46,6 +46,7 @@ var (
 	)
 	ErrColumnNotFound = errors.New("invalid field")
 	ErrInvalidFilters = errors.New("invalid filters")
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // New creates an active client connection to the (specified, or default) collection in the Milvus server
@@ -193,8 +194,14 @@ func (s *Store) load(ctx context.Context) error {
 // AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store'.
 // and returns the ids of the added documents.
 func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
-	_ ...vectorstores.Option,
+	options ...vectorstores.Option,
 ) ([]string, error) {
+	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
