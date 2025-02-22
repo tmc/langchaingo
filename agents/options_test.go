@@ -1,11 +1,12 @@
 package agents
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
-	"strings"
-	"testing"
 )
 
 func TestMrklPromptEdit(t *testing.T) {
@@ -26,9 +27,11 @@ func TestMrklPromptEdit(t *testing.T) {
 			promptPrefixInputVariables:       []string{"top"},
 			formatInstructionsInputVariables: []string{"instruction"},
 			promptSuffixInputVariables:       []string{"content", "end"},
-			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{"this {{.top}}",
+			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{
+				"this {{.top}}",
 				"this {{.instruction}}",
-				"this {{.content}} and {{.end}}"}, "\n\n"),
+				"this {{.content}} and {{.end}}",
+			}, "\n\n"),
 				[]string{"top", "instruction", "content", "end"},
 			),
 		},
@@ -39,14 +42,23 @@ func TestMrklPromptEdit(t *testing.T) {
 			promptPrefixInputVariables:       []string{},
 			formatInstructionsInputVariables: []string{},
 			promptSuffixInputVariables:       []string{},
-			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{_defaultMrklPrefix,
+			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{
+				_defaultMrklPrefix,
 				_defaultMrklFormatInstructions,
-				_defaultMrklSuffix}, "\n\n"),
+				_defaultMrklSuffix,
+			}, "\n\n"),
 				[]string{"today", "agent_scratchpad", "input"},
 			),
 		},
 	}
-
+	for k, v := range testCases {
+		expectPromptTemp := v.expectPromptTemplate
+		expectPromptTemp.PartialVariables = map[string]any{
+			"tool_names":        "",
+			"tool_descriptions": "",
+		}
+		testCases[k].expectPromptTemplate = expectPromptTemp
+	}
 	for _, tc := range testCases {
 		opt := mrklDefaultOptions()
 		if tc.promptPrefix != "" {
@@ -69,24 +81,8 @@ func TestMrklPromptEdit(t *testing.T) {
 		}
 
 		temp := opt.getMrklPrompt([]tools.Tool{})
-		require.Equal(t, temp.Template, tc.expectPromptTemplate.Template)
-		tempVariables := make(map[string]struct{})
-		for _, v := range opt.promptPrefixInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range opt.promptSuffixInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range opt.formatInstructionsInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range tc.expectPromptTemplate.GetInputVariables() {
-			if _, ok := tempVariables[v]; !ok {
-				t.Error(v, "not found in Variables")
-			}
-		}
+		require.Equal(t, tc.expectPromptTemplate, temp)
 	}
-
 }
 
 func TestConversationPromptEdit(t *testing.T) {
@@ -107,9 +103,11 @@ func TestConversationPromptEdit(t *testing.T) {
 			promptPrefixInputVariables:       []string{"top"},
 			formatInstructionsInputVariables: []string{"instruction"},
 			promptSuffixInputVariables:       []string{"content", "end"},
-			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{"this {{.top}}",
+			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{
+				"this {{.top}}",
 				"this {{.instruction}}",
-				"this {{.history}} and {{.end}}"}, "\n\n"),
+				"this {{.history}} and {{.end}}",
+			}, "\n\n"),
 				[]string{"top", "instruction", "content", "end"},
 			),
 		},
@@ -120,14 +118,24 @@ func TestConversationPromptEdit(t *testing.T) {
 			promptPrefixInputVariables:       []string{},
 			formatInstructionsInputVariables: []string{},
 			promptSuffixInputVariables:       []string{},
-			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{_defaultConversationalPrefix,
+			expectPromptTemplate: prompts.NewPromptTemplate(strings.Join([]string{
+				_defaultConversationalPrefix,
 				_defaultConversationalFormatInstructions,
-				_defaultConversationalSuffix}, "\n\n"),
+				_defaultConversationalSuffix,
+			}, "\n\n"),
 				[]string{"agent_scratchpad", "input"},
 			),
 		},
 	}
-
+	for k, v := range testCases {
+		expectPromptTemp := v.expectPromptTemplate
+		expectPromptTemp.PartialVariables = map[string]any{
+			"tool_names":        "",
+			"tool_descriptions": "",
+			"history":           "",
+		}
+		testCases[k].expectPromptTemplate = expectPromptTemp
+	}
 	for _, tc := range testCases {
 		opt := conversationalDefaultOptions()
 		if tc.promptPrefix != "" {
@@ -150,22 +158,6 @@ func TestConversationPromptEdit(t *testing.T) {
 		}
 
 		temp := opt.getConversationalPrompt([]tools.Tool{})
-		require.Equal(t, temp.Template, tc.expectPromptTemplate.Template)
-		tempVariables := make(map[string]struct{})
-		for _, v := range opt.promptPrefixInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range opt.promptSuffixInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range opt.formatInstructionsInputVariables {
-			tempVariables[v] = struct{}{}
-		}
-		for _, v := range tc.expectPromptTemplate.GetInputVariables() {
-			if _, ok := tempVariables[v]; !ok {
-				t.Error(v, "not found in Variables")
-			}
-		}
+		require.Equal(t, tc.expectPromptTemplate, temp)
 	}
-
 }

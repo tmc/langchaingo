@@ -195,7 +195,7 @@ func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix
 	}
 }
 
-// checkConversationalPrompt check ConversationalPrompt of Options
+// checkConversationalPrompt check ConversationalPrompt of Options.
 func checkConversationalTemplate(template string) error {
 	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
 	matches := re.FindAllStringSubmatch(template, -1)

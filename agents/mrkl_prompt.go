@@ -63,7 +63,7 @@ func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix mrklTempl
 	}
 }
 
-// checkMrklPrompt check Prompt for PartialVariables
+// checkMrklPrompt check Prompt for PartialVariables.
 func checkMrklTemplate(template string) error {
 	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
 	matches := re.FindAllStringSubmatch(template, -1)
