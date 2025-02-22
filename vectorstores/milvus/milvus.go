@@ -36,6 +36,7 @@ type Store struct {
 	metricType       entity.MetricType
 	searchParameters entity.SearchParam
 	schema           *entity.Schema
+	skipFlushOnWrite bool
 }
 
 var (
@@ -233,8 +234,10 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	if err != nil {
 		return nil, err
 	}
-	if err = s.client.Flush(ctx, s.collectionName, false); err != nil {
-		return nil, err
+	if !s.skipFlushOnWrite {
+		if err = s.client.Flush(ctx, s.collectionName, false); err != nil {
+			return nil, err
+		}
 	}
 	return nil, nil
 }

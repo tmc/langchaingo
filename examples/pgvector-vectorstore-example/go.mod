@@ -4,7 +4,7 @@ go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/tmc/langchaingo v0.1.12
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
@@ -14,6 +14,6 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5 // indirect
 	github.com/pgvector/pgvector-go v0.1.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 )
