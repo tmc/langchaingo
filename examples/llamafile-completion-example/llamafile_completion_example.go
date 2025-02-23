@@ -9,13 +9,11 @@ import (
 )
 
 func main() {
-
 	options := []llamafile.Option{
 		llamafile.WithEmbeddingSize(2048),
 		llamafile.WithTemperature(0.8),
 	}
 	llm, err := llamafile.New(options...)
-
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +33,6 @@ func main() {
 			fmt.Print(string(chunk))
 			return nil
 		}))
-
 	if err != nil {
 		panic(err)
 	}

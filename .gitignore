@@ -20,6 +20,7 @@ Thumbs.db
 
 # dev
 .env
+.envrc
 .env.local
 vendor/*
 service-account.json
@@ -32,3 +33,4 @@ service-account.json
 
 embeddings/cybertron/models/*
 examples/cybertron-embedding-example/models/*
+
