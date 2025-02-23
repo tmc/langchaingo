@@ -7,6 +7,12 @@ cover.cov
 
 # macOS Specific
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # IDE
 .idea
@@ -15,8 +21,15 @@ cover.cov
 # dev
 .env
 .envrc
+.env.local
 vendor/*
 service-account.json
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
 
 embeddings/cybertron/models/*
 examples/cybertron-embedding-example/models/*
