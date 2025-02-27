@@ -6,7 +6,7 @@ toolchain go1.22.1
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.13-pre.0
+	github.com/tmc/langchaingo v0.1.13-pre.1
 )
 
 require (
@@ -18,8 +18,8 @@ require (
 	github.com/pinecone-io/go-pinecone v0.4.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
 	google.golang.org/grpc v1.64.0 // indirect
