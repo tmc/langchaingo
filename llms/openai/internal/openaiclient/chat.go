@@ -454,9 +454,11 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
-				responseChan <- streamPayload
-				return
+				// No error handling will be done here. In actual use, it was found that the response information of some platforms was not strictly processed according to the standard. This should be a problem of the platform, for example, the first few messages in the openrouter platform are ->: OPENROUTER PROCESSING<-， So if there is an error here, just skip it
+				continue
+				// streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
+				// responseChan <- streamPayload
+				// return
 			}
 			responseChan <- streamPayload
 		}
