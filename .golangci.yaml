@@ -45,24 +45,26 @@ linters-settings:
   funlen:
     lines: 90
   depguard:
-    list-type: denylist
-    packages:
-      - github.com/samber/lo # Use exp packages or internal utilities instead.
-    additional-guards:
-      - list-type: denylist
-        include-go-root: false
-        packages:
-          - github.com/stretchr/testify
-        # Specify rules by which the linter ignores certain files for consideration.
-        ignore-file-rules:
-          - "**/*_test.go"
-          - "**/mock/**/*.go"
+    rules:
+      main:
+        files:
+          - $all
+        deny:
+          - pkg: github.com/samber/lo
+            desc: "Use exp packages or internal utilities instead."
+      testify:
+        files:
+          - $all
+          - "!**/*_test.go"
+          - "!**/mock/**/*.go"
+        deny:
+          - pkg: github.com/stretchr/testify
   forbidigo:
     forbid:
       - 'import "[^"]+/(util|common|helpers)"'
   gosec:
     excludes:
-    - G115 # https://github.com/securego/gosec/issues/1212
-run:
+      - G115 # https://github.com/securego/gosec/issues/1212
+issues:
   exclude-dirs:
     - 'exp'
