@@ -1,4 +1,4 @@
-module github.com/tmc/langchaingo/examples/openai-gpt4-turbo-example
+module github.com/tmc/langchaingo/examples/bedrock-claude3-vision-example
 
 go 1.22.0
 

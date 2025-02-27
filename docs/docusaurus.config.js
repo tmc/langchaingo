@@ -5,6 +5,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { ProvidePlugin } = require("webpack");
 const path = require("path");
+const lightCodeTheme = require('prism-react-renderer').themes.github;
+const darkCodeTheme = require('prism-react-renderer').themes.dracula;
 
 const examplesPath = path.resolve(__dirname, "..", "examples");
 
@@ -124,8 +126,8 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       prism: {
-        theme: require("prism-react-renderer/themes/vsLight"),
-        darkTheme: require("prism-react-renderer/themes/vsDark"),
+        theme: lightCodeTheme,
+        darkTheme: darkCodeTheme,
       },
       image: "img/parrot-chainlink-icon.png",
       navbar: {
