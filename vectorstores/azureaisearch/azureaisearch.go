@@ -39,6 +39,7 @@ var (
 	ErrAssertingContent = errors.New(
 		"couldn't assert content to string",
 	)
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // New creates a vectorstore for azure AI search
@@ -65,6 +66,11 @@ func (s *Store) AddDocuments(
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	ids := []string{}
 
 	texts := []string{}
