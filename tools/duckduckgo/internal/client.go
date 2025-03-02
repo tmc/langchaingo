@@ -71,7 +71,7 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 	}
 
 	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode > 299 {
 		return "", ErrAPIResponse
 	}
 
