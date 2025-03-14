@@ -50,6 +50,7 @@ func New(opts ...Option) (*LLM, error) {
 func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
 		token:      os.Getenv(tokenEnvVarName),
+		model:      os.Getenv(modelEnvVarName),
 		baseURL:    anthropicclient.DefaultBaseURL,
 		httpClient: http.DefaultClient,
 	}
