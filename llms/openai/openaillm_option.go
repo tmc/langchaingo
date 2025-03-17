@@ -40,6 +40,8 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
+
+	streamingChunkFilter openaiclient.StreamingChunkFilter
 }
 
 // Option is a functional option for the OpenAI client.
@@ -133,5 +135,18 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WithStreamingChunkFilter allows setting a function which decides if a chunk should be distributed.
+func WithStreamingChunkFilter(filter StreamingChunkFilter) Option {
+	return func(opts *options) {
+		opts.streamingChunkFilter = func(payload openaiclient.StreamedChatResponsePayload) bool {
+			delta := payload.Choices[0].Delta
+			return filter(StreamingChunkMetaData{
+				IsFunctionCall: delta.FunctionCall != nil,
+				IsToolCall:     len(delta.ToolCalls) > 0,
+			})
+		}
 	}
 }

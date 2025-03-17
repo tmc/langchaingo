@@ -24,6 +24,9 @@ const (
 	APITypeAzureAD APIType = "AZURE_AD"
 )
 
+// StreamingChunkFilter is a function which decides if a chunk of a streaming response should be distributed via StreamingFunc.
+type StreamingChunkFilter func(payload StreamedChatResponsePayload) bool
+
 // Client is a client for the OpenAI API.
 type Client struct {
 	token        string
@@ -38,6 +41,8 @@ type Client struct {
 	apiVersion string
 
 	ResponseFormat *ResponseFormat
+
+	streamingChunkFilter StreamingChunkFilter
 }
 
 // Option is an option for the OpenAI client.
@@ -51,19 +56,20 @@ type Doer interface {
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
-	responseFormat *ResponseFormat,
+	responseFormat *ResponseFormat, scFilter StreamingChunkFilter,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:          token,
-		Model:          model,
-		EmbeddingModel: embeddingModel,
-		baseURL:        strings.TrimSuffix(baseURL, "/"),
-		organization:   organization,
-		apiType:        apiType,
-		apiVersion:     apiVersion,
-		httpClient:     httpClient,
-		ResponseFormat: responseFormat,
+		token:                token,
+		Model:                model,
+		EmbeddingModel:       embeddingModel,
+		baseURL:              strings.TrimSuffix(baseURL, "/"),
+		organization:         organization,
+		apiType:              apiType,
+		apiVersion:           apiVersion,
+		httpClient:           httpClient,
+		ResponseFormat:       responseFormat,
+		streamingChunkFilter: scFilter,
 	}
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
