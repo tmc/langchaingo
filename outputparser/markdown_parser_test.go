@@ -40,9 +40,9 @@ func TestMarkdown(t *testing.T) {
 			hasError: false,
 		},
 		{
-			name:     "Multiple markdown blocks",
-			input:    "First block:\n```markdown\nContent 1\n```\n\nSecond block:\n```markdown\nContent 2\n```",
-			expected: "Content 1",
+			name:     "Markdown blocks and code blocks",
+			input:    "First block:\n```markdown\nContent 1\n\nCode block:\n```csharp\nContent 2\n``` 13456```",
+			expected: "Content 1\n\nCode block:\n```csharp\nContent 2\n``` 13456",
 			hasError: false,
 		},
 	}

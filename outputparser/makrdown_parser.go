@@ -25,18 +25,25 @@ var _ schema.OutputParser[any] = Markdown{}
 
 // parse extracts content from markdown code blocks in the given text.
 func (p Markdown) parse(text string) (string, error) {
-	// Extract content from ```markdown ... ``` blocks
-	_, afterStart, ok := strings.Cut(text, "```markdown\n")
-	if !ok {
+	// Find the starting ```markdown
+	startIdx := strings.Index(text, "```markdown\n")
+	if startIdx == -1 {
 		return "", ParseError{Text: text, Reason: "no ```markdown at start of output"}
 	}
 
-	content, _, ok := strings.Cut(afterStart, "```")
-	if !ok {
+	// Move to the content starting position
+	contentStart := startIdx + len("```markdown\n")
+
+	// Find the last ```
+	lastBacktickIdx := strings.LastIndex(text, "```")
+	if lastBacktickIdx <= contentStart {
 		return "", ParseError{Text: text, Reason: "no closing ``` at end of output"}
 	}
 
-	// Trim whitespace from content
+	// Extract the content
+	content := text[contentStart:lastBacktickIdx]
+
+	// Trim whitespace
 	content = strings.TrimSpace(content)
 
 	return content, nil
