@@ -15,8 +15,8 @@ type RecursiveCharacter struct {
 }
 
 // NewRecursiveCharacter creates a new recursive character splitter with default values. By
-// default, the separators used are "\n\n", "\n", " " and "". The chunk size is set to 4000
-// and chunk overlap is set to 200.
+// default, the separators used are "\n\n", "\n", " " and "". The chunk size is set to 512
+// and chunk overlap is set to 100.
 func NewRecursiveCharacter(opts ...Option) RecursiveCharacter {
 	options := DefaultOptions()
 	for _, o := range opts {
