@@ -161,30 +161,30 @@ func TestNew(t *testing.T) {
 			opts:                nil,
 			wantIndex:           "vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name:                "no options",
 			opts:                []Option{},
 			wantIndex:           "vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name:                "mixed custom options",
 			opts:                []Option{WithIndex("custom_vector_index")},
 			wantIndex:           "custom_vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name: "all custom options",
 			opts: []Option{
 				WithIndex("custom_vector_index"),
-				WithPath("custom_plot_embedding"),
+				WithPath("custom_embeddings"),
 			},
 			wantIndex: "custom_vector_index",
-			wantPath:  "custom_plot_embedding",
+			wantPath:  "custom_embeddings",
 		},
 	}
 
@@ -606,7 +606,7 @@ func resetForE2E(ctx context.Context, client *mongo.Client, idx string, dim int,
 
 	fields = append(fields, vectorField{
 		Type:          "vector",
-		Path:          "plot_embedding",
+		Path:          "embeddings",
 		NumDimensions: dim,
 		Similarity:    "dotProduct",
 	})
