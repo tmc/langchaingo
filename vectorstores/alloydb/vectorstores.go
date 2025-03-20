@@ -207,7 +207,6 @@ func (vs *VectorStore) executeSQLQuery(ctx context.Context, stmt string) ([]Sear
 func (vs *VectorStore) processResultsToDocuments(results []SearchDocument) ([]schema.Document, error) {
 	var documents []schema.Document
 	for _, result := range results {
-
 		mapMetadata := map[string]any{}
 		err := json.Unmarshal([]byte(result.Langchain_metadata), &mapMetadata)
 		if err != nil {
@@ -223,7 +222,7 @@ func (vs *VectorStore) processResultsToDocuments(results []SearchDocument) ([]sc
 	return documents, nil
 }
 
-// ApplyVectorIndex creates an index in the table of the embeddings
+// ApplyVectorIndex creates an index in the table of the embeddings.
 func (vs *VectorStore) ApplyVectorIndex(ctx context.Context, index BaseIndex, name string, concurrently, overwrite bool) error {
 	if index.indexType == "exactnearestneighbor" {
 		return vs.DropVectorIndex(ctx, name, overwrite)

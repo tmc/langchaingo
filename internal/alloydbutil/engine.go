@@ -32,14 +32,14 @@ func NewPostgresEngine(ctx context.Context, opts ...Option) (*PostgresEngine, er
 	if err != nil {
 		return nil, err
 	}
-	user, usingIAMAuth, err := getUser(ctx, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error assigning user. Err: %w", err)
-	}
-	if usingIAMAuth {
-		cfg.user = user
-	}
 	if cfg.connPool == nil {
+		user, usingIAMAuth, err := getUser(ctx, cfg)
+		if err != nil {
+			return nil, fmt.Errorf("error assigning user. Err: %w", err)
+		}
+		if usingIAMAuth {
+			cfg.user = user
+		}
 		cfg.connPool, err = createPool(ctx, cfg, usingIAMAuth)
 		if err != nil {
 			return &PostgresEngine{}, err

@@ -3,58 +3,71 @@ package alloydb_test
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/alloydbutil"
-	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores/alloydb"
-	"os"
-	"testing"
 )
 
-func getEnvVariables(t *testing.T) (string, string, string, string, string, string, string) {
+
+func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
 
-	username := os.Getenv("ALLOYDB_USERNAME")
-	if username == "" {
-		t.Skip("ALLOYDB_USERNAME environment variable not set")
-	}
-	password := os.Getenv("ALLOYDB_PASSWORD")
-	if password == "" {
-		t.Skip("ALLOYDB_PASSWORD environment variable not set")
-	}
-	database := os.Getenv("ALLOYDB_DATABASE")
-	if database == "" {
-		t.Skip("ALLOYDB_DATABASE environment variable not set")
-	}
-	projectID := os.Getenv("ALLOYDB_PROJECT_ID")
-	if projectID == "" {
-		t.Skip("ALLOYDB_PROJECT_ID environment variable not set")
-	}
-	region := os.Getenv("ALLOYDB_REGION")
-	if region == "" {
-		t.Skip("ALLOYDB_REGION environment variable not set")
-	}
-	instance := os.Getenv("ALLOYDB_INSTANCE")
-	if instance == "" {
-		t.Skip("ALLOYDB_INSTANCE environment variable not set")
-	}
-	cluster := os.Getenv("ALLOYDB_CLUSTER")
-	if cluster == "" {
-		t.Skip("ALLOYDB_CLUSTER environment variable not set")
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	return username, password, database, projectID, region, instance, cluster
+	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
+	if pgvectorURL == "" {
+		pgVectorContainer, err := tcpostgres.RunContainer(
+			context.Background(),
+			testcontainers.WithImage("docker.io/pgvector/pgvector:pg16"),
+			tcpostgres.WithDatabase("db_test"),
+			tcpostgres.WithUsername("user"),
+			tcpostgres.WithPassword("passw0rd!"),
+			testcontainers.WithWaitStrategy(
+				wait.ForLog("database system is ready to accept connections").
+					WithOccurrence(2).
+					WithStartupTimeout(30*time.Second)),
+		)
+		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+			t.Skip("Docker not available")
+		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
+		})
+
+		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
+		require.NoError(t, err)
+
+		pgvectorURL = str
+	}
+
+	return pgvectorURL
 }
 
 func setEngine(t *testing.T) (alloydbutil.PostgresEngine, error) {
-	username, password, database, projectID, region, instance, cluster := getEnvVariables(t)
+	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
+	myPool, err := pgxpool.New(ctx, pgvectorURL)
+	if err != nil {
+		t.Fatal("Could not set Engine: ", err)
+	}
+	// Call NewPostgresEngine to initialize the database connection
 	pgEngine, err := alloydbutil.NewPostgresEngine(ctx,
-		alloydbutil.WithUser(username),
-		alloydbutil.WithPassword(password),
-		alloydbutil.WithDatabase(database),
-		alloydbutil.WithAlloyDBInstance(projectID, region, cluster, instance),
+		alloydbutil.WithPool(myPool),
 	)
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
@@ -69,16 +82,27 @@ func setVectoreStore(t *testing.T) (alloydb.VectorStore, error) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	llmm, err := ollama.New(
-		ollama.WithModel("llama3"),
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	e, err := embeddings.NewEmbedder(llmm)
+	e, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		t.Fatal(err)
 	}
+	vectorstoreTableoptions := &alloydbutil.VectorstoreTableOptions{
+		TableName:  "table",
+		VectorSize: 768,
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pgEngine.InitVectorstoreTable(ctx, *vectorstoreTableoptions)
+
 	vs, err := alloydb.NewVectorStore(ctx, pgEngine, e, "items")
 	if err != nil {
 		t.Fatal(err)
@@ -88,7 +112,6 @@ func setVectoreStore(t *testing.T) (alloydb.VectorStore, error) {
 
 func TestPingToDB(t *testing.T) {
 	engine, err := setEngine(t)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +128,7 @@ func TestApplyVectorIndexAndDropIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{})
+	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{})
 	err = vs.ApplyVectorIndex(ctx, idx, "testindex", false, false)
 	if err != nil {
 		t.Fatal(err)
@@ -122,7 +145,7 @@ func TestIsValidIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{})
+	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{})
 	err = vs.ApplyVectorIndex(ctx, idx, "testindex", false, false)
 	if err != nil {
 		t.Fatal(err)
@@ -196,7 +219,6 @@ func TestAddDocuments(t *testing.T) {
 			},
 		},
 	})
-
 	if err != nil {
 		t.Fatal(err)
 	}

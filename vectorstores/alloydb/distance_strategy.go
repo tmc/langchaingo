@@ -2,7 +2,7 @@ package alloydb
 
 import "fmt"
 
-// defaultDistanceStrategy is the default strategy used if none is provided
+// defaultDistanceStrategy is the default strategy used if none is provided.
 var defaultDistanceStrategy = CosineDistance{}
 
 type distanceStrategy interface {
@@ -21,9 +21,11 @@ type Euclidean struct{}
 func (e Euclidean) String() string {
 	return "euclidean"
 }
+
 func (e Euclidean) operator() string {
 	return "<->"
 }
+
 func (e Euclidean) searchFunction() string {
 	return "vector_l2_ops"
 }
@@ -37,9 +39,11 @@ type CosineDistance struct{}
 func (c CosineDistance) String() string {
 	return "cosineDistance"
 }
+
 func (c CosineDistance) operator() string {
 	return "<=>"
 }
+
 func (c CosineDistance) searchFunction() string {
 	return "vector_cosine_ops"
 }
@@ -78,7 +82,7 @@ func (h HNSWOptions) Options() string {
 
 // IVFFlatOptions holds the configuration for the ivfflat index.
 type IVFFlatOptions struct {
-	    Lists int
+	Lists int
 }
 
 func (i IVFFlatOptions) Options() string {
@@ -105,7 +109,7 @@ func (s SCANNOptions) Options() string {
 	return fmt.Sprintf("(num_leaves = %d, quantizer = %s)", s.NumLeaves, s.Quantizer)
 }
 
-// indexOptions returns the specific options for the index based on the index type
+// indexOptions returns the specific options for the index based on the index type.
 func (index *BaseIndex) indexOptions() (string, error) {
 	return index.options.Options(), nil
 }
