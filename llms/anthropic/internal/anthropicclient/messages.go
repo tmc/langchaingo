@@ -309,20 +309,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "content_block_delta":
 		return handleContentBlockDeltaEvent(ctx, event, response, payload)
 	case "content_block_stop":
-		for _, content := range response.Content {
-			if content == nil {
-				continue
-			}
-			tuc, ok := content.(*ToolUseContent)
-			if !ok {
-				continue
-			}
-
-			err := tuc.DecodeStream()
-			if err != nil {
-				return response, fmt.Errorf("error decoding stream tool data: %w", err)
-			}
-		}
+		return handleContentBlockStopEvent(response)
 	case "message_delta":
 		return handleMessageDeltaEvent(event, response)
 	case "message_stop":
@@ -464,6 +451,24 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		err := payload.StreamingFunc(ctx, []byte(text))
 		if err != nil {
 			return response, fmt.Errorf("streaming func returned an error: %w", err)
+		}
+	}
+	return response, nil
+}
+
+func handleContentBlockStopEvent(response MessageResponsePayload) (MessageResponsePayload, error) {
+	for _, content := range response.Content {
+		if content == nil {
+			continue
+		}
+		tuc, ok := content.(*ToolUseContent)
+		if !ok {
+			continue
+		}
+
+		err := tuc.DecodeStream()
+		if err != nil {
+			return response, fmt.Errorf("error decoding stream tool data: %w", err)
 		}
 	}
 	return response, nil
