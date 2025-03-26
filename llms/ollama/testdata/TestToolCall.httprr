@@ -1,0 +1,15 @@
+httprr trace v1
+477 203
+POST http://localhost:11434/api/chat HTTP/1.1
+Host: localhost:11434
+User-Agent: langchaingo-httprr
+Content-Length: 290
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gemma3:1b","messages":[{"role":"user","content":"Which date do we have today?"}],"stream":false,"format":"","tools":[{"type":"function","function":{"name":"getTime","description":"Get the current time.","parameters":{"type":"object","required":[],"properties":{}}}}],"options":{}}HTTP/1.1 400 Bad Request
+Content-Length: 71
+Content-Type: application/json; charset=utf-8
+Date: Sun, 17 Aug 2025 12:11:34 GMT
+
+{"error":"registry.ollama.ai/library/gemma3:1b does not support tools"}
