@@ -40,18 +40,20 @@ require (
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.12 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.5 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.5 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.7 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.20.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.7 // indirect
-	github.com/aws/smithy-go v1.20.2 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -104,6 +106,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
@@ -168,7 +171,6 @@ require (
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
@@ -190,9 +192,13 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/amikos-tech/chroma-go v0.1.2
-	github.com/aws/aws-sdk-go-v2 v1.26.1
+	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.27.12
+	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.40.0
+	github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime v1.41.0
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.8.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
+	github.com/aws/smithy-go v1.22.2
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/fatih/color v1.17.0
 	github.com/gage-technologies/mistral-go v1.1.0
@@ -217,11 +223,13 @@ require (
 	github.com/redis/rueidis v1.0.34
 	github.com/weaviate/weaviate v1.24.1
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1
+	github.com/zeebo/blake3 v0.2.4
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
 	go.mongodb.org/mongo-driver v1.14.0
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+	golang.org/x/sync v0.9.0
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
 	google.golang.org/api v0.183.0
 	google.golang.org/grpc v1.64.0
