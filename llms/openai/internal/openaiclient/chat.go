@@ -31,7 +31,7 @@ type StreamOptions struct {
 type ChatRequest struct {
 	Model       string         `json:"model"`
 	Messages    []*ChatMessage `json:"messages"`
-	Temperature float64        `json:"temperature"`
+	Temperature float64        `json:"temperature,omitempty"`
 	TopP        float64        `json:"top_p,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
 	MaxTokens           int      `json:"-,omitempty"`
