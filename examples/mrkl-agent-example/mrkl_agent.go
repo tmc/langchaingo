@@ -35,8 +35,10 @@ func run() error {
 
 	agent := agents.NewOneShotAgent(llm,
 		agentTools,
-		agents.WithMaxIterations(3))
-	executor := agents.NewExecutor(agent)
+	)
+	executor := agents.NewExecutor(agent,
+		agents.WithMaxIterations(3),
+	)
 
 	question := "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
 	answer, err := chains.Run(context.Background(), executor, question)
