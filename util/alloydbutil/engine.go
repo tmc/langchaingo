@@ -101,7 +101,7 @@ func getUser(ctx context.Context, config engineConfig) (string, bool, error) {
 	case config.user == "" && config.password == "" && config.iamAccountEmail == "":
 		// If neither user and password nor iamAccountEmail are provided,
 		// retrieve IAM email from the environment.
-		serviceAccountEmail, err := config.emailRetreiver(ctx)
+		serviceAccountEmail, err := config.emailRetriever(ctx)
 		if err != nil {
 			return "", false, fmt.Errorf("unable to retrieve service account email: %w", err)
 		}
@@ -225,24 +225,5 @@ func (p *PostgresEngine) InitVectorstoreTable(ctx context.Context, opts Vectorst
 		return fmt.Errorf("failed to create table: %w", err)
 	}
 
-	return nil
-}
-
-// initChatHistoryTable creates a table to store chat history.
-func (p *PostgresEngine) InitChatHistoryTable(ctx context.Context, tableName string, opts ...OptionInitChatHistoryTable) error {
-	cfg := applyChatMessageHistoryOptions(opts...)
-
-	createTableQuery := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS "%s"."%s" (
-		id SERIAL PRIMARY KEY,
-		session_id TEXT NOT NULL,
-		data JSONB NOT NULL,
-		type TEXT NOT NULL
-	);`, cfg.schemaName, tableName)
-
-	// Execute the query
-	_, err := p.Pool.Exec(ctx, createTableQuery)
-	if err != nil {
-		return fmt.Errorf("failed to execute query: %w", err)
-	}
 	return nil
 }

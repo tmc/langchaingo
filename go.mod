@@ -232,5 +232,3 @@ require (
 	google.golang.org/protobuf v1.36.3
 	sigs.k8s.io/yaml v1.3.0
 )
-
-replace github.com/tmc/langchaingo v0.1.13 => github.com/averikitsch/langchaingo v0.1.13

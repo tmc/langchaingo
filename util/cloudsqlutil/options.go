@@ -24,7 +24,7 @@ type engineConfig struct {
 	password        string
 	ipType          string
 	iamAccountEmail string
-	emailRetreiver  EmailRetriever
+	emailRetriever  EmailRetriever
 	userAgents      string
 }
 
@@ -95,7 +95,7 @@ func WithIAMAccountEmail(email string) Option {
 
 func applyClientOptions(opts ...Option) (engineConfig, error) {
 	cfg := &engineConfig{
-		emailRetreiver: getServiceAccountEmail,
+		emailRetriever: getServiceAccountEmail,
 		ipType:         "PUBLIC",
 		userAgents:     defaultUserAgent,
 	}
@@ -107,31 +107,4 @@ func applyClientOptions(opts ...Option) (engineConfig, error) {
 	}
 
 	return *cfg, nil
-}
-
-// Option function type.
-type OptionInitChatHistoryTable func(*InitChatHistoryTableOptions)
-
-// Option type for defining options.
-type InitChatHistoryTableOptions struct {
-	schemaName string
-}
-
-// WithSchemaName sets a custom schema name.
-func WithSchemaName(schemaName string) OptionInitChatHistoryTable {
-	return func(i *InitChatHistoryTableOptions) {
-		i.schemaName = schemaName
-	}
-}
-
-// applyChatMessageHistoryOptions applies the given options to the
-// ChatMessageHistory.
-func applyChatMessageHistoryOptions(opts ...OptionInitChatHistoryTable) InitChatHistoryTableOptions {
-	cfg := &InitChatHistoryTableOptions{
-		schemaName: defaultSchemaName,
-	}
-	for _, opt := range opts {
-		opt(cfg)
-	}
-	return *cfg
 }
