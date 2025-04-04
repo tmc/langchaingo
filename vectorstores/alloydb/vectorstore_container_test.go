@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/averikitsch/langchaingo/util/alloydbutil"
+	"github.com/averikitsch/langchaingo/vectorstores/alloydb"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -16,8 +18,6 @@ import (
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/alloydbutil"
-	"github.com/tmc/langchaingo/vectorstores/alloydb"
 )
 
 func preCheckEnvSetting(t *testing.T) string {

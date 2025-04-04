@@ -26,7 +26,7 @@ Go version >= go 1.22.0
 
 ## Engine Creation
 
-The `CloudSQLEngine` configures a connection pool to your CloudSQL database. 
+The `CloudSQLEngine` configures a connection pool to your CloudSQL database.
 
 ```go
 package main
@@ -115,7 +115,7 @@ import (
   "github.com/tmc/langchaingo/embeddings"
   "github.com/tmc/langchaingo/internal/cloudsqlutil"
   "github.com/tmc/langchaingo/llms/googleai/vertex"
-  "github.com/tmc/langchaingo/vectorstores/cloudsql"
+  "github.com/averikitsch/langchaingo/vectorstores/cloudsql"
 )
 
 func main() {

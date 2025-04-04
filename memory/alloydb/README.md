@@ -27,7 +27,7 @@ Go version >= go 1.22.0
 
 ## Engine Creation
 
-The `AlloyDBEngine` configures a connection pool to your AlloyDB database. 
+The `AlloyDBEngine` configures a connection pool to your AlloyDB database.
 
 ```go
 package main
@@ -115,7 +115,7 @@ import (
 
   "github.com/tmc/langchaingo/internal/alloydbutil"
   "github.com/tmc/langchaingo/llms"
-  "github.com/tmc/langchaingo/memory/alloydb"
+  "github.com/averikitsch/langchaingo/memory/alloydb"
 )
 
 func main() {
@@ -124,7 +124,7 @@ func main() {
     if err != nil {
         return nil, err
     }
-    
+
 	// Creates a new table in the Postgres database, which will be used for storing Chat History.
 	err = alloyDBEngine.InitChatHistoryTable(ctx, "tableName")
 	if err != nil {

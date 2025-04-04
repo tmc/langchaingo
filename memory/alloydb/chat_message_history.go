@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/averikitsch/langchaingo/util/alloydbutil"
 	"github.com/jackc/pgx/v5"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/alloydbutil"
 )
 
 type ChatMessageHistory struct {

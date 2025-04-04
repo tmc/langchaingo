@@ -27,7 +27,7 @@ Go version >= go 1.22.0
 
 ## Engine Creation
 
-The `AlloyDBEngine` configures a connection pool to your AlloyDB database. 
+The `AlloyDBEngine` configures a connection pool to your AlloyDB database.
 
 ```go
 package main
@@ -116,7 +116,7 @@ import (
   "github.com/tmc/langchaingo/embeddings"
   "github.com/tmc/langchaingo/internal/alloydbutil"
   "github.com/tmc/langchaingo/llms/googleai/vertex"
-  "github.com/tmc/langchaingo/vectorstores/alloydb"
+  "github.com/averikitsch/langchaingo/vectorstores/alloydb"
 )
 
 func main() {
