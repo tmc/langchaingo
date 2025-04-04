@@ -2,8 +2,6 @@ module github.com/averikitsch/langchaingo
 
 go 1.22.0
 
-replace github.com/tmc/langchaingo v0.1.13 => github.com/averikitsch/langchaingo v0.0.0-20250404200339-d8eac6cf987e
-
 require (
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
