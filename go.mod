@@ -2,6 +2,8 @@ module github.com/averikitsch/langchaingo
 
 go 1.22.0
 
+replace github.com/tmc/langchaingo v0.1.13 => github.com/averikitsch/langchaingo v0.0.0-20250404200339-d8eac6cf987e
+
 require (
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.9.0
@@ -218,6 +220,7 @@ require (
 	github.com/pinecone-io/go-pinecone v0.4.1
 	github.com/pkoukk/tiktoken-go v0.1.6
 	github.com/redis/rueidis v1.0.34
+	github.com/tmc/langchaingo v0.1.13
 	github.com/weaviate/weaviate v1.24.1
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
