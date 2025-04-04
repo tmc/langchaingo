@@ -7,11 +7,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/mistral"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/llms/mistral"
+	"github.com/averikitsch/langchaingo/schema"
+	"github.com/averikitsch/langchaingo/vectorstores"
+	"github.com/averikitsch/langchaingo/vectorstores/pgvector"
 )
 
 func main() {

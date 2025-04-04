@@ -8,10 +8,10 @@ import (
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/schema"
+	"github.com/averikitsch/langchaingo/vectorstores"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
 	"golang.org/x/exp/maps"
 )
 

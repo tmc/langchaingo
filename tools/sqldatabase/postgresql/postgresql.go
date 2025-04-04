@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/averikitsch/langchaingo/tools/sqldatabase"
 	_ "github.com/jackc/pgx/v5/stdlib" // postgresql driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "pgx"
@@ -101,13 +101,13 @@ func (p PostgreSQL) TableNames(ctx context.Context) ([]string, error) {
 // It takes a context.Context and the name of the table.
 // It returns the table name and an error, if any.
 func (p PostgreSQL) TableInfo(ctx context.Context, table string) (string, error) {
-	_, result, err := p.Query(ctx, `SELECT 
-		table_name, 
-		column_name, 
-		data_type 
-	 FROM 
+	_, result, err := p.Query(ctx, `SELECT
+		table_name,
+		column_name,
+		data_type
+	 FROM
 		information_schema.columns
-	 WHERE 
+	 WHERE
 		table_name = $1`, table)
 	if err != nil {
 		return "", err

@@ -9,8 +9,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/averikitsch/langchaingo/llms"
+	"github.com/averikitsch/langchaingo/llms/ollama"
 )
 
 var flagVerbose = flag.Bool("v", false, "verbose mode")
@@ -143,7 +143,7 @@ func systemMessage() string {
 
 %s
 
-To use a tool, respond with a JSON object with the following structure: 
+To use a tool, respond with a JSON object with the following structure:
 {
 	"tool": <name of the called tool>,
 	"tool_input": <parameters for the tool matching the above JSON schema>
@@ -174,11 +174,11 @@ var functions = []llms.FunctionDefinition{
 		Name:        "getCurrentWeather",
 		Description: "Get the current weather in a given location",
 		Parameters: json.RawMessage(`{
-			"type": "object", 
+			"type": "object",
 			"properties": {
-				"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, 
+				"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"},
 				"unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
-			}, 
+			},
 			"required": ["location", "unit"]
 		}`),
 	},
@@ -188,10 +188,10 @@ var functions = []llms.FunctionDefinition{
 		Name:        "finalResponse",
 		Description: "Provide the final response to the user query",
 		Parameters: json.RawMessage(`{
-			"type": "object", 
+			"type": "object",
 			"properties": {
 				"response": {"type": "string", "description": "The final response to the user query"}
-			}, 
+			},
 			"required": ["response"]
 		}`),
 	},

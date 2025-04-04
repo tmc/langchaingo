@@ -4,7 +4,7 @@ import (
 	"context"
 
 	cache "github.com/Code-Hex/go-generics-cache"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/averikitsch/langchaingo/llms"
 )
 
 // InMemory is an in-memory `cache.Backend`.

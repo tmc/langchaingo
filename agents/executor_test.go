@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/averikitsch/langchaingo/agents"
+	"github.com/averikitsch/langchaingo/chains"
+	"github.com/averikitsch/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/prompts"
+	"github.com/averikitsch/langchaingo/schema"
+	"github.com/averikitsch/langchaingo/tools"
+	"github.com/averikitsch/langchaingo/tools/serpapi"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/agents"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/serpapi"
 )
 
 type testAgent struct {

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/averikitsch/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/prompts"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
 )
 
 func TestConstitutionCritiqueParsing(t *testing.T) {
@@ -17,15 +17,15 @@ func TestConstitutionCritiqueParsing(t *testing.T) {
 	textOne := ` This text is bad.
 
 	Revision request: Make it better.
-	
+
 	Revision:`
 
 	textTwo := " This text is bad.\n\n"
 
 	textThree := ` This text is bad.
-	
+
 	Revision request: Make it better.
-	
+
 	Revision: Better text`
 
 	for _, rawCritique := range []string{textOne, textTwo, textThree} {

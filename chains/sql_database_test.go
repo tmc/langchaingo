@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/averikitsch/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/tools/sqldatabase"
+	"github.com/averikitsch/langchaingo/tools/sqldatabase/mysql"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools/sqldatabase"
-	"github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
@@ -87,7 +87,7 @@ func TestExtractSQLQuery(t *testing.T) {
 			I am also a clumsy llm model, I don't fully understand the prompt
 			And accidentally put some extra text here.
 
-			SQLQuery: 
+			SQLQuery:
 			` + "```sql\n" + `
 			SELECT
 				order_id,

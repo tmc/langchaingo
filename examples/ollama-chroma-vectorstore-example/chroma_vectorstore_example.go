@@ -7,12 +7,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/llms/ollama"
+	"github.com/averikitsch/langchaingo/schema"
+	"github.com/averikitsch/langchaingo/vectorstores"
+	"github.com/averikitsch/langchaingo/vectorstores/chroma"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
 
 func main() {

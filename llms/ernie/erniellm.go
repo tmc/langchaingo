@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
+	"github.com/averikitsch/langchaingo/callbacks"
+	"github.com/averikitsch/langchaingo/llms"
+	"github.com/averikitsch/langchaingo/llms/ernie/internal/ernieclient"
 )
 
 var (
@@ -49,7 +49,7 @@ func newClient(opts *options) (*ernieclient.Client, error) {
 		return nil, fmt.Errorf(`%w
 You can pass auth info by use ernie.New(ernie.WithAKSK("{api Key}","{serect Key}")) ,
 or
-export ERNIE_API_KEY={API Key} 
+export ERNIE_API_KEY={API Key}
 export ERNIE_SECRET_KEY={Secret Key}
 doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNotSetAuth)
 	}

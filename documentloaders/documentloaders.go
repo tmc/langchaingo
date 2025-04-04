@@ -3,8 +3,8 @@ package documentloaders
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/averikitsch/langchaingo/schema"
+	"github.com/averikitsch/langchaingo/textsplitter"
 )
 
 // Loader is the interface for loading and splitting documents from a source.

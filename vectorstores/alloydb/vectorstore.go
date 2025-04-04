@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/schema"
 	"github.com/averikitsch/langchaingo/util/alloydbutil"
+	"github.com/averikitsch/langchaingo/vectorstores"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/pgvector/pgvector-go"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
 )
 
 const (

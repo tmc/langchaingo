@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tmc/langchaingo/callbacks"
+	"github.com/averikitsch/langchaingo/callbacks"
 	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )
@@ -18,7 +18,7 @@ var _ Tool = Calculator{}
 
 // Description returns a string describing the calculator tool.
 func (c Calculator) Description() string {
-	return `Useful for getting the result of a math expression. 
+	return `Useful for getting the result of a math expression.
 	The input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.`
 }
 

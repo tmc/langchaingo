@@ -1,8 +1,8 @@
 package chains
 
 import (
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/averikitsch/langchaingo/llms"
+	"github.com/averikitsch/langchaingo/prompts"
 )
 
 //nolint:lll
@@ -20,18 +20,18 @@ We have the opportunity to refine the existing answer
 ------------
 {{.context}}
 ------------
-Given the new context, refine the original answer to better answer the question. 
+Given the new context, refine the original answer to better answer the question.
 If the context isn't useful, return the original answer.`
 
 //nolint:lll
-const _defaultMapReduceGetInformationQATemplate = `Use the following portion of a long document to see if any of the text is relevant to answer the question. 
+const _defaultMapReduceGetInformationQATemplate = `Use the following portion of a long document to see if any of the text is relevant to answer the question.
 Return any relevant text verbatim.
 {{.context}}
 Question: {{.question}}
 Relevant text, if any:`
 
 //nolint:lll
-const _defaultMapReduceCombineQATemplate = `Given the following extracted parts of a long document and a question, create a final answer. 
+const _defaultMapReduceCombineQATemplate = `Given the following extracted parts of a long document and a question, create a final answer.
 If you don't know the answer, just say that you don't know. Don't try to make up an answer.
 
 QUESTION: {{.question}}

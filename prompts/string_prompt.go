@@ -1,6 +1,6 @@
 package prompts
 
-import "github.com/tmc/langchaingo/llms"
+import "github.com/averikitsch/langchaingo/llms"
 
 var _ llms.PromptValue = StringPromptValue("")
 

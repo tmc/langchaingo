@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/averikitsch/langchaingo/llms"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html

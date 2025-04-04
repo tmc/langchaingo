@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/llms"
+	"github.com/averikitsch/langchaingo/llms/openai"
 )
 
 var flagModel = flag.String("model", "o1-preview", "model to use (e.g. 'o1-preview', 'o1-mini')")
@@ -26,11 +26,11 @@ func main() {
 	ctx := context.Background()
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, `
-I want to build a Go app that takes user questions and looks them up in a 
+I want to build a Go app that takes user questions and looks them up in a
 database where they are mapped to answers. If there is a close match, it retrieves
-the matched answer. If there isn't, it asks the user to provide an answer and 
-stores the question/answer pair in the database. Make a plan for the directory 
-structure you'll need, then return each file in full. Only supply your reasoning 
+the matched answer. If there isn't, it asks the user to provide an answer and
+stores the question/answer pair in the database. Make a plan for the directory
+structure you'll need, then return each file in full. Only supply your reasoning
 at the beginning and end, not throughout the code.`),
 	}
 	fmt.Println("Generating content...")

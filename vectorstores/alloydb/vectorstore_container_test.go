@@ -8,6 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/schema"
 	"github.com/averikitsch/langchaingo/util/alloydbutil"
 	"github.com/averikitsch/langchaingo/vectorstores/alloydb"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,9 +18,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func preCheckEnvSetting(t *testing.T) string {

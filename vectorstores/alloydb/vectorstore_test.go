@@ -8,11 +8,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/averikitsch/langchaingo/embeddings"
+	"github.com/averikitsch/langchaingo/llms/openai"
+	"github.com/averikitsch/langchaingo/schema"
 	"github.com/averikitsch/langchaingo/util/alloydbutil"
 	"github.com/averikitsch/langchaingo/vectorstores/alloydb"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 type EnvVariables struct {

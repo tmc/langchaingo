@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/averikitsch/langchaingo/callbacks"
+	"github.com/averikitsch/langchaingo/tools"
 )
 
 const (
@@ -50,9 +50,9 @@ func (t Tool) Name() string {
 
 func (t Tool) Description() string {
 	return `
-	A wrapper around Wikipedia. 
-	Useful for when you need to answer general questions about 
-	people, places, companies, facts, historical events, or other subjects. 
+	A wrapper around Wikipedia.
+	Useful for when you need to answer general questions about
+	people, places, companies, facts, historical events, or other subjects.
 	Input should be a search query.`
 }
 
