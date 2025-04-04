@@ -25,7 +25,7 @@ type engineConfig struct {
 	password        string
 	ipType          string
 	iamAccountEmail string
-	emailRetreiver  EmailRetriever
+	emailRetriever  EmailRetriever
 	userAgents      string
 }
 
@@ -97,7 +97,7 @@ func WithIAMAccountEmail(email string) Option {
 
 func applyClientOptions(opts ...Option) (engineConfig, error) {
 	cfg := &engineConfig{
-		emailRetreiver: getServiceAccountEmail,
+		emailRetriever: getServiceAccountEmail,
 		ipType:         "PUBLIC",
 		userAgents:     defaultUserAgent,
 	}

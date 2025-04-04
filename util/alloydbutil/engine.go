@@ -101,7 +101,7 @@ func getUser(ctx context.Context, config engineConfig) (string, bool, error) {
 	case config.user == "" && config.password == "" && config.iamAccountEmail == "":
 		// If neither user and password nor iamAccountEmail are provided,
 		// retrieve IAM email from the environment.
-		serviceAccountEmail, err := config.emailRetreiver(ctx)
+		serviceAccountEmail, err := config.emailRetriever(ctx)
 		if err != nil {
 			return "", false, fmt.Errorf("unable to retrieve service account email: %w", err)
 		}

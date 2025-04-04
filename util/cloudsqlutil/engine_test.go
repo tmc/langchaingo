@@ -134,7 +134,7 @@ func TestGetUser(t *testing.T) {
 		},
 		{
 			name:             "Neither User nor Password, but service account email retrieved",
-			engineConfig:     engineConfig{emailRetreiver: mockEmailRetrevier},
+			engineConfig:     engineConfig{emailRetriever: mockEmailRetrevier},
 			expectedUserName: testServiceAccount,
 			expectedIamAuth:  true,
 		},
@@ -150,7 +150,7 @@ func TestGetUser(t *testing.T) {
 		},
 		{
 			name:         "Error - Failure retrieving service account email",
-			engineConfig: engineConfig{emailRetreiver: mockFailingEmailRetrevier},
+			engineConfig: engineConfig{emailRetriever: mockFailingEmailRetrevier},
 			expectedErr:  "unable to retrieve service account email: missing or invalid credentials",
 		},
 	}
