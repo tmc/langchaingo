@@ -28,20 +28,6 @@ type engineConfig struct {
 	userAgents      string
 }
 
-// VectorstoreTableOptions is used with the InitVectorstoreTable to use the required and default fields.
-type VectorstoreTableOptions struct {
-	TableName          string
-	VectorSize         int
-	SchemaName         string
-	ContentColumnName  string
-	EmbeddingColumn    string
-	MetadataJSONColumn string
-	IDColumn           Column
-	MetadataColumns    []Column
-	OverwriteExisting  bool
-	StoreMetadata      bool
-}
-
 // WithCloudSQLInstance sets the project, region, and instance fields.
 func WithCloudSQLInstance(projectID, region, instance string) Option {
 	return func(p *engineConfig) {

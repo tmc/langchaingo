@@ -29,20 +29,6 @@ type engineConfig struct {
 	userAgents      string
 }
 
-// VectorstoreTableOptions is used with the InitVectorstoreTable to use the required and default fields.
-type VectorstoreTableOptions struct {
-	TableName          string
-	VectorSize         int
-	SchemaName         string
-	ContentColumnName  string
-	EmbeddingColumn    string
-	MetadataJSONColumn string
-	IDColumn           Column
-	MetadataColumns    []Column
-	OverwriteExisting  bool
-	StoreMetadata      bool
-}
-
 // WithAlloyDBInstance sets the project, region, cluster, and instance fields.
 func WithAlloyDBInstance(projectID, region, cluster, instance string) Option {
 	return func(p *engineConfig) {
