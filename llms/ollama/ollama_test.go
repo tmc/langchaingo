@@ -24,7 +24,7 @@ const (
 	ollamaImage string = "mdelapenya/" + llamaModel + ":" + ollamaVersion + "-" + llamaModelTag
 )
 
-func runOllama(t *testing.T) (string, error) {
+func runOllama(t *testing.T) (*tcollama.OllamaContainer, error) {
 	t.Helper()
 
 	ctx := context.Background()
@@ -41,27 +41,50 @@ func runOllama(t *testing.T) (string, error) {
 		},
 		))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	url, err := ollamaContainer.ConnectionString(ctx)
-	if err != nil {
-		return "", err
-	}
-	return url, nil
+	return ollamaContainer, nil
 }
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
-	var ollamaModel string
-	if ollamaModel = os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
-		address, err := runOllama(t)
+	var address string
+	var err error
+	var ollamaContainer *tcollama.OllamaContainer
+	if address = os.Getenv("OLLAMA_HOST"); address == "" {
+		ollamaContainer, err = runOllama(t)
 		if err != nil {
-			t.Skip("OLLAMA_TEST_MODEL not set")
+			t.Skipf("failed to run ollama container: %s", err)
 			return nil
 		}
+
+		ollamaURL, err := ollamaContainer.ConnectionString(context.Background())
+		if err != nil {
+			t.Skipf("failed to get ollama URL: %s", err)
+			return nil
+		}
+
+		opts = append(opts, WithServerURL(ollamaURL))
+	}
+
+	var ollamaModel string
+	if ollamaModel = os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
 		ollamaModel = llamaModelName
-		opts = append(opts, WithServerURL(address))
+	}
+
+	// Pull and run the model in case it's not already pulled. Because the container image
+	// already has the model, the pull&run commands are idempotent.
+	_, _, err = ollamaContainer.Exec(context.Background(), []string{"ollama", "pull", ollamaModel})
+	if err != nil {
+		t.Skipf("failed to pull model %s: %s", ollamaModel, err)
+		return nil
+	}
+
+	_, _, err = ollamaContainer.Exec(context.Background(), []string{"ollama", "run", ollamaModel})
+	if err != nil {
+		t.Skipf("failed to run model %s: %s", ollamaModel, err)
+		return nil
 	}
 
 	opts = append([]Option{WithModel(ollamaModel)}, opts...)
@@ -72,7 +95,6 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 }
 
 func TestGenerateContent(t *testing.T) {
-	t.Parallel()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -94,7 +116,6 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestWithFormat(t *testing.T) {
-	t.Parallel()
 	llm := newTestClient(t, WithFormat("json"))
 
 	parts := []llms.ContentPart{
@@ -131,7 +152,6 @@ How many feet are in a nautical mile?`},
 }
 
 func TestWithStreaming(t *testing.T) {
-	t.Parallel()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -159,7 +179,6 @@ func TestWithStreaming(t *testing.T) {
 }
 
 func TestWithKeepAlive(t *testing.T) {
-	t.Parallel()
 	llm := newTestClient(t, WithKeepAlive("1m"))
 
 	parts := []llms.ContentPart{
