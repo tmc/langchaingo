@@ -66,6 +66,21 @@ func (tc TextContent) GetType() string {
 	return tc.Type
 }
 
+type ImageContent struct {
+	Type   string      `json:"type"`
+	Source ImageSource `json:"source"`
+}
+
+func (ic ImageContent) GetType() string {
+	return ic.Type
+}
+
+type ImageSource struct {
+	Type      string `json:"type"`
+	MediaType string `json:"media_type"`
+	Data      string `json:"data"`
+}
+
 type ToolUseContent struct {
 	Type  string                 `json:"type"`
 	ID    string                 `json:"id"`
