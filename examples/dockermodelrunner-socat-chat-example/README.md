@@ -1,4 +1,4 @@
-# OpenAI Completion Example
+# Docker Model Runner Chat Example
 
 Welcome to this cheerful example of using the LangChain Go library with Docker Model Runner! 🐳
 
