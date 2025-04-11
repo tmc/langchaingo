@@ -1,4 +1,4 @@
-module github.com/mdsq/langchaingo
+module github.com/mdsq1/langchaingo
 
 go 1.22.0
 
