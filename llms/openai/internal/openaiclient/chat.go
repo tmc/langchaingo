@@ -339,7 +339,7 @@ type StreamedChatResponsePayload struct {
 			// ToolCalls is a list of tools that were called in the message.
 			ToolCalls []*ToolCall `json:"tool_calls,omitempty"`
 			// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
-			ReasoningContent string `json:"reasoning_content,omitempty"`
+			ReasoningContent any `json:"reasoning_content,omitempty"`
 		} `json:"delta,omitempty"`
 		FinishReason FinishReason `json:"finish_reason,omitempty"`
 	} `json:"choices,omitempty"`
@@ -497,10 +497,13 @@ func combineStreamingChatResponse(
 		}
 		choice := streamResponse.Choices[0]
 		chunk := []byte(choice.Delta.Content)
-		reasoningChunk := []byte(choice.Delta.ReasoningContent) // TODO: not sure if there will be any reasoning related to function call later, so just pass it here
+		reasoningChunk := []byte{}
+		if choice.Delta.ReasoningContent != nil {
+			reasoningChunk = []byte(choice.Delta.ReasoningContent.(string)) // TODO: not sure if there will be any reasoning related to function call later, so just pass it here
+		}
 		response.Choices[0].Message.Content += choice.Delta.Content
 		response.Choices[0].FinishReason = choice.FinishReason
-		response.Choices[0].Message.ReasoningContent += choice.Delta.ReasoningContent
+		response.Choices[0].Message.ReasoningContent += string(reasoningChunk)
 
 		if choice.Delta.FunctionCall != nil {
 			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
