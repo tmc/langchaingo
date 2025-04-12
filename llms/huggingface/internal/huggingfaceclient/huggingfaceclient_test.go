@@ -62,10 +62,10 @@ func mockServer(t *testing.T) *httptest.Server {
 
 		if infReq.Parameters.TopK == -1 {
 			w.WriteHeader(http.StatusBadRequest)
-			_, _ = w.Write([]byte(fmt.Sprintf(`{"error":["%s"]}`, errMsg)))
+			_, _ = fmt.Fprintf(w, `{"error":["%s"]}`, errMsg)
 		} else {
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(fmt.Sprintf(`[{"generated_text":"%s"}]`, goodResponse)))
+			_, _ = fmt.Fprintf(w, `[{"generated_text":"%s"}]`, goodResponse)
 		}
 	}))
 }
