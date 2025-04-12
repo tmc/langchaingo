@@ -3,13 +3,13 @@ package chains
 import (
 	"context"
 	"fmt"
+	"maps"
 	"sort"
 	"strconv"
 
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/outputparser"
 	"github.com/tmc/langchaingo/schema"
-	"golang.org/x/exp/maps"
 )
 
 const (

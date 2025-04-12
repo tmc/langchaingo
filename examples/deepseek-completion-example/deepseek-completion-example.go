@@ -32,7 +32,7 @@ func main() {
 		content,
 		llms.WithMaxTokens(2000),
 		llms.WithTemperature(0.7),
-		llms.WithStreamingReasoningFunc(func(ctx context.Context, reasoningChunk []byte, chunk []byte) error {
+		llms.WithStreamingReasoningFunc(func(_ context.Context, reasoningChunk []byte, chunk []byte) error {
 			if len(reasoningChunk) > 0 {
 				fmt.Printf("Streaming Reasoning: %s\n", string(reasoningChunk))
 			}

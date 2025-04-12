@@ -76,12 +76,12 @@ func (wb *ConversationWindowBuffer) SaveContext(
 	if err != nil {
 		return err
 	}
-	messages, err := wb.ConversationBuffer.ChatHistory.Messages(ctx)
+	messages, err := wb.ChatHistory.Messages(ctx)
 	if err != nil {
 		return err
 	}
 	if messages, ok := wb.cutMessages(messages); ok {
-		err := wb.ConversationBuffer.ChatHistory.SetMessages(ctx, messages)
+		err := wb.ChatHistory.SetMessages(ctx, messages)
 		if err != nil {
 			return err
 		}
