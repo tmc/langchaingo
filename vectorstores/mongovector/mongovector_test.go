@@ -104,7 +104,7 @@ func setupTest(t *testing.T, dim int, index string) Store {
 		require.NoError(t, err)
 
 		uri = container.URI
-		os.Setenv(testURI, uri)
+		t.Setenv(testURI, uri)
 	}
 
 	require.NotEmpty(t, uri, "URI required")
