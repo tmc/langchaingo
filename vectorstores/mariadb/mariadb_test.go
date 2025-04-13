@@ -1,18 +1,19 @@
-package pgvector_test
+package mariadb_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	tcmariadb "github.com/testcontainers/testcontainers-go/modules/mariadb"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -20,7 +21,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	"github.com/tmc/langchaingo/vectorstores/mariadb"
 )
 
 func preCheckEnvSetting(t *testing.T) string {
@@ -30,16 +31,16 @@ func preCheckEnvSetting(t *testing.T) string {
 		t.Skip("OPENAI_API_KEY not set")
 	}
 
-	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
-	if pgvectorURL == "" {
-		pgVectorContainer, err := tcpostgres.Run(
+	mariadbURL := os.Getenv("MARIADB_CONNECTION_STRING")
+	if mariadbURL == "" {
+		mariadbContainer, err := tcmariadb.Run(
 			context.Background(),
-			"docker.io/pgvector/pgvector:pg16",
-			tcpostgres.WithDatabase("db_test"),
-			tcpostgres.WithUsername("user"),
-			tcpostgres.WithPassword("passw0rd!"),
+			"mariadb:11.7-rc", // supports vector types and functions
+			tcmariadb.WithDatabase("db_test"),
+			tcmariadb.WithUsername("user"),
+			tcmariadb.WithPassword("passw0rd!"),
 			testcontainers.WithWaitStrategy(
-				wait.ForLog("database system is ready to accept connections").
+				wait.ForLog("ready for connections").
 					WithOccurrence(2).
 					WithStartupTimeout(30*time.Second)),
 		)
@@ -48,39 +49,39 @@ func preCheckEnvSetting(t *testing.T) string {
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
+			require.NoError(t, mariadbContainer.Terminate(context.Background()))
 		})
 
-		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
+		str, err := mariadbContainer.ConnectionString(context.Background())
 		require.NoError(t, err)
 
-		pgvectorURL = str
+		mariadbURL = str
 	}
 
-	return pgvectorURL
+	return mariadbURL
 }
 
 func makeNewCollectionName() string {
 	return fmt.Sprintf("test-collection-%s", uuid.New().String())
 }
 
-func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, pgvectorURL string) {
+func cleanupTestArtifacts(ctx context.Context, t *testing.T, s mariadb.Store, mariadbURL string) {
 	t.Helper()
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	tx, err := conn.Begin(ctx)
+	tx, err := db.BeginTx(ctx, nil)
 	require.NoError(t, err)
 
-	require.NoError(t, s.RemoveCollection(ctx, tx))
+	require.NoError(t, s.RemoveDatabase(ctx, tx))
 
-	require.NoError(t, tx.Commit(ctx))
+	require.NoError(t, tx.Commit())
 }
 
-func TestPgvectorStoreRest(t *testing.T) {
+func TestMariaDBStoreRest(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -90,19 +91,20 @@ func TestPgvectorStoreRest(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -119,9 +121,9 @@ func TestPgvectorStoreRest(t *testing.T) {
 	require.Equal(t, "japan", docs[0].Metadata["country"])
 }
 
-func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
+func TestMariaDBStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -131,19 +133,20 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
@@ -179,9 +182,9 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	require.Len(t, docs, 10)
 }
 
-func TestPgvectorStoreSimilarityScore(t *testing.T) {
+func TestMariaDBStoreSimilarityScore(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -191,19 +194,20 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo is the capital city of Japan."},
@@ -226,7 +230,7 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -236,19 +240,20 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -286,7 +291,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	genaiKey := os.Getenv("GENAI_API_KEY")
 	if genaiKey == "" {
 		t.Skip("GENAI_API_KEY not set")
@@ -299,19 +304,19 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	e, err := embeddings.NewEmbedder(googleLLM)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(collectionName),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(collectionName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Beijing"},
@@ -326,16 +331,17 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	e, err = embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	store, err = pgvector.New(
+	store, err = mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(false),
-		pgvector.WithCollectionName(collectionName),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(false),
+		mariadb.WithDatabaseName(collectionName),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
@@ -360,9 +366,9 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	require.Len(t, docs, 5)
 }
 
-func TestPgvectorAsRetriever(t *testing.T) {
+func TestMariaDBAsRetriever(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -372,19 +378,20 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -408,9 +415,9 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
 }
 
-func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
+func TestMariaDBAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -420,19 +427,20 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -461,9 +469,9 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.Contains(t, result, "beige", "expected beige in result")
 }
 
-func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
+func TestMariaDBAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -473,19 +481,20 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(
 		ctx,
@@ -542,9 +551,9 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.Contains(t, result, "yellow", "expected yellow in result")
 }
 
-func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
+func TestMariaDBAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -554,19 +563,20 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(
 		context.Background(),
@@ -615,7 +625,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -625,19 +635,20 @@ func TestDeduplicater(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithVectorDimensions(1536),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -662,7 +673,7 @@ func TestDeduplicater(t *testing.T) {
 
 func TestWithAllOptions(t *testing.T) {
 	t.Parallel()
-	pgvectorURL := preCheckEnvSetting(t)
+	mariadbURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
 	llm, err := openai.New(
@@ -672,27 +683,26 @@ func TestWithAllOptions(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 	require.NoError(t, err)
-	conn, err := pgx.Connect(ctx, pgvectorURL)
+	db, err := sql.Open("mysql", mariadbURL)
 	require.NoError(t, err)
-	defer conn.Close(ctx)
+	defer db.Close()
 
-	store, err := pgvector.New(
+	store, err := mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
-		pgvector.WithCollectionTableName("collection_table_name"),
-		pgvector.WithEmbeddingTableName("embedding_table_name"),
-		pgvector.WithCollectionMetadata(map[string]any{
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
+		mariadb.WithCollectionTableName("collection_table_name"),
+		mariadb.WithEmbeddingTableName("embedding_table_name"),
+		mariadb.WithDatabaseMetadata(map[string]any{
 			"key": "value",
 		}),
-		pgvector.WithVectorDimensions(1536),
-		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+		mariadb.WithVectorDimensions(1536),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
@@ -708,23 +718,22 @@ func TestWithAllOptions(t *testing.T) {
 	require.Equal(t, "tokyo", docs[0].PageContent)
 	require.Equal(t, "japan", docs[0].Metadata["country"])
 
-	store, err = pgvector.New(
+	store, err = mariadb.New(
 		ctx,
-		pgvector.WithConn(conn),
-		pgvector.WithEmbedder(e),
-		pgvector.WithPreDeleteCollection(true),
-		pgvector.WithCollectionName(makeNewCollectionName()),
-		pgvector.WithCollectionTableName("collection_table_name1"),
-		pgvector.WithEmbeddingTableName("embedding_table_name1"),
-		pgvector.WithCollectionMetadata(map[string]any{
+		mariadb.WithDB(db),
+		mariadb.WithEmbedder(e),
+		mariadb.WithPreDeleteDatabase(true),
+		mariadb.WithDatabaseName(makeNewCollectionName()),
+		mariadb.WithCollectionTableName("collection_table_name1"),
+		mariadb.WithEmbeddingTableName("embedding_table_name1"),
+		mariadb.WithDatabaseMetadata(map[string]any{
 			"key": "value",
 		}),
-		pgvector.WithVectorDimensions(1536),
-		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
+		mariadb.WithVectorDimensions(1536),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
+	defer cleanupTestArtifacts(ctx, t, store, mariadbURL)
 
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
