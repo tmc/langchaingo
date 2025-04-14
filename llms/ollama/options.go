@@ -4,19 +4,20 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
-	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
+	"github.com/ollama/ollama/api"
 )
 
 type options struct {
 	ollamaServerURL     *url.URL
 	httpClient          *http.Client
 	model               string
-	ollamaOptions       ollamaclient.Options
+	ollamaOptions       api.Options
 	customModelTemplate string
 	system              string
 	format              string
-	keepAlive           string
+	keepAlive           *time.Duration
 }
 
 type Option func(*options)
@@ -44,11 +45,15 @@ func WithFormat(format string) Option {
 //	If not set, the model will stay loaded for 5 minutes by default
 func WithKeepAlive(keepAlive string) Option {
 	return func(opts *options) {
-		opts.keepAlive = keepAlive
+		ka, err := time.ParseDuration(keepAlive)
+		if err != nil {
+			log.Fatal(err)
+		}
+		opts.keepAlive = &ka
 	}
 }
 
-// WithSystem Set the system prompt. This is only valid if
+// WithSystemPrompt Set the system prompt. This is only valid if
 // WithCustomTemplate is not set and the ollama model use
 // .System in its model template OR if WithCustomTemplate
 // is set using {{.System}}.
@@ -83,13 +88,6 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
-// WithBackendUseNUMA Use NUMA optimization on certain systems.
-func WithRunnerUseNUMA(numa bool) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.UseNUMA = numa
-	}
-}
-
 // WithRunnerNumCtx Sets the size of the context window used to generate the next token (Default: 2048).
 func WithRunnerNumCtx(num int) Option {
 	return func(opts *options) {
@@ -116,13 +114,6 @@ func WithRunnerNumBatch(num int) Option {
 func WithRunnerNumThread(num int) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.NumThread = num
-	}
-}
-
-// WithRunnerNumGQA The number of GQA groups in the transformer layer. Required for some models.
-func WithRunnerNumGQA(num int) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.NumGQA = num
 	}
 }
 
@@ -178,7 +169,7 @@ func WithRunnerVocabOnly(val bool) Option {
 // of the model as needed.
 func WithRunnerUseMMap(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.UseMMap = val
+		opts.ollamaOptions.UseMMap = &val
 	}
 }
 
@@ -186,42 +177,6 @@ func WithRunnerUseMMap(val bool) Option {
 func WithRunnerUseMLock(val bool) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.UseMLock = val
-	}
-}
-
-// WithRunnerEmbeddingOnly Only return the embbeding.
-func WithRunnerEmbeddingOnly(val bool) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.EmbeddingOnly = val
-	}
-}
-
-// WithRunnerRopeFrequencyBase RoPE base frequency (default: loaded from model).
-func WithRunnerRopeFrequencyBase(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.RopeFrequencyBase = val
-	}
-}
-
-// WithRunnerRopeFrequencyScale Rope frequency scaling factor (default: loaded from model).
-func WithRunnerRopeFrequencyScale(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.RopeFrequencyScale = val
-	}
-}
-
-// WithPredictTFSZ Tail free sampling is used to reduce the impact of less probable tokens from the output.
-// A higher value (e.g., 2.0) will reduce the impact more, while a value of 1.0 disables this setting (default: 1).
-func WithPredictTFSZ(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.TFSZ = val
-	}
-}
-
-// WithPredictTypicalP Enable locally typical sampling with parameter p (default: 1.0, 1.0 = disabled).
-func WithPredictTypicalP(val float32) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.TypicalP = val
 	}
 }
 
@@ -255,12 +210,5 @@ func WithPredictMirostatTau(val float32) Option {
 func WithPredictMirostatEta(val float32) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.MirostatEta = val
-	}
-}
-
-// WithPredictPenalizeNewline Penalize newline tokens when applying the repeat penalty (default: true).
-func WithPredictPenalizeNewline(val bool) Option {
-	return func(opts *options) {
-		opts.ollamaOptions.PenalizeNewline = val
 	}
 }

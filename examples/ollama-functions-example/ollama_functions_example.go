@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"slices"
@@ -13,20 +12,17 @@ import (
 	"github.com/tmc/langchaingo/llms/ollama"
 )
 
-var flagVerbose = flag.Bool("v", false, "verbose mode")
-
 func main() {
 	flag.Parse()
 	// allow specifying your own model via OLLAMA_TEST_MODEL
 	// (same as the Ollama unit tests).
-	model := "llama3"
+	model := "llama3.2"
 	if v := os.Getenv("OLLAMA_TEST_MODEL"); v != "" {
 		model = v
 	}
 
 	llm, err := ollama.New(
 		ollama.WithModel(model),
-		ollama.WithFormat("json"),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -34,73 +30,66 @@ func main() {
 
 	var msgs []llms.MessageContent
 
-	// system message defines the available tools.
-	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeSystem, systemMessage()))
 	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather like in Beijing?"))
+
+	// options defines the available tools.
+	toolOpt := llms.WithTools(tools)
 
 	ctx := context.Background()
 
 	for retries := 3; retries > 0; retries = retries - 1 {
-		resp, err := llm.GenerateContent(ctx, msgs)
+		resp, err := llm.GenerateContent(ctx, msgs, toolOpt)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		choice1 := resp.Choices[0]
-		msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeAI, choice1.Content))
 
-		if c := unmarshalCall(choice1.Content); c != nil {
-			log.Printf("Call: %v", c.Tool)
-			if *flagVerbose {
-				log.Printf("Call: %v (raw: %v)", c.Tool, choice1.Content)
-			}
-			msg, cont := dispatchCall(c)
+		for _, tc := range choice1.ToolCalls {
+			log.Printf("Call: %v", tc.FunctionCall)
+
+			msgs = append(msgs, llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{tc},
+			})
+
+			msg, cont := dispatchCall(tc)
 			if !cont {
 				break
 			}
 			msgs = append(msgs, msg)
-		} else {
-			// Ollama doesn't always respond with a function call, let it try again.
-			log.Printf("Not a call: %v", choice1.Content)
-			msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
 		}
 
-		if retries == 0 {
-			log.Fatal("retries exhausted")
+		if len(choice1.ToolCalls) == 0 {
+			log.Printf(choice1.Content)
+			break
 		}
 	}
 }
 
-type Call struct {
-	Tool  string         `json:"tool"`
-	Input map[string]any `json:"tool_input"`
-}
-
-func unmarshalCall(input string) *Call {
-	var c Call
-	if err := json.Unmarshal([]byte(input), &c); err == nil && c.Tool != "" {
-		return &c
-	}
-	return nil
-}
-
-func dispatchCall(c *Call) (llms.MessageContent, bool) {
+func dispatchCall(c llms.ToolCall) (llms.MessageContent, bool) {
 	// ollama doesn't always respond with a *valid* function call. As we're using prompt
 	// engineering to inject the tools, it may hallucinate.
-	if !validTool(c.Tool) {
+	if !validTool(c.FunctionCall.Name) {
 		log.Printf("invalid function call: %#v, prompting model to try again", c)
 		return llms.TextParts(llms.ChatMessageTypeHuman,
 			"Tool does not exist, please try again."), true
 	}
 
+	var parsedArguments map[string]any
+	err := json.Unmarshal([]byte(c.FunctionCall.Arguments), &parsedArguments)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// we could make this more dynamic, by parsing the function schema.
-	switch c.Tool {
+	switch c.FunctionCall.Name {
 	case "getCurrentWeather":
-		loc, ok := c.Input["location"].(string)
+		loc, ok := parsedArguments["location"].(string)
 		if !ok {
 			log.Fatal("invalid input")
 		}
-		unit, ok := c.Input["unit"].(string)
+		unit, ok := parsedArguments["unit"].(string)
 		if !ok {
 			log.Fatal("invalid input")
 		}
@@ -109,16 +98,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		return llms.TextParts(llms.ChatMessageTypeHuman, weather), true
-	case "finalResponse":
-		resp, ok := c.Input["response"].(string)
-		if !ok {
-			log.Fatal("invalid input")
-		}
-
-		log.Printf("Final response: %v", resp)
-
-		return llms.MessageContent{}, false
+		return llms.TextParts(llms.ChatMessageTypeTool, weather), true
 	default:
 		// we already checked above if we had a valid tool.
 		panic("unreachable")
@@ -127,28 +107,10 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 
 func validTool(name string) bool {
 	var valid []string
-	for _, v := range functions {
-		valid = append(valid, v.Name)
+	for _, v := range tools {
+		valid = append(valid, v.Function.Name)
 	}
 	return slices.Contains(valid, name)
-}
-
-func systemMessage() string {
-	bs, err := json.Marshal(functions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return fmt.Sprintf(`You have access to the following tools:
-
-%s
-
-To use a tool, respond with a JSON object with the following structure: 
-{
-	"tool": <name of the called tool>,
-	"tool_input": <parameters for the tool matching the above JSON schema>
-}
-`, string(bs))
 }
 
 func getCurrentWeather(location string, unit string) (string, error) {
@@ -169,30 +131,20 @@ func getCurrentWeather(location string, unit string) (string, error) {
 	return string(b), nil
 }
 
-var functions = []llms.FunctionDefinition{
+var tools = []llms.Tool{
 	{
-		Name:        "getCurrentWeather",
-		Description: "Get the current weather in a given location",
-		Parameters: json.RawMessage(`{
-			"type": "object", 
-			"properties": {
-				"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, 
-				"unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
-			}, 
-			"required": ["location", "unit"]
-		}`),
-	},
-	{
-		// I found that providing a tool for Ollama to give the final response significantly
-		// increases the chances of success.
-		Name:        "finalResponse",
-		Description: "Provide the final response to the user query",
-		Parameters: json.RawMessage(`{
-			"type": "object", 
-			"properties": {
-				"response": {"type": "string", "description": "The final response to the user query"}
-			}, 
-			"required": ["response"]
-		}`),
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters: json.RawMessage(`{
+				"type": "object", 
+				"properties": {
+					"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, 
+					"unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+				}, 
+				"required": ["location", "unit"]
+			}`),
+		},
 	},
 }
