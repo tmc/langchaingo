@@ -127,29 +127,33 @@ type MessageRequest struct {
 	Model       string        `json:"model"`
 	Messages    []ChatMessage `json:"messages"`
 	System      string        `json:"system,omitempty"`
-	Temperature float64       `json:"temperature"`
+	Temperature *float64      `json:"temperature,omitempty"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
+	TopP        *float64      `json:"top_p,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
+	Thinking    *Thinking     `json:"thinking,omitempty"`
 
-	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
+	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
 // CreateMessage creates message for the messages api.
 func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*MessageResponsePayload, error) {
 	resp, err := c.createMessage(ctx, &messagePayload{
-		Model:         r.Model,
-		Messages:      r.Messages,
-		System:        r.System,
-		Temperature:   r.Temperature,
-		MaxTokens:     r.MaxTokens,
-		StopWords:     r.StopWords,
-		TopP:          r.TopP,
-		Tools:         r.Tools,
-		Stream:        r.Stream,
-		StreamingFunc: r.StreamingFunc,
+		Model:                  r.Model,
+		Messages:               r.Messages,
+		System:                 r.System,
+		Temperature:            r.Temperature,
+		MaxTokens:              r.MaxTokens,
+		StopWords:              r.StopWords,
+		TopP:                   r.TopP,
+		Tools:                  r.Tools,
+		Stream:                 r.Stream,
+		StreamingFunc:          r.StreamingFunc,
+		StreamingReasoningFunc: r.StreamingReasoningFunc,
+		Thinking:               r.Thinking,
 	})
 	if err != nil {
 		return nil, err
