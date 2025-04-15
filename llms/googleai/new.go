@@ -20,6 +20,7 @@ type GoogleAI struct {
 var _ llms.Model = &GoogleAI{}
 
 // New creates a new GoogleAI client.
+// Deprecated: Please use googlegenai instead.
 func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	clientOptions := DefaultOptions()
 	for _, opt := range opts {

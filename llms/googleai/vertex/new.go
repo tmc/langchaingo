@@ -26,6 +26,7 @@ type Vertex struct {
 
 var _ llms.Model = &Vertex{}
 
+// Deprecated: Please use googlegenai instead.
 // New creates a new Vertex client.
 func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 	clientOptions := googleai.DefaultOptions()
