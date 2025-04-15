@@ -190,9 +190,9 @@ func createChoice(resp maritacaclient.ChatResponse) []*llms.ContentChoice {
 		{
 			Content: resp.Answer,
 			GenerationInfo: map[string]any{
-				"CompletionTokens": resp.Metrics.Usage.CompletionTokens,
-				"PromptTokens":     resp.Metrics.Usage.PromptTokens,
-				"TotalTokens":      resp.Metrics.Usage.TotalTokens,
+				"CompletionTokens": resp.Usage.CompletionTokens,
+				"PromptTokens":     resp.Usage.PromptTokens,
+				"TotalTokens":      resp.Usage.TotalTokens,
 			},
 		},
 	}
