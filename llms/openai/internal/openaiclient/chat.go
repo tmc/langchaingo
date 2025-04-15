@@ -455,17 +455,16 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				return
 			}
 
-			skiped := false
+			skipped := false
 			for _, skip := range payload.StreamingSkipLines {
 				if strings.EqualFold(skip, data) {
 					// Skip this line
-					skiped = true
+					skipped = true
 					break
 				}
 			}
 
-			if skiped {
-				println("skipped line:", data)
+			if skipped {
 				continue
 			}
 
