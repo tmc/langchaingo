@@ -1,0 +1,88 @@
+---
+sidebar_label: Fake LLM
+---
+
+# Fake LLM
+
+## Overview
+
+This documentation provides an overview of the `fake` package, which offers a simulated implementation of a Language Learning Model (LLM) for testing purposes in Go applications.
+
+## Installation
+
+To use the `fake` package, import it into your Go project:
+
+```bash
+go get "github.com/tmc/langchaingo"
+```
+
+
+
+## Prerequisites
+Ensure you have Go programming language installed on your machine (version 1.15 or higher recommended).
+
+## Example Usage
+Here is an example demonstrating how to use the fake package:
+
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/fake"
+)
+
+func main() {
+	// Creating a fake LLM with initial responses.
+	responses := []string{
+		"Hello!",
+		"How are you?",
+		"I'm fine, thanks.",
+	}
+	llm := fake.NewFakeLLM(responses)
+
+	// Calling the fake LLM with a prompt.
+	ctx := context.Background()
+	response, err := llm.Call(ctx, "Hi there!")
+	if err != nil {
+		fmt.Printf("Error calling LLM: %v\n", err)
+	} else {
+		fmt.Println("LLM Response:", response)
+	}
+
+	// Adding a new response and testing again.
+	llm.AddResponse("Goodbye!")
+	response, err = llm.Call(ctx, "See you later!")
+	if err != nil {
+		fmt.Printf("Error calling LLM: %v\n", err)
+	} else {
+		fmt.Println("LLM Response:", response)
+	}
+}
+```
+
+# API Reference
+`NewFakeLLM(responses []string) *LLM`
+
+Creates a new instance of the fake LLM with the provided responses.
+
+`LLM.Call(ctx context.Context, prompt string) (string, error)`
+
+Simulates calling the model with a specific prompt and returns a fictional response.
+
+`LLM.Reset()`
+
+Resets the fake LLM, allowing responses to cycle through again.
+
+`LLM.AddResponse(response string)`
+
+Adds a new response to the list of possible responses of the fake LLM.
+
+# Purpose
+
+The fake package is designed to facilitate testing of applications that interact with language learning models, without relying on real model implementations. It helps validate application logic and behavior in a controlled environment.

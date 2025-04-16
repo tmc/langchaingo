@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic"
@@ -43,9 +42,9 @@ func initBackend(ctx context.Context) (llms.Model, error) {
 	case "ollama":
 		return ollama.New(ollama.WithModel("mistral"))
 	case "anthropic":
-		return anthropic.New(anthropic.WithModel("claude-2.1"))
+		return anthropic.New(anthropic.WithModel("claude-3-5-sonnet-20240620"))
 	case "googleai":
-		return googleai.New(ctx, googleai.WithAPIKey(os.Getenv("GOOGLE_AI_API_KEY")))
+		return googleai.New(ctx, googleai.WithDefaultModel("gemini-1.5-flash"))
 	default:
 		return nil, fmt.Errorf("unknown backend: %s", *flagBackend)
 	}

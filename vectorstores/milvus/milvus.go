@@ -36,6 +36,7 @@ type Store struct {
 	metricType       entity.MetricType
 	searchParameters entity.SearchParam
 	schema           *entity.Schema
+	skipFlushOnWrite bool
 }
 
 var (
@@ -45,6 +46,7 @@ var (
 		"number of vectors from embedder does not match number of documents",
 	)
 	ErrColumnNotFound = errors.New("invalid field")
+	ErrInvalidFilters = errors.New("invalid filters")
 )
 
 // New creates an active client connection to the (specified, or default) collection in the Milvus server
@@ -130,7 +132,7 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 			},
 			{
 				Name:     s.metaField,
-				DataType: entity.FieldTypeVarChar,
+				DataType: entity.FieldTypeJSON,
 				TypeParams: map[string]string{
 					entity.TypeParamMaxLength: strconv.Itoa(s.maxTextLength),
 				},
@@ -195,15 +197,10 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	_ ...vectorstores.Option,
 ) ([]string, error) {
 	texts := make([]string, 0, len(docs))
-	metadatas := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
-		buf, err := json.Marshal(doc.Metadata)
-		if err != nil {
-			return nil, err
-		}
-		metadatas = append(metadatas, string(buf))
 	}
+
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
@@ -216,14 +213,25 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 		return nil, err
 	}
 
-	textCol := entity.NewColumnVarChar(s.textField, texts)
-	metaCol := entity.NewColumnVarChar(s.metaField, metadatas)
-	vectorCol := entity.NewColumnFloatVector(s.vectorField, len(vectors[0]), vectors)
-	_, err = s.client.Insert(ctx, s.collectionName, s.partitionName, vectorCol, metaCol, textCol)
+	colsData := make([]interface{}, 0, len(docs))
+	for i, doc := range docs {
+		docMap := map[string]any{
+			s.metaField:   doc.Metadata,
+			s.textField:   doc.PageContent,
+			s.vectorField: vectors[i],
+		}
+		colsData = append(colsData, docMap)
+	}
+
+	_, err = s.client.InsertRows(ctx, s.collectionName, s.partitionName, colsData)
 	if err != nil {
 		return nil, err
 	}
-
+	if !s.skipFlushOnWrite {
+		if err = s.client.Flush(ctx, s.collectionName, false); err != nil {
+			return nil, err
+		}
+	}
 	return nil, nil
 }
 
@@ -258,7 +266,7 @@ func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]sc
 		if !ok {
 			return nil, fmt.Errorf("%w: text column missing", ErrColumnNotFound)
 		}
-		metacol, ok := res.Fields.GetColumn(s.metaField).(*entity.ColumnVarChar)
+		metacol, ok := res.Fields.GetColumn(s.metaField).(*entity.ColumnJSONBytes)
 		if !ok {
 			return nil, fmt.Errorf("%w: metadata column missing", ErrColumnNotFound)
 		}
@@ -274,7 +282,7 @@ func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]sc
 				return nil, err
 			}
 
-			if err := json.Unmarshal([]byte(metaStr), &doc.Metadata); err != nil {
+			if err := json.Unmarshal(metaStr, &doc.Metadata); err != nil {
 				return nil, err
 			}
 			doc.Score = res.Scores[i]
@@ -288,7 +296,10 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
-
+	filter, err := s.getFilters(opts)
+	if err != nil {
+		return nil, err
+	}
 	vector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
@@ -307,10 +318,10 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if opts.ScoreThreshold > 0 {
 		sp.AddRadius(float64(opts.ScoreThreshold))
 	}
-
-	searchResult, err := s.client.Search(ctx, s.collectionName,
+	searchResult, err := s.client.Search(ctx,
+		s.collectionName,
 		partitions,
-		"",
+		filter,
 		s.getSearchFields(),
 		vectors,
 		s.vectorField,
@@ -324,4 +335,15 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	return s.convertResultToDocument(searchResult)
+}
+
+// getFilters return metadata filters.
+func (s Store) getFilters(opts vectorstores.Options) (string, error) {
+	if opts.Filters != nil {
+		if filters, ok := opts.Filters.(string); ok {
+			return filters, nil
+		}
+		return "", ErrInvalidFilters
+	}
+	return "", nil
 }

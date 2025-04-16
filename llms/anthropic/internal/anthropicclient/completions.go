@@ -5,15 +5,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
-)
-
-const (
-	defaultCompletionModel = "claude-1"
 )
 
 type completionPayload struct {
@@ -36,17 +31,10 @@ type CompletionResponsePayload struct {
 	StopReason string `json:"stop_reason,omitempty"`
 }
 
-type errorMessage struct {
-	Error struct {
-		Message string `json:"message"`
-		Type    string `json:"type"`
-	} `json:"error"`
-}
-
 func (c *Client) setCompletionDefaults(payload *completionPayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 256
+		payload.MaxTokens = 2048
 	}
 
 	if len(payload.StopWords) == 0 {
@@ -62,7 +50,7 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultCompletionModel
+		payload.Model = defaultModel
 	}
 	if payload.StreamingFunc != nil {
 		payload.Stream = true
@@ -73,61 +61,41 @@ func (c *Client) setCompletionDefaults(payload *completionPayload) {
 func (c *Client) createCompletion(ctx context.Context, payload *completionPayload) (*CompletionResponsePayload, error) {
 	c.setCompletionDefaults(payload)
 
-	// Build request payload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	if c.baseURL == "" {
-		c.baseURL = DefaultBaseURL
-	}
-
-	url := fmt.Sprintf("%s/complete", c.baseURL)
-	// Build request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
+	resp, err := c.do(ctx, "/complete", payloadBytes)
 	if err != nil {
-		return nil, fmt.Errorf("create request: %w", err)
+		return nil, fmt.Errorf("failed request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, c.decodeError(resp)
 	}
 
-	c.setHeaders(req)
-
-	// Send request
-	r, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
-	}
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
-	}
 	if payload.StreamingFunc != nil {
-		// Read chunks
-		return parseStreamingCompletionResponse(ctx, r, payload)
+		return parseStreamingCompletionResponse(ctx, resp, payload)
 	}
 
-	// Parse response
 	var response CompletionResponsePayload
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
 
 	return &response, nil
 }
 
+type CompletionEvent struct {
+	Response *CompletionResponsePayload
+	Err      error
+}
+
 func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, payload *completionPayload) (*CompletionResponsePayload, error) { // nolint:lll
 	scanner := bufio.NewScanner(r.Body)
-	responseChan := make(chan *CompletionResponsePayload)
+	responseChan := make(chan CompletionEvent)
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -142,9 +110,10 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 			streamPayload := &CompletionResponsePayload{}
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				log.Fatalf("failed to decode stream payload: %v", err)
+				responseChan <- CompletionEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %w", err)}
+				return
 			}
-			responseChan <- streamPayload
+			responseChan <- CompletionEvent{Response: streamPayload, Err: nil}
 		}
 		if err := scanner.Err(); err != nil {
 			log.Println("issue scanning response:", err)
@@ -155,14 +124,17 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 
 	var lastResponse *CompletionResponsePayload
 	for streamResponse := range responseChan {
-		response.Completion += streamResponse.Completion
+		if streamResponse.Err != nil {
+			return nil, streamResponse.Err
+		}
+		response.Completion += streamResponse.Response.Completion
 		if payload.StreamingFunc != nil {
-			err := payload.StreamingFunc(ctx, []byte(streamResponse.Completion))
+			err := payload.StreamingFunc(ctx, []byte(streamResponse.Response.Completion))
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
-		lastResponse = streamResponse
+		lastResponse = streamResponse.Response
 	}
 	response.Model = lastResponse.Model
 	response.LogID = lastResponse.LogID

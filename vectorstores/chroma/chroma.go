@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 
 	chromago "github.com/amikos-tech/chroma-go"
 	"github.com/amikos-tech/chroma-go/openai"
@@ -12,7 +13,6 @@ import (
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"golang.org/x/exp/maps"
 )
 
 var (
@@ -139,7 +139,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query(ctx, []string{query}, int32(numDocuments), filter, nil, s.includes)
+	qr, queryErr := s.collection.Query(ctx, []string{query}, safeIntToInt32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
@@ -211,4 +211,8 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 	}
 
 	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
+}
+
+func safeIntToInt32(n int) int32 {
+	return int32(max(0, n))
 }

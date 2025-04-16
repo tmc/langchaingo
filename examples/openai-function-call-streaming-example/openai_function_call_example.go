@@ -9,23 +9,23 @@ import (
 	"github.com/tmc/langchaingo/jsonschema"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
 )
 
 func main() {
-	llm, err := openai.New(openai.WithModel("gpt-3.5-turbo-0613"))
+	llm, err := openai.New(openai.WithModel("gpt-4-turbo"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
-			llms.TextParts(schema.ChatMessageTypeHuman, "What is the weather like in Boston?")},
+			llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston?"),
+		},
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Printf("Received chunk: %s\n", chunk)
 			return nil
 		}),
-		llms.WithFunctions(functions))
+		llms.WithTools(tools))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,70 +52,79 @@ func getCurrentWeather(location string, unit string) (string, error) {
 
 // json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
 
-var functions = []llms.FunctionDefinition{
+var tools = []llms.Tool{
 	{
-		Name:        "getCurrentWeather",
-		Description: "Get the current weather in a given location",
-		Parameters: jsonschema.Definition{
-			Type: jsonschema.Object,
-			Properties: map[string]jsonschema.Definition{
-				"rationale": {
-					Type:        jsonschema.String,
-					Description: "The rationale for choosing this function call with these parameters",
-				},
-				"location": {
-					Type:        jsonschema.String,
-					Description: "The city and state, e.g. San Francisco, CA",
-				},
-				"unit": {
-					Type: jsonschema.String,
-					Enum: []string{"celsius", "fahrenheit"},
-				},
-			},
-			Required: []string{"rationale", "location"},
-		},
-	},
-	{
-		Name:        "getTomorrowWeather",
-		Description: "Get the predicted weather in a given location",
-		Parameters: jsonschema.Definition{
-			Type: jsonschema.Object,
-			Properties: map[string]jsonschema.Definition{
-				"rationale": {
-					Type:        jsonschema.String,
-					Description: "The rationale for choosing this function call with these parameters",
-				},
-				"location": {
-					Type:        jsonschema.String,
-					Description: "The city and state, e.g. San Francisco, CA",
-				},
-				"unit": {
-					Type: jsonschema.String,
-					Enum: []string{"celsius", "fahrenheit"},
-				},
-			},
-			Required: []string{"rationale", "location"},
-		},
-	},
-	{
-		Name:        "getSuggestedPrompts",
-		Description: "Given the user's input prompt suggest some related prompts",
-		Parameters: jsonschema.Definition{
-			Type: jsonschema.Object,
-			Properties: map[string]jsonschema.Definition{
-				"rationale": {
-					Type:        jsonschema.String,
-					Description: "The rationale for choosing this function call with these parameters",
-				},
-				"suggestions": {
-					Type: jsonschema.Array,
-					Items: &jsonschema.Definition{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"rationale": {
 						Type:        jsonschema.String,
-						Description: "A suggested prompt",
+						Description: "The rationale for choosing this function call with these parameters",
+					},
+					"location": {
+						Type:        jsonschema.String,
+						Description: "The city and state, e.g. San Francisco, CA",
+					},
+					"unit": {
+						Type: jsonschema.String,
+						Enum: []string{"celsius", "fahrenheit"},
 					},
 				},
+				Required: []string{"rationale", "location"},
 			},
-			Required: []string{"rationale", "suggestions"},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getTomorrowWeather",
+			Description: "Get the predicted weather in a given location",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"rationale": {
+						Type:        jsonschema.String,
+						Description: "The rationale for choosing this function call with these parameters",
+					},
+					"location": {
+						Type:        jsonschema.String,
+						Description: "The city and state, e.g. San Francisco, CA",
+					},
+					"unit": {
+						Type: jsonschema.String,
+						Enum: []string{"celsius", "fahrenheit"},
+					},
+				},
+				Required: []string{"rationale", "location"},
+			},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getSuggestedPrompts",
+			Description: "Given the user's input prompt suggest some related prompts",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"rationale": {
+						Type:        jsonschema.String,
+						Description: "The rationale for choosing this function call with these parameters",
+					},
+					"suggestions": {
+						Type: jsonschema.Array,
+						Items: &jsonschema.Definition{
+							Type:        jsonschema.String,
+							Description: "A suggested prompt",
+						},
+					},
+				},
+				Required: []string{"rationale", "suggestions"},
+			},
 		},
 	},
 }

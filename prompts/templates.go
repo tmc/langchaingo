@@ -3,6 +3,7 @@ package prompts
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/nikolalohinski/gonja"
 	"github.com/tmc/langchaingo/prompts/internal/fstring"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and

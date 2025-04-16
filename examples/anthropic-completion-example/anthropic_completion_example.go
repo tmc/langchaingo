@@ -10,13 +10,14 @@ import (
 )
 
 func main() {
-	llm, err := anthropic.New()
-	// note: You would include anthropic.WithModel("claude-2") to use the claude-2 model.
+	llm, err := anthropic.New(
+		anthropic.WithModel("claude-3-5-sonnet-20240620"),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, "Human: Who was the first man to walk on the moon?\nAssistant:",
+	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, "Hi claude, write a poem about golang powered AI systems",
 		llms.WithTemperature(0.8),
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Print(string(chunk))

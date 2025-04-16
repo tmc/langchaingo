@@ -2,9 +2,10 @@ package embeddings
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/internal/util"
+	"github.com/tmc/langchaingo/internal/sliceutil"
 )
 
 // NewEmbedder creates a new Embedder from the given EmbedderClient, with
@@ -59,7 +60,7 @@ func (ei *EmbedderImpl) EmbedQuery(ctx context.Context, text string) ([]float32,
 
 	emb, err := ei.client.CreateEmbedding(ctx, []string{text})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error embedding query: %w", err)
 	}
 
 	return emb[0], nil
@@ -88,7 +89,7 @@ func BatchTexts(texts []string, batchSize int) [][]string {
 	batchedTexts := make([][]string, 0, len(texts)/batchSize+1)
 
 	for i := 0; i < len(texts); i += batchSize {
-		batchedTexts = append(batchedTexts, texts[i:util.MinInt([]int{i + batchSize, len(texts)})])
+		batchedTexts = append(batchedTexts, texts[i:sliceutil.MinInt([]int{i + batchSize, len(texts)})])
 	}
 
 	return batchedTexts
@@ -103,7 +104,7 @@ func BatchedEmbed(ctx context.Context, embedder EmbedderClient, texts []string, 
 	for _, batch := range batchedTexts {
 		curBatchEmbeddings, err := embedder.CreateEmbedding(ctx, batch)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error embedding batch: %w", err)
 		}
 		emb = append(emb, curBatchEmbeddings...)
 	}

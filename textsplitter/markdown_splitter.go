@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"unicode/utf8"
 
 	"gitlab.com/golang-commonmark/markdown"
 )
@@ -18,11 +17,14 @@ func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 	}
 
 	sp := &MarkdownTextSplitter{
-		ChunkSize:      options.ChunkSize,
-		ChunkOverlap:   options.ChunkOverlap,
-		SecondSplitter: options.SecondSplitter,
-		CodeBlocks:     options.CodeBlocks,
-		ReferenceLinks: options.ReferenceLinks,
+		ChunkSize:        options.ChunkSize,
+		ChunkOverlap:     options.ChunkOverlap,
+		SecondSplitter:   options.SecondSplitter,
+		CodeBlocks:       options.CodeBlocks,
+		ReferenceLinks:   options.ReferenceLinks,
+		HeadingHierarchy: options.KeepHeadingHierarchy,
+		JoinTableRows:    options.JoinTableRows,
+		LenFunc:          options.LenFunc,
 	}
 
 	if sp.SecondSplitter == nil {
@@ -34,6 +36,7 @@ func NewMarkdownTextSplitter(opts ...Option) *MarkdownTextSplitter {
 				"\n",   // new line
 				" ",    // space
 			}),
+			WithLenFunc(options.LenFunc),
 		)
 	}
 
@@ -50,9 +53,12 @@ type MarkdownTextSplitter struct {
 	ChunkSize    int
 	ChunkOverlap int
 	// SecondSplitter splits paragraphs
-	SecondSplitter TextSplitter
-	CodeBlocks     bool
-	ReferenceLinks bool
+	SecondSplitter   TextSplitter
+	CodeBlocks       bool
+	ReferenceLinks   bool
+	HeadingHierarchy bool
+	JoinTableRows    bool
+	LenFunc          func(string) int
 }
 
 // SplitText splits a text into multiple text.
@@ -61,14 +67,18 @@ func (sp MarkdownTextSplitter) SplitText(text string) ([]string, error) {
 	tokens := mdParser.Parse([]byte(text))
 
 	mc := &markdownContext{
-		startAt:          0,
-		endAt:            len(tokens),
-		tokens:           tokens,
-		chunkSize:        sp.ChunkSize,
-		chunkOverlap:     sp.ChunkOverlap,
-		secondSplitter:   sp.SecondSplitter,
-		renderCodeBlocks: sp.CodeBlocks,
-		useInlineContent: !sp.ReferenceLinks,
+		startAt:                0,
+		endAt:                  len(tokens),
+		tokens:                 tokens,
+		chunkSize:              sp.ChunkSize,
+		chunkOverlap:           sp.ChunkOverlap,
+		secondSplitter:         sp.SecondSplitter,
+		renderCodeBlocks:       sp.CodeBlocks,
+		useInlineContent:       !sp.ReferenceLinks,
+		joinTableRows:          sp.JoinTableRows,
+		hTitleStack:            []string{},
+		hTitlePrependHierarchy: sp.HeadingHierarchy,
+		lenFunc:                sp.LenFunc,
 	}
 
 	chunks := mc.splitText()
@@ -87,8 +97,12 @@ type markdownContext struct {
 
 	// hTitle represents the current header(H1、H2 etc.) content
 	hTitle string
+	// hTitleStack represents the hierarchy of headers
+	hTitleStack []string
 	// hTitlePrepended represents whether hTitle has been appended to chunks
 	hTitlePrepended bool
+	// hTitlePrependHierarchy represents whether hTitle should contain the title hierarchy or only the last title
+	hTitlePrependHierarchy bool
 
 	// orderedList represents whether current list is ordered list
 	orderedList bool
@@ -118,6 +132,13 @@ type markdownContext struct {
 
 	// useInlineContent determines whether the default inline content is rendered
 	useInlineContent bool
+
+	// joinTableRows determines whether a chunk should contain multiple table rows,
+	// or if each row in a table should be split into a separate chunk.
+	joinTableRows bool
+
+	// lenFunc represents the function to calculate the length of a string.
+	lenFunc func(string) int
 }
 
 // splitText splits Markdown text.
@@ -167,6 +188,7 @@ func (mc *markdownContext) clone(startAt, endAt int) *markdownContext {
 		tokens: subTokens,
 
 		hTitle:          mc.hTitle,
+		hTitleStack:     mc.hTitleStack,
 		hTitlePrepended: mc.hTitlePrepended,
 
 		orderedList: mc.orderedList,
@@ -177,6 +199,8 @@ func (mc *markdownContext) clone(startAt, endAt int) *markdownContext {
 		chunkSize:      mc.chunkSize,
 		chunkOverlap:   mc.chunkOverlap,
 		secondSplitter: mc.secondSplitter,
+
+		lenFunc: mc.lenFunc,
 	}
 }
 
@@ -204,6 +228,24 @@ func (mc *markdownContext) onMDHeader() {
 
 	hm := repeatString(header.HLevel, "#")
 	mc.hTitle = fmt.Sprintf("%s %s", hm, inline.Content)
+
+	// fill titlestack with empty strings up to the current level
+	for len(mc.hTitleStack) < header.HLevel {
+		mc.hTitleStack = append(mc.hTitleStack, "")
+	}
+
+	if mc.hTitlePrependHierarchy {
+		// Build the new title from the title stack, joined by newlines, while ignoring empty entries
+		mc.hTitleStack = append(mc.hTitleStack[:header.HLevel-1], mc.hTitle)
+		mc.hTitle = ""
+		for _, t := range mc.hTitleStack {
+			if t != "" {
+				mc.hTitle = strings.Join([]string{mc.hTitle, t}, "\n")
+			}
+		}
+		mc.hTitle = strings.TrimLeft(mc.hTitle, "\n")
+	}
+
 	mc.hTitlePrepended = false
 }
 
@@ -398,14 +440,22 @@ func (mc *markdownContext) splitTableRows(header []string, bodies [][]string) {
 		return
 	}
 
-	// append table header
 	for _, row := range bodies {
 		line := tableRowInMarkdown(row)
 
-		mc.joinSnippet(fmt.Sprintf("%s\n%s", headerMD, line))
+		// If we're at the start of the current snippet, or adding the current line would
+		// overflow the chunk size, prepend the header to the line (so that the new chunk
+		// will include the table header).
+		if len(mc.curSnippet) == 0 || mc.lenFunc(mc.curSnippet+line) >= mc.chunkSize {
+			line = fmt.Sprintf("%s\n%s", headerMD, line)
+		}
 
-		// keep every row in a single Document
-		mc.applyToChunks()
+		mc.joinSnippet(line)
+
+		// If we're not joining table rows, create a new chunk.
+		if !mc.joinTableRows {
+			mc.applyToChunks()
+		}
 	}
 }
 
@@ -575,7 +625,7 @@ func (mc *markdownContext) joinSnippet(snippet string) {
 	}
 
 	// check whether current chunk exceeds chunk size, if so, apply to chunks
-	if utf8.RuneCountInString(mc.curSnippet)+utf8.RuneCountInString(snippet) >= mc.chunkSize {
+	if mc.lenFunc(mc.curSnippet+snippet) >= mc.chunkSize {
 		mc.applyToChunks()
 		mc.curSnippet = snippet
 	} else {
@@ -592,7 +642,7 @@ func (mc *markdownContext) applyToChunks() {
 	var chunks []string
 	if mc.curSnippet != "" {
 		// check whether current chunk is over ChunkSize，if so, re-split current chunk
-		if utf8.RuneCountInString(mc.curSnippet) <= mc.chunkSize+mc.chunkOverlap {
+		if mc.lenFunc(mc.curSnippet) <= mc.chunkSize+mc.chunkOverlap {
 			chunks = []string{mc.curSnippet}
 		} else {
 			// split current snippet to chunks

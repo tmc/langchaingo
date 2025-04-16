@@ -624,7 +624,7 @@ func (c *Constitutional) Call(ctx context.Context, inputs map[string]any, option
 // processCritiquesAndRevisions processes critiques and revisions based on the input response and prompt.
 // It iterates through constitutional principles, retrieves critiques, and performs revisions where necessary.
 // The resulting pairs of critiques and revisions are returned.
-func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, response any, inputPrompt schema.PromptValue,
+func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, response any, inputPrompt llms.PromptValue,
 	options []ChainCallOption,
 ) ([]Pair, error) {
 	critiquesAndRevisions := make([]Pair, 0, len(c.constitutionalPrinciples))

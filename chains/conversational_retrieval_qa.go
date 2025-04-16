@@ -95,12 +95,12 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 	}
 	chatHistoryStr, ok := values[c.Memory.GetMemoryKey(ctx)].(string)
 	if !ok {
-		chatHistory, ok := values[c.Memory.GetMemoryKey(ctx)].([]schema.ChatMessage)
+		chatHistory, ok := values[c.Memory.GetMemoryKey(ctx)].([]llms.ChatMessage)
 		if !ok {
 			return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
 		}
 
-		bufferStr, err := schema.GetBufferString(chatHistory, "Human", "AI")
+		bufferStr, err := llms.GetBufferString(chatHistory, "Human", "AI")
 		if err != nil {
 			return nil, err
 		}

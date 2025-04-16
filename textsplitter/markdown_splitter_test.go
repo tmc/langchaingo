@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
@@ -20,34 +21,73 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 	testCases := []testCase{
 		{
 			markdown: `
-### This is a header
+## First header: h2
+Some content below the first h2.
+## Second header: h2
+### Third header: h3
 
 - This is a list item of bullet type.
 - This is another list item.
 
  *Everything* is going according to **plan**.
+
+# Fourth header: h1
+Some content below the first h1.
+## Fifth header: h2
+#### Sixth header: h4
+
+Some content below h1>h2>h4.
 `,
 			expectedDocs: []schema.Document{
 				{
-					PageContent: `### This is a header
+					PageContent: `## First header: h2
+Some content below the first h2.`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `## Second header: h2`,
+					Metadata:    map[string]any{},
+				},
+				{
+					PageContent: `## Second header: h2
+### Third header: h3
 - This is a list item of bullet type.`,
 					Metadata: map[string]any{},
 				},
 				{
-					PageContent: `### This is a header
+					PageContent: `## Second header: h2
+### Third header: h3
 - This is another list item.`,
 					Metadata: map[string]any{},
 				},
 				{
-					PageContent: `### This is a header
+					PageContent: `## Second header: h2
+### Third header: h3
 *Everything* is going according to **plan**.`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `# Fourth header: h1
+Some content below the first h1.`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `# Fourth header: h1
+## Fifth header: h2`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `# Fourth header: h1
+## Fifth header: h2
+#### Sixth header: h4
+Some content below h1>h2>h4.`,
 					Metadata: map[string]any{},
 				},
 			},
 		},
 	}
 
-	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
+	splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32), WithHeadingHierarchy(true))
 	for _, tc := range testCases {
 		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
 		require.NoError(t, err)
@@ -56,14 +96,25 @@ func TestMarkdownHeaderTextSplitter_SplitText(t *testing.T) {
 }
 
 // TestMarkdownHeaderTextSplitter_Table markdown always split by line.
+//
+//nolint:funlen
 func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 	t.Parallel()
+
 	type testCase struct {
+		name         string
 		markdown     string
+		options      []Option
 		expectedDocs []schema.Document
 	}
+
 	testCases := []testCase{
 		{
+			name: "size(64)-overlap(32)",
+			options: []Option{
+				WithChunkSize(64),
+				WithChunkOverlap(32),
+			},
 			markdown: `| Syntax      | Description |
 | ----------- | ----------- |
 | Header      | Title       |
@@ -83,18 +134,92 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "size(512)-overlap(64)",
+			options: []Option{
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "big-tables-overflow",
+			options: []Option{
+				WithChunkSize(64),
+				WithChunkOverlap(32),
+				WithJoinTableRows(true),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "big-tables",
+			options: []Option{
+				WithChunkSize(128),
+				WithChunkOverlap(32),
+				WithJoinTableRows(true),
+			},
+			markdown: `| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		splitter := NewMarkdownTextSplitter(WithChunkSize(64), WithChunkOverlap(32))
-		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
-		require.NoError(t, err)
-		assert.Equal(t, tc.expectedDocs, docs)
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		splitter = NewMarkdownTextSplitter(WithChunkSize(512), WithChunkOverlap(64))
-		docs, err = CreateDocuments(splitter, []string{tc.markdown}, nil)
-		require.NoError(t, err)
-		assert.Equal(t, tc.expectedDocs, docs)
+			rq := require.New(t)
+
+			splitter := NewMarkdownTextSplitter(tc.options...)
+
+			docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
+			rq.NoError(err)
+			rq.Equal(tc.expectedDocs, docs)
+		})
 	}
 }
 
@@ -335,8 +460,6 @@ more text`,
 	}
 
 	for _, tc := range tt {
-		tc := tc // pin
-
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -441,8 +564,6 @@ func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
 	}
 
 	for _, tc := range tt {
-		tc := tc // pin
-
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -457,5 +578,49 @@ func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
 			rq.NoError(err)
 			rq.Equal(tc.expectedDocs, docs)
 		})
+	}
+}
+
+func TestMarkdownHeaderTextSplitter_LenFunc(t *testing.T) {
+	t.Parallel()
+
+	tokenEncoder, _ := tiktoken.GetEncoding("cl100k_base")
+
+	sampleText := "The quick brown fox jumped over the lazy dog."
+	tokensPerChunk := len(tokenEncoder.Encode(sampleText, nil, nil))
+
+	type testCase struct {
+		markdown     string
+		expectedDocs []schema.Document
+	}
+
+	testCases := []testCase{
+		{
+			markdown: `# Title` + "\n" + sampleText + "\n" + sampleText,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: "# Title" + "\n" + sampleText,
+					Metadata:    map[string]any{},
+				},
+				{
+					PageContent: "# Title" + "\n" + sampleText,
+					Metadata:    map[string]any{},
+				},
+			},
+		},
+	}
+
+	splitter := NewMarkdownTextSplitter(
+		WithChunkSize(tokensPerChunk+1),
+		WithChunkOverlap(0),
+		WithLenFunc(func(s string) int {
+			return len(tokenEncoder.Encode(s, nil, nil))
+		}),
+	)
+
+	for _, tc := range testCases {
+		docs, err := CreateDocuments(splitter, []string{tc.markdown}, nil)
+		require.NoError(t, err)
+		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }

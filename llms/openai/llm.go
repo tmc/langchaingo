@@ -17,7 +17,7 @@ var (
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
-// newClient is wrapper for openaiclient internal package.
+// newClient creates an instance of the internal client.
 func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	options := &options{
 		token:        os.Getenv(tokenEnvVarName),
@@ -48,7 +48,9 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	}
 
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
-		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel)
+		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel,
+		options.responseFormat,
+	)
 	return options, cli, err
 }
 

@@ -81,19 +81,16 @@ func (c *Cacher) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	return response, nil
 }
 
-// hashKeyForCache implements a hair-brained hashing scheme for the parameters to `GenerateContent`.
-// It simply marshals all parameters as JSON and hashes the result.
+// hashKeyForCache is a helper function that generates a unique key for a given
+// set of messages and call options.
 func hashKeyForCache(messages []llms.MessageContent, opts llms.CallOptions) (string, error) {
 	hash := sha256.New()
 	enc := json.NewEncoder(hash)
-
 	if err := enc.Encode(messages); err != nil {
 		return "", err
 	}
-
 	if err := enc.Encode(opts); err != nil {
 		return "", err
 	}
-
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }

@@ -56,7 +56,7 @@ func createMetaCompletion(ctx context.Context,
 		Prompt:      txt,
 		Temperature: options.Temperature,
 		TopP:        options.TopP,
-		MaxGenLen:   options.MaxTokens,
+		MaxGenLen:   getMaxTokens(options.MaxTokens, 512),
 	}
 
 	body, err := json.Marshal(input)

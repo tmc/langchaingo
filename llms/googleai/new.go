@@ -8,30 +8,30 @@ import (
 	"github.com/google/generative-ai-go/genai"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"google.golang.org/api/option"
 )
 
 // GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
 	CallbacksHandler callbacks.Handler
 	client           *genai.Client
-	opts             options
+	opts             Options
 }
 
 var _ llms.Model = &GoogleAI{}
 
 // New creates a new GoogleAI client.
 func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
-	clientOptions := defaultOptions()
+	clientOptions := DefaultOptions()
 	for _, opt := range opts {
 		opt(&clientOptions)
 	}
+	clientOptions.EnsureAuthPresent()
 
 	gi := &GoogleAI{
 		opts: clientOptions,
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(clientOptions.apiKey))
+	client, err := genai.NewClient(ctx, clientOptions.ClientOptions...)
 	if err != nil {
 		return gi, err
 	}

@@ -3,10 +3,10 @@ package chains
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
-	"golang.org/x/exp/maps"
 )
 
 // MapReduceDocuments is a chain that combines documents by mapping a chain over them, then
@@ -158,7 +158,11 @@ func (c MapReduceDocuments) GetInputKeys() []string {
 		inputKeys[key] = true
 	}
 
-	return maps.Keys(inputKeys)
+	result := make([]string, 0, len(inputKeys))
+	for k := range inputKeys {
+		result = append(result, k)
+	}
+	return result
 }
 
 func (c MapReduceDocuments) GetOutputKeys() []string {

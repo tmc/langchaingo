@@ -8,15 +8,9 @@ import (
 
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
-)
-
-const (
-	defaultAPIEndpoint = "us-central1-aiplatform.googleapis.com:443"
-	defaultLocation    = "us-central1"
-	defaultPublisher   = "google"
 )
 
 var (
@@ -48,19 +42,20 @@ type PaLMClient struct {
 }
 
 // New returns a new Vertex AI based PaLM API client.
-func New(projectID string, opts ...option.ClientOption) (*PaLMClient, error) {
+func New(ctx context.Context, projectID, location string, opts ...option.ClientOption) (*PaLMClient, error) {
 	numConns := runtime.GOMAXPROCS(0)
 	if numConns > defaultMaxConns {
 		numConns = defaultMaxConns
 	}
 	o := []option.ClientOption{
 		option.WithGRPCConnectionPool(numConns),
-		option.WithEndpoint(defaultAPIEndpoint),
+		option.WithEndpoint(fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)),
 	}
-	o = append(o, opts...)
+	opts = append(o, opts...)
+	// PredictionClient only support GRPC.
+	opts = append(opts, option.WithHTTPClient(nil))
 
-	ctx := context.Background()
-	client, err := aiplatform.NewPredictionClient(ctx, o...)
+	client, err := aiplatform.NewPredictionClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -175,15 +170,15 @@ type ChatMessage struct {
 }
 
 // Statically assert that the types implement the interface.
-var _ schema.ChatMessage = ChatMessage{}
+var _ llms.ChatMessage = ChatMessage{}
 
 // GetType returns the type of the message.
-func (m ChatMessage) GetType() schema.ChatMessageType {
+func (m ChatMessage) GetType() llms.ChatMessageType {
 	switch m.Author {
 	case "user":
-		return schema.ChatMessageTypeHuman
+		return llms.ChatMessageTypeHuman
 	default:
-		return schema.ChatMessageTypeAI
+		return llms.ChatMessageTypeAI
 	}
 }
 

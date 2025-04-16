@@ -15,9 +15,10 @@ import (
 
 func main() {
 	// Create an embeddings client using the OpenAI API. Requires environment variable OPENAI_API_KEY to be set.
-	llm, err := openai.New()
+	
+	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-3-small"))// Specify your preferred embedding model
 	if err != nil {
-		log.Fatal(err)
+    		log.Fatal(err)
 	}
 
 	e, err := embeddings.NewEmbedder(llm)
@@ -29,10 +30,7 @@ func main() {
 
 	// Create a new Pinecone vector store.
 	store, err := pinecone.New(
-		ctx,
-		pinecone.WithProjectName("YOUR_PROJECT_NAME"),
-		pinecone.WithIndexName("YOUR_INDEX_NAME"),
-		pinecone.WithEnvironment("YOUR_ENVIRONMENT"),
+		pinecone.WithHost("https://api.pinecone.io"),
 		pinecone.WithEmbedder(e),
 		pinecone.WithAPIKey("YOUR_API_KEY"),
 		pinecone.WithNameSpace(uuid.New().String()),

@@ -9,6 +9,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
 )
 
@@ -19,25 +20,33 @@ import (
 type Vertex struct {
 	CallbacksHandler callbacks.Handler
 	client           *genai.Client
-	opts             options
+	opts             googleai.Options
 	palmClient       *palmclient.PaLMClient
 }
 
 var _ llms.Model = &Vertex{}
 
 // New creates a new Vertex client.
-func New(ctx context.Context, opts ...Option) (*Vertex, error) {
-	clientOptions := defaultOptions()
+func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
+	clientOptions := googleai.DefaultOptions()
 	for _, opt := range opts {
 		opt(&clientOptions)
 	}
 
-	client, err := genai.NewClient(ctx, clientOptions.cloudProject, clientOptions.cloudLocation)
+	client, err := genai.NewClient(
+		ctx,
+		clientOptions.CloudProject,
+		clientOptions.CloudLocation,
+		clientOptions.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	palmClient, err := palmclient.New(clientOptions.cloudProject) //nolint:contextcheck
+	palmClient, err := palmclient.New(
+		ctx,
+		clientOptions.CloudProject,
+		clientOptions.CloudLocation,
+		clientOptions.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,10 @@
 package textsplitter
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
@@ -10,13 +12,17 @@ import (
 
 //nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
+	tokenEncoder, _ := tiktoken.GetEncoding("cl100k_base")
+
 	t.Parallel()
 	type testCase struct {
-		text         string
-		chunkOverlap int
-		chunkSize    int
-		separators   []string
-		expectedDocs []schema.Document
+		text          string
+		chunkOverlap  int
+		chunkSize     int
+		separators    []string
+		expectedDocs  []schema.Document
+		keepSeparator bool
+		LenFunc       func(string) int
 	}
 	testCases := []testCase{
 		{
@@ -106,12 +112,39 @@ Bye!
 				{PageContent: "Bye!\n\n-H.", Metadata: map[string]any{}},
 			},
 		},
+		{
+			text:          "Hi, Harrison. \nI am glad to meet you",
+			chunkOverlap:  0,
+			chunkSize:     10,
+			separators:    []string{"\n", "$"},
+			keepSeparator: true,
+			expectedDocs: []schema.Document{
+				{PageContent: "Hi, Harrison. ", Metadata: map[string]any{}},
+				{PageContent: "\nI am glad to meet you", Metadata: map[string]any{}},
+			},
+		},
+		{
+			text:          strings.Repeat("The quick brown fox jumped over the lazy dog. ", 2),
+			chunkOverlap:  0,
+			chunkSize:     10,
+			separators:    []string{" "},
+			keepSeparator: true,
+			LenFunc:       func(s string) int { return len(tokenEncoder.Encode(s, nil, nil)) },
+			expectedDocs: []schema.Document{
+				{PageContent: "The quick brown fox jumped over the lazy dog.", Metadata: map[string]any{}},
+				{PageContent: "The quick brown fox jumped over the lazy dog.", Metadata: map[string]any{}},
+			},
+		},
 	}
 	splitter := NewRecursiveCharacter()
 	for _, tc := range testCases {
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
 		splitter.Separators = tc.separators
+		splitter.KeepSeparator = tc.keepSeparator
+		if tc.LenFunc != nil {
+			splitter.LenFunc = tc.LenFunc
+		}
 
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		require.NoError(t, err)
