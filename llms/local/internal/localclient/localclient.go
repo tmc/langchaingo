@@ -13,11 +13,17 @@ type Client struct {
 	BinPath      string
 	Args         []string
 	GlobalAsArgs bool
+	OutCh        chan string
+	ErrCh        chan error
+	DoneCh       chan bool
 }
 
 // New returns a new local client.
 func New(binPath string, globalAsArgs bool, args ...string) (*Client, error) {
-	c := &Client{BinPath: binPath, GlobalAsArgs: globalAsArgs, Args: args}
+	outch := make(chan string)
+	donech := make(chan bool)
+	errch := make(chan error)
+	c := &Client{BinPath: binPath, GlobalAsArgs: globalAsArgs, Args: args, OutCh: outch, DoneCh: donech, ErrCh: errch}
 	return c, nil
 }
 
@@ -42,4 +48,12 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 	return &Completion{
 		Text: resp.Response,
 	}, nil
+}
+
+func (c *Client) CreateStreamCompletion(ctx context.Context, r *CompletionRequest) error {
+	err := c.createStreamCompletion(ctx, &completionPayload{
+		Prompt: r.Prompt,
+	})
+
+	return err
 }

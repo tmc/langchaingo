@@ -1,7 +1,11 @@
 package localclient
 
 import (
+	"bufio"
 	"context"
+	"errors"
+	"fmt"
+	"io"
 	"os/exec"
 )
 
@@ -26,4 +30,45 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	return &completionResponsePayload{
 		Response: string(out),
 	}, nil
+}
+
+func (c *Client) createStreamCompletion(ctx context.Context, payload *completionPayload) error {
+	c.Args = append(c.Args, payload.Prompt)
+
+	//cmd := exec.CommandContext(ctx, c.BinPath, c.Args...)
+	cmd := exec.Command(c.BinPath, c.Args...)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		c.ErrCh <- errors.New(fmt.Sprintf("Error creating stdout: %s", err))
+	}
+
+	if err := cmd.Start(); err != nil {
+		c.ErrCh <- errors.New(fmt.Sprintf("Error starting command: %s", err))
+	}
+
+	reader := bufio.NewReader(stdout)
+	buf := make([]byte, 1) // read one at a time
+
+	for {
+		_, err := reader.Read(buf)
+		if err != nil {
+			//treat eof different error
+			if err == io.EOF {
+				c.DoneCh <- true
+				break
+			}
+			c.ErrCh <- err
+			break
+		}
+		c.OutCh <- string(buf)
+	}
+
+	//receiver is polling for messages on channel so cant just return
+	if err := cmd.Wait(); err != nil {
+		c.ErrCh <- errors.New(fmt.Sprintf("Error waiting for command: %s", err))
+	}
+
+	//exit as normal
+	c.DoneCh <- true
+	return nil
 }
