@@ -2,23 +2,24 @@ package outputparser
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"golang.org/x/exp/slices"
 )
 
 // BooleanParser is an output parser used to parse the output of an LLM as a boolean.
 type BooleanParser struct {
-	TrueStr  string
-	FalseStr string
+	TrueStrings  []string
+	FalseStrings []string
 }
 
 // NewBooleanParser returns a new BooleanParser.
 func NewBooleanParser() BooleanParser {
 	return BooleanParser{
-		TrueStr:  "YES",
-		FalseStr: "NO",
+		TrueStrings:  []string{"YES", "TRUE"},
+		FalseStrings: []string{"NO", "FALSE"},
 	}
 }
 
@@ -32,20 +33,24 @@ func (p BooleanParser) GetFormatInstructions() string {
 
 func (p BooleanParser) parse(text string) (bool, error) {
 	text = normalize(text)
-	booleanStrings := []string{p.TrueStr, p.FalseStr}
 
-	if !slices.Contains(booleanStrings, text) {
-		return false, ParseError{
-			Text:   text,
-			Reason: fmt.Sprintf("Expected output to be either '%s' or '%s', received %s", p.TrueStr, p.FalseStr, text),
-		}
+	if slices.Contains(p.TrueStrings, text) {
+		return true, nil
 	}
 
-	return text == p.TrueStr, nil
+	if slices.Contains(p.FalseStrings, text) {
+		return false, nil
+	}
+
+	return false, ParseError{
+		Text:   text,
+		Reason: fmt.Sprintf("Expected output to one of %v, received %s", append(p.TrueStrings, p.FalseStrings...), text),
+	}
 }
 
 func normalize(text string) string {
 	text = strings.TrimSpace(text)
+	text = strings.Trim(text, "'\"`")
 	text = strings.ToUpper(text)
 
 	return text
@@ -57,7 +62,7 @@ func (p BooleanParser) Parse(text string) (any, error) {
 }
 
 // ParseWithPrompt does the same as Parse.
-func (p BooleanParser) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
+func (p BooleanParser) ParseWithPrompt(text string, _ llms.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

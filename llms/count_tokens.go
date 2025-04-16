@@ -33,12 +33,12 @@ var modelToContextSize = map[string]int{
 	"text-davinci-003": _textDavinci3ContextSize,
 	"text-curie-001":   _textCurie1ContextSize,
 	"text-babbage-001": _textBabbage1ContextSize,
-	"text-ada-001":     _textBabbage1ContextSize,
+	"text-ada-001":     _textAda1ContextSize,
 	"code-davinci-002": _codeDavinci2ContextSize,
 	"code-cushman-001": _codeCushman1ContextSize,
 }
 
-// ModelContextSize gets the max number of tokens for a language model. If the model
+// GetModelContextSize gets the max number of tokens for a language model. If the model
 // name isn't recognized the default value 2048 is returned.
 func GetModelContextSize(model string) int {
 	contextSize, ok := modelToContextSize[model]

@@ -1,6 +1,30 @@
 package ernieclient
 
-import "testing"
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
+	"testing"
+)
+
+type mockHTTPClient struct{}
+
+// implement ernieclient.Doer interface.
+func (m *mockHTTPClient) Do(_ *http.Request) (*http.Response, error) {
+	authResponse := &authResponse{
+		AccessToken: "test",
+	}
+	b, err := json.Marshal(authResponse)
+	if err != nil {
+		return nil, err
+	}
+	response := &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(strings.NewReader(string(b))),
+	}
+	return response, nil
+}
 
 func TestClient_buildURL(t *testing.T) {
 	t.Parallel()
@@ -9,8 +33,6 @@ func TestClient_buildURL(t *testing.T) {
 		secretKey   string
 		accessToken string
 		httpClient  Doer
-		Model       string
-		ModelPath   ModelPath
 	}
 	type args struct {
 		modelpath ModelPath
@@ -22,26 +44,35 @@ func TestClient_buildURL(t *testing.T) {
 		want   string
 	}{
 		{
-			name: "one",
+			name: "with access token",
 			fields: fields{
 				accessToken: "token",
 			},
 			args: args{modelpath: "eb-instant"},
 			want: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=token",
 		},
+		{
+			name: "with client, aksk",
+			fields: fields{
+				apiKey:     "test",
+				secretKey:  "test",
+				httpClient: &mockHTTPClient{},
+			},
+			args: args{modelpath: "eb-instant"},
+			want: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=test",
+		},
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			c := &Client{
-				apiKey:      tt.fields.apiKey,
-				secretKey:   tt.fields.secretKey,
-				accessToken: tt.fields.accessToken,
-				httpClient:  tt.fields.httpClient,
-				Model:       tt.fields.Model,
-				ModelPath:   tt.fields.ModelPath,
+			c, err := New(
+				WithAKSK(tt.fields.apiKey, tt.fields.secretKey),
+				WithAccessToken(tt.fields.accessToken),
+				WithHTTPClient(tt.fields.httpClient),
+			)
+			if err != nil {
+				t.Errorf("New got error. %v", err)
 			}
 			if got := c.buildURL(tt.args.modelpath); got != tt.want {
 				t.Errorf("buildURL() = %v, want %v", got, tt.want)

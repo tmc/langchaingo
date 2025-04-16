@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/llms"
 )
 
 func TestWindowBufferMemory(t *testing.T) {
@@ -64,11 +64,11 @@ func TestWindowBufferMemoryReturnMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedChatHistory := NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar2"},
-			schema.AIChatMessage{Content: "foo2"},
-			schema.HumanChatMessage{Content: "bar3"},
-			schema.AIChatMessage{Content: "foo3"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar2"},
+			llms.AIChatMessage{Content: "foo2"},
+			llms.HumanChatMessage{Content: "bar3"},
+			llms.AIChatMessage{Content: "foo3"},
 		}),
 	)
 
@@ -82,13 +82,13 @@ func TestWindowBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
 
 	m := NewConversationWindowBuffer(2, WithChatHistory(NewChatMessageHistory(
-		WithPreviousMessages([]schema.ChatMessage{
-			schema.HumanChatMessage{Content: "bar1"},
-			schema.AIChatMessage{Content: "foo1"},
-			schema.HumanChatMessage{Content: "bar2"},
-			schema.AIChatMessage{Content: "foo2"},
-			schema.HumanChatMessage{Content: "bar3"},
-			schema.AIChatMessage{Content: "foo3"},
+		WithPreviousMessages([]llms.ChatMessage{
+			llms.HumanChatMessage{Content: "bar1"},
+			llms.AIChatMessage{Content: "foo1"},
+			llms.HumanChatMessage{Content: "bar2"},
+			llms.AIChatMessage{Content: "foo2"},
+			llms.HumanChatMessage{Content: "bar3"},
+			llms.AIChatMessage{Content: "foo3"},
 		}),
 	)))
 
@@ -105,13 +105,13 @@ func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
 		ConversationWindowSize int
 	}
 	type args struct {
-		message []schema.ChatMessage
+		message []llms.ChatMessage
 	}
 	tests := []struct {
 		name        string
 		fields      fields
 		args        args
-		wantMessage []schema.ChatMessage
+		wantMessage []llms.ChatMessage
 		isCut       bool
 	}{
 		{
@@ -121,9 +121,9 @@ func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
 				ConversationWindowSize: 1,
 			},
 			args: args{
-				message: []schema.ChatMessage{},
+				message: []llms.ChatMessage{},
 			},
-			wantMessage: []schema.ChatMessage{},
+			wantMessage: []llms.ChatMessage{},
 			isCut:       false,
 		},
 		{
@@ -133,14 +133,14 @@ func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
 				ConversationWindowSize: 1,
 			},
 			args: args{
-				message: []schema.ChatMessage{
-					schema.HumanChatMessage{Content: "foo"},
-					schema.AIChatMessage{Content: "bar"},
+				message: []llms.ChatMessage{
+					llms.HumanChatMessage{Content: "foo"},
+					llms.AIChatMessage{Content: "bar"},
 				},
 			},
-			wantMessage: []schema.ChatMessage{
-				schema.HumanChatMessage{Content: "foo"},
-				schema.AIChatMessage{Content: "bar"},
+			wantMessage: []llms.ChatMessage{
+				llms.HumanChatMessage{Content: "foo"},
+				llms.AIChatMessage{Content: "bar"},
 			},
 			isCut: false,
 		},
@@ -151,15 +151,15 @@ func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
 				ConversationWindowSize: 1,
 			},
 			args: args{
-				message: []schema.ChatMessage{
-					schema.HumanChatMessage{Content: "foo"},
-					schema.AIChatMessage{Content: "bar"},
-					schema.HumanChatMessage{Content: "foo1"},
+				message: []llms.ChatMessage{
+					llms.HumanChatMessage{Content: "foo"},
+					llms.AIChatMessage{Content: "bar"},
+					llms.HumanChatMessage{Content: "foo1"},
 				},
 			},
-			wantMessage: []schema.ChatMessage{
-				schema.AIChatMessage{Content: "bar"},
-				schema.HumanChatMessage{Content: "foo1"},
+			wantMessage: []llms.ChatMessage{
+				llms.AIChatMessage{Content: "bar"},
+				llms.HumanChatMessage{Content: "foo1"},
 			},
 			isCut: true,
 		},
@@ -170,22 +170,21 @@ func TestConversationWindowBuffer_cutMessages(t *testing.T) { // nolint:funlen
 				ConversationWindowSize: 1,
 			},
 			args: args{
-				message: []schema.ChatMessage{
-					schema.HumanChatMessage{Content: "foo"},
-					schema.AIChatMessage{Content: "bar"},
-					schema.HumanChatMessage{Content: "foo1"},
-					schema.AIChatMessage{Content: "bar1"},
+				message: []llms.ChatMessage{
+					llms.HumanChatMessage{Content: "foo"},
+					llms.AIChatMessage{Content: "bar"},
+					llms.HumanChatMessage{Content: "foo1"},
+					llms.AIChatMessage{Content: "bar1"},
 				},
 			},
-			wantMessage: []schema.ChatMessage{
-				schema.HumanChatMessage{Content: "foo1"},
-				schema.AIChatMessage{Content: "bar1"},
+			wantMessage: []llms.ChatMessage{
+				llms.HumanChatMessage{Content: "foo1"},
+				llms.AIChatMessage{Content: "bar1"},
 			},
 			isCut: true,
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			wb := &ConversationWindowBuffer{

@@ -6,7 +6,7 @@
 package qdrant
 
 type upsertBatch struct {
-	Ids      []string                 `json:"ids"`
+	IDs      []string                 `json:"ids"`
 	Payloads []map[string]interface{} `json:"payloads"`
 	Vectors  [][]float32              `json:"vectors"`
 }

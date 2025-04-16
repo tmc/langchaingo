@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -88,7 +89,7 @@ func (p Combining) Parse(text string) (any, error) {
 }
 
 // ParseWithPrompt with prompts does the same as Parse.
-func (p Combining) ParseWithPrompt(text string, _ schema.PromptValue) (any, error) {
+func (p Combining) ParseWithPrompt(text string, _ llms.PromptValue) (any, error) {
 	return p.parse(text)
 }
 

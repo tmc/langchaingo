@@ -7,7 +7,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
 )
 
 // Client is a Bedrock client.
@@ -21,7 +20,7 @@ type Client struct {
 // The provider may then transform the message to its own
 // format before sending it to the LLM model API.
 type Message struct {
-	Role    schema.ChatMessageType
+	Role    llms.ChatMessageType
 	Content string
 	// Type may be "text" or "image"
 	Type string
@@ -85,4 +84,11 @@ func processInputMessagesGeneric(messages []Message) string {
 		sb.WriteString("AI: ")
 	}
 	return sb.String()
+}
+
+func getMaxTokens(maxTokens, defaultValue int) int {
+	if maxTokens <= 0 {
+		return defaultValue
+	}
+	return maxTokens
 }

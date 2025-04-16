@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -38,7 +39,7 @@ func (m *ConversationBuffer) MemoryVariables(context.Context) []string {
 
 // LoadMemoryVariables returns the previous chat messages stored in memory. Previous chat messages
 // are returned in a map with the key specified in the MemoryKey field. This key defaults to
-// "history". If ReturnMessages is set to true the output is a slice of schema.ChatMessage. Otherwise,
+// "history". If ReturnMessages is set to true the output is a slice of llms.ChatMessage. Otherwise,
 // the output is a buffer string of the chat messages.
 func (m *ConversationBuffer) LoadMemoryVariables(
 	ctx context.Context, _ map[string]any,
@@ -54,7 +55,7 @@ func (m *ConversationBuffer) LoadMemoryVariables(
 		}, nil
 	}
 
-	bufferString, err := schema.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
+	bufferString, err := llms.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (m *ConversationBuffer) SaveContext(
 	inputValues map[string]any,
 	outputValues map[string]any,
 ) error {
-	userInputValue, err := getInputValue(inputValues, m.InputKey)
+	userInputValue, err := GetInputValue(inputValues, m.InputKey)
 	if err != nil {
 		return err
 	}
@@ -85,7 +86,7 @@ func (m *ConversationBuffer) SaveContext(
 		return err
 	}
 
-	aiOutputValue, err := getInputValue(outputValues, m.OutputKey)
+	aiOutputValue, err := GetInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func (m *ConversationBuffer) GetMemoryKey(context.Context) string {
 	return m.MemoryKey
 }
 
-func getInputValue(inputValues map[string]any, inputKey string) (string, error) {
+func GetInputValue(inputValues map[string]any, inputKey string) (string, error) {
 	// If the input key is set, return the value in the inputValues with the input key.
 	if inputKey != "" {
 		inputValue, ok := inputValues[inputKey]

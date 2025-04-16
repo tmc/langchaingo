@@ -17,7 +17,6 @@ const _intermediateStepsOutputKey = "intermediateSteps"
 // Executor is the chain responsible for running agents.
 type Executor struct {
 	Agent            Agent
-	Tools            []tools.Tool
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
 	ErrorHandler     *ParserErrorHandler
@@ -32,7 +31,7 @@ var (
 )
 
 // NewExecutor creates a new agent executor with an agent and the tools the agent can use.
-func NewExecutor(agent Agent, tools []tools.Tool, opts ...Option) *Executor {
+func NewExecutor(agent Agent, opts ...Option) *Executor {
 	options := executorDefaultOptions()
 	for _, opt := range opts {
 		opt(&options)
@@ -40,7 +39,6 @@ func NewExecutor(agent Agent, tools []tools.Tool, opts ...Option) *Executor {
 
 	return &Executor{
 		Agent:                   agent,
-		Tools:                   tools,
 		Memory:                  options.memory,
 		MaxIterations:           options.maxIterations,
 		ReturnIntermediateSteps: options.returnIntermediateSteps,
@@ -54,7 +52,7 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...ch
 	if err != nil {
 		return nil, err
 	}
-	nameToTool := getNameToTool(e.Tools)
+	nameToTool := getNameToTool(e.Agent.GetTools())
 
 	steps := make([]schema.AgentStep, 0)
 	for i := 0; i < e.MaxIterations; i++ {

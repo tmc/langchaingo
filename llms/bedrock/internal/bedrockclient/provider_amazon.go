@@ -67,7 +67,7 @@ func createAmazonCompletion(ctx context.Context,
 	inputContent := amazonTextGenerationInput{
 		InputText: txt,
 		TextGenerationConfig: amazonTextGenerationConfigInput{
-			MaxTokens:     options.MaxTokens,
+			MaxTokens:     getMaxTokens(options.MaxTokens, 512),
 			TopP:          options.TopP,
 			Temperature:   options.Temperature,
 			StopSequences: options.StopWords,

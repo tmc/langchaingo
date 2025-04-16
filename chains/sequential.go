@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/internal/util"
+	"github.com/tmc/langchaingo/internal/maputil"
+	"github.com/tmc/langchaingo/internal/setutil"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -42,11 +43,11 @@ func NewSequentialChain(chains []Chain, inputKeys []string, outputKeys []string,
 }
 
 func (c *SequentialChain) validateSeqChain() error {
-	knownKeys := util.ToSet(c.inputKeys)
+	knownKeys := setutil.ToSet(c.inputKeys)
 
 	// Make sure memory keys don't collide with input keys
 	memoryKeys := c.memory.MemoryVariables(context.Background())
-	overlappingKeys := util.Intersection(memoryKeys, knownKeys)
+	overlappingKeys := setutil.Intersection(memoryKeys, knownKeys)
 	if len(overlappingKeys) > 0 {
 		return fmt.Errorf(
 			"%w: input keys [%v] also exist in the memory keys: [%v] - please use input keys and memory keys that don't overlap",
@@ -61,16 +62,16 @@ func (c *SequentialChain) validateSeqChain() error {
 
 	for i, c := range c.chains {
 		// Check that chain has input keys that are in knownKeys
-		missingKeys := util.Difference(c.GetInputKeys(), knownKeys)
+		missingKeys := setutil.Difference(c.GetInputKeys(), knownKeys)
 		if len(missingKeys) > 0 {
 			return fmt.Errorf(
 				"%w: missing required input keys: [%v], only had: [%v]",
-				ErrChainInitialization, strings.Join(missingKeys, delimiter), strings.Join(util.ListKeys(knownKeys), delimiter),
+				ErrChainInitialization, strings.Join(missingKeys, delimiter), strings.Join(maputil.ListKeys(knownKeys), delimiter),
 			)
 		}
 
 		// Check that chain does not have output keys that are already in knownKeys
-		overlappingKeys := util.Intersection(c.GetOutputKeys(), knownKeys)
+		overlappingKeys := setutil.Intersection(c.GetOutputKeys(), knownKeys)
 		if len(overlappingKeys) > 0 {
 			return fmt.Errorf(
 				"%w: chain at index %d has output keys that already exist: %v",

@@ -48,6 +48,12 @@ type Option func(*options)
 // ResponseFormat is the response format for the OpenAI client.
 type ResponseFormat = openaiclient.ResponseFormat
 
+// ResponseFormatJSONSchema is the JSON Schema response format in structured output.
+type ResponseFormatJSONSchema = openaiclient.ResponseFormatJSONSchema
+
+// ResponseFormatJSONSchemaProperty is the JSON Schema property in structured output.
+type ResponseFormatJSONSchemaProperty = openaiclient.ResponseFormatJSONSchemaProperty
+
 // ResponseFormatJSON is the JSON response format.
 var ResponseFormatJSON = &ResponseFormat{Type: "json_object"} //nolint:gochecknoglobals
 
