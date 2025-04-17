@@ -24,8 +24,22 @@ type engineConfig struct {
 	password        string
 	ipType          string
 	iamAccountEmail string
-	emailRetreiver  EmailRetriever
+	emailRetriever  EmailRetriever
 	userAgents      string
+}
+
+// VectorstoreTableOptions is used with the InitVectorstoreTable to use the required and default fields.
+type VectorstoreTableOptions struct {
+	TableName          string
+	VectorSize         int
+	SchemaName         string
+	ContentColumnName  string
+	EmbeddingColumn    string
+	MetadataJSONColumn string
+	IDColumn           Column
+	MetadataColumns    []Column
+	OverwriteExisting  bool
+	StoreMetadata      bool
 }
 
 // WithCloudSQLInstance sets the project, region, and instance fields.
@@ -81,7 +95,7 @@ func WithIAMAccountEmail(email string) Option {
 
 func applyClientOptions(opts ...Option) (engineConfig, error) {
 	cfg := &engineConfig{
-		emailRetreiver: getServiceAccountEmail,
+		emailRetriever: getServiceAccountEmail,
 		ipType:         "PUBLIC",
 		userAgents:     defaultUserAgent,
 	}
