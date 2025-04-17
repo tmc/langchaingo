@@ -2,11 +2,11 @@ package outputparser
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"golang.org/x/exp/slices"
 )
 
 // BooleanParser is an output parser used to parse the output of an LLM as a boolean.
