@@ -140,23 +140,6 @@ func getServiceAccountEmail(ctx context.Context) (string, error) {
 	return userInfo.Email, nil
 }
 
-// initChatHistoryTable creates a table to store chat history.
-func (p *PostgresEngine) InitChatHistoryTable(ctx context.Context, tableName string, opts ...OptionInitChatHistoryTable) error {
-	cfg := applyChatMessageHistoryOptions(opts...)
-
-	createTableQuery := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS "%s"."%s" (
-		id SERIAL PRIMARY KEY,
-		session_id TEXT NOT NULL,
-		data JSONB NOT NULL,
-		type TEXT NOT NULL
-	);`, cfg.schemaName, tableName)
-
-	// Execute the query
-	_, err := p.Pool.Exec(ctx, createTableQuery)
-	if err != nil {
-		return fmt.Errorf("failed to execute query: %w", err)
-	}
-
 // validateVectorstoreTableOptions initializes the options struct with the default values for
 // the InitVectorstoreTable function.
 func validateVectorstoreTableOptions(opts *VectorstoreTableOptions) error {
@@ -243,5 +226,24 @@ func (p *PostgresEngine) InitVectorstoreTable(ctx context.Context, opts Vectorst
 		return fmt.Errorf("failed to create table: %w", err)
 	}
 
+	return nil
+}
+
+// initChatHistoryTable creates a table to store chat history.
+func (p *PostgresEngine) InitChatHistoryTable(ctx context.Context, tableName string, opts ...OptionInitChatHistoryTable) error {
+	cfg := applyChatMessageHistoryOptions(opts...)
+
+	createTableQuery := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS "%s"."%s" (
+		id SERIAL PRIMARY KEY,
+		session_id TEXT NOT NULL,
+		data JSONB NOT NULL,
+		type TEXT NOT NULL
+	);`, cfg.schemaName, tableName)
+
+	// Execute the query
+	_, err := p.Pool.Exec(ctx, createTableQuery)
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
 	return nil
 }

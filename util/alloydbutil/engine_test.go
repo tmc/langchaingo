@@ -146,6 +146,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:         "Getting IAM account email from the env",
 			engineConfig: engineConfig{emailRetriever: mockEmailRetriever},
+
 			expectedUserName: testServiceAccount,
 			expectedIAMAuth:  true,
 		},
