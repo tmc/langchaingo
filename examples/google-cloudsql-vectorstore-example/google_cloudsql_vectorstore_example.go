@@ -64,8 +64,7 @@ func getEnvVariables() (string, string, string, string, string, string, string, 
 func main() {
 	// Requires the Environment variables to be set as indicated in the getEnvVariables function.
 	username, password, database, projectID, region, instance, table, cloudLocation := getEnvVariables()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
 
 	pgEngine, err := cloudsqlutil.NewPostgresEngine(ctx,
 		cloudsqlutil.WithUser(username),
@@ -132,34 +131,6 @@ func main() {
 			Metadata: map[string]any{
 				"population": 11,
 				"area":       105,
-			},
-		},
-		{
-			PageContent: "London",
-			Metadata: map[string]any{
-				"population": 9.5,
-				"area":       1572,
-			},
-		},
-		{
-			PageContent: "Santiago",
-			Metadata: map[string]any{
-				"population": 6.9,
-				"area":       641,
-			},
-		},
-		{
-			PageContent: "Buenos Aires",
-			Metadata: map[string]any{
-				"population": 15.5,
-				"area":       203,
-			},
-		},
-		{
-			PageContent: "Rio de Janeiro",
-			Metadata: map[string]any{
-				"population": 13.7,
-				"area":       1200,
 			},
 		},
 		{
