@@ -69,8 +69,7 @@ func getEnvVariables() (string, string, string, string, string, string, string, 
 func main() {
 	// Requires the Environment variables to be set as indicated in the getEnvVariables function.
 	username, password, database, projectID, region, instance, cluster, table, cloudLocation := getEnvVariables()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
 
 	pgEngine, err := alloydbutil.NewPostgresEngine(ctx,
 		alloydbutil.WithUser(username),
@@ -79,7 +78,6 @@ func main() {
 		alloydbutil.WithAlloyDBInstance(projectID, region, cluster, instance),
 		alloydbutil.WithIPType("PUBLIC"),
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,34 +138,6 @@ func main() {
 			},
 		},
 		{
-			PageContent: "London",
-			Metadata: map[string]any{
-				"population": 9.5,
-				"area":       1572,
-			},
-		},
-		{
-			PageContent: "Santiago",
-			Metadata: map[string]any{
-				"population": 6.9,
-				"area":       641,
-			},
-		},
-		{
-			PageContent: "Buenos Aires",
-			Metadata: map[string]any{
-				"population": 15.5,
-				"area":       203,
-			},
-		},
-		{
-			PageContent: "Rio de Janeiro",
-			Metadata: map[string]any{
-				"population": 13.7,
-				"area":       1200,
-			},
-		},
-		{
 			PageContent: "Sao Paulo",
 			Metadata: map[string]any{
 				"population": 22.6,
@@ -175,7 +145,6 @@ func main() {
 			},
 		},
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
