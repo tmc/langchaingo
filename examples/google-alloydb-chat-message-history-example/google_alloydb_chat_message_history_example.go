@@ -76,8 +76,8 @@ func printMessages(ctx context.Context, cmh alloydb.ChatMessageHistory) {
 func main() {
 	// Requires that the Environment variables to be set as indicated in the getEnvVariables function.
 	username, password, database, projectID, region, instance, cluster, tableName, sessionID := getEnvVariables()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
+
 	pgEngine, err := alloydbutil.NewPostgresEngine(ctx,
 		alloydbutil.WithUser(username),
 		alloydbutil.WithPassword(password),

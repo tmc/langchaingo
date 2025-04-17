@@ -71,8 +71,8 @@ func printMessages(ctx context.Context, cmh cloudsql.ChatMessageHistory) {
 func main() {
 	// Requires that the Environment variables to be set as indicated in the getEnvVariables function.
 	username, password, database, projectID, region, instance, tableName, sessionID := getEnvVariables()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
+
 	pgEngine, err := cloudsqlutil.NewPostgresEngine(ctx,
 		cloudsqlutil.WithUser(username),
 		cloudsqlutil.WithPassword(password),
@@ -99,12 +99,12 @@ func main() {
 	aiMessage := llms.AIChatMessage{Content: "test AI message"}
 	humanMessage := llms.HumanChatMessage{Content: "test HUMAN message"}
 	// Adds a user message to the chat message history.
-	err = cmh.AddUserMessage(ctx, string(aiMessage.GetContent()))
+	err = cmh.AddUserMessage(ctx, aiMessage.GetContent())
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Adds a user message to the chat message history.
-	err = cmh.AddUserMessage(ctx, string(humanMessage.GetContent()))
+	err = cmh.AddUserMessage(ctx, humanMessage.GetContent())
 	if err != nil {
 		log.Fatal(err)
 	}
