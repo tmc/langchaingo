@@ -73,7 +73,6 @@ func main() {
 		cloudsqlutil.WithCloudSQLInstance(projectID, region, instance),
 		cloudsqlutil.WithIPType("PUBLIC"),
 	)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +94,6 @@ func main() {
 			},
 		},
 	}
-
 	err = pgEngine.InitVectorstoreTable(ctx, vectorstoreTableoptions)
 	if err != nil {
 		log.Fatal(err)
@@ -141,7 +139,6 @@ func main() {
 			},
 		},
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
