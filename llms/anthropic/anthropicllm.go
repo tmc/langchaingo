@@ -129,6 +129,13 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 	return resp, nil
 }
 
+func isReasoningEnabled(opts *llms.CallOptions) bool {
+	return opts.Reasoning != nil &&
+		opts.Reasoning.IsEnabled &&
+		opts.Reasoning.Mode == llms.ReasoningModeTokens &&
+		opts.Reasoning.Tokens >= anthropicclient.MinThinkingTokens
+}
+
 func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
 	chatMessages, systemPrompt, err := processMessages(messages)
 	if err != nil {
@@ -147,7 +154,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if opts.TopP == 0 {
 		topP = nil
 	}
-	if opts.Reasoning != nil && opts.Reasoning.IsEnabled && opts.Reasoning.Mode == llms.ReasoningModeTokens && opts.Reasoning.Tokens >= anthropicclient.MinThinkingTokens {
+	if isReasoningEnabled(opts) {
 		tokens := 0
 		if opts.MaxTokens != 0 {
 			if opts.Reasoning.Tokens < opts.MaxTokens {
@@ -220,9 +227,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 				return nil, fmt.Errorf("anthropic: %w for thinking content", ErrInvalidContentType)
 			}
 		case "redacted_thinking":
-			{
-				// NO handling for redacted thinking as of now
-			}
+			// NO handling for redacted thinking as of now
 		case "tool_use":
 			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
 				argumentsJSON, err := json.Marshal(toolUseContent.Input)

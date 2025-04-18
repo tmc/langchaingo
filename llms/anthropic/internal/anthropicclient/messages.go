@@ -379,15 +379,17 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	}
 
 	if len(response.Content) <= index {
-		if eventType == "thinking" {
+		switch eventType {
+		case "thinking":
 			response.Content = append(response.Content, &ThinkingContent{
 				Type: eventType,
 			})
-		} else if eventType == "text" {
+		case "text":
 			response.Content = append(response.Content, &TextContent{
 				Type: eventType,
 			})
-		} // There may be redated thinking blocks in content block start
+			// There may be redated thinking blocks in content block start
+		}
 	}
 	return response, nil
 }
@@ -410,8 +412,10 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 
 	text := ""
 	thinkingText := ""
-	if deltaType == "text_delta" {
-		text, ok = delta["text"].(string)
+
+	switch deltaType {
+	case "text_delta":
+		text, ok := delta["text"].(string)
 		if !ok {
 			return response, ErrInvalidDeltaTextField
 		}
@@ -423,8 +427,9 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 			return response, ErrFailedCastToTextContent
 		}
 		textContent.Text += text
-	} else if deltaType == "thinking_delta" {
-		thinkingText, ok = delta["thinking"].(string)
+
+	case "thinking_delta":
+		thinkingText, ok := delta["thinking"].(string)
 		if !ok {
 			return response, ErrInvalidDeltaThinkingField
 		}
@@ -436,6 +441,7 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 			return response, ErrFailedCastToThinkingContent
 		}
 		thinkingContent.Thinking += thinkingText
+
 	} // ignoring signature delta and redacted delta
 
 	if payload.StreamingFunc != nil && text != "" {
