@@ -157,7 +157,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		return "system"
 	case llms.ChatMessageTypeAI:
 		return "assistant"

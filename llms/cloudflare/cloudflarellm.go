@@ -159,7 +159,7 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 
 func typeToRole(typ llms.ChatMessageType) cloudflareclient.Role {
 	switch typ {
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		return cloudflareclient.RoleSystem
 	case llms.ChatMessageTypeAI:
 		return cloudflareclient.RoleAssistant

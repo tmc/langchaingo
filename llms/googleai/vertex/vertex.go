@@ -231,7 +231,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	}
 
 	switch content.Role {
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		c.Role = RoleSystem
 	case llms.ChatMessageTypeAI:
 		c.Role = RoleModel

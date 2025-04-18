@@ -290,7 +290,7 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 	systemPrompt := ""
 	for _, msg := range messages {
 		switch msg.Role {
-		case llms.ChatMessageTypeSystem:
+		case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 			content, err := handleSystemMessage(msg)
 			if err != nil {
 				return nil, "", fmt.Errorf("anthropic: failed to handle system message: %w", err)

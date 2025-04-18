@@ -331,7 +331,7 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 // process the role of the message to anthropic supported role.
 func getAnthropicRole(role llms.ChatMessageType) (string, error) {
 	switch role {
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		return AnthropicSystem, nil
 
 	case llms.ChatMessageTypeAI:
