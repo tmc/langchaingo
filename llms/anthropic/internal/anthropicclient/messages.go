@@ -427,7 +427,6 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 			return response, ErrFailedCastToTextContent
 		}
 		textContent.Text += text
-
 	case "thinking_delta":
 		thinkingText, ok := delta["thinking"].(string)
 		if !ok {
@@ -441,9 +440,7 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 			return response, ErrFailedCastToThinkingContent
 		}
 		thinkingContent.Thinking += thinkingText
-
 	} // ignoring signature delta and redacted delta
-
 	if payload.StreamingFunc != nil && text != "" {
 		err := payload.StreamingFunc(ctx, []byte(text))
 		if err != nil {

@@ -133,7 +133,8 @@ func isReasoningEnabled(opts *llms.CallOptions) bool {
 	return opts.Reasoning != nil &&
 		opts.Reasoning.IsEnabled &&
 		opts.Reasoning.Mode == llms.ReasoningModeTokens &&
-		opts.Reasoning.Tokens >= anthropicclient.MinThinkingTokens
+		opts.Reasoning.Tokens >= anthropicclient.MinThinkingTokens &&
+		opts.MaxTokens != 0
 }
 
 func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) {
@@ -154,14 +155,11 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if opts.TopP == 0 {
 		topP = nil
 	}
+
 	if isReasoningEnabled(opts) {
-		tokens := 0
-		if opts.MaxTokens != 0 {
-			if opts.Reasoning.Tokens < opts.MaxTokens {
-				tokens = opts.Reasoning.Tokens
-			} else {
-				tokens = opts.MaxTokens - 1
-			}
+		tokens := opts.Reasoning.Tokens
+		if tokens >= opts.MaxTokens {
+			tokens = opts.MaxTokens - 1
 		}
 		if tokens >= 1024 {
 			thinking = &anthropicclient.Thinking{
