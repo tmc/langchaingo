@@ -426,14 +426,14 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
-		return parseStreamingChatResponse(ctx, r, payload)
+		return c.parseStreamingChatResponse(ctx, r, payload)
 	}
 	// Parse response
 	var response ChatCompletionResponse
 	return &response, json.NewDecoder(r.Body).Decode(&response)
 }
 
-func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatCompletionResponse,
+func (c *Client) parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatCompletionResponse,
 	error,
 ) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
@@ -466,10 +466,10 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		}
 	}()
 	// Combine response
-	return combineStreamingChatResponse(ctx, payload, responseChan)
+	return c.combineStreamingChatResponse(ctx, payload, responseChan)
 }
 
-func combineStreamingChatResponse(
+func (c *Client) combineStreamingChatResponse(
 	ctx context.Context,
 	payload *ChatRequest,
 	responseChan chan StreamedChatResponsePayload,
@@ -511,13 +511,18 @@ func combineStreamingChatResponse(
 				choice.Delta.ToolCalls)
 		}
 
-		if payload.StreamingFunc != nil {
+		shouldCallStreamingFunc := true
+		if c.streamingChunkFilter != nil {
+			shouldCallStreamingFunc = c.streamingChunkFilter(streamResponse)
+		}
+
+		if payload.StreamingFunc != nil && shouldCallStreamingFunc {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
-		if payload.StreamingReasoningFunc != nil {
+		if payload.StreamingReasoningFunc != nil && shouldCallStreamingFunc {
 			err := payload.StreamingReasoningFunc(ctx, reasoningChunk, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming reasoning func returned an error: %w", err)

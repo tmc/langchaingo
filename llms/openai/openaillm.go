@@ -16,6 +16,17 @@ type LLM struct {
 	client           *openaiclient.Client
 }
 
+// StreamingChunkFilter is a function which decides if a chunk of a streaming response should be distributed via StreamingFunc.
+type StreamingChunkFilter func(chunkMeta StreamingChunkMetaData) bool
+
+type StreamingChunkMetaData struct {
+	// IsFunctionCall is true if the chunk is part of a function call.
+	IsFunctionCall bool
+
+	// IsToolCall is true if the chunk is part of any tool call.
+	IsToolCall bool
+}
+
 const (
 	RoleSystem    = "system"
 	RoleAssistant = "assistant"
