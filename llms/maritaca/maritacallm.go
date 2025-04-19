@@ -10,11 +10,6 @@ import (
 	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
 )
 
-var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got embedded")
-)
-
 // LLM is a maritaca LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler
