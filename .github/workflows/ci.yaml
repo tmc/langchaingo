@@ -17,9 +17,9 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.61
+          version: v2.0.2
           args: --timeout=5m
   build-examples:
     name: Build Examples
@@ -45,5 +45,5 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
-        run: go test -v ./...
+        run: go test -v ./... -race
 
