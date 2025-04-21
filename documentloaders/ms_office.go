@@ -2,11 +2,11 @@ package documentloaders
 
 import (
 	"archive/zip"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/richardlehane/mscfb"
@@ -15,16 +15,21 @@ import (
 	"github.com/tmc/langchaingo/textsplitter"
 )
 
-var _ Loader = Office{}
+const (
+	txtASCIIRangeMin = 32
+	txtASCIIRangeMax = 126
+	CR               = 13
+	LF               = 10
+)
 
-// Office loads text data from an io.Reader.
 type Office struct {
 	reader   io.ReaderAt
 	size     int64
 	fileType string
 }
 
-// NewOffice creates a new text loader with an io.Reader, filename and file size.
+var _ Loader = Office{}
+
 func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 	return Office{
 		reader:   reader,
@@ -33,28 +38,20 @@ func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 	}
 }
 
-// Load reads from the io.Reader for the MS Office data and returns the raw document data.
-// nolint
 func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
+
 	switch loader.fileType {
-	case ".doc":
-		return loader.loadDoc()
-	case ".docx":
-		return loader.loadDocx()
+	case ".doc", ".docx":
+		return loader.loadWord()
 	case ".xls", ".xlsx":
 		return loader.loadExcel()
-	case ".ppt":
-		// parsing for old PPTs is same as for old DOCs
-		return loader.loadDoc()
-	case ".pptx":
-		return loader.loadPPTX()
+	case ".ppt", ".pptx":
+		return loader.loadPowerPoint()
 	default:
 		return nil, fmt.Errorf("unsupported file type: %s", loader.fileType)
 	}
 }
 
-// LoadAndSplit reads from the io.Reader for the MS Office data and returns the raw document data
-// and splits it into multiple documents using a text splitter.
 func (loader Office) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitter) ([]schema.Document, error) {
 	docs, err := loader.Load(ctx)
 	if err != nil {
@@ -64,6 +61,14 @@ func (loader Office) LoadAndSplit(ctx context.Context, splitter textsplitter.Tex
 	return textsplitter.SplitDocuments(splitter, docs)
 }
 
+func (loader Office) loadWord() ([]schema.Document, error) {
+	if loader.fileType == ".docx" {
+		return loader.loadDocx()
+	}
+
+	return loader.loadDoc()
+}
+
 func (loader Office) loadDoc() ([]schema.Document, error) {
 	doc, err := mscfb.New(io.NewSectionReader(loader.reader, 0, loader.size))
 	if err != nil {
@@ -71,21 +76,28 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 	}
 
 	var text strings.Builder
-	for entry, err := doc.Next(); err == nil; entry, err = doc.Next() {
-		// nolint
+	for {
+		entry, err := doc.Next()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("error reading DOC stream: %w", err)
+		}
+
 		if entry.Name == "WordDocument" {
 			buf := make([]byte, entry.Size)
 			i, err := doc.Read(buf)
 			if err != nil {
 				return nil, fmt.Errorf("error reading WordDocument stream: %w", err)
 			}
+
 			if i > 0 {
-				// Process the binary content
 				for j := 0; j < i; j++ {
-					// Extract readable ASCII text
-					if buf[j] >= 32 && buf[j] <= 126 {
+					if buf[j] >= txtASCIIRangeMin && buf[j] <= txtASCIIRangeMax {
 						text.WriteByte(buf[j])
-					} else if buf[j] == 13 || buf[j] == 10 {
+					} else if buf[j] == CR || buf[j] == LF {
 						text.WriteByte('\n')
 					}
 				}
@@ -93,30 +105,85 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 		}
 	}
 
-	documents := []schema.Document{
+	return []schema.Document{
 		{
 			PageContent: text.String(),
 			Metadata: map[string]interface{}{
 				"fileType": loader.fileType,
 			},
 		},
+	}, nil
+}
+
+func (loader Office) loadDocx() ([]schema.Document, error) {
+	zipReader, err := zip.NewReader(loader.reader, loader.size)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read DOCX file as ZIP: %w", err)
 	}
 
-	return documents, nil
+	var textContent string
+	for _, file := range zipReader.File {
+		if file.Name == "word/document.xml" {
+			rc, err := file.Open()
+			if err != nil {
+				return nil, fmt.Errorf("error opening document.xml: %w", err)
+			}
+
+			content, err := io.ReadAll(rc)
+			rc.Close()
+			if err != nil {
+				return nil, fmt.Errorf("error reading content: %w", err)
+			}
+
+			textContent = loader.parseDocx(content)
+			break
+		}
+	}
+
+	return []schema.Document{
+		{
+			PageContent: textContent,
+			Metadata: map[string]interface{}{
+				"fileType": loader.fileType,
+			},
+		},
+	}, nil
+}
+
+func (loader Office) parseDocx(xmlContent []byte) string {
+	re := regexp.MustCompile(`<w:t(?:\s+[^>]*)?>(.*?)</w:t>`)
+	matches := re.FindAllSubmatch(xmlContent, -1)
+
+	var textBuilder strings.Builder
+	for _, match := range matches {
+		if len(match) > 1 {
+			if textBuilder.Len() > 0 {
+				textBuilder.WriteString(" ")
+			}
+			textBuilder.Write(match[1])
+		}
+	}
+
+	text := textBuilder.String()
+	spaceRe := regexp.MustCompile(`\s+`)
+	text = spaceRe.ReplaceAllString(text, " ")
+
+	return strings.TrimSpace(text)
 }
 
 func (loader Office) loadExcel() ([]schema.Document, error) {
-	buf := bytes.NewBuffer(make([]byte, 0, loader.size))
-	if _, err := io.Copy(buf, io.NewSectionReader(loader.reader, 0, loader.size)); err != nil {
-		return nil, fmt.Errorf("failed to copy Excel content: %w", err)
-	}
-
-	xlFile, err := xlsx.OpenBinary(buf.Bytes())
+	buff := make([]byte, loader.size)
+	_, err := loader.reader.ReadAt(buff, 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read Excel file: %w", err)
 	}
 
-	docs := make([]schema.Document, 0, len(xlFile.Sheets))
+	xlFile, err := xlsx.OpenBinary(buff)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Excel file: %w", err)
+	}
+
+	var docs []schema.Document
 	for i, sheet := range xlFile.Sheets {
 		var text strings.Builder
 		for _, row := range sheet.Rows {
@@ -139,90 +206,120 @@ func (loader Office) loadExcel() ([]schema.Document, error) {
 	return docs, nil
 }
 
-func (loader Office) loadPPTX() ([]schema.Document, error) {
-	buf := bytes.NewBuffer(make([]byte, 0, loader.size))
-	if _, err := io.Copy(buf, io.NewSectionReader(loader.reader, 0, loader.size)); err != nil {
-		return nil, fmt.Errorf("failed to copy content: %w", err)
+func (loader Office) loadPowerPoint() ([]schema.Document, error) {
+	if loader.fileType == ".pptx" {
+		return loader.loadPptx()
+	}
+	return loader.loadPpt()
+}
+
+func (loader Office) loadPpt() ([]schema.Document, error) {
+	doc, err := mscfb.New(io.NewSectionReader(loader.reader, 0, loader.size))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PPT file: %w", err)
 	}
 
-	zipReader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), loader.size)
+	var text strings.Builder
+	for {
+		entry, err := doc.Next()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("error reading PPT stream: %w", err)
+		}
+
+		if entry.Name == "PowerPoint Document" {
+			buf := make([]byte, entry.Size)
+
+			i, err := doc.Read(buf)
+			if err != nil {
+				return nil, fmt.Errorf("error reading PPT stream: %w", err)
+			}
+
+			if i > 0 {
+				for j := 0; j < i; j++ {
+					if buf[j] >= txtASCIIRangeMin && buf[j] <= txtASCIIRangeMax {
+						text.WriteByte(buf[j])
+					} else if buf[j] == CR || buf[j] == LF {
+						text.WriteByte('\n')
+					}
+				}
+			}
+		}
+
+	}
+
+	return []schema.Document{
+		{
+			PageContent: text.String(),
+			Metadata: map[string]interface{}{
+				"fileType": loader.fileType,
+			},
+		},
+	}, nil
+}
+
+func (loader Office) loadPptx() ([]schema.Document, error) {
+	zipReader, err := zip.NewReader(loader.reader, loader.size)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read PPTX file as ZIP: %w", err)
 	}
 
-	var text strings.Builder
+	var allText strings.Builder
+	slideFilePattern := regexp.MustCompile(`ppt/slides/slide[0-9]+\.xml`)
+
 	for _, file := range zipReader.File {
-		// PPTX stores slide content in ppt/slides/slide*.xml files
-		if strings.HasPrefix(file.Name, "ppt/slides/slide") && strings.HasSuffix(file.Name, ".xml") {
+		if slideFilePattern.MatchString(file.Name) {
 			rc, err := file.Open()
 			if err != nil {
-				return nil, fmt.Errorf("error opening slide XML: %w", err)
+				return nil, fmt.Errorf("error opening slide %s: %w", file.Name, err)
 			}
-			defer rc.Close()
 
 			content, err := io.ReadAll(rc)
+			rc.Close()
 			if err != nil {
-				return nil, fmt.Errorf("error reading content: %w", err)
+				return nil, fmt.Errorf("error reading slide content: %w", err)
 			}
 
-			content = bytes.ReplaceAll(content, []byte("<"), []byte(" <"))
-			content = bytes.ReplaceAll(content, []byte(">"), []byte("> "))
-			text.Write(content)
-			text.WriteString("\n--- Next Slide ---\n")
+			slideText := loader.parsePPTX(content)
+			if slideText != "" {
+				if allText.Len() > 0 {
+					allText.WriteString("\n\n") // Add paragraph breaks between slides
+				}
+				allText.WriteString(slideText)
+			}
 		}
 	}
 
-	documents := []schema.Document{
+	return []schema.Document{
 		{
-			PageContent: text.String(),
+			PageContent: allText.String(),
 			Metadata: map[string]interface{}{
 				"fileType": loader.fileType,
 			},
 		},
-	}
-
-	return documents, nil
+	}, nil
 }
 
-func (loader Office) loadDocx() ([]schema.Document, error) {
-	buf := bytes.NewBuffer(make([]byte, 0, loader.size))
-	if _, err := io.Copy(buf, io.NewSectionReader(loader.reader, 0, loader.size)); err != nil {
-		return nil, fmt.Errorf("failed to copy content: %w", err)
-	}
+func (loader Office) parsePPTX(xmlContent []byte) string {
+	re := regexp.MustCompile(`<a:t(?:\s+[^>]*)?>(.*?)</a:t>`)
+	matches := re.FindAllSubmatch(xmlContent, -1)
 
-	zipReader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), loader.size)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read DOCX file as ZIP: %w", err)
-	}
-
-	var text strings.Builder
-	for _, file := range zipReader.File {
-		if file.Name == "word/document.xml" {
-			rc, err := file.Open()
-			if err != nil {
-				return nil, fmt.Errorf("error opening document.xml: %w", err)
+	var textBuilder strings.Builder
+	for _, match := range matches {
+		if len(match) > 1 {
+			if textBuilder.Len() > 0 {
+				textBuilder.WriteString(" ")
 			}
-			defer rc.Close()
-
-			content, err := io.ReadAll(rc)
-			if err != nil {
-				return nil, fmt.Errorf("error reading content: %w", err)
-			}
-
-			content = bytes.ReplaceAll(content, []byte("<"), []byte(" <"))
-			content = bytes.ReplaceAll(content, []byte(">"), []byte("> "))
-			text.Write(content)
+			textBuilder.Write(match[1])
 		}
 	}
 
-	documents := []schema.Document{
-		{
-			PageContent: text.String(),
-			Metadata: map[string]interface{}{
-				"fileType": loader.fileType,
-			},
-		},
-	}
+	text := textBuilder.String()
+	spaceRe := regexp.MustCompile(`\s+`)
+	text = spaceRe.ReplaceAllString(text, " ")
 
-	return documents, nil
+	return strings.TrimSpace(text)
 }
