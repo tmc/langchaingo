@@ -372,92 +372,96 @@ DoStream:
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
-// convertTools converts from a list of langchaingo tools to a list of genai
-// tools.
+// convertTools converts from a list of langchaingo tools to a list(length 1) of genai
+// tools with a list of all the tools as the function declarations.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	genaiTools := make([]*genai.Tool, 0, len(tools))
-	for i, tool := range tools {
-		if tool.Type != "function" {
-			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
-		}
-
-		// We have a llms.FunctionDefinition in tool.Function, and we have to
-		// convert it to genai.FunctionDeclaration
-		genaiFuncDecl := &genai.FunctionDeclaration{
-			Name:        tool.Function.Name,
-			Description: tool.Function.Description,
-		}
-
-		// Expect the Parameters field to be a map[string]any, from which we will
-		// extract properties to populate the schema.
-		params, ok := tool.Function.Parameters.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
-		}
-
-		schema := &genai.Schema{}
-		if ty, ok := params["type"]; ok {
-			tyString, ok := ty.(string)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d]: expected string for type", i)
+	if len(tools) > 0 {
+		functionDeclarations := make([]*genai.FunctionDeclaration, 0, len(tools))
+		for i, tool := range tools {
+			if tool.Type != "function" {
+				return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
 			}
-			schema.Type = convertToolSchemaType(tyString)
-		}
 
-		paramProperties, ok := params["properties"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
-		}
-
-		schema.Properties = make(map[string]*genai.Schema)
-		for propName, propValue := range paramProperties {
-			valueMap, ok := propValue.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
+			// We have a llms.FunctionDefinition in tool.Function, and we have to
+			// convert it to genai.FunctionDeclaration
+			genaiFuncDecl := &genai.FunctionDeclaration{
+				Name:        tool.Function.Name,
+				Description: tool.Function.Description,
 			}
-			schema.Properties[propName] = &genai.Schema{}
 
-			if ty, ok := valueMap["type"]; ok {
+			// Expect the Parameters field to be a map[string]any, from which we will
+			// extract properties to populate the schema.
+			params, ok := tool.Function.Parameters.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
+			}
+
+			schema := &genai.Schema{}
+			if ty, ok := params["type"]; ok {
 				tyString, ok := ty.(string)
 				if !ok {
 					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
 				}
-				schema.Properties[propName].Type = convertToolSchemaType(tyString)
+				schema.Type = convertToolSchemaType(tyString)
 			}
-			if desc, ok := valueMap["description"]; ok {
-				descString, ok := desc.(string)
+
+			paramProperties, ok := params["properties"].(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
+			}
+
+			schema.Properties = make(map[string]*genai.Schema)
+			for propName, propValue := range paramProperties {
+				valueMap, ok := propValue.(map[string]any)
 				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for description", i)
+					return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
 				}
-				schema.Properties[propName].Description = descString
-			}
-		}
+				schema.Properties[propName] = &genai.Schema{}
 
-		if required, ok := params["required"]; ok {
-			if rs, ok := required.([]string); ok {
-				schema.Required = rs
-			} else if ri, ok := required.([]interface{}); ok {
-				rs := make([]string, 0, len(ri))
-				for _, r := range ri {
-					rString, ok := r.(string)
+				if ty, ok := valueMap["type"]; ok {
+					tyString, ok := ty.(string)
 					if !ok {
-						return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+						return nil, fmt.Errorf("tool [%d]: expected string for type", i)
 					}
-					rs = append(rs, rString)
+					schema.Properties[propName].Type = convertToolSchemaType(tyString)
 				}
-				schema.Required = rs
-			} else {
-				return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+				if desc, ok := valueMap["description"]; ok {
+					descString, ok := desc.(string)
+					if !ok {
+						return nil, fmt.Errorf("tool [%d]: expected string for description", i)
+					}
+					schema.Properties[propName].Description = descString
+				}
 			}
+
+			if required, ok := params["required"]; ok {
+				if rs, ok := required.([]string); ok {
+					schema.Required = rs
+				} else if ri, ok := required.([]interface{}); ok {
+					rs := make([]string, 0, len(ri))
+					for _, r := range ri {
+						rString, ok := r.(string)
+						if !ok {
+							return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+						}
+						rs = append(rs, rString)
+					}
+					schema.Required = rs
+				} else {
+					return nil, fmt.Errorf("tool [%d]: expected string for required", i)
+				}
+			}
+			genaiFuncDecl.Parameters = schema
+
+			functionDeclarations = append(functionDeclarations, genaiFuncDecl)
 		}
-		genaiFuncDecl.Parameters = schema
-
-		genaiTools = append(genaiTools, &genai.Tool{
-			FunctionDeclarations: []*genai.FunctionDeclaration{genaiFuncDecl},
-		})
+		return []*genai.Tool{
+			{
+				FunctionDeclarations: functionDeclarations,
+			},
+		}, nil
 	}
-
-	return genaiTools, nil
+	return nil, nil
 }
 
 // convertToolSchemaType converts a tool's schema type from its langchaingo
