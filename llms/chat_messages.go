@@ -28,6 +28,7 @@ const (
 	ChatMessageTypeFunction ChatMessageType = "function"
 	// ChatMessageTypeTool is a message sent by a tool.
 	ChatMessageTypeTool ChatMessageType = "tool"
+	ChatMessageTypeDev  ChatMessageType = "developer"
 )
 
 // ChatMessage represents a message in a chat.
