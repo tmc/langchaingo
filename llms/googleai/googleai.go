@@ -386,7 +386,7 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			Description: tool.Function.Description,
 		}
 
-		schema, err := convertToSchema(tool.Function.Parameters)
+		schema, err := convertToSchema(tool.Function.Parameters, true)
 		if err != nil {
 			return nil, fmt.Errorf("tool [%d]: %w", i, err)
 		}
@@ -423,7 +423,7 @@ func convertMaps(i any) any {
 	return i
 }
 
-func convertToSchema(e any) (*genai.Schema, error) {
+func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
 	e = convertMaps(e)
 	schema := &genai.Schema{}
 
@@ -438,29 +438,39 @@ func convertToSchema(e any) (*genai.Schema, error) {
 			return nil, fmt.Errorf("tool: expected string for type")
 		}
 		schema.Type = convertToolSchemaType(tyString)
+
+		if topLevel && schema.Type != genai.TypeObject {
+			return nil, fmt.Errorf("tool: top-level schema must be an object")
+		}
 	}
 
-	if _, ok := eMap["properties"]; ok {
+	_, ok = eMap["properties"]
+	if ok {
 		paramProperties, ok := eMap["properties"].(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("tool: expected map[string]any for properties")
 		}
 		schema.Properties = make(map[string]*genai.Schema)
 		for propName, propValue := range paramProperties {
-			recSchema, err := convertToSchema(propValue)
+			recSchema, err := convertToSchema(propValue, false)
 			if err != nil {
 				return nil, fmt.Errorf("tool, property [%v]: %w", propName, err)
 			}
 			schema.Properties[propName] = recSchema
 		}
+	} else if schema.Type == genai.TypeObject {
+		return nil, fmt.Errorf("tool: object schema must have properties")
 	}
 
-	if items, ok := eMap["items"]; ok {
-		itemsSchema, err := convertToSchema(items)
+	items, ok := eMap["items"]
+	if ok {
+		itemsSchema, err := convertToSchema(items, false)
 		if err != nil {
 			return nil, fmt.Errorf("tool: %w", err)
 		}
 		schema.Items = itemsSchema
+	} else if schema.Type == genai.TypeArray {
+		return nil, fmt.Errorf("tool: array schema must have items")
 	}
 
 	if description, ok := eMap["description"]; ok {
