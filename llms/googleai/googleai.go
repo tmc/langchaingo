@@ -400,6 +400,7 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 	return genaiTools, nil
 }
 
+// convert map[any]any to map[string]any if possible
 func convertMaps(i any) any {
 	switch v := i.(type) {
 	case map[any]any:
@@ -439,7 +440,11 @@ func convertToSchema(e any) (*genai.Schema, error) {
 		schema.Type = convertToolSchemaType(tyString)
 	}
 
-	if paramProperties, ok := eMap["properties"].(map[string]any); ok {
+	if _, ok := eMap["properties"]; ok {
+		paramProperties, ok := eMap["properties"].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected map[string]any for properties")
+		}
 		schema.Properties = make(map[string]*genai.Schema)
 		for propName, propValue := range paramProperties {
 			recSchema, err := convertToSchema(propValue)
