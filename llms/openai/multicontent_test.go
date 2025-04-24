@@ -168,3 +168,69 @@ func showResponse(rsp any) string { //nolint:golint,unused
 	}
 	return string(b)
 }
+
+func TestChatMessageDeveloperRole(t *testing.T) {
+	t.Parallel()
+
+	// prepare a single llms.MessageContent with the Dev role
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeDev,
+			Parts: []llms.ContentPart{
+				llms.TextPart("developer instructions"),
+			},
+		},
+	}
+
+	chatMsgs := make([]*ChatMessage, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ChatMessage{MultiContent: mc.Parts}
+		switch mc.Role {
+		case llms.ChatMessageTypeDev:
+			msg.Role = RoleDeveloper
+		default:
+			t.Fatalf("unexpected role: %v", mc.Role)
+		}
+		chatMsgs = append(chatMsgs, msg)
+	}
+
+	// assertions
+	require.Len(t, chatMsgs, 1)
+	assert.Equal(t, RoleDeveloper, chatMsgs[0].Role, "should map ChatMessageTypeDev -> RoleDeveloper")
+
+	// ensure the content is carried over as the same ContentPart
+	require.Len(t, chatMsgs[0].MultiContent, 1)
+	assert.Equal(
+		t,
+		llms.TextPart("developer instructions"),
+		chatMsgs[0].MultiContent[0],
+		"expected the TextPart to be preserved",
+	)
+}
+
+func TestMultiContentTextChatSequence2(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t, WithModel("o3-mini-2025-01-31"))
+
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeDev,
+			Parts: []llms.ContentPart{llms.TextPart("Name some countries")},
+		},
+		{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{llms.TextPart("Spain and Lesotho")},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithTemperature(1))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Regexp(t, "spain.*larger", strings.ToLower(c1.Content))
+}

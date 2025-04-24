@@ -28,7 +28,7 @@ const (
 	ChatMessageTypeFunction ChatMessageType = "function"
 	// ChatMessageTypeTool is a message sent by a tool.
 	ChatMessageTypeTool ChatMessageType = "tool"
-	ChatMessageTypeDev  ChatMessageType = "developer"
+	ChatMessageTypeDev  ChatMessageType = "developer" // right now only supported for openAI
 )
 
 // ChatMessage represents a message in a chat.
