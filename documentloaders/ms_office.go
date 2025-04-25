@@ -3,6 +3,7 @@ package documentloaders
 import (
 	"archive/zip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -38,8 +39,7 @@ func NewOffice(reader io.ReaderAt, filename string, size int64) Office {
 	}
 }
 
-func (loader Office) Load(ctx context.Context) ([]schema.Document, error) {
-
+func (loader Office) Load(_ context.Context) ([]schema.Document, error) {
 	switch loader.fileType {
 	case ".doc", ".docx":
 		return loader.loadWord()
@@ -69,6 +69,19 @@ func (loader Office) loadWord() ([]schema.Document, error) {
 	return loader.loadDoc()
 }
 
+// extractTextFromBuffer processes a byte buffer to extract readable ASCII text
+func extractTextFromBuffer(buf []byte, size int) string {
+	var text strings.Builder
+	for j := 0; j < size; j++ {
+		if buf[j] >= txtASCIIRangeMin && buf[j] <= txtASCIIRangeMax {
+			text.WriteByte(buf[j])
+		} else if buf[j] == CR || buf[j] == LF {
+			text.WriteByte('\n')
+		}
+	}
+	return text.String()
+}
+
 func (loader Office) loadDoc() ([]schema.Document, error) {
 	doc, err := mscfb.New(io.NewSectionReader(loader.reader, 0, loader.size))
 	if err != nil {
@@ -78,7 +91,7 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 	var text strings.Builder
 	for {
 		entry, err := doc.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -87,21 +100,11 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 		}
 
 		if entry.Name == "WordDocument" {
-			buf := make([]byte, entry.Size)
-			i, err := doc.Read(buf)
+			content, err := loader.readEntryContent(doc, entry)
 			if err != nil {
-				return nil, fmt.Errorf("error reading WordDocument stream: %w", err)
+				return nil, err
 			}
-
-			if i > 0 {
-				for j := 0; j < i; j++ {
-					if buf[j] >= txtASCIIRangeMin && buf[j] <= txtASCIIRangeMax {
-						text.WriteByte(buf[j])
-					} else if buf[j] == CR || buf[j] == LF {
-						text.WriteByte('\n')
-					}
-				}
-			}
+			text.WriteString(content)
 		}
 	}
 
@@ -115,6 +118,20 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 	}, nil
 }
 
+// readEntryContent reads the content of an entry and returns it as a string
+func (loader Office) readEntryContent(doc *mscfb.Reader, entry *mscfb.File) (string, error) {
+	buf := make([]byte, entry.Size)
+	i, err := doc.Read(buf)
+	if err != nil {
+		return "", fmt.Errorf("error reading content stream: %w", err)
+	}
+
+	if i > 0 {
+		return extractTextFromBuffer(buf, i), nil
+	}
+	return "", nil
+}
+
 func (loader Office) loadDocx() ([]schema.Document, error) {
 	zipReader, err := zip.NewReader(loader.reader, loader.size)
 	if err != nil {
@@ -124,17 +141,10 @@ func (loader Office) loadDocx() ([]schema.Document, error) {
 	var textContent string
 	for _, file := range zipReader.File {
 		if file.Name == "word/document.xml" {
-			rc, err := file.Open()
+			content, err := loader.readZipFileContent(file)
 			if err != nil {
-				return nil, fmt.Errorf("error opening document.xml: %w", err)
+				return nil, err
 			}
-
-			content, err := io.ReadAll(rc)
-			rc.Close()
-			if err != nil {
-				return nil, fmt.Errorf("error reading content: %w", err)
-			}
-
 			textContent = loader.parseDocx(content)
 			break
 		}
@@ -148,6 +158,22 @@ func (loader Office) loadDocx() ([]schema.Document, error) {
 			},
 		},
 	}, nil
+}
+
+// readZipFileContent reads the content of a zip file entry
+func (loader Office) readZipFileContent(file *zip.File) ([]byte, error) {
+	rc, err := file.Open()
+	if err != nil {
+		return nil, fmt.Errorf("error opening file %s: %w", file.Name, err)
+	}
+	defer rc.Close()
+
+	content, err := io.ReadAll(rc)
+	if err != nil {
+		return nil, fmt.Errorf("error reading content: %w", err)
+	}
+
+	return content, nil
 }
 
 func (loader Office) parseDocx(xmlContent []byte) string {
@@ -183,7 +209,7 @@ func (loader Office) loadExcel() ([]schema.Document, error) {
 		return nil, fmt.Errorf("failed to read Excel file: %w", err)
 	}
 
-	var docs []schema.Document
+	docs := make([]schema.Document, 0, len(xlFile.Sheets))
 	for i, sheet := range xlFile.Sheets {
 		var text strings.Builder
 		for _, row := range sheet.Rows {
@@ -222,7 +248,7 @@ func (loader Office) loadPpt() ([]schema.Document, error) {
 	var text strings.Builder
 	for {
 		entry, err := doc.Next()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 
@@ -231,24 +257,12 @@ func (loader Office) loadPpt() ([]schema.Document, error) {
 		}
 
 		if entry.Name == "PowerPoint Document" {
-			buf := make([]byte, entry.Size)
-
-			i, err := doc.Read(buf)
+			content, err := loader.readEntryContent(doc, entry)
 			if err != nil {
-				return nil, fmt.Errorf("error reading PPT stream: %w", err)
+				return nil, err
 			}
-
-			if i > 0 {
-				for j := 0; j < i; j++ {
-					if buf[j] >= txtASCIIRangeMin && buf[j] <= txtASCIIRangeMax {
-						text.WriteByte(buf[j])
-					} else if buf[j] == CR || buf[j] == LF {
-						text.WriteByte('\n')
-					}
-				}
-			}
+			text.WriteString(content)
 		}
-
 	}
 
 	return []schema.Document{
@@ -271,25 +285,21 @@ func (loader Office) loadPptx() ([]schema.Document, error) {
 	slideFilePattern := regexp.MustCompile(`ppt/slides/slide[0-9]+\.xml`)
 
 	for _, file := range zipReader.File {
-		if slideFilePattern.MatchString(file.Name) {
-			rc, err := file.Open()
-			if err != nil {
-				return nil, fmt.Errorf("error opening slide %s: %w", file.Name, err)
-			}
+		if !slideFilePattern.MatchString(file.Name) {
+			continue
+		}
 
-			content, err := io.ReadAll(rc)
-			rc.Close()
-			if err != nil {
-				return nil, fmt.Errorf("error reading slide content: %w", err)
-			}
+		content, err := loader.readZipFileContent(file)
+		if err != nil {
+			return nil, err
+		}
 
-			slideText := loader.parsePPTX(content)
-			if slideText != "" {
-				if allText.Len() > 0 {
-					allText.WriteString("\n\n") // Add paragraph breaks between slides
-				}
-				allText.WriteString(slideText)
+		slideText := loader.parsePPTX(content)
+		if slideText != "" {
+			if allText.Len() > 0 {
+				allText.WriteString("\n\n") // Add paragraph breaks between slides
 			}
+			allText.WriteString(slideText)
 		}
 	}
 
