@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - neph-main
   pull_request:
     branches:
       - main
+      - neph-main
 jobs:
   lint:
     name: Lint
