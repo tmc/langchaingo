@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -17,6 +18,7 @@ type LLM struct {
 }
 
 const (
+	RoleDeveloper = "developer"
 	RoleSystem    = "system"
 	RoleAssistant = "assistant"
 	RoleUser      = "user"
@@ -43,6 +45,14 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
+// roleForSystemMessage determines the appropriate role based on the model's name.
+func roleForSystemMessage(model string) string {
+	if strings.Contains(model, "gpt-4o") || strings.Contains(model, "gpt-3") {
+		return RoleSystem
+	}
+	return RoleDeveloper
+}
+
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, goerr113, funlen
 	if o.CallbacksHandler != nil {
@@ -59,7 +69,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
 		case llms.ChatMessageTypeSystem:
-			msg.Role = RoleSystem
+			// With o1 models and newer, developer messages replace the previous system
+			msg.Role = roleForSystemMessage(o.client.Model)
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
 		case llms.ChatMessageTypeHuman:
