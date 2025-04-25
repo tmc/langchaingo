@@ -17,6 +17,7 @@ type LLM struct {
 }
 
 const (
+	RoleDeveloper = "developer"
 	RoleSystem    = "system"
 	RoleAssistant = "assistant"
 	RoleUser      = "user"
@@ -58,6 +59,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
+		case llms.ChatMessageTypeDev:
+			msg.Role = RoleDeveloper
 		case llms.ChatMessageTypeSystem:
 			msg.Role = RoleSystem
 		case llms.ChatMessageTypeAI:
