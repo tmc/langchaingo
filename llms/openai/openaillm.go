@@ -60,11 +60,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
+		// With o1 models and newer, developer messages replace the previous system
 		case llms.ChatMessageTypeSystem:
-			if strings.Contains(o.client.Model, "o3") {
-				msg.Role = RoleDeveloper
+			if strings.Contains(o.client.Model, "gpt-4o") {
+				msg.Role = RoleSystem
 			}
-			msg.Role = RoleSystem
+			msg.Role = RoleDeveloper
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
 		case llms.ChatMessageTypeHuman:
