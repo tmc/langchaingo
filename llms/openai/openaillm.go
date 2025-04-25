@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -59,9 +60,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
-		case llms.ChatMessageTypeDev:
-			msg.Role = RoleDeveloper
 		case llms.ChatMessageTypeSystem:
+			if strings.Contains(o.client.Model, "o3") {
+				msg.Role = RoleDeveloper
+			}
 			msg.Role = RoleSystem
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
