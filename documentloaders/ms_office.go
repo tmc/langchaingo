@@ -69,7 +69,7 @@ func (loader Office) loadWord() ([]schema.Document, error) {
 	return loader.loadDoc()
 }
 
-// extractTextFromBuffer processes a byte buffer to extract readable ASCII text
+// extractTextFromBuffer processes a byte buffer to extract readable ASCII text.
 func extractTextFromBuffer(buf []byte, size int) string {
 	var text strings.Builder
 	for j := 0; j < size; j++ {
@@ -118,7 +118,7 @@ func (loader Office) loadDoc() ([]schema.Document, error) {
 	}, nil
 }
 
-// readEntryContent reads the content of an entry and returns it as a string
+// readEntryContent reads the content of an entry and returns it as a string.
 func (loader Office) readEntryContent(doc *mscfb.Reader, entry *mscfb.File) (string, error) {
 	buf := make([]byte, entry.Size)
 	i, err := doc.Read(buf)
@@ -160,7 +160,7 @@ func (loader Office) loadDocx() ([]schema.Document, error) {
 	}, nil
 }
 
-// readZipFileContent reads the content of a zip file entry
+// readZipFileContent reads the content of a zip file entry.
 func (loader Office) readZipFileContent(file *zip.File) ([]byte, error) {
 	rc, err := file.Open()
 	if err != nil {
