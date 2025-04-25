@@ -14,15 +14,12 @@ This fun little program demonstrates how to use the LangChain Go library to gene
 
 ## How It Works
 
-The program uses the `langchaingo` library to interact with the OpenAI-compatible Docker Model Runner's APIs. It creates a new OpenAI client, sets up a context and the base URL for the Docker Model Runner, and then generates a completion based on the given prompt.
+The program uses the `langchaingo` library to interact with the OpenAI-compatible Docker Model Runner's APIs through a socat proxy. It creates a new OpenAI client, sets up a context and the base URL for the Docker Model Runner, obtained from the socat proxy, and then generates a completion based on the given prompt.
 
-The Docker Model Runner is embedded in the Docker Desktop app, and at the moment it's only available for Mac. The OpenAI-compatible API is available at `http://localhost:12434/engines/v1`. The 12434 TCP port is disabled by default, so you need to enable it in the Docker Desktop settings.
+The Docker Model Runner is embedded in the Docker Desktop app, and at the moment it's only available for Mac. The OpenAI-compatible API is available thanks to the socat proxy, which exposes a port on the host machine and maps it to the Docker Model Runner's 80 HTTP port. Finally, the LLM client is configured to use the socat proxy using the `/engines/v1` endpoint of the Docker Model Runner.
 
 > [!NOTE]
 > You can find more information about the Docker Model Runner APIs [here](https://docs.docker.com/desktop/features/model-runner/#what-api-endpoints-are-available).
-
-> [!NOTE]
-> If you don't want to expose the 12434 TCP port to the outside world, you can use the `socat` command to forward the port to localhost. You can find an example of how to do this in the [dockermodelrunner-socat-chat-example](../dockermodelrunner-socat-chat-example) directory.
 
 The `GenerateFromSinglePrompt` function is used with some interesting options:
 - `WithTemperature(0.8)`: This adds a bit of randomness to the output.
@@ -30,18 +27,16 @@ The `GenerateFromSinglePrompt` function is used with some interesting options:
 
 ## Running the Example
 
-To run this example, make sure you have Docker Desktop running and in the `v4.40+` version, which is the version that includes the Docker Model Runner. Then pull the `ai/llama3.2:3b` model, using the following command:
+To run this example, make sure you have Docker Desktop running and in the `v4.40+` version, which is the version that includes the Docker Model Runner. Then pull the `ai/smollm2:360M-Q4_K_M` model, using the following command:
 
 ```bash
-docker model pull ai/llama3.2:3b
+docker model pull ai/smollm2:360M-Q4_K_M
 ```
 
 Finally, simply execute the program and watch as it generates a creative response about company names!
 
 ```bash
-# Set the OPENAI_API_KEY environment variable to any value
-#so that the OpenAI client doesn't complain.
-OPENAI_API_KEY=foo go run -v .
+go run -v .
 ```
 
 Have fun exploring the possibilities with LangChain and the Docker Model Runner! 🐳
