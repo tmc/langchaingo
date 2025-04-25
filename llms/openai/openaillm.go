@@ -62,10 +62,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		switch mc.Role {
 		// With o1 models and newer, developer messages replace the previous system
 		case llms.ChatMessageTypeSystem:
-			if strings.Contains(o.client.Model, "gpt-4o") {
+			if strings.Contains(o.client.Model, "gpt-4o") || strings.Contains(o.client.Model, "gpt-3") {
 				msg.Role = RoleSystem
+			} else {
+				msg.Role = RoleDeveloper
 			}
-			msg.Role = RoleDeveloper
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
 		case llms.ChatMessageTypeHuman:
