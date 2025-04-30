@@ -7,7 +7,7 @@ toolchain go1.23.8
 replace github.com/tmc/langchaingo => ../..
 
 require (
-	github.com/testcontainers/testcontainers-go/modules/dockermodelrunner v0.37.1
+	github.com/testcontainers/testcontainers-go/modules/dockermodelrunner v0.37.2
 	github.com/tmc/langchaingo v0.1.13
 )
 
