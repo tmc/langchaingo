@@ -10,6 +10,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/milvus v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.31.0
+	github.com/testcontainers/testcontainers-go/modules/ollama v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/opensearch v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.31.0
 	github.com/testcontainers/testcontainers-go/modules/qdrant v0.31.0
