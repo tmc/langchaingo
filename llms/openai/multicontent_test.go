@@ -77,7 +77,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 func TestMultiContentImage(t *testing.T) {
 	t.Parallel()
 
-	llm := newTestClient(t, WithModel("gpt-4-vision-preview"))
+	llm := newTestClient(t, WithModel("gpt-4o"))
 
 	parts := []llms.ContentPart{
 		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
