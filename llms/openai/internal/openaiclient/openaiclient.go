@@ -2,19 +2,17 @@ package openaiclient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (
 	defaultBaseURL              = "https://api.openai.com/v1"
 	defaultFunctionCallBehavior = "auto"
 )
-
-// ErrEmptyResponse is returned when the OpenAI API returns an empty response.
-var ErrEmptyResponse = errors.New("empty response")
 
 type APIType string
 
@@ -90,7 +88,7 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 		return nil, err
 	}
 	if len(resp.Choices) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return &Completion{
 		Text: resp.Choices[0].Message.Content,
@@ -118,7 +116,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 	}
 
 	if len(resp.Data) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	embeddings := make([][]float32, 0)
@@ -143,7 +141,7 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletio
 		return nil, err
 	}
 	if len(resp.Choices) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp, nil
 }
@@ -157,10 +155,10 @@ func (c *Client) setHeaders(req *http.Request) {
 	if c.apiType == APITypeOpenAI || c.apiType == APITypeAzureAD {
 		req.Header.Set("Authorization", "Bearer "+c.token)
 	} else {
-		req.Header.Set("api-key", c.token)
+		req.Header.Set("Api-Key", c.token)
 	}
 	if c.organization != "" {
-		req.Header.Set("OpenAI-Organization", c.organization)
+		req.Header.Set("Openai-Organization", c.organization)
 	}
 }
 

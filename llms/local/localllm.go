@@ -13,12 +13,8 @@ import (
 	"github.com/tmc/langchaingo/llms/local/internal/localclient"
 )
 
-var (
-	// ErrEmptyResponse is returned when the local LLM binary returns an empty response.
-	ErrEmptyResponse = errors.New("no response")
-	// ErrMissingBin is returned when the LOCAL_LLM_BIN environment variable is not set.
-	ErrMissingBin = errors.New("missing the local LLM binary path, set the LOCAL_LLM_BIN environment variable")
-)
+// ErrMissingBin is returned when the LOCAL_LLM_BIN environment variable is not set.
+var ErrMissingBin = errors.New("missing the local LLM binary path, set the LOCAL_LLM_BIN environment variable")
 
 // LLM is a local LLM implementation.
 type LLM struct {

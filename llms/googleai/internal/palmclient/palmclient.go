@@ -21,10 +21,10 @@ var (
 )
 
 var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
-	"temperature":     0.2, //nolint:gomnd
-	"maxOutputTokens": 256, //nolint:gomnd
-	"topP":            0.8, //nolint:gomnd
-	"topK":            40,  //nolint:gomnd
+	"temperature":     0.2, //nolint:all
+	"maxOutputTokens": 256, //nolint:all
+	"topP":            0.8, //nolint:all
+	"topK":            40,  //nolint:all
 }
 
 const (
@@ -64,9 +64,6 @@ func New(ctx context.Context, projectID, location string, opts ...option.ClientO
 		projectID: projectID,
 	}, nil
 }
-
-// ErrEmptyResponse is returned when the OpenAI API returns an empty response.
-var ErrEmptyResponse = errors.New("empty response")
 
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
@@ -290,7 +287,7 @@ func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []s
 		return nil, err
 	}
 	if len(resp.GetPredictions()) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp.GetPredictions(), nil
 }
@@ -329,7 +326,7 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 		return nil, err
 	}
 	if len(resp.GetPredictions()) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp.GetPredictions(), nil
 }

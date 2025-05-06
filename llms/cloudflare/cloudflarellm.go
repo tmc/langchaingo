@@ -10,11 +10,6 @@ import (
 	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
 )
 
-var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got embedded")
-)
-
 // LLM is a cloudflare LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler
@@ -147,11 +142,11 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	}
 
 	if len(res.Result.Data) == 0 {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	if len(inputTexts) != len(res.Result.Data) {
-		return res.Result.Data, ErrIncompleteEmbedding
+		return res.Result.Data, llms.ErrIncompleteEmbedding
 	}
 
 	return res.Result.Data, nil

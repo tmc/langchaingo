@@ -11,8 +11,7 @@ import (
 )
 
 var (
-	ErrEmptyResponse = errors.New("no response")
-	ErrMissingToken  = errors.New("missing the COHERE_API_KEY key, set it in the COHERE_API_KEY environment variable")
+	ErrMissingToken = errors.New("missing the COHERE_API_KEY key, set it in the COHERE_API_KEY environment variable")
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )

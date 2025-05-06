@@ -74,7 +74,7 @@ func createCohereCompletion(ctx context.Context,
 		Temperature:    options.Temperature,
 		P:              options.TopP,
 		K:              options.TopK,
-		MaxTokens:      getMaxTokens(options.MaxTokens, 20),
+		MaxTokens:      getMaxTokens(options.MaxTokens, DefaultMaxTokenLength20),
 		StopSequences:  options.StopWords,
 		NumGenerations: options.CandidateCount,
 	}

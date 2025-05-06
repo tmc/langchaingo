@@ -9,11 +9,6 @@ import (
 	"github.com/tmc/langchaingo/llms/llamafile/internal/llamafileclient"
 )
 
-var (
-	ErrEmptyResponse       = errors.New("no response")
-	ErrIncompleteEmbedding = errors.New("not all input got embedded")
-)
-
 // LLM is a llamafile LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler

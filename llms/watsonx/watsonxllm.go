@@ -9,10 +9,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrInvalidPrompt = errors.New("invalid prompt")
-	ErrEmptyResponse = errors.New("no response")
-)
+var ErrInvalidPrompt = errors.New("invalid prompt")
 
 type LLM struct {
 	CallbacksHandler callbacks.Handler
@@ -53,7 +50,7 @@ func (wx *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConte
 	}
 
 	if result.Text == "" {
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	resp := &llms.ContentResponse{

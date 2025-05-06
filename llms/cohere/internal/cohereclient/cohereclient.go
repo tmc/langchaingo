@@ -10,12 +10,10 @@ import (
 	"strings"
 
 	"github.com/cohere-ai/tokenizer"
+	"github.com/tmc/langchaingo/llms"
 )
 
-var (
-	ErrEmptyResponse = errors.New("empty response")
-	ErrModelNotFound = errors.New("model not found")
-)
+var ErrModelNotFound = errors.New("model not found")
 
 type Client struct {
 	token      string
@@ -111,8 +109,8 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", "bearer "+c.token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "bearer "+c.token)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -129,7 +127,7 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		if strings.HasPrefix(response.Message, "model not found") {
 			return nil, ErrModelNotFound
 		}
-		return nil, ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
 	var generation Generation
