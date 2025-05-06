@@ -32,3 +32,4 @@ service-account.json
 
 embeddings/cybertron/models/*
 examples/cybertron-embedding-example/models/*
+!/.idea/
