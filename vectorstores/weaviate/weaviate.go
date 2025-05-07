@@ -33,7 +33,8 @@ var (
 	ErrInvalidResponse       = errors.New("invalid response")
 	ErrInvalidScoreThreshold = errors.New(
 		"score threshold must be between 0 and 1")
-	ErrInvalidFilter = errors.New("invalid filter")
+	ErrInvalidFilter  = errors.New("invalid filter")
+	ErrNotImplemented = errors.New("not implemented")
 )
 
 // Store is a wrapper around the weaviate client.
@@ -94,6 +95,11 @@ func (s Store) AddDocuments(ctx context.Context,
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	nameSpace := s.getNameSpace(opts)
 
 	docs = s.deduplicate(ctx, opts, docs)
