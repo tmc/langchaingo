@@ -59,10 +59,6 @@ func (l LogHandler) HandleText(_ context.Context, text string) {
 	fmt.Println(text)
 }
 
-func (l LogHandler) HandleLLMStart(_ context.Context, prompts []string) {
-	fmt.Println("Entering LLM with prompts:", prompts)
-}
-
 func (l LogHandler) HandleLLMError(_ context.Context, err error) {
 	fmt.Println("Exiting LLM with error:", err)
 }
