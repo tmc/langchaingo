@@ -38,6 +38,7 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 	for _, opt := range opts {
 		opt(&options)
 	}
+	options.loadOpenAIFunctionsTranslatable()
 
 	return &OpenAIFunctionsAgent{
 		LLM:              llm,

@@ -1,0 +1,4 @@
+开始吧！
+
+问题: {{.input}}
+思考: {{.agent_scratchpad}}
