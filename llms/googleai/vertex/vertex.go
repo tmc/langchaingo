@@ -375,7 +375,7 @@ DoStream:
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	genaiTools := make([]*genai.Tool, 0, len(tools))
+	genaiFuncDecls := make([]*genai.FunctionDeclaration, 0, len(tools))
 	for i, tool := range tools {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
@@ -452,10 +452,12 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 		genaiFuncDecl.Parameters = schema
 
-		genaiTools = append(genaiTools, &genai.Tool{
-			FunctionDeclarations: []*genai.FunctionDeclaration{genaiFuncDecl},
-		})
+		// google genai only support one tool, multiple tools must be embedded into function declarations:
+		// https://github.com/GoogleCloudPlatform/generative-ai/issues/636
+		// https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#chat-samples
+		genaiFuncDecls = append(genaiFuncDecls, genaiFuncDecl)
 	}
+	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
 
 	return genaiTools, nil
 }
