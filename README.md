@@ -58,6 +58,8 @@ Socktastic
 
 # Resources
 
+Join the Discord server for support and discussions: [Join Discord](https://discord.gg/t9UbBQs2rG)
+
 Here are some links to blog posts and articles on using Langchain Go:
 
 - [Using Gemini models in Go with LangChainGo](https://eli.thegreenplace.net/2024/using-gemini-models-in-go-with-langchaingo/) - Jan 2024
@@ -67,6 +69,8 @@ Here are some links to blog posts and articles on using Langchain Go:
 
 
 # Contributors
+
+There is a momentum for moving the developemnt of langchaingo to a more community effort, if you are interested in being a maintainer or you are a contributor please join our [Discord](https://discord.gg/t9UbBQs2rG) and let us know.
 
 <a href="https://github.com/tmc/langchaingo/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tmc/langchaingo" />
