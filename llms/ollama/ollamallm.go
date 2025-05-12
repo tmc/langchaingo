@@ -146,7 +146,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	// Add safety check before accessing resp.Message
+	if resp.Message == nil {
+		// Create a default message if it's somehow nil
+		resp.Message = &ollamaclient.Message{
+			Role:    "assistant",
+			Content: streamedResponse,
+		}
+	}
 	choices := []*llms.ContentChoice{
 		{
 			Content: resp.Message.Content,
