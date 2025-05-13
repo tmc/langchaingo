@@ -377,6 +377,10 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		return nil, nil
 	}
 
+	// Initialize a single genaiTool to hold all function declarations.
+	// This approach is used because the GoogleAI API expects a single tool
+	// with multiple function declarations, rather than multiple tools each with
+	// a single function declaration.
 	genaiTool := genai.Tool{
 		FunctionDeclarations: make([]*genai.FunctionDeclaration, 0, len(tools)),
 	}
