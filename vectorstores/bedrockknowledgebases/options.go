@@ -12,6 +12,15 @@ func (kb *KnowledgeBase) getOptions(options ...vectorstores.Option) *vectorstore
 	return opts
 }
 
+// Filter is the common interface for representing filters applied during
+// document retrieval from a Bedrock knowledge base.
+//
+// Filters can be combined using logical operators: AllFilter (AND semantics)
+// and AnyFilter (OR semantics). This allows the construction of complex,
+// nested filter conditions.
+//
+// The interface is sealed by the unexported isFilter method to prevent
+// external implementations, ensuring forward compatibility.
 type Filter interface {
 	isFilter()
 }
