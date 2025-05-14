@@ -20,6 +20,10 @@ type Store struct {
 
 var _ vectorstores.VectorStore = Store{}
 
+var (
+	ErrNotImplemented = errors.New("not implemented")
+)
+
 func New(opts ...Option) (Store, error) {
 	s, err := applyClientOptions(opts...)
 	if err != nil {
@@ -30,8 +34,14 @@ func New(opts ...Option) (Store, error) {
 
 func (s Store) AddDocuments(ctx context.Context,
 	docs []schema.Document,
-	_ ...vectorstores.Option,
+	options ...vectorstores.Option,
 ) ([]string, error) {
+	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)

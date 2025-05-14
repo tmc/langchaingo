@@ -22,6 +22,7 @@ var (
 	ErrAddDocument              = errors.New("error adding document")
 	ErrRemoveCollection         = errors.New("error resetting collection")
 	ErrUnsupportedOptions       = errors.New("unsupported options")
+	ErrNotImplemented           = errors.New("not implemented")
 )
 
 // Store is a wrapper around the chromaGo API and client.
@@ -93,6 +94,11 @@ func (s Store) AddDocuments(ctx context.Context,
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
 		return nil, ErrUnsupportedOptions
 	}

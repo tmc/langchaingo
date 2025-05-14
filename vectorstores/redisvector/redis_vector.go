@@ -23,6 +23,7 @@ var (
 	ErrInvalidEmbeddingVector = errors.New("embedding vector error")
 	ErrInvalidScoreThreshold  = errors.New("score threshold must be between 0 and 1")
 	ErrInvalidFilters         = errors.New("invalid filters")
+	ErrNotImplemented         = errors.New("not implemented")
 )
 
 // Store is a wrapper around the redis client.
@@ -76,7 +77,13 @@ func New(ctx context.Context, opts ...Option) (*Store, error) {
 //
 //	if doc.metadata has `keys` or `ids` field, the docId will use `keys` or `ids` value
 //	if not, the docId is uuid string
-func (s *Store) AddDocuments(ctx context.Context, docs []schema.Document, _ ...vectorstores.Option) ([]string, error) {
+func (s *Store) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+	opts := s.getOptions(options...)
+
+	if opts.Replacement {
+		return nil, ErrNotImplemented
+	}
+
 	err := s.appendDocumentsWithVectors(ctx, docs)
 	if err != nil {
 		return nil, err
