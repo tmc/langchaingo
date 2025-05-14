@@ -10,8 +10,10 @@ import (
 )
 
 func Test_parseStreamingMessageResponse_withEmptyInput(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	response := createSSEResponse(SSEDataWithEmptyInput)
+	defer response.Body.Close()
 	payload := &messagePayload{}
 
 	result, err := parseStreamingMessageResponse(ctx, response, payload)
@@ -36,9 +38,11 @@ func Test_parseStreamingMessageResponse_withEmptyInput(t *testing.T) {
 	require.Empty(t, secondContent.Input, "Tool use input should be empty")
 }
 
-func Test_parseStreamingMessageResponse_withInputJsonDeltas(t *testing.T) {
+func Test_parseStreamingMessageResponse_withInputJSONDeltas(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
-	response := createSSEResponse(SSEDataWithInputJsonDeltas)
+	response := createSSEResponse(SSEDataWithInputJSONDeltas)
+	defer response.Body.Close()
 	payload := &messagePayload{}
 
 	result, err := parseStreamingMessageResponse(ctx, response, payload)
@@ -66,12 +70,14 @@ func Test_parseStreamingMessageResponse_withInputJsonDeltas(t *testing.T) {
 }
 
 // createAnthropicSSEResponse creates an HTTP response containing a simulated
-// Anthropic API server-sent events (SSE) stream
+// Anthropic API server-sent events (SSE) stream.
 func createSSEResponse(data string) *http.Response {
 	recorder := httptest.NewRecorder()
 	recorder.Header().Set("Content-Type", "application/json")
 	recorder.WriteHeader(http.StatusOK)
-	recorder.WriteString(data)
+	if _, err := recorder.WriteString(data); err != nil {
+		panic(err)
+	}
 
 	return recorder.Result()
 }
@@ -112,7 +118,7 @@ data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":
 event: message_stop
 data: {"type":"message_stop"            }`
 
-const SSEDataWithInputJsonDeltas = `event: message_start
+const SSEDataWithInputJSONDeltas = `event: message_start
 data: {"type":"message_start","message":{"id":"msg_01QdDq6hdDLd5v9fndWvs43Z","type":"message","role":"assistant","model":"claude-3-7-sonnet-latest","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":463,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":2}}    }
 
 event: content_block_start

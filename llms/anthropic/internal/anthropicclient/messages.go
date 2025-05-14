@@ -21,7 +21,7 @@ var (
 	ErrInvalidDeltaField            = fmt.Errorf("invalid delta field type")
 	ErrInvalidDeltaTypeField        = fmt.Errorf("invalid delta type field type")
 	ErrInvalidDeltaTextField        = fmt.Errorf("invalid delta text field type")
-	ErrInvalidDeltaPartialJsonField = fmt.Errorf("invalid delta partial_json field type")
+	ErrInvalidDeltaPartialJSONField = fmt.Errorf("invalid delta partial_json field type")
 	ErrContentIndexOutOfRange       = fmt.Errorf("content index out of range")
 	ErrFailedCastToTextContent      = fmt.Errorf("failed to cast content to TextContent")
 	ErrFailedCastToToolUseContent   = fmt.Errorf("failed to cast content to ToolUseContent")
@@ -364,6 +364,7 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	return response, nil
 }
 
+// handleContentBlockDeltaEvent processes delta events for content blocks, handling both text and JSON deltas.
 func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interface{}, response MessageResponsePayload, payload *messagePayload) (MessageResponsePayload, error) {
 	indexValue, ok := event["index"].(float64)
 	if !ok {
@@ -386,38 +387,48 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 
 	switch deltaType {
 	case "text_delta":
-		text, ok := delta["text"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaTextField
-		}
-		textContent, ok := response.Content[index].(*TextContent)
-		if !ok {
-			return response, ErrFailedCastToTextContent
-		}
-		textContent.Text += text
-
-		// Streaming functions only work with text deltas.
-		if payload.StreamingFunc != nil {
-			text, ok := delta["text"].(string)
-			if !ok {
-				return response, ErrInvalidDeltaTextField
-			}
-			err := payload.StreamingFunc(ctx, []byte(text))
-			if err != nil {
-				return response, fmt.Errorf("streaming func returned an error: %w", err)
-			}
-		}
+		return handleTextDelta(ctx, delta, response, payload, index)
 	case "input_json_delta":
-		partialJson, ok := delta["partial_json"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaPartialJsonField
-		}
-		toolUseContent, ok := response.Content[index].(*ToolUseContent)
-		if !ok {
-			return response, ErrFailedCastToToolUseContent
-		}
-		toolUseContent.inputData += partialJson
+		return handleJSONDelta(delta, response, index)
 	}
+
+	return response, nil
+}
+
+// handleTextDelta processes text delta events for content blocks.
+func handleTextDelta(ctx context.Context, delta map[string]interface{}, response MessageResponsePayload, payload *messagePayload, index int) (MessageResponsePayload, error) {
+	text, ok := delta["text"].(string)
+	if !ok {
+		return response, ErrInvalidDeltaTextField
+	}
+	textContent, ok := response.Content[index].(*TextContent)
+	if !ok {
+		return response, ErrFailedCastToTextContent
+	}
+	textContent.Text += text
+
+	// Streaming functions only work with text deltas.
+	if payload.StreamingFunc != nil {
+		err := payload.StreamingFunc(ctx, []byte(text))
+		if err != nil {
+			return response, fmt.Errorf("streaming func returned an error: %w", err)
+		}
+	}
+
+	return response, nil
+}
+
+// handleJSONDelta processes JSON delta events for content blocks.
+func handleJSONDelta(delta map[string]interface{}, response MessageResponsePayload, index int) (MessageResponsePayload, error) {
+	partialJSON, ok := delta["partial_json"].(string)
+	if !ok {
+		return response, ErrInvalidDeltaPartialJSONField
+	}
+	toolUseContent, ok := response.Content[index].(*ToolUseContent)
+	if !ok {
+		return response, ErrFailedCastToToolUseContent
+	}
+	toolUseContent.inputData += partialJSON
 
 	return response, nil
 }
