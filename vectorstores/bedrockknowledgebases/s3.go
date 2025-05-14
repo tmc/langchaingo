@@ -52,18 +52,20 @@ func (kb *KnowledgeBase) removeFromS3(ctx context.Context, bucketArn string, doc
 	var wg sync.WaitGroup
 	for _, doc := range docs {
 		wg.Add(1)
-		go func() error {
+		go func(doc NamedDocument) {
 			defer wg.Done()
 			if err := sem.Acquire(ctx, 1); err != nil {
-				return fmt.Errorf("failed to acquire semaphore: %w", err)
+				// Log error and continue
+				fmt.Printf("failed to acquire semaphore: %v\n", err)
+				return
 			}
 			defer sem.Release(1)
 
 			if err := kb.removeS3Object(ctx, bucketArn, doc); err != nil {
-				return fmt.Errorf("failed to upload document: %w", err)
+				// Log error and continue
+				fmt.Printf("failed to remove document: %v\n", err)
 			}
-			return nil
-		}()
+		}(doc)
 	}
 	wg.Wait()
 }

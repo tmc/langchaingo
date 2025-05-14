@@ -23,7 +23,7 @@ type testModel struct{}
 
 var _ llms.Model = testModel{}
 
-func (testModel) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (testModel) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) {
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{Content: "orange"},
@@ -31,7 +31,7 @@ func (testModel) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	}, nil
 }
 
-func (testModel) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (testModel) Call(_ context.Context, _ string, _ ...llms.CallOption) (string, error) {
 	return "orange", nil
 }
 
@@ -42,7 +42,7 @@ type testBedrockAgent struct {
 
 var _ bedrockAgentAPI = &testBedrockAgent{}
 
-func (t *testBedrockAgent) GetKnowledgeBase(ctx context.Context, params *bedrockagent.GetKnowledgeBaseInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.GetKnowledgeBaseOutput, error) {
+func (t *testBedrockAgent) GetKnowledgeBase(_ context.Context, _ *bedrockagent.GetKnowledgeBaseInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetKnowledgeBaseOutput, error) {
 	t.calls++
 	return &bedrockagent.GetKnowledgeBaseOutput{
 		KnowledgeBase: &types.KnowledgeBase{
@@ -51,7 +51,7 @@ func (t *testBedrockAgent) GetKnowledgeBase(ctx context.Context, params *bedrock
 	}, nil
 }
 
-func (t *testBedrockAgent) ListDataSources(ctx context.Context, params *bedrockagent.ListDataSourcesInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.ListDataSourcesOutput, error) {
+func (t *testBedrockAgent) ListDataSources(_ context.Context, params *bedrockagent.ListDataSourcesInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.ListDataSourcesOutput, error) {
 	t.calls++
 	switch aws.ToString(params.KnowledgeBaseId) {
 	case "testKbWithoutDatasources":
@@ -99,7 +99,7 @@ func (t *testBedrockAgent) ListDataSources(ctx context.Context, params *bedrocka
 	}
 }
 
-func (t *testBedrockAgent) GetDataSource(ctx context.Context, params *bedrockagent.GetDataSourceInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.GetDataSourceOutput, error) {
+func (t *testBedrockAgent) GetDataSource(_ context.Context, params *bedrockagent.GetDataSourceInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetDataSourceOutput, error) {
 	t.mu.Lock()
 	t.calls++
 	t.mu.Unlock()
@@ -123,12 +123,12 @@ func (t *testBedrockAgent) GetDataSource(ctx context.Context, params *bedrockage
 	}, nil
 }
 
-func (t *testBedrockAgent) IngestKnowledgeBaseDocuments(ctx context.Context, params *bedrockagent.IngestKnowledgeBaseDocumentsInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.IngestKnowledgeBaseDocumentsOutput, error) {
+func (t *testBedrockAgent) IngestKnowledgeBaseDocuments(_ context.Context, _ *bedrockagent.IngestKnowledgeBaseDocumentsInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.IngestKnowledgeBaseDocumentsOutput, error) {
 	t.calls++
 	return &bedrockagent.IngestKnowledgeBaseDocumentsOutput{}, nil
 }
 
-func (t *testBedrockAgent) StartIngestionJob(ctx context.Context, params *bedrockagent.StartIngestionJobInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.StartIngestionJobOutput, error) {
+func (t *testBedrockAgent) StartIngestionJob(_ context.Context, _ *bedrockagent.StartIngestionJobInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.StartIngestionJobOutput, error) {
 	t.calls++
 	return &bedrockagent.StartIngestionJobOutput{
 		IngestionJob: &types.IngestionJob{
@@ -137,7 +137,7 @@ func (t *testBedrockAgent) StartIngestionJob(ctx context.Context, params *bedroc
 	}, nil
 }
 
-func (t *testBedrockAgent) GetIngestionJob(ctx context.Context, params *bedrockagent.GetIngestionJobInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.GetIngestionJobOutput, error) {
+func (t *testBedrockAgent) GetIngestionJob(_ context.Context, _ *bedrockagent.GetIngestionJobInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetIngestionJobOutput, error) {
 	t.calls++
 	return &bedrockagent.GetIngestionJobOutput{
 		IngestionJob: &types.IngestionJob{
@@ -150,7 +150,7 @@ type testBedrockAgentRuntime struct{ calls int }
 
 var _ bedrockAgentRuntimeAPI = &testBedrockAgentRuntime{}
 
-func (t *testBedrockAgentRuntime) Retrieve(ctx context.Context, params *bedrockagentruntime.RetrieveInput, optFns ...func(*bedrockagentruntime.Options)) (*bedrockagentruntime.RetrieveOutput, error) {
+func (t *testBedrockAgentRuntime) Retrieve(_ context.Context, _ *bedrockagentruntime.RetrieveInput, _ ...func(*bedrockagentruntime.Options)) (*bedrockagentruntime.RetrieveOutput, error) {
 	t.calls++
 	return &bedrockagentruntime.RetrieveOutput{
 		RetrievalResults: []runtimetypes.KnowledgeBaseRetrievalResult{
@@ -180,11 +180,12 @@ type testS3Client struct{ calls int }
 
 var _ s3API = &testS3Client{}
 
-func (t *testS3Client) PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
+func (t *testS3Client) PutObject(_ context.Context, _ *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
 	t.calls++
 	return &s3.PutObjectOutput{}, nil
 }
-func (t *testS3Client) DeleteObject(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+
+func (t *testS3Client) DeleteObject(_ context.Context, _ *s3.DeleteObjectInput, _ ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
 	t.calls++
 	return &s3.DeleteObjectOutput{}, nil
 }

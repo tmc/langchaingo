@@ -2,6 +2,7 @@ package bedrockknowledgebases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -96,39 +97,99 @@ func (kb *KnowledgeBase) AddNamedDocuments(ctx context.Context, docs []NamedDocu
 	return kb.addDocuments(ctx, docs, options...)
 }
 
+// shouldRemoveMetadata returns true if the value should be removed from metadata.
+func shouldRemoveMetadata(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	// Note: we're explicitly handling the cases we care about and have a default for all others
+	// nolint:exhaustive
+	switch rv.Kind() {
+	case reflect.Map, reflect.Slice:
+		return rv.Len() == 0
+	case reflect.String:
+		return v == ""
+	default:
+		// For all other kinds, keep the value
+		return false
+	}
+}
+
 func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
 	for i, doc := range docs {
-		if doc.Document.Metadata != nil {
-			for k, v := range doc.Document.Metadata {
-				if v == nil {
-					delete(doc.Document.Metadata, k)
-					continue
-				}
-
-				rv := reflect.ValueOf(v)
-				switch rv.Kind() {
-				case reflect.Map:
-					if rv.Len() == 0 {
-						delete(doc.Document.Metadata, k)
-					}
-				case reflect.Slice:
-					if rv.Len() == 0 {
-						delete(doc.Document.Metadata, k)
-					}
-				case reflect.String:
-					if v == "" {
-						delete(doc.Document.Metadata, k)
-					}
-				}
-			}
-
-			if len(doc.Document.Metadata) == 0 {
-				doc.Document.Metadata = nil
-			}
-
-			docs[i] = doc
+		if doc.Document.Metadata == nil {
+			continue
 		}
+
+		// Create a list of keys to remove
+		keysToRemove := []string{}
+		for k, v := range doc.Document.Metadata {
+			if shouldRemoveMetadata(v) {
+				keysToRemove = append(keysToRemove, k)
+			}
+		}
+
+		// Remove keys
+		for _, k := range keysToRemove {
+			delete(doc.Document.Metadata, k)
+		}
+
+		// If no metadata left, set to nil
+		if len(doc.Document.Metadata) == 0 {
+			doc.Document.Metadata = nil
+		}
+
+		docs[i] = doc
 	}
+}
+
+// validateDataSources checks if there are compatible data sources and returns an error if not.
+func (kb *KnowledgeBase) validateDataSources(compatibleDs, incompatibleDs []dataSource) error {
+	if len(compatibleDs) > 0 {
+		return nil
+	}
+
+	switch {
+	case len(incompatibleDs) > 0:
+		return fmt.Errorf(
+			"found data sources but none with S3 type, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
+			kb.knowledgeBaseID,
+		)
+	default:
+		return fmt.Errorf(
+			"no data sources with S3 type found, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
+			kb.knowledgeBaseID,
+		)
+	}
+}
+
+// findDataSource finds the appropriate data source based on options.
+func (kb *KnowledgeBase) findDataSource(compatibleDs []dataSource, nameSpace string) (string, string, error) {
+	if nameSpace != "" {
+		for _, ds := range compatibleDs {
+			if ds.ID == nameSpace {
+				return ds.ID, ds.BucketARN, nil
+			}
+		}
+		return "", "", fmt.Errorf("data source with S3 type with id %s not found", nameSpace)
+	}
+
+	if len(compatibleDs) == 1 {
+		return compatibleDs[0].ID, compatibleDs[0].BucketARN, nil
+	}
+
+	return "", "", fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
+}
+
+// collectDocumentNames extracts document names into a slice.
+func (kb *KnowledgeBase) collectDocumentNames(docs []NamedDocument) []string {
+	names := make([]string, len(docs))
+	for i, doc := range docs {
+		names[i] = doc.Name
+	}
+	return names
 }
 
 func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
@@ -138,42 +199,19 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 	if err := kb.checkKnowledgeBase(ctx); err != nil {
 		return nil, fmt.Errorf("failed to validate knowledge base: %w", err)
 	}
+
 	compatibleDs, incompatibleDs, err := kb.listDataSources(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list data sources: %w", err)
 	}
-	if len(compatibleDs) == 0 {
-		if len(incompatibleDs) > 0 {
-			return nil, fmt.Errorf(
-				"found data sources but none with S3 type, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
-				kb.knowledgeBaseID,
-			)
-		} else {
-			return nil, fmt.Errorf(
-				"no data sources with S3 type found, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
-				kb.knowledgeBaseID,
-			)
-		}
+
+	if err := kb.validateDataSources(compatibleDs, incompatibleDs); err != nil {
+		return nil, err
 	}
 
-	var datasourceID string
-	var bucketARN string
-	if opts.NameSpace != "" {
-		for _, ds := range compatibleDs {
-			if ds.Id == opts.NameSpace {
-				datasourceID = ds.Id
-				bucketARN = ds.BucketARN
-				break
-			}
-		}
-		if datasourceID == "" {
-			return nil, fmt.Errorf("data source with S3 type with id %s not found", opts.NameSpace)
-		}
-	} else if len(compatibleDs) == 1 {
-		datasourceID = compatibleDs[0].Id
-		bucketARN = compatibleDs[0].BucketARN
-	} else {
-		return nil, fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
+	datasourceID, bucketARN, err := kb.findDataSource(compatibleDs, opts.NameSpace)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := kb.addToS3(ctx, bucketARN, docs); err != nil {
@@ -200,11 +238,7 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 		)
 	}
 
-	names := make([]string, len(docs))
-	for i, doc := range docs {
-		names[i] = doc.Name
-	}
-	return names, nil
+	return kb.collectDocumentNames(docs), nil
 }
 
 func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) (
@@ -227,10 +261,14 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 		},
 	}
 
-	if filters, err := kb.getFilters(opts.Filters); err != nil {
-		return nil, err
-	} else if filters != nil {
-		retrieveInput.RetrievalConfiguration.VectorSearchConfiguration.Filter = filters
+	if opts.Filters != nil {
+		filters, err := kb.getFilters(opts.Filters)
+		if err != nil && !errors.Is(err, ErrNoFilters) {
+			return nil, err
+		}
+		if filters != nil {
+			retrieveInput.RetrievalConfiguration.VectorSearchConfiguration.Filter = filters
+		}
 	}
 
 	p := bedrockagentruntime.NewRetrievePaginator(kb.bedrockAgentRuntime, &retrieveInput)
@@ -263,78 +301,84 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 	return docs, nil
 }
 
-func (kb *KnowledgeBase) getFilters(filters any) (types.RetrievalFilter, error) {
-	if filters != nil {
-		switch filters := filters.(type) {
-		case EqualsFilter:
-			return &types.RetrievalFilterMemberEquals{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case NotEqualsFilter:
-			return &types.RetrievalFilterMemberNotEquals{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case ContainsFilter:
-			return &types.RetrievalFilterMemberListContains{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case AllFilter:
-			var filtersList []types.RetrievalFilter
-			for _, f := range filters.Filters {
-				f, err := kb.getFilters(f)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get filter: %w", err)
-				}
-				if f != nil {
-					filtersList = append(filtersList, f)
-				}
-			}
-			switch len(filtersList) {
-			case 0:
-				return nil, nil
-			case 1:
-				return filtersList[0], nil
-			default:
-				return &types.RetrievalFilterMemberAndAll{
-					Value: filtersList,
-				}, nil
-			}
-		case AnyFilter:
-			var filtersList []types.RetrievalFilter
-			for _, f := range filters.Filters {
-				f, err := kb.getFilters(f)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get filter: %w", err)
-				}
-				if f != nil {
-					filtersList = append(filtersList, f)
-				}
-			}
-			switch len(filtersList) {
-			case 0:
-				return nil, nil
-			case 1:
-				return filtersList[0], nil
-			default:
-				return &types.RetrievalFilterMemberOrAll{
-					Value: filtersList,
-				}, nil
-			}
-		default:
-			return nil, fmt.Errorf("unsupported filter type: %T", filters)
+// buildFilterAttribute creates a FilterAttribute from key and value.
+func buildFilterAttribute(key string, value any) types.FilterAttribute {
+	return types.FilterAttribute{
+		Key:   aws.String(key),
+		Value: document.NewLazyDocument(value),
+	}
+}
+
+// processFilters processes a list of filters and returns a filtered list.
+func (kb *KnowledgeBase) processFilters(filters []Filter) ([]types.RetrievalFilter, error) {
+	var filtersList []types.RetrievalFilter
+	for _, f := range filters {
+		filter, err := kb.getFilters(f)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get filter: %w", err)
+		}
+		if filter != nil {
+			filtersList = append(filtersList, filter)
 		}
 	}
+	return filtersList, nil
+}
 
-	return nil, nil
+// ErrEmptyFilterList is returned when the filter list is empty.
+var ErrEmptyFilterList = fmt.Errorf("empty filter list")
+
+// combineFilters combines a list of filters based on the number of filters.
+func combineFilters(filtersList []types.RetrievalFilter, combiner func([]types.RetrievalFilter) types.RetrievalFilter) (types.RetrievalFilter, error) {
+	switch len(filtersList) {
+	case 0:
+		return nil, ErrEmptyFilterList
+	case 1:
+		return filtersList[0], nil
+	default:
+		return combiner(filtersList), nil
+	}
+}
+
+// ErrNoFilters is returned when no filters are provided.
+var ErrNoFilters = fmt.Errorf("no filters provided")
+
+func (kb *KnowledgeBase) getFilters(filters any) (types.RetrievalFilter, error) {
+	if filters == nil {
+		return nil, ErrNoFilters
+	}
+
+	switch f := filters.(type) {
+	case EqualsFilter:
+		return &types.RetrievalFilterMemberEquals{
+			Value: buildFilterAttribute(f.Key, f.Value),
+		}, nil
+	case NotEqualsFilter:
+		return &types.RetrievalFilterMemberNotEquals{
+			Value: buildFilterAttribute(f.Key, f.Value),
+		}, nil
+	case ContainsFilter:
+		return &types.RetrievalFilterMemberListContains{
+			Value: buildFilterAttribute(f.Key, f.Value),
+		}, nil
+	case AllFilter:
+		filtersList, err := kb.processFilters(f.Filters)
+		if err != nil {
+			return nil, err
+		}
+		return combineFilters(filtersList, func(filters []types.RetrievalFilter) types.RetrievalFilter {
+			return &types.RetrievalFilterMemberAndAll{Value: filters}
+		})
+	case AnyFilter:
+		filtersList, err := kb.processFilters(f.Filters)
+		if err != nil {
+			return nil, err
+		}
+		return combineFilters(filtersList, func(filters []types.RetrievalFilter) types.RetrievalFilter {
+			return &types.RetrievalFilterMemberOrAll{Value: filters}
+		})
+	default:
+		return nil, fmt.Errorf("unsupported filter type: %T", filters)
+	}
 }
 
 func (kb *KnowledgeBase) parseMetadata(retrievalResult types.KnowledgeBaseRetrievalResult) (map[string]any, error) {
@@ -366,14 +410,15 @@ func (kb *KnowledgeBase) unmarshalMetadataValue(value document.Interface) (any, 
 	if err := value.UnmarshalSmithyDocument(&v); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal metadata value: %w", err)
 	}
-	switch value := v.(type) {
-	// convert to float 32 for easier handling by the user
-	case smithyDocument.Number:
-		floatValue, err := value.Float32()
+
+	// Handle specific types that need conversion
+	if number, ok := v.(smithyDocument.Number); ok {
+		floatValue, err := number.Float32()
 		if err != nil {
 			return nil, err
 		}
 		return float32(floatValue), nil
 	}
+
 	return v, nil
 }

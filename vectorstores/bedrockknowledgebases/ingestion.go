@@ -28,18 +28,18 @@ const (
 
 // dataSource represents a data source for a knowledge base.
 type dataSource struct {
-	Id        string
+	ID        string
 	BucketARN string
 }
 
 func (kb *KnowledgeBase) hash(docs []NamedDocument) string {
 	var hashInput bytes.Buffer
 	for _, doc := range docs {
-		hashInput.WriteString(doc.Document.PageContent)
+		_, _ = hashInput.WriteString(doc.Document.PageContent)
 	}
 
 	hasher := blake3.New()
-	hasher.Write(hashInput.Bytes())
+	_, _ = hasher.Write(hashInput.Bytes())
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
@@ -54,7 +54,8 @@ func (kb *KnowledgeBase) checkKnowledgeBase(ctx context.Context) error {
 }
 
 // listDataSources retrieves the list of data sources from Bedrock and returns the compatible and incompatible ones.
-func (kb *KnowledgeBase) listDataSources(ctx context.Context) (compatible, incompatible []dataSource, err error) {
+func (kb *KnowledgeBase) listDataSources(ctx context.Context) ([]dataSource, []dataSource, error) {
+	var compatible, incompatible []dataSource
 	result, err := kb.bedrockAgent.ListDataSources(ctx, &bedrockagent.ListDataSourcesInput{
 		KnowledgeBaseId: aws.String(kb.knowledgeBaseID),
 	})
@@ -78,7 +79,7 @@ func (kb *KnowledgeBase) listDataSources(ctx context.Context) (compatible, incom
 			defer mu.Unlock()
 			if res.DataSource.DataSourceConfiguration.Type == types.DataSourceTypeS3 {
 				compatible = append(compatible, dataSource{
-					Id:        aws.ToString(res.DataSource.DataSourceId),
+					ID:        aws.ToString(res.DataSource.DataSourceId),
 					BucketARN: aws.ToString(res.DataSource.DataSourceConfiguration.S3Configuration.BucketArn),
 				})
 			} else {
