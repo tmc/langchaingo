@@ -196,7 +196,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 				}
 			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message", ErrInvalidContentType)
+				return nil, fmt.Errorf("anthropic: %w for tool use message %T", ErrInvalidContentType, content)
 			}
 		default:
 			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
