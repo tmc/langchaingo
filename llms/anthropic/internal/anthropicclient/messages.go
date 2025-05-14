@@ -280,7 +280,6 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "content_block_delta":
 		return handleContentBlockDeltaEvent(ctx, event, response, payload)
 	case "content_block_stop":
-	case "content_block_stop":
 		return handleContentBlockStop(event, response)
 	case "message_delta":
 		return handleMessageDeltaEvent(event, response)
