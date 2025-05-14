@@ -14,16 +14,18 @@ import (
 )
 
 var (
-	ErrInvalidEventType        = fmt.Errorf("invalid event type field type")
-	ErrInvalidMessageField     = fmt.Errorf("invalid message field type")
-	ErrInvalidUsageField       = fmt.Errorf("invalid usage field type")
-	ErrInvalidIndexField       = fmt.Errorf("invalid index field type")
-	ErrInvalidDeltaField       = fmt.Errorf("invalid delta field type")
-	ErrInvalidDeltaTypeField   = fmt.Errorf("invalid delta type field type")
-	ErrInvalidDeltaTextField   = fmt.Errorf("invalid delta text field type")
-	ErrContentIndexOutOfRange  = fmt.Errorf("content index out of range")
-	ErrFailedCastToTextContent = fmt.Errorf("failed to cast content to TextContent")
-	ErrInvalidFieldType        = fmt.Errorf("invalid field type")
+	ErrInvalidEventType             = fmt.Errorf("invalid event type field type")
+	ErrInvalidMessageField          = fmt.Errorf("invalid message field type")
+	ErrInvalidUsageField            = fmt.Errorf("invalid usage field type")
+	ErrInvalidIndexField            = fmt.Errorf("invalid index field type")
+	ErrInvalidDeltaField            = fmt.Errorf("invalid delta field type")
+	ErrInvalidDeltaTypeField        = fmt.Errorf("invalid delta type field type")
+	ErrInvalidDeltaTextField        = fmt.Errorf("invalid delta text field type")
+	ErrInvalidDeltaPartialJsonField = fmt.Errorf("invalid delta partial_json field type")
+	ErrContentIndexOutOfRange       = fmt.Errorf("content index out of range")
+	ErrFailedCastToTextContent      = fmt.Errorf("failed to cast content to TextContent")
+	ErrFailedCastToToolUseContent   = fmt.Errorf("failed to cast content to ToolUseContent")
+	ErrInvalidFieldType             = fmt.Errorf("invalid field type")
 )
 
 type ChatMessage struct {
@@ -86,6 +88,8 @@ type ToolUseContent struct {
 	ID    string                 `json:"id"`
 	Name  string                 `json:"name"`
 	Input map[string]interface{} `json:"input"`
+
+	inputData string `json:"-"` // Used to gather input data when streaming
 }
 
 func (tuc ToolUseContent) GetType() string {
@@ -276,7 +280,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "content_block_delta":
 		return handleContentBlockDeltaEvent(ctx, event, response, payload)
 	case "content_block_stop":
-		// Nothing to do here
+		return handleContentBlockStop(event, response)
 	case "message_delta":
 		return handleMessageDeltaEvent(event, response)
 	case "message_stop":
@@ -324,15 +328,38 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	index := int(indexValue)
 
 	var eventType string
+	var contentBlock map[string]any
 	if cb, ok := event["content_block"].(map[string]any); ok {
+		contentBlock = cb
 		typ, _ := cb["type"].(string)
 		eventType = typ
 	}
+	if eventType == "" {
+		return response, fmt.Errorf("%w: content block type is empty", ErrInvalidDeltaField)
+	}
 
 	if len(response.Content) <= index {
-		response.Content = append(response.Content, &TextContent{
-			Type: eventType,
-		})
+		switch eventType {
+		case "text":
+			response.Content = append(response.Content, &TextContent{
+				Type: eventType,
+			})
+		case "tool_use":
+			input, ok := event["input"].(map[string]interface{})
+			if !ok {
+				// If the input is not provided, it may be coming in a future event.
+				input = make(map[string]interface{})
+			}
+
+			response.Content = append(response.Content, &ToolUseContent{
+				Type:  eventType,
+				ID:    getString(contentBlock, "id"),
+				Name:  getString(contentBlock, "name"),
+				Input: input,
+			})
+		default:
+			return response, fmt.Errorf("%w: unknown content block type: %s", ErrInvalidDeltaField, eventType)
+		}
 	}
 	return response, nil
 }
@@ -353,31 +380,69 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		return response, ErrInvalidDeltaTypeField
 	}
 
-	if deltaType == "text_delta" {
+	if len(response.Content) <= index {
+		return response, ErrContentIndexOutOfRange
+	}
+
+	switch deltaType {
+	case "text_delta":
 		text, ok := delta["text"].(string)
 		if !ok {
 			return response, ErrInvalidDeltaTextField
-		}
-		if len(response.Content) <= index {
-			return response, ErrContentIndexOutOfRange
 		}
 		textContent, ok := response.Content[index].(*TextContent)
 		if !ok {
 			return response, ErrFailedCastToTextContent
 		}
 		textContent.Text += text
+
+		// Streaming functions only work with text deltas.
+		if payload.StreamingFunc != nil {
+			text, ok := delta["text"].(string)
+			if !ok {
+				return response, ErrInvalidDeltaTextField
+			}
+			err := payload.StreamingFunc(ctx, []byte(text))
+			if err != nil {
+				return response, fmt.Errorf("streaming func returned an error: %w", err)
+			}
+		}
+	case "input_json_delta":
+		partialJson, ok := delta["partial_json"].(string)
+		if !ok {
+			return response, ErrInvalidDeltaPartialJsonField
+		}
+		toolUseContent, ok := response.Content[index].(*ToolUseContent)
+		if !ok {
+			return response, ErrFailedCastToTextContent
+		}
+		toolUseContent.inputData += partialJson
 	}
 
-	if payload.StreamingFunc != nil {
-		text, ok := delta["text"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaTextField
-		}
-		err := payload.StreamingFunc(ctx, []byte(text))
-		if err != nil {
-			return response, fmt.Errorf("streaming func returned an error: %w", err)
+	return response, nil
+}
+
+func handleContentBlockStop(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
+	indexValue, ok := event["index"].(float64)
+	if !ok {
+		return response, ErrInvalidIndexField
+	}
+
+	index := int(indexValue)
+	if len(response.Content) <= index {
+		return response, ErrContentIndexOutOfRange
+	}
+	if toolUseContent, ok := response.Content[index].(*ToolUseContent); ok {
+		toolUseContent.inputData = strings.TrimSpace(toolUseContent.inputData)
+		if toolUseContent.inputData != "" {
+			var input map[string]interface{}
+			if err := json.Unmarshal([]byte(toolUseContent.inputData), &input); err != nil {
+				return response, fmt.Errorf("failed to unmarshal input data: %w", err)
+			}
+			toolUseContent.Input = input
 		}
 	}
+
 	return response, nil
 }
 
