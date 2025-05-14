@@ -414,7 +414,7 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		}
 		toolUseContent, ok := response.Content[index].(*ToolUseContent)
 		if !ok {
-			return response, ErrFailedCastToTextContent
+			return response, ErrFailedCastToToolUseContent
 		}
 		toolUseContent.inputData += partialJson
 	}
