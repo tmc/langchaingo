@@ -1,7 +1,10 @@
 package agents
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"regexp"
 	"strings"
 
 	"github.com/tmc/langchaingo/prompts"
@@ -31,18 +34,50 @@ Question: {{.input}}
 {{.agent_scratchpad}}`
 )
 
-func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
-	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+type mrklTemplateBase struct {
+	Template       string
+	InputVariables []string
+}
+
+func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix mrklTemplateBase) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix.Template, instructions.Template, suffix.Template}, "\n\n")
+	inputVariables := make([]string, 0, len(prefix.InputVariables)+
+		len(instructions.InputVariables)+
+		len(suffix.InputVariables))
+	inputVariables = append(inputVariables, prefix.InputVariables...)
+	inputVariables = append(inputVariables, instructions.InputVariables...)
+	inputVariables = append(inputVariables, suffix.InputVariables...)
+
+	if err := checkMrklTemplate(template); err != nil {
+		log.Println(err.Error())
+	}
 
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "agent_scratchpad", "today"},
+		InputVariables: inputVariables,
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),
 		},
 	}
+}
+
+// checkMrklPrompt check Prompt for PartialVariables.
+func checkMrklTemplate(template string) error {
+	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
+	matches := re.FindAllStringSubmatch(template, -1)
+	matchesMap := make(map[string]struct{})
+	for _, match := range matches {
+		matchesMap[match[1]] = struct{}{}
+	}
+	mustMatches := []string{"tool_names", "tool_descriptions"}
+	for _, v := range mustMatches {
+		if _, ok := matchesMap[v]; !ok {
+			return errors.New(v + " is not contained in option template")
+		}
+	}
+	return nil
 }
 
 func toolNames(tools []tools.Tool) string {

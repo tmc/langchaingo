@@ -3,7 +3,9 @@ package agents
 import (
 	"context"
 	_ "embed"
+	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -36,6 +38,11 @@ type ConversationalAgent struct {
 	OutputKey string
 	// CallbacksHandler is the handler for callbacks.
 	CallbacksHandler callbacks.Handler
+}
+
+type conversationalTemplateBase struct {
+	Template       string
+	InputVariables []string
 }
 
 var _ Agent = (*ConversationalAgent)(nil)
@@ -164,17 +171,43 @@ var _defaultConversationalFormatInstructions string //nolint:gochecknoglobals
 //go:embed prompts/conversational_suffix.txt
 var _defaultConversationalSuffix string //nolint:gochecknoglobals
 
-func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
-	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
+func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix conversationalTemplateBase) prompts.PromptTemplate {
+	template := strings.Join([]string{prefix.Template, instructions.Template, suffix.Template}, "\n\n")
+	inputVariables := make([]string, 0, len(prefix.InputVariables)+
+		len(instructions.InputVariables)+
+		len(suffix.InputVariables))
+	inputVariables = append(inputVariables, prefix.InputVariables...)
+	inputVariables = append(inputVariables, instructions.InputVariables...)
+	inputVariables = append(inputVariables, suffix.InputVariables...)
+	if err := checkConversationalTemplate(template); err != nil {
+		log.Println(err.Error())
+	}
 
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "agent_scratchpad"},
+		InputVariables: inputVariables,
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),
 			"history":           "",
 		},
 	}
+}
+
+// checkConversationalPrompt check ConversationalPrompt of Options.
+func checkConversationalTemplate(template string) error {
+	re := regexp.MustCompile(`\{\{\.(.*?)\}\}`)
+	matches := re.FindAllStringSubmatch(template, -1)
+	matchesMap := make(map[string]struct{})
+	for _, match := range matches {
+		matchesMap[match[1]] = struct{}{}
+	}
+	mustMatches := []string{"tool_names", "tool_descriptions", "history"}
+	for _, v := range mustMatches {
+		if _, ok := matchesMap[v]; !ok {
+			return errors.New(v + " is not contained in option template")
+		}
+	}
+	return nil
 }

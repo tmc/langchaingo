@@ -20,6 +20,9 @@ type Options struct {
 	formatInstructions      string
 	promptSuffix            string
 
+	promptPrefixInputVariables       []string
+	formatInstructionsInputVariables []string
+	promptSuffixInputVariables       []string
 	// openai
 	systemMessage string
 	extraMessages []prompts.MessageFormatter
@@ -39,19 +42,25 @@ func executorDefaultOptions() Options {
 
 func mrklDefaultOptions() Options {
 	return Options{
-		promptPrefix:       _defaultMrklPrefix,
-		formatInstructions: _defaultMrklFormatInstructions,
-		promptSuffix:       _defaultMrklSuffix,
-		outputKey:          _defaultOutputKey,
+		promptPrefix:                     _defaultMrklPrefix,
+		formatInstructions:               _defaultMrklFormatInstructions,
+		promptSuffix:                     _defaultMrklSuffix,
+		outputKey:                        _defaultOutputKey,
+		promptPrefixInputVariables:       []string{"today"},
+		formatInstructionsInputVariables: []string{},
+		promptSuffixInputVariables:       []string{"agent_scratchpad", "input"},
 	}
 }
 
 func conversationalDefaultOptions() Options {
 	return Options{
-		promptPrefix:       _defaultConversationalPrefix,
-		formatInstructions: _defaultConversationalFormatInstructions,
-		promptSuffix:       _defaultConversationalSuffix,
-		outputKey:          _defaultOutputKey,
+		promptPrefix:                     _defaultConversationalPrefix,
+		formatInstructions:               _defaultConversationalFormatInstructions,
+		promptSuffix:                     _defaultConversationalSuffix,
+		outputKey:                        _defaultOutputKey,
+		promptPrefixInputVariables:       []string{},
+		formatInstructionsInputVariables: []string{},
+		promptSuffixInputVariables:       []string{"agent_scratchpad", "input"},
 	}
 }
 
@@ -69,9 +78,9 @@ func (co Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
 
 	return createMRKLPrompt(
 		tools,
-		co.promptPrefix,
-		co.formatInstructions,
-		co.promptSuffix,
+		mrklTemplateBase{co.promptPrefix, co.promptPrefixInputVariables},
+		mrklTemplateBase{co.formatInstructions, co.formatInstructionsInputVariables},
+		mrklTemplateBase{co.promptSuffix, co.promptSuffixInputVariables},
 	)
 }
 
@@ -82,9 +91,9 @@ func (co Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemp
 
 	return createConversationalPrompt(
 		tools,
-		co.promptPrefix,
-		co.formatInstructions,
-		co.promptSuffix,
+		conversationalTemplateBase{co.promptPrefix, co.promptPrefixInputVariables},
+		conversationalTemplateBase{co.formatInstructions, co.formatInstructionsInputVariables},
+		conversationalTemplateBase{co.promptSuffix, co.promptSuffixInputVariables},
 	)
 }
 
@@ -110,6 +119,13 @@ func WithPromptPrefix(prefix string) Option {
 	}
 }
 
+// WithPromptPrefixInputVariables is an option for setting the PrefixInputVariables of the prompt used by the agent.
+func WithPromptPrefixInputVariables(list []string) Option {
+	return func(co *Options) {
+		co.promptPrefixInputVariables = list
+	}
+}
+
 // WithPromptFormatInstructions is an option for setting the format instructions of the prompt
 // used by the agent.
 func WithPromptFormatInstructions(instructions string) Option {
@@ -118,10 +134,25 @@ func WithPromptFormatInstructions(instructions string) Option {
 	}
 }
 
+// WithPromptInstructionsInputVariables is an option for setting the format InstructionsInputVariables of the prompt
+// used by the agent.
+func WithPromptInstructionsInputVariables(list []string) Option {
+	return func(co *Options) {
+		co.formatInstructionsInputVariables = list
+	}
+}
+
 // WithPromptSuffix is an option for setting the suffix of the prompt used by the agent.
 func WithPromptSuffix(suffix string) Option {
 	return func(co *Options) {
 		co.promptSuffix = suffix
+	}
+}
+
+// WithPromptSuffixInputVariables is an option for setting the SuffixInputVariables of the prompt used by the agent.
+func WithPromptSuffixInputVariables(list []string) Option {
+	return func(co *Options) {
+		co.promptSuffixInputVariables = list
 	}
 }
 
