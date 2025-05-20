@@ -73,15 +73,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if opts.Model != "" {
 		model = opts.Model
 	}
-
 	// Convert messages to GitHub Models format
 	chatMsgs := make([]githubmodelsclient.Message, 0, len(messages))
-	for _, mc := range messages {		var contentText string
+	for _, mc := range messages {
+		var contentText string
 		for _, part := range mc.Parts {
 			if textContent, ok := part.(llms.TextContent); ok {
-				contentText = textContent.Text
-				break
+				contentText += textContent.Text // Concatenate all text parts
 			}
+			// Silently ignore non-text parts as GitHub Models API only supports text
 		}
 
 		chatMsgs = append(chatMsgs, githubmodelsclient.Message{

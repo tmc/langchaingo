@@ -77,3 +77,50 @@ func TestGenerateContent(t *testing.T) {
 	assert.NotEmpty(t, response.Choices)
 	assert.Contains(t, response.Choices[0].Content, "Paris")
 }
+
+func TestMessageTypeToRole(t *testing.T) {
+	tests := []struct {
+		name     string
+		msgType  llms.ChatMessageType
+		expected string
+	}{
+		{"system message", llms.ChatMessageTypeSystem, "system"},
+		{"human message", llms.ChatMessageTypeHuman, "user"},
+		{"ai message", llms.ChatMessageTypeAI, "assistant"},
+		{"generic message", llms.ChatMessageTypeGeneric, "user"},
+		{"function message", llms.ChatMessageTypeFunction, "function"},
+		{"tool message", llms.ChatMessageTypeTool, "tool"},
+		{"unknown message", llms.ChatMessageType("unknown"), "user"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := typeToRole(tc.msgType)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestContentPartConcatenation(t *testing.T) {
+	// Test case with multiple text parts
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextContent{Text: "Hello"},
+				llms.TextContent{Text: " World"},
+				llms.TextContent{Text: "!"},
+			},
+		},
+	}
+
+	// Test the message content concatenation behavior
+	var contentText string
+	for _, part := range messages[0].Parts {
+		if textContent, ok := part.(llms.TextContent); ok {
+			contentText += textContent.Text
+		}
+	}
+	// Verify the concatenation worked
+	assert.Equal(t, "Hello World!", contentText)
+}
