@@ -217,3 +217,11 @@ func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (*E
 	}
 	return resp, nil
 }
+
+func (c *Client) CreateEmbeddings(ctx context.Context, req *EmbeddingsRequest) (*EmbeddingsResponse, error) {
+	resp := &EmbeddingsResponse{}
+	if err := c.do(ctx, http.MethodPost, "/api/embed", req, &resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
