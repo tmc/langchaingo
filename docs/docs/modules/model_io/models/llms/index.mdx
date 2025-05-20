@@ -22,7 +22,7 @@ type LLM interface {
 	Generate(ctx context.Context, prompts []string, options ...CallOption) ([]*Generation, error)
 }
 ```
-As you can see LLMs expose two main methods. The Call metod takes a prompt and returns a completion and an evetuall error.
+As you can see LLMs expose two main methods. The Call method takes a prompt and returns a completion and an eventual error.
 With the generate method you can take multiple prompts and get a generation for each of the prompts.
 
 ```go
