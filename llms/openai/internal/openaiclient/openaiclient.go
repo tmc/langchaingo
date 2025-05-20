@@ -38,6 +38,9 @@ type Client struct {
 	apiVersion string
 
 	ResponseFormat *ResponseFormat
+
+	User              string
+	ParallelToolCalls bool
 }
 
 // Option is an option for the OpenAI client.
@@ -51,19 +54,21 @@ type Doer interface {
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
-	responseFormat *ResponseFormat,
+	responseFormat *ResponseFormat, user string, parallelToolCalls bool,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:          token,
-		Model:          model,
-		EmbeddingModel: embeddingModel,
-		baseURL:        strings.TrimSuffix(baseURL, "/"),
-		organization:   organization,
-		apiType:        apiType,
-		apiVersion:     apiVersion,
-		httpClient:     httpClient,
-		ResponseFormat: responseFormat,
+		token:             token,
+		Model:             model,
+		EmbeddingModel:    embeddingModel,
+		baseURL:           strings.TrimSuffix(baseURL, "/"),
+		organization:      organization,
+		apiType:           apiType,
+		apiVersion:        apiVersion,
+		httpClient:        httpClient,
+		ResponseFormat:    responseFormat,
+		User:              user,
+		ParallelToolCalls: parallelToolCalls,
 	}
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL

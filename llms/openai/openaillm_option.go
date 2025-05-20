@@ -40,6 +40,9 @@ type options struct {
 	embeddingModel string
 
 	callbackHandler callbacks.Handler
+
+	user              string
+	parallelToolCalls bool
 }
 
 // Option is a functional option for the OpenAI client.
@@ -133,5 +136,19 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WithUser allows setting a unique user identifier for the request.
+func WithUser(user string) Option {
+	return func(opts *options) {
+		opts.user = user
+	}
+}
+
+// WithParallelToolCalls allows enabling function calling during tool use.
+func WithParallelToolCalls(parallelToolCalls bool) Option {
+	return func(opts *options) {
+		opts.parallelToolCalls = parallelToolCalls
 	}
 }
