@@ -71,9 +71,18 @@ type EmbeddingRequest struct {
 	Options   Options `json:"options"`
 	KeepAlive string  `json:"keep_alive,omitempty"`
 }
-
 type EmbeddingResponse struct {
 	Embedding []float32 `json:"embedding"`
+}
+
+type EmbeddingsRequest struct {
+	Model     string   `json:"model"`
+	Prompts   []string `json:"input"`
+	Options   Options  `json:"options"`
+	KeepAlive string   `json:"keep_alive,omitempty"`
+}
+type EmbeddingsResponse struct {
+	Embeddings [][]float32 `json:"embeddings"`
 }
 
 type GenerateResponse struct {

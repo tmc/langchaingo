@@ -198,6 +198,27 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
+func (o *LLM) CreateEmbeddings(ctx context.Context, inputTexts []string) ([][]float32, error) {
+	req := &ollamaclient.EmbeddingsRequest{
+		Prompts: inputTexts,
+		Model:   o.options.model,
+	}
+	if o.options.keepAlive != "" {
+		req.KeepAlive = o.options.keepAlive
+	}
+
+	embeddings, err := o.client.CreateEmbeddings(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(embeddings.Embeddings) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	return embeddings.Embeddings, nil
+}
+
 func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
 	case llms.ChatMessageTypeSystem:
