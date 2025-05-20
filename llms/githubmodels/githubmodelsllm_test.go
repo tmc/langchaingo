@@ -19,11 +19,15 @@ func skipIfNoGitHubToken(t *testing.T) string {
 	return token
 }
 
+// TestNew tests the New function.
+// nolint:tparallel
 func TestNew(t *testing.T) {
+	// Cannot use t.Parallel() here because TestNew/with_token_from_env uses t.Setenv()
+
 	t.Run("with token from env", func(t *testing.T) {
+		// Cannot use t.Parallel() with t.Setenv()
 		token := skipIfNoGitHubToken(t)
-		os.Setenv(tokenEnvVarName, token)
-		defer os.Unsetenv(tokenEnvVarName)
+		t.Setenv(tokenEnvVarName, token)
 
 		llm, err := New()
 		require.NoError(t, err)
@@ -31,13 +35,15 @@ func TestNew(t *testing.T) {
 	})
 
 	t.Run("with explicit token", func(t *testing.T) {
+		t.Parallel()
 		token := skipIfNoGitHubToken(t)
 		llm, err := New(WithToken(token))
 		require.NoError(t, err)
 		require.NotNil(t, llm)
 	})
 
-	t.Run("no token", func(t *testing.T) {
+	t.Run("no token", func(t *testing.T) { //nolint:paralleltest
+		// Cannot use t.Parallel() with os.Unsetenv() which affects environment
 		os.Unsetenv(tokenEnvVarName)
 		llm, err := New()
 		require.Error(t, err)
@@ -47,6 +53,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestCall(t *testing.T) {
+	t.Parallel()
 	token := skipIfNoGitHubToken(t)
 	llm, err := New(WithToken(token))
 	require.NoError(t, err)
@@ -57,6 +64,7 @@ func TestCall(t *testing.T) {
 }
 
 func TestGenerateContent(t *testing.T) {
+	t.Parallel()
 	token := skipIfNoGitHubToken(t)
 	llm, err := New(WithToken(token))
 	require.NoError(t, err)
@@ -79,6 +87,7 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestMessageTypeToRole(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		msgType  llms.ChatMessageType
@@ -95,6 +104,7 @@ func TestMessageTypeToRole(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			result := typeToRole(tc.msgType)
 			assert.Equal(t, tc.expected, result)
 		})
@@ -102,6 +112,7 @@ func TestMessageTypeToRole(t *testing.T) {
 }
 
 func TestContentPartConcatenation(t *testing.T) {
+	t.Parallel()
 	// Test case with multiple text parts
 	messages := []llms.MessageContent{
 		{

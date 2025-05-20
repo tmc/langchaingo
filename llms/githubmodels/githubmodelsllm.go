@@ -11,6 +11,14 @@ import (
 	"github.com/tmc/langchaingo/llms/githubmodels/internal/githubmodelsclient"
 )
 
+const (
+	roleSystem    = "system"
+	roleAssistant = "assistant"
+	roleUser      = "user"
+	roleFunction  = "function"
+	roleTool      = "tool"
+)
+
 var (
 	ErrEmptyResponse = errors.New("no response")
 	ErrMissingToken  = errors.New("missing token")
@@ -33,7 +41,7 @@ func New(opts ...Option) (*LLM, error) {
 		model:      defaultModel,
 		httpClient: http.DefaultClient,
 	}
-	
+
 	// Apply all options
 	for _, opt := range opts {
 		opt(&o)
@@ -126,26 +134,26 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 // CreateEmbedding creates embeddings for the given input texts.
 // Note: As of this implementation, GitHub Models may not support embeddings.
 // This is a placeholder implementation to satisfy the interface.
-func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
+func (o *LLM) CreateEmbedding(_ context.Context, _ []string) ([][]float32, error) {
 	return nil, errors.New("embedding is not supported by GitHub Models at this time")
 }
 
-// typeToRole converts llms.ChatMessageType to GitHub Models role string
+// typeToRole converts llms.ChatMessageType to GitHub Models role string.
 func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
 	case llms.ChatMessageTypeSystem:
-		return "system"
+		return roleSystem
 	case llms.ChatMessageTypeAI:
-		return "assistant"
+		return roleAssistant
 	case llms.ChatMessageTypeHuman:
-		return "user"
+		return roleUser
 	case llms.ChatMessageTypeGeneric:
-		return "user"
+		return roleUser
 	case llms.ChatMessageTypeFunction:
-		return "function"
+		return roleFunction
 	case llms.ChatMessageTypeTool:
-		return "tool"
+		return roleTool
 	default:
-		return "user"
+		return roleUser
 	}
 }

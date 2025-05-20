@@ -8,7 +8,7 @@ import (
 
 const (
 	// tokenEnvVarName is the environment variable name for the GitHub token.
-	tokenEnvVarName = "GITHUB_TOKEN"
+	tokenEnvVarName = "GITHUB_TOKEN" // #nosec G101
 	// defaultModel is the default GitHub model to use.
 	defaultModel = "openai/gpt-4.1"
 )
@@ -19,14 +19,14 @@ const (
 // - anthropic/claude-3-haiku - Anthropic's Claude 3 Haiku model
 // - mistral/mistral-large - Mistral's Large model
 // - mistral/mistral-small - Mistral's Small model
-// 
+//
 // Note: Available models may change over time. Check GitHub documentation for the latest information.
 
 // options contains options for the GitHub Models client.
 type options struct {
-	token           string
-	model           string
-	httpClient      *http.Client
+	token            string
+	model            string
+	httpClient       *http.Client
 	callbacksHandler callbacks.Handler
 }
 

@@ -110,7 +110,7 @@ func (c *Client) sendRequest(ctx context.Context, method, url string, reqData in
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
 	req.Header.Set("X-GitHub-Api-Version", apiVersion)
-	req.Header.Set("User-Agent", 
+	req.Header.Set("User-Agent",
 		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	resp, err := c.httpClient.Do(req)
@@ -128,12 +128,12 @@ func (c *Client) sendRequest(ctx context.Context, method, url string, reqData in
 		apiErr := StatusError{
 			StatusCode: resp.StatusCode,
 		}
-		
+
 		// Try to unmarshal error response
 		if err := json.Unmarshal(respBody, &apiErr); err != nil {
 			apiErr.ErrorMessage = string(respBody)
 		}
-		
+
 		return nil, apiErr
 	}
 
