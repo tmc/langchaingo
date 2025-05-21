@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -11,10 +12,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var (
-	ErrNoGoodResult = errors.New("no good search results found")
-	ErrAPIResponse  = errors.New("duckduckgo api responded with error")
-)
+var ErrNoGoodResult = errors.New("no good search results found")
 
 // Client defines an HTTP client for communicating with duckduckgo.
 type Client struct {
@@ -72,7 +70,8 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return "", ErrAPIResponse
+		b, _ := io.ReadAll(response.Body) // body just used to populate an error message. No point capturing any errors reading from body
+		return "", fmt.Errorf("duckduckgo api responded with %d: %s", response.StatusCode, string(b))
 	}
 
 	doc, err := goquery.NewDocumentFromReader(response.Body)
