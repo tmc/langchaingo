@@ -1,0 +1,27 @@
+{
+  "name": "openai_TestMultiContentTextChatSequence.json",
+  "interactions": [
+    {
+      "id": "8e9f4g3b2c0d7e8f",
+      "request": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "headers": {
+          "Authorization": ["Bearer fake-api-key-for-testing"],
+          "Content-Type": ["application/json"],
+          "User-Agent": ["langchaingo/openai"]
+        },
+        "body": "{\"model\":\"gpt-3.5-turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"Name some countries\"},{\"role\":\"assistant\",\"content\":\"Spain and Lesotho\"},{\"role\":\"user\",\"content\":\"Which if these is larger?\"}],\"stream\":false}"
+      },
+      "response": {
+        "status": "200 OK",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "body": "{\"id\":\"chatcmpl-test456\",\"object\":\"chat.completion\",\"created\":1699000001,\"model\":\"gpt-3.5-turbo-0613\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Spain is much larger than Lesotho. Spain has an area of approximately 505,990 square kilometers (195,364 square miles), while Lesotho has an area of about 30,355 square kilometers (11,720 square miles). So Spain is about 16 times larger than Lesotho.\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":25,\"completion_tokens\":52,\"total_tokens\":77}}"
+      }
+    }
+  ],
+  "recorded_at": "2024-01-01T00:00:00Z"
+}

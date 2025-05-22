@@ -32,6 +32,7 @@ func (a *testAgent) Plan(
 	_ context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	_ ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	a.recordedIntermediateSteps = intermediateSteps
 	a.recordedInputs = inputs

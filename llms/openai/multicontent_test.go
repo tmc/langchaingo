@@ -9,15 +9,31 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
 	t.Helper()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-		return nil
+	
+	// Check if we need an API key (only for recording mode)
+	if httprr.GetTestMode() == httprr.TestModeRecord {
+		if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+			t.Skip("OPENAI_API_KEY not set")
+			return nil
+		}
+	} else {
+		// For replay mode, provide a fake API key if none is set
+		if os.Getenv("OPENAI_API_KEY") == "" {
+			opts = append([]Option{WithToken("fake-api-key-for-testing")}, opts...)
+		}
 	}
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "openai_"+t.Name())
+	
+	// Prepend HTTP client option
+	opts = append([]Option{WithHTTPClient(httpClient)}, opts...)
 
 	llm, err := New(opts...)
 	require.NoError(t, err)

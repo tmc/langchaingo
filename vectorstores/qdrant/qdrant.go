@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/url"
 
+	"github.com/qdrant/go-client/qdrant"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -16,6 +17,7 @@ type Store struct {
 	qdrantURL      url.URL
 	apiKey         string
 	contentKey     string
+	client         *qdrant.Client
 }
 
 var _ vectorstores.VectorStore = Store{}

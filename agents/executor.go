@@ -47,7 +47,7 @@ func NewExecutor(agent Agent, opts ...Option) *Executor {
 	}
 }
 
-func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
+func (e *Executor) Call(ctx context.Context, inputValues map[string]any, options ...chains.ChainCallOption) (map[string]any, error) { //nolint:lll
 	inputs, err := inputsToString(inputValues)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...ch
 	steps := make([]schema.AgentStep, 0)
 	for i := 0; i < e.MaxIterations; i++ {
 		var finish map[string]any
-		steps, finish, err = e.doIteration(ctx, steps, nameToTool, inputs)
+		steps, finish, err = e.doIteration(ctx, steps, nameToTool, inputs, options...)
 		if finish != nil || err != nil {
 			return finish, err
 		}
@@ -79,8 +79,9 @@ func (e *Executor) doIteration( // nolint
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
 	inputs map[string]string,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentStep, map[string]any, error) {
-	actions, finish, err := e.Agent.Plan(ctx, steps, inputs)
+	actions, finish, err := e.Agent.Plan(ctx, steps, inputs, options...)
 	if errors.Is(err, ErrUnableToParseOutput) && e.ErrorHandler != nil {
 		formattedObservation := err.Error()
 		if e.ErrorHandler.Formatter != nil {
