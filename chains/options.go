@@ -161,7 +161,7 @@ func WithCallback(callbackHandler callbacks.Handler) ChainCallOption {
 	}
 }
 
-func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:cyclop
+func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:cyclop
 	opts := &chainCallOption{}
 	for _, option := range options {
 		option(opts)
