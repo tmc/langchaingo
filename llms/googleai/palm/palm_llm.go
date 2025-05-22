@@ -116,5 +116,7 @@ func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 		return nil, ErrMissingLocation
 	}
 
-	return palmclient.New(context.TODO(), options.projectID, options.location, options.clientOptions...)
+	// Use context.Background() instead of context.TODO() for client initialization
+	// as this is expected to be a long-lived client initialization
+	return palmclient.New(context.Background(), options.projectID, options.location, options.clientOptions...)
 }

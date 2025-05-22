@@ -2,6 +2,7 @@ package redisvector
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,7 +23,8 @@ type RedisClient interface {
 	CreateIndexIfNotExists(ctx context.Context, index string, schema *IndexSchema) error
 	AddDocWithHash(ctx context.Context, prefix string, doc schema.Document) (string, error)
 	AddDocsWithHash(ctx context.Context, prefix string, docs []schema.Document) ([]string, error)
-	// TODO AddDocsWithJSON
+	AddDocWithJSON(ctx context.Context, prefix string, doc schema.Document) (string, error)
+	AddDocsWithJSON(ctx context.Context, prefix string, docs []schema.Document) ([]string, error)
 	Search(ctx context.Context, search IndexVectorSearch) (int64, []schema.Document, error)
 }
 
@@ -99,6 +101,39 @@ func (c RueidisClient) AddDocsWithHash(ctx context.Context, prefix string, docs 
 	return docIDs, errors.Join(errs...)
 }
 
+func (c RueidisClient) AddDocWithJSON(ctx context.Context, prefix string, doc schema.Document) (string, error) {
+	docID, cmd, err := c.generateJSONSetCMD(prefix, doc)
+	if err != nil {
+		return "", err
+	}
+	return docID, c.client.Do(ctx, cmd).Error()
+}
+
+func (c RueidisClient) AddDocsWithJSON(ctx context.Context, prefix string, docs []schema.Document) ([]string, error) {
+	cmds := make([]rueidis.Completed, 0, len(docs))
+	docIDs := make([]string, 0, len(docs))
+	errs := make([]error, 0, len(docs))
+	for _, doc := range docs {
+		docID, cmd, err := c.generateJSONSetCMD(prefix, doc)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		cmds = append(cmds, cmd)
+		docIDs = append(docIDs, docID)
+	}
+	if len(errs) > 0 {
+		return docIDs, errors.Join(errs...)
+	}
+	result := c.client.DoMulti(ctx, cmds...)
+	for _, res := range result {
+		if res.Error() != nil {
+			errs = append(errs, res.Error())
+		}
+	}
+	return docIDs, errors.Join(errs...)
+}
+
 func (c RueidisClient) Search(ctx context.Context, search IndexVectorSearch) (int64, []schema.Document, error) {
 	cmds := search.AsCommand()
 	// fmt.Println(strings.Join(cmds, " "))
@@ -129,6 +164,35 @@ func (c RueidisClient) generateHSetCMD(prefix string, doc schema.Document) (stri
 	}
 	docID := getDocIDWithMetaData(prefix, doc.Metadata)
 	return docID, c.client.B().Arbitrary("Hmset").Keys(docID).Args(kvs...).Build()
+}
+
+func (c RueidisClient) generateJSONSetCMD(prefix string, doc schema.Document) (string, rueidis.Completed, error) {
+	// Prepare document data for JSON storage
+	docData := make(map[string]any)
+	
+	// Copy metadata to document data
+	for k, v := range doc.Metadata {
+		if k == defaultContentVectorFieldKey {
+			// Keep vector fields as-is for JSON storage
+			docData[k] = v
+		} else {
+			docData[k] = v
+		}
+	}
+	
+	// Add page content if not already in metadata
+	if _, exists := docData[defaultContentFieldKey]; !exists && doc.PageContent != "" {
+		docData[defaultContentFieldKey] = doc.PageContent
+	}
+	
+	// Marshal to JSON
+	jsonData, err := json.Marshal(docData)
+	if err != nil {
+		return "", rueidis.Completed{}, fmt.Errorf("failed to marshal document to JSON: %w", err)
+	}
+	
+	docID := getDocIDWithMetaData(prefix, doc.Metadata)
+	return docID, c.client.B().JsonSet().Key(docID).Path("$").Value(rueidis.BinaryString(jsonData)).Build(), nil
 }
 
 // getPrefix get prefix with index name.
