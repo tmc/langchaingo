@@ -72,7 +72,7 @@ func (c *TypedLLMChain[T]) Call(
 		ctx,
 		c.LLM,
 		promptValue.String(),
-		getLLMCallOptions(options...)...,
+		GetLLMCallOptions(options...)...,
 	)
 	if err != nil {
 		return zero, nil, err

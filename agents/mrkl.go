@@ -64,6 +64,7 @@ func (a *OneShotZeroAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
@@ -82,12 +83,18 @@ func (a *OneShotZeroAgent) Plan(
 		}
 	}
 
+	// Merge provided options with required agent options
+	agentOptions := []chains.ChainCallOption{
+		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
+		chains.WithStreamingFunc(stream),
+	}
+	allOptions := append(agentOptions, options...)
+
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
 		fullInputs,
-		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
-		chains.WithStreamingFunc(stream),
+		allOptions...,
 	)
 	if err != nil {
 		return nil, nil, err
