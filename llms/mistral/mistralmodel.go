@@ -92,8 +92,7 @@ func setCallOptions(options []llms.CallOption, callOpts *llms.CallOptions) {
 
 func resolveDefaultOptions(sdkDefaults sdk.ChatRequestParams, c *clientOptions) *llms.CallOptions {
 	// Supported models: https://docs.mistral.ai/platform/endpoints/
-	// TODO: Mistral also supports ResponseType, which, when set to "json", ensures the model's output is strictly a JSON object.
-	// Question: Should `ResponseType` be made a part of llms.CallOptions and pulled whenever Call or GenerateContent is called?
+	// ResponseType is now supported - use JSONMode or ResponseMIMEType to enable JSON responses.
 	// The following llms.CallOptions are not supported at the moment by mistral SDK:
 	// MinLength, MaxLength,N (how many chat completion choices to generate for each input message), RepetitionPenalty, FrequencyPenalty, and PresencePenalty.
 	return &llms.CallOptions{
@@ -116,6 +115,14 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 	chatOpts.MaxTokens = callOpts.MaxTokens
 	chatOpts.Temperature = callOpts.Temperature
 	chatOpts.RandomSeed = callOpts.Seed
+	
+	// Set ResponseFormat based on JSONMode or ResponseMIMEType
+	if callOpts.JSONMode || callOpts.ResponseMIMEType == "application/json" {
+		chatOpts.ResponseFormat = sdk.ResponseFormatJsonObject
+	} else {
+		chatOpts.ResponseFormat = sdk.ResponseFormatText
+	}
+	
 	chatOpts.Tools = make([]sdk.Tool, 0)
 	if len(callOpts.Tools) > 0 {
 		for _, tool := range callOpts.Tools {
