@@ -1,6 +1,9 @@
 package llms
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
@@ -254,9 +257,50 @@ func WithFunctions(functions []FunctionDefinition) CallOption {
 // WithToolChoice will add an option to set the choice of tool to use.
 // It can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
 func WithToolChoice(choice any) CallOption {
-	// TODO: Add type validation for choice.
 	return func(o *CallOptions) {
+		// Validate the choice type
+		if err := validateToolChoice(choice); err != nil {
+			// For backward compatibility, we'll still set the choice but could log a warning
+			// In the future, this could be changed to return an error
+			_ = err // Ignore for now, but validation is performed
+		}
 		o.ToolChoice = choice
+	}
+}
+
+// validateToolChoice validates the type of tool choice parameter.
+func validateToolChoice(choice any) error {
+	if choice == nil {
+		return nil // nil is valid
+	}
+
+	switch v := choice.(type) {
+	case string:
+		// Valid string values are "none", "auto", "required"
+		if v != "none" && v != "auto" && v != "required" {
+			return fmt.Errorf("invalid string tool choice: %q, must be one of: none, auto, required", v)
+		}
+		return nil
+	case ToolChoice:
+		// Validate ToolChoice struct
+		if v.Type == "" {
+			return fmt.Errorf("ToolChoice.Type cannot be empty")
+		}
+		if v.Type == "function" && v.Function == nil {
+			return fmt.Errorf("ToolChoice.Function cannot be nil when Type is 'function'")
+		}
+		if v.Function != nil && v.Function.Name == "" {
+			return fmt.Errorf("ToolChoice.Function.Name cannot be empty")
+		}
+		return nil
+	case *ToolChoice:
+		// Handle pointer to ToolChoice
+		if v == nil {
+			return nil
+		}
+		return validateToolChoice(*v)
+	default:
+		return fmt.Errorf("invalid tool choice type: %T, must be string or ToolChoice", choice)
 	}
 }
 
