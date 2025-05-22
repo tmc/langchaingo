@@ -6,13 +6,13 @@ import (
 	"log"
 
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/llms/deepseek"
 )
 
 func main() {
-	// Initialize the OpenAI client with Deepseek model
-	llm, err := openai.New(
-		openai.WithModel("deepseek-reasoner"),
+	// Initialize the DeepSeek client - much simpler now!
+	llm, err := deepseek.New(
+		deepseek.WithModel(deepseek.ModelDeepSeekReasoner),
 	)
 	if err != nil {
 		log.Fatal(err)

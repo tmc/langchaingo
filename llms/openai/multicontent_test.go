@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -19,7 +20,25 @@ func newTestClient(t *testing.T, opts ...Option) llms.Model {
 		return nil
 	}
 
-	llm, err := New(opts...)
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	allOpts := append(opts, WithHTTPClient(httpClient))
+
+	llm, err := New(allOpts...)
+	require.NoError(t, err)
+	return llm
+}
+
+// newTestClientWithRecording creates a test client with explicit httprr configuration
+func newTestClientWithRecording(t *testing.T, testName string, opts ...Option) llms.Model {
+	t.Helper()
+	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
+		t.Skip("OPENAI_API_KEY not set")
+		return nil
+	}
+
+	helper := httprr.NewLLMTestHelper(testName)
+	llm, err := helper.TestOpenAI(opts...)
 	require.NoError(t, err)
 	return llm
 }

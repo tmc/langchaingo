@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -67,11 +68,29 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		return nil, ErrEmptyResponse
 	}
 	text := resp[0].Text
-	// TODO: Add response cleaning based on Model.
-	// e.g., for gpt2, text = text[len(request.Prompt)+1:]
+	// Clean response based on model type - remove prompt repetition for GPT-2 style models
+	text = cleanModelResponse(text, request.Prompt, request.Model)
 	return &InferenceResponse{
 		Text: text,
 	}, nil
+}
+
+// cleanModelResponse cleans the response text based on the model type.
+func cleanModelResponse(text, prompt, model string) string {
+	switch {
+	case strings.Contains(strings.ToLower(model), "gpt2"):
+		// For GPT-2 models, remove the prompt from the beginning if present
+		if strings.HasPrefix(text, prompt) {
+			return strings.TrimSpace(text[len(prompt):])
+		}
+	case strings.Contains(strings.ToLower(model), "t5"):
+		// T5 models typically don't repeat the prompt, but may have extra tokens
+		return strings.TrimSpace(text)
+	default:
+		// For other models, just trim whitespace
+		return strings.TrimSpace(text)
+	}
+	return text
 }
 
 // EmbeddingRequest is a request to create an embedding.

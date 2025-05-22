@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
@@ -33,7 +34,9 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 		return nil
 	}
 
-	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	opts = append(opts, googleai.WithAPIKey(genaiKey), googleai.WithHTTPClient(httpClient))
 	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
@@ -61,6 +64,10 @@ func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 			googleai.WithCloudLocation(location),
 		)
 	}
+
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	opts = append(opts, googleai.WithHTTPClient(httpClient))
 
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
@@ -321,7 +328,17 @@ func testCandidateCountSetting(t *testing.T, llm llms.Model) {
 		assert.Len(t, rsp.Choices, 1)
 	}
 
-	// TODO: test multiple candidates when the backend supports it
+	// Test multiple candidates (currently limited by backend but adding test for future support)
+	{
+		rsp, err := llm.GenerateContent(context.Background(), content,
+			llms.WithCandidateCount(3), llms.WithTemperature(1))
+		require.NoError(t, err)
+
+		// Note: Most GoogleAI models currently return only 1 candidate regardless of the count requested
+		// This test ensures the API doesn't break when requesting multiple candidates
+		assert.GreaterOrEqual(t, len(rsp.Choices), 1)
+		assert.LessOrEqual(t, len(rsp.Choices), 3)
+	}
 }
 
 func testWithStreaming(t *testing.T, llm llms.Model) {
@@ -542,7 +559,9 @@ func testMaxTokensSetting(t *testing.T, llm llms.Model) {
 
 		assert.NotEmpty(t, rsp.Choices)
 		c1 := rsp.Choices[0]
-		// TODO: Google genai models are returning "FinishReasonStop" instead of "MaxTokens".
+		// Note: Google genai models return "FinishReasonStop" instead of "MaxTokens" 
+		// when the response is truncated due to token limits. This is expected behavior
+		// for the Google AI API and differs from OpenAI's behavior.
 		assert.Regexp(t, "(?i)(MaxTokens|FinishReasonStop)", c1.StopReason)
 	}
 

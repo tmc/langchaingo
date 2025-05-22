@@ -234,12 +234,35 @@ func (f VectorField) AsCommand() []string {
 	return argsOut
 }
 
+type GeoField struct {
+	Name     string `json:"name"`
+	As       string `json:"as,omitempty"       yaml:"as,omitempty"`
+	NoIndex  bool   `json:"no_index,omitempty" yaml:"no_index,omitempty"`
+	Sortable bool   `json:"sortable,omitempty" yaml:"sortable,omitempty"`
+}
+
+func (f GeoField) AsCommand() []string {
+	argsOut := []string{f.Name}
+	if f.As != "" {
+		argsOut = append(argsOut, "AS", f.As, "GEO")
+	} else {
+		argsOut = append(argsOut, "GEO")
+	}
+	if f.NoIndex {
+		argsOut = append(argsOut, "NOINDEX")
+	}
+	if f.Sortable {
+		argsOut = append(argsOut, "SORTABLE")
+	}
+	return argsOut
+}
+
 type IndexSchema struct {
 	Tag     []TagField     `json:"tag"     yaml:"tag"`
 	Text    []TextField    `json:"text"    yaml:"text"`
 	Numeric []NumericField `json:"numeric" yaml:"numeric"`
 	Vector  []VectorField  `json:"vector"  yaml:"vector"`
-	// TODO GEO
+	Geo     []GeoField     `json:"geo"     yaml:"geo"`
 }
 
 // return names of field exclude vector key.
@@ -252,6 +275,9 @@ func (s *IndexSchema) MetadataKeys() map[string]any {
 		keys[tag.Name] = struct{}{}
 	}
 	for _, tag := range s.Numeric {
+		keys[tag.Name] = struct{}{}
+	}
+	for _, tag := range s.Geo {
 		keys[tag.Name] = struct{}{}
 	}
 	for _, tag := range s.Vector {
@@ -271,6 +297,9 @@ func (s *IndexSchema) AsCommand() []string {
 		argsOut = append(argsOut, tag.AsCommand()...)
 	}
 	for _, tag := range s.Numeric {
+		argsOut = append(argsOut, tag.AsCommand()...)
+	}
+	for _, tag := range s.Geo {
 		argsOut = append(argsOut, tag.AsCommand()...)
 	}
 	for _, tag := range s.Vector {
