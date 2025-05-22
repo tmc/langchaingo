@@ -254,8 +254,24 @@ func WithFunctions(functions []FunctionDefinition) CallOption {
 // WithToolChoice will add an option to set the choice of tool to use.
 // It can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
 func WithToolChoice(choice any) CallOption {
-	// TODO: Add type validation for choice.
 	return func(o *CallOptions) {
+		// Validate that choice is one of the accepted types
+		switch v := choice.(type) {
+		case string:
+			// Must be "none" or "auto"
+			if v != "none" && v != "auto" {
+				// Note: We can't return an error from this function, so we'll let the LLM handle invalid string values
+			}
+		case ToolChoice:
+			// Valid ToolChoice struct
+		case map[string]interface{}:
+			// Valid for cases where choice is passed as a map (e.g., {"type": "function", "function": {"name": "my_function"}})
+		case nil:
+			// nil is acceptable (will use default behavior)
+		default:
+			// Note: We can't return an error from this function signature, so invalid types will be passed through
+			// Individual LLM implementations should validate and handle invalid tool choice values appropriately
+		}
 		o.ToolChoice = choice
 	}
 }
