@@ -323,16 +323,37 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	}
 	index := int(indexValue)
 
-	var eventType string
+	var content Content
 	if cb, ok := event["content_block"].(map[string]any); ok {
 		typ, _ := cb["type"].(string)
-		eventType = typ
+		switch typ {
+		case "tool_use":
+			toolUse := &ToolUseContent{
+				Type: typ,
+			}
+			if id, ok := cb["id"].(string); ok {
+				toolUse.ID = id
+			}
+			if name, ok := cb["name"].(string); ok {
+				toolUse.Name = name
+			}
+			if input, ok := cb["input"]; ok {
+				toolUse.Input = input
+			}
+			content = toolUse
+		default:
+			content = &TextContent{
+				Type: typ,
+			}
+		}
+	} else {
+		content = &TextContent{
+			Type: "text",
+		}
 	}
 
 	if len(response.Content) <= index {
-		response.Content = append(response.Content, &TextContent{
-			Type: eventType,
-		})
+		response.Content = append(response.Content, content)
 	}
 	return response, nil
 }
@@ -353,7 +374,10 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		return response, ErrInvalidDeltaTypeField
 	}
 
-	if deltaType == "text_delta" {
+	var streamText string
+	
+	switch deltaType {
+	case "text_delta":
 		text, ok := delta["text"].(string)
 		if !ok {
 			return response, ErrInvalidDeltaTextField
@@ -366,14 +390,32 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 			return response, ErrFailedCastToTextContent
 		}
 		textContent.Text += text
+		streamText = text
+		
+	case "input_json_delta":
+		partialJson, ok := delta["partial_json"].(string)
+		if !ok {
+			// This is expected for empty input_json_delta events
+			partialJson = ""
+		}
+		if len(response.Content) <= index {
+			return response, ErrContentIndexOutOfRange
+		}
+		toolUseContent, ok := response.Content[index].(*ToolUseContent)
+		if !ok {
+			// For tool use content, we might need to update the input
+			// For now, we'll skip updating since the tool input is typically complete at content_block_start
+		} else {
+			// Update tool input if needed - this handles incremental JSON building
+			if inputStr, ok := toolUseContent.Input.(string); ok {
+				toolUseContent.Input = inputStr + partialJson
+			}
+		}
+		streamText = partialJson
 	}
 
-	if payload.StreamingFunc != nil {
-		text, ok := delta["text"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaTextField
-		}
-		err := payload.StreamingFunc(ctx, []byte(text))
+	if payload.StreamingFunc != nil && streamText != "" {
+		err := payload.StreamingFunc(ctx, []byte(streamText))
 		if err != nil {
 			return response, fmt.Errorf("streaming func returned an error: %w", err)
 		}
