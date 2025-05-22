@@ -2,7 +2,6 @@
 package httprr
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
