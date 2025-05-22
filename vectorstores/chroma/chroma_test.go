@@ -20,9 +20,9 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
 
-// TODO (noodnik2):
-//  add relevant tests from "weaviate_test.go" (the initial tests are based upon those found in "pinecone_test.go")
-//  consider refactoring out standard set of vectorstore unit tests to run across all implementations
+// Note: Standard vectorstore tests have been refactored into a shared test suite
+// (see TestChromaWithSharedTestSuite below and vectorstores/shared_test.go).
+// Additional provider-specific tests from weaviate_test.go can be added as needed.
 
 //
 // NOTE: View the 'getValues()' function to see which environment variables are required to run these tests.
@@ -244,9 +244,10 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// TODO (noodnik2): clarify - WHY should we see "orange" in the result,
-	//  as required by (expected in) the original "Pinecone" test??
-	//   require.Contains(t, result, "orange", "expected orange in result")
+	// The desk itself is orange, and should be included when asking about 
+	// "furniture next to the desk" since the LLM may interpret this as including
+	// the desk itself along with items beside it (lamp=black, chair=beige)
+	require.Contains(t, result, "orange", "expected orange (desk color) in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }
@@ -594,4 +595,28 @@ func cleanupTestArtifacts(t *testing.T, s chroma.Store) {
 
 func getTestNameSpace() string {
 	return fmt.Sprintf("test-namespace-%s", uuid.New().String())
+}
+
+// TestChromaWithSharedTestSuite runs standard vectorstore tests using the shared test suite.
+func TestChromaWithSharedTestSuite(t *testing.T) {
+	t.Parallel()
+
+	testChromaURL, openaiAPIKey := getValues(t)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	s, err := chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	suite := vectorstores.NewVectorStoreTestSuite(s, e, llm)
+	suite.RunStandardTests(t)
 }
