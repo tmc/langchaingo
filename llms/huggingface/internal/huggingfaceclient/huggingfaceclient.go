@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
 var (
@@ -12,9 +14,10 @@ var (
 )
 
 type Client struct {
-	Token string
-	Model string
-	url   string
+	Token      string
+	Model      string
+	url        string
+	httpClient *http.Client
 }
 
 func New(token, model, url string) (*Client, error) {
@@ -22,10 +25,16 @@ func New(token, model, url string) (*Client, error) {
 		return nil, ErrInvalidToken
 	}
 	return &Client{
-		Token: token,
-		Model: model,
-		url:   url,
+		Token:      token,
+		Model:      model,
+		url:        url,
+		httpClient: http.DefaultClient,
 	}, nil
+}
+
+// SetHTTPClient sets the HTTP client for the Hugging Face client.
+func (c *Client) SetHTTPClient(client *http.Client) {
+	c.httpClient = client
 }
 
 type InferenceRequest struct {
@@ -67,11 +76,34 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		return nil, ErrEmptyResponse
 	}
 	text := resp[0].Text
-	// TODO: Add response cleaning based on Model.
-	// e.g., for gpt2, text = text[len(request.Prompt)+1:]
+	
+	// Clean response based on model type
+	text = c.cleanResponse(request.Prompt, text, request.Model)
+	
 	return &InferenceResponse{
 		Text: text,
 	}, nil
+}
+
+// cleanResponse cleans the model response based on the model type and prompt.
+func (c *Client) cleanResponse(prompt, text, model string) string {
+	// Handle GPT-2 style models that include the prompt in the response
+	if strings.Contains(strings.ToLower(model), "gpt2") || 
+	   strings.Contains(strings.ToLower(model), "gpt-2") {
+		if strings.HasPrefix(text, prompt) {
+			return strings.TrimSpace(text[len(prompt):])
+		}
+	}
+	
+	// Handle DialoGPT models that might repeat the prompt
+	if strings.Contains(strings.ToLower(model), "dialogpt") {
+		if strings.HasPrefix(text, prompt) {
+			return strings.TrimSpace(text[len(prompt):])
+		}
+	}
+	
+	// For other models, return as-is but trimmed
+	return strings.TrimSpace(text)
 }
 
 // EmbeddingRequest is a request to create an embedding.

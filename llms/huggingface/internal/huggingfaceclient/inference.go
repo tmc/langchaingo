@@ -64,7 +64,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 	// }
 	// fmt.Fprintf(os.Stderr, "%s", reqDump)
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
