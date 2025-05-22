@@ -497,7 +497,7 @@ func combineStreamingChatResponse(
 		}
 		choice := streamResponse.Choices[0]
 		chunk := []byte(choice.Delta.Content)
-		reasoningChunk := []byte(choice.Delta.ReasoningContent) // TODO: not sure if there will be any reasoning related to function call later, so just pass it here
+		reasoningChunk := []byte(choice.Delta.ReasoningContent) // Pass reasoning content separately for o1 models with reasoning capabilities
 		response.Choices[0].Message.Content += choice.Delta.Content
 		response.Choices[0].FinishReason = choice.FinishReason
 		response.Choices[0].Message.ReasoningContent += choice.Delta.ReasoningContent
