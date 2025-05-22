@@ -1,0 +1,27 @@
+{
+  "name": "anthropic_TestAnthropicCall.json",
+  "interactions": [
+    {
+      "id": "9f0a5c8b3e7d2f4a",
+      "request": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "headers": {
+          "x-api-key": ["fake-api-key-for-testing"],
+          "Content-Type": ["application/json"],
+          "anthropic-version": ["2023-06-01"]
+        },
+        "body": "{\"model\":\"claude-3-haiku-20240307\",\"messages\":[{\"role\":\"user\",\"content\":\"What is the capital of France?\"}],\"max_tokens\":1024}"
+      },
+      "response": {
+        "status": "200 OK",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "body": "{\"id\":\"msg_test123\",\"type\":\"message\",\"role\":\"assistant\",\"model\":\"claude-3-haiku-20240307\",\"content\":[{\"type\":\"text\",\"text\":\"The capital of France is Paris. Paris is not only the largest city in France but also the country's political, economic, and cultural center. It's located in the north-central part of France along the Seine River.\"}],\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":13,\"output_tokens\":42}}"
+      }
+    }
+  ],
+  "recorded_at": "2024-01-01T00:00:00Z"
+}
