@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -53,33 +54,80 @@ type TokenCounter interface {
 	CountTokensFromMessages(messages []llms.ChatMessage) (int, error)
 }
 
-// TikTokenCounter provides integration with tiktoken-style tokenizers.
-// This implementation can be extended to use actual tiktoken-go library.
+// TikTokenCounter provides integration with tiktoken tokenizers.
 type TikTokenCounter struct {
 	ModelName string
-	// In a real implementation, this would contain the tiktoken encoder
-	// encoder tiktoken.Encoder
+	encoder   *tiktoken.Tiktoken
 }
 
 // CountTokens counts tokens using model-specific encoding.
 func (tc *TikTokenCounter) CountTokens(text string) (int, error) {
-	// TODO: Replace with actual tiktoken integration
-	// Example integration:
-	// return len(tc.encoder.Encode(text, nil, nil)), nil
+	if tc.encoder == nil {
+		encoder, err := tiktoken.EncodingForModel(tc.ModelName)
+		if err != nil {
+			// Fall back to approximation if model not supported
+			return tc.approximateTokenCount(text), nil
+		}
+		tc.encoder = encoder
+	}
 	
-	// For now, provide model-specific approximations
+	tokens := tc.encoder.Encode(text, nil, nil)
+	return len(tokens), nil
+}
+
+// approximateTokenCount provides a fallback token count estimation
+func (tc *TikTokenCounter) approximateTokenCount(text string) int {
 	switch {
 	case strings.Contains(tc.ModelName, "gpt-4"):
-		return (len(text) + 2) / 3, nil // GPT-4 is more efficient
+		return (len(text) + 2) / 3 // GPT-4 is more efficient
 	case strings.Contains(tc.ModelName, "gpt-3.5"):
-		return (len(text) + 3) / 4, nil // Standard GPT-3.5 ratio
+		return (len(text) + 3) / 4 // Standard GPT-3.5 ratio
 	default:
-		return (len(text) + 3) / 4, nil // Conservative estimate
+		return (len(text) + 3) / 4 // Conservative estimate
 	}
 }
 
 // CountTokensFromMessages counts tokens from chat messages with proper formatting overhead.
 func (tc *TikTokenCounter) CountTokensFromMessages(messages []llms.ChatMessage) (int, error) {
+	if tc.encoder == nil {
+		encoder, err := tiktoken.EncodingForModel(tc.ModelName)
+		if err != nil {
+			// Fall back to approximation
+			return tc.approximateTokenCountFromMessages(messages), nil
+		}
+		tc.encoder = encoder
+	}
+	
+	// Use tiktoken's built-in chat completion token counting for supported models
+	if strings.Contains(tc.ModelName, "gpt-3.5") || strings.Contains(tc.ModelName, "gpt-4") {
+		// Convert to tiktoken format
+		var chatMessages []tiktoken.ChatCompletionMessage
+		for _, msg := range messages {
+			role := "user"
+			switch msg.GetType() {
+			case llms.ChatMessageTypeAI:
+				role = "assistant"
+			case llms.ChatMessageTypeSystem:
+				role = "system"
+			case llms.ChatMessageTypeHuman:
+				role = "user"
+			}
+			
+			chatMessages = append(chatMessages, tiktoken.ChatCompletionMessage{
+				Role:    role,
+				Content: msg.GetContent(),
+			})
+		}
+		
+		return tiktoken.NumTokensFromMessages(chatMessages, tc.ModelName)
+	}
+	
+	// Fall back to manual counting for other models
+	return tc.approximateTokenCountFromMessages(messages), nil
+}
+
+// approximateTokenCountFromMessages provides fallback token counting
+func (tc *TikTokenCounter) approximateTokenCountFromMessages(messages []llms.ChatMessage) int {
 	total := 0
 	
 	// Add conversation setup tokens
@@ -87,10 +135,7 @@ func (tc *TikTokenCounter) CountTokensFromMessages(messages []llms.ChatMessage) 
 	
 	for _, msg := range messages {
 		// Count content tokens
-		contentTokens, err := tc.CountTokens(msg.GetContent())
-		if err != nil {
-			return 0, err
-		}
+		contentTokens := tc.approximateTokenCount(msg.GetContent())
 		total += contentTokens
 		
 		// Add role and formatting tokens based on model
@@ -103,7 +148,7 @@ func (tc *TikTokenCounter) CountTokensFromMessages(messages []llms.ChatMessage) 
 	}
 	
 	total += 3 // Conversation end tokens
-	return total, nil
+	return total
 }
 
 // LLMTokenCounter uses an LLM to count tokens (fallback option).
