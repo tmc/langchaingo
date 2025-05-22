@@ -1,0 +1,27 @@
+{
+  "name": "openai_TestMultiContentText.json",
+  "interactions": [
+    {
+      "id": "7d8e3f2a1b9c5d6e",
+      "request": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "headers": {
+          "Authorization": ["Bearer fake-api-key-for-testing"],
+          "Content-Type": ["application/json"],
+          "User-Agent": ["langchaingo/openai"]
+        },
+        "body": "{\"model\":\"gpt-3.5-turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"I'm a pomeranian What kind of mammal am I?\"}],\"stream\":false}"
+      },
+      "response": {
+        "status": "200 OK",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "body": "{\"id\":\"chatcmpl-test123\",\"object\":\"chat.completion\",\"created\":1699000000,\"model\":\"gpt-3.5-turbo-0613\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"You are a dog! Pomeranians are a small breed of dog that belongs to the Spitz family. As a dog, you are a mammal in the Canidae family, which includes all domestic dogs, wolves, foxes, and other canids. Dogs are carnivorous mammals known for their loyalty, intelligence, and companionship with humans.\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":12,\"completion_tokens\":58,\"total_tokens\":70}}"
+      }
+    }
+  ],
+  "recorded_at": "2024-01-01T00:00:00Z"
+}
