@@ -1,0 +1,15 @@
+REQUEST: GET https://api.example.com/weather?location=Munich&unit=fahrenheit
+
+GET /weather?location=Munich&unit=fahrenheit HTTP/1.1
+Host: api.example.com
+User-Agent: Go-http-client/1.1
+Accept-Encoding: gzip
+
+RESPONSE: 200 OK
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Date: Tue, 28 May 2024 10:00:00 GMT
+Content-Length: 72
+
+{"temperature":65.5,"location":"Munich","unit":"fahrenheit"}

@@ -1,0 +1,31 @@
+--- old_test.go	2023-01-01 00:00:00.000000000 -0500
++++ new_test.go	2023-01-01 00:00:00.000000000 -0500
+@@ -3,6 +3,8 @@
+ import (
+ 	"net/http"
+ 	"testing"
++	"path/filepath"
++	"github.com/tmc/langchaingo/internal/httprr"
+ )
+ 
+ func TestExample(t *testing.T) {
+@@ -10,7 +12,10 @@
+ 	// Test setup
+ 	
+ 	// Before: Using default client
+-	client := http.DefaultClient
++	// After: Using httprr
++	recordingsDir := filepath.Join("testdata", "example_recordings")
++	httpHelper := httprr.NewAutoHelper(t, recordingsDir)
++	client := httpHelper.Client
+ 	
+ 	service := NewService(client)
+ 	
+@@ -18,4 +23,7 @@
+ 	result := service.DoSomething()
+ 	
+ 	// Assert result
++	
++	// Optional: Add assertions about HTTP calls
++	httpHelper.AssertURLCalled("api.example.com")
+ }
