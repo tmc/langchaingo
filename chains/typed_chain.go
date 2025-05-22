@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/schema"
 )
 
@@ -83,19 +84,28 @@ func TypedCall[T any](
 		fullValues[key] = value
 	}
 
-	// TODO: Add callback handling similar to existing Call function
-
-	if err := validateTypedInputs(c, fullValues); err != nil {
-		var zero T
-		return zero, nil, err
+	// Handle callbacks similar to existing Call function
+	callbacksHandler := getTypedChainCallbackHandler(c)
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainStart(ctx, inputValues)
 	}
 
-	result, metadata, err := c.Call(ctx, fullValues, options...)
+	result, metadata, err := callTypedChain(ctx, c, fullValues, options...)
 	if err != nil {
+		if callbacksHandler != nil {
+			callbacksHandler.HandleChainError(ctx, err)
+		}
 		return result, metadata, err
 	}
 
-	// TODO: Add memory saving logic
+	if callbacksHandler != nil {
+		callbacksHandler.HandleChainEnd(ctx, metadata)
+	}
+
+	// Save memory context
+	if err = c.GetMemory().SaveContext(ctx, inputValues, metadata); err != nil {
+		return result, metadata, err
+	}
 
 	return result, metadata, nil
 }
@@ -146,3 +156,33 @@ type StringChain = TypedChain[string]
 
 // DocumentChain is a convenience type for chains that produce documents.
 type DocumentChain = TypedChain[[]schema.Document]
+
+// Helper functions for TypedChain support
+
+// getTypedChainCallbackHandler returns the callback handler for a TypedChain, if available.
+func getTypedChainCallbackHandler[T any](c TypedChain[T]) callbacks.Handler {
+	if handlerHaver, ok := any(c).(callbacks.HandlerHaver); ok {
+		return handlerHaver.GetCallbackHandler()
+	}
+	return nil
+}
+
+// callTypedChain handles the actual typed chain call with validation.
+func callTypedChain[T any](
+	ctx context.Context,
+	c TypedChain[T],
+	fullValues map[string]any,
+	options ...ChainCallOption,
+) (T, map[string]any, error) {
+	if err := validateTypedInputs(c, fullValues); err != nil {
+		var zero T
+		return zero, nil, err
+	}
+
+	result, metadata, err := c.Call(ctx, fullValues, options...)
+	if err != nil {
+		return result, metadata, err
+	}
+
+	return result, metadata, nil
+}
