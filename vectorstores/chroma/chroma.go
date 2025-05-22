@@ -125,6 +125,8 @@ func (s Store) AddDocuments(ctx context.Context,
 	return ids, nil
 }
 
+// SimilaritySearch performs a vector similarity search against the collection using the given query string.
+// It returns up to numDocuments that meet the score threshold (if configured), along with their metadata and scores.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
@@ -166,6 +168,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	return sDocs, nil
 }
 
+// RemoveCollection deletes the current collection from the Chroma client.
 func (s Store) RemoveCollection() error {
 	if s.client == nil || s.collection == nil {
 		return fmt.Errorf("%w: no collection", ErrRemoveCollection)
