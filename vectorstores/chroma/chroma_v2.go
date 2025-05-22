@@ -176,7 +176,7 @@ func (s StoreV2) RemoveCollection() error {
 	}
 	errDc := s.client.DeleteCollection(context.Background(), s.collection.Name())
 	if errDc != nil {
-		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name, errDc)
+		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name(), errDc)
 	}
 	return nil
 }
