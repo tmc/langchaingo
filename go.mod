@@ -1,6 +1,8 @@
 module github.com/tmc/langchaingo
 
-go 1.22.0
+go 1.23
+
+toolchain go1.24.3
 
 require (
 	github.com/google/uuid v1.6.0
@@ -98,6 +100,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
@@ -176,6 +179,7 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
+	google.golang.org/genai v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20241021214115-324edc3d5d38 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250122153221-138b5a5a4fd4 // indirect
