@@ -20,9 +20,8 @@ import (
 	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
 
-// TODO (noodnik2):
-//  add relevant tests from "weaviate_test.go" (the initial tests are based upon those found in "pinecone_test.go")
-//  consider refactoring out standard set of vectorstore unit tests to run across all implementations
+// Common vector store tests are now implemented in the vectorstores.TestSuite
+// This provides standardized testing across all vector store implementations
 
 //
 // NOTE: View the 'getValues()' function to see which environment variables are required to run these tests.
@@ -594,4 +593,33 @@ func cleanupTestArtifacts(t *testing.T, s chroma.Store) {
 
 func getTestNameSpace() string {
 	return fmt.Sprintf("test-namespace-%s", uuid.New().String())
+}
+
+// TestChromaCommonTestSuite runs the standard vector store test suite against Chroma.
+func TestChromaCommonTestSuite(t *testing.T) {
+	t.Parallel()
+
+	testChromaURL, openaiAPIKey := getValues(t)
+	llm, err := openai.New()
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+
+	s, err := chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+
+	suite := &vectorstores.TestSuite{
+		Store: s,
+		Cleanup: func() {
+			cleanupTestArtifacts(t, s)
+		},
+	}
+
+	suite.RunBasicTests(t)
 }

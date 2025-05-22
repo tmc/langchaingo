@@ -30,6 +30,13 @@ func WithClient(client http.Client) Option {
 	}
 }
 
+// WithHTTPClient is an option for providing a custom http client pointer.
+func WithHTTPClient(client *http.Client) Option {
+	return func(v *VoyageAI) {
+		v.client = client
+	}
+}
+
 // WithToken is an option for providing the VoyageAI token.
 func WithToken(token string) Option {
 	return func(v *VoyageAI) {
