@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
@@ -52,21 +53,34 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 	}
 }
 
+func newTestClient(t *testing.T, opts ...Option) *Mistral {
+	t.Helper()
+	
+	// Check if we need an API key (only for recording mode)
+	if httprr.GetTestMode() == httprr.TestModeRecord {
+		if mistralKey := os.Getenv("MISTRAL_API_KEY"); mistralKey == "" {
+			t.Skip("MISTRAL_API_KEY not set")
+			return nil
+		}
+	} else {
+		// For replay mode, provide a fake API key if none is set
+		if os.Getenv("MISTRAL_API_KEY") == "" {
+			opts = append([]Option{WithAPIKey("fake-api-key-for-testing")}, opts...)
+		}
+	}
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "mistral_"+t.Name())
+	opts = append([]Option{WithHTTPClient(httpClient)}, opts...)
+
+	model, err := New(opts...)
+	require.NoError(t, err)
+	return model
+}
+
 func TestMistralEmbed(t *testing.T) {
 	t.Parallel()
-	envVar := "MISTRAL_API_KEY"
-
-	// Get the value of the environment variable
-	value := os.Getenv(envVar)
-
-	// Check if it is set (non-empty)
-	if value == "" {
-		t.Skipf("Environment variable %s is not set, so skipping the test", envVar)
-		return
-	}
-
-	model, err := New()
-	require.NoError(t, err)
+	model := newTestClient(t)
 
 	e, err := embeddings.NewEmbedder(model)
 	require.NoError(t, err)

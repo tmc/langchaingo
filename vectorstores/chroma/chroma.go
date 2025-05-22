@@ -2,6 +2,8 @@ package chroma
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -106,7 +108,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
+		ids[docIdx] = s.generateDocumentID(doc)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
 		maps.Copy(mc, doc.Metadata)
@@ -215,4 +217,27 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 
 func safeIntToInt32(n int) int32 {
 	return int32(max(0, n))
+}
+
+// generateDocumentID creates a meaningful, deterministic ID for a document
+// based on its content and metadata. This ensures the same document content
+// will always get the same ID, avoiding duplicates.
+func (s Store) generateDocumentID(doc schema.Document) string {
+	hasher := sha256.New()
+	
+	// Include page content in the hash
+	hasher.Write([]byte(doc.PageContent))
+	
+	// Include metadata in the hash (if any)
+	if doc.Metadata != nil && len(doc.Metadata) > 0 {
+		// Sort metadata keys for deterministic hashing
+		metadataBytes, err := json.Marshal(doc.Metadata)
+		if err == nil {
+			hasher.Write(metadataBytes)
+		}
+	}
+	
+	// Return first 16 characters of hex digest for a readable but unique ID
+	hash := fmt.Sprintf("%x", hasher.Sum(nil))
+	return hash[:16]
 }

@@ -445,16 +445,78 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	return opts.ScoreThreshold, nil
 }
 
-// getFilters return metadata filters, now only support map[key]value pattern
-// TODO: should support more types like {"key1": {"key2":"values2"}} or {"key": ["value1", "values2"]}.
+// getFilters return metadata filters, supports various filter patterns:
+// - Simple key-value: {"key": "value"}
+// - Nested objects: {"key1": {"key2": "value2"}}
+// - Array values: {"key": ["value1", "value2"]}
 func (s Store) getFilters(opts vectorstores.Options) (map[string]any, error) {
 	if opts.Filters != nil {
 		if filters, ok := opts.Filters.(map[string]any); ok {
-			return filters, nil
+			// Validate and normalize the filters
+			normalized, err := s.normalizeFilters(filters)
+			if err != nil {
+				return nil, err
+			}
+			return normalized, nil
 		}
 		return nil, ErrInvalidFilters
 	}
 	return map[string]any{}, nil
+}
+
+// normalizeFilters processes and validates filter structures
+func (s Store) normalizeFilters(filters map[string]any) (map[string]any, error) {
+	normalized := make(map[string]any)
+	
+	for key, value := range filters {
+		switch v := value.(type) {
+		case string, int, int64, float32, float64, bool:
+			// Simple scalar values - keep as-is
+			normalized[key] = v
+		case []string:
+			// Array of strings - convert to SQL array format
+			if len(v) > 0 {
+				normalized[key] = v
+			}
+		case []interface{}:
+			// Generic array - convert to string array if possible
+			stringArray := make([]string, len(v))
+			for i, item := range v {
+				if str, ok := item.(string); ok {
+					stringArray[i] = str
+				} else {
+					return nil, fmt.Errorf("unsupported array item type: %T", item)
+				}
+			}
+			if len(stringArray) > 0 {
+				normalized[key] = stringArray
+			}
+		case map[string]interface{}:
+			// Nested object - flatten with dot notation
+			for nestedKey, nestedValue := range v {
+				flatKey := key + "." + nestedKey
+				if scalar := extractScalar(nestedValue); scalar != nil {
+					normalized[flatKey] = scalar
+				} else {
+					return nil, fmt.Errorf("unsupported nested value type: %T", nestedValue)
+				}
+			}
+		default:
+			return nil, fmt.Errorf("unsupported filter value type: %T", v)
+		}
+	}
+	
+	return normalized, nil
+}
+
+// extractScalar extracts scalar values from interface{}
+func extractScalar(value interface{}) interface{} {
+	switch v := value.(type) {
+	case string, int, int64, float32, float64, bool:
+		return v
+	default:
+		return nil
+	}
 }
 
 func (s Store) deduplicate(

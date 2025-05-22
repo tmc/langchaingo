@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/qdrant/go-client/qdrant"
 	"github.com/tmc/langchaingo/embeddings"
 )
 
@@ -56,6 +57,14 @@ func WithContentKey(contentKey string) Option {
 	}
 }
 
+// WithClient returns an Option for setting a custom Qdrant client.
+// If provided, this client will be used instead of creating a new one from URL and API key.
+func WithClient(client *qdrant.Client) Option {
+	return func(p *Store) {
+		p.client = client
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		contentKey: defaultContentKey,
@@ -69,12 +78,18 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		return Store{}, fmt.Errorf("%w: missing collection name", ErrInvalidOptions)
 	}
 
-	if o.qdrantURL == (url.URL{}) {
-		return Store{}, fmt.Errorf("%w: missing Qdrant URL", ErrInvalidOptions)
-	}
-
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
+	}
+
+	// If client is provided, we don't need URL or API key
+	if o.client != nil {
+		return *o, nil
+	}
+
+	// If no client is provided, we need URL to create our own HTTP client
+	if o.qdrantURL == (url.URL{}) {
+		return Store{}, fmt.Errorf("%w: missing Qdrant URL or client", ErrInvalidOptions)
 	}
 
 	return *o, nil

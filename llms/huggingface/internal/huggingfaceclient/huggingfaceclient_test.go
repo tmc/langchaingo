@@ -7,10 +7,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 const (
@@ -68,4 +70,39 @@ func mockServer(t *testing.T) *httptest.Server {
 			_, _ = fmt.Fprintf(w, `[{"generated_text":"%s"}]`, goodResponse)
 		}
 	}))
+}
+
+func TestRunInferenceWithHTTPrr(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("HUGGINGFACE_API_TOKEN") == "" {
+		t.Skip("HUGGINGFACE_API_TOKEN not set")
+	}
+
+	// Enable recording mode with TEST_RECORD=true
+	mode := httprr.ModeReplay
+	if os.Getenv("TEST_RECORD") == "true" {
+		mode = httprr.ModeRecord
+	}
+
+	httpClient := httprr.Client("testdata/huggingface_inference.json", mode)
+	
+	client, err := New(os.Getenv("HUGGINGFACE_API_TOKEN"), "microsoft/DialoGPT-medium", "")
+	require.NoError(t, err)
+	
+	// Set the HTTPrr client
+	client.SetHTTPClient(httpClient)
+
+	req := &InferenceRequest{
+		Model:       "microsoft/DialoGPT-medium",
+		Prompt:      "What is machine learning?",
+		Task:        InferenceTaskTextGeneration,
+		Temperature: 0.7,
+		MaxLength:   100,
+	}
+
+	resp, err := client.RunInference(context.Background(), req)
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Text)
+	assert.Contains(t, resp.Text, "machine learning")
 }

@@ -24,6 +24,7 @@ type (
 	VectorAlgorithm     string
 	VectorDataType      string
 	PhoneticMatcherType string
+	GeoShapeType        string
 )
 
 const (
@@ -49,6 +50,10 @@ const (
 	PhoneticDoubleMetaphoneFrench     PhoneticMatcherType = "dm:fr"
 	PhoneticDoubleMetaphonePortuguese PhoneticMatcherType = "dm:pt"
 	PhoneticDoubleMetaphoneSpanish    PhoneticMatcherType = "dm:es"
+	
+	// Geo Shape enum values.
+	GeoShapeFlat     GeoShapeType = "FLAT"
+	GeoShapeSpherical GeoShapeType = "SPHERICAL"
 )
 
 type RedisIndexSchemaField interface {
@@ -234,12 +239,43 @@ func (f VectorField) AsCommand() []string {
 	return argsOut
 }
 
+type GeoField struct {
+	Name      string       `json:"name" yaml:"name"`
+	As        string       `json:"as,omitempty" yaml:"as,omitempty"`
+	Shape     GeoShapeType `json:"shape,omitempty" yaml:"shape,omitempty"` // default="SPHERICAL"
+	NoIndex   bool         `json:"no_index,omitempty" yaml:"no_index,omitempty"`
+	Sortable  bool         `json:"sortable,omitempty" yaml:"sortable,omitempty"`
+}
+
+func (f GeoField) AsCommand() []string {
+	argsOut := []string{f.Name}
+	if f.As != "" {
+		argsOut = append(argsOut, "AS", f.As, "GEO")
+	} else {
+		argsOut = append(argsOut, "GEO")
+	}
+	
+	if f.Shape != "" {
+		argsOut = append(argsOut, string(f.Shape))
+	} else {
+		argsOut = append(argsOut, string(GeoShapeSpherical)) // default shape
+	}
+	
+	if f.NoIndex {
+		argsOut = append(argsOut, "NOINDEX")
+	}
+	if f.Sortable {
+		argsOut = append(argsOut, "SORTABLE")
+	}
+	return argsOut
+}
+
 type IndexSchema struct {
 	Tag     []TagField     `json:"tag"     yaml:"tag"`
 	Text    []TextField    `json:"text"    yaml:"text"`
 	Numeric []NumericField `json:"numeric" yaml:"numeric"`
 	Vector  []VectorField  `json:"vector"  yaml:"vector"`
-	// TODO GEO
+	Geo     []GeoField     `json:"geo"     yaml:"geo"`
 }
 
 // return names of field exclude vector key.
@@ -259,6 +295,9 @@ func (s *IndexSchema) MetadataKeys() map[string]any {
 			keys[tag.Name] = struct{}{}
 		}
 	}
+	for _, tag := range s.Geo {
+		keys[tag.Name] = struct{}{}
+	}
 	return keys
 }
 
@@ -274,6 +313,9 @@ func (s *IndexSchema) AsCommand() []string {
 		argsOut = append(argsOut, tag.AsCommand()...)
 	}
 	for _, tag := range s.Vector {
+		argsOut = append(argsOut, tag.AsCommand()...)
+	}
+	for _, tag := range s.Geo {
 		argsOut = append(argsOut, tag.AsCommand()...)
 	}
 	return argsOut

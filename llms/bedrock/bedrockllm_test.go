@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
 )
@@ -16,6 +17,26 @@ func setUpTest() (*bedrockruntime.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	client := bedrockruntime.NewFromConfig(cfg)
+	return client, nil
+}
+
+func setUpTestWithHTTPrr(cassettePath string) (*bedrockruntime.Client, error) {
+	// Enable recording mode with TEST_RECORD=true
+	mode := httprr.ModeReplay
+	if os.Getenv("TEST_RECORD") == "true" {
+		mode = httprr.ModeRecord
+	}
+
+	httpClient := httprr.Client(cassettePath, mode)
+	
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	
+	// Set the custom HTTP client in the config
+	cfg.HTTPClient = httpClient
 	client := bedrockruntime.NewFromConfig(cfg)
 	return client, nil
 }
@@ -83,4 +104,50 @@ func TestAmazonOutput(t *testing.T) {
 			t.Logf("Choice %d: %s", i, choice.Content)
 		}
 	}
+}
+
+func TestBedrockWithHTTPrr(t *testing.T) {
+	t.Parallel()
+
+	if os.Getenv("TEST_AWS") != "true" && os.Getenv("TEST_RECORD") != "true" {
+		t.Skip("Skipping test, requires AWS access or TEST_RECORD=true")
+	}
+
+	client, err := setUpTestWithHTTPrr("testdata/bedrock_claude.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	llm, err := bedrock.New(bedrock.WithClient(client))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msgs := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What is Go programming language in one sentence?"),
+			},
+		},
+	}
+
+	ctx := context.Background()
+	resp, err := llm.GenerateContent(ctx, msgs, 
+		llms.WithModel(bedrock.ModelAnthropicClaudeV3Haiku), 
+		llms.WithMaxTokens(100))
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	if len(resp.Choices) == 0 {
+		t.Fatal("No choices returned")
+	}
+	
+	content := resp.Choices[0].Content
+	if content == "" {
+		t.Fatal("Empty content returned")
+	}
+	
+	t.Logf("Response: %s", content)
 }
