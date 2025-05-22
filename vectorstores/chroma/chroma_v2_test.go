@@ -491,15 +491,15 @@ func TestChromaAsRetrieverWithMetadataFiltersV2(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
+	s, err := chroma.NewV2(
+		chroma.WithOpenAIAPIKeyV2(openaiAPIKey),
+		chroma.WithChromaURLV2(testChromaURL),
+		chroma.WithNameSpaceV2(getTestNameSpace()),
+		chroma.WithEmbedderV2(e),
 	)
 	require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+	defer cleanupTestArtifactsV2(t, s)
 
 	_, err = s.AddDocuments(
 		context.Background(),
