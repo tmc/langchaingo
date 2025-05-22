@@ -4,6 +4,7 @@ package deepseek
 
 import (
 	"context"
+	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -76,6 +77,16 @@ func New(opts ...Option) (*LLM, error) {
 
 	for _, opt := range opts {
 		opt(cfg)
+	}
+
+	// Auto-detect API token from environment if not explicitly set
+	if cfg.token == "" {
+		// Try DEEPSEEK_API_KEY first, then fall back to OPENAI_API_KEY for compatibility
+		if token := os.Getenv("DEEPSEEK_API_KEY"); token != "" {
+			cfg.token = token
+		} else if token := os.Getenv("OPENAI_API_KEY"); token != "" {
+			cfg.token = token
+		}
 	}
 
 	// Build OpenAI options

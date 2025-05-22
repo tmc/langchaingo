@@ -1,210 +1,236 @@
-# DeepSeek Integration Guide
+# DeepSeek LLM Integration
 
-DeepSeek models are fully supported in LangChain Go through the OpenAI-compatible API. This guide explains how to use DeepSeek models effectively.
+This package provides dedicated support for DeepSeek models in langchaingo. While DeepSeek API is OpenAI-compatible, this package offers a more convenient interface with DeepSeek-specific features and best practices.
 
-## Why Use OpenAI Client?
+## Quick Start
 
-DeepSeek provides an OpenAI-compatible API, which means:
-- **No separate client needed**: Use the existing `openai` package
-- **Full feature compatibility**: All OpenAI client features work with DeepSeek
-- **Easier maintenance**: Single codebase for multiple providers
-- **Seamless switching**: Easy to switch between OpenAI and DeepSeek models
-
-## Supported Models
-
-- `deepseek-reasoner`: Advanced reasoning model with step-by-step thinking
-- `deepseek-chat`: General chat model  
-- `deepseek-coder`: Code-specialized model
-
-## Basic Usage
+### Using the Dedicated DeepSeek Package (Recommended)
 
 ```go
-package main
-
 import (
     "context"
-    "log"
-    
-    "github.com/tmc/langchaingo/llms"
-    "github.com/tmc/langchaingo/llms/openai"
+    "github.com/tmc/langchaingo/llms/deepseek"
 )
 
-func main() {
-    // Initialize with DeepSeek model
-    llm, err := openai.New(
-        openai.WithModel("deepseek-reasoner"),
-        openai.WithBaseURL("https://api.deepseek.com/v1"), // Optional: explicit base URL
-    )
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    // Use as normal
-    response, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
-        llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println(response.Choices[0].Content)
-}
+// Initialize with API key from environment (DEEPSEEK_API_KEY or OPENAI_API_KEY)
+llm, err := deepseek.New()
+
+// Or specify options
+llm, err := deepseek.New(
+    deepseek.WithModel(deepseek.ModelReasoner),
+    deepseek.WithToken("your-api-key"),
+)
+
+// Simple chat
+response, err := llm.Chat(ctx, "What is the capital of France?")
+
+// Chat with reasoning (for reasoning models)
+reasoning, answer, err := llm.ChatWithReasoning(ctx, "Solve: 2+2*3")
 ```
 
-## Reasoning Models
+### Using OpenAI Client Directly (Also Valid)
+
+```go
+import "github.com/tmc/langchaingo/llms/openai"
+
+llm, err := openai.New(
+    openai.WithModel("deepseek-reasoner"),
+    openai.WithBaseURL("https://api.deepseek.com/v1"),
+)
+```
+
+## Available Models
+
+| Model | Constant | Description |
+|-------|----------|-------------|
+| `deepseek-reasoner` | `deepseek.ModelReasoner` | Advanced reasoning with step-by-step thinking |
+| `deepseek-chat` | `deepseek.ModelChat` | General purpose chat model |
+| `deepseek-coder` | `deepseek.ModelCoder` | Specialized for code generation |
+
+## Features
+
+- 🧠 **Dedicated DeepSeek Models**: Type-safe model constants
+- 🔍 **Reasoning Access**: Easy access to step-by-step reasoning content  
+- 🎯 **Convenience Methods**: Simplified APIs (`Chat`, `ChatWithReasoning`)
+- ⚙️ **Full Compatibility**: All OpenAI options available through pass-through
+- 🔧 **Better Developer Experience**: Purpose-built for DeepSeek
+
+## Configuration Options
+
+### DeepSeek-Specific Options
+
+```go
+llm, err := deepseek.New(
+    deepseek.WithModel(deepseek.ModelCoder),          // Choose model
+    deepseek.WithToken("sk-..."),                     // API key
+    deepseek.WithBaseURL("https://custom-url.com"),   // Custom endpoint
+)
+```
+
+### OpenAI Pass-Through Options
+
+All OpenAI client options are supported:
+
+```go
+llm, err := deepseek.New(
+    deepseek.WithOpenAIOption(openai.WithMaxTokens(1000)),
+    deepseek.WithOpenAIOption(openai.WithTemperature(0.7)),
+)
+```
+
+## Advanced Usage
+
+### Reasoning Models
 
 DeepSeek's reasoning models provide step-by-step thinking process:
 
 ```go
-// Enable reasoning content streaming
-completion, err := llm.GenerateContent(
-    ctx,
-    content,
-    llms.WithStreamingReasoningFunc(func(_ context.Context, reasoningChunk []byte, chunk []byte) error {
-        if len(reasoningChunk) > 0 {
-            fmt.Printf("Reasoning: %s", string(reasoningChunk))
-        }
-        if len(chunk) > 0 {
-            fmt.Printf("Answer: %s", string(chunk))
-        }
-        return nil
-    }),
+// Method 1: Using convenience method
+reasoning, answer, err := llm.ChatWithReasoning(
+    ctx, 
+    "Explain why the sky is blue",
+    llms.WithMaxTokens(1000),
 )
+fmt.Printf("Reasoning: %s\n", reasoning)
+fmt.Printf("Answer: %s\n", answer)
 
-// Access reasoning content after completion
-if len(completion.Choices) > 0 {
-    choice := completion.Choices[0]
+// Method 2: Using GenerateContent directly
+messages := []llms.MessageContent{
+    llms.TextParts(llms.ChatMessageTypeHuman, "Explain quantum computing"),
+}
+
+resp, err := llm.GenerateContent(ctx, messages)
+if len(resp.Choices) > 0 {
+    choice := resp.Choices[0]
     fmt.Printf("Reasoning: %s\n", choice.ReasoningContent)
     fmt.Printf("Answer: %s\n", choice.Content)
 }
 ```
 
-## Configuration
-
-### Environment Variables
-```bash
-export OPENAI_API_KEY="your-deepseek-api-key"
-export OPENAI_BASE_URL="https://api.deepseek.com/v1"  # Optional
-```
-
-### Programmatic Configuration
-```go
-llm, err := openai.New(
-    openai.WithToken("your-deepseek-api-key"),
-    openai.WithBaseURL("https://api.deepseek.com/v1"),
-    openai.WithModel("deepseek-reasoner"),
-)
-```
-
-## Advanced Features
-
-### Function Calling
-```go
-// DeepSeek supports function calling
-tools := []llms.Tool{
-    {
-        Type: "function",
-        Function: llms.FunctionDefinition{
-            Name:        "get_weather",
-            Description: "Get current weather",
-            Parameters: map[string]any{
-                "type": "object",
-                "properties": map[string]any{
-                    "location": map[string]any{
-                        "type": "string",
-                        "description": "City name",
-                    },
-                },
-                "required": []string{"location"},
-            },
-        },
-    },
-}
-
-response, err := llm.GenerateContent(ctx, messages, llms.WithTools(tools))
-```
-
 ### Streaming with Reasoning
+
 ```go
-response, err := llm.GenerateContent(
-    ctx,
-    messages,
+resp, err := llm.GenerateContent(ctx, messages,
     llms.WithStreamingReasoningFunc(func(ctx context.Context, reasoning, content []byte) error {
-        // Handle reasoning chunks (DeepSeek's thinking process)
         if len(reasoning) > 0 {
             fmt.Printf("🧠 Thinking: %s", reasoning)
         }
-        
-        // Handle final answer chunks
         if len(content) > 0 {
-            fmt.Printf("💬 Answer: %s", content)
+            fmt.Printf("💬 Response: %s", content)
         }
-        
         return nil
     }),
 )
 ```
 
-## Best Practices
+### Function Calling
 
-1. **Model Selection**: Choose the right model for your use case
-   - `deepseek-reasoner`: Complex reasoning tasks
-   - `deepseek-chat`: General conversation
-   - `deepseek-coder`: Code generation and analysis
+```go
+tools := []llms.Tool{
+    {
+        Type: "function",
+        Function: &llms.FunctionDefinition{
+            Name: "get_weather",
+            Description: "Get current weather",
+            Parameters: map[string]any{
+                "type": "object",
+                "properties": map[string]any{
+                    "location": map[string]any{"type": "string"},
+                },
+            },
+        },
+    },
+}
 
-2. **Reasoning Content**: For reasoning models, always handle both reasoning and content
-   ```go
-   if choice.ReasoningContent != "" {
-       log.Printf("Model reasoning: %s", choice.ReasoningContent)
-   }
-   ```
+resp, err := llm.GenerateContent(ctx, messages, llms.WithTools(tools))
+```
 
-3. **Error Handling**: DeepSeek uses OpenAI-compatible error responses
-   ```go
-   if err != nil {
-       // Handle same as OpenAI errors
-       log.Printf("DeepSeek API error: %v", err)
-   }
-   ```
+## Environment Variables
 
-4. **Rate Limiting**: Follow DeepSeek's rate limiting guidelines
-   ```go
-   // Add retry logic for rate limits
-   for retries := 0; retries < 3; retries++ {
-       response, err := llm.GenerateContent(ctx, messages)
-       if err == nil {
-           break
-       }
-       time.Sleep(time.Second * time.Duration(retries+1))
-   }
-   ```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DEEPSEEK_API_KEY` | DeepSeek API token | Required |
+| `OPENAI_API_KEY` | Also works (for compatibility) | Alternative to DEEPSEEK_API_KEY |
+| `DEEPSEEK_BASE_URL` | API base URL | `https://api.deepseek.com/v1` |
 
-## Comparison with Dedicated Client
+## Why Use the DeepSeek Package?
 
-### Why not a separate DeepSeek package?
+### Benefits Over Direct OpenAI Client
 
-| Aspect | Current Approach (OpenAI client) | Separate Package |
-|--------|----------------------------------|------------------|
-| Maintenance | ✅ Single codebase | ❌ Duplicate code |
-| Features | ✅ Full compatibility | ❌ May lag behind |
-| Switching | ✅ Easy model swap | ❌ Code changes needed |
-| Testing | ✅ Shared test suite | ❌ Separate tests |
-| API Changes | ✅ Automatic support | ❌ Manual updates |
+| Feature | DeepSeek Package | OpenAI Client Direct |
+|---------|------------------|---------------------|
+| Model Constants | ✅ Type-safe constants | ❌ String literals |
+| Convenience Methods | ✅ `Chat`, `ChatWithReasoning` | ❌ Manual message building |
+| Reasoning Access | ✅ Built-in support | ✅ Manual extraction |
+| Documentation | ✅ DeepSeek-specific | ❌ Generic OpenAI docs |
+| Future Features | ✅ DeepSeek-specific additions | ❌ May not fit OpenAI API |
+| Configuration | ✅ Sensible defaults | ❌ Manual setup required |
 
-### When to consider a dedicated package?
+### When to Use Each Approach
 
-A separate DeepSeek package would only be beneficial if:
-- DeepSeek adds non-OpenAI-compatible features
-- Significant performance optimizations are possible
-- Custom authentication methods are required
+**Use DeepSeek Package When:**
+- Building new applications with DeepSeek
+- Want the best developer experience
+- Using reasoning models extensively
+- Need type safety for models
+
+**Use OpenAI Client When:**
+- Migrating existing OpenAI code
+- Need to switch between OpenAI/DeepSeek dynamically
+- Using advanced OpenAI-specific features
+- Prefer minimal dependencies
+
+## Migration Guide
+
+### From OpenAI Client to DeepSeek Package
+
+```go
+// Before (OpenAI client)
+llm, err := openai.New(
+    openai.WithModel("deepseek-reasoner"),
+    openai.WithBaseURL("https://api.deepseek.com/v1"),
+    openai.WithToken(os.Getenv("DEEPSEEK_API_KEY")),
+)
+
+// After (DeepSeek package)
+llm, err := deepseek.New(
+    deepseek.WithModel(deepseek.ModelReasoner),
+)
+```
+
+### Accessing Reasoning Content
+
+```go
+// Before (manual extraction)
+resp, err := llm.GenerateContent(ctx, messages)
+reasoning := resp.Choices[0].ReasoningContent
+content := resp.Choices[0].Content
+
+// After (convenience method)
+reasoning, content, err := llm.ChatWithReasoning(ctx, "question")
+```
 
 ## Examples
 
-- [Basic DeepSeek Usage](../../examples/deepseek-completion-example/)
-- [OpenAI Examples](../../examples/openai-completion-example/) (work with DeepSeek)
+See the [complete example](../../examples/deepseek-completion-example/) for detailed usage patterns including both approaches.
+
+## FAQ
+
+**Q: Should I use the DeepSeek package or OpenAI client?**
+A: For new projects, use the DeepSeek package for better developer experience. For existing OpenAI code, either approach works.
+
+**Q: Do all OpenAI features work with DeepSeek?**  
+A: Most do, but some advanced features may differ. Check DeepSeek's API documentation for specifics.
+
+**Q: How do I access reasoning content?**
+A: Use `GenerateWithReasoning()` or `ChatWithReasoning()` methods, or access `choice.ReasoningContent` from responses.
+
+**Q: Can I switch between OpenAI and DeepSeek easily?**
+A: Yes, but it's easier with the OpenAI client approach. The DeepSeek package is optimized for DeepSeek-specific usage.
 
 ## Related
 
 - [DeepSeek API Documentation](https://platform.deepseek.com/api-docs/)
+- [Complete Example](../../examples/deepseek-completion-example/)
 - [OpenAI Client Documentation](../openai/README.md)
-- GitHub Discussion: #1212 "Use Deepseek with langchaingo"
+- GitHub Discussion: [#1212 "Use Deepseek with langchaingo"](https://github.com/tmc/langchaingo/discussions/1212)
