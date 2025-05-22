@@ -2,6 +2,7 @@ package chroma
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"maps"
@@ -106,7 +107,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
+		ids[docIdx] = s.generateDocumentID(doc)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
 		maps.Copy(mc, doc.Metadata)
@@ -215,4 +216,39 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 
 func safeIntToInt32(n int) int32 {
 	return int32(max(0, n))
+}
+
+// generateDocumentID creates a meaningful, deterministic ID for a document.
+// It uses the document content and key metadata to generate a SHA-256 hash,
+// which ensures the same document will always get the same ID while avoiding collisions.
+func (s Store) generateDocumentID(doc schema.Document) string {
+	// If the document has a specific ID field in metadata, prefer that
+	if id, exists := doc.Metadata["id"]; exists {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			return idStr
+		}
+	}
+	
+	// If the document has a source field, try to use that for more meaningful IDs
+	source := ""
+	if src, exists := doc.Metadata["source"]; exists {
+		if srcStr, ok := src.(string); ok {
+			source = srcStr
+		}
+	}
+	
+	// Create a hash from the document content and source
+	h := sha256.New()
+	h.Write([]byte(doc.PageContent))
+	if source != "" {
+		h.Write([]byte("|source:" + source))
+	}
+	
+	// Add namespace to the hash if it exists to ensure uniqueness across namespaces
+	if s.nameSpace != "" {
+		h.Write([]byte("|ns:" + s.nameSpace))
+	}
+	
+	// Return the first 16 characters of the hex hash for a balance between uniqueness and readability
+	return fmt.Sprintf("doc_%x", h.Sum(nil))[:20]
 }

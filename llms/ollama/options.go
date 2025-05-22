@@ -17,6 +17,7 @@ type options struct {
 	system              string
 	format              string
 	keepAlive           string
+	context             []int
 }
 
 type Option func(*options)
@@ -262,5 +263,14 @@ func WithPredictMirostatEta(val float32) Option {
 func WithPredictPenalizeNewline(val bool) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.PenalizeNewline = val
+	}
+}
+
+// WithContext sets the context parameter returned from a previous request to /generate.
+// This can be used to keep a short conversational memory.
+// The context is a sequence of integers that represents the model's internal state.
+func WithContext(context []int) Option {
+	return func(opts *options) {
+		opts.context = context
 	}
 }
