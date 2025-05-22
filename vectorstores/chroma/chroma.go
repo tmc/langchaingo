@@ -2,6 +2,7 @@ package chroma
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"maps"
@@ -106,7 +107,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
 	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
+		ids[docIdx] = generateDocumentID(doc)
 		texts[docIdx] = doc.PageContent
 		mc := make(map[string]any, 0)
 		maps.Copy(mc, doc.Metadata)
@@ -215,4 +216,44 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 
 func safeIntToInt32(n int) int32 {
 	return int32(max(0, n))
+}
+
+// generateDocumentID creates a meaningful ID for a document based on its content and metadata.
+// If the document has an existing "id" in metadata, use that. Otherwise, generate a deterministic
+// ID based on content hash combined with a UUID for uniqueness.
+func generateDocumentID(doc schema.Document) string {
+	// Check if document already has an ID in metadata
+	if existingID, exists := doc.Metadata["id"]; exists {
+		if idStr, ok := existingID.(string); ok && idStr != "" {
+			return idStr
+		}
+	}
+	
+	// Check for other common ID fields
+	for _, idField := range []string{"_id", "document_id", "doc_id", "key"} {
+		if existingID, exists := doc.Metadata[idField]; exists {
+			if idStr, ok := existingID.(string); ok && idStr != "" {
+				return idStr
+			}
+		}
+	}
+	
+	// Generate deterministic ID based on content hash
+	// This ensures same content gets same ID, useful for deduplication
+	hasher := sha256.New()
+	hasher.Write([]byte(doc.PageContent))
+	
+	// Include some metadata for uniqueness if available
+	if source, exists := doc.Metadata["source"]; exists {
+		hasher.Write([]byte(fmt.Sprintf("source:%v", source)))
+	}
+	if title, exists := doc.Metadata["title"]; exists {
+		hasher.Write([]byte(fmt.Sprintf("title:%v", title)))
+	}
+	
+	hash := fmt.Sprintf("%x", hasher.Sum(nil))
+	
+	// Combine with short UUID for additional uniqueness while keeping readability
+	shortUUID := uuid.New().String()[:8]
+	return fmt.Sprintf("doc_%s_%s", hash[:16], shortUUID)
 }

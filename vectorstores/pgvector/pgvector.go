@@ -445,16 +445,72 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 	return opts.ScoreThreshold, nil
 }
 
-// getFilters return metadata filters, now only support map[key]value pattern
-// TODO: should support more types like {"key1": {"key2":"values2"}} or {"key": ["value1", "values2"]}.
+// getFilters returns metadata filters with support for nested objects and arrays.
+// Supports patterns like {"key1": {"key2": "value2"}} and {"key": ["value1", "value2"]}.
 func (s Store) getFilters(opts vectorstores.Options) (map[string]any, error) {
-	if opts.Filters != nil {
-		if filters, ok := opts.Filters.(map[string]any); ok {
-			return filters, nil
-		}
+	if opts.Filters == nil {
+		return map[string]any{}, nil
+	}
+	
+	filters, ok := opts.Filters.(map[string]any)
+	if !ok {
 		return nil, ErrInvalidFilters
 	}
-	return map[string]any{}, nil
+	
+	// Process filters to handle nested structures and arrays
+	processedFilters := make(map[string]any)
+	for key, value := range filters {
+		processedValue, err := s.processFilterValue(key, value)
+		if err != nil {
+			return nil, fmt.Errorf("error processing filter for key %s: %w", key, err)
+		}
+		processedFilters[key] = processedValue
+	}
+	
+	return processedFilters, nil
+}
+
+// processFilterValue handles different types of filter values including nested objects and arrays
+func (s Store) processFilterValue(key string, value any) (any, error) {
+	switch v := value.(type) {
+	case map[string]any:
+		// Handle nested objects like {"key1": {"key2": "value2"}}
+		processed := make(map[string]any)
+		for nestedKey, nestedValue := range v {
+			processedNested, err := s.processFilterValue(fmt.Sprintf("%s.%s", key, nestedKey), nestedValue)
+			if err != nil {
+				return nil, err
+			}
+			processed[nestedKey] = processedNested
+		}
+		return processed, nil
+	case []any:
+		// Handle arrays like {"key": ["value1", "value2"]}
+		processed := make([]any, len(v))
+		for i, item := range v {
+			processedItem, err := s.processFilterValue(fmt.Sprintf("%s[%d]", key, i), item)
+			if err != nil {
+				return nil, err
+			}
+			processed[i] = processedItem
+		}
+		return processed, nil
+	case []string:
+		// Handle string arrays specifically
+		return v, nil
+	case []int:
+		// Handle int arrays specifically  
+		return v, nil
+	case []float64:
+		// Handle float arrays specifically
+		return v, nil
+	case string, int, int64, float64, bool:
+		// Handle primitive types
+		return v, nil
+	default:
+		// For other types, convert to string representation
+		return fmt.Sprintf("%v", v), nil
+	}
 }
 
 func (s Store) deduplicate(
