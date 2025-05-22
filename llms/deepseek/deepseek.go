@@ -8,6 +8,7 @@ import (
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
 // Model represents available DeepSeek models.
@@ -66,6 +67,11 @@ func WithOpenAIOption(opt openai.Option) Option {
 	return func(c *config) {
 		c.options = append(c.options, opt)
 	}
+}
+
+// WithHTTPClient sets a custom HTTP client.
+func WithHTTPClient(client openaiclient.Doer) Option {
+	return WithOpenAIOption(openai.WithHTTPClient(client))
 }
 
 // New creates a new DeepSeek LLM client.

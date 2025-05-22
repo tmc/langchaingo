@@ -2,10 +2,42 @@ package deepseek
 
 import (
 	"context"
+	"os"
+	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
+
+func newTestClient(t *testing.T, opts ...Option) *LLM {
+	t.Helper()
+	
+	// Check if we need an API key (only for recording mode)
+	if httprr.GetTestMode() == httprr.TestModeRecord {
+		if deepseekKey := os.Getenv("DEEPSEEK_API_KEY"); deepseekKey == "" {
+			t.Skip("DEEPSEEK_API_KEY not set")
+			return nil
+		}
+	} else {
+		// For replay mode, provide a fake API key if none is set
+		if os.Getenv("DEEPSEEK_API_KEY") == "" {
+			opts = append([]Option{WithToken("fake-api-key-for-testing")}, opts...)
+		}
+	}
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "deepseek_"+t.Name())
+	
+	// Prepend HTTP client option
+	opts = append([]Option{WithHTTPClient(httpClient)}, opts...)
+
+	llm, err := New(opts...)
+	require.NoError(t, err)
+	return llm
+}
 
 func TestNew(t *testing.T) {
 	tests := []struct {
@@ -94,6 +126,42 @@ func TestModels(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeepSeekCall(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t)
+
+	resp, err := llm.Call(context.Background(), "What is the capital of France?")
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp)
+	assert.Contains(t, strings.ToLower(resp), "paris")
+}
+
+func TestDeepSeekGenerateContent(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t)
+
+	messages := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "Tell me a short joke"),
+	}
+
+	resp, err := llm.GenerateContent(context.Background(), messages)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Len(t, resp.Choices, 1)
+	assert.NotEmpty(t, resp.Choices[0].Content)
+}
+
+func TestDeepSeekGenerateWithReasoning(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t, WithModel(ModelReasoner))
+
+	reasoning, answer, err := llm.GenerateWithReasoning(context.Background(), "What is 2+2?")
+	require.NoError(t, err)
+	assert.NotEmpty(t, reasoning)
+	assert.NotEmpty(t, answer)
+	assert.Contains(t, answer, "4")
 }
 
 // Mock test for convenience methods (would require actual API key for full testing)
