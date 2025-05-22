@@ -72,10 +72,6 @@ func (d *DeepSeek) GenerateContent(ctx context.Context, messages []llms.MessageC
 	return d.client.GenerateContent(ctx, messages, options...)
 }
 
-// CreateEmbedding implements the llms.Model interface.
-func (d *DeepSeek) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
-	return d.client.CreateEmbedding(ctx, texts)
-}
 
 // Configuration for DeepSeek client
 type config struct {

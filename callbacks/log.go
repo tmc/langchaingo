@@ -31,20 +31,7 @@ func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.M
 					fmt.Printf("    Detail: %s\n", content.Detail)
 				}
 			case llms.BinaryContent:
-				fmt.Printf("  Part %d (Binary): %s (%d bytes)\n", i+1, content.MimeType, len(content.Data))
-			case llms.ToolCallContent:
-				fmt.Printf("  Part %d (Tool Call): %s\n", i+1, content.ToolCall.Name)
-				if content.ToolCall.Arguments != "" {
-					fmt.Printf("    Arguments: %s\n", content.ToolCall.Arguments)
-				}
-			case llms.ToolCallResultContent:
-				fmt.Printf("  Part %d (Tool Result): %s\n", i+1, content.ToolCallID)
-				if content.Content != "" {
-					fmt.Printf("    Result: %s\n", content.Content)
-				}
-				if content.Error != "" {
-					fmt.Printf("    Error: %s\n", content.Error)
-				}
+				fmt.Printf("  Part %d (Binary): %s (%d bytes)\n", i+1, content.MIMEType, len(content.Data))
 			default:
 				fmt.Printf("  Part %d (Unknown): %T\n", i+1, content)
 			}
