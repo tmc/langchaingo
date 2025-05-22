@@ -18,15 +18,36 @@ var _ Handler = LogHandler{}
 func (l LogHandler) HandleLLMGenerateContentStart(_ context.Context, ms []llms.MessageContent) {
 	fmt.Println("Entering LLM with messages:")
 	for _, m := range ms {
-		// TODO: Implement logging of other content types
-		var buf strings.Builder
-		for _, t := range m.Parts {
-			if t, ok := t.(llms.TextContent); ok {
-				buf.WriteString(t.Text)
-			}
-		}
 		fmt.Println("Role:", m.Role)
-		fmt.Println("Text:", buf.String())
+		l.logMessageParts(m.Parts)
+	}
+}
+
+// logMessageParts logs all types of content parts in a message
+func (l LogHandler) logMessageParts(parts []llms.ContentPart) {
+	for i, part := range parts {
+		switch p := part.(type) {
+		case llms.TextContent:
+			fmt.Printf("  Part %d (Text): %s\n", i+1, p.Text)
+		case llms.ImageURLContent:
+			fmt.Printf("  Part %d (Image URL): %s", i+1, p.URL)
+			if p.Detail != "" {
+				fmt.Printf(" (detail: %s)", p.Detail)
+			}
+			fmt.Println()
+		case llms.BinaryContent:
+			fmt.Printf("  Part %d (Binary): %s, %d bytes\n", i+1, p.MIMEType, len(p.Data))
+		case llms.ToolCall:
+			fmt.Printf("  Part %d (Tool Call): ID=%s, Type=%s", i+1, p.ID, p.Type)
+			if p.FunctionCall != nil {
+				fmt.Printf(", Function=%s", p.FunctionCall.Name)
+			}
+			fmt.Println()
+		case llms.ToolCallResponse:
+			fmt.Printf("  Part %d (Tool Response): ID=%s, Name=%s, Content=%s\n", i+1, p.ToolCallID, p.Name, p.Content)
+		default:
+			fmt.Printf("  Part %d (Unknown): %T\n", i+1, part)
+		}
 	}
 }
 
