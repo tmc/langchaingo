@@ -1,6 +1,10 @@
 //nolint:all
 package googleai
 
+// TODO: Migrate to official Google Generative AI SDK (github.com/googleapis/go-genai)
+// The current github.com/google/generative-ai-go library is now legacy.
+// See MIGRATION.md for details and migration plan.
+
 import (
 	"context"
 	"encoding/json"
