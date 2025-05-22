@@ -9,18 +9,29 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
-	var ollamaModel string
-	if ollamaModel = os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
-		t.Skip("OLLAMA_TEST_MODEL not set")
-		return nil
+	
+	// Check if we need a model (only for recording mode)
+	if httprr.GetTestMode() == httprr.TestModeRecord {
+		if ollamaModel := os.Getenv("OLLAMA_TEST_MODEL"); ollamaModel == "" {
+			t.Skip("OLLAMA_TEST_MODEL not set")
+			return nil
+		} else {
+			opts = append([]Option{WithModel(ollamaModel)}, opts...)
+		}
+	} else {
+		// For replay mode, use a fake model
+		opts = append([]Option{WithModel("llama2")}, opts...)
 	}
-
-	opts = append([]Option{WithModel(ollamaModel)}, opts...)
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "ollama_"+t.Name())
+	opts = append([]Option{WithHTTPClient(httpClient)}, opts...)
 
 	c, err := New(opts...)
 	require.NoError(t, err)

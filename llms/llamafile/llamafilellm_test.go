@@ -7,15 +7,26 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
-func newTestClient(t *testing.T) *LLM {
+func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "llamafile_"+t.Name())
+	
+	// Default options for testing
 	options := []Option{
 		WithEmbeddingSize(2048),
 		WithTemperature(0.8),
+		WithHTTPClient(httpClient),
 	}
+	
+	// Add any additional options passed
+	options = append(options, opts...)
+	
 	c, err := New(options...)
 	require.NoError(t, err)
 	return c

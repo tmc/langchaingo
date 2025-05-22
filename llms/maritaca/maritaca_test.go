@@ -8,18 +8,29 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
-	var token string
-	if token = os.Getenv("MARITACA_KEY"); token == "" {
-		t.Skip("MARITACA_KEY not set")
-		return nil
+	
+	// Check if we need an API key (only for recording mode)
+	if httprr.GetTestMode() == httprr.TestModeRecord {
+		if token := os.Getenv("MARITACA_KEY"); token == "" {
+			t.Skip("MARITACA_KEY not set")
+			return nil
+		} else {
+			opts = append([]Option{WithToken(token), WithModel("sabia-2-medium")}, opts...)
+		}
+	} else {
+		// For replay mode, provide fake credentials
+		opts = append([]Option{WithToken("fake-token"), WithModel("sabia-2-medium")}, opts...)
 	}
-
-	opts = append([]Option{WithToken(token), WithModel("sabia-2-medium")}, opts...)
+	
+	// Create HTTP client with httprr support
+	httpClient := httprr.TestClient(t, "maritaca_"+t.Name())
+	opts = append([]Option{WithHTTPClient(httpClient)}, opts...)
 
 	c, err := New(opts...)
 	require.NoError(t, err)
