@@ -7,7 +7,7 @@ import (
 	"maps"
 
 	chromago "github.com/amikos-tech/chroma-go"
-	"github.com/amikos-tech/chroma-go/openai"
+	"github.com/amikos-tech/chroma-go/pkg/embeddings/openai"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
@@ -50,7 +50,7 @@ func New(opts ...Option) (Store, error) {
 	}
 
 	// create the client connection and confirm that we can access the server with it
-	chromaClient, err := chromago.NewClient(s.chromaURL)
+	chromaClient, err := chromago.NewClient(chromago.WithBasePath(s.chromaURL))
 	if err != nil {
 		return s, err
 	}
@@ -70,10 +70,12 @@ func New(opts ...Option) (Store, error) {
 		if s.openaiOrganization != "" {
 			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
 		}
-		embeddingFunction, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
+		openAiEmbeddingFunc, err := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
 		if err != nil {
 			return s, err
 		}
+
+		embeddingFunction = chromatypes.NewV2EmbeddingFunctionAdapter(openAiEmbeddingFunc)
 	}
 
 	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
