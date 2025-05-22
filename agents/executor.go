@@ -134,15 +134,18 @@ func (e *Executor) doAction(
 		}), nil
 	}
 	if e.CallbacksHandler != nil {
-		e.CallbacksHandler.HandleToolStart(ctx, fmt.Sprintf("%s: %s", action.Tool, action.ToolInput))
+		e.CallbacksHandler.HandleToolStart(ctx, fmt.Sprintf("%s::(%s)", action.Tool, action.ToolInput))
 	}
 
 	observation, err := tool.Call(ctx, action.ToolInput)
-	if e.CallbacksHandler != nil {
-		e.CallbacksHandler.HandleToolEnd(ctx, fmt.Sprintf("%s: %s", action.Tool, action.ToolInput))
-	}
 	if err != nil {
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return nil, err
+	}
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleToolEnd(ctx, observation)
 	}
 
 	return append(steps, schema.AgentStep{
