@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
@@ -33,7 +34,9 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 		return nil
 	}
 
-	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	opts = append(opts, googleai.WithAPIKey(genaiKey), googleai.WithHTTPClient(httpClient))
 	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
@@ -61,6 +64,10 @@ func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 			googleai.WithCloudLocation(location),
 		)
 	}
+
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	opts = append(opts, googleai.WithHTTPClient(httpClient))
 
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)

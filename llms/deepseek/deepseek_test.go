@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -13,7 +14,9 @@ func TestNew(t *testing.T) {
 		t.Skip("DEEPSEEK_API_KEY not set")
 	}
 
-	client, err := New()
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	client, err := New(WithHTTPClient(httpClient))
 	if err != nil {
 		t.Fatalf("Failed to create DeepSeek client: %v", err)
 	}
@@ -24,10 +27,13 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewWithOptions(t *testing.T) {
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
 	client, err := New(
 		WithAPIKey("test-key"),
 		WithModel(ModelDeepSeekCoder),
 		WithBaseURL("https://custom-api.example.com"),
+		WithHTTPClient(httpClient),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create DeepSeek client with options: %v", err)
@@ -43,7 +49,9 @@ func TestCall(t *testing.T) {
 		t.Skip("DEEPSEEK_API_KEY not set")
 	}
 
-	client, err := New(WithModel(ModelDeepSeekChat))
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	client, err := New(WithModel(ModelDeepSeekChat), WithHTTPClient(httpClient))
 	if err != nil {
 		t.Fatalf("Failed to create DeepSeek client: %v", err)
 	}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -19,7 +20,9 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 		return nil
 	}
 
-	opts = append([]Option{WithToken(token), WithModel("sabia-2-medium")}, opts...)
+	// Add httprr recording support
+	httpClient := httprr.NewTestClient(t.Name())
+	opts = append([]Option{WithToken(token), WithModel("sabia-2-medium"), WithHTTPClient(httpClient)}, opts...)
 
 	c, err := New(opts...)
 	require.NoError(t, err)
