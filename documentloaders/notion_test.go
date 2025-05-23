@@ -14,9 +14,7 @@ func TestNotionDirectoryLoader_Load(t *testing.T) {
 	t.Parallel()
 
 	// Create a temporary test directory
-	tempDir, err := os.MkdirTemp("", "notion_test")
-	require.NoError(t, err)
-	defer os.RemoveAll(tempDir)
+	tempDir := t.TempDir()
 
 	// Create sample Markdown files in the temporary directory
 	testFiles := []struct {

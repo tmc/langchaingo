@@ -1,68 +1,133 @@
+version: "2"
 linters:
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    - import
-    - metalinter
-    - module
-    - performance
-    - sql
-    - style
-    - test
-    - unused
   enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - cyclop
+    - decorder
+    - dogsled
+    - dupl
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exptostd
+    - fatcontext
     - forbidigo
+    - funlen
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - grouper
+    - iface
+    - importas
+    - inamedparam
+    - interfacebloat
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - testableexamples
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+    - zerologlint
   disable:
-    - gci # We don't use gci.
-    - godox # We allow TODO lines.
-    - tagliatelle # As we're dealing with third parties we must accept snake case.
-    - wsl # We don't agree with wsl's style rules
-    - exhaustruct
-    - lll
-    - varnamelen
-    - nlreturn
-    - gomnd
-    - err113
-    - wrapcheck # TODO: we should probably enable this one (at least for new code).
-    - testpackage
-    - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
-    - depguard # disabling temporarily
-    - ireturn # disabling temporarily
-    - perfsprint
-    - musttag
-    - tagalign # Impractical for schema-defined output parser, which relies heavily on struct tagging.
-    - mnd
     - canonicalheader
+    - depguard
+    - err113
+    - exhaustruct
+    - godox
     - intrange
+    - ireturn
+    - lll
+    - mnd
+    - musttag
+    - nlreturn
+    - nolintlint
+    - perfsprint
+    - tagalign
+    - tagliatelle
     - testifylint
-
-linters-settings:
-  cyclop:
-    max-complexity: 12
-  funlen:
-    lines: 90
-  depguard:
-    list-type: denylist
-    packages:
-      - github.com/samber/lo # Use exp packages or internal utilities instead.
-    additional-guards:
-      - list-type: denylist
-        include-go-root: false
-        packages:
-          - github.com/stretchr/testify
-        # Specify rules by which the linter ignores certain files for consideration.
-        ignore-file-rules:
-          - "**/*_test.go"
-          - "**/mock/**/*.go"
-  forbidigo:
-    forbid:
-      - 'import "[^"]+/(util|common|helpers)"'
-  gosec:
-    excludes:
-    - G115 # https://github.com/securego/gosec/issues/1212
-run:
-  exclude-dirs:
-    - 'exp'
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    - wsl
+  settings:
+    cyclop:
+      max-complexity: 12
+    forbidigo:
+      forbid:
+        - pattern: import "[^"]+/(util|common|helpers)"
+    funlen:
+      lines: 90
+    gosec:
+      excludes:
+        - G115
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
