@@ -1,10 +1,8 @@
-module github.com/tmc/langchaingo/examples/anthropic-vision-example
+module github.com/tmc/langchaingo-worktrees/langchaingo-upstream-main/examples/maritaca-example
 
-go 1.22.0
+go 1.24.3
 
-toolchain go1.22.1
-
-require github.com/tmc/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
