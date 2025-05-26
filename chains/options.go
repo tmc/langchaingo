@@ -161,6 +161,11 @@ func WithCallback(callbackHandler callbacks.Handler) ChainCallOption {
 	}
 }
 
+// GetLLMCallOptions converts a slice of ChainCallOption into a slice of llms.CallOption.
+// It processes the chain-level options (e.g., Model, MaxTokens, Temperature, StreamingFunc, Callbacks)
+// and translates them into options suitable for direct use with LLM generation calls.
+// If a CallbackHandler is provided and no StreamingFunc is set, it automatically configures
+// a StreamingFunc to call the handler's HandleStreamingFunc method.
 func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:cyclop
 	opts := &chainCallOption{}
 	for _, option := range options {
