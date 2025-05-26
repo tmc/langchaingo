@@ -3,8 +3,6 @@ package mongovector
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -13,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -33,51 +31,12 @@ const (
 	testIndexSize3            = 3
 )
 
-type atlasContainer struct {
-	testcontainers.Container
-	URI string
-}
-
-func setupAtlas(ctx context.Context) (*atlasContainer, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongodb/mongodb-atlas-local",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(1 * time.Second),
-	}
-
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var atlasC *atlasContainer
-	if container != nil {
-		atlasC = &atlasContainer{Container: container}
-	}
-
-	ip, err := container.Host(ctx)
-	if err != nil {
-		return atlasC, err
-	}
-
-	mappedPort, err := container.MappedPort(ctx, "27017")
-	if err != nil {
-		return atlasC, err
-	}
-
-	uri := &url.URL{
-		Scheme:   "mongodb",
-		Host:     net.JoinHostPort(ip, mappedPort.Port()),
-		Path:     "/",
-		RawQuery: "directConnection=true",
-	}
-
-	atlasC.URI = uri.String()
-
-	return atlasC, nil
+func setupMongoDB(ctx context.Context) (*mongodb.MongoDBContainer, error) {
+	// Use MongoDB Atlas Local image which supports vector search
+	return mongodb.Run(ctx, "mongodb/mongodb-atlas-local:latest",
+		mongodb.WithUsername("admin"),
+		mongodb.WithPassword("password"),
+	)
 }
 
 // resetVectorStore will reset the vector space defined by the given collection.
@@ -100,10 +59,21 @@ func setupTest(t *testing.T, dim int, index string) Store {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 
-		container, err := setupAtlas(ctx)
+		container, err := setupMongoDB(ctx)
 		require.NoError(t, err)
+		t.Cleanup(func() {
+			testcontainers.TerminateContainer(container)
+		})
 
-		uri = container.URI
+		// Get host and port directly
+		host, err := container.Host(ctx)
+		require.NoError(t, err)
+		
+		port, err := container.MappedPort(ctx, "27017")
+		require.NoError(t, err)
+		
+		// Build connection string with direct connection
+		uri = fmt.Sprintf("mongodb://%s:%s/?directConnection=true", host, port.Port())
 		t.Setenv(testURI, uri)
 	}
 
@@ -112,13 +82,13 @@ func setupTest(t *testing.T, dim int, index string) Store {
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	require.NoError(t, err, "failed to connect to MongoDB server")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	err = client.Ping(ctx, nil)
 	require.NoError(t, err, "failed to ping server")
 
-	time.Sleep(10 * time.Second) // Let the container warm up
+	time.Sleep(30 * time.Second) // Let the container warm up - Atlas needs more time
 
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()

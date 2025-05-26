@@ -9,12 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
@@ -24,17 +21,14 @@ func Test(t *testing.T) {
 	// export LANGCHAINGO_TEST_POSTGRESQL=postgres://db_user:mysecretpassword@localhost:5438/test?sslmode=disable
 	pgURI := os.Getenv("LANGCHAINGO_TEST_POSTGRESQL")
 	if pgURI == "" {
-		pgContainer, err := postgres.RunContainer(
+		pgContainer, err := postgres.Run(
 			context.Background(),
-			testcontainers.WithImage("postgres:16.2"),
+			"postgres:17", // TODO: lets add a text matrix for this (or do so in this test)
 			postgres.WithDatabase("test"),
 			postgres.WithUsername("db_user"),
 			postgres.WithPassword("p@mysecretpassword"),
 			postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
-			testcontainers.WithWaitStrategy(
-				wait.ForLog("database system is ready to accept connections").
-					WithOccurrence(2).
-					WithStartupTimeout(5*time.Second)),
+			postgres.BasicWaitStrategies(),
 		)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")

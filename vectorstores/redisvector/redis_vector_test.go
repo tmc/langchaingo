@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
@@ -44,6 +45,7 @@ func getValues(t *testing.T) (string, string) {
 				WaitingFor:   wait.ForLog("* Ready to accept connections"),
 			},
 			Started: true,
+			Logger:  tclog.TestLogger(t),
 		}
 
 		container, err := testcontainers.GenericContainer(ctx, genericContainerReq)
