@@ -16,6 +16,9 @@ const (
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
 	DefaultDistanceFunc    = chromatypes.L2
+
+	ChromaV1 = "v1"
+	ChromaV2 = "v2"
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -57,6 +60,19 @@ func WithDistanceFunction(distanceFunction chromatypes.DistanceFunction) Option 
 func WithIncludes(includes []chromatypes.QueryEnum) Option {
 	return func(p *Store) {
 		p.includes = includes
+	}
+}
+
+// WithIncludesV2 is an option for setting the includes to query the vectors.
+func WithIncludesV2(includes []chromatypes.QueryEnum) Option {
+	return func(p *Store) {
+		p.includes = includes
+	}
+}
+
+func WithChromaVersion(v string) Option {
+	return func(p *Store) {
+		p.version = v
 	}
 }
 

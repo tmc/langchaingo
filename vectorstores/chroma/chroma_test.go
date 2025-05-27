@@ -48,7 +48,25 @@ func TestChromaGoStoreRest(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+	chromaGoStoreRest(s, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+	chromaGoStoreRest(s, t)
+}
+
+func chromaGoStoreRest(s chroma.Store, t *testing.T) {
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -85,7 +103,25 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+	chromaStoreRestWithScoreThreshold(s, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+	chromaStoreRestWithScoreThreshold(s, t)
+}
+
+func chromaStoreRestWithScoreThreshold(s chroma.Store, t *testing.T) {
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -133,7 +169,23 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+	similaritySearchWithInvalidScoreThreshold(s, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+}
+
+func similaritySearchWithInvalidScoreThreshold(s chroma.Store, t *testing.T) {
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -178,7 +230,25 @@ func TestChromaAsRetriever(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+	chromaAsRetriever(s, llm, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+	chromaAsRetriever(s, llm, t)
+
+}
+
+func chromaAsRetriever(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -221,7 +291,25 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+	chromaAsRetrieverWithScoreThreshold(s, llm, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+	chromaAsRetrieverWithScoreThreshold(s, llm, t)
+}
+
+func chromaAsRetrieverWithScoreThreshold(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -270,7 +358,24 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+	chromaAsRetrieverWithMetadataFilterEqualsClause(s, llm, t)
+
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+
+	chromaAsRetrieverWithMetadataFilterEqualsClause(s, llm, t)
+}
+
+func chromaAsRetrieverWithMetadataFilterEqualsClause(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -342,10 +447,25 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	)
 	require.NoError(t, newChromaErr)
 
-	ns := getTestNameSpace()
+	defer cleanupTestArtifacts(t, s)
+
+	chromaAsRetrieverWithMetadataFilterInClause(s, llm, t)
+
+	s, newChromaErr = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, newChromaErr)
 
 	defer cleanupTestArtifacts(t, s)
 
+	chromaAsRetrieverWithMetadataFilterInClause(s, llm, t)
+}
+
+func chromaAsRetrieverWithMetadataFilterInClause(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	ns := getTestNameSpace()
 	_, addDocumentsErr := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -426,8 +546,23 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	require.NoError(t, err)
 
 	defer cleanupTestArtifacts(t, s)
+	chromaAsRetrieverWithMetadataFilterNotSelected(s, llm, t)
 
-	_, err = s.AddDocuments(
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+	chromaAsRetrieverWithMetadataFilterNotSelected(s, llm, t)
+}
+
+func chromaAsRetrieverWithMetadataFilterNotSelected(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -501,8 +636,24 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	defer cleanupTestArtifacts(t, s)
+	chromaAsRetrieverWithMetadataFilters(s, llm, t)
 
-	_, err = s.AddDocuments(
+	s, err = chroma.New(
+		chroma.WithOpenAIAPIKey(openaiAPIKey),
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+		chroma.WithChromaVersion(chroma.ChromaV1),
+	)
+	require.NoError(t, err)
+
+	defer cleanupTestArtifacts(t, s)
+	chromaAsRetrieverWithMetadataFilters(s, llm, t)
+
+}
+
+func chromaAsRetrieverWithMetadataFilters(s chroma.Store, llm *openai.LLM, t *testing.T) {
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
