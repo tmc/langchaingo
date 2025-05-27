@@ -1,82 +1,204 @@
 package ernieclient
 
 import (
-	"encoding/json"
-	"io"
+	"context"
 	"net/http"
-	"strings"
+	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
-type mockHTTPClient struct{}
+func TestClient_CreateCompletion(t *testing.T) {
+	t.Parallel()
 
-// implement ernieclient.Doer interface.
-func (m *mockHTTPClient) Do(_ *http.Request) (*http.Response, error) {
-	authResponse := &authResponse{
-		AccessToken: "test",
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub access token from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		// Scrub both the access_token in query params and auth headers
+		q := req.URL.Query()
+		if q.Get("access_token") != "" {
+			q.Set("access_token", "test-access-token")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	secretKey := "test-secret-key"
+	if key := os.Getenv("ERNIE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
-	b, err := json.Marshal(authResponse)
-	if err != nil {
-		return nil, err
+	if secret := os.Getenv("ERNIE_SECRET_KEY"); secret != "" && rr.Recording() {
+		secretKey = secret
 	}
-	response := &http.Response{
-		StatusCode: http.StatusOK,
-		Body:       io.NopCloser(strings.NewReader(string(b))),
+
+	client, err := New(
+		WithAKSK(apiKey, secretKey),
+		WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
+	req := &CompletionRequest{
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: "你好，请问你是谁？",
+			},
+		},
+		Temperature: 0.7,
 	}
-	return response, nil
+
+	resp, err := client.CreateCompletion(context.Background(), DefaultCompletionModelPath, req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp.Result)
 }
 
-func TestClient_buildURL(t *testing.T) {
+func TestClient_CreateCompletionStream(t *testing.T) {
 	t.Parallel()
-	type fields struct {
-		apiKey      string
-		secretKey   string
-		accessToken string
-		httpClient  Doer
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub access token from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("access_token") != "" {
+			q.Set("access_token", "test-access-token")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	secretKey := "test-secret-key"
+	if key := os.Getenv("ERNIE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
-	type args struct {
-		modelpath ModelPath
+	if secret := os.Getenv("ERNIE_SECRET_KEY"); secret != "" && rr.Recording() {
+		secretKey = secret
 	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   string
-	}{
-		{
-			name: "with access token",
-			fields: fields{
-				accessToken: "token",
+
+	client, err := New(
+		WithAKSK(apiKey, secretKey),
+		WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
+	var chunks []string
+	req := &CompletionRequest{
+		Messages: []Message{
+			{
+				Role:    "user",
+				Content: "数到5",
 			},
-			args: args{modelpath: "eb-instant"},
-			want: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=token",
 		},
-		{
-			name: "with client, aksk",
-			fields: fields{
-				apiKey:     "test",
-				secretKey:  "test",
-				httpClient: &mockHTTPClient{},
-			},
-			args: args{modelpath: "eb-instant"},
-			want: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token=test",
+		Temperature: 0.7,
+		Stream:      true,
+		StreamingFunc: func(ctx context.Context, chunk []byte) error {
+			chunks = append(chunks, string(chunk))
+			return nil
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			c, err := New(
-				WithAKSK(tt.fields.apiKey, tt.fields.secretKey),
-				WithAccessToken(tt.fields.accessToken),
-				WithHTTPClient(tt.fields.httpClient),
-			)
-			if err != nil {
-				t.Errorf("New got error. %v", err)
-			}
-			if got := c.buildURL(tt.args.modelpath); got != tt.want {
-				t.Errorf("buildURL() = %v, want %v", got, tt.want)
-			}
-		})
+	resp, err := client.CreateCompletion(context.Background(), DefaultCompletionModelPath, req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, chunks)
+}
+
+func TestClient_CreateChat(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub access token from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("access_token") != "" {
+			q.Set("access_token", "test-access-token")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	secretKey := "test-secret-key"
+	if key := os.Getenv("ERNIE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
+	if secret := os.Getenv("ERNIE_SECRET_KEY"); secret != "" && rr.Recording() {
+		secretKey = secret
+	}
+
+	client, err := New(
+		WithAKSK(apiKey, secretKey),
+		WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
+	req := &ChatRequest{
+		Messages: []*ChatMessage{
+			{
+				Role:    "user",
+				Content: "你好",
+			},
+		},
+		Temperature: 0.7,
+	}
+
+	resp, err := client.CreateChat(context.Background(), req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp.Result)
+}
+
+func TestClient_CreateEmbedding(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub access token from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("access_token") != "" {
+			q.Set("access_token", "test-access-token")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	secretKey := "test-secret-key"
+	if key := os.Getenv("ERNIE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+	if secret := os.Getenv("ERNIE_SECRET_KEY"); secret != "" && rr.Recording() {
+		secretKey = secret
+	}
+
+	client, err := New(
+		WithAKSK(apiKey, secretKey),
+		WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
+	texts := []string{"你好世界", "今天天气怎么样"}
+	resp, err := client.CreateEmbedding(context.Background(), texts)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Len(t, resp.Data, 2)
+	assert.NotEmpty(t, resp.Data[0].Embedding)
+	assert.NotEmpty(t, resp.Data[1].Embedding)
 }

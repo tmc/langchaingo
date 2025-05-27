@@ -54,6 +54,14 @@ func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 func setupTest(t *testing.T, dim int, index string) Store {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("skipping MongoDB vector store tests in short mode")
+	}
+
+	t.Skip("Skipping very slow mongo vector store tests. See https://github.com/tmc/langchaingo/issues/1273")
+	// FIXME: 30s is unaaccepable for a test, and this should detect log content in the container
+	// or use probes to check if the container is ready.
+
 	uri := os.Getenv(testURI)
 	if uri == "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -68,10 +76,10 @@ func setupTest(t *testing.T, dim int, index string) Store {
 		// Get host and port directly
 		host, err := container.Host(ctx)
 		require.NoError(t, err)
-		
+
 		port, err := container.MappedPort(ctx, "27017")
 		require.NoError(t, err)
-		
+
 		// Build connection string with direct connection
 		uri = fmt.Sprintf("mongodb://%s:%s/?directConnection=true", host, port.Port())
 		t.Setenv(testURI, uri)

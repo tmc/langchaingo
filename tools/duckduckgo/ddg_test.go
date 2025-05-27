@@ -2,23 +2,16 @@ package duckduckgo
 
 import (
 	"context"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 func TestDuckDuckGoTool(t *testing.T) {
 	t.Parallel()
 
-	// Setup HTTP record/replay for DuckDuckGo calls
-	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
-	require.NoError(t, err)
-	defer rr.Close()
-
-	// Create tool with httprr client
-	tool, err := NewWithClient(3, DefaultUserAgent, rr.Client())
+	// Create tool
+	tool, err := New(3, DefaultUserAgent)
 	require.NoError(t, err)
 
 	// Test search functionality

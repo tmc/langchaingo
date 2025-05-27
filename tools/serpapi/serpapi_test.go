@@ -2,13 +2,11 @@ package serpapi
 
 import (
 	"context"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 func TestSerpAPITool(t *testing.T) {
@@ -18,7 +16,7 @@ func TestSerpAPITool(t *testing.T) {
 	apiKey := os.Getenv("SERPAPI_API_KEY")
 	if apiKey == "" {
 		// Check if we have recorded data
-		testName := httprr.CleanFileName(t.Name())
+		testName := t.Name()
 		candidates := []string{
 			filepath.Join("testdata", testName+".httprr"),
 			filepath.Join("testdata", testName+".httprr.gz"),
@@ -40,15 +38,9 @@ func TestSerpAPITool(t *testing.T) {
 		apiKey = "test-key"
 	}
 
-	// Setup HTTP record/replay for SerpAPI calls
-	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
-	require.NoError(t, err)
-	defer rr.Close()
-
-	// Create tool with httprr client
+	// Create tool
 	tool, err := New(
 		WithAPIKey(apiKey),
-		WithHTTPClient(rr.Client()),
 	)
 	require.NoError(t, err)
 

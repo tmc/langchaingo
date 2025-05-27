@@ -1,0 +1,26 @@
+httprr trace v1
+617 700
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: Go-http-client/1.1
+Content-Length: 362
+Anthropic-Beta: tools-2024-05-16
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"What's the weather like?"}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 429 Too Many Requests
+Content-Length: 261
+Anthropic-Organization-Id: 2277c511-5523-4a62-83bd-b847b0c4b121
+Cf-Cache-Status: DYNAMIC
+Cf-Ray: 946127856c9deb1e-SJC
+Content-Type: application/json
+Date: Mon, 26 May 2025 23:46:52 GMT
+Request-Id: req_011CPX2uZNSuQSDRMggvp7ux
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Via: 1.1 google
+X-Robots-Tag: none
+X-Should-Retry: true
+
+{"type":"error","error":{"type":"rate_limit_error","message":"Number of concurrent connections has exceeded your rate limit. Please try again later or contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase."}}

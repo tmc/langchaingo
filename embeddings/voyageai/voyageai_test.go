@@ -2,26 +2,154 @@ package voyageai
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
-func TestVoyageAIEmbeddings(t *testing.T) {
+func TestVoyageAI_EmbedDocuments(t *testing.T) {
 	t.Parallel()
 
-	if voyageaiKey := os.Getenv("VOYAGEAI_API_KEY"); voyageaiKey == "" {
-		t.Skip("VOYAGEAI_API_KEY not set")
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("VOYAGE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
-	e, err := NewVoyageAI()
+
+	embedder, err := NewVoyageAI(
+		WithToken(apiKey),
+		WithClient(*rr.Client()),
+	)
 	require.NoError(t, err)
 
-	_, err = e.EmbedQuery(context.Background(), "Hello world!")
-	require.NoError(t, err)
+	texts := []string{
+		"The quick brown fox jumps over the lazy dog",
+		"Machine learning is a subset of artificial intelligence",
+		"Natural language processing enables computers to understand human language",
+	}
 
-	embeddings, err := e.EmbedDocuments(context.Background(), []string{"Hello world", "The world is ending", "good bye"})
+	embeddings, err := embedder.EmbedDocuments(context.Background(), texts)
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 3)
+	assert.NotEmpty(t, embeddings[0])
+	assert.NotEmpty(t, embeddings[1])
+	assert.NotEmpty(t, embeddings[2])
+}
+
+func TestVoyageAI_EmbedQuery(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("VOYAGE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	embedder, err := NewVoyageAI(
+		WithToken(apiKey),
+		WithClient(*rr.Client()),
+	)
+	require.NoError(t, err)
+
+	query := "What is machine learning?"
+
+	embedding, err := embedder.EmbedQuery(context.Background(), query)
+	require.NoError(t, err)
+	assert.NotEmpty(t, embedding)
+}
+
+func TestVoyageAI_WithBatchSize(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("VOYAGE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	embedder, err := NewVoyageAI(
+		WithToken(apiKey),
+		WithClient(*rr.Client()),
+		WithBatchSize(2),
+	)
+	require.NoError(t, err)
+
+	// Create 5 texts to test batching with batch size 2
+	texts := []string{
+		"Text 1",
+		"Text 2",
+		"Text 3",
+		"Text 4",
+		"Text 5",
+	}
+
+	embeddings, err := embedder.EmbedDocuments(context.Background(), texts)
+	require.NoError(t, err)
+	assert.Len(t, embeddings, 5)
+	for i, emb := range embeddings {
+		assert.NotEmpty(t, emb, "embedding %d should not be empty", i)
+	}
+}
+
+func TestVoyageAI_WithModel(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("VOYAGE_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	embedder, err := NewVoyageAI(
+		WithToken(apiKey),
+		WithClient(*rr.Client()),
+		WithModel("voyage-large-2"),
+	)
+	require.NoError(t, err)
+
+	query := "Test query with different model"
+
+	embedding, err := embedder.EmbedQuery(context.Background(), query)
+	require.NoError(t, err)
+	assert.NotEmpty(t, embedding)
 }

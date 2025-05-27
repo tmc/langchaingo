@@ -1,0 +1,18 @@
+httprr trace v1
+399 374
+POST https://chat.maritaca.ai/api/chat/inference HTTP/1.1
+Host: chat.maritaca.ai
+User-Agent: Go-http-client/1.1
+Content-Length: 170
+Accept: application/json
+Authorization: Key test-api-key
+Content-Type: application/json
+
+{"model":"sabia-2-medium","messages":[{"role":"user","content":"Olá, como você está?"}],"stream":false,"format":"","max_tokens":100,"do_sample":true,"temperature":0.7}HTTP/1.1 401 Unauthorized
+Content-Length: 209
+Connection: keep-alive
+Content-Type: application/json
+Date: Mon, 26 May 2025 23:46:56 GMT
+Server: nginx/1.27.5
+
+{"error":{"message":"Incorrect API key provided: test-**i-key. You can find your API key at https://plataforma.maritaca.ai/chaves-de-api.","type":"invalid_request_error","param":null,"code":"invalid_api_key"}}

@@ -1,0 +1,23 @@
+httprr trace v1
+349 838
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: Go-http-client/1.1
+Content-Length: 128
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"Hello, how are you?"}],"max_tokens":100,"temperature":0}HTTP/2.0 200 OK
+Anthropic-Organization-Id: 2277c511-5523-4a62-83bd-b847b0c4b121
+Cf-Cache-Status: DYNAMIC
+Cf-Ray: 946127856ca2eb1e-SJC
+Content-Type: application/json
+Date: Mon, 26 May 2025 23:46:54 GMT
+Request-Id: req_011CPX2uZSfaGSgdm8cbPenc
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Via: 1.1 google
+X-Robots-Tag: none
+
+{"id":"msg_018gyq4tQc8rRoS5eTybDWWW","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"Hello! As an AI language model, I don't have feelings, but I'm functioning properly and ready to assist you. How can I help you today?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":35,"service_tier":"standard"}}

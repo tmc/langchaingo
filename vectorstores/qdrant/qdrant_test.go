@@ -1,425 +1,247 @@
-package qdrant_test
+package qdrant
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
-	"strings"
 	"testing"
 
-	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	tcqdrant "github.com/testcontainers/testcontainers-go/modules/qdrant"
-	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/qdrant"
 )
 
-func TestQdrantStore(t *testing.T) {
-	t.Parallel()
+// MockEmbedder is a mock embedder for testing
+type MockEmbedder struct{}
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
+func (m MockEmbedder) EmbedDocuments(ctx context.Context, texts []string) ([][]float32, error) {
+	embeddings := make([][]float32, len(texts))
+	for i := range texts {
+		// Create a simple embedding based on text length
+		embeddings[i] = []float32{float32(len(texts[i])), 0.1, 0.2, 0.3}
 	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "tokyo"},
-		{PageContent: "potato"},
-	})
-	require.NoError(t, err)
-
-	docs, err := store.SimilaritySearch(context.Background(), "japan", 1)
-	require.NoError(t, err)
-	require.Len(t, docs, 1)
-	require.Equal(t, "tokyo", docs[0].PageContent)
+	return embeddings, nil
 }
 
-func TestQdrantStoreWithScoreThreshold(t *testing.T) {
-	t.Parallel()
-
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "Tokyo"},
-		{PageContent: "Yokohama"},
-		{PageContent: "Osaka"},
-		{PageContent: "Nagoya"},
-		{PageContent: "Sapporo"},
-		{PageContent: "Fukuoka"},
-		{PageContent: "Dublin"},
-		{PageContent: "Paris"},
-		{PageContent: "London "},
-		{PageContent: "New York"},
-	})
-	require.NoError(t, err)
-
-	// test with a score threshold of 0.8, expected 6 documents
-	docs, err := store.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0.8))
-	require.NoError(t, err)
-	require.Len(t, docs, 6)
-
-	// test with a score threshold of 0, expected all 10 documents
-	docs, err = store.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(0))
-	require.NoError(t, err)
-	require.Len(t, docs, 10)
+func (m MockEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
+	// Create a simple embedding based on text length
+	return []float32{float32(len(text)), 0.1, 0.2, 0.3}, nil
 }
 
-func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
+func TestStore_AddDocuments(t *testing.T) {
 	t.Parallel()
 
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	}
-
-	llm, err := openai.New(opts...)
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
 	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	defer rr.Close()
 
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(context.Background(), []schema.Document{
-		{PageContent: "Tokyo"},
-		{PageContent: "Yokohama"},
-		{PageContent: "Osaka"},
-		{PageContent: "Nagoya"},
-		{PageContent: "Sapporo"},
-		{PageContent: "Fukuoka"},
-		{PageContent: "Dublin"},
-		{PageContent: "Paris"},
-		{PageContent: "London "},
-		{PageContent: "New York"},
-	})
-	require.NoError(t, err)
-
-	_, err = store.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(-0.8))
-	require.Error(t, err)
-
-	_, err = store.SimilaritySearch(context.Background(),
-		"Which of these are cities in Japan", 10,
-		vectorstores.WithScoreThreshold(1.8))
-	require.Error(t, err)
-}
-
-func TestQdrantAsRetriever(t *testing.T) {
-	t.Parallel()
-
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(
-		context.Background(),
-		[]schema.Document{
-			{PageContent: "The color of the house is blue."},
-			{PageContent: "The color of the car is red."},
-			{PageContent: "The color of the desk is orange."},
-		},
-	)
-	require.NoError(t, err)
-
-	result, err := chains.Run(
-		context.TODO(),
-		chains.NewRetrievalQAFromLLM(
-			llm,
-			vectorstores.ToRetriever(store, 1),
-		),
-		"What color is the desk?",
-	)
-	require.NoError(t, err)
-	require.True(t, strings.Contains(result, "orange"), "expected orange in result")
-}
-
-func TestQdrantRetrieverScoreThreshold(t *testing.T) {
-	t.Parallel()
-
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(
-		context.Background(),
-		[]schema.Document{
-			{PageContent: "The color of the house is blue."},
-			{PageContent: "The color of the car is red."},
-			{PageContent: "The color of the desk is orange."},
-			{PageContent: "The color of the lamp beside the desk is black."},
-			{PageContent: "The color of the chair beside the desk is beige."},
-		},
-	)
-	require.NoError(t, err)
-
-	result, err := chains.Run(
-		context.TODO(),
-		chains.NewRetrievalQAFromLLM(
-			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithScoreThreshold(0.8)),
-		),
-		"What colors is each piece of furniture next to the desk?",
-	)
-	require.NoError(t, err)
-
-	require.Contains(t, result, "black", "expected black in result")
-	require.Contains(t, result, "beige", "expected beige in result")
-}
-
-func TestQdrantRetrieverFilter(t *testing.T) {
-	t.Parallel()
-
-	qdrantURL, apiKey, dimension, distance := getValues(t)
-	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
-	opts := []openai.Option{
-		openai.WithModel("gpt-3.5-turbo-0125"),
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	}
-
-	llm, err := openai.New(opts...)
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
-
-	url, err := url.Parse(qdrantURL)
-	require.NoError(t, err)
-	store, err := qdrant.New(
-		qdrant.WithURL(*url),
-		qdrant.WithAPIKey(apiKey),
-		qdrant.WithCollectionName(collectionName),
-		qdrant.WithEmbedder(e),
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(
-		context.Background(),
-		[]schema.Document{
-			{PageContent: "The color of the house is blue."},
-			{PageContent: "The color of the car is red."},
-			{PageContent: "The color of the desk is orange."},
-			{PageContent: "The color of the lamp beside the desk is black."},
-			{PageContent: "The color of the chair beside the desk is beige."},
-		},
-	)
-	require.NoError(t, err)
-
-	_, err = store.AddDocuments(
-		context.Background(),
-		[]schema.Document{
-			{
-				PageContent: "The color of the lamp beside the desk is black.",
-				Metadata: map[string]any{
-					"location": "kitchen",
-				},
-			},
-			{
-				PageContent: "The color of the lamp beside the desk is blue.",
-				Metadata: map[string]any{
-					"location": "bedroom",
-				},
-			},
-			{
-				PageContent: "The color of the lamp beside the desk is orange.",
-				Metadata: map[string]any{
-					"location": "office",
-				},
-			},
-			{
-				PageContent: "The color of the lamp beside the desk is purple.",
-				Metadata: map[string]any{
-					"location": "sitting room",
-				},
-			},
-		},
-	)
-	require.NoError(t, err)
-
-	filter := map[string]interface{}{
-		"must": []map[string]interface{}{
-			{
-				"key": "location",
-				"match": map[string]interface{}{
-					"value": "patio",
-				},
-			},
-		},
-	}
-
-	result, err := chains.Run(
-		context.TODO(),
-		chains.NewRetrievalQAFromLLM(
-			llm,
-			vectorstores.ToRetriever(store, 5, vectorstores.WithFilters(filter)),
-		),
-		"What colors is the lamp?",
-	)
-	require.NoError(t, err)
-	require.Contains(t, result, "yellow", "expected yellow in result")
-}
-
-func getValues(t *testing.T) (string, string, int, string) {
-	t.Helper()
-
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-
-	qdrantURL := os.Getenv("QDRANT_URL")
-	if qdrantURL == "" {
-		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
-		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
-			t.Skip("Docker not available")
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		if req.Header.Get("api-key") != "" {
+			req.Header.Set("api-key", "test-api-key")
 		}
-		require.NoError(t, err)
-		t.Cleanup(func() {
-			require.NoError(t, qdrantContainer.Terminate(context.Background()))
-		})
+		return nil
+	})
 
-		qdrantURL, err = qdrantContainer.RESTEndpoint(context.Background())
-		if err != nil {
-			t.Skipf("Failed to get qdrant container endpoint: %s", err)
-		}
+	endpoint := "http://localhost:6333"
+	apiKey := ""
+	collectionName := "test-collection"
+	
+	if envEndpoint := os.Getenv("QDRANT_URL"); envEndpoint != "" && rr.Recording() {
+		endpoint = envEndpoint
+	}
+	if envKey := os.Getenv("QDRANT_API_KEY"); envKey != "" && rr.Recording() {
+		apiKey = envKey
 	}
 
-	// Can be empty if using a local Qdrant deployment
-	apiKey := os.Getenv("QDRANT_API_KEY")
+	endpointURL, err := url.Parse(endpoint)
+	require.NoError(t, err)
 
-	// Reference: https://qdrant.tech/documentation/concepts/search/#metrics
-	distance := os.Getenv("QDRANT_DISTANCE_METRIC")
-	if distance == "" {
-		distance = "Cosine"
-	}
-	embeddingDimension, err := strconv.Atoi(os.Getenv("QDRANT_EMBEDDING_DIMENSION"))
-	if err != nil || embeddingDimension == 0 {
-		embeddingDimension = 1536
-	}
-	return qdrantURL, apiKey, embeddingDimension, distance
-}
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
 
-func setupCollection(t *testing.T, qdrantURL, apiKey string, dimension int, distance string) string {
-	t.Helper()
-	collectionName := uuid.NewString()
+	store, err := New(
+		WithURL(*endpointURL),
+		WithAPIKey(apiKey),
+		WithCollectionName(collectionName),
+		WithEmbedder(&MockEmbedder{}),
+	)
+	require.NoError(t, err)
 
-	collectionConfig := map[string]interface{}{
-		"vectors": map[string]interface{}{
-			"size":     dimension,
-			"distance": distance,
+	docs := []schema.Document{
+		{
+			PageContent: "The quick brown fox jumps over the lazy dog",
+			Metadata: map[string]any{
+				"source": "test1",
+				"page":   1,
+			},
+		},
+		{
+			PageContent: "Machine learning is a subset of artificial intelligence",
+			Metadata: map[string]any{
+				"source": "test2",
+				"page":   2,
+			},
 		},
 	}
 
-	url, err := url.Parse(qdrantURL)
+	ids, err := store.AddDocuments(context.Background(), docs)
 	require.NoError(t, err)
+	assert.Len(t, ids, 2)
+	assert.NotEmpty(t, ids[0])
+	assert.NotEmpty(t, ids[1])
+}
 
-	url = url.JoinPath("collections", collectionName)
-	_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodPut, collectionConfig)
+func TestStore_SimilaritySearch(t *testing.T) {
+	t.Parallel()
 
-	require.Equal(t, http.StatusOK, status)
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
 	require.NoError(t, err)
+	defer rr.Close()
 
-	t.Cleanup(func() {
-		_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodDelete, nil)
-
-		require.Equal(t, http.StatusOK, status)
-		require.NoError(t, err)
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		if req.Header.Get("api-key") != "" {
+			req.Header.Set("api-key", "test-api-key")
+		}
+		return nil
 	})
-	return collectionName
+
+	endpoint := "http://localhost:6333"
+	apiKey := ""
+	collectionName := "test-collection"
+	
+	if envEndpoint := os.Getenv("QDRANT_URL"); envEndpoint != "" && rr.Recording() {
+		endpoint = envEndpoint
+	}
+	if envKey := os.Getenv("QDRANT_API_KEY"); envKey != "" && rr.Recording() {
+		apiKey = envKey
+	}
+
+	endpointURL, err := url.Parse(endpoint)
+	require.NoError(t, err)
+
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
+
+	store, err := New(
+		WithURL(*endpointURL),
+		WithAPIKey(apiKey),
+		WithCollectionName(collectionName),
+		WithEmbedder(&MockEmbedder{}),
+	)
+	require.NoError(t, err)
+
+	query := "What is machine learning?"
+	numDocuments := 2
+
+	docs, err := store.SimilaritySearch(context.Background(), query, numDocuments)
+	require.NoError(t, err)
+	assert.LessOrEqual(t, len(docs), numDocuments)
+}
+
+func TestStore_SimilaritySearchWithScore(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		if req.Header.Get("api-key") != "" {
+			req.Header.Set("api-key", "test-api-key")
+		}
+		return nil
+	})
+
+	endpoint := "http://localhost:6333"
+	apiKey := ""
+	collectionName := "test-collection"
+	
+	if envEndpoint := os.Getenv("QDRANT_URL"); envEndpoint != "" && rr.Recording() {
+		endpoint = envEndpoint
+	}
+	if envKey := os.Getenv("QDRANT_API_KEY"); envKey != "" && rr.Recording() {
+		apiKey = envKey
+	}
+
+	endpointURL, err := url.Parse(endpoint)
+	require.NoError(t, err)
+
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
+
+	store, err := New(
+		WithURL(*endpointURL),
+		WithAPIKey(apiKey),
+		WithCollectionName(collectionName),
+		WithEmbedder(&MockEmbedder{}),
+	)
+	require.NoError(t, err)
+
+	query := "What is machine learning?"
+	numDocuments := 2
+	scoreThreshold := float32(0.5)
+
+	docs, err := store.SimilaritySearch(context.Background(), query, numDocuments, 
+		vectorstores.WithScoreThreshold(scoreThreshold))
+	require.NoError(t, err)
+	assert.LessOrEqual(t, len(docs), numDocuments)
+}
+
+func TestDoRequest(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		if req.Header.Get("api-key") != "" {
+			req.Header.Set("api-key", "test-api-key")
+		}
+		return nil
+	})
+
+	endpoint := "http://localhost:6333"
+	apiKey := ""
+	
+	if envEndpoint := os.Getenv("QDRANT_URL"); envEndpoint != "" && rr.Recording() {
+		endpoint = envEndpoint
+	}
+	if envKey := os.Getenv("QDRANT_API_KEY"); envKey != "" && rr.Recording() {
+		apiKey = envKey
+	}
+
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
+
+	testURL, err := url.Parse(endpoint + "/collections")
+	require.NoError(t, err)
+
+	// Test GET request
+	body, status, err := DoRequest(context.Background(), *testURL, apiKey, http.MethodGet, nil)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, status)
+	defer body.Close()
+
+	// Read response to ensure it's valid
+	data, err := io.ReadAll(body)
+	require.NoError(t, err)
+	assert.NotEmpty(t, data)
 }

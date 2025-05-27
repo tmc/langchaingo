@@ -2,70 +2,141 @@ package huggingfaceclient
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
-	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
-const (
-	goodResponse = "I hug, you hug, we all hug!"
-	errMsg       = "Error in `parameters.top_k`: ensure this value is greater than or equal to 1"
-)
+const testURL = "https://api-inference.huggingface.co"
 
-func TestRunInference(t *testing.T) {
+func TestClient_RunInference(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name     string
-		req      *InferenceRequest
-		expected *InferenceResponse
-		wantErr  string
-	}{
-		{"ok", &InferenceRequest{}, &InferenceResponse{Text: goodResponse}, ""},
-		{"not ok", &InferenceRequest{TopK: -1}, nil, errMsg},
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
+		apiKey = key
 	}
 
-	server := mockServer(t)
-	t.Cleanup(server.Close)
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			client, err := New("token", "model", server.URL)
-			require.NoError(t, err)
+	client, err := New(apiKey, "gpt2", testURL)
+	require.NoError(t, err)
 
-			resp, err := client.RunInference(context.TODO(), tc.req)
-			assert.Equal(t, tc.expected, resp)
-			if tc.wantErr != "" {
-				require.ErrorContains(t, err, tc.wantErr)
-			}
-		})
+	req := &InferenceRequest{
+		Model:       "gpt2",
+		Prompt:      "Hello, my name is",
+		Task:        InferenceTaskTextGeneration,
+		Temperature: 0.5,
+		MaxLength:   20,
 	}
+
+	resp, err := client.RunInference(context.Background(), req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp.Text)
 }
 
-func mockServer(t *testing.T) *httptest.Server {
-	t.Helper()
+func TestClient_RunInferenceText2Text(t *testing.T) {
+	t.Parallel()
 
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		b, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
 
-		var infReq inferencePayload
-		err = json.Unmarshal(b, &infReq)
-		require.NoError(t, err)
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
 
-		if infReq.Parameters.TopK == -1 {
-			w.WriteHeader(http.StatusBadRequest)
-			_, _ = fmt.Fprintf(w, `{"error":["%s"]}`, errMsg)
-		} else {
-			w.WriteHeader(http.StatusOK)
-			_, _ = fmt.Fprintf(w, `[{"generated_text":"%s"}]`, goodResponse)
-		}
-	}))
+	apiKey := "test-api-key"
+	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
+
+	client, err := New(apiKey, "google/flan-t5-base", testURL)
+	require.NoError(t, err)
+
+	req := &InferenceRequest{
+		Model:       "google/flan-t5-base",
+		Prompt:      "Translate to French: Hello, how are you?",
+		Task:        InferenceTaskText2TextGeneration,
+		Temperature: 0.5,
+		MaxLength:   50,
+	}
+
+	resp, err := client.RunInference(context.Background(), req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp.Text)
+}
+
+func TestClient_CreateEmbedding(t *testing.T) {
+	t.Parallel()
+
+	rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+	require.NoError(t, err)
+	defer rr.Close()
+
+	// Scrub API key from recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Set("Authorization", "Bearer test-api-key")
+		return nil
+	})
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	// Replace http.DefaultClient with our recording client
+	oldClient := http.DefaultClient
+	http.DefaultClient = rr.Client()
+	defer func() { http.DefaultClient = oldClient }()
+
+	client, err := New(apiKey, "", testURL)
+	require.NoError(t, err)
+
+	req := &EmbeddingRequest{
+		Inputs: []string{"Hello world", "How are you?"},
+		Options: map[string]any{
+			"wait_for_model": true,
+		},
+	}
+
+	embeddings, err := client.CreateEmbedding(context.Background(), "sentence-transformers/all-MiniLM-L6-v2", "feature-extraction", req)
+	require.NoError(t, err)
+	assert.NotNil(t, embeddings)
+	assert.Len(t, embeddings, 2)
+	assert.NotEmpty(t, embeddings[0])
+	assert.NotEmpty(t, embeddings[1])
+}
+
+func TestClient_InvalidToken(t *testing.T) {
+	t.Parallel()
+
+	_, err := New("", "model", testURL)
+	assert.ErrorIs(t, err, ErrInvalidToken)
 }

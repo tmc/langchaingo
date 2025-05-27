@@ -1,0 +1,24 @@
+httprr trace v1
+272 450
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: Go-http-client/1.1
+Content-Length: 80
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Once upon a time in a magical forest, there lived","model":"command"}HTTP/2.0 401 Unauthorized
+Content-Length: 31
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 26 May 2025 23:46:55 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Envoy-Upstream-Service-Time: 8
+
+{"message":"invalid api token"}
