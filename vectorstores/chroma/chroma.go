@@ -58,9 +58,9 @@ func New(opts ...Option) (Store, error) {
 
     if s.version == ChromaV1 {
         return NewV1(s)
-    } else {
-        return NewV2(s)
     }
+
+    return NewV2(s)
 }
 
 func NewV2(s Store) (Store, error) {
@@ -149,9 +149,9 @@ func (s Store) AddDocuments(ctx context.Context,
 ) ([]string, error) {
     if s.version == ChromaV1 {
         return s.AddDocumentsV1(ctx, docs, options...)
-    } else {
-        return s.AddDocumentsV2(ctx, docs, options...)
     }
+
+    return s.AddDocumentsV2(ctx, docs, options...)
 }
 
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
@@ -159,17 +159,17 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 ) ([]schema.Document, error) {
     if s.version == ChromaV1 {
         return s.SimilaritySearchV1(ctx, query, numDocuments, options...)
-    } else {
-        return s.SimilaritySearchV2(ctx, query, numDocuments, options...)
     }
+
+    return s.SimilaritySearchV2(ctx, query, numDocuments, options...)
 }
 
 func (s Store) RemoveCollection() error {
     if s.version == ChromaV1 {
         return s.RemoveCollectionV1()
-    } else {
-        return s.RemoveCollectionV2()
     }
+
+    return s.RemoveCollectionV2()
 }
 
 // AddDocumentsV1 adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
