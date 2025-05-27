@@ -56,6 +56,52 @@ func New(opts ...Option) (Store, error) {
         return s, coErr
     }
 
+    if s.version == ChromaV1 {
+        return NewV1(s)
+    } else {
+        return NewV2(s)
+    }
+}
+
+func NewV2(s Store) (Store, error) {
+    chromaClient, err := chromagov2.NewHTTPClient(chromagov2.WithBaseURL(s.chromaURL))
+    if err != nil {
+        return s, err
+    }
+
+    if errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
+        return s, errHb
+    }
+    s.clientV2 = chromaClient
+
+    // inject user's embedding function, if provided
+    var embeddingFunction chromaembedding.EmbeddingFunction
+    if s.embedder != nil {
+        // inject user's embedding function, if provided
+        embeddingFunction = chromaGoEmbedderV2{Embedder: s.embedder}
+    } else {
+        // otherwise use standard langchaingo OpenAI embedding function
+        var options []openai.Option
+        if s.openaiOrganization != "" {
+            options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
+        }
+        embeddingFunction, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
+        if err != nil {
+            return s, err
+        }
+    }
+
+    col, errCc := s.clientV2.GetOrCreateCollection(context.Background(), s.nameSpace,
+        chromagov2.WithEmbeddingFunctionCreate(embeddingFunction))
+    if errCc != nil {
+        return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
+    }
+
+    s.collectionV2 = col
+    return s, nil
+}
+
+func NewV1(s Store) (Store, error) {
     // create the client connection and confirm that we can access the server with it
     chromaClient, err := chromago.NewClient(chromago.WithBasePath(s.chromaURL))
     if err != nil {
@@ -68,7 +114,6 @@ func New(opts ...Option) (Store, error) {
     s.client = chromaClient
 
     var embeddingFunction chromatypes.EmbeddingFunction
-    var embeddingFunctionV2 chromaembedding.EmbeddingFunction
     if s.embedder != nil {
         // inject user's embedding function, if provided
         embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
@@ -76,44 +121,24 @@ func New(opts ...Option) (Store, error) {
         // otherwise use standard langchaingo OpenAI embedding function
         var options []openai.Option
 
-        if s.version == ChromaV1 {
-            if s.openaiOrganization != "" {
-                options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
-            }
-            openAiEmbeddingFunc, err := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
-            if err != nil {
-                return s, err
-            }
-
-            embeddingFunction = chromatypes.NewV2EmbeddingFunctionAdapter(openAiEmbeddingFunc)
-        } else {
-            if s.openaiOrganization != "" {
-                options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
-            }
-            embeddingFunctionV2, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
-            if err != nil {
-                return s, err
-            }
+        if s.openaiOrganization != "" {
+            options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
         }
+        openAiEmbeddingFunc, err := openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
+        if err != nil {
+            return s, err
+        }
+
+        embeddingFunction = chromatypes.NewV2EmbeddingFunctionAdapter(openAiEmbeddingFunc)
     }
 
-    if s.version == ChromaV1 {
-        col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
-            embeddingFunction, s.distanceFunction)
-        if errCc != nil {
-            return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
-        }
-
-        s.collection = col
-    } else {
-        col, errCc := s.clientV2.GetOrCreateCollection(context.Background(), s.nameSpace,
-            chromagov2.WithEmbeddingFunctionCreate(embeddingFunctionV2))
-        if errCc != nil {
-            return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
-        }
-
-        s.collectionV2 = col
+    col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
+        embeddingFunction, s.distanceFunction)
+    if errCc != nil {
+        return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
     }
+
+    s.collection = col
 
     return s, nil
 }
