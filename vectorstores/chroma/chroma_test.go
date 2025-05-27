@@ -206,7 +206,6 @@ func TestChromaAsRetriever(t *testing.T) {
 
 		chromaAsRetriever(t, s, llm)
 	}
-
 }
 
 func chromaAsRetriever(t *testing.T, s chroma.Store, llm *openai.LLM) {
@@ -258,7 +257,6 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 
 		chromaAsRetrieverWithScoreThreshold(t, s, llm)
 	}
-
 }
 
 func chromaAsRetrieverWithScoreThreshold(t *testing.T, s chroma.Store, llm *openai.LLM) {
@@ -569,7 +567,6 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 		defer cleanupTestArtifacts(t, s)
 		chromaAsRetrieverWithMetadataFilters(t, s, llm)
 	}
-
 }
 
 func chromaAsRetrieverWithMetadataFilters(t *testing.T, s chroma.Store, llm *openai.LLM) {
