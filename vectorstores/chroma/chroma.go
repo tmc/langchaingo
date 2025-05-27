@@ -383,7 +383,6 @@ func (s Store) SimilaritySearchV2(ctx context.Context, query string, numDocument
     for docsI := range qr.GetDocumentsGroups() {
         for docI := range qr.GetDocumentsGroups()[docsI] {
             if score := 1.0 - qr.GetDistancesGroups()[docsI][docI]; float32(score) >= scoreThreshold {
-
                 md := make(map[string]any)
                 dm, _ := qr.GetMetadatasGroups()[docsI][docI].(*chromagov2.DocumentMetadataImpl)
                 for _, key := range dm.Keys() {

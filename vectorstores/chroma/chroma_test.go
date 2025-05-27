@@ -52,10 +52,10 @@ func TestChromaGoStoreRest(t *testing.T) {
 
         chromaGoStoreRest(t, s)
     }
-
 }
 
 func chromaGoStoreRest(t *testing.T, s chroma.Store) {
+    t.Helper()
     _, err := s.AddDocuments(context.Background(), []schema.Document{
         {PageContent: "tokyo", Metadata: map[string]any{
             "country": "japan",
@@ -97,10 +97,10 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 
         chromaStoreRestWithScoreThreshold(t, s)
     }
-
 }
 
 func chromaStoreRestWithScoreThreshold(t *testing.T, s chroma.Store) {
+    t.Helper()
     _, err := s.AddDocuments(context.Background(), []schema.Document{
         {PageContent: "Tokyo"},
         {PageContent: "Yokohama"},
@@ -153,10 +153,10 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
         similaritySearchWithInvalidScoreThreshold(t, s)
     }
-
 }
 
 func similaritySearchWithInvalidScoreThreshold(t *testing.T, s chroma.Store) {
+    t.Helper()
     _, err := s.AddDocuments(context.Background(), []schema.Document{
         {PageContent: "Tokyo"},
         {PageContent: "Yokohama"},
@@ -210,6 +210,7 @@ func TestChromaAsRetriever(t *testing.T) {
 }
 
 func chromaAsRetriever(t *testing.T, s chroma.Store, llm *openai.LLM) {
+    t.Helper()
     _, err := s.AddDocuments(
         context.Background(),
         []schema.Document{
@@ -261,6 +262,7 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 }
 
 func chromaAsRetrieverWithScoreThreshold(t *testing.T, s chroma.Store, llm *openai.LLM) {
+    t.Helper()
     _, err := s.AddDocuments(
         context.Background(),
         []schema.Document{
@@ -317,6 +319,7 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 }
 
 func chromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T, s chroma.Store, llm *openai.LLM) {
+    t.Helper()
     _, err := s.AddDocuments(
         context.Background(),
         []schema.Document{
@@ -398,6 +401,7 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 }
 
 func chromaAsRetrieverWithMetadataFilterInClause(t *testing.T, s chroma.Store) {
+    t.Helper()
     ns := getTestNameSpace()
     _, addDocumentsErr := s.AddDocuments(
         context.Background(),
@@ -486,6 +490,7 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func chromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T, s chroma.Store, llm *openai.LLM) {
+    t.Helper()
     _, err := s.AddDocuments(
         context.Background(),
         []schema.Document{
@@ -568,6 +573,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 }
 
 func chromaAsRetrieverWithMetadataFilters(t *testing.T, s chroma.Store, llm *openai.LLM) {
+    t.Helper()
     _, err := s.AddDocuments(
         context.Background(),
         []schema.Document{
