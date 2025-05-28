@@ -157,16 +157,14 @@ type mockCallbackHandler struct {
 	toolErrorInput  error
 }
 
-func (m *mockCallbackHandler) HandleText(_ context.Context, _ string)       {}
-func (m *mockCallbackHandler) HandleLLMStart(_ context.Context, _ []string) {}
-func (m *mockCallbackHandler) HandleLLMGenerateContentStart(_ context.Context, _ []llms.MessageContent) {
-}
-func (m *mockCallbackHandler) HandleLLMGenerateContentEnd(_ context.Context, _ *llms.ContentResponse) {
-}
-func (m *mockCallbackHandler) HandleLLMError(_ context.Context, _ error)            {}
-func (m *mockCallbackHandler) HandleChainStart(_ context.Context, _ map[string]any) {}
-func (m *mockCallbackHandler) HandleChainEnd(_ context.Context, _ map[string]any)   {}
-func (m *mockCallbackHandler) HandleChainError(_ context.Context, _ error)          {}
+func (m *mockCallbackHandler) HandleText(context.Context, string)                                   {}
+func (m *mockCallbackHandler) HandleLLMStart(context.Context, []string)                             {}
+func (m *mockCallbackHandler) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {}
+func (m *mockCallbackHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse)   {}
+func (m *mockCallbackHandler) HandleLLMError(context.Context, error)                                {}
+func (m *mockCallbackHandler) HandleChainStart(context.Context, map[string]any)                     {}
+func (m *mockCallbackHandler) HandleChainEnd(context.Context, map[string]any)                       {}
+func (m *mockCallbackHandler) HandleChainError(context.Context, error)                              {}
 func (m *mockCallbackHandler) HandleToolStart(_ context.Context, input string) {
 	m.toolStartCalled = true
 	m.toolStartInput = input
