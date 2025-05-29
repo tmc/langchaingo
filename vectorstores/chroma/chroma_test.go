@@ -10,7 +10,6 @@ import (
 	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -38,18 +37,26 @@ func TestChromaGoStoreRest(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithDistanceFunction(chromatypes.COSINE),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		chromaGoStoreRest(t, s)
+	}
+}
+
+func chromaGoStoreRest(t *testing.T, s chroma.Store) {
+	t.Helper()
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -75,18 +82,26 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithDistanceFunction(chromatypes.COSINE),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		chromaStoreRestWithScoreThreshold(t, s)
+	}
+}
+
+func chromaStoreRestWithScoreThreshold(t *testing.T, s chroma.Store) {
+	t.Helper()
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -124,17 +139,25 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		similaritySearchWithInvalidScoreThreshold(t, s)
+	}
+}
+
+func similaritySearchWithInvalidScoreThreshold(t *testing.T, s chroma.Store) {
+	t.Helper()
+	_, err := s.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -169,17 +192,25 @@ func TestChromaAsRetriever(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+		chromaAsRetriever(t, s, llm)
+	}
+}
+
+func chromaAsRetriever(t *testing.T, s chroma.Store, llm *openai.LLM) {
+	t.Helper()
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -211,18 +242,26 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithDistanceFunction(chromatypes.COSINE),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+		chromaAsRetrieverWithScoreThreshold(t, s, llm)
+	}
+}
+
+func chromaAsRetrieverWithScoreThreshold(t *testing.T, s chroma.Store, llm *openai.LLM) {
+	t.Helper()
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
@@ -261,17 +300,25 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
 
-	_, err = s.AddDocuments(
+		chromaAsRetrieverWithMetadataFilterEqualsClause(t, s, llm)
+	}
+}
+
+func chromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T, s chroma.Store, llm *openai.LLM) {
+	t.Helper()
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -336,17 +383,24 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, newChromaErr := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, newChromaErr)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, newChromaErr := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, newChromaErr)
 
+		defer cleanupTestArtifacts(t, s)
+
+		chromaAsRetrieverWithMetadataFilterInClause(t, s)
+	}
+}
+
+func chromaAsRetrieverWithMetadataFilterInClause(t *testing.T, s chroma.Store) {
+	t.Helper()
 	ns := getTestNameSpace()
-
-	defer cleanupTestArtifacts(t, s)
-
 	_, addDocumentsErr := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -418,17 +472,24 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
+		chromaAsRetrieverWithMetadataFilterNotSelected(t, s, llm)
+	}
+}
 
-	_, err = s.AddDocuments(
+func chromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T, s chroma.Store, llm *openai.LLM) {
+	t.Helper()
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -493,17 +554,24 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
-		chroma.WithChromaURL(testChromaURL),
-		chroma.WithNameSpace(getTestNameSpace()),
-		chroma.WithEmbedder(e),
-	)
-	require.NoError(t, err)
+	for _, v := range []string{chroma.ChromaV1, chroma.ChromaV2} {
+		s, err := chroma.New(
+			chroma.WithOpenAIAPIKey(openaiAPIKey),
+			chroma.WithChromaURL(testChromaURL),
+			chroma.WithNameSpace(getTestNameSpace()),
+			chroma.WithEmbedder(e),
+			chroma.WithChromaVersion(v),
+		)
+		require.NoError(t, err)
 
-	defer cleanupTestArtifacts(t, s)
+		defer cleanupTestArtifacts(t, s)
+		chromaAsRetrieverWithMetadataFilters(t, s, llm)
+	}
+}
 
-	_, err = s.AddDocuments(
+func chromaAsRetrieverWithMetadataFilters(t *testing.T, s chroma.Store, llm *openai.LLM) {
+	t.Helper()
+	_, err := s.AddDocuments(
 		context.Background(),
 		[]schema.Document{
 			{
@@ -569,7 +637,7 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.24"))
+		chromaContainer, err := tcchroma.Run(context.Background(), "chromadb/chroma:0.4.24")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
