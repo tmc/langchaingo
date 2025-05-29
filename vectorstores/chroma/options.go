@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	chromagov2 "github.com/amikos-tech/chroma-go/pkg/api/v2"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/tmc/langchaingo/embeddings"
 )
@@ -64,9 +65,9 @@ func WithIncludes(includes []chromatypes.QueryEnum) Option {
 }
 
 // WithIncludesV2 is an option for setting the includes to query the vectors.
-func WithIncludesV2(includes []chromatypes.QueryEnum) Option {
+func WithIncludesV2(includes []chromagov2.Include) Option {
 	return func(p *Store) {
-		p.includes = includes
+		p.includesV2 = includes
 	}
 }
 
