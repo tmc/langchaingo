@@ -1,0 +1,70 @@
+---
+sidebar_label: GitHub Models
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleGitHubModels from "@examples/githubmodels-example/githubmodels_example.go";
+
+# GitHub Models
+
+GitHub Models offers access to various powerful language models like GPT-4.1, Claude 3, and Mistral through GitHub's Models API.
+
+This example shows how to use LangChain to interact with GitHub Models.
+
+## Authentication
+
+There are two ways to set the GitHub token for authentication:
+
+1. Set the environment variable `GITHUB_TOKEN` with your GitHub token:
+
+```bash
+# For Linux/macOS
+export GITHUB_TOKEN=your_github_token_here
+
+# For Windows PowerShell
+$env:GITHUB_TOKEN = "your_github_token_here"
+```
+
+2. Or provide it when initializing the client:
+
+```go
+llm, err := githubmodels.New(githubmodels.WithToken("your_github_token"))
+```
+
+## Available Models
+
+GitHub Models provides access to several models including:
+
+- `openai/gpt-4.1` (default)
+- `anthropic/claude-3-sonnet`
+- `anthropic/claude-3-haiku`
+- `mistral/mistral-large`
+- `mistral/mistral-small`
+
+You can specify the model to use:
+
+```go
+llm, err := githubmodels.New(githubmodels.WithModel("anthropic/claude-3-sonnet"))
+```
+
+## Callbacks
+
+GitHub Models integration supports callbacks, which can be useful for logging, monitoring, or other integrations:
+
+```go
+// Create a simple logger callback
+logger := callbacks.NewLogHandler()
+
+// Initialize the model with the callback
+llm, err := githubmodels.New(
+    githubmodels.WithCallbacksHandler(logger),
+)
+```
+
+## Example
+
+<CodeBlock language="go">{ExampleGitHubModels}</CodeBlock>
+
+## API Reference
+
+For more details on the GitHub Models API, see the [GitHub Models documentation](https://docs.github.com/en/github-models).
