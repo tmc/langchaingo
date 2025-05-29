@@ -66,6 +66,11 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
 		anthropicclient.WithAnthropicBetaHeader(options.anthropicBetaHeader),
+		anthropicclient.WithCache(
+			options.cacheTools,
+			options.cacheSystemMessage,
+			options.cacheChat,
+		),
 	)
 }
 
@@ -166,8 +171,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					Content:    textContent.Text,
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				}
 			} else {
@@ -191,8 +198,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				}
 			} else {
@@ -221,49 +230,52 @@ func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
 	return toolReq
 }
 
-func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
+func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, []anthropicclient.SystemTextMessage, error) {
 	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
-	systemPrompt := ""
+	systemPrompt := make([]anthropicclient.SystemTextMessage, 0, len(messages))
 	for _, msg := range messages {
 		switch msg.Role {
 		case llms.ChatMessageTypeSystem:
-			content, err := handleSystemMessage(msg)
+			systemMessage, err := handleSystemMessage(msg)
 			if err != nil {
-				return nil, "", fmt.Errorf("anthropic: failed to handle system message: %w", err)
+				return nil, nil, fmt.Errorf("anthropic: failed to handle system message: %w", err)
 			}
-			systemPrompt += content
+			systemPrompt = append(systemPrompt, systemMessage)
 		case llms.ChatMessageTypeHuman:
 			chatMessage, err := handleHumanMessage(msg)
 			if err != nil {
-				return nil, "", fmt.Errorf("anthropic: failed to handle human message: %w", err)
+				return nil, nil, fmt.Errorf("anthropic: failed to handle human message: %w", err)
 			}
 			chatMessages = append(chatMessages, chatMessage)
 		case llms.ChatMessageTypeAI:
 			chatMessage, err := handleAIMessage(msg)
 			if err != nil {
-				return nil, "", fmt.Errorf("anthropic: failed to handle AI message: %w", err)
+				return nil, nil, fmt.Errorf("anthropic: failed to handle AI message: %w", err)
 			}
 			chatMessages = append(chatMessages, chatMessage)
 		case llms.ChatMessageTypeTool:
 			chatMessage, err := handleToolMessage(msg)
 			if err != nil {
-				return nil, "", fmt.Errorf("anthropic: failed to handle tool message: %w", err)
+				return nil, nil, fmt.Errorf("anthropic: failed to handle tool message: %w", err)
 			}
 			chatMessages = append(chatMessages, chatMessage)
 		case llms.ChatMessageTypeGeneric, llms.ChatMessageTypeFunction:
-			return nil, "", fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
+			return nil, nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
 		default:
-			return nil, "", fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
+			return nil, nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
 		}
 	}
 	return chatMessages, systemPrompt, nil
 }
 
-func handleSystemMessage(msg llms.MessageContent) (string, error) {
+func handleSystemMessage(msg llms.MessageContent) (anthropicclient.SystemTextMessage, error) {
 	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return textContent.Text, nil
+		return anthropicclient.SystemTextMessage{
+			Type: "text",
+			Text: textContent.Text,
+		}, nil
 	}
-	return "", fmt.Errorf("anthropic: %w for system message", ErrInvalidContentType)
+	return anthropicclient.SystemTextMessage{}, fmt.Errorf("anthropic: %w for system message", ErrInvalidContentType)
 }
 
 func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
