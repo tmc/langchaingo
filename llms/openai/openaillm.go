@@ -162,6 +162,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"TotalTokens":      result.Usage.TotalTokens,
 				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
 			},
+			ReasoningContent: c.Message.ReasoningContent,
 		}
 
 		// Legacy function call handling
