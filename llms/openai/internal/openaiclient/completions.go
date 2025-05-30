@@ -2,22 +2,26 @@ package openaiclient
 
 import (
 	"context"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 // CompletionRequest is a request to complete a completion.
 type CompletionRequest struct {
-	Model       string  `json:"model"`
-	Prompt      string  `json:"prompt"`
-	Temperature float64 `json:"temperature"`
+	Model       string   `json:"model"`
+	Prompt      string   `json:"prompt"`
+	Temperature *float64 `json:"temperature,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
 	MaxTokens           int      `json:"-,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
 	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
-	TopP                float64  `json:"top_p,omitempty"`
+	TopP                *float64 `json:"top_p,omitempty"`
 	StopWords           []string `json:"stop,omitempty"`
 	Seed                int      `json:"seed,omitempty"`
+
+	ReasoningEffort llms.ReasoningLevel `json:"reasoning_effort,omitempty"`
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
@@ -89,5 +93,6 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		PresencePenalty:     payload.PresencePenalty,
 		StreamingFunc:       payload.StreamingFunc,
 		Seed:                payload.Seed,
+		ReasoningEffort:     payload.ReasoningEffort,
 	})
 }

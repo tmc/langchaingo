@@ -31,8 +31,8 @@ type StreamOptions struct {
 type ChatRequest struct {
 	Model       string         `json:"model"`
 	Messages    []*ChatMessage `json:"messages"`
-	Temperature float64        `json:"temperature"`
-	TopP        float64        `json:"top_p,omitempty"`
+	Temperature *float64       `json:"temperature,omitempty"`
+	TopP        *float64       `json:"top_p,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
 	MaxTokens           int      `json:"-,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
@@ -78,6 +78,9 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// ReasoningEffort constrains effort on reasoning for reasoning models
+	ReasoningEffort llms.ReasoningLevel `json:"reasoning_effort,omitempty"`
 }
 
 // ToolType is the type of a tool.

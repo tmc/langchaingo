@@ -274,7 +274,7 @@ func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessag
 		chatMsg.Role = "user"
 	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
 		chatMsg.Role = "tool"
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		chatMsg.Role = "system"
 	}
 }

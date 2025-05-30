@@ -147,7 +147,7 @@ func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 
 func typeToRole(typ llms.ChatMessageType) string {
 	switch typ {
-	case llms.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem, llms.ChatMessageTypeDeveloper:
 		return "system"
 	case llms.ChatMessageTypeAI:
 		return "assistant"
