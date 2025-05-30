@@ -48,18 +48,21 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 	}
 }
 
-func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
-	res := make([]llms.FunctionDefinition, 0)
+func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
+	res := make([]llms.Tool, 0)
 	for _, tool := range o.Tools {
-		res = append(res, llms.FunctionDefinition{
-			Name:        tool.Name(),
-			Description: tool.Description(),
-			Parameters: map[string]any{
-				"properties": map[string]any{
-					"__arg1": map[string]string{"title": "__arg1", "type": "string"},
+		res = append(res, llms.Tool{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        tool.Name(),
+				Description: tool.Description(),
+				Parameters: map[string]any{
+					"properties": map[string]any{
+						"__arg1": map[string]string{"title": "__arg1", "type": "string"},
+					},
+					"required": []string{"__arg1"},
+					"type":     "object",
 				},
-				"required": []string{"__arg1"},
-				"type":     "object",
 			},
 		})
 	}
@@ -130,7 +133,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	}
 
 	result, err := o.LLM.GenerateContent(ctx, mcList,
-		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
+		llms.WithTools(o.tools()), llms.WithStreamingFunc(stream))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -180,8 +183,20 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, llms.FunctionChatMessage{
-			Name:    step.Action.Tool,
+		messages = append(messages, llms.AIChatMessage{
+			ToolCalls: []llms.ToolCall{
+				{
+					ID:   step.Action.ToolID,
+					Type: "function",
+					FunctionCall: &llms.FunctionCall{
+						Name:      step.Action.Tool,
+						Arguments: step.Action.ToolInput,
+					},
+				},
+			},
+		})
+		messages = append(messages, llms.ToolChatMessage{
+			ID:      step.Action.ToolID,
 			Content: step.Observation,
 		})
 	}
