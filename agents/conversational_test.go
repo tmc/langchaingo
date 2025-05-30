@@ -22,13 +22,10 @@ func TestConversationalWithMemory(t *testing.T) {
 	llm, err := openai.New(openai.WithModel("gpt-4"))
 	require.NoError(t, err)
 
-	executor, err := Initialize(
-		llm,
-		[]tools.Tool{tools.Calculator{}},
-		ConversationalReactDescription,
+	executor := NewExecutor(
+		NewConversationalAgent(llm, []tools.Tool{tools.Calculator{}}),
 		WithMemory(memory.NewConversationBuffer()),
 	)
-	require.NoError(t, err)
 
 	_, err = chains.Run(context.Background(), executor, "Hi! my name is Bob and the year I was born is 1987")
 	require.NoError(t, err)
