@@ -101,6 +101,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Messages:               chatMsgs,
 		StreamingFunc:          opts.StreamingFunc,
 		StreamingReasoningFunc: opts.StreamingReasoningFunc,
+		StreamingSkipLines:     opts.StreamingSkipLines,
 		Temperature:            opts.Temperature,
 		N:                      opts.N,
 		FrequencyPenalty:       opts.FrequencyPenalty,
