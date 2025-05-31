@@ -21,6 +21,7 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
+	PreSendingHook        PreSendingHook
 
 	ClientOptions []option.ClientOption
 }
@@ -171,6 +172,14 @@ func WithDefaultTopP(defaultTopP float64) Option {
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	return func(opts *Options) {
 		opts.HarmThreshold = ht
+	}
+}
+
+// WithPreSendingHook sets a function which called right before sending the request to the model.
+// You can manipulate the model's value. Which can be necessary for caching or other purposes.
+func WithPreSendingHook(hook PreSendingHook) Option {
+	return func(opts *Options) {
+		opts.PreSendingHook = hook
 	}
 }
 
