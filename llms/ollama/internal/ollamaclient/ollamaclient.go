@@ -164,7 +164,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 		}
 
 		if errorResponse.Error != "" {
-			return fmt.Errorf(errorResponse.Error) //nolint
+			return fmt.Errorf("%s", errorResponse.Error)
 		}
 
 		if response.StatusCode >= http.StatusBadRequest {
@@ -216,4 +216,38 @@ func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (*E
 		return resp, err
 	}
 	return resp, nil
+}
+
+func (c *Client) Pull(ctx context.Context, req *PullRequest) error {
+	// Use streaming to handle the pull properly
+	req.Stream = true
+
+	var lastResponse PullResponse
+	err := c.stream(ctx, http.MethodPost, "/api/pull", req, func(bts []byte) error {
+		var resp PullResponse
+		if err := json.Unmarshal(bts, &resp); err != nil {
+			return err
+		}
+
+		// Store the last response
+		lastResponse = resp
+
+		// Check if there was an error in the response
+		if resp.Error != "" {
+			return fmt.Errorf("pull failed: %s", resp.Error)
+		}
+
+		// Continue processing
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// Check the final status
+	if lastResponse.Status != "success" && lastResponse.Error != "" {
+		return fmt.Errorf("pull failed: %s", lastResponse.Error)
+	}
+
+	return nil
 }

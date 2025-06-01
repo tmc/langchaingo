@@ -61,6 +61,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		model = opts.Model
 	}
 
+	// Pull model if enabled
+	if o.options.pullModel {
+		if err := o.pullModelIfNeeded(ctx, model); err != nil {
+			return nil, err
+		}
+	}
+
 	// Our input is a sequence of MessageContent, each of which potentially has
 	// a sequence of Part that could be text, images etc.
 	// We have to convert it to a format Ollama undestands: ChatRequest, which
@@ -168,6 +175,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 }
 
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
+	// Pull model if enabled
+	if o.options.pullModel {
+		if err := o.pullModelIfNeeded(ctx, o.options.model); err != nil {
+			return nil, err
+		}
+	}
+
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
@@ -229,4 +243,29 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
 	return ollamaOptions
+}
+
+// pullModelIfNeeded pulls the model if it's not already available.
+func (o *LLM) pullModelIfNeeded(ctx context.Context, model string) error {
+	// Try to use the model first. If it fails with a model not found error,
+	// then pull the model.
+	// This is a simple implementation. In production, you might want to
+	// implement a more sophisticated check (e.g., using a list endpoint).
+
+	// Apply timeout if configured
+	pullCtx := ctx
+	if o.options.pullTimeout > 0 {
+		var cancel context.CancelFunc
+		pullCtx, cancel = context.WithTimeout(ctx, o.options.pullTimeout)
+		defer cancel()
+	}
+
+	// For now, we'll just pull the model without checking.
+	// This ensures the model is available but may result in unnecessary pulls.
+	req := &ollamaclient.PullRequest{
+		Model:  model,
+		Stream: false,
+	}
+
+	return o.client.Pull(pullCtx, req)
 }

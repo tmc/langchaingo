@@ -109,6 +109,15 @@ func (o *OpenAIFunctionsAgent) Plan(
 				}},
 			}
 
+		case llms.FunctionChatMessage:
+			mc = llms.MessageContent{
+				Role: role,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{
+					Name:    p.Name,
+					Content: p.Content,
+				}},
+			}
+
 		case llms.AIChatMessage:
 			if len(p.ToolCalls) > 0 {
 				mc = llms.MessageContent{

@@ -45,4 +45,3 @@ require (
 )
 
 // test for new pkg version
-replace github.com/tmc/langchaingo => ../..

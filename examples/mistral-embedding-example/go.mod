@@ -6,8 +6,6 @@ toolchain go1.22.1
 
 require github.com/tmc/langchaingo v0.1.13
 
-replace github.com/tmc/langchaingo => ../../
-
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/gage-technologies/mistral-go v1.1.0 // indirect

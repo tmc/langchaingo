@@ -112,7 +112,7 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 	}
 
 	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", "bearer "+c.token)
+	req.Header.Set("authorization", "Bearer "+c.token)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {

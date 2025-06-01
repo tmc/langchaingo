@@ -24,6 +24,7 @@ func WithModel(model string) Option {
 }
 
 // WithClient is an option for providing a custom http client.
+// FIXME: This should accept *http.Client instead of http.Client to match Go conventions.
 func WithClient(client http.Client) Option {
 	return func(v *VoyageAI) {
 		v.client = &client
