@@ -1,0 +1,133 @@
+httprr trace v1
+1399 1638
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 1195
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is May 31, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+Content-Length: 915
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:55 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1410
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1418
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 1000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 999739
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 15ms
+X-Request-Id: req_42cd512d8a2f9a9d0b0363ad7e65d2c8
+
+{
+  "id": "chatcmpl-BdUdR5qp1GgGZZF1efvsOBfQ5pMQq",
+  "object": "chat.completion",
+  "created": 1748752253,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Thought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 239,
+    "completion_tokens": 35,
+    "total_tokens": 274,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1548 1588
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 1344
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is May 31, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+Content-Length: 867
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:57 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 808
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 811
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 1000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 999702
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 17ms
+X-Request-Id: req_71e512eb3253076d12cf1a32db1428c6
+
+{
+  "id": "chatcmpl-BdUdUnyjfSuQHgPDSVeu62LjMbeMt",
+  "object": "chat.completion",
+  "created": 1748752256,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Thought: I now know the final answer.\nFinal Answer: The result of 5 plus 3 is 8.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 277,
+    "completion_tokens": 24,
+    "total_tokens": 301,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

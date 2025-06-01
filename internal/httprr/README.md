@@ -219,13 +219,13 @@ testdata/
 
 ```bash
 # Compress all recordings (for repository storage)
-./internal/devtools/httprr-pack pack
+go run ./internal/devtools/rrtool pack -r
 
 # Check compression status
-./internal/devtools/httprr-pack check
+go run ./internal/devtools/rrtool check
 
 # Decompress for debugging
-./internal/devtools/httprr-pack unpack
+go run ./internal/devtools/rrtool unpack -r
 ```
 
 ### Recording with Rate Limit Protection
@@ -321,8 +321,8 @@ go test ./pkg -httprecord=. -run TestName
 **Solutions**:
 ```bash
 # Check and fix compression
-./internal/devtools/httprr-pack check
-./internal/devtools/httprr-pack pack
+go run ./internal/devtools/rrtool check
+go run ./internal/devtools/rrtool pack -r
 
 # Or remove the corrupted file and re-record
 rm testdata/TestName.httprr.gz

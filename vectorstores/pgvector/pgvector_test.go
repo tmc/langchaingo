@@ -32,6 +32,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
 	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client based on recording vs replay mode
@@ -62,6 +63,7 @@ func createOpenAILLMAndEmbedder(t *testing.T) (llm *openai.LLM, e *embeddings.Em
 	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
 	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client based on recording vs replay mode

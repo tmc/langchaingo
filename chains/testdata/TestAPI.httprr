@@ -1,0 +1,155 @@
+httprr trace v1
+4704 2277
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 4500
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"You are given the API Documentation:\n\nBASE URL: https://api.open-meteo.com/\n\nAPI Documentation\nThe API endpoint /v1/forecast accepts a geographical coordinate, a list of weather variables and responds with a JSON hourly weather forecast for 7 days. Time always starts at 0:00 today and contains 168 hours. All URL parameters are listed below:\n\nParameter\tFormat\tRequired\tDefault\tDescription\nlatitude, longitude\tFloating point\tYes\t\tGeographical WGS84 coordinate of the location\nhourly\tString array\tNo\t\tA list of weather variables which should be returned. Values can be comma separated, or multiple \u0026hourly= parameter in the URL can be used.\ndaily\tString array\tNo\t\tA list of daily weather variable aggregations which should be returned. Values can be comma separated, or multiple \u0026daily= parameter in the URL can be used. If daily weather variables are specified, parameter timezone is required.\ncurrent_weather\tBool\tNo\tfalse\tInclude current weather conditions in the JSON output.\ntemperature_unit\tString\tNo\tcelsius\tIf fahrenheit is set, all temperature values are converted to Fahrenheit.\nwindspeed_unit\tString\tNo\tkmh\tOther wind speed speed units: ms, mph and kn\nprecipitation_unit\tString\tNo\tmm\tOther precipitation amount units: inch\ntimeformat\tString\tNo\tiso8601\tIf format unixtime is selected, all time values are returned in UNIX epoch time in seconds. Please note that all timestamp are in GMT+0! For daily values with unix timestamps, please apply utc_offset_seconds again to get the correct date.\ntimezone\tString\tNo\tGMT\tIf timezone is set, all timestamps are returned as local-time and data is returned starting at 00:00 local-time. Any time zone name from the time zone database is supported. If auto is set as a time zone, the coordinates will be automatically resolved to the local time zone.\npast_days\tInteger (0-2)\tNo\t0\tIf past_days is set, yesterday or the day before yesterday data are also returned.\nstart_date\nend_date\tString (yyyy-mm-dd)\tNo\t\tThe time interval to get weather data. A day must be specified as an ISO8601 date (e.g. 2022-06-30).\nmodels\tString array\tNo\tauto\tManually select one or more weather models. Per default, the best suitable weather models will be combined.\n\nHourly Parameter Definition\nThe parameter \u0026hourly= accepts the following values. Most weather variables are given as an instantaneous value for the indicated hour. Some variables like precipitation are calculated from the preceding hour as an average or sum.\n\nVariable\tValid time\tUnit\tDescription\ntemperature_2m\tInstant\t°C (°F)\tAir temperature at 2 meters above ground\nsnowfall\tPreceding hour sum\tcm (inch)\tSnowfall amount of the preceding hour in centimeters. For the water equivalent in millimeter, divide by 7. E.g. 7 cm snow = 10 mm precipitation water equivalent\nrain\tPreceding hour sum\tmm (inch)\tRain from large scale weather systems of the preceding hour in millimeter\nshowers\tPreceding hour sum\tmm (inch)\tShowers from convective precipitation in millimeters from the preceding hour\nweathercode\tInstant\tWMO code\tWeather condition as a numeric code. Follow WMO weather interpretation codes. See table below for details.\nsnow_depth\tInstant\tmeters\tSnow depth on the ground\nfreezinglevel_height\tInstant\tmeters\tAltitude above sea level of the 0°C level\nvisibility\tInstant\tmeters\tViewing distance in meters. Influenced by low clouds, humidity and aerosols. Maximum visibility is approximately 24 km.\n\nYour task is to construct a full API JSON object based on the provided input. The input could be a question that requires an API call for its answer, or a direct or indirect instruction to consume an API. The input will be unpredictable and could come from a user or an agent.\n\nYour goal is to create an API call that accurately reflects the intent of the input. Be sure to exclude any unnecessary data in the API call to ensure efficiency.\n\nInput: What is the weather like right now in Munich, Germany in degrees Fahrenheit?\n\nRespond with a JSON object.\n\n{\n    \"method\":  [the HTTP method for the API call, such as GET or POST],\n    \"headers\": [object representing the HTTP headers required for the API call, always add a \"Content-Type\" header],\n    \"url\": \t   [full for the API call],\n    \"body\":    [object containing the data sent with the request, if needed]\n}"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1065
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Cf-Ray: 94882e257e0eebe3-SJC
+Content-Type: application/json
+Date: Sat, 31 May 2025 17:27:21 GMT
+Openai-Organization: tmc-corp
+Openai-Processing-Ms: 770
+Openai-Version: 2020-10-01
+Server: cloudflare
+Set-Cookie: __cf_bm=OLOwHLi.ATUvosOT2YeD4.STcBS5KsSMMj8.IJO9t6I-1748712441-1.0.1.1-9RprgZhgBzwH2LN_agpCWsqN4ilTVUje9mrG7jXLE8GEbGmTgk2DxvN5YayMchZ9GZX1hPELCSJlifkoHDAME5MoG9L_JUi5Lu4epYgAlp0; path=/; expires=Sat, 31-May-25 17:57:21 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+Set-Cookie: _cfuvid=QEzOC6J9MvicFKR2TcI1iRaofjI0_5_hIIsK3HxWRVg-1748712441813-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 13146
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49998932
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 1ms
+X-Request-Id: req_77c1ac664e2bd6c1d3c713e262a45e45
+
+{
+  "id": "chatcmpl-BdKHJCzdydd63C0W0TEQddaN4ZzFV",
+  "object": "chat.completion",
+  "created": 1748712441,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n    \"method\": \"GET\",\n    \"headers\": {\n        \"Content-Type\": \"application/json\"\n    },\n    \"url\": \"https://api.open-meteo.com/v1/forecast?latitude=48.137154&longitude=11.576124&current_weather=true&temperature_unit=fahrenheit\",\n    \"body\": {}\n}",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 965,
+    "completion_tokens": 71,
+    "total_tokens": 1036,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+228 635
+GET https://api.open-meteo.com/v1/forecast?latitude=48.137154&longitude=11.576124&current_weather=true&temperature_unit=fahrenheit HTTP/1.1
+Host: api.open-meteo.com
+User-Agent: Go-http-client/1.1
+Content-Type: application/json
+
+HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Connection: keep-alive
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 May 2025 17:27:22 GMT
+
+1d4
+{"latitude":48.14,"longitude":11.58,"generationtime_ms":0.04029273986816406,"utc_offset_seconds":0,"timezone":"GMT","timezone_abbreviation":"GMT","elevation":526.0,"current_weather_units":{"time":"iso8601","interval":"seconds","temperature":"°F","windspeed":"km/h","winddirection":"°","is_day":"","weathercode":"wmo code"},"current_weather":{"time":"2025-05-31T17:15","interval":900,"temperature":83.5,"windspeed":8.0,"winddirection":306,"is_day":1,"weathercode":0}}
+0
+
+5516 2192
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 5312
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"You are given the API Documentation:\n\nBASE URL: https://api.open-meteo.com/\n\nAPI Documentation\nThe API endpoint /v1/forecast accepts a geographical coordinate, a list of weather variables and responds with a JSON hourly weather forecast for 7 days. Time always starts at 0:00 today and contains 168 hours. All URL parameters are listed below:\n\nParameter\tFormat\tRequired\tDefault\tDescription\nlatitude, longitude\tFloating point\tYes\t\tGeographical WGS84 coordinate of the location\nhourly\tString array\tNo\t\tA list of weather variables which should be returned. Values can be comma separated, or multiple \u0026hourly= parameter in the URL can be used.\ndaily\tString array\tNo\t\tA list of daily weather variable aggregations which should be returned. Values can be comma separated, or multiple \u0026daily= parameter in the URL can be used. If daily weather variables are specified, parameter timezone is required.\ncurrent_weather\tBool\tNo\tfalse\tInclude current weather conditions in the JSON output.\ntemperature_unit\tString\tNo\tcelsius\tIf fahrenheit is set, all temperature values are converted to Fahrenheit.\nwindspeed_unit\tString\tNo\tkmh\tOther wind speed speed units: ms, mph and kn\nprecipitation_unit\tString\tNo\tmm\tOther precipitation amount units: inch\ntimeformat\tString\tNo\tiso8601\tIf format unixtime is selected, all time values are returned in UNIX epoch time in seconds. Please note that all timestamp are in GMT+0! For daily values with unix timestamps, please apply utc_offset_seconds again to get the correct date.\ntimezone\tString\tNo\tGMT\tIf timezone is set, all timestamps are returned as local-time and data is returned starting at 00:00 local-time. Any time zone name from the time zone database is supported. If auto is set as a time zone, the coordinates will be automatically resolved to the local time zone.\npast_days\tInteger (0-2)\tNo\t0\tIf past_days is set, yesterday or the day before yesterday data are also returned.\nstart_date\nend_date\tString (yyyy-mm-dd)\tNo\t\tThe time interval to get weather data. A day must be specified as an ISO8601 date (e.g. 2022-06-30).\nmodels\tString array\tNo\tauto\tManually select one or more weather models. Per default, the best suitable weather models will be combined.\n\nHourly Parameter Definition\nThe parameter \u0026hourly= accepts the following values. Most weather variables are given as an instantaneous value for the indicated hour. Some variables like precipitation are calculated from the preceding hour as an average or sum.\n\nVariable\tValid time\tUnit\tDescription\ntemperature_2m\tInstant\t°C (°F)\tAir temperature at 2 meters above ground\nsnowfall\tPreceding hour sum\tcm (inch)\tSnowfall amount of the preceding hour in centimeters. For the water equivalent in millimeter, divide by 7. E.g. 7 cm snow = 10 mm precipitation water equivalent\nrain\tPreceding hour sum\tmm (inch)\tRain from large scale weather systems of the preceding hour in millimeter\nshowers\tPreceding hour sum\tmm (inch)\tShowers from convective precipitation in millimeters from the preceding hour\nweathercode\tInstant\tWMO code\tWeather condition as a numeric code. Follow WMO weather interpretation codes. See table below for details.\nsnow_depth\tInstant\tmeters\tSnow depth on the ground\nfreezinglevel_height\tInstant\tmeters\tAltitude above sea level of the 0°C level\nvisibility\tInstant\tmeters\tViewing distance in meters. Influenced by low clouds, humidity and aerosols. Maximum visibility is approximately 24 km.\n\nYour task is to construct a full API JSON object based on the provided input. The input could be a question that requires an API call for its answer, or a direct or indirect instruction to consume an API. The input will be unpredictable and could come from a user or an agent.\n\nYour goal is to create an API call that accurately reflects the intent of the input. Be sure to exclude any unnecessary data in the API call to ensure efficiency.\n\nInput: What is the weather like right now in Munich, Germany in degrees Fahrenheit?\n\nRespond with a JSON object.\n\n{\n    \"method\":  [the HTTP method for the API call, such as GET or POST],\n    \"headers\": [object representing the HTTP headers required for the API call, always add a \"Content-Type\" header],\n    \"url\": \t   [full for the API call],\n    \"body\":    [object containing the data sent with the request, if needed]\n}\nHere is the response from the API:\n\n{\"latitude\":48.14,\"longitude\":11.58,\"generationtime_ms\":0.04029273986816406,\"utc_offset_seconds\":0,\"timezone\":\"GMT\",\"timezone_abbreviation\":\"GMT\",\"elevation\":526.0,\"current_weather_units\":{\"time\":\"iso8601\",\"interval\":\"seconds\",\"temperature\":\"°F\",\"windspeed\":\"km/h\",\"winddirection\":\"°\",\"is_day\":\"\",\"weathercode\":\"wmo code\"},\"current_weather\":{\"time\":\"2025-05-31T17:15\",\"interval\":900,\"temperature\":83.5,\"windspeed\":8.0,\"winddirection\":306,\"is_day\":1,\"weathercode\":0}}\n\nNow, summarize this response. Your summary should reflect the original input and highlight the key information from the API response that answers or relates to that input. Try to make your summary concise, yet informative.\n\nSummary:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 983
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Cf-Ray: 94882e7eda2febe3-SJC
+Content-Type: application/json
+Date: Sat, 31 May 2025 17:27:23 GMT
+Openai-Organization: tmc-corp
+Openai-Processing-Ms: 822
+Openai-Version: 2020-10-01
+Server: cloudflare
+Set-Cookie: __cf_bm=41puPJmXGEz3Vx5HW5zm2zpEDqlPRPL.gzHfVJ.9ink-1748712443-1.0.1.1-6OpxlqyLlFAamxl8HkByI9fi7JbHd81aEnEZ_TwA5nA47vzzW31lXFQnaLUAMwyfR.._XOYehjrYpWjhzV.zRCAsiVwfY3UODFY4Y_txTt4; path=/; expires=Sat, 31-May-25 17:57:23 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+Set-Cookie: _cfuvid=9zmJciY9N6lwCJyWvsaZdzYb9rO7QhehyFRANDTK3gc-1748712443616-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 826
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49998746
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 1ms
+X-Request-Id: req_1bd6b336d556bc2e2379d32504114202
+
+{
+  "id": "chatcmpl-BdKHK6uQ9kSQYDqoJNqILwACEHufO",
+  "object": "chat.completion",
+  "created": 1748712442,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The current weather in Munich, Germany is 83.5°F with a wind speed of 8.0 km/h coming from 306°. The weather condition is clear, and the data was generated at 17:15 GMT on May 31, 2025.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1154,
+    "completion_tokens": 56,
+    "total_tokens": 1210,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

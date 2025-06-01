@@ -69,33 +69,33 @@ func unpackCmd() {
 func checkCmd() {
 	fs := flag.NewFlagSet("check", flag.ExitOnError)
 	dirFlag := fs.String("dir", ".", "directory to process")
-	
+
 	fs.Parse(os.Args[2:])
-	
+
 	fmt.Printf("Checking httprr file compression status in %s...\n", *dirFlag)
-	
+
 	var uncompressedFiles []string
 	err := filepath.Walk(*dirFlag, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip devtools directory itself
 		if strings.Contains(path, "/internal/devtools/") {
 			return nil
 		}
-		
+
 		if !info.IsDir() && strings.HasSuffix(path, ".httprr") && !strings.HasSuffix(path, ".httprr.gz") {
 			uncompressedFiles = append(uncompressedFiles, path)
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error checking files: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	if len(uncompressedFiles) == 0 {
 		fmt.Println("✓ All httprr files are properly compressed")
 		os.Exit(0)
@@ -113,19 +113,19 @@ func cleanCmd() {
 	fs := flag.NewFlagSet("clean", flag.ExitOnError)
 	dirFlag := fs.String("dir", ".", "directory to process")
 	dryRunFlag := fs.Bool("dry-run", false, "show what would be removed without removing")
-	
+
 	fs.Parse(os.Args[2:])
-	
+
 	fmt.Printf("Cleaning up duplicate httprr files in %s...\n", *dirFlag)
-	
+
 	duplicates := make(map[string][]string)
-	
+
 	// Find all httprr files
 	err := filepath.Walk(*dirFlag, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if !info.IsDir() && (strings.HasSuffix(path, ".httprr") || strings.HasSuffix(path, ".httprr.gz")) {
 			// Get base name without extensions
 			base := path
@@ -134,17 +134,17 @@ func cleanCmd() {
 			} else {
 				base = strings.TrimSuffix(base, ".httprr")
 			}
-			
+
 			duplicates[base] = append(duplicates[base], path)
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error finding files: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	// Process duplicates
 	cleaned := 0
 	for _, files := range duplicates {
@@ -158,12 +158,12 @@ func cleanCmd() {
 					uncompressed = f
 				}
 			}
-			
+
 			if compressed != "" && uncompressed != "" {
 				// Determine which to remove based on modification time
 				compressedInfo, _ := os.Stat(compressed)
 				uncompressedInfo, _ := os.Stat(uncompressed)
-				
+
 				var toRemove string
 				if compressedInfo.ModTime().After(uncompressedInfo.ModTime()) {
 					toRemove = uncompressed
@@ -172,7 +172,7 @@ func cleanCmd() {
 					toRemove = compressed
 					fmt.Printf("Removing older compressed file: %s\n", compressed)
 				}
-				
+
 				if !*dryRunFlag {
 					if err := os.Remove(toRemove); err != nil {
 						fmt.Fprintf(os.Stderr, "Failed to remove %s: %v\n", toRemove, err)
@@ -185,7 +185,7 @@ func cleanCmd() {
 			}
 		}
 	}
-	
+
 	if cleaned == 0 {
 		fmt.Println("No duplicate files found")
 	} else {
@@ -223,9 +223,7 @@ func listPackagesCmd() {
 	case "command":
 		fmt.Printf("go test -httprecord=. %s", strings.Join(packages, " "))
 	case "paths":
-		for _, pkg := range packages {
-			fmt.Println(pkg)
-		}
+		fmt.Print(strings.Join(packages, " "))
 	default:
 		fmt.Fprintf(os.Stderr, "Error: unknown format '%s'. Use 'paths' or 'command'\n", *formatFlag)
 		os.Exit(1)
@@ -261,13 +259,13 @@ func findPackagesWithHttprr(rootDir string) ([]string, error) {
 		if hasHttprr {
 			// Get the package path relative to the module root
 			pkgDir := filepath.Dir(path)
-			
+
 			// Convert to Go module path format
 			relPath, err := filepath.Rel(rootDir, pkgDir)
 			if err != nil {
 				return err
 			}
-			
+
 			// Convert to Go package path format
 			pkgPath := "./" + filepath.ToSlash(relPath)
 			if pkgPath == "./" {
@@ -438,7 +436,7 @@ Commands:
 
 Options:
   -dir string    Directory to process (default ".")
-  -r             Process directories recursively (pack/unpack only)
+  -r             Process directories recursively (pack/unpack)
   -dry-run       Show what would be done without doing it (clean only)
   -format string Output format for list-packages: 'paths' or 'command' (default "paths")
 

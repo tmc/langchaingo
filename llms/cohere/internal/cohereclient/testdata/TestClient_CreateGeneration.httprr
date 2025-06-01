@@ -1,0 +1,32 @@
+httprr trace v1
+272 2309
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: Go-http-client/1.1
+Content-Length: 80
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Once upon a time in a magical forest, there lived","model":"command"}HTTP/2.0 200 OK
+Content-Length: 1583
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:31:03 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Num_chars: 1327
+Num_tokens: 282
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: 75015914c8e6fbc4b2cf466cf3f604ff
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 8116
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 39
+
+{"id":"26af7669-e949-4e99-b3cc-4b8959a939bf","generations":[{"id":"3a8c0eb3-6ecf-46fc-9160-af0a6ce5e506","text":" a clever little witch who enjoyed wandering the mystical forest, foraging for delicious berries and herbs to brew her potions. She had a particular fondness for a flowering plant known as the Wolfsbane, which grew in a clearing in the woods. This plant was said to have magical properties, and she would often gather its fragrant flowers and pungent roots to add to her spells.\n\nOne clear and starry night, the little witch decided to prepare a special potion. She gathered her ingredients and set about brewing a magic brew that would cure all ills. To her delight, the potion turned out to be more potent than any she had brewed before, and the sweet fragrance of the Wolfsbane permeated the air.\n\nNews of the little witch's extraordinary potion spread quickly throughout the land, and soon, ailing creatures great and small journeyed to the mystical forest in search of a cure. From ailing birds to sickly unicorns, all who drank the potion were restored to health, and the little witch, with her passion for healing and love for the magical Wolfsbane, became known far and wide as the most talented healer in the land. \n\nAnd so, in this enchanting forest, the little witch continued her work, always mindful of the healing power encapsulated within the majestic Wolfsbane. ","finish_reason":"COMPLETE"}],"prompt":"Once upon a time in a magical forest, there lived","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":11,"output_tokens":271}}}

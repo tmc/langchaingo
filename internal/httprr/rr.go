@@ -16,6 +16,7 @@ import (
 	"cmp"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -165,6 +166,9 @@ func create(file string, rt http.RoundTripper) (*RecordReplay, error) {
 		real:   rt,
 		record: f,
 	}
+	// Apply default scrubbing
+	rr.ScrubReq(getDefaultRequestScrubbers()...)
+	rr.ScrubResp(getDefaultResponseScrubbers()...)
 	return rr, nil
 }
 
@@ -234,6 +238,9 @@ func open(file string, rt http.RoundTripper) (*RecordReplay, error) {
 		real:   rt,
 		replay: replay,
 	}
+	// Apply default scrubbing
+	rr.ScrubReq(getDefaultRequestScrubbers()...)
+	rr.ScrubResp(getDefaultResponseScrubbers()...)
 	return rr, nil
 }
 
@@ -535,8 +542,6 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 		if err != nil {
 			t.Fatalf("httprr: failed to open recording file %s: %v", filename, err)
 		}
-		// Apply default scrubbing when recording
-		applyDefaultScrubbing(rr)
 		t.Cleanup(func() { rr.Close() })
 		return rr
 	}
@@ -547,8 +552,6 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Apply default scrubbing in replay mode too
-	applyDefaultScrubbing(rr)
 	t.Cleanup(func() { rr.Close() })
 	return rr
 }
@@ -762,69 +765,121 @@ func DecompressFile(path string) error {
 	return nil
 }
 
-// applyDefaultScrubbing adds default scrubbing functions to remove common API keys
-// and sensitive headers from recordings.
-func applyDefaultScrubbing(rr *RecordReplay) {
-	// Request scrubber to replace sensitive headers
-	rr.ScrubReq(func(req *http.Request) error {
-		// Iterate through all headers to find any containing api-key, api-token, token, or authorization (case insensitive)
-		for header, values := range req.Header {
-			headerLower := strings.ToLower(header)
-			if strings.Contains(headerLower, "api-key") ||
-				strings.Contains(headerLower, "api-token") ||
-				strings.Contains(headerLower, "token") ||
-				headerLower == "authorization" {
 
-				// Special handling for Authorization header
-				if headerLower == "authorization" && len(values) > 0 {
-					// Preserve the auth type (Bearer, Basic, etc.) but scrub the token
-					authValue := values[0]
-					parts := strings.SplitN(authValue, " ", 2)
-					if len(parts) == 2 {
-						req.Header.Set(header, parts[0]+" test-api-key")
+// getDefaultRequestScrubbers returns the default request scrubbing functions to remove
+// sensitive headers and API keys from request recordings.
+func getDefaultRequestScrubbers() []func(*http.Request) error {
+	return []func(*http.Request) error{
+		func(req *http.Request) error {
+			// Iterate through all headers to find any containing api-key, api-token, token, or authorization (case insensitive)
+			for header, values := range req.Header {
+				headerLower := strings.ToLower(header)
+				if strings.Contains(headerLower, "api-key") ||
+					strings.Contains(headerLower, "api-token") ||
+					strings.Contains(headerLower, "token") ||
+					headerLower == "authorization" {
+
+					// Special handling for Authorization header
+					if headerLower == "authorization" && len(values) > 0 {
+						// Preserve the auth type (Bearer, Basic, etc.) but scrub the token
+						authValue := values[0]
+						parts := strings.SplitN(authValue, " ", 2)
+						if len(parts) == 2 {
+							req.Header.Set(header, parts[0]+" test-api-key")
+						} else {
+							req.Header.Set(header, "test-api-key")
+						}
 					} else {
 						req.Header.Set(header, "test-api-key")
 					}
-				} else {
-					req.Header.Set(header, "test-api-key")
 				}
 			}
-		}
 
-		// Munge Openai-Organization header to a test value
-		if req.Header.Get("Openai-Organization") != "" {
-			req.Header.Set("Openai-Organization", "lcgo-tst")
-		}
-		if req.Header.Get("openai-organization") != "" {
-			req.Header.Set("openai-organization", "lcgo-tst")
-		}
+			// Munge Openai-Organization header to a test value
+			if req.Header.Get("Openai-Organization") != "" {
+				req.Header.Set("Openai-Organization", "lcgo-tst")
+			}
+			if req.Header.Get("openai-organization") != "" {
+				req.Header.Set("openai-organization", "lcgo-tst")
+			}
 
-		return nil
-	})
+			return nil
+		},
+	}
+}
 
-	// Response scrubber to remove sensitive response headers
-	rr.ScrubResp(func(buf *bytes.Buffer) error {
-		// Parse the response from the buffer
+// getDefaultResponseScrubbers returns the default response scrubbing functions to remove
+// sensitive headers and tracing information from response recordings.
+func getDefaultResponseScrubbers() []func(*bytes.Buffer) error {
+	return []func(*bytes.Buffer) error{
+		func(buf *bytes.Buffer) error {
+			// Parse the response from the buffer
+			resp, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(buf.Bytes())), nil)
+			if err != nil {
+				return nil // Ignore parse errors, just return the buffer as-is
+			}
+
+			// Remove Cf-Ray header (Cloudflare tracing)
+			resp.Header.Del("Cf-Ray")
+			resp.Header.Del("cf-ray")
+
+			// Remove Set-Cookie headers (session tokens, etc.)
+			resp.Header.Del("Set-Cookie")
+			resp.Header.Del("set-cookie")
+
+			// Munge Openai-Organization header in responses too
+			if resp.Header.Get("Openai-Organization") != "" {
+				resp.Header.Set("Openai-Organization", "lcgo-tst")
+			}
+			if resp.Header.Get("openai-organization") != "" {
+				resp.Header.Set("openai-organization", "lcgo-tst")
+			}
+
+			// Re-serialize the response
+			buf.Reset()
+			if err := resp.Write(buf); err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+}
+
+// EmbeddingJSONFormatter returns a response scrubber that formats JSON responses
+// with special handling for number arrays (displays them on single lines).
+// This is particularly useful for embedding API responses which often contain 
+// large arrays of floating-point numbers.
+//
+// Usage in tests:
+//   rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+func EmbeddingJSONFormatter() func(*bytes.Buffer) error {
+	return func(buf *bytes.Buffer) error {
+		// Parse the response to get headers and body
 		resp, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(buf.Bytes())), nil)
 		if err != nil {
-			return nil // Ignore parse errors, just return the buffer as-is
+			return nil // Not an HTTP response, skip formatting
 		}
 
-		// Remove Cf-Ray header (Cloudflare tracing)
-		resp.Header.Del("Cf-Ray")
-		resp.Header.Del("cf-ray")
-
-		// Remove Set-Cookie headers (session tokens, etc.)
-		resp.Header.Del("Set-Cookie")
-		resp.Header.Del("set-cookie")
-
-		// Munge Openai-Organization header in responses too
-		if resp.Header.Get("Openai-Organization") != "" {
-			resp.Header.Set("Openai-Organization", "lcgo-tst")
+		// Read the body
+		bodyBytes, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			return nil // Can't read body, skip formatting
 		}
-		if resp.Header.Get("openai-organization") != "" {
-			resp.Header.Set("openai-organization", "lcgo-tst")
+
+		// Check if content-type suggests JSON
+		contentType := resp.Header.Get("Content-Type")
+		if !strings.Contains(contentType, "application/json") {
+			return nil // Not JSON, skip formatting
 		}
+
+		// Try to format the JSON body
+		formattedBody := formatJSONBody(bodyBytes)
+
+		// Reconstruct the response with formatted body
+		resp.Body = io.NopCloser(bytes.NewReader(formattedBody))
+		resp.ContentLength = int64(len(formattedBody))
 
 		// Re-serialize the response
 		buf.Reset()
@@ -833,5 +888,128 @@ func applyDefaultScrubbing(rr *RecordReplay) {
 		}
 
 		return nil
-	})
+	}
+}
+
+// formatJSONBody formats JSON with special handling for number arrays
+func formatJSONBody(data []byte) []byte {
+	if len(data) == 0 {
+		return data
+	}
+
+	// Try to detect if this might be JSON
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 || (trimmed[0] != '{' && trimmed[0] != '[') {
+		return data
+	}
+
+	// Try to parse as JSON
+	var jsonData interface{}
+	if err := json.Unmarshal(data, &jsonData); err != nil {
+		return data // Not valid JSON, return original
+	}
+
+	// Format with custom handling for number arrays
+	formatted := formatJSONValue(jsonData, 0)
+	return []byte(formatted)
+}
+
+// formatJSONValue formats a JSON value with special handling for arrays of numbers
+func formatJSONValue(v interface{}, indent int) string {
+	indentStr := strings.Repeat("  ", indent)
+	nextIndentStr := strings.Repeat("  ", indent+1)
+
+	switch val := v.(type) {
+	case map[string]interface{}:
+		if len(val) == 0 {
+			return "{}"
+		}
+		var parts []string
+		parts = append(parts, "{")
+
+		// Preserve original key order by iterating over the map directly
+		i := 0
+		for k, v := range val {
+			formatted := formatJSONValue(v, indent+1)
+			parts = append(parts, fmt.Sprintf("%s\"%s\": %s", nextIndentStr, k, formatted))
+			if i < len(val)-1 {
+				parts[len(parts)-1] += ","
+			}
+			i++
+		}
+		parts = append(parts, indentStr+"}")
+		return strings.Join(parts, "\n")
+
+	case []interface{}:
+		if len(val) == 0 {
+			return "[]"
+		}
+
+		// Check if this is an array of numbers
+		allNumbers := true
+		for _, item := range val {
+			switch item.(type) {
+			case float64, int, int64:
+				// continue
+			default:
+				allNumbers = false
+				break
+			}
+		}
+
+		if allNumbers && len(val) > 0 {
+			// Format number arrays on a single line
+			var nums []string
+			for _, item := range val {
+				switch n := item.(type) {
+				case float64:
+					// Format float64 with appropriate precision
+					if n == float64(int64(n)) {
+						nums = append(nums, fmt.Sprintf("%d", int64(n)))
+					} else {
+						nums = append(nums, fmt.Sprintf("%g", n))
+					}
+				default:
+					nums = append(nums, fmt.Sprintf("%v", item))
+				}
+			}
+			return "[" + strings.Join(nums, ", ") + "]"
+		}
+
+		// Format other arrays with one item per line
+		var parts []string
+		parts = append(parts, "[")
+		for i, item := range val {
+			formatted := formatJSONValue(item, indent+1)
+			parts = append(parts, nextIndentStr+formatted)
+			if i < len(val)-1 {
+				parts[len(parts)-1] += ","
+			}
+		}
+		parts = append(parts, indentStr+"]")
+		return strings.Join(parts, "\n")
+
+	case string:
+		// Marshal string to get proper escaping
+		b, _ := json.Marshal(val)
+		return string(b)
+
+	case float64:
+		// Format float64 with appropriate precision
+		if val == float64(int64(val)) {
+			return fmt.Sprintf("%d", int64(val))
+		}
+		return fmt.Sprintf("%g", val)
+
+	case bool:
+		return fmt.Sprintf("%v", val)
+
+	case nil:
+		return "null"
+
+	default:
+		// Fallback to standard JSON marshaling
+		b, _ := json.Marshal(val)
+		return string(b)
+	}
 }

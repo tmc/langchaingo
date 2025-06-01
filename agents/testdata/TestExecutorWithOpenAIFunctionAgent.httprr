@@ -1,0 +1,143 @@
+httprr trace v1
+1212 1825
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 1008
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Unix first released at Bell Labs?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 1104
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:54 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 750
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 755
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 1000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 999874
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 7ms
+X-Request-Id: req_0123d2ba0c8ae77faf2480e26c744507
+
+{
+  "id": "chatcmpl-BdUdRj4FLoWkOLNTRevmMtrt1i7Xt",
+  "object": "chat.completion",
+  "created": 1748752253,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_e8O9gppYFda3q9uPncQFdnmB",
+            "type": "function",
+            "function": {
+              "name": "GoogleSearch",
+              "arguments": "{\n  \"__arg1\": \"Unix first release year at Bell Labs\"\n}"
+            }
+          }
+        ],
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 164,
+    "completion_tokens": 22,
+    "total_tokens": 186,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1280 1560
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 1076
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Unix first released at Bell Labs?"},{"role":"function","content":"November 1971","name":"GoogleSearch"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 840
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:56 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 636
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 640
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 1000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 999968
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 1ms
+X-Request-Id: req_1158b2ffcd84db0e6eefbea9f3a0b7ee
+
+{
+  "id": "chatcmpl-BdUdT3RiayTs1kBEdOYkCCzIlkn0g",
+  "object": "chat.completion",
+  "created": 1748752255,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Unix was first released at Bell Labs in November 1971.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 173,
+    "completion_tokens": 14,
+    "total_tokens": 187,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
