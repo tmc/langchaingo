@@ -1,0 +1,32 @@
+httprr trace v1
+259 1646
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: Go-http-client/1.1
+Content-Length: 67
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"What is the capital of France?","model":"command-light"}HTTP/2.0 200 OK
+Content-Length: 922
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:56 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Num_chars: 669
+Num_tokens: 123
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: e4ee93eb032ef72e14463abfc76662ef
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 1143
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 38
+
+{"id":"9ccf714a-f7f9-4d01-a714-f66aded55eeb","generations":[{"id":"b4e56ad3-b64c-4f95-9c43-c7be4c20c7b3","text":" Paris, France is recognized as the capital and political center of France. It holds significant landmarks and as well as iconic monuments like the Eiffel Tower, as well as cultural institutions and governmental buildings. \n\nThe name capital of France is based on legislative and administrative purposes, while other major cities like Lyon, Marseille, and Toulouse are also significant regional hubs. \n\nThese remain major centers of economic and cultural activities, but the administrative capital is a de facto economic and tour center and is often where many businesses decide to locate. It is not a official standing capital of France. ","finish_reason":"COMPLETE"}],"prompt":"What is the capital of France?","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":7,"output_tokens":116}}}

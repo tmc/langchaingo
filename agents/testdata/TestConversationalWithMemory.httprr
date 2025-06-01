@@ -1,0 +1,67 @@
+httprr trace v1
+2323 1705
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: Go-http-client/1.1
+Content-Length: 2119
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4","messages":[{"role":"user","content":"Assistant is a large language model trained by Meta.\n\nAssistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.\n\nAssistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.\n\nOverall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.\n\nTOOLS:\n------\n\nAssistant has access to the following tools:\n\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nTo use a tool, please use the following format:\n\nThought: Do I need to use a tool? Yes\nAction: the action to take, should be one of [calculator]\nAction Input: the input to the action\nObservation: the result of the action\n\nWhen you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:\n\nThought: Do I need to use a tool? No\nAI: [your response here]\n\n\nBegin!\n\nPrevious conversation history:\n\n\nNew input: Hi! my name is Bob and the year I was born is 1987\n\nThought:"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+Content-Length: 982
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Sun, 01 Jun 2025 04:30:58 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 4936
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 4939
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 1000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 999506
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 29ms
+X-Request-Id: req_1c67be48acded6bbafd5e495842e5548
+
+{
+  "id": "chatcmpl-BdUdRg5uNM2cLtE7rrSFAhQxbf0cM",
+  "object": "chat.completion",
+  "created": 1748752253,
+  "model": "gpt-4-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Do I need to use a tool? No\nAI: Hi Bob! It's nice to meet you. Based on the year you were born, you would be around 34 or 35 years old now, depending on your birthday. How can I assist you today?",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 404,
+    "completion_tokens": 55,
+    "total_tokens": 459,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
