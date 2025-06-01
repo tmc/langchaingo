@@ -32,7 +32,6 @@ linters:
       - std-error-handling
     paths:
       - internal
-      - vectorstores/bedrockknowledgebases
 formatters:
   enable:
     - gofmt
