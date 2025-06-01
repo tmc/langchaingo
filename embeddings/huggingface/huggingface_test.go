@@ -1,6 +1,7 @@
 package huggingface
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func TestHuggingfaceEmbeddings(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	if huggingfaceKey := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); huggingfaceKey == "" {
@@ -17,10 +19,10 @@ func TestHuggingfaceEmbeddings(t *testing.T) {
 	e, err := NewHuggingface()
 	require.NoError(t, err)
 
-	_, err = e.EmbedQuery(t.Context(), "Hello world!")
+	_, err = e.EmbedQuery(ctx, "Hello world!")
 	require.NoError(t, err)
 
-	embeddings, err := e.EmbedDocuments(t.Context(), []string{"Hello world", "The world is ending", "good bye"})
+	embeddings, err := e.EmbedDocuments(ctx, []string{"Hello world", "The world is ending", "good bye"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 3)
 }

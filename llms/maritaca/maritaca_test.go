@@ -27,6 +27,7 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 }
 
 func TestGenerateContent(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -40,7 +41,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 
 	require.NoError(t, err)
 
@@ -50,6 +51,7 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -64,7 +66,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(t.Context(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil

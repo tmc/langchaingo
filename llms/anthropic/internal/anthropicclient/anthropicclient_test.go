@@ -12,7 +12,8 @@ import (
 )
 
 func TestClient_CreateCompletion(t *testing.T) {
-	httprr.SkipIfNoCredentialsOrRecording(t, "ANTHROPIC_API_KEY")
+	ctx := context.Background()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ANTHROPIC_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -34,13 +35,14 @@ func TestClient_CreateCompletion(t *testing.T) {
 		MaxTokens:   100,
 	}
 
-	resp, err := client.CreateCompletion(t.Context(), req)
+	resp, err := client.CreateCompletion(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Text)
 }
 
 func TestClient_CreateMessage(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
@@ -65,13 +67,14 @@ func TestClient_CreateMessage(t *testing.T) {
 		MaxTokens: 100,
 	}
 
-	resp, err := client.CreateMessage(t.Context(), req)
+	resp, err := client.CreateMessage(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Content)
 }
 
 func TestClient_CreateMessageStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
@@ -102,13 +105,14 @@ func TestClient_CreateMessageStream(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateMessage(t.Context(), req)
+	resp, err := client.CreateMessage(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, chunks)
 }
 
 func TestClient_WithAnthropicBetaHeader(t *testing.T) {
+	ctx := context.Background()
 	t.Skip("Skipping due to rate limit error in test recording")
 	t.Parallel()
 
@@ -153,7 +157,7 @@ func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateMessage(t.Context(), req)
+	resp, err := client.CreateMessage(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }

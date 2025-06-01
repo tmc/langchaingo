@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,15 +10,16 @@ import (
 )
 
 func TestChatMessageHistory(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	h := NewChatMessageHistory()
-	err := h.AddAIMessage(t.Context(), "foo")
+	err := h.AddAIMessage(ctx, "foo")
 	require.NoError(t, err)
-	err = h.AddUserMessage(t.Context(), "bar")
+	err = h.AddUserMessage(ctx, "bar")
 	require.NoError(t, err)
 
-	messages, err := h.Messages(t.Context())
+	messages, err := h.Messages(ctx)
 	require.NoError(t, err)
 
 	assert.Equal(t, []llms.ChatMessage{
@@ -31,10 +33,10 @@ func TestChatMessageHistory(t *testing.T) {
 			llms.SystemChatMessage{Content: "bar"},
 		}),
 	)
-	err = h.AddUserMessage(t.Context(), "zoo")
+	err = h.AddUserMessage(ctx, "zoo")
 	require.NoError(t, err)
 
-	messages, err = h.Messages(t.Context())
+	messages, err = h.Messages(ctx)
 	require.NoError(t, err)
 
 	assert.Equal(t, []llms.ChatMessage{

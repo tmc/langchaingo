@@ -36,7 +36,7 @@ func getValues(t *testing.T) (string, string) {
 
 	uri := os.Getenv("REDIS_URL")
 	if uri == "" {
-		ctx := t.Context()
+		ctx := context.Background()
 
 		genericContainerReq := testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
@@ -79,10 +79,10 @@ var yamlSchemaData string
 
 func TestCreateRedisVectorOptions(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := t.Context()
 	index := "test_case1"
 
 	_, err := redisvector.New(ctx,
@@ -170,11 +170,10 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 
 func TestAddDocuments(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
-
-	ctx := t.Context()
 
 	index := "test_add_document"
 	prefix := "doc:"
@@ -258,10 +257,10 @@ func TestAddDocuments(t *testing.T) {
 
 func TestSimilaritySearch(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := t.Context()
 
 	index := "test_similarity_search"
 
@@ -347,10 +346,10 @@ func TestSimilaritySearch(t *testing.T) {
 
 func TestRedisVectorAsRetriever(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	redisURL, ollamaURL := getValues(t)
 	llm, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := t.Context()
 	index := "test_redis_vector_as_retriever"
 
 	store, err := redisvector.New(ctx,
@@ -405,10 +404,10 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 
 func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	redisURL, ollamaURL := getValues(t)
 	llm, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := t.Context()
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 
 	store, err := redisvector.New(ctx,
@@ -419,7 +418,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{
 				PageContent: "The color of the lamp beside the desk is black.",

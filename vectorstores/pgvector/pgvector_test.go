@@ -29,7 +29,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
 
 	// Setup httprr for OpenAI API calls
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
@@ -60,7 +60,7 @@ func createOpenAILLMAndEmbedder(t *testing.T) (llm *openai.LLM, e *embeddings.Em
 	t.Helper()
 
 	// Setup httprr for OpenAI API calls
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
@@ -92,8 +92,9 @@ func preCheckEnvSetting(t *testing.T) string {
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
+		ctx := context.Background()
 		pgVectorContainer, err := tcpostgres.Run(
-			t.Context(),
+			ctx,
 			"docker.io/pgvector/pgvector:pg16",
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
@@ -117,7 +118,7 @@ func preCheckEnvSetting(t *testing.T) string {
 			}
 		})
 
-		str, err := pgVectorContainer.ConnectionString(t.Context(), "sslmode=disable")
+		str, err := pgVectorContainer.ConnectionString(ctx, "sslmode=disable")
 		require.NoError(t, err)
 
 		pgvectorURL = str
@@ -150,7 +151,7 @@ func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, p
 func TestPgvectorStoreRest(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 
@@ -186,7 +187,7 @@ func TestPgvectorStoreRest(t *testing.T) {
 func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 
@@ -204,7 +205,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -241,7 +242,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 func TestPgvectorStoreSimilarityScore(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 
@@ -259,7 +260,7 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo is the capital city of Japan."},
 		{PageContent: "Paris is the city of love."},
 		{PageContent: "I like to visit London."},
@@ -281,7 +282,7 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 
@@ -334,7 +335,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 // openai embedding [dimensions](https://platform.openai.com/docs/api-reference/embeddings/create#embeddings-create-dimensions) args.
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	t.Parallel()
-	ctx := t.Context()
+	ctx := context.Background()
 	pgvectorURL := preCheckEnvSetting(t)
 	genaiKey := os.Getenv("GENAI_API_KEY")
 	if genaiKey == "" {
@@ -407,7 +408,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 func TestPgvectorAsRetriever(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
@@ -450,7 +451,7 @@ func TestPgvectorAsRetriever(t *testing.T) {
 func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
@@ -469,7 +470,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -498,7 +499,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
@@ -574,7 +575,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
@@ -593,7 +594,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{
 				PageContent: "In office, the color of the lamp beside the desk is orange.",
@@ -640,7 +641,7 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 
@@ -658,7 +659,7 @@ func TestDeduplicater(t *testing.T) {
 
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
 		}},
@@ -682,7 +683,7 @@ func TestDeduplicater(t *testing.T) {
 func TestWithAllOptions(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 
 	e := createOpenAIEmbedder(t)
 	conn, err := pgx.Connect(ctx, pgvectorURL)

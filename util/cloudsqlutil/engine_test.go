@@ -39,9 +39,10 @@ func getEnvVariables(t *testing.T) (string, string, string, string, string, stri
 }
 
 func TestNewPostgresEngine(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	username, password, database, projectID, region, instance := getEnvVariables(t)
-	ctx, cancel := context.WithCancel(t.Context())
+	ctx, cancel := context.WithCancel(ctx)
 	t.Cleanup(cancel)
 	tcs := []struct {
 		desc string
@@ -107,6 +108,7 @@ func TestNewPostgresEngine(t *testing.T) {
 }
 
 func TestGetUser(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	testServiceAccount := "test-service-account-email@test.com"
 	// Mock EmailRetriever function for testing.
@@ -158,7 +160,7 @@ func TestGetUser(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			username, usingIAMAuth, err := getUser(t.Context(), tc.engineConfig)
+			username, usingIAMAuth, err := getUser(ctx, tc.engineConfig)
 
 			// Check if the error matches the expected error
 			if err != nil && err.Error() != tc.expectedErr {

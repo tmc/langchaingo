@@ -30,9 +30,10 @@ func (m mockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, err
 }
 
 func TestStoreHTTPRR_CreateIndex(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -60,14 +61,15 @@ func TestStoreHTTPRR_CreateIndex(t *testing.T) {
 	indexName := "test-index"
 
 	// Create index with default options
-	err = store.CreateIndex(t.Context(), indexName)
+	err = store.CreateIndex(ctx, indexName)
 	require.NoError(t, err)
 }
 
 func TestStoreHTTPRR_AddDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -109,7 +111,7 @@ func TestStoreHTTPRR_AddDocuments(t *testing.T) {
 		},
 	}
 
-	ids, err := store.AddDocuments(t.Context(), docs)
+	ids, err := store.AddDocuments(ctx, docs)
 	require.NoError(t, err)
 	assert.Len(t, ids, 2)
 	assert.NotEmpty(t, ids[0])
@@ -117,9 +119,10 @@ func TestStoreHTTPRR_AddDocuments(t *testing.T) {
 }
 
 func TestStoreHTTPRR_SimilaritySearch(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -147,15 +150,16 @@ func TestStoreHTTPRR_SimilaritySearch(t *testing.T) {
 	query := "What is machine learning?"
 	numDocuments := 2
 
-	docs, err := store.SimilaritySearch(t.Context(), query, numDocuments)
+	docs, err := store.SimilaritySearch(ctx, query, numDocuments)
 	require.NoError(t, err)
 	assert.LessOrEqual(t, len(docs), numDocuments)
 }
 
 func TestStoreHTTPRR_DeleteIndex(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -182,14 +186,15 @@ func TestStoreHTTPRR_DeleteIndex(t *testing.T) {
 
 	indexName := "test-index-to-delete"
 
-	err = store.DeleteIndex(t.Context(), indexName)
+	err = store.DeleteIndex(ctx, indexName)
 	require.NoError(t, err)
 }
 
 func TestStoreHTTPRR_ListIndexes(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -215,7 +220,7 @@ func TestStoreHTTPRR_ListIndexes(t *testing.T) {
 	require.NoError(t, err)
 
 	var indexes map[string]interface{}
-	err = store.ListIndexes(t.Context(), &indexes)
+	err = store.ListIndexes(ctx, &indexes)
 	require.NoError(t, err)
 	assert.NotNil(t, indexes)
 }

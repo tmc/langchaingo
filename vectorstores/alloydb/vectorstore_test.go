@@ -2,6 +2,7 @@
 package alloydb_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -86,7 +87,7 @@ func getEnvVariables(t *testing.T) EnvVariables {
 
 func setEngine(t *testing.T, envVariables EnvVariables) alloydbutil.PostgresEngine {
 	t.Helper()
-	ctx := t.Context()
+	ctx := context.Background()
 	pgEngine, err := alloydbutil.NewPostgresEngine(ctx,
 		alloydbutil.WithUser(envVariables.Username),
 		alloydbutil.WithPassword(envVariables.Password),
@@ -103,7 +104,7 @@ func setEngine(t *testing.T, envVariables EnvVariables) alloydbutil.PostgresEngi
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -120,7 +121,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, func() error) {
 	t.Helper()
 	pgEngine := setEngine(t, envVariables)
-	ctx := t.Context()
+	ctx := context.Background()
 	vectorstoreTableoptions := alloydbutil.VectorstoreTableOptions{
 		TableName:         envVariables.Table,
 		OverwriteExisting: true,
@@ -146,20 +147,21 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, 
 }
 
 func TestPingToDB(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	engine := setEngine(t, envVariables)
 
 	defer engine.Close()
 
-	if err := engine.Pool.Ping(t.Context()); err != nil {
+	if err := engine.Pool.Ping(ctx); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestApplyVectorIndexAndDropIndex(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
-	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -176,9 +178,9 @@ func TestApplyVectorIndexAndDropIndex(t *testing.T) {
 }
 
 func TestIsValidIndex(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
-	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -200,7 +202,7 @@ func TestIsValidIndex(t *testing.T) {
 }
 
 func TestAddDocuments(t *testing.T) {
-	ctx := t.Context()
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
 	t.Cleanup(func() {

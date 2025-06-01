@@ -1,6 +1,7 @@
 package agents
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -14,7 +15,7 @@ import (
 
 func TestConversationalWithMemory(t *testing.T) {
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -41,7 +42,8 @@ func TestConversationalWithMemory(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	res, err := chains.Run(t.Context(), executor, "Hi! my name is Bob and the year I was born is 1987")
+	ctx := context.Background()
+	res, err := chains.Run(ctx, executor, "Hi! my name is Bob and the year I was born is 1987")
 	require.NoError(t, err)
 
 	// Verify we got a reasonable response

@@ -1,6 +1,7 @@
 package ollamaclient
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,9 +13,10 @@ import (
 )
 
 func TestClient_Generate(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OLLAMA_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -44,7 +46,7 @@ func TestClient_Generate(t *testing.T) {
 	}
 
 	var response *GenerateResponse
-	err = client.Generate(t.Context(), req, func(resp GenerateResponse) error {
+	err = client.Generate(ctx, req, func(resp GenerateResponse) error {
 		response = &resp
 		return nil
 	})
@@ -55,9 +57,10 @@ func TestClient_Generate(t *testing.T) {
 }
 
 func TestClient_GenerateStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OLLAMA_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -85,7 +88,7 @@ func TestClient_GenerateStream(t *testing.T) {
 	}
 
 	var responses []GenerateResponse
-	err = client.Generate(t.Context(), req, func(resp GenerateResponse) error {
+	err = client.Generate(ctx, req, func(resp GenerateResponse) error {
 		responses = append(responses, resp)
 		return nil
 	})
@@ -95,9 +98,10 @@ func TestClient_GenerateStream(t *testing.T) {
 }
 
 func TestClient_GenerateChat(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OLLAMA_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -129,7 +133,7 @@ func TestClient_GenerateChat(t *testing.T) {
 	}
 
 	var response *ChatResponse
-	err = client.GenerateChat(t.Context(), req, func(resp ChatResponse) error {
+	err = client.GenerateChat(ctx, req, func(resp ChatResponse) error {
 		response = &resp
 		return nil
 	})
@@ -141,9 +145,10 @@ func TestClient_GenerateChat(t *testing.T) {
 }
 
 func TestClient_GenerateChatStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OLLAMA_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -175,7 +180,7 @@ func TestClient_GenerateChatStream(t *testing.T) {
 	}
 
 	var responses []ChatResponse
-	err = client.GenerateChat(t.Context(), req, func(resp ChatResponse) error {
+	err = client.GenerateChat(ctx, req, func(resp ChatResponse) error {
 		responses = append(responses, resp)
 		return nil
 	})
@@ -185,9 +190,10 @@ func TestClient_GenerateChatStream(t *testing.T) {
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OLLAMA_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -211,7 +217,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateEmbedding(t.Context(), req)
+	resp, err := client.CreateEmbedding(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Embedding)

@@ -1,6 +1,7 @@
 package voyageai
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestVoyageAI_EmbedDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Check if we have API key or httprr recording
@@ -46,7 +48,7 @@ func TestVoyageAI_EmbedDocuments(t *testing.T) {
 		"Natural language processing enables computers to understand human language",
 	}
 
-	embeddings, err := embedder.EmbedDocuments(t.Context(), texts)
+	embeddings, err := embedder.EmbedDocuments(ctx, texts)
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 3)
 	assert.NotEmpty(t, embeddings[0])
@@ -55,6 +57,7 @@ func TestVoyageAI_EmbedDocuments(t *testing.T) {
 }
 
 func TestVoyageAI_EmbedQuery(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Check if we have API key or httprr recording
@@ -85,12 +88,13 @@ func TestVoyageAI_EmbedQuery(t *testing.T) {
 
 	query := "What is machine learning?"
 
-	embedding, err := embedder.EmbedQuery(t.Context(), query)
+	embedding, err := embedder.EmbedQuery(ctx, query)
 	require.NoError(t, err)
 	assert.NotEmpty(t, embedding)
 }
 
 func TestVoyageAI_WithBatchSize(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Check if we have API key or httprr recording
@@ -129,7 +133,7 @@ func TestVoyageAI_WithBatchSize(t *testing.T) {
 		"Text 5",
 	}
 
-	embeddings, err := embedder.EmbedDocuments(t.Context(), texts)
+	embeddings, err := embedder.EmbedDocuments(ctx, texts)
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 5)
 	for i, emb := range embeddings {
@@ -138,6 +142,7 @@ func TestVoyageAI_WithBatchSize(t *testing.T) {
 }
 
 func TestVoyageAI_WithModel(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Check if we have API key or httprr recording
@@ -169,7 +174,7 @@ func TestVoyageAI_WithModel(t *testing.T) {
 
 	query := "Test query with different model"
 
-	embedding, err := embedder.EmbedQuery(t.Context(), query)
+	embedding, err := embedder.EmbedQuery(ctx, query)
 	require.NoError(t, err)
 	assert.NotEmpty(t, embedding)
 }

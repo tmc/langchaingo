@@ -45,7 +45,8 @@ func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 
 	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
 
-	_, err := coll.DeleteMany(t.Context(), filter)
+	ctx := context.Background()
+	_, err := coll.DeleteMany(ctx, filter)
 	assert.NoError(t, err, "failed to reset vector store")
 }
 
@@ -65,7 +66,8 @@ func setupTest(t *testing.T, dim int, index string) Store {
 	initializeIndexes(t, client)
 
 	// Create the vectorstore collection
-	err := client.Database(testDB).CreateCollection(t.Context(), testColl)
+	ctx := context.Background()
+	err := client.Database(testDB).CreateCollection(ctx, testColl)
 	require.NoError(t, err, "failed to create collection")
 
 	coll := client.Database(testDB).Collection(testColl)
@@ -79,7 +81,7 @@ func getMongoURI(t *testing.T) string {
 	t.Helper()
 	uri := os.Getenv(testURI)
 	if uri == "" {
-		ctx, cancel := context.WithTimeout(t.Context(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 
 		container, err := setupMongoDB(ctx)
@@ -107,7 +109,7 @@ func connectMongoDB(t *testing.T, uri string) *mongo.Client {
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	require.NoError(t, err, "failed to connect to MongoDB server")
 
-	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	err = client.Ping(ctx, nil)
 	require.NoError(t, err, "failed to ping server")
@@ -118,7 +120,7 @@ func connectMongoDB(t *testing.T, uri string) *mongo.Client {
 
 func initializeIndexes(t *testing.T, client *mongo.Client) {
 	t.Helper()
-	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
 	err := resetForE2E(ctx, client, testIndexDP1536, testIndexSize1536, nil)
@@ -192,6 +194,7 @@ func TestNew(t *testing.T) {
 //nolint:paralleltest
 func TestStore_AddDocuments(t *testing.T) {
 	store := setupTest(t, testIndexSize1536, testIndexDP1536)
+	ctx := context.Background()
 
 	tests := []struct {
 		name    string
@@ -235,7 +238,7 @@ func TestStore_AddDocuments(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			resetVectorStore(t, store.coll)
 
-			ids, err := store.AddDocuments(t.Context(), test.docs, test.options...)
+			ids, err := store.AddDocuments(ctx, test.docs, test.options...)
 			if len(test.wantErr) > 0 {
 				require.Error(t, err)
 				for _, want := range test.wantErr {
@@ -290,7 +293,8 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 		test.options = append(test.options, vectorstores.WithEmbedder(emb))
 	}
 
-	err := flushMockDocuments(t.Context(), store, emb)
+	ctx := context.Background()
+	err := flushMockDocuments(ctx, store, emb)
 	require.NoError(t, err, "failed to flush mock embedder")
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
@@ -319,8 +323,8 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	}
 }
 
-//nolint:paralleltest
 func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
+	t.Parallel()
 	store := setupTest(t, testIndexSize3, testIndexDP3)
 
 	seed := []schema.Document{
@@ -355,8 +359,9 @@ func TestStore_SimilaritySearch_ExactQuery(t *testing.T) {
 	})
 }
 
-//nolint:funlen,paralleltest
+//nolint:funlen
 func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
+	t.Parallel()
 	store := setupTest(t, testIndexSize1536, testIndexDP1536)
 
 	seed := []schema.Document{
@@ -365,140 +370,108 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 		{PageContent: "v0001", Score: 0.001},
 	}
 
-	t.Run("numDocuments=1 of 3", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         seed,
-				want:         seed[:1],
-			})
-	})
-
-	t.Run("numDocuments=3 of 4", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				want:         seed,
-			})
-	})
-
-	t.Run("with score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
-				want:         seed[:2],
-			})
-	})
-
-	t.Run("with invalid score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         seed,
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
-				wantErr:      ErrInvalidScoreThreshold.Error(),
-			})
-	})
-
 	metadataSeed := []schema.Document{
 		{PageContent: "v090", Score: 0.90},
 		{PageContent: "v051", Score: 0.51, Metadata: map[string]any{"pi": 3.14}},
 		{PageContent: "v0001", Score: 0.001},
 	}
 
-	t.Run("with metadata", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         metadataSeed,
-				want:         metadataSeed,
+	tests := []struct {
+		name         string
+		numDocuments int
+		seed         []schema.Document
+		options      []vectorstores.Option
+		want         []schema.Document
+		wantErr      string
+		setupFunc    func() // Optional setup function for special cases
+	}{
+		{name: "numDocuments=1 of 3",
+			numDocuments: 1, seed: seed, want: seed[:1],
+		},
+		{name: "numDocuments=3 of 4",
+			numDocuments: 3, seed: seed, want: seed,
+		},
+		{name: "with score threshold",
+			numDocuments: 3, seed: seed, want: seed[:2],
+			options: []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
+		},
+		{
+			name:         "with invalid score threshold",
+			numDocuments: 3, seed: seed,
+			options: []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
+			wantErr: ErrInvalidScoreThreshold.Error(),
+		},
+		{name: "with metadata",
+			numDocuments: 3, seed: metadataSeed, want: metadataSeed,
+		},
+		{name: "with metadata and score threshold",
+			numDocuments: 3, seed: metadataSeed, want: metadataSeed[:2],
+			options: []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
+		},
+		{name: "with namespace",
+			numDocuments: 1,
+			setupFunc: func() {
+				emb := newMockEmbedder(testIndexSize3)
+				doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
+				emb.mockDocuments(doc)
+			},
+			seed: []schema.Document{{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}},
+			want: []schema.Document{{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}},
+			options: []vectorstores.Option{
+				vectorstores.WithNameSpace(testIndexDP3),
+				vectorstores.WithEmbedder(newMockEmbedder(testIndexSize3)),
+			},
+		},
+		{name: "with non-existent namespace",
+			numDocuments: 1,
+			seed:         metadataSeed,
+			options: []vectorstores.Option{
+				vectorstores.WithNameSpace("some-non-existent-index-name"),
+			},
+		},
+		{name: "with filter",
+			numDocuments: 1,
+			seed:         metadataSeed,
+			want:         metadataSeed[len(metadataSeed)-1:],
+			options: []vectorstores.Option{
+				vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
+				vectorstores.WithNameSpace(testIndexDP1536WithFilter),
+			},
+		},
+		{name: "with non-tokenized filter",
+			numDocuments: 1,
+			seed:         metadataSeed,
+			options: []vectorstores.Option{
+				vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
+				vectorstores.WithEmbedder(newMockEmbedder(testIndexSize1536)),
+			},
+			wantErr: "'pageContent' needs to be indexed as token",
+		},
+		{name: "with deduplicator",
+			numDocuments: 1,
+			seed:         metadataSeed,
+			options: []vectorstores.Option{
+				vectorstores.WithDeduplicater(func(context.Context, schema.Document) bool { return true }),
+			},
+			wantErr: ErrUnsupportedOptions.Error(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setupFunc != nil {
+				tt.setupFunc()
+			}
+
+			runSimilaritySearchTest(t, store, simSearchTest{
+				numDocuments: tt.numDocuments,
+				seed:         tt.seed,
+				options:      tt.options,
+				want:         tt.want,
+				wantErr:      tt.wantErr,
 			})
-	})
-
-	t.Run("with metadata and score threshold", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 3,
-				seed:         metadataSeed,
-				want:         metadataSeed[:2],
-				options:      []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
-			})
-	})
-
-	t.Run("with namespace", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize3)
-
-		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.mockDocuments(doc)
-
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         []schema.Document{doc},
-				want:         []schema.Document{doc},
-				options: []vectorstores.Option{
-					vectorstores.WithNameSpace(testIndexDP3),
-					vectorstores.WithEmbedder(emb),
-				},
-			})
-	})
-
-	t.Run("with non-existent namespace", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithNameSpace("some-non-existent-index-name"),
-				},
-			})
-	})
-
-	t.Run("with filter", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				want:         metadataSeed[len(metadataSeed)-1:],
-				options: []vectorstores.Option{
-					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
-					vectorstores.WithNameSpace(testIndexDP1536WithFilter),
-				},
-			})
-	})
-
-	t.Run("with non-tokenized filter", func(t *testing.T) {
-		emb := newMockEmbedder(testIndexSize1536)
-
-		doc := schema.Document{PageContent: "v090", Score: 0.90, Metadata: map[string]any{"phi": 1.618}}
-		emb.mockDocuments(doc)
-
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithFilters(bson.D{{Key: "pageContent", Value: "v0001"}}),
-					vectorstores.WithEmbedder(emb),
-				},
-				wantErr: "'pageContent' needs to be indexed as token",
-			})
-	})
-
-	t.Run("with deduplicator", func(t *testing.T) {
-		runSimilaritySearchTest(t, store,
-			simSearchTest{
-				numDocuments: 1,
-				seed:         metadataSeed,
-				options: []vectorstores.Option{
-					vectorstores.WithDeduplicater(func(context.Context, schema.Document) bool { return true }),
-				},
-				wantErr: ErrUnsupportedOptions.Error(),
-			})
-	})
+		})
+	}
 }
 
 // vectorField defines the fields of an index used for vector search.

@@ -52,11 +52,10 @@ func runTestContainer(t *testing.T) string {
 }
 
 func TestMongoDBChatMessageHistory(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	url := runTestContainer(t)
-
-	ctx := t.Context()
 	_, err := NewMongoDBChatMessageHistory(ctx, WithSessionID("test"))
 	assert.Equal(t, errMongoInvalidURL, err)
 

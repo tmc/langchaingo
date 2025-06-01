@@ -1,6 +1,7 @@
 package constitution
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -38,7 +39,8 @@ func TestConstitutionCritiqueParsing(t *testing.T) {
 
 func TestConstitutionalChain(t *testing.T) {
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	ctx := context.Background()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -62,6 +64,6 @@ func TestConstitutionalChain(t *testing.T) {
 			"Give a better answer.",
 		),
 	}, nil)
-	_, err = c.Call(t.Context(), map[string]any{"question": "What is the meaning of life?"})
+	_, err = c.Call(ctx, map[string]any{"question": "What is the meaning of life?"})
 	require.NoError(t, err)
 }

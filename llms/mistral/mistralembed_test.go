@@ -1,6 +1,7 @@
 package mistral
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -52,6 +53,7 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 }
 
 func TestMistralEmbed(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	envVar := "MISTRAL_API_KEY"
 
@@ -70,9 +72,9 @@ func TestMistralEmbed(t *testing.T) {
 	e, err := embeddings.NewEmbedder(model)
 	require.NoError(t, err)
 
-	_, err = e.EmbedDocuments(t.Context(), []string{"Hello world"})
+	_, err = e.EmbedDocuments(ctx, []string{"Hello world"})
 	require.NoError(t, err)
 
-	_, err = e.EmbedQuery(t.Context(), "Hello world")
+	_, err = e.EmbedQuery(ctx, "Hello world")
 	require.NoError(t, err)
 }

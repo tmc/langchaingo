@@ -36,10 +36,11 @@ func scrubWeaviateData(req *http.Request) error {
 }
 
 func TestWeaviateHTTPRR_AddDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -101,16 +102,17 @@ func TestWeaviateHTTPRR_AddDocuments(t *testing.T) {
 		},
 	}
 
-	ids, err := store.AddDocuments(t.Context(), docs)
+	ids, err := store.AddDocuments(ctx, docs)
 	require.NoError(t, err)
 	require.Len(t, ids, 2)
 }
 
 func TestWeaviateHTTPRR_SimilaritySearch(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -156,16 +158,17 @@ func TestWeaviateHTTPRR_SimilaritySearch(t *testing.T) {
 	require.NoError(t, err)
 
 	// Perform similarity search
-	results, err := store.SimilaritySearch(t.Context(), "Japan", 2)
+	results, err := store.SimilaritySearch(ctx, "Japan", 2)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(results), 0)
 }
 
 func TestWeaviateHTTPRR_SimilaritySearchWithAuth(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -210,16 +213,17 @@ func TestWeaviateHTTPRR_SimilaritySearchWithAuth(t *testing.T) {
 	require.NoError(t, err)
 
 	// Perform similarity search
-	results, err := store.SimilaritySearch(t.Context(), "test query", 5)
+	results, err := store.SimilaritySearch(ctx, "test query", 5)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(results), 0)
 }
 
 func TestWeaviateHTTPRR_WithQueryAttrs(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -257,7 +261,7 @@ func TestWeaviateHTTPRR_WithQueryAttrs(t *testing.T) {
 	require.NoError(t, err)
 
 	// Perform similarity search
-	results, err := store.SimilaritySearch(t.Context(), "test", 3,
+	results, err := store.SimilaritySearch(ctx, "test", 3,
 		vectorstores.WithScoreThreshold(0.7))
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(results), 0)

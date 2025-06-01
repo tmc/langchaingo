@@ -56,6 +56,7 @@ func (a *testAgent) GetTools() []tools.Tool {
 
 func TestExecutorWithErrorHandler(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	a := &testAgent{
 		err: agents.ErrUnableToParseOutput,
@@ -66,7 +67,7 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 		agents.WithParserErrorHandler(agents.NewParserErrorHandler(nil)),
 	)
 
-	_, err := chains.Call(t.Context(), executor, nil)
+	_, err := chains.Call(ctx, executor, nil)
 	require.ErrorIs(t, err, agents.ErrNotFinished)
 	require.Equal(t, 3, a.numPlanCalls)
 	require.Equal(t, []schema.AgentStep{
@@ -77,8 +78,9 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 
 func TestExecutorWithMRKLAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -123,8 +125,9 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 
 func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })

@@ -32,9 +32,10 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
 	}
 
+	ctx := context.Background()
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		openseachContainer, err := tcopensearch.Run(t.Context(), "opensearchproject/opensearch:2.11.1")
+		openseachContainer, err := tcopensearch.Run(ctx, "opensearchproject/opensearch:2.11.1")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
@@ -45,7 +46,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 			}
 		})
 
-		address, err := openseachContainer.Address(t.Context())
+		address, err := openseachContainer.Address(ctx)
 		if err != nil {
 			t.Skipf("cannot get address of opensearch container: %v\n", err)
 		}
@@ -76,7 +77,8 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.CreateIndex(t.Context(), indexName)
+	ctx := context.Background()
+	_, err := storer.CreateIndex(ctx, indexName)
 	if err != nil {
 		t.Fatalf("error creating index: %v\n", err)
 	}
@@ -84,7 +86,8 @@ func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 
 func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.DeleteIndex(t.Context(), indexName)
+	ctx := context.Background()
+	_, err := storer.DeleteIndex(ctx, indexName)
 	if err != nil {
 		t.Fatalf("error deleting index: %v\n", err)
 	}
@@ -93,7 +96,7 @@ func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -120,7 +123,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 // createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
 func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -178,6 +181,7 @@ func setOpensearchClient(
 }
 
 func TestOpensearchStoreRest(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
@@ -192,19 +196,20 @@ func TestOpensearchStoreRest(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	_, err = storer.AddDocuments(t.Context(), []schema.Document{
+	_, err = storer.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	time.Sleep(time.Second)
-	docs, err := storer.SimilaritySearch(t.Context(), "japan", 1, vectorstores.WithNameSpace(indexName))
+	docs, err := storer.SimilaritySearch(ctx, "japan", 1, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
 }
 
 func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
@@ -220,7 +225,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	_, err = storer.AddDocuments(t.Context(), []schema.Document{
+	_, err = storer.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -235,7 +240,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(time.Second)
 	// test with a score threshold of 0.72, expected 6 documents
-	docs, err := storer.SimilaritySearch(t.Context(),
+	docs, err := storer.SimilaritySearch(ctx,
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.72),
 		vectorstores.WithNameSpace(indexName))
@@ -244,6 +249,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestOpensearchAsRetriever(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
@@ -260,7 +266,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	defer removeIndex(t, storer, indexName)
 
 	_, err = storer.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -273,7 +279,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	time.Sleep(time.Second)
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(storer, 1, vectorstores.WithNameSpace(indexName)),
@@ -285,6 +291,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 }
 
 func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
@@ -301,7 +308,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	defer removeIndex(t, storer, indexName)
 
 	_, err = storer.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -314,7 +321,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(time.Second)
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(storer, 5,

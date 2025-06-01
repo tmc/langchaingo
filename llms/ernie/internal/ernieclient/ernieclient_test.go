@@ -34,6 +34,7 @@ func requireErnieCredentialsOrHTTPRR(t *testing.T) *httprr.RecordReplay {
 }
 
 func TestClient_CreateCompletion(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireErnieCredentialsOrHTTPRR(t)
@@ -74,13 +75,14 @@ func TestClient_CreateCompletion(t *testing.T) {
 		Temperature: 0.7,
 	}
 
-	resp, err := client.CreateCompletion(t.Context(), DefaultCompletionModelPath, req)
+	resp, err := client.CreateCompletion(ctx, DefaultCompletionModelPath, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Result)
 }
 
 func TestClient_CreateCompletionStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireErnieCredentialsOrHTTPRR(t)
@@ -126,13 +128,14 @@ func TestClient_CreateCompletionStream(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateCompletion(t.Context(), DefaultCompletionModelPath, req)
+	resp, err := client.CreateCompletion(ctx, DefaultCompletionModelPath, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, chunks)
 }
 
 func TestClient_CreateChat(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireErnieCredentialsOrHTTPRR(t)
@@ -172,13 +175,14 @@ func TestClient_CreateChat(t *testing.T) {
 		Temperature: 0.7,
 	}
 
-	resp, err := client.CreateChat(t.Context(), req)
+	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Result)
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireErnieCredentialsOrHTTPRR(t)
@@ -209,7 +213,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	require.NoError(t, err)
 
 	texts := []string{"你好世界", "今天天气怎么样"}
-	resp, err := client.CreateEmbedding(t.Context(), texts)
+	resp, err := client.CreateEmbedding(ctx, texts)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.Len(t, resp.Data, 2)

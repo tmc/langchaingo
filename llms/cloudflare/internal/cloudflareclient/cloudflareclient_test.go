@@ -36,6 +36,7 @@ func requireCloudflareCredentialsOrHTTPRR(t *testing.T) *httprr.RecordReplay {
 }
 
 func TestClient_GenerateContentWithHTTPRR(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireCloudflareCredentialsOrHTTPRR(t)
@@ -64,7 +65,7 @@ func TestClient_GenerateContentWithHTTPRR(t *testing.T) {
 		Stream: false,
 	}
 
-	resp, err := client.GenerateContent(t.Context(), req)
+	resp, err := client.GenerateContent(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.True(t, resp.Success)
@@ -72,6 +73,7 @@ func TestClient_GenerateContentWithHTTPRR(t *testing.T) {
 }
 
 func TestClient_GenerateContentStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireCloudflareCredentialsOrHTTPRR(t)
@@ -105,13 +107,14 @@ func TestClient_GenerateContentStream(t *testing.T) {
 		},
 	}
 
-	resp, err := client.GenerateContent(t.Context(), req)
+	resp, err := client.GenerateContent(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, chunks)
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	rr := requireCloudflareCredentialsOrHTTPRR(t)
@@ -135,7 +138,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		Text: []string{"Hello world", "How are you?"},
 	}
 
-	resp, err := client.CreateEmbedding(t.Context(), req)
+	resp, err := client.CreateEmbedding(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Result.Data)

@@ -1,6 +1,7 @@
 package embeddings
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -13,7 +14,7 @@ import (
 
 func newOpenAIEmbedder(t *testing.T, opts ...Option) *EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -27,28 +28,30 @@ func newOpenAIEmbedder(t *testing.T, opts ...Option) *EmbedderImpl {
 }
 
 func TestOpenaiEmbeddings(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	e := newOpenAIEmbedder(t)
-	_, err := e.EmbedQuery(t.Context(), "Hello world!")
+	_, err := e.EmbedQuery(ctx, "Hello world!")
 	require.NoError(t, err)
 
-	embeddings, err := e.EmbedDocuments(t.Context(), []string{"Hello world", "The world is ending", "good bye"})
+	embeddings, err := e.EmbedDocuments(ctx, []string{"Hello world", "The world is ending", "good bye"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 3)
 }
 
 func TestOpenaiEmbeddingsQueryVsDocuments(t *testing.T) {
+	ctx := context.Background()
 	// Verifies that we get the same embedding for the same string, regardless
 	// of which method we call.
 	t.Parallel()
 
 	e := newOpenAIEmbedder(t)
 	text := "hi there"
-	eq, err := e.EmbedQuery(t.Context(), text)
+	eq, err := e.EmbedQuery(ctx, text)
 	require.NoError(t, err)
 
-	eb, err := e.EmbedDocuments(t.Context(), []string{text})
+	eb, err := e.EmbedDocuments(ctx, []string{text})
 	require.NoError(t, err)
 
 	// Using strict equality should be OK here because we expect the same values
@@ -57,22 +60,24 @@ func TestOpenaiEmbeddingsQueryVsDocuments(t *testing.T) {
 }
 
 func TestOpenaiEmbeddingsWithOptions(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	e := newOpenAIEmbedder(t, WithBatchSize(1), WithStripNewLines(false))
 
-	_, err := e.EmbedQuery(t.Context(), "Hello world!")
+	_, err := e.EmbedQuery(ctx, "Hello world!")
 	require.NoError(t, err)
 
-	embeddings, err := e.EmbedDocuments(t.Context(), []string{"Hello world"})
+	embeddings, err := e.EmbedDocuments(ctx, []string{"Hello world"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 1)
 }
 
 func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -94,10 +99,10 @@ func TestOpenaiEmbeddingsWithAzureAPI(t *testing.T) {
 	e, err := NewEmbedder(client, WithBatchSize(1), WithStripNewLines(false))
 	require.NoError(t, err)
 
-	_, err = e.EmbedQuery(t.Context(), "Hello world!")
+	_, err = e.EmbedQuery(ctx, "Hello world!")
 	require.NoError(t, err)
 
-	embeddings, err := e.EmbedDocuments(t.Context(), []string{"Hello world"})
+	embeddings, err := e.EmbedDocuments(ctx, []string{"Hello world"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 1)
 }

@@ -1,6 +1,7 @@
 package llamafileclient
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,9 +13,10 @@ import (
 )
 
 func TestClient_Generate(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "LLAMAFILE_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "LLAMAFILE_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -41,7 +43,7 @@ func TestClient_Generate(t *testing.T) {
 	}
 
 	var response *GenerateResponse
-	err = client.Generate(t.Context(), req, func(resp GenerateResponse) error {
+	err = client.Generate(ctx, req, func(resp GenerateResponse) error {
 		response = &resp
 		return nil
 	})
@@ -52,9 +54,10 @@ func TestClient_Generate(t *testing.T) {
 }
 
 func TestClient_GenerateStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "LLAMAFILE_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "LLAMAFILE_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -81,7 +84,7 @@ func TestClient_GenerateStream(t *testing.T) {
 	}
 
 	var responses []GenerateResponse
-	err = client.Generate(t.Context(), req, func(resp GenerateResponse) error {
+	err = client.Generate(ctx, req, func(resp GenerateResponse) error {
 		responses = append(responses, resp)
 		return nil
 	})
@@ -91,9 +94,10 @@ func TestClient_GenerateStream(t *testing.T) {
 }
 
 func TestClient_GenerateChat(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "LLAMAFILE_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "LLAMAFILE_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -125,7 +129,7 @@ func TestClient_GenerateChat(t *testing.T) {
 	}
 
 	var response *ChatResponse
-	err = client.GenerateChat(t.Context(), req, func(resp ChatResponse) error {
+	err = client.GenerateChat(ctx, req, func(resp ChatResponse) error {
 		response = &resp
 		return nil
 	})
@@ -135,9 +139,10 @@ func TestClient_GenerateChat(t *testing.T) {
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "LLAMAFILE_HOST")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "LLAMAFILE_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -154,7 +159,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	require.NoError(t, err)
 
 	texts := []string{"Hello world", "How are you?"}
-	resp, err := client.CreateEmbedding(t.Context(), texts)
+	resp, err := client.CreateEmbedding(ctx, texts)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.Len(t, resp.Results, 2)

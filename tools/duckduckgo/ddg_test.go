@@ -1,12 +1,14 @@
 package duckduckgo
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestDuckDuckGoTool(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Create tool
@@ -14,7 +16,7 @@ func TestDuckDuckGoTool(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test search functionality
-	result, err := tool.Call(t.Context(), "golang programming language")
+	result, err := tool.Call(ctx, "golang programming language")
 	require.NoError(t, err)
 	require.NotEmpty(t, result)
 

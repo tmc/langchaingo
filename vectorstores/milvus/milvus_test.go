@@ -43,9 +43,10 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	}
 	_, e := getEmbedding("gemma:2b")
 
+	ctx := context.Background()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.Run(t.Context(), "milvusdb/milvus:v2.4.0-rc.1-latest")
+		milvusContainer, err := tcmilvus.Run(ctx, "milvusdb/milvus:v2.4.0-rc.1-latest")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
@@ -56,7 +57,7 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 			}
 		})
 
-		url, err = milvusContainer.ConnectionString(t.Context())
+		url, err = milvusContainer.ConnectionString(ctx)
 		if err != nil {
 			t.Skipf("Failed to get milvus container endpoint: %s", err)
 		}
@@ -73,13 +74,14 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		WithEmbedder(e),
 		WithIndex(idx))
 	return New(
-		t.Context(),
+		ctx,
 		config,
 		opts...,
 	)
 }
 
 func TestMilvusConnection(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
@@ -100,11 +102,11 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
 
-	_, err = storer.AddDocuments(t.Context(), data)
+	_, err = storer.AddDocuments(ctx, data)
 	require.NoError(t, err)
 
 	// search docs with filter
-	filterRes, err := storer.SimilaritySearch(t.Context(),
+	filterRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 10,
 		vectorstores.WithFilters("meta['area']==622"),
 	)
@@ -112,7 +114,7 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, filterRes, 1)
 
-	japanRes, err := storer.SimilaritySearch(t.Context(),
+	japanRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))
 	require.NoError(t, err)

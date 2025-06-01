@@ -599,14 +599,14 @@ func findBestReplayFile(t *testing.T, baseFilename string) string {
 	return baseFilename
 }
 
-// SkipIfNoCredentialsOrRecording skips the test if required environment variables
+// SkipIfNoCredentialsAndRecordingMissing skips the test if required environment variables
 // are not set and no httprr recording exists. This allows tests to gracefully
 // skip when they cannot run.
 //
 // Example usage:
 //
 //	func TestMyAPI(t *testing.T) {
-//	    httprr.SkipIfNoCredentialsOrRecording(t, "API_KEY", "API_URL")
+//	    httprr.SkipIfNoCredentialsAndRecordingMissing(t, "API_KEY", "API_URL")
 //
 //	    rr, err := httprr.OpenForTest(t, http.DefaultTransport)
 //	    if err != nil {
@@ -615,13 +615,21 @@ func findBestReplayFile(t *testing.T, baseFilename string) string {
 //	    defer rr.Close()
 //	    // use rr.Client() for HTTP requests...
 //	}
-func SkipIfNoCredentialsOrRecording(t *testing.T, envVars ...string) {
+func SkipIfNoCredentialsAndRecordingMissing(t *testing.T, envVars ...string) {
 	t.Helper()
 	if !hasRequiredCredentials(envVars) && !hasExistingRecording(t) {
 		skipMessage := "no httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions"
+
 		if len(envVars) > 0 {
-			skipMessage = fmt.Sprintf("%s not set and %s", strings.Join(envVars, "/"), skipMessage)
+			missingEnvVars := []string{}
+			for _, envVar := range envVars {
+				if os.Getenv(envVar) == "" {
+					missingEnvVars = append(missingEnvVars, envVar)
+				}
+			}
+			skipMessage = fmt.Sprintf("%s not set and %s", strings.Join(missingEnvVars, ","), skipMessage)
 		}
+
 		t.Skip(skipMessage)
 	}
 }
@@ -765,7 +773,6 @@ func DecompressFile(path string) error {
 	return nil
 }
 
-
 // getDefaultRequestScrubbers returns the default request scrubbing functions to remove
 // sensitive headers and API keys from request recordings.
 func getDefaultRequestScrubbers() []func(*http.Request) error {
@@ -848,11 +855,12 @@ func getDefaultResponseScrubbers() []func(*bytes.Buffer) error {
 
 // EmbeddingJSONFormatter returns a response scrubber that formats JSON responses
 // with special handling for number arrays (displays them on single lines).
-// This is particularly useful for embedding API responses which often contain 
+// This is particularly useful for embedding API responses which often contain
 // large arrays of floating-point numbers.
 //
 // Usage in tests:
-//   rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+//
+//	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
 func EmbeddingJSONFormatter() func(*bytes.Buffer) error {
 	return func(buf *bytes.Buffer) error {
 		// Parse the response to get headers and body

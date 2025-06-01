@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -13,7 +14,7 @@ import (
 // createOpenAILLMForQA creates an OpenAI LLM with httprr support for testing.
 func createOpenAILLMForQA(t *testing.T) *openai.LLM {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -23,6 +24,7 @@ func createOpenAILLMForQA(t *testing.T) *openai.LLM {
 }
 
 func TestRefineQA(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForQA(t)
@@ -31,7 +33,7 @@ func TestRefineQA(t *testing.T) {
 	qaChain := LoadRefineQA(llm)
 
 	results, err := Call(
-		t.Context(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -45,6 +47,7 @@ func TestRefineQA(t *testing.T) {
 }
 
 func TestMapReduceQA(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForQA(t)
@@ -53,7 +56,7 @@ func TestMapReduceQA(t *testing.T) {
 	qaChain := LoadMapReduceQA(llm)
 
 	result, err := Predict(
-		t.Context(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -68,6 +71,7 @@ func TestMapReduceQA(t *testing.T) {
 func TestMapRerankQA(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
+	ctx := context.Background()
 
 	llm := createOpenAILLMForQA(t)
 
@@ -75,7 +79,7 @@ func TestMapRerankQA(t *testing.T) {
 	mapRerankChain := LoadMapRerankQA(llm)
 
 	results, err := Call(
-		t.Context(),
+		ctx,
 		mapRerankChain,
 		map[string]any{
 			"input_documents": docs,
