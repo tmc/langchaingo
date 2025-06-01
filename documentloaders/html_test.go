@@ -1,7 +1,6 @@
 package documentloaders
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -16,7 +15,7 @@ func TestHTMLLoader(t *testing.T) {
 
 	loader := NewHTML(file)
 
-	docs, err := loader.Load(context.Background())
+	docs, err := loader.Load(t.Context())
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 

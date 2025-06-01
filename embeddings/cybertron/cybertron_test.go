@@ -1,7 +1,6 @@
 package cybertron
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -26,7 +25,7 @@ func TestCybertronEmbeddings(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	res, err := emb.CreateEmbedding(context.Background(), []string{
+	res, err := emb.CreateEmbedding(t.Context(), []string{
 		"Hello world", "The world is ending", "good bye",
 	})
 	require.NoError(t, err)

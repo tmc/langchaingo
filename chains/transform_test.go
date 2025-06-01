@@ -26,7 +26,7 @@ func TestTransform(t *testing.T) {
 		[]string{"output"},
 	)
 
-	output, err := Run(context.Background(), c, "baz")
+	output, err := Run(t.Context(), c, "baz")
 	require.NoError(t, err)
 	require.Equal(t, "bazfoo", output)
 }

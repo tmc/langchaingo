@@ -70,7 +70,7 @@ func TestAmazonOutput(t *testing.T) {
 		bedrock.ModelMetaLlama370bInstructV1,
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	for _, model := range models {
 		t.Logf("Model output for %s:-", model)

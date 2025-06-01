@@ -1,7 +1,6 @@
 package postgresql_test
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,12 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
@@ -24,27 +20,24 @@ func Test(t *testing.T) {
 	// export LANGCHAINGO_TEST_POSTGRESQL=postgres://db_user:mysecretpassword@localhost:5438/test?sslmode=disable
 	pgURI := os.Getenv("LANGCHAINGO_TEST_POSTGRESQL")
 	if pgURI == "" {
-		pgContainer, err := postgres.RunContainer(
-			context.Background(),
-			testcontainers.WithImage("postgres:16.2"),
+		pgContainer, err := postgres.Run(
+			t.Context(),
+			"postgres:17", // TODO: lets add a text matrix for this (or do so in this test)
 			postgres.WithDatabase("test"),
 			postgres.WithUsername("db_user"),
 			postgres.WithPassword("p@mysecretpassword"),
 			postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
-			testcontainers.WithWaitStrategy(
-				wait.ForLog("database system is ready to accept connections").
-					WithOccurrence(2).
-					WithStartupTimeout(5*time.Second)),
+			postgres.BasicWaitStrategies(),
 		)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		defer func() {
-			require.NoError(t, pgContainer.Terminate(context.Background()))
+			require.NoError(t, pgContainer.Terminate(t.Context()))
 		}()
 
-		pgURI, err = pgContainer.ConnectionString(context.Background(), "sslmode=disable")
+		pgURI, err = pgContainer.ConnectionString(t.Context(), "sslmode=disable")
 		require.NoError(t, err)
 	}
 
@@ -54,13 +47,13 @@ func Test(t *testing.T) {
 	tbs := db.TableNames()
 	require.NotEmpty(t, tbs)
 
-	desc, err := db.TableInfo(context.Background(), tbs)
+	desc, err := db.TableInfo(t.Context(), tbs)
 	require.NoError(t, err)
 
 	t.Log(desc)
 
 	for _, tableName := range tbs {
-		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
+		_, err = db.Query(t.Context(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
 		/* exclude no row error,
 		since we only need to check if db.Query function can perform query correctly*/
 		if errors.Is(err, sql.ErrNoRows) {

@@ -1,13 +1,13 @@
 package chains
 
 import (
-	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -15,10 +15,11 @@ import (
 
 func TestLLMChain(t *testing.T) {
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	model, err := openai.New()
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	model, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
@@ -30,7 +31,7 @@ func TestLLMChain(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	result, err := Predict(context.Background(), chain,
+	result, err := Predict(t.Context(), chain,
 		map[string]any{
 			"country": "France",
 		},
@@ -49,7 +50,7 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 			prompts.NewHumanMessagePromptTemplate("{{.boo}}", []string{"boo"}),
 		}),
 	)
-	result, err := Predict(context.Background(), c, map[string]any{
+	result, err := Predict(t.Context(), c, map[string]any{
 		"foo": "foo",
 		"boo": "boo",
 	})
@@ -59,11 +60,11 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 
 func TestLLMChainWithGoogleAI(t *testing.T) {
 	t.Parallel()
-	genaiKey := os.Getenv("GENAI_API_KEY")
-	if genaiKey == "" {
-		t.Skip("GENAI_API_KEY not set")
-	}
-	model, err := googleai.New(context.Background(), googleai.WithAPIKey(genaiKey))
+	httprr.SkipIfNoCredentialsOrRecording(t, "GENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	model, err := googleai.New(t.Context(), googleai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
@@ -79,7 +80,7 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	// chains tramples over defaults for options, so setting these options
 	// explicitly is required until https://github.com/tmc/langchaingo/issues/626
 	// is fully resolved.
-	result, err := Predict(context.Background(), chain,
+	result, err := Predict(t.Context(), chain,
 		map[string]any{
 			"country": "France",
 		},

@@ -1,22 +1,23 @@
 package chains
 
 import (
-	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
 
 func TestLLMChainAzure(t *testing.T) {
 	t.Parallel()
-	// Azure OpenAI Key is used as OPENAI_API_KEY
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
 	// Azure OpenAI URL is used as OPENAI_BASE_URL
 	if openaiBase := os.Getenv("OPENAI_BASE_URL"); openaiBase == "" {
 		t.Skip("OPENAI_BASE_URL not set")
@@ -28,6 +29,7 @@ func TestLLMChainAzure(t *testing.T) {
 		openai.WithModel("model-name"),
 		// Azure deployment that uses embeddings model, the name depends on what we define in the Azure deployment section
 		openai.WithEmbeddingModel("embeddings-model-name"),
+		openai.WithHTTPClient(rr.Client()),
 	)
 	require.NoError(t, err)
 
@@ -39,7 +41,7 @@ func TestLLMChainAzure(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	result, err := Predict(context.Background(), chain,
+	result, err := Predict(t.Context(), chain,
 		map[string]any{
 			"country": "France",
 		},

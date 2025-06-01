@@ -10,7 +10,6 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
@@ -46,16 +45,18 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
+		milvusContainer, err := tcmilvus.Run(t.Context(), "milvusdb/milvus:v2.4.0-rc.1-latest")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, milvusContainer.Terminate(context.Background()))
+			if err := milvusContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate milvus container: %v", err)
+			}
 		})
 
-		url, err = milvusContainer.ConnectionString(context.Background())
+		url, err = milvusContainer.ConnectionString(t.Context())
 		if err != nil {
 			t.Skipf("Failed to get milvus container endpoint: %s", err)
 		}
@@ -72,7 +73,7 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		WithEmbedder(e),
 		WithIndex(idx))
 	return New(
-		context.Background(),
+		t.Context(),
 		config,
 		opts...,
 	)
@@ -99,11 +100,11 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
 
-	_, err = storer.AddDocuments(context.Background(), data)
+	_, err = storer.AddDocuments(t.Context(), data)
 	require.NoError(t, err)
 
 	// search docs with filter
-	filterRes, err := storer.SimilaritySearch(context.Background(),
+	filterRes, err := storer.SimilaritySearch(t.Context(),
 		"Tokyo", 10,
 		vectorstores.WithFilters("meta['area']==622"),
 	)
@@ -111,7 +112,7 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, filterRes, 1)
 
-	japanRes, err := storer.SimilaritySearch(context.Background(),
+	japanRes, err := storer.SimilaritySearch(t.Context(),
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))
 	require.NoError(t, err)

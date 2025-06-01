@@ -2,6 +2,7 @@ package agents_test
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -64,7 +66,7 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 		agents.WithParserErrorHandler(agents.NewParserErrorHandler(nil)),
 	)
 
-	_, err := chains.Call(context.Background(), executor, nil)
+	_, err := chains.Call(t.Context(), executor, nil)
 	require.ErrorIs(t, err, agents.ErrNotFinished)
 	require.Equal(t, 3, a.numPlanCalls)
 	require.Equal(t, []schema.AgentStep{
@@ -76,14 +78,27 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 func TestExecutorWithMRKLAgent(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
 	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
 		t.Skip("SERPAPI_API_KEY not set")
 	}
 
-	llm, err := openai.New()
+	// Configure OpenAI client based on recording vs replay mode
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	searchTool, err := serpapi.New()
@@ -109,14 +124,27 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
 	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
 		t.Skip("SERPAPI_API_KEY not set")
 	}
 
-	llm, err := openai.New()
+	// Configure OpenAI client based on recording vs replay mode
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	searchTool, err := serpapi.New()
