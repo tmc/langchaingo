@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -46,8 +47,9 @@ visibility	Instant	meters	Viewing distance in meters. Influenced by low clouds, 
 func TestAPI(t *testing.T) {
 	t.Skip("Temporarily skipping due to httprr format issue")
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	// Setup HTTP record/replay for both OpenAI and external API calls
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
@@ -63,7 +65,7 @@ func TestAPI(t *testing.T) {
 		"api_docs": MeteoDocs,
 		"input":    "What is the weather like right now in Munich, Germany in degrees Fahrenheit?",
 	}
-	result, err := Call(t.Context(), chain, q)
+	result, err := Call(ctx, chain, q)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

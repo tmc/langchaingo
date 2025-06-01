@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -15,12 +16,13 @@ import (
 
 func loadTestData(t *testing.T) []schema.Document {
 	t.Helper()
+	ctx := context.Background()
 
 	file, err := os.Open("./testdata/mouse_story.txt")
 	require.NoError(t, err)
 
 	docs, err := documentloaders.NewText(file).LoadAndSplit(
-		t.Context(),
+		ctx,
 		textsplitter.NewRecursiveCharacter(),
 	)
 	require.NoError(t, err)
@@ -31,7 +33,7 @@ func loadTestData(t *testing.T) []schema.Document {
 // createOpenAILLMForTest creates an OpenAI LLM with httprr support for testing.
 func createOpenAILLMForTest(t *testing.T) *openai.LLM {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -41,6 +43,7 @@ func createOpenAILLMForTest(t *testing.T) *openai.LLM {
 }
 
 func TestStuffSummarization(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
@@ -49,7 +52,7 @@ func TestStuffSummarization(t *testing.T) {
 
 	chain := LoadStuffSummarization(llm)
 	_, err := Call(
-		t.Context(),
+		ctx,
 		chain,
 		map[string]any{"input_documents": docs},
 	)
@@ -57,6 +60,7 @@ func TestStuffSummarization(t *testing.T) {
 }
 
 func TestRefineSummarization(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
@@ -65,7 +69,7 @@ func TestRefineSummarization(t *testing.T) {
 
 	chain := LoadRefineSummarization(llm)
 	_, err := Call(
-		t.Context(),
+		ctx,
 		chain,
 		map[string]any{"input_documents": docs},
 	)
@@ -73,6 +77,7 @@ func TestRefineSummarization(t *testing.T) {
 }
 
 func TestMapReduceSummarization(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
@@ -81,7 +86,7 @@ func TestMapReduceSummarization(t *testing.T) {
 
 	chain := LoadMapReduceSummarization(llm)
 	_, err := Run(
-		t.Context(),
+		ctx,
 		chain,
 		docs,
 	)

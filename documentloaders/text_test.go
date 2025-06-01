@@ -1,6 +1,7 @@
 package documentloaders
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -9,13 +10,14 @@ import (
 )
 
 func TestTextLoader(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	file, err := os.Open("./testdata/test.txt")
 	require.NoError(t, err)
 
 	loader := NewText(file)
 
-	docs, err := loader.Load(t.Context())
+	docs, err := loader.Load(ctx)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 

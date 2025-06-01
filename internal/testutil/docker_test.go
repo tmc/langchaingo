@@ -71,7 +71,7 @@ func TestSetupDockerEnvironmentNoLog(t *testing.T) {
 	// Check if environment variables were set (if Docker is available)
 	dockerHost := os.Getenv("DOCKER_HOST")
 	socketOverride := os.Getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE")
-	
+
 	// If Docker is available, at least DOCKER_HOST should be set
 	if dockerHost == "" && socketOverride == "" {
 		t.Log("No Docker environment variables were set (Docker might not be available)")

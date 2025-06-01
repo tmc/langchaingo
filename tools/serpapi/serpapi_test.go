@@ -13,7 +13,7 @@ import (
 func TestSerpAPITool(t *testing.T) {
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "SERPAPI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })

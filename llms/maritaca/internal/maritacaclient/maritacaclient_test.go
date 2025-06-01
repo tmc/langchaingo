@@ -1,6 +1,7 @@
 package maritacaclient
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -11,9 +12,10 @@ import (
 )
 
 func TestClient_Generate(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "MARITACA_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -46,7 +48,7 @@ func TestClient_Generate(t *testing.T) {
 	}
 
 	var response *ChatResponse
-	err = client.Generate(t.Context(), req, func(resp ChatResponse) error {
+	err = client.Generate(ctx, req, func(resp ChatResponse) error {
 		response = &resp
 		return nil
 	})
@@ -56,9 +58,10 @@ func TestClient_Generate(t *testing.T) {
 }
 
 func TestClient_GenerateStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "MARITACA_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -91,7 +94,7 @@ func TestClient_GenerateStream(t *testing.T) {
 	}
 
 	var responses []ChatResponse
-	err = client.Generate(t.Context(), req, func(resp ChatResponse) error {
+	err = client.Generate(ctx, req, func(resp ChatResponse) error {
 		responses = append(responses, resp)
 		return nil
 	})

@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -12,9 +13,10 @@ import (
 )
 
 func TestStuffDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -36,7 +38,7 @@ func TestStuffDocuments(t *testing.T) {
 		{PageContent: "baz"},
 	}
 
-	result, err := Call(t.Context(), chain, map[string]any{
+	result, err := Call(ctx, chain, map[string]any{
 		"input_documents": docs,
 	})
 	require.NoError(t, err)

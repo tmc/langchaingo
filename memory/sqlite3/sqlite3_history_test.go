@@ -1,6 +1,7 @@
 package sqlite3_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,9 +11,8 @@ import (
 )
 
 func TestSqliteChatMessageHistory(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-
-	ctx := t.Context()
 	h := sqlite3.NewSqliteChatMessageHistory(sqlite3.WithContext(ctx))
 
 	err := h.AddAIMessage(ctx, "foo")

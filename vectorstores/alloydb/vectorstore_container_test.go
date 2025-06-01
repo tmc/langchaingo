@@ -24,11 +24,12 @@ import (
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
+	ctx := context.Background()
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
 		pgVectorContainer, err := tcpostgres.Run(
-			t.Context(),
+			ctx,
 			"docker.io/pgvector/pgvector:pg16",
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
@@ -52,7 +53,7 @@ func preCheckEnvSetting(t *testing.T) string {
 			}
 		})
 
-		str, err := pgVectorContainer.ConnectionString(t.Context(), "sslmode=disable")
+		str, err := pgVectorContainer.ConnectionString(ctx, "sslmode=disable")
 		require.NoError(t, err)
 
 		pgvectorURL = str
@@ -67,7 +68,7 @@ func preCheckEnvSetting(t *testing.T) string {
 func setEngineWithImage(t *testing.T) alloydbutil.PostgresEngine {
 	t.Helper()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := t.Context()
+	ctx := context.Background()
 	myPool, err := pgxpool.New(ctx, pgvectorURL)
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
@@ -86,7 +87,7 @@ func setEngineWithImage(t *testing.T) alloydbutil.PostgresEngine {
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedderForContainer(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -112,7 +113,7 @@ func createOpenAIEmbedderForContainer(t *testing.T) *embeddings.EmbedderImpl {
 func initVectorStore(t *testing.T) (alloydb.VectorStore, func() error) {
 	t.Helper()
 	pgEngine := setEngineWithImage(t)
-	ctx := t.Context()
+	ctx := context.Background()
 	vectorstoreTableoptions := alloydbutil.VectorstoreTableOptions{
 		TableName:         "my_test_table",
 		OverwriteExisting: true,
@@ -138,20 +139,21 @@ func initVectorStore(t *testing.T) (alloydb.VectorStore, func() error) {
 }
 
 func TestContainerPingToDB(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	engine := setEngineWithImage(t)
 
 	defer engine.Close()
 
-	if err := engine.Pool.Ping(t.Context()); err != nil {
+	if err := engine.Pool.Ping(ctx); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestContainerApplyVectorIndexAndDropIndex(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)
-	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -168,9 +170,9 @@ func TestContainerApplyVectorIndexAndDropIndex(t *testing.T) {
 }
 
 func TestContainerIsValidIndex(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)
-	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -192,8 +194,8 @@ func TestContainerIsValidIndex(t *testing.T) {
 }
 
 func TestContainerAddDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	ctx := t.Context()
 	vs, cleanUpTableFn := initVectorStore(t)
 	t.Cleanup(func() {
 		if err := cleanUpTableFn(); err != nil {

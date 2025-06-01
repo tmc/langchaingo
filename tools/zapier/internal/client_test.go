@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -22,10 +23,11 @@ func scrubZapierData(req *http.Request) error {
 }
 
 func TestZapierClient_List(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "ZAPIER_NLA_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ZAPIER_NLA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -52,16 +54,17 @@ func TestZapierClient_List(t *testing.T) {
 	}
 
 	// List actions
-	results, err := client.List(t.Context())
+	results, err := client.List(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, results)
 }
 
 func TestZapierClient_Execute(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "ZAPIER_NLA_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ZAPIER_NLA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -89,7 +92,7 @@ func TestZapierClient_Execute(t *testing.T) {
 
 	// Execute action (using a test action ID)
 	result, err := client.Execute(
-		t.Context(),
+		ctx,
 		"test-action-id",
 		"Send an email to test@example.com",
 		map[string]string{
@@ -102,10 +105,11 @@ func TestZapierClient_Execute(t *testing.T) {
 }
 
 func TestZapierClient_ExecuteAsString(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "ZAPIER_NLA_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ZAPIER_NLA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -133,7 +137,7 @@ func TestZapierClient_ExecuteAsString(t *testing.T) {
 
 	// Execute action as string
 	result, err := client.ExecuteAsString(
-		t.Context(),
+		ctx,
 		"test-action-id",
 		"Create a calendar event",
 		map[string]string{
@@ -147,10 +151,11 @@ func TestZapierClient_ExecuteAsString(t *testing.T) {
 }
 
 func TestZapierClient_WithAccessToken(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	// Setup HTTP record/replay
-	httprr.SkipIfNoCredentialsOrRecording(t, "ZAPIER_NLA_ACCESS_TOKEN")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ZAPIER_NLA_ACCESS_TOKEN")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -177,7 +182,7 @@ func TestZapierClient_WithAccessToken(t *testing.T) {
 	}
 
 	// List actions with OAuth
-	results, err := client.List(t.Context())
+	results, err := client.List(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, results)
 }

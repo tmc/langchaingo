@@ -25,12 +25,13 @@ import (
 
 func getWeaviateTestContainerSchemeAndHost(t *testing.T) (string, string) {
 	t.Helper()
+	ctx := context.Background()
 
 	scheme := os.Getenv("WEAVIATE_SCHEME")
 	host := os.Getenv("WEAVIATE_HOST")
 	if scheme == "" || host == "" {
 		weaviateContainer, err := tcweaviate.Run(
-			t.Context(),
+			ctx,
 			"semitechnologies/weaviate:1.25.5",
 			testcontainers.WithLogger(log.TestLogger(t)),
 		)
@@ -46,7 +47,7 @@ func getWeaviateTestContainerSchemeAndHost(t *testing.T) (string, string) {
 			}
 		})
 
-		scheme, host, err = weaviateContainer.HttpHostAddress(t.Context())
+		scheme, host, err = weaviateContainer.HttpHostAddress(ctx)
 		if err != nil {
 			t.Skipf("Failed to get weaviate container endpoint: %s", err)
 		}
@@ -86,7 +87,7 @@ func createTestClass(ctx context.Context, s Store) error {
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -136,6 +137,7 @@ func getLampDocuments() []schema.Document {
 }
 
 func TestWeaviateStoreRest(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -155,10 +157,10 @@ func TestWeaviateStoreRest(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -166,7 +168,7 @@ func TestWeaviateStoreRest(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	docs, err := store.SimilaritySearch(t.Context(), "japan", 1)
+	docs, err := store.SimilaritySearch(ctx, "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
@@ -174,6 +176,7 @@ func TestWeaviateStoreRest(t *testing.T) {
 }
 
 func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -192,10 +195,10 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -210,14 +213,14 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	// test with a score threshold of 0.8, expected 6 documents
-	docs, err := store.SimilaritySearch(t.Context(),
+	docs, err := store.SimilaritySearch(ctx,
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.9))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
 
 	// test with a score threshold of 0, expected all 10 documents
-	docs, err = store.SimilaritySearch(t.Context(),
+	docs, err = store.SimilaritySearch(ctx,
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0))
 	require.NoError(t, err)
@@ -225,6 +228,7 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestMetadataSearch(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -243,10 +247,10 @@ func TestMetadataSearch(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
 		}},
@@ -256,7 +260,7 @@ func TestMetadataSearch(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	docs, err := store.MetadataSearch(t.Context(), 2,
+	docs, err := store.MetadataSearch(ctx, 2,
 		vectorstores.WithFilters(
 			filters.Where().
 				WithPath([]string{"type"}).
@@ -270,6 +274,7 @@ func TestMetadataSearch(t *testing.T) {
 }
 
 func TestDeduplicater(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -291,10 +296,10 @@ func TestDeduplicater(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
 		}},
@@ -308,7 +313,7 @@ func TestDeduplicater(t *testing.T) {
 	))
 	require.NoError(t, err)
 
-	docs, err := store.MetadataSearch(t.Context(), 2)
+	docs, err := store.MetadataSearch(ctx, 2)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "potato", docs[0].PageContent)
@@ -316,6 +321,7 @@ func TestDeduplicater(t *testing.T) {
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -336,10 +342,10 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -353,18 +359,19 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	_, err = store.SimilaritySearch(t.Context(),
+	_, err = store.SimilaritySearch(ctx,
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8))
 	require.Error(t, err)
 
-	_, err = store.SimilaritySearch(t.Context(),
+	_, err = store.SimilaritySearch(ctx,
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
 	require.Error(t, err)
 }
 
 func TestWeaviateAsRetriever(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -388,11 +395,11 @@ func TestWeaviateAsRetriever(t *testing.T) {
 
 	nameSpace := uuid.New().String()
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -403,7 +410,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 	require.NoError(t, err)
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store, 1, vectorstores.WithNameSpace(nameSpace)),
@@ -415,6 +422,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 }
 
 func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -437,11 +445,11 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	nameSpace := randomizedCamelCaseClass()
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -454,7 +462,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(
@@ -474,6 +482,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 }
 
 func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -496,13 +505,13 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
 	nameSpace := randomizedCamelCaseClass()
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{
 				PageContent: "The color of the lamp beside the desk is black.",
@@ -545,7 +554,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		WithValueString("patio")
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store,
@@ -565,6 +574,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 }
 
 func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -587,15 +597,15 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
 	nameSpace := randomizedCamelCaseClass()
-	_, err = store.AddDocuments(t.Context(), getLampDocuments(), vectorstores.WithNameSpace(nameSpace))
+	_, err = store.AddDocuments(ctx, getLampDocuments(), vectorstores.WithNameSpace(nameSpace))
 	require.NoError(t, err)
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store, 5, vectorstores.WithNameSpace(nameSpace)),
@@ -627,6 +637,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -649,13 +660,13 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
 	nameSpace := randomizedCamelCaseClass()
 
 	_, err = store.AddDocuments(
-		t.Context(),
+		ctx,
 		[]schema.Document{
 			{
 				PageContent: "The color of the lamp beside the desk is orange.",
@@ -695,7 +706,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	})
 
 	result, err := chains.Run(
-		t.Context(),
+		ctx,
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(store,
@@ -712,6 +723,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 }
 
 func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -733,16 +745,16 @@ func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Foo"},
 	})
 	require.NoError(t, err)
 
 	// Check if the default additional fields are present in the result
-	docs, err := store.SimilaritySearch(t.Context(),
+	docs, err := store.SimilaritySearch(ctx,
 		"Foo", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -756,6 +768,7 @@ func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 }
 
 func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -778,16 +791,16 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Foo"},
 	})
 	require.NoError(t, err)
 
 	// Check if all the additional fields are present in the result
-	docs, err := store.SimilaritySearch(t.Context(),
+	docs, err := store.SimilaritySearch(ctx,
 		"Foo", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -806,6 +819,7 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 // `AddDocuments` or `SimilaritySearch` takes precedence over the one provided when creating
 // the `Store`.
 func TestWeaviateWithOptionEmbedder(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	if testing.Short() {
 		t.Skip("skipping Weaviate tests in short mode")
@@ -841,10 +855,10 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	err = createTestClass(t.Context(), store)
+	err = createTestClass(ctx, store)
 	require.NoError(t, err)
 
-	_, err = store.AddDocuments(t.Context(), []schema.Document{
+	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
 		}},
@@ -852,7 +866,7 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 	}, vectorstores.WithEmbedder(butme))
 	require.NoError(t, err)
 
-	docs, err := store.SimilaritySearch(t.Context(), "japan", 1,
+	docs, err := store.SimilaritySearch(ctx, "japan", 1,
 		vectorstores.WithEmbedder(butme))
 	require.NoError(t, err)
 	require.Len(t, docs, 1)

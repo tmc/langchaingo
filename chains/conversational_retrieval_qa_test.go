@@ -60,7 +60,7 @@ func (t testConversationalRetriever) GetRelevantDocuments(_ context.Context, que
 var _ schema.Retriever = testConversationalRetriever{}
 
 func createOpenAILLMForConversationalRetrievalQA(t *testing.T) *openai.LLM {
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
@@ -72,7 +72,7 @@ func TestConversationalRetrievalQA(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
 
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
@@ -99,7 +99,7 @@ func TestConversationalRetrievalQAWithReturnMessages(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
 
-	ctx := t.Context()
+	ctx := context.Background()
 
 	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
@@ -126,13 +126,13 @@ func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
 
-	ctx := t.Context()
+	ctx := context.Background()
 
 	r := testConversationalRetriever{}
 	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
 	chain := NewConversationalRetrievalQAFromLLM(llm, r, memory.NewConversationBuffer())
-	result, err := Run(t.Context(), chain, "What did the president say about Ketanji Brown Jackson")
+	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 
@@ -145,7 +145,7 @@ func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
 
-	ctx := t.Context()
+	ctx := context.Background()
 
 	r := testConversationalRetriever{}
 	llm := createOpenAILLMForConversationalRetrievalQA(t)
@@ -155,7 +155,7 @@ func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.
 		r,
 		memory.NewConversationTokenBuffer(llm, 2000),
 	)
-	result, err := Run(t.Context(), chain, "What did the president say about Ketanji Brown Jackson")
+	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 

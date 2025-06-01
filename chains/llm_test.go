@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
@@ -14,8 +15,9 @@ import (
 )
 
 func TestLLMChain(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -31,7 +33,7 @@ func TestLLMChain(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	result, err := Predict(t.Context(), chain,
+	result, err := Predict(ctx, chain,
 		map[string]any{
 			"country": "France",
 		},
@@ -41,6 +43,7 @@ func TestLLMChain(t *testing.T) {
 }
 
 func TestLLMChainWithChatPromptTemplate(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	c := NewLLMChain(
@@ -50,7 +53,7 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 			prompts.NewHumanMessagePromptTemplate("{{.boo}}", []string{"boo"}),
 		}),
 	)
-	result, err := Predict(t.Context(), c, map[string]any{
+	result, err := Predict(ctx, c, map[string]any{
 		"foo": "foo",
 		"boo": "boo",
 	})
@@ -59,12 +62,13 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 }
 
 func TestLLMChainWithGoogleAI(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "GENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
-	model, err := googleai.New(t.Context(), googleai.WithHTTPClient(rr.Client()))
+	model, err := googleai.New(ctx, googleai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
@@ -80,7 +84,7 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	// chains tramples over defaults for options, so setting these options
 	// explicitly is required until https://github.com/tmc/langchaingo/issues/626
 	// is fully resolved.
-	result, err := Predict(t.Context(), chain,
+	result, err := Predict(ctx, chain,
 		map[string]any{
 			"country": "France",
 		},

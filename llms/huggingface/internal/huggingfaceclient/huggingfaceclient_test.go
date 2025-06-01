@@ -1,6 +1,7 @@
 package huggingfaceclient
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -13,9 +14,10 @@ import (
 const testURL = "https://api-inference.huggingface.co"
 
 func TestClient_RunInference(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "HUGGINGFACEHUB_API_TOKEN")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -41,16 +43,17 @@ func TestClient_RunInference(t *testing.T) {
 		MaxLength:   20,
 	}
 
-	resp, err := client.RunInference(t.Context(), req)
+	resp, err := client.RunInference(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Text)
 }
 
 func TestClient_RunInferenceText2Text(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "HUGGINGFACEHUB_API_TOKEN")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -76,16 +79,17 @@ func TestClient_RunInferenceText2Text(t *testing.T) {
 		MaxLength:   50,
 	}
 
-	resp, err := client.RunInference(t.Context(), req)
+	resp, err := client.RunInference(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Text)
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "HUGGINGFACEHUB_API_TOKEN")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -110,7 +114,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		},
 	}
 
-	embeddings, err := client.CreateEmbedding(t.Context(), "sentence-transformers/all-MiniLM-L6-v2", "feature-extraction", req)
+	embeddings, err := client.CreateEmbedding(ctx, "sentence-transformers/all-MiniLM-L6-v2", "feature-extraction", req)
 	require.NoError(t, err)
 	assert.NotNil(t, embeddings)
 	assert.Len(t, embeddings, 2)

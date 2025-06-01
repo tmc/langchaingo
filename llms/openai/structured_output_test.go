@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestStructuredOutputObjectSchema(t *testing.T) {
+	ctx := context.Background()
 	responseFormat := &ResponseFormat{
 		Type: "json_schema",
 		JSONSchema: &ResponseFormatJSONSchema{
@@ -46,7 +48,7 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -55,6 +57,7 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 }
 
 func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
+	ctx := context.Background()
 	responseFormat := &ResponseFormat{
 		Type: "json_schema",
 		JSONSchema: &ResponseFormatJSONSchema{
@@ -95,7 +98,7 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -104,6 +107,7 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 }
 
 func TestStructuredOutputFunctionCalling(t *testing.T) {
+	ctx := context.Background()
 	llm := newTestClient(
 		t,
 		WithModel("gpt-4o-2024-08-06"),
@@ -147,7 +151,7 @@ func TestStructuredOutputFunctionCalling(t *testing.T) {
 	}
 
 	rsp, err := llm.GenerateContent(
-		t.Context(),
+		ctx,
 		content,
 		llms.WithTools(toolList),
 	)

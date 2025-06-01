@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strings"
@@ -18,8 +19,9 @@ import (
 
 func TestConversation(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -27,18 +29,19 @@ func TestConversation(t *testing.T) {
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationBuffer())
-	_, err = Run(t.Context(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(t.Context(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
 }
 
 func TestConversationWithZepMemory(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -71,18 +74,19 @@ func TestConversationWithZepMemory(t *testing.T) {
 			zep.WithAIPrefix("Robot"),
 		),
 	)
-	_, err = Run(t.Context(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(t.Context(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
 }
 
 func TestConversationWithChatLLM(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -90,15 +94,15 @@ func TestConversationWithChatLLM(t *testing.T) {
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))
-	_, err = Run(t.Context(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(t.Context(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 
 	// this message will hit the maxTokenLimit and will initiate the prune of the messages to fit the context
-	res, err = Run(t.Context(), c, "Are you sure that my name is Jim?")
+	res, err = Run(ctx, c, "Are you sure that my name is Jim?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 }

@@ -29,6 +29,7 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 }
 
 func TestGenerateContent(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -42,7 +43,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -51,6 +52,7 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestWithFormat(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t, WithFormat("json"))
 
@@ -64,7 +66,7 @@ func TestWithFormat(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -78,6 +80,7 @@ func TestWithFormat(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -92,7 +95,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(t.Context(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -106,6 +109,7 @@ func TestWithStreaming(t *testing.T) {
 }
 
 func TestWithKeepAlive(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t, WithKeepAlive("1m"))
 
@@ -119,19 +123,20 @@ func TestWithKeepAlive(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(t.Context(), content)
+	resp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, resp.Choices)
 	c1 := resp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 
-	vector, err := llm.CreateEmbedding(t.Context(), []string{"test embedding with keep_alive"})
+	vector, err := llm.CreateEmbedding(ctx, []string{"test embedding with keep_alive"})
 	require.NoError(t, err)
 	assert.NotEmpty(t, vector)
 }
 
 func TestWithPullModel(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	// This test uses a small model to minimize download time
 	// Skip if not explicitly enabled via environment variable
@@ -154,7 +159,7 @@ func TestWithPullModel(t *testing.T) {
 	}
 
 	// The model should be pulled automatically before generating content
-	resp, err := llm.GenerateContent(t.Context(), content)
+	resp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, resp.Choices)
@@ -163,6 +168,7 @@ func TestWithPullModel(t *testing.T) {
 }
 
 func TestWithPullTimeout(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	// This test verifies timeout functionality
 	// Skip if not explicitly enabled via environment variable
@@ -189,7 +195,7 @@ func TestWithPullTimeout(t *testing.T) {
 	}
 
 	// This should fail with a timeout error
-	_, err = llm.GenerateContent(t.Context(), content)
+	_, err = llm.GenerateContent(ctx, content)
 	require.Error(t, err)
 	// The error should contain "context deadline exceeded" or similar
 	assert.Contains(t, err.Error(), "context")

@@ -33,9 +33,10 @@ func (m MockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, err
 }
 
 func TestStore_AddDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "QDRANT_URL")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -84,7 +85,7 @@ func TestStore_AddDocuments(t *testing.T) {
 		},
 	}
 
-	ids, err := store.AddDocuments(t.Context(), docs)
+	ids, err := store.AddDocuments(ctx, docs)
 	require.NoError(t, err)
 	assert.Len(t, ids, 2)
 	assert.NotEmpty(t, ids[0])
@@ -92,9 +93,10 @@ func TestStore_AddDocuments(t *testing.T) {
 }
 
 func TestStore_SimilaritySearch(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "QDRANT_URL")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -129,15 +131,16 @@ func TestStore_SimilaritySearch(t *testing.T) {
 	query := "What is machine learning?"
 	numDocuments := 2
 
-	docs, err := store.SimilaritySearch(t.Context(), query, numDocuments)
+	docs, err := store.SimilaritySearch(ctx, query, numDocuments)
 	require.NoError(t, err)
 	assert.LessOrEqual(t, len(docs), numDocuments)
 }
 
 func TestStore_SimilaritySearchWithScore(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "QDRANT_URL")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -173,16 +176,17 @@ func TestStore_SimilaritySearchWithScore(t *testing.T) {
 	numDocuments := 2
 	scoreThreshold := float32(0.5)
 
-	docs, err := store.SimilaritySearch(t.Context(), query, numDocuments,
+	docs, err := store.SimilaritySearch(ctx, query, numDocuments,
 		vectorstores.WithScoreThreshold(scoreThreshold))
 	require.NoError(t, err)
 	assert.LessOrEqual(t, len(docs), numDocuments)
 }
 
 func TestDoRequest(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "QDRANT_URL")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -206,7 +210,7 @@ func TestDoRequest(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test GET request
-	body, status, err := DoRequest(t.Context(), *testURL, apiKey, http.MethodGet, nil)
+	body, status, err := DoRequest(ctx, *testURL, apiKey, http.MethodGet, nil)
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, status)
 	defer body.Close()

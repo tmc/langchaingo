@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strings"
@@ -13,8 +14,9 @@ import (
 )
 
 func TestLLMChainAzure(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -41,7 +43,7 @@ func TestLLMChainAzure(t *testing.T) {
 
 	chain := NewLLMChain(model, prompt)
 
-	result, err := Predict(t.Context(), chain,
+	result, err := Predict(ctx, chain,
 		map[string]any{
 			"country": "France",
 		},

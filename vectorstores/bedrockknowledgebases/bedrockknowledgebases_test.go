@@ -191,11 +191,11 @@ func (t *testS3Client) DeleteObject(_ context.Context, _ *s3.DeleteObjectInput, 
 }
 
 func TestKnowledgeBaseAddDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
@@ -206,11 +206,11 @@ func TestKnowledgeBaseAddDocuments(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddDocumentsWithoutDs(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithoutDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
@@ -218,11 +218,11 @@ func TestKnowledgeBaseAddDocumentsWithoutDs(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddDocumentsWithWrongDsId(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("wrongDatasourceID"))
@@ -230,11 +230,11 @@ func TestKnowledgeBaseAddDocumentsWithWrongDsId(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithTwoS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("testS3DatasourceID"))
@@ -245,11 +245,11 @@ func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithTwoMixedDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
@@ -260,9 +260,9 @@ func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddDocumentsWithMultipleS3DsAndWithoutDsID(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	kb := newFromClients("testKbWithTwoS3Datasource", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
 
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
@@ -270,11 +270,11 @@ func TestKnowledgeBaseAddDocumentsWithMultipleS3DsAndWithoutDsID(t *testing.T) {
 }
 
 func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
-	ctx := t.Context()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
 
 	ids, err := kb.AddNamedDocuments(
@@ -294,9 +294,9 @@ func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
 }
 
 func TestKnowledgeBaseSimilaritySearch(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
 
 	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5)
@@ -308,9 +308,9 @@ func TestKnowledgeBaseSimilaritySearch(t *testing.T) {
 }
 
 func TestKnowledgeBaseSimilaritySearchWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
 
 	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithScoreThreshold(0.8))
@@ -321,9 +321,9 @@ func TestKnowledgeBaseSimilaritySearchWithScoreThreshold(t *testing.T) {
 }
 
 func TestKnowledgeBaseSimilaritySearchWithFilter(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
 
 	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters(EqualsFilter{Key: "color", Value: "orange"}))
@@ -331,9 +331,9 @@ func TestKnowledgeBaseSimilaritySearchWithFilter(t *testing.T) {
 }
 
 func TestKnowledgeBaseSimilaritySearchWrongWithFilter(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
 
 	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters("wrongFilter"))
@@ -361,9 +361,9 @@ func (t *trackSearchResults) SimilaritySearch(ctx context.Context, query string,
 }
 
 func TestKnowledgeBaseAsRetriever(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
 	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
 
@@ -385,9 +385,9 @@ func TestKnowledgeBaseAsRetriever(t *testing.T) {
 }
 
 func TestKnowledgeBaseAsRetrieverWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	ctx := t.Context()
 	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
 	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
 

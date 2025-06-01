@@ -1,6 +1,7 @@
 package cohereclient
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -28,6 +29,7 @@ func setupTestClient(t *testing.T, baseURL, model string) (*Client, *httprr.Reco
 }
 
 func TestClient_CreateGeneration(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	client, rr := setupTestClient(t, "", "command")
@@ -37,13 +39,14 @@ func TestClient_CreateGeneration(t *testing.T) {
 		Prompt: "Once upon a time in a magical forest, there lived",
 	}
 
-	resp, err := client.CreateGeneration(t.Context(), req)
+	resp, err := client.CreateGeneration(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Text)
 }
 
 func TestClient_CreateGenerationWithCustomModel(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	client, rr := setupTestClient(t, "https://api.cohere.ai", "command-light")
@@ -53,7 +56,7 @@ func TestClient_CreateGenerationWithCustomModel(t *testing.T) {
 		Prompt: "What is the capital of France?",
 	}
 
-	resp, err := client.CreateGeneration(t.Context(), req)
+	resp, err := client.CreateGeneration(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Text)

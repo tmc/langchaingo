@@ -64,9 +64,8 @@ func TestCache_hashKeyForCache(t *testing.T) {
 }
 
 func TestCache_Call(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-
-	ctx := t.Context()
 	rq := require.New(t)
 
 	exp := &llms.ContentResponse{
@@ -121,9 +120,8 @@ func TestCache_Call(t *testing.T) {
 }
 
 func TestCache_Call_Streaming(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-
-	ctx := t.Context()
 	rq := require.New(t)
 
 	exp := &llms.ContentResponse{

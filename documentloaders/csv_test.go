@@ -1,6 +1,7 @@
 package documentloaders
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -15,7 +16,8 @@ func TestCSVLoader(t *testing.T) {
 
 	loader := NewCSV(file)
 
-	docs, err := loader.Load(t.Context())
+	ctx := context.Background()
+	docs, err := loader.Load(ctx)
 	require.NoError(t, err)
 	require.Len(t, docs, 20)
 
@@ -36,7 +38,8 @@ func TestCSVLoaderWithFilteringColumns(t *testing.T) {
 
 	loader := NewCSV(file, "city")
 
-	docs, err := loader.Load(t.Context())
+	ctx := context.Background()
+	docs, err := loader.Load(ctx)
 	require.NoError(t, err)
 	require.Len(t, docs, 20)
 

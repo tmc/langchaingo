@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -32,6 +33,7 @@ func TestMapReduceInputVariables(t *testing.T) {
 
 func TestMapReduce(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	c := NewMapReduceDocuments(
 		NewLLMChain(
@@ -46,7 +48,7 @@ func TestMapReduce(t *testing.T) {
 		),
 	)
 
-	result, err := Run(t.Context(), c, []schema.Document{
+	result, err := Run(ctx, c, []schema.Document{
 		{PageContent: "foo"},
 		{PageContent: "boo"},
 		{PageContent: "zoo"},

@@ -4,13 +4,14 @@ package cloudsql_test
 import (
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/util/cloudsqlutil"
 	"github.com/tmc/langchaingo/vectorstores/cloudsql"
-	"os"
-	"testing"
 )
 
 type EnvVariables struct {

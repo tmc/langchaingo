@@ -1,6 +1,7 @@
 package chains
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -13,8 +14,9 @@ import (
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -37,7 +39,7 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 		"query":              "How many cards are there?",
 		"table_names_to_use": []string{"AllianceAuthority", "AllianceGift", "Card"},
 	}
-	result, err := chain.Call(t.Context(), input)
+	result, err := chain.Call(ctx, input)
 	require.NoError(t, err)
 
 	ret, ok := result["result"].(string)

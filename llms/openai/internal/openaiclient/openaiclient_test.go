@@ -15,7 +15,7 @@ import (
 func setupTestClient(t *testing.T, model string) *Client {
 	t.Helper()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -35,7 +35,8 @@ func setupTestClient(t *testing.T, model string) *Client {
 }
 
 func TestClient_CreateChatCompletion(t *testing.T) {
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	ctx := context.Background()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -64,7 +65,7 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 		MaxCompletionTokens: 50,
 	}
 
-	resp, err := client.CreateChat(t.Context(), req)
+	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Choices)
@@ -72,9 +73,10 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 }
 
 func TestClient_CreateChatCompletionStream(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -104,16 +106,17 @@ func TestClient_CreateChatCompletionStream(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateChat(t.Context(), req)
+	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, chunks)
 }
 
 func TestClient_CreateEmbedding(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -130,7 +133,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		Input: []string{"Hello world"},
 	}
 
-	resp, err := client.CreateEmbedding(t.Context(), req)
+	resp, err := client.CreateEmbedding(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp)
@@ -139,9 +142,10 @@ func TestClient_CreateEmbedding(t *testing.T) {
 }
 
 func TestClient_FunctionCall(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -181,15 +185,16 @@ func TestClient_FunctionCall(t *testing.T) {
 		},
 	}
 
-	resp, err := client.CreateChat(t.Context(), req)
+	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
 func TestClient_WithResponseFormat(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -215,7 +220,7 @@ func TestClient_WithResponseFormat(t *testing.T) {
 		ResponseFormat:      responseFormat,
 	}
 
-	resp, err := client.CreateChat(t.Context(), req)
+	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Choices)

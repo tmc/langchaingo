@@ -16,7 +16,7 @@ import (
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
 	t.Helper()
 
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
@@ -44,6 +44,7 @@ func newTestClient(t *testing.T, opts ...Option) llms.Model {
 }
 
 func TestMultiContentText(t *testing.T) {
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -57,7 +58,7 @@ func TestMultiContentText(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -66,6 +67,7 @@ func TestMultiContentText(t *testing.T) {
 }
 
 func TestMultiContentTextChatSequence(t *testing.T) {
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	content := []llms.MessageContent{
@@ -83,7 +85,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -92,6 +94,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 }
 
 func TestMultiContentImage(t *testing.T) {
+	ctx := context.Background()
 
 	llm := newTestClient(t, WithModel("gpt-4o"))
 
@@ -106,7 +109,7 @@ func TestMultiContentImage(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content, llms.WithMaxTokens(300))
+	rsp, err := llm.GenerateContent(ctx, content, llms.WithMaxTokens(300))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -115,6 +118,7 @@ func TestMultiContentImage(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -129,7 +133,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(t.Context(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -145,6 +149,7 @@ func TestWithStreaming(t *testing.T) {
 
 //nolint:lll
 func TestFunctionCall(t *testing.T) {
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -165,7 +170,7 @@ func TestFunctionCall(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(t.Context(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithFunctions(functions))
 	require.NoError(t, err)
 

@@ -27,7 +27,7 @@ func (r testRetriever) GetRelevantDocuments(_ context.Context, _ string) ([]sche
 // createOpenAILLMForRetrieval creates an OpenAI LLM with httprr support for testing.
 func createOpenAILLMForRetrieval(t *testing.T) *openai.LLM {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -37,6 +37,7 @@ func createOpenAILLMForRetrieval(t *testing.T) *openai.LLM {
 }
 
 func TestRetrievalQA(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	llm := createOpenAILLMForRetrieval(t)
@@ -51,19 +52,20 @@ func TestRetrievalQA(t *testing.T) {
 
 	chain := NewRetrievalQA(combineChain, r)
 
-	result, err := Run(t.Context(), chain, "what is foo? ")
+	result, err := Run(ctx, chain, "what is foo? ")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "34"), "expected 34 in result")
 }
 
 func TestRetrievalQAFromLLM(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	r := testRetriever{}
 	llm := createOpenAILLMForRetrieval(t)
 
 	chain := NewRetrievalQAFromLLM(llm, r)
-	result, err := Run(t.Context(), chain, "what is foo? ")
+	result, err := Run(ctx, chain, "what is foo? ")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "34"), "expected 34 in result")
 }

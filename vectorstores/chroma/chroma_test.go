@@ -33,7 +33,7 @@ import (
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
@@ -50,7 +50,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 // createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
 func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
 	t.Helper()
-	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })

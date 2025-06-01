@@ -1,6 +1,7 @@
 package perplexity
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func TestTool_Integration(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	apiKey := os.Getenv("PERPLEXITY_API_KEY")
@@ -24,7 +26,6 @@ func TestTool_Integration(t *testing.T) {
 	assert.NotEmpty(t, tool.Description())
 
 	// Test Call functionality
-	ctx := t.Context()
 	response, err := tool.Call(ctx, "what is the largest country in the world by total area?")
 	require.NoError(t, err)
 	assert.Contains(t, response, "Russia")

@@ -1,6 +1,7 @@
 package inmemory
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -11,9 +12,8 @@ import (
 )
 
 func TestInMemory(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-
-	ctx := t.Context()
 	rq := require.New(t)
 	ttl := time.Second / 2
 
