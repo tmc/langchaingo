@@ -40,7 +40,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(t.Context(), content)
 
 	require.NoError(t, err)
 
@@ -64,7 +64,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(t.Context(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil

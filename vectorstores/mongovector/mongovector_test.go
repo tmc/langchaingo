@@ -3,8 +3,6 @@ package mongovector
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -13,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -33,51 +31,12 @@ const (
 	testIndexSize3            = 3
 )
 
-type atlasContainer struct {
-	testcontainers.Container
-	URI string
-}
-
-func setupAtlas(ctx context.Context) (*atlasContainer, error) {
-	req := testcontainers.ContainerRequest{
-		Image:        "mongodb/mongodb-atlas-local",
-		ExposedPorts: []string{"27017/tcp"},
-		WaitingFor:   wait.ForLog("Waiting for connections").WithStartupTimeout(1 * time.Second),
-	}
-
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var atlasC *atlasContainer
-	if container != nil {
-		atlasC = &atlasContainer{Container: container}
-	}
-
-	ip, err := container.Host(ctx)
-	if err != nil {
-		return atlasC, err
-	}
-
-	mappedPort, err := container.MappedPort(ctx, "27017")
-	if err != nil {
-		return atlasC, err
-	}
-
-	uri := &url.URL{
-		Scheme:   "mongodb",
-		Host:     net.JoinHostPort(ip, mappedPort.Port()),
-		Path:     "/",
-		RawQuery: "directConnection=true",
-	}
-
-	atlasC.URI = uri.String()
-
-	return atlasC, nil
+func setupMongoDB(ctx context.Context) (*mongodb.MongoDBContainer, error) {
+	// Use MongoDB Atlas Local image which supports vector search
+	return mongodb.Run(ctx, "mongodb/mongodb-atlas-local:latest",
+		mongodb.WithUsername("admin"),
+		mongodb.WithPassword("password"),
+	)
 }
 
 // resetVectorStore will reset the vector space defined by the given collection.
@@ -86,7 +45,7 @@ func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 
 	filter := bson.D{{Key: pageContentName, Value: bson.D{{Key: "$exists", Value: true}}}}
 
-	_, err := coll.DeleteMany(context.Background(), filter)
+	_, err := coll.DeleteMany(t.Context(), filter)
 	assert.NoError(t, err, "failed to reset vector store")
 }
 
@@ -95,35 +54,74 @@ func resetVectorStore(t *testing.T, coll *mongo.Collection) {
 func setupTest(t *testing.T, dim int, index string) Store {
 	t.Helper()
 
-	uri := os.Getenv(testURI)
-	if uri == "" {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-		defer cancel()
-
-		container, err := setupAtlas(ctx)
-		require.NoError(t, err)
-
-		uri = container.URI
-		t.Setenv(testURI, uri)
+	if testing.Short() {
+		t.Skip("skipping MongoDB vector store tests in short mode")
 	}
 
-	require.NotEmpty(t, uri, "URI required")
+	t.Skip("Skipping very slow mongo vector store tests. See https://github.com/tmc/langchaingo/issues/1273")
 
+	uri := getMongoURI(t)
+	client := connectMongoDB(t, uri)
+	initializeIndexes(t, client)
+
+	// Create the vectorstore collection
+	err := client.Database(testDB).CreateCollection(t.Context(), testColl)
+	require.NoError(t, err, "failed to create collection")
+
+	coll := client.Database(testDB).Collection(testColl)
+	resetVectorStore(t, coll)
+
+	emb := newMockEmbedder(dim)
+	return New(coll, emb, WithIndex(index))
+}
+
+func getMongoURI(t *testing.T) string {
+	t.Helper()
+	uri := os.Getenv(testURI)
+	if uri == "" {
+		ctx, cancel := context.WithTimeout(t.Context(), 5*time.Minute)
+		defer cancel()
+
+		container, err := setupMongoDB(ctx)
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			if err := testcontainers.TerminateContainer(container); err != nil {
+				t.Logf("Failed to terminate mongodb container: %v", err)
+			}
+		})
+
+		host, err := container.Host(ctx)
+		require.NoError(t, err)
+		port, err := container.MappedPort(ctx, "27017")
+		require.NoError(t, err)
+
+		uri = fmt.Sprintf("mongodb://%s:%s/?directConnection=true", host, port.Port())
+		t.Setenv(testURI, uri)
+	}
+	require.NotEmpty(t, uri, "URI required")
+	return uri
+}
+
+func connectMongoDB(t *testing.T, uri string) *mongo.Client {
+	t.Helper()
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	require.NoError(t, err, "failed to connect to MongoDB server")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 	defer cancel()
-
 	err = client.Ping(ctx, nil)
 	require.NoError(t, err, "failed to ping server")
 
-	time.Sleep(10 * time.Second) // Let the container warm up
+	time.Sleep(30 * time.Second) // Let the container warm up
+	return client
+}
 
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Minute)
+func initializeIndexes(t *testing.T, client *mongo.Client) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Minute)
 	defer cancel()
 
-	err = resetForE2E(ctx, client, testIndexDP1536, testIndexSize1536, nil)
+	err := resetForE2E(ctx, client, testIndexDP1536, testIndexSize1536, nil)
 	require.NoError(t, err)
 
 	filters := []string{"pageContent"}
@@ -132,18 +130,6 @@ func setupTest(t *testing.T, dim int, index string) Store {
 
 	err = resetForE2E(ctx, client, testIndexDP3, testIndexSize3, nil)
 	require.NoError(t, err)
-
-	// Create the vectorstore collection
-	err = client.Database(testDB).CreateCollection(context.Background(), testColl)
-	require.NoError(t, err, "failed to create collection")
-
-	coll := client.Database(testDB).Collection(testColl)
-	resetVectorStore(t, coll)
-
-	emb := newMockEmbedder(dim)
-	store := New(coll, emb, WithIndex(index))
-
-	return store
 }
 
 func TestNew(t *testing.T) {
@@ -249,7 +235,7 @@ func TestStore_AddDocuments(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			resetVectorStore(t, store.coll)
 
-			ids, err := store.AddDocuments(context.Background(), test.docs, test.options...)
+			ids, err := store.AddDocuments(t.Context(), test.docs, test.options...)
 			if len(test.wantErr) > 0 {
 				require.Error(t, err)
 				for _, want := range test.wantErr {
@@ -304,7 +290,7 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 		test.options = append(test.options, vectorstores.WithEmbedder(emb))
 	}
 
-	err := flushMockDocuments(context.Background(), store, emb)
+	err := flushMockDocuments(t.Context(), store, emb)
 	require.NoError(t, err, "failed to flush mock embedder")
 
 	raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)

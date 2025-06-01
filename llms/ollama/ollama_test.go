@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,7 +42,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(t.Context(), content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -63,7 +64,7 @@ func TestWithFormat(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(t.Context(), content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -91,7 +92,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(t.Context(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -118,14 +119,78 @@ func TestWithKeepAlive(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), content)
+	resp, err := llm.GenerateContent(t.Context(), content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, resp.Choices)
 	c1 := resp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 
-	vector, err := llm.CreateEmbedding(context.Background(), []string{"test embedding with keep_alive"})
+	vector, err := llm.CreateEmbedding(t.Context(), []string{"test embedding with keep_alive"})
 	require.NoError(t, err)
 	assert.NotEmpty(t, vector)
+}
+
+func TestWithPullModel(t *testing.T) {
+	t.Parallel()
+	// This test uses a small model to minimize download time
+	// Skip if not explicitly enabled via environment variable
+	if os.Getenv("OLLAMA_TEST_PULL") == "" {
+		t.Skip("OLLAMA_TEST_PULL not set, skipping pull test")
+	}
+
+	// Use a small model for testing
+	llm, err := New(WithModel("gemma:2b"), WithPullModel())
+	require.NoError(t, err)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "Say hello"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	// The model should be pulled automatically before generating content
+	resp, err := llm.GenerateContent(t.Context(), content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, resp.Choices)
+	c1 := resp.Choices[0]
+	assert.NotEmpty(t, c1.Content)
+}
+
+func TestWithPullTimeout(t *testing.T) {
+	t.Parallel()
+	// This test verifies timeout functionality
+	// Skip if not explicitly enabled via environment variable
+	if os.Getenv("OLLAMA_TEST_PULL") == "" {
+		t.Skip("OLLAMA_TEST_PULL not set, skipping pull timeout test")
+	}
+
+	// Use a very short timeout that should fail for any real model pull
+	llm, err := New(
+		WithModel("llama2:70b"), // Large model that would take time to download
+		WithPullModel(),
+		WithPullTimeout(1*time.Millisecond), // Extremely short timeout
+	)
+	require.NoError(t, err)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "Say hello"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	// This should fail with a timeout error
+	_, err = llm.GenerateContent(t.Context(), content)
+	require.Error(t, err)
+	// The error should contain "context deadline exceeded" or similar
+	assert.Contains(t, err.Error(), "context")
 }

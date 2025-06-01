@@ -1,7 +1,6 @@
 package wikipedia
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,6 +12,6 @@ func TestWikipedia(t *testing.T) {
 	t.Parallel()
 
 	tool := New(_userAgent)
-	_, err := tool.Call(context.Background(), "america")
+	_, err := tool.Call(t.Context(), "america")
 	require.NoError(t, err)
 }

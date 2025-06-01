@@ -36,7 +36,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(t.Context(), content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -60,7 +60,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(t.Context(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -78,7 +78,7 @@ func TestCreateEmbedding(t *testing.T) {
 	t.Skip("llamafile is not available")
 	llm := newTestClient(t)
 
-	embeddings, err := llm.CreateEmbedding(context.Background(), []string{"hello", "world"})
+	embeddings, err := llm.CreateEmbedding(t.Context(), []string{"hello", "world"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 2)
 }

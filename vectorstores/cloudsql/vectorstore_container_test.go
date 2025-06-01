@@ -29,29 +29,38 @@ func preCheckEnvSetting(t *testing.T) string {
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
-		pgVectorContainer, err := tcpostgres.RunContainer(
-			context.Background(),
-			testcontainers.WithImage("docker.io/pgvector/pgvector:pg16"),
+		pgVectorContainer, err := tcpostgres.Run(
+			t.Context(),
+			"docker.io/pgvector/pgvector:pg16",
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
 			tcpostgres.WithPassword("passw0rd!"),
 			testcontainers.WithWaitStrategy(
-				wait.ForLog("database system is ready to accept connections").
-					WithOccurrence(2).
-					WithStartupTimeout(30*time.Second)),
+				wait.ForAll(
+					wait.ForLog("database system is ready to accept connections").
+						WithOccurrence(2).
+						WithStartupTimeout(60*time.Second),
+					wait.ForListeningPort("5432/tcp").
+						WithStartupTimeout(60*time.Second),
+				)),
 		)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
+			if err := pgVectorContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate cloudsql container: %v", err)
+			}
 		})
 
-		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
+		str, err := pgVectorContainer.ConnectionString(t.Context(), "sslmode=disable")
 		require.NoError(t, err)
 
 		pgvectorURL = str
+
+		// Give the container a moment to fully initialize
+		time.Sleep(2 * time.Second)
 	}
 
 	return pgvectorURL
@@ -60,7 +69,7 @@ func preCheckEnvSetting(t *testing.T) string {
 func setEngineWithImage(t *testing.T) cloudsqlutil.PostgresEngine {
 	t.Helper()
 	pgvectorURL := preCheckEnvSetting(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	myPool, err := pgxpool.New(ctx, pgvectorURL)
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
@@ -79,7 +88,7 @@ func setEngineWithImage(t *testing.T) cloudsqlutil.PostgresEngine {
 func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 	t.Helper()
 	pgEngine := setEngineWithImage(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	vectorstoreTableoptions := cloudsqlutil.VectorstoreTableOptions{
 		TableName:         "my_test_table",
 		OverwriteExisting: true,
@@ -119,7 +128,7 @@ func TestContainerPingToDB(t *testing.T) {
 
 	defer engine.Close()
 
-	if err := engine.Pool.Ping(context.Background()); err != nil {
+	if err := engine.Pool.Ping(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -127,7 +136,7 @@ func TestContainerPingToDB(t *testing.T) {
 func TestContainerApplyVectorIndexAndDropIndex(t *testing.T) {
 	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", cloudsql.CosineDistance{}, []string{}, cloudsql.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -146,7 +155,7 @@ func TestContainerApplyVectorIndexAndDropIndex(t *testing.T) {
 func TestContainerIsValidIndex(t *testing.T) {
 	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	idx := vs.NewBaseIndex("testindex", "hnsw", cloudsql.CosineDistance{}, []string{}, cloudsql.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -168,7 +177,7 @@ func TestContainerIsValidIndex(t *testing.T) {
 
 func TestContainerAddDocuments(t *testing.T) {
 	t.Parallel()
-	ctx := context.Background()
+	ctx := t.Context()
 	vs, cleanUpTableFn := initVectorStore(t)
 
 	_, err := vs.AddDocuments(ctx, []schema.Document{

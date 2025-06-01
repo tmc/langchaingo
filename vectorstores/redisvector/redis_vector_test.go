@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
@@ -35,7 +36,7 @@ func getValues(t *testing.T) (string, string) {
 
 	uri := os.Getenv("REDIS_URL")
 	if uri == "" {
-		ctx := context.Background()
+		ctx := t.Context()
 
 		genericContainerReq := testcontainers.GenericContainerRequest{
 			ContainerRequest: testcontainers.ContainerRequest{
@@ -44,6 +45,7 @@ func getValues(t *testing.T) (string, string) {
 				WaitingFor:   wait.ForLog("* Ready to accept connections"),
 			},
 			Started: true,
+			Logger:  tclog.TestLogger(t),
 		}
 
 		container, err := testcontainers.GenericContainer(ctx, genericContainerReq)
@@ -54,7 +56,9 @@ func getValues(t *testing.T) (string, string) {
 
 		redisContainer := &tcredis.RedisContainer{Container: container}
 		t.Cleanup(func() {
-			require.NoError(t, redisContainer.Terminate(context.Background()))
+			if err := redisContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate redis container: %v", err)
+			}
 		})
 
 		url, err := redisContainer.ConnectionString(ctx)
@@ -78,7 +82,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := context.Background()
+	ctx := t.Context()
 	index := "test_case1"
 
 	_, err := redisvector.New(ctx,
@@ -170,7 +174,7 @@ func TestAddDocuments(t *testing.T) {
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	index := "test_add_document"
 	prefix := "doc:"
@@ -257,7 +261,7 @@ func TestSimilaritySearch(t *testing.T) {
 
 	redisURL, ollamaURL := getValues(t)
 	_, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := context.Background()
+	ctx := t.Context()
 
 	index := "test_similarity_search"
 
@@ -346,7 +350,7 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 
 	redisURL, ollamaURL := getValues(t)
 	llm, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := context.Background()
+	ctx := t.Context()
 	index := "test_redis_vector_as_retriever"
 
 	store, err := redisvector.New(ctx,
@@ -404,7 +408,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	redisURL, ollamaURL := getValues(t)
 	llm, e := getEmbedding(ollamaModel, ollamaURL)
-	ctx := context.Background()
+	ctx := t.Context()
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 
 	store, err := redisvector.New(ctx,
@@ -415,7 +419,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = store.AddDocuments(
-		context.Background(),
+		t.Context(),
 		[]schema.Document{
 			{
 				PageContent: "The color of the lamp beside the desk is black.",

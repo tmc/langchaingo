@@ -2,6 +2,7 @@ package opensearch_test
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -10,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
 	tcopensearch "github.com/testcontainers/testcontainers-go/modules/opensearch"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -33,16 +34,18 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		openseachContainer, err := tcopensearch.RunContainer(context.Background(), testcontainers.WithImage("opensearchproject/opensearch:2.11.1"))
+		openseachContainer, err := tcopensearch.Run(t.Context(), "opensearchproject/opensearch:2.11.1")
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, openseachContainer.Terminate(context.Background()))
+			if err := openseachContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate opensearch container: %v", err)
+			}
 		})
 
-		address, err := openseachContainer.Address(context.Background())
+		address, err := openseachContainer.Address(t.Context())
 		if err != nil {
 			t.Skipf("cannot get address of opensearch container: %v\n", err)
 		}
@@ -73,7 +76,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 
 func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.CreateIndex(context.TODO(), indexName)
+	_, err := storer.CreateIndex(t.Context(), indexName)
 	if err != nil {
 		t.Fatalf("error creating index: %v\n", err)
 	}
@@ -81,31 +84,79 @@ func setIndex(t *testing.T, storer opensearch.Store, indexName string) {
 
 func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	t.Helper()
-	_, err := storer.DeleteIndex(context.TODO(), indexName)
+	_, err := storer.DeleteIndex(t.Context(), indexName)
 	if err != nil {
 		t.Fatalf("error deleting index: %v\n", err)
 	}
 }
 
-func setLLM(t *testing.T) *openai.LLM {
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-	openaiOpts := []openai.Option{}
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	openaiOpts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
 
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
 		openaiOpts = append(openaiOpts,
 			openai.WithBaseURL(openAIBaseURL),
 			openai.WithAPIType(openai.APITypeAzure),
-			openai.WithEmbeddingModel("text-embedding-ada-002"),
+		)
+	}
+
+	llm, err := openai.New(openaiOpts...)
+	require.NoError(t, err)
+
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+	return e
+}
+
+// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
+func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
+	t.Helper()
+	httprr.SkipIfNoCredentialsOrRecording(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	openaiOpts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
+		openaiOpts = append(openaiOpts,
+			openai.WithBaseURL(openAIBaseURL),
+			openai.WithAPIType(openai.APITypeAzure),
 			openai.WithModel("gpt-4"),
 		)
 	}
 
 	llm, err := openai.New(openaiOpts...)
-	if err != nil {
-		t.Fatalf("error setting openAI embedded: %v\n", err)
+	require.NoError(t, err)
+
+	embeddingOpts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
 	}
 
-	return llm
+	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
+		embeddingOpts = append(embeddingOpts,
+			openai.WithBaseURL(openAIBaseURL),
+			openai.WithAPIType(openai.APITypeAzure),
+		)
+	}
+
+	embeddingLLM, err := openai.New(embeddingOpts...)
+	require.NoError(t, err)
+
+	e, err := embeddings.NewEmbedder(embeddingLLM)
+	require.NoError(t, err)
+	return llm, e
 }
 
 func setOpensearchClient(
@@ -130,9 +181,7 @@ func TestOpensearchStoreRest(t *testing.T) {
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
-	llm := setLLM(t)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -143,13 +192,13 @@ func TestOpensearchStoreRest(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	_, err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(t.Context(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	time.Sleep(time.Second)
-	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1, vectorstores.WithNameSpace(indexName))
+	docs, err := storer.SimilaritySearch(t.Context(), "japan", 1, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
@@ -160,9 +209,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	llm := setLLM(t)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -173,7 +220,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
 
-	_, err = storer.AddDocuments(context.Background(), []schema.Document{
+	_, err = storer.AddDocuments(t.Context(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
 		{PageContent: "Osaka"},
@@ -188,7 +235,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(time.Second)
 	// test with a score threshold of 0.72, expected 6 documents
-	docs, err := storer.SimilaritySearch(context.Background(),
+	docs, err := storer.SimilaritySearch(t.Context(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.72),
 		vectorstores.WithNameSpace(indexName))
@@ -201,9 +248,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	llm := setLLM(t)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -215,7 +260,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	defer removeIndex(t, storer, indexName)
 
 	_, err = storer.AddDocuments(
-		context.Background(),
+		t.Context(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -228,7 +273,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	time.Sleep(time.Second)
 
 	result, err := chains.Run(
-		context.TODO(),
+		t.Context(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(storer, 1, vectorstores.WithNameSpace(indexName)),
@@ -244,9 +289,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	llm := setLLM(t)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -258,7 +301,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	defer removeIndex(t, storer, indexName)
 
 	_, err = storer.AddDocuments(
-		context.Background(),
+		t.Context(),
 		[]schema.Document{
 			{PageContent: "The color of the house is blue."},
 			{PageContent: "The color of the car is red."},
@@ -271,7 +314,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(time.Second)
 	result, err := chains.Run(
-		context.TODO(),
+		t.Context(),
 		chains.NewRetrievalQAFromLLM(
 			llm,
 			vectorstores.ToRetriever(storer, 5,

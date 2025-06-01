@@ -1,7 +1,6 @@
 package chains
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -45,14 +44,14 @@ func TestMapRerankDocumentsCall(t *testing.T) {
 	mapRerankDocumentsChain := NewMapRerankDocuments(mapRerankLLMChain)
 
 	// Test that the answer is the highest scoring document.
-	answer, err := Run(context.Background(), mapRerankDocumentsChain, docs)
+	answer, err := Run(t.Context(), mapRerankDocumentsChain, docs)
 
 	require.NoError(t, err)
 	require.Equal(t, "Test High", answer)
 
 	// Test that the answer cannot be processed if ReturnIntermediateSteps is true.
 	mapRerankDocumentsChain.ReturnIntermediateSteps = true
-	_, err = Run(context.Background(), mapRerankDocumentsChain, docs)
+	_, err = Run(t.Context(), mapRerankDocumentsChain, docs)
 
 	require.Error(t, err)
 
@@ -63,7 +62,7 @@ func TestMapRerankDocumentsCall(t *testing.T) {
 		{PageContent: "Test High\nScore:"},
 	}
 
-	_, err = Run(context.Background(), mapRerankDocumentsChain, docs)
+	_, err = Run(t.Context(), mapRerankDocumentsChain, docs)
 
 	require.Error(t, err)
 }

@@ -1,7 +1,6 @@
 package chains
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -47,7 +46,7 @@ func TestMapReduce(t *testing.T) {
 		),
 	)
 
-	result, err := Run(context.Background(), c, []schema.Document{
+	result, err := Run(t.Context(), c, []schema.Document{
 		{PageContent: "foo"},
 		{PageContent: "boo"},
 		{PageContent: "zoo"},

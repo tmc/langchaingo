@@ -1,7 +1,6 @@
 package documentloaders
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -12,7 +11,7 @@ import (
 func TestAssemblyAIAudioTranscriptLoader_Load(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	var apiKey string
 	if apiKey = os.Getenv("ASSEMBLYAI_API_KEY"); apiKey == "" {

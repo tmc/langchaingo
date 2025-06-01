@@ -72,7 +72,7 @@ func setEngine(ctx context.Context, t *testing.T) (alloydbutil.PostgresEngine, e
 
 func TestValidateTable(t *testing.T) {
 	t.Parallel()
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	t.Cleanup(cancel)
 	engine, err := setEngine(ctx, t)
 	if err != nil {

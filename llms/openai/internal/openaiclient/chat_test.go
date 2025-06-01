@@ -26,7 +26,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(t.Context(), r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -47,7 +47,7 @@ func TestParseStreamingChatResponse_ReasoningContent(t *testing.T) {
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(t.Context(), r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -74,7 +74,7 @@ data: {"id":"fa7e4fc5-a05d-4e7b-9a66-a2dd89e91a4e","object":"chat.completion.chu
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(t.Context(), r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

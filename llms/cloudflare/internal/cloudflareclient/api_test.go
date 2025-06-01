@@ -58,7 +58,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				embeddingModelName: "embeddingModelName",
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: t.Context(),
 				request: &GenerateContentRequest{
 					Messages: []Message{
 						{Role: "system", Content: "systemPrompt"},
@@ -90,7 +90,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				embeddingModelName: "embeddingModelName",
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: t.Context(),
 				request: &GenerateContentRequest{
 					Messages: []Message{
 						{Role: "system", Content: "systemPrompt"},
@@ -131,7 +131,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				bearerToken:        tt.fields.bearerToken,
 			}
 
-			got, err := c.GenerateContent(context.Background(), tt.args.request)
+			got, err := c.GenerateContent(t.Context(), tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateContent() error = %v, wantErr %v", err, tt.wantErr)
 				return
