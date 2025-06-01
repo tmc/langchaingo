@@ -69,9 +69,10 @@ func WithAnthropicBetaHeader(val string) Option {
 // New returns a new Anthropic client.
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:   model,
-		token:   token,
-		baseURL: strings.TrimSuffix(baseURL, "/"),
+		Model:      model,
+		token:      token,
+		baseURL:    strings.TrimSuffix(baseURL, "/"),
+		httpClient: http.DefaultClient,
 	}
 
 	for _, opt := range opts {
