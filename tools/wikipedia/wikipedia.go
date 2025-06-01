@@ -3,6 +3,7 @@ package wikipedia
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strconv"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -29,19 +30,37 @@ type Tool struct {
 	LanguageCode string
 	// The user agent sent in the heder. See https://www.mediawiki.org/wiki/API:Etiquette.
 	UserAgent string
+	// HTTP client for making requests.
+	httpClient *http.Client
 }
 
 var _ tools.Tool = Tool{}
 
+// Option defines a function for configuring the Wikipedia tool.
+type Option func(*Tool)
+
+// WithHTTPClient sets a custom HTTP client for the Wikipedia tool.
+func WithHTTPClient(client *http.Client) Option {
+	return func(t *Tool) {
+		t.httpClient = client
+	}
+}
+
 // New creates a new wikipedia tool to find wikipedia pages using the wikipedia api. TopK is set
 // to 2, DocMaxChars is set to 2000 and the language code is set to "en".
-func New(userAgent string) Tool {
-	return Tool{
+func New(userAgent string, opts ...Option) Tool {
+	tool := Tool{
 		TopK:         _defaultTopK,
 		DocMaxChars:  _defaultDocMaxChars,
 		LanguageCode: _defaultLanguageCode,
 		UserAgent:    userAgent,
 	}
+
+	for _, opt := range opts {
+		opt(&tool)
+	}
+
+	return tool
 }
 
 func (t Tool) Name() string {
@@ -79,7 +98,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 }
 
 func (t Tool) searchWiKi(ctx context.Context, input string) (string, error) {
-	searchResult, err := search(ctx, t.TopK, input, t.LanguageCode, t.UserAgent)
+	searchResult, err := search(ctx, t.TopK, input, t.LanguageCode, t.UserAgent, t.httpClient)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +110,7 @@ func (t Tool) searchWiKi(ctx context.Context, input string) (string, error) {
 	result := ""
 
 	for _, search := range searchResult.Query.Search {
-		getPageResult, err := getPage(ctx, search.PageID, t.LanguageCode, t.UserAgent)
+		getPageResult, err := getPage(ctx, search.PageID, t.LanguageCode, t.UserAgent, t.httpClient)
 		if err != nil {
 			return "", err
 		}

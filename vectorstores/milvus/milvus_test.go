@@ -11,8 +11,10 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
@@ -38,24 +40,31 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	// Default to localhost if OLLAMA_HOST not set
 	ollamaURL := os.Getenv("OLLAMA_HOST")
 	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
+		ollamaURL = "http://localhost:11434"
 	}
-	_, e := getEmbedding("gemma:2b")
 
+	_, e := getEmbedding("nomic-embed-text", ollamaURL)
+
+	ctx := context.Background()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
+		milvusContainer, err := tcmilvus.Run(ctx, "milvusdb/milvus:v2.4.0-rc.1-latest", testcontainers.WithLogger(tclog.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, milvusContainer.Terminate(context.Background()))
+			if err := milvusContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate milvus container: %v", err)
+			}
 		})
 
-		url, err = milvusContainer.ConnectionString(context.Background())
+		url, err = milvusContainer.ConnectionString(ctx)
 		if err != nil {
 			t.Skipf("Failed to get milvus container endpoint: %s", err)
 		}
@@ -72,14 +81,18 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		WithEmbedder(e),
 		WithIndex(idx))
 	return New(
-		context.Background(),
+		ctx,
 		config,
 		opts...,
 	)
 }
 
 func TestMilvusConnection(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
+	if testing.Short() {
+		t.Skip("Skipping Milvus connection test in short mode")
+	}
 	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
 
@@ -99,11 +112,11 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
 
-	_, err = storer.AddDocuments(context.Background(), data)
+	_, err = storer.AddDocuments(ctx, data)
 	require.NoError(t, err)
 
 	// search docs with filter
-	filterRes, err := storer.SimilaritySearch(context.Background(),
+	filterRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 10,
 		vectorstores.WithFilters("meta['area']==622"),
 	)
@@ -111,7 +124,7 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, filterRes, 1)
 
-	japanRes, err := storer.SimilaritySearch(context.Background(),
+	japanRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))
 	require.NoError(t, err)

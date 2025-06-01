@@ -1,7 +1,10 @@
 package serpapi
 
+import "net/http"
+
 type options struct {
-	apiKey string
+	apiKey     string
+	httpClient *http.Client
 }
 
 type Option func(*options)
@@ -11,5 +14,12 @@ type Option func(*options)
 func WithAPIKey(apiKey string) Option {
 	return func(opts *options) {
 		opts.apiKey = apiKey
+	}
+}
+
+// WithHTTPClient sets a custom HTTP client for the SerpAPI requests.
+func WithHTTPClient(client *http.Client) Option {
+	return func(opts *options) {
+		opts.httpClient = client
 	}
 }

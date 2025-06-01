@@ -15,6 +15,7 @@ import (
 )
 
 func Test(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	const dsn = `test.sqlite`
@@ -40,7 +41,7 @@ func Test(t *testing.T) {
 	tbs := db.TableNames()
 	require.Len(t, tbs, 3)
 
-	desc, err := db.TableInfo(context.Background(), tbs)
+	desc, err := db.TableInfo(ctx, tbs)
 	require.NoError(t, err)
 
 	desc = strings.TrimSpace(desc)
@@ -50,7 +51,7 @@ func Test(t *testing.T) {
 	require.True(t, strings.Contains(desc, "Activity2"))     //nolint:stylecheck
 
 	for _, tableName := range tbs {
-		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
+		_, err = db.Query(ctx, fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
 		/* exclude no row error,
 		since we only need to check if db.Query function can perform query correctly*/
 		if errors.Is(err, sql.ErrNoRows) {

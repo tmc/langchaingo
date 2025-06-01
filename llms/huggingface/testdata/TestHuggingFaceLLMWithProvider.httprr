@@ -1,0 +1,30 @@
+httprr trace v1
+371 1483
+POST https://router.huggingface.co/hyperbolic/v1/chat/completions HTTP/1.1
+Host: router.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 143
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek-ai/DeepSeek-R1-0528","messages":[{"role":"user","content":"What is 2+2?"}],"stream":false,"temperature":0.5,"max_tokens":50}HTTP/2.0 200 OK
+Content-Length: 645
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Cross-Origin-Opener-Policy: same-origin
+Date: Tue, 03 Jun 2025 13:02:14 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Origin
+Via: 1.1 943eef8bcb9ae2cbd9546c9e3bf846e2.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: 5J-P_wti_3FlhUSvf0eFAn5LLDY0g4MbDzbIlmhtVasPiLmeOuPBHQ==
+X-Amz-Cf-Pop: SFO53-P3
+X-Cache: Miss from cloudfront
+X-Inference-Request-Id: d31052f3-ae64-45d1-85c1-d9fd3ee7caea
+X-Powered-By: huggingface-moon
+X-Request-Id: Root=1-683ef254-0520f9d15667883e0b8eb72e
+X-Robots-Tag: none
+
+{"id":"chatcmpl-9ff74221f54a4c2e807f531757c531e5","object":"chat.completion","created":1748955733,"model":"deepseek-ai/DeepSeek-R1-0528","choices":[{"index":0,"message":{"role":"assistant","reasoning_content":null,"content":"<think>\nOkay, the user is asking \"What is 2+2?\" This seems like a very basic math question. \n\nHmm, I wonder if this is a genuine question or some kind of test. The answer is obviously 4,","tool_calls":[]},"logprobs":null,"finish_reason":"length","stop_reason":null}],"usage":{"prompt_tokens":10,"total_tokens":60,"completion_tokens":50,"prompt_tokens_details":null},"prompt_logprobs":null,"kv_transfer_params":null}

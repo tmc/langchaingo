@@ -148,20 +148,19 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 				"found data sources but none with S3 type, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
 				kb.knowledgeBaseID,
 			)
-		} else {
-			return nil, fmt.Errorf(
-				"no data sources with S3 type found, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
-				kb.knowledgeBaseID,
-			)
 		}
+		return nil, fmt.Errorf(
+			"no data sources with S3 type found, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
+			kb.knowledgeBaseID,
+		)
 	}
 
 	var datasourceID string
 	var bucketARN string
 	if opts.NameSpace != "" {
 		for _, ds := range compatibleDs {
-			if ds.Id == opts.NameSpace {
-				datasourceID = ds.Id
+			if ds.ID == opts.NameSpace {
+				datasourceID = ds.ID
 				bucketARN = ds.BucketARN
 				break
 			}
@@ -170,7 +169,7 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 			return nil, fmt.Errorf("data source with S3 type with id %s not found", opts.NameSpace)
 		}
 	} else if len(compatibleDs) == 1 {
-		datasourceID = compatibleDs[0].Id
+		datasourceID = compatibleDs[0].ID
 		bucketARN = compatibleDs[0].BucketARN
 	} else {
 		return nil, fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
@@ -264,77 +263,64 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 }
 
 func (kb *KnowledgeBase) getFilters(filters any) (types.RetrievalFilter, error) {
-	if filters != nil {
-		switch filters := filters.(type) {
-		case EqualsFilter:
-			return &types.RetrievalFilterMemberEquals{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case NotEqualsFilter:
-			return &types.RetrievalFilterMemberNotEquals{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case ContainsFilter:
-			return &types.RetrievalFilterMemberListContains{
-				Value: types.FilterAttribute{
-					Key:   aws.String(filters.Key),
-					Value: document.NewLazyDocument(filters.Value),
-				},
-			}, nil
-		case AllFilter:
-			var filtersList []types.RetrievalFilter
-			for _, f := range filters.Filters {
-				f, err := kb.getFilters(f)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get filter: %w", err)
-				}
-				if f != nil {
-					filtersList = append(filtersList, f)
-				}
-			}
-			switch len(filtersList) {
-			case 0:
-				return nil, nil
-			case 1:
-				return filtersList[0], nil
-			default:
-				return &types.RetrievalFilterMemberAndAll{
-					Value: filtersList,
-				}, nil
-			}
-		case AnyFilter:
-			var filtersList []types.RetrievalFilter
-			for _, f := range filters.Filters {
-				f, err := kb.getFilters(f)
-				if err != nil {
-					return nil, fmt.Errorf("failed to get filter: %w", err)
-				}
-				if f != nil {
-					filtersList = append(filtersList, f)
-				}
-			}
-			switch len(filtersList) {
-			case 0:
-				return nil, nil
-			case 1:
-				return filtersList[0], nil
-			default:
-				return &types.RetrievalFilterMemberOrAll{
-					Value: filtersList,
-				}, nil
-			}
-		default:
-			return nil, fmt.Errorf("unsupported filter type: %T", filters)
+	if filters == nil {
+		return nil, nil
+	}
+
+	switch filters := filters.(type) {
+	case EqualsFilter:
+		return &types.RetrievalFilterMemberEquals{
+			Value: types.FilterAttribute{
+				Key:   aws.String(filters.Key),
+				Value: document.NewLazyDocument(filters.Value),
+			},
+		}, nil
+	case NotEqualsFilter:
+		return &types.RetrievalFilterMemberNotEquals{
+			Value: types.FilterAttribute{
+				Key:   aws.String(filters.Key),
+				Value: document.NewLazyDocument(filters.Value),
+			},
+		}, nil
+	case ContainsFilter:
+		return &types.RetrievalFilterMemberListContains{
+			Value: types.FilterAttribute{
+				Key:   aws.String(filters.Key),
+				Value: document.NewLazyDocument(filters.Value),
+			},
+		}, nil
+	case AllFilter:
+		return kb.buildCompositeFilter(filters.Filters, true)
+	case AnyFilter:
+		return kb.buildCompositeFilter(filters.Filters, false)
+	default:
+		return nil, fmt.Errorf("unsupported filter type: %T", filters)
+	}
+}
+
+func (kb *KnowledgeBase) buildCompositeFilter(filters []Filter, isAll bool) (types.RetrievalFilter, error) {
+	var filtersList []types.RetrievalFilter
+	for _, f := range filters {
+		filter, err := kb.getFilters(f)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get filter: %w", err)
+		}
+		if filter != nil {
+			filtersList = append(filtersList, filter)
 		}
 	}
 
-	return nil, nil
+	switch len(filtersList) {
+	case 0:
+		return nil, nil
+	case 1:
+		return filtersList[0], nil
+	default:
+		if isAll {
+			return &types.RetrievalFilterMemberAndAll{Value: filtersList}, nil
+		}
+		return &types.RetrievalFilterMemberOrAll{Value: filtersList}, nil
+	}
 }
 
 func (kb *KnowledgeBase) parseMetadata(retrievalResult types.KnowledgeBaseRetrievalResult) (map[string]any, error) {

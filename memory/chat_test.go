@@ -10,15 +10,16 @@ import (
 )
 
 func TestChatMessageHistory(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	h := NewChatMessageHistory()
-	err := h.AddAIMessage(context.Background(), "foo")
+	err := h.AddAIMessage(ctx, "foo")
 	require.NoError(t, err)
-	err = h.AddUserMessage(context.Background(), "bar")
+	err = h.AddUserMessage(ctx, "bar")
 	require.NoError(t, err)
 
-	messages, err := h.Messages(context.Background())
+	messages, err := h.Messages(ctx)
 	require.NoError(t, err)
 
 	assert.Equal(t, []llms.ChatMessage{
@@ -32,10 +33,10 @@ func TestChatMessageHistory(t *testing.T) {
 			llms.SystemChatMessage{Content: "bar"},
 		}),
 	)
-	err = h.AddUserMessage(context.Background(), "zoo")
+	err = h.AddUserMessage(ctx, "zoo")
 	require.NoError(t, err)
 
-	messages, err = h.Messages(context.Background())
+	messages, err = h.Messages(ctx)
 	require.NoError(t, err)
 
 	assert.Equal(t, []llms.ChatMessage{

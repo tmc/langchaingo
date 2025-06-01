@@ -3,6 +3,7 @@ package prompts
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"text/template"
@@ -10,7 +11,6 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/nikolalohinski/gonja"
 	"github.com/tmc/langchaingo/prompts/internal/fstring"
-	"golang.org/x/exp/maps"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and
@@ -72,7 +72,7 @@ func interpolateJinja2(tmpl string, values map[string]any) (string, error) {
 }
 
 func newInvalidTemplateError(gotTemplateFormat TemplateFormat) error {
-	formats := maps.Keys(defaultFormatterMapping)
+	formats := slices.AppendSeq(make([]TemplateFormat, 0, len(defaultFormatterMapping)), maps.Keys(defaultFormatterMapping))
 	slices.Sort(formats)
 	return fmt.Errorf("%w, got: %s, should be one of %s",
 		ErrInvalidTemplateFormat,

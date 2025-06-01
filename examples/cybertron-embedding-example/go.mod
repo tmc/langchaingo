@@ -1,8 +1,6 @@
-module github.com/tmtsmc/langchaingo/examples/cybertron-embedding-example
+module github.com/tmc/langchaingo/examples/cybertron-embedding-example
 
-go 1.22.0
-
-toolchain go1.22.1
+go 1.24.3
 
 require (
 	github.com/chewxy/math32 v1.11.1

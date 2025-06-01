@@ -13,6 +13,7 @@ import (
 )
 
 func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	mockBody := `data: {"choices":[{"index":0,"delta":{"role":"assistant","content":"hello"},"finish_reason":"stop"}]}`
 	r := &http.Response{
@@ -26,7 +27,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(ctx, r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -34,6 +35,7 @@ func TestParseStreamingChatResponse_FinishReason(t *testing.T) {
 }
 
 func TestParseStreamingChatResponse_ReasoningContent(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	mockBody := `data: {"choices":[{"index":0,"delta":{"role":"assistant","content":"final answer","reasoning_content":"step-by-step reasoning"},"finish_reason":"stop"}]}`
 	r := &http.Response{
@@ -47,7 +49,7 @@ func TestParseStreamingChatResponse_ReasoningContent(t *testing.T) {
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(ctx, r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -57,6 +59,7 @@ func TestParseStreamingChatResponse_ReasoningContent(t *testing.T) {
 }
 
 func TestParseStreamingChatResponse_ReasoningFunc(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	mockBody := `
 data: {"id":"fa7e4fc5-a05d-4e7b-9a66-a2dd89e91a4e","object":"chat.completion.chunk","created":1738492867,"model":"deepseek-reasoner","system_fingerprint":"fp_7e73fd9a08","choices":[{"index":0,"delta":{"content":null,"reasoning_content":"Okay"},"logprobs":null,"finish_reason":null}]}
@@ -74,7 +77,7 @@ data: {"id":"fa7e4fc5-a05d-4e7b-9a66-a2dd89e91a4e","object":"chat.completion.chu
 		},
 	}
 
-	resp, err := parseStreamingChatResponse(context.Background(), r, req)
+	resp, err := parseStreamingChatResponse(ctx, r, req)
 
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

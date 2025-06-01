@@ -18,7 +18,8 @@ func (m *mockHTTPClient) Do(_ *http.Request) (*http.Response, error) {
 	return m.response, m.err
 }
 
-func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
+func TestClient_GenerateContent(t *testing.T) {
+	ctx := context.Background() // nolint:funlen
 	t.Parallel()
 
 	type fields struct {
@@ -58,7 +59,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				embeddingModelName: "embeddingModelName",
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 				request: &GenerateContentRequest{
 					Messages: []Message{
 						{Role: "system", Content: "systemPrompt"},
@@ -90,7 +91,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				embeddingModelName: "embeddingModelName",
 			},
 			args: args{
-				ctx: context.Background(),
+				ctx: ctx,
 				request: &GenerateContentRequest{
 					Messages: []Message{
 						{Role: "system", Content: "systemPrompt"},
@@ -131,7 +132,7 @@ func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
 				bearerToken:        tt.fields.bearerToken,
 			}
 
-			got, err := c.GenerateContent(context.Background(), tt.args.request)
+			got, err := c.GenerateContent(ctx, tt.args.request)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GenerateContent() error = %v, wantErr %v", err, tt.wantErr)
 				return

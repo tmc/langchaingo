@@ -1,0 +1,30 @@
+httprr trace v1
+378 1505
+POST https://router.huggingface.co/hyperbolic/v1/chat/completions HTTP/1.1
+Host: router.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 150
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek-ai/DeepSeek-R1-0528","messages":[{"role":"user","content":"Hello, how are you?"}],"stream":false,"temperature":0.5,"max_tokens":50}HTTP/2.0 200 OK
+Content-Length: 667
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Cross-Origin-Opener-Policy: same-origin
+Date: Tue, 03 Jun 2025 13:02:17 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Origin
+Via: 1.1 55e9464473b96a5fed56600591202122.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: SF5kyCK0DSRFScyWnrhITtfjP8i7MiMw2LdhGgZSp93iL8O1JMj3uA==
+X-Amz-Cf-Pop: SFO53-P3
+X-Cache: Miss from cloudfront
+X-Inference-Request-Id: 5c77a036-383d-4c84-8e77-e95f196de224
+X-Powered-By: huggingface-moon
+X-Request-Id: Root=1-683ef257-363d5f1352165a830772ddda
+X-Robots-Tag: none
+
+{"id":"chatcmpl-4ea4b21b3af84fa9b5f9bb4c84b842ca","object":"chat.completion","created":1748955736,"model":"deepseek-ai/DeepSeek-R1-0528","choices":[{"index":0,"message":{"role":"assistant","reasoning_content":null,"content":"<think>\nOkay, the user just said “Hello, how are you?” - pretty standard opening. They're probably being polite or checking if I'm “awake” before asking the real question.  \n\nHmm, no context yet, so they","tool_calls":[]},"logprobs":null,"finish_reason":"length","stop_reason":null}],"usage":{"prompt_tokens":9,"total_tokens":59,"completion_tokens":50,"prompt_tokens_details":null},"prompt_logprobs":null,"kv_transfer_params":null}

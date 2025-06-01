@@ -12,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var (
@@ -142,7 +144,7 @@ func WithAccessToken(accessToken string) Option {
 // New returns a new ERNIE client.
 func New(opts ...Option) (*Client, error) {
 	c := &Client{
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {

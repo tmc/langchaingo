@@ -24,6 +24,11 @@ func DownloadImageData(url string) (string, []byte, error) {
 
 	mimeType := resp.Header.Get("Content-Type")
 
+	// Handle empty Content-Type header
+	if mimeType == "" {
+		return "", urlData, nil
+	}
+
 	parts := strings.Split(mimeType, "/")
 	if len(parts) != 2 {
 		return "", nil, fmt.Errorf("invalid mime type %v", mimeType)

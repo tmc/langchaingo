@@ -3,9 +3,9 @@ package maritaca
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
 )
@@ -32,7 +32,7 @@ func New(opts ...Option) (*LLM, error) {
 	}
 
 	if o.httpClient == nil {
-		o.httpClient = http.DefaultClient
+		o.httpClient = httputil.DefaultClient
 	}
 
 	client, err := maritacaclient.NewClient(o.httpClient)

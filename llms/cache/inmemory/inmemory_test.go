@@ -12,9 +12,8 @@ import (
 )
 
 func TestInMemory(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
+	t.Parallel()
 	rq := require.New(t)
 	ttl := time.Second / 2
 

@@ -1,9 +1,11 @@
 package huggingface
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -12,7 +14,7 @@ import (
 
 var (
 	ErrEmptyResponse            = errors.New("empty response")
-	ErrMissingToken             = errors.New("missing the Hugging Face API token. Set it in the HUGGINGFACEHUB_API_TOKEN environment variable") //nolint:lll
+	ErrMissingToken             = errors.New("missing the Hugging Face API token. Set it in the HF_TOKEN or HUGGINGFACEHUB_API_TOKEN environment variable, or save it to ~/.cache/huggingface/token") //nolint:lll
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
 )
 
@@ -74,7 +76,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 func New(opts ...Option) (*LLM, error) {
 	options := &options{
-		token: os.Getenv(tokenEnvVarName),
+		token: getHuggingFaceToken(),
 		model: defaultModel,
 		url:   defaultURL,
 	}
@@ -87,7 +89,20 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	c, err := huggingfaceclient.New(options.token, options.model, options.url)
+	// If a provider is specified, use the router URL
+	if options.provider != "" {
+		options.url = routerURL
+	}
+
+	var clientOpts []huggingfaceclient.Option
+	if options.httpClient != nil {
+		clientOpts = append(clientOpts, huggingfaceclient.WithHTTPClient(options.httpClient))
+	}
+	if options.provider != "" {
+		clientOpts = append(clientOpts, huggingfaceclient.WithProvider(options.provider))
+	}
+
+	c, err := huggingfaceclient.New(options.token, options.model, options.url, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +110,59 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client: c,
 	}, nil
+}
+
+// getHuggingFaceToken attempts to retrieve the Hugging Face API token from various sources
+// in the following order:
+// 1. HF_TOKEN environment variable (current standard)
+// 2. HUGGINGFACEHUB_API_TOKEN environment variable (legacy)
+// 3. Token file at path specified by HF_TOKEN_PATH
+// 4. Default token file at $HF_HOME/token or ~/.cache/huggingface/token
+func getHuggingFaceToken() string {
+	// Try HF_TOKEN first (current standard)
+	if token := os.Getenv(hfTokenEnvVarName); token != "" {
+		return token
+	}
+
+	// Try legacy HUGGINGFACEHUB_API_TOKEN
+	if token := os.Getenv(tokenEnvVarName); token != "" {
+		return token
+	}
+
+	// Try reading from token file
+	tokenPath := getTokenPath()
+	if tokenPath != "" {
+		if data, err := os.ReadFile(tokenPath); err == nil {
+			return string(bytes.TrimSpace(data))
+		}
+	}
+
+	return ""
+}
+
+// getTokenPath returns the path to the token file
+func getTokenPath() string {
+	// Check if HF_TOKEN_PATH is set
+	if path := os.Getenv(hfTokenPathEnvVarName); path != "" {
+		return path
+	}
+
+	// Try HF_HOME/token
+	if hfHome := os.Getenv(hfHomeEnvVarName); hfHome != "" {
+		return filepath.Join(hfHome, defaultTokenPath)
+	}
+
+	// Try XDG_CACHE_HOME/huggingface/token
+	if xdgCache := os.Getenv(xdgCacheHomeEnvVar); xdgCache != "" {
+		return filepath.Join(xdgCache, "huggingface", defaultTokenPath)
+	}
+
+	// Default to ~/.cache/huggingface/token
+	if home, err := os.UserHomeDir(); err == nil {
+		return filepath.Join(home, ".cache", "huggingface", defaultTokenPath)
+	}
+
+	return ""
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

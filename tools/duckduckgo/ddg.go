@@ -3,6 +3,7 @@ package duckduckgo
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/tools"
@@ -20,12 +21,28 @@ type Tool struct {
 
 var _ tools.Tool = Tool{}
 
+// Option defines a function for configuring the DuckDuckGo tool.
+type Option func(*Tool)
+
+// WithHTTPClient sets a custom HTTP client for the DuckDuckGo tool.
+func WithHTTPClient(client *http.Client) Option {
+	return func(t *Tool) {
+		t.client.SetHTTPClient(client)
+	}
+}
+
 // New initializes a new DuckDuckGo Search tool with arguments for setting a
 // max results per search query and a value for the user agent header.
-func New(maxResults int, userAgent string) (*Tool, error) {
-	return &Tool{
+func New(maxResults int, userAgent string, opts ...Option) (*Tool, error) {
+	tool := &Tool{
 		client: internal.New(maxResults, userAgent),
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(tool)
+	}
+
+	return tool, nil
 }
 
 // Name returns a name for the tool.

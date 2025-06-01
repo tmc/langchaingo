@@ -76,6 +76,7 @@ var _ llms.Model = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	numInputs := 10
 	maxWorkers := 5
@@ -87,18 +88,19 @@ func TestApply(t *testing.T) {
 	}
 
 	c := NewLLMChain(&testLanguageModel{}, prompts.NewPromptTemplate("{{.text}}", []string{"text"}))
-	results, err := Apply(context.Background(), c, inputs, maxWorkers)
+	results, err := Apply(ctx, c, inputs, maxWorkers)
 	require.NoError(t, err)
 	require.Equal(t, inputs, results, "inputs and results not equal")
 }
 
 func TestApplyWithCanceledContext(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	numInputs := 10
 	maxWorkers := 5
 	inputs := make([]map[string]any, numInputs)
-	ctx, cancelFunc := context.WithCancel(context.Background())
+	ctx, cancelFunc := context.WithCancel(ctx)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	c := NewLLMChain(&testLanguageModel{simulateWork: time.Second}, prompts.NewPromptTemplate("test", nil))

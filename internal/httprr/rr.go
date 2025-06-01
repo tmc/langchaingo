@@ -763,7 +763,7 @@ func findBestReplayFile(t *testing.T, baseFilename string) string {
 //	}
 func SkipIfNoCredentialsAndRecordingMissing(t *testing.T, envVars ...string) {
 	t.Helper()
-	if !hasRequiredCredentials(envVars) && !hasExistingRecording(t) {
+	if !hasExistingRecording(t) && !hasRequiredCredentials(envVars) {
 		skipMessage := "no httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions\nDebug flags: -httprecord-debug for recording details, -httpdebug for HTTP traffic"
 
 		if len(envVars) > 0 {
@@ -800,123 +800,6 @@ func hasExistingRecording(t *testing.T) bool {
 	_, compressedErr := os.Stat(baseFilename + ".gz")
 
 	return uncompressedErr == nil || compressedErr == nil
-}
-
-// ConvertAllInDir processes all files in a directory, converting between
-// compressed and uncompressed formats based on the compress parameter.
-func ConvertAllInDir(dir string, compress bool) error {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return fmt.Errorf("reading directory: %w", err)
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-
-		path := filepath.Join(dir, entry.Name())
-
-		if compress {
-			if strings.HasSuffix(path, ".httprr") && !strings.HasSuffix(path, ".httprr.gz") {
-				if err := CompressFile(path); err != nil {
-					return fmt.Errorf("compressing %s: %w", path, err)
-				}
-			}
-		} else {
-			if strings.HasSuffix(path, ".httprr.gz") {
-				if err := DecompressFile(path); err != nil {
-					return fmt.Errorf("decompressing %s: %w", path, err)
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-// CompressFile compresses a file to .httprr.gz format.
-func CompressFile(path string) error {
-	if !strings.HasSuffix(path, ".httprr") || strings.HasSuffix(path, ".httprr.gz") {
-		return fmt.Errorf("invalid file for compression: %s", path)
-	}
-
-	// Read the original file
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return fmt.Errorf("reading file: %w", err)
-	}
-
-	// Write compressed file
-	compressedPath := path + ".gz"
-	f, err := os.Create(compressedPath)
-	if err != nil {
-		return fmt.Errorf("creating compressed file: %w", err)
-	}
-	defer f.Close()
-
-	gz := gzip.NewWriter(f)
-	defer gz.Close()
-
-	if _, err := gz.Write(data); err != nil {
-		os.Remove(compressedPath)
-		return fmt.Errorf("writing compressed data: %w", err)
-	}
-
-	if err := gz.Close(); err != nil {
-		os.Remove(compressedPath)
-		return fmt.Errorf("finalizing compressed file: %w", err)
-	}
-
-	// Remove original file
-	if err := os.Remove(path); err != nil {
-		// Try to clean up the compressed file if we can't remove the original
-		os.Remove(compressedPath)
-		return fmt.Errorf("removing original file: %w", err)
-	}
-
-	return nil
-}
-
-// DecompressFile decompresses an .httprr.gz file to .httprr format.
-func DecompressFile(path string) error {
-	if !strings.HasSuffix(path, ".httprr.gz") {
-		return fmt.Errorf("invalid file for decompression: %s", path)
-	}
-
-	// Open the compressed file
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("opening compressed file: %w", err)
-	}
-	defer f.Close()
-
-	gz, err := gzip.NewReader(f)
-	if err != nil {
-		return fmt.Errorf("creating gzip reader: %w", err)
-	}
-	defer gz.Close()
-
-	// Read decompressed data
-	data, err := io.ReadAll(gz)
-	if err != nil {
-		return fmt.Errorf("reading compressed data: %w", err)
-	}
-
-	// Write decompressed file
-	decompressedPath := strings.TrimSuffix(path, ".gz")
-	if err := os.WriteFile(decompressedPath, data, 0o644); err != nil {
-		return fmt.Errorf("writing decompressed file: %w", err)
-	}
-
-	// Remove compressed file
-	if err := os.Remove(path); err != nil {
-		// Try to clean up the decompressed file if we can't remove the compressed one
-		os.Remove(decompressedPath)
-		return fmt.Errorf("removing compressed file: %w", err)
-	}
-
-	return nil
 }
 
 // getDefaultRequestScrubbers returns the default request scrubbing functions to remove

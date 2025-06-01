@@ -2,23 +2,39 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
 
 func TestLLMChain(t *testing.T) {
-	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
-	model, err := openai.New()
+
+	var opts []openai.Option
+	opts = append(opts, openai.WithHTTPClient(rr.Client()))
+
+	// Use test token when replaying
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	model, err := openai.New(opts...)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
@@ -26,11 +42,10 @@ func TestLLMChain(t *testing.T) {
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
-	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)
 
-	result, err := Predict(context.Background(), chain,
+	result, err := Predict(ctx, chain,
 		map[string]any{
 			"country": "France",
 		},
@@ -40,7 +55,7 @@ func TestLLMChain(t *testing.T) {
 }
 
 func TestLLMChainWithChatPromptTemplate(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
 	c := NewLLMChain(
 		&testLanguageModel{},
@@ -49,7 +64,7 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 			prompts.NewHumanMessagePromptTemplate("{{.boo}}", []string{"boo"}),
 		}),
 	)
-	result, err := Predict(context.Background(), c, map[string]any{
+	result, err := Predict(ctx, c, map[string]any{
 		"foo": "foo",
 		"boo": "boo",
 	})
@@ -58,13 +73,17 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 }
 
 func TestLLMChainWithGoogleAI(t *testing.T) {
-	t.Parallel()
-	genaiKey := os.Getenv("GENAI_API_KEY")
-	if genaiKey == "" {
-		t.Skip("GENAI_API_KEY not set")
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
-	model, err := googleai.New(context.Background(), googleai.WithAPIKey(genaiKey))
-	require.NoError(t, err)
+	model, err := googleai.New(ctx, googleai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
@@ -72,14 +91,13 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
-	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)
 
 	// chains tramples over defaults for options, so setting these options
 	// explicitly is required until https://github.com/tmc/langchaingo/issues/626
 	// is fully resolved.
-	result, err := Predict(context.Background(), chain,
+	result, err := Predict(ctx, chain,
 		map[string]any{
 			"country": "France",
 		},

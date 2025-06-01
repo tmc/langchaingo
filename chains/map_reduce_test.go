@@ -33,6 +33,7 @@ func TestMapReduceInputVariables(t *testing.T) {
 
 func TestMapReduce(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	c := NewMapReduceDocuments(
 		NewLLMChain(
@@ -47,7 +48,7 @@ func TestMapReduce(t *testing.T) {
 		),
 	)
 
-	result, err := Run(context.Background(), c, []schema.Document{
+	result, err := Run(ctx, c, []schema.Document{
 		{PageContent: "foo"},
 		{PageContent: "boo"},
 		{PageContent: "zoo"},

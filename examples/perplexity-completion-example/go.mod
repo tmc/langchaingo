@@ -1,8 +1,6 @@
 module github.com/tmc/langchaingo/examples/perplexity-completion-example
 
-go 1.22.0
-
-toolchain go1.22.1
+go 1.24.3
 
 require (
 	github.com/joho/godotenv v1.5.1

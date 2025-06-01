@@ -1,0 +1,77 @@
+httprr trace v1
+788 4392
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 368
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.3 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"Tell me about safety features"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":4}, {"category":7, "threshold":4}, {"category":8, "threshold":4}, {"category":9, "threshold":4}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 4012
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sun, 08 Jun 2025 18:44:01 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5022
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Okay, let's talk about safety features! To give you the most helpful information, I need a little more direction.  Safety features exist in a huge range of contexts.  To give you a relevant answer, tell me:\n\n**1. What are you interested in the safety features of?**  For example:\n\n*   **Cars/Vehicles:** (e.g., airbags, lane departure warning, automatic emergency braking)\n*   **Homes:** (e.g., smoke detectors, security systems, fire extinguishers)\n*   **Websites/Online:** (e.g., two-factor authentication, encryption, privacy settings)\n*   **Software/Applications:** (e.g., sandboxing, permissions, data encryption)\n*   **Workplace/Industrial:** (e.g., machine guarding, safety training, personal protective equipment)\n*   **Toys/Children's Products:** (e.g., non-toxic materials, small parts warnings, age appropriateness)\n*   **Medical Devices:** (e.g., fail-safes, sterilization, user error prevention)\n*   **Food:** (e.g., pasteurization, expiration dates, tamper-evident packaging)\n*   **Something else entirely?** Be specific!\n\n**2. What aspects of safety features are you curious about?**  For example:\n\n*   **How they work:**  Do you want a technical explanation?\n*   **Their effectiveness:**  Are you looking for statistics or studies?\n*   **Regulations or standards:** Are you interested in legal requirements?\n*   **Cost:** Are you trying to understand the price implications of safety features?\n*   **Different types:** Are you looking for a comparison of various approaches?\n*   **New or emerging technologies:**  Are you interested in the latest innovations?\n*   **Specific brands or models:** Are you trying to compare safety features across different products?\n*   **General information/overview:** Just looking for a basic understanding?\n\nOnce I know what you're interested in, I can provide a much more focused and helpful response.\n\n**In the meantime, here are some very general points about safety features:**\n\n*   **Purpose:** Safety features are designed to reduce the risk of harm, injury, or damage.\n*   **Prevention vs. Mitigation:** Some features *prevent* accidents from happening in the first place (e.g., anti-lock brakes), while others *mitigate* the consequences of an accident (e.g., airbags).\n*   **Active vs. Passive:**  *Active* safety features require some action or input (e.g., wearing a seatbelt, using a password), while *passive* safety features work automatically (e.g., airbags deploying in a crash, a fire sprinkler system).\n*   **Redundancy:**  Often, safety systems incorporate multiple layers of protection, so that if one feature fails, another can take over.\n*   **Standards and Regulations:**  Many industries have safety standards and regulations that dictate the design and implementation of safety features.\n*   **User Responsibility:**  Even with the best safety features, user behavior is crucial.  Following instructions, being aware of risks, and taking appropriate precautions are essential.\n\nI look forward to hearing more about what you're interested in!\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ],
+      "avgLogprobs": -0.2287706805102398
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 5,
+    "candidatesTokenCount": 692,
+    "totalTokenCount": 697,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 5
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 692
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "7NlFaMzGJeannvgP4a3muQo"
+}

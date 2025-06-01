@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var ErrNoGoodResult = errors.New("no good search results found")
@@ -18,6 +19,7 @@ var ErrNoGoodResult = errors.New("no good search results found")
 type Client struct {
 	maxResults int
 	userAgent  string
+	httpClient *http.Client
 }
 
 // Result defines a search query result type.
@@ -37,7 +39,13 @@ func New(maxResults int, userAgent string) *Client {
 	return &Client{
 		maxResults: maxResults,
 		userAgent:  userAgent,
+		httpClient: &http.Client{Transport: httputil.DefaultTransport},
 	}
+}
+
+// SetHTTPClient sets a custom HTTP client for the DuckDuckGo client.
+func (client *Client) SetHTTPClient(httpClient *http.Client) {
+	client.httpClient = httpClient
 }
 
 func (client *Client) newRequest(ctx context.Context, queryURL string) (*http.Request, error) {
@@ -63,7 +71,7 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", err
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := client.httpClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("get %s error: %w", queryURL, err)
 	}

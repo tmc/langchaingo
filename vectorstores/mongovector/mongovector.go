@@ -32,8 +32,8 @@ var (
 type Store struct {
 	coll          *mongo.Collection
 	embedder      embeddings.Embedder
-	index         string
-	path          string
+	index         string // Name of the Atlas Vector Search Index tied to Collection
+	path          string // Field in Collection containing embedding vectors
 	numCandidates int
 }
 

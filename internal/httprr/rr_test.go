@@ -104,68 +104,68 @@ func TestRecordReplay(t *testing.T) {
 			case 3:
 				start = Open
 			}
-		rr, err := start(file, http.DefaultTransport)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if rr.Recording() {
-			t.Log("RECORDING")
-		} else {
-			t.Log("REPLAYING")
-		}
-		rr.ScrubReq(dropPort, dropSecretHeader)
-		rr.ScrubReq(hideSecretBody)
-		rr.ScrubResp(doNothing, doRefresh)
-
-		mustNewRequest := func(method, url string, body io.Reader) *http.Request {
-			req, err := http.NewRequest(method, url, body)
+			rr, err := start(file, http.DefaultTransport)
 			if err != nil {
-				t.Helper()
 				t.Fatal(err)
 			}
-			return req
-		}
-
-		mustDo := func(req *http.Request, status int) {
-			resp, err := rr.Client().Do(req)
-			if err != nil {
-				t.Helper()
-				t.Fatal(err)
+			if rr.Recording() {
+				t.Log("RECORDING")
+			} else {
+				t.Log("REPLAYING")
 			}
-			body, _ := io.ReadAll(resp.Body)
-			resp.Body.Close()
-			if resp.StatusCode != status {
-				t.Helper()
-				t.Fatalf("%v: %s\n%s", req.URL, resp.Status, body)
+			rr.ScrubReq(dropPort, dropSecretHeader)
+			rr.ScrubReq(hideSecretBody)
+			rr.ScrubResp(doNothing, doRefresh)
+
+			mustNewRequest := func(method, url string, body io.Reader) *http.Request {
+				req, err := http.NewRequest(method, url, body)
+				if err != nil {
+					t.Helper()
+					t.Fatal(err)
+				}
+				return req
 			}
-		}
 
-		srv := httptest.NewServer(http.HandlerFunc(h))
-		defer srv.Close()
-
-		req := mustNewRequest("GET", srv.URL+"/myrequest", nil)
-		req.Header.Set("Secret", "key")
-		mustDo(req, 200)
-
-		req = mustNewRequest("POST", srv.URL+"/myrequest", strings.NewReader("my Secret"))
-		mustDo(req, 200)
-
-		req = mustNewRequest("GET", srv.URL+"/redirect", nil)
-		mustDo(req, 304)
-
-		if !rr.Recording() {
-			req = mustNewRequest("GET", srv.URL+"/uncached", nil)
-			resp, err := rr.Client().Do(req)
-			if err == nil {
+			mustDo := func(req *http.Request, status int) {
+				resp, err := rr.Client().Do(req)
+				if err != nil {
+					t.Helper()
+					t.Fatal(err)
+				}
 				body, _ := io.ReadAll(resp.Body)
 				resp.Body.Close()
-				t.Fatalf("%v: %s\n%s", req.URL, resp.Status, body)
+				if resp.StatusCode != status {
+					t.Helper()
+					t.Fatalf("%v: %s\n%s", req.URL, resp.Status, body)
+				}
 			}
-		}
 
-		if err := rr.Close(); err != nil {
-			t.Fatal(err)
-		}
+			srv := httptest.NewServer(http.HandlerFunc(h))
+			defer srv.Close()
+
+			req := mustNewRequest("GET", srv.URL+"/myrequest", nil)
+			req.Header.Set("Secret", "key")
+			mustDo(req, 200)
+
+			req = mustNewRequest("POST", srv.URL+"/myrequest", strings.NewReader("my Secret"))
+			mustDo(req, 200)
+
+			req = mustNewRequest("GET", srv.URL+"/redirect", nil)
+			mustDo(req, 304)
+
+			if !rr.Recording() {
+				req = mustNewRequest("GET", srv.URL+"/uncached", nil)
+				resp, err := rr.Client().Do(req)
+				if err == nil {
+					body, _ := io.ReadAll(resp.Body)
+					resp.Body.Close()
+					t.Fatalf("%v: %s\n%s", req.URL, resp.Status, body)
+				}
+			}
+
+			if err := rr.Close(); err != nil {
+				t.Fatal(err)
+			}
 		}()
 	}
 

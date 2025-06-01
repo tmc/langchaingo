@@ -35,7 +35,8 @@ const (
 
 // Client for interacting with Zapier NLA API.
 type Client struct {
-	client *http.Client
+	client  *http.Client
+	baseURL string
 }
 
 // Transport RoundTripper for Zapier NLA API which adds on Correct Headers.
@@ -111,6 +112,7 @@ func NewClient(opts ClientOptions) (*Client, error) {
 				UserAgent:    opts.UserAgent,
 			},
 		},
+		baseURL: opts.ZapierNLABaseURL,
 	}, nil
 }
 
@@ -137,7 +139,7 @@ param. All others optional and if provided will override any AI guesses
 https://nla.zapier.com/api/v1/docs).
 */
 func (c *Client) List(ctx context.Context) ([]ListResult, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, formatListURL(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.formatListURL(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +184,7 @@ func (c *Client) Execute(
 	if err != nil {
 		return "", err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, formatExecuteURL(actionID), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.formatExecuteURL(actionID), body)
 	if err != nil {
 		return "", err
 	}
@@ -225,15 +227,18 @@ func (c *Client) ExecuteAsString(
 	return fmt.Sprintf("%v", r), nil
 }
 
-func formatListURL() string {
-	return fmt.Sprintf("%s/exposed", zapierNLABaseURL)
+func (c *Client) formatListURL() string {
+	return fmt.Sprintf("%s/exposed", c.baseURL)
 }
 
-func formatExecuteURL(actionID string) string {
-	return fmt.Sprintf("%s/exposed/%s/execute/", zapierNLABaseURL, actionID)
+func (c *Client) formatExecuteURL(actionID string) string {
+	return fmt.Sprintf("%s/exposed/%s/execute/", c.baseURL, actionID)
 }
 
 func createPayload(input string, params map[string]string) (*bytes.Buffer, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
 	params["instructions"] = input
 
 	b, err := json.Marshal(params)

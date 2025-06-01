@@ -2,28 +2,34 @@ package agents_test
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
 )
 
 func TestOpenAIFunctionsAgentWithHTTPRR(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		t.Skip("Skipping test because OPENAI_API_KEY is not set")
-	}
 
-	// Configure OpenAI client
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
 	llm, err := openai.New(opts...)
@@ -59,15 +65,20 @@ func TestOpenAIFunctionsAgentWithHTTPRR(t *testing.T) {
 }
 
 func TestOpenAIFunctionsAgentComplexCalculation(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		t.Skip("Skipping test because OPENAI_API_KEY is not set")
-	}
 
-	// Configure OpenAI client
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
 	llm, err := openai.New(opts...)

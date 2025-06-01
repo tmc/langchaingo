@@ -68,6 +68,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			msg.Role = RoleUser
 		case llms.ChatMessageTypeFunction:
 			msg.Role = RoleFunction
+			// Extract name and content from ToolCallResponse for function messages
+			if len(mc.Parts) == 1 {
+				if p, ok := mc.Parts[0].(llms.ToolCallResponse); ok {
+					msg.Name = p.Name
+					msg.Content = p.Content
+				}
+			}
 		case llms.ChatMessageTypeTool:
 			msg.Role = RoleTool
 			// Here we extract tool calls from the message and populate the ToolCalls field.
