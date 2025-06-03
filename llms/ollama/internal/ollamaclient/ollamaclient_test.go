@@ -5,27 +5,62 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/internal/httprr"
 )
 
+// getOllamaTestURL returns the Ollama server URL to use for testing.
+// It uses OLLAMA_HOST if set, otherwise defaults to localhost:11434.
+func getOllamaTestURL(t *testing.T, rr *httprr.RecordReplay) string {
+	t.Helper()
+	
+	// Default to localhost
+	baseURL := "http://localhost:11434"
+	
+	// Use environment variable if set and we're recording
+	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
+		baseURL = envURL
+	}
+	
+	return baseURL
+}
+
+// checkOllamaEndpoint performs a lightweight health check on the Ollama endpoint.
+// Returns true if the endpoint is available, false otherwise.
+func checkOllamaEndpoint(baseURL string) bool {
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Get(baseURL + "/api/tags")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
+}
+
 func TestClient_Generate(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
-
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
 	// No auth scrubbing needed for Ollama as it doesn't use API keys
 
-	baseURL := "http://localhost:11434"
-	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
-		baseURL = envURL
+	baseURL := getOllamaTestURL(t, rr)
+	
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+	
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	parsedURL, err := url.Parse(baseURL)
@@ -36,7 +71,7 @@ func TestClient_Generate(t *testing.T) {
 
 	stream := false
 	req := &GenerateRequest{
-		Model:  "llama2",
+		Model:  "gemma3:1b",
 		Prompt: "Hello, how are you?",
 		Stream: &stream,
 		Options: Options{
@@ -60,14 +95,19 @@ func TestClient_GenerateStream(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
-
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	baseURL := "http://localhost:11434"
-	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
-		baseURL = envURL
+	baseURL := getOllamaTestURL(t, rr)
+	
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+	
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	parsedURL, err := url.Parse(baseURL)
@@ -78,7 +118,7 @@ func TestClient_GenerateStream(t *testing.T) {
 
 	stream := true
 	req := &GenerateRequest{
-		Model:  "llama2",
+		Model:  "gemma3:1b",
 		Prompt: "Count from 1 to 5",
 		Stream: &stream,
 		Options: Options{
@@ -101,14 +141,19 @@ func TestClient_GenerateChat(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
-
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	baseURL := "http://localhost:11434"
-	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
-		baseURL = envURL
+	baseURL := getOllamaTestURL(t, rr)
+	
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+	
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	parsedURL, err := url.Parse(baseURL)
@@ -118,7 +163,7 @@ func TestClient_GenerateChat(t *testing.T) {
 	require.NoError(t, err)
 
 	req := &ChatRequest{
-		Model: "llama2",
+		Model: "gemma3:1b",
 		Messages: []*Message{
 			{
 				Role:    "user",
@@ -148,14 +193,19 @@ func TestClient_GenerateChatStream(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
-
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	baseURL := "http://localhost:11434"
-	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
-		baseURL = envURL
+	baseURL := getOllamaTestURL(t, rr)
+	
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+	
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	parsedURL, err := url.Parse(baseURL)
@@ -165,7 +215,7 @@ func TestClient_GenerateChatStream(t *testing.T) {
 	require.NoError(t, err)
 
 	req := &ChatRequest{
-		Model: "llama2",
+		Model: "gemma3:1b",
 		Messages: []*Message{
 			{
 				Role:    "user",
@@ -193,14 +243,19 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_HOST")
-
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	baseURL := "http://localhost:11434"
-	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
-		baseURL = envURL
+	baseURL := getOllamaTestURL(t, rr)
+	
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+	
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	parsedURL, err := url.Parse(baseURL)
@@ -210,7 +265,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
-		Model:  "llama2",
+		Model:  "nomic-embed-text",
 		Prompt: "Hello world",
 		Options: Options{
 			Temperature: 0.0,
@@ -218,6 +273,9 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	}
 
 	resp, err := client.CreateEmbedding(ctx, req)
+	if err != nil && strings.Contains(err.Error(), "does not support embeddings") {
+		t.Skipf("Model %s does not support embeddings", req.Model)
+	}
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Embedding)
