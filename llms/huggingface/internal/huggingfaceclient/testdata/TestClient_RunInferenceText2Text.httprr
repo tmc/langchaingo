@@ -1,1 +1,41 @@
 httprr trace v1
+349 2150
+POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
+Host: api-inference.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 102
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"inputs":"Translate to French: Hello, how are you?","parameters":{"temperature":0.5,"max_length":50}}HTTP/2.0 200 OK
+Content-Length: 813
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Content-Type: application/json
+Cross-Origin-Opener-Policy: same-origin
+Date: Tue, 03 Jun 2025 13:02:32 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Vary: origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers
+Via: 1.1 cee0190e1cb0dc6b63b41b56541199e0.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: 44Csa0DQhfscpuF4FuTGznSzKJcIKPdq24pBEgiUAaD16H8Blrcn3A==
+X-Amz-Cf-Pop: SFO53-P3
+X-Cache: Miss from cloudfront
+X-Compute-Characters: 40
+X-Compute-Time: 17.021568237
+X-Compute-Type: 1-nvida-l4
+X-Generated-Tokens: 234
+X-Inference-Id: 08333bdc-ffab-4fbd-8281-4bb82254a1ce
+X-Inference-Time: 17017
+X-Powered-By: huggingface-moon
+X-Prompt-Tokens: 12
+X-Proxied-Host: http://10.101.34.74
+X-Proxied-Path: /
+X-Proxied-Replica: qhz2zash-hehip
+X-Queue-Time: 3
+X-Request-Id: Root=1-683ef257-0093f7b9410c7fb82a195383
+X-Time-Per-Token: 72
+X-Total-Time: 17021
+X-Validation-Time: 0
+
+[{"generated_text":"Translate to French: Hello, how are you?\n\nThe French phrase for \"hello\" is \"bonjour\" (pronounced bohn-JOOR). The French phrase for \"how are you?\" is \"comment ça va?\" (pronounced kom-MAHN sah-VAH).\n\nHere's how you might say hello and ask how someone is doing in French:\n\nBonjour, comment ça va? (pronounced bohn-JOOR koh-MAHN sah-VAH)\n\nThis is a common greeting in French, and it's polite to ask how someone is doing before getting into the conversation.\n\nNote that in French, \"ça\" (pronounced sah) is a contraction of \"ce que\" (pronounced seh KUH), which means \"what.\" So \"comment ça va?\" (pronounced kom-MAHN sah-VAH) can be translated literally as \"how what's going?\" or \"how is it going?\"\n\nHope that helps! Let me know if you have any other questions."}]

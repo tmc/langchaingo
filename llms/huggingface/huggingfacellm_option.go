@@ -1,5 +1,9 @@
 package huggingface
 
+import (
+	"net/http"
+)
+
 const (
 	tokenEnvVarName   = "HUGGINGFACEHUB_API_TOKEN" // Legacy environment variable
 	hfTokenEnvVarName = "HF_TOKEN"                 // Current primary environment variable
@@ -10,12 +14,15 @@ const (
 	defaultTokenPath      = "token"          // Default token filename
 	defaultModel          = "gpt2"
 	defaultURL            = "https://api-inference.huggingface.co"
+	routerURL             = "https://router.huggingface.co"
 )
 
 type options struct {
-	token string
-	model string
-	url   string
+	token      string
+	model      string
+	url        string
+	httpClient *http.Client
+	provider   string // Inference provider (e.g., "hyperbolic", "nebius")
 }
 
 type Option func(*options)
@@ -41,5 +48,21 @@ func WithModel(model string) Option {
 func WithURL(url string) Option {
 	return func(opts *options) {
 		opts.url = url
+	}
+}
+
+// WithHTTPClient passes a custom HTTP client to the HuggingFace client.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(opts *options) {
+		opts.httpClient = httpClient
+	}
+}
+
+// WithInferenceProvider passes the inference provider to use with HuggingFace's router.
+// When set, the client will use the router URL (https://router.huggingface.co/{provider}/v1/...)
+// instead of the default inference API. Common providers include "hyperbolic", "nebius", etc.
+func WithInferenceProvider(provider string) Option {
+	return func(opts *options) {
+		opts.provider = provider
 	}
 }

@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/tmc/langchaingo/httputil"
 )
 
 type embeddingPayload struct {
@@ -38,7 +36,7 @@ func (c *Client) createEmbedding(ctx context.Context, model string, task string,
 	req.Header.Set("Authorization", "Bearer "+c.Token)
 	req.Header.Set("Content-Type", "application/json")
 
-	r, err := httputil.DefaultClient.Do(req)
+	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

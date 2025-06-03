@@ -1,1 +1,41 @@
 httprr trace v1
+325 2589
+POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
+Host: api-inference.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 79
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"inputs":"Hello, my name is","parameters":{"temperature":0.5,"max_length":20}}HTTP/2.0 200 OK
+Content-Length: 1250
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Content-Type: application/json
+Cross-Origin-Opener-Policy: same-origin
+Date: Tue, 03 Jun 2025 13:02:38 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Vary: origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers
+Via: 1.1 cee0190e1cb0dc6b63b41b56541199e0.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: P5PGbXVZStpdc77cF28542VRRQfo__gu_ybH87hGERNgDk5FbRJw4A==
+X-Amz-Cf-Pop: SFO53-P3
+X-Cache: Miss from cloudfront
+X-Compute-Characters: 17
+X-Compute-Time: 22.624564667
+X-Compute-Type: 1-nvida-l4
+X-Generated-Tokens: 304
+X-Inference-Id: 88e6420e-aa4b-4370-bef4-b7eb4f99ebeb
+X-Inference-Time: 22494
+X-Powered-By: huggingface-moon
+X-Prompt-Tokens: 6
+X-Proxied-Host: http://10.101.34.74
+X-Proxied-Path: /
+X-Proxied-Replica: qhz2zash-hehip
+X-Queue-Time: 130
+X-Request-Id: Root=1-683ef257-2abc701b73e2efe8504b1a37
+X-Time-Per-Token: 73
+X-Total-Time: 22624
+X-Validation-Time: 0
+
+[{"generated_text":"Hello, my name is Sarah and I am a 23 year old Canadian currently living in London, England. I’ve been studying a Masters in Marketing here at the London School of Economics and Political Science (LSE) for the past year.\n\nI’ve always been an avid traveller, but my love for travel really began when I was 16 and went on a school trip to Peru. I remember feeling so overwhelmed and humbled by the culture, people and landscape. From that point on, I was hooked. Since then, I’ve been fortunate enough to travel to some incredible places such as Costa Rica, Australia, New Zealand, Thailand, Cambodia, Vietnam, Laos, Bali, Morocco, Portugal, Spain, Italy, France, Greece, Turkey, Egypt, Jordan, Israel and the US.\n\nI’ve always loved writing, and I’ve kept a travel journal since I was 16. I’ve also always loved taking photos and sharing them with others. I started this blog as a way to combine both of those passions.\n\nI’m excited to share my adventures with you and hope that my experiences will inspire you to travel and explore the world as well.\n\nIf you have any questions, comments or suggestions, please don’t hesitate to contact me at sarah.leblanc19@gmail.com.\n\nThanks for reading!\n\nSarah xx"}]

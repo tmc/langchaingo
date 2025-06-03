@@ -89,7 +89,20 @@ func New(opts ...Option) (*LLM, error) {
 		return nil, ErrMissingToken
 	}
 
-	c, err := huggingfaceclient.New(options.token, options.model, options.url)
+	// If a provider is specified, use the router URL
+	if options.provider != "" {
+		options.url = routerURL
+	}
+
+	var clientOpts []huggingfaceclient.Option
+	if options.httpClient != nil {
+		clientOpts = append(clientOpts, huggingfaceclient.WithHTTPClient(options.httpClient))
+	}
+	if options.provider != "" {
+		clientOpts = append(clientOpts, huggingfaceclient.WithProvider(options.provider))
+	}
+
+	c, err := huggingfaceclient.New(options.token, options.model, options.url, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
