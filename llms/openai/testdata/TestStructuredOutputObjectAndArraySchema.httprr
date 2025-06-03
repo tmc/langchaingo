@@ -13,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:11 GMT
+Date: Tue, 03 Jun 2025 08:47:09 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1346
+Openai-Processing-Ms: 1261
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1352
+X-Envoy-Upstream-Service-Time: 1267
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999984
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_13d0ddd6949ab9e3b32ec3ee0ebed623
+X-Request-Id: req_36db73cff599d3299371f09a0ca7e1bc
 
 {
-  "id": "chatcmpl-BeCGYK16wfWDr3c7eLMnh90ROS56i",
+  "id": "chatcmpl-BeHaVBASpSlWxV7h67Y6qM6uw6muZ",
   "object": "chat.completion",
-  "created": 1748919970,
+  "created": 1748940427,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -63,5 +63,5 @@ X-Request-Id: req_13d0ddd6949ab9e3b32ec3ee0ebed623
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
+  "system_fingerprint": "fp_a288987b44"
 }

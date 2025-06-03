@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:23 GMT
+Date: Tue, 03 Jun 2025 08:47:21 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 45
+Openai-Processing-Ms: 50
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-74c8894ff9-q9bdq
+Via: envoy-router-78456c78d9-2ckrg
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 80
+X-Envoy-Upstream-Service-Time: 52
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999954
+X-Ratelimit-Remaining-Tokens: 9999953
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_818ebfe2fa484c43ac20267acaf89de2
+X-Request-Id: req_ebc7697533400ef248db3cfdb6304425
 
 {
   "object": "list",
@@ -7767,23 +7767,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:25 GMT
+Date: Tue, 03 Jun 2025 08:47:24 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 41
+Openai-Processing-Ms: 85
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-7ffd9cff7b-zptqx
+Via: envoy-router-78998c59cd-bmv24
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 43
+X-Envoy-Upstream-Service-Time: 91
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999986
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_d30e86b0f5cb15a84ec4a746cda8f9d5
+X-Request-Id: req_11caa2a709801c7edafdaca6fb491ffe
 
 {
   "object": "list",
@@ -9351,26 +9351,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:27 GMT
+Date: Tue, 03 Jun 2025 08:47:25 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 707
+Openai-Processing-Ms: 286
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 732
+X-Envoy-Upstream-Service-Time: 290
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999902
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_e336f2373dd784761b5b64e4d68d1e66
+X-Request-Id: req_e624c6458db7707be5faed816c7d3818
 
 {
-  "id": "chatcmpl-BeCGpb07YUdFBWuQ7ER3rZ6fjCzKj",
+  "id": "chatcmpl-BeHan3TOa8V80e9k8ZCwl0qYlHj61",
   "object": "chat.completion",
-  "created": 1748919987,
+  "created": 1748940445,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {

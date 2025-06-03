@@ -1,5 +1,5 @@
 httprr trace v1
-257 67687
+257 67686
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:23 GMT
+Date: Tue, 03 Jun 2025 08:47:21 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 142
+Openai-Processing-Ms: 37
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-b5646b449-xltmn
+Via: envoy-router-74c8894ff9-t2wzq
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 145
+X-Envoy-Upstream-Service-Time: 42
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_fba9fc7d1801f05e13ba19bd4b715ff6
+X-Request-Id: req_ad2a3854ee36dab6775d2cccda5e11c2
 
 {
   "object": "list",
@@ -3126,7 +3126,7 @@ X-Request-Id: req_fba9fc7d1801f05e13ba19bd4b715ff6
     "total_tokens": 4
   }
 }
-248 34352
+248 34350
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -3141,23 +3141,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:26 GMT
+Date: Tue, 03 Jun 2025 08:47:23 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 101
+Openai-Processing-Ms: 87
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-78998c59cd-h78ld
+Via: envoy-router-74c8894ff9-t2pz4
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 103
+X-Envoy-Upstream-Service-Time: 90
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999998
+X-Ratelimit-Remaining-Tokens: 9999999
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_3f6aa321456a34d171e88f024515caf0
+X-Request-Id: req_8a8715dd42536806dbd0f7087b7c99c5
 
 {
   "object": "list",

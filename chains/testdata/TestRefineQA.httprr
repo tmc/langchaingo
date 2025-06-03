@@ -1,5 +1,5 @@
 httprr trace v1
-867 1529
+867 1528
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
+Date: Tue, 03 Jun 2025 08:46:53 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 293
+Openai-Processing-Ms: 278
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 298
+X-Envoy-Upstream-Service-Time: 302
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9997
+X-Ratelimit-Remaining-Requests: 9998
 X-Ratelimit-Remaining-Tokens: 49999853
-X-Ratelimit-Reset-Requests: 14ms
+X-Ratelimit-Reset-Requests: 8ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_77bbe5ba341281f9c7639c8948de84b0
+X-Request-Id: req_37fad0551f23b501748ed58ebdcb8c34
 
 {
-  "id": "chatcmpl-BeCGKaauJjlJMGpugZVMpckzXEclK",
+  "id": "chatcmpl-BeHaHxrEnrbQlhdj9jDxotbnNZcx2",
   "object": "chat.completion",
-  "created": 1748919956,
+  "created": 1748940413,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -79,26 +79,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
+Date: Tue, 03 Jun 2025 08:46:54 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 206
+Openai-Processing-Ms: 272
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 211
+X-Envoy-Upstream-Service-Time: 278
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999817
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_473260e9b5e7dc65488614416ce73567
+X-Request-Id: req_8c70e45af21cd5dd1d58f738f54c7e21
 
 {
-  "id": "chatcmpl-BeCGMpPU1g8EYAQevsM7FP5w9KGk0",
+  "id": "chatcmpl-BeHaIADkLm1mzinefVc7yNF4J0EYT",
   "object": "chat.completion",
-  "created": 1748919958,
+  "created": 1748940414,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -131,7 +131,7 @@ X-Request-Id: req_473260e9b5e7dc65488614416ce73567
   "service_tier": "default",
   "system_fingerprint": null
 }
-1003 1601
+1003 1597
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -140,38 +140,38 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Oliver\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nVenturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 879
+Content-Length: 875
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:59 GMT
+Date: Tue, 03 Jun 2025 08:46:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 395
+Openai-Processing-Ms: 324
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 402
+X-Envoy-Upstream-Service-Time: 328
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999819
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_9c00d0497d1e89e838008b1d4f2b2a76
+X-Request-Id: req_df3e5c0ec7c3d44459d9c434e32d4b15
 
 {
-  "id": "chatcmpl-BeCGNC0CtTf54GhClSlzqshVQLavb",
+  "id": "chatcmpl-BeHaJe84MCre8Jd83QyI2wDtTTdzD",
   "object": "chat.completion",
-  "created": 1748919959,
+  "created": 1748940415,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Oliver, the adventurous lion, roamed through the forest with excitement in his heart.",
+        "content": "Oliver, the curious lion, roamed through the forest with excitement in his heart.",
         "refusal": null,
         "annotations": []
       },
@@ -197,40 +197,40 @@ X-Request-Id: req_9c00d0497d1e89e838008b1d4f2b2a76
   "service_tier": "default",
   "system_fingerprint": null
 }
-1184 1592
+1180 1592
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 981
+Content-Length: 977
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Oliver, the adventurous lion, roamed through the forest with excitement in his heart.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Oliver, the curious lion, roamed through the forest with excitement in his heart.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 870
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:01 GMT
+Date: Tue, 03 Jun 2025 08:46:57 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 346
+Openai-Processing-Ms: 365
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 349
+X-Envoy-Upstream-Service-Time: 366
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999776
+X-Ratelimit-Remaining-Tokens: 49999777
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_8947d2e3eab442fb37af9f6ea04dea5a
+X-Request-Id: req_c95cb8d699b543895fe44b3b52a20331
 
 {
-  "id": "chatcmpl-BeCGP6rbUne3JJvZTYlqozuUnnWIZ",
+  "id": "chatcmpl-BeHaLsxpbWZSXrElagTv6iHDIcpjC",
   "object": "chat.completion",
-  "created": 1748919961,
+  "created": 1748940417,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -277,26 +277,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:03 GMT
+Date: Tue, 03 Jun 2025 08:46:59 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 552
+Openai-Processing-Ms: 437
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 554
+X-Envoy-Upstream-Service-Time: 441
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999818
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_68192d6625be1379f3c6a8717eb7a909
+X-Request-Id: req_537b51e6eba39b27237b3038143bd3d4
 
 {
-  "id": "chatcmpl-BeCGQCkIydCD5YYcbkLaQ8FCVoSQd",
+  "id": "chatcmpl-BeHaMIv3Buk8ihjBUQVWEVcPvfxtU",
   "object": "chat.completion",
-  "created": 1748919962,
+  "created": 1748940418,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -329,7 +329,7 @@ X-Request-Id: req_68192d6625be1379f3c6a8717eb7a909
   "service_tier": "default",
   "system_fingerprint": null
 }
-1109 1615
+1109 1714
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -338,38 +338,38 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, roamed through the forest with excitement in his heart, ready to embark on a noble quest with his newfound friend Oliver.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nWith Leo by his side, Oliver's adventure took on a new dimension. The unlikely duo traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 893
+Content-Length: 992
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:04 GMT
+Date: Tue, 03 Jun 2025 08:47:01 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 300
+Openai-Processing-Ms: 548
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 303
+X-Envoy-Upstream-Service-Time: 559
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999793
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_9e4d6af293f44d9bc28cb103b0a729d8
+X-Request-Id: req_139a8f38e1f9c1885b33b449856e862b
 
 {
-  "id": "chatcmpl-BeCGS3WEqXl1J7xEoe2TzjALhHqSX",
+  "id": "chatcmpl-BeHaO7GuDlFEFgGaJTMiwOx3tTePq",
   "object": "chat.completion",
-  "created": 1748919964,
+  "created": 1748940420,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest.",
+        "content": "Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who joined them in their adventures.",
         "refusal": null,
         "annotations": []
       },
@@ -379,8 +379,8 @@ X-Request-Id: req_9e4d6af293f44d9bc28cb103b0a729d8
   ],
   "usage": {
     "prompt_tokens": 175,
-    "completion_tokens": 23,
-    "total_tokens": 198,
+    "completion_tokens": 43,
+    "total_tokens": 218,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -395,47 +395,47 @@ X-Request-Id: req_9e4d6af293f44d9bc28cb103b0a729d8
   "service_tier": "default",
   "system_fingerprint": null
 }
-1280 1625
+1379 1714
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1076
+Content-Length: 1175
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nFreddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 903
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who joined them in their adventures.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nFreddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 992
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:06 GMT
+Date: Tue, 03 Jun 2025 08:47:02 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 365
+Openai-Processing-Ms: 437
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 368
+X-Envoy-Upstream-Service-Time: 440
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999751
+X-Ratelimit-Remaining-Tokens: 49999727
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_d53e7cd4cffaa8737729831ad1147695
+X-Request-Id: req_b05a080a8aeecfebe7c981d596975a87
 
 {
-  "id": "chatcmpl-BeCGTxD1V5rr3kepeZKGaLR3isd0X",
+  "id": "chatcmpl-BeHaQMYZoO4SIWhuM3EjbPYlZkb8c",
   "object": "chat.completion",
-  "created": 1748919965,
+  "created": 1748940422,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the regal lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest.",
+        "content": "Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures.",
         "refusal": null,
         "annotations": []
       },
@@ -444,9 +444,9 @@ X-Request-Id: req_d53e7cd4cffaa8737729831ad1147695
     }
   ],
   "usage": {
-    "prompt_tokens": 215,
-    "completion_tokens": 26,
-    "total_tokens": 241,
+    "prompt_tokens": 235,
+    "completion_tokens": 42,
+    "total_tokens": 277,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -461,47 +461,47 @@ X-Request-Id: req_d53e7cd4cffaa8737729831ad1147695
   "service_tier": "default",
   "system_fingerprint": null
 }
-1254 1625
+1343 1723
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1050
+Content-Length: 1139
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nBut their adventure was far from over. As they ventured deeper into the forest, they stumbled upon a towering volcano, spewing molten lava into the sky. From the fiery depths emerged a fearsome lava monster, its fiery eyes glaring with malevolence.\n\nOliver, Leo, and Freddie stood face to face with the menacing creature, their hearts pounding with a mixture of fear and determination. Oliver's quick wit came to the forefront, and he hatched a plan to defeat the lava monster.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 903
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nBut their adventure was far from over. As they ventured deeper into the forest, they stumbled upon a towering volcano, spewing molten lava into the sky. From the fiery depths emerged a fearsome lava monster, its fiery eyes glaring with malevolence.\n\nOliver, Leo, and Freddie stood face to face with the menacing creature, their hearts pounding with a mixture of fear and determination. Oliver's quick wit came to the forefront, and he hatched a plan to defeat the lava monster.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1000
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:07 GMT
+Date: Tue, 03 Jun 2025 08:47:04 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 408
+Openai-Processing-Ms: 557
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 414
+X-Envoy-Upstream-Service-Time: 564
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999757
+X-Ratelimit-Remaining-Tokens: 49999735
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a607b5de61e0f546001e827baf933d2a
+X-Request-Id: req_8705dd49209632047a67be00597b8ea0
 
 {
-  "id": "chatcmpl-BeCGVF3OQBnzrjDtjUJn8vmzBlJdk",
+  "id": "chatcmpl-BeHaRxG6lNZYMyYQACto9Xu2VrQWy",
   "object": "chat.completion",
-  "created": 1748919967,
+  "created": 1748940423,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures.",
         "refusal": null,
         "annotations": []
       },
@@ -510,9 +510,9 @@ X-Request-Id: req_a607b5de61e0f546001e827baf933d2a
     }
   ],
   "usage": {
-    "prompt_tokens": 206,
-    "completion_tokens": 25,
-    "total_tokens": 231,
+    "prompt_tokens": 222,
+    "completion_tokens": 44,
+    "total_tokens": 266,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -527,47 +527,47 @@ X-Request-Id: req_a607b5de61e0f546001e827baf933d2a
   "service_tier": "default",
   "system_fingerprint": null
 }
-1129 1684
+1227 1870
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 926
+Content-Length: 1023
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\n\"Listen, my friends! We must work together, combining our unique strengths and abilities,\" Oliver declared with conviction. \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot. Freddie, your agility and quick reflexes will guide us through the treacherous terrain. Together, we shall triumph!\"\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 962
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\n\"Listen, my friends! We must work together, combining our unique strengths and abilities,\" Oliver declared with conviction. \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot. Freddie, your agility and quick reflexes will guide us through the treacherous terrain. Together, we shall triumph!\"\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1147
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:09 GMT
+Date: Tue, 03 Jun 2025 08:47:06 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 391
+Openai-Processing-Ms: 668
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 394
+X-Envoy-Upstream-Service-Time: 672
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999790
+X-Ratelimit-Remaining-Tokens: 49999766
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_7141d93a194747d737860f1024d57291
+X-Request-Id: req_64e5eb34c0e0e283ca4fe2b12a78eaa6
 
 {
-  "id": "chatcmpl-BeCGWppSe69MKWs5duglnvhxwccyU",
+  "id": "chatcmpl-BeHaTJiNlXDx94nFZz54EERutpNXS",
   "object": "chat.completion",
-  "created": 1748919968,
+  "created": 1748940425,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\"",
         "refusal": null,
         "annotations": []
       },
@@ -576,9 +576,9 @@ X-Request-Id: req_7141d93a194747d737860f1024d57291
     }
   ],
   "usage": {
-    "prompt_tokens": 174,
-    "completion_tokens": 36,
-    "total_tokens": 210,
+    "prompt_tokens": 193,
+    "completion_tokens": 71,
+    "total_tokens": 264,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -593,47 +593,47 @@ X-Request-Id: req_7141d93a194747d737860f1024d57291
   "service_tier": "default",
   "system_fingerprint": null
 }
-1323 1684
+1508 2050
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1119
+Content-Length: 1304
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAnd so, the courageous trio battled the lava monster. Leo roared, drawing the monster's attention, while Freddie and Oliver scurried through the maze of fiery rocks, narrowly dodging molten lava. Finally, they discovered the creature's weak spot—a tiny gem embedded in its chest.\n\nWith their combined efforts, they struck the vulnerable spot, causing the monster to crumble and dissolve into a cascade of ash. The forest rejoiced, as the once-threatening presence was banished forever.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 962
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\"\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAnd so, the courageous trio battled the lava monster. Leo roared, drawing the monster's attention, while Freddie and Oliver scurried through the maze of fiery rocks, narrowly dodging molten lava. Finally, they discovered the creature's weak spot—a tiny gem embedded in its chest.\n\nWith their combined efforts, they struck the vulnerable spot, causing the monster to crumble and dissolve into a cascade of ash. The forest rejoiced, as the once-threatening presence was banished forever.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1327
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:11 GMT
+Date: Tue, 03 Jun 2025 08:47:08 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 494
+Openai-Processing-Ms: 980
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 496
+X-Envoy-Upstream-Service-Time: 989
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999741
+X-Ratelimit-Remaining-Tokens: 49999695
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ee2b4ec330fe80766689644076dc42b7
+X-Request-Id: req_2b7875b77ea08533f13974c4dcad7a44
 
 {
-  "id": "chatcmpl-BeCGYFYvIfKjQCf8r1K53DhbtEDA3",
+  "id": "chatcmpl-BeHaVJ8My7TNHTFz124VmZm5drfI7",
   "object": "chat.completion",
-  "created": 1748919970,
+  "created": 1748940427,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe.",
         "refusal": null,
         "annotations": []
       },
@@ -642,9 +642,9 @@ X-Request-Id: req_ee2b4ec330fe80766689644076dc42b7
     }
   ],
   "usage": {
-    "prompt_tokens": 215,
-    "completion_tokens": 36,
-    "total_tokens": 251,
+    "prompt_tokens": 250,
+    "completion_tokens": 105,
+    "total_tokens": 355,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -659,47 +659,47 @@ X-Request-Id: req_ee2b4ec330fe80766689644076dc42b7
   "service_tier": "default",
   "system_fingerprint": null
 }
-1095 1831
+1460 2229
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 892
+Content-Length: 1256
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1108
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1504
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:12 GMT
+Date: Tue, 03 Jun 2025 08:47:10 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 662
+Openai-Processing-Ms: 1194
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 667
+X-Envoy-Upstream-Service-Time: 1220
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999796
+X-Ratelimit-Remaining-Tokens: 49999707
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a9e995c4088187e1a45d9fe62503f3c3
+X-Request-Id: req_290afcbaa94598deeb99bef51faeb555
 
 {
-  "id": "chatcmpl-BeCGaZYb9qUbl9E9HFLPSyMf0zLK2",
+  "id": "chatcmpl-BeHaXl01yMcSn0IZll3J2ti01Wq1c",
   "object": "chat.completion",
-  "created": 1748919972,
+  "created": 1748940429,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger. After their victory, Leo was hailed as a hero by the animals of the enchanted forest, solidifying his place as a legendary figure in their midst.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe. After their victory, the animals of the enchanted forest gathered to celebrate their bravery, with Leo being hailed as a hero for his fearless leadership in the face of danger.",
         "refusal": null,
         "annotations": []
       },
@@ -708,9 +708,9 @@ X-Request-Id: req_a9e995c4088187e1a45d9fe62503f3c3
     }
   ],
   "usage": {
-    "prompt_tokens": 167,
-    "completion_tokens": 66,
-    "total_tokens": 233,
+    "prompt_tokens": 236,
+    "completion_tokens": 138,
+    "total_tokens": 374,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -725,47 +725,47 @@ X-Request-Id: req_a9e995c4088187e1a45d9fe62503f3c3
   "service_tier": "default",
   "system_fingerprint": null
 }
-1330 2185
+1725 2580
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1126
+Content-Length: 1521
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger. After their victory, Leo was hailed as a hero by the animals of the enchanted forest, solidifying his place as a legendary figure in their midst.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nFrom that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1460
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe. After their victory, the animals of the enchanted forest gathered to celebrate their bravery, with Leo being hailed as a hero for his fearless leadership in the face of danger.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nFrom that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1855
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:15 GMT
+Date: Tue, 03 Jun 2025 08:47:13 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1141
+Openai-Processing-Ms: 1580
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1144
+X-Envoy-Upstream-Service-Time: 1584
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999738
+X-Ratelimit-Remaining-Tokens: 49999641
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_081e6b1f3ec002b39151acf69969e7a8
+X-Request-Id: req_a6656f5ddcb861df189ea6c1990f8ccf
 
 {
-  "id": "chatcmpl-BeCGbLH1EA8QcOnFOHFWvPXtRaFlh",
+  "id": "chatcmpl-BeHaZOJXCEixOvNefwsIy1T0uM28f",
   "object": "chat.completion",
-  "created": 1748919973,
+  "created": 1748940431,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger. After their victory, Leo was hailed as a hero by the animals of the enchanted forest, solidifying his place as a legendary figure in their midst. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe. After their victory, the animals of the enchanted forest gathered to celebrate their bravery, with Leo being hailed as a hero for his fearless leadership in the face of danger. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.",
         "refusal": null,
         "annotations": []
       },
@@ -774,9 +774,9 @@ X-Request-Id: req_081e6b1f3ec002b39151acf69969e7a8
     }
   ],
   "usage": {
-    "prompt_tokens": 209,
-    "completion_tokens": 129,
-    "total_tokens": 338,
+    "prompt_tokens": 281,
+    "completion_tokens": 201,
+    "total_tokens": 482,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -791,47 +791,47 @@ X-Request-Id: req_081e6b1f3ec002b39151acf69969e7a8
   "service_tier": "default",
   "system_fingerprint": null
 }
-1529 2376
+1924 2779
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1325
+Content-Length: 1720
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger. After their victory, Leo was hailed as a hero by the animals of the enchanted forest, solidifying his place as a legendary figure in their midst. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAnd so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1651
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe. After their victory, the animals of the enchanted forest gathered to celebrate their bravery, with Leo being hailed as a hero for his fearless leadership in the face of danger. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAnd so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 2054
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:17 GMT
+Date: Tue, 03 Jun 2025 08:47:16 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1447
+Openai-Processing-Ms: 1790
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1451
+X-Envoy-Upstream-Service-Time: 1795
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999689
+X-Ratelimit-Remaining-Tokens: 49999591
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ebe6e3b23c949b32c5a6d8a1b6cffefb
+X-Request-Id: req_c21944e3307c6af8ffdfe8f02962b494
 
 {
-  "id": "chatcmpl-BeCGeg1lIxy8PcbcGD5j4B2rdR7d8",
+  "id": "chatcmpl-BeHacSiSbIoEGGclug2lTJcEvHH7C",
   "object": "chat.completion",
-  "created": 1748919976,
+  "created": 1748940434,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Leo, the brave lion, led the way as he, Oliver, and Freddie embarked on their noble quest through the forest, showcasing his strength and courage in the face of danger. After their victory, Leo was hailed as a hero by the animals of the enchanted forest, solidifying his place as a legendary figure in their midst. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds. Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.",
+        "content": "Leo, the regal lion, bravely led the way as he and Oliver embarked on their noble quest through the forest. Along their journey, they met a whimsical frog named Freddie, who eagerly joined their adventures. Oliver declared with conviction, \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot.\" As they battled the lava monster, Leo's roar drew the creature's attention, allowing Freddie and Oliver to locate and strike its weak spot, ultimately defeating the menacing foe. After their victory, the animals of the enchanted forest gathered to celebrate their bravery, with Leo being hailed as a hero for his fearless leadership in the face of danger. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds. And so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.",
         "refusal": null,
         "annotations": []
       },
@@ -840,9 +840,9 @@ X-Request-Id: req_ebe6e3b23c949b32c5a6d8a1b6cffefb
     }
   ],
   "usage": {
-    "prompt_tokens": 251,
-    "completion_tokens": 168,
-    "total_tokens": 419,
+    "prompt_tokens": 323,
+    "completion_tokens": 243,
+    "total_tokens": 566,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0

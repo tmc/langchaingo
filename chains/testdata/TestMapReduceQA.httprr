@@ -1,269 +1,5 @@
 httprr trace v1
-930 1538
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 727
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 816
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 215
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 219
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999839
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_0c4e23186594905ede83ff9d54975959
-
-{
-  "id": "chatcmpl-BeCGKHSwcRsUh2O1UBrFIUaY2as4G",
-  "object": "chat.completion",
-  "created": 1748919956,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "The lion's name is Leo.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 148,
-    "completion_tokens": 7,
-    "total_tokens": 155,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-766 1518
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 563
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nLeo raised his magnificent head, his golden eyes sparkling with curiosity. \"Greetings, Oliver! I must admit, I've never met a mouse with such courage. I would be honored to accompany you on your noble quest. Together, we shall forge an unbreakable bond of friendship!\"\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 796
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 223
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 225
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9998
-X-Ratelimit-Remaining-Tokens: 49999878
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_79c955e098af8de142911992d762a30a
-
-{
-  "id": "chatcmpl-BeCGKYeGpz2nuja8eh4nG5aP75BqW",
-  "object": "chat.completion",
-  "created": 1748919956,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Leo",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 111,
-    "completion_tokens": 1,
-    "total_tokens": 112,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-828 1632
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 625
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nVenturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 910
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 306
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 309
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9998
-X-Ratelimit-Remaining-Tokens: 49999862
-X-Ratelimit-Reset-Requests: 8ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_345ec2657e7335ed5f03e84c9d36a63a
-
-{
-  "id": "chatcmpl-BeCGKq12KEM7IOeTcVBptKjlZw3oQ",
-  "object": "chat.completion",
-  "created": 1748919956,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "There is no relevant text to answer the question about the name of the lion in the provided portion of the document.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 122,
-    "completion_tokens": 23,
-    "total_tokens": 145,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-851 1521
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 648
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nOnce upon a time, in a charming little village nestled deep within the enchanted forest, lived a small mouse named Oliver. Oliver was unlike the other mice in the village. While they scurried and chattered happily amongst themselves, Oliver felt a longing for something more, a yearning for adventure and new friendships beyond the familiar mouse tunnels.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 799
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 215
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 218
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999856
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_f5961c5fb45bce285884d6e540e4f3b1
-
-{
-  "id": "chatcmpl-BeCGKmJIQBdDp6Toz2D6XZ5108VZO",
-  "object": "chat.completion",
-  "created": 1748919956,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 122,
-    "completion_tokens": 2,
-    "total_tokens": 124,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-831 1522
+831 1521
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -277,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
+Date: Tue, 03 Jun 2025 08:46:53 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 163
+Openai-Processing-Ms: 253
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 165
+X-Envoy-Upstream-Service-Time: 259
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9997
+X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999862
-X-Ratelimit-Reset-Requests: 17ms
+X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_3f2ef4f2321ec91a1cc9f39f11a373cc
+X-Request-Id: req_08b8a42b2a6ebcdee5d2caa5d0d8ed4b
 
 {
-  "id": "chatcmpl-BeCGK1A4FJ6EvM5TcD2SlSDITVesV",
+  "id": "chatcmpl-BeHaGFFk3m29CcCmvk65sqBdGBlxC",
   "object": "chat.completion",
-  "created": 1748919956,
+  "created": 1748940412,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -329,40 +65,172 @@ X-Request-Id: req_3f2ef4f2321ec91a1cc9f39f11a373cc
   "service_tier": "default",
   "system_fingerprint": null
 }
-1011 1518
+930 1538
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 808
+Content-Length: 727
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nFreddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 816
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:53 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 242
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 245
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999839
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_334a8e377e9d4a5697d051d7a68ec5c7
+
+{
+  "id": "chatcmpl-BeHaHsXDQi4r0qABGUoSBhsDCTB2G",
+  "object": "chat.completion",
+  "created": 1748940413,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The lion's name is Leo.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 148,
+    "completion_tokens": 7,
+    "total_tokens": 155,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+828 1632
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 625
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nVenturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 910
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:53 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 403
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 406
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999863
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_44fbc1461408c652a37c6ca79e994d4c
+
+{
+  "id": "chatcmpl-BeHaH95tFDv6dDoZdkqw7F1M2Kq0H",
+  "object": "chat.completion",
+  "created": 1748940413,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "There is no relevant text to answer the question about the name of the lion in the provided portion of the document.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 122,
+    "completion_tokens": 23,
+    "total_tokens": 145,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+766 1520
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 563
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nLeo raised his magnificent head, his golden eyes sparkling with curiosity. \"Greetings, Oliver! I must admit, I've never met a mouse with such courage. I would be honored to accompany you on your noble quest. Together, we shall forge an unbreakable bond of friendship!\"\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 796
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
+Date: Tue, 03 Jun 2025 08:46:53 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 209
+Openai-Processing-Ms: 630
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 219
+X-Envoy-Upstream-Service-Time: 634
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999817
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_c532cf62d7262ef2a5ece56e928defa4
+X-Ratelimit-Remaining-Requests: 9997
+X-Ratelimit-Remaining-Tokens: 49997282
+X-Ratelimit-Reset-Requests: 14ms
+X-Ratelimit-Reset-Tokens: 3ms
+X-Request-Id: req_d79d88cd39cb9d1dfeaeca5aa244649f
 
 {
-  "id": "chatcmpl-BeCGLfq9ZhNvKwA47zBX3UoKGS6un",
+  "id": "chatcmpl-BeHaGkWBHPqDySlwWhm3xCZLuMbzP",
   "object": "chat.completion",
-  "created": 1748919957,
+  "created": 1748940412,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -378,9 +246,9 @@ X-Request-Id: req_c532cf62d7262ef2a5ece56e928defa4
     }
   ],
   "usage": {
-    "prompt_tokens": 166,
+    "prompt_tokens": 111,
     "completion_tokens": 1,
-    "total_tokens": 167,
+    "total_tokens": 112,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -409,26 +277,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
+Date: Tue, 03 Jun 2025 08:46:54 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 289
+Openai-Processing-Ms: 188
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 295
+X-Envoy-Upstream-Service-Time: 193
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999871
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_3de37843f590ea788ee7f035c849e413
+X-Request-Id: req_7d5b9bcbe80a7532991789140e02cf99
 
 {
-  "id": "chatcmpl-BeCGLhM4aTR4x16iy2bOdIl9N6y3p",
+  "id": "chatcmpl-BeHaII36BRD5zHNbBr1xVgwTMVVEk",
   "object": "chat.completion",
-  "created": 1748919957,
+  "created": 1748940414,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -461,6 +329,138 @@ X-Request-Id: req_3de37843f590ea788ee7f035c849e413
   "service_tier": "default",
   "system_fingerprint": null
 }
+1011 1518
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 808
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nFreddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 796
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:54 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 144
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 147
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999817
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_2c85380c884eb2fa4d95c86c80c54e8f
+
+{
+  "id": "chatcmpl-BeHaIzpSUmPeoR79D6Qs3biqmyJes",
+  "object": "chat.completion",
+  "created": 1748940414,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Leo",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 166,
+    "completion_tokens": 1,
+    "total_tokens": 167,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+975 1587
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 772
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nBut their adventure was far from over. As they ventured deeper into the forest, they stumbled upon a towering volcano, spewing molten lava into the sky. From the fiery depths emerged a fearsome lava monster, its fiery eyes glaring with malevolence.\n\nOliver, Leo, and Freddie stood face to face with the menacing creature, their hearts pounding with a mixture of fear and determination. Oliver's quick wit came to the forefront, and he hatched a plan to defeat the lava monster.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 864
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:54 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 286
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 297
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9998
+X-Ratelimit-Remaining-Tokens: 49999827
+X-Ratelimit-Reset-Requests: 11ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_a1419e0e0d32643684fcbf80702fa731
+
+{
+  "id": "chatcmpl-BeHaIL15SfRWzsg2XOH9pYTC67ZKG",
+  "object": "chat.completion",
+  "created": 1748940414,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, Leo, and Freddie stood face to face with the menacing creature",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 154,
+    "completion_tokens": 15,
+    "total_tokens": 169,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
 851 1518
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
@@ -475,26 +475,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
+Date: Tue, 03 Jun 2025 08:46:54 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 153
+Openai-Processing-Ms: 237
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 156
+X-Envoy-Upstream-Service-Time: 240
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999857
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ae51883bd00cf8a314091d180e2bc54c
+X-Request-Id: req_c4522bcfc9d06beb4d97cc1e79f9bead
 
 {
-  "id": "chatcmpl-BeCGLoWbFkA3A2PLDhWqIEqvub1BP",
+  "id": "chatcmpl-BeHaIkV9uLy74tO6rcAWbzhUJ9jnk",
   "object": "chat.completion",
-  "created": 1748919957,
+  "created": 1748940414,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -541,26 +541,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
+Date: Tue, 03 Jun 2025 08:46:55 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 199
+Openai-Processing-Ms: 198
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 203
+X-Envoy-Upstream-Service-Time: 202
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999824
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_eb6fea6f19f9afe6567f3fd10e289caa
+X-Request-Id: req_2a74a74dad5b6ab5c548c417ccbc425f
 
 {
-  "id": "chatcmpl-BeCGLgYruyJsrATxZKRgG4JuDqVZ4",
+  "id": "chatcmpl-BeHaJ4opCDv0G2ThwHnHceV7LXbyO",
   "object": "chat.completion",
-  "created": 1748919957,
+  "created": 1748940415,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -593,139 +593,7 @@ X-Request-Id: req_eb6fea6f19f9afe6567f3fd10e289caa
   "service_tier": "default",
   "system_fingerprint": null
 }
-975 1586
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 772
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nBut their adventure was far from over. As they ventured deeper into the forest, they stumbled upon a towering volcano, spewing molten lava into the sky. From the fiery depths emerged a fearsome lava monster, its fiery eyes glaring with malevolence.\n\nOliver, Leo, and Freddie stood face to face with the menacing creature, their hearts pounding with a mixture of fear and determination. Oliver's quick wit came to the forefront, and he hatched a plan to defeat the lava monster.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 864
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:58 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 280
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 285
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999827
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_f6ebd251557bd7391763ba832b7c02b0
-
-{
-  "id": "chatcmpl-BeCGLAnO5beThDGVvN1eUgKWyKqK5",
-  "object": "chat.completion",
-  "created": 1748919957,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver, Leo, and Freddie stood face to face with the menacing creature",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 154,
-    "completion_tokens": 15,
-    "total_tokens": 169,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-694 1519
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 491
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nAnd so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 797
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:59 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 192
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 197
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999897
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_0938d96186dd42448c4eb964742f2e82
-
-{
-  "id": "chatcmpl-BeCGNclDpxoxjHg8TBcmxvYq2stym",
-  "object": "chat.completion",
-  "created": 1748919959,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 96,
-    "completion_tokens": 2,
-    "total_tokens": 98,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-758 1521
+758 1518
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -734,38 +602,38 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nAs Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 799
+Content-Length: 796
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:59 GMT
+Date: Tue, 03 Jun 2025 08:46:55 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 203
+Openai-Processing-Ms: 225
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 211
+X-Envoy-Upstream-Service-Time: 230
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999880
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_51627bb7d1064d1169104d101ea4ad31
+X-Request-Id: req_01c695708443c211a065919853154207
 
 {
-  "id": "chatcmpl-BeCGNszN5ywLgZAJ60cx5NjO1Q480",
+  "id": "chatcmpl-BeHaJ2h75hXqzLqS5kDZIXYn4e39Y",
   "object": "chat.completion",
-  "created": 1748919959,
+  "created": 1748940415,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Oliver",
+        "content": "Leo",
         "refusal": null,
         "annotations": []
       },
@@ -775,8 +643,8 @@ X-Request-Id: req_51627bb7d1064d1169104d101ea4ad31
   ],
   "usage": {
     "prompt_tokens": 105,
-    "completion_tokens": 2,
-    "total_tokens": 107,
+    "completion_tokens": 1,
+    "total_tokens": 106,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -805,26 +673,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:59 GMT
+Date: Tue, 03 Jun 2025 08:46:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 223
+Openai-Processing-Ms: 182
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 228
+X-Envoy-Upstream-Service-Time: 192
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999859
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_e375dae9ab5d73d024b9867a312b82e8
+X-Request-Id: req_b60765893638043749d59d9c487c9e49
 
 {
-  "id": "chatcmpl-BeCGNfwfSFyxZ4eDXoybZ9lDHfJKX",
+  "id": "chatcmpl-BeHaKsuONPmF383n31OOwfMGKCxqF",
   "object": "chat.completion",
-  "created": 1748919959,
+  "created": 1748940416,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -857,40 +725,172 @@ X-Request-Id: req_e375dae9ab5d73d024b9867a312b82e8
   "service_tier": "default",
   "system_fingerprint": null
 }
-854 1518
+694 1519
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 651
+Content-Length: 491
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Given the following extracted parts of a long document and a question, create a final answer. \nIf you don't know the answer, just say that you don't know. Don't try to make up an answer.\n\nQUESTION: What is the name of the lion?\n=========\nOliver\n\nOliver\n\nThere is no relevant text to answer the question about the name of the lion in the provided portion of the document.\n\nThe lion's name is Leo.\n\nLeo\n\nLeo\n\nLeo\n\nOliver, Leo, and Freddie stood face to face with the menacing creature\n\nLeo\n\nLeo\n\nOliver\n\nLeo\n\nOliver\n=========\nFINAL ANSWER:"}],"temperature":0}HTTP/2.0 200 OK
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nAnd so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 797
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:56 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 201
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 208
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999897
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_774dad66530858abf3db4c859893fa44
+
+{
+  "id": "chatcmpl-BeHaKIURewQAzcWH1c7CDxsIm3UiU",
+  "object": "chat.completion",
+  "created": 1748940416,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 96,
+    "completion_tokens": 2,
+    "total_tokens": 98,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+851 1523
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 648
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following portion of a long document to see if any of the text is relevant to answer the question. \nReturn any relevant text verbatim.\nOnce upon a time, in a charming little village nestled deep within the enchanted forest, lived a small mouse named Oliver. Oliver was unlike the other mice in the village. While they scurried and chattered happily amongst themselves, Oliver felt a longing for something more, a yearning for adventure and new friendships beyond the familiar mouse tunnels.\nQuestion: What is the name of the lion?\nRelevant text, if any:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 799
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:57 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 4129
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 4138
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9998
+X-Ratelimit-Remaining-Tokens: 49999856
+X-Ratelimit-Reset-Requests: 8ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_b386786f029f1229b88f7d2b3a0161ba
+
+{
+  "id": "chatcmpl-BeHaHCV9ob3jTGQk9WpqBlLNPvv54",
+  "object": "chat.completion",
+  "created": 1748940413,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 122,
+    "completion_tokens": 2,
+    "total_tokens": 124,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+851 1518
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 648
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Given the following extracted parts of a long document and a question, create a final answer. \nIf you don't know the answer, just say that you don't know. Don't try to make up an answer.\n\nQUESTION: What is the name of the lion?\n=========\nOliver\n\nOliver\n\nThere is no relevant text to answer the question about the name of the lion in the provided portion of the document.\n\nThe lion's name is Leo.\n\nLeo\n\nLeo\n\nLeo\n\nOliver, Leo, and Freddie stood face to face with the menacing creature\n\nLeo\n\nLeo\n\nLeo\n\nLeo\n\nOliver\n=========\nFINAL ANSWER:"}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 796
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:06:00 GMT
+Date: Tue, 03 Jun 2025 08:46:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 190
+Openai-Processing-Ms: 167
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 196
+X-Envoy-Upstream-Service-Time: 170
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999863
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_9f3707b7408e6cf841986b08d2f6a012
+X-Request-Id: req_7465832abc754246bbe385032c068f7a
 
 {
-  "id": "chatcmpl-BeCGOtj0ombC9V1a3bx1nkhzY3qR6",
+  "id": "chatcmpl-BeHaMxIqDK0xoLkMPS5Bdf5O4Y0ZS",
   "object": "chat.completion",
-  "created": 1748919960,
+  "created": 1748940418,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -906,9 +906,9 @@ X-Request-Id: req_9f3707b7408e6cf841986b08d2f6a012
     }
   ],
   "usage": {
-    "prompt_tokens": 137,
+    "prompt_tokens": 136,
     "completion_tokens": 1,
-    "total_tokens": 138,
+    "total_tokens": 137,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
