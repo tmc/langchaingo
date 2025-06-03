@@ -1,7 +1,7 @@
 .PHONY: start
 start:
-	npm run start
+	pnpm run start
 
 .PHONY: build
 build:
-	npm run build
+	pnpm run build

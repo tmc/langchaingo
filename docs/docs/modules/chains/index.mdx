@@ -1,22 +1,45 @@
 ---
 hide_table_of_contents: true
-sidebar_label: Unfinished Chains
+sidebar_label: Chains
 sidebar_position: 3
-draft: true
 ---
 
 import DocCardList from "@theme/DocCardList";
 import CodeBlock from "@theme/CodeBlock";
 
-# Getting Started: Chains
+# Chains
 
 :::info
-[Conceptual Guide](https://python.langchain.com/docs/modules/chains)
-:::info
+[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
+:::
 
-Using a language model in isolation is fine for some applications, but it is often useful to combine language models with other sources of information, third-party APIs, or even other language models. This is where the concept of a chain comes in.
+Chains enable you to combine language models with other sources of information, third-party APIs, or even other language models. This allows you to create powerful, multi-step applications that go beyond single LLM calls.
 
-LangChain provides a standard interface for chains, as well as a number of built-in chains that can be used out of the box. You can also create your own chains by creating structs that implement the chain interface.
+LangChain Go provides a standard interface for chains, along with several built-in implementations for common patterns. You can also create custom chains by implementing the `Chain` interface.
+
+## Key Concepts
+
+- **Sequential Processing**: Chains execute steps in sequence, passing outputs between stages
+- **Flexible Input/Output**: Chains work with map-based inputs and outputs for maximum flexibility  
+- **Memory Integration**: Chains can maintain conversation state across calls
+- **Composability**: Chains can be combined to create complex workflows
+
+## Built-in Chain Types
+
+### LLM Chain
+The simplest chain that calls an LLM with a prompt template.
+
+### Sequential Chain
+Chains multiple steps together, where each step's output feeds into the next.
+
+### Map-Reduce Chain
+Processes large documents by mapping operations across chunks and reducing results.
+
+### Conversation Chain
+Maintains conversation memory while processing new inputs.
+
+### Retrieval QA Chain
+Combines document retrieval with question answering capabilities.
 
 ## Executing chains
 

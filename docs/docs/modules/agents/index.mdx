@@ -1,16 +1,112 @@
 ---
 sidebar_position: 5
 hide_table_of_contents: true
-draft: true
 ---
 
 import DocCardList from "@theme/DocCardList";
 
-# Unfinished Agents
+# Agents
 
 :::info
-[Conceptual Guide](https://python.langchain.com/docs/modules/agents)
+[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
 :::
 
-Some applications will require not just a predetermined chain of calls to LLMs/other tools, but potentially an unknown chain that depends on the user's input. In these types of chains, there is a “agent” which has access to a suite of tools. Depending on the user input, the agent can then decide which, if any, of these tools to call.
+Agents enable autonomous behavior by allowing language models to dynamically choose which tools to use based on user input. Unlike predetermined chains, agents make real-time decisions about their actions.
 
+## Core Concepts
+
+An agent system consists of several key components:
+
+- **Agent**: The decision-making component that chooses which tools to use
+- **Tools**: The available functions/APIs the agent can invoke
+- **Executor**: Manages the agent's execution loop and tool invocation
+- **Memory**: Maintains conversation context across agent interactions
+
+## How Agents Work
+
+1. **Receive Input**: Agent receives a user query or task
+2. **Plan Action**: Agent analyzes the input and decides which tool(s) to use
+3. **Execute Tool**: Agent invokes the selected tool with appropriate parameters
+4. **Process Result**: Agent evaluates the tool's output
+5. **Decide Next Step**: Agent determines if more actions are needed or if the task is complete
+6. **Respond**: Agent provides a final response to the user
+
+## Agent Types
+
+### MRKL Agent (ReAct)
+Uses a Reasoning and Acting pattern where the agent alternates between thinking about what to do and taking actions.
+
+### OpenAI Functions Agent
+Leverages OpenAI's function calling capabilities for more structured tool usage and parameter passing.
+
+### Conversational Agent
+Designed for multi-turn conversations, maintaining context while using tools to assist with tasks.
+
+### Plan-and-Execute Agent
+Creates a plan of actions first, then executes each step systematically.
+
+## Available Tools
+
+LangChain Go provides several built-in tools:
+
+- **Calculator**: Perform mathematical calculations
+- **Web Search**: Search the internet for information
+- **File Operations**: Read, write, and manipulate files
+- **Database Query**: Execute database operations
+- **API Calls**: Make HTTP requests to external services
+- **Custom Tools**: Create your own tools for specific use cases
+
+## Building Agents
+
+### Basic Agent Setup
+
+```go
+// Create tools
+tools := []tools.Tool{
+    tools.Calculator{},
+    tools.WebSearch{APIKey: "your-api-key"},
+}
+
+// Create agent
+agent := agents.NewMRKLAgent(llm, tools)
+
+// Create executor
+executor := agents.NewExecutor(agent)
+
+// Execute
+result, err := executor.Call(ctx, map[string]any{
+    "input": "What is 25 * 4 and what's the weather like today?",
+})
+```
+
+### Custom Tools
+
+```go
+type CustomTool struct{}
+
+func (c CustomTool) Name() string {
+    return "custom_tool"
+}
+
+func (c CustomTool) Description() string {
+    return "Performs custom operations"
+}
+
+func (c CustomTool) Call(ctx context.Context, input string) (string, error) {
+    // Your custom logic here
+    return "Tool result", nil
+}
+```
+
+## Best Practices
+
+1. **Tool Selection**: Choose tools that complement each other and cover your use case
+2. **Prompt Engineering**: Design clear tool descriptions and agent prompts
+3. **Error Recovery**: Implement fallback strategies for tool failures
+4. **Resource Management**: Set timeouts and limits on tool execution
+5. **Security**: Validate tool inputs and sanitize outputs
+6. **Monitoring**: Track agent performance and decision quality
+
+## Agent Components
+
+<DocCardList />

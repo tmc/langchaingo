@@ -1,0 +1,91 @@
+.navbar__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navbar__search-input {
+  width: 200px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ifm-navbar-search-input-color);
+  background-color: var(--ifm-navbar-search-input-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-global-radius);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.navbar__search-input:focus {
+  outline: 0;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.navbar__search-input::placeholder {
+  color: var(--ifm-color-emphasis-500);
+  opacity: 1;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-global-radius);
+  box-shadow: var(--ifm-global-shadow-md);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+.search-result-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--ifm-color-emphasis-100);
+  transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-title {
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.search-result-content {
+  font-size: 0.8125rem;
+  color: var(--ifm-color-content-secondary);
+  line-height: 1.4;
+}
+
+.search-result-content mark {
+  background-color: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-darkest);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .search-result-content mark {
+  background-color: var(--ifm-color-primary-dark);
+  color: var(--ifm-color-primary-lightest);
+}
+
+@media (max-width: 768px) {
+  .navbar__search-input {
+    width: 150px;
+  }
+}

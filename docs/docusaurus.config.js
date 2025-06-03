@@ -15,9 +15,6 @@ const config = {
   title: "🦜️🔗 LangchainGo",
   tagline: "LangChain Go Docs",
   favicon: "img/favicon.ico",
-  customFields: {
-    mendableAnonKey: process.env.MENDABLE_ANON_KEY,
-  },
   // Set the production url of your site here
   url: "https://tmc.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -34,6 +31,7 @@ const config = {
         plugins: [
           new ProvidePlugin({
             process: require.resolve("process/browser"),
+            React: "react",
           }),
         ],
         resolve: {
@@ -125,9 +123,16 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      // Color mode configuration
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['go', 'bash', 'json', 'yaml'],
       },
       image: "img/parrot-chainlink-icon.png",
       navbar: {
