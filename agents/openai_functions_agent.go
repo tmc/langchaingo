@@ -110,15 +110,22 @@ func (o *OpenAIFunctionsAgent) Plan(
 			}
 
 		case llms.AIChatMessage:
-			mc = llms.MessageContent{
-				Role: role,
-				Parts: []llms.ContentPart{
-					llms.ToolCall{
-						ID:           p.ToolCalls[0].ID,
-						Type:         p.ToolCalls[0].Type,
-						FunctionCall: p.ToolCalls[0].FunctionCall,
+			if len(p.ToolCalls) > 0 {
+				mc = llms.MessageContent{
+					Role: role,
+					Parts: []llms.ContentPart{
+						llms.ToolCall{
+							ID:           p.ToolCalls[0].ID,
+							Type:         p.ToolCalls[0].Type,
+							FunctionCall: p.ToolCalls[0].FunctionCall,
+						},
 					},
-				},
+				}
+			} else {
+				mc = llms.MessageContent{
+					Role:  role,
+					Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+				}
 			}
 		default:
 			mc = llms.MessageContent{
@@ -180,8 +187,23 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, llms.FunctionChatMessage{
-			Name:    step.Action.Tool,
+		// First add the AI message with the tool call
+		messages = append(messages, llms.AIChatMessage{
+			Content: step.Action.Log,
+			ToolCalls: []llms.ToolCall{
+				{
+					ID:   step.Action.ToolID,
+					Type: "function",
+					FunctionCall: &llms.FunctionCall{
+						Name:      step.Action.Tool,
+						Arguments: step.Action.ToolInput,
+					},
+				},
+			},
+		})
+		// Then add the tool response message
+		messages = append(messages, llms.ToolChatMessage{
+			ID:      step.Action.ToolID,
 			Content: step.Observation,
 		})
 	}
@@ -211,7 +233,16 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	toolInputMap := make(map[string]any, 0)
 	err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
 	if err != nil {
-		return nil, nil, err
+		// If it's not valid JSON, it might be a raw expression for the calculator
+		// Try to use it directly as tool input
+		return []schema.AgentAction{
+			{
+				Tool:      functionName,
+				ToolInput: toolInputStr,
+				Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+				ToolID:    choice.ToolCalls[0].ID,
+			},
+		}, nil, nil
 	}
 
 	toolInput := toolInputStr
