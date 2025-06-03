@@ -19,17 +19,12 @@ func TestConversationalWithMemory(t *testing.T) {
 
 	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
-	// Configure OpenAI client based on recording vs replay mode
+	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-
-	// Only add fake token when NOT recording (i.e., during replay)
-	if !rr.Recording() {
-		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
-	}
-	// When recording, openai.New() will read OPENAI_API_KEY from environment
+	// httprr handles credentials automatically
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)

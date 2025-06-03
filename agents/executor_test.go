@@ -3,7 +3,6 @@ package agents_test
 import (
 	"context"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -81,29 +80,22 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
-	}
 
-	// Configure OpenAI client based on recording vs replay mode
+	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-
-	// Only add fake token when NOT recording (i.e., during replay)
-	if !rr.Recording() {
-		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
-	}
-	// When recording, openai.New() will read OPENAI_API_KEY from environment
+	// httprr handles credentials automatically
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -128,29 +120,22 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
-	}
 
-	// Configure OpenAI client based on recording vs replay mode
+	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-
-	// Only add fake token when NOT recording (i.e., during replay)
-	if !rr.Recording() {
-		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
-	}
-	// When recording, openai.New() will read OPENAI_API_KEY from environment
+	// httprr handles credentials automatically
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -168,7 +153,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	e := agents.NewExecutor(a)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), e, "when was the Go programming language tagged version 1.0?") //nolint:lll
+	result, err := chains.Run(ctx, e, "when was the Go programming language tagged version 1.0?") //nolint:lll
 	require.NoError(t, err)
 
 	t.Logf("Result: %s", result)

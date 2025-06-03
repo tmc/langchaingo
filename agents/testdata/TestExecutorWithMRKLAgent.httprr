@@ -1,5 +1,5 @@
 httprr trace v1
-1400 1638
+1400 1681
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7,32 +7,34 @@ Content-Length: 1196
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 915
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
+Connection: keep-alive
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 08:47:23 GMT
+Date: Tue, 03 Jun 2025 16:40:45 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 2028
+Openai-Processing-Ms: 2826
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 2032
+X-Envoy-Upstream-Service-Time: 2830
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 999738
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 15ms
-X-Request-Id: req_d13632ee56799b711b07fc5a2db8fe6f
+X-Request-Id: req_a87f406ee3b1d23d3a55b82cc7a4ab2f
 
+393
 {
-  "id": "chatcmpl-BeHajjIAXo8Gp5V5Mt2GUbQZMuRlf",
+  "id": "chatcmpl-BeOyobhqiUkPqfbCGM97B9yLTtnhN",
   "object": "chat.completion",
-  "created": 1748940441,
+  "created": 1748968842,
   "model": "gpt-4-0613",
   "choices": [
     {
@@ -65,7 +67,10 @@ X-Request-Id: req_d13632ee56799b711b07fc5a2db8fe6f
   "service_tier": "default",
   "system_fingerprint": null
 }
-1549 1589
+
+0
+
+1549 1633
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -73,39 +78,41 @@ Content-Length: 1345
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 866
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
+Connection: keep-alive
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 08:47:26 GMT
+Date: Tue, 03 Jun 2025 16:40:47 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1418
+Openai-Processing-Ms: 1190
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1428
+X-Envoy-Upstream-Service-Time: 1196
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 999702
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 17ms
-X-Request-Id: req_aa9f7d72aae67e91716ed68ac5a53fca
+X-Request-Id: req_0eafb82071cb51344508e7228f3c0e0f
 
+363
 {
-  "id": "chatcmpl-BeHamdAWBNDiTHgo6fqbReH5Qf51u",
+  "id": "chatcmpl-BeOyslN6A23fFhh3jGEQPtnq2QTUC",
   "object": "chat.completion",
-  "created": 1748940444,
+  "created": 1748968846,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Thought: I now know the final answer\nFinal Answer: The result of 5 plus 3 is 8.",
+        "content": "Thought: I now know the final answer.\nFinal Answer: The result of 5 plus 3 is 8.",
         "refusal": null,
         "annotations": []
       },
@@ -131,3 +138,6 @@ X-Request-Id: req_aa9f7d72aae67e91716ed68ac5a53fca
   "service_tier": "default",
   "system_fingerprint": null
 }
+
+0
+
