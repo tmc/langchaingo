@@ -2,24 +2,26 @@ package maritaca
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
-	var token string
-	if token = os.Getenv("MARITACA_KEY"); token == "" {
-		t.Skip("MARITACA_KEY not set")
-		return nil
-	}
 
-	opts = append([]Option{WithToken(token), WithModel("sabia-2-medium")}, opts...)
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Configure with httprr HTTP client
+	opts = append([]Option{WithHTTPClient(rr.Client()), WithModel("sabia-2-medium")}, opts...)
 
 	c, err := New(opts...)
 	require.NoError(t, err)

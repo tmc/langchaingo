@@ -1,0 +1,143 @@
+httprr trace v1
+755 1807
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 552
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 1082
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Wed, 04 Jun 2025 16:02:24 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1006
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1013
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 30000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 29999974
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_5ed5c04c186d5af4c4ac124280013414
+
+{
+  "id": "chatcmpl-BekrH5udYqGCTHlXNUj8vOWitASB2",
+  "object": "chat.completion",
+  "created": 1749052943,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_gudkKizHgkAdAvn0UCIedFfB",
+            "type": "function",
+            "function": {
+              "name": "calculator",
+              "arguments": "{\"__arg1\":\"15 * 4\"}"
+            }
+          }
+        ],
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 94,
+    "completion_tokens": 19,
+    "total_tokens": 113,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_07871e2ad8"
+}
+993 1553
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 790
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_gudkKizHgkAdAvn0UCIedFfB","type":"function","function":{"name":"calculator","arguments":"15 * 4"}}]},{"role":"tool","content":"60","tool_call_id":"call_gudkKizHgkAdAvn0UCIedFfB"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 829
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Wed, 04 Jun 2025 16:02:27 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1505
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1508
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 30000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 29999973
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_ee5ec4e41e55edf5bd59d4e4b00143d6
+
+{
+  "id": "chatcmpl-BekrK4bOMWbVine8ps1bFtC8TmNw3",
+  "object": "chat.completion",
+  "created": 1749052946,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "15 multiplied by 4 is 60.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 115,
+    "completion_tokens": 10,
+    "total_tokens": 125,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_07871e2ad8"
+}

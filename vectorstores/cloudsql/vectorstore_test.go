@@ -4,10 +4,12 @@ package cloudsql_test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/util/cloudsqlutil"
@@ -27,6 +29,9 @@ type EnvVariables struct {
 
 func getEnvVariables(t *testing.T) EnvVariables {
 	t.Helper()
+
+	// Check for OpenAI API key since we use OpenAI embeddings
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	username := os.Getenv("CLOUDSQL_USERNAME")
 	if username == "" {
@@ -115,9 +120,14 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore,
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Initialize VertexAI LLM
+	// Setup httprr for OpenAI embeddings
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Initialize OpenAI LLM with httprr
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
 	)
 
 	if err != nil {

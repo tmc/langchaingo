@@ -225,40 +225,24 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 ) {
 	choice := contentResp.Choices[0]
 
-	// finish
-	if choice.FuncCall == nil {
-		return nil, &schema.AgentFinish{
-			ReturnValues: map[string]any{
-				"output": choice.Content,
-			},
-			Log: choice.Content,
-		}, nil
-	}
-
-	// action
-	functionCall := choice.FuncCall
-	functionName := functionCall.Name
-	toolInputStr := functionCall.Arguments
-	toolInputMap := make(map[string]any, 0)
-	err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
-	if err != nil {
-		// If it's not valid JSON, it might be a raw expression for the calculator
-		// Try to use it directly as tool input
-		return []schema.AgentAction{
-			{
-				Tool:      functionName,
-				ToolInput: toolInputStr,
-				Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
-				ToolID:    choice.ToolCalls[0].ID,
-			},
-		}, nil, nil
-	}
-
-	toolInput := toolInputStr
-	if arg1, ok := toolInputMap["__arg1"]; ok {
-		toolInputCheck, ok := arg1.(string)
-		if ok {
-			toolInput = toolInputCheck
+	// Check for new-style tool calls first
+	if len(choice.ToolCalls) > 0 {
+		toolCall := choice.ToolCalls[0]
+		functionName := toolCall.FunctionCall.Name
+		toolInputStr := toolCall.FunctionCall.Arguments
+		toolInputMap := make(map[string]any, 0)
+		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+		if err != nil {
+			// If it's not valid JSON, it might be a raw expression for the calculator
+			// Try to use it directly as tool input
+			return []schema.AgentAction{
+				{
+					Tool:      functionName,
+					ToolInput: toolInputStr,
+					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+					ToolID:    toolCall.ID,
+				},
+			}, nil, nil
 		}
 
 		toolInput := toolInputStr
@@ -292,7 +276,16 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 		toolInputMap := make(map[string]any, 0)
 		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
 		if err != nil {
-			return nil, nil, err
+			// If it's not valid JSON, it might be a raw expression for the calculator
+			// Try to use it directly as tool input
+			return []schema.AgentAction{
+				{
+					Tool:      functionName,
+					ToolInput: toolInputStr,
+					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+					ToolID:    "", // Legacy function calls don't have tool IDs
+				},
+			}, nil, nil
 		}
 
 		toolInput := toolInputStr

@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Wed, 04 Jun 2025 16:10:10 GMT
+Date: Wed, 04 Jun 2025 16:10:49 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 240
+Openai-Processing-Ms: 167
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-69c98f9bbf-2lstl
+Via: envoy-router-869b6f9f57-6gpng
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 248
+X-Envoy-Upstream-Service-Time: 171
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999986
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_e9b5a9bdf0e75a9e2117c74db23fe2a1
+X-Request-Id: req_4be165063f222626a481b5a4c3b4227a
 
 {
   "object": "list",

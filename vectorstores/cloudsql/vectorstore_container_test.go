@@ -4,6 +4,7 @@ package cloudsql_test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
@@ -31,9 +33,7 @@ func preCheckEnvSetting(t *testing.T) string {
 		t.Skip("Skipping test in short mode")
 	}
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 	ctx := context.Background()
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
@@ -109,9 +109,15 @@ func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Initialize VertexAI LLM
+
+	// Setup httprr for OpenAI embeddings
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Initialize OpenAI LLM with httprr
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
 	)
 	if err != nil {
 		t.Fatal(err)
