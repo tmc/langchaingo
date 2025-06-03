@@ -10,12 +10,7 @@ help:
 	@echo "  test           - Run all tests with basic environment setup"
 	@echo "  test-race      - Run tests with race detection"
 	@echo "  test-cover     - Run tests with coverage reporting"
-	@echo "  test-with-env  - Run tests respecting existing API keys"
-	@echo "  test-record    - Run tests with HTTP recording (requires real API keys)"
-	@echo ""
-	@echo "HTTP Recording (httprr):"
-	@echo "  httprr-record  - Re-record all HTTP interactions (interactive, needs API keys)"
-	@echo "  httprr-check   - Check compression status of httprr files"
+	@echo "  test-record    - Run tests with re-recording of httprr files"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  lint           - Run linter with auto-installation if needed"
@@ -80,19 +75,6 @@ test-cover:
 
 .PHONY: test-record
 test-record:
-	@echo "Running tests with HTTP recording enabled..."
-	@echo "This requires real API keys to be set in environment variables"
-	DOCKER_HOST=$$(docker context inspect -f='{{.Endpoints.docker.Host}}' 2>/dev/null || echo "unix:///var/run/docker.sock"); \
-	export DOCKER_HOST; \
-	export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock"; \
-	PACKAGES=$$(go run ./internal/devtools/rrtool list-packages -format=paths); \
-	for pkg in $$PACKAGES; do \
-		echo "Recording: $$pkg"; \
-		(cd $$pkg && go test -httprecord="." -httprecord-delay=1s -timeout=300s .) || echo "Failed to record $$pkg"; \
-	done
-
-.PHONY: httprr-record
-httprr-record:
 	@echo "Re-recording HTTP interactions for all packages using httprr..."
 	PACKAGES=$$(go run ./internal/devtools/rrtool list-packages -format=paths) && \
 	echo "Recording HTTP interactions for packages:" && \
@@ -101,12 +83,6 @@ httprr-record:
 	env DOCKER_HOST=$$(docker context inspect -f='{{.Endpoints.docker.Host}}' 2>/dev/null || echo "unix:///var/run/docker.sock") \
 	TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="/var/run/docker.sock" \
 	go test $$PACKAGES -httprecord=. -httprecord-delay=1s -timeout=300s
-
-.PHONY: httprr-check
-httprr-check:
-	@echo "Checking httprr file compression status..."
-	go run ./internal/devtools/rrtool check
-
 
 .PHONY: run-pkgsite
 run-pkgsite:
