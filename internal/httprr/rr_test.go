@@ -76,6 +76,7 @@ func doRefresh(b *bytes.Buffer) error {
 }
 
 func TestRecordReplay(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	file := dir + "/rr"
 
@@ -184,6 +185,7 @@ var badResponseTrace = []byte("httprr trace v1\n" +
 	"\r\n")
 
 func TestErrors(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	var resp *http.Response
 	var err error
