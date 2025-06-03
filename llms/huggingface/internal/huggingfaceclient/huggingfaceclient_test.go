@@ -2,12 +2,12 @@ package huggingfaceclient
 
 import (
 	"context"
-	"net/http"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 )
 
@@ -17,23 +17,29 @@ func TestClient_RunInference(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
+	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
+	}
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	apiKey := "test-api-key"
-	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
-		apiKey = key
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
+	// Create client with recording HTTP client
 	client, err := New(apiKey, "gpt2", testURL)
 	require.NoError(t, err)
+	// Note: The client already uses httputil.DefaultClient internally,
+	// which is wrapped by httprr through httputil.DefaultTransport
 
 	req := &InferenceRequest{
 		Model:       "gpt2",
@@ -53,23 +59,29 @@ func TestClient_RunInferenceText2Text(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
+	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
+	}
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	apiKey := "test-api-key"
-	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
-		apiKey = key
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
+	// Create client with recording HTTP client
 	client, err := New(apiKey, "google/flan-t5-base", testURL)
 	require.NoError(t, err)
+	// Note: The client already uses httputil.DefaultClient internally,
+	// which is wrapped by httprr through httputil.DefaultTransport
 
 	req := &InferenceRequest{
 		Model:       "google/flan-t5-base",
@@ -89,23 +101,29 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HUGGINGFACEHUB_API_TOKEN")
+	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
+	}
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	apiKey := "test-api-key"
-	if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" && rr.Recording() {
-		apiKey = key
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
+	// Create client with recording HTTP client
 	client, err := New(apiKey, "", testURL)
 	require.NoError(t, err)
+	// Note: The client already uses httputil.DefaultClient internally,
+	// which is wrapped by httprr through httputil.DefaultTransport
 
 	req := &EmbeddingRequest{
 		Inputs: []string{"Hello world", "How are you?"},
@@ -114,7 +132,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		},
 	}
 
-	embeddings, err := client.CreateEmbedding(ctx, "sentence-transformers/all-MiniLM-L6-v2", "feature-extraction", req)
+	embeddings, err := client.CreateEmbedding(ctx, "BAAI/bge-small-en-v1.5", "feature-extraction", req)
 	require.NoError(t, err)
 	assert.NotNil(t, embeddings)
 	assert.Len(t, embeddings, 2)
