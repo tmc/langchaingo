@@ -1,9 +1,15 @@
 package huggingface
 
 const (
-	tokenEnvVarName = "HUGGINGFACEHUB_API_TOKEN"
-	defaultModel    = "gpt2"
-	defaultURL      = "https://api-inference.huggingface.co"
+	tokenEnvVarName   = "HUGGINGFACEHUB_API_TOKEN" // Legacy environment variable
+	hfTokenEnvVarName = "HF_TOKEN"                 // Current primary environment variable
+	//nolint:gosec // This is not a hardcoded credential, it's an environment variable name
+	hfTokenPathEnvVarName = "HF_TOKEN_PATH"  // Path to token file
+	hfHomeEnvVarName      = "HF_HOME"        // HF home directory
+	xdgCacheHomeEnvVar    = "XDG_CACHE_HOME" // XDG cache directory
+	defaultTokenPath      = "token"          // Default token filename
+	defaultModel          = "gpt2"
+	defaultURL            = "https://api-inference.huggingface.co"
 )
 
 type options struct {
