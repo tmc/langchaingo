@@ -3,6 +3,7 @@ package ollama
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -12,6 +13,8 @@ import (
 var (
 	ErrEmptyResponse       = errors.New("no response")
 	ErrIncompleteEmbedding = errors.New("not all input got embedded")
+	ErrPullError           = errors.New("ollama model pull error")
+	ErrPullTimeout         = errors.New("ollama model pull deadline exceeded")
 )
 
 // LLM is a ollama LLM implementation.
@@ -64,7 +67,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Pull model if enabled
 	if o.options.pullModel {
 		if err := o.pullModelIfNeeded(ctx, model); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %w", ErrPullError, err)
 		}
 	}
 
@@ -256,8 +259,12 @@ func (o *LLM) pullModelIfNeeded(ctx context.Context, model string) error {
 	pullCtx := ctx
 	if o.options.pullTimeout > 0 {
 		var cancel context.CancelFunc
-		pullCtx, cancel = context.WithTimeout(ctx, o.options.pullTimeout)
-		defer cancel()
+		pullCtx, cancel = context.WithTimeoutCause(ctx, o.options.pullTimeout, ErrPullTimeout)
+		defer func() {
+			if cancel != nil {
+				cancel()
+			}
+		}()
 	}
 
 	// For now, we'll just pull the model without checking.
@@ -267,5 +274,16 @@ func (o *LLM) pullModelIfNeeded(ctx context.Context, model string) error {
 		Stream: false,
 	}
 
-	return o.client.Pull(pullCtx, req)
+	err := o.client.Pull(pullCtx, req)
+	if err != nil {
+		// Check if the error is due to context timeout
+		if errors.Is(err, context.DeadlineExceeded) {
+			return err
+		}
+		// Check if the context has a cause
+		if cause := context.Cause(pullCtx); cause != nil {
+			return fmt.Errorf("%w: %w", cause, err)
+		}
+	}
+	return err
 }

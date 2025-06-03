@@ -240,19 +240,22 @@ func TestCreateEmbedding(t *testing.T) {
 func TestWithPullTimeout(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
+	if testing.Short() {
+		t.Skip("Skipping pull timeout test in short mode")
+	}
 
-	// This test verifies timeout functionality.
-	// Skip if not explicitly enabled via environment variable since
-	// it tests timeout behavior which may be flaky in CI.
-	if os.Getenv("OLLAMA_TEST_PULL") == "" {
-		t.Skip("OLLAMA_TEST_PULL not set, skipping pull timeout test")
+	// Check if we're recording - timeout tests don't work with replay
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Skip("Skipping pull timeout test when not recording (timeout behavior cannot be replayed)")
 	}
 
 	// Use a very short timeout that should fail for any real model pull
 	llm := newTestClient(t,
 		WithModel("llama2:70b"), // Large model that would take time to download
 		WithPullModel(),
-		WithPullTimeout(1*time.Millisecond), // Extremely short timeout
+		WithPullTimeout(50*time.Millisecond), // Extremely short timeout
 	)
 
 	parts := []llms.ContentPart{
@@ -267,7 +270,11 @@ func TestWithPullTimeout(t *testing.T) {
 
 	// This should fail with a timeout error
 	_, err := llm.GenerateContent(ctx, content)
-	require.Error(t, err)
-	// The error should contain "context deadline exceeded" or similar
-	assert.Contains(t, err.Error(), "context")
+
+	if err == nil {
+		t.Fatal("Expected error due to pull timeout, but got none")
+	}
+	if !strings.Contains(err.Error(), "deadline exceeded") {
+		t.Fatalf("Expected timeout error, got: %v", err)
+	}
 }
