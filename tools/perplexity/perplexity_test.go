@@ -2,23 +2,24 @@ package perplexity
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 func TestTool_Integration(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	apiKey := os.Getenv("PERPLEXITY_API_KEY")
-	if apiKey == "" {
-		t.Skip("PERPLEXITY_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "PERPLEXITY_API_KEY")
 
-	tool, err := New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	tool, err := New(WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 	require.NotNil(t, tool)
 

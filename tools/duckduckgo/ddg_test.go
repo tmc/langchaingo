@@ -2,17 +2,23 @@ package duckduckgo
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 func TestDuckDuckGoTool(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	// Create tool
-	tool, err := New(3, DefaultUserAgent)
+	// Setup httprr for HTTP requests
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Create tool with httprr HTTP client
+	tool, err := New(3, DefaultUserAgent, WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	// Test search functionality
@@ -28,7 +34,7 @@ func TestDuckDuckGoTool(t *testing.T) {
 func TestDuckDuckGoToolBasicConstruction(t *testing.T) {
 	t.Parallel()
 
-	// Test basic construction without HTTP client
+	// Test basic construction
 	tool, err := New(5, DefaultUserAgent)
 	require.NoError(t, err)
 	require.NotNil(t, tool)

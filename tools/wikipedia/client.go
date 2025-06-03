@@ -36,6 +36,7 @@ func search(
 	query,
 	languageCode,
 	userAgent string,
+	httpClient *http.Client,
 ) (searchResponse, error) {
 	params := make(url.Values)
 	params.Add("format", "json")
@@ -51,7 +52,10 @@ func search(
 	}
 	req.Header.Add("User-Agent", userAgent)
 
-	res, err := httputil.DefaultClient.Do(req)
+	if httpClient == nil {
+		httpClient = httputil.DefaultClient
+	}
+	res, err := httpClient.Do(req)
 	if err != nil {
 		return searchResponse{}, fmt.Errorf("doing response in wikipedia: %w", err)
 	}
@@ -81,7 +85,7 @@ type pageResult struct {
 	} `json:"query"`
 }
 
-func getPage(ctx context.Context, pageID int, languageCode, userAgent string) (pageResult, error) {
+func getPage(ctx context.Context, pageID int, languageCode, userAgent string, httpClient *http.Client) (pageResult, error) {
 	params := make(url.Values)
 	params.Add("format", "json")
 	params.Add("action", "query")
@@ -96,7 +100,10 @@ func getPage(ctx context.Context, pageID int, languageCode, userAgent string) (p
 	}
 	req.Header.Add("User-Agent", userAgent)
 
-	res, err := httputil.DefaultClient.Do(req)
+	if httpClient == nil {
+		httpClient = httputil.DefaultClient
+	}
+	res, err := httpClient.Do(req)
 	if err != nil {
 		return pageResult{}, fmt.Errorf("doing response in wikipedia: %w", err)
 	}
