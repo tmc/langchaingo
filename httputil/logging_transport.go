@@ -11,35 +11,64 @@ import (
 	"strings"
 )
 
-// LoggingClient is an [http.Client] that logs the request and response with full contents to the default [slog.Logger].
+// LoggingClient is an [http.Client] that logs complete HTTP requests and responses
+// using structured logging via [slog]. This client is useful for debugging API
+// interactions, as it captures the full request and response including headers
+// and bodies. The logs are emitted at DEBUG level.
+//
+// Example:
+//
+//	slog.SetLogLoggerLevel(slog.LevelDebug)
+//	resp, err := httputil.LoggingClient.Get("https://api.example.com/data")
 var LoggingClient = &http.Client{ //nolint:gochecknoglobals
 	Transport: &Transport{
 		Transport: &LoggingTransport{},
 	},
 }
 
-// JSONDebugClient is an HTTP client that pretty-prints JSON request/response bodies with color.
-// Use this for debugging JSON APIs during development.
+// JSONDebugClient is an [http.Client] designed for debugging JSON APIs.
+// It pretty-prints JSON request and response bodies to stdout with ANSI colors:
+// requests are shown in blue, responses in green. This client is intended for
+// development and debugging purposes only.
+//
+// Unlike [LoggingClient], this client writes directly to stdout rather than
+// using structured logging.
 var JSONDebugClient = &http.Client{ //nolint:gochecknoglobals
 	Transport: &Transport{
 		Transport: &jsonDebugTransport{},
 	},
 }
 
+// DebugHTTPClient is a deprecated alias for [LoggingClient].
+//
 // Deprecated: Use [LoggingClient] instead.
 var DebugHTTPClient = LoggingClient
 
-// Deprecated: Use JSONDebugClient instead.
+// DebugHTTPColorJSON is a deprecated alias for [JSONDebugClient].
+//
+// Deprecated: Use [JSONDebugClient] instead.
 var DebugHTTPColorJSON = JSONDebugClient //nolint:gochecknoglobals
 
-// LoggingTransport is an [http.RoundTripper] that logs the request and response with full contents.
-// It uses [http.DefaultTransport] if the Transport field is nil, and the default [slog.Logger] if the Logger field is nil.
+// LoggingTransport is an [http.RoundTripper] that logs complete HTTP requests
+// and responses using structured logging. It's designed for debugging and
+// development purposes.
+//
+// The transport logs at DEBUG level, so ensure your logger is configured
+// appropriately to see the output.
 type LoggingTransport struct {
+	// Transport is the underlying [http.RoundTripper] to use.
+	// If nil, [http.DefaultTransport] is used.
 	Transport http.RoundTripper
-	Logger    *slog.Logger
+
+	// Logger is the [slog.Logger] to use for logging.
+	// If nil, [slog.Default] is used.
+	Logger *slog.Logger
 }
 
-// RoundTrip implements the [http.RoundTripper] interface and logs the request and response to the Logger field.
+// RoundTrip implements the [http.RoundTripper] interface. It logs the complete
+// HTTP request (including headers and body) before sending it, executes the
+// request using the underlying transport, then logs the complete response.
+// Both request and response are logged at DEBUG level.
 func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	logger := t.Logger
 	if logger == nil {
@@ -87,7 +116,7 @@ func (t *jsonDebugTransport) RoundTrip(req *http.Request) (*http.Response, error
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	
+
 	// Log JSON request if present
 	if strings.Contains(req.Header.Get("Content-Type"), "application/json") && req.Body != nil {
 		body, err := io.ReadAll(req.Body)
