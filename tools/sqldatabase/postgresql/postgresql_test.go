@@ -11,6 +11,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
@@ -30,6 +32,7 @@ func Test(t *testing.T) {
 			postgres.WithPassword("p@mysecretpassword"),
 			postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
 			postgres.BasicWaitStrategies(),
+			testcontainers.WithLogger(log.TestLogger(t)),
 		)
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")

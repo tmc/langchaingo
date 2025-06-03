@@ -10,6 +10,8 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
@@ -37,16 +39,19 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
+
+	// Default to localhost if OLLAMA_HOST not set
 	ollamaURL := os.Getenv("OLLAMA_HOST")
 	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
+		ollamaURL = "http://localhost:11434"
 	}
-	_, e := getEmbedding("gemma:2b")
+
+	_, e := getEmbedding("nomic-embed-text", ollamaURL)
 
 	ctx := context.Background()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.Run(ctx, "milvusdb/milvus:v2.4.0-rc.1-latest")
+		milvusContainer, err := tcmilvus.Run(ctx, "milvusdb/milvus:v2.4.0-rc.1-latest", testcontainers.WithLogger(tclog.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}

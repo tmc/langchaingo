@@ -1,8 +1,8 @@
 httprr trace v1
-335 334474
+335 334475
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 138
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:31:02 GMT
+Date: Tue, 03 Jun 2025 08:47:04 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 172
+Openai-Processing-Ms: 161
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-b5646b449-4kxns
+Via: envoy-router-7c4c8df9b7-xb8ls
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 180
+X-Envoy-Upstream-Service-Time: 166
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999984
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_d6ffd6ad591351f438b28d1af1b750ed
+X-Request-Id: req_84a93ae8bab2b957b926905ded107ec0
 
 {
   "object": "list",
@@ -15462,10 +15462,10 @@ X-Request-Id: req_d6ffd6ad591351f438b28d1af1b750ed
     "total_tokens": 24
   }
 }
-277 34007
+277 34008
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 81
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -15477,23 +15477,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:31:03 GMT
+Date: Tue, 03 Jun 2025 08:47:05 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 105
+Openai-Processing-Ms: 107
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-b5646b449-x9cbt
+Via: envoy-router-7c4c8df9b7-jcb66
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 109
+X-Envoy-Upstream-Service-Time: 110
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999992
+X-Ratelimit-Remaining-Tokens: 9999991
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_66a71b5056525e8adab813f693be5009
+X-Request-Id: req_247c957daf7d79ce7794b985f431d3af
 
 {
   "object": "list",
@@ -17047,10 +17047,10 @@ X-Request-Id: req_66a71b5056525e8adab813f693be5009
     "total_tokens": 7
   }
 }
-277 34006
+277 34008
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 81
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -17062,23 +17062,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:31:05 GMT
+Date: Tue, 03 Jun 2025 08:47:06 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 35
+Openai-Processing-Ms: 488
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-7ffd9cff7b-fwrx9
+Via: envoy-router-74c8894ff9-xcnkt
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 38
+X-Envoy-Upstream-Service-Time: 492
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999991
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_b317d7dab517bf2199c30c0059f7808c
+X-Request-Id: req_9db401014e90442498f7399ce490da3b
 
 {
   "object": "list",

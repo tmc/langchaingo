@@ -13,9 +13,13 @@ func TestHuggingfaceEmbeddings(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	if huggingfaceKey := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); huggingfaceKey == "" {
-		t.Skip("HUGGINGFACEHUB_API_TOKEN not set")
+	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+	hfToken := os.Getenv("HF_TOKEN")
+	huggingfaceToken := os.Getenv("HUGGINGFACEHUB_API_TOKEN")
+	if hfToken == "" && huggingfaceToken == "" {
+		t.Skip("HF_TOKEN or HUGGINGFACEHUB_API_TOKEN not set")
 	}
+
 	e, err := NewHuggingface()
 	require.NoError(t, err)
 

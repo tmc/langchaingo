@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const _baseURL = "https://%s.wikipedia.org/w/api.php"
@@ -49,7 +51,7 @@ func search(
 	}
 	req.Header.Add("User-Agent", userAgent)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := httputil.DefaultClient.Do(req)
 	if err != nil {
 		return searchResponse{}, fmt.Errorf("doing response in wikipedia: %w", err)
 	}
@@ -94,7 +96,7 @@ func getPage(ctx context.Context, pageID int, languageCode, userAgent string) (p
 	}
 	req.Header.Add("User-Agent", userAgent)
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := httputil.DefaultClient.Do(req)
 	if err != nil {
 		return pageResult{}, fmt.Errorf("doing response in wikipedia: %w", err)
 	}

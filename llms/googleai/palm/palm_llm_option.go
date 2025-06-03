@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	projectIDEnvVarName = "GOOGLE_CLOUD_PROJECT" //nolint:gosec
+	projectIDEnvVarName = "GOOGLE_CLOUD_PROJECT"  //nolint:gosec
+	locationEnvVarName  = "GOOGLE_CLOUD_LOCATION" //nolint:gosec
 )
 
 var (
@@ -34,6 +35,7 @@ type Option func(*options)
 func initOpts() {
 	defaultOptions = &options{
 		projectID: os.Getenv(projectIDEnvVarName),
+		location:  os.Getenv(locationEnvVarName),
 	}
 }
 

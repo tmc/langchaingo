@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"os"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -63,7 +65,7 @@ func applyOptions(opts ...Option) (*VoyageAI, error) {
 		opt(o)
 	}
 	if o.client == nil {
-		o.client = http.DefaultClient
+		o.client = httputil.DefaultClient
 	}
 	if o.token == "" {
 		token := os.Getenv("VOYAGEAI_API_KEY")

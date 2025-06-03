@@ -1,51 +1,50 @@
 httprr trace v1
-361 1629
+361 1568
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 140
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"Count from 1 to 5"}],"max_tokens":100,"stream":true,"temperature":0}HTTP/1.1 200 OK
-Content-Length: 1191
+{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"Count from 1 to 5"}],"max_tokens":100,"stream":true,"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1154
 Anthropic-Organization-Id: 2277c511-5523-4a62-83bd-b847b0c4b121
 Cache-Control: no-cache
 Cf-Cache-Status: DYNAMIC
-Connection: keep-alive
 Content-Type: text/event-stream; charset=utf-8
-Date: Sun, 01 Jun 2025 04:30:57 GMT
-Request-Id: req_011CPgscYmkEJNsXLwaz3mFD
+Date: Tue, 03 Jun 2025 08:46:59 GMT
+Request-Id: req_011CPkzknWYU7CuJ9ZsHgM5C
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 Via: 1.1 google
 X-Robots-Tag: none
 
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_01NvkZyEq32AUxcnFejgoQKu","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":15,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":3,"service_tier":"standard"}}      }
+data: {"type":"message_start","message":{"id":"msg_01LKvLNqrMiQxAGJc128ivMj","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":15,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":3,"service_tier":"standard"}}             }
 
 event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}          }
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
 
 event: ping
 data: {"type": "ping"}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"1"}    }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"1"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n2\n3"}    }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n2\n3"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n4\n5"}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\n4\n5"}}
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":0              }
+data: {"type":"content_block_stop","index":0  }
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":13} }
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":13}        }
 
 event: message_stop
-data: {"type":"message_stop"             }
+data: {"type":"message_stop" }
 

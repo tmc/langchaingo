@@ -39,7 +39,7 @@ require (
 
 // Vector stores
 require (
-	github.com/amikos-tech/chroma-go v0.1.2
+	github.com/amikos-tech/chroma-go v0.1.4
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pgvector/pgvector-go v0.1.1
@@ -103,7 +103,6 @@ require (
 require (
 	github.com/Code-Hex/go-generics-cache v1.3.1
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/fatih/color v1.17.0
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/google/go-cmp v0.7.0
 	github.com/nikolalohinski/gonja v1.5.3

@@ -1,8 +1,8 @@
 httprr trace v1
-257 67688
+257 67687
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 61
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:31:08 GMT
+Date: Tue, 03 Jun 2025 08:47:07 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 449
+Openai-Processing-Ms: 141
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-78998c59cd-dwsqt
+Via: envoy-router-b5646b449-trdtb
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 451
+X-Envoy-Upstream-Service-Time: 147
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_eaca55f3606131248152360f3befdf7a
+X-Request-Id: req_c683d651c09d95c10812476087ab7191
 
 {
   "object": "list",
@@ -3126,10 +3126,10 @@ X-Request-Id: req_eaca55f3606131248152360f3befdf7a
     "total_tokens": 4
   }
 }
-248 34350
+248 34351
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 52
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -3141,23 +3141,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:31:09 GMT
+Date: Tue, 03 Jun 2025 08:47:08 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 36
+Openai-Processing-Ms: 137
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-74c8894ff9-jcjbf
+Via: envoy-router-6b5d94d96-hz2rr
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 38
+X-Envoy-Upstream-Service-Time: 141
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999999
+X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_06759bfcbb9b2c5d16aa29959159b722
+X-Request-Id: req_48a52bc987e8a3a72b24e37d622db404
 
 {
   "object": "list",

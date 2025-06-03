@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var ErrUnexpectedStatusCode = errors.New("unexpected status code")
@@ -64,7 +66,7 @@ func (c *Client) runInference(ctx context.Context, payload *inferencePayload) (i
 	// }
 	// fmt.Fprintf(os.Stderr, "%s", reqDump)
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := httputil.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

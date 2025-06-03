@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const _url = "https://serpapi.com/search"
@@ -25,7 +27,7 @@ type Client struct {
 
 func New(apiKey string, httpClient *http.Client) *Client {
 	if httpClient == nil {
-		httpClient = http.DefaultClient
+		httpClient = httputil.DefaultClient
 	}
 	return &Client{
 		apiKey:     apiKey,

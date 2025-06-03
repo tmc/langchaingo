@@ -1,5 +1,5 @@
 httprr trace v1
-330 1049
+330 1052
 POST http://localhost:11434/api/generate HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -8,8 +8,8 @@ Accept: application/x-ndjson
 Content-Type: application/json
 
 {"model":"gemma3:1b","prompt":"Hello, how are you?","system":"","template":"","stream":false,"options":{"num_predict":100,"temperature":0}}HTTP/1.1 200 OK
-Content-Length: 925
+Content-Length: 928
 Content-Type: application/json; charset=utf-8
-Date: Tue, 03 Jun 2025 05:00:56 GMT
+Date: Tue, 03 Jun 2025 08:47:00 GMT
 
-{"model":"gemma3:1b","created_at":"2025-06-03T05:00:56.418751Z","response":"Hello there! I’m doing well, thanks for asking. As an AI, I don’t really *feel* in the same way humans do, but I’m functioning perfectly and ready to help you with whatever you need. 😊 \n\nHow about you? How’s your day going so far?","done":true,"done_reason":"stop","context":[105,2364,107,9259,236764,1217,659,611,236881,106,107,105,4368,107,9259,993,236888,564,236858,236757,3490,1388,236764,8863,573,10980,236761,1773,614,12498,236764,564,1537,236858,236745,2126,808,62713,236829,528,506,1638,1595,14464,776,236764,840,564,236858,236757,28488,13275,532,5508,531,1601,611,607,9002,611,1202,236761,103453,236743,108,3910,1003,611,236881,2088,236858,236751,822,1719,1771,834,2793,236881],"total_duration":711214333,"load_duration":27267458,"prompt_eval_count":15,"prompt_eval_duration":17229958,"eval_count":65,"eval_duration":437586875}
+{"model":"gemma3:1b","created_at":"2025-06-03T08:47:00.544584Z","response":"Hello there! I’m doing well, thanks for asking. As an AI, I don’t really *feel* in the same way humans do, but I’m functioning perfectly and ready to help you with whatever you need. 😊 \n\nHow about you? How’s your day going so far?","done":true,"done_reason":"stop","context":[105,2364,107,9259,236764,1217,659,611,236881,106,107,105,4368,107,9259,993,236888,564,236858,236757,3490,1388,236764,8863,573,10980,236761,1773,614,12498,236764,564,1537,236858,236745,2126,808,62713,236829,528,506,1638,1595,14464,776,236764,840,564,236858,236757,28488,13275,532,5508,531,1601,611,607,9002,611,1202,236761,103453,236743,108,3910,1003,611,236881,2088,236858,236751,822,1719,1771,834,2793,236881],"total_duration":5726965250,"load_duration":2621852875,"prompt_eval_count":15,"prompt_eval_duration":16954792,"eval_count":65,"eval_duration":486189708}

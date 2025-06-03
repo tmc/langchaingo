@@ -1,8 +1,8 @@
 httprr trace v1
-442 106465
+442 106466
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 245
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 05:29:09 GMT
+Date: Tue, 03 Jun 2025 08:47:07 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 113
+Openai-Processing-Ms: 232
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-6b5d94d96-d7b92
+Via: envoy-router-78456c78d9-7lvpr
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 117
+X-Envoy-Upstream-Service-Time: 235
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999953
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_597e3d5a3cf8b9a76efd05e6f4cc55ed
+X-Request-Id: req_37675c63273778703ffd6ff78a139d46
 
 {
   "object": "list",
@@ -66,10 +66,10 @@ X-Request-Id: req_597e3d5a3cf8b9a76efd05e6f4cc55ed
     "prompt_tokens": 46,
     "total_tokens": 46
   }
-}300 22053
+}300 22055
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 103
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -81,23 +81,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 05:29:10 GMT
+Date: Tue, 03 Jun 2025 08:47:09 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 37
+Openai-Processing-Ms: 252
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-7ffd9cff7b-j4vbn
+Via: envoy-router-6d88f968d4-64gt9
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 40
+X-Envoy-Upstream-Service-Time: 255
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999986
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_c535f4ecb665bc89f6a53b90caff0175
+X-Request-Id: req_acb3575c852c8bad2572df1392f3511d
 
 {
   "object": "list",
@@ -116,7 +116,7 @@ X-Request-Id: req_c535f4ecb665bc89f6a53b90caff0175
 }709 1577
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 506
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -127,28 +127,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 05:29:12 GMT
+Date: Tue, 03 Jun 2025 08:47:10 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 249
+Openai-Processing-Ms: 315
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 252
+X-Envoy-Upstream-Service-Time: 321
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999895
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_549c8ffe1e57739786d9270318442eff
+X-Request-Id: req_365f110189e4fb880be47332a0e5abf6
 
 {
   "service_tier": "default",
   "system_fingerprint": null,
-  "id": "chatcmpl-BdVXsbDQMJL0xysmF89ZWz54Vh31A",
+  "id": "chatcmpl-BeHaYom5wmVAMFO0QCw3Up7USalE9",
   "object": "chat.completion",
-  "created": 1748755752,
+  "created": 1748940430,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -172,10 +172,10 @@ X-Request-Id: req_549c8ffe1e57739786d9270318442eff
       "audio_tokens": 0
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
       "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
+      "rejected_prediction_tokens": 0,
+      "reasoning_tokens": 0,
+      "audio_tokens": 0
     }
   }
 }

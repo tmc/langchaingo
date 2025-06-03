@@ -11,6 +11,8 @@ import (
 	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	tcopensearch "github.com/testcontainers/testcontainers-go/modules/opensearch"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
@@ -35,7 +37,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 	ctx := context.Background()
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
-		openseachContainer, err := tcopensearch.Run(ctx, "opensearchproject/opensearch:2.11.1")
+		openseachContainer, err := tcopensearch.Run(ctx, "opensearchproject/opensearch:2.11.1", testcontainers.WithLogger(log.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
