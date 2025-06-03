@@ -21,6 +21,10 @@ help:
 	@echo "  docs           - Generate documentation"
 	@echo "  clean          - Clean lint cache"
 	@echo "  help           - Show this help message"
+	@echo ""
+	@echo "Git Hooks:"
+	@echo "  pre-push       - Run lint and fast tests (suitable for git pre-push hook)"
+	@echo "  install-git-hooks  - Install git hooks (sets up pre-push hook)"
 
 .PHONY: test
 test:
@@ -125,3 +129,14 @@ lint-prepush:
 .PHONY: lint-prepush-fix
 lint-prepush-fix:
 	go run ./internal/devtools/lint -prepush -fix -v
+
+.PHONY: pre-push
+pre-push:
+	@echo "Running pre-push checks..."
+	@$(MAKE) lint
+	@go test -short ./...
+	@echo "✅ Pre-push checks passed!"
+
+.PHONY: install-git-hooks
+install-git-hooks:
+	@./internal/devtools/git-hooks/install-git-hooks.sh
