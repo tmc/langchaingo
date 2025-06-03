@@ -14,6 +14,7 @@ import (
 	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
@@ -39,6 +40,7 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
 
 	// Default to localhost if OLLAMA_HOST not set
 	ollamaURL := os.Getenv("OLLAMA_HOST")
@@ -88,6 +90,9 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 func TestMilvusConnection(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
+	if testing.Short() {
+		t.Skip("Skipping Milvus connection test in short mode")
+	}
 	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
 

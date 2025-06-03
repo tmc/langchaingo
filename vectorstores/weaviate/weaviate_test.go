@@ -16,6 +16,7 @@ import (
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -25,6 +26,7 @@ import (
 
 func getWeaviateTestContainerSchemeAndHost(t *testing.T) (string, string) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
 	ctx := context.Background()
 
 	scheme := os.Getenv("WEAVIATE_SCHEME")
