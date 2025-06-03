@@ -8,6 +8,9 @@
 // is controlled by the -httprecord flag, which is defined by this package
 // only in test programs (built by “go test”).
 // See the [Open] documentation for more details.
+//
+// Note: This package has been adapted for use in the LangChainGo library with convienence
+// functions for creating [RecordReplay] instances that are suitable for testing.
 package httprr
 
 import (
@@ -20,7 +23,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	nethttputil "net/http/httputil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -29,16 +34,22 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var (
 	record      = new(string)
+	debug       = new(bool)
+	httpDebug   = new(bool)
 	recordDelay = new(time.Duration)
 )
 
 func init() {
 	if testing.Testing() {
 		record = flag.String("httprecord", "", "re-record traces for files matching `regexp`")
+		debug = flag.Bool("httprecord-debug", false, "enable debug output for httprr recording details")
+		httpDebug = flag.Bool("httpdebug", false, "enable HTTP request/response logging")
 		recordDelay = flag.Duration("httprecord-delay", 0, "delay between HTTP requests during recording (helps avoid rate limits)")
 	}
 }
@@ -60,6 +71,7 @@ type RecordReplay struct {
 	replay    map[string]string           // if replaying, the log
 	record    *os.File                    // if recording, the file being written
 	writeErr  error                       // if recording, any write error encountered
+	logger    *slog.Logger                // logger for debug output
 }
 
 // ScrubReq adds new request scrubbing functions to rr.
@@ -287,6 +299,13 @@ func (b *Body) Close() error {
 // and then responds with the previously logged response.
 // If the log does not contain req, RoundTrip returns an error.
 func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Log the request if httpdebug is enabled
+	if rr.logger != nil && *httpDebug {
+		if reqDump, err := nethttputil.DumpRequestOut(req, true); err == nil {
+			rr.logger.Debug(string(reqDump))
+		}
+	}
+
 	reqWire, err := rr.reqWire(req)
 	if err != nil {
 		return nil, err
@@ -294,7 +313,17 @@ func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	// If we're in replay mode, replay a response.
 	if rr.replay != nil {
-		return rr.replayRoundTrip(req, reqWire)
+		resp, err := rr.replayRoundTrip(req, reqWire)
+		if err != nil {
+			return nil, err
+		}
+		// Log the response if httpdebug is enabled
+		if rr.logger != nil && *httpDebug {
+			if respDump, err := nethttputil.DumpResponse(resp, true); err == nil {
+				rr.logger.Debug(string(respDump))
+			}
+		}
+		return resp, nil
 	}
 
 	// Otherwise run a real round trip and save the request-response pair.
@@ -308,6 +337,13 @@ func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err := rr.real.RoundTrip(req)
 	if err != nil {
 		return nil, err
+	}
+
+	// Log the response if httpdebug is enabled
+	if rr.logger != nil && *httpDebug {
+		if respDump, err := nethttputil.DumpResponse(resp, true); err == nil {
+			rr.logger.Debug(string(respDump))
+		}
 	}
 
 	// Add delay after request when recording (helps avoid rate limits)
@@ -415,14 +451,58 @@ func (rr *RecordReplay) respWire(resp *http.Response) (string, error) {
 
 // replayRoundTrip implements RoundTrip using the replay log.
 func (rr *RecordReplay) replayRoundTrip(req *http.Request, reqLog string) (*http.Response, error) {
+	// Log the incoming request if debug is enabled
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: attempting to match request in replay cache",
+			"method", req.Method,
+			"url", req.URL.String(),
+			"file", rr.file,
+		)
+		// Also dump the full request for detailed debugging
+		if reqDump, err := nethttputil.DumpRequestOut(req, true); err == nil {
+			rr.logger.Debug("httprr: request details\n" + string(reqDump))
+		}
+	}
+
 	respLog, ok := rr.replay[reqLog]
 	if !ok {
-		return nil, fmt.Errorf("cached HTTP response not found for:\n%s\n\nHint: Re-run tests with -httprecord=. to record new HTTP interactions", reqLog)
+		if rr.logger != nil && *debug {
+			rr.logger.Debug("httprr: request not found in replay cache",
+				"method", req.Method,
+				"url", req.URL.String(),
+				"file", rr.file,
+			)
+		}
+		return nil, fmt.Errorf("cached HTTP response not found for:\n%s\n\nHint: Re-run tests with -httprecord=. to record new HTTP interactions\nDebug flags: -httprecord-debug for recording details, -httpdebug for HTTP traffic", reqLog)
 	}
+
+	// Log that we found a match
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: found matching request in replay cache",
+			"method", req.Method,
+			"url", req.URL.String(),
+			"file", rr.file,
+			"response_size", len(respLog),
+		)
+	}
+
 	resp, err := http.ReadResponse(bufio.NewReader(strings.NewReader(respLog)), req)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: corrupt httprr trace: %w", rr.file, err)
 	}
+
+	// Log the response being returned
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: returning cached response",
+			"status", resp.StatusCode,
+			"content_length", resp.ContentLength,
+		)
+		// Also dump the full response for detailed debugging
+		if respDump, err := nethttputil.DumpResponse(resp, true); err == nil {
+			rr.logger.Debug("httprr: response details\n" + string(respDump))
+		}
+	}
+
 	return resp, nil
 }
 
@@ -501,17 +581,39 @@ func CleanFileName(testName string) string {
 	return clean
 }
 
+func logWriter(t *testing.T) io.Writer {
+	t.Helper()
+	return testWriter{t}
+}
+
+type testWriter struct{ t *testing.T }
+
+func (w testWriter) Write(b []byte) (int, error) {
+	w.t.Logf("%s", b)
+	return len(b), nil
+}
+
 // OpenForTest creates a [RecordReplay] for the given test using a filename
 // derived from the test name. The recording will be stored in a "testdata"
 // subdirectory with a ".httprr" extension.
 //
+// The transport parameter is optional. If not provided (nil), it defaults to
+// [httputil.DefaultTransport].
+//
 // Example usage:
 //
 //	func TestMyAPI(t *testing.T) {
-//	    rr, err := httprr.OpenForTest(t, http.DefaultTransport)
-//	    if err != nil {
-//	        t.Fatal(err)
-//	    }
+//	    rr := httprr.OpenForTest(t, nil) // Uses httputil.DefaultTransport
+//	    defer rr.Close()
+//
+//	    client := rr.Client()
+//	    // use client for HTTP requests...
+//	}
+//
+//	// Or with a custom transport:
+//	func TestMyAPIWithCustomTransport(t *testing.T) {
+//	    customTransport := &http.Transport{MaxIdleConns: 10}
+//	    rr := httprr.OpenForTest(t, customTransport)
 //	    defer rr.Close()
 //
 //	    client := rr.Client()
@@ -521,6 +623,12 @@ func CleanFileName(testName string) string {
 // This will create/use a file at "testdata/TestMyAPI.httprr".
 func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 	t.Helper()
+
+	// Default to httputil.DefaultTransport if no transport provided
+	if rt == nil {
+		rt = httputil.DefaultTransport
+	}
+
 	testName := CleanFileName(t.Name())
 	filename := filepath.Join("testdata", testName+".httprr")
 
@@ -529,10 +637,26 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 		t.Fatalf("httprr: failed to create testdata directory: %v", err)
 	}
 
+	// Create logger for debug mode
+	var logger *slog.Logger
+	if *debug || *httpDebug {
+		logger = slog.New(slog.NewTextHandler(logWriter(t), &slog.HandlerOptions{Level: slog.LevelDebug}))
+		if *debug {
+			rt = &httputil.LoggingTransport{
+				Transport: rt,
+				Logger:    logger,
+			}
+		}
+	}
+
 	// Check if we're in recording mode
 	recording, err := Recording(filename)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if recording && testing.Short() {
+		t.Skipf("httprr: skipping recording for %s in short mode", filename)
 	}
 
 	if recording {
@@ -542,6 +666,7 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 		if err != nil {
 			t.Fatalf("httprr: failed to open recording file %s: %v", filename, err)
 		}
+		rr.logger = logger
 		t.Cleanup(func() { rr.Close() })
 		return rr
 	}
@@ -552,7 +677,12 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { rr.Close() })
+	rr.logger = logger
+	t.Cleanup(func() {
+		if err := rr.Close(); err != nil {
+			t.Logf("httprr: failed to close RecordReplay: %v", err)
+		}
+	})
 	return rr
 }
 
@@ -563,7 +693,6 @@ func cleanupExistingFiles(t *testing.T, baseFilename string) {
 
 	for _, filename := range filesToCheck {
 		if _, err := os.Stat(filename); err == nil {
-			t.Logf("httprr: removing existing file %s", filename)
 			if err := os.Remove(filename); err != nil {
 				t.Logf("httprr: warning - failed to remove %s: %v", filename, err)
 			}
@@ -618,7 +747,7 @@ func findBestReplayFile(t *testing.T, baseFilename string) string {
 func SkipIfNoCredentialsAndRecordingMissing(t *testing.T, envVars ...string) {
 	t.Helper()
 	if !hasRequiredCredentials(envVars) && !hasExistingRecording(t) {
-		skipMessage := "no httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions"
+		skipMessage := "no httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions\nDebug flags: -httprecord-debug for recording details, -httpdebug for HTTP traffic"
 
 		if len(envVars) > 0 {
 			missingEnvVars := []string{}
@@ -809,6 +938,7 @@ func getDefaultRequestScrubbers() []func(*http.Request) error {
 			if req.Header.Get("openai-organization") != "" {
 				req.Header.Set("openai-organization", "lcgo-tst")
 			}
+			req.Header.Set("User-Agent", "langchaingo-httprr")
 
 			return nil
 		},

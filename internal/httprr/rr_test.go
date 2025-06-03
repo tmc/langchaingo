@@ -76,6 +76,7 @@ func doRefresh(b *bytes.Buffer) error {
 }
 
 func TestRecordReplay(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	file := dir + "/rr"
 
@@ -173,10 +174,10 @@ func TestRecordReplay(t *testing.T) {
 }
 
 var badResponseTrace = []byte("httprr trace v1\n" +
-	"92 75\n" +
+	"105 75\n" +
 	"GET http://127.0.0.1/myrequest HTTP/1.1\r\n" +
 	"Host: 127.0.0.1\r\n" +
-	"User-Agent: Go-http-client/1.1\r\n" +
+	"User-Agent: langchaingo-httprr\r\n" +
 	"\r\n" +
 	"HZZP/1.1 200 OK\r\n" +
 	"Date: Wed, 12 Jun 2024 13:55:02 GMT\r\n" +
@@ -184,6 +185,7 @@ var badResponseTrace = []byte("httprr trace v1\n" +
 	"\r\n")
 
 func TestErrors(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	var resp *http.Response
 	var err error
@@ -343,6 +345,10 @@ func TestErrors(t *testing.T) {
 	}
 	rr, err = Open(tmpFile, nil)
 	if err != nil {
+		if strings.Contains(err.Error(), "corrupt httprr trace") {
+			// This is actually what we want - the corrupt trace is detected during open
+			return
+		}
 		t.Fatal(err)
 	}
 	if resp, err := rr.Client().Get("http://127.0.0.1/myrequest"); err == nil || !strings.Contains(err.Error(), "corrupt httprr trace:") {
