@@ -1,26 +1,24 @@
 httprr trace v1
-617 700
+617 1182
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 362
 Anthropic-Beta: tools-2024-05-16
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"What's the weather like?"}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 429 Too Many Requests
-Content-Length: 261
+{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":"What's the weather like?"}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 810
 Anthropic-Organization-Id: 2277c511-5523-4a62-83bd-b847b0c4b121
 Cf-Cache-Status: DYNAMIC
-Cf-Ray: 94882faadb0efaf4-SJC
 Content-Type: application/json
-Date: Sat, 31 May 2025 17:28:10 GMT
-Request-Id: req_011CPg15DzD4eqU5RwJ2ReXS
+Date: Tue, 03 Jun 2025 03:06:05 GMT
+Request-Id: req_011CPkYkkgsvhf7aeSdqxrrC
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 Via: 1.1 google
 X-Robots-Tag: none
-X-Should-Retry: true
 
-{"type":"error","error":{"type":"rate_limit_error","message":"Number of concurrent connections has exceeded your rate limit. Please try again later or contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase."}}
+{"id":"msg_01YYpy4QoJ3qwfkfBrMReMHX","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"<thinking>\nThe get_weather tool is relevant for answering this question about the weather. It requires a location parameter, but the user did not specify a location in their request. I don't have enough context to reasonably infer a location. Without a location, I don't have the required information to call the get_weather tool to answer the question.\n</thinking>\n\nTo get the weather forecast, I need to know the location you're interested in. Could you please provide the city"}],"stop_reason":"max_tokens","stop_sequence":null,"usage":{"input_tokens":611,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":100,"service_tier":"standard"}}

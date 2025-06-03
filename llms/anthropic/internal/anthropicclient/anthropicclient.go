@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -72,7 +74,7 @@ func New(token string, model string, baseURL string, opts ...Option) (*Client, e
 		Model:      model,
 		token:      token,
 		baseURL:    strings.TrimSuffix(baseURL, "/"),
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {

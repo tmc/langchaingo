@@ -1,8 +1,8 @@
 httprr trace v1
-251 34364
+251 34366
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 55
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -14,23 +14,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:54 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 87
+Openai-Processing-Ms: 115
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-6b5d94d96-w29j6
+Via: envoy-router-6b5d94d96-4gswz
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 92
+X-Envoy-Upstream-Service-Time: 120
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_c1ad160fd8423613d0edc27874e9b4ac
+X-Request-Id: req_24a00566d7aab13306e957f3d73e8e24
 
 {
   "object": "list",
@@ -1587,7 +1587,7 @@ X-Request-Id: req_c1ad160fd8423613d0edc27874e9b4ac
 251 34367
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 55
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -1599,23 +1599,23 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:58 GMT
+Date: Tue, 03 Jun 2025 03:05:55 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 132
+Openai-Processing-Ms: 131
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-78456c78d9-ht2sh
+Via: envoy-router-6d88f968d4-r442f
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 365
+X-Envoy-Upstream-Service-Time: 139
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_80b747f46a75fbe4057408e791705130
+X-Request-Id: req_11b99acd4a7ca622cc5ed99a0ccc5b4a
 
 {
   "object": "list",

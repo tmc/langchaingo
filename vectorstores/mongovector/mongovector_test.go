@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -31,11 +32,12 @@ const (
 	testIndexSize3            = 3
 )
 
-func setupMongoDB(ctx context.Context) (*mongodb.MongoDBContainer, error) {
+func setupMongoDB(ctx context.Context, t *testing.T) (*mongodb.MongoDBContainer, error) {
 	// Use MongoDB Atlas Local image which supports vector search
 	return mongodb.Run(ctx, "mongodb/mongodb-atlas-local:latest",
 		mongodb.WithUsername("admin"),
 		mongodb.WithPassword("password"),
+		testcontainers.WithLogger(log.TestLogger(t)),
 	)
 }
 
@@ -84,7 +86,7 @@ func getMongoURI(t *testing.T) string {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 
-		container, err := setupMongoDB(ctx)
+		container, err := setupMongoDB(ctx, t)
 		require.NoError(t, err)
 		t.Cleanup(func() {
 			if err := testcontainers.TerminateContainer(container); err != nil {

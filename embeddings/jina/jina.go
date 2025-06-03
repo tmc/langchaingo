@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 type Jina struct {
@@ -98,8 +99,7 @@ func (j *Jina) CreateEmbedding(ctx context.Context, texts []string) ([][]float32
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+j.APIKey)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := httputil.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

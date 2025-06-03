@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var ErrNoGoodResult = errors.New("no good search results found")
@@ -63,7 +64,7 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", err
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := httputil.DefaultClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("get %s error: %w", queryURL, err)
 	}

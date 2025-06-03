@@ -2,7 +2,7 @@ httprr trace v1
 414 1545
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 211
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -13,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:57 GMT
+Date: Tue, 03 Jun 2025 03:05:57 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 258
+Openai-Processing-Ms: 255
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 267
+X-Envoy-Upstream-Service-Time: 263
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999982
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_c74399aa4dfc031db9fda7f61b61e799
+X-Request-Id: req_850e804fce5854f1362d5df71ff8dc9e
 
 {
-  "id": "chatcmpl-BdUdVavhfPF1yDTuFnA189leI57A3",
+  "id": "chatcmpl-BeCGLyN1Fm1K4rxGpdHBP1mjedA9N",
   "object": "chat.completion",
-  "created": 1748752257,
+  "created": 1748919957,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {

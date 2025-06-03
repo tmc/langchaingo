@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cohere-ai/tokenizer"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var (
@@ -51,7 +52,7 @@ func New(token string, baseURL string, model string, opts ...Option) (*Client, e
 		token:      token,
 		baseURL:    baseURL,
 		model:      model,
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 		encoder:    encoder,
 	}
 

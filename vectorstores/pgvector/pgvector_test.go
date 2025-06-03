@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
@@ -99,6 +100,7 @@ func preCheckEnvSetting(t *testing.T) string {
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
 			tcpostgres.WithPassword("passw0rd!"),
+			testcontainers.WithLogger(log.TestLogger(t)),
 			testcontainers.WithWaitStrategy(
 				wait.ForAll(
 					wait.ForLog("database system is ready to accept connections").

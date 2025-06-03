@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/llms"
@@ -23,6 +24,7 @@ func runTestContainer(t *testing.T) string {
 		"mongo:7.0.8",
 		mongodb.WithUsername("test"),
 		mongodb.WithPassword("test"),
+		testcontainers.WithLogger(log.TestLogger(t)),
 		testcontainers.WithWaitStrategy(
 			wait.ForAll(
 				wait.ForLog("Waiting for connections").

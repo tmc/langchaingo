@@ -43,7 +43,6 @@ func TestClient_CreateCompletion(t *testing.T) {
 
 func TestClient_CreateMessage(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -75,7 +74,6 @@ func TestClient_CreateMessage(t *testing.T) {
 
 func TestClient_CreateMessageStream(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -113,8 +111,6 @@ func TestClient_CreateMessageStream(t *testing.T) {
 
 func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 	ctx := context.Background()
-	t.Skip("Skipping due to rate limit error in test recording")
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()

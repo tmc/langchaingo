@@ -1,41 +1,41 @@
 httprr trace v1
-204 40409
+204 40671
 GET https://serpapi.com/search?api_key=test-api-key&gl=us&google_domain=google.com&hl=en&q=What+year+was+Unix+first+released+at+Bell+Labs%3F HTTP/1.1
 Host: serpapi.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 
 HTTP/2.0 200 OK
-Content-Length: 39731
-Age: 1361
+Content-Length: 39993
+Age: 1596
 Alt-Svc: h3=":443"; ma=86400
 Cache-Control: max-age=3600, public
 Cf-Cache-Status: HIT
 Content-Type: application/json; charset=utf-8
-Date: Sun, 01 Jun 2025 04:30:55 GMT
-Etag: W/"6817173e24b9c7245673e1da7b30b35b"
+Date: Tue, 03 Jun 2025 03:05:55 GMT
+Etag: W/"b24f0e3b4ada2f60b104e3dd3ba5b5ad"
 Referrer-Policy: strict-origin-when-cross-origin
-Serpapi-Search-Id: 683bd22cf9aa737825d85758
+Serpapi-Search-Id: 683e605097f1ccd1da8263f4
 Server: cloudflare
 Vary: Accept-Encoding
 X-Content-Type-Options: nosniff
 X-Download-Options: noopen
 X-Frame-Options: SAMEORIGIN
 X-Permitted-Cross-Domain-Policies: none
-X-Request-Id: 3512198c-b8e0-45cb-b882-cee7d324629c
+X-Request-Id: d80ecd7f-0524-4739-bb30-e93feaf6bdf7
 X-Robots-Tag: noindex, nofollow
-X-Runtime: 2.477600
+X-Runtime: 6.996325
 X-Xss-Protection: 1; mode=block
 
 {
   "search_metadata": {
-    "id": "683bd22cf9aa737825d85758",
+    "id": "683e605097f1ccd1da8263f4",
     "status": "Success",
-    "json_endpoint": "https://serpapi.com/searches/025bbc4ac19e9565/683bd22cf9aa737825d85758.json",
-    "created_at": "2025-06-01 04:08:12 UTC",
-    "processed_at": "2025-06-01 04:08:12 UTC",
+    "json_endpoint": "https://serpapi.com/searches/025bbc4ac19e9565/683e605097f1ccd1da8263f4.json",
+    "created_at": "2025-06-03 02:39:12 UTC",
+    "processed_at": "2025-06-03 02:39:12 UTC",
     "google_url": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs%3F&oq=What+year+was+Unix+first+released+at+Bell+Labs%3F&hl=en&gl=us&sourceid=chrome&ie=UTF-8",
-    "raw_html_file": "https://serpapi.com/searches/025bbc4ac19e9565/683bd22cf9aa737825d85758.html",
-    "total_time_taken": 2.4
+    "raw_html_file": "https://serpapi.com/searches/025bbc4ac19e9565/683e605097f1ccd1da8263f4.html",
+    "total_time_taken": 6.93
   },
   "search_parameters": {
     "engine": "google",
@@ -48,7 +48,7 @@ X-Xss-Protection: 1; mode=block
   "search_information": {
     "query_displayed": "What year was Unix first released at Bell Labs?",
     "total_results": 524000,
-    "time_taken_displayed": 0.32,
+    "time_taken_displayed": 0.37,
     "organic_results_state": "Results for exact spelling"
   },
   "related_questions": [
@@ -59,8 +59,8 @@ X-Xss-Protection: 1; mode=block
       "link": "https://users.dimi.uniud.it/~antonio.dangelo/LabOS/2008/lessons/helper/history/unixHistory.html#:~:text=Summer%201969%20Unix%20was%20developed.&text=Linus%20Torvalds%20is%20born.&text=First%20edition%20of%20Unix%20released%2011%2F03%2F1971.",
       "displayed_link": "https://users.dimi.uniud.it › LabOS › lessons › helper › u...",
       "source_logo": null,
-      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGVuIHdhcyBVTklYIGZpcnN0IHJlbGVhc2VkPyIsImxrIjoiR2h4M2FHVnVJSGRoY3lCMWJtbDRJR1pwY25OMElISmxiR1ZoYzJWayIsImJzIjoiYzJYUHZRckNNQlFGWUZ3enVRaWxXTDN1RGxwRTdCU29pMEp4azdwR2V6V0IyRXFTMnZvV3ZvQ2JteTlwYXZGX1BYejNjQzRKaVJkelRLRmdHcGFMLVFxMlFta0RDaVV5alFsMUxwN2ZjZHZGMC1TcEtIOE1tUkdJbi1jSkhsRm1CMHlBR1FoUlNvallXbFBuTnZGN2J2ZlY4TVhXRlpPV2tSVVp4TndtbFRNY3dRckZqRWgzb0VfYTRCNnk3YnNVaHNFNG9NNjVWVFdfT2g3cDN5R1prazdNeFlhRDBKREpCRldfM3BzcGlFU2FsOVM1anVwSFAxRTkxaHBabVdiakRnIiwiaWQiOiJmY19MZEk3YUxQZU43VGV3YmtQMnEzbnFBOF8xIn0=",
-      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGVuIHdhcyBVTklYIGZpcnN0IHJlbGVhc2VkPyIsImxrIjoiR2h4M2FHVnVJSGRoY3lCMWJtbDRJR1pwY25OMElISmxiR1ZoYzJWayIsImJzIjoiYzJYUHZRckNNQlFGWUZ3enVRaWxXTDN1RGxwRTdCU29pMEp4azdwR2V6V0IyRXFTMnZvV3ZvQ2JteTlwYXZGX1BYejNjQzRKaVJkelRLRmdHcGFMLVFxMlFta0RDaVV5alFsMUxwN2ZjZHZGMC1TcEtIOE1tUkdJbi1jSkhsRm1CMHlBR1FoUlNvallXbFBuTnZGN2J2ZlY4TVhXRlpPV2tSVVp4TndtbFRNY3dRckZqRWgzb0VfYTRCNnk3YnNVaHNFNG9NNjVWVFdfT2g3cDN5R1prazdNeFlhRDBKREpCRldfM3BzcGlFU2FsOVM1anVwSFAxRTkxaHBabVdiakRnIiwiaWQiOiJmY19MZEk3YUxQZU43VGV3YmtQMnEzbnFBOF8xIn0%3D"
+      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGVuIHdhcyBVTklYIGZpcnN0IHJlbGVhc2VkPyIsImxrIjoiR2h4M2FHVnVJSGRoY3lCMWJtbDRJR1pwY25OMElISmxiR1ZoYzJWayIsImJzIjoiYzJYUHZRckNNQlFGWUZ3enVRaWxXTDN1RGxwRTdCU29pMEp4azdwR2V6V0IyRXFTMnZvV3ZvQ2JteTlwYXZGX1BYejNjQzRKaVJkelRLRmdHcGFMLVFxMlFta0RDaVV5alFsMUxwN2ZjZHZGMC1TcEtIOE1tUkdJbi1jSkhsRm1CMHlBR1FoUlNvallXbFBuTnZGN2J2ZlY4TVhXRlpPV2tSVVp4TndtbFRNY3dRckZqRWgzb0VfYTRCNnk3YnNVaHNFNG9NNjVWVFdfT2g3cDN5R1prazdNeFlhRDBKREpCRldfM3BzcGlFU2FsOVM1anVwSFAxRTkxaHBabVdiakRnIiwiaWQiOiJmY19WbUEtYUxQN0hZbnExZThQa0l5Y3VRRV8xIn0=",
+      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGVuIHdhcyBVTklYIGZpcnN0IHJlbGVhc2VkPyIsImxrIjoiR2h4M2FHVnVJSGRoY3lCMWJtbDRJR1pwY25OMElISmxiR1ZoYzJWayIsImJzIjoiYzJYUHZRckNNQlFGWUZ3enVRaWxXTDN1RGxwRTdCU29pMEp4azdwR2V6V0IyRXFTMnZvV3ZvQ2JteTlwYXZGX1BYejNjQzRKaVJkelRLRmdHcGFMLVFxMlFta0RDaVV5alFsMUxwN2ZjZHZGMC1TcEtIOE1tUkdJbi1jSkhsRm1CMHlBR1FoUlNvallXbFBuTnZGN2J2ZlY4TVhXRlpPV2tSVVp4TndtbFRNY3dRckZqRWgzb0VfYTRCNnk3YnNVaHNFNG9NNjVWVFdfT2g3cDN5R1prazdNeFlhRDBKREpCRldfM3BzcGlFU2FsOVM1anVwSFAxRTkxaHBabVdiakRnIiwiaWQiOiJmY19WbUEtYUxQN0hZbnExZThQa0l5Y3VRRV8xIn0%3D"
     },
     {
       "question": "Was UNIX developed at Bell Labs?",
@@ -68,8 +68,8 @@ X-Xss-Protection: 1; mode=block
       "title": "50 years of Unix | Nokia.com",
       "link": "https://www.nokia.com/bell-labs/about/history/innovation-stories/50-years-unix/#:~:text=That%20left%20Thompson%2C%20Ritchie%20and,That%20summer%20Unix%20was%20born.",
       "displayed_link": "https://www.nokia.com › ... › History › Innovation stories",
-      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXYXMgVU5JWCBkZXZlbG9wZWQgYXQgQmVsbCBMYWJzPyIsImxrIjoiR2g5M1lYTWdkVzVwZUNCa1pYWmxiRzl3WldRZ1lYUWdZbVZzYkNCc1lXSnoiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfTGRJN2FMUGVON1Rld2JrUDJxM25xQThfMSJ9",
-      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXYXMgVU5JWCBkZXZlbG9wZWQgYXQgQmVsbCBMYWJzPyIsImxrIjoiR2g5M1lYTWdkVzVwZUNCa1pYWmxiRzl3WldRZ1lYUWdZbVZzYkNCc1lXSnoiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfTGRJN2FMUGVON1Rld2JrUDJxM25xQThfMSJ9"
+      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXYXMgVU5JWCBkZXZlbG9wZWQgYXQgQmVsbCBMYWJzPyIsImxrIjoiR2g5M1lYTWdkVzVwZUNCa1pYWmxiRzl3WldRZ1lYUWdZbVZzYkNCc1lXSnoiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUVfMSJ9",
+      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXYXMgVU5JWCBkZXZlbG9wZWQgYXQgQmVsbCBMYWJzPyIsImxrIjoiR2g5M1lYTWdkVzVwZUNCa1pYWmxiRzl3WldRZ1lYUWdZbVZzYkNCc1lXSnoiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUVfMSJ9"
     },
     {
       "question": "What was the operating system of Bell Labs 1969?",
@@ -77,9 +77,9 @@ X-Xss-Protection: 1; mode=block
       "title": "Unix",
       "link": "https://en.wikipedia.org/wiki/Unix#:~:text=Unix%20(%2F%CB%88ju%CB%90n,%2C%20Dennis%20Ritchie%2C%20and%20others.",
       "displayed_link": "https://en.wikipedia.org › wiki › Unix",
-      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO3kSWDKVCI7YfDDddysBuQ02sHMQgjfBQpvN1a2w8XA&s",
-      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGF0IHdhcyB0aGUgb3BlcmF0aW5nIHN5c3RlbSBvZiBCZWxsIExhYnMgMTk2OT8iLCJsayI6IkdoOWlaV3hzSUd4aFluTWdNVGsyT1NCdmNHVnlZWFJwYm1jZ2MzbHpkR1Z0IiwiYnMiOiJjMlhQdlFyQ01CUUZZRnd6dVFpbFdMM3VEbHBFN0JTb2kwSnhrN3BHZXpXQjJFcVMydm9Xdm9DYm15OXBhdkZfUFh6M2NDNEppUmR6VEtGZ0dwYUwtUXEyUW1rRENpVXlqUWwxTHA3ZmNkdkYwLVNwS0g4TW1SR0luLWNKSGxGbUIweUFHUWhSU29qWVdsUG5OdkY3YnZmVjhNWFdGWk9Xa1JVWnhOd21sVE1jd1FyRmpFaDNvRV9hNEI2eTdic1Voc0U0b002NVZUV19PaDdwM3lHWmtrN014WWFEMEpESkJGV18zcHNwaUVTYWw5UzVqdXBIUDFFOTFocFptV2JqRGciLCJpZCI6ImZjX0xkSTdhTFBlTjdUZXdia1AycTNucUE4XzEifQ==",
-      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGF0IHdhcyB0aGUgb3BlcmF0aW5nIHN5c3RlbSBvZiBCZWxsIExhYnMgMTk2OT8iLCJsayI6IkdoOWlaV3hzSUd4aFluTWdNVGsyT1NCdmNHVnlZWFJwYm1jZ2MzbHpkR1Z0IiwiYnMiOiJjMlhQdlFyQ01CUUZZRnd6dVFpbFdMM3VEbHBFN0JTb2kwSnhrN3BHZXpXQjJFcVMydm9Xdm9DYm15OXBhdkZfUFh6M2NDNEppUmR6VEtGZ0dwYUwtUXEyUW1rRENpVXlqUWwxTHA3ZmNkdkYwLVNwS0g4TW1SR0luLWNKSGxGbUIweUFHUWhSU29qWVdsUG5OdkY3YnZmVjhNWFdGWk9Xa1JVWnhOd21sVE1jd1FyRmpFaDNvRV9hNEI2eTdic1Voc0U0b002NVZUV19PaDdwM3lHWmtrN014WWFEMEpESkJGV18zcHNwaUVTYWw5UzVqdXBIUDFFOTFocFptV2JqRGciLCJpZCI6ImZjX0xkSTdhTFBlTjdUZXdia1AycTNucUE4XzEifQ%3D%3D"
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMDRujyysehenhmtWuVBQtmMoH0bSmZlXKdxppMWAcHQ&s",
+      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGF0IHdhcyB0aGUgb3BlcmF0aW5nIHN5c3RlbSBvZiBCZWxsIExhYnMgMTk2OT8iLCJsayI6IkdoOWlaV3hzSUd4aFluTWdNVGsyT1NCdmNHVnlZWFJwYm1jZ2MzbHpkR1Z0IiwiYnMiOiJjMlhQdlFyQ01CUUZZRnd6dVFpbFdMM3VEbHBFN0JTb2kwSnhrN3BHZXpXQjJFcVMydm9Xdm9DYm15OXBhdkZfUFh6M2NDNEppUmR6VEtGZ0dwYUwtUXEyUW1rRENpVXlqUWwxTHA3ZmNkdkYwLVNwS0g4TW1SR0luLWNKSGxGbUIweUFHUWhSU29qWVdsUG5OdkY3YnZmVjhNWFdGWk9Xa1JVWnhOd21sVE1jd1FyRmpFaDNvRV9hNEI2eTdic1Voc0U0b002NVZUV19PaDdwM3lHWmtrN014WWFEMEpESkJGV18zcHNwaUVTYWw5UzVqdXBIUDFFOTFocFptV2JqRGciLCJpZCI6ImZjX1ZtQS1hTFA3SFlucTFlOFBrSXljdVFFXzEifQ==",
+      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGF0IHdhcyB0aGUgb3BlcmF0aW5nIHN5c3RlbSBvZiBCZWxsIExhYnMgMTk2OT8iLCJsayI6IkdoOWlaV3hzSUd4aFluTWdNVGsyT1NCdmNHVnlZWFJwYm1jZ2MzbHpkR1Z0IiwiYnMiOiJjMlhQdlFyQ01CUUZZRnd6dVFpbFdMM3VEbHBFN0JTb2kwSnhrN3BHZXpXQjJFcVMydm9Xdm9DYm15OXBhdkZfUFh6M2NDNEppUmR6VEtGZ0dwYUwtUXEyUW1rRENpVXlqUWwxTHA3ZmNkdkYwLVNwS0g4TW1SR0luLWNKSGxGbUIweUFHUWhSU29qWVdsUG5OdkY3YnZmVjhNWFdGWk9Xa1JVWnhOd21sVE1jd1FyRmpFaDNvRV9hNEI2eTdic1Voc0U0b002NVZUV19PaDdwM3lHWmtrN014WWFEMEpESkJGV18zcHNwaUVTYWw5UzVqdXBIUDFFOTFocFptV2JqRGciLCJpZCI6ImZjX1ZtQS1hTFA3SFlucTFlOFBrSXljdVFFXzEifQ%3D%3D"
     },
     {
       "question": "Which is older, UNIX or Linux?",
@@ -96,14 +96,14 @@ X-Xss-Protection: 1; mode=block
         "References."
       ],
       "displayed_link": "https://medium.com › history-of-unix-and-linux-from-p...",
-      "source_logo": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/ea9839db49202b7e8de6484c625ffd615f03657e0dbb7dea1f3141b39317a9cd.png",
-      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGljaCBpcyBvbGRlciwgVU5JWCBvciBMaW51eD8iLCJsayI6IkdoeDNhR2xqYUNCcGN5QnZiR1JsY2lCMWJtbDRJRzl5SUd4cGJuVjQiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfTGRJN2FMUGVON1Rld2JrUDJxM25xQThfMSJ9",
-      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR1dVWTBjV3R5Y1dZNGMxQk1TVzVZVmxaaFozRm1kMFExUjBoV1owaHpTMUZmUzJwRmJVZEZOVGR0U1dORlNsUXljWFJ3U2pBMVRuUkRlR3BrZW1FdFIzaEVRM05CUzFwQ1JuUXRWV1JCWTJJNGJWaGxWbFZKVW05NVFSSVhUR1JKTjJGTVVHVk9OMVJsZDJKclVESnhNMjV4UVRnYUlrRkdUVUZIUjNKdExVSXRkRk13V1RWMlFrbFRhRkpIZDFOa1p6aFZRVEZpTkZFIiwiZmN2IjoiMyIsImVpIjoiTGRJN2FMUGVON1Rld2JrUDJxM25xQTgiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGljaCBpcyBvbGRlciwgVU5JWCBvciBMaW51eD8iLCJsayI6IkdoeDNhR2xqYUNCcGN5QnZiR1JsY2lCMWJtbDRJRzl5SUd4cGJuVjQiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfTGRJN2FMUGVON1Rld2JrUDJxM25xQThfMSJ9"
+      "source_logo": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/ea9839db49202b7e8de6484c625ffd615f03657e0dbb7dea1f3141b39317a9cd.png",
+      "next_page_token": "eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGljaCBpcyBvbGRlciwgVU5JWCBvciBMaW51eD8iLCJsayI6IkdoeDNhR2xqYUNCcGN5QnZiR1JsY2lCMWJtbDRJRzl5SUd4cGJuVjQiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUVfMSJ9",
+      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_related_questions&google_domain=google.com&next_page_token=eyJvbnMiOiIxMDA0MSIsImZjIjoiRXFFQkNtSkJUR3QwWDNaR05qZEhkVW96T1dsT1dXRmxRM0JRU0MxSFR6SlBWR0pFTm1wSmEzTnFSRlJsZGpKMFJYWlJhM3BTTlcxSU1qVmlObTE2Y1hZM1NEQXlOM1JSYXpOWFJGZHJRVFpoV1hZNWRFVldaVGRVWDJSWFNGSXRRM0pIZDNGSFVSSVhWbTFCTFdGTVVEZElXVzV4TVdVNFVHdEplV04xVVVVYUlrRkdUVUZIUjNCZmNIaFlNVzAyTFZGb1dTMDRURzlRUldkaGVHZDBOV3hHZG5jIiwiZmN2IjoiMyIsImVpIjoiVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUUiLCJxYyI6IkNpNTNhR0YwSUhsbFlYSWdkMkZ6SUhWdWFYZ2dabWx5YzNRZ2NtVnNaV0Z6WldRZ1lYUWdZbVZzYkNCc1lXSnpFQUI5b25JcFB3IiwicXVlc3Rpb24iOiJXaGljaCBpcyBvbGRlciwgVU5JWCBvciBMaW51eD8iLCJsayI6IkdoeDNhR2xqYUNCcGN5QnZiR1JsY2lCMWJtbDRJRzl5SUd4cGJuVjQiLCJicyI6ImMyWFB2UXJDTUJRRllGd3p1UWlsV0wzdURscEU3QlNvaTBKeGs3cEdleldCMkVxUzJ2b1d2b0NibXk5cGF2Rl9QWHozY0M0SmlSZHpUS0ZnR3BhTC1RcTJRbWtEQ2lVeWpRbDFMcDdmY2R2RjAtU3BLSDhNbVJHSW4tY0pIbEZtQjB5QUdRaFJTb2pZV2xQbk52RjdidmZWOE1YV0ZaT1drUlVaeE53bWxUTWN3UXJGakVoM29FX2E0QjZ5N2JzVWhzRTRvTTY1VlRXX09oN3AzeUdaa2s3TXhZYUQwSkRKQkZXXzNwc3BpRVNhbDlTNWp1cEhQMUU5MWhwWm1XYmpEZyIsImlkIjoiZmNfVm1BLWFMUDdIWW5xMWU4UGtJeWN1UUVfMSJ9"
     }
   ],
   "ai_overview": {
-    "page_token": "0OhnbXicvZRbk6pGEIBf80fCi4ngwnrZKurUzAh7RkVFZb28WNwckJsCLrpv-S_5Vfk1GUBR93LqpJJKFzUzMN3TPd0f_cefvht6f_3y5KTpLnli2SzL6iSKiG_XzShg9eQUmuwm8pPYdL4RXzwkjOOLdsicXkWeMRORY2xXHFi4pQ_G9rA1szPDGz_s-XAP2kxhLq4NPbG39PTjNmHXLB28X_kufakndTusG3LUDGJ3tWxy9Qeu0a6PWD2gCuDfCHn_hogKgFp9karhXmCugyWk3piWssyXUIqowtWOwMs5dEEwWB_aY3gxuaohcuMaIIEOAzk3X0HzPlJYrd5H0L9Vw3dGhSNUPF8LyqqDqf4ruXgyS7_5GV2C4DVOFQrgO1kTD-MPB1OtPtkG6sZ7_sIblDllooMMSKxFaDU51ojp1GDjJK8tmnW4SFaGjocWz_YLLxzRdCG50WrRfUu6DUx-K6gxkwqb5BYbWQbcm4nbnIDrgzpsVMzg3sxblrnLytRgIKs3af0ok8uiqkSVA4depKuQqHjJVA8C5JU7I9B9Hnh7UtUYgwsz-QSLiX6hTADJKwORzi7oTpDXAKm5iVSkusi7V8VhZ9CleqS8Bj3tlG90C2ZkuCydICJV9yrrVgyYgIHjAoW67gPpMMYZud5TlUoPGCKKS148rYBJRWPKZHYOnp5WOi8t6e-AJBooBaJwiM75VOhP8Z0ycyErt70n8zNRP_vvSpE-g2ScTvtNWVMfQ17mf9-snmMJKuAov2gXSKLA-AfNxfxfMcpbj6PSq1QYaV9g9K715AU4Y7TMMYJSUqTughGZXDCaIJVgibaeDXTOGEmgwoio6g1G19Zj5a3nFqN8-AmMVoXGBSP5jBH6EUbn1nPG6NV5PGNkln4_YvTftZ6CJruc7vvQYUs-oKY3ZF3YcYRbDT08ioxO1m7ITTya8hS1TZA-7eKIrlzrCT700pPF7MW5o6e1k63HtUxPalroHmsbN07SWmz7NoXTqtF9aPt-baAbyTcm8ONI5PQW6liTt6kU7WKLd7gpjrhUbqfuqt-YCP0Fl7V4YS5MOkcVDUnUMWbmLOObrYM94vnVkt_KIdYDPOd6fNjQhvJLU_GGba23VLOm25wPW4qJHgecnsHl1tA0O1b0geZv5lEqcPvNptMamv2-WQSTiJKymIWy19r1MiaITZGmfA-6rgo4AJjE1Nd28ipagt7RLbNtWkLbMDaPTEDS004UGn8DF2xpGQ",
-    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=0OhnbXicvZRbk6pGEIBf80fCi4ngwnrZKurUzAh7RkVFZb28WNwckJsCLrpv-S_5Vfk1GUBR93LqpJJKFzUzMN3TPd0f_cefvht6f_3y5KTpLnli2SzL6iSKiG_XzShg9eQUmuwm8pPYdL4RXzwkjOOLdsicXkWeMRORY2xXHFi4pQ_G9rA1szPDGz_s-XAP2kxhLq4NPbG39PTjNmHXLB28X_kufakndTusG3LUDGJ3tWxy9Qeu0a6PWD2gCuDfCHn_hogKgFp9karhXmCugyWk3piWssyXUIqowtWOwMs5dEEwWB_aY3gxuaohcuMaIIEOAzk3X0HzPlJYrd5H0L9Vw3dGhSNUPF8LyqqDqf4ruXgyS7_5GV2C4DVOFQrgO1kTD-MPB1OtPtkG6sZ7_sIblDllooMMSKxFaDU51ojp1GDjJK8tmnW4SFaGjocWz_YLLxzRdCG50WrRfUu6DUx-K6gxkwqb5BYbWQbcm4nbnIDrgzpsVMzg3sxblrnLytRgIKs3af0ok8uiqkSVA4depKuQqHjJVA8C5JU7I9B9Hnh7UtUYgwsz-QSLiX6hTADJKwORzi7oTpDXAKm5iVSkusi7V8VhZ9CleqS8Bj3tlG90C2ZkuCydICJV9yrrVgyYgIHjAoW67gPpMMYZud5TlUoPGCKKS148rYBJRWPKZHYOnp5WOi8t6e-AJBooBaJwiM75VOhP8Z0ycyErt70n8zNRP_vvSpE-g2ScTvtNWVMfQ17mf9-snmMJKuAov2gXSKLA-AfNxfxfMcpbj6PSq1QYaV9g9K715AU4Y7TMMYJSUqTughGZXDCaIJVgibaeDXTOGEmgwoio6g1G19Zj5a3nFqN8-AmMVoXGBSP5jBH6EUbn1nPG6NV5PGNkln4_YvTftZ6CJruc7vvQYUs-oKY3ZF3YcYRbDT08ioxO1m7ITTya8hS1TZA-7eKIrlzrCT700pPF7MW5o6e1k63HtUxPalroHmsbN07SWmz7NoXTqtF9aPt-baAbyTcm8ONI5PQW6liTt6kU7WKLd7gpjrhUbqfuqt-YCP0Fl7V4YS5MOkcVDUnUMWbmLOObrYM94vnVkt_KIdYDPOd6fNjQhvJLU_GGba23VLOm25wPW4qJHgecnsHl1tA0O1b0geZv5lEqcPvNptMamv2-WQSTiJKymIWy19r1MiaITZGmfA-6rgo4AJjE1Nd28ipagt7RLbNtWkLbMDaPTEDS004UGn8DF2xpGQ"
+    "page_token": "HbjZ-HicvZTdbuI4FMdv90WWGwZISqBQKRrZ-VoTvgy0lN5EwQ0mkBBIADdzt--yT7VPs3YSKIVWmtGu1kGO7eNz-B_7l_PnX4G_Wf_92-Nyv98mD7UaY6xKo4gGXpVEYc1N0g2pLaIgicnyOw3UQ1JaBqq3KaVHtV4iiSqVPF99CkHF7Q7v_5htdrLXGq5RSg7YKGXuqjN3E2_Fo7-tkppT493697rOJ9Wk6m2qP3DDCmf9GQ3X1TtJblUHNTfkG8C_afR6pvHevFzjC_jWz4BArCNgfBKLCeMYm9x4Gcri21E-RCLA0KlD1rvy1sQPnn0Q6AIEQY9L0PprU7tScRrADwN4JRlfeWgf5d407g9Pcqjwdk4WnWaasiwIwLOLuB6AylDpaO4ngRE2DAbbaKjBG1vWtsB3p0bCXWuvlN-pVJvH_CXX4kTcsDZpS5Gp3Acbbdurv8QNa3hc08OA9CznMGhg9i1jhyRneJJLeHbNqT01FJmFSrVbncpnclBnsp7lx8PyLBAwMfhCZNZeToNzlqfT1cTZ9lI_N0CNUGAXNgSGs8F4B8RVFj5ncjDoZUduYM0wKORzjA1q5GaKM_4sERmLYGP-FJwi-z2IAZjeBFOQ3634JCTxr6AgBz2ahRIb4DM0GZs5xxiwEdc_ghhM9S3BGOYpUoAK5CBHweCRRLpmdl4GWDGgtXIJPkA0DwYLEWI7l6CzHLcRRWIKxfOBHJBlJNrl2nVDXxk4MbeoWJokE3kM2T1eMs_C9-32bKzI5G7kgQKVKJz_QqEh_ytMNIOJmpcw-Z_CdF2GBEz0BBMTMPEyRIsydIYJnWBCYx7g6NR11jvBRM8w8TJ0hulDGZLM4sZOMInuJ2Bi7zAZ7zAF4CuYijJUwMSzdE4wTXKYOjcw_YdlKGPKy18fa9JhRW-Am_TYAAHLAUFdHiw780qacvieERrz2rQI9w_bOKLfHP_1Ad519ulraadOl-6-nHpuXGZuUn7c-G_lhR8n-3LsBR5H9LXM7dALgnLXnSffS2EQR6rkKpGGOm0_prb9EkmHNzt8GrnuehQQ0Oq-RHLcetvLy_i5MYxJ3-mu2UwfDXedeHN0ljB1zN2Ohmn42JrVK_Jojw6-ttTbB_k-tFeV-d4eDWmXNKxYl_QjMA7KvD6pKK-NvjWRnnxt-7ypGP1WvO2PvaNtgnmmKlEtZ9GVJi9k0VFKYUxUfks7oPtYlKFSQlzHS44qIXLTXTS9luTNvXpTLoV0n25VRf4HuW5v5A",
+    "serpapi_link": "https://serpapi.com/search.json?engine=google_ai_overview&page_token=HbjZ-HicvZTdbuI4FMdv90WWGwZISqBQKRrZ-VoTvgy0lN5EwQ0mkBBIADdzt--yT7VPs3YSKIVWmtGu1kGO7eNz-B_7l_PnX4G_Wf_92-Nyv98mD7UaY6xKo4gGXpVEYc1N0g2pLaIgicnyOw3UQ1JaBqq3KaVHtV4iiSqVPF99CkHF7Q7v_5htdrLXGq5RSg7YKGXuqjN3E2_Fo7-tkppT493697rOJ9Wk6m2qP3DDCmf9GQ3X1TtJblUHNTfkG8C_afR6pvHevFzjC_jWz4BArCNgfBKLCeMYm9x4Gcri21E-RCLA0KlD1rvy1sQPnn0Q6AIEQY9L0PprU7tScRrADwN4JRlfeWgf5d407g9Pcqjwdk4WnWaasiwIwLOLuB6AylDpaO4ngRE2DAbbaKjBG1vWtsB3p0bCXWuvlN-pVJvH_CXX4kTcsDZpS5Gp3Acbbdurv8QNa3hc08OA9CznMGhg9i1jhyRneJJLeHbNqT01FJmFSrVbncpnclBnsp7lx8PyLBAwMfhCZNZeToNzlqfT1cTZ9lI_N0CNUGAXNgSGs8F4B8RVFj5ncjDoZUduYM0wKORzjA1q5GaKM_4sERmLYGP-FJwi-z2IAZjeBFOQ3634JCTxr6AgBz2ahRIb4DM0GZs5xxiwEdc_ghhM9S3BGOYpUoAK5CBHweCRRLpmdl4GWDGgtXIJPkA0DwYLEWI7l6CzHLcRRWIKxfOBHJBlJNrl2nVDXxk4MbeoWJokE3kM2T1eMs_C9-32bKzI5G7kgQKVKJz_QqEh_ytMNIOJmpcw-Z_CdF2GBEz0BBMTMPEyRIsydIYJnWBCYx7g6NR11jvBRM8w8TJ0hulDGZLM4sZOMInuJ2Bi7zAZ7zAF4CuYijJUwMSzdE4wTXKYOjcw_YdlKGPKy18fa9JhRW-Am_TYAAHLAUFdHiw780qacvieERrz2rQI9w_bOKLfHP_1Ad519ulraadOl-6-nHpuXGZuUn7c-G_lhR8n-3LsBR5H9LXM7dALgnLXnSffS2EQR6rkKpGGOm0_prb9EkmHNzt8GrnuehQQ0Oq-RHLcetvLy_i5MYxJ3-mu2UwfDXedeHN0ljB1zN2Ohmn42JrVK_Jojw6-ttTbB_k-tFeV-d4eDWmXNKxYl_QjMA7KvD6pKK-NvjWRnnxt-7ypGP1WvO2PvaNtgnmmKlEtZ9GVJi9k0VFKYUxUfks7oPtYlKFSQlzHS44qIXLTXTS9luTNvXpTLoV0n25VRf4HuW5v5A"
   },
   "answer_box": {
     "type": "organic_result",
@@ -111,7 +111,7 @@ X-Xss-Protection: 1; mode=block
     "link": "https://en.wikipedia.org/wiki/History_of_Unix",
     "displayed_link": "https://en.wikipedia.org › wiki › History_of_Unix",
     "answer": "1969",
-    "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/b9965f0d40bc4bdcb71c9965e96d2bda96a98b10b5006f2e.png",
+    "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/b9965f0d40bc4bdcb71c9965e96d2bda96a98b10b5006f2e.png",
     "source": "Wikipedia",
     "description": "History of Unix",
     "contents": {
@@ -151,9 +151,9 @@ X-Xss-Protection: 1; mode=block
       "position": 1,
       "title": "Unix",
       "link": "https://en.wikipedia.org/wiki/Unix",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://en.wikipedia.org/wiki/Unix&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDcQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://en.wikipedia.org/wiki/Unix&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDYQAQ&usg=AOvVaw3Z7iUi5-vcbjy03vITOPEl",
       "displayed_link": "https://en.wikipedia.org › wiki › Unix",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63baf11406f14ddc0915b6b00a5846d30c9.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63baf11406f14ddc0915b6b00a5846d30c9.png",
       "snippet": "Development started in 1969. First manual published internally in November 1971 (1971-11) · Announced outside Bell Labs in October 1973 (1973-10) · English.",
       "snippet_highlighted_words": [
         "First",
@@ -187,9 +187,9 @@ X-Xss-Protection: 1; mode=block
       "position": 2,
       "title": "The history of how Unix started and influenced Linux",
       "link": "https://www.redhat.com/en/blog/unix-linux-history",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.redhat.com/en/blog/unix-linux-history&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDMQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.redhat.com/en/blog/unix-linux-history&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECFYQAQ&usg=AOvVaw3q7upXHjlcMLdTRIJQNnk9",
       "displayed_link": "https://www.redhat.com › blog › unix-linux-history",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63b67366dde2420dba8c0a3317623400206.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63b67366dde2420dba8c0a3317623400206.png",
       "date": "Nov 11, 2022",
       "snippet": "By November 1971, Bell Labs collected the programs and released Unix 1st Edition, followed by Unix 2nd Edition in July 1972. These early ...",
       "snippet_highlighted_words": [
@@ -201,9 +201,9 @@ X-Xss-Protection: 1; mode=block
       "position": 3,
       "title": "50 years of Unix",
       "link": "https://www.nokia.com/bell-labs/about/history/innovation-stories/50-years-unix/",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.nokia.com/bell-labs/about/history/innovation-stories/50-years-unix/&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDQQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.nokia.com/bell-labs/about/history/innovation-stories/50-years-unix/&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECC8QAQ&usg=AOvVaw1pKz02QC3kP36RjN01CBYH",
       "displayed_link": "https://www.nokia.com › ... › History › Innovation stories",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63be21e8287c47b5fc332636466acc55a19.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63be21e8287c47b5fc332636466acc55a19.png",
       "snippet": "100 years pioneering. It all started in 1969, when two Bell Labs computer scientists were looking for a new research project. Ken Thompson and Dennis Ritchie ...",
       "snippet_highlighted_words": [
         "1969"
@@ -214,7 +214,7 @@ X-Xss-Protection: 1; mode=block
       "position": 4,
       "title": "History of UNIX and Linux",
       "link": "https://users.dimi.uniud.it/~antonio.dangelo/LabOS/2008/lessons/helper/history/unixHistory.html",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://users.dimi.uniud.it/~antonio.dangelo/LabOS/2008/lessons/helper/history/unixHistory.html&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECC4QAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://users.dimi.uniud.it/~antonio.dangelo/LabOS/2008/lessons/helper/history/unixHistory.html&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECC4QAQ&usg=AOvVaw0Hp96fB7P-5irPktm54UvH",
       "displayed_link": "https://users.dimi.uniud.it › LabOS › lessons › helper › u...",
       "snippet": "Year, Event. 1957, Bell Labs found they needed an operating system for their computer center which at the time was running various batch jobs.",
       "snippet_highlighted_words": [
@@ -226,9 +226,9 @@ X-Xss-Protection: 1; mode=block
       "position": 5,
       "title": "The UNIX System -- History and Timeline",
       "link": "https://unix.org/what_is_unix/history_timeline.html",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://unix.org/what_is_unix/history_timeline.html&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDEQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://unix.org/what_is_unix/history_timeline.html&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDEQAQ&usg=AOvVaw3n8UwAid8QqjZZR0_E1iUf",
       "displayed_link": "https://unix.org › what_is_unix › history_timeline",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63b7d5829d0fce153692faf30ccdf3956fb.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63b7d5829d0fce153692faf30ccdf3956fb.png",
       "snippet": "The history of UNIX starts back in 1969, when Ken Thompson, Dennis Ritchie and others started working on the \"little-used PDP-7 in a corner\" at Bell Labs and ...",
       "snippet_highlighted_words": [
         "1969"
@@ -239,9 +239,9 @@ X-Xss-Protection: 1; mode=block
       "position": 6,
       "title": "Technology history: Where Unix came from",
       "link": "https://allthingsopen.org/articles/where-unix-came-from",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://allthingsopen.org/articles/where-unix-came-from&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDIQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://allthingsopen.org/articles/where-unix-came-from&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDUQAQ&usg=AOvVaw1Gtz0KuvL6mmGv4teN6i-b",
       "displayed_link": "https://allthingsopen.org › Articles",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63be97bb3fbb9cf78589fb9dbfc8dca6375.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63be97bb3fbb9cf78589fb9dbfc8dca6375.png",
       "date": "Jul 31, 2024",
       "snippet": "By November 1971, Bell Labs collected the programs for the new operating system and created “Unix 1st Edition.” This was followed by Unix 2nd ...",
       "snippet_highlighted_words": [
@@ -253,9 +253,9 @@ X-Xss-Protection: 1; mode=block
       "position": 7,
       "title": "History of Unix",
       "link": "http://ibgwww.colorado.edu/~lessem/psyc5112/usail/concepts/hx-of-unix/unixhx.html",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=http://ibgwww.colorado.edu/~lessem/psyc5112/usail/concepts/hx-of-unix/unixhx.html&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECC8QAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=http://ibgwww.colorado.edu/~lessem/psyc5112/usail/concepts/hx-of-unix/unixhx.html&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDQQAQ&usg=AOvVaw240yhrA-NOltwpPY0-Qc3L",
       "displayed_link": "http://ibgwww.colorado.edu › usail › hx-of-unix › unixhx",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63ba49cbc53ddaa09126b53b7c2a198f220.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63ba49cbc53ddaa09126b53b7c2a198f220.png",
       "snippet": "The MULTICS project began in the mid 1960s as a joint effort by General Electric, Massachusetts Institute for Technology and Bell Laboratories. In 1969 Bell ...",
       "snippet_highlighted_words": [
         "1969"
@@ -266,11 +266,11 @@ X-Xss-Protection: 1; mode=block
       "position": 8,
       "title": "The Earliest Unix Code: An Anniversary Source Code Release",
       "link": "https://computerhistory.org/blog/the-earliest-unix-code-an-anniversary-source-code-release/",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://computerhistory.org/blog/the-earliest-unix-code-an-anniversary-source-code-release/&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDYQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://computerhistory.org/blog/the-earliest-unix-code-an-anniversary-source-code-release/&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDMQAQ&usg=AOvVaw34p9Ks_sj9XREaky0ANNtW",
       "displayed_link": "https://computerhistory.org › ... › From the Collection",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63b9a8efb98f652c7295a69cb37959d21c1.png",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63b9a8efb98f652c7295a69cb37959d21c1.png",
       "date": "Oct 17, 2019",
-      "snippet": "These programs were written by the first participants in the Unix effort at the Bell Telephone Laboratories, starting in 1969. Ken Thompson and ...",
+      "snippet": "2019 marks the 50th anniversary of the start of Unix. In the summer of 1969, that same summer that saw humankind's first steps on the surface of ...",
       "snippet_highlighted_words": [
         "1969"
       ],
@@ -280,9 +280,9 @@ X-Xss-Protection: 1; mode=block
       "position": 9,
       "title": "Unix | EBSCO Research Starters",
       "link": "https://www.ebsco.com/research-starters/computer-science/unix",
-      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.ebsco.com/research-starters/computer-science/unix&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQFnoECDAQAQ",
+      "redirect_link": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.ebsco.com/research-starters/computer-science/unix&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQFnoECDIQAQ&usg=AOvVaw3X0OiC41sIcldRgYI722NO",
       "displayed_link": "https://www.ebsco.com › computer-science › unix",
-      "favicon": "https://serpapi.com/searches/683bd22cf9aa737825d85758/images/114b7c395a7c6e4d3251deb447b3a63b8c3d1c2585c574c35c3bd0d0ccd8ad52.jpeg",
+      "favicon": "https://serpapi.com/searches/683e605097f1ccd1da8263f4/images/114b7c395a7c6e4d3251deb447b3a63b8c3d1c2585c574c35c3bd0d0ccd8ad52.jpeg",
       "snippet": "The first complete version of Unix was released in 1971, featuring ... UNIX did not leave the confines of Bell Labs until 1974, when a paper on its ...",
       "snippet_highlighted_words": [
         "1971"
@@ -297,103 +297,103 @@ X-Xss-Protection: 1; mode=block
         {
           "name": "Linux",
           "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLPfaS5p6jfN1J_BBIWGUYI8l6awcWoc2qCGCn9hjDuIFadBNj-pe2&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Linux&stick=H4sIAAAAAAAAAOMwVOLUz9U3SCuoqir4xciwgYXhFQs3F0LsFQsXFweIZ2paWQTnmBcnV8DVGVeYFubCpYwqUyrgnOSMvLRXLDxcXCBOUUFWkmkhXM6kINcMwSmKt4ArNCqvKEkvX8TK6pOZV1pxi02SYfeijp8srvsNN1oab9wk9ng7-y_3v7VpM1Yu4hALSM0vyElVSMwpzlcoTk0sSs5QSMsvWsHBCABjvmzd2wAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQEAk",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Linux&stick=H4sIAAAAAAAAAOMwVOLUz9U3SCuoqir4xciwgYXhFQs3F0LsFQsXFweIZ2paWQTnmBcnV8DVGVeYFubCpYwqUyrgnOSMvLRXLDxcXCBOUUFWkmkhXM6kINcMwSmKt4ArNCqvKEkvX8TK6pOZV1pxi02SYfeijp8srvsNN1oab9wk9ng7-y_3v7VpM1Yu4hALSM0vyElVSMwpzlcoTk0sSs5QSMsvWsHBCABjvmzd2wAAAA"
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Linux&stick=H4sIAAAAAAAAAOMwVOLUz9U3SCuoqir4xciwgYXhFQs3F0LsFQsXFweIZ2paWQTnmBcnV8DVGVeYFubCpYwqUyrgnOSMvLRXLDxcXCBOUUFWkmkhXM6kINcMwSmKt1jEyuqTmVdacYtNkmH3oo6fLK77DTdaGm_cJPZ4O_sv97-1aTNWLuIQC0jNL8hJVUjMKc5XKE5NLErOUEjLL1rBwQgAQ2_NGMwAAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3EAk",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Linux&stick=H4sIAAAAAAAAAOMwVOLUz9U3SCuoqir4xciwgYXhFQs3F0LsFQsXFweIZ2paWQTnmBcnV8DVGVeYFubCpYwqUyrgnOSMvLRXLDxcXCBOUUFWkmkhXM6kINcMwSmKt1jEyuqTmVdacYtNkmH3oo6fLK77DTdaGm_cJPZ4O_sv97-1aTNWLuIQC0jNL8hJVUjMKc5XKE5NLErOUEjLL1rBwQgAQ2_NGMwAAAA"
         },
         {
           "name": "macOS",
           "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrjTOM6-V8m_2mB9lXLQP8ZO25y7VcfLXzsnmD&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=macOS&stick=H4sIAAAAAAAAAOMwVOLQz9U3MDWtLPrFyLCBheEVCzcXJ0goraCqquAVCxcXXAGcY16cXAFXZ1xhWpgLlzKqTKmAc5Iz8tJesfBwcYE4RQVZSaaFcDmTglwzBKco3gKu0Ki8oiS9fBEra25isn_wLTZJht2LOn6yuO433GhpvHGT2OPt7L_c_9amzVi5iEMsIDW_ICdVITGnOF-hODWxKDlDIS2_aAUHIwBOlYC72gAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQEA4",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=macOS&stick=H4sIAAAAAAAAAOMwVOLQz9U3MDWtLPrFyLCBheEVCzcXJ0goraCqquAVCxcXXAGcY16cXAFXZ1xhWpgLlzKqTKmAc5Iz8tJesfBwcYE4RQVZSaaFcDmTglwzBKco3gKu0Ki8oiS9fBEra25isn_wLTZJht2LOn6yuO433GhpvHGT2OPt7L_c_9amzVi5iEMsIDW_ICdVITGnOF-hODWxKDlDIS2_aAUHIwBOlYC72gAAAA"
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=macOS&stick=H4sIAAAAAAAAAOMwVOLQz9U3MDWtLPrFyLCBheEVCzcXJ0goraCqquAVCxcXXAGcY16cXAFXZ1xhWpgLlzKqTKmAc5Iz8tJesfBwcYE4RQVZSaaFcDmTglwzBKco3mIRK2tuYrJ_8C02SYbdizp-srjuN9xoabxxk9jj7ey_3P_Wps1YuYhDLCA1vyAnVSExpzhfoTg1sSg5QyEtv2gFByMAtSxjNMsAAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3EA4",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=macOS&stick=H4sIAAAAAAAAAOMwVOLQz9U3MDWtLPrFyLCBheEVCzcXJ0goraCqquAVCxcXXAGcY16cXAFXZ1xhWpgLlzKqTKmAc5Iz8tJesfBwcYE4RQVZSaaFcDmTglwzBKco3mIRK2tuYrJ_8C02SYbdizp-srjuN9xoabxxk9jj7ey_3P_Wps1YuYhDLCA1vyAnVSExpzhfoTg1sSg5QyEtv2gFByMAtSxjNMsAAAA"
         },
         {
           "name": "Unix",
           "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1gJuozPQQOCAU2WLkfHNJNB9tUNnHX5lYGDMI&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Unix&stick=H4sIAAAAAAAAAOMwVOLQz9U3MC9OrvjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnANSDVdnXGFamAuXMqpMqYBzkjPy0l6x8HBxgThFBVlJpoVwOZOCXDMEpyjeAq7QqLyiJL18EStLaF5mxS02SYbdizp-srjuN9xoabxxk9jj7ey_3P_Wps1YuYhDLCA1vyAnVSExpzhfoTg1sSg5QyEtv2gFByMAsgTEitkAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQEBM",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Unix&stick=H4sIAAAAAAAAAOMwVOLQz9U3MC9OrvjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnANSDVdnXGFamAuXMqpMqYBzkjPy0l6x8HBxgThFBVlJpoVwOZOCXDMEpyjeAq7QqLyiJL18EStLaF5mxS02SYbdizp-srjuN9xoabxxk9jj7ey_3P_Wps1YuYhDLCA1vyAnVSExpzhfoTg1sSg5QyEtv2gFByMAsgTEitkAAAA"
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Unix&stick=H4sIAAAAAAAAAOMwVOLQz9U3MC9OrvjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnANSDVdnXGFamAuXMqpMqYBzkjPy0l6x8HBxgThFBVlJpoVwOZOCXDMEpyjeYhErS2heZsUtNkmG3Ys6frK47jfcaGm8cZPY4-3sv9z_1qbNWLmIQywgNb8gJ1UhMac4X6E4NbEoOUMhLb9oBQcjAONIugzKAAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3EBM",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Unix&stick=H4sIAAAAAAAAAOMwVOLQz9U3MC9OrvjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnANSDVdnXGFamAuXMqpMqYBzkjPy0l6x8HBxgThFBVlJpoVwOZOCXDMEpyjeYhErS2heZsUtNkmG3Ys6frK47jfcaGm8cZPY4-3sv9z_1qbNWLmIQywgNb8gJ1UhMac4X6E4NbEoOUMhLb9oBQcjAONIugzKAAAA"
         },
         {
           "name": "Ubuntu",
-          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDioi6jxxQ3Vq4ffLly98BJTpeETaxJXW8hP5O&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Ubuntu&stick=H4sIAAAAAAAAAOMwVOLUz9U3MK4wLcz9xciwgYXhFQs3F1gsraCqquAVCxcXB4hnalpZBOeYFydXwNWB9cKljCpTKuCc5Iy8tFcsPFxcIE5RQVaSaSFczqQg1wzBKYq3gCs0Kq8oSS9fxMoWmlSaV1J6i02SYfeijp8srvsNN1oab9wk9ng7-y_3v7VpM1Yu4hALSM0vyElVSMwpzlcoTk0sSs5QSMsvWsHBCADY1Fjo3AAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQEBg",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Ubuntu&stick=H4sIAAAAAAAAAOMwVOLUz9U3MK4wLcz9xciwgYXhFQs3F1gsraCqquAVCxcXB4hnalpZBOeYFydXwNWB9cKljCpTKuCc5Iy8tFcsPFxcIE5RQVaSaSFczqQg1wzBKYq3gCs0Kq8oSS9fxMoWmlSaV1J6i02SYfeijp8srvsNN1oab9wk9ng7-y_3v7VpM1Yu4hALSM0vyElVSMwpzlcoTk0sSs5QSMsvWsHBCADY1Fjo3AAAAA"
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlx8XUyomAnsA-88Kx0qst7aRunUJ6zrCzJJRTv2PkurlFGn0vnfg&s=0",
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Ubuntu&stick=H4sIAAAAAAAAAOMwVOLUz9U3MK4wLcz9xciwgYXhFQs3F1gsraCqquAVCxcXB4hnalpZBOeYFydXwNWB9cKljCpTKuCc5Iy8tFcsPFxcIE5RQVaSaSFczqQg1wzBKYq3WMTKFppUmldSeotNkmH3oo6fLK77DTdaGm_cJPZ4O_sv97-1aTNWLuIQC0jNL8hJVUjMKc5XKE5NLErOUEjLL1rBwQgAgJg7J80AAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3EBg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Ubuntu&stick=H4sIAAAAAAAAAOMwVOLUz9U3MK4wLcz9xciwgYXhFQs3F1gsraCqquAVCxcXB4hnalpZBOeYFydXwNWB9cKljCpTKuCc5Iy8tFcsPFxcIE5RQVaSaSFczqQg1wzBKYq3WMTKFppUmldSeotNkmH3oo6fLK77DTdaGm_cJPZ4O_sv97-1aTNWLuIQC0jNL8hJVUjMKc5XKE5NLErOUEjLL1rBwQgAgJg7J80AAAA"
         },
         {
           "name": "FreeBSD",
           "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJqY_YeQnfK23YYgyOteGtgQYWkBBR8gJ2XBFKAmj_kFCB896Cx-4M&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=FreeBSD&stick=H4sIAAAAAAAAAOMwVOLQz9U3MKpMqfjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cCGQTnJGfkpb1i4eHiAnGKCrKSTAvhciYFuWYITlG8BVyhUXlFSXr5IlZ2t6LUVKdgl1tskgy7F3X8ZHHdb7jR0njjJrHH29l_uf-tTZuxchGHWEBqfkFOqkJiTnG-QnFqYlFyhkJaftEKDkYAWgrhftwAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQEB0",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=FreeBSD&stick=H4sIAAAAAAAAAOMwVOLQz9U3MKpMqfjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cCGQTnJGfkpb1i4eHiAnGKCrKSTAvhciYFuWYITlG8BVyhUXlFSXr5IlZ2t6LUVKdgl1tskgy7F3X8ZHHdb7jR0njjJrHH29l_uf-tTZuxchGHWEBqfkFOqkJiTnG-QnFqYlFyhkJaftEKDkYAWgrhftwAAAA"
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=FreeBSD&stick=H4sIAAAAAAAAAOMwVOLQz9U3MKpMqfjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cCGQTnJGfkpb1i4eHiAnGKCrKSTAvhciYFuWYITlG8xSJWdrei1FSnYJdbbJIMuxd1_GRx3W-40dJ44yaxx9vZf7n_rU2bsXIRh1hAan5BTqpCYk5xvkJxamJRcoZCWn7RCg5GAHOtAUjNAAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3EB0",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=FreeBSD&stick=H4sIAAAAAAAAAOMwVOLQz9U3MKpMqfjFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cCGQTnJGfkpb1i4eHiAnGKCrKSTAvhciYFuWYITlG8xSJWdrei1FSnYJdbbJIMuxd1_GRx3W-40dJ44yaxx9vZf7n_rU2bsXIRh1hAan5BTqpCYk5xvkJxamJRcoZCWn7RCg5GAHOtAUjNAAAA"
         },
         {
           "name": "Solaris",
-          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVa-XO0xL0q6m-AxJ7G45rabNF8KkaBdGesRQncYMciJ1B8Zm_BQ5r&s=0",
-          "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Oracle+Solaris&stick=H4sIAAAAAAAAAOMwVOLQz9U3SM7IS_vFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cyqkypgHNApr5i4eHiAnGKCrKSTAvhciYFuWYITlG8BVyhUXlFSXr5IlY-_6LE5JxUheD8nMSizOJbbJIMuxd1_GRx3W-40dJ44yaxx9vZf7n_rU2bsXIRh1hAan4BUHFiTnG-QnFqYlFyhkJaftEKDkYAi8wAh-MAAAA&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQs9oBKAB6BAhQECI",
-          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Oracle+Solaris&stick=H4sIAAAAAAAAAOMwVOLQz9U3SM7IS_vFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cyqkypgHNApr5i4eHiAnGKCrKSTAvhciYFuWYITlG8BVyhUXlFSXr5IlY-_6LE5JxUheD8nMSizOJbbJIMuxd1_GRx3W-40dJ44yaxx9vZf7n_rU2bsXIRh1hAan4BUHFiTnG-QnFqYlFyhkJaftEKDkYAi8wAh-MAAAA"
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR641Ctz0k8Oahh-7uaE2xWikT-iOdlHwMeDvo41UN1esB20D6-iCgC&s=0",
+          "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Oracle+Solaris&stick=H4sIAAAAAAAAAOMwVOLQz9U3SM7IS_vFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cyqkypgHNApr5i4eHiAnGKCrKSTAvhciYFuWYITlG8xSJWPv-ixOScVIXg_JzEosziW2ySDLsXdfxkcd1vuNHSeOMmscfb2X-5_61Nm7FyEYdYQGp-AVBxYk5xvkJxamJRcoZCWn7RCg5GAHaQvKDUAAAA&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQs9oBKAB6BAg3ECI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Oracle+Solaris&stick=H4sIAAAAAAAAAOMwVOLQz9U3SM7IS_vFyLCBheEVCzcXJ0goraCqquAVCxcXWIGpaWURnGNenFwBV2dcYVqYC5cyqkypgHNApr5i4eHiAnGKCrKSTAvhciYFuWYITlG8xSJWPv-ixOScVIXg_JzEosziW2ySDLsXdfxkcd1vuNHSeOMmscfb2X-5_61Nm7FyEYdYQGp-AVBxYk5xvkJxamJRcoZCWn7RCg5GAHaQvKDUAAAA"
         }
       ]
     },
     {
       "block_position": 1,
       "query": "What year was unix first released at bell labs 2021",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=What+year+was+unix+first+released+at+bell+labs+2021&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhXEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=What+year+was+unix+first+released+at+bell+labs+2021&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhMEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=What+year+was+unix+first+released+at+bell+labs+2021"
     },
     {
       "block_position": 1,
       "query": "Unix vs Linux",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Unix+vs+Linux&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhWEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Unix+vs+Linux&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhQEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Unix+vs+Linux"
     },
     {
       "block_position": 1,
       "query": "Unix was developed by which company",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Unix+was+developed+by+which+company&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhREAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Unix+was+developed+by+which+company&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhPEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Unix+was+developed+by+which+company"
     },
     {
       "block_position": 1,
       "query": "Is Windows Unix",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Is+Windows+Unix&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhVEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Is+Windows+Unix&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhJEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Is+Windows+Unix"
     },
     {
       "block_position": 1,
       "query": "Is Unix still used",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Is+Unix+still+used&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhSEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Is+Unix+still+used&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhNEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Is+Unix+still+used"
     },
     {
       "block_position": 1,
       "query": "Unix download",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Unix+download&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhYEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Unix+download&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhLEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Unix+download"
     },
     {
       "block_position": 1,
       "query": "Is Linux-based on Unix",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=Is+Linux-based+on+Unix&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhUEAE",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Is+Linux-based+on+Unix&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhOEAE",
       "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Is+Linux-based+on+Unix"
     },
     {
       "block_position": 1,
-      "query": "UNIX Full Form",
-      "link": "https://www.google.com/search?sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&q=UNIX+Full+Form&sa=X&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ1QJ6BAhTEAE",
-      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=UNIX+Full+Form"
+      "query": "Types of Unix operating system",
+      "link": "https://www.google.com/search?sca_esv=cc16af6e80ebe361&gl=us&hl=en&q=Types+of+Unix+operating+system&sa=X&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ1QJ6BAhKEAE",
+      "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Types+of+Unix+operating+system"
     }
   ],
   "pagination": {
     "current": 1,
-    "next": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=10&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8NMDegQIDhAW",
+    "next": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=10&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8NMDegQIChAW",
     "other_pages": {
-      "2": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=10&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAE",
-      "3": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=20&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAG",
-      "4": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=30&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAI",
-      "5": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=40&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAK",
-      "6": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=50&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAM",
-      "7": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=60&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAO",
-      "8": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=70&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAQ",
-      "9": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=80&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAS",
-      "10": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=d4a9adc8cd48bbf5&gl=us&hl=en&ei=LdI7aLPeN7TewbkP2q3nqA8&start=90&sa=N&sstk=Ac65TH5XozQykr79XQgWAA4kiU9faZTPcHioIc8MOPqViNJrDRQ6cKD1Kxir9D4rRGFDdL1Fv1uZQZKMMVA-z7UpBHbozrwqoEshJg&ved=2ahUKEwjzqNTerM-NAxU0bzABHdrWGfUQ8tMDegQIDhAU"
+      "2": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=10&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAE",
+      "3": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=20&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAG",
+      "4": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=30&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAI",
+      "5": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=40&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAK",
+      "6": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=50&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAM",
+      "7": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=60&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAO",
+      "8": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=70&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAQ",
+      "9": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=80&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAS",
+      "10": "https://www.google.com/search?q=What+year+was+Unix+first+released+at+Bell+Labs?&sca_esv=cc16af6e80ebe361&gl=us&hl=en&ei=VmA-aLP7HYnq1e8PkIycuQE&start=90&sa=N&sstk=Ac65TH7W0uS5QL9r56Jxw0q2PaQMXptBRMaHuR4dKGKB-uqIr-fHurnzAxoBKWOuFhMK6hwqSjiEu0tVqJCKmxV6ZbS_n2gqeV8ITw&ved=2ahUKEwiz_v7LnNSNAxUJdfUHHRAGJxcQ8tMDegQIChAU"
     }
   },
   "serpapi_pagination": {

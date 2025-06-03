@@ -1,38 +1,38 @@
 httprr trace v1
-1212 1825
+1216 1825
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 1008
+User-Agent: langchaingo-httprr
+Content-Length: 1012
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Unix first released at Bell Labs?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 1104
+{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Plan 9 from Bell Labs first released?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 1102
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
+Date: Tue, 03 Jun 2025 03:05:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 750
+Openai-Processing-Ms: 1065
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 755
+X-Envoy-Upstream-Service-Time: 1068
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 999874
+X-Ratelimit-Remaining-Tokens: 999972
 X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 7ms
-X-Request-Id: req_0123d2ba0c8ae77faf2480e26c744507
+X-Ratelimit-Reset-Tokens: 1ms
+X-Request-Id: req_05a442db8c220d4450a1d22c2b7c17e4
 
 {
-  "id": "chatcmpl-BdUdRj4FLoWkOLNTRevmMtrt1i7Xt",
+  "id": "chatcmpl-BeCGJ5shHcJ0rfbVLHSy3XCJGm41y",
   "object": "chat.completion",
-  "created": 1748752253,
+  "created": 1748919955,
   "model": "gpt-4-0613",
   "choices": [
     {
@@ -42,11 +42,11 @@ X-Request-Id: req_0123d2ba0c8ae77faf2480e26c744507
         "content": null,
         "tool_calls": [
           {
-            "id": "call_e8O9gppYFda3q9uPncQFdnmB",
+            "id": "call_SvgYTX8u8F3DiREXYVggIruE",
             "type": "function",
             "function": {
               "name": "GoogleSearch",
-              "arguments": "{\n  \"__arg1\": \"Unix first release year at Bell Labs\"\n}"
+              "arguments": "{\n  \"__arg1\": \"Plan 9 from Bell Labs release year\"\n}"
             }
           }
         ],
@@ -58,9 +58,9 @@ X-Request-Id: req_0123d2ba0c8ae77faf2480e26c744507
     }
   ],
   "usage": {
-    "prompt_tokens": 164,
-    "completion_tokens": 22,
-    "total_tokens": 186,
+    "prompt_tokens": 166,
+    "completion_tokens": 23,
+    "total_tokens": 189,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -75,47 +75,47 @@ X-Request-Id: req_0123d2ba0c8ae77faf2480e26c744507
   "service_tier": "default",
   "system_fingerprint": null
 }
-1280 1560
+1275 1564
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 1076
+User-Agent: langchaingo-httprr
+Content-Length: 1071
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Unix first released at Bell Labs?"},{"role":"function","content":"November 1971","name":"GoogleSearch"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 840
+{"model":"gpt-4","messages":[{"role":"system","content":"you are a helpful assistant"},{"role":"user","content":"please be strict"},{"role":"user","content":"What year was Plan 9 from Bell Labs first released?"},{"role":"function","content":"1992","name":"GoogleSearch"}],"temperature":0,"tools":[{"type":"function","function":{"name":"GoogleSearch","description":"\n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}},{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 844
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 636
+Openai-Processing-Ms: 768
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 640
+X-Envoy-Upstream-Service-Time: 771
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 999968
+X-Ratelimit-Remaining-Tokens: 999969
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_1158b2ffcd84db0e6eefbea9f3a0b7ee
+X-Request-Id: req_5ff97bb498c5181b7cb596af469a151e
 
 {
-  "id": "chatcmpl-BdUdT3RiayTs1kBEdOYkCCzIlkn0g",
+  "id": "chatcmpl-BeCGLHiyPhJ1WQFRq30P5MV1watXT",
   "object": "chat.completion",
-  "created": 1748752255,
+  "created": 1748919957,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Unix was first released at Bell Labs in November 1971.",
+        "content": "Plan 9 from Bell Labs was first released in the year 1992.",
         "refusal": null,
         "annotations": []
       },
@@ -125,8 +125,8 @@ X-Request-Id: req_1158b2ffcd84db0e6eefbea9f3a0b7ee
   ],
   "usage": {
     "prompt_tokens": 173,
-    "completion_tokens": 14,
-    "total_tokens": 187,
+    "completion_tokens": 17,
+    "total_tokens": 190,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0

@@ -2,7 +2,7 @@ httprr trace v1
 297 1926
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 95
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -13,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:55 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 841
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 849
+X-Envoy-Upstream-Service-Time: 845
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999995
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a804e59f251e04e554501d23baafce51
+X-Request-Id: req_50694ceca1f69162074c8bebdf5e3b87
 
 {
-  "id": "chatcmpl-BdUdSjfPvlmEZsdSBa1SCEBUDkYvP",
+  "id": "chatcmpl-BeCGMqZfo7jqi3v0pvXnjsztiSFvK",
   "object": "chat.completion",
-  "created": 1748752254,
+  "created": 1748919958,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -68,7 +68,7 @@ X-Request-Id: req_a804e59f251e04e554501d23baafce51
 5348 1878
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 5144
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -79,26 +79,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:57 GMT
+Date: Tue, 03 Jun 2025 03:06:00 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 653
+Openai-Processing-Ms: 754
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 656
+X-Envoy-Upstream-Service-Time: 762
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49998742
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_e21d8d57852621609ce6db8f88c06799
+X-Request-Id: req_3474ee29caf177a1e05eeb55b4f81035
 
 {
-  "id": "chatcmpl-BdUdU1r0nYR58Gc3NhY7j6J2P8dnp",
+  "id": "chatcmpl-BeCGOTmdqWUNulF1CyRjoTIPznCMH",
   "object": "chat.completion",
-  "created": 1748752256,
+  "created": 1748919960,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {

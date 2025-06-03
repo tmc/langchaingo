@@ -1,140 +1,8 @@
 httprr trace v1
-793 1648
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 590
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"As Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 926
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 389
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 392
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999874
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_577393cd2db5e8931113cccbbaea47fc
-
-{
-  "id": "chatcmpl-BdUdRfj8vErW97EiHNz9FUg9iOBmJ",
-  "object": "chat.completion",
-  "created": 1748752253,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver encounters a majestic lion named Leo at a pond and eagerly asks if Leo would like to join him on a quest to find new friends.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 114,
-    "completion_tokens": 29,
-    "total_tokens": 143,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-629 1656
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 426
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Leo raised his magnificent head, his golden eyes sparkling with curiosity. \"Greetings, Oliver! I must admit, I've never met a mouse with such courage. I would be honored to accompany you on your noble quest. Together, we shall forge an unbreakable bond of friendship!\"\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 934
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 431
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 436
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999913
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_5adf71fbfd7860de0facbc5820e35fc5
-
-{
-  "id": "chatcmpl-BdUdRUkiU7O7v2XOWG4HLwAYYDNm9",
-  "object": "chat.completion",
-  "created": 1748752253,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Leo, a magnificent and curious lion, offers to accompany Oliver, a courageous mouse, on his noble quest, forming a strong bond of friendship.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 80,
-    "completion_tokens": 29,
-    "total_tokens": 109,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
 714 1671
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 511
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -145,26 +13,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
+Date: Tue, 03 Jun 2025 03:05:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 440
+Openai-Processing-Ms: 434
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 448
+X-Envoy-Upstream-Service-Time: 436
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999892
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ca83d91631bcb44b531e6c4f38d1fa59
+X-Request-Id: req_35f05f401a01d32b9fb925128ecc5370
 
 {
-  "id": "chatcmpl-BdUdSumkAOPvrz3lvtUQoXg1h2PHy",
+  "id": "chatcmpl-BeCGKilBRZbS8qqsUYgJEjQBbRgs4",
   "object": "chat.completion",
-  "created": 1748752254,
+  "created": 1748919956,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -197,47 +65,113 @@ X-Request-Id: req_ca83d91631bcb44b531e6c4f38d1fa59
   "service_tier": "default",
   "system_fingerprint": null
 }
-694 1679
+691 1650
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 491
+User-Agent: langchaingo-httprr
+Content-Length: 488
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"One sunny morning, as the golden rays of the sun danced through the treetops, Oliver decided it was time to embark on a grand journey to find new friends who shared his thirst for excitement. With a determined gleam in his eye, he packed a tiny satchel filled with cheese, a sturdy walking stick, and bid farewell to his mouse friends.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 957
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Venturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 927
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
+Date: Tue, 03 Jun 2025 03:05:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 576
+Openai-Processing-Ms: 356
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 581
+X-Envoy-Upstream-Service-Time: 359
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Requests: 9996
 X-Ratelimit-Remaining-Tokens: 49999898
-X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Requests: 19ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_229ae9df9c506a3dd4cb08f7f87330ce
+X-Request-Id: req_accf6e04190c5b79049ffd839ce1f268
 
 {
-  "id": "chatcmpl-BdUdRjVCHnJLecIgFikTw6Sv4by7d",
+  "id": "chatcmpl-BeCGKpxpRcfJbwIqWRjBSxSjg8d3S",
   "object": "chat.completion",
-  "created": 1748752253,
+  "created": 1748919956,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Oliver sets out on a journey to find new friends who share his thirst for excitement, packing cheese and a walking stick before saying goodbye to his mouse friends.",
+        "content": "Oliver explores the forest, excited and captivated by the sights and sounds of nature. He discovers a clearing with a shimmering pond.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 28,
+    "total_tokens": 117,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+694 1676
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 491
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"One sunny morning, as the golden rays of the sun danced through the treetops, Oliver decided it was time to embark on a grand journey to find new friends who shared his thirst for excitement. With a determined gleam in his eye, he packed a tiny satchel filled with cheese, a sturdy walking stick, and bid farewell to his mouse friends.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 954
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 03:05:56 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 377
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 381
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999898
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_275733a50abb6915686feaff6b76796d
+
+{
+  "id": "chatcmpl-BeCGKw0AHSi1F3u0ZzPll86pE2VYI",
+  "object": "chat.completion",
+  "created": 1748919956,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver sets out on a journey to find new friends who share his love for adventure, packing cheese and a walking stick before saying goodbye to his mouse friends.",
         "refusal": null,
         "annotations": []
       },
@@ -263,47 +197,47 @@ X-Request-Id: req_229ae9df9c506a3dd4cb08f7f87330ce
   "service_tier": "default",
   "system_fingerprint": null
 }
-691 1639
+793 1653
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 488
+User-Agent: langchaingo-httprr
+Content-Length: 590
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Venturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 916
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"As Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 931
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:54 GMT
+Date: Tue, 03 Jun 2025 03:05:56 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 625
+Openai-Processing-Ms: 405
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 631
+X-Envoy-Upstream-Service-Time: 409
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9997
-X-Ratelimit-Remaining-Tokens: 49999897
-X-Ratelimit-Reset-Requests: 15ms
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999874
+X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_d85cc27e3c2f94660ac73b03cfdf60f0
+X-Request-Id: req_4ee5c5c004c266731c4883b1696fb7e9
 
 {
-  "id": "chatcmpl-BdUdRm3yhKtAmGfcNPg79noIhr3AG",
+  "id": "chatcmpl-BeCGKwe5eiAm1grQsFSxqZYIDnoRi",
   "object": "chat.completion",
-  "created": 1748752253,
+  "created": 1748919956,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Oliver explores the forest, excited and captivated by the beauty of nature. He discovers a clearing with a shimmering pond.",
+        "content": "Oliver encounters a majestic lion named Leo at a pond and eagerly asks if the lion would like to join him on a quest to find new friends.",
         "refusal": null,
         "annotations": []
       },
@@ -312,9 +246,75 @@ X-Request-Id: req_d85cc27e3c2f94660ac73b03cfdf60f0
     }
   ],
   "usage": {
-    "prompt_tokens": 89,
-    "completion_tokens": 26,
-    "total_tokens": 115,
+    "prompt_tokens": 114,
+    "completion_tokens": 30,
+    "total_tokens": 144,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+629 1664
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 426
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Leo raised his magnificent head, his golden eyes sparkling with curiosity. \"Greetings, Oliver! I must admit, I've never met a mouse with such courage. I would be honored to accompany you on your noble quest. Together, we shall forge an unbreakable bond of friendship!\"\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 942
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 03:05:57 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 433
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 437
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999913
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_f1f867e29c392f1b9c6a38a9bd50ac78
+
+{
+  "id": "chatcmpl-BeCGKIoK8SjBFfqgzZT8NA657Q04V",
+  "object": "chat.completion",
+  "created": 1748919956,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Leo, a magnificent and courageous character, offers to accompany Oliver on his noble quest, expressing a desire to forge a strong bond of friendship.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 80,
+    "completion_tokens": 28,
+    "total_tokens": 108,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -332,7 +332,7 @@ X-Request-Id: req_d85cc27e3c2f94660ac73b03cfdf60f0
 661 1665
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 458
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -343,26 +343,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:55 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 369
+Openai-Processing-Ms: 378
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 372
+X-Envoy-Upstream-Service-Time: 384
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999906
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_35382c68f16c374c353fec911575784a
+X-Request-Id: req_422258f962499ba4bc5beba9fc1e4197
 
 {
-  "id": "chatcmpl-BdUdT6L3IvaQPhdw6jlL6Tl71X635",
+  "id": "chatcmpl-BeCGMI3aHiD4MetchjIX5YOmNFdUl",
   "object": "chat.completion",
-  "created": 1748752255,
+  "created": 1748919958,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -395,76 +395,10 @@ X-Request-Id: req_35382c68f16c374c353fec911575784a
   "service_tier": "default",
   "system_fingerprint": null
 }
-874 1658
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 671
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Freddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 936
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:55 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 412
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 418
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999854
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_66ceabc4225d5e8f7508957dd761e48a
-
-{
-  "id": "chatcmpl-BdUdTcCkH0P2tSsfEfWbN8LX2YckD",
-  "object": "chat.completion",
-  "created": 1748752255,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Freddie, a frog with emerald-green skin, joins Oliver and Leo on their quest, forming a strong bond and finding true friendship along the way.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 133,
-    "completion_tokens": 31,
-    "total_tokens": 164,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
 838 1645
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 635
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -475,26 +409,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 371
+Openai-Processing-Ms: 399
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 374
+X-Envoy-Upstream-Service-Time: 404
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999862
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_774ef9c183b9218bbb4ecd1747be25e5
+X-Request-Id: req_286c6c0d2feca2f12e97ffda4e57cbf9
 
 {
-  "id": "chatcmpl-BdUdTztaiSo70tEj8qeR3WqxMT5ms",
+  "id": "chatcmpl-BeCGMqtUY56oV8yq6t5ETgnL7ysBd",
   "object": "chat.completion",
-  "created": 1748752255,
+  "created": 1748919958,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -527,47 +461,113 @@ X-Request-Id: req_774ef9c183b9218bbb4ecd1747be25e5
   "service_tier": "default",
   "system_fingerprint": null
 }
-848 1651
+874 1658
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 645
+User-Agent: langchaingo-httprr
+Content-Length: 671
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"And so, the courageous trio battled the lava monster. Leo roared, drawing the monster's attention, while Freddie and Oliver scurried through the maze of fiery rocks, narrowly dodging molten lava. Finally, they discovered the creature's weak spot—a tiny gem embedded in its chest.\n\nWith their combined efforts, they struck the vulnerable spot, causing the monster to crumble and dissolve into a cascade of ash. The forest rejoiced, as the once-threatening presence was banished forever.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 929
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Freddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 936
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 385
+Openai-Processing-Ms: 429
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 390
+X-Envoy-Upstream-Service-Time: 435
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999860
+X-Ratelimit-Remaining-Tokens: 49999854
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_42e4d18e7f3405f2fe742d9501215fdd
+X-Request-Id: req_47650f858505e52fc038adef32c48ac6
 
 {
-  "id": "chatcmpl-BdUdTJhQWN6MXSvL7DEMoHdZmDMUw",
+  "id": "chatcmpl-BeCGM98vg8SEfLsNeP1N8ce0gqOx3",
   "object": "chat.completion",
-  "created": 1748752255,
+  "created": 1748919958,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "A courageous trio battles a lava monster by exploiting its weak spot, causing it to crumble and dissolve, bringing peace to the forest.",
+        "content": "Freddie, a frog with emerald-green skin, joins Oliver and Leo on their quest, forming a strong bond and finding true friendship along the way.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 133,
+    "completion_tokens": 31,
+    "total_tokens": 164,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+848 1715
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 645
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"And so, the courageous trio battled the lava monster. Leo roared, drawing the monster's attention, while Freddie and Oliver scurried through the maze of fiery rocks, narrowly dodging molten lava. Finally, they discovered the creature's weak spot—a tiny gem embedded in its chest.\n\nWith their combined efforts, they struck the vulnerable spot, causing the monster to crumble and dissolve into a cascade of ash. The forest rejoiced, as the once-threatening presence was banished forever.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 993
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 03:05:58 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 496
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 499
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9998
+X-Ratelimit-Remaining-Tokens: 49999860
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_9e563c2abe67cd44f1705a8c3957df9f
+
+{
+  "id": "chatcmpl-BeCGMUPdilzBQfaZ4vXrkZ8xz9XfF",
+  "object": "chat.completion",
+  "created": 1748919958,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "A courageous trio battles a lava monster in a fiery maze, discovering its weak spot and defeating it with a combined effort, causing it to crumble and dissolve into ash, bringing peace to the forest.",
         "refusal": null,
         "annotations": []
       },
@@ -577,8 +577,8 @@ X-Request-Id: req_42e4d18e7f3405f2fe742d9501215fdd
   ],
   "usage": {
     "prompt_tokens": 119,
-    "completion_tokens": 27,
-    "total_tokens": 146,
+    "completion_tokens": 40,
+    "total_tokens": 159,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -596,7 +596,7 @@ X-Request-Id: req_42e4d18e7f3405f2fe742d9501215fdd
 714 1822
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 511
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -607,26 +607,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 554
+Openai-Processing-Ms: 622
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 559
+X-Envoy-Upstream-Service-Time: 625
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999894
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_1323c8506e0258fb65606bd485ee6651
+X-Request-Id: req_d194469ad3cb1fb7c86aaebf551a00a6
 
 {
-  "id": "chatcmpl-BdUdTIWYlLcO6hkxGCJ4aQgWqE7gP",
+  "id": "chatcmpl-BeCGMzG0Wl7NlZsH2y565tgGGLxnX",
   "object": "chat.completion",
-  "created": 1748752255,
+  "created": 1748919958,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -659,142 +659,10 @@ X-Request-Id: req_1323c8506e0258fb65606bd485ee6651
   "service_tier": "default",
   "system_fingerprint": null
 }
-621 1707
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 418
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"As Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 985
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:57 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 418
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 422
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999915
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_fbe14c40761f84280e72353ff4215593
-
-{
-  "id": "chatcmpl-BdUdUkaGsZvRPIU1tCLScvetXhx12",
-  "object": "chat.completion",
-  "created": 1748752256,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver, Leo, and Freddie are celebrated as heroes by the animals of the enchanted forest after their victory. The mouse who sought new friends not only found friendship but also became a hero.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 71,
-    "completion_tokens": 38,
-    "total_tokens": 109,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
-709 1758
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 506
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1035
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:57 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 509
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 516
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 50000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999894
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_e0a7401c0532afe074e8d1c1cf513b92
-
-{
-  "id": "chatcmpl-BdUdVDx7h2AgkAqfYC5bbmjS9Zzgb",
-  "object": "chat.completion",
-  "created": 1748752257,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Oliver, Leo, and Freddie form an inseparable bond, sharing their adventures and inspiring others with their courage and kindness in the enchanted forest. Their friendship blossoms, showing that true friendship transcends differences and size.",
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 84,
-    "completion_tokens": 44,
-    "total_tokens": 128,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": null
-}
 557 1682
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 354
 Authorization: Bearer test-api-key
 Content-Type: application/json
@@ -805,26 +673,26 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:57 GMT
+Date: Tue, 03 Jun 2025 03:06:00 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 397
+Openai-Processing-Ms: 384
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 402
+X-Envoy-Upstream-Service-Time: 387
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999932
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_4d18e7bed14dc103675140310c41c103
+X-Request-Id: req_6c6fe957ac6b7f303d4541b82fcf0587
 
 {
-  "id": "chatcmpl-BdUdVjM3mcuby1ICALnRsMX7IpP8q",
+  "id": "chatcmpl-BeCGNrTR6fjDlIJFlbbEfMp63Chgx",
   "object": "chat.completion",
-  "created": 1748752257,
+  "created": 1748919959,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -857,47 +725,47 @@ X-Request-Id: req_4d18e7bed14dc103675140310c41c103
   "service_tier": "default",
   "system_fingerprint": null
 }
-2588 1950
+621 1728
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Content-Length: 2384
+User-Agent: langchaingo-httprr
+Content-Length: 418
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Oliver, a small mouse living in a village in an enchanted forest, desires adventure and new friendships beyond the familiar surroundings of his fellow mice.\n\nOliver sets out on a journey to find new friends who share his thirst for excitement, packing cheese and a walking stick before saying goodbye to his mouse friends.\n\nOliver explores the forest, excited and captivated by the beauty of nature. He discovers a clearing with a shimmering pond.\n\nOliver encounters a majestic lion named Leo at a pond and eagerly asks if Leo would like to join him on a quest to find new friends.\n\nLeo, a magnificent and curious lion, offers to accompany Oliver, a courageous mouse, on his noble quest, forming a strong bond of friendship.\n\nOliver and Leo embark on an adventurous journey through meadows, trees, and rivers, meeting a frog named Freddie who helps them find hidden treasures.\n\nFreddie, a frog with emerald-green skin, joins Oliver and Leo on their quest, forming a strong bond and finding true friendship along the way.\n\nOliver, Leo, and Freddie encounter a lava monster in a forest near a volcano. Oliver comes up with a plan to defeat the creature.\n\nOliver urges his friends to work together, utilizing their unique strengths to defeat a monster. Leo will distract the monster with his strength and courage, while Freddie's agility and quick reflexes will help navigate the terrain. Oliver is confident that by combining their abilities, they will triumph.\n\nA courageous trio battles a lava monster by exploiting its weak spot, causing it to crumble and dissolve, bringing peace to the forest.\n\nOliver, Leo, and Freddie are celebrated as heroes by the animals of the enchanted forest after their victory. The mouse who sought new friends not only found friendship but also became a hero.\n\nOliver, Leo, and Freddie form an inseparable bond, sharing their adventures and inspiring others with their courage and kindness in the enchanted forest. Their friendship blossoms, showing that true friendship transcends differences and size.\n\nOliver's story, filled with magic, friendship, and bravery, becomes a timeless legend passed down through generations of forest dwellers, enchanting both young and old.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1227
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"As Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1005
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:59 GMT
+Date: Tue, 03 Jun 2025 03:06:00 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 845
+Openai-Processing-Ms: 452
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 850
+X-Envoy-Upstream-Service-Time: 458
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999429
+X-Ratelimit-Remaining-Tokens: 49999915
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_12868ba3f56743461fe2a8bcdd0da311
+X-Request-Id: req_9aec4a6e2cdbf8c4ed31f5d1cf1c0970
 
 {
-  "id": "chatcmpl-BdUdWMMJgKaFUEgCoutWHpJMgxi08",
+  "id": "chatcmpl-BeCGNpfpNEWoGB4da4ADLqA4nzZFg",
   "object": "chat.completion",
-  "created": 1748752258,
+  "created": 1748919959,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Oliver, a small mouse, seeks adventure and new friendships beyond his village in an enchanted forest. He meets Leo, a lion, and Freddie, a frog, forming a strong bond as they embark on a quest together. The trio defeats a lava monster, becoming heroes and inspiring others in the forest. Their friendship blossoms, showing that true friendship transcends differences. Oliver's story becomes a timeless legend in the enchanted forest.",
+        "content": "Oliver, Leo, and Freddie are celebrated as heroes by the animals of the enchanted forest after their victory. The mouse who sought new friends not only found the true meaning of friendship but also became a hero.",
         "refusal": null,
         "annotations": []
       },
@@ -906,9 +774,141 @@ X-Request-Id: req_12868ba3f56743461fe2a8bcdd0da311
     }
   ],
   "usage": {
-    "prompt_tokens": 455,
-    "completion_tokens": 86,
-    "total_tokens": 541,
+    "prompt_tokens": 71,
+    "completion_tokens": 42,
+    "total_tokens": 113,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+709 1745
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 506
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1022
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 03:06:00 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 468
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 473
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999894
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_6073bf1869f931a1cc8e919badd8539a
+
+{
+  "id": "chatcmpl-BeCGNX6a5XSjvMbEPv1vOARpg7Ih9",
+  "object": "chat.completion",
+  "created": 1748919959,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, Leo, and Freddie form an inseparable bond in the enchanted forest, inspiring others with their courage and kindness. Their adventures and friendships flourish, showing that true friendship transcends differences and size.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 84,
+    "completion_tokens": 41,
+    "total_tokens": 125,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+2680 1952
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 2476
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Oliver, a small mouse living in a village in an enchanted forest, desires adventure and new friendships beyond the familiar surroundings of his fellow mice.\n\nOliver sets out on a journey to find new friends who share his love for adventure, packing cheese and a walking stick before saying goodbye to his mouse friends.\n\nOliver explores the forest, excited and captivated by the sights and sounds of nature. He discovers a clearing with a shimmering pond.\n\nOliver encounters a majestic lion named Leo at a pond and eagerly asks if the lion would like to join him on a quest to find new friends.\n\nLeo, a magnificent and courageous character, offers to accompany Oliver on his noble quest, expressing a desire to forge a strong bond of friendship.\n\nOliver and Leo embark on an adventurous journey through meadows, trees, and rivers, meeting a frog named Freddie who helps them find hidden treasures.\n\nFreddie, a frog with emerald-green skin, joins Oliver and Leo on their quest, forming a strong bond and finding true friendship along the way.\n\nOliver, Leo, and Freddie encounter a lava monster in a forest near a volcano. Oliver comes up with a plan to defeat the creature.\n\nOliver urges his friends to work together, utilizing their unique strengths to defeat a monster. Leo will distract the monster with his strength and courage, while Freddie's agility and quick reflexes will help navigate the terrain. Oliver is confident that by combining their abilities, they will triumph.\n\nA courageous trio battles a lava monster in a fiery maze, discovering its weak spot and defeating it with a combined effort, causing it to crumble and dissolve into ash, bringing peace to the forest.\n\nOliver, Leo, and Freddie are celebrated as heroes by the animals of the enchanted forest after their victory. The mouse who sought new friends not only found the true meaning of friendship but also became a hero.\n\nOliver, Leo, and Freddie form an inseparable bond in the enchanted forest, inspiring others with their courage and kindness. Their adventures and friendships flourish, showing that true friendship transcends differences and size.\n\nOliver's story, filled with magic, friendship, and bravery, becomes a timeless legend passed down through generations of forest dwellers, enchanting both young and old.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1229
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 03:06:01 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 710
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 712
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999406
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_e5aea6595ff97e29b6299f5296dfcfb1
+
+{
+  "id": "chatcmpl-BeCGP99ETWMhwSiRTf27xOnMPZCoz",
+  "object": "chat.completion",
+  "created": 1748919961,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse, seeks adventure and new friendships beyond his village in an enchanted forest. He sets out on a journey with a lion named Leo and a frog named Freddie, forming a strong bond and defeating a lava monster together. The trio becomes celebrated heroes in the forest, inspiring others with their courage and kindness. Oliver's story of magic, friendship, and bravery becomes a timeless legend in the enchanted forest.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 471,
+    "completion_tokens": 84,
+    "total_tokens": 555,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0

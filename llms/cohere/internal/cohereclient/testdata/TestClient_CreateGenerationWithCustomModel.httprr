@@ -1,32 +1,32 @@
 httprr trace v1
-259 1646
+259 1293
 POST https://api.cohere.ai/v1/generate HTTP/1.1
 Host: api.cohere.ai
-User-Agent: Go-http-client/1.1
+User-Agent: langchaingo-httprr
 Content-Length: 67
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"prompt":"What is the capital of France?","model":"command-light"}HTTP/2.0 200 OK
-Content-Length: 922
+Content-Length: 571
 Access-Control-Expose-Headers: X-Debug-Trace-ID
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
 Content-Type: application/json
-Date: Sun, 01 Jun 2025 04:30:56 GMT
+Date: Tue, 03 Jun 2025 03:05:55 GMT
 Expires: Thu, 01 Jan 1970 00:00:00 UTC
-Num_chars: 669
-Num_tokens: 123
+Num_chars: 320
+Num_tokens: 69
 Pragma: no-cache
 Server: envoy
 Vary: Origin
 Via: 1.1 google
 X-Accel-Expires: 0
 X-Api-Warning: unknown field: parameter 'model' is not a valid field
-X-Debug-Trace-Id: e4ee93eb032ef72e14463abfc76662ef
+X-Debug-Trace-Id: e6cf17c28ec694e0e5db26ecc9127cb9
 X-Endpoint-Monthly-Call-Limit: 1000
-X-Envoy-Upstream-Service-Time: 1143
+X-Envoy-Upstream-Service-Time: 632
 X-Trial-Endpoint-Call-Limit: 40
-X-Trial-Endpoint-Call-Remaining: 38
+X-Trial-Endpoint-Call-Remaining: 39
 
-{"id":"9ccf714a-f7f9-4d01-a714-f66aded55eeb","generations":[{"id":"b4e56ad3-b64c-4f95-9c43-c7be4c20c7b3","text":" Paris, France is recognized as the capital and political center of France. It holds significant landmarks and as well as iconic monuments like the Eiffel Tower, as well as cultural institutions and governmental buildings. \n\nThe name capital of France is based on legislative and administrative purposes, while other major cities like Lyon, Marseille, and Toulouse are also significant regional hubs. \n\nThese remain major centers of economic and cultural activities, but the administrative capital is a de facto economic and tour center and is often where many businesses decide to locate. It is not a official standing capital of France. ","finish_reason":"COMPLETE"}],"prompt":"What is the capital of France?","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":7,"output_tokens":116}}}
+{"id":"7f718f8f-2093-4e1e-a1e8-17a45c8cc232","generations":[{"id":"3f5c647d-7331-4cab-b69d-fe7bed34b602","text":" Paris, France is well-known as its iconic landmarks, such as the Eiffel Tower, the Louvre Museum, Notre-Dame Cathedral, and many more historical and artistic destinations. \n\nWould you like me to help you answer any other questions about France? or other multiple things? a typical France?\n","finish_reason":"COMPLETE"}],"prompt":"What is the capital of France?","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":7,"output_tokens":62}}}
