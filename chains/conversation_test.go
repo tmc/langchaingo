@@ -39,6 +39,13 @@ func TestConversationWithZepMemory(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
+	if zepKey := os.Getenv("ZEP_API_KEY"); zepKey == "" {
+		t.Skip("ZEP_API_KEY not set")
+	}
+	if sessionID := os.Getenv("ZEP_SESSION_ID"); sessionID == "" {
+		t.Skip("ZEP_SESSION_ID not set")
+	}
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 
