@@ -17,6 +17,7 @@ import (
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -25,6 +26,11 @@ import (
 
 func getEnvVariables(t *testing.T) (string, string, string) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
 
 	var osUser string
 	var osPassword string

@@ -12,11 +12,17 @@ import (
 	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
 )
 
 func runTestContainer(t *testing.T) string {
 	t.Helper()
+
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
 	ctx := context.Background()
 
 	mongoContainer, err := mongodb.Run(
@@ -54,8 +60,9 @@ func runTestContainer(t *testing.T) string {
 }
 
 func TestMongoDBChatMessageHistory(t *testing.T) {
-	ctx := context.Background()
 	t.Parallel()
+	testctr.SkipIfDockerNotAvailable(t)
+	ctx := context.Background()
 
 	url := runTestContainer(t)
 	_, err := NewMongoDBChatMessageHistory(ctx, WithSessionID("test"))

@@ -14,12 +14,19 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 )
 
 func Test(t *testing.T) {
-	ctx := context.Background()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
 	t.Parallel()
+	ctx := context.Background()
 
 	// export LANGCHAINGO_TEST_POSTGRESQL=postgres://db_user:mysecretpassword@localhost:5438/test?sslmode=disable
 	pgURI := os.Getenv("LANGCHAINGO_TEST_POSTGRESQL")

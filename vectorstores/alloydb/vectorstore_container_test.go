@@ -17,6 +17,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/util/alloydbutil"
@@ -25,7 +26,12 @@ import (
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
 	ctx := context.Background()
+	if testing.Short() {
+		t.Skip("skipping alloydb vectorstore tests in short mode")
+	}
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
@@ -114,6 +120,9 @@ func createOpenAIEmbedderForContainer(t *testing.T) *embeddings.EmbedderImpl {
 
 func initVectorStore(t *testing.T) (alloydb.VectorStore, func() error) {
 	t.Helper()
+	if testing.Short() {
+		t.Skip("Skipping alloydb vectorstore tests in short mode")
+	}
 	pgEngine := setEngineWithImage(t)
 	ctx := context.Background()
 	vectorstoreTableoptions := alloydbutil.VectorstoreTableOptions{

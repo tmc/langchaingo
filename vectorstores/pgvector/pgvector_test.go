@@ -19,6 +19,7 @@ import (
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
@@ -90,6 +91,11 @@ func createOpenAILLMAndEmbedder(t *testing.T) (llm *openai.LLM, e *embeddings.Em
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {

@@ -15,6 +15,7 @@ import (
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama"
 	"github.com/tmc/langchaingo/schema"
@@ -27,8 +28,13 @@ const (
 	ollamaChatModel      = "gemma3:1b"
 )
 
-func getValues(t *testing.T) (string, string) {
+func getTestURIs(t *testing.T) (string, string) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
 
 	// Default to localhost if OLLAMA_HOST not set
 	ollamaURL := os.Getenv("OLLAMA_HOST")
@@ -75,7 +81,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getValues(t)
+	redisURL, ollamaURL := getTestURIs(t)
 	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
 	index := "test_case1"
 
@@ -166,7 +172,7 @@ func TestAddDocuments(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getValues(t)
+	redisURL, ollamaURL := getTestURIs(t)
 	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
 
 	index := "test_add_document"
@@ -253,7 +259,7 @@ func TestSimilaritySearch(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getValues(t)
+	redisURL, ollamaURL := getTestURIs(t)
 	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
 
 	index := "test_similarity_search"
@@ -343,7 +349,7 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getValues(t)
+	redisURL, ollamaURL := getTestURIs(t)
 	llm, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
 	index := "test_redis_vector_as_retriever"
 
@@ -401,7 +407,7 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getValues(t)
+	redisURL, ollamaURL := getTestURIs(t)
 	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 

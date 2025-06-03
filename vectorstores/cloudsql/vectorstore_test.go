@@ -100,6 +100,9 @@ func setEngine(t *testing.T, envVariables EnvVariables) cloudsqlutil.PostgresEng
 
 func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore, func() error) {
 	t.Helper()
+	if testing.Short() {
+		t.Skip("skipping cloudsql tests in short mode")
+	}
 	pgEngine := setEngine(t, envVariables)
 	ctx := context.Background()
 	vectorstoreTableoptions := cloudsqlutil.VectorstoreTableOptions{

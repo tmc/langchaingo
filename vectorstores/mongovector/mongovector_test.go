@@ -21,6 +21,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -59,8 +60,12 @@ type testEnv struct {
 // This ensures the MongoDB Atlas Local container is properly terminated
 // even if tests fail or panic.
 func TestMain(m *testing.M) {
-	// Run tests
-	code := m.Run()
+	// Setup container environment
+	code := testctr.EnsureTestEnv()
+	if code == 0 {
+		// Run tests
+		code = m.Run()
+	}
 
 	// Cleanup shared container if it was created
 	if sharedTestEnv != nil && sharedTestEnv.container != nil {
@@ -444,7 +449,7 @@ type simSearchTest struct {
 func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	t.Helper()
 
-	emb := setupTestEmbedder(t, store, test)
+	emb, options := setupTestEmbedder(t, store, test)
 
 	ctx := context.Background()
 	err := flushMockDocuments(ctx, store, emb)
@@ -471,7 +476,7 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 			time.Sleep(sleepTime)
 		}
 
-		raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, test.options...)
+		raw, err := store.SimilaritySearch(test.ctx, "", test.numDocuments, options...)
 
 		if test.wantErr != "" {
 			if err == nil || !strings.Contains(err.Error(), test.wantErr) {
@@ -495,8 +500,8 @@ func runSimilaritySearchTest(t *testing.T, store Store, test simSearchTest) {
 	t.Fatalf("all %d attempts failed, last error: %v", maxAttempts, lastErr)
 }
 
-// setupTestEmbedder configures the embedder for the test
-func setupTestEmbedder(t *testing.T, store Store, test simSearchTest) *mockEmbedder {
+// setupTestEmbedder configures the embedder for the test and returns updated options
+func setupTestEmbedder(t *testing.T, store Store, test simSearchTest) (*mockEmbedder, []vectorstores.Option) {
 	t.Helper()
 
 	// Merge options
@@ -506,6 +511,8 @@ func setupTestEmbedder(t *testing.T, store Store, test simSearchTest) *mockEmbed
 	}
 
 	var emb *mockEmbedder
+	options := test.options
+
 	if opts.Embedder != nil {
 		var ok bool
 		emb, ok = opts.Embedder.(*mockEmbedder)
@@ -519,9 +526,9 @@ func setupTestEmbedder(t *testing.T, store Store, test simSearchTest) *mockEmbed
 		emb = newMockEmbedder(len(semb.queryVector))
 		emb.mockDocuments(test.seed...)
 
-		test.options = append(test.options, vectorstores.WithEmbedder(emb))
+		options = append(options, vectorstores.WithEmbedder(emb))
 	}
-	return emb
+	return emb, options
 }
 
 // verifySearchResults checks if the search results match expectations

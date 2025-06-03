@@ -14,13 +14,20 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 	_ "github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 )
 
 func Test(t *testing.T) {
-	ctx := context.Background()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
 	t.Parallel()
+	ctx := context.Background()
 
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")

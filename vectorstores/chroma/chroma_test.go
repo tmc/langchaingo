@@ -17,6 +17,7 @@ import (
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -573,6 +574,11 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
 
 	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
