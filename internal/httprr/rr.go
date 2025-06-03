@@ -8,6 +8,9 @@
 // is controlled by the -httprecord flag, which is defined by this package
 // only in test programs (built by “go test”).
 // See the [Open] documentation for more details.
+//
+// Note: This package has been adapted for use in the LangChainGo library with convienence
+// functions for creating [RecordReplay] instances that are suitable for testing.
 package httprr
 
 import (
@@ -552,7 +555,11 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { rr.Close() })
+	t.Cleanup(func() {
+		if err := rr.Close(); err != nil {
+			t.Logf("httprr: failed to close RecordReplay: %v", err)
+		}
+	})
 	return rr
 }
 
@@ -563,7 +570,6 @@ func cleanupExistingFiles(t *testing.T, baseFilename string) {
 
 	for _, filename := range filesToCheck {
 		if _, err := os.Stat(filename); err == nil {
-			t.Logf("httprr: removing existing file %s", filename)
 			if err := os.Remove(filename); err != nil {
 				t.Logf("httprr: warning - failed to remove %s: %v", filename, err)
 			}
@@ -809,6 +815,7 @@ func getDefaultRequestScrubbers() []func(*http.Request) error {
 			if req.Header.Get("openai-organization") != "" {
 				req.Header.Set("openai-organization", "lcgo-tst")
 			}
+			req.Header.Set("User-Agent", "langchaingo-httprr")
 
 			return nil
 		},
