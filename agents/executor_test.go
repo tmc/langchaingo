@@ -115,7 +115,7 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), a, "What is 5 plus 3? Please calculate this.") //nolint:lll
+	result, err := chains.Run(ctx, a, "What is 5 plus 3? Please calculate this.") //nolint:lll
 	require.NoError(t, err)
 
 	t.Logf("MRKL Agent response: %s", result)

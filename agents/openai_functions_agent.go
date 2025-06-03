@@ -260,19 +260,69 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 		if ok {
 			toolInput = toolInputCheck
 		}
+
+		toolInput := toolInputStr
+		if arg1, ok := toolInputMap["__arg1"]; ok {
+			toolInputCheck, ok := arg1.(string)
+			if ok {
+				toolInput = toolInputCheck
+			}
+		}
+
+		contentMsg := "\n"
+		if choice.Content != "" {
+			contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+		}
+
+		return []schema.AgentAction{
+			{
+				Tool:      functionName,
+				ToolInput: toolInput,
+				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:    toolCall.ID,
+			},
+		}, nil, nil
 	}
 
-	contentMsg := "\n"
-	if choice.Content != "" {
-		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+	// Check for legacy function call
+	if choice.FuncCall != nil {
+		functionCall := choice.FuncCall
+		functionName := functionCall.Name
+		toolInputStr := functionCall.Arguments
+		toolInputMap := make(map[string]any, 0)
+		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		toolInput := toolInputStr
+		if arg1, ok := toolInputMap["__arg1"]; ok {
+			toolInputCheck, ok := arg1.(string)
+			if ok {
+				toolInput = toolInputCheck
+			}
+		}
+
+		contentMsg := "\n"
+		if choice.Content != "" {
+			contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+		}
+
+		return []schema.AgentAction{
+			{
+				Tool:      functionName,
+				ToolInput: toolInput,
+				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:    "", // Legacy function calls don't have tool IDs
+			},
+		}, nil, nil
 	}
 
-	return []schema.AgentAction{
-		{
-			Tool:      functionName,
-			ToolInput: toolInput,
-			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-			ToolID:    choice.ToolCalls[0].ID,
+	// No function/tool call - this is a finish
+	return nil, &schema.AgentFinish{
+		ReturnValues: map[string]any{
+			"output": choice.Content,
 		},
-	}, nil, nil
+		Log: choice.Content,
+	}, nil
 }
