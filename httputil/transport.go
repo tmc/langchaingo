@@ -1,4 +1,3 @@
-// Package httputil provides HTTP utilities for LangChainGo.
 package httputil
 
 import (
@@ -7,24 +6,39 @@ import (
 
 var (
 	// DefaultTransport is the default HTTP transport for LangChainGo.
-	// It adds a User-Agent header with version information.
+	// It wraps [http.DefaultTransport] and adds a User-Agent header containing
+	// the LangChainGo version, program information, and system details.
+	// This transport is suitable for use with httprr in tests.
 	DefaultTransport http.RoundTripper = &Transport{
 		Transport: http.DefaultTransport,
 	}
 
 	// DefaultClient is the default HTTP client for LangChainGo.
-	// It includes a User-Agent header with version information.
+	// It uses [DefaultTransport] to automatically include proper User-Agent
+	// headers in all requests. This client is recommended for all LangChainGo
+	// HTTP operations unless custom transport behavior is required.
 	DefaultClient = &http.Client{
 		Transport: DefaultTransport,
 	}
 )
 
-// Transport is a custom [http.RoundTripper] that adds a User-Agent header.
+// Transport is an [http.RoundTripper] that adds LangChainGo User-Agent headers
+// to outgoing HTTP requests. It wraps another RoundTripper (typically
+// [http.DefaultTransport]) and can be used to add User-Agent headers to any
+// HTTP client.
+//
+// If the wrapped request already has a User-Agent header, the LangChainGo
+// User-Agent is appended to it rather than replacing it.
 type Transport struct {
+	// Transport is the underlying [http.RoundTripper] to use.
+	// If nil, [http.DefaultTransport] is used.
 	Transport http.RoundTripper
 }
 
-// RoundTrip executes a single HTTP transaction.
+// RoundTrip implements the [http.RoundTripper] interface. It adds the LangChainGo
+// User-Agent header to the request and then delegates to the underlying transport.
+// If the request already has a User-Agent header, the LangChainGo information is
+// appended to preserve existing client identification.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	transport := t.Transport
 	if transport == nil {

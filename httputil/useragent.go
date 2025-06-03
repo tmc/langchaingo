@@ -19,7 +19,7 @@ var (
 func UserAgent() string {
 	userAgentOnce.Do(func() {
 		parts := []string{}
-		
+
 		// Get build info once
 		if info, ok := debug.ReadBuildInfo(); ok {
 			// Add program name if available
@@ -27,7 +27,7 @@ func UserAgent() string {
 				name := info.Main.Path[strings.LastIndex(info.Main.Path, "/")+1:]
 				parts = append(parts, name+"/devel")
 			}
-			
+
 			// Add langchaingo version
 			langchainVer := "devel"
 			for _, dep := range info.Deps {
@@ -41,11 +41,11 @@ func UserAgent() string {
 			// Fallback if no build info
 			parts = append(parts, "langchaingo/devel")
 		}
-		
+
 		// Add Go version and platform
 		parts = append(parts, fmt.Sprintf("Go/%s", runtime.Version()))
 		parts = append(parts, fmt.Sprintf("(%s %s)", runtime.GOOS, runtime.GOARCH))
-		
+
 		userAgent = strings.Join(parts, " ")
 	})
 	return userAgent
