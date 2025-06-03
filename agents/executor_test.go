@@ -137,9 +137,11 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	e := agents.NewExecutor(a)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
+	result, err := chains.Run(context.Background(), e, "when was the Go programming language tagged version 1.0?") //nolint:lll
 	require.NoError(t, err)
 
-	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
-		"correct answer 47 or 49 not in response")
+	t.Logf("Result: %s", result)
+
+	require.True(t, strings.Contains(result, "2012") || strings.Contains(result, "March"),
+		"correct answer 2012 or March not in response")
 }
