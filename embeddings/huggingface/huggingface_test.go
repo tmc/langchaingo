@@ -2,25 +2,29 @@ package huggingface
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/llms/huggingface"
 )
 
 func TestHuggingfaceEmbeddings(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
-	hfToken := os.Getenv("HF_TOKEN")
-	huggingfaceToken := os.Getenv("HUGGINGFACEHUB_API_TOKEN")
-	if hfToken == "" && huggingfaceToken == "" {
-		t.Skip("HF_TOKEN or HUGGINGFACEHUB_API_TOKEN not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
 
-	e, err := NewHuggingface()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Create HuggingFace client with httprr HTTP client
+	hfClient, err := huggingface.New(huggingface.WithHTTPClient(rr.Client()))
+	require.NoError(t, err)
+
+	e, err := NewHuggingface(WithClient(*hfClient))
 	require.NoError(t, err)
 
 	_, err = e.EmbedQuery(ctx, "Hello world!")

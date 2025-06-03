@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
