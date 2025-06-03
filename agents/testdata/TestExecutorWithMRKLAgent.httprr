@@ -7,32 +7,32 @@ Content-Length: 1196
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 02, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
 Content-Length: 915
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:56 GMT
+Date: Tue, 03 Jun 2025 08:47:23 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1509
+Openai-Processing-Ms: 2028
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1516
+X-Envoy-Upstream-Service-Time: 2032
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 999738
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 15ms
-X-Request-Id: req_12b88b261d4031f1e5a38c0147fc94f7
+X-Request-Id: req_d13632ee56799b711b07fc5a2db8fe6f
 
 {
-  "id": "chatcmpl-BeCGJSbMP7RMEMPE9UUjej3QDcyaf",
+  "id": "chatcmpl-BeHajjIAXo8Gp5V5Mt2GUbQZMuRlf",
   "object": "chat.completion",
-  "created": 1748919955,
+  "created": 1748940441,
   "model": "gpt-4-0613",
   "choices": [
     {
@@ -65,7 +65,7 @@ X-Request-Id: req_12b88b261d4031f1e5a38c0147fc94f7
   "service_tier": "default",
   "system_fingerprint": null
 }
-1549 1576
+1549 1589
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -73,39 +73,39 @@ Content-Length: 1345
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 02, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 855
+{"model":"gpt-4","messages":[{"role":"user","content":"Today is June 03, 2025.\nAnswer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+Content-Length: 866
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 03:05:59 GMT
+Date: Tue, 03 Jun 2025 08:47:26 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 841
+Openai-Processing-Ms: 1418
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 846
+X-Envoy-Upstream-Service-Time: 1428
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 999702
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 17ms
-X-Request-Id: req_57c1c28c6330325fdf23998344a72e13
+X-Request-Id: req_aa9f7d72aae67e91716ed68ac5a53fca
 
 {
-  "id": "chatcmpl-BeCGMJZg1IsZQ4JXxYE2twmVyfXM0",
+  "id": "chatcmpl-BeHamdAWBNDiTHgo6fqbReH5Qf51u",
   "object": "chat.completion",
-  "created": 1748919958,
+  "created": 1748940444,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Thought: I now know the final answer.\nFinal Answer: The answer is 8.",
+        "content": "Thought: I now know the final answer\nFinal Answer: The result of 5 plus 3 is 8.",
         "refusal": null,
         "annotations": []
       },
@@ -115,8 +115,8 @@ X-Request-Id: req_57c1c28c6330325fdf23998344a72e13
   ],
   "usage": {
     "prompt_tokens": 277,
-    "completion_tokens": 18,
-    "total_tokens": 295,
+    "completion_tokens": 24,
+    "total_tokens": 301,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
