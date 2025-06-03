@@ -245,9 +245,10 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 
 			// If this is the final chunk, set the complete content and call fn
 			if resp.Done {
-				if finalResp.Message != nil {
-					finalResp.Message.Content = accumulatedContent
+				if finalResp.Message == nil {
+					finalResp.Message = &Message{}
 				}
+				finalResp.Message.Content = accumulatedContent
 				return fn(finalResp)
 			}
 
@@ -297,11 +298,11 @@ func (c *Client) Pull(ctx context.Context, req *PullRequest) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("error during pull: %w", err)
 	}
 
-	// Check the final status
-	if lastResponse.Status != "success" && lastResponse.Error != "" {
+	// Check the final status if we have a response
+	if lastResponse.Error != "" {
 		return fmt.Errorf("pull failed: %s", lastResponse.Error)
 	}
 
