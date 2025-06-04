@@ -17,6 +17,7 @@ type options struct {
 	system              string
 	format              string
 	keepAlive           string
+	tools               []ollamaclient.Tool
 }
 
 type Option func(*options)
@@ -262,5 +263,12 @@ func WithPredictMirostatEta(val float32) Option {
 func WithPredictPenalizeNewline(val bool) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.PenalizeNewline = val
+	}
+}
+
+// WithTools Provide tools description to the model. The model should support it.
+func WithTools(val []ollamaclient.Tool) Option {
+	return func(opts *options) {
+		opts.tools = val
 	}
 }
