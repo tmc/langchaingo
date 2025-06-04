@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
-	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"slices"
+	"sort"
 	"strings"
 )
 
@@ -194,6 +193,15 @@ func run(fix bool) error {
 	return nil
 }
 
+// mapKeys returns a slice of keys from a map[string]bool
+func mapKeys(m map[string]bool) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 // checkMissingExampleGoModFiles checks if the example directories have go.mod files.
 func checkMissingExampleGoModFiles(fix bool) error {
 	examplePaths, _ := filepath.Glob("./examples/*/*.go")
@@ -212,7 +220,9 @@ func checkMissingExampleGoModFiles(fix bool) error {
 	}
 	// Find missing go.mod directories
 	var errs []error
-	for _, dir := range slices.Sorted(maps.Keys(allDirs)) {
+	dirs := mapKeys(allDirs)
+	sort.Strings(dirs)
+	for _, dir := range dirs {
 		if _, ok := okDirs[dir]; !ok {
 			if fix {
 				errs = append(errs, fixMissingExampleGoModFile(dir))
@@ -616,11 +626,8 @@ func clearKnownIssues() {
 
 // saveKnownIssuesToFile saves known issues to a file.
 func saveKnownIssuesToFile(filename string) error {
-	var issues []string
-	for issue := range knownIssues {
-		issues = append(issues, issue)
-	}
-	slices.Sort(issues)
+	issues := mapKeys(knownIssues)
+	sort.Strings(issues)
 
 	content := strings.Join(issues, "\n") + "\n"
 	return os.WriteFile(filename, []byte(content), 0o644)
