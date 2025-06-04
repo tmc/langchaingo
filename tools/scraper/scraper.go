@@ -18,6 +18,7 @@ const (
 	DefualtParallels = 2
 	DefualtDelay     = 3
 	DefualtAsync     = true
+	DefualtMaxPages  = 0
 )
 
 var ErrScrapingFailed = errors.New("scraper could not read URL, or scraping is not allowed for provided URL")
@@ -28,6 +29,7 @@ type Scraper struct {
 	Delay     int64
 	Blacklist []string
 	Async     bool
+	MaxPages  int
 }
 
 var _ tools.Tool = Scraper{}
@@ -46,6 +48,7 @@ func New(options ...Options) (*Scraper, error) {
 		Parallels: DefualtParallels,
 		Delay:     int64(DefualtDelay),
 		Async:     DefualtAsync,
+		MaxPages:  DefualtMaxPages,
 		Blacklist: []string{
 			"login",
 			"signup",
@@ -114,10 +117,24 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 	homePageLinks := make(map[string]bool)
 	scrapedLinks := make(map[string]bool)
 	scrapedLinksMutex := sync.RWMutex{}
+	pageCount := 0
+	pageCountMutex := sync.Mutex{}
 
 	c.OnRequest(func(r *colly.Request) {
 		if ctx.Err() != nil {
 			r.Abort()
+			return
+		}
+
+		if s.MaxPages > 0 {
+			pageCountMutex.Lock()
+			if pageCount >= s.MaxPages {
+				r.Abort()
+				pageCountMutex.Unlock()
+				return
+			}
+			pageCount++
+			pageCountMutex.Unlock()
 		}
 	})
 
