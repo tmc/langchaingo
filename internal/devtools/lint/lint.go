@@ -15,17 +15,11 @@ import (
 )
 
 var (
-	flagFix          = flag.Bool("fix", false, "fix issues found by linters")
-	flagPrepush      = flag.Bool("prepush", false, "run additional linters that need to pass before pushing to GitHub")
-	flagArchitecture = flag.Bool("architecture", false, "run linters that verify the package architecture and dependency graph")
-	flagNoChdir      = flag.Bool("no-chdir", false, "don't automatically change to repository root directory")
-	flagVerbose      = flag.Bool("v", false, "enable verbose output")
-	flagVeryVerbose  = flag.Bool("vv", false, "enable very verbose output")
-	// flagStrict is disabled until architecture checking is implemented
-	// flagStrict          = flag.Bool("strict", false, "treat all architecture issues as errors, including known issues").
-	flagKnownIssue      = flag.String("known-issue", "", "add a known issue to the list of issues that are only warnings (format: 'pkg imports otherpkg')")
-	flagKnownIssueFile  = flag.String("known-issue-file", "", "path to file containing known issues, one per line")
-	flagSaveKnownIssues = flag.String("save-known-issues", "", "path to file where to save known issues")
+	flagFix         = flag.Bool("fix", false, "fix issues found by linters")
+	flagPrepush     = flag.Bool("prepush", false, "run additional linters that need to pass before pushing to GitHub")
+	flagNoChdir     = flag.Bool("no-chdir", false, "don't automatically change to repository root directory")
+	flagVerbose     = flag.Bool("v", false, "enable verbose output")
+	flagVeryVerbose = flag.Bool("vv", false, "enable very verbose output")
 )
 
 func main() {
@@ -37,47 +31,6 @@ func main() {
 	if !*flagNoChdir {
 		if err := changeToRepoRoot(); err != nil {
 			log.Fatal(err)
-		}
-	}
-
-	// Load default known issues file if it exists
-	defaultKnownIssuesFile := filepath.Join("internal", "devtools", "lint", "known_issues.txt")
-	if _, err := os.Stat(defaultKnownIssuesFile); err == nil {
-		if err := loadKnownIssuesFile(defaultKnownIssuesFile); err != nil {
-			log.Printf("Warning: Failed to load default known issues file: %v", err)
-		} else if *flagVerbose {
-			log.Printf("Loaded default known issues from %s", defaultKnownIssuesFile)
-		}
-	}
-
-	// Process additional known issues
-	if *flagKnownIssue != "" {
-		addKnownIssue(*flagKnownIssue)
-		if *flagVerbose {
-			log.Printf("Added known issue: %s", *flagKnownIssue)
-		}
-	}
-
-	// Process specified known issues file (overrides default)
-	if *flagKnownIssueFile != "" {
-		// Clear previous known issues if loading a new file
-		clearKnownIssues()
-		if err := loadKnownIssuesFile(*flagKnownIssueFile); err != nil {
-			log.Fatalf("Error loading known issues file: %v", err)
-		}
-	}
-
-	// Save known issues if requested (do this before running checks)
-	if *flagSaveKnownIssues != "" {
-		if err := saveKnownIssuesToFile(*flagSaveKnownIssues); err != nil {
-			log.Fatalf("Error saving known issues: %v", err)
-		}
-		if *flagVerbose {
-			log.Printf("Saved known issues to %s", *flagSaveKnownIssues)
-		}
-		// If we're just saving known issues, exit successfully
-		if !*flagArchitecture && !*flagPrepush && !*flagFix {
-			return
 		}
 	}
 
@@ -150,22 +103,6 @@ func changeToRepoRoot() error {
 }
 
 func run(fix bool) error {
-	// For architecture mode, run checks related to code architecture
-	if *flagArchitecture {
-		log.Println("running in architecture mode, checking package dependencies and architecture")
-		if *flagVeryVerbose {
-			log.Println("running with very verbose debugging")
-		}
-
-		// Skip running tests when in architecture mode
-		// Tests can be run separately with `go test`
-
-		// Run the architecture checks
-		// if err := checkArchitecture(fix); err != nil {
-		return fmt.Errorf("checkArchitecture: not on this branch")
-		// }
-	}
-
 	// For prepush mode, run additional linters needed before pushing to GitHub
 	if *flagPrepush {
 		if *flagVerbose {
@@ -593,45 +530,6 @@ func fixRemoveReplaceDirectives(dir string) error {
 	return nil
 }
 
-// Known issues tracking functions.
-var knownIssues = make(map[string]bool)
-
-// loadKnownIssuesFile loads known issues from a file.
-func loadKnownIssuesFile(filename string) error {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line != "" && !strings.HasPrefix(line, "#") {
-			knownIssues[line] = true
-		}
-	}
-
-	return nil
-}
-
-// addKnownIssue adds a known issue to the list.
-func addKnownIssue(issue string) {
-	knownIssues[issue] = true
-}
-
-// clearKnownIssues clears the known issues list.
-func clearKnownIssues() {
-	knownIssues = make(map[string]bool)
-}
-
-// saveKnownIssuesToFile saves known issues to a file.
-func saveKnownIssuesToFile(filename string) error {
-	issues := mapKeys(knownIssues)
-	sort.Strings(issues)
-
-	content := strings.Join(issues, "\n") + "\n"
-	return os.WriteFile(filename, []byte(content), 0o644)
-}
 
 // checkHttprrCompression verifies that all httprr files are in compressed format.
 // This ensures the repository stays clean and git grep doesn't match against large trace files.
