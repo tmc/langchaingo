@@ -33,14 +33,11 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [stable, oldstable]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: go.mod
           cache: true
           check-latest: false
       - name: Build
@@ -49,14 +46,11 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [stable, oldstable]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: go.mod
           cache: true
           check-latest: false
       - name: Get Go version
@@ -83,22 +77,13 @@ jobs:
   test-race:
     name: test -race
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [stable, oldstable]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: "go.mod"
           cache: true
           check-latest: false
-      - name: Get Go version
-        id: go-version
-        run: |
-          GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
-          echo "Go version: $GO_VERSION"
-          echo "version=$GO_VERSION" >> $GITHUB_OUTPUT
       - name: Test with Race Detector
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

@@ -1,0 +1,32 @@
+httprr trace v1
+272 4360
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 80
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Once upon a time in a magical forest, there lived","model":"command"}HTTP/2.0 200 OK
+Content-Length: 3633
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:47:17 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Num_chars: 3337
+Num_tokens: 707
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: 72317ca0629e16ac5300d832ed471bc8
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 23594
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 38
+
+{"id":"92ea71ef-b15a-4e8b-8c7a-b3deabf81e32","generations":[{"id":"e39614cf-29c9-4769-ab61-7114bcfd1baf","text":" a wise old owl. He had lived through generations of creatures developing and growing roots in the forest. As the keeper of the forest's secrets, he knew all about the animals, plants, and magical creatures residing there.\n\nOne day, a young and curious elf wandered into the forest, drawn by the enchanting sounds and sights it contained. Stumbling upon the owl, who was sitting on a gnarled oak, she asked, \"Wise sir, can you please tell me the tale of this forest and all its secrets?\"\n\nThe owl, with his large, golden eyes, regarded the elf for a moment before answering. \"I will gladly share with you the ancient story of this forest,\" he said. \"But fair maiden, be prepared for a tale filled with wonder and unexpected twists.\"\n\nAnd so, perched on the branches of the oak tree, the owl began his narrative:\n\n\"In the beginning, when this forest was but a sapling, it was a place of serene beauty. Gentle creatures like rabbits and deer roamed freely, finding sustenance among the budding flora. The air was crisp and clean, and the sun painted the landscape with a warm, nourishing light. It was a haven of peace and harmony.\"\n\n\"However,\" continued the owl, \"that tranquility was disrupted when a rift appeared in the magical realm. A menacing shadow began to creep over the forest, transforming it into a place of uncertainty and danger. Some creatures reacted fearfully, their trust in the forest fading, while others rose to the challenge, determined to keep the balance and protect their home.\"\n\n\"Amidst this upheaval,\" said the owl, \"an extraordinary alliance formed. The animals and magical beings of the forest, driven by a profound sense of unity and purpose, banded together to face the rising threats. They used their unique abilities to shield one another, forging a resilient force that intimidated even the most sinister creatures.\"\n\n\"Their resilience was tested time and time again,\" the owl went on. \"For the forest had become a magnet for all manner of enigmatic foes. There were cunning foxes and mischievous pixies, both of whom had their roles in the intricate web of the forest's tale. Some were allies, and others posed as threats, but all were a part of the rich tapestry of this magical domain.\"\n\nThe elf, mesmerized by the owl's storytelling, sat silently, waiting for the conclusion of the tale. The owl's intense gaze seemed to search for the right words to conclude his story. \n\n\"And so,\" he said, spreading his wings majestically, \"the true tale of the magical forest lies not in the tranquility of its beginning or the darkness that crept in, but in the resilience and solidarity of its inhabitants. Through their unwavering dedication to their home and one another, they ensured that the forest stood resilient, growing stronger with each passing season. The story continues to unfold daily, and it is for those who call this place home to protect its mysteries and wonders.\" \n\nThe owl's eyes glimmered with wisdom as he delivered the conclusion of his tale. The elf sat in silence, absorbing the weight of the owl's words, and the magnitude of the responsibility entrusted to those who called the magical forest their home. \n\nAnd from that day on, the elf understood the profound importance of preserving the mysteries and magic of the mystical forest. ","finish_reason":"COMPLETE"}],"prompt":"Once upon a time in a magical forest, there lived","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":11,"output_tokens":696}}}

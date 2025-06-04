@@ -2,22 +2,25 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
 )
 
 func TestStuffDocuments(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	model, err := openai.New()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	model, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	prompt := prompts.NewPromptTemplate(
@@ -35,7 +38,7 @@ func TestStuffDocuments(t *testing.T) {
 		{PageContent: "baz"},
 	}
 
-	result, err := Call(context.Background(), chain, map[string]any{
+	result, err := Call(ctx, chain, map[string]any{
 		"input_documents": docs,
 	})
 	require.NoError(t, err)

@@ -43,6 +43,7 @@ var (
 	debug       = new(bool)
 	httpDebug   = new(bool)
 	recordDelay = new(time.Duration)
+	recordMu    sync.Mutex
 )
 
 func init() {
@@ -147,6 +148,8 @@ func Open(file string, rt http.RoundTripper) (*RecordReplay, error) {
 // for the given file.
 // It returns an error if the flag is set to an invalid value.
 func Recording(file string) (bool, error) {
+	recordMu.Lock()
+	defer recordMu.Unlock()
 	if *record != "" {
 		re, err := regexp.Compile(*record)
 		if err != nil {
@@ -157,6 +160,20 @@ func Recording(file string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+// setRecordForTesting sets the record flag value for testing purposes.
+// It returns a function that restores the original value.
+func setRecordForTesting(value string) func() {
+	recordMu.Lock()
+	defer recordMu.Unlock()
+	old := *record
+	*record = value
+	return func() {
+		recordMu.Lock()
+		defer recordMu.Unlock()
+		*record = old
+	}
 }
 
 // creates a new record-mode RecordReplay in the file.

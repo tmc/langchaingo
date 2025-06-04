@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
@@ -51,7 +51,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
 		token:      os.Getenv(tokenEnvVarName),
 		baseURL:    anthropicclient.DefaultBaseURL,
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {

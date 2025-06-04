@@ -21,6 +21,7 @@ func setUpTest() (*bedrockruntime.Client, error) {
 }
 
 func TestAmazonOutput(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	if os.Getenv("TEST_AWS") != "true" {
@@ -69,8 +70,6 @@ func TestAmazonOutput(t *testing.T) {
 		bedrock.ModelMetaLlama38bInstructV1,
 		bedrock.ModelMetaLlama370bInstructV1,
 	}
-
-	ctx := context.Background()
 
 	for _, model := range models {
 		t.Logf("Model output for %s:-", model)

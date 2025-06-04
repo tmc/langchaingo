@@ -43,6 +43,3 @@ require (
 	google.golang.org/grpc v1.70.0 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
 )
-
-// test for new pkg version
-replace github.com/tmc/langchaingo => ../..

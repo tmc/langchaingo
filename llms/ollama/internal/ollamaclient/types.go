@@ -168,3 +168,17 @@ type Options struct {
 	TopP             float32 `json:"top_p,omitempty"`
 	PenalizeNewline  bool    `json:"penalize_newline,omitempty"`
 }
+
+type PullRequest struct {
+	Model  string `json:"model"`
+	Stream bool   `json:"stream,omitempty"`
+}
+
+type PullResponse struct {
+	Status          string  `json:"status"`
+	Digest          string  `json:"digest,omitempty"`
+	Total           int64   `json:"total,omitempty"`
+	Completed       int64   `json:"completed,omitempty"`
+	DownloadPercent float64 `json:"percent,omitempty"`
+	Error           string  `json:"error,omitempty"`
+}

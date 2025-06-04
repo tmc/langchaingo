@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	zClient "github.com/getzep/zep-go/client"
 	zOption "github.com/getzep/zep-go/option"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/memory/zep"
@@ -17,27 +19,36 @@ import (
 
 func TestConversation(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationBuffer())
-	_, err = Run(context.Background(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(context.Background(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
 }
 
 func TestConversationWithZepMemory(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	zepAPIKey := os.Getenv("ZEP_API_KEY")
+	sessionID := os.Getenv("ZEP_SESSION_ID")
+	if zepAPIKey == "" || sessionID == "" {
+		t.Skip("ZEP_API_KEY or ZEP_SESSION_ID not set")
 	}
 	if zepKey := os.Getenv("ZEP_API_KEY"); zepKey == "" {
 		t.Skip("ZEP_API_KEY not set")
@@ -50,9 +61,8 @@ func TestConversationWithZepMemory(t *testing.T) {
 	require.NoError(t, err)
 
 	zc := zClient.NewClient(
-		zOption.WithAPIKey(os.Getenv("ZEP_API_KEY")),
+		zOption.WithAPIKey(zepAPIKey),
 	)
-	sessionID := os.Getenv("ZEP_SESSION_ID")
 
 	c := NewConversation(
 		llm,
@@ -64,34 +74,35 @@ func TestConversationWithZepMemory(t *testing.T) {
 			zep.WithAIPrefix("Robot"),
 		),
 	)
-	_, err = Run(context.Background(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(context.Background(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does not contain the keyword 'Jim'`)
 }
 
 func TestConversationWithChatLLM(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))
-	_, err = Run(context.Background(), c, "Hi! I'm Jim")
+	_, err = Run(ctx, c, "Hi! I'm Jim")
 	require.NoError(t, err)
 
-	res, err := Run(context.Background(), c, "What is my name?")
+	res, err := Run(ctx, c, "What is my name?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 
 	// this message will hit the maxTokenLimit and will initiate the prune of the messages to fit the context
-	res, err = Run(context.Background(), c, "Are you sure that my name is Jim?")
+	res, err = Run(ctx, c, "Are you sure that my name is Jim?")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(res, "Jim"), `result does contain the keyword 'Jim'`)
 }

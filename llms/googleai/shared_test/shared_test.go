@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
@@ -27,13 +28,14 @@ import (
 func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
 
-	genaiKey := os.Getenv("GENAI_API_KEY")
-	if genaiKey == "" {
-		t.Skip("GENAI_API_KEY not set")
-		return nil
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
 
-	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Configure client with httprr - httprr handles credentials automatically
+	opts = append(opts, googleai.WithRest(), googleai.WithHTTPClient(rr.Client()))
+
 	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
@@ -42,25 +44,13 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
-	// If credentials are set, use them. Otherwise, look for project env var.
-	if creds := os.Getenv("VERTEX_CREDENTIALS"); creds != "" {
-		opts = append(opts, googleai.WithCredentialsFile(creds))
-	} else {
-		project := os.Getenv("VERTEX_PROJECT")
-		if project == "" {
-			t.Skip("VERTEX_PROJECT not set")
-			return nil
-		}
-		location := os.Getenv("VERTEX_LOCATION")
-		if location == "" {
-			location = "us-central1"
-		}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "VERTEX_PROJECT")
 
-		opts = append(opts,
-			googleai.WithCloudProject(project),
-			googleai.WithCloudLocation(location),
-		)
-	}
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Configure client with httprr - httprr handles credentials automatically
+	opts = append(opts, googleai.WithHTTPClient(rr.Client()))
 
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)

@@ -2,13 +2,14 @@ package agents_test
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -54,6 +55,7 @@ func (a *testAgent) GetTools() []tools.Tool {
 
 func TestExecutorWithErrorHandler(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	a := &testAgent{
 		err: agents.ErrUnableToParseOutput,
@@ -64,7 +66,7 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 		agents.WithParserErrorHandler(agents.NewParserErrorHandler(nil)),
 	)
 
-	_, err := chains.Call(context.Background(), executor, nil)
+	_, err := chains.Call(ctx, executor, nil)
 	require.ErrorIs(t, err, agents.ErrNotFinished)
 	require.Equal(t, 3, a.numPlanCalls)
 	require.Equal(t, []schema.AgentStep{
@@ -75,18 +77,25 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 
 func TestExecutorWithMRKLAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Configure OpenAI client with httprr
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	// httprr handles credentials automatically
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -98,7 +107,7 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), a, "What is 5 plus 3? Please calculate this.") //nolint:lll
+	result, err := chains.Run(ctx, a, "What is 5 plus 3? Please calculate this.") //nolint:lll
 	require.NoError(t, err)
 
 	t.Logf("MRKL Agent response: %s", result)
@@ -108,18 +117,25 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 
 func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	// Configure OpenAI client with httprr
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	// httprr handles credentials automatically
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -137,7 +153,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	e := agents.NewExecutor(a)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), e, "when was the Go programming language tagged version 1.0?") //nolint:lll
+	result, err := chains.Run(ctx, e, "when was the Go programming language tagged version 1.0?") //nolint:lll
 	require.NoError(t, err)
 
 	t.Logf("Result: %s", result)
