@@ -22,6 +22,10 @@ type options struct {
 
 	// If supplied, the 'anthropic-beta' header will be added to the request with the given value.
 	anthropicBetaHeader string
+
+	cacheTools         bool
+	cacheSystemMessage bool
+	cacheChat          bool
 }
 
 type Option func(*options)
@@ -68,5 +72,26 @@ func WithLegacyTextCompletionsAPI() Option {
 func WithAnthropicBetaHeader(value string) Option {
 	return func(opts *options) {
 		opts.anthropicBetaHeader = value
+	}
+}
+
+// WithCacheTools enables caching of tool definitions. See https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+func WithCacheTools() Option {
+	return func(opts *options) {
+		opts.cacheTools = true
+	}
+}
+
+// WithCacheSystemMessage enables caching of the system message. See https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+func WithCacheSystemMessage() Option {
+	return func(opts *options) {
+		opts.cacheSystemMessage = true
+	}
+}
+
+// WithCacheChat enables caching of chat messages. See https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+func WithCacheChat() Option {
+	return func(opts *options) {
+		opts.cacheChat = true
 	}
 }
