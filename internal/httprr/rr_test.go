@@ -86,20 +86,24 @@ func TestRecordReplay(t *testing.T) {
 	//	2: Open with -httprecord="r+"
 	//	3: Open with -httprecord=""
 	for pass := range 4 {
-		start := open
-		h := always555
-		*record = ""
-		switch pass {
-		case 0:
-			start = create
-			h = handler
-		case 2:
-			start = Open
-			*record = "r+"
-			h = handler
-		case 3:
-			start = Open
-		}
+		func() {
+			start := open
+			h := always555
+			restore := setRecordForTesting("")
+			defer restore()
+			switch pass {
+			case 0:
+				start = create
+				h = handler
+			case 2:
+				start = Open
+				restore()
+				restore = setRecordForTesting("r+")
+				defer restore()
+				h = handler
+			case 3:
+				start = Open
+			}
 		rr, err := start(file, http.DefaultTransport)
 		if err != nil {
 			t.Fatal(err)
@@ -162,6 +166,7 @@ func TestRecordReplay(t *testing.T) {
 		if err := rr.Close(); err != nil {
 			t.Fatal(err)
 		}
+		}()
 	}
 
 	data, err := os.ReadFile(file)
@@ -201,11 +206,11 @@ func TestErrors(t *testing.T) {
 	}
 
 	// -httprecord regexp parsing
-	*record = "+"
+	restore := setRecordForTesting("+")
 	if _, err := Open(makeTmpFile(), nil); err == nil || !strings.Contains(err.Error(), "invalid -httprecord flag") {
 		t.Errorf("did not diagnose bad -httprecord: err = %v", err)
 	}
-	*record = ""
+	restore()
 
 	// invalid httprr trace
 	if _, err := Open(makeTmpFile(), nil); err == nil || !strings.Contains(err.Error(), "not an httprr trace") {
