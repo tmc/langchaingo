@@ -29,7 +29,6 @@ func TestLLMChain(t *testing.T) {
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
-	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)
 
@@ -70,14 +69,12 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	t.Cleanup(func() { rr.Close() })
 	model, err := googleai.New(ctx, googleai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
-	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
 	prompt := prompts.NewPromptTemplate(
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
-	require.NoError(t, err)
 
 	chain := NewLLMChain(model, prompt)
 
