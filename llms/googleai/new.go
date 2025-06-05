@@ -39,3 +39,8 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	gi.client = client
 	return gi, nil
 }
+
+// GetGenaiClient returns the underlying [genai.Client] which is used for communication with the Google AI API.
+func (g *GoogleAI) GetGenaiClient() *genai.Client {
+	return g.client
+}
