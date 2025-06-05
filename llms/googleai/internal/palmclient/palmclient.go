@@ -28,7 +28,7 @@ var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
 }
 
 const (
-	embeddingModelName = "textembedding-gecko"
+	embeddingModelName = "text-embedding-005"
 	TextModelName      = "text-bison"
 	ChatModelName      = "chat-bison"
 
