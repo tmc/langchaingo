@@ -21,7 +21,6 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
-	ToolConfig            *ToolConfig
 
 	ClientOptions []option.ClientOption
 }
@@ -188,30 +187,6 @@ const (
 	HarmBlockOnlyHigh HarmBlockThreshold = 3
 	// HarmBlockNone means all content will be allowed.
 	HarmBlockNone HarmBlockThreshold = 4
-)
-
-func WithToolConfig(config *ToolConfig) Option {
-	return func(opts *Options) {
-		opts.ToolConfig = config
-	}
-}
-
-type ToolConfig struct {
-	FunctionCallingConfig *FunctionCallingConfig
-}
-
-type FunctionCallingConfig struct {
-	Mode                 FunctionCallingMode
-	AllowedFunctionNames []string
-}
-
-type FunctionCallingMode int32
-
-const (
-	FunctionCallingModeUnspecified FunctionCallingMode = 0
-	FunctionCallingModeAuto        FunctionCallingMode = 1
-	FunctionCallingModeAny         FunctionCallingMode = 2
-	FunctionCallingModeNone        FunctionCallingMode = 3
 )
 
 // helper to inspect incoming client options for auth options.

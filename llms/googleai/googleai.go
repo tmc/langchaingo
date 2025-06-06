@@ -89,7 +89,7 @@ func (g *GoogleAI) GenerateContent(
 	}
 
 	// set tool config
-	model.ToolConfig = convertToolConfig(g.opts.ToolConfig)
+	model.ToolConfig = convertToolConfig(opts.ToolChoice)
 
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
@@ -123,28 +123,52 @@ func (g *GoogleAI) GenerateContent(
 	return response, nil
 }
 
-// convertToolConfig converts a ToolConfig to a genai.ToolConfig.
-func convertToolConfig(config *ToolConfig) *genai.ToolConfig {
-	if config == nil || config.FunctionCallingConfig == nil {
+// convertToolConfig converts a ToolChoice to a genai.ToolConfig.
+func convertToolConfig(config any) *genai.ToolConfig {
+	if config == nil {
 		return nil
 	}
 
 	var mode genai.FunctionCallingMode
-	switch config.FunctionCallingConfig.Mode {
-	case FunctionCallingModeUnspecified:
-		mode = genai.FunctionCallingUnspecified
-	case FunctionCallingModeAuto:
+	var allowedFunctionNames []string
+
+	switch c := config.(type) {
+	case string:
+		switch strings.ToLower(c) {
+		case "any":
+			mode = genai.FunctionCallingAny
+		case "none":
+			mode = genai.FunctionCallingNone
+		default:
+			mode = genai.FunctionCallingAuto
+		}
+	case []string:
+		if len(c) > 0 {
+			mode = genai.FunctionCallingAny
+			allowedFunctionNames = c
+		} else {
+			mode = genai.FunctionCallingAuto
+		}
+	case []interface{}:
+		if len(c) > 0 {
+			mode = genai.FunctionCallingAny
+			allowedFunctionNames = make([]string, len(c))
+			for i, v := range c {
+				if s, ok := v.(string); ok {
+					allowedFunctionNames[i] = s
+				}
+			}
+		} else {
+			mode = genai.FunctionCallingAuto
+		}
+	default:
 		mode = genai.FunctionCallingAuto
-	case FunctionCallingModeAny:
-		mode = genai.FunctionCallingAny
-	case FunctionCallingModeNone:
-		mode = genai.FunctionCallingNone
 	}
 
 	return &genai.ToolConfig{
 		FunctionCallingConfig: &genai.FunctionCallingConfig{
 			Mode:                 mode,
-			AllowedFunctionNames: config.FunctionCallingConfig.AllowedFunctionNames,
+			AllowedFunctionNames: allowedFunctionNames,
 		},
 	}
 }
