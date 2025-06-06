@@ -1,0 +1,28 @@
+httprr trace v1
+439 1537
+POST http://localhost:11434/api/chat HTTP/1.1
+Host: localhost:11434
+User-Agent: langchaingo-httprr
+Content-Length: 252
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gemma3:1b","messages":[{"role":"user","content":"How many feet are in a nautical mile? Respond with JSON containing the answer."}],"format":{"type":"object","properties":{"feet":{"type":"number","properties":{}}}},"options":{"temperature":0}}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Type: application/x-ndjson
+Date: Fri, 06 Jun 2025 08:47:45 GMT
+
+57d
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:45.955136Z","message":{"role":"assistant","content":"{\""},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:45.989993Z","message":{"role":"assistant","content":"feet"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.02758Z","message":{"role":"assistant","content":"\":"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.037475Z","message":{"role":"assistant","content":" "},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.047148Z","message":{"role":"assistant","content":"6"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.053092Z","message":{"role":"assistant","content":"0"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.058647Z","message":{"role":"assistant","content":"7"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.064159Z","message":{"role":"assistant","content":"6"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.069715Z","message":{"role":"assistant","content":"}"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-06T08:47:46.078645Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":917300917,"load_duration":610052375,"prompt_eval_count":25,"prompt_eval_duration":44651000,"eval_count":10,"eval_duration":148641334}
+
+0
+
