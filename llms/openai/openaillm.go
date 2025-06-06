@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -296,6 +297,24 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
+	}
+	if opts.JSONSchema != nil {
+		j, err := json.Marshal(opts.JSONSchema)
+		if err != nil {
+			return nil, err
+		}
+		var schema ResponseFormatJSONSchemaProperty
+		if err = json.Unmarshal(j, &schema); err != nil {
+			return nil, err
+		}
+		req.ResponseFormat = &ResponseFormat{
+			Type: "json_schema",
+			JSONSchema: &ResponseFormatJSONSchema{
+				Name:   schema.Type,
+				Strict: true,
+				Schema: &schema,
+			},
+		}
 	}
 
 	// since req.Functions is deprecated, we need to use the new Tools API.
