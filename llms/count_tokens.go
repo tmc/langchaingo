@@ -14,6 +14,7 @@ const (
 	_gpt35TurboContextSize   = 4096
 	_gpt432KContextSize      = 32768
 	_gpt4ContextSize         = 8192
+	_gpt4OMiniContextSize    = 128000
 	_textDavinci3ContextSize = 4097
 	_textBabbage1ContextSize = 2048
 	_textAda1ContextSize     = 2048
@@ -30,6 +31,7 @@ var modelToContextSize = map[string]int{
 	"gpt-3.5-turbo":    _gpt35TurboContextSize,
 	"gpt-4-32k":        _gpt432KContextSize,
 	"gpt-4":            _gpt4ContextSize,
+	"gpt-4o-mini":      _gpt4OMiniContextSize,
 	"text-davinci-003": _textDavinci3ContextSize,
 	"text-curie-001":   _textCurie1ContextSize,
 	"text-babbage-001": _textBabbage1ContextSize,
