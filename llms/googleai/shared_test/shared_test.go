@@ -95,6 +95,7 @@ var testConfigs = []testConfig{
 	{testTools, nil},
 	{testMultipleTools, nil},
 	{testToolsWithInterfaceRequired, nil},
+	{testToolConfig, nil},
 	{
 		testMultiContentText,
 		[]googleai.Option{googleai.WithHarmThreshold(googleai.HarmBlockMediumAndAbove)},
@@ -728,5 +729,191 @@ func checkMatch(t *testing.T, got string, wants ...string) {
 		if !re.MatchString(got) {
 			t.Errorf("\ngot %q\nwanted to match %q", got, want)
 		}
+	}
+}
+
+func testToolConfig(t *testing.T, llm llms.Model) {
+	t.Helper()
+
+	weatherTool := llms.Tool{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"location": map[string]any{
+						"type":        "string",
+						"description": "The city and state, e.g. San Francisco, CA",
+					},
+				},
+				"required": []string{"location"},
+			},
+		},
+	}
+
+	forecastTool := llms.Tool{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getWeatherForecast",
+			Description: "Get the weather forecast for the next 7 days in a given location",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"location": map[string]any{
+						"type":        "string",
+						"description": "The city and state, e.g. San Francisco, CA",
+					},
+				},
+				"required": []string{"location"},
+			},
+		},
+	}
+
+	testCases := []struct {
+		name                 string
+		toolConfig           *googleai.ToolConfig
+		tools                []llms.Tool
+		query                string
+		expectToolCalls      *bool    // nil = don't check, true = expect calls, false = expect no calls
+		allowedFunctionNames []string // if not empty, check that only these functions are called
+	}{
+		{
+			name: "ModeAuto",
+			toolConfig: &googleai.ToolConfig{
+				FunctionCallingConfig: &googleai.FunctionCallingConfig{
+					Mode: googleai.FunctionCallingModeAuto,
+				},
+			},
+			tools: []llms.Tool{weatherTool},
+			query: "What is the weather like in Chicago?",
+			// With AUTO mode, we can't guarantee tool calls, so don't check
+			expectToolCalls: nil,
+		},
+		{
+			name: "ModeAny",
+			toolConfig: &googleai.ToolConfig{
+				FunctionCallingConfig: &googleai.FunctionCallingConfig{
+					Mode: googleai.FunctionCallingModeAny,
+				},
+			},
+			tools:           []llms.Tool{weatherTool},
+			query:           "What is the weather like in Chicago?",
+			expectToolCalls: func() *bool { b := true; return &b }(),
+		},
+		{
+			name: "ModeNone",
+			toolConfig: &googleai.ToolConfig{
+				FunctionCallingConfig: &googleai.FunctionCallingConfig{
+					Mode: googleai.FunctionCallingModeNone,
+				},
+			},
+			tools:           []llms.Tool{weatherTool},
+			query:           "What is the weather like in Chicago?",
+			expectToolCalls: func() *bool { b := false; return &b }(),
+		},
+		{
+			name: "AllowedFunctionNames",
+			toolConfig: &googleai.ToolConfig{
+				FunctionCallingConfig: &googleai.FunctionCallingConfig{
+					Mode:                 googleai.FunctionCallingModeAuto,
+					AllowedFunctionNames: []string{"getCurrentWeather"},
+				},
+			},
+			tools:                []llms.Tool{weatherTool, forecastTool},
+			query:                "What is the weather forecast for Chicago?",
+			allowedFunctionNames: []string{"getCurrentWeather"},
+		},
+		{
+			name: "Combined_AnyMode_AllowedFunctions",
+			toolConfig: &googleai.ToolConfig{
+				FunctionCallingConfig: &googleai.FunctionCallingConfig{
+					Mode:                 googleai.FunctionCallingModeAny,
+					AllowedFunctionNames: []string{"getCurrentWeather"},
+				},
+			},
+			tools:                []llms.Tool{weatherTool, forecastTool},
+			query:                "Tell me about Chicago weather",
+			expectToolCalls:      func() *bool { b := true; return &b }(),
+			allowedFunctionNames: []string{"getCurrentWeather"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Create a new client with the specific tool config for this test case
+			var testLLM llms.Model
+			if _, ok := llm.(*googleai.GoogleAI); ok {
+				genaiKey := os.Getenv("GENAI_API_KEY")
+				if genaiKey == "" {
+					t.Skip("GENAI_API_KEY not set")
+					return
+				}
+				newLLM, err := googleai.New(context.Background(),
+					googleai.WithAPIKey(genaiKey),
+					googleai.WithToolConfig(tc.toolConfig))
+				require.NoError(t, err)
+				testLLM = newLLM
+			} else if _, ok := llm.(*vertex.Vertex); ok {
+				var opts []googleai.Option
+				if creds := os.Getenv("VERTEX_CREDENTIALS"); creds != "" {
+					opts = append(opts, googleai.WithCredentialsFile(creds))
+				} else {
+					project := os.Getenv("VERTEX_PROJECT")
+					if project == "" {
+						t.Skip("VERTEX_PROJECT not set")
+						return
+					}
+					location := os.Getenv("VERTEX_LOCATION")
+					if location == "" {
+						location = "us-central1"
+					}
+					opts = append(opts,
+						googleai.WithCloudProject(project),
+						googleai.WithCloudLocation(location),
+					)
+				}
+				opts = append(opts, googleai.WithToolConfig(tc.toolConfig))
+				newLLM, err := vertex.New(context.Background(), opts...)
+				require.NoError(t, err)
+				testLLM = newLLM
+			} else {
+				t.Skip("Unknown LLM type")
+				return
+			}
+
+			content := []llms.MessageContent{
+				llms.TextParts(llms.ChatMessageTypeHuman, tc.query),
+			}
+			resp, err := testLLM.GenerateContent(
+				context.Background(),
+				content,
+				llms.WithTools(tc.tools))
+			require.NoError(t, err)
+			assert.NotEmpty(t, resp.Choices)
+
+			c1 := resp.Choices[0]
+
+			// Check if tool calls are expected/not expected
+			if tc.expectToolCalls != nil {
+				if *tc.expectToolCalls {
+					assert.NotEmpty(t, c1.ToolCalls, "Expected tool calls for %s", tc.name)
+				} else {
+					assert.Empty(t, c1.ToolCalls, "Expected no tool calls for %s", tc.name)
+					assert.NotEmpty(t, c1.Content, "Expected text response instead of tool calls for %s", tc.name)
+				}
+			}
+
+			// Check allowed function names if specified
+			if len(tc.allowedFunctionNames) > 0 {
+				for _, toolCall := range c1.ToolCalls {
+					assert.Contains(t, tc.allowedFunctionNames, toolCall.FunctionCall.Name,
+						"Function call should only be to allowed functions for %s", tc.name)
+				}
+			}
+		})
 	}
 }

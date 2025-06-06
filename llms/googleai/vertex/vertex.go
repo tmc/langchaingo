@@ -15,6 +15,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/internal/imageutil"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/googleai"
 	"google.golang.org/api/iterator"
 )
 
@@ -90,6 +91,7 @@ func (g *Vertex) GenerateContent(
 	if model.Tools, err = convertTools(opts.Tools); err != nil {
 		return nil, err
 	}
+	model.ToolConfig = convertToolConfig(g.opts.ToolConfig)
 
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
@@ -121,6 +123,32 @@ func (g *Vertex) GenerateContent(
 	}
 
 	return response, nil
+}
+
+// convertToolConfig converts a ToolConfig to a genai.ToolConfig.
+func convertToolConfig(config *googleai.ToolConfig) *genai.ToolConfig {
+	if config == nil || config.FunctionCallingConfig == nil {
+		return nil
+	}
+
+	var mode genai.FunctionCallingMode
+	switch config.FunctionCallingConfig.Mode {
+	case googleai.FunctionCallingModeUnspecified:
+		mode = genai.FunctionCallingUnspecified
+	case googleai.FunctionCallingModeAuto:
+		mode = genai.FunctionCallingAuto
+	case googleai.FunctionCallingModeAny:
+		mode = genai.FunctionCallingAny
+	case googleai.FunctionCallingModeNone:
+		mode = genai.FunctionCallingNone
+	}
+
+	return &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode:                 mode,
+			AllowedFunctionNames: config.FunctionCallingConfig.AllowedFunctionNames,
+		},
+	}
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.

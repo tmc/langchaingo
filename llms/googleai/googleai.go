@@ -88,6 +88,9 @@ func (g *GoogleAI) GenerateContent(
 		return nil, err
 	}
 
+	// set tool config
+	model.ToolConfig = convertToolConfig(g.opts.ToolConfig)
+
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
 	case opts.ResponseMIMEType != "" && opts.JSONMode:
@@ -118,6 +121,32 @@ func (g *GoogleAI) GenerateContent(
 	}
 
 	return response, nil
+}
+
+// convertToolConfig converts a ToolConfig to a genai.ToolConfig.
+func convertToolConfig(config *ToolConfig) *genai.ToolConfig {
+	if config == nil || config.FunctionCallingConfig == nil {
+		return nil
+	}
+
+	var mode genai.FunctionCallingMode
+	switch config.FunctionCallingConfig.Mode {
+	case FunctionCallingModeUnspecified:
+		mode = genai.FunctionCallingUnspecified
+	case FunctionCallingModeAuto:
+		mode = genai.FunctionCallingAuto
+	case FunctionCallingModeAny:
+		mode = genai.FunctionCallingAny
+	case FunctionCallingModeNone:
+		mode = genai.FunctionCallingNone
+	}
+
+	return &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode:                 mode,
+			AllowedFunctionNames: config.FunctionCallingConfig.AllowedFunctionNames,
+		},
+	}
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
