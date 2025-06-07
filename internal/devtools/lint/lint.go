@@ -721,7 +721,7 @@ func checkHttprrTestPatterns(fix bool) error {
 	// Report the issues without fixing
 	var errorLines []string
 	errorLines = append(errorLines, fmt.Sprintf("Found %d httprr test pattern issues:", len(allIssues)))
-	
+
 	// Group issues by type
 	tokenIssues := 0
 	cleanupIssues := 0
@@ -734,9 +734,9 @@ func checkHttprrTestPatterns(fix bool) error {
 			cleanupIssues++
 		}
 	}
-	
+
 	errorLines = append(errorLines, "")
-	
+
 	if tokenIssues > 0 {
 		errorLines = append(errorLines, "Some files use the old httprr pattern where WithToken(\"test-api-key\") is called")
 		errorLines = append(errorLines, "unconditionally, even during recording mode, which causes authentication errors.")
@@ -748,13 +748,13 @@ func checkHttprrTestPatterns(fix bool) error {
 		errorLines = append(errorLines, "  }")
 		errorLines = append(errorLines, "")
 	}
-	
+
 	if cleanupIssues > 0 {
 		errorLines = append(errorLines, "Some files have redundant cleanup calls. httprr.OpenForTest automatically")
 		errorLines = append(errorLines, "handles cleanup, so t.Cleanup(func() { rr.Close() }) is not needed.")
 		errorLines = append(errorLines, "")
 	}
-	
+
 	errorLines = append(errorLines, "To fix these issues automatically, run:")
 	errorLines = append(errorLines, "  go run ./internal/devtools/lint -testing -fix")
 
@@ -813,12 +813,12 @@ func analyzeHttprrPatternsInFile(filePath string) ([]HttprrIssue, error) {
 
 // HttprrAnalyzer implements ast.Visitor to analyze httprr patterns.
 type HttprrAnalyzer struct {
-	fset          *token.FileSet
-	file          string
-	issues        []HttprrIssue
-	currentFunc   *ast.FuncDecl
-	httprOpenCall ast.Node // Track httprr.OpenForTest calls
-	inRecordingCheck bool   // Track if we're inside a !rr.Recording() check
+	fset             *token.FileSet
+	file             string
+	issues           []HttprrIssue
+	currentFunc      *ast.FuncDecl
+	httprOpenCall    ast.Node // Track httprr.OpenForTest calls
+	inRecordingCheck bool     // Track if we're inside a !rr.Recording() check
 }
 
 // Visit implements ast.Visitor.
@@ -831,7 +831,7 @@ func (a *HttprrAnalyzer) Visit(node ast.Node) ast.Visitor {
 	case *ast.FuncDecl:
 		// Track current function for context
 		a.currentFunc = n
-		
+
 		// Check for t.Parallel() calls in test functions
 		if strings.HasPrefix(n.Name.Name, "Test") && len(n.Type.Params.List) > 0 {
 			a.checkParallelUsage(n)
@@ -854,12 +854,12 @@ func (a *HttprrAnalyzer) Visit(node ast.Node) ast.Visitor {
 		if a.isHttprrOpenForTest(n) {
 			a.httprOpenCall = n
 		}
-		
+
 		// Check for hardcoded WithToken/WithAPIKey calls
 		if a.isWithTokenCall(n) {
 			a.checkTokenUsage(n)
 		}
-		
+
 		// Check for t.Cleanup calls
 		if a.isCleanupCall(n) {
 			a.checkCleanupUsage(n)
@@ -887,8 +887,8 @@ func (a *HttprrAnalyzer) isWithTokenCall(call *ast.CallExpr) bool {
 			// Check if the argument is "test-api-key"
 			if len(call.Args) > 0 {
 				if lit, ok := call.Args[0].(*ast.BasicLit); ok {
-					return lit.Kind == token.STRING && 
-						   (lit.Value == `"test-api-key"` || lit.Value == "'test-api-key'")
+					return lit.Kind == token.STRING &&
+						(lit.Value == `"test-api-key"` || lit.Value == "'test-api-key'")
 				}
 			}
 		}
@@ -947,7 +947,7 @@ func (a *HttprrAnalyzer) checkParallelUsage(fn *ast.FuncDecl) {
 						}
 					}
 				}
-				
+
 				// Check for httprr.OpenForTest
 				if a.isHttprrOpenForTest(call) {
 					httprCall = call
@@ -955,12 +955,12 @@ func (a *HttprrAnalyzer) checkParallelUsage(fn *ast.FuncDecl) {
 			}
 			return true
 		})
-		
+
 		// If we found both, check the order
 		if parallelCall != nil && httprCall != nil {
 			parallelPos := a.fset.Position(parallelCall.Pos())
 			httprPos := a.fset.Position(httprCall.Pos())
-			
+
 			// If t.Parallel() comes before httprr.OpenForTest, it's an issue
 			if parallelPos.Line < httprPos.Line {
 				a.issues = append(a.issues, HttprrIssue{
@@ -992,7 +992,7 @@ func (a *HttprrAnalyzer) checkCleanupUsage(call *ast.CallExpr) {
 	if a.httprOpenCall == nil {
 		return
 	}
-	
+
 	// Check if the cleanup function contains rr.Close()
 	if len(call.Args) > 0 {
 		if fn, ok := call.Args[0].(*ast.FuncLit); ok {
@@ -1142,7 +1142,7 @@ func (f *HttprrFixer) fixParallelUsageInFunction(fn *ast.FuncDecl) {
 	var newStmts []ast.Stmt
 	for _, stmt := range fn.Body.List {
 		keep := true
-		
+
 		// Check if this statement contains t.Parallel()
 		ast.Inspect(stmt, func(node ast.Node) bool {
 			if call, ok := node.(*ast.CallExpr); ok {
@@ -1157,7 +1157,7 @@ func (f *HttprrFixer) fixParallelUsageInFunction(fn *ast.FuncDecl) {
 			}
 			return true
 		})
-		
+
 		if keep {
 			newStmts = append(newStmts, stmt)
 		}
@@ -1171,7 +1171,7 @@ func (f *HttprrFixer) fixRedundantCleanupInFunction(fn *ast.FuncDecl) {
 	if fn.Body == nil {
 		return
 	}
-	
+
 	// Find cleanup issues that relate to this function
 	fnPos := f.fset.Position(fn.Pos())
 	var cleanupIssues []HttprrIssue
@@ -1184,16 +1184,16 @@ func (f *HttprrFixer) fixRedundantCleanupInFunction(fn *ast.FuncDecl) {
 			}
 		}
 	}
-	
+
 	if len(cleanupIssues) == 0 {
 		return
 	}
-	
+
 	// Remove the redundant cleanup statements
 	var newStmts []ast.Stmt
 	for _, stmt := range fn.Body.List {
 		keep := true
-		
+
 		// Check if this statement is a redundant cleanup call
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if call, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -1213,12 +1213,12 @@ func (f *HttprrFixer) fixRedundantCleanupInFunction(fn *ast.FuncDecl) {
 				}
 			}
 		}
-		
+
 		if keep {
 			newStmts = append(newStmts, stmt)
 		}
 	}
-	
+
 	fn.Body.List = newStmts
 }
 
@@ -1229,12 +1229,12 @@ func (f *HttprrFixer) fixTokenUsageInCall(call *ast.CallExpr) {
 	// For now, we'll focus on the more common parallel execution issues
 	// Token usage issues are more complex to fix automatically since they require
 	// restructuring the code to add conditional logic
-	
+
 	// This could be implemented by:
 	// 1. Finding the assignment statement containing the WithToken call
 	// 2. Converting it to an if-else structure
 	// 3. Adding the appropriate Recording() check
-	// 
+	//
 	// This level of AST manipulation is complex and may be better left for manual fixing
 	// or a more sophisticated code transformation tool
 }
