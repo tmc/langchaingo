@@ -116,5 +116,9 @@ func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 		return nil, ErrMissingLocation
 	}
 
-	return palmclient.New(context.TODO(), options.projectID, options.location, options.clientOptions...)
+	palmOptions := []palmclient.Option{
+		palmclient.WithClientOptions(options.clientOptions...),
+	}
+
+	return palmclient.New(context.TODO(), options.location, options.projectID, palmOptions...)
 }
