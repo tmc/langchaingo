@@ -10,6 +10,7 @@ const (
 	chatModelName      = "chat-bison"
 )
 
+// Options are the Palm client options
 type Options struct {
 	EmbeddingModelName string
 	TextModelName      string
@@ -17,8 +18,10 @@ type Options struct {
 	ClientOptions      []option.ClientOption
 }
 
+// Option is an option
 type Option func(*Options)
 
+// WithEmbeddingModelName sets the default embedding model
 func WithEmbeddingModelName(modelName string) Option {
 	return func(o *Options) {
 		if modelName != "" {
@@ -27,6 +30,7 @@ func WithEmbeddingModelName(modelName string) Option {
 	}
 }
 
+// WithTextModelName sets the default text model
 func WithTextModelName(modelName string) Option {
 	return func(o *Options) {
 		if modelName != "" {
@@ -35,6 +39,7 @@ func WithTextModelName(modelName string) Option {
 	}
 }
 
+// WithChatModelName sets the default chat model
 func WithChatModelName(modelName string) Option {
 	return func(o *Options) {
 		if modelName != "" {
@@ -43,6 +48,7 @@ func WithChatModelName(modelName string) Option {
 	}
 }
 
+// WithClientOptions sets the client options for the Google API client
 func WithClientOptions(opts ...option.ClientOption) Option {
 	return func(o *Options) {
 		o.ClientOptions = append(o.ClientOptions, opts...)
