@@ -8,10 +8,6 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	// Save original env var
-	origToken := os.Getenv("ANTHROPIC_API_KEY")
-	defer os.Setenv("ANTHROPIC_API_KEY", origToken)
-
 	tests := []struct {
 		name     string
 		envToken string

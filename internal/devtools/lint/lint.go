@@ -20,12 +20,13 @@ import (
 )
 
 var (
-	flagFix         = flag.Bool("fix", false, "fix issues found by linters")
-	flagPrepush     = flag.Bool("prepush", false, "run additional linters that need to pass before pushing to GitHub")
-	flagTesting     = flag.Bool("testing", false, "run testing-specific linters (httprr patterns)")
-	flagNoChdir     = flag.Bool("no-chdir", false, "don't automatically change to repository root directory")
-	flagVerbose     = flag.Bool("v", false, "enable verbose output")
-	flagVeryVerbose = flag.Bool("vv", false, "enable very verbose output")
+	flagFix          = flag.Bool("fix", false, "fix issues found by linters")
+	flagPrepush      = flag.Bool("prepush", false, "run additional linters that need to pass before pushing to GitHub")
+	flagTesting      = flag.Bool("testing", false, "run testing-specific linters (httprr patterns)")
+	flagArchitecture = flag.Bool("architecture", false, "run architectural linters (dependency rules, interface patterns)")
+	flagNoChdir      = flag.Bool("no-chdir", false, "don't automatically change to repository root directory")
+	flagVerbose      = flag.Bool("v", false, "enable verbose output")
+	flagVeryVerbose  = flag.Bool("vv", false, "enable very verbose output")
 )
 
 func main() {
@@ -116,6 +117,17 @@ func run(fix bool) error {
 		}
 		if err := checkHttprrTestPatterns(fix); err != nil {
 			return fmt.Errorf("checkHttprrTestPatterns: %w", err)
+		}
+		return nil
+	}
+
+	// For architecture mode, run architectural linters
+	if *flagArchitecture {
+		if *flagVerbose {
+			log.Println("running in architecture mode, checking architectural rules and patterns")
+		}
+		if err := checkArchitecturalRules(fix); err != nil {
+			return fmt.Errorf("checkArchitecturalRules: %w", err)
 		}
 		return nil
 	}
@@ -725,6 +737,8 @@ func checkHttprrTestPatterns(fix bool) error {
 	// Group issues by type
 	tokenIssues := 0
 	cleanupIssues := 0
+	osGetenvIssues := 0
+	notRecordingIssues := 0
 	for _, issue := range allIssues {
 		errorLines = append(errorLines, fmt.Sprintf("  - %s:%d: %s", issue.File, issue.Line, issue.Description))
 		switch issue.Type {
@@ -732,6 +746,10 @@ func checkHttprrTestPatterns(fix bool) error {
 			tokenIssues++
 		case IssueRedundantCleanup:
 			cleanupIssues++
+		case IssueDirectOsGetenv:
+			osGetenvIssues++
+		case IssueNotRecordingPattern:
+			notRecordingIssues++
 		}
 	}
 
@@ -752,6 +770,35 @@ func checkHttprrTestPatterns(fix bool) error {
 	if cleanupIssues > 0 {
 		errorLines = append(errorLines, "Some files have redundant cleanup calls. httprr.OpenForTest automatically")
 		errorLines = append(errorLines, "handles cleanup, so t.Cleanup(func() { rr.Close() }) is not needed.")
+		errorLines = append(errorLines, "")
+	}
+
+	if osGetenvIssues > 0 {
+		errorLines = append(errorLines, "Some files use direct os.Getenv() calls to check for API keys in tests.")
+		errorLines = append(errorLines, "This should be replaced with httprr.SkipIfNoCredentialsAndRecordingMissing().")
+		errorLines = append(errorLines, "")
+		errorLines = append(errorLines, "The correct pattern is:")
+		errorLines = append(errorLines, "  httprr.SkipIfNoCredentialsAndRecordingMissing(t, \"API_KEY\")")
+		errorLines = append(errorLines, "")
+		errorLines = append(errorLines, "  var opts []ProviderOption")
+		errorLines = append(errorLines, "  opts = append(opts, WithModel(\"model-name\"))")
+		errorLines = append(errorLines, "  if rr.Replaying() {")
+		errorLines = append(errorLines, "      opts = append(opts, WithAPIKey(\"test-api-key\"))")
+		errorLines = append(errorLines, "  }")
+		errorLines = append(errorLines, "  provider, err := NewProvider(opts...)")
+		errorLines = append(errorLines, "")
+		errorLines = append(errorLines, "If you need to keep the os.Getenv() call, add a trailing comment:")
+		errorLines = append(errorLines, "  if os.Getenv(\"API_KEY\") == \"\" { // some explanation")
+		errorLines = append(errorLines, "")
+	}
+
+	if notRecordingIssues > 0 {
+		errorLines = append(errorLines, "Some files use !rr.Recording() instead of rr.Replaying().")
+		errorLines = append(errorLines, "For better readability, use the positive condition:")
+		errorLines = append(errorLines, "")
+		errorLines = append(errorLines, "  if rr.Replaying() {")
+		errorLines = append(errorLines, "      // replay-specific logic")
+		errorLines = append(errorLines, "  }")
 		errorLines = append(errorLines, "")
 	}
 
@@ -777,6 +824,8 @@ const (
 	IssueHardcodedToken HttprrIssueType = iota
 	IssueParallelBeforeHttprr
 	IssueRedundantCleanup
+	IssueDirectOsGetenv
+	IssueNotRecordingPattern
 )
 
 // analyzeHttprrPatternsInFile uses AST analysis to find httprr pattern issues in a file.
@@ -803,6 +852,7 @@ func analyzeHttprrPatternsInFile(filePath string) ([]HttprrIssue, error) {
 		fset:   fset,
 		file:   filePath,
 		issues: []HttprrIssue{},
+		ast:    node,
 	}
 
 	// Walk the AST and find issues
@@ -817,8 +867,9 @@ type HttprrAnalyzer struct {
 	file             string
 	issues           []HttprrIssue
 	currentFunc      *ast.FuncDecl
-	httprOpenCall    ast.Node // Track httprr.OpenForTest calls
-	inRecordingCheck bool     // Track if we're inside a !rr.Recording() check
+	httprOpenCall    ast.Node  // Track httprr.OpenForTest calls
+	inRecordingCheck bool      // Track if we're inside a !rr.Recording() check
+	ast              *ast.File // The parsed AST file for comment access
 }
 
 // Visit implements ast.Visitor.
@@ -838,7 +889,12 @@ func (a *HttprrAnalyzer) Visit(node ast.Node) ast.Visitor {
 		}
 
 	case *ast.IfStmt:
-		// Check if this is a !rr.Recording() check
+		// Check if this is a !rr.Recording() pattern that should use rr.Replaying()
+		if a.isNotRecordingCheck(n) {
+			a.checkNotRecordingUsage(n)
+		}
+
+		// Check if this is a !rr.Recording() check (for token usage analysis)
 		if a.isRecordingCheck(n) {
 			oldInCheck := a.inRecordingCheck
 			a.inRecordingCheck = true
@@ -863,6 +919,11 @@ func (a *HttprrAnalyzer) Visit(node ast.Node) ast.Visitor {
 		// Check for t.Cleanup calls
 		if a.isCleanupCall(n) {
 			a.checkCleanupUsage(n)
+		}
+
+		// Check for os.Getenv calls
+		if a.isOsGetenvCall(n) {
+			a.checkOsGetenvUsage(n)
 		}
 	}
 
@@ -896,7 +957,7 @@ func (a *HttprrAnalyzer) isWithTokenCall(call *ast.CallExpr) bool {
 	return false
 }
 
-// isRecordingCheck checks if an if statement is checking !rr.Recording()
+// isRecordingCheck checks if an if statement is checking !rr.Recording() or rr.Replaying()
 func (a *HttprrAnalyzer) isRecordingCheck(ifStmt *ast.IfStmt) bool {
 	// Check for !rr.Recording()
 	if unary, ok := ifStmt.Cond.(*ast.UnaryExpr); ok && unary.Op == token.NOT {
@@ -908,7 +969,49 @@ func (a *HttprrAnalyzer) isRecordingCheck(ifStmt *ast.IfStmt) bool {
 			}
 		}
 	}
+
+	// Check for rr.Replaying()
+	if call, ok := ifStmt.Cond.(*ast.CallExpr); ok {
+		if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+			if ident, ok := sel.X.(*ast.Ident); ok {
+				return ident.Name == "rr" && sel.Sel.Name == "Replaying"
+			}
+		}
+	}
+
 	return false
+}
+
+// isNotRecordingCheck checks if an if statement is checking !rr.Recording() (for linting purposes)
+func (a *HttprrAnalyzer) isNotRecordingCheck(ifStmt *ast.IfStmt) bool {
+	// Only flag this in test functions
+	if a.currentFunc == nil || !strings.HasPrefix(a.currentFunc.Name.Name, "Test") {
+		return false
+	}
+
+	// Check for !rr.Recording()
+	if unary, ok := ifStmt.Cond.(*ast.UnaryExpr); ok && unary.Op == token.NOT {
+		if call, ok := unary.X.(*ast.CallExpr); ok {
+			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := sel.X.(*ast.Ident); ok {
+					return ident.Name == "rr" && sel.Sel.Name == "Recording"
+				}
+			}
+		}
+	}
+	return false
+}
+
+// checkNotRecordingUsage suggests using rr.Replaying() instead of !rr.Recording()
+func (a *HttprrAnalyzer) checkNotRecordingUsage(ifStmt *ast.IfStmt) {
+	pos := a.fset.Position(ifStmt.Pos())
+	a.issues = append(a.issues, HttprrIssue{
+		File:        a.file,
+		Line:        pos.Line,
+		Type:        IssueNotRecordingPattern,
+		Description: "use rr.Replaying() instead of !rr.Recording() for better readability",
+		Node:        ifStmt,
+	})
 }
 
 // checkTokenUsage checks if a WithToken call is properly wrapped in a Recording() check.
@@ -1034,6 +1137,149 @@ func (a *HttprrAnalyzer) containsRRClose(stmt ast.Stmt) bool {
 	return contains
 }
 
+// isOsGetenvCall checks if a call expression is os.Getenv
+func (a *HttprrAnalyzer) isOsGetenvCall(call *ast.CallExpr) bool {
+	if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+		if ident, ok := sel.X.(*ast.Ident); ok {
+			return ident.Name == "os" && sel.Sel.Name == "Getenv"
+		}
+	}
+	return false
+}
+
+// checkOsGetenvUsage checks if an os.Getenv call should be replaced with httprr.SkipIfNoCredentialsAndRecordingMissing
+func (a *HttprrAnalyzer) checkOsGetenvUsage(call *ast.CallExpr) {
+	// Only report in test functions
+	if a.currentFunc == nil || !strings.HasPrefix(a.currentFunc.Name.Name, "Test") {
+		return
+	}
+
+	// Check if this is checking for an API key or credential
+	if len(call.Args) > 0 {
+		if lit, ok := call.Args[0].(*ast.BasicLit); ok && lit.Kind == token.STRING {
+			envVar := strings.Trim(lit.Value, `"'`)
+			// Check if this looks like an API key or credential
+			if a.isCredentialEnvVar(envVar) {
+				// Check if there's a trailing comment on the same line
+				if a.hasTrailingComment(call) {
+					return // Skip reporting if comment is present
+				}
+
+				// Check if this os.Getenv is part of a condition that also checks rr.Recording()
+				if a.isInRecordingCondition(call) {
+					return // Skip reporting if it's in a Recording() condition (correct pattern)
+				}
+
+				pos := a.fset.Position(call.Pos())
+				a.issues = append(a.issues, HttprrIssue{
+					File:        a.file,
+					Line:        pos.Line,
+					Type:        IssueDirectOsGetenv,
+					Description: fmt.Sprintf("direct os.Getenv(%q) call should use httprr.SkipIfNoCredentialsAndRecordingMissing", envVar),
+					Node:        call,
+				})
+			}
+		}
+	}
+}
+
+// isCredentialEnvVar checks if an environment variable name looks like a credential
+func (a *HttprrAnalyzer) isCredentialEnvVar(envVar string) bool {
+	envVar = strings.ToUpper(envVar)
+	credentialPatterns := []string{
+		"API_KEY", "APIKEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIALS",
+		"CLIENT_ID", "CLIENT_SECRET", "AUTH", "BEARER", "ACCESS_KEY",
+	}
+
+	for _, pattern := range credentialPatterns {
+		if strings.Contains(envVar, pattern) {
+			return true
+		}
+	}
+
+	// Also check for specific known API key patterns in this codebase
+	knownKeys := []string{
+		"JINA_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
+		"GOOGLE_API_KEY", "HUGGINGFACE_API_TOKEN", "HF_TOKEN",
+		"COHERE_API_KEY", "MISTRAL_API_KEY", "VOYAGEAI_API_KEY",
+	}
+
+	for _, key := range knownKeys {
+		if envVar == key {
+			return true
+		}
+	}
+
+	return false
+}
+
+// hasTrailingComment checks if there's a comment on the same line as the os.Getenv call
+func (a *HttprrAnalyzer) hasTrailingComment(call *ast.CallExpr) bool {
+	if a.ast == nil || a.ast.Comments == nil {
+		return false
+	}
+
+	callLine := a.fset.Position(call.Pos()).Line
+
+	// Check all comment groups for comments on the same line
+	for _, commentGroup := range a.ast.Comments {
+		for _, comment := range commentGroup.List {
+			commentLine := a.fset.Position(comment.Pos()).Line
+			if commentLine == callLine {
+				return true // Found a comment on the same line
+			}
+		}
+	}
+
+	return false
+}
+
+// isInRecordingCondition checks if an os.Getenv call is part of a condition that also checks rr.Recording()
+func (a *HttprrAnalyzer) isInRecordingCondition(call *ast.CallExpr) bool {
+	// Walk up the AST to find the containing if statement or similar condition
+	// This is a simplified implementation that looks for Recording() calls in the same expression tree
+
+	// Find the containing statement by looking at the function body
+	if a.currentFunc == nil || a.currentFunc.Body == nil {
+		return false
+	}
+
+	// Check if this os.Getenv call is in an expression that also contains rr.Recording()
+	callLine := a.fset.Position(call.Pos()).Line
+
+	// Walk through the function statements to find the one containing our call
+	for _, stmt := range a.currentFunc.Body.List {
+		stmtStartLine := a.fset.Position(stmt.Pos()).Line
+		stmtEndLine := a.fset.Position(stmt.End()).Line
+
+		if callLine >= stmtStartLine && callLine <= stmtEndLine {
+			// This statement contains our call, check if it also contains rr.Recording()
+			return a.statementContainsRecordingCall(stmt)
+		}
+	}
+
+	return false
+}
+
+// statementContainsRecordingCall checks if a statement contains a call to rr.Recording() or rr.Replaying()
+func (a *HttprrAnalyzer) statementContainsRecordingCall(stmt ast.Stmt) bool {
+	contains := false
+	ast.Inspect(stmt, func(node ast.Node) bool {
+		if call, ok := node.(*ast.CallExpr); ok {
+			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := sel.X.(*ast.Ident); ok {
+					if ident.Name == "rr" && (sel.Sel.Name == "Recording" || sel.Sel.Name == "Replaying") {
+						contains = true
+						return false
+					}
+				}
+			}
+		}
+		return true
+	})
+	return contains
+}
+
 // fixHttprrPatternsInFileAST attempts to automatically fix httprr patterns in a file using AST manipulation.
 func fixHttprrPatternsInFileAST(filePath string, issues []HttprrIssue) error {
 	// Read the file
@@ -1110,6 +1356,10 @@ func (f *HttprrFixer) Visit(node ast.Node) ast.Visitor {
 			f.fixParallelUsageInFunction(n)
 			f.fixRedundantCleanupInFunction(n)
 		}
+
+	case *ast.IfStmt:
+		// Handle !rr.Recording() patterns that should use rr.Replaying()
+		f.fixNotRecordingPattern(n)
 
 	case *ast.CallExpr:
 		// Handle hardcoded token issues by wrapping them in Recording() checks
@@ -1237,4 +1487,661 @@ func (f *HttprrFixer) fixTokenUsageInCall(call *ast.CallExpr) {
 	//
 	// This level of AST manipulation is complex and may be better left for manual fixing
 	// or a more sophisticated code transformation tool
+}
+
+// fixNotRecordingPattern fixes !rr.Recording() patterns to use rr.Replaying() instead.
+func (f *HttprrFixer) fixNotRecordingPattern(ifStmt *ast.IfStmt) {
+	// Check if this if statement has a NotRecordingPattern issue
+	ifPos := f.fset.Position(ifStmt.Pos())
+	var hasIssue bool
+	for _, issue := range f.issues {
+		if issue.Type == IssueNotRecordingPattern && issue.Line == ifPos.Line {
+			hasIssue = true
+			break
+		}
+	}
+
+	if !hasIssue {
+		return
+	}
+
+	// Transform !rr.Recording() to rr.Replaying()
+	if unary, ok := ifStmt.Cond.(*ast.UnaryExpr); ok {
+		if unary.Op == token.NOT {
+			if call, ok := unary.X.(*ast.CallExpr); ok {
+				if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+					if ident, ok := sel.X.(*ast.Ident); ok {
+						if ident.Name == "rr" && sel.Sel.Name == "Recording" {
+							// Replace !rr.Recording() with rr.Replaying()
+							sel.Sel.Name = "Replaying"
+							ifStmt.Cond = call // Remove the ! operator
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+// checkArchitecturalRules checks architectural rules and patterns in the codebase.
+func checkArchitecturalRules(fix bool) error {
+	if *flagVerbose {
+		log.Println("Checking architectural rules using AST analysis")
+	}
+
+	// Collect all Go files in the repository
+	var goFiles []string
+	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip certain directories
+		if d.IsDir() {
+			switch d.Name() {
+			case ".git", "node_modules", "vendor":
+				return fs.SkipDir
+			}
+			return nil
+		}
+
+		// Check all Go files including tests
+		if strings.HasSuffix(path, ".go") {
+			goFiles = append(goFiles, path)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("walking directory: %w", err)
+	}
+
+	var allIssues []ArchitecturalIssue
+	for _, file := range goFiles {
+		// Skip certain directories that should be excluded from architectural checks
+		if shouldSkipArchitecturalCheck(file) {
+			continue
+		}
+
+		issues, err := checkArchitecturalRulesInFile(file)
+		if err != nil {
+			if *flagVerbose {
+				log.Printf("Warning: failed to check architectural rules in %s: %v", file, err)
+			}
+			continue
+		}
+		allIssues = append(allIssues, issues...)
+	}
+
+	if len(allIssues) == 0 {
+		if *flagVerbose {
+			log.Println("No architectural rule violations found")
+		}
+		return nil
+	}
+
+	// Group and display issues
+	issuesByType := make(map[ArchitecturalIssueType][]ArchitecturalIssue)
+	for _, issue := range allIssues {
+		issuesByType[issue.Type] = append(issuesByType[issue.Type], issue)
+	}
+
+	log.Printf("checkArchitecturalRules: Found %d architectural rule violations:", len(allIssues))
+
+	// Sort and display issues by type
+	for _, issueType := range []ArchitecturalIssueType{
+		IssueDirectHttpClientUsage,
+		IssueProviderCrossDependency,
+		IssueMissingOptionsPattern,
+		IssueInterfaceViolation,
+		IssueTestPlacement,
+		IssueInternalPackageUsage,
+		IssueTestHttpClientUsage,
+		IssueTestMissingHttprr,
+		IssueTestHttpGetUsage,
+		IssueTestHttpClientModification,
+	} {
+		if issues, exists := issuesByType[issueType]; exists {
+			for _, issue := range issues {
+				log.Printf("  - %s:%d: %s", issue.File, issue.Line, issue.Message)
+			}
+		}
+	}
+
+	// Provide guidance
+	log.Println("")
+	log.Println("Architectural Guidelines:")
+	log.Println("1. HTTP Client Usage: Use httputil.DefaultClient instead of http.DefaultClient")
+	log.Println("2. Provider Isolation: Providers should not depend on each other directly")
+	log.Println("3. Options Pattern: All constructors should use functional options")
+	log.Println("4. Interface Compliance: Types should implement expected interfaces")
+	log.Println("5. Test Organization: Tests should be in the same package as the code")
+	log.Println("6. Internal Package: Only parent packages should import internal/ packages")
+	log.Println("7. Test HTTP Usage: Tests should use httprr.OpenForTest() or httputil.DefaultClient, not http.DefaultClient")
+	log.Println("")
+
+	if fix {
+		log.Println("Note: Architectural fixes require manual intervention")
+		log.Println("These rules help maintain clean architecture but cannot be auto-fixed")
+	}
+
+	// Return error to indicate violations were found
+	return fmt.Errorf("found %d architectural rule violations", len(allIssues))
+}
+
+// ArchitecturalIssueType represents different types of architectural violations.
+type ArchitecturalIssueType int
+
+const (
+	IssueDirectHttpClientUsage ArchitecturalIssueType = iota
+	IssueProviderCrossDependency
+	IssueMissingOptionsPattern
+	IssueInterfaceViolation
+	IssueTestPlacement
+	IssueInternalPackageUsage
+	IssueTestHttpClientUsage
+	IssueTestMissingHttprr
+	IssueTestHttpGetUsage
+	IssueTestHttpClientModification
+)
+
+// ArchitecturalIssue represents an architectural rule violation.
+type ArchitecturalIssue struct {
+	Type    ArchitecturalIssueType
+	File    string
+	Line    int
+	Message string
+	Node    ast.Node
+}
+
+// shouldSkipArchitecturalCheck determines if a file should be skipped for architectural checks.
+func shouldSkipArchitecturalCheck(file string) bool {
+	skipPaths := []string{
+		"testing/",
+		"examples/",
+		"docs/",
+		"scripts/",
+		"internal/devtools/",
+		".git/",
+		"vendor/",
+	}
+
+	for _, skipPath := range skipPaths {
+		if strings.Contains(file, skipPath) {
+			return true
+		}
+	}
+	return false
+}
+
+// checkArchitecturalRulesInFile checks architectural rules in a single Go file.
+func checkArchitecturalRulesInFile(filePath string) ([]ArchitecturalIssue, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, filePath, content, parser.ParseComments)
+	if err != nil {
+		return nil, err
+	}
+
+	analyzer := &ArchitecturalAnalyzer{
+		file:        filePath,
+		fset:        fset,
+		ast:         node,
+		issues:      []ArchitecturalIssue{},
+		usesHttprr:  false,
+		usesTestify: false,
+	}
+
+	// Walk the AST and check for architectural violations
+	ast.Walk(analyzer, node)
+
+	return analyzer.issues, nil
+}
+
+// ArchitecturalAnalyzer implements ast.Visitor to detect architectural violations.
+type ArchitecturalAnalyzer struct {
+	file        string
+	fset        *token.FileSet
+	ast         *ast.File
+	issues      []ArchitecturalIssue
+	usesHttprr  bool // tracks if this file imports httprr
+	usesTestify bool // tracks if this file is a test file using testify
+}
+
+// Visit implements ast.Visitor.
+func (a *ArchitecturalAnalyzer) Visit(node ast.Node) ast.Visitor {
+	if node == nil {
+		return nil
+	}
+
+	switch n := node.(type) {
+	case *ast.ImportSpec:
+		a.checkImportUsage(n)
+	case *ast.SelectorExpr:
+		a.checkHttpClientUsage(n)
+	case *ast.CallExpr:
+		a.checkOptionsPatternUsage(n)
+	case *ast.FuncDecl:
+		a.checkConstructorPattern(n)
+		a.checkInterfaceCompliance(n)
+	case *ast.TypeSpec:
+		a.checkTypeDefinition(n)
+	}
+
+	return a
+}
+
+// checkImportUsage checks for proper import patterns.
+func (a *ArchitecturalAnalyzer) checkImportUsage(imp *ast.ImportSpec) {
+	if imp.Path == nil {
+		return
+	}
+
+	importPath := strings.Trim(imp.Path.Value, `"`)
+
+	// Track imports for test analysis
+	if strings.Contains(importPath, "/internal/httprr") {
+		a.usesHttprr = true
+	}
+	if strings.Contains(importPath, "github.com/stretchr/testify") {
+		a.usesTestify = true
+	}
+
+	// Check for internal package usage violations
+	if strings.Contains(importPath, "/internal/") {
+		if !a.isValidInternalImport(importPath) {
+			pos := a.fset.Position(imp.Pos())
+			a.issues = append(a.issues, ArchitecturalIssue{
+				Type:    IssueInternalPackageUsage,
+				File:    a.file,
+				Line:    pos.Line,
+				Message: fmt.Sprintf("invalid internal package import: %s", importPath),
+				Node:    imp,
+			})
+		}
+	}
+
+	// Check for provider cross-dependencies
+	if a.isProviderPackage() && a.isImportingOtherProvider(importPath) {
+		pos := a.fset.Position(imp.Pos())
+		a.issues = append(a.issues, ArchitecturalIssue{
+			Type:    IssueProviderCrossDependency,
+			File:    a.file,
+			Line:    pos.Line,
+			Message: fmt.Sprintf("provider should not import other provider: %s", importPath),
+			Node:    imp,
+		})
+	}
+}
+
+// checkHttpClientUsage checks for direct usage of http.DefaultClient.
+func (a *ArchitecturalAnalyzer) checkHttpClientUsage(sel *ast.SelectorExpr) {
+	// Check for http.DefaultClient usage
+	if ident, ok := sel.X.(*ast.Ident); ok {
+		if ident.Name == "http" && sel.Sel.Name == "DefaultClient" {
+			pos := a.fset.Position(sel.Pos())
+
+			if a.isTestFile() {
+				// Special rule for test files - provide specific guidance based on what they're already using
+				var message string
+				if a.usesHttprr {
+					message = "test file already uses httprr - replace http.DefaultClient with rr.Client() from httprr.OpenForTest()"
+				} else if a.usesTestify {
+					message = "test file should use httprr.OpenForTest() for HTTP mocking instead of http.DefaultClient"
+				} else {
+					message = "tests should use httprr.OpenForTest() for HTTP mocking or httputil.DefaultClient, not http.DefaultClient"
+				}
+
+				a.issues = append(a.issues, ArchitecturalIssue{
+					Type:    IssueTestHttpClientUsage,
+					File:    a.file,
+					Line:    pos.Line,
+					Message: message,
+					Node:    sel,
+				})
+			} else {
+				// Regular files should use httputil.DefaultClient
+				a.issues = append(a.issues, ArchitecturalIssue{
+					Type:    IssueDirectHttpClientUsage,
+					File:    a.file,
+					Line:    pos.Line,
+					Message: "use httputil.DefaultClient instead of http.DefaultClient",
+					Node:    sel,
+				})
+			}
+		}
+	}
+}
+
+// checkOptionsPatternUsage checks for proper options pattern usage.
+func (a *ArchitecturalAnalyzer) checkOptionsPatternUsage(call *ast.CallExpr) {
+	// Check if this is a constructor call that should use options pattern
+	if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+		if strings.HasPrefix(sel.Sel.Name, "New") {
+			// Skip standard library constructors
+			if a.isStandardLibraryCall(sel) {
+				return
+			}
+
+			// This is a New* function call, check if it uses options pattern
+			if !a.usesOptionsPattern(call) && a.shouldUseOptionsPattern(sel.Sel.Name) {
+				pos := a.fset.Position(call.Pos())
+				a.issues = append(a.issues, ArchitecturalIssue{
+					Type:    IssueMissingOptionsPattern,
+					File:    a.file,
+					Line:    pos.Line,
+					Message: fmt.Sprintf("constructor %s should use functional options pattern", sel.Sel.Name),
+					Node:    call,
+				})
+			}
+		}
+	}
+}
+
+// checkConstructorPattern checks if constructors follow the expected pattern.
+func (a *ArchitecturalAnalyzer) checkConstructorPattern(fn *ast.FuncDecl) {
+	if fn.Name == nil || !strings.HasPrefix(fn.Name.Name, "New") {
+		return
+	}
+
+	// Check if this constructor has the right signature for options pattern
+	if fn.Type.Params == nil || len(fn.Type.Params.List) == 0 {
+		return
+	}
+
+	// Look for variadic options parameter
+	lastParam := fn.Type.Params.List[len(fn.Type.Params.List)-1]
+	if lastParam.Type != nil {
+		if ellipsis, ok := lastParam.Type.(*ast.Ellipsis); ok {
+			if ident, ok := ellipsis.Elt.(*ast.Ident); ok {
+				if ident.Name == "Option" {
+					// This is good - uses options pattern
+					return
+				}
+			}
+		}
+	}
+
+	// If we get here, this New* function doesn't use options pattern
+	if a.shouldUseOptionsPattern(fn.Name.Name) {
+		pos := a.fset.Position(fn.Pos())
+		a.issues = append(a.issues, ArchitecturalIssue{
+			Type:    IssueMissingOptionsPattern,
+			File:    a.file,
+			Line:    pos.Line,
+			Message: fmt.Sprintf("constructor %s should accept variadic ...Option parameter", fn.Name.Name),
+			Node:    fn,
+		})
+	}
+}
+
+// checkInterfaceCompliance checks if types implement expected interfaces.
+func (a *ArchitecturalAnalyzer) checkInterfaceCompliance(fn *ast.FuncDecl) {
+	// This would check if LLM providers implement the Model interface,
+	// if chains implement the Chain interface, etc.
+	// Implementation would require more sophisticated type analysis
+}
+
+// checkTypeDefinition checks type definitions for architectural compliance.
+func (a *ArchitecturalAnalyzer) checkTypeDefinition(typeSpec *ast.TypeSpec) {
+	// Check if types follow naming conventions and patterns
+	if typeSpec.Name == nil {
+		return
+	}
+
+	typeName := typeSpec.Name.Name
+
+	// Check if this is in a provider package and follows naming conventions
+	if a.isProviderPackage() {
+		if !a.followsProviderNamingConvention(typeName) {
+			pos := a.fset.Position(typeSpec.Pos())
+			a.issues = append(a.issues, ArchitecturalIssue{
+				Type:    IssueInterfaceViolation,
+				File:    a.file,
+				Line:    pos.Line,
+				Message: fmt.Sprintf("provider type %s should follow naming convention", typeName),
+				Node:    typeSpec,
+			})
+		}
+	}
+}
+
+// Helper methods for architectural analysis
+
+func (a *ArchitecturalAnalyzer) isValidInternalImport(importPath string) bool {
+	// Internal packages can only be imported by their parent package or siblings
+
+	// For our project structure, these internal imports are allowed:
+	// - /internal/* packages can be imported by any package at the root level
+	// - Provider internal packages (e.g., /llms/openai/internal/*) can only be imported by their parent
+
+	if strings.Contains(importPath, "github.com/tmc/langchaingo/internal/") {
+		// Root level internal packages are allowed from anywhere in the project
+		return true
+	}
+
+	// For provider-specific internal packages, check if we're in the same provider
+	importParts := strings.Split(importPath, "/")
+
+	// Find the "internal" part in the import path
+	internalIndex := -1
+	for i, part := range importParts {
+		if part == "internal" {
+			internalIndex = i
+			break
+		}
+	}
+
+	if internalIndex == -1 {
+		return true // Not an internal import
+	}
+
+	// Check if we're in the same provider directory
+	if internalIndex >= 2 {
+		providerPath := strings.Join(importParts[:internalIndex], "/")
+		fileDir := filepath.Dir(a.file)
+
+		// Convert paths for comparison
+		providerPath = strings.TrimPrefix(providerPath, "github.com/tmc/langchaingo/")
+		fileDir = strings.TrimPrefix(fileDir, "./")
+
+		return strings.HasPrefix(fileDir, providerPath)
+	}
+
+	return true
+}
+
+func (a *ArchitecturalAnalyzer) isProviderPackage() bool {
+	return strings.Contains(a.file, "/llms/") ||
+		strings.Contains(a.file, "/embeddings/") ||
+		strings.Contains(a.file, "/vectorstores/")
+}
+
+func (a *ArchitecturalAnalyzer) isMainPackage() bool {
+	return strings.Contains(a.file, "/chains/") ||
+		strings.Contains(a.file, "/agents/") ||
+		strings.Contains(a.file, "/memory/") ||
+		strings.Contains(a.file, "/tools/")
+}
+
+func (a *ArchitecturalAnalyzer) isTestFile() bool {
+	return strings.HasSuffix(a.file, "_test.go")
+}
+
+func (a *ArchitecturalAnalyzer) isImportingOtherProvider(importPath string) bool {
+	// Check if this import is for another provider
+	providerPaths := []string{"/llms/", "/embeddings/", "/vectorstores/"}
+
+	for _, providerPath := range providerPaths {
+		if strings.Contains(importPath, providerPath) {
+			// This is importing a provider, check if it's a different one
+			currentProviderPath := ""
+			for _, path := range providerPaths {
+				if strings.Contains(a.file, path) {
+					currentProviderPath = path
+					break
+				}
+			}
+
+			if currentProviderPath != "" && strings.Contains(importPath, currentProviderPath) {
+				// Extract provider names to compare
+				currentProvider := a.extractProviderName(a.file, currentProviderPath)
+				importedProvider := a.extractProviderName(importPath, providerPath)
+
+				return currentProvider != importedProvider &&
+					importedProvider != "" &&
+					currentProvider != ""
+			}
+		}
+	}
+
+	return false
+}
+
+func (a *ArchitecturalAnalyzer) extractProviderName(path, providerType string) string {
+	parts := strings.Split(path, providerType)
+	if len(parts) < 2 {
+		return ""
+	}
+
+	afterProvider := strings.TrimPrefix(parts[1], "/")
+	providerParts := strings.Split(afterProvider, "/")
+	if len(providerParts) > 0 {
+		return providerParts[0]
+	}
+
+	return ""
+}
+
+func (a *ArchitecturalAnalyzer) usesOptionsPattern(call *ast.CallExpr) bool {
+	// Check if the last argument is a variadic options argument
+	if len(call.Args) == 0 {
+		return false
+	}
+
+	// Look for ...opts or similar patterns in the arguments
+	for _, arg := range call.Args {
+		if ident, ok := arg.(*ast.Ident); ok {
+			if strings.Contains(strings.ToLower(ident.Name), "opt") {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (a *ArchitecturalAnalyzer) shouldUseOptionsPattern(functionName string) bool {
+	// Only check provider constructors and main package constructors
+	if !a.isProviderPackage() && !a.isMainPackage() {
+		return false
+	}
+
+	// Constructor functions that should use options pattern
+	constructorPatterns := []string{
+		"NewJina",
+		"NewOpenAI",
+		"NewAnthropic",
+		"NewGoogle",
+		"NewHuggingFace",
+		"NewBedrock",
+		"NewOllama",
+		"NewChroma",
+		"NewPgVector",
+		"NewPinecone",
+		"NewQdrant",
+		"NewWeaviate",
+		"NewMilvus",
+		"NewLLMChain",
+		"NewConversation",
+		"NewAPIChain",
+		"NewSequentialChain",
+		"NewSimpleSequentialChain",
+		"NewRetrievalQA",
+		"NewConversationalRetrievalQA",
+		"NewSQLDatabaseChain",
+		"NewMapReduceDocuments",
+		"NewStuffDocuments",
+		"NewRefineDocuments",
+		"NewLLMMathChain",
+		"NewTransform",
+	}
+
+	for _, pattern := range constructorPatterns {
+		if functionName == pattern {
+			return true
+		}
+	}
+
+	// Only flag simple "New" if it's in a provider package
+	if functionName == "New" && a.isProviderPackage() {
+		return true
+	}
+
+	return false
+}
+
+func (a *ArchitecturalAnalyzer) followsProviderNamingConvention(typeName string) bool {
+	// Provider types should not have generic names
+	genericNames := []string{
+		"Client",
+		"Service",
+		"Provider",
+		"Handler",
+		"Manager",
+	}
+
+	for _, generic := range genericNames {
+		if typeName == generic {
+			return false
+		}
+	}
+
+	return true
+}
+
+// isStandardLibraryCall checks if a call is to the standard library or third-party packages.
+func (a *ArchitecturalAnalyzer) isStandardLibraryCall(sel *ast.SelectorExpr) bool {
+	if ident, ok := sel.X.(*ast.Ident); ok {
+		// Check for common standard library packages that have New* constructors
+		standardLibPackages := []string{
+			"errors",   // errors.New()
+			"context",  // context.New*()
+			"sync",     // sync.New*()
+			"http",     // http.New*()
+			"fmt",      // fmt.New*()
+			"strings",  // strings.New*()
+			"bytes",    // bytes.New*()
+			"time",     // time.New*()
+			"crypto",   // crypto.New*()
+			"hash",     // hash.New*()
+			"regexp",   // regexp.New*()
+			"template", // template.New*()
+			"json",     // json.New*()
+			"xml",      // xml.New*()
+			"sql",      // sql.New*()
+			"log",      // log.New*()
+			"bufio",    // bufio.New*()
+			"io",       // io.New*()
+			"os",       // os.New*()
+		}
+
+		for _, pkg := range standardLibPackages {
+			if ident.Name == pkg {
+				return true
+			}
+		}
+
+		// Check for third-party packages (those with dots in import paths)
+		// This is a heuristic - most third-party packages don't need to follow our options pattern
+		if strings.Contains(ident.Name, ".") {
+			return true
+		}
+	}
+
+	return false
 }

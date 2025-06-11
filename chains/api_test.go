@@ -56,14 +56,14 @@ func TestAPI(t *testing.T) {
 	defer rr.Close()
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 
 	opts := []openai.Option{
 		openai.WithHTTPClient(rr.Client()),
 	}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 	llm, err := openai.New(opts...)

@@ -99,7 +99,7 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
@@ -107,7 +107,7 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	require.NoError(t, err)
 
 	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
 	}
 	searchTool, err := serpapi.New(serpapiOpts...)
@@ -154,7 +154,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
@@ -162,7 +162,7 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	require.NoError(t, err)
 
 	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
 	}
 	searchTool, err := serpapi.New(serpapiOpts...)

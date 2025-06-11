@@ -244,7 +244,7 @@ func TestWithPullTimeout(t *testing.T) {
 	// Check if we're recording - timeout tests don't work with replay
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Skip("Skipping pull timeout test when not recording (timeout behavior cannot be replayed)")
 	}
 

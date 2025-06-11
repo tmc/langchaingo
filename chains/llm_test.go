@@ -22,7 +22,7 @@ func TestLLMChain(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 
@@ -30,7 +30,7 @@ func TestLLMChain(t *testing.T) {
 	opts = append(opts, openai.WithHTTPClient(rr.Client()))
 
 	// Use test token when replaying
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
@@ -80,7 +80,7 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 	model, err := googleai.New(ctx, googleai.WithHTTPClient(rr.Client()))

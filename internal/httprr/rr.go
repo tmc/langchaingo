@@ -113,6 +113,11 @@ func (rr *RecordReplay) Recording() bool {
 	return rr.record != nil
 }
 
+// Replaying reports whether the [RecordReplay] is in replaying mode.
+func (rr *RecordReplay) Replaying() bool {
+	return !rr.Recording()
+}
+
 // Open opens a new record/replay log in the named file and
 // returns a [RecordReplay] backed by that file.
 //

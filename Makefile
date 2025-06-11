@@ -17,6 +17,7 @@ help:
 	@echo "  lint-fix       - Run linter with automatic fixes"
 	@echo "  lint-testing   - Check test patterns and practices (httprr, etc.)"
 	@echo "  lint-testing-fix - Check and attempt to fix test patterns"
+	@echo "  lint-architecture - Check architectural rules and patterns"
 	@echo ""
 	@echo "Other:"
 	@echo "  build-examples - Build all example projects to verify they compile"
@@ -44,7 +45,7 @@ lint-exp:
 
 .PHONY: lint-fix
 lint-fix:
-	golangci-lint run --fix --skip-dirs=./exp ./...
+	golangci-lint run --fix ./...
 
 .PHONY: lint-all
 lint-all:

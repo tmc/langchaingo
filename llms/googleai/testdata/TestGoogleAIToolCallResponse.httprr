@@ -1,20 +1,20 @@
 httprr trace v1
-1017 1471
+996 1472
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 597
+Content-Length: 576
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.3 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What is 15 * 7?"}], "role":"user"}], "tools":[{"functionDeclarations":[{"name":"calculate", "description":"Perform a calculation", "parameters":{"type":6, "properties":{"expression":{"type":1, "description":"Mathematical expression to evaluate"}}, "required":["expression"]}}]}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
-Content-Length: 1092
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"}],"tools":[{"functionDeclarations":[{"name":"calculate","description":"Perform a calculation","parameters":{"type":6,"properties":{"expression":{"type":1,"description":"Mathematical expression to evaluate"}},"required":["expression"]}}]}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 1093
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sun, 08 Jun 2025 18:44:03 GMT
+Date: Wed, 11 Jun 2025 20:44:38 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=600
+Server-Timing: gfet4t7; dur=475
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -57,7 +57,7 @@ X-Xss-Protection: 0
           "probability": 1
         }
       ],
-      "avgLogprobs": -0.0010924447726990496
+      "avgLogprobs": -7.6935476889567723e-06
     }
   ],
   "usageMetadata": {
@@ -78,24 +78,24 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "8tlFaOnMKaKnnvgP25vU6Q0"
+  "responseId": "tupJaLiUBr-7698PjbiRqA4"
 }
-1223 2067
+1196 2067
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 797
+Content-Length: 770
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.3 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What is 15 * 7?"}], "role":"user"}, {"parts":[{"functionCall":{"name":"calculate", "args":{"expression":"15 * 7"}}}], "role":"model"}, {"parts":[{"functionResponse":{"name":"calculate", "response":{"response":"105"}}}], "role":"user"}], "tools":[{"functionDeclarations":[{"name":"calculate", "description":"Perform a calculation", "parameters":{"type":6, "properties":{"expression":{"type":1, "description":"Mathematical expression to evaluate"}}, "required":["expression"]}}]}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"},{"parts":[{"functionCall":{"name":"calculate","args":{"expression":"15 * 7"}}}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculate","response":{"response":"105"}}}],"role":"user"}],"tools":[{"functionDeclarations":[{"name":"calculate","description":"Perform a calculation","parameters":{"type":6,"properties":{"expression":{"type":1,"description":"Mathematical expression to evaluate"}},"required":["expression"]}}]}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
 Content-Length: 1688
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sun, 08 Jun 2025 18:44:04 GMT
+Date: Wed, 11 Jun 2025 20:44:39 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=370
+Server-Timing: gfet4t7; dur=345
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -145,7 +145,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "9NlFaOiRFKKnnvgP25vU6Q0"
+  "responseId": "t-pJaP3uKLOb2PgPrM3soAU"
 }
 ,
 {
@@ -198,6 +198,6 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "9NlFaOiRFKKnnvgP25vU6Q0"
+  "responseId": "t-pJaP3uKLOb2PgPrM3soAU"
 }
 ]

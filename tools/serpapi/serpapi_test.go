@@ -30,7 +30,7 @@ func TestSerpAPITool(t *testing.T) {
 	opts = append(opts, WithHTTPClient(rr.Client()))
 
 	// Use test key when replaying, environment key when recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 

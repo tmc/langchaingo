@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
@@ -262,7 +263,7 @@ func TestStore_AddDocuments(t *testing.T) { //nolint:funlen // comprehensive tes
 				azureAISearchEndpoint: serverURL,
 				azureAISearchAPIKey:   "test-key",
 				embedder:              embedder,
-				client:                http.DefaultClient,
+				client:                httputil.DefaultClient,
 			}
 
 			ctx := context.Background()
@@ -470,7 +471,7 @@ func TestStore_SimilaritySearch(t *testing.T) { //nolint:funlen // comprehensive
 				azureAISearchEndpoint: serverURL,
 				azureAISearchAPIKey:   "test-key",
 				embedder:              embedder,
-				client:                http.DefaultClient,
+				client:                httputil.DefaultClient,
 			}
 
 			ctx := context.Background()
@@ -545,7 +546,7 @@ func TestStore_CreateIndex(t *testing.T) {
 			store := Store{
 				azureAISearchEndpoint: server.URL,
 				azureAISearchAPIKey:   "test-key",
-				client:                http.DefaultClient,
+				client:                httputil.DefaultClient,
 			}
 
 			ctx := context.Background()
@@ -577,7 +578,7 @@ func TestStore_DeleteIndex(t *testing.T) {
 	store := Store{
 		azureAISearchEndpoint: server.URL,
 		azureAISearchAPIKey:   "test-key",
-		client:                http.DefaultClient,
+		client:                httputil.DefaultClient,
 	}
 
 	ctx := context.Background()
@@ -606,7 +607,7 @@ func TestStore_ListIndexes(t *testing.T) {
 	store := Store{
 		azureAISearchEndpoint: server.URL,
 		azureAISearchAPIKey:   "test-key",
-		client:                http.DefaultClient,
+		client:                httputil.DefaultClient,
 	}
 
 	ctx := context.Background()
@@ -640,7 +641,7 @@ func TestStore_RetrieveIndex(t *testing.T) {
 	store := Store{
 		azureAISearchEndpoint: server.URL,
 		azureAISearchAPIKey:   "test-key",
-		client:                http.DefaultClient,
+		client:                httputil.DefaultClient,
 	}
 
 	ctx := context.Background()
@@ -1146,7 +1147,7 @@ func TestDocumentUploadEdgeCases(t *testing.T) {
 				azureAISearchEndpoint: server.URL,
 				azureAISearchAPIKey:   "test-key",
 				embedder:              &testEmbedder{},
-				client:                http.DefaultClient,
+				client:                httputil.DefaultClient,
 			}
 
 			ctx := context.Background()
@@ -1232,7 +1233,7 @@ func TestSearchWithComplexFilters(t *testing.T) {
 				azureAISearchEndpoint: server.URL,
 				azureAISearchAPIKey:   "test-key",
 				embedder:              &testEmbedder{},
-				client:                http.DefaultClient,
+				client:                httputil.DefaultClient,
 			}
 
 			ctx := context.Background()
@@ -1280,7 +1281,7 @@ func TestConcurrentOperations(t *testing.T) {
 		azureAISearchEndpoint: server.URL,
 		azureAISearchAPIKey:   "test-key",
 		embedder:              &testEmbedder{},
-		client:                http.DefaultClient,
+		client:                httputil.DefaultClient,
 	}
 
 	ctx := context.Background()

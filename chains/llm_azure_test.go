@@ -21,7 +21,7 @@ func TestLLMChainAzure(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 	// Azure OpenAI URL is used as OPENAI_BASE_URL

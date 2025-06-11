@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 func TestNewVoyageAI(t *testing.T) { //nolint:funlen // comprehensive test
@@ -200,7 +201,7 @@ func TestVoyageAI_EmbedQuery_InvalidURL(t *testing.T) {
 		Model:         _defaultModel,
 		StripNewLines: true,
 		BatchSize:     _defaultBatchSize,
-		client:        http.DefaultClient,
+		client:        httputil.DefaultClient,
 	}
 
 	ctx := context.Background()
@@ -217,7 +218,7 @@ func TestVoyageAI_EmbedDocuments_InvalidURL(t *testing.T) {
 		Model:         _defaultModel,
 		StripNewLines: true,
 		BatchSize:     _defaultBatchSize,
-		client:        http.DefaultClient,
+		client:        httputil.DefaultClient,
 	}
 
 	ctx := context.Background()

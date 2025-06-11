@@ -21,7 +21,7 @@ func TestPerplexityTool(t *testing.T) {
 	opts = append(opts, WithHTTPClient(rr.Client()))
 
 	// Use test token when replaying
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 

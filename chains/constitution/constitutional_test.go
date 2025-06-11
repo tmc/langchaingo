@@ -47,7 +47,7 @@ func TestConstitutionalChain(t *testing.T) {
 	opts := []openai.Option{
 		openai.WithHTTPClient(rr.Client()),
 	}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 

@@ -25,7 +25,7 @@ func TestConversation(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 
@@ -34,7 +34,7 @@ func TestConversation(t *testing.T) {
 	}
 
 	// Only add fake token when NOT recording (i.e., during replay)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 	// When recording, openai.New() will read OPENAI_API_KEY from environment
@@ -60,7 +60,7 @@ func TestConversationWithZepMemory(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 	zepAPIKey := os.Getenv("ZEP_API_KEY")
@@ -108,7 +108,7 @@ func TestConversationWithChatLLM(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording (to avoid rate limits)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Parallel()
 	}
 
@@ -117,7 +117,7 @@ func TestConversationWithChatLLM(t *testing.T) {
 	}
 
 	// Only add fake token when NOT recording (i.e., during replay)
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 	// When recording, openai.New() will read OPENAI_API_KEY from environment

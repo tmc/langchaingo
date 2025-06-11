@@ -58,7 +58,7 @@ func TestClient_Generate(t *testing.T) {
 	}
 
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -104,7 +104,7 @@ func TestClient_GenerateStream(t *testing.T) {
 	}
 
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -149,7 +149,7 @@ func TestClient_GenerateChat(t *testing.T) {
 	}
 
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -200,7 +200,7 @@ func TestClient_GenerateChatStream(t *testing.T) {
 	}
 
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -249,7 +249,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	}
 
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 

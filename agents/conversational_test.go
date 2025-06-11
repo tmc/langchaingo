@@ -24,7 +24,7 @@ func TestConversationalWithMemory(t *testing.T) {
 		openai.WithModel("gpt-4o"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	if !rr.Recording() {
+	if rr.Replaying() {
 		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 

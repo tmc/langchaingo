@@ -28,18 +28,37 @@ func isLlamafileAvailable() bool {
 	}
 
 	// Try to connect to llamafile server
-	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get(host + "/health")
-	if err != nil {
-		// Try without /health endpoint
-		resp, err = client.Get(host)
-		if err != nil {
-			return false
-		}
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+		// Don't use system proxy for local llamafile check
+		Transport: &http.Transport{
+			Proxy: nil,
+		},
 	}
-	defer resp.Body.Close()
 
-	return resp.StatusCode < 500
+	// Try the /v1/models endpoint first (standard OpenAI API endpoint)
+	resp, err := client.Get(host + "/v1/models")
+	if err == nil {
+		defer resp.Body.Close()
+		return resp.StatusCode == 200
+	}
+
+	// Try /health endpoint
+	resp, err = client.Get(host + "/health")
+	if err == nil {
+		defer resp.Body.Close()
+		return resp.StatusCode < 500
+	}
+
+	// Try root endpoint as last resort
+	resp, err = client.Get(host)
+	if err == nil {
+		defer resp.Body.Close()
+		return resp.StatusCode < 500
+	}
+
+	// Server is not available
+	return false
 }
 
 func newTestClient(t *testing.T) *LLM {
