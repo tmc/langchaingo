@@ -128,31 +128,38 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	return e
 }
 
-// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
+// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for testing.
 func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
 	t.Helper()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
-	openaiOpts := []openai.Option{
+
+	llmOpts := []openai.Option{
 		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		llmOpts = append(llmOpts, openai.WithToken("test-api-key"))
 	}
 
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
-		openaiOpts = append(openaiOpts,
+		llmOpts = append(llmOpts,
 			openai.WithBaseURL(openAIBaseURL),
 			openai.WithAPIType(openai.APITypeAzure),
 			openai.WithModel("gpt-4"),
 		)
 	}
 
-	llm, err := openai.New(openaiOpts...)
+	llm, err := openai.New(llmOpts...)
 	require.NoError(t, err)
 
 	embeddingOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		embeddingOpts = append(embeddingOpts, openai.WithToken("test-api-key"))
 	}
 
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
@@ -189,8 +196,15 @@ func setOpensearchClient(
 }
 
 func TestOpensearchStoreRest(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENSEARCH_ENDPOINT", "OPENSEARCH_USER", "OPENSEARCH_PASSWORD", "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
-	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 	e := createOpenAIEmbedder(t)
@@ -217,8 +231,15 @@ func TestOpensearchStoreRest(t *testing.T) {
 }
 
 func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENSEARCH_ENDPOINT", "OPENSEARCH_USER", "OPENSEARCH_PASSWORD", "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
-	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
@@ -257,8 +278,15 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestOpensearchAsRetriever(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENSEARCH_ENDPOINT", "OPENSEARCH_USER", "OPENSEARCH_PASSWORD", "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
-	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
@@ -299,8 +327,15 @@ func TestOpensearchAsRetriever(t *testing.T) {
 }
 
 func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENSEARCH_ENDPOINT", "OPENSEARCH_USER", "OPENSEARCH_PASSWORD", "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
-	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 

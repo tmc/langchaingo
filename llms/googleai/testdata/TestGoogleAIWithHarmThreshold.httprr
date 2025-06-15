@@ -1,0 +1,77 @@
+httprr trace v1
+773 6645
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 353
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"Tell me about safety features"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":4},{"category":7,"threshold":4},{"category":8,"threshold":4},{"category":9,"threshold":4}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 6265
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 14 Jun 2025 00:58:16 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=7075
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Okay, let's talk about safety features! To give you the most helpful information, I need a little more context.  Are you interested in safety features for:\n\n*   **Cars?**\n*   **Homes?**\n*   **Software/Online security?**\n*   **Something else entirely?**\n\nIn the meantime, here's a general overview of safety features across different categories:\n\n**I. Automotive Safety Features:**\n\n*   **Active Safety Features (Prevent Accidents):**\n    *   **Anti-lock Braking System (ABS):** Prevents wheels from locking up during braking, allowing you to steer.\n    *   **Electronic Stability Control (ESC):** Helps prevent skidding by selectively applying brakes to individual wheels.\n    *   **Traction Control System (TCS):** Limits wheel spin during acceleration, improving grip.\n    *   **Automatic Emergency Braking (AEB):** Detects potential collisions and automatically applies the brakes.\n    *   **Lane Departure Warning (LDW) / Lane Keeping Assist (LKA):** Warns you if you're drifting out of your lane and may even steer you back.\n    *   **Blind Spot Monitoring (BSM):** Alerts you to vehicles in your blind spots.\n    *   **Rear Cross-Traffic Alert (RCTA):** Warns you of approaching vehicles when backing up.\n    *   **Adaptive Cruise Control (ACC):** Maintains a set distance from the vehicle ahead, automatically adjusting speed.\n    *   **Automatic High Beams:** Automatically switches between high and low beams based on traffic conditions.\n    *   **Tire Pressure Monitoring System (TPMS):** Alerts you when tire pressure is low.\n*   **Passive Safety Features (Protect During Accidents):**\n    *   **Airbags:** Provide cushioning in a collision. (Front, side, curtain, knee)\n    *   **Seatbelts:** Restrain occupants in a crash.\n    *   ** crumple zones:** Designed to absorb impact energy in a collision.\n    *   **Side-impact beams:** Strengthen doors to protect occupants in side collisions.\n    *   **Reinforced Safety Cage:** Protects the passenger compartment.\n    *   **Head restraints:** Reduce whiplash injuries.\n\n**II. Home Safety Features:**\n\n*   **Fire Safety:**\n    *   **Smoke Detectors:** Detect smoke and sound an alarm. (Essential on every level of the home and inside/outside bedrooms)\n    *   **Carbon Monoxide Detectors:** Detect carbon monoxide, a deadly, odorless gas.\n    *   **Fire Extinguishers:** For putting out small fires. (Know how to use them!)\n    *   **Fire Escape Plan:** A pre-determined route for exiting the home in case of a fire.\n*   **Security:**\n    *   **Door and Window Locks:** Prevent unauthorized entry.\n    *   **Security System:** Detects intruders and alerts authorities.\n    *   **Security Cameras:** Record activity around the home.\n    *   **Motion-Sensing Lights:** Deter intruders.\n    *   **Reinforced Doors and Frames:** Make it harder to break in.\n    *   **Window Film:** Makes windows more difficult to break.\n*   **General Safety:**\n    *   **First Aid Kit:** For treating minor injuries.\n    *   **Emergency Contact List:** Keep important phone numbers readily available.\n    *   **Proper Lighting:** Reduces the risk of falls.\n    *   **Handrails:** On stairs and in bathrooms.\n    *   **Non-slip Surfaces:** In bathrooms and kitchens.\n    *   **Childproofing:** Outlet covers, cabinet locks, etc.\n    *   **Safe Storage of Medications and Chemicals:** Keep out of reach of children.\n\n**III. Software/Online Safety Features:**\n\n*   **Antivirus Software:** Detects and removes malware.\n*   **Firewall:** Blocks unauthorized access to your computer or network.\n*   **Strong Passwords:** Use unique, complex passwords for each account.\n*   **Two-Factor Authentication (2FA):** Adds an extra layer of security to your accounts.\n*   **Phishing Detection:** Be wary of suspicious emails or websites that try to steal your information.\n*   **Privacy Settings:** Control who can see your information on social media and other online platforms.\n*   **VPN (Virtual Private Network):** Encrypts your internet traffic and hides your IP address.\n*   **Regular Software Updates:** Keep your operating system and software up to date to patch security vulnerabilities.\n*   **Data Encryption:** Protects your data by converting it into an unreadable format.\n\n**IV. Workplace Safety Features:**\n\n*   **Personal Protective Equipment (PPE):** Hard hats, safety glasses, gloves, etc.\n*   **Machine Guarding:** Barriers to prevent contact with moving parts.\n*   **Hazard Communication:** Clear labeling and training on hazardous materials.\n*   **Emergency Procedures:** Evacuation plans, first aid training.\n*   **Ergonomics:** Designing workspaces to reduce strain and injury.\n*   **Regular Safety Inspections:** Identifying and correcting potential hazards.\n\n**To give you more specific information, please tell me:**\n\n*   **What area of safety are you most interested in?**\n*   **What is the specific application or context?** (e.g., \"What are the best safety features for a family SUV?\" or \"What safety features should I look for in a home security system?\")\n*   **Are there any specific concerns you have?** (e.g., \"I'm worried about preventing falls in my elderly parent's home.\")\n\nOnce I have this information, I can provide a more tailored and helpful response.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ],
+      "avgLogprobs": -0.11929785085863494
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 5,
+    "candidatesTokenCount": 1214,
+    "totalTokenCount": 1219,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 5
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 1214
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "IclMaOXDC4rvgLUPrZ2JoAY"
+}

@@ -22,12 +22,14 @@ func TestOpenAIFunctionsAgentWithHTTPRR(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
 		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
 	llm, err := openai.New(opts...)
@@ -69,12 +71,14 @@ func TestOpenAIFunctionsAgentComplexCalculation(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
 		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
 
 	llm, err := openai.New(opts...)

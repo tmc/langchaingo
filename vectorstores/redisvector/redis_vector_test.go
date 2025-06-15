@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -15,17 +16,12 @@ import (
 	tcredis "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/redisvector"
-)
-
-const (
-	ollamaEmbeddingModel = "nomic-embed-text"
-	ollamaChatModel      = "gemma3:1b"
 )
 
 func getTestURIs(t *testing.T) (string, string) {
@@ -78,45 +74,71 @@ var jsonSchemaData string
 var yamlSchemaData string
 
 func TestCreateRedisVectorOptions(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	redisURL, ollamaURL := getTestURIs(t)
-	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	ctx := context.Background()
+	redisURL, _ := getTestURIs(t)
+	e := createOpenAIEmbedder(t)
 	index := "test_case1"
 
+	// Test invalid configurations
+	testInvalidRedisVectorConfigs(t, ctx, redisURL, e, index)
+
+	// Test valid configurations with schema files and data
+	testValidRedisVectorConfigs(t, ctx, redisURL, e, index)
+}
+
+func testInvalidRedisVectorConfigs(t *testing.T, ctx context.Context, redisURL string, e *embeddings.EmbedderImpl, index string) {
+	t.Helper()
+
+	// Missing index name
 	_, err := redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithEmbedder(e),
 	)
 	assert.Equal(t, "invalid options: missing index name", err.Error())
 
+	// Missing embedder
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 	)
 	assert.Equal(t, "invalid options: missing embedder", err.Error())
 
+	// Missing connection URL
 	_, err = redisvector.New(ctx,
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
 	assert.Equal(t, "redis: invalid URL scheme: ", err.Error())
 
+	// Index doesn't exist
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, false),
 		redisvector.WithEmbedder(e),
 	)
 	assert.Equal(t, "redis index name does not exist", err.Error())
+}
 
-	_, err = redisvector.New(ctx,
+func testValidRedisVectorConfigs(t *testing.T, ctx context.Context, redisURL string, e *embeddings.EmbedderImpl, index string) {
+	t.Helper()
+
+	// Create index
+	_, err := redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
 		redisvector.WithEmbedder(e),
 	)
 	require.NoError(t, err)
 
+	// Test missing schema file
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
@@ -125,6 +147,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	)
 	assert.Equal(t, "open ./testdata/not_exists.yml: no such file or directory", err.Error())
 
+	// Test empty schema content
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
@@ -133,7 +156,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	)
 	assert.Equal(t, redisvector.ErrEmptySchemaContent, err)
 
-	// create redis vector with file
+	// Test with schema files
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
@@ -150,7 +173,7 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// create redis vector with string
+	// Test with schema data
 	_, err = redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
@@ -169,11 +192,18 @@ func TestCreateRedisVectorOptions(t *testing.T) {
 }
 
 func TestAddDocuments(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getTestURIs(t)
-	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
+	redisURL, _ := getTestURIs(t)
+	e := createOpenAIEmbedder(t)
 
 	index := "test_add_document"
 	prefix := "doc:"
@@ -256,11 +286,18 @@ func TestAddDocuments(t *testing.T) {
 }
 
 func TestSimilaritySearch(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getTestURIs(t)
-	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
+	redisURL, _ := getTestURIs(t)
+	e := createOpenAIEmbedder(t)
 
 	index := "test_similarity_search"
 
@@ -346,11 +383,18 @@ func TestSimilaritySearch(t *testing.T) {
 }
 
 func TestRedisVectorAsRetriever(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getTestURIs(t)
-	llm, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
+	redisURL, _ := getTestURIs(t)
+	llm, e := createOpenAILLMAndEmbedder(t)
 	index := "test_redis_vector_as_retriever"
 
 	store, err := redisvector.New(ctx,
@@ -404,11 +448,18 @@ func TestRedisVectorAsRetriever(t *testing.T) {
 }
 
 func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 
-	redisURL, ollamaURL := getTestURIs(t)
-	_, e := getOllamaClient(ollamaEmbeddingModel, ollamaChatModel, ollamaURL)
+	redisURL, _ := getTestURIs(t)
+	e := createOpenAIEmbedder(t)
 	index := "test_redis_vector_as_retriever_with_metadata_filters"
 
 	store, err := redisvector.New(ctx,
@@ -469,34 +520,38 @@ func TestRedisVectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Equal(t, "patio", docs[0].Metadata["location"], "document should be from patio")
 }
 
-// nolint: unparam
-func getOllamaClient(embeddingModel, chatModel string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
-	// Create embedding LLM
-	embOpts := []ollama.Option{ollama.WithModel(embeddingModel)}
-	if len(connectionStr) > 0 {
-		embOpts = append(embOpts, ollama.WithServerURL(connectionStr[0]))
-	}
-	embLlm, err := ollama.New(embOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
 
-	e, err := embeddings.NewEmbedder(embLlm)
-	if err != nil {
-		log.Fatal(err)
-	}
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+	return e
+}
 
-	// Create chat LLM
-	chatOpts := []ollama.Option{ollama.WithModel(chatModel)}
-	if len(connectionStr) > 0 {
-		chatOpts = append(chatOpts, ollama.WithServerURL(connectionStr[0]))
-	}
-	chatLlm, err := ollama.New(chatOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
+// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
+func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
+	t.Helper()
 
-	return llms.Model(chatLlm), e
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	llm, err := openai.New(
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+	embeddingLLM, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(embeddingLLM)
+	require.NoError(t, err)
+	return llm, e
 }
 
 /**

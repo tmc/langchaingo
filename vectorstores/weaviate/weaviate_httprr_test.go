@@ -37,7 +37,6 @@ func scrubWeaviateData(req *http.Request) error {
 
 func TestWeaviateHTTPRR_AddDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Setup HTTP record/replay
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
@@ -109,7 +108,6 @@ func TestWeaviateHTTPRR_AddDocuments(t *testing.T) {
 
 func TestWeaviateHTTPRR_SimilaritySearch(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Setup HTTP record/replay
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
@@ -165,7 +163,6 @@ func TestWeaviateHTTPRR_SimilaritySearch(t *testing.T) {
 
 func TestWeaviateHTTPRR_SimilaritySearchWithAuth(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Setup HTTP record/replay
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")
@@ -220,7 +217,6 @@ func TestWeaviateHTTPRR_SimilaritySearchWithAuth(t *testing.T) {
 
 func TestWeaviateHTTPRR_WithQueryAttrs(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Setup HTTP record/replay
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "WEAVIATE_HOST", "WEAVIATE_API_KEY")

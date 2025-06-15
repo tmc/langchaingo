@@ -95,6 +95,30 @@ func setEngineWithImage(t *testing.T) cloudsqlutil.PostgresEngine {
 	return pgEngine
 }
 
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	opts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	llm, err := openai.New(opts...)
+	if err != nil {
+		t.Fatalf("Failed to create OpenAI LLM: %v", err)
+	}
+	e, err := embeddings.NewEmbedder(llm)
+	if err != nil {
+		t.Fatalf("Failed to create embedder: %v", err)
+	}
+	return e
+}
+
 func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 	t.Helper()
 	pgEngine := setEngineWithImage(t)
@@ -110,22 +134,8 @@ func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 		t.Fatal(err)
 	}
 
-	// Setup httprr for OpenAI embeddings
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-
-	// Initialize OpenAI LLM with httprr
-	llm, err := openai.New(
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithHTTPClient(rr.Client()),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Initialize OpenAI embedder with httprr
+	e := createOpenAIEmbedder(t)
 	vs, err := cloudsql.NewVectorStore(pgEngine, e, "my_test_table")
 	if err != nil {
 		t.Fatal(err)
@@ -193,6 +203,13 @@ func TestContainerIsValidIndex(t *testing.T) {
 }
 
 func TestContainerAddDocuments(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)

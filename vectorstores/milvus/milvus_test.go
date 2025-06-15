@@ -2,7 +2,7 @@ package milvus
 
 import (
 	"context"
-	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -14,27 +14,36 @@ import (
 	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
-	opts := []ollama.Option{ollama.WithModel(model)}
-	if len(connectionStr) > 0 {
-		opts = append(opts, ollama.WithServerURL(connectionStr[0]))
-	}
-	llm, err := ollama.New(opts...)
-	if err != nil {
-		log.Fatal(err)
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) (llms.Model, *embeddings.EmbedderImpl) {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("OPENAI_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
 
+	llm, err := openai.New(
+		openai.WithToken(apiKey),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
 	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 	return llms.Model(llm), e
 }
 
@@ -42,14 +51,7 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
 	testctr.SkipIfDockerNotAvailable(t)
 
-	// Default to localhost if OLLAMA_HOST not set
-	ollamaURL := os.Getenv("OLLAMA_HOST")
-	if ollamaURL == "" {
-		ollamaURL = "http://localhost:11434"
-	}
-
-	_, e := getEmbedding("nomic-embed-text", ollamaURL)
-
+	_, e := createOpenAIEmbedder(t)
 	ctx := context.Background()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {

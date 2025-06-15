@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -23,6 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -102,7 +104,7 @@ func cleanName(name string) string {
 // This uses sync.Once to ensure the MongoDB Atlas Local container is only
 // created once and shared across all tests for efficiency.
 // The container includes both MongoDB and Atlas Search capabilities.
-func setupTestEnv(t *testing.T) *testEnv {
+func setupTestEnv(t *testing.T, httpClient ...*http.Client) *testEnv {
 	t.Helper()
 
 	if testing.Short() {
@@ -365,10 +367,15 @@ func TestNew(t *testing.T) {
 // TestStore_AddDocuments verifies document insertion functionality.
 // Each subtest gets its own collection to enable parallel execution.
 func TestStore_AddDocuments(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MONGODB_URI")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	// Set up shared test environment for all subtests
-	env := setupTestEnv(t)
+	env := setupTestEnv(t, rr.Client())
 	ctx := context.Background()
 
 	tests := []struct {

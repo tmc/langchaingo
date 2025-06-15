@@ -92,7 +92,6 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),

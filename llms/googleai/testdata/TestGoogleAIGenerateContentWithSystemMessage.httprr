@@ -1,0 +1,149 @@
+httprr trace v1
+898 2566
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 472
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-1.5-flash
+
+{"model":"models/gemini-1.5-flash","systemInstruction":{"parts":[{"text":"You are a helpful assistant that always responds in haiku format."}],"role":"system"},"contents":[{"parts":[{"text":"Tell me about the ocean"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 2187
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 14 Jun 2025 00:57:50 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=186
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+[{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Vast"
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 19,
+    "totalTokenCount": 19,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 19
+      }
+    ]
+  },
+  "modelVersion": "gemini-1.5-flash",
+  "responseId": "DslMaOmAEorvgLUPrZ2JoAY"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " and deep blue sea,\nCreatures swim in coral bright,\nWaves crash"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 19,
+    "totalTokenCount": 19,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 19
+      }
+    ]
+  },
+  "modelVersion": "gemini-1.5-flash",
+  "responseId": "DslMaOmAEorvgLUPrZ2JoAY"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " on the shore.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 17,
+    "candidatesTokenCount": 22,
+    "totalTokenCount": 39,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 17
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 22
+      }
+    ]
+  },
+  "modelVersion": "gemini-1.5-flash",
+  "responseId": "DslMaOmAEorvgLUPrZ2JoAY"
+}
+]
