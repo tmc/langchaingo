@@ -3,6 +3,7 @@ package perplexity
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -28,8 +29,9 @@ const (
 type Option func(*options)
 
 type options struct {
-	apiKey string
-	model  Model
+	apiKey     string
+	model      Model
+	httpClient *http.Client
 }
 
 // WithAPIKey sets the API key for Perplexity AI.
@@ -43,6 +45,13 @@ func WithAPIKey(apiKey string) Option {
 func WithModel(model Model) Option {
 	return func(o *options) {
 		o.model = model
+	}
+}
+
+// WithHTTPClient sets the HTTP client for Perplexity AI.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(o *options) {
+		o.httpClient = httpClient
 	}
 }
 
@@ -69,11 +78,17 @@ func New(opts ...Option) (*Tool, error) {
 		return nil, fmt.Errorf("PERPLEXITY_API_KEY key not set")
 	}
 
-	llm, err := openai.New(
+	openaiOpts := []openai.Option{
 		openai.WithModel(string(options.model)),
 		openai.WithBaseURL("https://api.perplexity.ai"),
 		openai.WithToken(options.apiKey),
-	)
+	}
+
+	if options.httpClient != nil {
+		openaiOpts = append(openaiOpts, openai.WithHTTPClient(options.httpClient))
+	}
+
+	llm, err := openai.New(openaiOpts...)
 	if err != nil {
 		return nil, err
 	}

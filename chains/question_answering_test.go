@@ -2,28 +2,38 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
+// createOpenAILLMForQA creates an OpenAI LLM with httprr support for testing.
+func createOpenAILLMForQA(t *testing.T) *openai.LLM {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+	require.NoError(t, err)
+	return llm
+}
+
 func TestRefineQA(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	qaChain := LoadRefineQA(llm)
 
 	results, err := Call(
-		context.Background(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -37,19 +47,16 @@ func TestRefineQA(t *testing.T) {
 }
 
 func TestMapReduceQA(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	qaChain := LoadMapReduceQA(llm)
 
 	result, err := Predict(
-		context.Background(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -64,18 +71,15 @@ func TestMapReduceQA(t *testing.T) {
 func TestMapRerankQA(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	mapRerankChain := LoadMapRerankQA(llm)
 
 	results, err := Call(
-		context.Background(),
+		ctx,
 		mapRerankChain,
 		map[string]any{
 			"input_documents": docs,

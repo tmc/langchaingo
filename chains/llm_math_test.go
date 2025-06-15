@@ -2,26 +2,28 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func TestLLMMath(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	chain := NewLLMMathChain(llm)
 	q := "what is forty plus three? take that then multiply it by ten thousand divided by 7324.3"
-	result, err := Run(context.Background(), chain, q)
+	result, err := Run(ctx, chain, q)
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "58.708"), "expected 58.708 in result")
 }

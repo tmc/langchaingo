@@ -2,22 +2,25 @@ package chains
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/tools/sqldatabase"
 	"github.com/tmc/langchaingo/tools/sqldatabase/mysql"
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
@@ -36,7 +39,7 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 		"query":              "How many cards are there?",
 		"table_names_to_use": []string{"AllianceAuthority", "AllianceGift", "Card"},
 	}
-	result, err := chain.Call(context.Background(), input)
+	result, err := chain.Call(ctx, input)
 	require.NoError(t, err)
 
 	ret, ok := result["result"].(string)

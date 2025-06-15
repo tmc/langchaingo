@@ -7,7 +7,7 @@ import (
 const (
 	_defaultBatchSize     = 512
 	_defaultStripNewLines = true
-	_defaultModel         = "sentence-transformers/all-mpnet-base-v2"
+	_defaultModel         = "BAAI/bge-small-en-v1.5"
 	_defaultTask          = "feature-extraction"
 )
 

@@ -109,16 +109,32 @@ func (o *OpenAIFunctionsAgent) Plan(
 				}},
 			}
 
-		case llms.AIChatMessage:
+		case llms.FunctionChatMessage:
 			mc = llms.MessageContent{
 				Role: role,
-				Parts: []llms.ContentPart{
-					llms.ToolCall{
-						ID:           p.ToolCalls[0].ID,
-						Type:         p.ToolCalls[0].Type,
-						FunctionCall: p.ToolCalls[0].FunctionCall,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{
+					Name:    p.Name,
+					Content: p.Content,
+				}},
+			}
+
+		case llms.AIChatMessage:
+			if len(p.ToolCalls) > 0 {
+				mc = llms.MessageContent{
+					Role: role,
+					Parts: []llms.ContentPart{
+						llms.ToolCall{
+							ID:           p.ToolCalls[0].ID,
+							Type:         p.ToolCalls[0].Type,
+							FunctionCall: p.ToolCalls[0].FunctionCall,
+						},
 					},
-				},
+				}
+			} else {
+				mc = llms.MessageContent{
+					Role:  role,
+					Parts: []llms.ContentPart{llms.TextContent{Text: text}},
+				}
 			}
 		default:
 			mc = llms.MessageContent{
@@ -180,8 +196,23 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
-		messages = append(messages, llms.FunctionChatMessage{
-			Name:    step.Action.Tool,
+		// First add the AI message with the tool call
+		messages = append(messages, llms.AIChatMessage{
+			Content: step.Action.Log,
+			ToolCalls: []llms.ToolCall{
+				{
+					ID:   step.Action.ToolID,
+					Type: "function",
+					FunctionCall: &llms.FunctionCall{
+						Name:      step.Action.Tool,
+						Arguments: step.Action.ToolInput,
+					},
+				},
+			},
+		})
+		// Then add the tool response message
+		messages = append(messages, llms.ToolChatMessage{
+			ID:      step.Action.ToolID,
 			Content: step.Observation,
 		})
 	}
@@ -194,45 +225,97 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 ) {
 	choice := contentResp.Choices[0]
 
-	// finish
-	if choice.FuncCall == nil {
-		return nil, &schema.AgentFinish{
-			ReturnValues: map[string]any{
-				"output": choice.Content,
-			},
-			Log: choice.Content,
-		}, nil
-	}
-
-	// action
-	functionCall := choice.FuncCall
-	functionName := functionCall.Name
-	toolInputStr := functionCall.Arguments
-	toolInputMap := make(map[string]any, 0)
-	err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	toolInput := toolInputStr
-	if arg1, ok := toolInputMap["__arg1"]; ok {
-		toolInputCheck, ok := arg1.(string)
-		if ok {
-			toolInput = toolInputCheck
+	// Check for new-style tool calls first
+	if len(choice.ToolCalls) > 0 {
+		toolCall := choice.ToolCalls[0]
+		functionName := toolCall.FunctionCall.Name
+		toolInputStr := toolCall.FunctionCall.Arguments
+		toolInputMap := make(map[string]any, 0)
+		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+		if err != nil {
+			// If it's not valid JSON, it might be a raw expression for the calculator
+			// Try to use it directly as tool input
+			return []schema.AgentAction{
+				{
+					Tool:      functionName,
+					ToolInput: toolInputStr,
+					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+					ToolID:    toolCall.ID,
+				},
+			}, nil, nil
 		}
+
+		toolInput := toolInputStr
+		if arg1, ok := toolInputMap["__arg1"]; ok {
+			toolInputCheck, ok := arg1.(string)
+			if ok {
+				toolInput = toolInputCheck
+			}
+		}
+
+		contentMsg := "\n"
+		if choice.Content != "" {
+			contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+		}
+
+		return []schema.AgentAction{
+			{
+				Tool:      functionName,
+				ToolInput: toolInput,
+				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:    toolCall.ID,
+			},
+		}, nil, nil
 	}
 
-	contentMsg := "\n"
-	if choice.Content != "" {
-		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+	// Check for legacy function call
+	if choice.FuncCall != nil {
+		functionCall := choice.FuncCall
+		functionName := functionCall.Name
+		toolInputStr := functionCall.Arguments
+		toolInputMap := make(map[string]any, 0)
+		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+		if err != nil {
+			// If it's not valid JSON, it might be a raw expression for the calculator
+			// Try to use it directly as tool input
+			return []schema.AgentAction{
+				{
+					Tool:      functionName,
+					ToolInput: toolInputStr,
+					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+					ToolID:    "", // Legacy function calls don't have tool IDs
+				},
+			}, nil, nil
+		}
+
+		toolInput := toolInputStr
+		if arg1, ok := toolInputMap["__arg1"]; ok {
+			toolInputCheck, ok := arg1.(string)
+			if ok {
+				toolInput = toolInputCheck
+			}
+		}
+
+		contentMsg := "\n"
+		if choice.Content != "" {
+			contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+		}
+
+		return []schema.AgentAction{
+			{
+				Tool:      functionName,
+				ToolInput: toolInput,
+				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:    "", // Legacy function calls don't have tool IDs
+			},
+		}, nil, nil
 	}
 
-	return []schema.AgentAction{
-		{
-			Tool:      functionName,
-			ToolInput: toolInput,
-			Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-			ToolID:    choice.ToolCalls[0].ID,
+	// No function/tool call - this is a finish
+	return nil, &schema.AgentFinish{
+		ReturnValues: map[string]any{
+			"output": choice.Content,
 		},
-	}, nil, nil
+		Log: choice.Content,
+	}, nil
 }
