@@ -53,7 +53,7 @@ Thank you for your interest in contributing to LangChainGo! This guide will help
 - Ensure all tests pass with `go test ./...`
 - Add tests for new functionality
 - Use package-prefixed commit messages (see PR Guidelines below)
-- Keep commits focused and atomic
+- Keep commits focused to a single topic
 
 ### Testing
 
