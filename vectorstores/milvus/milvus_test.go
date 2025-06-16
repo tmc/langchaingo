@@ -2,6 +2,7 @@ package milvus
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -115,6 +116,18 @@ func TestMilvusConnection(t *testing.T) {
 	_, err = storer.AddDocuments(ctx, data)
 	require.NoError(t, err)
 
+	unusedData := []schema.Document{
+		{PageContent: "MockCity", Metadata: map[string]any{"population": 100, "area": 100}},
+	}
+
+	embedderM := &mockEmbedder{
+		embedDocumentsErr: errEmbeddingDocuments,
+		embedQueryErr:     errEmbeddingQuery,
+	}
+
+	_, err = storer.AddDocuments(context.Background(), unusedData, vectorstores.WithEmbedder(embedderM))
+	require.ErrorIs(t, err, errEmbeddingDocuments)
+
 	// search docs with filter
 	filterRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 10,
@@ -130,3 +143,23 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, japanRes, 1)
 }
+
+type mockEmbedder struct {
+	embedDocumentsReturn [][]float32
+	embedDocumentsErr    error
+	embedQueryReturn     []float32
+	embedQueryErr        error
+}
+
+func (m *mockEmbedder) EmbedDocuments(_ context.Context, _ []string) ([][]float32, error) {
+	return m.embedDocumentsReturn, m.embedDocumentsErr
+}
+
+func (m *mockEmbedder) EmbedQuery(_ context.Context, _ string) ([]float32, error) {
+	return m.embedQueryReturn, m.embedQueryErr
+}
+
+var (
+	errEmbeddingDocuments = errors.New("error embedding documents")
+	errEmbeddingQuery     = errors.New("error embedding query")
+)
