@@ -48,7 +48,7 @@ Thank you for your interest in contributing to LangChainGo! This guide will help
 
 ### Code Style
 
-- Follow standard Go conventions and idioms
+- Follow standard [Go conventions and idioms](https://go.dev/doc/effective_go)
 - Run `go fmt` before committing
 - Ensure all tests pass with `go test ./...`
 - Add tests for new functionality
