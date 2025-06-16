@@ -188,7 +188,8 @@ We have several tutorials and guides marked as "Coming Soon". Here's how to cont
 
 ### 1. Choose a Topic
 
-Check our [Tutorials](/docs/tutorials) and [How-To Guides](/docs/how-to) for topics marked as coming soon.
+- Check our [Tutorials](/docs/tutorials) and [How-To Guides](/docs/how-to) for topics marked as coming soon. 
+- Review open issues for topics that have already been claimed (avoid duplicate work).
 
 ### 2. Open an Issue
 
