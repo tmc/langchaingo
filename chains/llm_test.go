@@ -2,8 +2,6 @@ package chains
 
 import (
 	"context"
-	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -15,25 +13,6 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 )
-
-// apiKeyTransport adds the API key to requests
-// This is needed because the Google API library doesn't add the API key
-// when WithHTTPClient is used with WithAPIKey
-type apiKeyTransport struct {
-	wrapped http.RoundTripper
-	apiKey  string
-}
-
-func (t *apiKeyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Clone the request to avoid modifying the original
-	newReq := req.Clone(req.Context())
-	q := newReq.URL.Query()
-	if q.Get("key") == "" && t.apiKey != "" {
-		q.Set("key", t.apiKey)
-		newReq.URL.RawQuery = q.Encode()
-	}
-	return t.wrapped.RoundTrip(newReq)
-}
 
 func TestLLMChain(t *testing.T) {
 	ctx := context.Background()
@@ -95,30 +74,20 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 
 func TestLLMChainWithGoogleAI(t *testing.T) {
 	ctx := context.Background()
-	// Skip if no credentials and no recording
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
-	// Skip if no credentials and no recording
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 
-	// Create httprr with API key transport wrapper
-	// This is necessary because the Google API library doesn't add the API key
-	// when a custom HTTP client is provided via WithHTTPClient
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-	transport := httputil.DefaultTransport
-	if apiKey != "" {
-		transport = &apiKeyTransport{
-			wrapped: transport,
-			apiKey:  apiKey,
-		}
+	// Configure client with httprr - use test credentials when replaying
+	var opts []googleai.Option
+	opts = append(opts, googleai.WithRest(), googleai.WithHTTPClient(rr.Client()))
+
+	if rr.Replaying() {
+		// Use test credentials during replay
+		opts = append(opts, googleai.WithAPIKey("test-api-key"))
 	}
 
-	rr := httprr.OpenForTest(t, transport)
-	// Configure client with httprr
-	model, err := googleai.New(ctx,
-		googleai.WithRest(),
-		googleai.WithHTTPClient(rr.Client()),
-	)
+	model, err := googleai.New(ctx, opts...)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 

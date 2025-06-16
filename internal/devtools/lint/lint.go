@@ -2206,7 +2206,7 @@ func (a *ArchitecturalAnalyzer) checkTestFunctionHttprr(fn *ast.FuncDecl) {
 	// Check if this test function makes HTTP calls but doesn't use httprr
 	hasHttpCalls := a.functionMakesHttpCalls(fn)
 	hasHttprrUsage := a.functionUsesHttprr(fn)
-	
+
 	// Skip Pinecone tests - they legitimately skip httprr due to client limitations
 	isPineconeTest := strings.Contains(a.file, "/pinecone/pinecone_test.go")
 
@@ -2527,7 +2527,7 @@ func (a *ArchitecturalAnalyzer) checkProviderConstructorUsage(call *ast.CallExpr
 		if strings.Contains(constructorName, "vector") || strings.Contains(constructorName, "store") {
 			return
 		}
-		
+
 		// Skip Pinecone constructor calls - Pinecone client doesn't support custom HTTP clients
 		if strings.Contains(constructorName, "pinecone.New") {
 			return
@@ -2614,7 +2614,7 @@ func (a *ArchitecturalAnalyzer) checkTestProviderConstructors(fn *ast.FuncDecl) 
 	hasProviderConstructors := a.functionUsesProviderConstructors(fn)
 	hasHttprrUsage := a.functionUsesHttprr(fn)
 	skipsHttprr := a.functionSkipsHttprr(fn)
-	
+
 	// Skip Pinecone tests - they legitimately skip httprr due to client limitations
 	isPineconeTest := strings.Contains(a.file, "/pinecone/pinecone_test.go")
 
@@ -2764,12 +2764,12 @@ func (a *ArchitecturalAnalyzer) functionSkipsHttprrCheck(fn *ast.FuncDecl) bool 
 		}
 		return true
 	})
-	
+
 	// If function uses httprr.SkipIfNoCredentialsAndRecordingMissing, it's not bypassing
 	if usesHttprrSkip {
 		return false
 	}
-	
+
 	bypassesCheck := false
 	ast.Inspect(fn, func(node ast.Node) bool {
 		// Check for environment variable checks that bypass httprr

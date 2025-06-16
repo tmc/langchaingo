@@ -108,6 +108,7 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	t.Cleanup(func() { rr.Close() })
+
 	openaiOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),

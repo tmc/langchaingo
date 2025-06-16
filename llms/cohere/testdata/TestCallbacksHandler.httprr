@@ -1,0 +1,32 @@
+httprr trace v1
+220 1239
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 28
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"test","model":""}HTTP/2.0 200 OK
+Content-Length: 516
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 16 Jun 2025 09:59:06 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Num_chars: 265
+Num_tokens: 63
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: 0725b5069e15b368b42216fe4bc787c8
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 1798
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 38
+
+{"id":"9a08ed33-e28e-49f6-a8e2-1bf3b56c3c6b","generations":[{"id":"2da643f8-071f-4a0a-9149-f2cb49d88037","text":" This is a test of the Cohere conversational AI model! How can I help you today? \nLet me know if you'd like me to assist with anything specific, or provide answers to your questions. \n\nI'm ready to respond to your queries, and look forward to our conversation. ","finish_reason":"COMPLETE"}],"prompt":"test","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":1,"output_tokens":62}}}

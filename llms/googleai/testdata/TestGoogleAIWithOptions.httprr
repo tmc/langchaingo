@@ -1,20 +1,20 @@
 httprr trace v1
-760 1351
+775 1351
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 340
+Content-Length: 355
 Content-Type: application/json
 x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-1.5-flash
 
-{"model":"models/gemini-1.5-flash","contents":[{"parts":[{"text":"Count from 1 to 5"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":100,"temperature":0.1,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+{"model":"models/gemini-1.5-flash", "contents":[{"parts":[{"text":"Count from 1 to 5"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":100, "temperature":0.1, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
 Content-Length: 973
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sat, 14 Jun 2025 00:57:54 GMT
+Date: Mon, 16 Jun 2025 13:08:02 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=345
+Server-Timing: gfet4t7; dur=696
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -52,7 +52,7 @@ X-Xss-Protection: 0
           "probability": 1
         }
       ],
-      "avgLogprobs": -0.00032188510522246361
+      "avgLogprobs": -0.00032190213512097089
     }
   ],
   "usageMetadata": {
@@ -73,5 +73,5 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-1.5-flash",
-  "responseId": "EslMaLnbHPWm1dkPiO6MmQE"
+  "responseId": "MhdQaJu6FprnqsMPzonmkA0"
 }

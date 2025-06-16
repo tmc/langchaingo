@@ -10,16 +10,22 @@ import (
 	"github.com/tmc/langchaingo/internal/httprr"
 )
 
-func TestTool_Integration(t *testing.T) {
+func TestPerplexityTool(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "PERPLEXITY_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
-	tool, err := New(WithHTTPClient(rr.Client()))
+	var opts []Option
+	opts = append(opts, WithHTTPClient(rr.Client()))
+
+	// Use test token when replaying
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
+	}
+
+	tool, err := New(opts...)
 	require.NoError(t, err)
 	require.NotNil(t, tool)
 

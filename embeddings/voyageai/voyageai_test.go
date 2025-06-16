@@ -14,7 +14,6 @@ import (
 
 func TestVoyageAI_EmbedDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check if we have API key or httprr recording
 	if os.Getenv("VOYAGE_API_KEY") == "" {
@@ -58,7 +57,6 @@ func TestVoyageAI_EmbedDocuments(t *testing.T) {
 
 func TestVoyageAI_EmbedQuery(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check if we have API key or httprr recording
 	if os.Getenv("VOYAGE_API_KEY") == "" {
@@ -95,7 +93,6 @@ func TestVoyageAI_EmbedQuery(t *testing.T) {
 
 func TestVoyageAI_WithBatchSize(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check if we have API key or httprr recording
 	if os.Getenv("VOYAGE_API_KEY") == "" {
@@ -143,7 +140,6 @@ func TestVoyageAI_WithBatchSize(t *testing.T) {
 
 func TestVoyageAI_WithModel(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check if we have API key or httprr recording
 	if os.Getenv("VOYAGE_API_KEY") == "" {

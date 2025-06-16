@@ -211,7 +211,6 @@ func TestContainerAddDocuments(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	t.Parallel()
 	vs, cleanUpTableFn := initVectorStore(t)
 
 	_, err := vs.AddDocuments(ctx, []schema.Document{

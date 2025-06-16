@@ -18,15 +18,15 @@ import (
 // It uses OLLAMA_HOST if set, otherwise defaults to localhost:11434.
 func getOllamaTestURL(t *testing.T, rr *httprr.RecordReplay) string {
 	t.Helper()
-	
+
 	// Default to localhost
 	baseURL := "http://localhost:11434"
-	
+
 	// Use environment variable if set and we're recording
 	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
 		baseURL = envURL
 	}
-	
+
 	return baseURL
 }
 
@@ -44,7 +44,6 @@ func checkOllamaEndpoint(baseURL string) bool {
 
 func TestClient_Generate(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
@@ -52,14 +51,14 @@ func TestClient_Generate(t *testing.T) {
 	// No auth scrubbing needed for Ollama as it doesn't use API keys
 
 	baseURL := getOllamaTestURL(t, rr)
-	
+
 	// If recording and endpoint is not available, skip the test
 	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
 		t.Skipf("Ollama endpoint not available at %s", baseURL)
 	}
-	
+
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -93,20 +92,19 @@ func TestClient_Generate(t *testing.T) {
 
 func TestClient_GenerateStream(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
 	baseURL := getOllamaTestURL(t, rr)
-	
+
 	// If recording and endpoint is not available, skip the test
 	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
 		t.Skipf("Ollama endpoint not available at %s", baseURL)
 	}
-	
+
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -139,20 +137,19 @@ func TestClient_GenerateStream(t *testing.T) {
 
 func TestClient_GenerateChat(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
 	baseURL := getOllamaTestURL(t, rr)
-	
+
 	// If recording and endpoint is not available, skip the test
 	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
 		t.Skipf("Ollama endpoint not available at %s", baseURL)
 	}
-	
+
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -191,20 +188,19 @@ func TestClient_GenerateChat(t *testing.T) {
 
 func TestClient_GenerateChatStream(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
 	baseURL := getOllamaTestURL(t, rr)
-	
+
 	// If recording and endpoint is not available, skip the test
 	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
 		t.Skipf("Ollama endpoint not available at %s", baseURL)
 	}
-	
+
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
@@ -241,20 +237,19 @@ func TestClient_GenerateChatStream(t *testing.T) {
 
 func TestClient_CreateEmbedding(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
 	baseURL := getOllamaTestURL(t, rr)
-	
+
 	// If recording and endpoint is not available, skip the test
 	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
 		t.Skipf("Ollama endpoint not available at %s", baseURL)
 	}
-	
+
 	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
+	if rr.Replaying() {
 		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 

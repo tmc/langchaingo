@@ -179,11 +179,3 @@ func TestFunctionCall(t *testing.T) {
 	assert.Equal(t, "tool_calls", c1.StopReason)
 	assert.NotNil(t, c1.FuncCall)
 }
-
-func showResponse(rsp any) string { //nolint:golint,unused
-	b, err := json.MarshalIndent(rsp, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
-}

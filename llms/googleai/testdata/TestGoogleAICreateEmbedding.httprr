@@ -1,20 +1,20 @@
 httprr trace v1
-740 49798
+749 49798
 POST https://generativelanguage.googleapis.com/v1beta/models/embedding-001:batchEmbedContents?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 323
+Content-Length: 332
 Content-Type: application/json
 x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
 x-goog-request-params: model=models%2Fembedding-001
 
-{"model":"models/embedding-001","requests":[{"model":"models/embedding-001","content":{"parts":[{"text":"hello world"}],"role":"user"}},{"model":"models/embedding-001","content":{"parts":[{"text":"goodbye world"}],"role":"user"}},{"model":"models/embedding-001","content":{"parts":[{"text":"hello world"}],"role":"user"}}]}HTTP/2.0 200 OK
+{"model":"models/embedding-001", "requests":[{"model":"models/embedding-001", "content":{"parts":[{"text":"hello world"}], "role":"user"}}, {"model":"models/embedding-001", "content":{"parts":[{"text":"goodbye world"}], "role":"user"}}, {"model":"models/embedding-001", "content":{"parts":[{"text":"hello world"}], "role":"user"}}]}HTTP/2.0 200 OK
 Content-Length: 49418
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sat, 14 Jun 2025 00:57:53 GMT
+Date: Mon, 16 Jun 2025 13:08:00 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=212
+Server-Timing: gfet4t7; dur=549
 Vary: Origin
 Vary: X-Origin
 Vary: Referer

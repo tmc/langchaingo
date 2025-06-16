@@ -712,11 +712,6 @@ func OpenForTest(t *testing.T, rt http.RoundTripper) *RecordReplay {
 		t.Fatal(err)
 	}
 	rr.logger = logger
-	t.Cleanup(func() {
-		if err := rr.Close(); err != nil {
-			t.Logf("httprr: failed to close RecordReplay: %v", err)
-		}
-	})
 	return rr
 }
 

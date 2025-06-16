@@ -12,6 +12,25 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
+// newClientWithHTTPClient creates a cohere client with a custom HTTP client for testing
+func newClientWithHTTPClient(httpClient *http.Client, opts ...Option) (*cohereclient.Client, error) {
+	options := &options{
+		token:   os.Getenv(tokenEnvVarName),
+		baseURL: os.Getenv(baseURLEnvVarName),
+		model:   os.Getenv(modelEnvVarName),
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	if len(options.token) == 0 {
+		return nil, ErrMissingToken
+	}
+
+	return cohereclient.New(options.token, options.baseURL, options.model, cohereclient.WithHTTPClient(httpClient))
+}
+
 func TestNew(t *testing.T) {
 	// Save original env vars
 	origToken := os.Getenv("COHERE_API_KEY")
@@ -126,13 +145,15 @@ func TestGenerateContent(t *testing.T) {
 		t.Parallel()
 	}
 
-	token := "test-token"
-	// Only use fake API key when replaying
-	if !rr.Recording() {
-		token = "test-api-key"
+	var opts []Option
+
+	// Use test token when replaying, real token when recording
+	if rr.Replaying() {
+		opts = append(opts, WithToken("test-api-key"))
 	}
 
-	client, err := cohereclient.New(token, "", "", cohereclient.WithHTTPClient(rr.Client()))
+	// Create LLM with httprr client - need to pass through to internal client
+	client, err := newClientWithHTTPClient(rr.Client(), opts...)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}
@@ -203,13 +224,14 @@ func TestCallbacksHandler(t *testing.T) {
 		t.Parallel()
 	}
 
-	token := "test-token"
-	// Only use fake API key when replaying
-	if !rr.Recording() {
-		token = "test-api-key"
+	var opts []Option
+
+	// Use test token when replaying, real token when recording
+	if rr.Replaying() {
+		opts = append(opts, WithToken("test-api-key"))
 	}
 
-	client, err := cohereclient.New(token, "", "", cohereclient.WithHTTPClient(rr.Client()))
+	client, err := newClientWithHTTPClient(rr.Client(), opts...)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
 	}

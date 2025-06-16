@@ -525,10 +525,19 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	llm, err := openai.New(
+
+	openaiOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
-	)
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		openaiOpts = append(openaiOpts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(openaiOpts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -540,14 +549,25 @@ func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.Embedder
 	t.Helper()
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	llm, err := openai.New(
+
+	llmOpts := []openai.Option{
 		openai.WithHTTPClient(rr.Client()),
-	)
-	require.NoError(t, err)
-	embeddingLLM, err := openai.New(
+	}
+	embeddingOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
-	)
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		llmOpts = append(llmOpts, openai.WithToken("test-api-key"))
+		embeddingOpts = append(embeddingOpts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(llmOpts...)
+	require.NoError(t, err)
+	embeddingLLM, err := openai.New(embeddingOpts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(embeddingLLM)
 	require.NoError(t, err)

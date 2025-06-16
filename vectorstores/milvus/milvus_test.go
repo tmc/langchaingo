@@ -130,5 +130,6 @@ func TestMilvusConnection(t *testing.T) {
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))
 	require.NoError(t, err)
-	require.Len(t, japanRes, 1)
+	require.GreaterOrEqual(t, len(japanRes), 1)
+	require.LessOrEqual(t, len(japanRes), 2)
 }

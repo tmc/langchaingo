@@ -1,20 +1,20 @@
 httprr trace v1
-1014 1473
+1035 1472
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 594
+Content-Length: 615
 Content-Type: application/json
 x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"tools":[{"functionDeclarations":[{"name":"getWeather","description":"Get the weather for a location","parameters":{"type":6,"properties":{"location":{"type":1,"description":"The location to get weather for"}},"required":["location"]}}]}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
-Content-Length: 1094
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What's the weather in New York?"}], "role":"user"}], "tools":[{"functionDeclarations":[{"name":"getWeather", "description":"Get the weather for a location", "parameters":{"type":6, "properties":{"location":{"type":1, "description":"The location to get weather for"}}, "required":["location"]}}]}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 1093
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sat, 14 Jun 2025 00:57:59 GMT
+Date: Mon, 16 Jun 2025 13:08:08 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=463
+Server-Timing: gfet4t7; dur=430
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -57,7 +57,7 @@ X-Xss-Protection: 0
           "probability": 1
         }
       ],
-      "avgLogprobs": -7.5177499093115335e-05
+      "avgLogprobs": 4.4852538849227129e-06
     }
   ],
   "usageMetadata": {
@@ -78,5 +78,5 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "F8lMaJCTGIrvgLUPrZ2JoAY"
+  "responseId": "OBdQaMPHEI6AsbQPzcnOoQQ"
 }
