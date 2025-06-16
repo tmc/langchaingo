@@ -1,63 +1,63 @@
-# How-to Guides
+# How-to guides
 
-These guides answer "How do I...?" questions with practical solutions for specific problems.
+These how-to guides answer "How do I...?" questions with practical solutions for specific problems.
 
-**Note**: Many guides are still being written. Want to help? See our [Documentation Contribution Guide](/docs/contributing/documentation)!
+**Note**: Many guides are still being written. Want to help? See our [documentation contribution guide](/docs/contributing/documentation)!
 
-## LLMs and Chat Models
+## LLMs and chat models
 
-### Basic Configuration
+### Basic configuration
 - [How to configure different LLM providers](./configure-llm-providers)
 
-### Advanced Features
+### Advanced features
 - How to handle API rate limits and retries
 - How to stream responses from LLMs  
 - How to use function calling with OpenAI
 - How to implement custom LLM providers
 
-## Prompts and Templates
+## Prompts and templates
 
-### Template Creation
+### Template creation
 - How to create dynamic prompt templates
 - How to implement few-shot prompting
 
-### Output Processing
+### Output processing
 - How to parse structured output from LLMs
 - How to validate and sanitize LLM outputs
 
-## Memory and Conversation
+## Memory and conversation
 
-### Memory Management
+### Memory management
 - How to implement conversation memory
 - How to persist conversation history
 - How to implement context windowing
 - How to handle long conversations
 
-## Agents and Tools
+## Agents and tools
 
-### Tool Development
+### Tool development
 - How to create custom tools for agents
 - How to handle tool execution errors
 
-### Agent Optimization
+### Agent optimization
 - How to implement multi-step reasoning
 - How to optimize agent performance
 
-## Production and Deployment
+## Production and deployment
 
-### Project Structure
+### Project structure
 - How to structure LangChainGo projects
 - How to handle secrets and configuration
 
-### Monitoring and Scaling
+### Monitoring and scaling
 - How to implement logging and monitoring
 - How to deploy with Docker
 - How to implement health checks
 - How to scale LangChainGo applications
 
-## Testing and Debugging
+## Testing and debugging
 
-### Testing Strategies
+### Testing strategies
 - How to write tests for LangChainGo components
 - How to mock LLM responses for testing
 
@@ -65,13 +65,13 @@ These guides answer "How do I...?" questions with practical solutions for specif
 - How to debug chain execution
 - How to benchmark performance
 
-## Integration Patterns
+## Integration patterns
 
-### Web Applications
+### Web applications
 - How to integrate with web frameworks (Gin, Echo)
 - How to implement background processing
 
-### Data Integration
+### Data integration
 - How to integrate with databases
 - How to implement caching strategies
 

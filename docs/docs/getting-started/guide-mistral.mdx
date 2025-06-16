@@ -4,34 +4,52 @@ sidebar_position: 3
 
 # Quickstart: LangChainGo with Mistral
 
-Dive right into executing your first program utilizing LangChainGo in tandem with the [Mistral Platform](https://mistral.ai/).
+Get started by running your first program with LangChainGo and the [Mistral Platform](https://mistral.ai/).
 
-## Pre-requisites
+## Prerequisites
 
 1. **Mistral API Key**: Sign up on [Mistral](https://mistral.ai/) and retrieve your API key.
 2. **Go**: [Download and install Go](https://go.dev/doc/install).
 
-## Steps
+## Setup
 
-1. **Set up your Mistral API Key**: Before interacting with the Mistral API, ensure that you've set up your API key. Typically, this is done by setting an environment variable. In your terminal, run the command:
-```shell
-   export MISTRAL_API_KEY=your_mistral_api_key_here
+Before interacting with the Mistral API, you need to set up your API key as an environment variable.
+
+### Linux/macOS (bash/zsh)
+```bash
+export MISTRAL_API_KEY="your_mistral_api_key_here"
 ```
 
-2. Run the Example: Execute the following command:
+### Windows (Command Prompt)
+```cmd
+set MISTRAL_API_KEY=your_mistral_api_key_here
+```
+
+### Windows (PowerShell)
+```powershell
+$env:MISTRAL_API_KEY="your_mistral_api_key_here"
+```
+
+For permanent setup, add the environment variable to your shell's profile file (`~/.bashrc`, `~/.zshrc`, etc.) or system environment variables on Windows.
+
+## Steps
+
+1. **Set up your Mistral API Key**: Follow the setup instructions above to configure your API key.
+
+2. **Run the example**: Execute the following command:
 
 ```shell
 go run github.com/tmc/langchaingo/examples/mistral-completion-example@main
 ```
 
-Anticipate an output similar to the one below:
+You should see output similar to the following:
 
 ```txt
 The first man to walk on the moon was Neil Armstrong on July 20, 1969. He made this historic step during the Apollo 11 mission. Armstrong's famous quote upon setting foot on the lunar surface was, "That's one small step for man, one giant leap for mankind."
 The first human to go to space was Yuri Gagarin, a Soviet cosmonaut. He completed an orbit around the Earth in the spacecraft Vostok 1 on April 12, 1961. This historic event marked the beginning of human space exploration.
 ```
 
-Congratulations! You've successfully built and executed your first LangChainGo LLM-backed program using Mistral's cloud-based inference.
+Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using Mistral's cloud-based inference.
 
 
 Here is the entire program (from [mistral-chat-example](https://github.com/tmc/langchaingo/blob/main/examples/mistral-chat-example/mistral_chat_example.go)).
@@ -43,12 +61,19 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/mistral"
 )
 
 func main() {
+	// Check if API key is set
+	apiKey := os.Getenv("MISTRAL_API_KEY")
+	if apiKey == "" {
+		log.Fatal("MISTRAL_API_KEY environment variable is required")
+	}
+
 	llm, err := mistral.New()
 	if err != nil {
 		log.Fatal(err)

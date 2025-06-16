@@ -1,4 +1,4 @@
-# Building a Simple Chat Application
+# Building a simple chat application
 
 In this tutorial, you'll build a basic chat application using LangChainGo. This application will demonstrate core concepts like LLM integration, conversation memory, and basic prompt templates.
 
@@ -8,7 +8,7 @@ In this tutorial, you'll build a basic chat application using LangChainGo. This 
 - OpenAI API key
 - Basic Go programming knowledge
 
-## Step 1: Project Setup
+## Step 1: Project setup
 
 Create a new Go module for your chat application:
 
@@ -24,9 +24,9 @@ Add LangChainGo as a dependency:
 go get github.com/tmc/langchaingo
 ```
 
-## Step 2: Basic Chat Implementation
+## Step 2: Basic chat implementation
 
-Create `main.go` with a simple chat loop:
+Create `main.go` with a basic chat loop:
 
 ```go
 package main
@@ -89,7 +89,7 @@ func main() {
 }
 ```
 
-## Step 3: Add Environment Variable Setup
+## Step 3: Add environment variable setup
 
 Set your OpenAI API key:
 
@@ -97,7 +97,7 @@ Set your OpenAI API key:
 export OPENAI_API_KEY="your-api-key-here"
 ```
 
-## Step 4: Run Your Chat App
+## Step 4: Run your chat app
 
 ```bash
 go run main.go
@@ -112,7 +112,7 @@ AI: Hello! How can I help you today?
 You: quit
 ```
 
-## Step 5: Enhanced Chat with Memory
+## Step 5: Enhanced chat with memory
 
 Let's improve the chat app to use conversation memory:
 
@@ -173,7 +173,7 @@ func main() {
 }
 ```
 
-## Step 6: Add Custom Prompt Template
+## Step 6: Add custom prompt template
 
 Create a more sophisticated chat experience with custom prompts:
 

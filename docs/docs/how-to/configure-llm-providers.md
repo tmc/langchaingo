@@ -1,10 +1,10 @@
-# How to Configure Different LLM Providers
+# How to configure different LLM providers
 
 This guide shows you how to configure and use different LLM providers with LangChainGo.
 
 ## OpenAI
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/openai"
@@ -16,7 +16,7 @@ llm, err := openai.New()
 llm, err := openai.New(openai.WithAPIKey("your-api-key"))
 ```
 
-### Advanced Configuration
+### Advanced configuration
 
 ```go
 llm, err := openai.New(
@@ -43,7 +43,7 @@ llm, err := openai.New(
 
 ## Anthropic
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/anthropic"
@@ -55,7 +55,7 @@ llm, err := anthropic.New()
 llm, err := anthropic.New(anthropic.WithAPIKey("your-api-key"))
 ```
 
-### Model Selection
+### Model selection
 
 ```go
 llm, err := anthropic.New(
@@ -66,7 +66,7 @@ llm, err := anthropic.New(
 
 ## Google AI (Gemini)
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/googleai"
@@ -81,7 +81,7 @@ llm, err := googleai.New(
 )
 ```
 
-### Model Configuration
+### Model configuration
 
 ```go
 llm, err := googleai.New(
@@ -93,7 +93,7 @@ llm, err := googleai.New(
 
 ## Vertex AI
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/vertexai"
@@ -105,7 +105,7 @@ llm, err := vertexai.New(
 )
 ```
 
-### With Service Account
+### With service account
 
 ```go
 llm, err := vertexai.New(
@@ -118,7 +118,7 @@ llm, err := vertexai.New(
 
 ## Local Models (Ollama)
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/ollama"
@@ -135,7 +135,7 @@ llm, err := ollama.New(
 
 ## Hugging Face
 
-### Basic Configuration
+### Basic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/huggingface"
@@ -147,7 +147,7 @@ llm, err := huggingface.New()
 llm, err := huggingface.New(huggingface.WithToken("your-hf-token"))
 ```
 
-### Model Selection
+### Model selection
 
 ```go
 llm, err := huggingface.New(
@@ -156,7 +156,7 @@ llm, err := huggingface.New(
 )
 ```
 
-## Environment Variables
+## Environment variables
 
 Set up your environment with the appropriate API keys:
 
@@ -177,9 +177,9 @@ export HF_TOKEN="hf_..."
 export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
 ```
 
-## Provider-Specific Features
+## Provider-specific features
 
-### OpenAI Functions
+### OpenAI functions
 
 ```go
 tools := []openai.Tool{
@@ -205,7 +205,7 @@ tools := []openai.Tool{
 response, err := llm.GenerateContent(ctx, messages, llms.WithTools(tools))
 ```
 
-### Anthropic System Messages
+### Anthropic system messages
 
 ```go
 messages := []llms.MessageContent{
@@ -214,7 +214,7 @@ messages := []llms.MessageContent{
 }
 ```
 
-### Streaming Responses
+### Streaming responses
 
 ```go
 // Works with most providers
@@ -228,7 +228,7 @@ response, err := llm.GenerateContent(
 )
 ```
 
-## Error Handling
+## Error handling
 
 ```go
 response, err := llm.GenerateContent(ctx, messages)
@@ -248,18 +248,18 @@ if err != nil {
 }
 ```
 
-## Best Practices
+## Best practices
 
-1. **Use Environment Variables**: Store API keys securely in environment variables
-2. **Handle Rate Limits**: Implement retry logic with exponential backoff
-3. **Model Selection**: Choose the right model for your use case and budget
-4. **Error Handling**: Implement robust error handling for different failure modes
-5. **Resource Management**: Use context for timeouts and cancellation
+1. **Use environment variables**: Store API keys securely in environment variables
+2. **Handle rate limits**: Implement retry logic with exponential backoff
+3. **Model selection**: Choose the right model for your use case and budget
+4. **Error handling**: Implement robust error handling for different failure modes
+5. **Resource management**: Use context for timeouts and cancellation
 6. **Testing**: Use mock providers for testing (see testing guide)
 
-## Provider Comparison
+## Provider comparison
 
-| Provider | Strengths | Use Cases |
+| Provider | Strengths | Use cases |
 |----------|-----------|-----------|
 | OpenAI | High quality, function calling | General purpose, agents |
 | Anthropic | Safety, long context | Research, content analysis |

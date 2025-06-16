@@ -2,22 +2,22 @@
 
 This document explains LangChainGo's architecture and how it follows Go conventions.
 
-## Modular Adoption Philosophy
+## Modular adoption philosophy
 
 **You don't need to adopt the entire LangChainGo framework.** The architecture is designed for selective adoption - use only the components that solve your specific problems:
 
-- **Need just an LLM client?** Use only the `llms` package
+- **Need an LLM client?** Use only the `llms` package
 - **Want prompt templating?** Add the `prompts` package
 - **Building conversational apps?** Include `memory` for state management
 - **Creating autonomous agents?** Combine `agents`, `tools`, and `chains`
 
 Each component is designed to work independently while providing seamless integration when combined. Start small and grow your usage as needed.
 
-## Standard Library Alignment
+## Standard library alignment
 
-LangChainGo follows Go's standard library patterns and philosophy. We model our interfaces after proven stdlib designs:
+LangChainGo follows Go's standard library patterns and philosophy. We model our interfaces after proven standard library designs:
 
-- **`context.Context` first**: Like `database/sql`, `net/http`, and other stdlib packages
+- **`context.Context` first**: Like `database/sql`, `net/http`, and other standard library packages
 - **Interface composition**: Small, focused interfaces that compose well (like `io.Reader`, `io.Writer`)
 - **Constructor patterns**: `New()` functions with functional options (like `http.Client`)
 - **Error handling**: Explicit errors with type assertions (like `net.OpError`, `os.PathError`)
@@ -27,21 +27,21 @@ When the standard library evolves, we evolve with it. Recent examples:
 - Use `context.WithCancelCause` for richer cancellation
 - Follow `testing/slogtest` patterns for handler validation
 
-### Interface Evolution
+### Interface evolution
 
-Our core interfaces will change as Go and the AI ecosystem evolve. We welcome discussion about better alignment with stdlib patterns - open an issue if you see opportunities to make our APIs more Go-like.
+Our core interfaces will change as Go and the AI ecosystem evolve. We welcome discussion about better alignment with standard library patterns - open an issue if you see opportunities to make our APIs more Go-like.
 
 Common areas for improvement:
-- Method naming consistency with stdlib conventions
+- Method naming consistency with standard library conventions
 - Error type definitions and handling patterns  
 - Streaming patterns that match `io` package designs
-- Configuration patterns that follow stdlib examples
+- Configuration patterns that follow standard library examples
 
-## Design Philosophy
+## Design philosophy
 
 LangChainGo is built around several key principles:
 
-### Interface-Driven Design
+### Interface-driven design
 
 Every major component is defined by interfaces:
 - **Modularity**: Swap implementations without changing code
@@ -61,7 +61,7 @@ type Chain interface {
 }
 ```
 
-### Context-First Approach
+### Context-first approach
 
 All operations accept `context.Context` as the first parameter:
 - **Cancellation**: Cancel long-running operations
@@ -76,9 +76,9 @@ defer cancel()
 response, err := llm.GenerateContent(ctx, messages)
 ```
 
-### Go Idiomatic Patterns
+### Go idiomatic patterns
 
-#### Error Handling
+#### Error handling
 Error handling uses Go's standard patterns with typed errors:
 
 ```go
@@ -94,7 +94,7 @@ if errors.Is(err, llms.ErrRateLimit) {
 }
 ```
 
-#### Options Pattern
+#### Options pattern
 Functional options provide flexible configuration:
 
 ```go
@@ -105,7 +105,7 @@ llm, err := openai.New(
 )
 ```
 
-#### Channels and Goroutines
+#### Channels and goroutines
 Use Go's concurrency features for streaming and parallel processing:
 
 ```go
@@ -122,9 +122,9 @@ response, err := llm.GenerateContent(ctx, messages,
 )
 ```
 
-## Core Components
+## Core components
 
-### 1. Models Layer
+### 1. Models layer
 
 The models layer provides abstractions for different types of language models:
 
@@ -146,7 +146,7 @@ Each model type implements specific interfaces:
 - `EmbeddingModel`: Specialized for generating embeddings
 - `ChatModel`: Optimized for conversational interactions
 
-### 2. Prompt Management
+### 2. Prompt management
 
 Prompts are first-class citizens with template support:
 
@@ -162,7 +162,7 @@ prompt, err := template.Format(map[string]any{
 })
 ```
 
-### 3. Memory Subsystem
+### 3. Memory subsystem
 
 Memory provides stateful conversation management:
 
@@ -178,7 +178,7 @@ Memory provides stateful conversation management:
 └─────────────────┴─────────────────┴─────────────────────┘
 ```
 
-### 4. Chain Orchestration
+### 4. Chain orchestration
 
 Chains enable complex workflows:
 
@@ -190,7 +190,7 @@ chain2 := chains.NewLLMChain(llm, template2)
 sequential := chains.NewSequentialChain([]chains.Chain{chain1, chain2})
 ```
 
-### 5. Agent Framework
+### 5. Agent framework
 
 Agents provide autonomous behavior:
 
@@ -207,16 +207,16 @@ Agents provide autonomous behavior:
 └─────────────────┴─────────────────┴─────────────────────┘
 ```
 
-## Data Flow
+## Data flow
 
-### Request Flow
+### Request flow
 ```
 User Input → Prompt Template → LLM → Output Parser → Response
      ↓             ↓              ↓         ↓           ↓
    Memory ←── Chain Logic ←── API Call ←── Processing ←── Memory
 ```
 
-### Agent Flow
+### Agent flow
 ```
 User Input → Agent Planning → Tool Selection → Tool Execution
      ↓              ↓              ↓              ↓
@@ -225,11 +225,11 @@ User Input → Agent Planning → Tool Selection → Tool Execution
    Response ←── Final Answer
 ```
 
-## Concurrency Model
+## Concurrency model
 
 LangChainGo embraces Go's concurrency model:
 
-### Parallel Processing
+### Parallel processing
 ```go
 // Process multiple inputs concurrently
 var wg sync.WaitGroup
@@ -272,9 +272,9 @@ func (s *StreamProcessor) Process(ctx context.Context) {
 }
 ```
 
-## Extension Points
+## Extension points
 
-### Custom LLM Providers
+### Custom LLM providers
 Implement the `Model` interface:
 
 ```go
@@ -288,7 +288,7 @@ func (c *CustomLLM) GenerateContent(ctx context.Context, messages []MessageConte
 }
 ```
 
-### Custom Tools
+### Custom tools
 Implement the `Tool` interface:
 
 ```go
@@ -304,7 +304,7 @@ func (t *CustomTool) Call(ctx context.Context, input string) (string, error) {
 }
 ```
 
-### Custom Memory
+### Custom memory
 Implement the `Memory` interface:
 
 ```go
@@ -321,9 +321,9 @@ func (m *CustomMemory) MemoryVariables() []string {
 }
 ```
 
-## Performance Considerations
+## Performance considerations
 
-### Connection Pooling
+### Connection pooling
 LLM providers use HTTP connection pooling for efficiency:
 
 ```go
@@ -336,7 +336,7 @@ client := &http.Client{
 }
 ```
 
-### Memory Management
+### Memory management
 - Use appropriate memory types for your use case
 - Implement cleanup strategies for long-running applications
 - Monitor memory usage in production
@@ -355,14 +355,14 @@ type CachingLLM struct {
 }
 ```
 
-## Error Handling Strategy
+## Error handling strategy
 
-### Layered Error Handling
+### Layered error handling
 1. **Provider Level**: Handle API-specific errors
 2. **Component Level**: Handle component-specific errors  
 3. **Application Level**: Handle business logic errors
 
-### Retry Logic
+### Retry logic
 ```go
 func retryableCall(ctx context.Context, fn func() error) error {
     backoff := time.Second
@@ -390,9 +390,9 @@ func retryableCall(ctx context.Context, fn func() error) error {
 }
 ```
 
-## Testing Architecture
+## Testing architecture
 
-### Interface Mocking
+### Interface mocking
 Use interfaces for comprehensive testing:
 
 ```go
@@ -414,7 +414,7 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []MessageContent
 }
 ```
 
-### HTTP Testing with httprr
+### HTTP testing with httprr
 
 For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](https://pkg.go.dev/github.com/tmc/langchaingo/internal/httprr) for recording and replaying HTTP interactions. This is an internal testing tool used by LangChainGo's own test suite to ensure reliable, fast tests without hitting real APIs.
 
@@ -447,7 +447,7 @@ func TestOpenAIWithRecording(t *testing.T) {
 }
 ```
 
-#### Recording Guidelines
+#### Recording guidelines
 
 1. **Initial Recording**: Run tests with real API credentials to create recordings
 2. **Sensitive Data**: httprr automatically redacts common sensitive headers
@@ -483,7 +483,7 @@ When contributing to LangChainGo's internal tests:
    git commit -m "test: update API recordings"
    ```
 
-### Integration Testing
+### Integration testing
 Use testcontainers for external dependencies:
 
 ```go

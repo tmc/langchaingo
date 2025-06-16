@@ -1,8 +1,8 @@
-# Building an AI Code Reviewer
+# Building an AI code reviewer
 
 Create an intelligent code review assistant that analyzes Go code for bugs, style issues, and performance improvements.
 
-## What You'll Build
+## What you'll build
 
 A CLI tool that:
 - Analyzes Go source files for potential issues
@@ -16,7 +16,7 @@ A CLI tool that:
 - OpenAI or Anthropic API key
 - Git installed
 
-## Step 1: Project Setup
+## Step 1: Project setup
 
 ```bash
 mkdir ai-code-reviewer
@@ -25,7 +25,7 @@ go mod init code-reviewer
 go get github.com/tmc/langchaingo
 ```
 
-## Step 2: Core Reviewer Structure
+## Step 2: Core reviewer structure
 
 Create `main.go`:
 
@@ -194,7 +194,7 @@ func reviewGitChanges(reviewer *CodeReviewer) error {
 }
 ```
 
-## Step 3: Test with Sample Code
+## Step 3: Test with sample code
 
 Create `sample.go` to test the reviewer:
 
@@ -222,14 +222,14 @@ func badCode() {
 }
 ```
 
-## Step 4: Run the Code Reviewer
+## Step 4: Run the code reviewer
 
 ```bash
 export OPENAI_API_KEY="your-openai-api-key-here"
 go run main.go -file=sample.go
 ```
 
-## Step 5: Enhanced Version with Structured Output
+## Step 5: Enhanced version with structured output
 
 Create `reviewer.go` for more sophisticated analysis:
 
@@ -321,7 +321,7 @@ Focus on real issues. Score: 100 = perfect, 0 = many serious issues.`,
 }
 ```
 
-## Step 6: Create a Git Hook
+## Step 6: Create a Git hook
 
 Create `.git/hooks/pre-commit`:
 
@@ -342,9 +342,9 @@ Make it executable:
 chmod +x .git/hooks/pre-commit
 ```
 
-## Advanced Features
+## Advanced features
 
-### Custom Rules Engine
+### Custom rules engine
 
 Add specific checks for your codebase:
 
@@ -417,7 +417,7 @@ jobs:
         docker run --rm -v $PWD:/code code-reviewer -dir=/code
 ```
 
-## Next Steps
+## Next steps
 
 - Add support for other languages
 - Implement learning from feedback

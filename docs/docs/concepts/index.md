@@ -1,67 +1,67 @@
 # Concepts
 
-Understanding the fundamental concepts behind LangChainGo will help you build better applications.
+Understanding the fundamental concepts behind LangChainGo helps you build better applications.
 
-## Core Architecture
+## Core architecture
 
 LangChainGo is built around several key architectural principles:
 
-### Framework Design
-- **Interface-Driven Design**: Every major component is defined by interfaces for modularity and testability
-- **Component Architecture**: Clear separation between models, chains, memory, agents, and tools
-- **Go-Specific Patterns**: Leverage Go's strengths like interfaces, goroutines, and explicit error handling
+### Framework design
+- **Interface-driven design**: Every major component is defined by interfaces for modularity and testability
+- **Component architecture**: Clear separation between models, chains, memory, agents, and tools
+- **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and explicit error handling
 
-### Execution Model  
-- **Context Propagation**: All operations use `context.Context` for cancellation and timeouts
-- **Error Handling**: Explicit error handling with typed errors for different failure modes
+### Execution model
+- **Context propagation**: All operations use `context.Context` for cancellation and timeouts
+- **Error handling**: Explicit error handling with typed errors for different failure modes
 - **Concurrency**: Native support for concurrent operations using goroutines and channels
-- **Resource Management**: Proper cleanup and resource management patterns
+- **Resource management**: Proper cleanup and resource management patterns
 
-## Language Models
+## Language models
 
-### Model Abstraction
+### Model abstraction
 The `Model` interface provides a unified way to interact with different LLM providers:
 - Consistent API across OpenAI, Anthropic, Google AI, and local models
 - Multi-modal capabilities for text, images, and other content types
 - Flexible configuration through functional options
 - Provider-specific features accessible through type assertions
 
-### Communication Patterns
+### Communication patterns
 - **Request/Response**: Standard synchronous communication with LLMs
 - **Streaming**: Real-time response streaming for better user experience  
-- **Batch Processing**: Efficient handling of multiple requests
-- **Rate Limiting**: Built-in backoff and retry mechanisms
+- **Batch processing**: Efficient handling of multiple requests
+- **Rate limiting**: Built-in backoff and retry mechanisms
 
-## Memory and State Management
+## Memory and state management
 
-### Memory Types
-- **Buffer Memory**: Stores complete conversation history
-- **Window Memory**: Maintains sliding window of recent messages
-- **Token Buffer**: Manages memory based on token count limits
-- **Summary Memory**: Automatically summarizes older conversations
+### Memory types
+- **Buffer memory**: Stores complete conversation history
+- **Window memory**: Maintains sliding window of recent messages
+- **Token buffer**: Manages memory based on token count limits
+- **Summary memory**: Automatically summarizes older conversations
 
-### State Persistence
+### State persistence
 - In-memory storage for development and testing
-- File-based persistence for simple applications
+- File-based persistence for straightforward applications
 - Database integration for production applications
 - Custom storage backends through interfaces
 
-## Agents and Autonomy
+## Agents and autonomy
 
-### Agent Architecture
+### Agent architecture
 Agents combine reasoning with tool usage:
-- **Decision Making**: LLM determines which tools to use
-- **Tool Integration**: Seamless integration with external APIs and functions
-- **Execution Loop**: Iterative reasoning-action-observation cycles
-- **Memory Integration**: Maintain context across multiple tool calls
+- **Decision making**: LLM determines which tools to use
+- **Tool integration**: Seamless integration with external APIs and functions
+- **Execution loop**: Iterative reasoning-action-observation cycles
+- **Memory integration**: Maintain context across multiple tool calls
 
-### Tool System
+### Tool system
 - Built-in tools for common operations (calculator, web search, file operations)
-- Custom tool creation through simple interfaces
+- Custom tool creation through straightforward interfaces
 - Tool composition for complex operations
 - Error handling and timeout management
 
-## Production Considerations
+## Production considerations
 
 ### Performance
 - Connection pooling for HTTP clients

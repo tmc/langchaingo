@@ -1,8 +1,8 @@
-# Building an Intelligent Log Analyzer
+# Building an intelligent log analyzer
 
 Create an AI-powered log analysis tool that identifies patterns, anomalies, and potential issues in application logs.
 
-## What You'll Build
+## What you'll build
 
 A CLI tool that:
 - Parses log files in various formats (JSON, structured text, etc.)
@@ -17,7 +17,7 @@ A CLI tool that:
 - LLM API key (OpenAI, Anthropic, etc.)
 - Sample log files to analyze
 
-## Step 1: Project Setup
+## Step 1: Project setup
 
 ```bash
 mkdir log-analyzer
@@ -27,7 +27,7 @@ go get github.com/tmc/langchaingo
 go get github.com/sirupsen/logrus  # For structured logging examples
 ```
 
-## Step 2: Core Log Analyzer Structure
+## Step 2: Core log analyzer structure
 
 Create `main.go`:
 
@@ -502,7 +502,7 @@ func analyzeFile(analyzer *LogAnalyzer, filename, outputFile string) error {
 }
 ```
 
-## Step 3: Create Sample Log File
+## Step 3: Create sample log file
 
 Create `sample.log` for testing:
 
@@ -519,14 +519,14 @@ Create `sample.log` for testing:
 2024-01-15 10:30:31 [INFO] Application shutdown initiated
 ```
 
-## Step 4: Run the Analyzer
+## Step 4: Run the analyzer
 
 ```bash
 export OPENAI_API_KEY="your-openai-api-key-here"
 go run main.go -file=sample.log -output=report.json
 ```
 
-## Step 5: Enhanced Real-time Monitoring
+## Step 5: Enhanced real-time monitoring
 
 Create `monitor.go` for continuous monitoring:
 
@@ -672,7 +672,7 @@ func (lm *LogMonitor) shouldAlert(entries []LogEntry) bool {
 }
 ```
 
-## Step 6: Integration with Observability Tools
+## Step 6: Integration with observability tools
 
 Create `integrations.go`:
 
@@ -732,7 +732,7 @@ log_warnings_total %d
 }
 ```
 
-## Use Cases
+## Use cases
 
 This log analyzer can be used for:
 
@@ -742,7 +742,7 @@ This log analyzer can be used for:
 4. **Security Monitoring**: Detect suspicious patterns
 5. **Capacity Planning**: Understand usage patterns and growth
 
-## Advanced Features
+## Advanced features
 
 - **Machine Learning**: Train models on historical log patterns
 - **Correlation Analysis**: Link errors across multiple services

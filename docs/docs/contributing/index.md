@@ -1,33 +1,33 @@
 # Contributing to LangChainGo
 
-Thank you for your interest in contributing to LangChainGo! This guide will help you get started.
+Thank you for your interest in contributing to LangChainGo! This guide helps you get started.
 
-## Ways to Contribute
+## Ways to contribute
 
-### 1. Code Contributions
+### 1. Code contributions
 
-- **Bug Fixes**: Help us squash bugs and improve stability
-- **New Features**: Implement new LLM providers, tools, or chains
-- **Performance Improvements**: Optimize existing code
+- **Bug fixes**: Help us squash bugs and improve stability
+- **New features**: Implement new LLM providers, tools, or chains
+- **Performance improvements**: Optimize existing code
 - **Tests**: Improve test coverage and add missing tests
 
-### 2. Documentation Contributions
+### 2. Documentation contributions
 
 - **Tutorials**: Write step-by-step guides for common use cases
-- **How-To Guides**: Create practical solutions for specific problems
-- **API Documentation**: Improve code comments and examples
-- **Conceptual Guides**: Explain architectural decisions and patterns
+- **How-to guides**: Create practical solutions for specific problems
+- **API documentation**: Improve code comments and examples
+- **Conceptual guides**: Explain architectural decisions and patterns
 
-### 3. Community Support
+### 3. Community support
 
-- **Answer Questions**: Help others in GitHub Discussions
-- **Report Issues**: File detailed bug reports
+- **Answer questions**: Help others in GitHub Discussions
+- **Report issues**: File detailed bug reports
 - **Review PRs**: Provide feedback on pull requests
-- **Share Examples**: Showcase your LangChainGo projects
+- **Share examples**: Showcase your LangChainGo projects
 
-## Getting Started
+## Getting started
 
-### Development Setup
+### Development setup
 
 1. Fork the repository on GitHub
 2. Clone your fork locally:
@@ -46,7 +46,7 @@ Thank you for your interest in contributing to LangChainGo! This guide will help
    git checkout -b feature/your-feature-name
    ```
 
-### Code Style
+### Code style
 
 - Follow standard [Go conventions and idioms](https://go.dev/doc/effective_go)
 - Run `go fmt` before committing
@@ -64,19 +64,19 @@ When contributing code that interacts with external APIs:
 3. Ensure tests can run without external dependencies
 4. See the [Architecture Guide](/docs/concepts/architecture#http-testing-with-httprr) for details
 
-## Contribution Process
+## Contribution process
 
-1. **Check Existing Issues**: Look for existing issues or discussions about your idea
-2. **Open an Issue**: For significant changes, open an issue to discuss first
-3. **Make Changes**: Implement your changes in a feature branch
-4. **Follow Commit Style**: Use Go-style package-prefixed commit messages
-5. **Test Thoroughly**: Ensure all tests pass and add new ones as needed
+1. **Check existing issues**: Look for existing issues or discussions about your idea
+2. **Open an issue**: For significant changes, open an issue to discuss first
+3. **Make changes**: Implement your changes in a feature branch
+4. **Follow commit style**: Use Go-style package-prefixed commit messages
+5. **Test thoroughly**: Ensure all tests pass and add new ones as needed
 6. **Submit PR**: Open a pull request with a clear description following our guidelines
-7. **Address Feedback**: Respond to review comments promptly
+7. **Address feedback**: Respond to review comments promptly
 
-## Pull Request Guidelines
+## Pull request guidelines
 
-### PR Title Format
+### PR title format
 
 **Use Go-style package-prefixed commit messages** following the [Go Contribute Guidelines](https://go.dev/doc/contribute#commit_messages):
 
@@ -96,7 +96,7 @@ Examples of good commit messages:
 - `tools: add calculator tool with error handling`
 - `all: update dependencies and organize go.mod file`
 
-### PR Description
+### PR description
 Include:
 - Summary of changes
 - Related issue numbers  
@@ -104,7 +104,7 @@ Include:
 - Breaking changes (if any)
 - Reference to similar features in Python/TypeScript LangChain (when applicable)
 
-## Documentation Contributions
+## Documentation contributions
 
 See our dedicated [Documentation Contribution Guide](./documentation) for details on:
 - Writing tutorials
@@ -112,9 +112,9 @@ See our dedicated [Documentation Contribution Guide](./documentation) for detail
 - Documentation style guide
 - Building and testing docs locally
 
-## Code of Conduct
+## Code of conduct
 
-Please note that this project follows a Code of Conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+Please note that this project follows a code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## Recognition
 

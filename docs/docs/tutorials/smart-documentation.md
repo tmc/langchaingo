@@ -1,8 +1,8 @@
-# Building Smart Documentation Generator
+# Building smart documentation generator
 
 Create an AI-powered tool that automatically generates and maintains technical documentation from your codebase.
 
-## What You'll Build
+## What you'll build
 
 A CLI tool that:
 - Analyzes Go code to understand structure and purpose
@@ -17,7 +17,7 @@ A CLI tool that:
 - LLM API key
 - A Go project to document
 
-## Step 1: Project Setup
+## Step 1: Project setup
 
 ```bash
 mkdir smart-docs
@@ -28,7 +28,7 @@ go get golang.org/x/tools/go/packages
 go get golang.org/x/tools/go/ast/astutil
 ```
 
-## Step 2: Code Analysis Engine
+## Step 2: Code analysis engine
 
 Create `analyzer.go`:
 
@@ -543,7 +543,7 @@ func cleanDoc(doc string) string {
 }
 ```
 
-## Step 3: Documentation Generator
+## Step 3: Documentation generator
 
 Create `generator.go`:
 
@@ -960,7 +960,7 @@ Return only the Go code snippet.`,
 }
 ```
 
-## Step 4: Main Application
+## Step 4: Main application
 
 Create `main.go`:
 
@@ -1130,7 +1130,7 @@ func loadConfig(filename string, config *DocConfig) error {
 }
 ```
 
-## Step 5: Run the Documentation Generator
+## Step 5: Run the documentation generator
 
 Create a sample package to document:
 
@@ -1202,7 +1202,7 @@ export OPENAI_API_KEY="your-openai-api-key-here"
 go run *.go -dir=example-package -output=./generated-docs
 ```
 
-## Step 6: Configuration File
+## Step 6: Configuration file
 
 Create `docgen.json`:
 
@@ -1217,7 +1217,7 @@ Create `docgen.json`:
 }
 ```
 
-## Advanced Features
+## Advanced features
 
 ### Integration with CI/CD
 
@@ -1253,7 +1253,7 @@ jobs:
         publish_dir: ./docs
 ```
 
-### Multiple Output Formats
+### Multiple output formats
 
 Add support for different output formats:
 
@@ -1267,7 +1267,7 @@ func (dg *DocGenerator) GenerateOpenAPI(pkg *PackageInfo) (string, error) {
 }
 ```
 
-## Use Cases
+## Use cases
 
 This smart documentation generator can:
 

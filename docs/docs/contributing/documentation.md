@@ -1,8 +1,8 @@
-# Documentation Contribution Guide
+# Documentation contribution guide
 
 This guide helps you contribute documentation to LangChainGo. We especially need help with tutorials and how-to guides!
 
-## Documentation Structure
+## Documentation structure
 
 Our documentation is organized into four main categories:
 
@@ -18,30 +18,30 @@ Our documentation is organized into four main categories:
 - Progressive complexity
 - Real-world applications
 
-### 3. How-To Guides
+### 3. How-to guides
 **Purpose**: Solve specific problems
 - Focused on single tasks
 - Assume some knowledge
 - Practical solutions
 
-### 4. API Reference
+### 4. API reference
 **Purpose**: Technical specifications
 - Generated from code comments
 - Complete parameter documentation
 - Usage examples
 
-## Writing Tutorials
+## Writing tutorials
 
 Tutorials are complete learning experiences. Here's how to write a great tutorial:
 
-### Tutorial Template
+### Tutorial template
 
 ```markdown
 # Building [What You're Building]
 
 [One sentence description of what the reader will build]
 
-## What You'll Build
+## What you'll build
 
 A [type of application] that:
 - [Feature 1]
@@ -62,23 +62,23 @@ A [type of application] that:
 // Complete, runnable code
 ```
 
-## Step 2: [Next Task]
+## Step 2: [next task]
 
 [Continue with progressive steps...]
 
-## Running the Application
+## Running the application
 
 ```bash
 # Clear commands to run
 ```
 
-## Next Steps
+## Next steps
 
 - [Potential improvements]
 - [Related tutorials]
 ```
 
-### Tutorial Guidelines
+### Tutorial guidelines
 
 1. **Start Simple**: Begin with minimal code that works
 2. **Build Progressively**: Add complexity step by step
@@ -86,11 +86,11 @@ A [type of application] that:
 4. **Complete Code**: Every code block should be runnable
 5. **Test Everything**: Ensure all code examples work
 
-## Writing How-To Guides
+## Writing how-to guides
 
 How-to guides solve specific problems. They differ from tutorials:
 
-### How-To Template
+### How-to template
 
 ```markdown
 # How to [Specific Task]
@@ -115,12 +115,12 @@ How-to guides solve specific problems. They differ from tutorials:
 - [Security considerations]
 - [Alternative approaches]
 
-## Related Guides
+## Related guides
 
 - [Link to related how-tos]
 ```
 
-### How-To Guidelines
+### How-to guidelines
 
 1. **One Problem**: Focus on solving one specific issue
 2. **Clear Title**: "How to X" format
@@ -128,16 +128,16 @@ How-to guides solve specific problems. They differ from tutorials:
 4. **Multiple Solutions**: Show alternatives when relevant
 5. **Practical Focus**: Real problems developers face
 
-## Documentation Style Guide
+## Documentation style guide
 
-### Language and Tone
+### Language and tone
 
 - **Direct and Clear**: Avoid flowery language
 - **Active Voice**: "Configure the client" not "The client should be configured"
 - **Present Tense**: "This function returns" not "This function will return"
 - **You/Your**: Address the reader directly
 
-### Code Examples
+### Code examples
 
 ```go
 // DO: Complete, runnable examples
@@ -166,15 +166,15 @@ llm := openai.New() // Missing error handling
 // ... magic happens here
 ```
 
-### Formatting Conventions
+### Formatting conventions
 
-- **Headers**: Use sentence case, not Title Case
+- **Headers**: Use sentence case, not title case
 - **Code Blocks**: Always specify language (` ```go`)
 - **Emphasis**: Use **bold** for important concepts
 - **Lists**: Use `-` for unordered lists
-- **Links**: Use descriptive text, not "click here"
+- **Links**: Use descriptive link text, not "click here"
 
-### Things to Avoid
+### Things to avoid
 
 - No emojis in documentation
 - No marketing language or hype
@@ -182,27 +182,27 @@ llm := openai.New() // Missing error handling
 - No hardcoded API keys
 - No external service dependencies
 
-## Contributing Missing Documentation
+## Contributing missing documentation
 
 We have several tutorials and guides marked as "Coming Soon". Here's how to contribute:
 
-### 1. Choose a Topic
+### 1. Choose a topic
 
 - Check our [Tutorials](/docs/tutorials) and [How-To Guides](/docs/how-to) for topics marked as coming soon. 
 - Review open issues for topics that have already been claimed (avoid duplicate work).
 
-### 2. Open an Issue
+### 2. Open an issue
 
 Before writing, open an issue to:
 - Claim the topic (avoid duplicate work)
 - Discuss the approach
 - Get feedback on the outline
 
-### 3. Write the Content
+### 3. Write the content
 
 Follow the templates and guidelines above.
 
-### 4. Test Everything
+### 4. Test everything
 
 - Ensure all code examples run
 - Test on a clean environment
@@ -215,9 +215,11 @@ Create a pull request with:
 - Link to the tracking issue
 - Summary of what's covered
 
-## Local Development
+## Local development
 
-### Building Documentation
+### Building documentation
+
+#### Local development
 
 ```bash
 cd docs
@@ -227,30 +229,71 @@ npm run start
 
 This starts a local server at `http://localhost:3000`
 
-### Testing Documentation
+#### Docker development
+
+For a containerized environment:
+
+```bash
+cd docs
+
+# Quick development server with live reload
+make docker-dev
+
+# Or build and run a persistent container
+make docker-run
+
+# Clean up when done
+make docker-clean
+```
+
+The Docker approach ensures consistent Node.js environment and dependencies.
+
+### Testing documentation
 
 Before submitting:
 
 1. **Check Links**: Ensure all links work
 2. **Run Code**: Test all code examples
 3. **Review Formatting**: Check rendering in browser
-4. **Spell Check**: Use your editor's spell checker
+4. **Lint Documentation**: Run Vale to check style consistency
+5. **Spell Check**: Use your editor's spell checker
 
-## Examples of Good Documentation
+#### Running Vale linting
 
-### Good Tutorial Example
+Vale automatically checks documentation style and consistency:
+
+```bash
+# Install Vale (on macOS)
+make lint-deps
+
+# Lint all documentation
+make lint-docs
+
+# Or run Vale directly
+vale docs
+```
+
+Vale checks for:
+- Sentence case headers
+- Consistent terminology
+- Spelling of technical terms
+- Writing style guidelines
+
+## Examples of good documentation
+
+### Good tutorial example
 - [Building an AI Code Reviewer](/docs/tutorials/code-reviewer)
 - Complete, practical application
 - Progressive complexity
 - Real-world use case
 
-### Good How-To Example
+### Good how-to guide example
 - [How to configure different LLM providers](/docs/how-to/configure-llm-providers)
 - Focused on specific task
 - Multiple provider examples
 - Clear configuration steps
 
-## Need Help?
+## Need help?
 
 - Check existing documentation for style examples
 - Open a [GitHub Discussion](https://github.com/tmc/langchaingo/discussions) for questions
