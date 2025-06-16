@@ -132,8 +132,7 @@ func convertToolConfig(config any) *genai.ToolConfig {
 	var mode genai.FunctionCallingMode
 	var allowedFunctionNames []string
 
-	switch c := config.(type) {
-	case string:
+	if c, ok := config.(string); ok {
 		switch strings.ToLower(c) {
 		case "any":
 			mode = genai.FunctionCallingAny
@@ -142,26 +141,14 @@ func convertToolConfig(config any) *genai.ToolConfig {
 		default:
 			mode = genai.FunctionCallingAuto
 		}
-	case []string:
+	} else if c, ok := config.([]string); ok {
 		if len(c) > 0 {
 			mode = genai.FunctionCallingAny
 			allowedFunctionNames = c
 		} else {
 			mode = genai.FunctionCallingAuto
 		}
-	case []interface{}:
-		if len(c) > 0 {
-			mode = genai.FunctionCallingAny
-			allowedFunctionNames = make([]string, len(c))
-			for i, v := range c {
-				if s, ok := v.(string); ok {
-					allowedFunctionNames[i] = s
-				}
-			}
-		} else {
-			mode = genai.FunctionCallingAuto
-		}
-	default:
+	} else {
 		mode = genai.FunctionCallingAuto
 	}
 
