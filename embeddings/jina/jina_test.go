@@ -3,8 +3,6 @@ package jina
 import (
 	"context"
 	"net/http"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,37 +12,21 @@ import (
 
 func TestJina_EmbedDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	// Check if we have API key or httprr recording
-	if os.Getenv("JINA_API_KEY") == "" {
-		testName := httprr.CleanFileName(t.Name())
-		httprrFile := filepath.Join("testdata", testName+".httprr")
-		httprrGzFile := httprrFile + ".gz"
-		if _, err := os.Stat(httprrFile); os.IsNotExist(err) {
-			if _, err := os.Stat(httprrGzFile); os.IsNotExist(err) {
-				t.Skip("JINA_API_KEY not set and no httprr recording available")
-			}
-		}
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "JINA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	apiKey := "test-api-key"
-	if key := os.Getenv("JINA_API_KEY"); key != "" && rr.Recording() {
-		apiKey = key
+	var opts []Option
+	opts = append(opts, WithModel("jina-embeddings-v2-base-en"))
+	opts = append(opts, WithClient(rr.Client()))
+
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
-	embedder, err := NewJina(
-		WithAPIKey(apiKey),
-		WithModel("jina-embeddings-v2-base-en"),
-	)
+	embedder, err := NewJina(opts...)
 	require.NoError(t, err)
 
 	texts := []string{
@@ -63,37 +45,21 @@ func TestJina_EmbedDocuments(t *testing.T) {
 
 func TestJina_EmbedQuery(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	// Check if we have API key or httprr recording
-	if os.Getenv("JINA_API_KEY") == "" {
-		testName := httprr.CleanFileName(t.Name())
-		httprrFile := filepath.Join("testdata", testName+".httprr")
-		httprrGzFile := httprrFile + ".gz"
-		if _, err := os.Stat(httprrFile); os.IsNotExist(err) {
-			if _, err := os.Stat(httprrGzFile); os.IsNotExist(err) {
-				t.Skip("JINA_API_KEY not set and no httprr recording available")
-			}
-		}
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "JINA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	apiKey := "test-api-key"
-	if key := os.Getenv("JINA_API_KEY"); key != "" && rr.Recording() {
-		apiKey = key
+	var opts []Option
+	opts = append(opts, WithModel("jina-embeddings-v2-base-en"))
+	opts = append(opts, WithClient(rr.Client()))
+
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
-	embedder, err := NewJina(
-		WithAPIKey(apiKey),
-		WithModel("jina-embeddings-v2-base-en"),
-	)
+	embedder, err := NewJina(opts...)
 	require.NoError(t, err)
 
 	query := "What is machine learning?"
@@ -105,38 +71,22 @@ func TestJina_EmbedQuery(t *testing.T) {
 
 func TestJina_WithBatchSize(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	// Check if we have API key or httprr recording
-	if os.Getenv("JINA_API_KEY") == "" {
-		testName := httprr.CleanFileName(t.Name())
-		httprrFile := filepath.Join("testdata", testName+".httprr")
-		httprrGzFile := httprrFile + ".gz"
-		if _, err := os.Stat(httprrFile); os.IsNotExist(err) {
-			if _, err := os.Stat(httprrGzFile); os.IsNotExist(err) {
-				t.Skip("JINA_API_KEY not set and no httprr recording available")
-			}
-		}
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "JINA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	apiKey := "test-api-key"
-	if key := os.Getenv("JINA_API_KEY"); key != "" && rr.Recording() {
-		apiKey = key
+	var opts []Option
+	opts = append(opts, WithModel("jina-embeddings-v2-base-en"))
+	opts = append(opts, WithBatchSize(2))
+	opts = append(opts, WithClient(rr.Client()))
+
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
-	embedder, err := NewJina(
-		WithAPIKey(apiKey),
-		WithModel("jina-embeddings-v2-base-en"),
-		WithBatchSize(2),
-	)
+	embedder, err := NewJina(opts...)
 	require.NoError(t, err)
 
 	// Create 5 texts to test batching with batch size 2
@@ -158,38 +108,22 @@ func TestJina_WithBatchSize(t *testing.T) {
 
 func TestJina_StripNewLines(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	// Check if we have API key or httprr recording
-	if os.Getenv("JINA_API_KEY") == "" {
-		testName := httprr.CleanFileName(t.Name())
-		httprrFile := filepath.Join("testdata", testName+".httprr")
-		httprrGzFile := httprrFile + ".gz"
-		if _, err := os.Stat(httprrFile); os.IsNotExist(err) {
-			if _, err := os.Stat(httprrGzFile); os.IsNotExist(err) {
-				t.Skip("JINA_API_KEY not set and no httprr recording available")
-			}
-		}
-	}
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "JINA_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	apiKey := "test-api-key"
-	if key := os.Getenv("JINA_API_KEY"); key != "" && rr.Recording() {
-		apiKey = key
+	var opts []Option
+	opts = append(opts, WithModel("jina-embeddings-v2-base-en"))
+	opts = append(opts, WithStripNewLines(true))
+	opts = append(opts, WithClient(rr.Client()))
+
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
-
-	embedder, err := NewJina(
-		WithAPIKey(apiKey),
-		WithModel("jina-embeddings-v2-base-en"),
-		WithStripNewLines(true),
-	)
+	embedder, err := NewJina(opts...)
 	require.NoError(t, err)
 
 	query := "Text with\nnew lines\nshould be processed"

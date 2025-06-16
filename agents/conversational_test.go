@@ -18,13 +18,14 @@ func TestConversationalWithMemory(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4o"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	// httprr handles credentials automatically
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)

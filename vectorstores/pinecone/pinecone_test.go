@@ -2,6 +2,7 @@ package pinecone_test
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -10,43 +11,92 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/pinecone"
 )
 
+// getValues returns Pinecone API credentials for testing.
+//
+// ARCHITECTURAL NOTE: Pinecone tests skip when credentials are not available
+// instead of using httprr because the Pinecone client does not support custom
+// HTTP clients, making it impossible to use httprr for HTTP mocking.
+// This is a legitimate architectural exception to the standard httprr pattern.
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
 
+	// Skip test if credentials are not available - Pinecone tests require real credentials
+	// since Pinecone client doesn't support custom HTTP clients for httprr mocking
 	pineconeAPIKey := os.Getenv("PINECONE_API_KEY")
-	if pineconeAPIKey == "" {
-		t.Skip("Must set PINECONE_API_KEY to run test")
-	}
-
 	pineconeHost := os.Getenv("PINECONE_HOST")
-	if pineconeHost == "" {
-		t.Skip("Must set PINECONE_HOST to run test")
-	}
-
-	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
-	if openaiAPIKey == "" {
-		t.Skip("Must set OPENAI_API_KEY to run test")
+	if pineconeAPIKey == "" || pineconeHost == "" {
+		t.Skip("Pinecone tests require PINECONE_API_KEY and PINECONE_HOST environment variables")
 	}
 
 	return pineconeAPIKey, pineconeHost
 }
 
-func TestPineconeStoreRest(t *testing.T) {
-	ctx := context.Background()
-	t.Parallel()
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
 
-	apiKey, host := getValues(t)
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	opts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
+	return e
+}
+
+// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
+func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
+	t.Helper()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	embeddingOpts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+		embeddingOpts = append(embeddingOpts, openai.WithToken("test-api-key"))
+	}
+
+	llm, err := openai.New(opts...)
+	require.NoError(t, err)
+	embeddingLLM, err := openai.New(embeddingOpts...)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(embeddingLLM)
+	require.NoError(t, err)
+	return llm, e
+}
+
+func TestPineconeStoreRest(t *testing.T) {
+	ctx := context.Background()
+
+	t.Parallel()
+
+	apiKey, host := getValues(t)
+	e := createOpenAIEmbedder(t)
 
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -73,11 +123,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -121,11 +167,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -165,11 +207,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -208,11 +246,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -257,11 +291,7 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -334,11 +364,7 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -412,11 +438,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
@@ -488,11 +510,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 
 	apiKey, host := getValues(t)
-
-	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),

@@ -2,11 +2,13 @@ package bedrock_test
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/tmc/langchaingo/httputil"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
 )
@@ -22,11 +24,21 @@ func setUpTest() (*bedrockruntime.Client, error) {
 
 func TestAmazonOutput(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	if os.Getenv("TEST_AWS") != "true" {
-		t.Skip("Skipping test, requires AWS access")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
+
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	client, err := setUpTest()
 	if err != nil {

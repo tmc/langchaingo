@@ -3,7 +3,6 @@ package weaviate
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -15,6 +14,7 @@ import (
 	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -86,20 +86,41 @@ func createTestClass(ctx context.Context, s Store) error {
 	}).Do(ctx)
 }
 
-// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
-func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+// createOpenAIClient creates OpenAI embedder and LLM with shared httprr for testing.
+func createOpenAIClient(t *testing.T) (*embeddings.EmbedderImpl, *openai.LLM) {
 	t.Helper()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	llm, err := openai.New(
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithHTTPClient(rr.Client()),
-	)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	var opts []openai.Option
+	opts = append(opts, openai.WithHTTPClient(rr.Client()))
+
+	// Use test token when replaying
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	// Create LLM for embeddings (with embedding model)
+	embeddingOpts := append(opts, openai.WithEmbeddingModel("text-embedding-ada-002"))
+	embeddingLLM, err := openai.New(embeddingOpts...)
 	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
+
+	// Create embedder
+	e, err := embeddings.NewEmbedder(embeddingLLM)
 	require.NoError(t, err)
+
+	// Create LLM for chains (with default chat model)
+	llm, err := openai.New(opts...)
+	require.NoError(t, err)
+
+	return e, llm
+}
+
+// createOpenAIEmbedder creates just an OpenAI embedder with httprr for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
+	e, _ := createOpenAIClient(t)
 	return e
 }
 
@@ -283,10 +304,7 @@ func TestDeduplicater(t *testing.T) {
 	}
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -330,10 +348,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	}
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -381,10 +396,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e, llm := createOpenAIClient(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -432,10 +444,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e, llm := createOpenAIClient(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -492,10 +501,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e, llm := createOpenAIClient(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -584,10 +590,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e, llm := createOpenAIClient(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -647,10 +650,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e, llm := createOpenAIClient(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -733,10 +733,7 @@ func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -778,10 +775,7 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	store, err := New(
 		WithScheme(scheme),
@@ -829,8 +823,7 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 
 	scheme, host := getWeaviateTestContainerSchemeAndHost(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
+	_, llm := createOpenAIClient(t)
 
 	notme, err := embeddings.NewEmbedder(
 		embeddings.EmbedderClientFunc(func(context.Context, []string) ([][]float32, error) {

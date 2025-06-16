@@ -177,10 +177,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
+			return nil, errors.New(msg)
 		}
 
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 	}
 	if payload.StreamingFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)

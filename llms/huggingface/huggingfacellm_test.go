@@ -11,7 +11,7 @@ import (
 )
 
 func TestHuggingFaceLLMWithProvider(t *testing.T) {
-	t.Parallel()
+
 	ctx := context.Background()
 
 	// Skip if no credentials and no recording - HuggingFace accepts either token
@@ -22,11 +22,14 @@ func TestHuggingFaceLLMWithProvider(t *testing.T) {
 	rr := httprr.OpenForTest(t, nil)
 	defer rr.Close()
 	// Create LLM with provider
-	llm, err := New(
+	opts := []Option{
 		WithModel("deepseek-ai/DeepSeek-R1-0528"),
 		WithInferenceProvider("hyperbolic"),
 		WithHTTPClient(rr.Client()),
-	)
+		WithToken("test-api-key"),
+	}
+
+	llm, err := New(opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +56,7 @@ func TestHuggingFaceLLMWithProvider(t *testing.T) {
 }
 
 func TestHuggingFaceLLMStandardInference(t *testing.T) {
-	t.Parallel()
+
 	ctx := context.Background()
 
 	// Skip if no credentials and no recording - HuggingFace accepts either token
@@ -64,10 +67,13 @@ func TestHuggingFaceLLMStandardInference(t *testing.T) {
 	rr := httprr.OpenForTest(t, nil)
 	defer rr.Close()
 	// Create standard LLM without provider
-	llm, err := New(
+	opts := []Option{
 		WithModel("HuggingFaceH4/zephyr-7b-beta"),
 		WithHTTPClient(rr.Client()),
-	)
+		WithToken("test-api-key"),
+	}
+
+	llm, err := New(opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +100,6 @@ func TestHuggingFaceLLMStandardInference(t *testing.T) {
 func TestHuggingFaceLLMGenerateContent(t *testing.T) {
 	t.Skip("temporarily skip")
 
-	t.Parallel()
 	ctx := context.Background()
 
 	// Skip if no credentials and no recording
@@ -106,6 +111,7 @@ func TestHuggingFaceLLMGenerateContent(t *testing.T) {
 	llm, err := New(
 		WithModel("HuggingFaceH4/zephyr-7b-beta"),
 		WithHTTPClient(rr.Client()),
+		WithToken("test-api-key"),
 	)
 	if err != nil {
 		t.Fatal(err)

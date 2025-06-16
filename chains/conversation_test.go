@@ -18,14 +18,28 @@ import (
 )
 
 func TestConversation(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationBuffer())
@@ -38,13 +52,16 @@ func TestConversation(t *testing.T) {
 }
 
 func TestConversationWithZepMemory(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
 	zepAPIKey := os.Getenv("ZEP_API_KEY")
 	sessionID := os.Getenv("ZEP_SESSION_ID")
 	if zepAPIKey == "" || sessionID == "" {
@@ -83,14 +100,28 @@ func TestConversationWithZepMemory(t *testing.T) {
 }
 
 func TestConversationWithChatLLM(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	c := NewConversation(llm, memory.NewConversationTokenBuffer(llm, 2000))
