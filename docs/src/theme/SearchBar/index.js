@@ -58,14 +58,45 @@ export default function SearchBar() {
     }
 
     const searchResults = searchIndex
-      .filter(item => 
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.content.toLowerCase().includes(query.toLowerCase())
-      )
+      .filter(item => {
+        const queryLower = query.toLowerCase();
+        
+        // Search in title
+        if (item.title.toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        
+        // Search in content
+        if (item.content && item.content.toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        
+        // Search in package.title combination (e.g., "llms.Model")
+        if (item.package && (item.package + '.' + item.title).toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        
+        // Search in keywords array
+        if (item.keywords && item.keywords.some(keyword => 
+          keyword.toLowerCase().includes(queryLower)
+        )) {
+          return true;
+        }
+        
+        // Search in signature
+        if (item.signature && item.signature.toLowerCase().includes(queryLower)) {
+          return true;
+        }
+        
+        return false;
+      })
       .slice(0, 8)
       .map(item => ({
         ...item,
-        highlight: highlightMatch(item.title, query) || highlightMatch(item.content, query)
+        highlight: highlightMatch(item.title, query) || 
+                   highlightMatch(item.content, query) ||
+                   (item.package && highlightMatch(item.package + '.' + item.title, query)) ||
+                   (item.signature && highlightMatch(item.signature, query))
       }));
 
     setResults(searchResults);
@@ -142,6 +173,7 @@ export default function SearchBar() {
               onClick={() => handleResultClick(result.url)}
             >
               <div className="search-result-title">
+                {result.package && <span className="search-result-package">{result.package}.</span>}
                 {result.title}
                 {result.external && <span className="search-result-external">↗</span>}
               </div>

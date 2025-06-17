@@ -37,6 +37,15 @@ jobs:
           cache: pnpm
           cache-dependency-path: docs/pnpm-lock.yaml
 
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Build search index
+        working-directory: docs
+        run: go run search-indexer.go
+
       - name: Build docs
         working-directory: docs
         run: |

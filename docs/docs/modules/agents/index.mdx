@@ -68,7 +68,7 @@ tools := []tools.Tool{
 }
 
 // Create agent
-agent := agents.NewMRKLAgent(llm, tools)
+agent := agents.NewOneShotAgent(llm, tools)
 
 // Create executor
 executor := agents.NewExecutor(agent)
