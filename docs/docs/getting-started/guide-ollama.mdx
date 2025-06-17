@@ -2,6 +2,9 @@
 sidebar_position: 1
 ---
 
+import CodeBlock from "@theme/CodeBlock";
+import ExampleOllama from "@examples/ollama-completion-example/ollama_completion_example.go";
+
 # Quickstart: LangChainGo with Ollama
 
 Get started by running your first program with LangChainGo and [Ollama](https://ollama.ai/). Ollama provides the most straightforward method for local LLM inference across all computer platforms.
@@ -41,39 +44,6 @@ The first human to set foot on the moon was Neil Armstrong, an American astronau
 
 Congratulations! You have successfully built and executed your first open-source LLM-based program using local inference.
 
-Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)).
+Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)):
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
-)
-
-func main() {
-	// Create Ollama client with the llama2 model
-	llm, err := ollama.New(ollama.WithModel("llama2"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	
-	ctx := context.Background()
-	completion, err := llm.Call(ctx, "Human: Who was the first man to walk on the moon?\nAssistant:",
-		llms.WithTemperature(0.8),
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-			fmt.Print(string(chunk))
-			return nil
-		}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_ = completion
-}
-```
+<CodeBlock language="go">{ExampleOllama}</CodeBlock>

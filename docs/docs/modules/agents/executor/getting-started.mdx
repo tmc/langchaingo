@@ -3,6 +3,9 @@ sidebar_label: Getting Started
 hide_table_of_contents: true
 ---
 
+import CodeBlock from "@theme/CodeBlock";
+import ExampleMRKL from "@examples/mrkl-agent-example/mrkl_agent.go";
+
 # Getting Started: Agent Executors
 
 Agents use an LLM to determine which actions to take and in what order. An action can either be using a tool and observing its output, or returning to the user.
@@ -21,50 +24,8 @@ For this example, you'll need to set the SerpAPI environment variables in the `.
 SERPAPI_API_KEY="..."
 ```
 
-## Load the LLM
-```go
-llm, err := ollama.New(ollama.WithModel("llama2"))
-if err != nil {
-    return err
-}
-```
+## Complete Example
 
-## Define Tools
-```go
-search, err := serpapi.New()
-if err != nil {
-    return err
-}
-agentTools := []tools.Tool{
-    tools.Calculator{},
-    search,
-}
-```
+Here's a complete working example showing how to create and run an agent executor:
 
-## Create Prompt
-```go
-prompt := "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
-```
-
-## Create the Agent Executor
-```go
-executor, err := agents.Initialize(
-    llm,
-    agentTools,
-    agents.ZeroShotReactDescription,
-    agents.WithMaxIterations(3),
-)
-if err != nil {
-    return err
-}
-
-answer, err := chains.Run(context.Background(), executor, prompt)
-fmt.Println(answer)
-return err
-```
-
-You can compare this to the base LLM.
-```go
-baseline, _ := llm.Call(context.Background(), prompt)
-fmt.Println(baseline)	
-```
+<CodeBlock language="go">{ExampleMRKL}</CodeBlock>
