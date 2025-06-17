@@ -69,7 +69,37 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// Reasoning constrains effort on reasoning for reasoning models
+	Reasoning *Reasoning `json:"reasoning,omitempty"`
 }
+
+type Reasoning struct {
+	IsEnabled bool           `json:"is_enabled"`
+	Mode      ReasoningMode  `json:"mode,omitempty"`
+	Level     ReasoningLevel `json:"level,omitempty"`
+	Tokens    int            `json:"tokens,omitempty"`
+}
+
+// ReasoningMode is the reasoning mode supported by the model.
+// OpenAI APIs support levels based reasoning, i.e "low", "medium", "high".
+// Anthropic supports allocating budget tokens (>1024) for reasoning.
+type ReasoningMode string
+
+const (
+	ReasoningModeLevel  ReasoningMode = "level"
+	ReasoningModeTokens ReasoningMode = "tokens"
+)
+
+// ReasoningLevel is the reasoning level to use for the model.
+// Defaults to "medium".
+type ReasoningLevel string
+
+const (
+	ReasoningLevelLow    ReasoningLevel = "low"
+	ReasoningLevelMedium ReasoningLevel = "medium"
+	ReasoningLevelHigh   ReasoningLevel = "high"
+)
 
 // Tool is a tool that can be used by the model.
 type Tool struct {
@@ -288,5 +318,12 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
+	}
+}
+
+// WithReasoning sets the reasoning object for the model, if it supports it.
+func WithReasoning(reasoning Reasoning) CallOption {
+	return func(o *CallOptions) {
+		o.Reasoning = &reasoning
 	}
 }
