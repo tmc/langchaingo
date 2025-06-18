@@ -1,0 +1,32 @@
+httprr trace v1
+230 1325
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 38
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Hello, Cohere!","model":""}HTTP/2.0 200 OK
+Content-Length: 602
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 16 Jun 2025 09:59:03 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 UTC
+Num_chars: 350
+Num_tokens: 88
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: 71c0effc5b010368de8937b06184853c
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 2412
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 39
+
+{"id":"2a15312f-ca17-4175-895e-e074cd94654b","generations":[{"id":"804a32a9-162f-4df7-a276-15ecd246e2a2","text":" Hi! I'm Cohere, an AI-assistant chatbot trained to assist human users by providing thorough responses. How can I help you today? \n\nPlease ask me anything you like, and I will do my best to assist you. \n\nLet me know if you have any specific questions, or if you would like me to focus on anything specific, and I will be glad to do so! ","finish_reason":"COMPLETE"}],"prompt":"Hello, Cohere!","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":5,"output_tokens":83}}}

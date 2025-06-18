@@ -39,7 +39,7 @@ func (kb *KnowledgeBase) hash(docs []NamedDocument) string {
 	}
 
 	hasher := blake3.New()
-	_, _ = hasher.Write(hashInput.Bytes())
+	_, _ = hasher.Write(hashInput.Bytes()) // hash.Hash.Write never returns an error
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 

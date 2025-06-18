@@ -28,7 +28,7 @@ var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
 }
 
 const (
-	embeddingModelName = "textembedding-gecko"
+	embeddingModelName = "text-embedding-005"
 	TextModelName      = "text-bison"
 	ChatModelName      = "chat-bison"
 
@@ -235,7 +235,13 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 				mergedParams[paramKey] = value
 			}
 		case int:
+			if value != 0 {
+				mergedParams[paramKey] = value
+			}
 		case int32:
+			if value != 0 {
+				mergedParams[paramKey] = value
+			}
 		case int64:
 			if value != 0 {
 				mergedParams[paramKey] = value

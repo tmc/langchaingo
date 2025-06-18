@@ -1,0 +1,12 @@
+extends: existence
+message: "Use 'you/your' to address readers directly"
+level: suggestion
+scope: sentence
+tokens:
+  - 'the user'
+  - 'the developer'
+  - 'the reader'
+  - 'one should'
+  - 'users should'
+  - 'developers should'
+

@@ -1,0 +1,554 @@
+httprr trace v1
+798 11563
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 372
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"Tell me a short story about a cat"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 11183
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 16 Jun 2025 13:08:04 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=267
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+[{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "C"
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "lementine wasn't your average tabby. Sure, she had the classic orange stripes"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " and a perpetually grumpy face, but her heart held a secret yearning for adventure. While"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " the other cats of Willow Creek napped in sunbeams and chased dust bunnies, Clementine dreamt of mountains, forests, and the thrill of the unknown.\n\nOne"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " crisp autumn morning, Clementine decided she'd had enough of routine. She slipped out the slightly ajar back door, her tail held high, and ventured"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " beyond the familiar rose bushes. The world exploded with new smells: damp earth, decaying leaves, and the tantalizing scent of something wild.\n\nShe followed the scent, her paws padding softly on the fallen leaves. The journey led her to the"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " edge of the woods, a place she'd only glimpsed from the safety of the porch. Hesitation flickered in her emerald eyes, but the call of adventure was too strong to resist.\n\nThe woods were a symphony of rustling leaves"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " and chirping birds. Clementine stalked through the undergrowth, her instincts sharpening with every step. She chased butterflies, startled squirrels, and even had a brief standoff with a grumpy robin.\n\nAs dusk began to settle, painting the sky in hues of orange and purple, Clementine found herself lost. Panic began to creep"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " in. The woods, once enchanting, now seemed menacing. She called out, a plaintive meow that was swallowed by the rustling trees.\n\nJust as despair threatened to overwhelm her, she heard a faint sound. A familiar meow, closer this time. She followed the sound, her heart pounding with hope.\n\nEmer"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ging from the trees, she saw him: Barnaby, the scruffy tomcat from next door, sitting patiently on the edge of the woods. He wasn't a mountain or a forest, but he was familiar, safe.\n\nBarnaby gave a short, almost imperceptible nod. Clementine, humbled"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " and exhausted, rubbed against his leg. He led her back to Willow Creek, back to the familiar scent of home.\n\nThat night, curled up on her favorite cushion, Clementine dreamt not of grand adventures, but of the comfort of a warm lap and a bowl of tuna. She realized that adventure wasn't always"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " about faraway places. Sometimes, it was about finding your way back home, and appreciating the familiar comfort waiting there. And maybe, just maybe, having a grumpy tomcat to guide you along the way.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 8,
+    "candidatesTokenCount": 497,
+    "totalTokenCount": 505,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 8
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 497
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+}
+]
