@@ -67,6 +67,12 @@
   gap: 4px;
 }
 
+.search-result-package {
+  font-size: 12px;
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+}
+
 .search-result-external {
   font-size: 12px;
   color: var(--ifm-color-emphasis-600);

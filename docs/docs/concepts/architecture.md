@@ -187,7 +187,15 @@ Chains enable complex workflows:
 chain1 := chains.NewLLMChain(llm, template1)
 chain2 := chains.NewLLMChain(llm, template2)
 
-sequential := chains.NewSequentialChain([]chains.Chain{chain1, chain2})
+// For simple sequential chains where output of one feeds to next
+sequential := chains.NewSimpleSequentialChain([]chains.Chain{chain1, chain2})
+
+// Or for complex sequential chains with specific input/output keys
+sequential, err := chains.NewSequentialChain(
+    []chains.Chain{chain1, chain2},
+    []string{"input"},      // input keys
+    []string{"final_output"}, // output keys
+)
 ```
 
 ### 5. Agent framework

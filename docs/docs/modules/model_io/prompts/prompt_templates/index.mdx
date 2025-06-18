@@ -13,7 +13,7 @@ import DocCardList from "@theme/DocCardList";
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/prompts/quick_start#prompttemplate)
 :::
 
-A fundemental part of working with language models is taking some input and formatting it in some way using a template. 
+A fundamental part of working with language models is taking some input and formatting it in some way using a template. 
 Doing this is simple using LangChain. Here is a simple example: 
 
 ```go
@@ -75,12 +75,12 @@ You are encouraged to use these chat related prompt templates instead of PromptT
 import "github.com/tmc/langchaingo/prompts"
 
 func main() {
-   prompt := prompts.NewChatPromptTemplate([]MessageFormatter{
-        NewSystemMessagePromptTemplate(
+   prompt := prompts.NewChatPromptTemplate([]prompts.MessageFormatter{
+        prompts.NewSystemMessagePromptTemplate(
             "You are a translation engine that can only translate text and cannot interpret it.",
             nil,
         ),
-        NewHumanMessagePromptTemplate(
+        prompts.NewHumanMessagePromptTemplate(
             `translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
             []string{"inputLang", "outputLang", "input"},
         ),
