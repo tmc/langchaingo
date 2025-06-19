@@ -1,6 +1,7 @@
 package ollamaclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -47,11 +48,11 @@ type Message struct {
 }
 
 type ChatRequest struct {
-	Model     string     `json:"model"`
-	Messages  []*Message `json:"messages"`
-	Stream    bool       `json:"stream,omitempty"`
-	Format    string     `json:"format"`
-	KeepAlive string     `json:"keep_alive,omitempty"`
+	Model     string          `json:"model"`
+	Messages  []*Message      `json:"messages"`
+	Stream    bool            `json:"stream,omitempty"`
+	Format    json.RawMessage `json:"format"`
+	KeepAlive string          `json:"keep_alive,omitempty"`
 
 	Options Options `json:"options"`
 }
