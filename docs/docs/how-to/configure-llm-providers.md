@@ -13,14 +13,14 @@ import "github.com/tmc/langchaingo/llms/openai"
 llm, err := openai.New()
 
 // Or with explicit API key
-llm, err := openai.New(openai.WithAPIKey("your-api-key"))
+llm, err := openai.New(openai.WithToken("your-api-key"))
 ```
 
 ### Advanced configuration
 
 ```go
 llm, err := openai.New(
-    openai.WithAPIKey("your-api-key"),
+    openai.WithToken("your-api-key"),
     openai.WithModel("gpt-4"), // Specify model
     openai.WithBaseURL("https://custom-endpoint.com"), // Custom endpoint
     openai.WithOrganization("org-id"), // Organization ID
@@ -34,7 +34,7 @@ llm, err := openai.New(
 import "github.com/tmc/langchaingo/llms/openai"
 
 llm, err := openai.New(
-    openai.WithAPIKey("your-azure-api-key"),
+    openai.WithToken("your-azure-api-key"),
     openai.WithBaseURL("https://your-resource.openai.azure.com"),
     openai.WithAPIVersion("2023-12-01-preview"),
     openai.WithAPIType(openai.APITypeAzure),
@@ -52,7 +52,7 @@ import "github.com/tmc/langchaingo/llms/anthropic"
 llm, err := anthropic.New()
 
 // Or with explicit API key
-llm, err := anthropic.New(anthropic.WithAPIKey("your-api-key"))
+llm, err := anthropic.New(anthropic.WithToken("your-api-key"))
 ```
 
 ### Model selection
@@ -60,7 +60,7 @@ llm, err := anthropic.New(anthropic.WithAPIKey("your-api-key"))
 ```go
 llm, err := anthropic.New(
     anthropic.WithModel("claude-3-opus-20240229"),
-    anthropic.WithAPIKey("your-api-key"),
+    anthropic.WithToken("your-api-key"),
 )
 ```
 
