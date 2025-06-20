@@ -261,7 +261,7 @@ func (s Store) AddDocuments(
 
 	ids := make([]string, len(docs))
 	for docIdx, doc := range docs {
-		id := uuid.New().String()
+		id := opts.GenerateDocumentID(ctx, doc, ids)
 		ids[docIdx] = id
 		b.Queue(sql, id, doc.PageContent, pgvector.NewVector(vectors[docIdx]), doc.Metadata, s.collectionUUID)
 	}
