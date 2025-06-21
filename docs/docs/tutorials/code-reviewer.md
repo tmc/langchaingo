@@ -86,7 +86,7 @@ Focus on the most important issues first.`,
 
     return &CodeReviewer{
         llm: llm,
-        template: template,
+        template: &template,
     }, nil
 }
 
