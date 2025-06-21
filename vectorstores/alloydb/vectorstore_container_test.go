@@ -98,20 +98,15 @@ func createOpenAIEmbedderForContainer(t *testing.T) *embeddings.EmbedderImpl {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
-	var token string
-	if rr.Recording() {
-		token = os.Getenv("OPENAI_API_KEY")
-	} else {
-		token = "fake-api-key-for-testing" //nolint:gosec
-	}
-
-	llm, err := openai.New(
-		openai.WithToken(token),
+	opts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
-	)
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
@@ -206,7 +201,11 @@ func TestContainerIsValidIndex(t *testing.T) {
 
 func TestContainerAddDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
 	vs, cleanUpTableFn := initVectorStore(t)
 	t.Cleanup(func() {
 		if err := cleanUpTableFn(); err != nil {

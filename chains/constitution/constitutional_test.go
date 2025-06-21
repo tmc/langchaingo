@@ -15,7 +15,7 @@ import (
 )
 
 func TestConstitutionCritiqueParsing(t *testing.T) {
-	t.Parallel()
+
 	textOne := ` This text is bad.
 
 	Revision request: Make it better.
@@ -43,8 +43,14 @@ func TestConstitutionalChain(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	model, err := openai.New(openai.WithHTTPClient(rr.Client()))
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	model, err := openai.New(opts...)
 	require.NoError(t, err)
 	chain := *chains.NewLLMChain(model, &prompts.FewShotPrompt{
 		Examples:         []map[string]string{{"question": "What's life?"}},

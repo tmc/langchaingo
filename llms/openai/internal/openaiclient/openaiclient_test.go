@@ -41,9 +41,6 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
 	// Only run tests in parallel when not recording
-	if !rr.Recording() {
-		t.Parallel()
-	}
 
 	apiKey := "test-api-key"
 	if key := os.Getenv("OPENAI_API_KEY"); key != "" && rr.Recording() {
@@ -74,7 +71,6 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 
 func TestClient_CreateChatCompletionStream(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
@@ -114,7 +110,6 @@ func TestClient_CreateChatCompletionStream(t *testing.T) {
 
 func TestClient_CreateEmbedding(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
@@ -143,7 +138,6 @@ func TestClient_CreateEmbedding(t *testing.T) {
 
 func TestClient_FunctionCall(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
@@ -192,7 +186,6 @@ func TestClient_FunctionCall(t *testing.T) {
 
 func TestClient_WithResponseFormat(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 

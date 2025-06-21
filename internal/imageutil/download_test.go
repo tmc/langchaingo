@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 )
 
@@ -27,18 +28,18 @@ func requireHttprrRecording(t *testing.T) *httprr.RecordReplay {
 	return rr
 }
 
-func TestDownloadImageData(t *testing.T) {
+func TestDownloadImageData_Integration(t *testing.T) {
 	t.Parallel()
 
 	// Setup HTTP record/replay
 	rr := requireHttprrRecording(t)
 	defer rr.Close()
 
-	// Replace http.DefaultClient's transport with httprr
-	oldTransport := http.DefaultClient.Transport
-	http.DefaultClient.Transport = rr
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
 	defer func() {
-		http.DefaultClient.Transport = oldTransport
+		httputil.DefaultClient = oldClient
 	}()
 
 	// Test downloading a PNG image
@@ -55,11 +56,11 @@ func TestDownloadImageData_JPEG(t *testing.T) {
 	rr := requireHttprrRecording(t)
 	defer rr.Close()
 
-	// Replace http.DefaultClient's transport with httprr
-	oldTransport := http.DefaultClient.Transport
-	http.DefaultClient.Transport = rr
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
 	defer func() {
-		http.DefaultClient.Transport = oldTransport
+		httputil.DefaultClient = oldClient
 	}()
 
 	// Test downloading a JPEG image
@@ -69,18 +70,18 @@ func TestDownloadImageData_JPEG(t *testing.T) {
 	require.NotEmpty(t, data)
 }
 
-func TestDownloadImageData_InvalidURL(t *testing.T) {
+func TestDownloadImageData_InvalidURL_Integration(t *testing.T) {
 	t.Parallel()
 
 	// Setup HTTP record/replay
 	rr := requireHttprrRecording(t)
 	defer rr.Close()
 
-	// Replace http.DefaultClient's transport with httprr
-	oldTransport := http.DefaultClient.Transport
-	http.DefaultClient.Transport = rr
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
 	defer func() {
-		http.DefaultClient.Transport = oldTransport
+		httputil.DefaultClient = oldClient
 	}()
 
 	// Test with invalid URL
@@ -95,11 +96,11 @@ func TestDownloadImageData_NotFound(t *testing.T) {
 	rr := requireHttprrRecording(t)
 	defer rr.Close()
 
-	// Replace http.DefaultClient's transport with httprr
-	oldTransport := http.DefaultClient.Transport
-	http.DefaultClient.Transport = rr
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
 	defer func() {
-		http.DefaultClient.Transport = oldTransport
+		httputil.DefaultClient = oldClient
 	}()
 
 	// Test with 404 response
@@ -116,11 +117,11 @@ func TestDownloadImageData_InvalidMimeType(t *testing.T) {
 	rr := requireHttprrRecording(t)
 	defer rr.Close()
 
-	// Replace http.DefaultClient's transport with httprr
-	oldTransport := http.DefaultClient.Transport
-	http.DefaultClient.Transport = rr
+	// Replace httputil.DefaultClient with httprr client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
 	defer func() {
-		http.DefaultClient.Transport = oldTransport
+		httputil.DefaultClient = oldClient
 	}()
 
 	// Test with text content (which should return text/plain or text/html)

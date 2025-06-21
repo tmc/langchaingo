@@ -2,12 +2,12 @@ package chains
 
 import (
 	"context"
-	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -16,12 +16,24 @@ import (
 
 func TestLLMChain(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	model, err := openai.New(openai.WithHTTPClient(rr.Client()))
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
+
+	var opts []openai.Option
+	opts = append(opts, openai.WithHTTPClient(rr.Client()))
+
+	// Use test token when replaying
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	model, err := openai.New(opts...)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
@@ -62,12 +74,20 @@ func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 
 func TestLLMChainWithGoogleAI(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	model, err := googleai.New(ctx, googleai.WithHTTPClient(rr.Client()))
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Configure client with httprr - use test credentials when replaying
+	var opts []googleai.Option
+	opts = append(opts, googleai.WithRest(), googleai.WithHTTPClient(rr.Client()))
+
+	if rr.Replaying() {
+		// Use test credentials during replay
+		opts = append(opts, googleai.WithAPIKey("test-api-key"))
+	}
+
+	model, err := googleai.New(ctx, opts...)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
 
@@ -85,7 +105,6 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 		map[string]any{
 			"country": "France",
 		},
-		WithCallback(callbacks.LogHandler{}),
 	)
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Paris"))

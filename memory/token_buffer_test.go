@@ -2,25 +2,48 @@ package memory
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-func TestTokenBufferMemory(t *testing.T) {
-	ctx := context.Background()
-	t.Parallel()
+// newTestOpenAIClient creates an OpenAI client with httprr support for testing.
+func newTestOpenAIClient(t *testing.T) *openai.LLM {
+	t.Helper()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
 	}
 
-	llm, err := openai.New()
+	openaiOpts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		openaiOpts = append(openaiOpts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(openaiOpts...)
 	require.NoError(t, err)
+	return llm
+}
+
+func TestTokenBufferMemory(t *testing.T) {
+	ctx := context.Background()
+
+	llm := newTestOpenAIClient(t)
 	m := NewConversationTokenBuffer(llm, 2000)
 
 	result1, err := m.LoadMemoryVariables(ctx, map[string]any{})
@@ -40,14 +63,8 @@ func TestTokenBufferMemory(t *testing.T) {
 
 func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := newTestOpenAIClient(t)
 	m := NewConversationTokenBuffer(llm, 2000, WithReturnMessages(true))
 
 	expected1 := map[string]any{"history": []llms.ChatMessage{}}
@@ -76,14 +93,8 @@ func TestTokenBufferMemoryReturnMessage(t *testing.T) {
 
 func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := newTestOpenAIClient(t)
 
 	m := NewConversationTokenBuffer(llm, 2000, WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]llms.ChatMessage{

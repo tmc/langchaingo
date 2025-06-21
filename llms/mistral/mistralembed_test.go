@@ -2,11 +2,13 @@ package mistral
 
 import (
 	"context"
-	"os"
+	"math"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
 )
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
@@ -37,6 +39,31 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 			input:    []float64{0.0, 0.0, 0.0},
 			expected: []float32{0.0, 0.0, 0.0},
 		},
+		{
+			name:     "negative values",
+			input:    []float64{-1.5, -2.7, -3.9},
+			expected: []float32{-1.5, -2.7, -3.9},
+		},
+		{
+			name:     "large values",
+			input:    []float64{1e6, 1e7, 1e8},
+			expected: []float32{1e6, 1e7, 1e8},
+		},
+		{
+			name:     "very small values",
+			input:    []float64{1e-6, 1e-7, 1e-8},
+			expected: []float32{1e-6, 1e-7, 1e-8},
+		},
+		{
+			name:     "special values",
+			input:    []float64{math.Inf(1), math.Inf(-1), 0},
+			expected: []float32{float32(math.Inf(1)), float32(math.Inf(-1)), 0},
+		},
+		{
+			name:     "nil input handling",
+			input:    nil,
+			expected: []float32{},
+		},
 	}
 
 	for _, tt := range tests {
@@ -46,24 +73,39 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 
 			require.Equal(t, len(tt.expected), len(output), "length mismatch")
 			for i := range output {
-				require.Equal(t, tt.expected[i], output[i], "at index %d", i)
+				if math.IsInf(float64(tt.expected[i]), 0) {
+					require.True(t, math.IsInf(float64(output[i]), int(math.Copysign(1, float64(tt.expected[i])))),
+						"at index %d: expected %v, got %v", i, tt.expected[i], output[i])
+				} else {
+					require.Equal(t, tt.expected[i], output[i], "at index %d", i)
+				}
 			}
 		})
 	}
 }
 
+func TestErrEmptyEmbeddings(t *testing.T) {
+	// Test the error constant
+	require.NotNil(t, ErrEmptyEmbeddings)
+	require.Equal(t, "empty embeddings", ErrEmptyEmbeddings.Error())
+}
+
 func TestMistralEmbed(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MISTRAL_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
-	t.Parallel()
-	envVar := "MISTRAL_API_KEY"
 
-	// Get the value of the environment variable
-	value := os.Getenv(envVar)
-
-	// Check if it is set (non-empty)
-	if value == "" {
-		t.Skipf("Environment variable %s is not set, so skipping the test", envVar)
-		return
+	// Skip test during replay mode since Mistral SDK doesn't support HTTP client injection
+	if !rr.Recording() {
+		t.Skip("Mistral SDK doesn't support HTTP client injection - skipping replay test")
 	}
 
 	model, err := New()

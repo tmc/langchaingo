@@ -134,12 +134,10 @@ func TestClient_CreateCompletionStream(t *testing.T) {
 	assert.NotEmpty(t, chunks)
 }
 
-func TestClient_CreateChat(t *testing.T) {
-	ctx := context.Background()
-	t.Parallel()
-
+func newErnieTestClient(t *testing.T) *Client {
+	t.Helper()
 	rr := requireErnieCredentialsOrHTTPRR(t)
-	defer rr.Close()
+	t.Cleanup(func() { rr.Close() })
 
 	// Scrub access token from recordings
 	rr.ScrubReq(func(req *http.Request) error {
@@ -150,6 +148,7 @@ func TestClient_CreateChat(t *testing.T) {
 		}
 		return nil
 	})
+
 	apiKey := os.Getenv("ERNIE_API_KEY")
 	if apiKey == "" {
 		apiKey = "test-api-key"
@@ -164,6 +163,14 @@ func TestClient_CreateChat(t *testing.T) {
 		WithHTTPClient(rr.Client()),
 	)
 	require.NoError(t, err)
+	return client
+}
+
+func TestClient_CreateChat(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	client := newErnieTestClient(t)
 
 	req := &ChatRequest{
 		Messages: []*ChatMessage{
@@ -185,32 +192,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
 
-	rr := requireErnieCredentialsOrHTTPRR(t)
-	defer rr.Close()
-
-	// Scrub access token from recordings
-	rr.ScrubReq(func(req *http.Request) error {
-		q := req.URL.Query()
-		if q.Get("access_token") != "" {
-			q.Set("access_token", "test-access-token")
-			req.URL.RawQuery = q.Encode()
-		}
-		return nil
-	})
-	apiKey := os.Getenv("ERNIE_API_KEY")
-	if apiKey == "" {
-		apiKey = "test-api-key"
-	}
-	secretKey := os.Getenv("ERNIE_SECRET_KEY")
-	if secretKey == "" {
-		secretKey = "test-secret-key"
-	}
-
-	client, err := New(
-		WithAKSK(apiKey, secretKey),
-		WithHTTPClient(rr.Client()),
-	)
-	require.NoError(t, err)
+	client := newErnieTestClient(t)
 
 	texts := []string{"你好世界", "今天天气怎么样"}
 	resp, err := client.CreateEmbedding(ctx, texts)

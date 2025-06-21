@@ -39,7 +39,6 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
@@ -56,7 +55,6 @@ func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.Embedder
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 	llm, err := openai.New(
 		openai.WithHTTPClient(rr.Client()),
 	)
@@ -72,7 +70,12 @@ func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.Embedder
 }
 
 func TestChromaGoStoreRest(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 	e := createOpenAIEmbedder(t)
@@ -106,7 +109,12 @@ func TestChromaGoStoreRest(t *testing.T) {
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 	e := createOpenAIEmbedder(t)
@@ -152,7 +160,12 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 	e := createOpenAIEmbedder(t)
@@ -193,7 +206,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 }
 
 func TestChromaAsRetriever(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
@@ -232,7 +250,12 @@ func TestChromaAsRetriever(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
@@ -279,7 +302,12 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
@@ -351,7 +379,12 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
@@ -427,7 +460,12 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
@@ -499,7 +537,12 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 

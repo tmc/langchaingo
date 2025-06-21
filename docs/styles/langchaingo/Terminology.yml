@@ -1,0 +1,13 @@
+extends: substitution
+message: "Use '%s' instead of '%s' for consistency"
+level: warning
+ignorecase: true
+swap:
+  'click here': 'descriptive link text'
+  'will return': 'returns'
+  'should be configured': 'configure'
+  'the client should be': 'configure the client'
+  'Title Case': 'sentence case'
+  'how-to': 'how-to guide'
+  'howto': 'how-to guide'
+

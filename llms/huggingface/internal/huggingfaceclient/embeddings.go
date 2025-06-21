@@ -51,7 +51,7 @@ func (c *Client) createEmbedding(ctx context.Context, model string, task string,
 		if len(body) > 0 {
 			msg = fmt.Sprintf("%s, body: %s", msg, string(body))
 		}
-		return nil, fmt.Errorf("%s: %s", msg, "unable to create embeddings") // nolint:goerr113
+		return nil, fmt.Errorf("%s: %s", msg, "unable to create embeddings")
 	}
 
 	var response [][]float32

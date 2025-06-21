@@ -1,0 +1,185 @@
+httprr trace v1
+1017 1472
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 597
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What is 15 * 7?"}], "role":"user"}], "tools":[{"functionDeclarations":[{"name":"calculate", "description":"Perform a calculation", "parameters":{"type":6, "properties":{"expression":{"type":1, "description":"Mathematical expression to evaluate"}}, "required":["expression"]}}]}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 1093
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 16 Jun 2025 13:08:25 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=500
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "calculate",
+              "args": {
+                "expression": "15 * 7"
+              }
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ],
+      "avgLogprobs": -0.00011299893126956054
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 21,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 28,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 21
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 7
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "SBdQaIm0KIiugLUP2Pbb4A0"
+}
+1223 1743
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 797
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What is 15 * 7?"}], "role":"user"}, {"parts":[{"functionCall":{"name":"calculate", "args":{"expression":"15 * 7"}}}], "role":"model"}, {"parts":[{"functionResponse":{"name":"calculate", "response":{"response":"105"}}}], "role":"user"}], "tools":[{"functionDeclarations":[{"name":"calculate", "description":"Perform a calculation", "parameters":{"type":6, "properties":{"expression":{"type":1, "description":"Mathematical expression to evaluate"}}, "required":["expression"]}}]}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 1364
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 16 Jun 2025 13:08:26 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=380
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+[{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The"
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 78,
+    "totalTokenCount": 78,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 78
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "ShdQaKHcL5uTgLUPkueNoQ4"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " answer is 105.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 33,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 42,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 33
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "ShdQaKHcL5uTgLUPkueNoQ4"
+}
+]

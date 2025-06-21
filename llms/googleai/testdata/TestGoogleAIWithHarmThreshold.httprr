@@ -1,0 +1,77 @@
+httprr trace v1
+788 3085
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 368
+Content-Type: application/json
+x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"Tell me about safety features"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":4}, {"category":7, "threshold":4}, {"category":8, "threshold":4}, {"category":9, "threshold":4}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+Content-Length: 2705
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 16 Jun 2025 13:08:23 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=3436
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Okay, let's talk about safety features! To give you the most helpful information, I need a little more direction.  Safety features are found in many different contexts.  Could you tell me what you're interested in?  For example, are you interested in:\n\n*   **Cars?** (e.g., airbags, ABS, lane departure warning, automatic emergency braking)\n*   **Home?** (e.g., smoke detectors, carbon monoxide detectors, security systems, fire extinguishers)\n*   **Workplace?** (e.g., machine guards, safety training, personal protective equipment)\n*   **Software/Online?** (e.g., two-factor authentication, encryption, firewalls, privacy settings)\n*   **Toys?** (e.g., non-toxic materials, size restrictions to prevent choking, rounded edges)\n*   **Something else entirely?**\n\nOnce you tell me the context, I can provide a much more detailed and relevant answer.\n\nIn the meantime, here are some general points about safety features:\n\n*   **Purpose:** The primary goal of safety features is to reduce the risk of harm, injury, or damage. They can help prevent accidents from happening in the first place, or minimize the severity of the consequences if an accident does occur.\n*   **Types:** Safety features can be active (requiring user intervention or automatic activation) or passive (always in effect).\n*   **Importance:** Understanding and utilizing safety features is crucial for protecting yourself and others.\n*   **Limitations:** It's important to remember that safety features are not foolproof. They are designed to reduce risk, but they cannot eliminate it entirely.  It's still important to exercise caution and follow safety guidelines.\n\nI look forward to hearing from you so I can give you a more specific and helpful response!\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ],
+      "avgLogprobs": -0.18729964974000282
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 5,
+    "candidatesTokenCount": 388,
+    "totalTokenCount": 393,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 5
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 388
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "RBdQaKfJAf6ShMIPm7P8iAY"
+}
