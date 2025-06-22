@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -34,11 +35,10 @@ func (m MockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, err
 
 func TestStore_AddDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	endpoint := "http://localhost:6333"
@@ -55,10 +55,10 @@ func TestStore_AddDocuments(t *testing.T) {
 	endpointURL, err := url.Parse(endpoint)
 	require.NoError(t, err)
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
+	// Replace httputil.DefaultClient with our recording client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	store, err := New(
 		WithURL(*endpointURL),
@@ -94,11 +94,10 @@ func TestStore_AddDocuments(t *testing.T) {
 
 func TestStore_SimilaritySearch(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	endpoint := "http://localhost:6333"
@@ -115,10 +114,10 @@ func TestStore_SimilaritySearch(t *testing.T) {
 	endpointURL, err := url.Parse(endpoint)
 	require.NoError(t, err)
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
+	// Replace httputil.DefaultClient with our recording client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	store, err := New(
 		WithURL(*endpointURL),
@@ -138,11 +137,10 @@ func TestStore_SimilaritySearch(t *testing.T) {
 
 func TestStore_SimilaritySearchWithScore(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	endpoint := "http://localhost:6333"
@@ -159,10 +157,10 @@ func TestStore_SimilaritySearchWithScore(t *testing.T) {
 	endpointURL, err := url.Parse(endpoint)
 	require.NoError(t, err)
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
+	// Replace httputil.DefaultClient with our recording client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	store, err := New(
 		WithURL(*endpointURL),
@@ -184,11 +182,10 @@ func TestStore_SimilaritySearchWithScore(t *testing.T) {
 
 func TestDoRequest(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "QDRANT_URL")
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 
 	endpoint := "http://localhost:6333"
@@ -201,10 +198,10 @@ func TestDoRequest(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Replace http.DefaultClient with our recording client
-	oldClient := http.DefaultClient
-	http.DefaultClient = rr.Client()
-	defer func() { http.DefaultClient = oldClient }()
+	// Replace httputil.DefaultClient with our recording client
+	oldClient := httputil.DefaultClient
+	httputil.DefaultClient = rr.Client()
+	defer func() { httputil.DefaultClient = oldClient }()
 
 	testURL, err := url.Parse(endpoint + "/collections")
 	require.NoError(t, err)

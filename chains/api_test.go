@@ -55,7 +55,18 @@ func TestAPI(t *testing.T) {
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	llm, err := openai.New(opts...)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}

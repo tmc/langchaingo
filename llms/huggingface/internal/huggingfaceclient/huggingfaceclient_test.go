@@ -16,7 +16,6 @@ const testURL = "https://api-inference.huggingface.co"
 
 func TestClient_RunInference(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
 	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
@@ -63,7 +62,6 @@ func TestClient_RunInference(t *testing.T) {
 
 func TestClient_RunInferenceText2Text(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
 	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
@@ -111,7 +109,6 @@ func TestClient_RunInferenceText2Text(t *testing.T) {
 func TestClient_CreateEmbedding(t *testing.T) {
 	t.Skip("temporary skip")
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
 	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
@@ -151,7 +148,6 @@ func TestClient_CreateEmbedding(t *testing.T) {
 }
 
 func TestClient_InvalidToken(t *testing.T) {
-	t.Parallel()
 
 	_, err := New("", "model", testURL)
 	assert.ErrorIs(t, err, ErrInvalidToken)
@@ -159,7 +155,6 @@ func TestClient_InvalidToken(t *testing.T) {
 
 func TestClient_RunInferenceWithProvider(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Check both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
 	if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {

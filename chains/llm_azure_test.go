@@ -15,11 +15,13 @@ import (
 
 func TestLLMChainAzure(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
 	// Azure OpenAI URL is used as OPENAI_BASE_URL
 	if openaiBase := os.Getenv("OPENAI_BASE_URL"); openaiBase == "" {
 		t.Skip("OPENAI_BASE_URL not set")

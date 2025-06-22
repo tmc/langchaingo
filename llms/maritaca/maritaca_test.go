@@ -18,7 +18,6 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Configure with httprr HTTP client
 	opts = append([]Option{WithHTTPClient(rr.Client()), WithModel("sabia-2-medium")}, opts...)

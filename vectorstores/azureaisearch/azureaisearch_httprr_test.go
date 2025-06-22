@@ -31,7 +31,6 @@ func (m mockEmbedder) EmbedQuery(_ context.Context, text string) ([]float32, err
 
 func TestStoreHTTPRR_CreateIndex(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
@@ -47,14 +46,11 @@ func TestStoreHTTPRR_CreateIndex(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Set endpoint via environment variable
-	os.Setenv("AZURE_AI_SEARCH_ENDPOINT", endpoint)
-	defer os.Unsetenv("AZURE_AI_SEARCH_ENDPOINT")
-
 	store, err := New(
 		WithAPIKey(apiKey),
 		WithEmbedder(&mockEmbedder{}),
 		WithHTTPClient(rr.Client()),
+		WithEndpoint(endpoint),
 	)
 	require.NoError(t, err)
 
@@ -67,7 +63,6 @@ func TestStoreHTTPRR_CreateIndex(t *testing.T) {
 
 func TestStoreHTTPRR_AddDocuments(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
@@ -83,14 +78,11 @@ func TestStoreHTTPRR_AddDocuments(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Set endpoint via environment variable
-	os.Setenv("AZURE_AI_SEARCH_ENDPOINT", endpoint)
-	defer os.Unsetenv("AZURE_AI_SEARCH_ENDPOINT")
-
 	store, err := New(
 		WithAPIKey(apiKey),
 		WithEmbedder(&mockEmbedder{}),
 		WithHTTPClient(rr.Client()),
+		WithEndpoint(endpoint),
 	)
 	require.NoError(t, err)
 
@@ -120,7 +112,6 @@ func TestStoreHTTPRR_AddDocuments(t *testing.T) {
 
 func TestStoreHTTPRR_SimilaritySearch(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
@@ -136,14 +127,11 @@ func TestStoreHTTPRR_SimilaritySearch(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Set endpoint via environment variable
-	os.Setenv("AZURE_AI_SEARCH_ENDPOINT", endpoint)
-	defer os.Unsetenv("AZURE_AI_SEARCH_ENDPOINT")
-
 	store, err := New(
 		WithAPIKey(apiKey),
 		WithEmbedder(&mockEmbedder{}),
 		WithHTTPClient(rr.Client()),
+		WithEndpoint(endpoint),
 	)
 	require.NoError(t, err)
 
@@ -157,7 +145,6 @@ func TestStoreHTTPRR_SimilaritySearch(t *testing.T) {
 
 func TestStoreHTTPRR_DeleteIndex(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
@@ -173,14 +160,11 @@ func TestStoreHTTPRR_DeleteIndex(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Set endpoint via environment variable
-	os.Setenv("AZURE_AI_SEARCH_ENDPOINT", endpoint)
-	defer os.Unsetenv("AZURE_AI_SEARCH_ENDPOINT")
-
 	store, err := New(
 		WithAPIKey(apiKey),
 		WithEmbedder(&mockEmbedder{}),
 		WithHTTPClient(rr.Client()),
+		WithEndpoint(endpoint),
 	)
 	require.NoError(t, err)
 
@@ -192,7 +176,6 @@ func TestStoreHTTPRR_DeleteIndex(t *testing.T) {
 
 func TestStoreHTTPRR_ListIndexes(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AZURE_AI_SEARCH_ENDPOINT", "AZURE_AI_SEARCH_API_KEY")
 
@@ -208,14 +191,11 @@ func TestStoreHTTPRR_ListIndexes(t *testing.T) {
 		apiKey = envKey
 	}
 
-	// Set endpoint via environment variable
-	os.Setenv("AZURE_AI_SEARCH_ENDPOINT", endpoint)
-	defer os.Unsetenv("AZURE_AI_SEARCH_ENDPOINT")
-
 	store, err := New(
 		WithAPIKey(apiKey),
 		WithEmbedder(&mockEmbedder{}),
 		WithHTTPClient(rr.Client()),
+		WithEndpoint(endpoint),
 	)
 	require.NoError(t, err)
 

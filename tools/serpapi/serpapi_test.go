@@ -11,14 +11,12 @@ import (
 )
 
 func TestSerpAPITool(t *testing.T) {
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
-	// Scrub the API key from requests
+	// Scrub the API key from requests to use test key in recordings
 	rr.ScrubReq(func(req *http.Request) error {
 		if req.URL != nil {
 			q := req.URL.Query()
@@ -28,19 +26,15 @@ func TestSerpAPITool(t *testing.T) {
 		return nil
 	})
 
-	// Create tool - use dummy key for replay mode, real key for recording
-	var apiKey string
-	if rr.Recording() {
-		apiKey = os.Getenv("SERPAPI_API_KEY")
-	} else {
-		apiKey = "test-api-key"
+	var opts []Option
+	opts = append(opts, WithHTTPClient(rr.Client()))
+
+	// Use test key when replaying, environment key when recording
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	// Create tool with HTTP client
-	tool, err := New(
-		WithAPIKey(apiKey),
-		WithHTTPClient(rr.Client()),
-	)
+	tool, err := New(opts...)
 	if err != nil {
 		t.Fatalf("Failed to create tool: %v", err)
 	}
@@ -64,7 +58,6 @@ func TestSerpAPITool(t *testing.T) {
 }
 
 func TestSerpAPIToolError(t *testing.T) {
-	t.Parallel()
 
 	// Save original environment variable
 	originalKey := os.Getenv("SERPAPI_API_KEY")

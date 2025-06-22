@@ -83,19 +83,24 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	// httprr handles credentials automatically
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
+	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
+	if rr.Replaying() {
+		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
+	}
+	searchTool, err := serpapi.New(serpapiOpts...)
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -123,19 +128,24 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "SERPAPI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Configure OpenAI client with httprr
 	opts := []openai.Option{
 		openai.WithModel("gpt-4"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-	// httprr handles credentials automatically
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
+	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
+	if rr.Replaying() {
+		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
+	}
+	searchTool, err := serpapi.New(serpapiOpts...)
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}

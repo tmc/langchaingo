@@ -36,15 +36,29 @@ func createOpenAILLMForTest(t *testing.T) *openai.LLM {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+
+	// Only run tests in parallel when not recording
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	return llm
 }
 
 func TestStuffSummarization(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
 
@@ -61,7 +75,6 @@ func TestStuffSummarization(t *testing.T) {
 
 func TestRefineSummarization(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
 
@@ -78,7 +91,6 @@ func TestRefineSummarization(t *testing.T) {
 
 func TestMapReduceSummarization(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	llm := createOpenAILLMForTest(t)
 

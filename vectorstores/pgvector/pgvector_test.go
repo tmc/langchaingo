@@ -18,6 +18,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms/googleai"
@@ -29,25 +30,17 @@ import (
 
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
-
-	// Setup httprr for OpenAI API calls
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
-	t.Cleanup(func() { rr.Close() })
 
-	// Configure OpenAI client based on recording vs replay mode
 	opts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-
-	// Only add fake token when NOT recording (i.e., during replay)
 	if !rr.Recording() {
-		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
-	// When recording, openai.New() will read OPENAI_API_KEY from environment
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
@@ -60,30 +53,32 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 
 func createOpenAILLMAndEmbedder(t *testing.T) (llm *openai.LLM, e *embeddings.EmbedderImpl) {
 	t.Helper()
-
-	// Setup httprr for OpenAI API calls
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
-	t.Cleanup(func() { rr.Close() })
 
-	// Configure OpenAI client based on recording vs replay mode
 	opts := []openai.Option{
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
 		openai.WithHTTPClient(rr.Client()),
 	}
-
-	// Only add fake token when NOT recording (i.e., during replay)
 	if !rr.Recording() {
-		opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
+		opts = append(opts, openai.WithToken("test-api-key"))
 	}
-	// When recording, openai.New() will read OPENAI_API_KEY from environment
 
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	e, err = embeddings.NewEmbedder(llm)
+	embeddingOpts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		embeddingOpts = append(embeddingOpts, openai.WithToken("test-api-key"))
+	}
+
+	embeddingLLM, err := openai.New(embeddingOpts...)
+	require.NoError(t, err)
+
+	e, err = embeddings.NewEmbedder(embeddingLLM)
 	require.NoError(t, err)
 
 	return llm, e
@@ -157,7 +152,16 @@ func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, p
 }
 
 func TestPgvectorStoreRest(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -193,7 +197,16 @@ func TestPgvectorStoreRest(t *testing.T) {
 }
 
 func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -248,7 +261,16 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestPgvectorStoreSimilarityScore(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -288,7 +310,16 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -342,17 +373,36 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 // note, we can also use same llm to show this test, but need imply
 // openai embedding [dimensions](https://platform.openai.com/docs/api-reference/embeddings/create#embeddings-create-dimensions) args.
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	// Scrub Google AI API key for security in recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("key") != "" {
+			q.Set("key", "test-api-key")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 	pgvectorURL := preCheckEnvSetting(t)
-	genaiKey := os.Getenv("GENAI_API_KEY")
-	if genaiKey == "" {
-		t.Skip("GENAI_API_KEY not set")
-	}
 	collectionName := makeNewCollectionName()
 
 	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
-	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
+	googleLLM, err := googleai.New(ctx,
+		googleai.WithRest(),
+		googleai.WithAPIKey("test-api-key"),
+		googleai.WithHTTPClient(rr.Client()),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(googleLLM)
 	require.NoError(t, err)
@@ -414,7 +464,16 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 }
 
 func TestPgvectorAsRetriever(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -457,7 +516,16 @@ func TestPgvectorAsRetriever(t *testing.T) {
 }
 
 func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -505,7 +573,16 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 }
 
 func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -581,7 +658,16 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -647,7 +733,16 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 }
 
 func TestDeduplicater(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -689,7 +784,16 @@ func TestDeduplicater(t *testing.T) {
 }
 
 func TestWithAllOptions(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
 
@@ -730,6 +834,7 @@ func TestWithAllOptions(t *testing.T) {
 	require.Equal(t, "tokyo", docs[0].PageContent)
 	require.Equal(t, "japan", docs[0].Metadata["country"])
 
+	e = createOpenAIEmbedder(t)
 	store, err = pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),

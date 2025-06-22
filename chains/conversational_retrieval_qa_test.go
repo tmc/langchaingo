@@ -60,10 +60,17 @@ func (t testConversationalRetriever) GetRelevantDocuments(_ context.Context, que
 var _ schema.Retriever = testConversationalRetriever{}
 
 func createOpenAILLMForConversationalRetrievalQA(t *testing.T) *openai.LLM {
+	t.Helper()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	llm, err := openai.New(openai.WithHTTPClient(rr.Client()))
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	return llm
 }

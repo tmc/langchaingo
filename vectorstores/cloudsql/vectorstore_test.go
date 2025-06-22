@@ -8,9 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/util/cloudsqlutil"
 	"github.com/tmc/langchaingo/vectorstores/cloudsql"
@@ -120,23 +118,8 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore,
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Setup httprr for OpenAI embeddings
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
-
-	// Initialize OpenAI LLM with httprr
-	llm, err := openai.New(
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithHTTPClient(rr.Client()),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Initialize OpenAI embedder with httprr
+	e := createOpenAIEmbedder(t)
 	vs, err := cloudsql.NewVectorStore(pgEngine, e, envVariables.Table)
 	if err != nil {
 		t.Fatal(err)
@@ -196,7 +179,13 @@ func TestIsValidIndex(t *testing.T) {
 }
 
 func TestAddDocuments(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)

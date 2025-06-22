@@ -12,14 +12,18 @@ import (
 )
 
 func TestHuggingfaceEmbeddings(t *testing.T) {
-	t.Parallel()
+
 	t.Skip("temporary skip")
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
+	}
 
 	// Create HuggingFace client with httprr HTTP client
 	hfClient, err := huggingface.New(huggingface.WithHTTPClient(rr.Client()))

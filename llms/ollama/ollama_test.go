@@ -20,7 +20,6 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 
 	// Set up httprr for recording/replaying HTTP interactions
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	// Default model for testing
 	ollamaModel := "gemma3:1b"
@@ -69,7 +68,7 @@ func newEmbeddingTestClient(t *testing.T, opts ...Option) *LLM {
 
 func TestGenerateContent(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -92,7 +91,7 @@ func TestGenerateContent(t *testing.T) {
 
 func TestWithFormat(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+
 	llm := newTestClient(t, WithFormat("json"))
 
 	parts := []llms.ContentPart{
@@ -121,7 +120,7 @@ func TestWithFormat(t *testing.T) {
 
 func TestWithStreaming(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -150,7 +149,7 @@ func TestWithStreaming(t *testing.T) {
 
 func TestWithKeepAlive(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+
 	llm := newTestClient(t, WithKeepAlive("1m"))
 
 	parts := []llms.ContentPart{
@@ -176,7 +175,6 @@ func TestWithKeepAlive(t *testing.T) {
 
 func TestWithPullModel(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// This test verifies the WithPullModel option works correctly.
 	// It uses a model that's likely already available locally (gemma3:1b)
@@ -206,7 +204,6 @@ func TestWithPullModel(t *testing.T) {
 
 func TestCreateEmbedding(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	// Use the embedding-specific test client
 	llm := newEmbeddingTestClient(t)
@@ -239,7 +236,7 @@ func TestCreateEmbedding(t *testing.T) {
 
 func TestWithPullTimeout(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
+
 	if testing.Short() {
 		t.Skip("Skipping pull timeout test in short mode")
 	}
@@ -247,7 +244,7 @@ func TestWithPullTimeout(t *testing.T) {
 	// Check if we're recording - timeout tests don't work with replay
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
-	if !rr.Recording() {
+	if rr.Replaying() {
 		t.Skip("Skipping pull timeout test when not recording (timeout behavior cannot be replayed)")
 	}
 

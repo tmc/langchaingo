@@ -13,7 +13,6 @@ import (
 
 func TestClient_Generate(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_API_KEY")
 
@@ -59,7 +58,6 @@ func TestClient_Generate(t *testing.T) {
 
 func TestClient_GenerateStream(t *testing.T) {
 	ctx := context.Background()
-	t.Parallel()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_API_KEY")
 

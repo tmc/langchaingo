@@ -30,7 +30,7 @@ func DefaultOptions() Options {
 	return Options{
 		CloudProject:          "",
 		CloudLocation:         "",
-		DefaultModel:          "gemini-pro",
+		DefaultModel:          "gemini-2.0-flash",
 		DefaultEmbeddingModel: "embedding-001",
 		DefaultCandidateCount: 1,
 		DefaultMaxTokens:      2048,
@@ -209,8 +209,7 @@ func hasAuthOptions(opts []option.ClientOption) bool {
 		case "option.withAPIKey":
 			return v.String() != ""
 
-		case "option.withHTTPClient",
-			"option.withTokenSource",
+		case "option.withTokenSource",
 			"option.withCredentialsFile",
 			"option.withCredentialsJSON":
 			return true

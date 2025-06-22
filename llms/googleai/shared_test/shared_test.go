@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
@@ -35,15 +36,38 @@ import (
 func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GENAI_API_KEY")
+	// Always check for recordings first - prefer recordings over environment variables
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+	}
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
+	// Temporarily unset Google API key environment variable to prevent bypass
+	oldKey := os.Getenv("GOOGLE_API_KEY")
+	os.Unsetenv("GOOGLE_API_KEY")
+	t.Cleanup(func() {
+		if oldKey != "" {
+			os.Setenv("GOOGLE_API_KEY", oldKey)
+		}
+	})
 
-	// Configure client with httprr - httprr handles credentials automatically
-	// Prepend default options
-	defaultOpts := []googleai.Option{googleai.WithRest(), googleai.WithHTTPClient(rr.Client())}
-	opts = append(defaultOpts, opts...)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Scrub API key for security in recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("key") != "" {
+			q.Set("key", "test-api-key")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	// Configure client with httprr and test credentials
+	opts = append(opts,
+		googleai.WithRest(),
+		googleai.WithAPIKey("test-api-key"),
+		googleai.WithHTTPClient(rr.Client()),
+	)
 
 	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
@@ -53,18 +77,41 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "VERTEX_PROJECT")
+	// Always check for recordings first - prefer recordings over environment variables
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+	}
 
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
+	// Temporarily unset Google API key environment variable to prevent bypass
+	oldKey := os.Getenv("GOOGLE_API_KEY")
+	os.Unsetenv("GOOGLE_API_KEY")
+	t.Cleanup(func() {
+		if oldKey != "" {
+			os.Setenv("GOOGLE_API_KEY", oldKey)
+		}
+	})
 
-	// Configure client with httprr - httprr handles credentials automatically
-	// Prepend the default options to the beginning of the slice.
-	opts = append([]googleai.Option{googleai.WithHTTPClient(rr.Client())}, opts...)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Configure client with httprr and test credentials
+	opts = append(opts,
+		googleai.WithHTTPClient(rr.Client()),
+		googleai.WithCloudProject("test-project"),
+		googleai.WithCloudLocation("us-central1"),
+	)
 
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
+}
+
+// hasExistingRecording checks if a httprr recording exists for this test
+func hasExistingRecording(t *testing.T) bool {
+	testName := strings.ReplaceAll(t.Name(), "/", "_")
+	testName = strings.ReplaceAll(testName, " ", "_")
+	recordingPath := filepath.Join("testdata", testName+".httprr")
+	_, err := os.Stat(recordingPath)
+	return err == nil
 }
 
 // funcName obtains the name of the given function value, without a package
