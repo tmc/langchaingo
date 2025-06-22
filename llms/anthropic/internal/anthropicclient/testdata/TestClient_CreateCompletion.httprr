@@ -1,0 +1,23 @@
+httprr trace v1
+342 595
+POST https://api.anthropic.com/v1/complete HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 121
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-2.1","prompt":"\n\nHuman: Hello, how are you?\n\nAssistant:","temperature":0,"max_tokens_to_sample":100}HTTP/2.0 200 OK
+Content-Length: 223
+Anthropic-Organization-Id: 2277c511-5523-4a62-83bd-b847b0c4b121
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 03 Jun 2025 08:46:54 GMT
+Request-Id: req_011CPkzkNH278kxq3bPmrZ7A
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Via: 1.1 google
+X-Robots-Tag: none
+
+{"type":"completion","id":"compl_01NE6nLNjr9E3uWW1Z3DZEbh","completion":" I'm doing well, thanks for asking!","stop_reason":"stop_sequence","model":"claude-2.1","stop":"\n\nHuman:","log_id":"compl_01NE6nLNjr9E3uWW1Z3DZEbh"}

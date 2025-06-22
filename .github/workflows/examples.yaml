@@ -1,0 +1,48 @@
+name: Build Examples
+on:
+  push: {}
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  discover-examples:
+    name: Discover Examples
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          # Find all example directories and create a JSON array
+          examples=$(find ./examples -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix={\"example\":$examples}" >> $GITHUB_OUTPUT
+          echo "Found examples: $examples"
+
+  build-example:
+    name: Build ${{ matrix.example }}
+    needs: discover-examples
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-examples.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          check-latest: false
+          cache-dependency-path: |
+            go.sum
+            examples/${{ matrix.example }}/go.sum
+      - name: Build ${{ matrix.example }}
+        run: |
+          cd examples/${{ matrix.example }}
+          echo "Building ${{ matrix.example }}"
+          go mod tidy
+          go build -o /dev/null .

@@ -1,0 +1,7 @@
+# Mark httprr recording files as generated
+*.httprr linguist-generated=true
+*.httprr.gz linguist-generated=true
+
+# Preserve exact line endings in httprr files (HTTP protocol requirement)
+*.httprr -text
+*.httprr.gz binary

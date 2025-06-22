@@ -1,0 +1,20 @@
+extends: existence
+message: "Don't use emojis in documentation"
+level: error
+tokens:
+  - '😀'
+  - '😃'
+  - '😄'
+  - '😁'
+  - '🎉'
+  - '🚀'
+  - '💡'
+  - '⚡'
+  - '🔥'
+  - '✨'
+  - '👍'
+  - '👎'
+  - '❤️'
+  - '💯'
+  - '🎯'
+

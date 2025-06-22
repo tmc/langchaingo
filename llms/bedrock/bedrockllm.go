@@ -22,7 +22,12 @@ type LLM struct {
 
 // New creates a new Bedrock LLM implementation.
 func New(opts ...Option) (*LLM, error) {
-	o, c, err := newClient(opts...)
+	return NewWithContext(context.Background(), opts...)
+}
+
+// NewWithContext creates a new Bedrock LLM implementation with context.
+func NewWithContext(ctx context.Context, opts ...Option) (*LLM, error) {
+	o, c, err := newClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +38,7 @@ func New(opts ...Option) (*LLM, error) {
 	}, nil
 }
 
-func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
+func newClient(ctx context.Context, opts ...Option) (*options, *bedrockclient.Client, error) {
 	options := &options{
 		modelID: defaultModel,
 	}
@@ -43,7 +48,7 @@ func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
 	}
 
 	if options.client == nil {
-		cfg, err := config.LoadDefaultConfig(context.Background())
+		cfg, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
 			return options, nil, err
 		}

@@ -12,8 +12,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 	"strings"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const maxBufferSize = 512 * 1000
@@ -76,11 +77,7 @@ func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
 	}
 
 	if ohttp == nil {
-		ohttp = &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}
+		ohttp = httputil.DefaultClient
 	}
 
 	client := Client{
@@ -111,8 +108,6 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	respObj, err := c.httpClient.Do(request)
 	if err != nil {
@@ -181,7 +176,6 @@ func (c *Client) sendHTTPRequest(ctx context.Context, method, path string, buf *
 func setRequestHeaders(request *http.Request) {
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/x-ndjson")
-	request.Header.Set("User-Agent", fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 }
 
 // processResponse handles the HTTP response, parsing and forwarding JSON data.

@@ -1,10 +1,8 @@
 module github.com/tmc/langchaingo/examples/googleai-completion-example
 
-go 1.22.0
+go 1.24.3
 
-toolchain go1.22.1
-
-require github.com/tmc/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13
 
 require (
 	cloud.google.com/go v0.114.0 // indirect

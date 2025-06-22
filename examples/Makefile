@@ -11,3 +11,7 @@ install-all: ## Add go work files to all examples
 .PHONY: tidy-all
 tidy-all: ## Tidy all go.mod files
 	@find . -name go.mod -execdir go mod tidy \;
+
+.PHONY: fmt-all
+fmt-all: ## Run go fmt on all examples
+	@find . -name go.mod -execdir go fmt \;

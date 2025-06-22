@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/chains"
@@ -71,7 +70,6 @@ func (a *OneShotZeroAgent) Plan(
 	}
 
 	fullInputs["agent_scratchpad"] = constructMrklScratchPad(intermediateSteps)
-	fullInputs["today"] = time.Now().Format("January 02, 2006")
 
 	var stream func(ctx context.Context, chunk []byte) error
 
@@ -102,7 +100,7 @@ func (a *OneShotZeroAgent) GetInputKeys() []string {
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
-		if v == "agent_scratchpad" || v == "today" {
+		if v == "agent_scratchpad" {
 			continue
 		}
 		agentInput = append(agentInput, v)
