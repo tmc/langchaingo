@@ -6,8 +6,8 @@ import (
 
 const (
 	embeddingModelName = "text-embedding-005"
-	textModelName      = "text-bison"
-	chatModelName      = "chat-bison"
+	TextModelName      = "text-bison"
+	ChatModelName      = "chat-bison"
 )
 
 // Options are the Palm client options
@@ -58,7 +58,7 @@ func WithClientOptions(opts ...option.ClientOption) Option {
 func defaultOptions() Options {
 	return Options{
 		EmbeddingModelName: embeddingModelName,
-		TextModelName:      textModelName,
-		ChatModelName:      chatModelName,
+		TextModelName:      TextModelName,
+		ChatModelName:      ChatModelName,
 	}
 }
