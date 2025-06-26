@@ -260,8 +260,8 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
-		Model:  "nomic-embed-text",
-		Prompt: "Hello world",
+		Model: "nomic-embed-text",
+		Input: "Hello world",
 		Options: Options{
 			Temperature: 0.0,
 		},
@@ -273,5 +273,5 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	}
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotEmpty(t, resp.Embedding)
+	assert.NotEmpty(t, resp.Embeddings)
 }

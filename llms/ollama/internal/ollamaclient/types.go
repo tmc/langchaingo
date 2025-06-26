@@ -67,13 +67,13 @@ type Metrics struct {
 
 type EmbeddingRequest struct {
 	Model     string  `json:"model"`
-	Prompt    string  `json:"prompt"`
+	Input     string  `json:"input"`
 	Options   Options `json:"options"`
 	KeepAlive string  `json:"keep_alive,omitempty"`
 }
 
 type EmbeddingResponse struct {
-	Embedding []float32 `json:"embedding"`
+	Embeddings [][]float32 `json:"embeddings"`
 }
 
 type GenerateResponse struct {
