@@ -10,18 +10,18 @@ Content-Type: application/json
 {"model":"gemma3:1b","messages":[{"role":"user","content":"How many feet are in a nautical mile? Respond with JSON containing the answer."}],"format":"json","options":{"temperature":0}}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
-Date: Tue, 03 Jun 2025 11:25:36 GMT
+Date: Thu, 26 Jun 2025 14:33:11 GMT
 
 507
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.287524Z","message":{"role":"assistant","content":"{\""},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.295267Z","message":{"role":"assistant","content":"answer"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.302719Z","message":{"role":"assistant","content":"\":"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.310174Z","message":{"role":"assistant","content":" \""},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.317379Z","message":{"role":"assistant","content":"6"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.332885Z","message":{"role":"assistant","content":"0"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.340177Z","message":{"role":"assistant","content":"0"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.347155Z","message":{"role":"assistant","content":"\"}"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:36.387439Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":308113417,"load_duration":77847333,"prompt_eval_count":25,"prompt_eval_duration":35082458,"eval_count":9,"eval_duration":118123625}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.383639Z","message":{"role":"assistant","content":"{\""},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.391298Z","message":{"role":"assistant","content":"answer"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.398982Z","message":{"role":"assistant","content":"\":"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.408592Z","message":{"role":"assistant","content":" \""},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.415021Z","message":{"role":"assistant","content":"6"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.422645Z","message":{"role":"assistant","content":"0"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.430031Z","message":{"role":"assistant","content":"0"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.437438Z","message":{"role":"assistant","content":"\"}"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.481257Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":275917458,"load_duration":24036750,"prompt_eval_count":25,"prompt_eval_duration":28090375,"eval_count":9,"eval_duration":125564125}
 
 0
 

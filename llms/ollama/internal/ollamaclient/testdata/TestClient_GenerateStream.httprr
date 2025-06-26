@@ -1,5 +1,5 @@
 httprr trace v1
-326 2580
+326 2579
 POST http://localhost:11434/api/generate HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -10,31 +10,31 @@ Content-Type: application/json
 {"model":"gemma3:1b","prompt":"Count from 1 to 5","system":"","template":"","stream":true,"options":{"num_predict":50,"temperature":0}}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
-Date: Tue, 03 Jun 2025 08:46:59 GMT
+Date: Thu, 26 Jun 2025 14:32:29 GMT
 
-990
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.283394Z","response":"Okay","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.290407Z","response":",","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.297991Z","response":" here","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.305533Z","response":" we","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.313035Z","response":" go","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.320594Z","response":"!","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.327828Z","response":"\n\n","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.33466Z","response":"1","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.341595Z","response":",","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.349118Z","response":" ","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.356552Z","response":"2","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.36481Z","response":",","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.371025Z","response":" ","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.377888Z","response":"3","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.384807Z","response":",","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.392391Z","response":" ","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.399807Z","response":"4","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.407566Z","response":",","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.416878Z","response":" ","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.424146Z","response":"5","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.430898Z","response":"\n","done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T08:46:59.43793Z","response":"","done":true,"done_reason":"stop","context":[105,2364,107,4377,699,236743,236770,531,236743,236810,106,107,105,4368,107,19058,236764,1590,692,817,236888,108,236770,236764,236743,236778,236764,236743,236800,236764,236743,236812,236764,236743,236810,107],"total_duration":4620328000,"load_duration":2621562542,"prompt_eval_count":16,"prompt_eval_duration":30607667,"eval_count":22,"eval_duration":154996458}
+98f
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:29.961688Z","response":"Okay","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:29.970082Z","response":",","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:29.978175Z","response":" here","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:29.986661Z","response":" we","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:29.995263Z","response":" go","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.004011Z","response":"!","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.015134Z","response":"\n\n","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.023142Z","response":"1","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.03198Z","response":",","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.040322Z","response":" ","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.049035Z","response":"2","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.057593Z","response":",","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.066301Z","response":" ","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.075045Z","response":"3","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.083823Z","response":",","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.092705Z","response":" ","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.101388Z","response":"4","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.110008Z","response":",","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.118481Z","response":" ","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.126776Z","response":"5","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.135357Z","response":"\n","done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:32:30.143221Z","response":"","done":true,"done_reason":"stop","context":[105,2364,107,4377,699,236743,236770,531,236743,236810,106,107,105,4368,107,19058,236764,1590,692,817,236888,108,236770,236764,236743,236778,236764,236743,236800,236764,236743,236812,236764,236743,236810,107],"total_duration":253305333,"load_duration":41517125,"prompt_eval_count":16,"prompt_eval_duration":29013458,"eval_count":22,"eval_duration":182347500}
 
 0
 
