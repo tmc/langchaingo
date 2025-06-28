@@ -46,7 +46,7 @@ const (
 	//
 	// Max tokens: 128k
 	// Languages: English, Multilingual in 200+ languages.
-	ModelAmazonNovaMicroV1 = "amazon.nova-micro-v1:0"
+	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
 
 	// Amazon Nova Lite is a very low-cost multimodal model that is lightning fast for
 	// processing image, video, and text inputs. Amazon Nova Lite’s accuracy across a
@@ -56,7 +56,7 @@ const (
 	//
 	// Max tokens: 300k
 	// Languages: English, Multilingual in 200+ languages.
-	ModelAmazonNovaLiteV1 = "amazon.nova-lite-v1:0"
+	ModelAmazonNovaLiteV1 = "us.amazon.nova-lite-v1:0"
 
 	// Amazon Nova Pro is a highly capable multimodal model with the best combination of
 	// accuracy, speed, and cost for a wide range of tasks. Amazon Nova Pro’s capabilities,
@@ -70,7 +70,7 @@ const (
 	//
 	// Max tokens: 300k
 	// Languages: English, Multilingual in 200+ languages.
-	ModelAmazonNovaProV1 = "amazon.nova-pro-v1:0"
+	ModelAmazonNovaProV1 = "us.amazon.nova-pro-v1:0"
 
 	// Claude 3 Sonnet by Anthropic strikes the ideal balance between intelligence and
 	// speed—particularly for enterprise workloads. It offers maximum utility at a lower

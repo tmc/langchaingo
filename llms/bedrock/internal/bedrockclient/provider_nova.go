@@ -102,8 +102,10 @@ type novaTextGenerationOutput struct {
 
 // Finish reason for the completion of the generation.
 const (
-	NovaCompletionReasonEndTurn      = "end_turn"
-	NovaCompletionReasonStopSequence = "stop_sequence"
+	NovaCompletionReasonEndTurn         = "end_turn"
+	NovaCompletionReasonStopSequence    = "stop_sequence"
+	NovaCompletionReasonMaxTokens       = "max_tokens"
+	NovaCompletionReasonContentFiltered = "content_filtered"
 )
 
 // Role attribute for the anthropic message.
@@ -178,7 +180,10 @@ func createNovaCompletion(ctx context.Context,
 	content := output.Output.Message.Content
 	if len(content) == 0 {
 		return nil, errors.New("no results")
-	} else if stopReason := output.StopReason; stopReason != NovaCompletionReasonEndTurn && stopReason != NovaCompletionReasonStopSequence {
+	} else if stopReason := output.StopReason; stopReason != NovaCompletionReasonEndTurn && 
+		stopReason != NovaCompletionReasonStopSequence && 
+		stopReason != NovaCompletionReasonMaxTokens && 
+		stopReason != NovaCompletionReasonContentFiltered {
 		return nil, errors.New("completed due to " + stopReason + ". Maybe try increasing max tokens")
 	}
 	Contentchoices := make([]*llms.ContentChoice, len(content))

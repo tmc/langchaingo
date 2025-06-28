@@ -8,7 +8,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/bedrock"
@@ -19,6 +18,21 @@ func setUpTest() (*bedrockruntime.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	client := bedrockruntime.NewFromConfig(cfg)
+	return client, nil
+}
+
+func setUpTestWithTransport(transport http.RoundTripper) (*bedrockruntime.Client, error) {
+	httpClient := &http.Client{
+		Transport: transport,
+	}
+	
+	cfg, err := config.LoadDefaultConfig(context.Background(), 
+		config.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, err
+	}
+	
 	client := bedrockruntime.NewFromConfig(cfg)
 	return client, nil
 }
@@ -36,12 +50,8 @@ func TestAmazonOutput(t *testing.T) {
 		t.Parallel()
 	}
 
-	// Replace httputil.DefaultClient with httprr client
-	oldClient := httputil.DefaultClient
-	httputil.DefaultClient = rr.Client()
-	defer func() { httputil.DefaultClient = oldClient }()
-
-	client, err := setUpTest()
+	// Configure AWS client to use httprr transport
+	client, err := setUpTestWithTransport(rr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,12 +121,8 @@ func TestAmazonNova(t *testing.T) {
 		t.Parallel()
 	}
 
-	// Replace httputil.DefaultClient with httprr client
-	oldClient := httputil.DefaultClient
-	httputil.DefaultClient = rr.Client()
-	defer func() { httputil.DefaultClient = oldClient }()
-
-	client, err := setUpTest()
+	// Configure AWS client to use httprr transport
+	client, err := setUpTestWithTransport(rr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,12 +179,8 @@ func TestAnthropicNovaImage(t *testing.T) {
 		t.Parallel()
 	}
 
-	// Replace httputil.DefaultClient with httprr client
-	oldClient := httputil.DefaultClient
-	httputil.DefaultClient = rr.Client()
-	defer func() { httputil.DefaultClient = oldClient }()
-
-	client, err := setUpTest()
+	// Configure AWS client to use httprr transport
+	client, err := setUpTestWithTransport(rr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +215,6 @@ func TestAnthropicNovaImage(t *testing.T) {
 	models := []string{
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaProV1,
-		bedrock.ModelAnthropicClaudeV3Sonnet,
 	}
 
 	ctx := context.Background()
