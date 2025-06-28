@@ -29,10 +29,12 @@ type Message struct {
 }
 
 func getProvider(modelID string) string {
-	parts := strings.Split(modelID, ".")
-	if len(parts) >= 2 && strings.HasPrefix(parts[1], "nova") {
+	// Check for Nova models (including inference profiles like us.amazon.nova-*)
+	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
 		return "nova"
 	}
+	
+	parts := strings.Split(modelID, ".")
 	
 	// For backward compatibility with the original provider detection
 	switch {
