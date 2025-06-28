@@ -13,26 +13,17 @@ import (
 	"github.com/tmc/langchaingo/llms/bedrock"
 )
 
-func setUpTest() (*bedrockruntime.Client, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	client := bedrockruntime.NewFromConfig(cfg)
-	return client, nil
-}
-
 func setUpTestWithTransport(transport http.RoundTripper) (*bedrockruntime.Client, error) {
 	httpClient := &http.Client{
 		Transport: transport,
 	}
-	
-	cfg, err := config.LoadDefaultConfig(context.Background(), 
+
+	cfg, err := config.LoadDefaultConfig(context.Background(),
 		config.WithHTTPClient(httpClient))
 	if err != nil {
 		return nil, err
 	}
-	
+
 	client := bedrockruntime.NewFromConfig(cfg)
 	return client, nil
 }
