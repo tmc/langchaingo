@@ -187,7 +187,7 @@ func TestAnthropicNovaImage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	image, err := os.ReadFile("wikipage.jpg")
+	image, err := os.ReadFile("testdata/wikipage.jpg")
 	mimeType := "image/jpeg"
 	if err != nil {
 		t.Fatal(err)
