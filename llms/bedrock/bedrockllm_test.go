@@ -3,6 +3,7 @@ package bedrock_test
 import (
 	"context"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -21,7 +22,6 @@ func setUpTest() (*bedrockruntime.Client, error) {
 	client := bedrockruntime.NewFromConfig(cfg)
 	return client, nil
 }
-
 
 func TestAmazonOutput(t *testing.T) {
 	ctx := context.Background()
