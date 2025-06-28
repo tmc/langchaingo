@@ -23,6 +23,7 @@ type testAgent struct {
 	err        error
 	inputKeys  []string
 	outputKeys []string
+	tools      []tools.Tool
 
 	recordedIntermediateSteps []schema.AgentStep
 	recordedInputs            map[string]string
@@ -50,7 +51,7 @@ func (a testAgent) GetOutputKeys() []string {
 }
 
 func (a *testAgent) GetTools() []tools.Tool {
-	return nil
+	return a.tools
 }
 
 func TestExecutorWithErrorHandler(t *testing.T) {
@@ -170,4 +171,60 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 
 	require.True(t, strings.Contains(result, "2012") || strings.Contains(result, "March"),
 		"correct answer 2012 or March not in response")
+}
+
+// mockTool implements the tools.Tool interface for testing
+type mockTool struct {
+	name         string
+	description  string
+	receivedInputPtr *string
+}
+
+func (m *mockTool) Name() string {
+	return m.name
+}
+
+func (m *mockTool) Description() string {
+	return m.description
+}
+
+func (m *mockTool) Call(_ context.Context, input string) (string, error) {
+	*m.receivedInputPtr = input
+	return "mock result", nil
+}
+
+func TestExecutorTrimsObservationSuffix(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	// Create a mock tool that records what input it receives
+	var receivedInput string
+	mockToolInst := &mockTool{
+		name:             "mock_tool",
+		description:      "A mock tool for testing",
+		receivedInputPtr: &receivedInput,
+	}
+
+	// Create a test agent that returns an action with trailing "\nObservation:"
+	testAgent := &testAgent{
+		actions: []schema.AgentAction{
+			{
+				Tool:      "mock_tool",
+				ToolInput: "test input\nObservation:",
+				Log:       "Action: mock_tool\nAction Input: test input\nObservation:",
+			},
+		},
+		inputKeys:  []string{"input"},
+		outputKeys: []string{"output"},
+		tools:      []tools.Tool{mockToolInst},
+	}
+
+	executor := agents.NewExecutor(testAgent, agents.WithMaxIterations(1))
+
+	_, err := chains.Call(ctx, executor, map[string]any{"input": "test question"})
+	// We expect ErrNotFinished since our test agent doesn't provide a finish action
+	require.ErrorIs(t, err, agents.ErrNotFinished)
+
+	// Verify that the tool received the input with "\nObservation:" trimmed off
+	require.Equal(t, "test input", receivedInput, "Tool should receive input with \\nObservation: suffix trimmed")
 }
