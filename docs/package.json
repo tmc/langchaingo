@@ -20,8 +20,8 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,md,mdx}\""
   },
   "dependencies": {
-    "@docusaurus/core": "^3.8.0",
-    "@docusaurus/preset-classic": "^3.8.0",
+    "@docusaurus/core": "^3.8.1",
+    "@docusaurus/preset-classic": "^3.8.1",
     "@docusaurus/remark-plugin-npm2yarn": "^3.8.0",
     "@docusaurus/theme-classic": "^3.8.0",
     "@docusaurus/theme-common": "^3.8.0",
@@ -62,5 +62,10 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "pnpm": {
+    "overrides": {
+      "webpack-dev-server": ">=5.2.1"
+    }
   }
 }
