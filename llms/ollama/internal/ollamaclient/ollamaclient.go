@@ -269,7 +269,7 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 
 func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 	resp := &EmbeddingResponse{}
-	if err := c.do(ctx, http.MethodPost, "/api/embeddings", req, &resp); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/embed", req, &resp); err != nil {
 		return resp, err
 	}
 	return resp, nil
