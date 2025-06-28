@@ -46,7 +46,7 @@ func TestGetProvider(t *testing.T) {
 		{
 			name:     "unknown provider",
 			modelID:  "unknown.model",
-			expected: "",
+			expected: "unknown",
 		},
 	}
 
