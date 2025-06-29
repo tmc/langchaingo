@@ -76,7 +76,7 @@ Bye!
 			},
 		},
 	}
-	splitter := NewTokenSplitter()
+	splitter := NewTokenSplitter(WithEncodingName("cl100k_base"))
 	for _, tc := range testCases {
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize

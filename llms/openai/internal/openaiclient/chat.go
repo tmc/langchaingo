@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultChatModel = "gpt-3.5-turbo"
+	defaultChatModel = "gpt-4o-mini"
 )
 
 var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
