@@ -33,13 +33,13 @@ require (
 	github.com/IBM/watsonx-go v1.0.0
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/gage-technologies/mistral-go v1.1.0
-	github.com/google/generative-ai-go v0.15.1
+	github.com/google/generative-ai-go v0.19.0
 	github.com/pkoukk/tiktoken-go v0.1.6
 )
 
 // Vector stores
 require (
-	github.com/amikos-tech/chroma-go v0.1.4
+	github.com/amikos-tech/chroma-go v0.2.3
 	github.com/milvus-io/milvus-sdk-go/v2 v2.4.0
 	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pgvector/pgvector-go v0.1.1
@@ -117,7 +117,7 @@ require (
 // Cloud platforms and AI services - indirect
 require (
 	cloud.google.com/go v0.116.0 // indirect
-	cloud.google.com/go/ai v0.7.0 // indirect
+	cloud.google.com/go/ai v0.8.0 // indirect
 	cloud.google.com/go/alloydb v1.14.0 // indirect
 	cloud.google.com/go/auth v0.14.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
@@ -208,7 +208,7 @@ require (
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/containerd/platforms v0.2.1 // indirect
+	github.com/containerd/platforms v1.0.0-rc.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
@@ -315,4 +315,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require github.com/stretchr/objx v0.5.2 // indirect
+require (
+	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/yalue/onnxruntime_go v1.19.0 // indirect
+)
