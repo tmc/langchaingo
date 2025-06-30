@@ -18,67 +18,96 @@ func TestFileChatMessageHistory(t *testing.T) {
 
 	filePath := filepath.Join(tempDir, "chat_history.json")
 
-	history, err := NewFileChatMessageHistory(
-		WithFilePath(filePath),
-		WithCreateDirIfNotExist(true),
-	)
-	require.NoError(t, err)
+	t.Run("Basic Operations", func(t *testing.T) {
+		history, err := NewFileChatMessageHistory(
+			WithFilePath(filePath),
+			WithCreateDirIfNotExist(true),
+		)
+		require.NoError(t, err)
 
-	// Test adding messages
-	ctx := context.Background()
-	err = history.AddUserMessage(ctx, "Hello")
-	require.NoError(t, err)
-	err = history.AddAIMessage(ctx, "Hi there! How can I help you?")
-	require.NoError(t, err)
+		// Test adding messages
+		ctx := context.Background()
+		err = history.AddUserMessage(ctx, "Hello")
+		require.NoError(t, err)
+		err = history.AddAIMessage(ctx, "Hi there! How can I help you?")
+		require.NoError(t, err)
 
-	// Test retrieving messages
-	messages, err := history.Messages(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, 2, len(messages))
-	assert.Equal(t, "Hello", messages[0].GetContent())
-	assert.Equal(t, "Hi there! How can I help you?", messages[1].GetContent())
+		// Test retrieving messages
+		messages, err := history.Messages(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 2, len(messages))
+		assert.Equal(t, "Hello", messages[0].GetContent())
+		assert.Equal(t, "Hi there! How can I help you?", messages[1].GetContent())
+	})
 
-	// Test adding custom message
-	err = history.AddMessage(ctx, llms.SystemChatMessage{Content: "This is a system message"})
-	require.NoError(t, err)
-	messages, err = history.Messages(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, 3, len(messages))
-	assert.Equal(t, "This is a system message", messages[2].GetContent())
+	t.Run("Custom Message Types", func(t *testing.T) {
+		history, err := NewFileChatMessageHistory(WithFilePath(filePath))
+		require.NoError(t, err)
 
-	// Test setting messages
-	newMessages := []llms.ChatMessage{
-		llms.HumanChatMessage{Content: "New message 1"},
-		llms.AIChatMessage{Content: "New message 2"},
-	}
-	err = history.SetMessages(ctx, newMessages)
-	require.NoError(t, err)
-	messages, err = history.Messages(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, 2, len(messages))
-	assert.Equal(t, "New message 1", messages[0].GetContent())
-	assert.Equal(t, "New message 2", messages[1].GetContent())
+		ctx := context.Background()
+		err = history.Clear(ctx)
+		require.NoError(t, err)
 
-	// Test clearing messages
-	err = history.Clear(ctx)
-	require.NoError(t, err)
-	messages, err = history.Messages(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, 0, len(messages))
+		// Test adding custom message
+		err = history.AddMessage(ctx, llms.SystemChatMessage{Content: "This is a system message"})
+		require.NoError(t, err)
+		messages, err := history.Messages(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(messages))
+		assert.Equal(t, "This is a system message", messages[0].GetContent())
+	})
 
-	// Test file persistence
-	err = history.AddUserMessage(ctx, "Test persistence")
-	require.NoError(t, err)
+	t.Run("Set Messages", func(t *testing.T) {
+		history, err := NewFileChatMessageHistory(WithFilePath(filePath))
+		require.NoError(t, err)
 
-	// Create new instance, should be able to read previously saved messages
-	newHistory, err := NewFileChatMessageHistory(
-		WithFilePath(filePath),
-	)
-	require.NoError(t, err)
-	messages, err = newHistory.Messages(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, 1, len(messages))
-	assert.Equal(t, "Test persistence", messages[0].GetContent())
+		ctx := context.Background()
+
+		// Test setting messages
+		newMessages := []llms.ChatMessage{
+			llms.HumanChatMessage{Content: "New message 1"},
+			llms.AIChatMessage{Content: "New message 2"},
+		}
+		err = history.SetMessages(ctx, newMessages)
+		require.NoError(t, err)
+		messages, err := history.Messages(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 2, len(messages))
+		assert.Equal(t, "New message 1", messages[0].GetContent())
+		assert.Equal(t, "New message 2", messages[1].GetContent())
+	})
+
+	t.Run("Clear Messages", func(t *testing.T) {
+		history, err := NewFileChatMessageHistory(WithFilePath(filePath))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		// Test clearing messages
+		err = history.Clear(ctx)
+		require.NoError(t, err)
+		messages, err := history.Messages(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 0, len(messages))
+	})
+
+	t.Run("Persistence", func(t *testing.T) {
+		history, err := NewFileChatMessageHistory(WithFilePath(filePath))
+		require.NoError(t, err)
+
+		ctx := context.Background()
+
+		// Test file persistence
+		err = history.AddUserMessage(ctx, "Test persistence")
+		require.NoError(t, err)
+
+		newHistory, err := NewFileChatMessageHistory(WithFilePath(filePath))
+		require.NoError(t, err)
+		messages, err := newHistory.Messages(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(messages))
+		assert.Equal(t, "Test persistence", messages[0].GetContent())
+	})
 }
 
 func TestFileChatHistoryWithNestedDirectory(t *testing.T) {

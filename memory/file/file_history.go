@@ -48,7 +48,7 @@ func NewFileChatMessageHistory(options ...FileChatMessageHistoryOption) (*FileCh
 
 	// Create an empty JSON array file if it doesn't exist
 	if _, err := os.Stat(h.FilePath); os.IsNotExist(err) {
-		if err := os.WriteFile(h.FilePath, []byte("[]"), 0644); err != nil {
+		if err := os.WriteFile(h.FilePath, []byte("[]"), 0600); err != nil {
 			return nil, fmt.Errorf("failed to create history file: %w", err)
 		}
 	}
@@ -78,7 +78,7 @@ func (h *FileChatMessageHistory) saveMessages(messages []StoredMessage) error {
 		return fmt.Errorf("failed to serialize messages: %w", err)
 	}
 
-	if err := os.WriteFile(h.FilePath, data, 0644); err != nil {
+	if err := os.WriteFile(h.FilePath, data, 0600); err != nil {
 		return fmt.Errorf("failed to write history file: %w", err)
 	}
 
