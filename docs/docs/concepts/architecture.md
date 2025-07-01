@@ -1,52 +1,52 @@
-# LangChainGo Architecture
+# LangChainGo 架构
 
-This document explains LangChainGo's architecture and how it follows Go conventions.
+本文档解释了 LangChainGo 的架构以及它如何遵循 Go 语言约定。
 
-## Modular adoption philosophy
+## 模块化采用理念
 
-**You don't need to adopt the entire LangChainGo framework.** The architecture is designed for selective adoption - use only the components that solve your specific problems:
+**您无需采用整个 LangChainGo 框架。** 架构设计支持选择性采用 - 只使用解决您特定问题的组件：
 
-- **Need an LLM client?** Use only the `llms` package
-- **Want prompt templating?** Add the `prompts` package
-- **Building conversational apps?** Include `memory` for state management
-- **Creating autonomous agents?** Combine `agents`, `tools`, and `chains`
+- **需要 LLM 客户端？** 只使用 `llms` 包
+- **想要提示模板？** 添加 `prompts` 包
+- **构建对话应用？** 包含 `memory` 进行状态管理
+- **创建自主代理？** 组合 `agents`、`tools` 和 `chains`
 
-Each component is designed to work independently while providing seamless integration when combined. Start small and grow your usage as needed.
+每个组件都设计为独立工作，同时在组合时提供无缝集成。从小处开始，根据需要扩展您的使用。
 
-## Standard library alignment
+## 标准库对齐
 
-LangChainGo follows Go's standard library patterns and philosophy. We model our interfaces after proven standard library designs:
+LangChainGo 遵循 Go 标准库的模式和理念。我们的接口模仿经过验证的标准库设计：
 
-- **`context.Context` first**: Like `database/sql`, `net/http`, and other standard library packages
-- **Interface composition**: Small, focused interfaces that compose well (like `io.Reader`, `io.Writer`)
-- **Constructor patterns**: `New()` functions with functional options (like `http.Client`)
-- **Error handling**: Explicit errors with type assertions (like `net.OpError`, `os.PathError`)
+- **`context.Context` 优先**：如 `database/sql`、`net/http` 和其他标准库包
+- **接口组合**：小型、专注的接口，能够很好地组合（如 `io.Reader`、`io.Writer`）
+- **构造器模式**：带有函数选项的 `New()` 函数（如 `http.Client`）
+- **错误处理**：带有类型断言的显式错误（如 `net.OpError`、`os.PathError`）
 
-When the standard library evolves, we evolve with it. Recent examples:
-- Adopted `slog` patterns for structured logging
-- Use `context.WithCancelCause` for richer cancellation
-- Follow `testing/slogtest` patterns for handler validation
+当标准库演进时，我们也随之演进。最近的例子：
+- 采用 `slog` 模式进行结构化日志记录
+- 使用 `context.WithCancelCause` 进行更丰富的取消操作
+- 遵循 `testing/slogtest` 模式进行处理器验证
 
-### Interface evolution
+### 接口演进
 
-Our core interfaces will change as Go and the AI ecosystem evolve. We welcome discussion about better alignment with standard library patterns - open an issue if you see opportunities to make our APIs more Go-like.
+我们的核心接口将随着 Go 和 AI 生态系统的发展而变化。我们欢迎关于更好地与标准库模式对齐的讨论 - 如果您看到使我们的 API 更符合 Go 风格的机会，请开启一个问题。
 
-Common areas for improvement:
-- Method naming consistency with standard library conventions
-- Error type definitions and handling patterns  
-- Streaming patterns that match `io` package designs
-- Configuration patterns that follow standard library examples
+常见的改进领域：
+- 与标准库约定一致的方法命名
+- 错误类型定义和处理模式
+- 匹配 `io` 包设计的流式模式
+- 遵循标准库示例的配置模式
 
-## Design philosophy
+## 设计理念
 
-LangChainGo is built around several key principles:
+LangChainGo 围绕几个关键原则构建：
 
-### Interface-driven design
+### 接口驱动设计
 
-Every major component is defined by interfaces:
-- **Modularity**: Swap implementations without changing code
-- **Testability**: Mock interfaces for testing
-- **Extensibility**: Add new providers and components
+每个主要组件都由接口定义：
+- **模块化**：无需更改代码即可交换实现
+- **可测试性**：模拟接口进行测试
+- **可扩展性**：添加新的提供商和组件
 
 ```go
 type Model interface {
@@ -61,13 +61,13 @@ type Chain interface {
 }
 ```
 
-### Context-first approach
+### 上下文优先方法
 
-All operations accept `context.Context` as the first parameter:
-- **Cancellation**: Cancel long-running operations
-- **Timeouts**: Set deadlines for API calls
-- **Request Tracing**: Propagate request context through the call stack
-- **Graceful Shutdown**: Handle application termination cleanly
+所有操作都接受 `context.Context` 作为第一个参数：
+- **取消**：取消长时间运行的操作
+- **超时**：为 API 调用设置截止时间
+- **请求追踪**：通过调用栈传播请求上下文
+- **优雅关闭**：干净地处理应用程序终止
 
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -76,10 +76,10 @@ defer cancel()
 response, err := llm.GenerateContent(ctx, messages)
 ```
 
-### Go idiomatic patterns
+### Go 惯用模式
 
-#### Error handling
-Error handling uses Go's standard patterns with typed errors:
+#### 错误处理
+错误处理使用 Go 的标准模式和类型化错误：
 
 ```go
 type Error struct {
@@ -88,14 +88,14 @@ type Error struct {
     Cause   error
 }
 
-// Check for specific error types
+// 检查特定错误类型
 if errors.Is(err, llms.ErrRateLimit) {
-    // Handle rate limiting
+    // 处理速率限制
 }
 ```
 
-#### Options pattern
-Functional options provide flexible configuration:
+#### 选项模式
+函数选项提供灵活的配置：
 
 ```go
 llm, err := openai.New(
@@ -105,11 +105,11 @@ llm, err := openai.New(
 )
 ```
 
-#### Channels and goroutines
-Use Go's concurrency features for streaming and parallel processing:
+#### 通道和 goroutine
+使用 Go 的并发特性进行流式处理和并行处理：
 
 ```go
-// Streaming responses
+// 流式响应
 response, err := llm.GenerateContent(ctx, messages, 
     llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
         select {
@@ -122,124 +122,124 @@ response, err := llm.GenerateContent(ctx, messages,
 )
 ```
 
-## Core components
+## 核心组件
 
-### 1. Models layer
+### 1. 模型层
 
-The models layer provides abstractions for different types of language models:
+模型层为不同类型的语言模型提供抽象：
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Models Layer                         │
+│                    模型层                               │
 ├─────────────────┬─────────────────┬─────────────────────┤
-│   Chat Models   │   LLM Models    │  Embedding Models   │
+│   聊天模型      │   LLM 模型      │    嵌入模型         │
 ├─────────────────┼─────────────────┼─────────────────────┤
-│  • OpenAI       │  • Completion   │  • OpenAI           │
-│  • Anthropic    │  • Legacy APIs  │  • HuggingFace      │
-│  • Google AI    │  • Local Models │  • Local Models     │
-│  • Local (Ollama)│               │                     │
+│  • OpenAI       │  • 补全         │  • OpenAI           │
+│  • Anthropic    │  • 传统 API     │  • HuggingFace      │
+│  • Google AI    │  • 本地模型     │  • 本地模型         │
+│  • 本地 (Ollama)│                │                     │
 └─────────────────┴─────────────────┴─────────────────────┘
 ```
 
-Each model type implements specific interfaces:
-- `Model`: Unified interface for all language models
-- `EmbeddingModel`: Specialized for generating embeddings
-- `ChatModel`: Optimized for conversational interactions
+每种模型类型实现特定接口：
+- `Model`：所有语言模型的统一接口
+- `EmbeddingModel`：专门用于生成嵌入
+- `ChatModel`：针对对话交互优化
 
-### 2. Prompt management
+### 2. 提示管理
 
-Prompts are first-class citizens with template support:
+提示是一等公民，支持模板：
 
 ```go
 template := prompts.NewPromptTemplate(
-    "You are a {{.role}}. Answer this question: {{.question}}",
+    "你是一个 {{.role}}。回答这个问题：{{.question}}",
     []string{"role", "question"},
 )
 
 prompt, err := template.Format(map[string]any{
-    "role":     "helpful assistant",
-    "question": "What is Go?",
+    "role":     "有用的助手",
+    "question": "什么是 Go？",
 })
 ```
 
-### 3. Memory subsystem
+### 3. 内存子系统
 
-Memory provides stateful conversation management:
+内存提供有状态的对话管理：
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  Memory Subsystem                       │
+│                  内存子系统                             │
 ├─────────────────┬─────────────────┬─────────────────────┤
-│  Buffer Memory  │ Window Memory   │  Summary Memory     │
+│  缓冲内存       │  窗口内存       │    摘要内存         │
 ├─────────────────┼─────────────────┼─────────────────────┤
-│ • Simple buffer │ • Sliding window│ • Auto-summarization│
-│ • Full history  │ • Fixed size    │ • Token management  │
-│ • Fast access   │ • Recent focus  │ • Long conversations│
+│ • 简单缓冲      │ • 滑动窗口      │ • 自动摘要          │
+│ • 完整历史      │ • 固定大小      │ • 令牌管理          │
+│ • 快速访问      │ • 关注最近      │ • 长对话            │
 └─────────────────┴─────────────────┴─────────────────────┘
 ```
 
-### 4. Chain orchestration
+### 4. 链编排
 
-Chains enable complex workflows:
+链支持复杂的工作流：
 
 ```go
-// Sequential chain example
+// 顺序链示例
 chain1 := chains.NewLLMChain(llm, template1)
 chain2 := chains.NewLLMChain(llm, template2)
 
-// For simple sequential chains where output of one feeds to next
+// 对于简单的顺序链，其中一个的输出作为下一个的输入
 sequential := chains.NewSimpleSequentialChain([]chains.Chain{chain1, chain2})
 
-// Or for complex sequential chains with specific input/output keys
+// 或者对于具有特定输入/输出键的复杂顺序链
 sequential, err := chains.NewSequentialChain(
     []chains.Chain{chain1, chain2},
-    []string{"input"},      // input keys
-    []string{"final_output"}, // output keys
+    []string{"input"},        // 输入键
+    []string{"final_output"}, // 输出键
 )
 ```
 
-### 5. Agent framework
+### 5. 代理框架
 
-Agents provide autonomous behavior:
+代理提供自主行为：
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  Agent Framework                        │
+│                  代理框架                               │
 ├─────────────────┬─────────────────┬─────────────────────┤
-│     Agent       │     Tools       │    Executor         │
+│     代理        │     工具        │    执行器           │
 ├─────────────────┼─────────────────┼─────────────────────┤
-│ • Decision logic│ • Calculator    │ • Execution loop    │
-│ • Tool selection│ • Web search    │ • Error handling    │
-│ • ReAct pattern │ • File ops      │ • Result processing │
-│ • Planning      │ • Custom tools  │ • Memory management │
+│ • 决策逻辑      │ • 计算器        │ • 执行循环          │
+│ • 工具选择      │ • 网络搜索      │ • 错误处理          │
+│ • ReAct 模式    │ • 文件操作      │ • 结果处理          │
+│ • 规划          │ • 自定义工具    │ • 内存管理          │
 └─────────────────┴─────────────────┴─────────────────────┘
 ```
 
-## Data flow
+## 数据流
 
-### Request flow
+### 请求流
 ```
-User Input → Prompt Template → LLM → Output Parser → Response
-     ↓             ↓              ↓         ↓           ↓
-   Memory ←── Chain Logic ←── API Call ←── Processing ←── Memory
-```
-
-### Agent flow
-```
-User Input → Agent Planning → Tool Selection → Tool Execution
-     ↓              ↓              ↓              ↓
-   Memory ←── Result Analysis ←── Tool Results ←── External APIs
-     ↓              ↓
-   Response ←── Final Answer
+用户输入 → 提示模板 → LLM → 输出解析器 → 响应
+     ↓          ↓         ↓        ↓        ↓
+   内存 ←── 链逻辑 ←── API 调用 ←── 处理 ←── 内存
 ```
 
-## Concurrency model
+### 代理流
+```
+用户输入 → 代理规划 → 工具选择 → 工具执行
+     ↓          ↓          ↓          ↓
+   内存 ←── 结果分析 ←── 工具结果 ←── 外部 API
+     ↓          ↓
+   响应 ←── 最终答案
+```
 
-LangChainGo embraces Go's concurrency model:
+## 并发模型
 
-### Parallel processing
+LangChainGo 拥抱 Go 的并发模型：
+
+### 并行处理
 ```go
-// Process multiple inputs concurrently
+// 并发处理多个输入
 var wg sync.WaitGroup
 results := make(chan string, len(inputs))
 
@@ -258,9 +258,9 @@ wg.Wait()
 close(results)
 ```
 
-### Streaming
+### 流式处理
 ```go
-// Stream processing with channels
+// 使用通道进行流式处理
 type StreamProcessor struct {
     input  chan string
     output chan string
@@ -270,7 +270,7 @@ func (s *StreamProcessor) Process(ctx context.Context) {
     for {
         select {
         case input := <-s.input:
-            // Process input
+            // 处理输入
             result := processInput(input)
             s.output <- result
         case <-ctx.Done():
@@ -280,10 +280,10 @@ func (s *StreamProcessor) Process(ctx context.Context) {
 }
 ```
 
-## Extension points
+## 扩展点
 
-### Custom LLM providers
-Implement the `Model` interface:
+### 自定义 LLM 提供商
+实现 `Model` 接口：
 
 ```go
 type CustomLLM struct {
@@ -292,12 +292,12 @@ type CustomLLM struct {
 }
 
 func (c *CustomLLM) GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
-    // Custom implementation
+    // 自定义实现
 }
 ```
 
-### Custom tools
-Implement the `Tool` interface:
+### 自定义工具
+实现 `Tool` 接口：
 
 ```go
 type CustomTool struct {
@@ -308,12 +308,12 @@ type CustomTool struct {
 func (t *CustomTool) Name() string { return t.name }
 func (t *CustomTool) Description() string { return t.description }
 func (t *CustomTool) Call(ctx context.Context, input string) (string, error) {
-    // Tool logic
+    // 工具逻辑
 }
 ```
 
-### Custom memory
-Implement the `Memory` interface:
+### 自定义内存
+实现 `Memory` 接口：
 
 ```go
 type CustomMemory struct {
@@ -321,7 +321,7 @@ type CustomMemory struct {
 }
 
 func (m *CustomMemory) ChatHistory() schema.ChatMessageHistory {
-    // Return chat history implementation
+    // 返回聊天历史实现
 }
 
 func (m *CustomMemory) MemoryVariables() []string {
@@ -329,10 +329,10 @@ func (m *CustomMemory) MemoryVariables() []string {
 }
 ```
 
-## Performance considerations
+## 性能考虑
 
-### Connection pooling
-LLM providers use HTTP connection pooling for efficiency:
+### 连接池
+LLM 提供商使用 HTTP 连接池来提高效率：
 
 ```go
 client := &http.Client{
@@ -344,16 +344,16 @@ client := &http.Client{
 }
 ```
 
-### Memory management
-- Use appropriate memory types for your use case
-- Implement cleanup strategies for long-running applications
-- Monitor memory usage in production
+### 内存管理
+- 为您的用例使用适当的内存类型
+- 为长时间运行的应用程序实现清理策略
+- 在生产环境中监控内存使用
 
-### Caching
-Implement caching at multiple levels:
-- LLM response caching
-- Embedding caching
-- Tool result caching
+### 缓存
+在多个层级实现缓存：
+- LLM 响应缓存
+- 嵌入缓存
+- 工具结果缓存
 
 ```go
 type CachingLLM struct {
@@ -363,14 +363,14 @@ type CachingLLM struct {
 }
 ```
 
-## Error handling strategy
+## 错误处理策略
 
-### Layered error handling
-1. **Provider Level**: Handle API-specific errors
-2. **Component Level**: Handle component-specific errors  
-3. **Application Level**: Handle business logic errors
+### 分层错误处理
+1. **提供商层级**：处理 API 特定错误
+2. **组件层级**：处理组件特定错误
+3. **应用层级**：处理业务逻辑错误
 
-### Retry logic
+### 重试逻辑
 ```go
 func retryableCall(ctx context.Context, fn func() error) error {
     backoff := time.Second
@@ -394,14 +394,14 @@ func retryableCall(ctx context.Context, fn func() error) error {
         }
     }
     
-    return fmt.Errorf("max retries exceeded")
+    return fmt.Errorf("超过最大重试次数")
 }
 ```
 
-## Testing architecture
+## 测试架构
 
-### Interface mocking
-Use interfaces for comprehensive testing:
+### 接口模拟
+使用接口进行全面测试：
 
 ```go
 type MockLLM struct {
@@ -411,7 +411,7 @@ type MockLLM struct {
 
 func (m *MockLLM) GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error) {
     if m.index >= len(m.responses) {
-        return nil, fmt.Errorf("no more responses")
+        return nil, fmt.Errorf("没有更多响应")
     }
     
     response := &ContentResponse{
@@ -422,93 +422,176 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []MessageContent
 }
 ```
 
-### HTTP testing with httprr
+### 使用 httprr 进行 HTTP 测试
 
-For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](https://pkg.go.dev/github.com/tmc/langchaingo/internal/httprr) for recording and replaying HTTP interactions. This is an internal testing tool used by LangChainGo's own test suite to ensure reliable, fast tests without hitting real APIs.
+对于基于 HTTP 的 LLM 提供商的内部测试，LangChainGo 使用 [httprr](https://pkg.go.dev/github.com/tmc/langchaingo/internal/httprr) 来记录和重放 HTTP 交互。这是 LangChainGo 自己的测试套件使用的内部测试工具，确保可靠、快速的测试，而无需访问真实的 API。
 
-#### Setting up httprr
+#### 设置 httprr
 
 ```go
 func TestOpenAIWithRecording(t *testing.T) {
-    // Start httprr recorder
+    // 启动 httprr 记录器
     recorder := httprr.New("testdata/openai_recording")
     defer recorder.Stop()
     
-    // Configure HTTP client to use recorder
+    // 配置 HTTP 客户端使用记录器
     client := &http.Client{
         Transport: recorder,
     }
     
-    // Create LLM with custom client
+    // 创建带有自定义客户端的 LLM
     llm, err := openai.New(
         openai.WithHTTPClient(client),
-        openai.WithToken("test-token"), // Will be redacted in recording
+        openai.WithToken("test-token"), // 将在记录中被编辑
     )
     require.NoError(t, err)
     
-    // Make actual API call (recorded on first run, replayed on subsequent runs)
+    // 进行实际 API 调用（首次运行时记录，后续运行时重放）
     response, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
-        llms.TextParts(llms.ChatMessageTypeHuman, "Hello, world!"),
+        llms.TextParts(llms.ChatMessageTypeHuman, "你好，世界！"),
     })
     require.NoError(t, err)
     require.NotEmpty(t, response.Choices[0].Content)
 }
 ```
 
-#### Recording guidelines
+#### 记录指南
 
-1. **Initial Recording**: Run tests with real API credentials to create recordings
-2. **Sensitive Data**: httprr automatically redacts common sensitive headers
-3. **Deterministic Tests**: Recordings ensure consistent test results across environments
-4. **Version Control**: Commit recording files for team consistency
+1. **初始记录**：使用真实的 API 凭据运行测试以创建记录
+2. **敏感数据**：httprr 自动编辑常见的敏感标头
+3. **确定性测试**：记录确保跨环境的一致测试结果
+4. **版本控制**：提交记录文件以保持团队一致性
 
-#### Contributing with httprr
+#### 使用 httprr 贡献
 
-When contributing to LangChainGo's internal tests:
+在为 LangChainGo 的内部测试做贡献时：
 
-1. **Use httprr for new LLM providers**:
+1. **为新的 LLM 提供商使用 httprr**：
    ```go
    func TestNewProvider(t *testing.T) {
        recorder := httprr.New("testdata/newprovider_test")
        defer recorder.Stop()
        
-       // Test implementation
+       // 测试实现
    }
    ```
 
-2. **Update recordings when APIs change**:
+2. **当 API 更改时更新记录**：
    ```bash
-   # Delete old recordings
+   # 删除旧记录
    rm testdata/provider_test.httprr
    
-   # Re-run tests with real credentials
+   # 使用真实凭据重新运行测试
    PROVIDER_API_KEY=real_key go test
    ```
 
-3. **Verify recordings are committed**:
+3. **验证记录已提交**：
    ```bash
    git add testdata/*.httprr
-   git commit -m "test: update API recordings"
+   git commit -m "test: 更新 API 记录"
    ```
 
-### Integration testing
-Use testcontainers for external dependencies:
+### 集成测试
+使用 testcontainers 处理外部依赖：
 
 ```go
 func TestWithDatabase(t *testing.T) {
     ctx := context.Background()
     
-    postgresContainer, err := postgres.RunContainer(ctx,
-        testcontainers.WithImage("postgres:13"),
-        postgres.WithDatabase("test"),
-        postgres.WithUsername("test"),
-        postgres.WithPassword("test"),
-    )
+    // 使用 testcontainers 启动数据库
+    container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+        ContainerRequest: testcontainers.ContainerRequest{
+            Image:        "postgres:13",
+            ExposedPorts: []string{"5432/tcp"},
+            Env: map[string]string{
+                "POSTGRES_PASSWORD": "password",
+                "POSTGRES_DB":       "testdb",
+            },
+        },
+        Started: true,
+    })
     require.NoError(t, err)
-    defer postgresContainer.Terminate(ctx)
+    defer container.Terminate(ctx)
     
-    // Test with real database
+    // 获取连接信息并运行测试
+    host, _ := container.Host(ctx)
+    port, _ := container.MappedPort(ctx, "5432")
+    
+    // 测试数据库集成
 }
 ```
 
-This architecture follows Go's principles of simplicity, clarity, and performance.
+## 部署模式
+
+### 单体应用
+```go
+func main() {
+    // 初始化组件
+    llm, _ := openai.New()
+    memory := memory.NewBuffer()
+    chain := chains.NewConversationChain(llm, memory)
+    
+    // 启动 HTTP 服务器
+    http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
+        response, _ := chain.Run(r.Context(), r.FormValue("message"))
+        w.Write([]byte(response))
+    })
+    
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+```
+
+### 微服务架构
+```go
+// 聊天服务
+type ChatService struct {
+    llm    llms.Model
+    memory memory.Memory
+}
+
+func (s *ChatService) HandleChat(ctx context.Context, req *ChatRequest) (*ChatResponse, error) {
+    chain := chains.NewConversationChain(s.llm, s.memory)
+    result, err := chain.Run(ctx, req.Message)
+    if err != nil {
+        return nil, err
+    }
+    
+    return &ChatResponse{Message: result}, nil
+}
+```
+
+### 云原生部署
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langchaingo-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: langchaingo-app
+  template:
+    metadata:
+      labels:
+        app: langchaingo-app
+    spec:
+      containers:
+      - name: app
+        image: langchaingo-app:latest
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: openai-key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+```
+
+这种架构为使用 LangChainGo 构建强大、可扩展的 AI 应用程序提供了坚实的基础，同时保持了 Go 语言的简洁性和性能特征。

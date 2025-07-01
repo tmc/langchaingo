@@ -1,333 +1,330 @@
+# 为 langchaingo 做贡献
 
-# Contributing to langchaingo
+首先，感谢您抽出时间做出贡献！ ❤️
 
-First off, thanks for taking the time to contribute! ❤️
+我们鼓励并重视所有类型的贡献。请参阅[目录](#目录)了解不同的帮助方式以及本项目如何处理它们的详细信息。在做出贡献之前，请务必阅读相关部分。这将使我们维护者的工作更加轻松，并使所有相关人员的体验更加顺畅。社区期待您的贡献。 🎉
 
-All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
+> 如果您喜欢这个项目，但没有时间做出贡献，那也没关系。还有其他简单的方法可以支持项目并表达您的谢意，我们对此也会非常高兴：
+> - 为项目点赞 (Star)
+> - 在社交媒体上宣传它 (Tweet about it)
+> - 在您项目的自述文件中引用此项目
+> - 在本地聚会上提及该项目并告诉您的朋友/同事
 
-> And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
-> - Star the project
-> - Tweet about it
-> - Refer this project in your project's readme
-> - Mention the project at local meetups and tell your friends/colleagues
+## 目录
 
-## Table of Contents
+- [行为准则](#行为准则)
+- [我有一个问题](#我有一个问题)
+- [我想做出贡献](#我想做出贡献)
+  - [报告错误](#报告错误)
+    - [提交错误报告之前](#提交错误报告之前)
+    - [如何提交一个好的错误报告？](#如何提交一个好的错误报告)
+  - [建议增强功能](#建议增强功能)
+    - [提交增强功能建议之前](#提交增强功能建议之前)
+    - [如何提交一个好的增强功能建议？](#如何提交一个好的增强功能建议)
+  - [您的第一个代码贡献](#您的第一个代码贡献)
+    - [进行更改](#进行更改)
+      - [在用户界面中进行更改](#在用户界面中进行更改)
+      - [在本地进行更改](#在本地进行更改)
+    - [运行测试](#运行测试)
+    - [使用 httprr 进行测试](#使用-httprr-进行测试)
+      - [httprr 如何工作](#httprr-如何工作)
+      - [使用 httprr 编写测试](#使用-httprr-编写测试)
+      - [录制新测试](#录制新测试)
+      - [关于 httprr 的重要说明](#关于-httprr-的重要说明)
+      - [调试 httprr 问题](#调试-httprr-问题)
+    - [提交您的更新](#提交您的更新)
+    - [拉取请求 (Pull Request)](#拉取请求-pull-request)
+    - [您的 PR 已合并！](#您的-pr-已合并)
 
-- [Code of Conduct](#code-of-conduct)
-- [I Have a Question](#i-have-a-question)
-- [I Want To Contribute](#i-want-to-contribute)
-  - [Reporting Bugs](#reporting-bugs)
-    - [Before Submitting a Bug Report](#before-submitting-a-bug-report)
-    - [How Do I Submit a Good Bug Report?](#how-do-i-submit-a-good-bug-report)
-  - [Suggesting Enhancements](#suggesting-enhancements)
-    - [Before Submitting an Enhancement](#before-submitting-an-enhancement)
-    - [How Do I Submit a Good Enhancement Suggestion?](#how-do-i-submit-a-good-enhancement-suggestion)
-  - [Your First Code Contribution](#your-first-code-contribution)
-    - [Make Changes](#make-changes)
-      - [Make changes in the UI](#make-changes-in-the-ui)
-      - [Make changes locally](#make-changes-locally)
-    - [Running Tests](#running-tests)
-    - [Testing with httprr](#testing-with-httprr)
-      - [How httprr works](#how-httprr-works)
-      - [Writing tests with httprr](#writing-tests-with-httprr)
-      - [Recording new tests](#recording-new-tests)
-      - [Important notes about httprr](#important-notes-about-httprr)
-      - [Debugging httprr issues](#debugging-httprr-issues)
-    - [Commit your update](#commit-your-update)
-    - [Pull Request](#pull-request)
-    - [Your PR is merged!](#your-pr-is-merged)
+## 行为准则
 
-## Code of Conduct
-
-This project and everyone participating in it is governed by the
-[langchaingo Code of Conduct](CODE_OF_CONDUCT.md).
-By participating, you are expected to uphold this code. Please report unacceptable behavior
-to <travis.cline@gmail.com>.
+本项目及其所有参与者均受 [langchaingo 行为准则](CODE_OF_CONDUCT.md)的约束。
+通过参与，您应遵守此准则。请将不可接受的行为报告给 <travis.cline@gmail.com>。
 
 
-## I Have a Question
+## 我有一个问题
 
-> If you want to ask a question, we assume that you have read the available [Documentation](https://pkg.go.dev/github.com/tmc/langchaingo).
+> 如果您想提问，我们假设您已经阅读了可用的[文档](https://pkg.go.dev/github.com/tmc/langchaingo)。
 
-Before you ask a question, it is best to search for existing [Issues](https://github.com/tmc/langchaingo/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
+在提问之前，最好先搜索现有的[问题 (Issues)](https://github.com/tmc/langchaingo/issues) 看是否能帮到您。如果您找到了合适的问题但仍需要澄清，您可以在该问题中写下您的问题。建议您也先在互联网上搜索答案。
 
-If you then still feel the need to ask a question and need clarification, we recommend the following:
+如果您仍然觉得需要提问并需要澄清，我们建议如下：
 
-- Open an [Issue](https://github.com/tmc/langchaingo/issues/new).
-- Provide as much context as you can about what you're running into.
-- Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
+- 新建一个[问题 (Issue)](https://github.com/tmc/langchaingo/issues/new)。
+- 尽可能多地提供您遇到的问题的上下文。
+- 提供项目和平台版本（nodejs、npm 等），具体取决于哪些信息似乎相关。
 
-We will then take care of the issue as soon as possible.
+然后我们会尽快处理该问题。
 
-## I Want To Contribute
+## 我想做出贡献
 
-> ### Legal Notice
-> When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project license.
+> ### 法律声明
+> 当您为本项目做出贡献时，您必须同意您是所贡献内容的 100% 作者，您拥有对该内容的必要权利，并且您贡献的内容可以在项目许可下提供。
 
-### Reporting Bugs
+### 报告错误
 
-#### Before Submitting a Bug Report
+#### 提交错误报告之前
 
-A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
+一个好的错误报告不应该让其他人需要向您追问更多信息。因此，我们要求您仔细调查、收集信息并在报告中详细描述问题。请提前完成以下步骤，以帮助我们尽快修复任何潜在的错误。
 
-- Make sure that you are using the latest version.
-- Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://pkg.go.dev/github.com/tmc/langchaingo). If you are looking for support, you might want to check [this section](#i-have-a-question)).
-- To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/tmc/langchaingo/issues?q=label%3Abug).
-- Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
-- Collect information about the bug:
-  - Stack trace (Traceback)
-  - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
-  - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
-  - Possibly your input and the output
-  - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
+- 确保您使用的是最新版本。
+- 判断您的错误是否真的是一个错误，而不是您操作不当造成的，例如使用了不兼容的环境组件/版本（请确保您已阅读[文档](https://pkg.go.dev/github.com/tmc/langchaingo)。如果您正在寻求支持，您可能需要查看[此部分](#我有一个问题)）。
+- 查看其他用户是否遇到过（并可能已经解决了）与您相同的问题，请在[错误跟踪器](https://github.com/tmc/langchaingo/issues?q=label%3Abug)中检查是否已存在针对您的错误或问题的错误报告。
+- 同时确保搜索互联网（包括 Stack Overflow），看看 GitHub 社区之外的用户是否讨论过该问题。
+- 收集有关错误的信息：
+  - 堆栈跟踪 (Stack trace / Traceback)
+  - 操作系统、平台和版本 (Windows、Linux、macOS、x86、ARM)
+  - 解释器、编译器、SDK、运行时环境、包管理器的版本，具体取决于哪些信息似乎相关。
+  - 可能的话，提供您的输入和输出
+  - 您能可靠地重现该问题吗？您也能用旧版本重现它吗？
 
-#### How Do I Submit a Good Bug Report?
+#### 如何提交一个好的错误报告？
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <travis.cline@gmail.com>.
-<!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
+> 您绝不能将与安全相关的问题、漏洞或包含敏感信息的错误报告给问题跟踪器或其他公共场所。相反，敏感错误必须通过电子邮件发送至 <travis.cline@gmail.com>。
+<!-- 您可以添加一个 PGP 密钥以允许加密发送消息。 -->
 
-We use GitHub issues to track bugs and errors. If you run into an issue with the project:
+我们使用 GitHub Issues 来跟踪错误。如果您遇到项目问题：
 
-- Open an [Issue](https://github.com/tmc/langchaingo/issues/new). (Since we can't be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)
-- Explain the behavior you would expect and the actual behavior.
-- Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
-- Provide the information you collected in the previous section.
+- 新建一个[问题 (Issue)](https://github.com/tmc/langchaingo/issues/new)。（由于此时我们不确定这是否是一个错误，我们要求您暂时不要称其为错误，也不要给问题添加标签。）
+- 解释您期望的行为和实际行为。
+- 请尽可能多地提供上下文，并描述其他人可以遵循的*重现步骤*，以便他们自己重现该问题。这通常包括您的代码。对于好的错误报告，您应该隔离问题并创建一个简化的测试用例。
+- 提供您在上一节中收集的信息。
 
-Once it's filed:
+提交后：
 
-- The project team will label the issue accordingly.
-- A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
-- If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
+- 项目团队将相应地标记问题。
+- 团队成员将尝试使用您提供的步骤重现该问题。如果没有重现步骤或没有明显的方法可以重现问题，团队将要求您提供这些步骤，并将问题标记为 `needs-repro`。带有 `needs-repro` 标签的错误在重现之前不会得到处理。
+- 如果团队能够重现该问题，它将被标记为 `needs-fix`，以及可能的其他标签（例如 `critical`），并且该问题将留给[某人来实现](#您的第一个代码贡献)。
 
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
+<!-- 您可能希望为错误创建一个问题模板，该模板可用作指南并定义要包含的信息的结构。如果这样做，请在此处的描述中引用它。 -->
 
 
-### Suggesting Enhancements
+### 建议增强功能
 
-This section guides you through submitting an enhancement suggestion for langchaingo, **including completely new features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.
+本节指导您为 langchaingo 提交增强功能建议，**包括全新的功能和对现有功能的微小改进**。遵循这些准则将有助于维护者和社区理解您的建议并找到相关的建议。
 
-#### Before Submitting an Enhancement
+#### 提交增强功能建议之前
 
-- Make sure that you are using the latest version.
-- Read the [documentation](https://pkg.go.dev/github.com/tmc/langchaingo) carefully and find out if the functionality is already covered, maybe by an individual configuration.
-- Perform a [search](https://github.com/tmc/langchaingo/issues) to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
-- Find out whether your idea fits with the scope and aims of the project. It's up to you to make a strong case to convince the project's developers of the merits of this feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you're just targeting a minority of users, consider writing an add-on/plugin library.
+- 确保您使用的是最新版本。
+- 仔细阅读[文档](https://pkg.go.dev/github.com/tmc/langchaingo)并确定该功能是否已被涵盖，也许可以通过单独的配置实现。
+- 执行[搜索](https://github.com/tmc/langchaingo/issues)以查看是否已有人建议过此增强功能。如果是，请向现有问题添加评论，而不是新建一个。
+- 确定您的想法是否符合项目的范围和目标。您需要充分说明理由，以说服项目的开发人员相信此功能的优点。请记住，我们希望功能对我们的大多数用户有用，而不仅仅是一小部分用户。如果您只针对少数用户，请考虑编写一个附加组件/插件库。
 
-#### How Do I Submit a Good Enhancement Suggestion?
+#### 如何提交一个好的增强功能建议？
 
-Enhancement suggestions are tracked as [GitHub issues](https://github.com/tmc/langchaingo/issues).
+增强功能建议作为 [GitHub Issues](https://github.com/tmc/langchaingo/issues) 进行跟踪。
 
-- Use a **clear and descriptive title** for the issue to identify the suggestion.
-- Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
-- **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
-- You may want to **include screenshots and animated GIFs** which help you demonstrate the steps or point out the part which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux. <!-- this should only be included if the project has a GUI -->
-- **Explain why this enhancement would be useful** to most langchaingo users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
-- We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.
+- 为问题使用**清晰且描述性的标题**以识别建议。
+- 尽可能详细地**逐步描述建议的增强功能**。
+- **描述当前行为**并**解释您期望看到的行为以及原因**。此时，您还可以说明哪些替代方案对您不起作用。
+- 您可能希望**包含屏幕截图和动画 GIF**，以帮助您演示步骤或指出建议相关的部分。您可以使用[此工具](https://www.cockos.com/licecap/)在 macOS 和 Windows 上录制 GIF，以及在 Linux 上使用[此工具](https://github.com/colinkeenan/silentcast)或[此工具](https://github.com/GNOME/byzanz)。<!-- 仅当项目具有 GUI 时才应包含此内容 -->
+- **解释为什么此增强功能对大多数 langchaingo 用户有用**。您可能还想指出其他项目如何更好地解决了该问题，哪些项目可以作为灵感。
+- 我们力求在概念上与 Langchain 的 Python 和 TypeScript 版本保持一致。在引入新概念时，请链接/引用这些代码库中的相关概念。
 
-<!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
+<!-- 您可能希望为增强功能建议创建一个问题模板，该模板可用作指南并定义要包含的信息的结构。如果这样做，请在此处的描述中引用它。 -->
 
-### Your First Code Contribution
+### 您的第一个代码贡献
 
-#### Make Changes
+#### 进行更改
 
-##### Make changes in the UI
+##### 在用户界面中进行更改
 
-Click **Make a contribution** at the bottom of any docs page to make small changes such as a typo, sentence fix, or a broken link. This takes you to the `.md` file where you can make your changes and [create a pull request](#pull-request) for a review.
+单击任何文档页面底部的**做出贡献 (Make a contribution)** 以进行小的更改，例如拼写错误、句子修正或损坏的链接。这将带您进入 `.md` 文件，您可以在其中进行更改并[创建拉取请求](#拉取请求-pull-request)以供审阅。
 
-##### Make changes locally
+##### 在本地进行更改
 
-1. Fork the repository.
-- Using GitHub Desktop:
-  - [Getting started with GitHub Desktop](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/getting-started-with-github-desktop) will guide you through setting up Desktop.
-  - Once Desktop is set up, you can use it to [fork the repo](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/cloning-and-forking-repositories-from-github-desktop)!
+1. Fork (分叉) 代码仓库。
+- 使用 GitHub Desktop：
+  - [GitHub Desktop 入门](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/getting-started-with-github-desktop)将指导您完成 Desktop 的设置。
+  - 设置好 Desktop 后，您可以使用它来 [fork 代码仓库](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/cloning-and-forking-repositories-from-github-desktop)！
 
-- Using the command line:
-  - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
+- 使用命令行：
+  - [Fork 代码仓库](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository)，以便您可以在不影响原始项目的情况下进行更改，直到准备好合并它们。
 
-2. Install or make sure **Golang** is updated.
+2. 安装或确保 **Golang** 已更新。
 
-3. Create a working branch and start with your changes!
+3. 创建一个工作分支并开始进行更改！
 
-##### Recent Updates and Dependencies
+##### 最近的更新和依赖项
 
-Be aware of these recent changes when contributing:
+贡献时请注意这些最近的更改：
 
-- **HTTP Client Standardization**: All HTTP clients now use `httputil.DefaultClient` with custom User-Agent headers (`langchaingo/{version}`)
-- **HuggingFace Environment Variables**: Supports multiple token sources in priority order: `HF_TOKEN`, `HUGGINGFACEHUB_API_TOKEN`, token file from `HF_TOKEN_PATH`, or default `~/.cache/huggingface/token`
-- **OpenAI Functions Agent**: Updated to handle OpenAI's new tool calling API while maintaining backward compatibility
-- **Chroma Vector Store**: Updated to use `github.com/amikos-tech/chroma-go` v0.1.4+
-- **Testcontainers Migration**: New testcontainers API using `Run()` instead of deprecated `RunContainer()` where supported
-- **HTTPRR Files**: No longer compressed - commit `.httprr` files directly to the repository
+- **HTTP 客户端标准化**：所有 HTTP 客户端现在都使用带有自定义 User-Agent 标头 (`langchaingo/{version}`) 的 `httputil.DefaultClient`
+- **HuggingFace 环境变量**：按优先级顺序支持多个令牌来源：`HF_TOKEN`、`HUGGINGFACEHUB_API_TOKEN`、来自 `HF_TOKEN_PATH` 的令牌文件，或默认的 `~/.cache/huggingface/token`
+- **OpenAI Functions Agent**：已更新以处理 OpenAI 新的工具调用 API，同时保持向后兼容性
+- **Chroma 向量存储**：已更新为使用 `github.com/amikos-tech/chroma-go` v0.1.4+
+- **Testcontainers 迁移**：在支持的情况下，新的 testcontainers API 使用 `Run()` 而不是已弃用的 `RunContainer()`
+- **HTTPRR 文件**：不再压缩 - 直接将 `.httprr` 文件提交到代码仓库
 
-##### Project Structure and Conventions
+##### 项目结构和约定
 
-When making changes, follow these architectural conventions:
+进行更改时，请遵循以下架构约定：
 
-- **HTTP Clients**: Use `httputil.DefaultClient` instead of `http.DefaultClient` for all HTTP operations to ensure proper User-Agent headers
-- **Interface-based Design**: Core functionality is defined through interfaces (Model, Chain, Memory, etc.)
-- **Provider Isolation**: Each LLM/embedding provider has its own package with internal client implementation
-- **Options Pattern**: Use functional options for configuration (see existing examples)
-- **Context Propagation**: All operations should accept `context.Context` for cancellation and deadlines
-- **Error Handling**: Use standardized error types and mapping (see `llms.Error` and provider error mappers)
+- **HTTP 客户端**：对所有 HTTP 操作使用 `httputil.DefaultClient` 而不是 `http.DefaultClient`，以确保正确的 User-Agent 标头
+- **基于接口的设计**：核心功能通过接口（Model、Chain、Memory 等）定义
+- **提供程序隔离**：每个 LLM/嵌入提供程序都有其自己的包，其中包含内部客户端实现
+- **选项模式 (Options Pattern)**：对配置使用功能选项（请参阅现有示例）
+- **上下文传播 (Context Propagation)**：所有操作都应接受 `context.Context` 以进行取消和设置截止日期
+- **错误处理**：使用标准化的错误类型和映射（请参阅 `llms.Error` 和提供程序错误映射器）
 
-##### Adding a New LLM Provider
+##### 添加新的 LLM 提供程序
 
-When adding a new LLM provider:
+添加新的 LLM 提供程序时：
 
-1. Create a new package under `/llms/your-provider`
-2. Implement the `llms.Model` interface
-3. Create an internal client package for HTTP interactions
-4. Use `httputil.DefaultClient` for HTTP requests
-5. Add compliance tests: `compliance.NewSuite("yourprovider", model).Run(t)`
-6. Add tests with httprr recordings for HTTP calls
-7. Follow the existing provider patterns for options and error handling
+1. 在 `/llms/your-provider` 下创建一个新包
+2. 实现 `llms.Model` 接口
+3. 为 HTTP 交互创建一个内部客户端包
+4. 对 HTTP 请求使用 `httputil.DefaultClient`
+5. 添加合规性测试：`compliance.NewSuite("yourprovider", model).Run(t)`
+6. 为 HTTP 调用添加带有 httprr 录制的测试
+7. 遵循现有的提供程序模式进行选项和错误处理
 
-##### Adding a New Vector Store
+##### 添加新的向量存储
 
-When adding a new vector store:
+添加新的向量存储时：
 
-1. Create a new package under `/vectorstores/your-store`
-2. Implement the vector store interface
-3. Use testcontainers for integration tests where possible
-4. Follow existing patterns for distance strategies and metadata filtering
+1. 在 `/vectorstores/your-store` 下创建一个新包
+2. 实现向量存储接口
+3. 尽可能使用 testcontainers 进行集成测试
+4. 遵循现有的距离策略和元数据过滤模式
 
-#### Running Tests
+#### 运行测试
 
-Before submitting your changes, make sure all tests pass:
+提交更改之前，请确保所有测试都通过：
 
 ```bash
-# Run all tests
+# 运行所有测试
 make test
 
-# Run tests for a specific package
+# 运行特定包的测试
 go test ./chains
 
-# Run a specific test
+# 运行特定测试
 go test -run TestLLMChain ./chains
 
-# Run tests with race detection
+# 运行带有竞争检测的测试
 make test-race
 
-# Run tests with coverage
+# 运行带有覆盖率的测试
 make test-cover
 
-# Test separation scripts
-./scripts/run_unit_tests.sh      # Run only unit tests (no external dependencies)
-./scripts/run_all_tests.sh       # Run complete test suite
-./scripts/run_integration_tests.sh # Run only integration tests (requires Docker)
+# 测试分离脚本
+./scripts/run_unit_tests.sh      # 仅运行单元测试（无外部依赖）
+./scripts/run_all_tests.sh       # 运行完整的测试套件
+./scripts/run_integration_tests.sh # 仅运行集成测试（需要 Docker）
 
-# Record HTTP interactions for tests (when adding new tests)
+# 录制测试的 HTTP 交互（添加新测试时）
 go test -httprecord=. -v ./path/to/package
 ```
 
-Also ensure your code passes linting:
+同时确保您的代码通过 linting (代码风格检查)：
 
 ```bash
-# Run linter
+# 运行 linter
 make lint
 
-# Run linter with auto-fix
+# 运行 linter 并自动修复
 make lint-fix
 
-# Run experimental linter configuration
+# 运行实验性 linter 配置
 make lint-exp
 
-# Run all linters including experimental
+# 运行所有 linter，包括实验性的
 make lint-all
 
-# Clean lint cache
+# 清理 lint 缓存
 make clean-lint-cache
 
-# Development tools
-make build-examples         # Build all examples to verify they compile  
-make docs                  # Generate documentation
-make run-pkgsite          # Run local documentation server
-make install-git-hooks    # Install git hooks (sets up pre-push hook)
-make pre-push             # Run lint and fast tests (suitable for git pre-push hook)
+# 开发工具
+make build-examples         # 构建所有示例以验证它们是否可以编译
+make docs                  # 生成文档
+make run-pkgsite          # 运行本地文档服务器
+make install-git-hooks    # 安装 git钩子 (设置 pre-push 钩子)
+make pre-push             # 运行 lint 和快速测试 (适用于 git pre-push 钩子)
 ```
 
-##### Additional Development Tools
+##### 其他开发工具
 
-The project includes several development tools in `/internal/devtools`:
+项目在 `/internal/devtools` 中包含多个开发工具：
 
 ```bash
-# Custom linting tools
-make lint-devtools         # Run custom architectural lints
-make lint-devtools-fix     # Run custom lints with auto-fix
-make lint-architecture     # Run architectural validation
-make lint-prepush          # Run pre-push lints
-make lint-prepush-fix      # Run pre-push lints with auto-fix
+# 自定义 linting 工具
+make lint-devtools         # 运行自定义架构 lint
+make lint-devtools-fix     # 运行自定义 lint 并自动修复
+make lint-architecture     # 运行架构验证
+make lint-prepush          # 运行 pre-push lint
+make lint-prepush-fix      # 运行 pre-push lint 并自动修复
 
-# HTTPRR management
-go run ./internal/devtools/rrtool list-packages  # List packages using httprr
-make test-record           # Re-record all HTTP interactions
+# HTTPRR 管理
+go run ./internal/devtools/rrtool list-packages  # 列出使用 httprr 的包
+make test-record           # 重新录制所有 HTTP 交互
 
-# Test pattern validation
-make lint-testing          # Check for incorrect httprr test patterns
-make lint-testing-fix      # Attempt to fix httprr test patterns automatically
+# 测试模式验证
+make lint-testing          # 检查不正确的 httprr 测试模式
+make lint-testing-fix      # 尝试自动修复 httprr 测试模式
 ```
 
-#### Testing with httprr
+#### 使用 httprr 进行测试
 
-This project uses a custom HTTP record/replay system (httprr) for testing HTTP interactions with external APIs. This allows tests to run deterministically without requiring actual API credentials or making real API calls.
+本项目使用自定义的 HTTP 录制/回放系统 (httprr) 来测试与外部 API 的 HTTP 交互。这使得测试可以确定性地运行，而无需实际的 API 凭据或进行真实的 API 调用。
 
-##### How httprr works
+##### httprr 如何工作
 
-- **Recording mode**: When tests run with real API credentials, httprr records all HTTP requests and responses to `.httprr` files in the `testdata` directory.
-- **Replay mode**: When tests run without credentials, httprr replays the recorded HTTP interactions from the `.httprr` files.
-- **Automatic mode switching**: Tests automatically skip if no credentials and no recording are available, with a helpful message.
+- **录制模式**：当测试使用真实的 API 凭据运行时，httprr 会将所有 HTTP 请求和响应录制到 `testdata` 目录中的 `.httprr` 文件中。
+- **回放模式**：当测试在没有凭据的情况下运行时，httprr 会从 `.httprr` 文件中回放录制的 HTTP 交互。
+- **自动模式切换**：如果没有可用的凭据且没有录制文件，测试会自动跳过，并显示有用的消息。
 
-##### Writing tests with httprr
+##### 使用 httprr 编写测试
 
-When writing tests that make HTTP calls to external APIs, follow this pattern:
+在编写调用外部 API 的 HTTP 测试时，请遵循以下模式：
 
 ```go
 func TestMyFeature(t *testing.T) {
     t.Parallel()
     ctx := context.Background()
-    
-    // Skip if no credentials and no recording
+
+    // 如果没有凭据且缺少录制文件，则跳过
     httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
-    
-    // Set up httprr (automatically cleaned up via t.Cleanup)
-    // Use httputil.DefaultTransport for User-Agent headers, or http.DefaultTransport for simpler cases
+
+    // 设置 httprr (通过 t.Cleanup 自动清理)
+    // 对 User-Agent 标头使用 httputil.DefaultTransport，或对更简单的情况使用 http.DefaultTransport
     rr := httprr.OpenForTest(t, httputil.DefaultTransport)
-    
+
     var opts []openai.Option
     opts = append(opts, openai.WithHTTPClient(rr.Client()))
-    
-    // Use test token when replaying
+
+    // 回放时使用测试令牌
     if !rr.Recording() {
         opts = append(opts, openai.WithToken("test-api-key"))
     }
-    // When recording, the client will use the real API key from environment
-    
+    // 录制时，客户端将使用环境中的真实 API 密钥
+
     client, err := openai.New(opts...)
     require.NoError(t, err)
-    
-    // Run your test
+
+    // 运行您的测试
     result, err := client.Call(ctx, "test input")
     require.NoError(t, err)
-    // ... assertions ...
+    // ...断言...
 }
 ```
 
-This pattern ensures:
-- **When recording**: Uses real API key from environment to capture valid responses
-- **When replaying**: Uses "test-api-key" to satisfy client validation (httprr intercepts before actual API calls)
+此模式可确保：
+- **录制时**：使用环境中的真实 API 密钥来捕获有效的响应
+- **回放时**：使用 "test-api-key" 来满足客户端验证（httprr 在实际 API 调用之前进行拦截）
 
-For other providers, use their specific options:
+对于其他提供程序，请使用其特定选项：
 
 ```go
-// HuggingFace example (supports multiple environment variables)
+// HuggingFace 示例 (支持多个环境变量)
 func TestHuggingFace(t *testing.T) {
-    // HuggingFace supports both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+    // HuggingFace 支持 HF_TOKEN 和 HUGGINGFACEHUB_API_TOKEN
     if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
         httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
     }
-    
+
     rr := httprr.OpenForTest(t, httputil.DefaultTransport)
-    
+
     apiKey := "test-api-key"
     if rr.Recording() {
         if key := os.Getenv("HF_TOKEN"); key != "" {
@@ -336,7 +333,7 @@ func TestHuggingFace(t *testing.T) {
             apiKey = key
         }
     }
-    
+
     llm, err := huggingface.New(
         huggingface.WithHTTPClient(rr.Client()),
         huggingface.WithToken(apiKey),
@@ -344,7 +341,7 @@ func TestHuggingFace(t *testing.T) {
     // ...
 }
 
-// Perplexity example  
+// Perplexity 示例
 var opts []perplexity.Option
 opts = append(opts, perplexity.WithHTTPClient(rr.Client()))
 if !rr.Recording() {
@@ -352,7 +349,7 @@ if !rr.Recording() {
 }
 tool, err := perplexity.New(opts...)
 
-// SerpAPI example with request scrubbing
+// SerpAPI 示例，带有请求清理功能
 rr.ScrubReq(func(req *http.Request) error {
     if req.URL != nil {
         q := req.URL.Query()
@@ -363,121 +360,121 @@ rr.ScrubReq(func(req *http.Request) error {
 })
 ```
 
-For tests that need to create clients multiple times, consider using a helper function:
+对于需要多次创建客户端的测试，请考虑使用辅助函数：
 
 ```go
 func newOpenAILLM(t *testing.T) *openai.LLM {
     t.Helper()
     httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
-    
+
     rr := httprr.OpenForTest(t, httputil.DefaultTransport)
-    
-    // Only run tests in parallel when not recording (to avoid rate limits)
+
+    // 仅在不录制时并行运行测试（以避免速率限制）
     if !rr.Recording() {
         t.Parallel()
     }
-    
+
     var opts []openai.Option
     opts = append(opts, openai.WithHTTPClient(rr.Client()))
-    
+
     if !rr.Recording() {
         opts = append(opts, openai.WithToken("test-api-key"))
     }
-    // When recording, openai.New() will read OPENAI_API_KEY from environment
-    
+    // 录制时，openai.New() 将从环境中读取 OPENAI_API_KEY
+
     llm, err := openai.New(opts...)
     require.NoError(t, err)
     return llm
 }
 ```
 
-##### Recording new tests
+##### 录制新测试
 
-To record HTTP interactions for new tests:
+为新测试录制 HTTP 交互：
 
-1. Set the required environment variables (e.g., `OPENAI_API_KEY`)
-2. Run the test with recording enabled:
+1. 设置所需的环境变量（例如 `OPENAI_API_KEY`）
+2. 启用录制并运行测试：
    ```bash
    go test -v -httprecord=. ./path/to/package
-   
-   # To avoid rate limits, you can control parallelism:
+
+   # 为避免速率限制，可以控制并行度：
    go test -v -httprecord=. -p 1 -parallel=1 ./path/to/package
-   
-   # Or use the Makefile target to record all packages
+
+   # 或者使用 Makefile 目标来录制所有包
    make test-record
    ```
-3. The test will create `.httprr` files in the `testdata` directory
-4. Commit these recording files with your PR
-5. For tests that require API key scrubbing, add request scrubbing functions
+3. 测试将在 `testdata` 目录中创建 `.httprr` 文件
+4. 将这些录制文件与您的 PR 一起提交
+5. 对于需要 API 密钥清理的测试，请添加请求清理函数
 
-##### Important notes about httprr
+##### 关于 httprr 的重要说明
 
-- **Transport choice**: Use `httputil.DefaultTransport` for User-Agent headers, or `http.DefaultTransport` for simpler cases
-- **Check rr.Recording()**: Use this to conditionally add test tokens only when replaying
-- **httprr handles cleanup**: OpenForTest automatically registers cleanup with t.Cleanup()
-- **Real keys for recording**: When recording, let the client use the real API key from environment
-- **Test tokens for replay**: When replaying, use "test-api-key" to satisfy client validation
-- **Parallel testing**: Only run `t.Parallel()` when not recording to avoid hitting API rate limits
-- **Multiple credential sources**: For HuggingFace, check both `HF_TOKEN` and `HUGGINGFACEHUB_API_TOKEN`
-- **Request scrubbing**: Use `rr.ScrubReq()` for APIs that need URL parameter scrubbing (like SerpAPI)
-- **Recordings are deterministic**: The same inputs should produce the same outputs
-- **Sensitive data is scrubbed**: httprr automatically removes authorization headers and other sensitive data from recordings
-- **Commit recording files**: Always commit the `.httprr` files so tests can run in CI without credentials
-- **Delete invalid recordings**: If a test fails due to an invalid recording (e.g., 401 error), delete the recording file and re-record with valid credentials
+- **Transport 选择**：对 User-Agent 标头使用 `httputil.DefaultTransport`，或对更简单的情况使用 `http.DefaultTransport`
+- **检查 rr.Recording()**：使用此选项仅在回放时有条件地添加测试令牌
+- **httprr 处理清理**：OpenForTest 会自动使用 t.Cleanup() 注册清理
+- **录制时使用真实密钥**：录制时，让客户端使用环境中的真实 API 密钥
+- **回放时使用测试令牌**：回放时，使用 "test-api-key" 来满足客户端验证
+- **并行测试**：仅在不录制时运行 `t.Parallel()` 以避免达到 API 速率限制
+- **多个凭据来源**：对于 HuggingFace，同时检查 `HF_TOKEN` 和 `HUGGINGFACEHUB_API_TOKEN`
+- **请求清理**：对需要 URL 参数清理的 API（如 SerpAPI）使用 `rr.ScrubReq()`
+- **录制是确定性的**：相同的输入应产生相同的输出
+- **敏感数据已清理**：httprr 会自动从录制中删除授权标头和其他敏感数据
+- **提交录制文件**：始终提交 `.httprr` 文件，以便测试可以在没有凭据的 CI 中运行
+- **删除无效录制**：如果由于录制无效（例如 401 错误）导致测试失败，请删除录制文件并使用有效凭据重新录制
 
-##### Debugging httprr issues
+##### 调试 httprr 问题
 
-- Use `-httprecord-debug` flag for detailed recording information
-- Use `-httpdebug` flag to see actual HTTP traffic
-- Check if recordings exist: `ls testdata/*.httprr`
-- Verify recording contents: `head testdata/TestName.httprr`
-- Use test separation scripts to isolate unit vs integration test issues:
+- 使用 `-httprecord-debug` 标志获取详细的录制信息
+- 使用 `-httpdebug` 标志查看实际的 HTTP 流量
+- 检查录制是否存在：`ls testdata/*.httprr`
+- 验证录制内容：`head testdata/TestName.httprr`
+- 使用测试分离脚本来隔离单元测试与集成测试问题：
   ```bash
-  ./scripts/run_unit_tests.sh      # Fast tests without external dependencies
-  ./scripts/run_integration_tests.sh # Tests requiring Docker/external services
+  ./scripts/run_unit_tests.sh      # 无外部依赖的快速测试
+  ./scripts/run_integration_tests.sh # 需要 Docker/外部服务的测试
   ```
 
-##### Automated httprr pattern validation
+##### 自动化的 httprr 模式验证
 
-The project includes a custom linter to detect incorrect httprr usage patterns:
+项目包含一个自定义 linter 来检测不正确的 httprr 使用模式：
 
 ```bash
-# Check for incorrect patterns
+# 检查不正确的模式
 make lint-testing
 
-# See specific issues found
+# 查看发现的具体问题
 go run ./internal/devtools/lint -testing -v
 ```
 
-The linter detects:
-- **Hardcoded test tokens**: `WithToken("test-api-key")` called unconditionally (should be conditional on `!rr.Recording()`)  
-- **Incorrect parallel execution**: `t.Parallel()` called before httprr setup (should be conditional on `!rr.Recording()`)
+linter 会检测：
+- **硬编码的测试令牌**：无条件调用 `WithToken("test-api-key")`（应根据 `!rr.Recording()` 条件调用）
+- **不正确的并行执行**：在 httprr 设置之前调用 `t.Parallel()`（应根据 `!rr.Recording()` 条件调用）
 
-These issues cause authentication errors during recording and race conditions during testing.
+这些问题会导致录制期间出现身份验证错误以及测试期间出现竞争条件。
 
-#### Commit your update
+#### 提交您的更新
 
-Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process:zap:.
+当您对更改满意后，提交它们。不要忘记进行自我审查以加快审查过程：zap:。
 
-#### Pull Request
+#### 拉取请求 (Pull Request)
 
-When you're finished with the changes, create a pull request, also known as a PR.
-- Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such as `memory: add interfaces` or `util: add helpers`)
-- Run all linters and ensure tests pass: `make lint && make test`
-- If you added new HTTP-based functionality, include httprr recordings
-- **We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.**
-- Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
-- Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
-- Enable the checkbox to [allow maintainer edits](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork) so the branch can be updated for a merge.
-Once you submit your PR, a team member will review your proposal. We may ask questions or request additional information.
-- We may ask for changes to be made before a PR can be merged, either using [suggested changes](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request) or pull request comments. You can apply suggested changes directly through the UI. You can make any other changes in your fork, then commit them to your branch.
-- As you update your PR and apply changes, mark each conversation as [resolved](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request#resolving-conversations).
-- If you run into any merge issues, checkout this [git tutorial](https://github.com/skills/resolve-merge-conflicts) to help you resolve merge conflicts and other issues.
+完成更改后，创建一个拉取请求，也称为 PR。
+- 根据 [Go 贡献指南](https://go.dev/doc/contribute#commit_messages)清晰、简洁地命名您的拉取请求标题，并以您更改的主要受影响包的名称作为前缀。（例如 `memory: add interfaces` 或 `util: add helpers`）
+- 运行所有 linter 并确保测试通过：`make lint && make test`
+- 如果您添加了新的基于 HTTP 的功能，请包含 httprr 录制
+- **我们力求在概念上与 Langchain 的 Python 和 TypeScript 版本保持一致。在引入新概念时，请链接/引用这些代码库中的相关概念。**
+- 填写“准备审阅”模板，以便我们可以审阅您的 PR。此模板可帮助审阅者了解您的更改以及拉取请求的目的。
+- 如果您正在解决某个问题，请不要忘记[将 PR 链接到问题](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue)。
+- 选中复选框以[允许维护者编辑](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork)，以便可以更新分支以进行合并。
+提交 PR 后，团队成员将审阅您的提议。我们可能会提出问题或要求提供其他信息。
+- 我们可能会要求在合并 PR 之前进行更改，可以使用[建议的更改](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request)或拉取请求评论。您可以直接通过 UI 应用建议的更改。您可以在您的 fork 中进行任何其他更改，然后将它们提交到您的分支。
+- 在更新 PR 并应用更改时，将每个对话标记为[已解决](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request#resolving-conversations)。
+- 如果遇到任何合并问题，请查看此 [git 教程](https://github.com/skills/resolve-merge-conflicts)以帮助您解决合并冲突和其他问题。
 
-#### Your PR is merged!
+#### 您的 PR 已合并！
 
-Congratulations :tada::tada: The langchaingo team thanks you :sparkles:.
+恭喜 :tada::tada: langchaingo 团队感谢您 :sparkles:。
 
-Once your PR is merged, your contributions will be publicly visible on the repository contributors list.
+PR 合并后，您的贡献将在代码仓库贡献者列表中公开可见。
 
-Now that you are part of the community!
+现在您已成为社区的一员！

@@ -1,84 +1,84 @@
-# Concepts
+# 概念
 
-Understanding the fundamental concepts behind LangChainGo helps you build better applications.
+理解 LangChainGo 背后的基本概念有助于您构建更好的应用程序。
 
-## Core architecture
+## 核心架构
 
-LangChainGo is built around several key architectural principles:
+LangChainGo 围绕几个关键的架构原则构建：
 
-### Framework design
-- **Interface-driven design**: Every major component is defined by interfaces for modularity and testability
-- **Component architecture**: Clear separation between models, chains, memory, agents, and tools
-- **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and explicit error handling
+### 框架设计
+- **接口驱动设计**：每个主要组件都由接口定义，以实现模块化和可测试性
+- **组件架构**：模型、链、内存、代理和工具之间的清晰分离
+- **Go 特定模式**：利用 Go 的优势，如接口、goroutine 和显式错误处理
 
-### Execution model
-- **Context propagation**: All operations use `context.Context` for cancellation and timeouts
-- **Error handling**: Explicit error handling with typed errors for different failure modes
-- **Concurrency**: Native support for concurrent operations using goroutines and channels
-- **Resource management**: Proper cleanup and resource management patterns
+### 执行模型
+- **上下文传播**：所有操作都使用 `context.Context` 进行取消和超时
+- **错误处理**：针对不同故障模式的显式错误处理和类型化错误
+- **并发性**：使用 goroutine 和通道对并发操作的原生支持
+- **资源管理**：适当的清理和资源管理模式
 
-## Language models
+## 语言模型
 
-### Model abstraction
-The `Model` interface provides a unified way to interact with different LLM providers:
-- Consistent API across OpenAI, Anthropic, Google AI, and local models
-- Multi-modal capabilities for text, images, and other content types
-- Flexible configuration through functional options
-- Provider-specific features accessible through type assertions
+### 模型抽象
+`Model` 接口提供了与不同 LLM 提供商交互的统一方式：
+- 跨 OpenAI、Anthropic、Google AI 和本地模型的一致 API
+- 文本、图像和其他内容类型的多模态功能
+- 通过函数选项进行灵活配置
+- 通过类型断言访问提供商特定功能
 
-### Communication patterns
-- **Request/Response**: Standard synchronous communication with LLMs
-- **Streaming**: Real-time response streaming for better user experience  
-- **Batch processing**: Efficient handling of multiple requests
-- **Rate limiting**: Built-in backoff and retry mechanisms
+### 通信模式
+- **请求/响应**：与 LLM 的标准同步通信
+- **流式传输**：实时响应流式传输，提供更好的用户体验
+- **批处理**：高效处理多个请求
+- **速率限制**：内置退避和重试机制
 
-## Memory and state management
+## 内存和状态管理
 
-### Memory types
-- **Buffer memory**: Stores complete conversation history
-- **Window memory**: Maintains sliding window of recent messages
-- **Token buffer**: Manages memory based on token count limits
-- **Summary memory**: Automatically summarizes older conversations
+### 内存类型
+- **缓冲内存**：存储完整的对话历史
+- **窗口内存**：维护最近消息的滑动窗口
+- **令牌缓冲**：基于令牌计数限制管理内存
+- **摘要内存**：自动摘要较旧的对话
 
-### State persistence
-- In-memory storage for development and testing
-- File-based persistence for straightforward applications
-- Database integration for production applications
-- Custom storage backends through interfaces
+### 状态持久化
+- 用于开发和测试的内存存储
+- 适用于简单应用程序的基于文件的持久化
+- 用于生产应用程序的数据库集成
+- 通过接口自定义存储后端
 
-## Agents and autonomy
+## 代理和自主性
 
-### Agent architecture
-Agents combine reasoning with tool usage:
-- **Decision making**: LLM determines which tools to use
-- **Tool integration**: Seamless integration with external APIs and functions
-- **Execution loop**: Iterative reasoning-action-observation cycles
-- **Memory integration**: Maintain context across multiple tool calls
+### 代理架构
+代理将推理与工具使用相结合：
+- **决策制定**：LLM 确定使用哪些工具
+- **工具集成**：与外部 API 和函数的无缝集成
+- **执行循环**：迭代的推理-行动-观察循环
+- **内存集成**：在多个工具调用之间维护上下文
 
-### Tool system
-- Built-in tools for common operations (calculator, web search, file operations)
-- Custom tool creation through straightforward interfaces
-- Tool composition for complex operations
-- Error handling and timeout management
+### 工具系统
+- 用于常见操作的内置工具（计算器、网络搜索、文件操作）
+- 通过简单接口创建自定义工具
+- 用于复杂操作的工具组合
+- 错误处理和超时管理
 
-## Production considerations
+## 生产环境考虑
 
-### Performance
-- Connection pooling for HTTP clients
-- Caching strategies for responses and embeddings
-- Concurrent processing with goroutines
-- Memory-efficient streaming operations
+### 性能
+- HTTP 客户端的连接池
+- 响应和嵌入的缓存策略
+- 使用 goroutine 进行并发处理
+- 内存高效的流式操作
 
-### Reliability
-- Circuit breaker patterns for external API calls
-- Graceful degradation when services are unavailable
-- Comprehensive error handling and recovery
-- Health checks and monitoring integration
+### 可靠性
+- 外部 API 调用的断路器模式
+- 服务不可用时的优雅降级
+- 全面的错误处理和恢复
+- 健康检查和监控集成
 
-### Security
-- Secure API key management
-- Input validation and sanitization
-- Output filtering for sensitive data
-- Rate limiting and abuse protection
+### 安全性
+- 安全的 API 密钥管理
+- 输入验证和清理
+- 敏感数据的输出过滤
+- 速率限制和滥用保护
 
-These concepts form the foundation for building robust, scalable applications with LangChainGo. Each concept builds upon Go's strengths while providing the flexibility needed for diverse AI applications.
+这些概念构成了使用 LangChainGo 构建强大、可扩展应用程序的基础。每个概念都建立在 Go 的优势之上，同时为多样化的 AI 应用程序提供所需的灵活性。

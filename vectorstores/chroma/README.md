@@ -1,64 +1,49 @@
-# Chroma Support
+# Chroma 支持
 
-You can access Chroma via the included implementation of the
-[`vectorstores.VectorStore` interface](../vectorstores.go)
-by creating and using a Chroma client `Store` instance with
-the [`New` function](./chroma.go) API.
+您可以通过包含的 [`vectorstores.VectorStore` 接口](../vectorstores.go) 实现来访问 Chroma，方法是使用 [`New` 函数](./chroma.go) API 创建并使用 Chroma 客户端 `Store` 实例。
 
-## Client/Server
+## 客户端/服务器模式
 
-Until
-[an "in-memory" version](https://docs.trychroma.com/usage-guide#running-chroma-in-clientserver-mode)
-is released, only client/server mode is available.
+在[“内存中”版本](https://docs.trychroma.com/usage-guide#running-chroma-in-clientserver-mode)发布之前，仅提供客户端/服务器模式。
 
-> **Note:** Additional ways to run Chroma locally can be found
-> in [Chroma Cookbook](https://cookbook.chromadb.dev/running/running-chroma/)
+> **注意：** 更多在本地运行 Chroma 的方法可以在 [Chroma 指南](https://cookbook.chromadb.dev/running/running-chroma/)中找到。
 
-Use the [`WithChromaURL` API](./options.go) or the `CHROMA_URL` environment
-variable to specify the URL of the Chroma server when creating the client instance.
+创建客户端实例时，使用 [`WithChromaURL` API](./options.go) 或 `CHROMA_URL` 环境变量来指定 Chroma 服务器的 URL。
 
-## Using OpenAI LLM
+## 使用 OpenAI LLM
 
-To use the OpenAI LLM with Chroma, use either the
-[`WithOpenAIAPIKey` API](./options.go) or the `OPENAI_API_KEY` environment
-variable when creating the client.
+要将 OpenAI LLM 与 Chroma 一起使用，请在创建客户端时使用 [`WithOpenAIAPIKey` API](./options.go) 或 `OPENAI_API_KEY` 环境变量。
 
-## Running With Docker
+## 使用 Docker 运行
 
-Running a Chroma server in a local docker instance can be especially useful for testing
-and development workflows. An example invocation scenario is presented below:
+在本地 Docker 实例中运行 Chroma 服务器对于测试和开发工作流特别有用。下面提供了一个示例调用场景：
 
-### Starting the Chroma Server
+### 启动 Chroma 服务器
 
-As of this writing, the newest release of the Chroma docker image is
-[chroma:0.5.0](https://github.com/chroma-core/chroma/pkgs/container/chroma/184319417?tag=0.5.0).
-Running it directly while exposing its port to your local machine can be
-accomplished with:
+在撰写本文时，Chroma Docker 镜像的最新版本是 [chroma:0.5.0](https://github.com/chroma-core/chroma/pkgs/container/chroma/184319417?tag=0.5.0)。
+可以通过以下命令直接运行它，同时将其端口暴露给您的本地计算机：
 
 ```shell
 $ docker run -p 8000:8000 ghcr.io/chroma-core/chroma:0.5.0
 ```
 
-### Running an Example `langchaingo` Application
+### 运行示例 `langchaingo` 应用程序
 
-With the "Simple Docker Server" running (see above), running the included
-example `langchaingo` app should produce the following result:
+在“简单 Docker 服务器”运行的情况下（见上文），运行包含的示例 `langchaingo` 应用程序应产生以下结果：
 
 ```shell
 $ export CHROMA_URL=http://localhost:8000
-$ export OPENAI_API_KEY=YourOpenApiKeyGoesHere
+$ export OPENAI_API_KEY=此处填写您的OpenApiKey
 $ go run ./examples/chroma-vectorstore-example/chroma_vectorstore_example.go
-Results:
-1. case: Up to 5 Cities in Japan
-    result: Tokyo, Nagoya, Kyoto, Fukuoka, Hiroshima
-2. case: A City in South America
-    result: Buenos Aires
-3. case: Large Cities in South America
-    result: Sao Paulo, Rio de Janeiro
+结果:
+1. 案例: 日本最多五个城市
+    结果: 东京, 名古屋, 京都, 福冈, 广岛
+2. 案例: 南美洲的一个城市
+    结果: 布宜诺斯艾利斯
+3. 案例: 南美洲的大城市
+    结果: 圣保罗, 里约热内卢
 ```
 
-## Tests
+## 测试
 
-The test suite `chroma_test.go` started as a clone of the adjacent `pinecone_test.go`,
-and is initially quite sparse. Consider contributing new test cases, or adding
-coverage to accompany any changes made to the code.
+测试套件 `chroma_test.go` 最初是相邻的 `pinecone_test.go` 的克隆版本，内容相对较少。欢迎贡献新的测试用例，或为代码更改添加覆盖范围。

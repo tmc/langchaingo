@@ -1,77 +1,76 @@
-# How-to guides
+# 操作指南
 
-These how-to guides answer "How do I...?" questions with practical solutions for specific problems.
+这些操作指南通过针对特定问题的实用解决方案来回答 “我该如何...?” 这类问题。
 
-**Note**: Many guides are still being written. Want to help? See our [documentation contribution guide](/docs/contributing/documentation)!
+**注意**：许多指南仍在编写中。想要帮忙吗？请参阅我们的[文档贡献指南](/docs/contributing/documentation)！
 
-## LLMs and chat models
+## LLM 和聊天模型
 
-### Basic configuration
-- [How to configure different LLM providers](./configure-llm-providers)
+### 基本配置
+- [如何配置不同的 LLM 提供商](./configure-llm-providers)
 
-### Advanced features
-- How to handle API rate limits and retries
-- How to stream responses from LLMs  
-- How to use function calling with OpenAI
-- How to implement custom LLM providers
+### 高级功能
+- 如何处理 API 速率限制和重试
+- 如何从 LLM 流式传输响应
+- 如何将函数调用与 OpenAI 结合使用
+- 如何实现自定义 LLM 提供商
 
-## Prompts and templates
+## 提示和模板
 
-### Template creation
-- How to create dynamic prompt templates
-- How to implement few-shot prompting
+### 模板创建
+- 如何创建动态提示模板
+- 如何实现少样本提示 (few-shot prompting)
 
-### Output processing
-- How to parse structured output from LLMs
-- How to validate and sanitize LLM outputs
+### 输出处理
+- 如何从 LLM 解析结构化输出
+- 如何验证和清理 LLM 输出
 
-## Memory and conversation
+## 记忆和对话
 
-### Memory management
-- How to implement conversation memory
-- How to persist conversation history
-- How to implement context windowing
-- How to handle long conversations
+### 记忆管理
+- 如何实现对话记忆
+- 如何持久化对话历史
+- 如何实现上下文窗口
+- 如何处理长对话
 
-## Agents and tools
+## 代理和工具
 
-### Tool development
-- How to create custom tools for agents
-- How to handle tool execution errors
+### 工具开发
+- 如何为代理创建自定义工具
+- 如何处理工具执行错误
 
-### Agent optimization
-- How to implement multi-step reasoning
-- How to optimize agent performance
+### 代理优化
+- 如何实现多步推理
+- 如何优化代理性能
 
-## Production and deployment
+## 生产和部署
 
-### Project structure
-- How to structure LangChainGo projects
-- How to handle secrets and configuration
+### 项目结构
+- 如何构建 LangChainGo 项目
+- 如何处理密钥和配置
 
-### Monitoring and scaling
-- How to implement logging and monitoring
-- How to deploy with Docker
-- How to implement health checks
-- How to scale LangChainGo applications
+### 监控和扩展
+- 如何实现日志记录和监控
+- 如何使用 Docker 部署
+- 如何实现健康检查
+- 如何扩展 LangChainGo 应用程序
 
-## Testing and debugging
+## 测试和调试
 
-### Testing strategies
-- How to write tests for LangChainGo components
-- How to mock LLM responses for testing
+### 测试策略
+- 如何为 LangChainGo 组件编写测试
+- 如何模拟 LLM 响应以进行测试
 
-### Performance
-- How to debug chain execution
-- How to benchmark performance
+### 性能
+- 如何调试链执行过程
+- 如何进行性能基准测试
 
-## Integration patterns
+## 集成模式
 
-### Web applications
-- How to integrate with web frameworks (Gin, Echo)
-- How to implement background processing
+### Web 应用程序
+- 如何与 Web 框架（Gin、Echo）集成
+- 如何实现后台处理
 
-### Data integration
-- How to integrate with databases
-- How to implement caching strategies
-
+### 数据集成
+- 如何与数据库集成
+- 如何实现缓存策略
