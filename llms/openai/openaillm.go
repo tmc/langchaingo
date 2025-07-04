@@ -161,8 +161,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
-			Content:    c.Message.Content,
-			StopReason: fmt.Sprint(c.FinishReason),
+			Content:          c.Message.Content,
+			ReasoningContent: c.Message.ReasoningContent,
+			StopReason:       fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
 				"CompletionTokens": result.Usage.CompletionTokens,
 				"PromptTokens":     result.Usage.PromptTokens,
