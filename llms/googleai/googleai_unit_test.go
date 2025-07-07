@@ -403,4 +403,170 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Len(t, funcDecl.Parameters.Properties, 2)
 		assert.Contains(t, funcDecl.Parameters.Required, "location")
 	})
+
+	t.Run("nested object schema", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name:        "create_user",
+					Description: "Create a user with nested address",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"name": map[string]any{
+								"type":        "string",
+								"description": "User name",
+							},
+							"address": map[string]any{
+								"type":        "object",
+								"description": "User address",
+								"properties": map[string]any{
+									"street": map[string]any{
+										"type":        "string",
+										"description": "Street address",
+									},
+									"city": map[string]any{
+										"type":        "string",
+										"description": "City name",
+									},
+									"coordinates": map[string]any{
+										"type":        "object",
+										"description": "GPS coordinates",
+										"properties": map[string]any{
+											"lat": map[string]any{
+												"type":        "number",
+												"description": "Latitude",
+											},
+											"lng": map[string]any{
+												"type":        "number",
+												"description": "Longitude",
+											},
+										},
+										"required": []string{"lat", "lng"},
+									},
+								},
+								"required": []string{"street", "city"},
+							},
+						},
+						"required": []string{"name", "address"},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Len(t, result[0].FunctionDeclarations, 1)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		assert.Equal(t, "create_user", funcDecl.Name)
+		assert.Equal(t, "Create a user with nested address", funcDecl.Description)
+		assert.NotNil(t, funcDecl.Parameters)
+		assert.Len(t, funcDecl.Parameters.Properties, 2)
+		assert.Contains(t, funcDecl.Parameters.Required, "name")
+		assert.Contains(t, funcDecl.Parameters.Required, "address")
+
+		// Check nested address object
+		addressProp := funcDecl.Parameters.Properties["address"]
+		assert.NotNil(t, addressProp)
+		assert.Len(t, addressProp.Properties, 3)
+		assert.Contains(t, addressProp.Required, "street")
+		assert.Contains(t, addressProp.Required, "city")
+
+		// Check deeply nested coordinates object
+		coordsProp := addressProp.Properties["coordinates"]
+		assert.NotNil(t, coordsProp)
+		assert.Len(t, coordsProp.Properties, 2)
+		assert.Contains(t, coordsProp.Required, "lat")
+		assert.Contains(t, coordsProp.Required, "lng")
+	})
+
+	t.Run("array with nested objects", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name:        "create_order",
+					Description: "Create an order with array of items",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"customer_id": map[string]any{
+								"type":        "string",
+								"description": "Customer ID",
+							},
+							"items": map[string]any{
+								"type":        "array",
+								"description": "Order items",
+								"items": map[string]any{
+									"type":        "object",
+									"description": "Individual item",
+									"properties": map[string]any{
+										"product_id": map[string]any{
+											"type":        "string",
+											"description": "Product ID",
+										},
+										"quantity": map[string]any{
+											"type":        "integer",
+											"description": "Quantity",
+										},
+										"customizations": map[string]any{
+											"type":        "array",
+											"description": "Item customizations",
+											"items": map[string]any{
+												"type":        "object",
+												"description": "Customization option",
+												"properties": map[string]any{
+													"option": map[string]any{
+														"type":        "string",
+														"description": "Customization option name",
+													},
+													"value": map[string]any{
+														"type":        "string",
+														"description": "Customization value",
+													},
+												},
+												"required": []string{"option", "value"},
+											},
+										},
+									},
+									"required": []string{"product_id", "quantity"},
+								},
+							},
+						},
+						"required": []string{"customer_id", "items"},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Len(t, result[0].FunctionDeclarations, 1)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		assert.Equal(t, "create_order", funcDecl.Name)
+		assert.Equal(t, "Create an order with array of items", funcDecl.Description)
+		assert.NotNil(t, funcDecl.Parameters)
+		assert.Len(t, funcDecl.Parameters.Properties, 2)
+		assert.Contains(t, funcDecl.Parameters.Required, "customer_id")
+		assert.Contains(t, funcDecl.Parameters.Required, "items")
+
+		// Check items array
+		itemsProp := funcDecl.Parameters.Properties["items"]
+		assert.NotNil(t, itemsProp)
+		assert.NotNil(t, itemsProp.Items)
+		assert.Len(t, itemsProp.Items.Properties, 3)
+		assert.Contains(t, itemsProp.Items.Required, "product_id")
+		assert.Contains(t, itemsProp.Items.Required, "quantity")
+
+		// Check nested customizations array
+		customizationsProp := itemsProp.Items.Properties["customizations"]
+		assert.NotNil(t, customizationsProp)
+		assert.NotNil(t, customizationsProp.Items)
+		assert.Len(t, customizationsProp.Items.Properties, 2)
+		assert.Contains(t, customizationsProp.Items.Required, "option")
+		assert.Contains(t, customizationsProp.Items.Required, "value")
+	})
 }
