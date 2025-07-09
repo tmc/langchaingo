@@ -1,9 +1,8 @@
 //nolint:contextcheck
-package cloudsql
+package cloudsql_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -14,6 +13,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/tmc/langchaingo/memory/cloudsql"
 	"github.com/tmc/langchaingo/util/cloudsqlutil"
 )
 
@@ -51,9 +51,10 @@ func preCheckEnvSetting(t *testing.T) string {
 	return pgvectorURL
 }
 
-func setEngineWithImage(ctx context.Context, t *testing.T) (cloudsqlutil.PostgresEngine, error) {
+func setEngineWithImage(t *testing.T) cloudsqlutil.PostgresEngine {
 	t.Helper()
 	pgvectorURL := preCheckEnvSetting(t)
+	ctx := context.Background()
 	myPool, err := pgxpool.New(ctx, pgvectorURL)
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
@@ -66,15 +67,75 @@ func setEngineWithImage(ctx context.Context, t *testing.T) (cloudsqlutil.Postgre
 		t.Fatal("Could not set Engine: ", err)
 	}
 
-	return pgEngine, err
+	return pgEngine
 }
 
 func TestValidateTableWithContainer(t *testing.T) {
 	t.Parallel()
 	ctx, cancel := context.WithCancel(context.Background())
-	engine, err := setEngineWithImage(ctx, t)
-	if err != nil {
-		t.Fatal(fmt.Printf("setEngineWithImage Error: %s", err))
+	engine := setEngineWithImage(t)
+
+	t.Cleanup(func() {
+		cancel()
+		engine.Close()
+	})
+	tcs := []struct {
+		desc      string
+		tableName string
+		sessionID string
+		err       string
+	}{
+		{
+			desc:      "Successful creation of Chat Message History",
+			tableName: "items",
+			sessionID: "session",
+			err:       "",
+		},
+
+		{
+			desc:      "Creation of Chat Message History with missing session ID",
+			tableName: "testchattable",
+			sessionID: "",
+			err:       "session ID must be provided",
+		},
 	}
-	cmhTestCases(ctx, t, engine, cancel)
+
+	for _, tc := range tcs {
+		t.Run(tc.desc, func(t *testing.T) {
+			err := engine.InitChatHistoryTable(ctx, tc.tableName)
+			if err != nil {
+				t.Fatal("Failed to create chat msg table", err)
+			}
+			chatMsgHistory, err := cloudsql.NewChatMessageHistory(ctx, engine, tc.tableName, tc.sessionID)
+			if tc.err != "" && (err == nil || !strings.Contains(err.Error(), tc.err)) {
+				t.Fatalf("unexpected error: got %q, want %q", err, tc.err)
+			} else {
+				if err != nil {
+					errStr := err.Error()
+					if errStr != tc.err {
+						t.Fatalf("unexpected error: got %q, want %q", errStr, tc.err)
+					}
+				}
+			}
+			// if the chat message history was created successfully, continue with the other methods tests
+			if err == nil {
+				err = chatMsgHistory.AddMessage(ctx, chatMsg{})
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = chatMsgHistory.AddAIMessage(ctx, "AI message")
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = chatMsgHistory.AddUserMessage(ctx, "user message")
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = chatMsgHistory.Clear(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
 }
