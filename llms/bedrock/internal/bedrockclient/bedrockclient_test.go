@@ -316,12 +316,12 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 			expectedSystem: "",
 		},
 		{
-			name: "unsupported role",
+			name: "function role converted to user",
 			messages: []Message{
 				{Role: llms.ChatMessageTypeFunction, Type: "text", Content: "Function call"},
 			},
-			expectError:   true,
-			errorContains: "role not supported",
+			expectedMsgs:   1,
+			expectedSystem: "",
 		},
 	}
 
@@ -369,14 +369,14 @@ func TestGetAnthropicRole(t *testing.T) {
 			expected: AnthropicRoleUser,
 		},
 		{
-			name:        "function role not supported",
-			role:        llms.ChatMessageTypeFunction,
-			expectError: true,
+			name:     "function role treated as user",
+			role:     llms.ChatMessageTypeFunction,
+			expected: AnthropicRoleUser,
 		},
 		{
-			name:        "tool role not supported",
-			role:        llms.ChatMessageTypeTool,
-			expectError: true,
+			name:     "tool role treated as user",
+			role:     llms.ChatMessageTypeTool,
+			expected: AnthropicRoleUser,
 		},
 	}
 
@@ -661,10 +661,7 @@ func TestAnthropicResponseParsing(t *testing.T) {
 	output := anthropicTextGenerationOutput{
 		Type: "message",
 		Role: "assistant",
-		Content: []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		}{
+		Content: []anthropicContentBlock{
 			{
 				Type: "text",
 				Text: "Hello! I'm Claude, an AI assistant.",
@@ -716,12 +713,9 @@ func TestEmptyResponses(t *testing.T) {
 
 	t.Run("Anthropic empty content", func(t *testing.T) {
 		output := anthropicTextGenerationOutput{
-			Type: "message",
-			Role: "assistant",
-			Content: []struct {
-				Type string `json:"type"`
-				Text string `json:"text"`
-			}{},
+			Type:       "message",
+			Role:       "assistant",
+			Content:    []anthropicContentBlock{},
 			StopReason: AnthropicCompletionReasonEndTurn,
 		}
 
