@@ -23,9 +23,9 @@ func preCheckEnvSetting(t *testing.T) string {
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	ctx := context.Background()
 	if pgvectorURL == "" {
-		pgVectorContainer, err := tcpostgres.RunContainer(
+		pgVectorContainer, err := tcpostgres.Run(
 			ctx,
-			testcontainers.WithImage("docker.io/pgvector/pgvector:pg16"),
+			"docker.io/pgvector/pgvector:pg16",
 			tcpostgres.WithDatabase("db_test"),
 			tcpostgres.WithUsername("user"),
 			tcpostgres.WithPassword("passw0rd!"),
