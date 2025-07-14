@@ -580,7 +580,7 @@ func TestAmazonResponseParsing(t *testing.T) {
 	output := amazonTextGenerationOutput{
 		InputTextTokenCount: 5,
 		Results: []struct {
-			TokenCount       int    `json:"tokenCount"`
+			TokenCount       int32  `json:"tokenCount"`
 			OutputText       string `json:"outputText"`
 			CompletionReason string `json:"completionReason"`
 		}{
@@ -599,9 +599,9 @@ func TestAmazonResponseParsing(t *testing.T) {
 	err = json.Unmarshal(data, &parsed)
 	require.NoError(t, err)
 
-	require.Equal(t, 5, parsed.InputTextTokenCount)
+	require.Equal(t, int32(5), parsed.InputTextTokenCount)
 	require.Len(t, parsed.Results, 1)
-	require.Equal(t, 15, parsed.Results[0].TokenCount)
+	require.Equal(t, int32(15), parsed.Results[0].TokenCount)
 	require.Equal(t, "AI is transforming the world.", parsed.Results[0].OutputText)
 	require.Equal(t, AmazonCompletionReasonFinish, parsed.Results[0].CompletionReason)
 }
@@ -654,8 +654,8 @@ func TestMetaResponseParsing(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, output.Generation, parsed.Generation)
-	require.Equal(t, 7, parsed.PromptTokenCount)
-	require.Equal(t, 12, parsed.GenerationTokenCount)
+	require.Equal(t, int32(7), parsed.PromptTokenCount)
+	require.Equal(t, int32(12), parsed.GenerationTokenCount)
 	require.Equal(t, MetaCompletionReasonStop, parsed.StopReason)
 }
 
@@ -672,8 +672,8 @@ func TestAnthropicResponseParsing(t *testing.T) {
 		StopReason:   AnthropicCompletionReasonEndTurn,
 		StopSequence: "",
 		Usage: struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
+			InputTokens  int32 `json:"input_tokens"`
+			OutputTokens int32 `json:"output_tokens"`
 		}{
 			InputTokens:  10,
 			OutputTokens: 15,
@@ -693,8 +693,8 @@ func TestAnthropicResponseParsing(t *testing.T) {
 	require.Equal(t, "text", parsed.Content[0].Type)
 	require.Equal(t, "Hello! I'm Claude, an AI assistant.", parsed.Content[0].Text)
 	require.Equal(t, AnthropicCompletionReasonEndTurn, parsed.StopReason)
-	require.Equal(t, 10, parsed.Usage.InputTokens)
-	require.Equal(t, 15, parsed.Usage.OutputTokens)
+	require.Equal(t, int32(10), parsed.Usage.InputTokens)
+	require.Equal(t, int32(15), parsed.Usage.OutputTokens)
 }
 
 // Edge case tests
@@ -703,7 +703,7 @@ func TestEmptyResponses(t *testing.T) {
 		output := amazonTextGenerationOutput{
 			InputTextTokenCount: 5,
 			Results: []struct {
-				TokenCount       int    `json:"tokenCount"`
+				TokenCount       int32  `json:"tokenCount"`
 				OutputText       string `json:"outputText"`
 				CompletionReason string `json:"completionReason"`
 			}{},
@@ -745,8 +745,8 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					StopReason   any    `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
 					Usage        struct {
-						InputTokens  int `json:"input_tokens"`
-						OutputTokens int `json:"output_tokens"`
+						InputTokens  int32 `json:"input_tokens"`
+						OutputTokens int32 `json:"output_tokens"`
 					} `json:"usage"`
 				}{
 					ID:    "msg-123",
@@ -754,8 +754,8 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					Role:  "assistant",
 					Model: "claude-3",
 					Usage: struct {
-						InputTokens  int `json:"input_tokens"`
-						OutputTokens int `json:"output_tokens"`
+						InputTokens  int32 `json:"input_tokens"`
+						OutputTokens int32 `json:"output_tokens"`
 					}{
 						InputTokens: 25,
 					},
@@ -795,7 +795,7 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					StopReason: AnthropicCompletionReasonEndTurn,
 				},
 				Usage: struct {
-					OutputTokens int `json:"output_tokens"`
+					OutputTokens int32 `json:"output_tokens"`
 				}{
 					OutputTokens: 12,
 				},

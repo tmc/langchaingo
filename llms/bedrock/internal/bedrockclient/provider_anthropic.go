@@ -114,8 +114,8 @@ type anthropicTextGenerationOutput struct {
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
 	Usage        struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
+		InputTokens  int32 `json:"input_tokens"`
+		OutputTokens int32 `json:"output_tokens"`
 	} `json:"usage"`
 }
 
@@ -302,13 +302,13 @@ type streamingCompletionResponseChunk struct {
 		Input map[string]any `json:"input"`
 	} `json:"content_block"`
 	AmazonBedrockInvocationMetrics struct {
-		InputTokenCount   int `json:"inputTokenCount"`
-		OutputTokenCount  int `json:"outputTokenCount"`
-		InvocationLatency int `json:"invocationLatency"`
-		FirstByteLatency  int `json:"firstByteLatency"`
+		InputTokenCount   int32 `json:"inputTokenCount"`
+		OutputTokenCount  int32 `json:"outputTokenCount"`
+		InvocationLatency int32 `json:"invocationLatency"`
+		FirstByteLatency  int32 `json:"firstByteLatency"`
 	} `json:"amazon-bedrock-invocationMetrics"`
 	Usage struct {
-		OutputTokens int `json:"output_tokens"`
+		OutputTokens int32 `json:"output_tokens"`
 	} `json:"usage"`
 	Message struct {
 		ID           string `json:"id"`
@@ -319,8 +319,8 @@ type streamingCompletionResponseChunk struct {
 		StopReason   any    `json:"stop_reason"`
 		StopSequence any    `json:"stop_sequence"`
 		Usage        struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
+			InputTokens  int32 `json:"input_tokens"`
+			OutputTokens int32 `json:"output_tokens"`
 		} `json:"usage"`
 	} `json:"message"`
 }

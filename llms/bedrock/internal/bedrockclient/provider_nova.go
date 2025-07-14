@@ -96,11 +96,11 @@ type novaTextGenerationOutput struct {
 	} `json:"output"`
 	StopReason string `json:"stopReason"`
 	Usage      struct {
-		InputTokens               int  `json:"inputTokens"`
-		OutputTokens              int  `json:"outputTokens"`
-		TotalTokens               int  `json:"totalTokens"`
-		CacheReadInputTokenCount  *int `json:"cacheReadInputTokenCount"`
-		CacheWriteInputTokenCount *int `json:"cacheWriteInputTokenCount"`
+		InputTokens               int32  `json:"inputTokens"`
+		OutputTokens              int32  `json:"outputTokens"`
+		TotalTokens               int32  `json:"totalTokens"`
+		CacheReadInputTokenCount  *int32 `json:"cacheReadInputTokenCount"`
+		CacheWriteInputTokenCount *int32 `json:"cacheWriteInputTokenCount"`
 	} `json:"usage"`
 }
 
@@ -114,13 +114,13 @@ type novaStreamingResponseChunk struct {
 	MessageStart struct {
 		Role  string `json:"role"`
 		Usage struct {
-			InputTokens int `json:"inputTokens"`
+			InputTokens int32 `json:"inputTokens"`
 		} `json:"usage"`
 	} `json:"messageStart"`
 	MessageDelta struct {
 		StopReason string `json:"stopReason"`
 		Usage      struct {
-			OutputTokens int `json:"outputTokens"`
+			OutputTokens int32 `json:"outputTokens"`
 		} `json:"usage"`
 	} `json:"messageDelta"`
 	MessageStop struct{} `json:"messageStop"`

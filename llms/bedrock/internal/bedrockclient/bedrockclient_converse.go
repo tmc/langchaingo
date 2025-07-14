@@ -495,9 +495,15 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 
 	// Add usage information
 	if response.Usage != nil {
-		choice.GenerationInfo["input_tokens"] = response.Usage.InputTokens
-		choice.GenerationInfo["output_tokens"] = response.Usage.OutputTokens
-		choice.GenerationInfo["total_tokens"] = response.Usage.TotalTokens
+		if response.Usage.InputTokens != nil {
+			choice.GenerationInfo["input_tokens"] = *response.Usage.InputTokens
+		}
+		if response.Usage.OutputTokens != nil {
+			choice.GenerationInfo["output_tokens"] = *response.Usage.OutputTokens
+		}
+		if response.Usage.TotalTokens != nil {
+			choice.GenerationInfo["total_tokens"] = *response.Usage.TotalTokens
+		}
 	}
 
 	return &llms.ContentResponse{

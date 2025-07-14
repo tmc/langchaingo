@@ -40,11 +40,11 @@ type amazonTextGenerationInput struct {
 // amazonTextGenerationOutput is the output for the text generation for Amazon Models.
 type amazonTextGenerationOutput struct {
 	// The number of tokens in the prompt
-	InputTextTokenCount int `json:"inputTextTokenCount"`
+	InputTextTokenCount int32 `json:"inputTextTokenCount"`
 	// The results of the request
 	Results []struct {
 		// The number of tokens in the response
-		TokenCount int `json:"tokenCount"`
+		TokenCount int32 `json:"tokenCount"`
 		// The generated text
 		OutputText string `json:"outputText"`
 		// The reason for the completion of the generation
@@ -59,8 +59,8 @@ type amazonStreamingResponseChunk struct {
 	Index                int    `json:"index"`
 	TotalOutputTextCount int    `json:"totalOutputTextCount"`
 	CompletionReason     string `json:"completionReason"`
-	InputTextTokenCount  int    `json:"inputTextTokenCount"`
-	OutputTextTokenCount int    `json:"outputTextTokenCount"`
+	InputTextTokenCount  int32  `json:"inputTextTokenCount"`
+	OutputTextTokenCount int32  `json:"outputTextTokenCount"`
 }
 
 // Finish reason for the completion of the generation for Amazon Models.

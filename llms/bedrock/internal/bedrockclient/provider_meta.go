@@ -35,9 +35,9 @@ type metaTextGenerationOutput struct {
 	// The generated text.
 	Generation string `json:"generation"`
 	// The number of tokens in the prompt.
-	PromptTokenCount int `json:"prompt_token_count"`
+	PromptTokenCount int32 `json:"prompt_token_count"`
 	// The number of tokens in the generated text.
-	GenerationTokenCount int `json:"generation_token_count"`
+	GenerationTokenCount int32 `json:"generation_token_count"`
 	// The reason why the response stopped generating text.
 	// One of: ["stop", "length"]
 	StopReason string `json:"stop_reason"`
@@ -46,13 +46,13 @@ type metaTextGenerationOutput struct {
 // Meta streaming response structure
 type metaStreamingResponseChunk struct {
 	Generation           string `json:"generation"`
-	PromptTokenCount     int    `json:"prompt_token_count,omitempty"`
-	GenerationTokenCount int    `json:"generation_token_count,omitempty"`
+	PromptTokenCount     int32  `json:"prompt_token_count,omitempty"`
+	GenerationTokenCount int32  `json:"generation_token_count,omitempty"`
 	StopReason           string `json:"stop_reason,omitempty"`
 	Amazon               struct {
 		BedrockInvocationMetrics struct {
-			InputTokenCount  int `json:"inputTokenCount"`
-			OutputTokenCount int `json:"outputTokenCount"`
+			InputTokenCount  int32 `json:"inputTokenCount"`
+			OutputTokenCount int32 `json:"outputTokenCount"`
 		} `json:"bedrock-invocationMetrics"`
 	} `json:"amazon-bedrock-invocationMetrics,omitempty"`
 }

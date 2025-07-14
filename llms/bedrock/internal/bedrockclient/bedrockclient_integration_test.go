@@ -118,8 +118,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				require.Len(t, resp.Choices, 1)
 				assert.Equal(t, "Hello! How can I help you?", resp.Choices[0].Content)
 				assert.Equal(t, Ai21CompletionReasonStop, resp.Choices[0].StopReason)
-				assert.Equal(t, 5, resp.Choices[0].GenerationInfo["input_tokens"])
-				assert.Equal(t, 7, resp.Choices[0].GenerationInfo["output_tokens"])
+				assert.Equal(t, int32(5), resp.Choices[0].GenerationInfo["input_tokens"])
+				assert.Equal(t, int32(7), resp.Choices[0].GenerationInfo["output_tokens"])
 			},
 		},
 		{
@@ -135,7 +135,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 			mockResponse: amazonTextGenerationOutput{
 				InputTextTokenCount: 4,
 				Results: []struct {
-					TokenCount       int    `json:"tokenCount"`
+					TokenCount       int32  `json:"tokenCount"`
 					OutputText       string `json:"outputText"`
 					CompletionReason string `json:"completionReason"`
 				}{
@@ -150,8 +150,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				require.Len(t, resp.Choices, 1)
 				assert.Equal(t, "Hello! I'm Amazon Titan.", resp.Choices[0].Content)
 				assert.Equal(t, AmazonCompletionReasonFinish, resp.Choices[0].StopReason)
-				assert.Equal(t, 4, resp.Choices[0].GenerationInfo["input_tokens"])
-				assert.Equal(t, 8, resp.Choices[0].GenerationInfo["output_tokens"])
+				assert.Equal(t, int32(4), resp.Choices[0].GenerationInfo["input_tokens"])
+				assert.Equal(t, int32(8), resp.Choices[0].GenerationInfo["output_tokens"])
 			},
 		},
 		{
@@ -176,8 +176,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				},
 				StopReason: AnthropicCompletionReasonEndTurn,
 				Usage: struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens  int32 `json:"input_tokens"`
+					OutputTokens int32 `json:"output_tokens"`
 				}{
 					InputTokens:  10,
 					OutputTokens: 5,
@@ -187,8 +187,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				require.Len(t, resp.Choices, 1)
 				assert.Equal(t, "Hello! I'm Claude.", resp.Choices[0].Content)
 				assert.Equal(t, AnthropicCompletionReasonEndTurn, resp.Choices[0].StopReason)
-				assert.Equal(t, 10, resp.Choices[0].GenerationInfo["input_tokens"])
-				assert.Equal(t, 5, resp.Choices[0].GenerationInfo["output_tokens"])
+				assert.Equal(t, int32(10), resp.Choices[0].GenerationInfo["input_tokens"])
+				assert.Equal(t, int32(5), resp.Choices[0].GenerationInfo["output_tokens"])
 			},
 		},
 		{
@@ -245,8 +245,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				require.Len(t, resp.Choices, 1)
 				assert.Equal(t, "Hello! I'm LLaMA 2.", resp.Choices[0].Content)
 				assert.Equal(t, MetaCompletionReasonStop, resp.Choices[0].StopReason)
-				assert.Equal(t, 3, resp.Choices[0].GenerationInfo["input_tokens"])
-				assert.Equal(t, 6, resp.Choices[0].GenerationInfo["output_tokens"])
+				assert.Equal(t, int32(3), resp.Choices[0].GenerationInfo["input_tokens"])
+				assert.Equal(t, int32(6), resp.Choices[0].GenerationInfo["output_tokens"])
 			},
 		},
 		{
@@ -441,16 +441,16 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 				StopReason   any    `json:"stop_reason"`
 				StopSequence any    `json:"stop_sequence"`
 				Usage        struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens  int32 `json:"input_tokens"`
+					OutputTokens int32 `json:"output_tokens"`
 				} `json:"usage"`
 			}{
 				ID:   "msg-123",
 				Type: "message",
 				Role: "assistant",
 				Usage: struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens  int32 `json:"input_tokens"`
+					OutputTokens int32 `json:"output_tokens"`
 				}{
 					InputTokens: 10,
 				},
@@ -503,7 +503,7 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
 			Usage: struct {
-				OutputTokens int `json:"output_tokens"`
+				OutputTokens int32 `json:"output_tokens"`
 			}{
 				OutputTokens: 15,
 			},
@@ -538,8 +538,8 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 	require.Len(t, resp.Choices, 1)
 	assert.Equal(t, "Once upon a time, there was a brave knight.", resp.Choices[0].Content)
 	assert.Equal(t, AnthropicCompletionReasonEndTurn, resp.Choices[0].StopReason)
-	assert.Equal(t, 10, resp.Choices[0].GenerationInfo["input_tokens"])
-	assert.Equal(t, 15, resp.Choices[0].GenerationInfo["output_tokens"])
+	assert.Equal(t, int32(10), resp.Choices[0].GenerationInfo["input_tokens"])
+	assert.Equal(t, int32(15), resp.Choices[0].GenerationInfo["output_tokens"])
 
 	// Validate streamed content
 	assert.Equal(t, []string{"Once upon a time, ", "there was a brave knight."}, streamedContent)
@@ -643,7 +643,7 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 			},
 			mockResponse: amazonTextGenerationOutput{
 				Results: []struct {
-					TokenCount       int    `json:"tokenCount"`
+					TokenCount       int32  `json:"tokenCount"`
 					OutputText       string `json:"outputText"`
 					CompletionReason string `json:"completionReason"`
 				}{},
@@ -879,8 +879,8 @@ func testCreateAi21CompletionWithMock(ctx context.Context, client *mockBedrockCl
 			Content:    c.Data.Text,
 			StopReason: c.FinishReason.Reason,
 			GenerationInfo: map[string]any{
-				"input_tokens":  len(output.Prompt.Tokens),
-				"output_tokens": len(c.Data.Tokens),
+				"input_tokens":  int32(len(output.Prompt.Tokens)),
+				"output_tokens": int32(len(c.Data.Tokens)),
 			},
 		}
 	}

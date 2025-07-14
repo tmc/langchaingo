@@ -71,9 +71,9 @@ type ai21JambaOutput struct {
 		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {
-		PromptTokens     int `json:"prompt_tokens"`
-		CompletionTokens int `json:"completion_tokens"`
-		TotalTokens      int `json:"total_tokens"`
+		PromptTokens     int32 `json:"prompt_tokens"`
+		CompletionTokens int32 `json:"completion_tokens"`
+		TotalTokens      int32 `json:"total_tokens"`
 	} `json:"usage"`
 	Meta  any    `json:"meta"`
 	Model string `json:"model"`
@@ -85,8 +85,8 @@ type ai21StreamingResponseChunk struct {
 	FinishReason string `json:"finish_reason,omitempty"`
 	Index        int    `json:"index,omitempty"`
 	Usage        struct {
-		PromptTokens     int `json:"prompt_tokens"`
-		CompletionTokens int `json:"completion_tokens"`
+		PromptTokens     int32 `json:"prompt_tokens"`
+		CompletionTokens int32 `json:"completion_tokens"`
 	} `json:"usage,omitempty"`
 }
 
@@ -218,8 +218,8 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 			StopReason: completion.FinishReason.Reason,
 			GenerationInfo: map[string]any{
 				"id":            output.ID,
-				"input_tokens":  len(output.Prompt.Tokens),
-				"output_tokens": len(completion.Data.Tokens),
+				"input_tokens":  int32(len(output.Prompt.Tokens)),
+				"output_tokens": int32(len(completion.Data.Tokens)),
 			},
 		}
 	}
