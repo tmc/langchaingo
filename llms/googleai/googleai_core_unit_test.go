@@ -295,7 +295,7 @@ func TestConvertResponse(t *testing.T) { //nolint:funlen
 
 			// Check for thinking content in metadata
 			if hasThinkingContent(tt.response) {
-				assert.Contains(t, choice.GenerationInfo, "thinking")
+				assert.NotEmpty(t, choice.ReasoningContent)
 			}
 		})
 	}

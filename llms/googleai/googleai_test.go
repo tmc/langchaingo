@@ -530,11 +530,7 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 		assert.Contains(t, resp.Choices[0].Content, "42")
 
 		// Check that thinking content is present in metadata
-		if metadata, ok := resp.Choices[0].GenerationInfo["thinking"]; ok {
-			thinkingContent, ok := metadata.(string)
-			assert.True(t, ok, "thinking metadata should be a string")
-			assert.NotEmpty(t, thinkingContent, "thinking content should not be empty")
-		}
+		assert.NotEmpty(t, resp.Choices[0].ReasoningContent, "thinking content should not be empty")
 	})
 
 	t.Run("streaming", func(t *testing.T) {
@@ -581,5 +577,6 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 		assert.NotEmpty(t, resp.Choices)
 		assert.Contains(t, resp.Choices[0].Content, "42")
 		assert.NotEmpty(t, thinkingContent.String(), "Thinking content should be streamed")
+		assert.Equal(t, resp.Choices[0].ReasoningContent, thinkingContent.String())
 	})
 }

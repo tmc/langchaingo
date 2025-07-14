@@ -112,7 +112,7 @@ func (g *GoogleAI) GenerateContent(
 		config.ResponseMIMEType = ResponseMIMETypeJson
 	}
 
-	// Handle thinking configuration for 2.5 models
+	// Handle thinking configuration for reasoning models
 	if opts.Reasoning != nil && opts.Reasoning.IsEnabled() {
 		thinkingBudget := int32(opts.Reasoning.GetTokens(opts.MaxTokens))
 		if thinkingBudget > 0 {
@@ -200,7 +200,6 @@ func (g *GoogleAI) generateFromSingleMessage(
 		return convertResponse(resp)
 	}
 
-	// For streaming
 	return g.generateStreamingContent(ctx, model, content, config, opts)
 }
 
@@ -254,6 +253,7 @@ func (g *GoogleAI) generateStreamingContent(
 	defer streaming.CallWithDone(ctx, opts.StreamingFunc)
 
 	var accumulatedContent strings.Builder
+	var accumulatedReasoningContent strings.Builder
 	var accumulatedToolCalls []llms.ToolCall
 
 	// Trying to keep the same ID for the same tool call name
@@ -279,7 +279,7 @@ func (g *GoogleAI) generateStreamingContent(
 		for _, part := range candidate.Content.Parts {
 			if len(part.Text) > 0 {
 				if part.Thought {
-					// Stream thinking content separately if supported
+					accumulatedReasoningContent.WriteString(part.Text)
 					chunk := streaming.Chunk{
 						Type:    streaming.ChunkTypeReasoning,
 						Content: part.Text,
@@ -311,8 +311,9 @@ func (g *GoogleAI) generateStreamingContent(
 StreamEnd:
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{{
-			Content:   accumulatedContent.String(),
-			ToolCalls: accumulatedToolCalls,
+			Content:          accumulatedContent.String(),
+			ReasoningContent: accumulatedReasoningContent.String(),
+			ToolCalls:        accumulatedToolCalls,
 		}},
 	}, nil
 }
@@ -360,11 +361,6 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
 
-		// Add thinking content if present
-		if len(thinkingContent) > 0 {
-			metadata["thinking"] = thinkingContent
-		}
-
 		if resp.UsageMetadata != nil {
 			metadata["input_tokens"] = resp.UsageMetadata.PromptTokenCount
 			metadata["output_tokens"] = resp.UsageMetadata.CandidatesTokenCount
@@ -372,10 +368,11 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 		}
 
 		choices = append(choices, &llms.ContentChoice{
-			Content:        buf.String(),
-			StopReason:     string(candidate.FinishReason),
-			GenerationInfo: metadata,
-			ToolCalls:      toolCalls,
+			Content:          buf.String(),
+			ReasoningContent: thinkingContent,
+			StopReason:       string(candidate.FinishReason),
+			GenerationInfo:   metadata,
+			ToolCalls:        toolCalls,
 		})
 	}
 
