@@ -233,7 +233,7 @@ func TestAmazonOutputLegacyAPI(t *testing.T) {
 	}
 }
 
-func TestAmazonStreamingOutputConverseAPI(t *testing.T) {
+func TestAmazonStreamingOutputConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -331,6 +331,8 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) {
 				streamedChunks = append(streamedChunks, chunk.Content)
 			case streaming.ChunkTypeDone:
 				isDone = true
+			default:
+				// Ignore other chunks in this test
 			}
 			return nil
 		}
@@ -371,7 +373,7 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) {
 	}
 }
 
-func TestAmazonStreamingOutputLegacyAPI(t *testing.T) {
+func TestAmazonStreamingOutputLegacyAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -469,6 +471,8 @@ func TestAmazonStreamingOutputLegacyAPI(t *testing.T) {
 				streamedChunks = append(streamedChunks, chunk.Content)
 			case streaming.ChunkTypeDone:
 				isDone = true
+			default:
+				// Ignore other chunks in this test
 			}
 			return nil
 		}
@@ -1117,6 +1121,8 @@ func testReasoningWorkflow(
 			switch chunk.Type {
 			case streaming.ChunkTypeReasoning:
 				reasoningChunks = append(reasoningChunks, chunk.ReasoningContent)
+			default:
+				// Ignore other chunks in this test
 			}
 			return nil
 		}
@@ -1190,6 +1196,8 @@ type calculatorSchema struct {
 }
 
 // testToolCallingWorkflow tests the complete tool calling workflow for a given model
+//
+//nolint:funlen
 func testToolCallingWorkflow(
 	ctx context.Context,
 	t *testing.T,
@@ -1258,6 +1266,8 @@ func testToolCallingWorkflow(
 				} else {
 					streaming.AppendToolCall(toolCall, resToolCall)
 				}
+			default:
+				// Ignore other chunks in this test
 			}
 			return nil
 		}

@@ -184,7 +184,9 @@ func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, e
 			case llms.ToolCall:
 				var arguments map[string]any
 				if part.FunctionCall != nil {
-					json.Unmarshal([]byte(part.FunctionCall.Arguments), &arguments)
+					if err := json.Unmarshal([]byte(part.FunctionCall.Arguments), &arguments); err != nil {
+						return nil, err
+					}
 				}
 				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
 					Role: m.Role,
