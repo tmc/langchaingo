@@ -1,0 +1,38 @@
+httprr trace v1
+557 2229
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 243
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":4096,"messages":[{"role":"user","content":[{"type":"text","text":"Think step by step: What is 17 * 23? Show your reasoning process."}]}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
+Content-Length: 1944
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 12:08:55 GMT
+X-Amzn-Bedrock-Input-Token-Count: 54
+X-Amzn-Bedrock-Invocation-Latency: 6577
+X-Amzn-Bedrock-Output-Token-Count: 368
+X-Amzn-Requestid: 32f6bd72-4e42-4bc8-bfb6-4df9b99d2209
+
+{"id":"msg_bdrk_01S6i9gjiN81Tj9SVDWJ5GiH","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[{"type":"thinking","thinking":"I need to calculate 17 * 23. Let me do this step by step using the standard multiplication method.\n\n17 * 23\n\nI can break this down as:\n17 * (20 + 3)\n= 17 * 20 + 17 * 3\n= 340 + 51\n= 391\n\nLet me double-check this using the standard multiplication algorithm:\n\n    17\n  × 23\n  ----\n    51  (17 × 3)\n   340  (17 × 20)\n  ----\n   391\n\nSo 17 * 23 = 391","signature":"EoYECkgIBRABGAIqQNgPRy9k06lN319EyMT3TlIY0JtdTEVVbnZ057Ky+8RfWMpNO9k6MIrYoQa6dulDWmyAKl/ZBMZeMUQw2k1Z+zoSDCqET9cB+NnfK5c3hRoMMoNLMalQh3gB2ijHIjCeZ5YpJbHNWgAfvLY+iLOXYGvUYA7RWW8Gqyd/UGOyosFgTkTpsWKVyoKSQGwyfdEq6wJdLm7qFED7odfn2Kt5Xq6ffbu84e35rybigDVyIjIggZrFhZcFIFogy/6vNqbvIV04S3P6F4Uzjn7xuRKRT+D75VqSh/wf+qkejSVodrvzhRqJRftaKmM2Y927jbRV4ZSn0ADR36Aa8sF6FJg25sDsrCXkSYBjR6nEchw1ud/JZwqkecDO8P5k3bKQ5qpARZlqm8nfiZLjhQw/UFTZbYO/8OFm6aFw4rdVz4KNghKtx19vwzPDFmaarWZO/bSSDQMt5z0IOwHhY9QkevQTBVjg9/vRx7WVlMGarOpblRvKJy/vo9Mw8U5gTDHnvRV6o91Bn2FB3+QZ1KKX5kdIkqM9JX6mAR+4kCVtTCO+KVg2hMuCI/cDHE9gH53TO6sMYKm17Y6+0VI0H2/QRxuEOmbHqd/0WZ/B6MhmnwEx9qp+dLrjnMaJyQw40USKwihjRnb1H+a21OpHmKL0h1wLgP2b64gk89/3Wg7kXVgYAQ=="},{"type":"text","text":"I'll solve 17 × 23 step by step using the distributive property.\n\n**Step 1: Break down 23 into easier parts**\n23 = 20 + 3\n\n**Step 2: Apply the distributive property**\n17 × 23 = 17 × (20 + 3) = (17 × 20) + (17 × 3)\n\n**Step 3: Calculate each part**\n- 17 × 20 = 340\n- 17 × 3 = 51\n\n**Step 4: Add the results together**\n340 + 51 = 391\n\n**Verification using standard multiplication:**\n```\n    17\n  × 23\n  ----\n    51  (17 × 3)\n   340  (17 × 20)\n  ----\n   391\n```\n\nTherefore, **17 × 23 = 391**"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":54,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":368}}559 1742
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 243
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":4096,"messages":[{"role":"user","content":[{"type":"text","text":"Think step by step: What is 17 * 23? Show your reasoning process."}]}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
+Content-Length: 1457
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 12:09:05 GMT
+X-Amzn-Bedrock-Input-Token-Count: 54
+X-Amzn-Bedrock-Invocation-Latency: 8145
+X-Amzn-Bedrock-Output-Token-Count: 377
+X-Amzn-Requestid: f1468b89-cdc9-4f6e-9df0-74cf3638686d
+
+{"id":"msg_bdrk_01Gu7CT1cfKu2nbnkHKZAenh","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[{"type":"thinking","thinking":"To multiply 17 * 23, I'll break this down into steps:\n\nStep 1: I can use the distributive property to make this easier. Let me rewrite 17 * 23 as 17 * (20 + 3).\n17 * 23 = 17 * (20 + 3) = 17 * 20 + 17 * 3\n\nStep 2: Calculate 17 * 20\n17 * 20 = 17 * 2 * 10 = 34 * 10 = 340\n\nStep 3: Calculate 17 * 3\n17 * 3 = 51\n\nStep 4: Add the results from Step 2 and Step 3\n17 * 23 = 340 + 51 = 391","signature":"ErcBCkgIBRABGAIiQIWEBOuDBa7budxFOLGzT9elfnAEVQe0uvhNaaK7ctWtkz5UjRGps0Aetbmv3j5A/N1JMnQ16F4Z5+rl9b0ll6kSDCdJ/M1kW+uXFbEqYxoMlgVereK9tXRClFGIIjDHm881TjRFzFFrnaTn3GDQ51svRPT0wtRQPCOfhR1ujP+JVcFfxeg8GkcMiXw1l7kqHaPc5dnjccg4LuhIbmzf7TOA1HooAbbyBcCY1xmNGAI="},{"type":"text","text":"# Finding the product of 17 × 23\n\nI'll solve this step by step.\n\n## Method 1: Standard multiplication\nLet me multiply these numbers the traditional way:\n```\n    17\n  × 23\n  ----\n    51  (17 × 3)\n   340  (17 × 20)\n  ----\n   391\n```\n\n## Method 2: Using the distributive property\nI can break down 23 into 20 + 3:\n\n17 × 23 = 17 × (20 + 3)\n        = (17 × 20) + (17 × 3)\n        = 340 + 51\n        = 391\n\nTherefore, 17 × 23 = 391."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":54,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":377}}

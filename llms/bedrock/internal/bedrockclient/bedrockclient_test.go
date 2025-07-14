@@ -52,7 +52,7 @@ func TestGetProvider(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := getProvider(tt.modelID)
+			result := GetProvider(tt.modelID)
 			require.Equal(t, tt.expected, result)
 		})
 	}
@@ -376,9 +376,9 @@ func TestGetAnthropicRole(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name:        "tool role not supported",
-			role:        llms.ChatMessageTypeTool,
-			expectError: true,
+			name:     "tool role",
+			role:     llms.ChatMessageTypeTool,
+			expected: AnthropicRoleUser,
 		},
 	}
 
@@ -663,10 +663,7 @@ func TestAnthropicResponseParsing(t *testing.T) {
 	output := anthropicTextGenerationOutput{
 		Type: "message",
 		Role: "assistant",
-		Content: []struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		}{
+		Content: []anthropicContentBlock{
 			{
 				Type: "text",
 				Text: "Hello! I'm Claude, an AI assistant.",
@@ -718,12 +715,9 @@ func TestEmptyResponses(t *testing.T) {
 
 	t.Run("Anthropic empty content", func(t *testing.T) {
 		output := anthropicTextGenerationOutput{
-			Type: "message",
-			Role: "assistant",
-			Content: []struct {
-				Type string `json:"type"`
-				Text string `json:"text"`
-			}{},
+			Type:       "message",
+			Role:       "assistant",
+			Content:    []anthropicContentBlock{},
 			StopReason: AnthropicCompletionReasonEndTurn,
 		}
 
@@ -776,8 +770,10 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 				Delta: struct {
 					Type         string `json:"type"`
 					Text         string `json:"text"`
+					PartialJSON  string `json:"partial_json"`
 					StopReason   string `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
+					Thinking     string `json:"thinking,omitempty"`
 				}{
 					Type: "text_delta",
 					Text: "Hello, how can I help you today?",
@@ -791,8 +787,10 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 				Delta: struct {
 					Type         string `json:"type"`
 					Text         string `json:"text"`
+					PartialJSON  string `json:"partial_json"`
 					StopReason   string `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
+					Thinking     string `json:"thinking,omitempty"`
 				}{
 					StopReason: AnthropicCompletionReasonEndTurn,
 				},

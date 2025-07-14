@@ -1,76 +1,135 @@
 package bedrock
 
 const (
-	// Jurassic-2 Ultra is AI21’s most powerful model for complex tasks that require
-	// advanced text generation and comprehension.
+	// Jamba 1.5 Large is part of the Jamba 1.5 Model Family with a 256K token effective context window,
+	// one of the largest on the market. Jamba 1.5 models focus on speed and efficiency,
+	// delivering up to 2.5x faster inference than leading models of comparable size.
+	// Jamba supports function calling/tool use, structured output (JSON) and documents API.
 	//
-	// Popular use cases include question answering, summarization, long-form copy generation,
-	// advanced information extraction, and more.
+	// Popular use cases include text generation, conversation, and instruction following.
 	//
-	// Max tokens: 8191
-	//
-	// Languages: English, Spanish, French, German, Portuguese, Italian, Dutch.
-	ModelAi21J2UltraV1 = "ai21.j2-ultra-v1"
+	// Max tokens: 256k
+	// Languages: English (primary), French, Spanish, Portuguese, German, Arabic, Hebrew, and many others.
+	ModelAi21Jamba15LargeV1 = "ai21.jamba-1-5-large-v1:0"
 
-	// Jurassic-2 Mid is less powerful than Ultra, yet carefully designed to strike
-	// the right balance between exceptional quality and affordability.
+	// Jamba 1.5 Mini is part of the Jamba 1.5 Model Family with a 256K token effective context window,
+	// one of the largest on the market. Jamba 1.5 models focus on speed and efficiency,
+	// delivering up to 2.5x faster inference than leading models of comparable size.
+	// Jamba supports function calling/tool use, structured output (JSON) and documents API.
 	//
-	// Jurassic-2 Mid can be applied to any language comprehension or generation task
-	// including question answering, summarization, long-form copy generation,
-	// advanced information extraction and many others.
+	// Popular use cases include text generation, conversation, and instruction following.
 	//
-	// Max tokens: 8191
-	// Languages: English, Spanish, French, German, Portuguese, Italian, Dutch.
-	ModelAi21J2MidV1 = "ai21.j2-mid-v1"
-	// Amazon Titan Text Lite is a light weight efficient model ideal for fine-tuning
-	// for English-language tasks, including like summarization and copywriting,
-	// where customers want a smaller, more cost-effective model that is also highly customizable.
+	// Max tokens: 256k
+	// Languages: English (primary), French, Spanish, Portuguese, German, Arabic, Hebrew, and many others.
+	ModelAi21Jamba15MiniV1 = "ai21.jamba-1-5-mini-v1:0"
+
+	// Jamba-Instruct offers an impressive 256K context window and delivers the best value per price
+	// on core text generation, summarization, and question answering tasks for the enterprise.
 	//
-	// Max tokens: 4k
+	// Popular use cases include text generation, document summarization, and question answering.
+	//
+	// Max tokens: 256k
 	// Languages: English.
-	ModelAmazonTitanTextLiteV1 = "amazon.titan-text-lite-v1"
+	ModelAi21JambaInstructV1 = "ai21.jamba-instruct-v1:0"
 
-	// Amazon Titan Text Express has a context length of up to 8,000 tokens,
-	// making it well-suited for a wide range of advanced, general language tasks such as
-	// open-ended text generation and conversational chat, as well as support within
-	// Retrieval Augmented Generation (RAG).
+	// Amazon Nova Premier is the most capable of Amazon's multimodal models for complex reasoning tasks
+	// and for use as the best teacher for distilling custom models. It supports agents, chat optimization,
+	// code generation, complex reasoning analysis, conversation, math, multilingual support,
+	// question answering, RAG, text generation, text summarization, translation, and video-to-text.
 	//
-	// Max tokens: 8k
-	// Languages: English (GA), Multilingual in 100+ languages (Preview).
-	ModelAmazonTitanTextExpressV1 = "amazon.titan-text-express-v1"
+	// Max tokens: 1M
+	// Languages: 200+ languages.
+	ModelAmazonNovaPremiereV1 = "us.amazon.nova-premier-v1:0"
 
-	// Amazon Nova Micro is a text only model that delivers the lowest latency responses at very low cost.
-	// It is highly performant at language understanding, translation, reasoning, code completion,
-	// brainstorming, and mathematical problem-solving. With its generation speed of over 200 tokens per second,
-	// Amazon Nova Micro is ideal for applications that require fast responses.
-	//
-	// Max tokens: 128k
-	// Languages: English, Multilingual in 200+ languages.
-	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
-
-	// Amazon Nova Lite is a very low-cost multimodal model that is lightning fast for
-	// processing image, video, and text inputs. Amazon Nova Lite’s accuracy across a
-	// breadth of tasks, coupled with its lightning-fast speed, makes it suitable for
-	// a wide range of interactive and high-volume applications where cost is a key
-	// consideration.
+	// Amazon Nova Pro is a multimodal understanding foundation model. It is multilingual and can reason
+	// over text, images and videos. It supports agents, chat optimization, code generation, complex
+	// reasoning analysis, conversation, math, multilingual support, question answering, RAG, text
+	// generation, text summarization, translation, and video-to-text.
 	//
 	// Max tokens: 300k
-	// Languages: English, Multilingual in 200+ languages.
+	// Languages: 200+ languages.
+	ModelAmazonNovaProV1 = "us.amazon.nova-pro-v1:0"
+
+	// Amazon Nova Lite is a multimodal understanding foundation model. It is multilingual and can reason
+	// over text, images and videos. It supports agents, chat optimization, conversation, math, multilingual
+	// support, question answering, RAG, text generation, text summarization, translation, and video-to-text.
+	//
+	// Max tokens: 300k
+	// Languages: 200+ languages.
 	ModelAmazonNovaLiteV1 = "us.amazon.nova-lite-v1:0"
 
-	// Amazon Nova Pro is a highly capable multimodal model with the best combination of
-	// accuracy, speed, and cost for a wide range of tasks. Amazon Nova Pro’s capabilities,
-	// coupled with its industry-leading speed and cost efficiency, makes it a compelling
-	// model for almost any task, including video summarization, Q&A, mathematical reasoning,
-	// software development, and AI agents that can execute multi-step workflows. In
-	// addition to state-of-the-art accuracy on text and visual intelligence benchmarks,
-	// Amazon Nova Pro excels at instruction following and agentic workflows as measured by
-	// Comprehensive RAG Benchmark (CRAG), the Berkeley Function Calling Leaderboard, and
-	// Mind2Web.
+	// Amazon Nova Micro is a text-to-text understanding foundation model. It is multilingual and can reason
+	// over text. It supports agents, chat optimization, conversation, math, multilingual support, question
+	// answering, RAG, text generation, text summarization, and translation.
 	//
-	// Max tokens: 300k
-	// Languages: English, Multilingual in 200+ languages.
-	ModelAmazonNovaProV1 = "us.amazon.nova-pro-v1:0"
+	// Max tokens: 128k
+	// Languages: 200+ languages.
+	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
+
+	// Amazon Titan Text Premier is a powerful and advanced model within the Titan Text family,
+	// designed to deliver superior performance across a wide range of enterprise applications.
+	// With its cutting-edge capabilities, it offers enhanced accuracy and exceptional results,
+	// making it an excellent choice for organizations seeking top-notch text processing solutions.
+	//
+	// Max tokens: 32k
+	// Languages: English.
+	ModelAmazonTitanTextPremierV1 = "amazon.titan-text-premier-v1:0"
+
+	// Claude Opus 4 is Anthropic's most intelligent model and is state-of-the-art for coding
+	// and agent capabilities, especially agentic search. It excels for customers needing
+	// frontier intelligence including advanced coding, AI agents, agentic search and research,
+	// long-horizon tasks and complex problem solving, and content creation.
+	//
+	// Max tokens: 200k
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish and other languages.
+	ModelAnthropicClaudeOpus4 = "us.anthropic.claude-opus-4-20250514-v1:0"
+
+	// Claude Sonnet 4 balances impressive performance for coding with the right speed and cost
+	// for high-volume use cases. It handles everyday development tasks, powers production-ready
+	// AI assistants, performs efficient research, and generates large-scale content.
+	//
+	// Max tokens: 200k
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish and other languages.
+	ModelAnthropicClaudeSonnet4 = "us.anthropic.claude-sonnet-4-20250514-v1:0"
+
+	// Claude 3.7 Sonnet is Anthropic's most intelligent model to date and the first Claude model
+	// to offer extended thinking—the ability to solve complex problems with careful, step-by-step
+	// reasoning. It's state-of-the-art for coding and ideal for powering AI agents.
+	//
+	// Max tokens: 200k
+	// Languages: English, Spanish, Japanese, and multiple other languages.
+	ModelAnthropicClaude37Sonnet = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+
+	// Claude 3.5 Haiku is Anthropic's fastest and most cost-effective model, excelling at use cases
+	// like code and test case generation, sub-agents, and user-facing chatbots.
+	//
+	// Max tokens: 200k
+	// Languages: English, Spanish, Japanese, and multiple other languages.
+	ModelAnthropicClaude35Haiku = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
+	// Claude 3.5 Sonnet (v2) is the upgraded version that is now state-of-the-art for a variety of tasks
+	// including real-world software engineering, agentic capabilities and computer use.
+	// It can process images and return text outputs, and features a 200K context window.
+	//
+	// Max tokens: 200k
+	// Languages: English, Spanish, Japanese, and multiple other languages.
+	ModelAnthropicClaude35SonnetV2 = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+	// Claude 3.5 Sonnet (v1) raises the industry bar for intelligence, outperforming competitor models
+	// and Claude 3 Opus on a wide range of evaluations, with the speed and cost of the mid-tier model.
+	// It can process images and return text outputs, and features a 200K context window.
+	//
+	// Max tokens: 200k
+	// Languages: English, Spanish, Japanese, and multiple other languages.
+	ModelAnthropicClaude35SonnetV1 = "us.anthropic.claude-3-5-sonnet-20240620-v1:0"
+
+	// Claude 3 Opus is Anthropic's most powerful AI model, with state-of-the-art performance on highly complex tasks.
+	// It can navigate open-ended prompts and sight-unseen scenarios with remarkable fluency and human-like understanding.
+	// Claude 3 Opus can process images and return text outputs, and features a 200K context window.
+	//
+	// Max tokens: 200k
+	// Languages: English and multiple other languages.
+	ModelAnthropicClaude3Opus = "us.anthropic.claude-3-opus-20240229-v1:0"
 
 	// Claude 3 Sonnet by Anthropic strikes the ideal balance between intelligence and
 	// speed—particularly for enterprise workloads. It offers maximum utility at a lower
@@ -92,26 +151,19 @@ const (
 	// Languages: English and multiple other languages.
 	ModelAnthropicClaudeV3Haiku = "anthropic.claude-3-haiku-20240307-v1:0"
 
-	// An update to Claude 2 that features double the context window, plus improvements
-	// across reliability, hallucination rates, and evidence-based accuracy in long document and RAG contexts.
+	// Command R is a generative language model optimized for long-context tasks and large scale production workloads.
+	// It supports natural language processing, text generation, and text summarization.
 	//
-	// Max tokens: 200k
-	// Languages: English and multiple other languages.
-	ModelAnthropicClaudeV21 = "anthropic.claude-v2:1"
+	// Max tokens: 128k
+	// Languages: English, French, Spanish, Italian, German, Portuguese, Japanese, Korean, Arabic, and Chinese.
+	ModelCohereCommandRV1 = "cohere.command-r-v1:0"
 
-	// Anthropic's highly capable model across a wide range of tasks from sophisticated dialogue
-	// and creative content generation to detailed instruction following.
+	// Command R+ is a highly performant generative language model optimized for large scale production workloads.
+	// It supports natural language processing, text generation, and text summarization.
 	//
-	// Max tokens: 100k
-	// Languages: English and multiple other languages.
-	ModelAnthropicClaudeV2 = "anthropic.claude-v2"
-
-	// A fast, affordable yet still very capable model, which can handle a range of tasks
-	// including casual dialogue, text analysis, summarization, and document question-answering.
-	//
-	// Max tokens: 100k
-	// Languages: English and multiple other languages.
-	ModelAnthropicClaudeInstantV1 = "anthropic.claude-instant-v1"
+	// Max tokens: 128k
+	// Languages: English, French, Spanish, Italian, German, Portuguese, Japanese, Korean, Arabic, and Chinese.
+	ModelCohereCommandRPlusV1 = "cohere.command-r-plus-v1:0"
 
 	// Command is Cohere's flagship text generation model.
 	// It is trained to follow user commands and to be instantly useful in practical business applications.
@@ -127,39 +179,70 @@ const (
 	// Languages: English.
 	ModelCohereCommandLightTextV14 = "cohere.command-light-text-v14"
 
-	// A dialogue use case optimized variant of Llama 2 models.
-	// Llama 2 is an auto-regressive language model that uses an optimized transformer architecture.
-	// Llama 2 is intended for commercial and research use in English.
-	// This is the 13 billion parameter variant.
+	// Llama 4 Maverick offers unparalleled, industry-leading performance in image and text understanding
+	// with support for 12 languages, enabling the creation of sophisticated AI applications that bridge
+	// language barriers. As the product workhorse model for general assistant and chat use cases,
+	// it's great for precise image understanding and creative writing.
 	//
-	// Max tokens: 4096
-	// Languages: English.
-	ModelMetaLlama213bChatV1 = "meta.llama2-13b-chat-v1"
+	// Max tokens: 1M
+	// Languages: English, French, German, Hindi, Italian, Portuguese, Spanish, Thai, Arabic, Indonesian, Tagalog, Vietnamese.
+	ModelMetaLlama4MaverickInstructV1 = "us.meta.llama4-maverick-17b-instruct-v1:0"
 
-	// A dialogue use case optimized variant of Llama 2 models.
-	// Llama 2 is an auto-regressive language model that uses an optimized transformer architecture.
-	// Llama 2 is intended for commercial and research use in English.
-	// This is the 70 billion parameter variant.
+	// Llama 4 Scout is a general purpose model with 17 billion active parameters, 16 experts, and 109 billion
+	// total parameters that delivers state-of-the-art performance for its class. Scout dramatically increases
+	// the supported context length to an industry leading 10 million tokens, opening up possibilities for
+	// multi-document summarization, parsing extensive user activity, and reasoning over vast codebases.
 	//
-	// Max tokens: 4096
-	// Languages: English.
-	ModelMetaLlama270bChatV1 = "meta.llama2-70b-chat-v1"
+	// Max tokens: 3.5M
+	// Languages: English, French, German, Hindi, Italian, Portuguese, Spanish, Thai, Arabic, Indonesian, Tagalog, Vietnamese.
+	ModelMetaLlama4ScoutInstructV1 = "us.meta.llama4-scout-17b-instruct-v1:0"
 
-	// Llama 3 is the most capable Llama model yet, which supports a 8K context length that doubles the capacity of Llama 2.
-	// Llama 3 was pretrained on over 15 trillion tokens of data from publicly available source.
-	// This is the 8 billion parameter variant.
+	// Llama 3.3 70B offers on par performance with the 405B model at a lower cost.
+	// With tool use, code generation, advanced reasoning and decision making, and steerability.
+	// We recommend upgrading to this model as soon as possible for optimal performance.
+	//
+	// Max tokens: 128k
+	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
+	ModelMetaLlama3370bInstructV1 = "us.meta.llama3-3-70b-instruct-v1:0"
+
+	// Llama 3.2 11B Vision Instruct is a multimodal, fine-tuned model with 11 billion parameters
+	// that delivers unparalleled capabilities in image understanding, visual reasoning, and multimodal
+	// interaction. It enables advanced applications such as image captioning, image-text retrieval,
+	// visual grounding, visual question answering, and document visual question answering.
+	//
+	// Max tokens: 128k
+	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
+	ModelMetaLlama3211bInstructV1 = "us.meta.llama3-2-11b-instruct-v1:0"
+
+	// Llama 3.1 8B Instruct is an update to Meta Llama 3 8B Instruct that includes an expanded 128K context length,
+	// multilinguality and improved reasoning capabilities. It's optimized for multilingual dialogue use cases
+	// and outperforms many available open source chat models on common industry benchmarks.
+	//
+	// Max tokens: 128k
+	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
+	ModelMetaLlama318bInstructV1 = "us.meta.llama3-1-8b-instruct-v1:0"
+
+	// Meta Llama 3 70B Instruct is an accessible, open large language model designed for developers,
+	// researchers, and businesses to build, experiment, and responsibly scale their generative AI ideas.
+	// Ideal for content creation, conversational AI, language understanding, R&D, and Enterprise applications.
 	//
 	// Max tokens: 8k
-	// Languages: English(Over 5% of the Llama 3 pretraining dataset consists of high-quality non-English data that covers over 30 languages.
-	// However, we do not expect the same level of performance in these languages as in English.)
+	// Languages: English.
+	ModelMetaLlama370bInstructV1 = "meta.llama3-70b-instruct-v1:0"
+
+	// Meta Llama 3 8B Instruct is an accessible, open large language model designed for developers,
+	// researchers, and businesses to build, experiment, and responsibly scale their generative AI ideas.
+	// Ideal for limited computational power and resources, edge devices, and faster training times.
+	//
+	// Max tokens: 8k
+	// Languages: English.
 	ModelMetaLlama38bInstructV1 = "meta.llama3-8b-instruct-v1:0"
 
-	// Llama 3 is the most capable Llama model yet, which supports a 8K context length that doubles the capacity of Llama 2.
-	// Llama 3 was pretrained on over 15 trillion tokens of data from publicly available source.
-	// This is the 70 billion parameter variant.
+	// DeepSeek-R1 provides customers a state-of-the-art reasoning model, optimized for general reasoning tasks,
+	// math, science, and code generation. This model is created by DeepSeek and developed through a combination
+	// of cold-start data and reinforcement learning. DeepSeek-R1 is a text-only model supporting English and Chinese.
 	//
-	// Max tokens: 8k
-	// Languages: English(Over 5% of the Llama 3 pretraining dataset consists of high-quality non-English data that covers over 30 languages.
-	// However, we do not expect the same level of performance in these languages as in English.)
-	ModelMetaLlama370bInstructV1 = "meta.llama3-70b-instruct-v1:0"
+	// Max tokens: 128k
+	// Languages: English, Chinese.
+	ModelDeepSeekR1V1 = "us.deepseek.r1-v1:0"
 )

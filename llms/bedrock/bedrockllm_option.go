@@ -13,6 +13,7 @@ type options struct {
 	modelID         string
 	client          *bedrockruntime.Client
 	callbackHandler callbacks.Handler
+	useConverseAPI  bool
 }
 
 // WithModel allows setting a custom modelId.
@@ -42,5 +43,26 @@ func WithClient(client *bedrockruntime.Client) Option {
 func WithCallback(callbackHandler callbacks.Handler) Option {
 	return func(o *options) {
 		o.callbackHandler = callbackHandler
+	}
+}
+
+// WithConverseAPI enables the use of the unified Bedrock Converse API
+// instead of the model-specific legacy implementations.
+//
+// The Converse API provides:
+// - Unified interface for all supported Bedrock models
+// - Built-in tool calling support
+// - Streaming responses with ConverseStream
+// - Reasoning content support for Claude 3.7+ and Nova models
+// - Multimodal input support (text, images, documents)
+// - Better error handling and response consistency
+//
+// Supported models: All Anthropic Claude, Amazon Nova, Meta Llama,
+// Cohere Command, and AI21 Jamba models available through Bedrock.
+//
+// Note: This is the recommended approach for new applications.
+func WithConverseAPI() Option {
+	return func(o *options) {
+		o.useConverseAPI = true
 	}
 }

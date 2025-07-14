@@ -1,0 +1,30 @@
+httprr trace v1
+543 2375
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 240
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":1024}},"inferenceConfig":{"maxTokens":4096},"messages":[{"content":[{"text":"Think step by step: What is 17 * 23? Show your reasoning process."}],"role":"user"}]}HTTP/2.0 200 OK
+Content-Length: 2209
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 12:19:00 GMT
+X-Amzn-Requestid: 73136ad2-a48b-43a2-a836-ddbd055519ed
+
+{"metrics":{"latencyMs":8484},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EvsECkgIBRABGAIqQN+UN1xiOQ1bWK1idzPcWpQNG21zA6YZr7nrx/YbpM812s/XGLLRWwijEde2cHJSVhBhUv9NkkZnT+VKuTHTFDUSDNAIGBC1G8ixxw8RCxoMjhKtDetOUAImnXR4IjDjWdgrWCh93PY/dsnVA7A8T3DZZqQsyv8lZE9zUSj9FSUwbiF6TsDFiVFikak9s9Mq4AP7D3Y07susNJR35Y4tswLUs/lWmk3SoCHb+FfOyJkAvvyLSLAFsuqt3OylWceUurBdovABG3LBJwgfmb3hVstDkVsd6DsGHkx6O8TCd/Ymp7d4zLce4/95NqpeuXmBSiFy3iC79dFvxRi74vn9s8gxdZUH2D7L7cicIraTc+wMhUzvNOHyky45JtIIkOwa/R5BnUPrdiJcY0JL5KCjNvLhH9wioqdl8RM5wHS5QtVdIisejSyWCC7WDuVP0uGu/PQNhjvatAsBoyBo9OoisLI44A7fflOIlg6WBEoUYmzV/pqLdIQaTmI0ouirGoII6HgJDiQKxUsFiQCIPtu8V2Csy/8Jwm4AUyMZaErdZwMoEB1SdB+qtb9fUeZP/UvfqT4yyOc0y0DvOtLqpKQlR0HLA3j/Yz16OP7Xnom6hDjWc8XgrECiS5XfyZp8/mpVeyGNERLRXw0wwEvAd2jJr7uTTpPWpga++OBGdpdO+NrCgWXhWH6t222v+1z7t03rTexT+G53h79JIpamJ1D4wY2DSehhLUET/943R+l+XA50/lDh9dU5acXo9/wS2xHTGuWX2NUZDBHZ/esL21hGnfvyUt5TTxq7wOF9Xqm5tgqObhz9+UU0K/PVZ/3he8mJ7m4YAQ==","text":"I need to calculate 17 * 23. Let me do this step by step using the standard multiplication method.\n\n17 * 23\n\nI can break this down using the distributive property:\n17 * 23 = 17 * (20 + 3) = 17 * 20 + 17 * 3\n\nLet me calculate each part:\n17 * 20 = 17 * 2 * 10 = 34 * 10 = 340\n17 * 3 = 51\n\nSo 17 * 23 = 340 + 51 = 391\n\nLet me double-check this using the standard algorithm:\n    17\n  × 23\n  ----\n    51  (17 × 3)\n  340   (17 × 20)\n  ----\n  391\n\nYes, that's correct."}}},{"text":"I'll solve 17 × 23 step by step using the distributive property.\n\n**Step 1: Break down 23 into easier parts**\n23 = 20 + 3\n\n**Step 2: Apply the distributive property**\n17 × 23 = 17 × (20 + 3) = (17 × 20) + (17 × 3)\n\n**Step 3: Calculate each part**\n- 17 × 20 = 340\n- 17 × 3 = 51\n\n**Step 4: Add the results**\n340 + 51 = 391\n\n**Verification using standard multiplication:**\n```\n   17\n×  23\n-----\n   51  (17 × 3)\n  340  (17 × 20)\n-----\n  391\n```\n\nTherefore, **17 × 23 = 391**"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":54,"outputTokens":422,"totalTokens":476}}545 1573
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 240
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":1024}},"inferenceConfig":{"maxTokens":4096},"messages":[{"content":[{"text":"Think step by step: What is 17 * 23? Show your reasoning process."}],"role":"user"}]}HTTP/2.0 200 OK
+Content-Length: 1407
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 12:19:08 GMT
+X-Amzn-Requestid: e328cea1-5142-414b-a0a5-dbbfc639f4c4
+
+{"metrics":{"latencyMs":6891},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"ErcBCkgIBRABGAIiQMMkDn9Ye1hKUUZZNvOLECluR+NxXXUCiZUTNpBIIMCVlp5HslHo20Qv7/Cb4sHd6VauU+dkPcKNJnEWemTq8IcSDAqIzFsg1g+abNBczxoMAYzRFrvBEYb5Ezb1IjAxX/Mfcs/gxh/U1lbqwiA3VZwLT4Qy1Wu9i39loDoLG22/n+h92aPo8mJEZ2SAA7UqHcMXceU1JCMz/IDEY5BMPzRtc14OKlcXVIqyYCnwGAI=","text":"To multiply 17 * 23, I'll break it down into steps.\n\nFirst, I'll use the distributive property to make this calculation easier.\n17 * 23 = 17 * (20 + 3)\n        = 17 * 20 + 17 * 3\n\nNow I'll calculate each part:\n17 * 20 = 17 * 2 * 10 = 34 * 10 = 340\n\n17 * 3 = 51\n\nNow I add these together:\n340 + 51 = 391\n\nSo 17 * 23 = 391"}}},{"text":"# Calculating 17 × 23\n\nI'll solve this multiplication step-by-step.\n\n## Method 1: Long multiplication\n```\n   17\n×  23\n-----\n   51  (17 × 3)\n  340  (17 × 20)\n-----\n  391\n```\n\n## Method 2: Breaking it down\nI can break this into more manageable parts:\n- 17 × 23 = 17 × (20 + 3)\n- 17 × 23 = (17 × 20) + (17 × 3)\n\nCalculating each part:\n- 17 × 20 = 340\n- 17 × 3 = 51\n\nAdding the parts:\n340 + 51 = 391\n\nTherefore, 17 × 23 = 391."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":54,"outputTokens":352,"totalTokens":406}}

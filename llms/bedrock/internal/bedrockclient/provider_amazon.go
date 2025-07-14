@@ -1,14 +1,17 @@
 package bedrockclient
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html
@@ -50,6 +53,16 @@ type amazonTextGenerationOutput struct {
 	} `json:"results"`
 }
 
+// Amazon Titan streaming response structure
+type amazonStreamingResponseChunk struct {
+	OutputText           string `json:"outputText"`
+	Index                int    `json:"index"`
+	TotalOutputTextCount int    `json:"totalOutputTextCount"`
+	CompletionReason     string `json:"completionReason"`
+	InputTextTokenCount  int    `json:"inputTextTokenCount"`
+	OutputTextTokenCount int    `json:"outputTextTokenCount"`
+}
+
 // Finish reason for the completion of the generation for Amazon Models.
 const (
 	AmazonCompletionReasonFinish          = "FINISH"
@@ -78,6 +91,16 @@ func createAmazonCompletion(ctx context.Context,
 	body, err := json.Marshal(inputContent)
 	if err != nil {
 		return nil, err
+	}
+
+	if options.StreamingFunc != nil {
+		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
+			ModelId:     aws.String(modelID),
+			Accept:      aws.String("*/*"),
+			ContentType: aws.String("application/json"),
+			Body:        body,
+		}
+		return parseAmazonStreamingResponse(ctx, client, modelInput, options)
 	}
 
 	modelInput := &bedrockruntime.InvokeModelInput{
@@ -116,5 +139,61 @@ func createAmazonCompletion(ctx context.Context,
 
 	return &llms.ContentResponse{
 		Choices: contentChoices,
+	}, nil
+}
+
+func parseAmazonStreamingResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
+	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
+	if err != nil {
+		return nil, err
+	}
+	stream := output.GetStream()
+	if stream == nil {
+		return nil, errors.New("no stream")
+	}
+	defer stream.Close()
+	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
+
+	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	for e := range stream.Events() {
+		if err = stream.Err(); err != nil {
+			return nil, err
+		}
+
+		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
+			var resp amazonStreamingResponseChunk
+			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
+			if err != nil {
+				return nil, err
+			}
+
+			// Send text chunk if available
+			if resp.OutputText != "" {
+				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.OutputText); err != nil {
+					return nil, err
+				}
+				contentchoices[0].Content += resp.OutputText
+			}
+
+			// Set completion reason
+			if resp.CompletionReason != "" {
+				contentchoices[0].StopReason = resp.CompletionReason
+			}
+
+			// Set token counts
+			if resp.InputTextTokenCount > 0 {
+				contentchoices[0].GenerationInfo["input_tokens"] = resp.InputTextTokenCount
+			}
+			if resp.OutputTextTokenCount > 0 {
+				contentchoices[0].GenerationInfo["output_tokens"] = resp.OutputTextTokenCount
+			}
+		}
+	}
+	if err = stream.Err(); err != nil {
+		return nil, err
+	}
+
+	return &llms.ContentResponse{
+		Choices: contentchoices,
 	}, nil
 }

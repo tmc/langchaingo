@@ -1,0 +1,182 @@
+httprr trace v1
+863 748
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 549
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 464
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:08 GMT
+X-Amzn-Bedrock-Input-Token-Count: 445
+X-Amzn-Bedrock-Invocation-Latency: 3057
+X-Amzn-Bedrock-Output-Token-Count: 99
+X-Amzn-Requestid: 3a64421e-8be5-42ff-b573-0da3c1c3e351
+
+{"id":"msg_bdrk_0183YVPantPtsiuJA73WBzNf","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[{"type":"text","text":"I'll calculate 15 * 8 for you."},{"type":"tool_use","id":"toolu_bdrk_01GtnXZm5dDwUUBpLtBLF3LZ","name":"calculator","input":{"operation":"multiply","a":15,"b":8}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":445,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":99}}1144 618
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 830
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_01GtnXZm5dDwUUBpLtBLF3LZ","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_01GtnXZm5dDwUUBpLtBLF3LZ","content":"120"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 334
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:11 GMT
+X-Amzn-Bedrock-Input-Token-Count: 544
+X-Amzn-Bedrock-Invocation-Latency: 1823
+X-Amzn-Bedrock-Output-Token-Count: 17
+X-Amzn-Requestid: 76a47665-81ba-44ba-bd40-0be0ea16d796
+
+{"id":"msg_bdrk_01Gdy3hQzdh4F4ZB3NYAACmj","type":"message","role":"assistant","model":"claude-sonnet-4-20250514","content":[{"type":"text","text":"The result of 15 × 8 is 120."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":544,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":17}}865 778
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 549
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 493
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:24 GMT
+X-Amzn-Bedrock-Input-Token-Count: 445
+X-Amzn-Bedrock-Invocation-Latency: 2101
+X-Amzn-Bedrock-Output-Token-Count: 103
+X-Amzn-Requestid: 7e0c5a85-768a-4f44-b34f-95447b565d7d
+
+{"id":"msg_bdrk_01QU13MkBtffAaepYrdEZkGe","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[{"type":"text","text":"I'll calculate 15 * 8 for you using the calculator tool."},{"type":"tool_use","id":"toolu_bdrk_017WucrZHF9CThu6Mhr7cCmo","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":445,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":103}}1146 618
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 830
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_017WucrZHF9CThu6Mhr7cCmo","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_017WucrZHF9CThu6Mhr7cCmo","content":"120"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 334
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:28 GMT
+X-Amzn-Bedrock-Input-Token-Count: 543
+X-Amzn-Bedrock-Invocation-Latency: 2561
+X-Amzn-Bedrock-Output-Token-Count: 17
+X-Amzn-Requestid: 535e22d1-c77c-437e-b22f-be9b64b3b607
+
+{"id":"msg_bdrk_01C3cQ2j3hxScfPMu2vs6XB7","type":"message","role":"assistant","model":"claude-3-7-sonnet-20250219","content":[{"type":"text","text":"The result of 15 × 8 = 120"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":543,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":17}}864 730
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-haiku-20241022-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 549
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 445
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:41 GMT
+X-Amzn-Bedrock-Input-Token-Count: 396
+X-Amzn-Bedrock-Invocation-Latency: 1874
+X-Amzn-Bedrock-Output-Token-Count: 105
+X-Amzn-Requestid: fba22e20-e789-43ff-ae82-a3fcceb91a20
+
+{"id":"msg_bdrk_016HAaLiUTW3Ebydq7HwD48X","type":"message","role":"assistant","model":"claude-3-5-haiku-20241022","content":[{"type":"text","text":"I'll help you calculate 15 multiplied by 8 using the calculator tool."},{"type":"tool_use","id":"toolu_bdrk_019Brvyh3bauvTcvAE9CudFz","name":"calculator","input":{"operation":"multiply","a":15,"b":8}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":396,"output_tokens":105}}1145 618
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-haiku-20241022-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 830
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_019Brvyh3bauvTcvAE9CudFz","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_019Brvyh3bauvTcvAE9CudFz","content":"120"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 334
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:44 GMT
+X-Amzn-Bedrock-Input-Token-Count: 494
+X-Amzn-Bedrock-Invocation-Latency: 1172
+X-Amzn-Bedrock-Output-Token-Count: 18
+X-Amzn-Requestid: c4d259d7-a32d-4945-852d-02ebcb9d79b2
+
+{"id":"msg_bdrk_0186QnALASvLDuTZkBcFi1qK","type":"message","role":"assistant","model":"claude-3-5-haiku-20241022","content":[{"type":"text","text":"The result of 15 * 8 is 120."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":494,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":18}}865 724
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20241022-v2%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 549
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 439
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:37:57 GMT
+X-Amzn-Bedrock-Input-Token-Count: 445
+X-Amzn-Bedrock-Invocation-Latency: 2329
+X-Amzn-Bedrock-Output-Token-Count: 103
+X-Amzn-Requestid: 5e37e1c9-e683-4af3-9c61-938546675270
+
+{"id":"msg_bdrk_01CS1DiQaDJzLzMKWNcKX7sr","type":"message","role":"assistant","model":"claude-3-5-sonnet-20241022","content":[{"type":"text","text":"I'll help you multiply 15 and 8 using the calculator function."},{"type":"tool_use","id":"toolu_bdrk_01Qw3ucqpqM2JSvTbwvKnyBw","name":"calculator","input":{"operation":"multiply","a":15,"b":8}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":445,"output_tokens":103}}1146 621
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20241022-v2%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 830
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_01Qw3ucqpqM2JSvTbwvKnyBw","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_01Qw3ucqpqM2JSvTbwvKnyBw","content":"120"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 337
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:38:00 GMT
+X-Amzn-Bedrock-Input-Token-Count: 543
+X-Amzn-Bedrock-Invocation-Latency: 1283
+X-Amzn-Bedrock-Output-Token-Count: 16
+X-Amzn-Requestid: 437ba7a2-d5df-4c68-869d-cd87eedebc7e
+
+{"id":"msg_bdrk_01GHp42CqfiHHaGYDbqTWMKx","type":"message","role":"assistant","model":"claude-3-5-sonnet-20241022","content":[{"type":"text","text":"15 multiplied by 8 equals 120."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":543,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":16}}865 803
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20240620-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 549
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 518
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:38:14 GMT
+X-Amzn-Bedrock-Input-Token-Count: 426
+X-Amzn-Bedrock-Invocation-Latency: 2644
+X-Amzn-Bedrock-Output-Token-Count: 117
+X-Amzn-Requestid: 4b87dd54-134f-4813-8aed-5ebb59b198da
+
+{"id":"msg_bdrk_01AgwgTpwwcm7kuGzevrTZvy","type":"message","role":"assistant","model":"claude-3-5-sonnet-20240620","content":[{"type":"text","text":"Certainly! I can help you calculate 15 * 8 using the calculator function. Let's use the multiplication operation to perform this calculation."},{"type":"tool_use","id":"toolu_bdrk_011sXi5gwCUQVaS2scHJq8on","name":"calculator","input":{"operation":"multiply","a":15,"b":8}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":426,"output_tokens":117}}1146 570
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20240620-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 830
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"Calculate 15 * 8"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_011sXi5gwCUQVaS2scHJq8on","name":"calculator","input":{"a":15,"b":8,"operation":"multiply"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_011sXi5gwCUQVaS2scHJq8on","content":"120"}]}],"tools":[{"name":"calculator","description":"A calculator that can perform basic arithmetic operations","input_schema":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}}]}HTTP/2.0 200 OK
+Content-Length: 287
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:38:16 GMT
+X-Amzn-Bedrock-Input-Token-Count: 524
+X-Amzn-Bedrock-Invocation-Latency: 924
+X-Amzn-Bedrock-Output-Token-Count: 20
+X-Amzn-Requestid: 6a5adf17-6649-48b1-9e41-dda4fa41b90b
+
+{"id":"msg_bdrk_014BkoLD282SGampKxchU3mg","type":"message","role":"assistant","model":"claude-3-5-sonnet-20240620","content":[{"type":"text","text":"The result of 15 multiplied by 8 is 120."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":524,"output_tokens":20}}

@@ -21,22 +21,40 @@ type Client struct {
 // The provider may then transform the message to its own
 // format before sending it to the LLM model API.
 type Message struct {
-	Role    llms.ChatMessageType
+	Role llms.ChatMessageType
+	// Content contains the main message content
 	Content string
-	// Type may be "text" or "image"
+	// Type may be "text", "image", "tool_use", "tool_result"
 	Type string
-	// MimeType is the MIME type
+	// MimeType is the MIME type for image content
 	MimeType string
+	// Tool calling fields
+	ToolCall   *ToolCall   `json:"tool_call,omitempty"`
+	ToolResult *ToolResult `json:"tool_result,omitempty"`
 }
 
-func getProvider(modelID string) string {
+// ToolCall represents a function call request from the model
+type ToolCall struct {
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Arguments map[string]any `json:"arguments"`
+}
+
+// ToolResult represents the result of a function call execution
+type ToolResult struct {
+	ToolCallID string `json:"tool_call_id"`
+	ToolName   string `json:"tool_name"`
+	Content    string `json:"content"`
+}
+
+func GetProvider(modelID string) string {
 	// Check for Nova models (including inference profiles like us.amazon.nova-*)
 	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
 		return "nova"
 	}
-	
+
 	parts := strings.Split(modelID, ".")
-	
+
 	// For backward compatibility with the original provider detection
 	switch {
 	case strings.Contains(modelID, "ai21"):
@@ -49,13 +67,15 @@ func getProvider(modelID string) string {
 		return "cohere"
 	case strings.Contains(modelID, "meta"):
 		return "meta"
+	case strings.Contains(modelID, "deepseek"):
+		return "deepseek"
 	}
 
 	// Default to using the first part of the model ID
 	if len(parts) > 0 {
 		return parts[0]
 	}
-	
+
 	return ""
 }
 
@@ -73,7 +93,7 @@ func (c *Client) CreateCompletion(ctx context.Context,
 	messages []Message,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	provider := getProvider(modelID)
+	provider := GetProvider(modelID)
 	switch provider {
 	case "ai21":
 		return createAi21Completion(ctx, c.client, modelID, messages, options)
@@ -87,6 +107,8 @@ func (c *Client) CreateCompletion(ctx context.Context,
 		return createCohereCompletion(ctx, c.client, modelID, messages, options)
 	case "meta":
 		return createMetaCompletion(ctx, c.client, modelID, messages, options)
+	case "deepseek":
+		return createDeepSeekCompletion(ctx, c.client, modelID, messages, options)
 	default:
 		return nil, errors.New("unsupported provider")
 	}

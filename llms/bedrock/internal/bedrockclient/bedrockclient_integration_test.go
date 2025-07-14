@@ -68,7 +68,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 		modelID        string
 		messages       []Message
 		options        llms.CallOptions
-		mockResponse   interface{}
+		mockResponse   any
 		expectedError  string
 		validateResult func(t *testing.T, resp *llms.ContentResponse)
 	}{
@@ -168,10 +168,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 			mockResponse: anthropicTextGenerationOutput{
 				Type: "message",
 				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{
+				Content: []anthropicContentBlock{
 					{
 						Type: "text",
 						Text: "Hello! I'm Claude.",
@@ -382,7 +379,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 
 // Helper function to test CreateCompletion with our mock
 func testCreateCompletionWithMock(ctx context.Context, client *mockBedrockClient, modelID string, messages []Message, options llms.CallOptions) (*llms.ContentResponse, error) {
-	provider := getProvider(modelID)
+	provider := GetProvider(modelID)
 	switch provider {
 	case "ai21":
 		return testCreateAi21CompletionWithMock(ctx, client, modelID, messages, options)
@@ -469,8 +466,10 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Delta: struct {
 				Type         string `json:"type"`
 				Text         string `json:"text"`
+				PartialJSON  string `json:"partial_json"`
 				StopReason   string `json:"stop_reason"`
 				StopSequence any    `json:"stop_sequence"`
+				Thinking     string `json:"thinking,omitempty"`
 			}{
 				Type: "text_delta",
 				Text: "Once upon a time, ",
@@ -482,8 +481,10 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Delta: struct {
 				Type         string `json:"type"`
 				Text         string `json:"text"`
+				PartialJSON  string `json:"partial_json"`
 				StopReason   string `json:"stop_reason"`
 				StopSequence any    `json:"stop_sequence"`
+				Thinking     string `json:"thinking,omitempty"`
 			}{
 				Type: "text_delta",
 				Text: "there was a brave knight.",
@@ -494,8 +495,10 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Delta: struct {
 				Type         string `json:"type"`
 				Text         string `json:"text"`
+				PartialJSON  string `json:"partial_json"`
 				StopReason   string `json:"stop_reason"`
 				StopSequence any    `json:"stop_sequence"`
+				Thinking     string `json:"thinking,omitempty"`
 			}{
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
@@ -610,7 +613,7 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 		name          string
 		modelID       string
 		messages      []Message
-		mockResponse  interface{}
+		mockResponse  any
 		expectedError string
 	}{
 		{
@@ -654,12 +657,9 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
 			},
 			mockResponse: anthropicTextGenerationOutput{
-				Type: "message",
-				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{},
+				Type:       "message",
+				Role:       "assistant",
+				Content:    []anthropicContentBlock{},
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
 			expectedError: "no results",
@@ -673,10 +673,7 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 			mockResponse: anthropicTextGenerationOutput{
 				Type: "message",
 				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{
+				Content: []anthropicContentBlock{
 					{
 						Type: "text",
 						Text: "Once upon a time...",
@@ -791,8 +788,10 @@ func TestClient_CreateCompletion_StreamingCancellation(t *testing.T) {
 				Delta: struct {
 					Type         string `json:"type"`
 					Text         string `json:"text"`
+					PartialJSON  string `json:"partial_json"`
 					StopReason   string `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
+					Thinking     string `json:"thinking,omitempty"`
 				}{
 					Type: "text_delta",
 					Text: fmt.Sprintf("Chunk %d ", i),
@@ -879,7 +878,7 @@ func testCreateAi21CompletionWithMock(ctx context.Context, client *mockBedrockCl
 		Contentchoices[i] = &llms.ContentChoice{
 			Content:    c.Data.Text,
 			StopReason: c.FinishReason.Reason,
-			GenerationInfo: map[string]interface{}{
+			GenerationInfo: map[string]any{
 				"input_tokens":  len(output.Prompt.Tokens),
 				"output_tokens": len(c.Data.Tokens),
 			},
@@ -935,7 +934,7 @@ func testCreateAmazonCompletionWithMock(ctx context.Context, client *mockBedrock
 		Contentchoices[i] = &llms.ContentChoice{
 			Content:    r.OutputText,
 			StopReason: r.CompletionReason,
-			GenerationInfo: map[string]interface{}{
+			GenerationInfo: map[string]any{
 				"input_tokens":  output.InputTextTokenCount,
 				"output_tokens": r.TokenCount,
 			},
@@ -1003,7 +1002,7 @@ func testCreateAnthropicCompletionWithMock(ctx context.Context, client *mockBedr
 		Contentchoices[i] = &llms.ContentChoice{
 			Content:    c.Text,
 			StopReason: output.StopReason,
-			GenerationInfo: map[string]interface{}{
+			GenerationInfo: map[string]any{
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
 			},
@@ -1103,7 +1102,7 @@ func testCreateMetaCompletionWithMock(ctx context.Context, client *mockBedrockCl
 		{
 			Content:    output.Generation,
 			StopReason: output.StopReason,
-			GenerationInfo: map[string]interface{}{
+			GenerationInfo: map[string]any{
 				"input_tokens":  output.PromptTokenCount,
 				"output_tokens": output.GenerationTokenCount,
 			},
@@ -1117,7 +1116,7 @@ func testCreateMetaCompletionWithMock(ctx context.Context, client *mockBedrockCl
 
 // Helper function to test streaming response parsing
 func testParseStreamingCompletionResponse(ctx context.Context, stream *mockEventStream, options llms.CallOptions) *llms.ContentResponse {
-	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]interface{}{}}}
+	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	for e := range stream.Events() {

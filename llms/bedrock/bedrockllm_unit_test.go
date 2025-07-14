@@ -2,9 +2,11 @@ package bedrock
 
 import (
 	"context"
+	"slices"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 	"github.com/vxcontrol/langchaingo/schema"
 
@@ -160,19 +162,48 @@ func TestOptions(t *testing.T) {
 			t.Error("WithCallback() did not set handler")
 		}
 	})
+
+	t.Run("WithConverseAPI", func(t *testing.T) {
+		opts := &options{}
+		WithConverseAPI()(opts)
+		if !opts.useConverseAPI {
+			t.Error("WithConverseAPI() did not enable Converse API")
+		}
+	})
 }
 
 func TestModelConstants(t *testing.T) {
 	// Test that some key model constants are defined
 	models := []string{
-		ModelAi21J2MidV1,
-		ModelAi21J2UltraV1,
-		ModelAmazonTitanTextLiteV1,
-		ModelAmazonTitanTextExpressV1,
+		ModelAi21Jamba15LargeV1,
+		ModelAi21Jamba15MiniV1,
+		ModelAi21JambaInstructV1,
+		ModelAmazonNovaPremiereV1,
+		ModelAmazonNovaProV1,
+		ModelAmazonNovaLiteV1,
+		ModelAmazonNovaMicroV1,
+		ModelAmazonTitanTextPremierV1,
+		ModelAnthropicClaudeOpus4,
+		ModelAnthropicClaudeSonnet4,
+		ModelAnthropicClaude37Sonnet,
+		ModelAnthropicClaude35Haiku,
+		ModelAnthropicClaude35SonnetV2,
+		ModelAnthropicClaude35SonnetV1,
+		ModelAnthropicClaude3Opus,
 		ModelAnthropicClaudeV3Sonnet,
 		ModelAnthropicClaudeV3Haiku,
+		ModelCohereCommandRV1,
+		ModelCohereCommandRPlusV1,
 		ModelCohereCommandTextV14,
-		ModelMetaLlama270bChatV1,
+		ModelCohereCommandLightTextV14,
+		ModelMetaLlama4MaverickInstructV1,
+		ModelMetaLlama4ScoutInstructV1,
+		ModelMetaLlama3370bInstructV1,
+		ModelMetaLlama3211bInstructV1,
+		ModelMetaLlama318bInstructV1,
+		ModelMetaLlama370bInstructV1,
+		ModelMetaLlama38bInstructV1,
+		ModelDeepSeekR1V1,
 	}
 
 	for _, model := range models {
@@ -186,13 +217,8 @@ func TestModelConstants(t *testing.T) {
 }
 
 func containsProvider(model string) bool {
-	providers := []string{"ai21", "amazon", "anthropic", "cohere", "meta"}
-	for _, provider := range providers {
-		if len(model) > len(provider) && model[:len(provider)] == provider {
-			return true
-		}
-	}
-	return false
+	providers := []string{"ai21", "amazon", "anthropic", "cohere", "meta", "nova", "deepseek"}
+	return slices.Contains(providers, bedrockclient.GetProvider(model))
 }
 
 // Test helpers

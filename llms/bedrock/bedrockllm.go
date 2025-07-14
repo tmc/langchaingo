@@ -2,6 +2,7 @@ package bedrock
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
@@ -12,12 +13,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
 
-const defaultModel = ModelAmazonTitanTextLiteV1
+const defaultModel = ModelAmazonTitanTextPremierV1
 
 // LLM is a Bedrock LLM implementation.
 type LLM struct {
 	modelID          string
 	client           *bedrockclient.Client
+	converseClient   *bedrockclient.ConverseClient
+	useConverseAPI   bool
 	CallbacksHandler callbacks.Handler
 }
 
@@ -28,18 +31,20 @@ func New(opts ...Option) (*LLM, error) {
 
 // NewWithContext creates a new Bedrock LLM implementation with context.
 func NewWithContext(ctx context.Context, opts ...Option) (*LLM, error) {
-	o, c, err := newClient(ctx, opts...)
+	o, c, converseC, err := newClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return &LLM{
 		client:           c,
+		converseClient:   converseC,
+		useConverseAPI:   o.useConverseAPI,
 		modelID:          o.modelID,
 		CallbacksHandler: o.callbackHandler,
 	}, nil
 }
 
-func newClient(ctx context.Context, opts ...Option) (*options, *bedrockclient.Client, error) {
+func newClient(ctx context.Context, opts ...Option) (*options, *bedrockclient.Client, *bedrockclient.ConverseClient, error) {
 	options := &options{
 		modelID: defaultModel,
 	}
@@ -51,12 +56,16 @@ func newClient(ctx context.Context, opts ...Option) (*options, *bedrockclient.Cl
 	if options.client == nil {
 		cfg, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
-			return options, nil, err
+			return nil, nil, nil, err
 		}
 		options.client = bedrockruntime.NewFromConfig(cfg)
 	}
 
-	return options, bedrockclient.NewClient(options.client), nil
+	// Create both clients - legacy and Converse API
+	legacyClient := bedrockclient.NewClient(options.client)
+	converseClient := bedrockclient.NewConverseClient(options.client)
+
+	return options, legacyClient, converseClient, nil
 }
 
 // Call implements llms.Model.
@@ -77,6 +86,62 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
+	// Use Converse API if enabled
+	if l.useConverseAPI {
+		return l.generateContentWithConverseAPI(ctx, messages, opts)
+	}
+
+	// Use legacy implementation
+	return l.generateContentWithLegacyAPI(ctx, messages, opts)
+}
+
+// generateContentWithConverseAPI uses the unified Converse API
+func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
+	m, err := processMessages(messages)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build Converse input
+	input := &bedrockclient.ConverseInput{
+		ModelID:         opts.Model,
+		Messages:        m,
+		Tools:           opts.Tools,
+		StreamingFunc:   opts.StreamingFunc,
+		ReasoningConfig: opts.Reasoning,
+	}
+
+	// Set inference parameters
+	if opts.MaxTokens > 0 {
+		input.MaxTokens = &opts.MaxTokens
+	}
+	if opts.Temperature > 0 {
+		input.Temperature = &opts.Temperature
+	}
+	if opts.TopP > 0 {
+		input.TopP = &opts.TopP
+	}
+	if len(opts.StopWords) > 0 {
+		input.StopSequences = opts.StopWords
+	}
+
+	res, err := l.converseClient.CreateCompletionConverse(ctx, input)
+	if err != nil {
+		if l.CallbacksHandler != nil {
+			l.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return nil, err
+	}
+
+	if l.CallbacksHandler != nil {
+		l.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, res)
+	}
+
+	return res, nil
+}
+
+// generateContentWithLegacyAPI uses the original model-specific implementations
+func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
 	m, err := processMessages(messages)
 	if err != nil {
 		return nil, err
@@ -115,6 +180,30 @@ func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, e
 					Content:  string(part.Data),
 					MimeType: part.MIMEType,
 					Type:     "image",
+				})
+			case llms.ToolCall:
+				var arguments map[string]any
+				if part.FunctionCall != nil {
+					json.Unmarshal([]byte(part.FunctionCall.Arguments), &arguments)
+				}
+				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+					Role: m.Role,
+					Type: "tool_use",
+					ToolCall: &bedrockclient.ToolCall{
+						ID:        part.ID,
+						Name:      part.FunctionCall.Name,
+						Arguments: arguments,
+					},
+				})
+			case llms.ToolCallResponse:
+				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+					Role: m.Role,
+					Type: "tool_result",
+					ToolResult: &bedrockclient.ToolResult{
+						ToolCallID: part.ToolCallID,
+						ToolName:   part.Name,
+						Content:    part.Content,
+					},
 				})
 			default:
 				return nil, errors.New("unsupported message type")

@@ -1,0 +1,310 @@
+httprr trace v1
+452 431
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/ai21.jamba-1-5-large-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 266
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:20 GMT
+X-Amzn-Requestid: 39bcfdb2-e216-4e10-b134-81330818ebfc
+
+{"metrics":{"latencyMs":508},"output":{"message":{"content":[{"text":" Software mimicking human intelligence through data learning and pattern recognition."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":25,"outputTokens":13,"totalTokens":38}}451 405
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/ai21.jamba-1-5-mini-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 240
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:22 GMT
+X-Amzn-Requestid: af8de9f9-9078-4df7-85cd-3bd8c34e84f0
+
+{"metrics":{"latencyMs":328},"output":{"message":{"content":[{"text":" Intelligent systems that learn from data to perform tasks."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":25,"outputTokens":11,"totalTokens":36}}451 384
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/ai21.jamba-instruct-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 219
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:23 GMT
+X-Amzn-Requestid: a8b7e5a3-7b15-4ae2-bdd1-6ba2c49c8623
+
+{"metrics":{"latencyMs":281},"output":{"message":{"content":[{"text":" Intelligence demonstrated by machines."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":46,"outputTokens":9,"totalTokens":55}}454 428
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-premier-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 263
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:25 GMT
+X-Amzn-Requestid: e5fdd943-f75b-4271-b572-ebbcc18b3d62
+
+{"metrics":{"latencyMs":502},"output":{"message":{"content":[{"text":"AI simulates human intelligence using machines and computers. Simple yet powerful."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":14,"totalTokens":30}}450 418
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-pro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 253
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:27 GMT
+X-Amzn-Requestid: e3a87179-c0b8-4353-b57f-95ed25e8a58e
+
+{"metrics":{"latencyMs":353},"output":{"message":{"content":[{"text":"Intelligent systems simulating human cognition and learning autonomously."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":9,"totalTokens":25}}451 390
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 225
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:28 GMT
+X-Amzn-Requestid: 524b6bd5-58a1-4157-82b0-a3267d6e27b1
+
+{"metrics":{"latencyMs":284},"output":{"message":{"content":[{"text":"AI: Intelligent machines, learning, adapting."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":9,"totalTokens":25}}452 392
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 227
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:30 GMT
+X-Amzn-Requestid: f06f65f6-3fb9-4a2b-8633-4ea5a3947668
+
+{"metrics":{"latencyMs":218},"output":{"message":{"content":[{"text":"Machines learn, mimic human intelligence tasks."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":8,"totalTokens":24}}467 528
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-opus-4-20250514-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 363
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:35 GMT
+X-Amzn-Requestid: 5f89996e-7b72-47ac-87f9-d08cd2468fee
+
+{"metrics":{"latencyMs":4068},"output":{"message":{"content":[{"text":"Machines learning patterns from data to make predictions and decisions."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":24,"outputTokens":15,"totalTokens":39}}469 530
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 365
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:38 GMT
+X-Amzn-Requestid: ab3c2e83-1489-4479-b587-d2a7cf429782
+
+{"metrics":{"latencyMs":1812},"output":{"message":{"content":[{"text":"Computer systems that learn and make intelligent decisions independently."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":24,"outputTokens":13,"totalTokens":37}}471 532
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 367
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:40 GMT
+X-Amzn-Requestid: e2f465a0-a228-4d8d-a7a5-456307b9f641
+
+{"metrics":{"latencyMs":875},"output":{"message":{"content":[{"text":"AI: Computer systems learning to perform tasks mimicking human intelligence."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":24,"outputTokens":16,"totalTokens":40}}470 520
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-haiku-20241022-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 355
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:43 GMT
+X-Amzn-Requestid: 0f132ced-81bb-468a-99a4-d83c59dcf5f4
+
+{"metrics":{"latencyMs":1392},"output":{"message":{"content":[{"text":"Machines learning to think, solve problems, and make decisions."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":24,"outputTokens":16,"totalTokens":40}}471 522
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20241022-v2%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 357
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:45 GMT
+X-Amzn-Requestid: e08c3637-b1a8-4618-adc5-dffcb8d9cd19
+
+{"metrics":{"latencyMs":1022},"output":{"message":{"content":[{"text":"Computer systems that learn, adapt, and mimic human intelligence."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":24,"outputTokens":16,"totalTokens":40}}471 424
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20240620-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 259
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:47 GMT
+X-Amzn-Requestid: 2af2e948-921b-438a-9676-ea62610e8faf
+
+{"metrics":{"latencyMs":852},"output":{"message":{"content":[{"text":"AI: Machines mimicking human intelligence to perform tasks and solve problems."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":24,"outputTokens":18,"totalTokens":42}}466 423
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 258
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:49 GMT
+X-Amzn-Requestid: e9f37336-e0c9-493b-a697-43afe1e1e0c1
+
+{"metrics":{"latencyMs":586},"output":{"message":{"content":[{"text":"Artificial intelligence: machines imitating human intelligence and cognition."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":24,"outputTokens":17,"totalTokens":41}}465 432
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 267
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:51 GMT
+X-Amzn-Requestid: 934a28dc-bb72-4cf3-89ce-8a02c6673383
+
+{"metrics":{"latencyMs":353},"output":{"message":{"content":[{"text":"Artificial intelligence: machines replicating and improving human cognitive abilities."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":24,"outputTokens":17,"totalTokens":41}}448 425
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/cohere.command-r-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 260
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:52 GMT
+X-Amzn-Requestid: 6e61e6ff-07d6-4e67-89aa-0319c0b67457
+
+{"metrics":{"latencyMs":252},"output":{"message":{"content":[{"text":"AI enables machines to learn, reason, generalize, recognize and make decisions."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":16,"totalTokens":32}}453 401
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/cohere.command-r-plus-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 236
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:54 GMT
+X-Amzn-Requestid: 1e55d51b-f8d4-4585-b7fa-ef70f24ce7d4
+
+{"metrics":{"latencyMs":343},"output":{"message":{"content":[{"text":"AI is the simulation of human intelligence by machines."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":10,"totalTokens":26}}461 368
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.meta.llama3-3-70b-instruct-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 203
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:55 GMT
+X-Amzn-Requestid: 573463e0-13ef-4675-8f3a-99851203b67c
+
+{"metrics":{"latencyMs":188},"output":{"message":{"content":[{"text":"Artificial Intelligence"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":51,"outputTokens":4,"totalTokens":55}}460 438
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.meta.llama3-1-8b-instruct-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 273
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:57 GMT
+X-Amzn-Requestid: 6b2285e7-8186-4af6-a729-5437867447c7
+
+{"metrics":{"latencyMs":276},"output":{"message":{"content":[{"text":"\n\nArtificial Intelligence: Systems that mimic human thought and problem-solving abilities."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":31,"outputTokens":16,"totalTokens":47}}456 411
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/meta.llama3-70b-instruct-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 246
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:28:58 GMT
+X-Amzn-Requestid: e39d62f3-6610-49c6-bba7-40914a35eca1
+
+{"metrics":{"latencyMs":434},"output":{"message":{"content":[{"text":"\n\nIntelligent machines that learn, reason, and act like humans."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":30,"outputTokens":15,"totalTokens":45}}455 417
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/meta.llama3-8b-instruct-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 252
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:29:00 GMT
+X-Amzn-Requestid: 864a3795-2eaf-490c-9a01-d60f4ac2bd52
+
+{"metrics":{"latencyMs":225},"output":{"message":{"content":[{"text":"\n\nArtificial Intelligence: Machines that think and learn like humans."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":30,"outputTokens":14,"totalTokens":44}}446 1589
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.deepseek.r1-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 166
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Explain AI in 10 words or less."}],"role":"user"}],"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
+Content-Length: 1423
+Content-Type: application/json
+Date: Sun, 13 Jul 2025 21:29:03 GMT
+X-Amzn-Requestid: 857971c5-36ec-453b-9afa-d68b35fa9652
+
+{"metrics":{"latencyMs":1739},"output":{"message":{"content":[{"text":"\n\nMachines simulating human intelligence to learn, reason, and adapt autonomously."},{"reasoningContent":{"reasoningText":{"text":"Okay, the user wants me to explain AI in 10 words or less. Let me start by recalling what AI stands for. AI is Artificial Intelligence. So, the core idea is machines simulating human intelligence.\n\nHmm, how to condense that. Maybe start with \"Machines simulating human intelligence to perform tasks.\" That's 8 words. Wait, \"simulating\" or \"mimicking\"? \"Mimicking\" might be simpler. Let me check synonyms. \"Imitate\" is another option, but \"simulating\" is more accurate in a technical context.\n\nThe user might be looking for a concise yet comprehensive definition. They could be a student needing a quick answer or someone curious about the basics. I should ensure the explanation is accessible. Including \"learn, reason, adapt\" covers key aspects like machine learning and adaptability. \"Autonomously\" adds that it operates without human intervention. Let me piece it together: \"Machines simulating human intelligence to learn, reason, and adapt autonomously.\" That's exactly 10 words. Checks the boxes: defines AI, mentions key functions, and stays within the word limit. Perfect.\n"}}}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":20,"outputTokens":252,"totalTokens":272}}

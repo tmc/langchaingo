@@ -54,13 +54,13 @@ require (
 require (
 	cloud.google.com/go/aiplatform v1.85.0
 	cloud.google.com/go/vertexai v0.12.0
-	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2 v1.36.5
 	github.com/aws/aws-sdk-go-v2/config v1.29.4
-	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.40.0
-	github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime v1.41.0
-	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.24.3
+	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.44.2
+	github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime v1.45.2
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.31.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
-	github.com/aws/smithy-go v1.22.2
+	github.com/aws/smithy-go v1.22.4
 	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.238.0
 	google.golang.org/grpc v1.73.0
@@ -125,11 +125,11 @@ require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
 	cloud.google.com/go/iam v1.5.2 // indirect
 	cloud.google.com/go/longrunning v0.6.7 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.11 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.57 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.27 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.36 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.36 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect

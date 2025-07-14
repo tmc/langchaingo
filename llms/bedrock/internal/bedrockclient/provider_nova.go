@@ -1,14 +1,17 @@
 package bedrockclient
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 )
 
 // Ref: https://boto3.amazonaws.com/v1/documentation/api/1.35.8/reference/services/bedrock-runtime/client/converse.html
@@ -101,11 +104,33 @@ type novaTextGenerationOutput struct {
 	} `json:"usage"`
 }
 
-// Finish reason for the completion of the generation.
+// Nova streaming response structure
+type novaStreamingResponseChunk struct {
+	ContentBlockDelta struct {
+		Delta struct {
+			Text string `json:"text"`
+		} `json:"delta"`
+	} `json:"contentBlockDelta"`
+	MessageStart struct {
+		Role  string `json:"role"`
+		Usage struct {
+			InputTokens int `json:"inputTokens"`
+		} `json:"usage"`
+	} `json:"messageStart"`
+	MessageDelta struct {
+		StopReason string `json:"stopReason"`
+		Usage      struct {
+			OutputTokens int `json:"outputTokens"`
+		} `json:"usage"`
+	} `json:"messageDelta"`
+	MessageStop struct{} `json:"messageStop"`
+}
+
+// Finish reason for Nova models
 const (
 	NovaCompletionReasonEndTurn         = "end_turn"
-	NovaCompletionReasonStopSequence    = "stop_sequence"
 	NovaCompletionReasonMaxTokens       = "max_tokens"
+	NovaCompletionReasonStopSequence    = "stop_sequence"
 	NovaCompletionReasonContentFiltered = "content_filtered"
 )
 
@@ -159,7 +184,13 @@ func createNovaCompletion(ctx context.Context,
 	}
 
 	if options.StreamingFunc != nil {
-		return nil, errors.New("streaming not implemented for nova")
+		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
+			ModelId:     aws.String(modelID),
+			Accept:      aws.String("*/*"),
+			ContentType: aws.String("application/json"),
+			Body:        body,
+		}
+		return parseNovaStreamingResponse(ctx, client, modelInput, options)
 	}
 
 	modelInput := &bedrockruntime.InvokeModelInput{
@@ -192,7 +223,7 @@ func createNovaCompletion(ctx context.Context,
 		Contentchoices[i] = &llms.ContentChoice{
 			Content:    c.Text,
 			StopReason: output.StopReason,
-			GenerationInfo: map[string]interface{}{
+			GenerationInfo: map[string]any{
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
 			},
@@ -303,4 +334,60 @@ func mimeTypeToFormat(mimeType string) string {
 	default:
 		return ""
 	}
+}
+
+func parseNovaStreamingResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
+	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
+	if err != nil {
+		return nil, err
+	}
+	stream := output.GetStream()
+	if stream == nil {
+		return nil, errors.New("no stream")
+	}
+	defer stream.Close()
+	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
+
+	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	for e := range stream.Events() {
+		if err = stream.Err(); err != nil {
+			return nil, err
+		}
+
+		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
+			var resp novaStreamingResponseChunk
+			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
+			if err != nil {
+				return nil, err
+			}
+
+			// Check for content delta (text chunks)
+			if resp.ContentBlockDelta.Delta.Text != "" {
+				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.ContentBlockDelta.Delta.Text); err != nil {
+					return nil, err
+				}
+				contentchoices[0].Content += resp.ContentBlockDelta.Delta.Text
+			}
+
+			// Check for message start (contains input tokens)
+			if resp.MessageStart.Usage.InputTokens > 0 {
+				contentchoices[0].GenerationInfo["input_tokens"] = resp.MessageStart.Usage.InputTokens
+			}
+
+			// Check for message delta (contains stop reason and output tokens)
+			if resp.MessageDelta.StopReason != "" {
+				contentchoices[0].StopReason = resp.MessageDelta.StopReason
+			}
+			if resp.MessageDelta.Usage.OutputTokens > 0 {
+				contentchoices[0].GenerationInfo["output_tokens"] = resp.MessageDelta.Usage.OutputTokens
+			}
+		}
+	}
+	if err = stream.Err(); err != nil {
+		return nil, err
+	}
+
+	return &llms.ContentResponse{
+		Choices: contentchoices,
+	}, nil
 }

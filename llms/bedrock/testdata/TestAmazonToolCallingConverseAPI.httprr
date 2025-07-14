@@ -1,0 +1,282 @@
+httprr trace v1
+862 738
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-premier-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 573
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:42 GMT
+X-Amzn-Requestid: 4332241d-b884-487b-8dd2-ca0a17cd3f3b
+
+{"metrics":{"latencyMs":2822},"output":{"message":{"content":[{"text":"<thinking>The user's request is to calculate 15 multiplied by 8. This is a straightforward multiplication problem that can be handled using the calculator tool. I'll verify that both numbers are provided and use the multiply operation as instructed.</thinking>\n\n"},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_XBHMjhJtRqaHwJBqZEgdVA"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":743,"outputTokens":79,"totalTokens":822}}1102 747
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-premier-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_XBHMjhJtRqaHwJBqZEgdVA"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_XBHMjhJtRqaHwJBqZEgdVA"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 582
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:46 GMT
+X-Amzn-Requestid: cb81cb67-a380-43c4-8307-177a19a6bc64
+
+{"metrics":{"latencyMs":3150},"output":{"message":{"content":[{"text":"<thinking>The calculator tool has returned the result of 120 for the multiplication of 15 and 8. This confirms that 15 multiplied by 8 equals 120. The calculation was straightforward and did not require multiple steps. The tool was used correctly with the appropriate parameters, and the result matches the expected outcome of the multiplication.</thinking> The result of 15 multiplied by 8 is 120."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":786,"outputTokens":92,"totalTokens":878}}858 639
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-pro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 474
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:49 GMT
+X-Amzn-Requestid: e6ae51ee-61fb-4933-b41c-88f55a3188c8
+
+{"metrics":{"latencyMs":1164},"output":{"message":{"content":[{"text":"<thinking> The user has requested a multiplication operation. I need to use the calculator tool with the 'multiply' operation and the numbers 15 and 8. </thinking>\n"},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_wNvrWcfUTIqRiHTPDHvpcA"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":462,"outputTokens":62,"totalTokens":524}}1098 389
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-pro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_wNvrWcfUTIqRiHTPDHvpcA"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_wNvrWcfUTIqRiHTPDHvpcA"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 224
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:50 GMT
+X-Amzn-Requestid: 9178cc3a-31d5-4ee5-96ab-ae75a162c01c
+
+{"metrics":{"latencyMs":516},"output":{"message":{"content":[{"text":"The result of multiplying 15 by 8 is 120."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":503,"outputTokens":16,"totalTokens":519}}859 652
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 487
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:52 GMT
+X-Amzn-Requestid: f015dce7-db56-4f77-8028-a1a618372fcc
+
+{"metrics":{"latencyMs":715},"output":{"message":{"content":[{"text":"<thinking>The User has asked to calculate the product of 15 and 8. This is a simple multiplication operation that can be performed using the provided calculator tool.</thinking>\n"},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_ugMFvjqBR0u76M_D4x62iA"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":462,"outputTokens":62,"totalTokens":524}}1099 516
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_ugMFvjqBR0u76M_D4x62iA"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_ugMFvjqBR0u76M_D4x62iA"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 351
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:54 GMT
+X-Amzn-Requestid: 3e805b7a-bca4-4b24-84dc-4ec72b4bca3c
+
+{"metrics":{"latencyMs":649},"output":{"message":{"content":[{"text":"<thinking> The calculator tool has returned the result of 15 multiplied by 8, which is 120. </thinking>\n<response> The result of 15 multiplied by 8 is 120. </response>"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":503,"outputTokens":51,"totalTokens":554}}860 613
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 448
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:56 GMT
+X-Amzn-Requestid: afcbeb5d-0b40-4342-94c6-a1400691f0ca
+
+{"metrics":{"latencyMs":426},"output":{"message":{"content":[{"text":"<thinking> The user has requested to calculate 15 * 8. I can use the calculator tool to perform this multiplication operation. </thinking>\n"},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_hDdd3xCYTmWbGKzOsNzesw"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":462,"outputTokens":56,"totalTokens":518}}1100 388
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_hDdd3xCYTmWbGKzOsNzesw"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_hDdd3xCYTmWbGKzOsNzesw"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 223
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:29:57 GMT
+X-Amzn-Requestid: 879d1c2b-4ab8-4bab-b083-9eb8b47bad7b
+
+{"metrics":{"latencyMs":368},"output":{"message":{"content":[{"text":"The result of 15 multiplied by 8 is 120."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":503,"outputTokens":16,"totalTokens":519}}877 614
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 449
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:01 GMT
+X-Amzn-Requestid: 3dee0c2d-b196-4397-8779-559b063b9edc
+
+{"metrics":{"latencyMs":2257},"output":{"message":{"content":[{"text":"I'll calculate 15 * 8 for you."},{"toolUse":{"input":{"operation":"multiply","a":15,"b":8},"name":"calculator","toolUseId":"tooluse_WNwkcHAESh2rJ_hXPxVxBg"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":445,"outputTokens":99,"totalTokens":544}}1117 472
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_WNwkcHAESh2rJ_hXPxVxBg"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_WNwkcHAESh2rJ_hXPxVxBg"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 307
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:03 GMT
+X-Amzn-Requestid: 0a6c7931-031a-4674-a47d-9e8092577589
+
+{"metrics":{"latencyMs":1325},"output":{"message":{"content":[{"text":"15 × 8 = 120"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":493,"outputTokens":12,"totalTokens":505}}879 642
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 477
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:09 GMT
+X-Amzn-Requestid: 95b0963c-80a6-4225-a94a-79920443a65b
+
+{"metrics":{"latencyMs":4805},"output":{"message":{"content":[{"text":"I'll calculate 15 × 8 for you using the calculator tool."},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_CnjB9Sq2S9eA38O2ajL7bQ"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":445,"outputTokens":103,"totalTokens":548}}1119 486
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-7-sonnet-20250219-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_CnjB9Sq2S9eA38O2ajL7bQ"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_CnjB9Sq2S9eA38O2ajL7bQ"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 321
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:11 GMT
+X-Amzn-Requestid: 3190a92c-0f44-42cb-9f04-ee79150dac19
+
+{"metrics":{"latencyMs":817},"output":{"message":{"content":[{"text":"The result of 15 * 8 is 120."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":492,"outputTokens":18,"totalTokens":510}}878 548
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-haiku-20241022-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 383
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:14 GMT
+X-Amzn-Requestid: 05712893-8c11-4c81-98c5-f00c039a5fbe
+
+{"metrics":{"latencyMs":1778},"output":{"message":{"content":[{"text":"I'll help you calculate 15 multiplied by 8 using the calculator function."},{"toolUse":{"input":{"operation":"multiply","a":15,"b":8},"name":"calculator","toolUseId":"tooluse_okj-A5-XSLqTHjeqsIAuJg"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":396,"outputTokens":105,"totalTokens":501}}1118 591
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-haiku-20241022-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_okj-A5-XSLqTHjeqsIAuJg"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_okj-A5-XSLqTHjeqsIAuJg"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 426
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:18 GMT
+X-Amzn-Requestid: c619861e-a0e0-4819-bd7a-412266536535
+
+{"metrics":{"latencyMs":2132},"output":{"message":{"content":[{"text":"The result of 15 * 8 is 120.\n\nI used the calculator tool with the \"multiply\" operation to perform the multiplication of 15 by 8."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":443,"outputTokens":42,"totalTokens":485}}879 646
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20241022-v2%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 481
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:22 GMT
+X-Amzn-Requestid: c8a9efdb-f17f-4ba5-92cc-3c8ebb95cb63
+
+{"metrics":{"latencyMs":2568},"output":{"message":{"content":[{"text":"I'll help you multiply 15 by 8 using the calculator function."},{"toolUse":{"input":{"operation":"multiply","a":15,"b":8},"name":"calculator","toolUseId":"tooluse_7l6XEML0QLuyeNKrFSMkqQ"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":445,"outputTokens":103,"totalTokens":548}}1119 519
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20241022-v2%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_7l6XEML0QLuyeNKrFSMkqQ"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_7l6XEML0QLuyeNKrFSMkqQ"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 354
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:24 GMT
+X-Amzn-Requestid: ce2bfa76-e280-4801-b090-3387e27e48ea
+
+{"metrics":{"latencyMs":1663},"output":{"message":{"content":[{"text":"The result of multiplying 15 by 8 is 120.\n\n<parameter name=\"operation\">multiply</parameter>\n<parameter name=\"a\">15</parameter>\n<parameter name=\"b\">8</parameter>"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":492,"outputTokens":71,"totalTokens":563}}879 602
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20240620-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 437
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:28 GMT
+X-Amzn-Requestid: f6b68774-e0d5-4f21-aaaa-f0d2be3d87a6
+
+{"metrics":{"latencyMs":2774},"output":{"message":{"content":[{"text":"Certainly! I can help you calculate 15 * 8 using the calculator function. Let's use the multiplication operation to solve this."},{"toolUse":{"input":{"operation":"multiply","a":15,"b":8},"name":"calculator","toolUseId":"tooluse_zYE3t7CWSNGQSJp-1Sa6RA"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":426,"outputTokens":116,"totalTokens":542}}1119 802
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-5-sonnet-20240620-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_zYE3t7CWSNGQSJp-1Sa6RA"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_zYE3t7CWSNGQSJp-1Sa6RA"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 637
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:34 GMT
+X-Amzn-Requestid: a5d21445-54dc-4615-bcb8-c7d9ada21690
+
+{"metrics":{"latencyMs":4068},"output":{"message":{"content":[{"text":"The result of 15 * 8 is 120.\n\nTo break down the calculation:\n\n1. We used the calculator function to perform the multiplication operation.\n2. The operation was \"multiply\".\n3. The first number (a) was 15.\n4. The second number (b) was 8.\n\nThe calculator performed the multiplication and returned the result 120, which is correct. \n\n15 * 8 = 120\n\nThis can be verified by thinking about 8 groups of 15 or 15 groups of 8, which both equal 120."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":473,"outputTokens":133,"totalTokens":606}}861 524
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/cohere.command-r-plus-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 574
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 359
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:37 GMT
+X-Amzn-Requestid: 97a4b791-b55d-42d8-bfbe-f918e68d53f7
+
+{"metrics":{"latencyMs":2051},"output":{"message":{"content":[{"text":"I will use the calculator tool to multiply 15 and 8."},{"toolUse":{"input":{"a":15,"b":8,"operation":"multiply"},"name":"calculator","toolUseId":"tooluse_FvNSwiHtTwu2SV-2uLmFWA"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"inputTokens":39,"outputTokens":30,"totalTokens":69}}1101 368
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/cohere.command-r-plus-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 814
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":512},"messages":[{"content":[{"text":"Calculate 15 * 8"}],"role":"user"},{"content":[{"toolUse":{"input":{},"name":"calculator","toolUseId":"tooluse_FvNSwiHtTwu2SV-2uLmFWA"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"120"}],"toolUseId":"tooluse_FvNSwiHtTwu2SV-2uLmFWA"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"A calculator that can perform basic arithmetic operations","inputSchema":{"json":{"type":"object","properties":{"operation":{"type":"string","description":"The operation to perform","enum":["add","subtract","multiply","divide"]},"a":{"type":"number","description":"First number"},"b":{"type":"number","description":"Second number"}},"required":["operation","a","b"]}},"name":"calculator"}}]}}HTTP/2.0 200 OK
+Content-Length: 203
+Content-Type: application/json
+Date: Mon, 14 Jul 2025 11:30:40 GMT
+X-Amzn-Requestid: 0ac4494f-bf53-42c4-b99a-fac0304132cf
+
+{"metrics":{"latencyMs":1503},"output":{"message":{"content":[{"text":"The answer is **120**."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":51,"outputTokens":8,"totalTokens":59}}
