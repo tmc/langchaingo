@@ -397,7 +397,13 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		// extract properties to populate the schema.
 		params, ok := tool.Function.Parameters.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
+			paramsData, err := json.Marshal(tool.Function.Parameters)
+			if err != nil {
+				return nil, fmt.Errorf("tool [%d]: failed to marshal parameters: %w", i, err)
+			}
+			if err := json.Unmarshal(paramsData, &params); err != nil {
+				return nil, fmt.Errorf("tool [%d]: failed to unmarshal parameters: %w", i, err)
+			}
 		}
 
 		schema := &genai.Schema{}

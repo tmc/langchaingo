@@ -2,6 +2,7 @@ package googleai
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -296,6 +297,84 @@ func TestGoogleAIWithTools(t *testing.T) {
 		assert.NotEmpty(t, toolCall.ID, "ToolCall ID should not be empty")
 		assert.Equal(t, "getWeather", toolCall.FunctionCall.Name)
 		assert.Contains(t, toolCall.FunctionCall.Arguments, "New York")
+	} else {
+		t.Fail()
+	}
+}
+
+func TestGoogleAIWithToolsCustomType(t *testing.T) {
+	llm := newHTTPRRClient(t)
+
+	type toolCallArgs struct {
+		Location string `json:"location"`
+	}
+
+	type property struct {
+		Type        string `json:"type"`
+		Description string `json:"description"`
+	}
+
+	type properties struct {
+		Location property `json:"location"`
+	}
+
+	type parameters struct {
+		Type       string     `json:"type"`
+		Properties properties `json:"properties"`
+		Required   []string   `json:"required"`
+	}
+
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getWeather",
+				Description: "Get the weather for a location",
+				Parameters: parameters{
+					Type: "object",
+					Properties: properties{
+						Location: property{
+							Type:        "string",
+							Description: "The location to get weather for",
+						},
+					},
+					Required: []string{"location"},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What's the weather in New York?"),
+			},
+		},
+	}
+
+	resp, err := llm.GenerateContent(
+		t.Context(),
+		content,
+		llms.WithTools(tools),
+	)
+
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.NotEmpty(t, resp.Choices)
+
+	// Check if tool call was made
+	if len(resp.Choices[0].ToolCalls) > 0 {
+		toolCall := resp.Choices[0].ToolCalls[0]
+		assert.NotEmpty(t, toolCall.ID, "ToolCall ID should not be empty")
+		assert.Equal(t, "getWeather", toolCall.FunctionCall.Name)
+		assert.Contains(t, toolCall.FunctionCall.Arguments, "New York")
+		var args toolCallArgs
+		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args)
+		require.NoError(t, err)
+		assert.Equal(t, "New York", args.Location)
+	} else {
+		t.Fail()
 	}
 }
 

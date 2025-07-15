@@ -505,30 +505,49 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 	}}, nil
 }
 
-func convertMaps(i any) any {
+func convertMaps(i any) (any, error) {
+	var err error
 	switch v := i.(type) {
 	case map[any]any:
 		m := make(map[string]any)
 		for key, val := range v {
 			sKey, ok := key.(string)
 			if !ok {
-				return v
+				return v, nil
 			}
-			m[sKey] = convertMaps(val)
+			m[sKey], err = convertMaps(val)
+			if err != nil {
+				return nil, err
+			}
 		}
-		return m
+		return m, nil
 	case []any:
 		s := make([]any, len(v))
 		for idx, val := range v {
-			s[idx] = convertMaps(val)
+			s[idx], err = convertMaps(val)
+			if err != nil {
+				s[idx] = val
+			}
 		}
-		return s
+		return s, nil
+	default:
+		d, err := json.Marshal(i)
+		if err != nil {
+			return i, err
+		}
+		var m any
+		if err := json.Unmarshal(d, &m); err != nil {
+			return i, err
+		}
+		return m, nil
 	}
-	return i
 }
 
 func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
-	e = convertMaps(e)
+	e, err := convertMaps(e)
+	if err != nil {
+		return nil, err
+	}
 	schema := &genai.Schema{}
 
 	eMap, ok := e.(map[string]any)
