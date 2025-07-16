@@ -446,7 +446,12 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				continue
 			}
 
-			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
+			// Ignore SSE comment line
+			if !strings.HasPrefix(line, ": ") {
+				continue
+			}
+
+			data := strings.TrimPrefix(line, "data: ") // here use `data:` instead of `data: ` for compatibility
 			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
 				return
@@ -454,7 +459,6 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				fmt.Println("stream payload: ", string(data))
 				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
 				responseChan <- streamPayload
 				return
