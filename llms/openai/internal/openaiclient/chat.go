@@ -446,6 +446,11 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				continue
 			}
 
+			// Ignore SSE comment line
+			if strings.HasPrefix(line, ": ") {
+				continue
+			}
+
 			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
 			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
