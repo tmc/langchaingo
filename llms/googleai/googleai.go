@@ -266,7 +266,13 @@ func (g *GoogleAI) generateStreamingContent(
 		return toolCallIDs[name]
 	}
 
-	for chunk := range iter {
+	for chunk, err := range iter {
+		if err != nil {
+			return nil, fmt.Errorf("error generating content: %w", err)
+		}
+		if chunk == nil {
+			return nil, fmt.Errorf("unexpected case: chunk is nil")
+		}
 		if len(chunk.Candidates) == 0 {
 			continue
 		}
