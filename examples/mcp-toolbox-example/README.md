@@ -22,17 +22,12 @@ Before you get started:
 2. Configure Your Toolbox:
   Refer to the [configuration guide](https://googleapis.github.io/genai-toolbox/getting-started/configure/) to set up your toolbox.
 
-3. Install the MCP Toolbox Go Client SDK:
-  ```shell
-  go get github.com/googleapis/mcp-toolbox-sdk-go
-  ```
-
-4. Set Your Google API Key:
+3. Set Your Google API Key:
   ```shell
   export GOOGLE_API_KEY=<your_google_api_key>
   ```
 
-5. Run the example:
+4. Run the example:
   ```go
   go run mcp_toolbox_example.go
   ```
