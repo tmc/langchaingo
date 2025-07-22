@@ -2,7 +2,7 @@
 
 [MCP Toolbox for Databases](https://github.com/googleapis/genai-toolbox) is an open source MCP server for databases. It was designed with enterprise-grade and production-quality in mind. It enables you to develop tools easier, faster, and more securely by handling the complexities such as connection pooling, authentication, and more.
 For more information on how to get started, see the [documentation](https://googleapis.github.io/genai-toolbox/getting-started/).
-This example demonstrates how to use  Toolbox Tools seemlessly with LangChain Go.
+This example demonstrates how to use  Toolbox Tools seamlessly with LangChain Go.
 
 ## What does this example do?
 
