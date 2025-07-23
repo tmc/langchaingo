@@ -168,7 +168,11 @@ func TestClient_CreateCompletion(t *testing.T) {
 				Role: "assistant",
 				Content: []struct {
 					Type string `json:"type"`
-					Text string `json:"text"`
+					Text string `json:"text,omitempty"`
+					// Tool use fields
+					ID string `json:"id,omitempty"`
+					Name string `json:"name,omitempty"`
+					Input interface{} `json:"input,omitempty"`
 				}{
 					{
 						Type: "text",
@@ -645,7 +649,11 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 				Role: "assistant",
 				Content: []struct {
 					Type string `json:"type"`
-					Text string `json:"text"`
+					Text string `json:"text,omitempty"`
+					// Tool use fields
+					ID string `json:"id,omitempty"`
+					Name string `json:"name,omitempty"`
+					Input interface{} `json:"input,omitempty"`
 				}{},
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
@@ -662,7 +670,11 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 				Role: "assistant",
 				Content: []struct {
 					Type string `json:"type"`
-					Text string `json:"text"`
+					Text string `json:"text,omitempty"`
+					// Tool use fields
+					ID string `json:"id,omitempty"`
+					Name string `json:"name,omitempty"`
+					Input interface{} `json:"input,omitempty"`
 				}{
 					{
 						Type: "text",

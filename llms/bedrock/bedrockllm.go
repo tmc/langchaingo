@@ -2,6 +2,7 @@ package bedrock
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -114,6 +115,43 @@ func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, e
 					Content:  string(part.Data),
 					MimeType: part.MIMEType,
 					Type:     "image",
+				})
+			case llms.ToolCall:
+				// Serialize tool call as JSON
+				toolCallData := map[string]interface{}{
+					"id":    part.ID,
+					"name":  part.FunctionCall.Name,
+					"input": map[string]interface{}{},
+				}
+				if part.FunctionCall.Arguments != "" {
+					var args map[string]interface{}
+					if err := json.Unmarshal([]byte(part.FunctionCall.Arguments), &args); err == nil {
+						toolCallData["input"] = args
+					}
+				}
+				content, err := json.Marshal(toolCallData)
+				if err != nil {
+					return nil, err
+				}
+				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+					Role:    m.Role,
+					Content: string(content),
+					Type:    "tool_use",
+				})
+			case llms.ToolCallResponse:
+				// Serialize tool response as JSON
+				toolResultData := map[string]interface{}{
+					"tool_use_id": part.ToolCallID,
+					"content":     part.Content,
+				}
+				content, err := json.Marshal(toolResultData)
+				if err != nil {
+					return nil, err
+				}
+				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+					Role:    m.Role,
+					Content: string(content),
+					Type:    "tool_result",
 				})
 			default:
 				return nil, errors.New("unsupported message type")
