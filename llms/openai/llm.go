@@ -46,9 +46,13 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 		return options, nil, ErrMissingToken
 	}
 
+	var clientOptions []openaiclient.Option
+	if options.embeddingDimensions != 0 {
+		clientOptions = append(clientOptions, openaiclient.WithEmbeddingDimensions(options.embeddingDimensions))
+	}
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
 		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel,
-		options.responseFormat,
+		options.responseFormat, clientOptions...,
 	)
 	return options, cli, err
 }

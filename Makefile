@@ -55,13 +55,13 @@ lint-all:
 lint-deps:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo >&2 "golangci-lint not found. Installing..."; \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.0; \
 		command -v golangci-lint >/dev/null 2>&1 || { \
 			echo >&2 "Failed to detect golangci-lint after installation. Please check your Go installation and PATH."; \
 			exit 1; \
 		} \
 	}
-	@golangci-lint version | grep -q "version v2" || { echo "Error: golangci-lint v2.x.x required, found:" && golangci-lint version && exit 1; }
+	@golangci-lint version | grep -qE "version v?2" || { echo "Error: golangci-lint v2.x.x required, found:" && golangci-lint version && exit 1; }
 
 .PHONY: docs
 docs:
