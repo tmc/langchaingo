@@ -36,8 +36,9 @@ type options struct {
 	responseFormat *ResponseFormat
 
 	// required when APIType is APITypeAzure or APITypeAzureAD
-	apiVersion     string
-	embeddingModel string
+	apiVersion          string
+	embeddingModel      string
+	embeddingDimensions int
 
 	callbackHandler callbacks.Handler
 }
@@ -78,6 +79,16 @@ func WithModel(model string) Option {
 func WithEmbeddingModel(embeddingModel string) Option {
 	return func(opts *options) {
 		opts.embeddingModel = embeddingModel
+	}
+}
+
+// WithEmbeddingDimensions passes the OpenAI embeddings dimensions to the client.
+// Requires a compatible model, test-embedding-3 or later.
+// For more info, please check openai doc
+// https://platform.openai.com/docs/api-reference/embeddings/create#embeddings-create-dimensions
+func WithEmbeddingDimensions(dimensions int) Option {
+	return func(opts *options) {
+		opts.embeddingDimensions = dimensions
 	}
 }
 
