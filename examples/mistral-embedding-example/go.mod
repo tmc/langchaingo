@@ -1,8 +1,8 @@
 module github.com/tmc/langchaingo/examples/mistral-embedding-example
 
-go 1.22.0
+go 1.23.0
 
-toolchain go1.22.1
+toolchain go1.24.2
 
 require github.com/tmc/langchaingo v0.1.13
 
@@ -15,6 +15,6 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2 // indirect
 	github.com/pgvector/pgvector-go v0.1.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 )
