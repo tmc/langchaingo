@@ -1,6 +1,6 @@
 package zep
 
-import "github.com/getzep/zep-go"
+import "github.com/getzep/zep-go/v2"
 
 // MemoryOption ZepMemoryOption is a function for creating new buffer
 // with other than the default values.
@@ -49,7 +49,7 @@ func WithMemoryKey(memoryKey string) MemoryOption {
 }
 
 // WithMemoryType specifies zep memory type.
-func WithMemoryType(memoryType zep.MemoryGetRequestMemoryType) MemoryOption {
+func WithMemoryType(memoryType zep.MemoryType) MemoryOption {
 	return func(b *Memory) {
 		b.MemoryType = memoryType
 	}
@@ -63,7 +63,7 @@ func applyZepMemoryOptions(opts ...MemoryOption) *Memory {
 		HumanPrefix:    "Human",
 		AIPrefix:       "AI",
 		MemoryKey:      "history",
-		MemoryType:     zep.MemoryGetRequestMemoryTypePerpetual,
+		MemoryType:     zep.MemoryTypePerpetual,
 	}
 
 	for _, opt := range opts {

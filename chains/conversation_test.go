@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	z "github.com/getzep/zep-go"
-	zClient "github.com/getzep/zep-go/client"
-	zOption "github.com/getzep/zep-go/option"
+	z "github.com/getzep/zep-go/v2"
+	zClient "github.com/getzep/zep-go/v2/client"
+	zOption "github.com/getzep/zep-go/v2/option"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
@@ -86,7 +86,7 @@ func TestConversationWithZepMemory(t *testing.T) {
 		zep.NewMemory(
 			zc,
 			sessionID,
-			zep.WithMemoryType(z.MemoryGetRequestMemoryTypePerpetual),
+			zep.WithMemoryType(z.MemoryTypePerpetual),
 			zep.WithHumanPrefix("Joe"),
 			zep.WithAIPrefix("Robot"),
 		),

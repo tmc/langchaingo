@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/getzep/zep-go"
-	zepClient "github.com/getzep/zep-go/client"
-	zepOption "github.com/getzep/zep-go/option"
+	"github.com/getzep/zep-go/v2"
+	zepClient "github.com/getzep/zep-go/v2/client"
+	zepOption "github.com/getzep/zep-go/v2/option"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms/openai"
 	zepLangchainMemory "github.com/tmc/langchaingo/memory/zep"
@@ -29,7 +29,7 @@ func main() {
 		zepLangchainMemory.NewMemory(
 			client,
 			sessionID,
-			zepLangchainMemory.WithMemoryType(zep.MemoryGetRequestMemoryTypePerpetual),
+			zepLangchainMemory.WithMemoryType(zep.MemoryTypePerpetual),
 			zepLangchainMemory.WithReturnMessages(true),
 			zepLangchainMemory.WithAIPrefix("Robot"),
 			zepLangchainMemory.WithHumanPrefix("Joe"),

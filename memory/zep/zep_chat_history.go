@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/getzep/zep-go"
-	zepClient "github.com/getzep/zep-go/client"
+	"github.com/getzep/zep-go/v2"
+	zepClient "github.com/getzep/zep-go/v2/client"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -15,7 +15,7 @@ import (
 type ChatMessageHistory struct {
 	ZepClient   *zepClient.Client
 	SessionID   string
-	MemoryType  zep.MemoryGetRequestMemoryType
+	MemoryType  zep.MemoryType
 	HumanPrefix string
 	AIPrefix    string
 }
@@ -34,16 +34,16 @@ func NewZepChatMessageHistory(zep *zepClient.Client, sessionID string, options .
 func (h *ChatMessageHistory) messagesFromZepMessages(zepMessages []*zep.Message) []llms.ChatMessage {
 	var chatMessages []llms.ChatMessage
 	for _, zepMessage := range zepMessages {
-		switch *zepMessage.RoleType { // nolint We do not store other message types in zep memory
+		switch zepMessage.RoleType { // nolint We do not store other message types in zep memory
 		case zep.RoleTypeUserRole:
-			chatMessages = append(chatMessages, llms.HumanChatMessage{Content: *zepMessage.Content})
+			chatMessages = append(chatMessages, llms.HumanChatMessage{Content: zepMessage.Content})
 		case zep.RoleTypeAssistantRole:
-			chatMessages = append(chatMessages, llms.AIChatMessage{Content: *zepMessage.Content})
+			chatMessages = append(chatMessages, llms.AIChatMessage{Content: zepMessage.Content})
 		case zep.RoleTypeToolRole:
 		case zep.RoleTypeFunctionRole:
-			chatMessages = append(chatMessages, llms.ToolChatMessage{Content: *zepMessage.Content})
+			chatMessages = append(chatMessages, llms.ToolChatMessage{Content: zepMessage.Content})
 		default:
-			log.Print(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
+			log.Print(fmt.Errorf("unknown role: %s", zepMessage.RoleType))
 			continue
 		}
 	}
@@ -54,25 +54,25 @@ func (h *ChatMessageHistory) messagesToZepMessages(messages []llms.ChatMessage) 
 	var zepMessages []*zep.Message //nolint We don't know the final size of the messages as some might be skipped due to unsupported role.
 	for _, m := range messages {
 		zepMessage := zep.Message{
-			Content: zep.String(m.GetContent()),
+			Content: m.GetContent(),
 		}
 		switch m.GetType() { // nolint We only expect to bring these three types into chat history
 		case llms.ChatMessageTypeHuman:
-			zepMessage.RoleType = zep.RoleTypeUserRole.Ptr()
+			zepMessage.RoleType = zep.RoleTypeUserRole
 			if h.HumanPrefix != "" {
 				zepMessage.Role = zep.String(h.HumanPrefix)
 			}
 		case llms.ChatMessageTypeAI:
-			zepMessage.RoleType = zep.RoleTypeAssistantRole.Ptr()
+			zepMessage.RoleType = zep.RoleTypeAssistantRole
 			if h.AIPrefix != "" {
 				zepMessage.Role = zep.String(h.AIPrefix)
 			}
 		case llms.ChatMessageTypeFunction:
-			zepMessage.RoleType = zep.RoleTypeFunctionRole.Ptr()
+			zepMessage.RoleType = zep.RoleTypeFunctionRole
 		case llms.ChatMessageTypeTool:
-			zepMessage.RoleType = zep.RoleTypeToolRole.Ptr()
+			zepMessage.RoleType = zep.RoleTypeToolRole
 		default:
-			log.Print(fmt.Errorf("unknown role: %s", *zepMessage.RoleType))
+			log.Print(fmt.Errorf("unknown role: %s", zepMessage.RoleType))
 			continue
 		}
 		zepMessages = append(zepMessages, &zepMessage)
@@ -82,21 +82,23 @@ func (h *ChatMessageHistory) messagesToZepMessages(messages []llms.ChatMessage) 
 
 // Messages returns all messages stored.
 func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, error) {
-	memory, err := h.ZepClient.Memory.Get(ctx, h.SessionID, &zep.MemoryGetRequest{
-		MemoryType: h.MemoryType.Ptr(),
-	})
+	memory, err := h.ZepClient.Memory.Get(ctx, h.SessionID, nil)
 	if err != nil {
 		return nil, err
 	}
 	messages := h.messagesFromZepMessages(memory.Messages)
-	zepFacts := memory.Facts
+
+	// Use the new Context field if available
 	systemPromptContent := ""
-	for _, fact := range zepFacts {
-		systemPromptContent += fmt.Sprintf("%s\n", fact)
+	if memory.Context != nil && *memory.Context != "" {
+		systemPromptContent = *memory.Context
+	} else if memory.RelevantFacts != nil {
+		// Use RelevantFacts if Context is not available
+		for _, fact := range memory.RelevantFacts {
+			systemPromptContent += fmt.Sprintf("%s\n", fact.Content)
+		}
 	}
-	if memory.Summary != nil && memory.Summary.Content != nil {
-		systemPromptContent += fmt.Sprintf("%s\n", *memory.Summary.Content)
-	}
+
 	if systemPromptContent != "" {
 		// Add system prompt to the beginning of the messages.
 		messages = append(

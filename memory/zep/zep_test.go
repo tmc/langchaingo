@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/getzep/zep-go"
-	zepClient "github.com/getzep/zep-go/client"
+	"github.com/getzep/zep-go/v2"
+	zepClient "github.com/getzep/zep-go/v2/client"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -95,7 +95,7 @@ func TestNewMemoryWithOptions(t *testing.T) {
 		WithAIPrefix("Assistant"),
 		WithInputKey("input"),
 		WithOutputKey("output"),
-		WithMemoryType(zep.MemoryGetRequestMemoryTypeSummaryRetriever),
+		WithMemoryType(zep.MemoryTypeSummaryRetriever),
 	)
 
 	if m.ReturnMessages {
@@ -116,7 +116,7 @@ func TestNewMemoryWithOptions(t *testing.T) {
 	if m.OutputKey != "output" {
 		t.Errorf("Expected OutputKey to be 'output', got %s", m.OutputKey)
 	}
-	if m.MemoryType != zep.MemoryGetRequestMemoryTypeSummaryRetriever {
+	if m.MemoryType != zep.MemoryTypeSummaryRetriever {
 		t.Errorf("Expected MemoryType to be SummaryRetriever")
 	}
 }
@@ -164,7 +164,7 @@ func TestNewZepChatMessageHistory(t *testing.T) {
 	if h.SessionID != sessionID {
 		t.Errorf("Expected SessionID to be %s, got %s", sessionID, h.SessionID)
 	}
-	if h.MemoryType != zep.MemoryGetRequestMemoryTypePerpetual {
+	if h.MemoryType != zep.MemoryTypePerpetual {
 		t.Errorf("Expected default MemoryType to be Perpetual")
 	}
 }
@@ -178,12 +178,12 @@ func TestNewZepChatMessageHistoryWithOptions(t *testing.T) {
 	h := NewZepChatMessageHistory(
 		client,
 		sessionID,
-		WithChatHistoryMemoryType(zep.MemoryGetRequestMemoryTypeSummaryRetriever),
+		WithChatHistoryMemoryType(zep.MemoryTypeSummaryRetriever),
 		WithChatHistoryHumanPrefix("User"),
 		WithChatHistoryAIPrefix("Bot"),
 	)
 
-	if h.MemoryType != zep.MemoryGetRequestMemoryTypeSummaryRetriever {
+	if h.MemoryType != zep.MemoryTypeSummaryRetriever {
 		t.Errorf("Expected MemoryType to be SummaryRetriever")
 	}
 	if h.HumanPrefix != "User" {
@@ -199,22 +199,18 @@ func TestMessagesFromZepMessages(t *testing.T) {
 
 	h := &ChatMessageHistory{}
 
-	userRole := zep.RoleTypeUserRole
-	assistantRole := zep.RoleTypeAssistantRole
-	functionRole := zep.RoleTypeFunctionRole
-
 	zepMessages := []*zep.Message{
 		{
-			Content:  zep.String("Hello"),
-			RoleType: &userRole,
+			Content:  "Hello",
+			RoleType: zep.RoleTypeUserRole,
 		},
 		{
-			Content:  zep.String("Hi there"),
-			RoleType: &assistantRole,
+			Content:  "Hi there",
+			RoleType: zep.RoleTypeAssistantRole,
 		},
 		{
-			Content:  zep.String("Function result"),
-			RoleType: &functionRole,
+			Content:  "Function result",
+			RoleType: zep.RoleTypeFunctionRole,
 		},
 	}
 
@@ -257,21 +253,21 @@ func TestMessagesToZepMessages(t *testing.T) {
 		t.Errorf("Expected 3 messages, got %d", len(zepMessages))
 	}
 
-	if *zepMessages[0].Content != "Hello" || *zepMessages[0].RoleType != zep.RoleTypeUserRole {
+	if zepMessages[0].Content != "Hello" || zepMessages[0].RoleType != zep.RoleTypeUserRole {
 		t.Errorf("Expected first message to be user role with content 'Hello'")
 	}
 	if *zepMessages[0].Role != "User" {
 		t.Errorf("Expected first message role to be 'User', got %s", *zepMessages[0].Role)
 	}
 
-	if *zepMessages[1].Content != "Hi there" || *zepMessages[1].RoleType != zep.RoleTypeAssistantRole {
+	if zepMessages[1].Content != "Hi there" || zepMessages[1].RoleType != zep.RoleTypeAssistantRole {
 		t.Errorf("Expected second message to be assistant role with content 'Hi there'")
 	}
 	if *zepMessages[1].Role != "Bot" {
 		t.Errorf("Expected second message role to be 'Bot', got %s", *zepMessages[1].Role)
 	}
 
-	if *zepMessages[2].Content != "Function result" || *zepMessages[2].RoleType != zep.RoleTypeFunctionRole {
+	if zepMessages[2].Content != "Function result" || zepMessages[2].RoleType != zep.RoleTypeFunctionRole {
 		t.Errorf("Expected third message to be function role with content 'Function result'")
 	}
 }
