@@ -87,14 +87,18 @@ func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 		return nil, err
 	}
 	messages := h.messagesFromZepMessages(memory.Messages)
-	zepFacts := memory.Facts
+
+	// Use the new Context field if available
 	systemPromptContent := ""
-	for _, fact := range zepFacts {
-		systemPromptContent += fmt.Sprintf("%s\n", fact)
+	if memory.Context != nil && *memory.Context != "" {
+		systemPromptContent = *memory.Context
+	} else if memory.RelevantFacts != nil {
+		// Use RelevantFacts if Context is not available
+		for _, fact := range memory.RelevantFacts {
+			systemPromptContent += fmt.Sprintf("%s\n", fact.Content)
+		}
 	}
-	if memory.Summary != nil && memory.Summary.Content != nil {
-		systemPromptContent += fmt.Sprintf("%s\n", *memory.Summary.Content)
-	}
+
 	if systemPromptContent != "" {
 		// Add system prompt to the beginning of the messages.
 		messages = append(
