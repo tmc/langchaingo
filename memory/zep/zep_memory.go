@@ -3,8 +3,8 @@ package zep
 import (
 	"context"
 
-	"github.com/getzep/zep-go"
-	zepClient "github.com/getzep/zep-go/client"
+	"github.com/getzep/zep-go/v2"
+	zepClient "github.com/getzep/zep-go/v2/client"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
@@ -19,7 +19,7 @@ type Memory struct {
 	HumanPrefix    string
 	AIPrefix       string
 	MemoryKey      string
-	MemoryType     zep.MemoryGetRequestMemoryType
+	MemoryType     zep.MemoryType
 	ZepClient      *zepClient.Client
 	SessionID      string
 }

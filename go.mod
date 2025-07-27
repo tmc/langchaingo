@@ -315,4 +315,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+require github.com/getzep/zep-go/v2 v2.22.0
+
 require github.com/stretchr/objx v0.5.2 // indirect

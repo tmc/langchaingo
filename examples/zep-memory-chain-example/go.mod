@@ -3,7 +3,7 @@ module github.com/tmc/langchaingo/examples/zep-memory-chain-example
 go 1.24.3
 
 require (
-	github.com/getzep/zep-go v1.0.4
+	github.com/getzep/zep-go/v2 v2.22.0
 	github.com/tmc/langchaingo v0.1.13
 )
 

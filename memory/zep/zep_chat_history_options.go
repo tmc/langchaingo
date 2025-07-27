@@ -1,13 +1,13 @@
 package zep
 
-import "github.com/getzep/zep-go"
+import "github.com/getzep/zep-go/v2"
 
 // ChatMessageHistoryOption is a function for creating new chat message history
 // with other than the default values.
 type ChatMessageHistoryOption func(m *ChatMessageHistory)
 
 // WithChatHistoryMemoryType specifies zep memory type.
-func WithChatHistoryMemoryType(memoryType zep.MemoryGetRequestMemoryType) ChatMessageHistoryOption {
+func WithChatHistoryMemoryType(memoryType zep.MemoryType) ChatMessageHistoryOption {
 	return func(b *ChatMessageHistory) {
 		b.MemoryType = memoryType
 	}
@@ -29,7 +29,7 @@ func WithChatHistoryAIPrefix(aiPrefix string) ChatMessageHistoryOption {
 
 func applyZepChatHistoryOptions(options ...ChatMessageHistoryOption) *ChatMessageHistory {
 	h := &ChatMessageHistory{
-		MemoryType: zep.MemoryGetRequestMemoryTypePerpetual,
+		MemoryType: zep.MemoryTypePerpetual,
 	}
 
 	for _, option := range options {
