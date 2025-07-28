@@ -375,7 +375,7 @@ func TestEmbeddingProcessing(t *testing.T) {
 
 func TestConstants(t *testing.T) {
 	// Test that constants have expected values
-	assert.Equal(t, "textembedding-gecko", embeddingModelName)
+	assert.Equal(t, "text-embedding-005", embeddingModelName)
 	assert.Equal(t, "text-bison", TextModelName)
 	assert.Equal(t, "chat-bison", ChatModelName)
 	assert.Equal(t, 4, defaultMaxConns)

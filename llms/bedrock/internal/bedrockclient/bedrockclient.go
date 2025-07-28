@@ -29,6 +29,14 @@ type Message struct {
 }
 
 func getProvider(modelID string) string {
+	// Check for Nova models (including inference profiles like us.amazon.nova-*)
+	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
+		return "nova"
+	}
+	
+	parts := strings.Split(modelID, ".")
+	
+	// For backward compatibility with the original provider detection
 	switch {
 	case strings.Contains(modelID, "ai21"):
 		return "ai21"
@@ -40,9 +48,14 @@ func getProvider(modelID string) string {
 		return "cohere"
 	case strings.Contains(modelID, "meta"):
 		return "meta"
-	default:
-		return ""
 	}
+
+	// Default to using the first part of the model ID
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	
+	return ""
 }
 
 // NewClient creates a new Bedrock client.
@@ -65,6 +78,8 @@ func (c *Client) CreateCompletion(ctx context.Context,
 		return createAi21Completion(ctx, c.client, modelID, messages, options)
 	case "amazon":
 		return createAmazonCompletion(ctx, c.client, modelID, messages, options)
+	case "nova":
+		return createNovaCompletion(ctx, c.client, modelID, messages, options)
 	case "anthropic":
 		return createAnthropicCompletion(ctx, c.client, modelID, messages, options)
 	case "cohere":

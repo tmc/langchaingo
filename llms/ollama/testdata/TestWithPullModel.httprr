@@ -10,7 +10,7 @@ Content-Type: application/json
 {"model":"gemma3:1b","stream":true}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
-Date: Tue, 03 Jun 2025 11:25:36 GMT
+Date: Thu, 26 Jun 2025 14:33:15 GMT
 
 357
 {"status":"pulling manifest"}
@@ -25,7 +25,7 @@ Date: Tue, 03 Jun 2025 11:25:36 GMT
 
 0
 
-299 1805
+299 1807
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -36,21 +36,21 @@ Content-Type: application/json
 {"model":"gemma3:1b","messages":[{"role":"user","content":"Say hello"}],"format":"","options":{"temperature":0}}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
-Date: Tue, 03 Jun 2025 11:25:37 GMT
+Date: Thu, 26 Jun 2025 14:33:16 GMT
 
-689
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.808118Z","message":{"role":"assistant","content":"Hello"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.820763Z","message":{"role":"assistant","content":" there"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.82794Z","message":{"role":"assistant","content":"!"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.834677Z","message":{"role":"assistant","content":" How"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.841319Z","message":{"role":"assistant","content":" can"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.848064Z","message":{"role":"assistant","content":" I"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.854786Z","message":{"role":"assistant","content":" help"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.861536Z","message":{"role":"assistant","content":" you"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.868561Z","message":{"role":"assistant","content":" today"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.875772Z","message":{"role":"assistant","content":"?"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.88247Z","message":{"role":"assistant","content":" 😊"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-03T11:25:37.889159Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":801560250,"load_duration":20181208,"prompt_eval_count":11,"prompt_eval_duration":24010042,"eval_count":12,"eval_duration":81467500}
+68b
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.704635Z","message":{"role":"assistant","content":"Hello"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.713357Z","message":{"role":"assistant","content":" there"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.730444Z","message":{"role":"assistant","content":"!"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.739046Z","message":{"role":"assistant","content":" How"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.747499Z","message":{"role":"assistant","content":" can"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.756021Z","message":{"role":"assistant","content":" I"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.764544Z","message":{"role":"assistant","content":" help"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.77321Z","message":{"role":"assistant","content":" you"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.781942Z","message":{"role":"assistant","content":" today"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.790474Z","message":{"role":"assistant","content":"?"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.799143Z","message":{"role":"assistant","content":" 😊"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-06-26T14:33:16.807822Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":173933875,"load_duration":44731834,"prompt_eval_count":11,"prompt_eval_duration":24938708,"eval_count":12,"eval_duration":103826750}
 
 0
 

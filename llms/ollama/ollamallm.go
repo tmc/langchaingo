@@ -188,8 +188,8 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 
 	for _, input := range inputTexts {
 		req := &ollamaclient.EmbeddingRequest{
-			Prompt: input,
-			Model:  o.options.model,
+			Input: input,
+			Model: o.options.model,
 		}
 		if o.options.keepAlive != "" {
 			req.KeepAlive = o.options.keepAlive
@@ -200,11 +200,11 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 			return nil, err
 		}
 
-		if len(embedding.Embedding) == 0 {
+		if len(embedding.Embeddings) == 0 {
 			return nil, ErrEmptyResponse
 		}
 
-		embeddings = append(embeddings, embedding.Embedding)
+		embeddings = append(embeddings, embedding.Embeddings...)
 	}
 
 	if len(inputTexts) != len(embeddings) {
