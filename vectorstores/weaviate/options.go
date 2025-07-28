@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/auth"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/0xDezzy/langchaingo/internal/httprr"
 )
 
 func TestPerplexityTool(t *testing.T) {

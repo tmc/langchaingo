@@ -7,9 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/0xDezzy/langchaingo/internal/httprr"
+	"github.com/0xDezzy/langchaingo/llms"
+	"github.com/0xDezzy/langchaingo/llms/openai"
 )
 
 // newTestOpenAIClient creates an OpenAI client with httprr support for testing.

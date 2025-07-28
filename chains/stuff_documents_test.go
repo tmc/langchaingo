@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/0xDezzy/langchaingo/internal/httprr"
+	"github.com/0xDezzy/langchaingo/llms/openai"
+	"github.com/0xDezzy/langchaingo/prompts"
+	"github.com/0xDezzy/langchaingo/schema"
 )
 
 func TestStuffDocuments(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 	"github.com/getzep/zep-go/v2"
 	zepClient "github.com/getzep/zep-go/v2/client"
 	zepOption "github.com/getzep/zep-go/v2/option"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	zepLangchainMemory "github.com/tmc/langchaingo/memory/zep"
+	"github.com/0xDezzy/langchaingo/chains"
+	"github.com/0xDezzy/langchaingo/llms/openai"
+	zepLangchainMemory "github.com/0xDezzy/langchaingo/memory/zep"
 )
 
 func main() {

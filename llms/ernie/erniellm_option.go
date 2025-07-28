@@ -3,7 +3,7 @@ package ernie
 import (
 	"net/http"
 
-	"github.com/tmc/langchaingo/callbacks"
+	"github.com/0xDezzy/langchaingo/callbacks"
 )
 
 const (

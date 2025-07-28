@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/0xDezzy/langchaingo/llms"
 )
 
 func TestNew(t *testing.T) {

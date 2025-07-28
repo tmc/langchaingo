@@ -4,7 +4,7 @@ import (
 	"time"
 
 	cache "github.com/Code-Hex/go-generics-cache"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/0xDezzy/langchaingo/llms"
 )
 
 // Option is a functional argument that configures the Options.

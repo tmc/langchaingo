@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/0xDezzy/langchaingo/llms"
 )
 
 // Backend is the interface that needs to be implemented by cache backends.

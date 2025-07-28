@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/0xDezzy/langchaingo/prompts"
+	"github.com/0xDezzy/langchaingo/schema"
 )
 
 func TestMapReduceInputVariables(t *testing.T) {

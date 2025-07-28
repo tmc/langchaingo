@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/internal/testutil/testctr"
+	"github.com/0xDezzy/langchaingo/internal/testutil/testctr"
 )
 
 func TestMain(m *testing.M) {

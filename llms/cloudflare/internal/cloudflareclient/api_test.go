@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/0xDezzy/langchaingo/internal/httprr"
 )
 
 func TestClient_GenerateContent(t *testing.T) {

@@ -56,8 +56,8 @@ func changeToRepoRoot() error {
 		if err == nil {
 			lines := strings.Split(string(content), "\n")
 			for _, line := range lines {
-				if strings.HasPrefix(line, "module github.com/tmc/langchaingo") &&
-					!strings.HasPrefix(line, "module github.com/tmc/langchaingo/") {
+				if strings.HasPrefix(line, "module github.com/0xDezzy/langchaingo") &&
+					!strings.HasPrefix(line, "module github.com/0xDezzy/langchaingo/") {
 					// Already at the root
 					if *flagVerbose {
 						log.Println("already at repository root")
@@ -84,8 +84,8 @@ func changeToRepoRoot() error {
 			if err == nil {
 				lines := strings.Split(string(content), "\n")
 				for _, line := range lines {
-					if strings.HasPrefix(line, "module github.com/tmc/langchaingo") &&
-						!strings.HasPrefix(line, "module github.com/tmc/langchaingo/") {
+					if strings.HasPrefix(line, "module github.com/0xDezzy/langchaingo") &&
+						!strings.HasPrefix(line, "module github.com/0xDezzy/langchaingo/") {
 						// Found the root, change directory
 						if err := os.Chdir(currentDir); err != nil {
 							return fmt.Errorf("failed to change to repository root: %w", err)
@@ -253,14 +253,14 @@ func checkModuleNameMatchesDirectory(fix bool) error {
 
 		// Get expected module name based on directory
 		dir := filepath.Dir(path)
-		expectedModuleName := fmt.Sprintf("github.com/tmc/langchaingo/%s", dir)
+		expectedModuleName := fmt.Sprintf("github.com/0xDezzy/langchaingo/%s", dir)
 
 		// Handle examples differently
 		if strings.Contains(dir, "examples/") {
 			// Extract example name from directory path
 			exampleName := filepath.Base(dir)
 
-			// For examples, module should be github.com/tmc/langchaingo/examples/example-name
+			// For examples, module should be github.com/0xDezzy/langchaingo/examples/example-name
 			// Or at least the basename should be consistent with directory name
 			if !strings.HasSuffix(moduleName, exampleName) && !strings.Contains(moduleName, exampleName) {
 				if *flagVeryVerbose {
@@ -270,7 +270,7 @@ func checkModuleNameMatchesDirectory(fix bool) error {
 
 				if fix {
 					// For examples, just use a simple module name based on directory
-					expectedExampleModule := fmt.Sprintf("github.com/tmc/langchaingo/examples/%s", exampleName)
+					expectedExampleModule := fmt.Sprintf("github.com/0xDezzy/langchaingo/examples/%s", exampleName)
 					errs = append(errs, fixModuleName(dir, expectedExampleModule))
 				} else {
 					errs = append(errs, fmt.Errorf("example module name mismatch in %s: directory is '%s', but module is '%s'",
@@ -1935,7 +1935,7 @@ func (a *ArchitecturalAnalyzer) isValidInternalImport(importPath string) bool {
 	// - /internal/* packages can be imported by any package at the root level
 	// - Provider internal packages (e.g., /llms/openai/internal/*) can only be imported by their parent
 
-	if strings.Contains(importPath, "github.com/tmc/langchaingo/internal/") {
+	if strings.Contains(importPath, "github.com/0xDezzy/langchaingo/internal/") {
 		// Root level internal packages are allowed from anywhere in the project
 		return true
 	}
@@ -1962,7 +1962,7 @@ func (a *ArchitecturalAnalyzer) isValidInternalImport(importPath string) bool {
 		fileDir := filepath.Dir(a.file)
 
 		// Convert paths for comparison
-		providerPath = strings.TrimPrefix(providerPath, "github.com/tmc/langchaingo/")
+		providerPath = strings.TrimPrefix(providerPath, "github.com/0xDezzy/langchaingo/")
 		fileDir = strings.TrimPrefix(fileDir, "./")
 
 		return strings.HasPrefix(fileDir, providerPath)

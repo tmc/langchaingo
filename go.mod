@@ -1,4 +1,4 @@
-module github.com/tmc/langchaingo
+module github.com/0xDezzy/langchaingo
 
 go 1.23.0
 
@@ -94,7 +94,6 @@ require (
 
 // Memory and agent tools
 require (
-	github.com/getzep/zep-go v1.0.4
 	github.com/metaphorsystems/metaphor-go v0.0.0-20230816231421-43794c04824e
 	go.starlark.net v0.0.0-20230302034142-4b1e35fe2254
 )

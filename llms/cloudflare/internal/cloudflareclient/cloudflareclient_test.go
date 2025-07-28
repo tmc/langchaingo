@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/0xDezzy/langchaingo/internal/httprr"
 )
 
 const testBaseURL = "https://api.cloudflare.com/client/v4/accounts"

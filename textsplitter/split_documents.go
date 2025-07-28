@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/tmc/langchaingo/schema"
+	"github.com/0xDezzy/langchaingo/schema"
 )
 
 // ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
