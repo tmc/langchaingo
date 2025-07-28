@@ -9,8 +9,6 @@ import (
 )
 
 var (
-	// ErrInputVariableReserved is returned when there is a conflict with a reserved variable name.
-	ErrInputVariableReserved = errors.New("conflict with reserved variable name")
 	// ErrInvalidPartialVariableType is returned when a partial variable is not a supported type.
 	// Valid types are string, int, float64, bool, and func() string, func() int, func() float64, func() bool.
 	ErrInvalidPartialVariableType = errors.New("invalid partial variable type")
