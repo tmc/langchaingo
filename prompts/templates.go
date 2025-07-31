@@ -42,7 +42,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/tmc/langchaingo/prompts/internal/fstring"
-	"github.com/tmc/langchaingo/prompts/internal/sanitization"
+	sanitization "github.com/tmc/langchaingo/prompts/internal/sanitization"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and

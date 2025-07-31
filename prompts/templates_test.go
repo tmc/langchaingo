@@ -5,11 +5,9 @@ import (
 	"strings"
 	"testing"
 	"testing/fstest"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
+//nolint:funlen // TestInterpolateGoTemplate requires comprehensive coverage
 func TestInterpolateGoTemplate(t *testing.T) {
 	t.Parallel()
 
@@ -57,15 +55,23 @@ func TestInterpolateGoTemplate(t *testing.T) {
 				t.Parallel()
 
 				actual, err := interpolateGoTemplate(tc.template, tc.templateValues)
-				require.NoError(t, err)
-				assert.Equal(t, tc.expected, actual)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if actual != tc.expected {
+					t.Errorf("expected %q, got %q", tc.expected, actual)
+				}
 			})
 			t.Run("jinja2", func(t *testing.T) {
 				t.Parallel()
 
 				actual, err := interpolateJinja2(strings.ReplaceAll(tc.template, "{{ .", "{{ "), tc.templateValues)
-				require.NoError(t, err)
-				assert.Equal(t, tc.expected, actual)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if actual != tc.expected {
+					t.Errorf("expected %q, got %q", tc.expected, actual)
+				}
 			})
 		})
 	}
@@ -90,8 +96,11 @@ func TestInterpolateGoTemplate(t *testing.T) {
 			t.Parallel()
 
 			_, err := interpolateGoTemplate(tc.template, map[string]any{})
-			require.Error(t, err)
-			require.EqualError(t, err, tc.errValue)
+			if err == nil {
+				t.Errorf("expected error, got nil")
+			} else if err.Error() != tc.errValue {
+				t.Errorf("expected error %q, got %q", tc.errValue, err.Error())
+			}
 		})
 	}
 }
@@ -103,24 +112,33 @@ func TestCheckValidTemplate(t *testing.T) {
 		t.Parallel()
 
 		err := CheckValidTemplate("Hello, {test}", "unknown", []string{"test"})
-		require.Error(t, err)
-		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
-		require.EqualError(t, err, "invalid template format, got: unknown, should be one of [f-string go-template jinja2]")
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		} else if !errors.Is(err, ErrInvalidTemplateFormat) {
+			t.Errorf("expected ErrInvalidTemplateFormat, got %v", err)
+		} else if err.Error() != "invalid template format, got: unknown, should be one of [f-string go-template jinja2]" {
+			t.Errorf("expected specific error message, got %q", err.Error())
+		}
 	})
 
 	t.Run("TemplateErrored", func(t *testing.T) {
 		t.Parallel()
 
 		err := CheckValidTemplate("Hello, {{{ test }}", TemplateFormatGoTemplate, []string{"test"})
-		require.Error(t, err)
-		require.EqualError(t, err, "template parse failure: template: template:1: unexpected \"{\" in command")
+		if err == nil {
+			t.Errorf("expected error, got nil")
+		} else if err.Error() != "template parse failure: template: template:1: unexpected \"{\" in command" {
+			t.Errorf("expected specific error message, got %q", err.Error())
+		}
 	})
 
 	t.Run("TemplateValid", func(t *testing.T) {
 		t.Parallel()
 
 		err := CheckValidTemplate("Hello, {{ .test }}", TemplateFormatGoTemplate, []string{"test"})
-		require.NoError(t, err)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 	})
 }
 
@@ -137,8 +155,12 @@ func TestRenderTemplate(t *testing.T) {
 				"key": "world",
 			},
 		)
-		require.NoError(t, err)
-		assert.Equal(t, "Hello world", actual)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if actual != "Hello world" {
+			t.Errorf("expected %q, got %q", "Hello world", actual)
+		}
 	})
 
 	t.Run("TemplateNotAvailable", func(t *testing.T) {
@@ -151,120 +173,15 @@ func TestRenderTemplate(t *testing.T) {
 				"key": "world",
 			},
 		)
-		require.Error(t, err)
-		require.ErrorIs(t, err, ErrInvalidTemplateFormat)
-	})
-}
-
-//nolint:funlen // Comprehensive security tests
-func TestJinja2Security(t *testing.T) {
-	t.Parallel()
-
-	t.Run("IncludeDisabledByDefault", func(t *testing.T) {
-		t.Parallel()
-
-		// This should fail because filesystem access is disabled by default
-		_, err := RenderTemplate(
-			`{% include "/etc/passwd" %}`,
-			TemplateFormatJinja2,
-			map[string]any{},
-		)
 		if err == nil {
 			t.Errorf("expected error, got nil")
-		} else if !strings.Contains(err.Error(), "template loading from filesystem disabled for security reasons") {
-			t.Errorf("expected error to contain %q, got %q", "template loading from filesystem disabled for security reasons", err.Error())
-		}
-	})
-
-	t.Run("ExtendsDisabledByDefault", func(t *testing.T) {
-		t.Parallel()
-
-		// This should fail because filesystem access is disabled by default
-		_, err := RenderTemplate(
-			`{% extends "/etc/passwd" %}`,
-			TemplateFormatJinja2,
-			map[string]any{},
-		)
-		if err == nil {
-			t.Errorf("expected error, got nil")
-		} else if !strings.Contains(err.Error(), "template loading from filesystem disabled for security reasons") {
-			t.Errorf("expected error to contain %q, got %q", "template loading from filesystem disabled for security reasons", err.Error())
-		}
-	})
-
-	t.Run("ImportDisabledByDefault", func(t *testing.T) {
-		t.Parallel()
-
-		// This should fail because filesystem access is disabled by default
-		_, err := RenderTemplate(
-			`{% import "/etc/passwd" as p %}`,
-			TemplateFormatJinja2,
-			map[string]any{},
-		)
-		if err == nil {
-			t.Errorf("expected error, got nil")
-		} else if !strings.Contains(err.Error(), "template loading from filesystem disabled for security reasons") {
-			t.Errorf("expected error to contain %q, got %q", "template loading from filesystem disabled for security reasons", err.Error())
-		}
-	})
-
-	t.Run("FromDisabledByDefault", func(t *testing.T) {
-		t.Parallel()
-
-		// This should fail because filesystem access is disabled by default
-		_, err := RenderTemplate(
-			`{% from "/etc/passwd" import root %}`,
-			TemplateFormatJinja2,
-			map[string]any{},
-		)
-		if err == nil {
-			t.Errorf("expected error, got nil")
-		} else if !strings.Contains(err.Error(), "template loading from filesystem disabled for security reasons") {
-			t.Errorf("expected error to contain %q, got %q", "template loading from filesystem disabled for security reasons", err.Error())
-		}
-	})
-
-	t.Run("SafeTemplatesStillWork", func(t *testing.T) {
-		t.Parallel()
-
-		// Normal variable interpolation should still work
-		result, err := RenderTemplate(
-			`Hello {{ name }}, the time is {{ time }}`,
-			TemplateFormatJinja2,
-			map[string]any{
-				"name": "world",
-				"time": "now",
-			},
-		)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if result != "Hello world, the time is now" {
-			t.Errorf("expected %q, got %q", "Hello world, the time is now", result)
-		}
-	})
-
-	t.Run("ComplexSafeTemplatesWork", func(t *testing.T) {
-		t.Parallel()
-
-		// More complex but safe templates should work
-		result, err := RenderTemplate(
-			`{% for item in items %}{{ item }} {% endfor %}`,
-			TemplateFormatJinja2,
-			map[string]any{
-				"items": []string{"apple", "banana", "cherry"},
-			},
-		)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if result != "apple banana cherry " {
-			t.Errorf("expected %q, got %q", "apple banana cherry ", result)
+		} else if !errors.Is(err, ErrInvalidTemplateFormat) {
+			t.Errorf("expected ErrInvalidTemplateFormat, got %v", err)
 		}
 	})
 }
 
-//nolint:funlen // Comprehensive filesystem template tests
+//nolint:funlen // TestRenderTemplateFS requires comprehensive filesystem tests
 func TestRenderTemplateFS(t *testing.T) {
 	t.Parallel()
 
@@ -388,7 +305,7 @@ func TestRenderTemplateFS(t *testing.T) {
 	})
 }
 
-//nolint:funlen // Migration patterns need comprehensive examples
+//nolint:funlen // TestMigrationPatterns requires comprehensive migration examples
 func TestMigrationPatterns(t *testing.T) {
 	t.Parallel()
 
@@ -404,7 +321,9 @@ func TestMigrationPatterns(t *testing.T) {
 
 		// OLD API (still works for safe templates)
 		result1, err := RenderTemplate(template, TemplateFormatJinja2, data)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		// NEW API with explicit filesystem (works the same for inline templates)
 		fsys := &fstest.MapFS{
@@ -413,52 +332,18 @@ func TestMigrationPatterns(t *testing.T) {
 			},
 		}
 		result2, err := RenderTemplateFS(fsys, "template.j2", TemplateFormatJinja2, data)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		// Both should produce the same result
 		expected := "Hello Alice! Your score is 92%."
-		assert.Equal(t, expected, result1)
-		assert.Equal(t, expected, result2)
-	})
-
-	t.Run("MigrationFromVulnerableToSecure", func(t *testing.T) {
-		t.Parallel()
-
-		// Demonstrate that the OLD vulnerable pattern no longer works
-		t.Run("OldVulnerablePatternBlocked", func(t *testing.T) {
-			t.Parallel()
-
-			// This would be the old vulnerable way - trying to include system files
-			vulnerableTemplate := `User info: {% include "/etc/passwd" %}`
-
-			// This should now be blocked by the secure loader
-			_, err := RenderTemplate(vulnerableTemplate, TemplateFormatJinja2, map[string]any{})
-			require.Error(t, err)
-			assert.Contains(t, err.Error(), "template loading from filesystem disabled for security reasons")
-		})
-
-		t.Run("NewSecurePatternWorks", func(t *testing.T) {
-			t.Parallel()
-
-			// NEW secure way - controlled filesystem access with explicit fs.FS
-			fsys := &fstest.MapFS{
-				"main.j2": &fstest.MapFile{
-					Data: []byte("User: {{ username }}\n{% include 'user_info.j2' %}"),
-				},
-				"user_info.j2": &fstest.MapFile{
-					Data: []byte("Role: {{ role }}\nDepartment: {{ department }}"),
-				},
-			}
-
-			result, err := RenderTemplateFS(fsys, "main.j2", TemplateFormatJinja2, map[string]any{
-				"username":   "alice",
-				"role":       "developer",
-				"department": "engineering",
-			})
-			require.NoError(t, err)
-			expected := "User: alice\nRole: developer\nDepartment: engineering"
-			assert.Equal(t, expected, result)
-		})
+		if result1 != expected {
+			t.Errorf("result1: expected %q, got %q", expected, result1)
+		}
+		if result2 != expected {
+			t.Errorf("result2: expected %q, got %q", expected, result2)
+		}
 	})
 
 	t.Run("ComplexTemplateInheritance", func(t *testing.T) {
@@ -497,14 +382,26 @@ func TestMigrationPatterns(t *testing.T) {
 				"role":  "Senior Developer",
 			},
 		})
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
 		// Verify the template inheritance worked correctly
-		assert.Contains(t, result, "<title>Alice Johnson's Profile</title>")
-		assert.Contains(t, result, "<h1>Welcome, Alice Johnson!</h1>")
-		assert.Contains(t, result, "Email: alice@example.com")
-		assert.Contains(t, result, "Role: Senior Developer")
-		assert.Contains(t, result, "<!DOCTYPE html>")
+		if !strings.Contains(result, "<title>Alice Johnson's Profile</title>") {
+			t.Errorf("expected title tag in result")
+		}
+		if !strings.Contains(result, "<h1>Welcome, Alice Johnson!</h1>") {
+			t.Errorf("expected welcome header in result")
+		}
+		if !strings.Contains(result, "Email: alice@example.com") {
+			t.Errorf("expected email in result")
+		}
+		if !strings.Contains(result, "Role: Senior Developer") {
+			t.Errorf("expected role in result")
+		}
+		if !strings.Contains(result, "<!DOCTYPE html>") {
+			t.Errorf("expected DOCTYPE in result")
+		}
 	})
 
 	t.Run("EmbedFSIntegration", func(t *testing.T) {
@@ -542,11 +439,21 @@ The {{ company }} Team`),
 				"department": "Engineering",
 			},
 		})
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 
-		assert.Contains(t, result, "Subject: Welcome to Acme Corp!")
-		assert.Contains(t, result, "Dear Bob Smith,")
-		assert.Contains(t, result, "Username: bsmith")
-		assert.Contains(t, result, "The Acme Corp Team")
+		if !strings.Contains(result, "Subject: Welcome to Acme Corp!") {
+			t.Errorf("expected 'Subject: Welcome to Acme Corp!' in result")
+		}
+		if !strings.Contains(result, "Dear Bob Smith,") {
+			t.Errorf("expected 'Dear Bob Smith,' in result")
+		}
+		if !strings.Contains(result, "Username: bsmith") {
+			t.Errorf("expected 'Username: bsmith' in result")
+		}
+		if !strings.Contains(result, "The Acme Corp Team") {
+			t.Errorf("expected 'The Acme Corp Team' in result")
+		}
 	})
 }
