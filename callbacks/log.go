@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // LogHandler is a callback handler that prints to the standard output.
@@ -112,7 +112,7 @@ func formatChainValues(values map[string]any) string {
 	for key, value := range values {
 		output += fmt.Sprintf("\"%s\" : \"%s\", ", removeNewLines(key), removeNewLines(value))
 	}
-
+	
 	return output
 }
 

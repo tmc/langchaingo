@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-
-	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
+	
+	"github.com/yincongcyincong/langchaingo/llms/ollama/internal/ollamaclient"
 )
 
 type options struct {

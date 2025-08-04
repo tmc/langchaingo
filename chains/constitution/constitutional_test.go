@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 func TestConstitutionCritiqueParsing(t *testing.T) {
@@ -20,15 +20,15 @@ func TestConstitutionCritiqueParsing(t *testing.T) {
 	Revision request: Make it better.
 	
 	Revision:`
-
+	
 	textTwo := " This text is bad.\n\n"
-
+	
 	textThree := ` This text is bad.
 	
 	Revision request: Make it better.
 	
 	Revision: Better text`
-
+	
 	for _, rawCritique := range []string{textOne, textTwo, textThree} {
 		critique := parseCritique(rawCritique)
 		require.Equal(t, "This text is bad.", strings.TrimSpace(critique),
@@ -54,7 +54,7 @@ func Test(t *testing.T) {
 		TemplateFormat:   prompts.TemplateFormatGoTemplate,
 		ValidateTemplate: false,
 	})
-
+	
 	c := NewConstitutional(model, chain, []ConstitutionalPrinciple{
 		NewConstitutionalPrinciple(
 			"Tell if this answer is good.",

@@ -2,8 +2,8 @@ package cache
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // === Mock for llms.Model
@@ -32,15 +32,15 @@ func (m *mockLLM) GenerateContent(ctx context.Context, _ []llms.MessageContent, 
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	if opts.StreamingFunc != nil && len(m.response.Choices) > 0 {
 		if err := opts.StreamingFunc(ctx, []byte(m.response.Choices[0].Content)); err != nil {
 			return nil, err
 		}
 	}
-
+	
 	m.called++
-
+	
 	return m.response, m.error
 }
 
@@ -64,7 +64,7 @@ type mockCache struct {
 func (m *mockCache) Get(_ context.Context, key string) *llms.ContentResponse {
 	v, ok := m.entries[key]
 	m.hit = ok
-
+	
 	return v
 }
 

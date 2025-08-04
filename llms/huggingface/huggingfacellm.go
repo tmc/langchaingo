@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"os"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/huggingface/internal/huggingfaceclient"
 )
 
 var (
@@ -30,16 +30,16 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := &llms.CallOptions{Model: defaultModel}
 	for _, opt := range options {
 		opt(opts)
 	}
-
+	
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
@@ -61,7 +61,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
@@ -78,20 +78,20 @@ func New(opts ...Option) (*LLM, error) {
 		model: defaultModel,
 		url:   defaultURL,
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	if len(options.token) == 0 {
 		return nil, ErrMissingToken
 	}
-
+	
 	c, err := huggingfaceclient.New(options.token, options.model, options.url)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &LLM{
 		client: c,
 	}, nil

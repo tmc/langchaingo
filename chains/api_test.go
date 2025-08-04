@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 // nolint
@@ -50,10 +50,10 @@ func TestAPI(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
-
+	
 	chain := NewAPIChain(llm, http.DefaultClient)
 	q := map[string]any{
 		"api_docs": MeteoDocs,
@@ -61,7 +61,7 @@ func TestAPI(t *testing.T) {
 	}
 	result, err := Call(context.Background(), chain, q)
 	require.NoError(t, err)
-
+	
 	answer, ok := result["answer"].(string)
 	if !ok {
 		t.Fatal("expected answer to be a string")

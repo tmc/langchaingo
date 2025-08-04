@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/huggingface"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/huggingface"
 )
 
 func main() {
@@ -16,14 +16,14 @@ func main() {
 	// 	huggingface.WithModel("ZZZ"),
 	// }
 	// llm, err := huggingface.New(clientOptions...)
-
+	
 	// Or you may instantiate a client with a default model and use token from environment variable
 	llm, err := huggingface.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	// Or override default model to another one
 	generateOptions := []llms.CallOption{
 		llms.WithModel("gpt2"),

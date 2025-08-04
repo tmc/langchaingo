@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"strings"
-
+	
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 // Bedrock is the embedder used generate text embeddings through Amazon Bedrock.
@@ -23,7 +23,7 @@ func NewBedrock(opts ...Option) (*Bedrock, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return v, nil
 }
 
@@ -39,11 +39,11 @@ func (b *Bedrock) EmbedDocuments(ctx context.Context, texts []string) ([][]float
 		b.BatchSize,
 	)
 	provider := getProvider(b.ModelID)
-
+	
 	allEmbeds := make([][]float32, 0, len(texts))
 	var embeddings [][]float32
 	var err error
-
+	
 	for _, batch := range batchedTexts {
 		switch provider {
 		case "amazon":
@@ -53,7 +53,7 @@ func (b *Bedrock) EmbedDocuments(ctx context.Context, texts []string) ([][]float
 		default:
 			err = errors.New("unsupported text embedding provider: " + provider)
 		}
-
+		
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +67,7 @@ func (b *Bedrock) EmbedDocuments(ctx context.Context, texts []string) ([][]float
 func (b *Bedrock) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	var embeddings [][]float32
 	var err error
-
+	
 	switch provider := getProvider(b.ModelID); provider {
 	case "amazon":
 		embeddings, err = FetchAmazonTextEmbeddings(ctx, b.client, b.ModelID, []string{text})
@@ -76,7 +76,7 @@ func (b *Bedrock) EmbedQuery(ctx context.Context, text string) ([]float32, error
 	default:
 		err = errors.New("unsupported text embedding provider: " + provider)
 	}
-
+	
 	if err != nil {
 		return nil, err
 	}

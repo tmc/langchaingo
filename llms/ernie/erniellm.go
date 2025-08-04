@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ernie/internal/ernieclient"
 )
 
 var (
@@ -30,13 +30,13 @@ func New(opts ...Option) (*LLM, error) {
 		apiKey:    os.Getenv(ernieAPIKey),
 		secretKey: os.Getenv(ernieSecretKey),
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	c, err := newClient(options)
-
+	
 	return &LLM{
 		client:           c,
 		model:            options.modelName,
@@ -53,7 +53,7 @@ export ERNIE_API_KEY={API Key}
 export ERNIE_SECRET_KEY={Secret Key}
 doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNotSetAuth)
 	}
-
+	
 	return ernieclient.New(
 		ernieclient.WithAccessToken(opts.accessToken),
 		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
@@ -65,16 +65,16 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
 	}
-
+	
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
@@ -100,7 +100,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
@@ -111,7 +111,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
-
+	
 	return resp, nil
 }
 
@@ -124,27 +124,27 @@ func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 	if e != nil {
 		return nil, e
 	}
-
+	
 	if resp.ErrorCode > 0 {
 		return nil, fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
 			ErrCodeResponse, resp.ErrorCode, resp.ErrorMsg, resp.ID)
 	}
-
+	
 	emb := make([][]float32, 0, len(texts))
 	for i := range resp.Data {
 		emb = append(emb, resp.Data[i].Embedding)
 	}
-
+	
 	return emb, nil
 }
 
 func (o *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
 	model := o.model
-
+	
 	if model == "" {
 		model = ModelName(opts.Model)
 	}
-
+	
 	return modelToPath(model)
 }
 
@@ -165,7 +165,7 @@ func modelToPath(model ModelName) ernieclient.ModelPath {
 	case ModelNameLlama2_70BChat:
 		return "llama_2_70b"
 	default:
-
+		
 		return ernieclient.DefaultCompletionModelPath
 	}
 }

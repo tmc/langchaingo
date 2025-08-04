@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"strings"
-
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 var (
@@ -77,10 +77,10 @@ func NewConstitutional(llm llms.Model, chain chains.LLMChain,
 			revisionPrompt = RevisionPrompt
 		}
 	}
-
+	
 	critiqueChain := *chains.NewLLMChain(llm, critiquePrompt)
 	revisionChain := *chains.NewLLMChain(llm, revisionPrompt)
-
+	
 	return &Constitutional{
 		chain:                    chain,
 		critiqueChain:            critiqueChain,
@@ -100,7 +100,7 @@ func (c *Constitutional) Call(ctx context.Context, inputs map[string]any,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	response, ok := result["text"]
 	if !ok {
 		return nil, ErrResponseTextNotFound
@@ -147,12 +147,12 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			return nil, ErrStringConvert
 		}
 		critique := parseCritique(stringOutput)
-
+		
 		critique = strings.Trim(critique, " ")
 		if critique == "no critique needed" {
 			continue
 		}
-
+		
 		if strings.Contains(strings.ToLower(critique), "no critique needed") {
 			critiquesAndRevisions = append(critiquesAndRevisions, pair{
 				first:  critique,
@@ -160,7 +160,7 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			})
 			continue
 		}
-
+		
 		result, err := c.revisionChain.Call(ctx, map[string]any{
 			"inputPrompt":     inputPrompt,
 			"outputFromModel": response,

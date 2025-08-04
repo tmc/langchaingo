@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/internal/maputil"
-	"github.com/tmc/langchaingo/internal/setutil"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/internal/maputil"
+	"github.com/yincongcyincong/langchaingo/internal/setutil"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const delimiter = ","
@@ -30,21 +30,21 @@ func NewSequentialChain(chains []Chain, inputKeys []string, outputKeys []string,
 		outputKeys: outputKeys,
 		memory:     memory.NewSimple(),
 	}
-
+	
 	for _, opt := range opts {
 		opt(s)
 	}
-
+	
 	if err := s.validateSeqChain(); err != nil {
 		return nil, err
 	}
-
+	
 	return s, nil
 }
 
 func (c *SequentialChain) validateSeqChain() error {
 	knownKeys := setutil.ToSet(c.inputKeys)
-
+	
 	// Make sure memory keys don't collide with input keys
 	memoryKeys := c.memory.MemoryVariables(context.Background())
 	overlappingKeys := setutil.Intersection(memoryKeys, knownKeys)
@@ -54,12 +54,12 @@ func (c *SequentialChain) validateSeqChain() error {
 			ErrChainInitialization, strings.Join(overlappingKeys, delimiter), strings.Join(memoryKeys, delimiter),
 		)
 	}
-
+	
 	// Add memory keys to known keys
 	for _, key := range memoryKeys {
 		knownKeys[key] = struct{}{}
 	}
-
+	
 	for i, c := range c.chains {
 		// Check that chain has input keys that are in knownKeys
 		missingKeys := setutil.Difference(c.GetInputKeys(), knownKeys)
@@ -69,7 +69,7 @@ func (c *SequentialChain) validateSeqChain() error {
 				ErrChainInitialization, strings.Join(missingKeys, delimiter), strings.Join(maputil.ListKeys(knownKeys), delimiter),
 			)
 		}
-
+		
 		// Check that chain does not have output keys that are already in knownKeys
 		overlappingKeys := setutil.Intersection(c.GetOutputKeys(), knownKeys)
 		if len(overlappingKeys) > 0 {
@@ -78,20 +78,20 @@ func (c *SequentialChain) validateSeqChain() error {
 				ErrChainInitialization, i, strings.Join(overlappingKeys, delimiter),
 			)
 		}
-
+		
 		// Add the chain's output keys to knownKeys
 		for _, key := range c.GetOutputKeys() {
 			knownKeys[key] = struct{}{}
 		}
 	}
-
+	
 	// Check that outputKeys are in knownKeys
 	for _, key := range c.outputKeys {
 		if _, ok := knownKeys[key]; !ok {
 			return fmt.Errorf("%w: output key %s is not in the known keys", ErrChainInitialization, key)
 		}
 	}
-
+	
 	return nil
 }
 
@@ -149,7 +149,7 @@ func NewSimpleSequentialChain(chains []Chain) (*SimpleSequentialChain, error) {
 	if err := validateSimpleSeq(chains); err != nil {
 		return nil, err
 	}
-
+	
 	return &SimpleSequentialChain{chains: chains, memory: memory.NewSimple()}, nil
 }
 
@@ -161,7 +161,7 @@ func validateSimpleSeq(chains []Chain) error {
 				ErrInvalidInputNumberInSimpleSeq, i, chain.GetInputKeys(),
 			)
 		}
-
+		
 		if len(chain.GetOutputKeys()) != 1 {
 			return fmt.Errorf(
 				"%w: chain at index [%d] has output keys: %v",

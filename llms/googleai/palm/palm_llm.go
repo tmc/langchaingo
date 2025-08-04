@@ -6,10 +6,10 @@ package palm
 import (
 	"context"
 	"errors"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/googleai/internal/palmclient"
 )
 
 var (
@@ -34,20 +34,20 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
-
+	
 	results, err := o.client.CreateCompletion(ctx, &palmclient.CompletionRequest{
 		Prompts:       []string{part.(llms.TextContent).Text},
 		MaxTokens:     opts.MaxTokens,
@@ -60,7 +60,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
@@ -71,7 +71,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
-
+	
 	return resp, nil
 }
 
@@ -83,14 +83,14 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	if err != nil {
 		return [][]float32{}, err
 	}
-
+	
 	if len(embeddings) == 0 {
 		return nil, ErrEmptyResponse
 	}
 	if len(inputTexts) != len(embeddings) {
 		return embeddings, ErrUnexpectedResponseLength
 	}
-
+	
 	return embeddings, nil
 }
 
@@ -105,7 +105,7 @@ func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 	initOptions.Do(initOpts)
 	options := &options{}
 	*options = *defaultOptions // Copy default options.
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
@@ -115,6 +115,6 @@ func newClient(opts ...Option) (*palmclient.PaLMClient, error) {
 	if len(options.location) == 0 {
 		return nil, ErrMissingLocation
 	}
-
+	
 	return palmclient.New(context.TODO(), options.projectID, options.location, options.clientOptions...)
 }

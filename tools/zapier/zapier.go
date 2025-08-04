@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"context"
 	"text/template"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/zapier/internal"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools/zapier/internal"
 )
 
 type description struct {
@@ -48,7 +48,7 @@ func New(opts ToolOptions) (*Tool, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if opts.Client != nil {
 		opts.Client, err = internal.NewClient(internal.ClientOptions{
 			APIKey:      opts.APIKey,
@@ -59,7 +59,7 @@ func New(opts ToolOptions) (*Tool, error) {
 			return nil, err
 		}
 	}
-
+	
 	t := &Tool{
 		client:   opts.Client,
 		name:     opts.Name,
@@ -82,7 +82,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
-
+	
 	result, err := t.client.ExecuteAsString(ctx, t.actionID, input, t.params)
 	if err != nil {
 		if t.CallbacksHandler != nil {
@@ -90,11 +90,11 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 		}
 		return "", err
 	}
-
+	
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
-
+	
 	return result, nil
 }
 
@@ -104,21 +104,21 @@ func (t Tool) createDescription() string {
 		panic(err)
 	}
 	var bytes bytes.Buffer
-
+	
 	paramNames := make([]string, 0, len(t.params))
 	for k := range t.params {
 		paramNames = append(paramNames, k)
 	}
-
+	
 	desc := description{
 		Params:            paramNames,
 		ZapierDescription: t.name,
 	}
-
+	
 	err = tmpl.Execute(&bytes, desc)
 	if err != nil {
 		panic(err)
 	}
-
+	
 	return bytes.String()
 }

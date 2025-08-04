@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/watsonx"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/watsonx"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	// Or override default model to another one
 	prompt := "What would be a good company name be for name a company that makes colorful socks?"
 	completion, err := llms.GenerateFromSinglePrompt(

@@ -8,9 +8,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
+	
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // upsertPoints updates or inserts points into the Qdrant collection.
@@ -24,7 +24,7 @@ func (s Store) upsertPoints(
 	for i := range ids {
 		ids[i] = uuid.NewString()
 	}
-
+	
 	payload := upsertBody{
 		Batch: upsertBatch{
 			IDs:      ids,
@@ -32,7 +32,7 @@ func (s Store) upsertPoints(
 			Payloads: payloads,
 		},
 	}
-
+	
 	url := baseURL.JoinPath("collections", s.collectionName, "points")
 	body,
 		status,
@@ -46,11 +46,11 @@ func (s Store) upsertPoints(
 		return nil, err
 	}
 	defer body.Close()
-
+	
 	if status == http.StatusOK {
 		return ids, nil
 	}
-
+	
 	return nil,
 		newAPIError("upserting vectors", body)
 }
@@ -71,11 +71,11 @@ func (s Store) searchPoints(
 		Limit:       numVectors,
 		Filter:      filter,
 	}
-
+	
 	if scoreThreshold != 0 {
 		payload.ScoreThreshold = scoreThreshold
 	}
-
+	
 	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
 	body,
 		statusCode,
@@ -89,13 +89,13 @@ func (s Store) searchPoints(
 		return nil, err
 	}
 	defer body.Close()
-
+	
 	if statusCode != http.StatusOK {
 		return nil, newAPIError("querying collection", body)
 	}
-
+	
 	var response searchResponse
-
+	
 	decoder := json.NewDecoder(body)
 	err = decoder.Decode(&response)
 	if err != nil {
@@ -108,16 +108,16 @@ func (s Store) searchPoints(
 			return nil, fmt.Errorf("payload does not contain content key '%s'", s.contentKey)
 		}
 		delete(match.Payload, s.contentKey)
-
+		
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    match.Payload,
 			Score:       match.Score,
 		}
-
+		
 		docs[i] = doc
 	}
-
+	
 	return docs, nil
 }
 
@@ -133,15 +133,15 @@ func DoRequest(ctx context.Context,
 		return nil, 0, err
 	}
 	body := bytes.NewReader(payloadBytes)
-
+	
 	req, err := http.NewRequestWithContext(ctx, method, url.String()+"?wait=true", body)
 	if err != nil {
 		return nil, 0, err
 	}
-
+	
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("api-Key", apiKey)
-
+	
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, 0, err
@@ -157,6 +157,6 @@ func newAPIError(task string, body io.ReadCloser) error {
 	if err != nil {
 		return fmt.Errorf("failed to read body of error message: %w", err)
 	}
-
+	
 	return fmt.Errorf("%s: %s", task, buf.String())
 }

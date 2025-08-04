@@ -6,17 +6,17 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ollama"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
@@ -28,7 +28,7 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	e, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +43,7 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		t.Skip("OLLAMA_HOST not set")
 	}
 	_, e := getEmbedding("gemma:2b")
-
+	
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
 		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
@@ -54,7 +54,7 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		t.Cleanup(func() {
 			require.NoError(t, milvusContainer.Terminate(context.Background()))
 		})
-
+		
 		url, err = milvusContainer.ConnectionString(context.Background())
 		if err != nil {
 			t.Skipf("Failed to get milvus container endpoint: %s", err)
@@ -82,7 +82,7 @@ func TestMilvusConnection(t *testing.T) {
 	t.Parallel()
 	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
-
+	
 	data := []schema.Document{
 		{PageContent: "Tokyo", Metadata: map[string]any{"population": 9.7, "area": 622}},
 		{PageContent: "Kyoto", Metadata: map[string]any{"population": 1.46, "area": 828}},
@@ -98,19 +98,19 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Rio de Janeiro", Metadata: map[string]any{"population": 13.7, "area": 1200}},
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
-
+	
 	_, err = storer.AddDocuments(context.Background(), data)
 	require.NoError(t, err)
-
+	
 	// search docs with filter
 	filterRes, err := storer.SimilaritySearch(context.Background(),
 		"Tokyo", 10,
 		vectorstores.WithFilters("meta['area']==622"),
 	)
-
+	
 	require.NoError(t, err)
 	require.Len(t, filterRes, 1)
-
+	
 	japanRes, err := storer.SimilaritySearch(context.Background(),
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))

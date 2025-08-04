@@ -3,9 +3,9 @@ package sqlite3
 import (
 	"context"
 	"database/sql"
-
+	
 	_ "github.com/mattn/go-sqlite3" // sqlite3 driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "sqlite3"
@@ -30,7 +30,7 @@ func NewSQLite3(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
-
+	
 	return &SQLite3{
 		db: db,
 	}, nil
@@ -96,7 +96,7 @@ func (m SQLite3) TableInfo(ctx context.Context, table string) (string, error) {
 	if len(result[0]) < 1 {
 		return "", sqldatabase.ErrInvalidResult
 	}
-
+	
 	return result[0][0], nil
 }
 

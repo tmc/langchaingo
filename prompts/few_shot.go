@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 var (
@@ -66,7 +66,7 @@ func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string
 	if exampleSeparator != "" {
 		prompt.ExampleSeparator = exampleSeparator
 	}
-
+	
 	if prompt.ValidateTemplate {
 		err := CheckValidTemplate(prompt.Prefix+prompt.Suffix, prompt.TemplateFormat, append(input,
 			getMapKeys(partialInput)...))
@@ -122,20 +122,20 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 		return "", err
 	}
 	exampleStrings := make([]string, len(examples))
-
+	
 	for i, example := range examples {
 		exampleMap := make(map[string]interface{})
 		for k, v := range example {
 			exampleMap[k] = v
 		}
-
+		
 		res, err := p.ExamplePrompt.Format(exampleMap)
 		if err != nil {
 			return "", err
 		}
 		exampleStrings[i] = res
 	}
-
+	
 	template := p.AssemblePieces(exampleStrings)
 	return defaultFormatterMapping[p.TemplateFormat](template, resolvedValues)
 }
@@ -147,17 +147,17 @@ func (p *FewShotPrompt) AssemblePieces(exampleStrings []string) string {
 	if p.Prefix != "" {
 		pieces = append(pieces, p.Prefix)
 	}
-
+	
 	for _, elem := range exampleStrings {
 		if elem != "" {
 			pieces = append(pieces, elem)
 		}
 	}
-
+	
 	if p.Suffix != "" {
 		pieces = append(pieces, p.Suffix)
 	}
-
+	
 	return strings.Join(pieces, p.ExampleSeparator)
 }
 
@@ -175,7 +175,7 @@ func (p *FewShotPrompt) FormatPrompt(values map[string]any) (llms.PromptValue, e
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return StringPromptValue(f), nil
 }
 

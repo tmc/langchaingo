@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"log"
 	"time"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/mistral"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/mistral"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/pgvector"
 )
 
 func main() {
@@ -22,13 +22,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	
 	e, err := embeddings.NewEmbedder(model)
-
+	
 	if err != nil {
 		panic(err)
 	}
-
+	
 	// Create a new pgvector store.
 	ctx := context.Background()
 	store, err := pgvector.New(
@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatal("pgvector.New", err)
 	}
-
+	
 	// Add documents to the pgvector store.
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{
@@ -96,29 +96,29 @@ func main() {
 		log.Fatal("store.AddDocuments:\n", err)
 	}
 	time.Sleep(1 * time.Second)
-
+	
 	// Search for similar documents.
 	docs, err := store.SimilaritySearch(ctx, "japan", 1)
 	if err != nil {
 		log.Fatal("store.SimilaritySearch1:\n", err)
 	}
 	fmt.Println("store.SimilaritySearch1:\n", docs)
-
+	
 	time.Sleep(2 * time.Second) // Don't trigger cloudflare
-
+	
 	// Search for similar documents using score threshold.
 	docs, err = store.SimilaritySearch(ctx, "only cities in south america", 3, vectorstores.WithScoreThreshold(0.50))
 	if err != nil {
 		log.Fatal("store.SimilaritySearch2:\n", err)
 	}
 	fmt.Println("store.SimilaritySearch2:\n", docs)
-
+	
 	time.Sleep(3 * time.Second) // Don't trigger cloudflare
-
+	
 	// Search for similar documents using score threshold and metadata filter.
 	// Metadata filter for pgvector only supports key-value pairs for now.
 	filter := map[string]any{"area": "1523"} // Sao Paulo
-
+	
 	docs, err = store.SimilaritySearch(ctx, "only cities in south america",
 		3,
 		vectorstores.WithScoreThreshold(0.50),

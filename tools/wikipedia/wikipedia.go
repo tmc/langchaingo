@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"strconv"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 const (
@@ -62,7 +62,7 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
-
+	
 	result, err := t.searchWiKi(ctx, input)
 	if err != nil {
 		if t.CallbacksHandler != nil {
@@ -70,11 +70,11 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 		}
 		return "", err
 	}
-
+	
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolEnd(ctx, result)
 	}
-
+	
 	return result, nil
 }
 
@@ -83,19 +83,19 @@ func (t Tool) searchWiKi(ctx context.Context, input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	
 	if len(searchResult.Query.Search) == 0 {
 		return "no wikipedia pages found", nil
 	}
-
+	
 	result := ""
-
+	
 	for _, search := range searchResult.Query.Search {
 		getPageResult, err := getPage(ctx, search.PageID, t.LanguageCode, t.UserAgent)
 		if err != nil {
 			return "", err
 		}
-
+		
 		page, ok := getPageResult.Query.Pages[strconv.Itoa(search.PageID)]
 		if !ok {
 			return "", ErrUnexpectedAPIResult
@@ -106,6 +106,6 @@ func (t Tool) searchWiKi(ctx context.Context, input string) (string, error) {
 		}
 		result += page.Extract
 	}
-
+	
 	return result, nil
 }

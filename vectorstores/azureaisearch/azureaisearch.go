@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-
+	
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 // Store is a wrapper to use azure AI search rest API.
@@ -47,11 +47,11 @@ func New(opts ...Option) (Store, error) {
 	s := Store{
 		client: http.DefaultClient,
 	}
-
+	
 	if err := applyClientOptions(&s, opts...); err != nil {
 		return s, err
 	}
-
+	
 	return s, nil
 }
 
@@ -66,18 +66,18 @@ func (s *Store) AddDocuments(
 ) ([]string, error) {
 	opts := s.getOptions(options...)
 	ids := []string{}
-
+	
 	texts := []string{}
-
+	
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return ids, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return ids, ErrNumberOfVectorDoesNotMatch
 	}
@@ -88,7 +88,7 @@ func (s *Store) AddDocuments(
 		}
 		ids = append(ids, id)
 	}
-
+	
 	return ids, nil
 }
 
@@ -101,12 +101,12 @@ func (s *Store) SimilaritySearch(
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
-
+	
 	queryVector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	payload := SearchDocumentsRequestInput{
 		Vectors: []SearchDocumentsRequestInputVector{{
 			Fields: "contentVector",
@@ -114,30 +114,30 @@ func (s *Store) SimilaritySearch(
 			K:      numDocuments,
 		}},
 	}
-
+	
 	if filter, ok := opts.Filters.(string); ok {
 		payload.Filter = filter
 	}
-
+	
 	searchResults := SearchDocumentsRequestOuput{}
 	if err := s.SearchDocuments(ctx, opts.NameSpace, payload, &searchResults); err != nil {
 		return nil, err
 	}
-
+	
 	output := []schema.Document{}
 	for _, searchResult := range searchResults.Value {
 		doc, err := assertResultValues(searchResult)
 		if err != nil {
 			return output, err
 		}
-
+		
 		if opts.ScoreThreshold > 0 && opts.ScoreThreshold > doc.Score {
 			continue
 		}
-
+		
 		output = append(output, *doc)
 	}
-
+	
 	return output, nil
 }
 
@@ -148,7 +148,7 @@ func assertResultValues(searchResult map[string]interface{}) (*schema.Document, 
 	} else {
 		return nil, ErrAssertingSearchScore
 	}
-
+	
 	metadata := map[string]interface{}{}
 	if resultMetadata, ok := searchResult["metadata"].(string); ok {
 		if err := json.Unmarshal([]byte(resultMetadata), &metadata); err != nil {
@@ -157,13 +157,13 @@ func assertResultValues(searchResult map[string]interface{}) (*schema.Document, 
 	} else {
 		return nil, ErrAssertingMetadata
 	}
-
+	
 	var pageContent string
 	var ok bool
 	if pageContent, ok = searchResult["content"].(string); !ok {
 		return nil, ErrAssertingContent
 	}
-
+	
 	return &schema.Document{
 		PageContent: pageContent,
 		Metadata:    metadata,

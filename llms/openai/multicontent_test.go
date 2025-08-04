@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
@@ -18,7 +18,7 @@ func newTestClient(t *testing.T, opts ...Option) llms.Model {
 		t.Skip("OPENAI_API_KEY not set")
 		return nil
 	}
-
+	
 	llm, err := New(opts...)
 	require.NoError(t, err)
 	return llm
@@ -27,7 +27,7 @@ func newTestClient(t *testing.T, opts ...Option) llms.Model {
 func TestMultiContentText(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextPart("I'm a pomeranian"),
 		llms.TextPart("What kind of mammal am I?"),
@@ -38,10 +38,10 @@ func TestMultiContentText(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
@@ -50,7 +50,7 @@ func TestMultiContentText(t *testing.T) {
 func TestMultiContentTextChatSequence(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeHuman,
@@ -65,10 +65,10 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 			Parts: []llms.ContentPart{llms.TextPart("Which if these is larger?")},
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "spain.*larger", strings.ToLower(c1.Content))
@@ -76,11 +76,11 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 
 func TestMultiContentImage(t *testing.T) {
 	t.Parallel()
-
+	
 	llm := newTestClient(t, WithModel("gpt-4o"))
-
+	
 	parts := []llms.ContentPart{
-		llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
+		llms.ImageURLPart("https://github.com/yincongcyincong/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"),
 		llms.TextPart("describe this image in detail"),
 	}
 	content := []llms.MessageContent{
@@ -89,10 +89,10 @@ func TestMultiContentImage(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithMaxTokens(300))
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "parrot", strings.ToLower(c1.Content))
@@ -101,7 +101,7 @@ func TestMultiContentImage(t *testing.T) {
 func TestWithStreaming(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextPart("I'm a pomeranian"),
 		llms.TextPart("Tell me more about my taxonomy"),
@@ -112,16 +112,16 @@ func TestWithStreaming(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	var sb strings.Builder
 	rsp, err := llm.GenerateContent(context.Background(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
 		}))
-
+	
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
@@ -132,7 +132,7 @@ func TestWithStreaming(t *testing.T) {
 func TestFunctionCall(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextPart("What is the weather like in Boston?"),
 	}
@@ -142,7 +142,7 @@ func TestFunctionCall(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	functions := []llms.FunctionDefinition{
 		{
 			Name:        "getCurrentWeather",
@@ -150,11 +150,11 @@ func TestFunctionCall(t *testing.T) {
 			Parameters:  json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content,
 		llms.WithFunctions(functions))
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Equal(t, "tool_calls", c1.StopReason)

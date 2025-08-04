@@ -3,10 +3,10 @@ package ollama
 import (
 	"context"
 	"errors"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ollama/internal/ollamaclient"
 )
 
 var (
@@ -29,12 +29,12 @@ func New(opts ...Option) (*LLM, error) {
 	for _, opt := range opts {
 		opt(&o)
 	}
-
+	
 	client, err := ollamaclient.NewClient(o.ollamaServerURL, o.httpClient)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &LLM{client: client, options: o}, nil
 }
 
@@ -49,18 +49,18 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	// Override LLM model if set as llms.CallOption
 	model := o.options.model
 	if opts.Model != "" {
 		model = opts.Model
 	}
-
+	
 	// Our input is a sequence of MessageContent, each of which potentially has
 	// a sequence of Part that could be text, images etc.
 	// We have to convert it to a format Ollama undestands: ChatRequest, which
@@ -69,13 +69,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	chatMsgs := make([]*ollamaclient.Message, 0, len(messages))
 	for _, mc := range messages {
 		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
-
+		
 		// Look at all the parts in mc; expect to find a single Text part and
 		// any number of binary parts.
 		var text string
 		foundText := false
 		var images []ollamaclient.ImageData
-
+		
 		for _, p := range mc.Parts {
 			switch pt := p.(type) {
 			case llms.TextContent:
@@ -90,17 +90,17 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				return nil, errors.New("only support Text and BinaryContent parts right now")
 			}
 		}
-
+		
 		msg.Content = text
 		msg.Images = images
 		chatMsgs = append(chatMsgs, msg)
 	}
-
+	
 	format := o.options.format
 	if opts.JSONMode {
 		format = "json"
 	}
-
+	
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 	req := &ollamaclient.ChatRequest{
@@ -110,16 +110,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Options:  ollamaOptions,
 		Stream:   opts.StreamingFunc != nil,
 	}
-
+	
 	keepAlive := o.options.keepAlive
 	if keepAlive != "" {
 		req.KeepAlive = keepAlive
 	}
-
+	
 	var fn ollamaclient.ChatResponseFunc
 	streamedResponse := ""
 	var resp ollamaclient.ChatResponse
-
+	
 	fn = func(response ollamaclient.ChatResponse) error {
 		if opts.StreamingFunc != nil && response.Message != nil {
 			if err := opts.StreamingFunc(ctx, []byte(response.Message.Content)); err != nil {
@@ -138,7 +138,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil
 	}
-
+	
 	err := o.client.GenerateChat(ctx, req, fn)
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -146,7 +146,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	choices := []*llms.ContentChoice{
 		{
 			Content: resp.Message.Content,
@@ -157,19 +157,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		},
 	}
-
+	
 	response := &llms.ContentResponse{Choices: choices}
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
+	
 	return response, nil
 }
 
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
 	embeddings := [][]float32{}
-
+	
 	for _, input := range inputTexts {
 		req := &ollamaclient.EmbeddingRequest{
 			Prompt: input,
@@ -178,23 +178,23 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 		if o.options.keepAlive != "" {
 			req.KeepAlive = o.options.keepAlive
 		}
-
+		
 		embedding, err := o.client.CreateEmbedding(ctx, req)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		if len(embedding.Embedding) == 0 {
 			return nil, ErrEmptyResponse
 		}
-
+		
 		embeddings = append(embeddings, embedding.Embedding)
 	}
-
+	
 	if len(inputTexts) != len(embeddings) {
 		return embeddings, ErrIncompleteEmbedding
 	}
-
+	
 	return embeddings, nil
 }
 
@@ -227,6 +227,6 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.RepeatPenalty = float32(opts.RepetitionPenalty)
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
-
+	
 	return ollamaOptions
 }

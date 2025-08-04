@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/memory/sqlite3"
-
+	
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/memory/sqlite3"
+	
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -29,15 +29,15 @@ func prepare(ctx context.Context, db *sql.DB) error {
 	if err := res.Err(); err != nil {
 		return err
 	}
-
+	
 	if err := res.Scan(&count); err != nil {
 		return err
 	}
-
+	
 	if count > 0 {
 		return nil
 	}
-
+	
 	_, err := db.ExecContext(
 		ctx,
 		"INSERT INTO langchaingo_messages(session, content, type) VALUES (?, ?, ?)",
@@ -53,12 +53,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
+	
 	db, err := sql.Open("sqlite3", "history_example.db")
 	if err != nil {
 		return err
 	}
-
+	
 	chatHistory := sqlite3.NewSqliteChatMessageHistory(
 		sqlite3.WithSession("example"),
 		sqlite3.WithDB(db),
@@ -66,17 +66,17 @@ func run() error {
 	conversationBuffer := memory.NewConversationBuffer(memory.WithChatHistory(chatHistory))
 	llmChain := chains.NewConversation(llm, conversationBuffer)
 	ctx := context.Background()
-
+	
 	// prepare the db with some sample data
 	if err := prepare(ctx, db); err != nil {
 		return err
 	}
-
+	
 	out, err := chains.Run(ctx, llmChain, "What's my name? How many times did I ask this?")
 	if err != nil {
 		return err
 	}
-
+	
 	fmt.Println(out)
 	return nil
 }

@@ -5,48 +5,48 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pinecone"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/pinecone"
 )
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
-
+	
 	pineconeAPIKey := os.Getenv("PINECONE_API_KEY")
 	if pineconeAPIKey == "" {
 		t.Skip("Must set PINECONE_API_KEY to run test")
 	}
-
+	
 	pineconeHost := os.Getenv("PINECONE_HOST")
 	if pineconeHost == "" {
 		t.Skip("Must set PINECONE_HOST to run test")
 	}
-
+	
 	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
 	if openaiAPIKey == "" {
 		t.Skip("Must set OPENAI_API_KEY to run test")
 	}
-
+	
 	return pineconeAPIKey, pineconeHost
 }
 
 func TestPineconeStoreRest(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
@@ -54,13 +54,13 @@ func TestPineconeStoreRest(t *testing.T) {
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -69,14 +69,14 @@ func TestPineconeStoreRest(t *testing.T) {
 
 func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
@@ -84,7 +84,7 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -98,14 +98,14 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := storer.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.8))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
-
+	
 	// test with a score threshold of 0, expected all 10 documents
 	docs, err = storer.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
@@ -116,14 +116,14 @@ func TestPineconeStoreRestWithScoreThreshold(t *testing.T) {
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
@@ -131,7 +131,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		pinecone.WithNameSpace(uuid.New().String()),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -145,12 +145,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	_, err = storer.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8))
 	require.Error(t, err)
-
+	
 	_, err = storer.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
@@ -159,23 +159,23 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 func TestPineconeAsRetriever(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -186,7 +186,7 @@ func TestPineconeAsRetriever(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -201,23 +201,23 @@ func TestPineconeAsRetriever(t *testing.T) {
 
 func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -230,7 +230,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -241,7 +241,7 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
@@ -249,23 +249,23 @@ func TestPineconeAsRetrieverWithScoreThreshold(t *testing.T) {
 
 func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -303,12 +303,12 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	filter := make(map[string]any)
 	filterValue := make(map[string]any)
 	filterValue["$eq"] = "patio"
 	filter["location"] = filterValue
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -319,29 +319,29 @@ func TestPineconeAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		"What colors is the lamp?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "yellow", "expected yellow in result")
 }
 
 func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -379,12 +379,12 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	filter := make(map[string]any)
 	filterValue := make(map[string]any)
 	filterValue["$in"] = []string{"office", "kitchen"}
 	filter["location"] = filterValue
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -395,30 +395,30 @@ func TestPineconeAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "orange", "expected orange in result")
 }
 
 func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -456,7 +456,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -467,7 +467,7 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "blue", "expected blue in result")
 	require.Contains(t, result, "orange", "expected orange in result")
@@ -477,23 +477,23 @@ func TestPineconeAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
-
+	
 	apiKey, host := getValues(t)
-
+	
 	llm, err := openai.New(openai.WithEmbeddingModel("text-embedding-ada-002"))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := pinecone.New(
 		pinecone.WithAPIKey(apiKey),
 		pinecone.WithHost(host),
 		pinecone.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	id := uuid.New().String()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -522,7 +522,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 		vectorstores.WithNameSpace(id),
 	)
 	require.NoError(t, err)
-
+	
 	filter := map[string]interface{}{
 		"$and": []map[string]interface{}{
 			{
@@ -537,7 +537,7 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 			},
 		},
 	}
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -548,6 +548,6 @@ func TestPineconeAsRetrieverWithMetadataFilters(t *testing.T) {
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "purple", "expected black in purple")
 }

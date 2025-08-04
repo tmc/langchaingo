@@ -10,8 +10,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 const (
@@ -31,10 +31,10 @@ type ChatRequest struct {
 	Stream           bool           `json:"stream,omitempty"`
 	FrequencyPenalty float64        `json:"frequency_penalty,omitempty"`
 	PresencePenalty  float64        `json:"presence_penalty,omitempty"`
-
+	
 	// If the 'functions' parameter is set, setting the 'system' parameter is not supported.
 	System string `json:"system,omitempty"`
-
+	
 	// Function definitions to include in the request.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
@@ -42,7 +42,7 @@ type ChatRequest struct {
 	// If a specific function should be invoked, use the format:
 	// `{"name": "my_function"}`
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
-
+	
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
@@ -57,7 +57,7 @@ type ChatMessage struct {
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
 	Name string `json:"name,omitempty"`
-
+	
 	// FunctionCall represents a function call to be made in the message.
 	FunctionCall *llms.FunctionCall `json:"function_call,omitempty"`
 }
@@ -153,33 +153,33 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatRes
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Build request
 	body := bytes.NewReader(payloadBytes)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL(c.ModelPath), body)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	c.setHeaders(req)
-
+	
 	// Send request
 	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer r.Body.Close()
-
+	
 	if r.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
+		
 		// No need to check the error here: if it fails, we'll just return the
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
 			return nil, errors.New(msg) // nolint:goerr113
 		}
-
+		
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
 	if payload.StreamingFunc != nil {
@@ -220,7 +220,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 	}()
 	// Parse response
 	response := ChatResponse{}
-
+	
 	for streamResponse := range responseChan {
 		chunk := []byte(streamResponse.Result)
 		response.Result += streamResponse.Result
@@ -229,14 +229,14 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			response.FunctionCall = streamResponse.FunctionCall
 			chunk, _ = json.Marshal(response.FunctionCall) // nolint:errchkjson
 		}
-
+		
 		if payload.StreamingFunc != nil {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
-
+		
 		if streamResponse.IsEnd {
 			break
 		}

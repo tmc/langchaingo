@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // ParseError is the error type returned by output parsers.
@@ -23,7 +23,7 @@ const (
 	// _structuredFormatInstructionTemplate is a template for the format
 	// instructions of the structured output parser.
 	_structuredFormatInstructionTemplate = "The output should be a markdown code snippet formatted in the following schema: \n```json\n{\n%s}\n```" // nolint
-
+	
 	// _structuredLineTemplate is a single line of the json schema in the
 	// format instruction of the structured output parser. The fist verb is
 	// the name, the second verb is the type and the third is a description of
@@ -67,18 +67,18 @@ func (p Structured) parse(text string) (map[string]string, error) {
 	if !ok {
 		return nil, ParseError{Text: text, Reason: "no ```json at start of output"}
 	}
-
+	
 	jsonString, _, ok := strings.Cut(withoutJSONStart, "```")
 	if !ok {
 		return nil, ParseError{Text: text, Reason: "no ``` at end of output"}
 	}
-
+	
 	var parsed map[string]string
 	err := json.Unmarshal([]byte(jsonString), &parsed)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Validate that the parsed map contains all fields specified in the response
 	// schemas.
 	missingKeys := make([]string, 0)
@@ -87,14 +87,14 @@ func (p Structured) parse(text string) (map[string]string, error) {
 			missingKeys = append(missingKeys, rs.Name)
 		}
 	}
-
+	
 	if len(missingKeys) > 0 {
 		return nil, ParseError{
 			Text:   text,
 			Reason: fmt.Sprintf("output is missing the following fields %v", missingKeys),
 		}
 	}
-
+	
 	return parsed, nil
 }
 
@@ -119,7 +119,7 @@ func (p Structured) GetFormatInstructions() string {
 			rs.Description,
 		)
 	}
-
+	
 	return fmt.Sprintf(_structuredFormatInstructionTemplate, jsonLines)
 }
 

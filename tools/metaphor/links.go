@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
+	
 	"github.com/metaphorsystems/metaphor-go"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 // LinksSearch defines a tool implementation for the Metaphor Find Similar Links.
@@ -26,7 +26,7 @@ var _ tools.Tool = &LinksSearch{}
 // It returns a pointer to a LinksSearch instance and an error.
 func NewLinksSearch(options ...metaphor.ClientOptions) (*LinksSearch, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-
+	
 	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func NewLinksSearch(options ...metaphor.ClientOptions) (*LinksSearch, error) {
 		client:  client,
 		options: options,
 	}
-
+	
 	return metaphor, nil
 }
 
@@ -77,16 +77,16 @@ func (tool *LinksSearch) Call(ctx context.Context, input string) (string, error)
 		}
 		return "", err
 	}
-
+	
 	return tool.formatLinks(links), nil
 }
 
 func (tool *LinksSearch) formatLinks(response *metaphor.SearchResponse) string {
 	formattedResults := ""
-
+	
 	for _, result := range response.Results {
 		formattedResults += fmt.Sprintf("Title: %s\nURL: %s\nID: %s\n\n", result.Title, result.URL, result.ID)
 	}
-
+	
 	return formattedResults
 }

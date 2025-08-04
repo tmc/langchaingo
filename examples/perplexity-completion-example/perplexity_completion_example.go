@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
+	
 	"github.com/joho/godotenv"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -16,9 +16,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-
+	
 	apiKey := os.Getenv("PERPLEXITY_API_KEY")
-
+	
 	llm, err := openai.New(
 		// Supported models: https://docs.perplexity.ai/docs/model-cards
 		openai.WithModel("llama-3.1-sonar-large-128k-online"),

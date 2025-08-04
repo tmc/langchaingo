@@ -1,8 +1,8 @@
 package chains
 
 import (
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 const _stuffSummarizationTemplate = `Write a concise summary of the following:
@@ -32,7 +32,7 @@ func LoadStuffSummarization(llm llms.Model) StuffDocuments {
 	llmChain := NewLLMChain(llm, prompts.NewPromptTemplate(
 		_stuffSummarizationTemplate, []string{"context"},
 	))
-
+	
 	return NewStuffDocuments(llmChain)
 }
 
@@ -45,7 +45,7 @@ func LoadRefineSummarization(llm llms.Model) RefineDocuments {
 	refineLLMChain := NewLLMChain(llm, prompts.NewPromptTemplate(
 		_refineSummarizationTemplate, []string{"existing_answer", "context"},
 	))
-
+	
 	return NewRefineDocuments(llmChain, refineLLMChain)
 }
 
@@ -56,6 +56,6 @@ func LoadMapReduceSummarization(llm llms.Model) MapReduceDocuments {
 		_stuffSummarizationTemplate, []string{"context"},
 	))
 	combineChain := LoadStuffSummarization(llm)
-
+	
 	return NewMapReduceDocuments(mapChain, combineChain)
 }

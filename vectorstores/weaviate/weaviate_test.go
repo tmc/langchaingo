@@ -6,23 +6,23 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
 	"github.com/weaviate/weaviate/entities/models"
 )
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
-
+	
 	scheme := os.Getenv("WEAVIATE_SCHEME")
 	host := os.Getenv("WEAVIATE_HOST")
 	if scheme == "" || host == "" {
@@ -34,17 +34,17 @@ func getValues(t *testing.T) (string, string) {
 		t.Cleanup(func() {
 			require.NoError(t, weaviateContainer.Terminate(context.Background()))
 		})
-
+		
 		scheme, host, err = weaviateContainer.HttpHostAddress(context.Background())
 		if err != nil {
 			t.Skipf("Failed to get weaviate container endpoint: %s", err)
 		}
 	}
-
+	
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	return scheme, host
 }
 
@@ -74,14 +74,14 @@ func createTestClass(ctx context.Context, s Store) error {
 
 func TestWeaviateStoreRest(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -91,10 +91,10 @@ func TestWeaviateStoreRest(t *testing.T) {
 		WithQueryAttrs([]string{"country"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
@@ -102,7 +102,7 @@ func TestWeaviateStoreRest(t *testing.T) {
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -112,14 +112,14 @@ func TestWeaviateStoreRest(t *testing.T) {
 
 func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -128,10 +128,10 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 		WithIndexName(randomizedCamelCaseClass()),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -145,14 +145,14 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.9))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
-
+	
 	// test with a score threshold of 0, expected all 10 documents
 	docs, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
@@ -163,13 +163,13 @@ func TestWeaviateStoreRestWithScoreThreshold(t *testing.T) {
 
 func TestMetadataSearch(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -179,10 +179,10 @@ func TestMetadataSearch(t *testing.T) {
 		WithQueryAttrs([]string{"type"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
@@ -192,7 +192,7 @@ func TestMetadataSearch(t *testing.T) {
 		}},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.MetadataSearch(context.Background(), 2,
 		vectorstores.WithFilters(
 			filters.Where().
@@ -208,13 +208,13 @@ func TestMetadataSearch(t *testing.T) {
 
 func TestDeduplicater(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -224,10 +224,10 @@ func TestDeduplicater(t *testing.T) {
 		WithQueryAttrs([]string{"type"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
@@ -241,7 +241,7 @@ func TestDeduplicater(t *testing.T) {
 		},
 	))
 	require.NoError(t, err)
-
+	
 	docs, err := store.MetadataSearch(context.Background(), 2)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -251,13 +251,13 @@ func TestDeduplicater(t *testing.T) {
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -266,10 +266,10 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		WithIndexName(randomizedCamelCaseClass()),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -283,12 +283,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8))
 	require.Error(t, err)
-
+	
 	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
@@ -297,14 +297,14 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 func TestWeaviateAsRetriever(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -313,12 +313,12 @@ func TestWeaviateAsRetriever(t *testing.T) {
 		WithIndexName(randomizedCamelCaseClass()),
 	)
 	require.NoError(t, err)
-
+	
 	nameSpace := uuid.New().String()
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -329,7 +329,7 @@ func TestWeaviateAsRetriever(t *testing.T) {
 		vectorstores.WithNameSpace(nameSpace),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -344,14 +344,14 @@ func TestWeaviateAsRetriever(t *testing.T) {
 
 func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -360,11 +360,11 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 		WithIndexName(randomizedCamelCaseClass()),
 	)
 	require.NoError(t, err)
-
+	
 	nameSpace := randomizedCamelCaseClass()
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -377,7 +377,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 		vectorstores.WithNameSpace(nameSpace),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -388,7 +388,7 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
@@ -396,14 +396,14 @@ func TestWeaviateAsRetrieverWithScoreThreshold(t *testing.T) {
 
 func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -413,12 +413,12 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		WithQueryAttrs([]string{"location"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	nameSpace := randomizedCamelCaseClass()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -456,12 +456,12 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		vectorstores.WithNameSpace(nameSpace),
 	)
 	require.NoError(t, err)
-
+	
 	filter := filters.Where().
 		WithPath([]string{"location"}).
 		WithOperator(filters.Equal).
 		WithValueString("patio")
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -474,7 +474,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		"What colors is the lamp?",
 	)
 	require.NoError(t, err)
-
+	
 	require.NotContains(t, result, "black", "expected black not in result")
 	require.NotContains(t, result, "blue", "expected blue not in result")
 	require.NotContains(t, result, "orange", "expected orange not in result")
@@ -484,14 +484,14 @@ func TestWeaviateAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 
 func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -501,12 +501,12 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		WithQueryAttrs([]string{"location"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	nameSpace := randomizedCamelCaseClass()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -544,7 +544,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		vectorstores.WithNameSpace(nameSpace),
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -554,7 +554,7 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		"What color is the lamp in each room?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "blue", "expected blue in result")
 	require.Contains(t, result, "orange", "expected orange in result")
@@ -564,14 +564,14 @@ func TestWeaviateAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 
 func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -581,12 +581,12 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 		WithQueryAttrs([]string{"location"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	nameSpace := randomizedCamelCaseClass()
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -615,7 +615,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 		vectorstores.WithNameSpace(nameSpace),
 	)
 	require.NoError(t, err)
-
+	
 	filter := filters.Where().WithOperator(filters.And).WithOperands([]*filters.WhereBuilder{
 		filters.Where().WithOperator(filters.Or).WithOperands([]*filters.WhereBuilder{
 			filters.Where().WithPath([]string{"location"}).
@@ -626,7 +626,7 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 		filters.Where().WithPath([]string{"square_feet"}).
 			WithOperator(filters.GreaterThanEqual).WithValueNumber(300),
 	})
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -646,14 +646,14 @@ func TestWeaviateAsRetrieverWithMetadataFilters(t *testing.T) {
 
 func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -662,39 +662,39 @@ func TestWeaviateStoreAdditionalFieldsDefaults(t *testing.T) {
 		WithIndexName(randomizedCamelCaseClass()),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Foo"},
 	})
 	require.NoError(t, err)
-
+	
 	// Check if the default additional fields are present in the result
 	docs, err := store.SimilaritySearch(context.Background(),
 		"Foo", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-
+	
 	additional, ok := docs[0].Metadata["_additional"].(map[string]any)
 	require.True(t, ok, "expected '_additional' to be present in the metadata and parsable as 'map[string]any'")
 	require.Len(t, additional, 1)
-
+	
 	certainty, _ := additional["certainty"].(float64)
 	require.InDelta(t, docs[0].Score, float32(certainty), 0, "expect score to be equal to the certainty")
 }
 
 func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -704,25 +704,25 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 		WithAdditionalFields([]string{"id", "vector", "certainty", "distance"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Foo"},
 	})
 	require.NoError(t, err)
-
+	
 	// Check if all the additional fields are present in the result
 	docs, err := store.SimilaritySearch(context.Background(),
 		"Foo", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
-
+	
 	additional, ok := docs[0].Metadata["_additional"].(map[string]any)
 	require.True(t, ok, "expected '_additional' to be present in the metadata and parsable as 'map[string]any'")
 	require.Len(t, additional, 4)
-
+	
 	require.NotEmpty(t, additional["id"], "expected the id to be present")
 	require.NotEmpty(t, additional["vector"], "expected the vector to be present")
 	require.NotEmpty(t, additional["certainty"], "expected the certainty to be present")
@@ -734,12 +734,12 @@ func TestWeaviateStoreAdditionalFieldsAdded(t *testing.T) {
 // the `Store`.
 func TestWeaviateWithOptionEmbedder(t *testing.T) {
 	t.Parallel()
-
+	
 	scheme, host := getValues(t)
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
-
+	
 	notme, err := embeddings.NewEmbedder(
 		embeddings.EmbedderClientFunc(func(context.Context, []string) ([][]float32, error) {
 			require.FailNow(t, "wrong embedder was called")
@@ -747,14 +747,14 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 		}),
 	)
 	require.NoError(t, err)
-
+	
 	butme, err := embeddings.NewEmbedder(
 		embeddings.EmbedderClientFunc(func(ctx context.Context, texts []string) ([][]float32, error) {
 			return llm.CreateEmbedding(ctx, texts)
 		}),
 	)
 	require.NoError(t, err)
-
+	
 	store, err := New(
 		WithScheme(scheme),
 		WithHost(host),
@@ -764,10 +764,10 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 		WithQueryAttrs([]string{"location"}),
 	)
 	require.NoError(t, err)
-
+	
 	err = createTestClass(context.Background(), store)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
@@ -775,7 +775,7 @@ func TestWeaviateWithOptionEmbedder(t *testing.T) {
 		{PageContent: "potato"},
 	}, vectorstores.WithEmbedder(butme))
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(context.Background(), "japan", 1,
 		vectorstores.WithEmbedder(butme))
 	require.NoError(t, err)

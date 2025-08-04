@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 const _intermediateStepsOutputKey = "intermediateSteps"
@@ -20,7 +20,7 @@ type Executor struct {
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
 	ErrorHandler     *ParserErrorHandler
-
+	
 	MaxIterations           int
 	ReturnIntermediateSteps bool
 }
@@ -36,7 +36,7 @@ func NewExecutor(agent Agent, opts ...Option) *Executor {
 	for _, opt := range opts {
 		opt(&options)
 	}
-
+	
 	return &Executor{
 		Agent:                   agent,
 		Memory:                  options.memory,
@@ -53,7 +53,7 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...ch
 		return nil, err
 	}
 	nameToTool := getNameToTool(e.Agent.GetTools())
-
+	
 	steps := make([]schema.AgentStep, 0)
 	for i := 0; i < e.MaxIterations; i++ {
 		var finish map[string]any
@@ -62,7 +62,7 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, _ ...ch
 			return finish, err
 		}
 	}
-
+	
 	if e.CallbacksHandler != nil {
 		e.CallbacksHandler.HandleAgentFinish(ctx, schema.AgentFinish{
 			ReturnValues: map[string]any{"output": ErrNotFinished.Error()},
@@ -94,25 +94,25 @@ func (e *Executor) doIteration( // nolint
 	if err != nil {
 		return steps, nil, err
 	}
-
+	
 	if len(actions) == 0 && finish == nil {
 		return steps, nil, ErrAgentNoReturn
 	}
-
+	
 	if finish != nil {
 		if e.CallbacksHandler != nil {
 			e.CallbacksHandler.HandleAgentFinish(ctx, *finish)
 		}
 		return steps, e.getReturn(finish, steps), nil
 	}
-
+	
 	for _, action := range actions {
 		steps, err = e.doAction(ctx, steps, nameToTool, action)
 		if err != nil {
 			return steps, nil, err
 		}
 	}
-
+	
 	return steps, nil, nil
 }
 
@@ -125,7 +125,7 @@ func (e *Executor) doAction(
 	if e.CallbacksHandler != nil {
 		e.CallbacksHandler.HandleAgentAction(ctx, action)
 	}
-
+	
 	tool, ok := nameToTool[strings.ToUpper(action.Tool)]
 	if !ok {
 		return append(steps, schema.AgentStep{
@@ -133,12 +133,12 @@ func (e *Executor) doAction(
 			Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
 		}), nil
 	}
-
+	
 	observation, err := tool.Call(ctx, action.ToolInput)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return append(steps, schema.AgentStep{
 		Action:      action,
 		Observation: observation,
@@ -149,7 +149,7 @@ func (e *Executor) getReturn(finish *schema.AgentFinish, steps []schema.AgentSte
 	if e.ReturnIntermediateSteps {
 		finish.ReturnValues[_intermediateStepsOutputKey] = steps
 	}
-
+	
 	return finish.ReturnValues
 }
 
@@ -179,10 +179,10 @@ func inputsToString(inputValues map[string]any) (map[string]string, error) {
 		if !ok {
 			return nil, fmt.Errorf("%w: %s", ErrExecutorInputNotString, key)
 		}
-
+		
 		inputs[key] = valueStr
 	}
-
+	
 	return inputs, nil
 }
 
@@ -190,11 +190,11 @@ func getNameToTool(t []tools.Tool) map[string]tools.Tool {
 	if len(t) == 0 {
 		return nil
 	}
-
+	
 	nameToTool := make(map[string]tools.Tool, len(t))
 	for _, tool := range t {
 		nameToTool[strings.ToUpper(tool.Name())] = tool
 	}
-
+	
 	return nameToTool
 }

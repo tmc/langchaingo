@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"runtime"
-
+	
 	aiplatform "cloud.google.com/go/aiplatform/apiv1"
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -31,7 +31,7 @@ const (
 	embeddingModelName = "textembedding-gecko"
 	TextModelName      = "text-bison"
 	ChatModelName      = "chat-bison"
-
+	
 	defaultMaxConns = 4
 )
 
@@ -54,7 +54,7 @@ func New(ctx context.Context, projectID, location string, opts ...option.ClientO
 	opts = append(o, opts...)
 	// PredictionClient only support GRPC.
 	opts = append(opts, option.WithHTTPClient(nil))
-
+	
 	client, err := aiplatform.NewPredictionClient(ctx, opts...)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) (
 	if err != nil {
 		return nil, err
 	}
-
+	
 	embeddings := [][]float32{}
 	for _, res := range responses {
 		value := res.GetStructValue().AsMap()

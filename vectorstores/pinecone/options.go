@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 const (
@@ -63,19 +63,19 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		textKey: _defaultTextKey,
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.host == "" {
 		return Store{}, fmt.Errorf("%w: missing host", ErrInvalidOptions)
 	}
-
+	
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	if o.apiKey == "" {
 		o.apiKey = os.Getenv(_pineconeEnvVrName)
 		if o.apiKey == "" {
@@ -86,6 +86,6 @@ func applyClientOptions(opts ...Option) (Store, error) {
 			)
 		}
 	}
-
+	
 	return *o, nil
 }

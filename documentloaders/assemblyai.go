@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-
+	
 	"github.com/AssemblyAI/assemblyai-go-sdk"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 // ErrMissingAudioSource is returned when neither an audio URL nor a reader has
@@ -21,16 +21,16 @@ type TranscriptFormat int
 const (
 	// Single document with full transcript text.
 	TranscriptFormatText TranscriptFormat = iota
-
+	
 	// Multiple documents with each sentence as page content.
 	TranscriptFormatSentences
-
+	
 	// Multiple documents with each paragraph as page content.
 	TranscriptFormatParagraphs
-
+	
 	// Single document with SRT formatted subtitles as page content.
 	TranscriptFormatSubtitlesSRT
-
+	
 	// Single document with VTT formatted subtitles as page content.
 	TranscriptFormatSubtitlesVTT
 )
@@ -45,16 +45,16 @@ const (
 // [FAQ]: https://www.assemblyai.com/docs/concepts/faq
 type AssemblyAIAudioTranscriptLoader struct {
 	client *assemblyai.Client
-
+	
 	// URL of the audio file to transcribe.
 	url string
-
+	
 	// Reader of the audio file to transcribe.
 	r io.Reader
-
+	
 	// Optional parameters for the transcription.
 	params *assemblyai.TranscriptOptionalParams
-
+	
 	// Format of the document page content.
 	format TranscriptFormat
 }
@@ -71,11 +71,11 @@ func NewAssemblyAIAudioTranscript(apiKey string, opts ...AssemblyAIOption) *Asse
 		client: assemblyai.NewClient(apiKey),
 		format: TranscriptFormatText,
 	}
-
+	
 	for _, opt := range opts {
 		opt(loader)
 	}
-
+	
 	return loader
 }
 
@@ -115,12 +115,12 @@ func (a *AssemblyAIAudioTranscriptLoader) Load(ctx context.Context) ([]schema.Do
 	if err != nil {
 		return nil, err
 	}
-
+	
 	docs, err := a.formatTranscript(ctx, transcript)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return docs, nil
 }
 
@@ -130,11 +130,11 @@ func (a *AssemblyAIAudioTranscriptLoader) transcribe(ctx context.Context) (assem
 	if a.url != "" {
 		return a.client.Transcripts.TranscribeFromURL(ctx, a.url, a.params)
 	}
-
+	
 	if a.r != nil {
 		return a.client.Transcripts.TranscribeFromReader(ctx, a.r, a.params)
 	}
-
+	
 	return assemblyai.Transcript{}, ErrMissingAudioSource
 }
 
@@ -148,31 +148,31 @@ func (a *AssemblyAIAudioTranscriptLoader) formatTranscript(ctx context.Context, 
 			return nil, err
 		}
 		return documentsFromSentences(sentences.Sentences)
-
+	
 	case TranscriptFormatParagraphs:
 		paragraphs, err := a.client.Transcripts.GetParagraphs(ctx, assemblyai.ToString(transcript.ID))
 		if err != nil {
 			return nil, err
 		}
 		return documentsFromParagraphs(paragraphs.Paragraphs)
-
+	
 	case TranscriptFormatSubtitlesSRT:
 		srt, err := a.client.Transcripts.GetSubtitles(ctx, assemblyai.ToString(transcript.ID), "srt", nil)
 		if err != nil {
 			return nil, err
 		}
 		return []schema.Document{{PageContent: string(srt)}}, nil
-
+	
 	case TranscriptFormatSubtitlesVTT:
 		vtt, err := a.client.Transcripts.GetSubtitles(ctx, assemblyai.ToString(transcript.ID), "vtt", nil)
 		if err != nil {
 			return nil, err
 		}
 		return []schema.Document{{PageContent: string(vtt)}}, nil
-
+	
 	case TranscriptFormatText:
 		fallthrough
-
+	
 	default:
 		metadata, err := toMetadata(transcript)
 		if err != nil {
@@ -184,37 +184,37 @@ func (a *AssemblyAIAudioTranscriptLoader) formatTranscript(ctx context.Context, 
 
 func documentsFromSentences(sentences []assemblyai.TranscriptSentence) ([]schema.Document, error) {
 	docs := make([]schema.Document, 0, len(sentences))
-
+	
 	for _, sentence := range sentences {
 		metadata, err := toMetadata(sentence)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		docs = append(docs, schema.Document{
 			PageContent: assemblyai.ToString(sentence.Text),
 			Metadata:    metadata,
 		})
 	}
-
+	
 	return docs, nil
 }
 
 func documentsFromParagraphs(paragraphs []assemblyai.TranscriptParagraph) ([]schema.Document, error) {
 	docs := make([]schema.Document, 0, len(paragraphs))
-
+	
 	for _, paragraph := range paragraphs {
 		metadata, err := toMetadata(paragraph)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		docs = append(docs, schema.Document{
 			PageContent: assemblyai.ToString(paragraph.Text),
 			Metadata:    metadata,
 		})
 	}
-
+	
 	return docs, nil
 }
 
@@ -224,15 +224,15 @@ func toMetadata(obj any) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var metadata map[string]any
 	if err := json.Unmarshal(b, &metadata); err != nil {
 		return nil, err
 	}
-
+	
 	// Remove redundant transcript text.
 	delete(metadata, "text")
-
+	
 	return metadata, nil
 }
 
@@ -243,6 +243,6 @@ func (a *AssemblyAIAudioTranscriptLoader) LoadAndSplit(ctx context.Context, spli
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return textsplitter.SplitDocuments(splitter, docs)
 }

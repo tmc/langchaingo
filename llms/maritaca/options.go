@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-
-	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
+	
+	"github.com/yincongcyincong/langchaingo/llms/maritaca/internal/maritacaclient"
 )
 
 type options struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -17,15 +17,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	ctx := context.Background()
-
+	
 	// Create messages for the chat
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, "You are a helpful assistant that explains complex topics step by step"),
 		llms.TextParts(llms.ChatMessageTypeHuman, "Explain how quantum entanglement works and why it's important for quantum computing"),
 	}
-
+	
 	// Generate content with streaming to see both reasoning and final answer in real-time
 	completion, err := llm.GenerateContent(
 		ctx,
@@ -45,7 +45,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Access the reasoning content and final answer separately
 	if len(completion.Choices) > 0 {
 		choice := completion.Choices[0]

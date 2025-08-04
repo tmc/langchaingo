@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
+	
 	"github.com/google/uuid"
 	"github.com/pinecone-io/go-pinecone/pinecone"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
@@ -33,7 +33,7 @@ var (
 type Store struct {
 	embedder embeddings.Embedder
 	client   *pinecone.Client
-
+	
 	host      string
 	apiKey    string
 	textKey   string
@@ -46,12 +46,12 @@ func New(opts ...Option) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
-
+	
 	s.client, err = pinecone.NewClient(pinecone.NewClientParams{ApiKey: s.apiKey})
 	if err != nil {
 		return Store{}, err
 	}
-
+	
 	return s, nil
 }
 
@@ -62,29 +62,29 @@ func (s Store) AddDocuments(ctx context.Context,
 	options ...vectorstores.Option,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
-
+	
 	nameSpace := s.getNameSpace(opts)
-
+	
 	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
 	if err != nil {
 		return nil, err
 	}
 	defer indexConn.Close()
-
+	
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-
+	
 	metadatas := make([]map[string]any, 0, len(docs))
 	for i := 0; i < len(docs); i++ {
 		metadata := make(map[string]any, len(docs[i].Metadata))
@@ -92,19 +92,19 @@ func (s Store) AddDocuments(ctx context.Context,
 			metadata[key] = value
 		}
 		metadata[s.textKey] = texts[i]
-
+		
 		metadatas = append(metadatas, metadata)
 	}
-
+	
 	pineconeVectors := make([]*pinecone.Vector, 0, len(vectors))
-
+	
 	ids := make([]string, len(vectors))
 	for i := 0; i < len(vectors); i++ {
 		metadataStruct, err := structpb.NewStruct(metadatas[i])
 		if err != nil {
 			return nil, err
 		}
-
+		
 		id := uuid.New().String()
 		ids[i] = id
 		pineconeVectors = append(
@@ -116,12 +116,12 @@ func (s Store) AddDocuments(ctx context.Context,
 			},
 		)
 	}
-
+	
 	_, err = indexConn.UpsertVectors(&ctx, pineconeVectors)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return ids, nil
 }
 
@@ -129,14 +129,14 @@ func (s Store) AddDocuments(ctx context.Context,
 // and queries to find the most similar documents.
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) ([]schema.Document, error) { //nolint:lll
 	opts := s.getOptions(options...)
-
+	
 	nameSpace := s.getNameSpace(opts)
 	indexConn, err := s.client.IndexWithNamespace(s.host, nameSpace)
 	if err != nil {
 		return nil, err
 	}
 	defer indexConn.Close()
-
+	
 	var protoFilterStruct *structpb.Struct
 	filters := s.getFilters(opts)
 	if filters != nil {
@@ -145,17 +145,17 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 			return nil, err
 		}
 	}
-
+	
 	scoreThreshold, err := s.getScoreThreshold(opts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	vector, err := s.embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	queryResult, err := indexConn.QueryByVectorValues(
 		&ctx,
 		&pinecone.QueryByVectorValuesRequest{
@@ -169,11 +169,11 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(queryResult.Matches) == 0 {
 		return []schema.Document{}, nil
 	}
-
+	
 	return s.getDocumentsFromMatches(queryResult, scoreThreshold)
 }
 
@@ -186,13 +186,13 @@ func (s Store) getDocumentsFromMatches(queryResult *pinecone.QueryVectorsRespons
 			return nil, ErrMissingTextKey
 		}
 		delete(metadata, s.textKey)
-
+		
 		doc := schema.Document{
 			PageContent: pageContent,
 			Metadata:    metadata,
 			Score:       match.Score,
 		}
-
+		
 		// If scoreThreshold is not 0, we only return matches with a score above the threshold.
 		if scoreThreshold != 0 && match.Score >= scoreThreshold {
 			resultDocuments = append(resultDocuments, doc)
@@ -237,12 +237,12 @@ func (s Store) createProtoStructFilter(filter any) (*structpb.Struct, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var filterStruct structpb.Struct
 	err = json.Unmarshal(filterBytes, &filterStruct)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &filterStruct, nil
 }

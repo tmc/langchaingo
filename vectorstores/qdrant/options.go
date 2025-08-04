@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 const (
@@ -60,22 +60,22 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		contentKey: defaultContentKey,
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.collectionName == "" {
 		return Store{}, fmt.Errorf("%w: missing collection name", ErrInvalidOptions)
 	}
-
+	
 	if o.qdrantURL == (url.URL{}) {
 		return Store{}, fmt.Errorf("%w: missing Qdrant URL", ErrInvalidOptions)
 	}
-
+	
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	return *o, nil
 }

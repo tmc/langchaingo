@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println("The first man to walk on the moon:")
 	fmt.Println(completion)
 }

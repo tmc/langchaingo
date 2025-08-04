@@ -7,10 +7,10 @@ import (
 	"context"
 	"database/sql"
 	"strings"
-
+	
 	_ "github.com/mattn/go-sqlite3" // sqlite3 driver.
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // SqliteChatMessageHistory is a struct that stores chat messages.
@@ -53,18 +53,18 @@ func (h *SqliteChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMes
 	if err != nil {
 		return nil, err
 	}
-
+	
 	defer res.Close()
-
+	
 	var msgs []llms.ChatMessage
 	for res.Next() {
 		var content, msgtype string
 		var created interface{}
-
+		
 		if err = res.Scan(&content, &msgtype, &created); err != nil {
 			return nil, err
 		}
-
+		
 		switch msgtype {
 		case string(llms.ChatMessageTypeAI):
 			msgs = append(msgs, llms.AIChatMessage{Content: content})
@@ -75,11 +75,11 @@ func (h *SqliteChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMes
 		default:
 		}
 	}
-
+	
 	if err := res.Err(); err != nil {
 		return nil, err
 	}
-
+	
 	return msgs, nil
 }
 
@@ -113,7 +113,7 @@ func (h *SqliteChatMessageHistory) Clear(ctx context.Context) error {
 	if !h.Overwrite {
 		return nil
 	}
-
+	
 	querytpl := []string{
 		"DELETE FROM ",
 		" WHERE session = ?;",
@@ -128,7 +128,7 @@ func (h *SqliteChatMessageHistory) SetMessages(ctx context.Context, messages []l
 	if !h.Overwrite {
 		return nil
 	}
-
+	
 	/*
 	 BEGIN TRANSACTION;
 	 DELETE FROM table WHERE session = ?;
@@ -143,18 +143,18 @@ func (h *SqliteChatMessageHistory) SetMessages(ctx context.Context, messages []l
 	buf.WriteString(" INSERT INTO ")
 	buf.WriteString(h.TableName)
 	buf.WriteString(" (session, content, type) VALUES ")
-
+	
 	inputs := make([]string, len(messages))
 	values := []interface{}{h.Session}
-
+	
 	for i, msg := range messages {
 		inputs[i] = "(?, ?, ?)"
 		values = append(values, h.Session, msg.GetContent(), string(msg.GetType()))
 	}
-
+	
 	buf.WriteString(strings.Join(inputs, ", "))
 	buf.WriteString("; COMMIT;")
-
+	
 	_, err := h.DB.ExecContext(ctx, buf.String(), values...)
 	return err
 }

@@ -3,10 +3,10 @@ package mongo
 import (
 	"context"
 	"encoding/json"
-
-	"github.com/tmc/langchaingo/internal/mongodb"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/internal/mongodb"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -40,20 +40,20 @@ func NewMongoDBChatMessageHistory(ctx context.Context, options ...ChatMessageHis
 	if err != nil {
 		return nil, err
 	}
-
+	
 	client, err := mongodb.NewClient(ctx, h.url)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	h.client = client
-
+	
 	h.collection = client.Database(h.databaseName).Collection(h.collectionName)
 	// create session id index
 	if _, err := h.collection.Indexes().CreateOne(ctx, mongo.IndexModel{Keys: bson.D{{Key: mongoSessionIDKey, Value: 1}}}); err != nil {
 		return nil, err
 	}
-
+	
 	return h, nil
 }
 
@@ -65,7 +65,7 @@ func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 	if err != nil {
 		return messages, err
 	}
-
+	
 	_messages := []chatMessageModel{}
 	if err := cursor.All(ctx, &_messages); err != nil {
 		return messages, err
@@ -77,7 +77,7 @@ func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 		}
 		messages = append(messages, m.ToChatMessage())
 	}
-
+	
 	return messages, nil
 }
 
@@ -104,12 +104,12 @@ func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMe
 	if err != nil {
 		return err
 	}
-
+	
 	_, err = h.collection.InsertOne(ctx, chatMessageModel{
 		SessionID: h.sessionID,
 		History:   string(_message),
 	})
-
+	
 	return err
 }
 
@@ -126,11 +126,11 @@ func (h *ChatMessageHistory) SetMessages(ctx context.Context, messages []llms.Ch
 			History:   string(_message),
 		})
 	}
-
+	
 	if err := h.Clear(ctx); err != nil {
 		return err
 	}
-
+	
 	_, err := h.collection.InsertMany(ctx, _messages)
 	return err
 }

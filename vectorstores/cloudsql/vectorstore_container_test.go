@@ -9,11 +9,11 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores/cloudsql"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/cloudsqlutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores/cloudsql"
 	"os"
 	"strings"
 	"testing"
@@ -22,11 +22,11 @@ import (
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
-
+	
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
 		pgVectorContainer, err := tcpostgres.RunContainer(
@@ -47,13 +47,13 @@ func preCheckEnvSetting(t *testing.T) string {
 		t.Cleanup(func() {
 			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
 		})
-
+		
 		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
 		require.NoError(t, err)
-
+		
 		pgvectorURL = str
 	}
-
+	
 	return pgvectorURL
 }
 
@@ -72,7 +72,7 @@ func setEngineWithImage(t *testing.T) cloudsqlutil.PostgresEngine {
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
 	}
-
+	
 	return pgEngine
 }
 
@@ -105,7 +105,7 @@ func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	cleanUpTableFn := func() error {
 		_, err := pgEngine.Pool.Exec(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", "my_test_table"))
 		return err
@@ -116,9 +116,9 @@ func initVectorStore(t *testing.T) (cloudsql.VectorStore, func() error) {
 func TestContainerPingToDB(t *testing.T) {
 	t.Parallel()
 	engine := setEngineWithImage(t)
-
+	
 	defer engine.Close()
-
+	
 	if err := engine.Pool.Ping(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +170,7 @@ func TestContainerAddDocuments(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 	vs, cleanUpTableFn := initVectorStore(t)
-
+	
 	_, err := vs.AddDocuments(ctx, []schema.Document{
 		{
 			PageContent: "Tokyo",

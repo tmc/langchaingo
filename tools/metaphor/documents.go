@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
+	
 	"github.com/metaphorsystems/metaphor-go"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 // Documents defines a tool implementation for the Metaphor Web scrapper.
@@ -25,12 +25,12 @@ var _ tools.Tool = &Documents{}
 // It returns a pointer to a Documents struct and an error.
 func NewDocuments(options ...metaphor.ClientOptions) (*Documents, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-
+	
 	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &Documents{
 		client:  client,
 		options: options,
@@ -76,7 +76,7 @@ func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
 	for i, id := range ids {
 		ids[i] = strings.TrimSpace(id)
 	}
-
+	
 	contents, err := tool.client.GetContents(ctx, ids)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoContentExtracted) {
@@ -84,16 +84,16 @@ func (tool *Documents) Call(ctx context.Context, input string) (string, error) {
 		}
 		return "", err
 	}
-
+	
 	return tool.formatContents(contents), nil
 }
 
 func (tool *Documents) formatContents(response *metaphor.ContentsResponse) string {
 	formattedResults := ""
-
+	
 	for _, result := range response.Contents {
 		formattedResults += fmt.Sprintf("Title: %s\nContent: %s\nURL: %s\n\n", result.Title, result.Extract, result.URL)
 	}
-
+	
 	return formattedResults
 }

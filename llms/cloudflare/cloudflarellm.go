@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/cloudflare/internal/cloudflareclient"
 )
 
 var (
@@ -29,11 +29,11 @@ func New(opts ...Option) (*LLM, error) {
 	o := options{
 		httpClient: http.DefaultClient,
 	}
-
+	
 	for _, opt := range opts {
 		opt(&o)
 	}
-
+	
 	client := cloudflareclient.NewClient(
 		o.httpClient,
 		o.cloudflareAccountID,
@@ -42,7 +42,7 @@ func New(opts ...Option) (*LLM, error) {
 		o.model,
 		o.embeddingModel,
 	)
-
+	
 	return &LLM{client: client, options: o}, nil
 }
 
@@ -56,38 +56,38 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	// Our input is a sequence of Message, each of which potentially has
 	// a sequence of Part that is text.
 	// We have to convert it to a format Cloudflare understands: []Message, which
 	// has a sequence of Message, each of which has a role and content - single
 	// text + potential images.
 	chatMsgs := []cloudflareclient.Message{}
-
+	
 	if o.options.system != "" {
 		chatMsgs = append(chatMsgs, cloudflareclient.Message{
 			Role:    cloudflareclient.RoleSystem,
 			Content: o.options.system,
 		})
 	}
-
+	
 	for i := range messages {
 		mc := messages[i]
-
+		
 		msg := cloudflareclient.Message{
 			Role: typeToRole(mc.Role),
 		}
-
+		
 		// Look at all the parts in mc; expect to find a single Text part and
 		// any number of binary parts.
 		var text string
 		var foundText bool
-
+		
 		for _, p := range mc.Parts {
 			switch pt := p.(type) {
 			case llms.TextContent:
@@ -102,13 +102,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				return nil, errors.New("only supports Text right now")
 			}
 		}
-
+		
 		msg.Content = text
 		chatMsgs = append(chatMsgs, msg)
 	}
-
+	
 	stream := func(b bool) *bool { return &b }(opts.StreamingFunc != nil)
-
+	
 	res, err := o.client.GenerateContent(ctx, &cloudflareclient.GenerateContentRequest{
 		Messages:      chatMsgs,
 		Stream:        *stream,
@@ -117,23 +117,23 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if err != nil {
 		return nil, err
 	}
-
+	
 	for i := range res.Errors {
 		return nil, errors.Join(errors.New(res.Errors[i].Message))
 	}
-
+	
 	choices := []*llms.ContentChoice{
 		{
 			Content: res.Result.Response,
 		},
 	}
-
+	
 	response := &llms.ContentResponse{Choices: choices}
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
+	
 	return response, nil
 }
 
@@ -145,15 +145,15 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(res.Result.Data) == 0 {
 		return nil, ErrEmptyResponse
 	}
-
+	
 	if len(inputTexts) != len(res.Result.Data) {
 		return res.Result.Data, ErrIncompleteEmbedding
 	}
-
+	
 	return res.Result.Data, nil
 }
 

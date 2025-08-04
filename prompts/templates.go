@@ -6,10 +6,10 @@ import (
 	"slices"
 	"strings"
 	"text/template"
-
+	
 	"github.com/Masterminds/sprig/v3"
 	"github.com/nikolalohinski/gonja"
-	"github.com/tmc/langchaingo/prompts/internal/fstring"
+	"github.com/yincongcyincong/langchaingo/prompts/internal/fstring"
 	"golang.org/x/exp/maps"
 )
 
@@ -88,12 +88,12 @@ func CheckValidTemplate(template string, templateFormat TemplateFormat, inputVar
 	if !ok {
 		return newInvalidTemplateError(templateFormat)
 	}
-
+	
 	dummyInputs := make(map[string]any, len(inputVariables))
 	for _, v := range inputVariables {
 		dummyInputs[v] = "foo"
 	}
-
+	
 	_, err := RenderTemplate(template, templateFormat, dummyInputs)
 	return err
 }

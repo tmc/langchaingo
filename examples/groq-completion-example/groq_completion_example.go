@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
+	
 	"github.com/joho/godotenv"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -16,9 +16,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-
+	
 	apiKey := os.Getenv("GROQ_API_KEY")
-
+	
 	llm, err := openai.New(
 		openai.WithModel("llama3-8b-8192"),
 		openai.WithBaseURL("https://api.groq.com/openai/v1"),

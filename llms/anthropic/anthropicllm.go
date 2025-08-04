@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 var (
@@ -53,15 +53,15 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 		baseURL:    anthropicclient.DefaultBaseURL,
 		httpClient: http.DefaultClient,
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	if len(options.token) == 0 {
 		return nil, ErrMissingToken
 	}
-
+	
 	return anthropicclient.New(options.token, options.model, options.baseURL,
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
@@ -79,12 +79,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
 	}
-
+	
 	if o.client.UseLegacyTextCompletionsAPI {
 		return generateCompletionsContent(ctx, o, messages, opts)
 	}
@@ -95,7 +95,7 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 	if len(messages) == 0 || len(messages[0].Parts) == 0 {
 		return nil, ErrEmptyResponse
 	}
-
+	
 	msg0 := messages[0]
 	part := msg0.Parts[0]
 	partText, ok := part.(llms.TextContent)
@@ -118,7 +118,7 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 		}
 		return nil, fmt.Errorf("anthropic: failed to create completion: %w", err)
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
@@ -134,7 +134,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
 	}
-
+	
 	tools := toolsToTools(opts.Tools)
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
@@ -156,7 +156,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if result == nil {
 		return nil, ErrEmptyResponse
 	}
-
+	
 	choices := make([]*llms.ContentChoice, len(result.Content))
 	for i, content := range result.Content {
 		switch content.GetType() {
@@ -202,7 +202,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
 		}
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: choices,
 	}
@@ -268,7 +268,7 @@ func handleSystemMessage(msg llms.MessageContent) (string, error) {
 
 func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	var contents []anthropicclient.Content
-
+	
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
 		case llms.TextContent:
@@ -289,11 +289,11 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported human message part type: %T", part)
 		}
 	}
-
+	
 	if len(contents) == 0 {
 		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: no valid content in human message")
 	}
-
+	
 	return anthropicclient.ChatMessage{
 		Role:    RoleUser,
 		Content: contents,
@@ -313,7 +313,7 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 			Name:  toolCall.FunctionCall.Name,
 			Input: inputStruct,
 		}
-
+		
 		return anthropicclient.ChatMessage{
 			Role:    RoleAssistant,
 			Content: []anthropicclient.Content{toolUse},
@@ -344,7 +344,7 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 			ToolUseID: toolCallResponse.ToolCallID,
 			Content:   toolCallResponse.Content,
 		}
-
+		
 		return anthropicclient.ChatMessage{
 			Role:    RoleUser,
 			Content: []anthropicclient.Content{toolContent},

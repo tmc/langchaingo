@@ -7,10 +7,10 @@ import (
 	"sync"
 	"testing"
 	"time"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 type testLanguageModel struct {
@@ -52,19 +52,19 @@ func (l *testLanguageModel) GenerateContent(_ context.Context, mc []llms.Message
 		stringPromptValue{s: prompt},
 	}
 	l.mu.Unlock()
-
+	
 	if l.simulateWork > 0 {
 		time.Sleep(l.simulateWork)
 	}
-
+	
 	var llmResult string
-
+	
 	if l.expResult != "" {
 		llmResult = l.expResult
 	} else {
 		llmResult = prompt
 	}
-
+	
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{Content: llmResult},
@@ -76,7 +76,7 @@ var _ llms.Model = &testLanguageModel{}
 
 func TestApply(t *testing.T) {
 	t.Parallel()
-
+	
 	numInputs := 10
 	maxWorkers := 5
 	inputs := make([]map[string]any, numInputs)
@@ -85,7 +85,7 @@ func TestApply(t *testing.T) {
 			"text": strconv.Itoa(i),
 		}
 	}
-
+	
 	c := NewLLMChain(&testLanguageModel{}, prompts.NewPromptTemplate("{{.text}}", []string{"text"}))
 	results, err := Apply(context.Background(), c, inputs, maxWorkers)
 	require.NoError(t, err)
@@ -94,7 +94,7 @@ func TestApply(t *testing.T) {
 
 func TestApplyWithCanceledContext(t *testing.T) {
 	t.Parallel()
-
+	
 	numInputs := 10
 	maxWorkers := 5
 	inputs := make([]map[string]any, numInputs)
@@ -102,16 +102,16 @@ func TestApplyWithCanceledContext(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	c := NewLLMChain(&testLanguageModel{simulateWork: time.Second}, prompts.NewPromptTemplate("test", nil))
-
+	
 	var applyErr error
 	go func() {
 		defer wg.Done()
 		_, applyErr = Apply(ctx, c, inputs, maxWorkers)
 	}()
-
+	
 	cancelFunc()
 	wg.Wait()
-
+	
 	if applyErr == nil || applyErr.Error() != "context canceled" {
 		t.Fatal("expected context canceled error, got:", applyErr)
 	}

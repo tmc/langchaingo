@@ -9,11 +9,11 @@ import (
 	"io"
 	"net/http"
 	"regexp"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 //go:embed prompts/llm_api_url.txt
@@ -42,10 +42,10 @@ type APIChain struct {
 func NewAPIChain(llm llms.Model, request HTTPRequest) APIChain {
 	reqPrompt := prompts.NewPromptTemplate(_llmAPIURLPrompt, []string{"api_docs", "input"})
 	reqChain := NewLLMChain(llm, reqPrompt)
-
+	
 	resPrompt := prompts.NewPromptTemplate(_llmAPIResponsePrompt, []string{"input", "api_docs", "api_response"})
 	resChain := NewLLMChain(llm, resPrompt)
-
+	
 	return APIChain{
 		RequestChain: reqChain,
 		AnswerChain:  resChain,
@@ -60,21 +60,21 @@ func NewAPIChain(llm llms.Model, request HTTPRequest) APIChain {
 func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...ChainCallOption) (map[string]any, error) {
 	reqChainTmp := 0.0
 	opts = append(opts, WithTemperature(reqChainTmp))
-
+	
 	tmpOutput, err := Call(ctx, a.RequestChain, values, opts...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	outputText, ok := tmpOutput["text"].(string)
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
+	
 	// Extract the json from llm output
 	re := regexp.MustCompile(`(?s)\{.*\}`)
 	jsonString := re.FindString(outputText)
-
+	
 	// Convert the LLM output into the anonymous struct.
 	var output struct {
 		Method  string            `json:"method"`
@@ -82,26 +82,26 @@ func (a APIChain) Call(ctx context.Context, values map[string]any, opts ...Chain
 		URL     string            `json:"url"`
 		Body    map[string]string `json:"body"`
 	}
-
+	
 	err = json.Unmarshal([]byte(jsonString), &output)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	apiResponse, err := a.runRequest(ctx, output.Method, output.URL, output.Headers, output.Body)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	tmpOutput["input"] = values["input"]
 	tmpOutput["api_docs"] = values["api_docs"]
 	tmpOutput["api_response"] = apiResponse
-
+	
 	answer, err := Call(ctx, a.AnswerChain, tmpOutput, opts...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return map[string]any{"answer": answer["text"]}, err
 }
 
@@ -137,38 +137,38 @@ func (a APIChain) runRequest(
 	body map[string]string,
 ) (string, error) {
 	var bodyReader io.Reader
-
+	
 	if method == "POST" || method == "PUT" {
 		bodyBytes, err := json.Marshal(body)
 		if err != nil {
 			return "", err
 		}
-
+		
 		bodyReader = bytes.NewBuffer(bodyBytes)
 	}
-
+	
 	// Create the new request defined by reqChain
 	req, err := http.NewRequestWithContext(ctx, method, url, bodyReader)
 	if err != nil {
 		return "", err
 	}
-
+	
 	// set request headers passed from reqChain
 	for key, value := range headers {
 		req.Header.Add(key, value)
 	}
-
+	
 	resp, err := a.Request.Do(req)
 	if err != nil {
 		return "", err
 	}
-
+	
 	defer resp.Body.Close()
-
+	
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
-
+	
 	return string(resBody), nil
 }

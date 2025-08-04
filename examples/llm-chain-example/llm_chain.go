@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
+	
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func run() error {
 		[]string{"product"},
 	)
 	llmChain := chains.NewLLMChain(llm, prompt)
-
+	
 	// If a chain only needs one input we can use Run to execute it.
 	// We can pass callbacks to Run as an option, e.g:
 	//   chains.WithCallback(callbacks.StreamLogHandler{})
@@ -38,13 +38,13 @@ func run() error {
 		return err
 	}
 	fmt.Println(out)
-
+	
 	translatePrompt := prompts.NewPromptTemplate(
 		"Translate the following text from {{.inputLanguage}} to {{.outputLanguage}}. {{.text}}",
 		[]string{"inputLanguage", "outputLanguage", "text"},
 	)
 	llmChain = chains.NewLLMChain(llm, translatePrompt)
-
+	
 	// Otherwise the call function must be used.
 	outputValues, err := chains.Call(ctx, llmChain, map[string]any{
 		"inputLanguage":  "English",
@@ -54,12 +54,12 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
+	
 	out, ok := outputValues[llmChain.OutputKey].(string)
 	if !ok {
 		return fmt.Errorf("invalid chain return")
 	}
 	fmt.Println(out)
-
+	
 	return nil
 }

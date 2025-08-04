@@ -3,10 +3,10 @@ package chains
 import (
 	"context"
 	"fmt"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const (
@@ -21,13 +21,13 @@ const (
 type RetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
-
+	
 	// The chain the documents and query is given to.
 	CombineDocumentsChain Chain
-
+	
 	// The input key to get the query from, by default "query".
 	InputKey string
-
+	
 	// If the chain should return the documents used by the combine
 	// documents chain in the "source_documents" key.
 	ReturnSourceDocuments bool
@@ -64,12 +64,12 @@ func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ..
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
+	
 	docs, err := c.Retriever.GetRelevantDocuments(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	result, err := Call(ctx, c.CombineDocumentsChain, map[string]any{
 		"question":        query,
 		"input_documents": docs,
@@ -77,11 +77,11 @@ func (c RetrievalQA) Call(ctx context.Context, values map[string]any, options ..
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if c.ReturnSourceDocuments {
 		result[_retrievalQADefaultSourceDocumentKey] = docs
 	}
-
+	
 	return result, nil
 }
 
@@ -98,6 +98,6 @@ func (c RetrievalQA) GetOutputKeys() []string {
 	if c.ReturnSourceDocuments {
 		outputKeys = append(outputKeys, _retrievalQADefaultSourceDocumentKey)
 	}
-
+	
 	return outputKeys
 }

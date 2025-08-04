@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/prompts"
+	
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 func main() {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/local"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/local"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Or instantiate a client with a custom bin and args options
 	//clientOptions := []local.Option{
 	//	local.WithBin("/usr/bin/echo"),
@@ -23,10 +23,10 @@ func main() {
 	//	local.WithGlobalAsArgs(), // build key-value arguments from global llms.Options, then append to args
 	//}
 	//llm, err := local.New(clientOptions...)
-
+	
 	// Init context
 	ctx := context.Background()
-
+	
 	// By default, library will use default bin and args
 	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, "How many sides does a square have?")
 	// Or append to default args options from global llms.Options

@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
+	
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/pgvector/pgvector-go"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/cloudsqlutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 const (
@@ -92,7 +92,7 @@ func (vs *VectorStore) AddDocuments(ctx context.Context, docs []schema.Document,
 		}
 	}
 	b := &pgx.Batch{}
-
+	
 	for i := range texts {
 		id := ids[i]
 		content := texts[i]
@@ -104,12 +104,12 @@ func (vs *VectorStore) AddDocuments(ctx context.Context, docs []schema.Document,
 		}
 		b.Queue(query, values...)
 	}
-
+	
 	batchResults := vs.engine.Pool.SendBatch(ctx, b)
 	if err := batchResults.Close(); err != nil {
 		return nil, fmt.Errorf("failed to execute batch: %w", err)
 	}
-
+	
 	return ids, nil
 }
 
@@ -119,16 +119,16 @@ func (vs *VectorStore) generateAddDocumentsQuery(id, content, embedding string, 
 	if len(vs.metadataColumns) > 0 {
 		metadataColNames = ", " + strings.Join(vs.metadataColumns, ", ")
 	}
-
+	
 	if vs.metadataJSONColumn != "" {
 		metadataColNames += ", " + vs.metadataJSONColumn
 	}
-
+	
 	insertStmt := fmt.Sprintf(`INSERT INTO %q.%q (%s, %s, %s%s)`,
 		vs.schemaName, vs.tableName, vs.idColumn, vs.contentColumn, vs.embeddingColumn, metadataColNames)
 	valuesStmt := "VALUES ($1, $2, $3"
 	values := []any{id, content, embedding}
-
+	
 	// Add metadata
 	for _, metadataColumn := range vs.metadataColumns {
 		if val, ok := metadata[metadataColumn]; ok {
@@ -164,7 +164,7 @@ func (vs *VectorStore) SimilaritySearch(ctx context.Context, query string, _ int
 	}
 	operator := vs.distanceStrategy.operator()
 	searchFunction := vs.distanceStrategy.similaritySearchFunction()
-
+	
 	columns := []string{}
 	columns = append(columns, vs.contentColumn)
 	if vs.metadataJSONColumn != "" {
@@ -180,7 +180,7 @@ func (vs *VectorStore) SimilaritySearch(ctx context.Context, query string, _ int
         SELECT %s, %s(%s, '%s') AS distance FROM "%s"."%s" %s ORDER BY %s %s '%s' LIMIT $1::int;`,
 		columnNames, searchFunction, vs.embeddingColumn, vector.String(), vs.schemaName, vs.tableName,
 		whereClause, vs.embeddingColumn, operator, vector.String())
-
+	
 	results, err := vs.executeSQLQuery(ctx, stmt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute sql query: %w", err)
@@ -198,11 +198,11 @@ func (vs *VectorStore) executeSQLQuery(ctx context.Context, stmt string) ([]Sear
 		return nil, fmt.Errorf("failed to execute similar search query: %w", err)
 	}
 	defer rows.Close()
-
+	
 	var results []SearchDocument
 	for rows.Next() {
 		doc := SearchDocument{}
-
+		
 		err = rows.Scan(&doc.Content, &doc.LangchainMetadata, &doc.Distance)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan result: %w", err)
@@ -238,35 +238,35 @@ func (vs *VectorStore) ApplyVectorIndex(ctx context.Context, index BaseIndex, na
 	if index.indexType == "exactnearestneighbor" {
 		return vs.DropVectorIndex(ctx, name)
 	}
-
+	
 	filter := ""
 	if len(index.partialIndexes) > 0 {
 		filter = fmt.Sprintf("WHERE %s", index.partialIndexes)
 	}
 	optsString := index.indexOptions()
 	params := fmt.Sprintf("WITH %s", optsString)
-
+	
 	if name == "" {
 		if index.name == "" {
 			index.name = vs.tableName + defaultIndexNameSuffix
 		}
 		name = index.name
 	}
-
+	
 	concurrentlyStr := ""
 	if concurrently {
 		concurrentlyStr = "CONCURRENTLY"
 	}
-
+	
 	function := index.distanceStrategy.searchFunction()
 	stmt := fmt.Sprintf(`CREATE INDEX %s %s ON "%s"."%s" USING %s (%s %s) %s %s`,
 		concurrentlyStr, name, vs.schemaName, vs.tableName, index.indexType, vs.embeddingColumn, function, params, filter)
-
+	
 	_, err := vs.engine.Pool.Exec(ctx, stmt)
 	if err != nil {
 		return fmt.Errorf("failed to execute creation of index: %w", err)
 	}
-
+	
 	return nil
 }
 
@@ -283,7 +283,7 @@ func (vs *VectorStore) ReIndexWithName(ctx context.Context, indexName string) er
 	if err != nil {
 		return fmt.Errorf("failed to reindex: %w", err)
 	}
-
+	
 	return nil
 }
 
@@ -297,7 +297,7 @@ func (vs *VectorStore) DropVectorIndex(ctx context.Context, indexName string) er
 	if err != nil {
 		return fmt.Errorf("failed to drop vector index: %w", err)
 	}
-
+	
 	return nil
 }
 
@@ -313,7 +313,7 @@ func (vs *VectorStore) IsValidIndex(ctx context.Context, indexName string) (bool
 	if err != nil {
 		return false, fmt.Errorf("failed to check if index exists: %w", err)
 	}
-
+	
 	return indexnameFromDB == indexName, nil
 }
 

@@ -1,6 +1,6 @@
 package constitution
 
-import "github.com/tmc/langchaingo/prompts"
+import "github.com/yincongcyincong/langchaingo/prompts"
 
 type constitutionalExample struct {
 	inputPrompt     string
@@ -104,7 +104,7 @@ func getConstitutionalExample() []constitutionalExample {
 func initCritiqueRevision() (*prompts.FewShotPrompt, *prompts.FewShotPrompt) {
 	critiqueExamples := make([]map[string]string, 0)
 	revisionExamples := make([]map[string]string, 0)
-
+	
 	var critiquePrompt *prompts.FewShotPrompt
 	var revisionPrompt *prompts.FewShotPrompt
 	critiqueExample := prompts.NewPromptTemplate(`Human: {{ .inputPrompt }}
@@ -121,7 +121,7 @@ Critique: {{ .critique }}`,
 			"critique",
 		},
 	)
-
+	
 	for _, ex := range getConstitutionalExample() {
 		exampleMap := map[string]string{
 			"inputPrompt":     ex.inputPrompt,
@@ -142,7 +142,7 @@ Critique: {{ .critique }}`,
 		revisionExampleMap["revisionRequest"] = ex.revisionRequest
 		revisionExamples = append(revisionExamples, revisionExampleMap)
 	}
-
+	
 	critiquePrompt, _ = prompts.NewFewShotPrompt(critiqueExample, critiqueExamples, nil,
 		"Below is a conversation between a human and an AI model. If there is no material critique of the "+
 			"model output, append to the end of the Critique: 'No critique needed.' If there is material critique of "+
@@ -153,7 +153,7 @@ Critique: {{ .critique }}`,
 			"outputFromModel",
 			"critiqueRequest",
 		}, nil, "\n === \n", prompts.TemplateFormatGoTemplate, false)
-
+	
 	revisionPrompt, _ = prompts.NewFewShotPrompt(critiqueExample, revisionExamples, nil,
 		`Below is a conversation between a human and an AI model.`, "Human: {{ .inputPrompt }}\n\nModel:"+
 			" {{ .outputFromModel }}\n\nCritique Request: {{ .critiqueRequest }}\n\nCritique: {{ .critique }}\n\nIf "+
@@ -168,6 +168,6 @@ Critique: {{ .critique }}`,
 			"critique",
 			"revisionRequest",
 		}, nil, "\n === \n", prompts.TemplateFormatGoTemplate, false)
-
+	
 	return critiquePrompt, revisionPrompt
 }

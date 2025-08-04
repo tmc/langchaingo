@@ -9,17 +9,17 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
-	"github.com/tmc/langchaingo/tools/sqldatabase"
-	_ "github.com/tmc/langchaingo/tools/sqldatabase/mysql"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
+	_ "github.com/yincongcyincong/langchaingo/tools/sqldatabase/mysql"
 )
 
 func Test(t *testing.T) {
 	t.Parallel()
-
+	
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
@@ -39,22 +39,22 @@ func Test(t *testing.T) {
 		defer func() {
 			require.NoError(t, mysqlContainer.Terminate(context.Background()))
 		}()
-
+		
 		mysqlURI, err = mysqlContainer.ConnectionString(context.Background())
 		require.NoError(t, err)
 	}
-
+	
 	db, err := sqldatabase.NewSQLDatabaseWithDSN("mysql", mysqlURI, nil)
 	require.NoError(t, err)
-
+	
 	tbs := db.TableNames()
 	require.NotEmpty(t, tbs)
-
+	
 	desc, err := db.TableInfo(context.Background(), tbs)
 	require.NoError(t, err)
-
+	
 	t.Log(desc)
-
+	
 	for _, tableName := range tbs {
 		_, err = db.Query(context.Background(), fmt.Sprintf("SELECT * from %s LIMIT 1", tableName))
 		/* exclude no row error,

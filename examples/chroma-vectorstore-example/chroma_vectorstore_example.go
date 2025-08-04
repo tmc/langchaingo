@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 	"strings"
-
+	
 	chroma_go "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/chroma"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/chroma"
 )
 
 func main() {
@@ -25,9 +25,9 @@ func main() {
 	if errNs != nil {
 		log.Fatalf("new: %v\n", errNs)
 	}
-
+	
 	type meta = map[string]any
-
+	
 	// Add documents to the vector store.
 	_, errAd := store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo", Metadata: meta{"population": 9.7, "area": 622}},
@@ -47,18 +47,18 @@ func main() {
 	if errAd != nil {
 		log.Fatalf("AddDocument: %v\n", errAd)
 	}
-
+	
 	ctx := context.TODO()
-
+	
 	type exampleCase struct {
 		name         string
 		query        string
 		numDocuments int
 		options      []vectorstores.Option
 	}
-
+	
 	type filter = map[string]any
-
+	
 	exampleCases := []exampleCase{
 		{
 			name:         "Up to 5 Cities in Japan",
@@ -90,7 +90,7 @@ func main() {
 			},
 		},
 	}
-
+	
 	// run the example cases
 	results := make([][]schema.Document, len(exampleCases))
 	for ecI, ec := range exampleCases {
@@ -100,7 +100,7 @@ func main() {
 		}
 		results[ecI] = docs
 	}
-
+	
 	// print out the results of the run
 	fmt.Printf("Results:\n")
 	for ecI, ec := range exampleCases {

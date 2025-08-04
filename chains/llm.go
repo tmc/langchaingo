@@ -2,13 +2,13 @@ package chains
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/outputparser"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/outputparser"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const _llmChainDefaultOutputKey = "text"
@@ -19,7 +19,7 @@ type LLMChain struct {
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
 	OutputParser     schema.OutputParser[any]
-
+	
 	OutputKey string
 }
 
@@ -42,7 +42,7 @@ func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCal
 		OutputKey:        _llmChainDefaultOutputKey,
 		CallbacksHandler: opt.CallbackHandler,
 	}
-
+	
 	return chain
 }
 
@@ -55,17 +55,17 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 	if err != nil {
 		return nil, err
 	}
-
+	
 	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	finalOutput, err := c.OutputParser.ParseWithPrompt(result, promptValue)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return map[string]any{c.OutputKey: finalOutput}, nil
 }
 

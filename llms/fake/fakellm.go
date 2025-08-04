@@ -3,8 +3,8 @@ package fake
 import (
 	"context"
 	"errors"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 type LLM struct {

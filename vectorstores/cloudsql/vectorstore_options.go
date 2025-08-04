@@ -2,10 +2,10 @@ package cloudsql
 
 import (
 	"errors"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/util/cloudsqlutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 const (
@@ -95,7 +95,7 @@ func applyCloudSQLVectorStoreOptions(engine cloudsqlutil.PostgresEngine,
 		return VectorStore{}, errors.New("missing vector store table name")
 	}
 	defaultDistanceStrategy := CosineDistance{}
-
+	
 	vs := &VectorStore{
 		engine:             engine,
 		embedder:           embedder,
@@ -112,7 +112,7 @@ func applyCloudSQLVectorStoreOptions(engine cloudsqlutil.PostgresEngine,
 	for _, opt := range opts {
 		opt(vs)
 	}
-
+	
 	return *vs, nil
 }
 

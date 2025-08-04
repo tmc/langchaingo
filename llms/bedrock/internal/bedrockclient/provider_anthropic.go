@@ -6,11 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
@@ -131,7 +131,7 @@ func createAnthropicCompletion(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
 		MaxTokens:        getMaxTokens(options.MaxTokens, 2048),
@@ -142,12 +142,12 @@ func createAnthropicCompletion(ctx context.Context,
 		TopK:             options.TopK,
 		StopSequences:    options.StopWords,
 	}
-
+	
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if options.StreamingFunc != nil {
 		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
 			ModelId:     aws.String(modelID),
@@ -157,7 +157,7 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
 	}
-
+	
 	modelInput := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Accept:      aws.String("*/*"),
@@ -168,13 +168,13 @@ func createAnthropicCompletion(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var output anthropicTextGenerationOutput
 	err = json.Unmarshal(resp.Body, &output)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(output.Content) == 0 {
 		return nil, errors.New("no results")
 	} else if stopReason := output.StopReason; stopReason != AnthropicCompletionReasonEndTurn && stopReason != AnthropicCompletionReasonStopSequence {
@@ -239,20 +239,20 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 		return nil, errors.New("no stream")
 	}
 	defer stream.Close()
-
+	
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]interface{}{}}}
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
 			return nil, err
 		}
-
+		
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp streamingCompletionResponseChunk
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
 			if err != nil {
 				return nil, err
 			}
-
+			
 			switch resp.Type {
 			case "message_start":
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
@@ -270,7 +270,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	if err = stream.Err(); err != nil {
 		return nil, err
 	}
-
+	
 	return &llms.ContentResponse{
 		Choices: contentchoices,
 	}, nil
@@ -295,7 +295,7 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 	if len(currentChunk) > 0 {
 		chunkedMessages = append(chunkedMessages, currentChunk)
 	}
-
+	
 	inputContents := make([]*anthropicTextGenerationInputMessage, 0, len(messages))
 	var systemPrompt string
 	for _, chunk := range chunkedMessages {
@@ -333,10 +333,10 @@ func getAnthropicRole(role llms.ChatMessageType) (string, error) {
 	switch role {
 	case llms.ChatMessageTypeSystem:
 		return AnthropicSystem, nil
-
+	
 	case llms.ChatMessageTypeAI:
 		return AnthropicRoleAssistant, nil
-
+	
 	case llms.ChatMessageTypeGeneric:
 		fallthrough
 	case llms.ChatMessageTypeHuman:

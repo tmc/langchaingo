@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/vectorstores"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 const (
@@ -72,22 +72,22 @@ func applyClientOptions(s *Store, opts ...Option) error {
 	for _, opt := range opts {
 		opt(s)
 	}
-
+	
 	if s.azureAISearchEndpoint == "" {
 		s.azureAISearchEndpoint = strings.TrimSuffix(os.Getenv(EnvironmentVariableEndpoint), "/")
 	}
-
+	
 	if s.azureAISearchEndpoint == "" {
 		return ErrMissingEnvVariableAzureAISearchEndpoint
 	}
-
+	
 	if s.embedder == nil {
 		return ErrMissingEmbedded
 	}
-
+	
 	if envVariableAPIKey := os.Getenv(EnvironmentVariableAPIKey); envVariableAPIKey != "" {
 		s.azureAISearchAPIKey = envVariableAPIKey
 	}
-
+	
 	return nil
 }

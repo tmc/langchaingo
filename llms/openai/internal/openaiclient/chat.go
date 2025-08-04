@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 const (
@@ -42,10 +42,10 @@ type ChatRequest struct {
 	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
 	PresencePenalty     float64  `json:"presence_penalty,omitempty"`
 	Seed                int      `json:"seed,omitempty"`
-
+	
 	// ResponseFormat is the format of the response.
 	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
-
+	
 	// LogProbs indicates whether to return log probabilities of the output tokens or not.
 	// If true, returns the log probabilities of each output token returned in the content of message.
 	// This option is currently not available on the gpt-4-vision-preview model.
@@ -54,28 +54,28 @@ type ChatRequest struct {
 	// token position, each with an associated log probability.
 	// logprobs must be set to true if this parameter is used.
 	TopLogProbs int `json:"top_logprobs,omitempty"`
-
+	
 	Tools []Tool `json:"tools,omitempty"`
 	// This can be either a string or a ToolChoice object.
 	// If it is a string, it should be one of 'none', or 'auto', otherwise it should be a ToolChoice object specifying a specific tool to use.
 	ToolChoice any `json:"tool_choice,omitempty"`
-
+	
 	// Options for streaming response. Only set this when you set stream: true.
 	StreamOptions *StreamOptions `json:"stream_options,omitempty"`
-
+	
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
-
+	
 	// StreamingReasoningFunc is a function to be called for each reasoning and content chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
-
+	
 	// Deprecated: use Tools instead.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// Deprecated: use ToolChoice instead.
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
-
+	
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
 }
@@ -139,29 +139,29 @@ type ResponseFormat struct {
 type ChatMessage struct { //nolint:musttag
 	// The role of the author of this message. One of system, user, assistant, function, or tool.
 	Role string
-
+	
 	// The content of the message.
 	// This field is mutually exclusive with MultiContent.
 	Content string
-
+	
 	// MultiContent is a list of content parts to use in the message.
 	MultiContent []llms.ContentPart
-
+	
 	// The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores,
 	// with a maximum length of 64 characters.
 	Name string
-
+	
 	// ToolCalls is a list of tools that were called in the message.
 	ToolCalls []ToolCall `json:"tool_calls,omitempty"`
-
+	
 	// FunctionCall represents a function call that was made in the message.
 	// Deprecated: use ToolCalls instead.
 	FunctionCall *FunctionCall
-
+	
 	// ToolCallID is the ID of the tool call this message is for.
 	// Only present in tool messages.
 	ToolCallID string `json:"tool_call_id,omitempty"`
-
+	
 	// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 	ReasoningContent string `json:"reasoning_content,omitempty"`
 }
@@ -181,14 +181,14 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			MultiContent []llms.ContentPart `json:"content,omitempty"`
 			Name         string             `json:"name,omitempty"`
 			ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
-
+			
 			// Deprecated: use ToolCalls instead.
 			FunctionCall *FunctionCall `json:"function_call,omitempty"`
-
+			
 			// ToolCallID is the ID of the tool call this message is for.
 			// Only present in tool messages.
 			ToolCallID string `json:"tool_call_id,omitempty"`
-
+			
 			// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 			ReasoningContent string `json:"reasoning_content,omitempty"`
 		}(m)
@@ -202,11 +202,11 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
 		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
-
+		
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
-
+		
 		// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}(m)
@@ -230,11 +230,11 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		ToolCalls    []ToolCall         `json:"tool_calls,omitempty"`
 		// Deprecated: use ToolCalls instead.
 		FunctionCall *FunctionCall `json:"function_call,omitempty"`
-
+		
 		// ToolCallID is the ID of the tool call this message is for.
 		// Only present in tool messages.
 		ToolCallID string `json:"tool_call_id,omitempty"`
-
+		
 		// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 		ReasoningContent string `json:"reasoning_content,omitempty"`
 	}{}
@@ -391,38 +391,38 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		}
 	}
 	// Build request payload
-
+	
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Build request
 	body := bytes.NewReader(payloadBytes)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.buildURL("/chat/completions", payload.Model), body)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	c.setHeaders(req)
-
+	
 	// Send request
 	r, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer r.Body.Close()
-
+	
 	if r.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
+		
 		// No need to check the error here: if it fails, we'll just return the
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
 			return nil, errors.New(msg) // nolint:goerr113
 		}
-
+		
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
@@ -445,7 +445,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if line == "" {
 				continue
 			}
-
+			
 			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
 			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
@@ -479,19 +479,19 @@ func combineStreamingChatResponse(
 			{},
 		},
 	}
-
+	
 	for streamResponse := range responseChan {
 		if streamResponse.Error != nil {
 			return nil, streamResponse.Error
 		}
-
+		
 		if streamResponse.Usage != nil {
 			response.Usage.CompletionTokens = streamResponse.Usage.CompletionTokens
 			response.Usage.PromptTokens = streamResponse.Usage.PromptTokens
 			response.Usage.TotalTokens = streamResponse.Usage.TotalTokens
 			response.Usage.CompletionTokensDetails.ReasoningTokens = streamResponse.Usage.CompletionTokensDetails.ReasoningTokens
 		}
-
+		
 		if len(streamResponse.Choices) == 0 {
 			continue
 		}
@@ -501,16 +501,16 @@ func combineStreamingChatResponse(
 		response.Choices[0].Message.Content += choice.Delta.Content
 		response.Choices[0].FinishReason = choice.FinishReason
 		response.Choices[0].Message.ReasoningContent += choice.Delta.ReasoningContent
-
+		
 		if choice.Delta.FunctionCall != nil {
 			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
 		}
-
+		
 		if len(choice.Delta.ToolCalls) > 0 {
 			chunk, response.Choices[0].Message.ToolCalls = updateToolCalls(response.Choices[0].Message.ToolCalls,
 				choice.Delta.ToolCalls)
 		}
-
+		
 		if payload.StreamingFunc != nil {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
@@ -548,17 +548,17 @@ func updateToolCalls(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
 			if lindex < 0 {
 				continue
 			}
-
+			
 			tools[lindex].Function.Arguments += t.Function.Arguments
 			continue
 		}
-
+		
 		// Otherwise, this is a new tool call, append that to the stack
 		tools = append(tools, *t)
 	}
-
+	
 	chunk, _ := json.Marshal(delta) // nolint:errchkjson
-
+	
 	return chunk, tools
 }
 
@@ -574,16 +574,16 @@ func StreamingChatResponseTools(tools []ToolCall, delta []*ToolCall) ([]byte, []
 			if lindex < 0 {
 				continue
 			}
-
+			
 			tools[lindex].Function.Arguments += t.Function.Arguments
 			continue
 		}
-
+		
 		// Otherwise, this is a new tool call, append that to the stack
 		tools = append(tools, *t)
 	}
-
+	
 	chunk, _ := json.Marshal(delta) // nolint:errchkjson
-
+	
 	return chunk, tools
 }

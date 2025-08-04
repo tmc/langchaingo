@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/googleai/vertex"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/googleai"
+	"github.com/yincongcyincong/langchaingo/llms/googleai/vertex"
 )
 
 func main() {
@@ -30,12 +30,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	prompt := "Who was the second person to walk on the moon?"
 	answer, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println(answer)
 }

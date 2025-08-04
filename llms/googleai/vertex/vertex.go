@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
+	
 	"cloud.google.com/go/vertexai/genai"
-	"github.com/tmc/langchaingo/internal/imageutil"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/internal/imageutil"
+	"github.com/yincongcyincong/langchaingo/llms"
 	"google.golang.org/api/iterator"
 )
 
@@ -48,7 +48,7 @@ func (g *Vertex) GenerateContent(
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{
 		Model:          g.opts.DefaultModel,
 		CandidateCount: g.opts.DefaultCandidateCount,
@@ -60,7 +60,7 @@ func (g *Vertex) GenerateContent(
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	model := g.client.GenerativeModel(opts.Model)
 	model.SetCandidateCount(int32(opts.CandidateCount))
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
@@ -90,7 +90,7 @@ func (g *Vertex) GenerateContent(
 	if model.Tools, err = convertTools(opts.Tools); err != nil {
 		return nil, err
 	}
-
+	
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
 	case opts.ResponseMIMEType != "" && opts.JSONMode:
@@ -100,9 +100,9 @@ func (g *Vertex) GenerateContent(
 	case opts.ResponseMIMEType == "" && opts.JSONMode:
 		model.ResponseMIMEType = ResponseMIMETypeJson
 	}
-
+	
 	var response *llms.ContentResponse
-
+	
 	if len(messages) == 1 {
 		theMessage := messages[0]
 		if theMessage.Role != llms.ChatMessageTypeHuman {
@@ -115,11 +115,11 @@ func (g *Vertex) GenerateContent(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
+	
 	return response, nil
 }
 
@@ -127,10 +127,10 @@ func (g *Vertex) GenerateContent(
 func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
 	var toolCalls []llms.ToolCall
-
+	
 	for _, candidate := range candidates {
 		buf := strings.Builder{}
-
+		
 		if candidate.Content != nil {
 			for _, part := range candidate.Content.Parts {
 				switch v := part.(type) {
@@ -156,17 +156,17 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 				}
 			}
 		}
-
+		
 		metadata := make(map[string]any)
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
-
+		
 		if usage != nil {
 			metadata["input_tokens"] = usage.PromptTokenCount
 			metadata["output_tokens"] = usage.CandidatesTokenCount
 			metadata["total_tokens"] = usage.TotalTokenCount
 		}
-
+		
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
 				Content:        buf.String(),
@@ -183,7 +183,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 	convertedParts := make([]genai.Part, 0, len(parts))
 	for _, part := range parts {
 		var out genai.Part
-
+		
 		switch p := part.(type) {
 		case llms.TextContent:
 			out = genai.Text(p.Text)
@@ -213,7 +213,7 @@ func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
 				},
 			}
 		}
-
+		
 		convertedParts = append(convertedParts, out)
 	}
 	return convertedParts, nil
@@ -225,11 +225,11 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	c := &genai.Content{
 		Parts: parts,
 	}
-
+	
 	switch content.Role {
 	case llms.ChatMessageTypeSystem:
 		c.Role = RoleSystem
@@ -246,7 +246,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 	default:
 		return nil, fmt.Errorf("role %v not supported", content.Role)
 	}
-
+	
 	return c, nil
 }
 
@@ -262,7 +262,7 @@ func generateFromSingleMessage(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if opts.StreamingFunc == nil {
 		// When no streaming is requested, just call GenerateContent and return
 		// the complete response with a list of candidates.
@@ -270,7 +270,7 @@ func generateFromSingleMessage(
 		if err != nil {
 			return nil, err
 		}
-
+		
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
@@ -298,22 +298,22 @@ func generateFromMessages(
 		}
 		history = append(history, content)
 	}
-
+	
 	// Given N total messages, genai's chat expects the first N-1 messages as
 	// history and the last message as the actual request.
 	n := len(history)
 	reqContent := history[n-1]
 	history = history[:n-1]
-
+	
 	session := model.StartChat()
 	session.History = history
-
+	
 	if opts.StreamingFunc == nil {
 		resp, err := session.SendMessage(ctx, reqContent.Parts...)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
@@ -345,12 +345,12 @@ DoStream:
 		if err != nil {
 			return nil, fmt.Errorf("error in stream mode: %w", err)
 		}
-
+		
 		if len(resp.Candidates) != 1 {
 			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
 		}
 		respCandidate := resp.Candidates[0]
-
+		
 		if respCandidate.Content == nil {
 			break DoStream
 		}
@@ -359,7 +359,7 @@ DoStream:
 		candidate.FinishReason = respCandidate.FinishReason
 		candidate.SafetyRatings = respCandidate.SafetyRatings
 		candidate.CitationMetadata = respCandidate.CitationMetadata
-
+		
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
 				if opts.StreamingFunc(ctx, []byte(text)) != nil {
@@ -380,21 +380,21 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
 		}
-
+		
 		// We have a llms.FunctionDefinition in tool.Function, and we have to
 		// convert it to genai.FunctionDeclaration
 		genaiFuncDecl := &genai.FunctionDeclaration{
 			Name:        tool.Function.Name,
 			Description: tool.Function.Description,
 		}
-
+		
 		// Expect the Parameters field to be a map[string]any, from which we will
 		// extract properties to populate the schema.
 		params, ok := tool.Function.Parameters.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
 		}
-
+		
 		schema := &genai.Schema{}
 		if ty, ok := params["type"]; ok {
 			tyString, ok := ty.(string)
@@ -403,12 +403,12 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			}
 			schema.Type = convertToolSchemaType(tyString)
 		}
-
+		
 		paramProperties, ok := params["properties"].(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
 		}
-
+		
 		schema.Properties = make(map[string]*genai.Schema)
 		for propName, propValue := range paramProperties {
 			valueMap, ok := propValue.(map[string]any)
@@ -416,7 +416,7 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 				return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
 			}
 			schema.Properties[propName] = &genai.Schema{}
-
+			
 			if ty, ok := valueMap["type"]; ok {
 				tyString, ok := ty.(string)
 				if !ok {
@@ -432,7 +432,7 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 				schema.Properties[propName].Description = descString
 			}
 		}
-
+		
 		if required, ok := params["required"]; ok {
 			if rs, ok := required.([]string); ok {
 				schema.Required = rs
@@ -451,12 +451,12 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			}
 		}
 		genaiFuncDecl.Parameters = schema
-
+		
 		genaiTools = append(genaiTools, &genai.Tool{
 			FunctionDeclarations: []*genai.FunctionDeclaration{genaiFuncDecl},
 		})
 	}
-
+	
 	return genaiTools, nil
 }
 

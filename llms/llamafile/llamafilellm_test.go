@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T) *LLM {
@@ -25,7 +25,7 @@ func TestGenerateContent(t *testing.T) {
 	t.Skip("llamafile is not available")
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "Brazil is a country? the answer should just be yes or no"},
 	}
@@ -35,10 +35,10 @@ func TestGenerateContent(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "yes", strings.ToLower(c1.Content))
@@ -48,7 +48,7 @@ func TestWithStreaming(t *testing.T) {
 	t.Skip("llamafile is not available")
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "Brazil is a country? answer yes or no"},
 	}
@@ -58,7 +58,7 @@ func TestWithStreaming(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	var sb strings.Builder
 	rsp, err := llm.GenerateContent(context.Background(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
@@ -66,7 +66,7 @@ func TestWithStreaming(t *testing.T) {
 			return nil
 		}))
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "yes", strings.ToLower(c1.Content))
@@ -77,7 +77,7 @@ func TestCreateEmbedding(t *testing.T) {
 	t.Parallel()
 	t.Skip("llamafile is not available")
 	llm := newTestClient(t)
-
+	
 	embeddings, err := llm.CreateEmbedding(context.Background(), []string{"hello", "world"})
 	require.NoError(t, err)
 	assert.Len(t, embeddings, 2)

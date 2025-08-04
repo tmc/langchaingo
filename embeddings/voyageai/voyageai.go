@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 var _ embeddings.Embedder = &VoyageAI{}
@@ -50,7 +50,7 @@ func (v *VoyageAI) EmbedDocuments(ctx context.Context, texts []string) ([][]floa
 		embeddings.MaybeRemoveNewLines(texts, v.StripNewLines),
 		v.BatchSize,
 	)
-
+	
 	embeddings := make([][]float32, 0, len(texts))
 	for _, batch := range batchedTexts {
 		req := embedDocumentsRequest{
@@ -58,22 +58,22 @@ func (v *VoyageAI) EmbedDocuments(ctx context.Context, texts []string) ([][]floa
 			Input:     batch,
 			InputType: "document",
 		}
-
+		
 		resp, err := v.request(ctx, "/embeddings", req)
 		if err != nil {
 			return nil, fmt.Errorf("embed documents request error: %w", err)
 		}
 		defer resp.Body.Close()
-
+		
 		if resp.StatusCode != http.StatusOK {
 			return nil, v.decodeError(resp)
 		}
-
+		
 		var embeddingResp embeddingResponse
 		if err := json.NewDecoder(resp.Body).Decode(&embeddingResp); err != nil {
 			return nil, err
 		}
-
+		
 		for _, data := range embeddingResp.Data {
 			embeddings = append(embeddings, data.Embedding)
 		}
@@ -99,11 +99,11 @@ func (v *VoyageAI) EmbedQuery(ctx context.Context, text string) ([]float32, erro
 		return nil, fmt.Errorf("embed query request error: %w", err)
 	}
 	defer resp.Body.Close()
-
+	
 	if resp.StatusCode != http.StatusOK {
 		return nil, v.decodeError(resp)
 	}
-
+	
 	var embeddingResp embeddingResponse
 	if err := json.NewDecoder(resp.Body).Decode(&embeddingResp); err != nil {
 		return nil, err
@@ -116,15 +116,15 @@ func (v *VoyageAI) request(ctx context.Context, path string, body any) (*http.Re
 	if err != nil {
 		return nil, err
 	}
-
+	
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, v.baseURL+path, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, err
 	}
-
+	
 	httpReq.Header.Set("Authorization", "Bearer "+v.token)
 	httpReq.Header.Set("Content-Type", "application/json")
-
+	
 	return v.client.Do(httpReq)
 }
 

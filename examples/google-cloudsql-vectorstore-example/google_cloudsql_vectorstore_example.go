@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/googleai/vertex"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/cloudsql"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/googleai"
+	"github.com/yincongcyincong/langchaingo/llms/googleai/vertex"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/cloudsqlutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/cloudsql"
 )
 
 func getEnvVariables() (string, string, string, string, string, string, string, string) {
@@ -51,13 +51,13 @@ func getEnvVariables() (string, string, string, string, string, string, string, 
 	if table == "" {
 		log.Fatal("env variable POSTGRES_TABLE is empty")
 	}
-
+	
 	// Requires environment variable GOOGLE_CLOUD_LOCATION to be set.
 	location := os.Getenv("GOOGLE_CLOUD_LOCATION")
 	if location == "" {
 		log.Fatal("env variable GOOGLE_CLOUD_LOCATION is empty")
 	}
-
+	
 	return username, password, database, projectID, region, instance, table, location
 }
 
@@ -65,7 +65,7 @@ func main() {
 	// Requires the Environment variables to be set as indicated in the getEnvVariables function.
 	username, password, database, projectID, region, instance, table, cloudLocation := getEnvVariables()
 	ctx := context.Background()
-
+	
 	pgEngine, err := cloudsqlutil.NewPostgresEngine(ctx,
 		cloudsqlutil.WithUser(username),
 		cloudsqlutil.WithPassword(password),
@@ -76,7 +76,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Initialize table for the Vectorstore to use. You only need to do this the first time you use this table.
 	vectorstoreTableoptions := cloudsqlutil.VectorstoreTableOptions{
 		TableName:         table,
@@ -98,24 +98,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Initialize VertexAI LLM
 	llm, err := vertex.New(ctx, googleai.WithCloudProject(projectID), googleai.WithCloudLocation(cloudLocation), googleai.WithDefaultModel("text-embedding-005"))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	e, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Create a new Vectorstore
 	vs, err := cloudsql.NewVectorStore(pgEngine, e, table, cloudsql.WithMetadataColumns([]string{"area", "population"}))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	_, err = vs.AddDocuments(ctx, []schema.Document{
 		{
 			PageContent: "Tokyo",
@@ -142,12 +142,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	docs, err := vs.SimilaritySearch(ctx, "Japan", 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println("Docs:", docs)
 	filter := "\"area\" > 1500"
 	filteredDocs, err := vs.SimilaritySearch(ctx, "Japan", 0, vectorstores.WithFilters(filter))

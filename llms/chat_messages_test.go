@@ -2,8 +2,8 @@ package llms_test
 
 import (
 	"testing"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func TestGetBufferString(t *testing.T) {
@@ -48,7 +48,7 @@ func TestGetBufferString(t *testing.T) {
 			expectError: true,
 		},
 	}
-
+	
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -56,7 +56,7 @@ func TestGetBufferString(t *testing.T) {
 			if (err != nil) != tc.expectError {
 				t.Fatalf("expected error: %v, got: %v", tc.expectError, err)
 			}
-
+			
 			if result != tc.expected {
 				t.Errorf("expected: %q, got: %q", tc.expected, result)
 			}

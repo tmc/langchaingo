@@ -8,9 +8,9 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
+	
 	"github.com/metaphorsystems/metaphor-go"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 var _ tools.Tool = &API{}
@@ -36,12 +36,12 @@ type ToolInput struct {
 // Returns a pointer to the created API client and an error, if any.
 func NewClient() (*API, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-
+	
 	client, err := metaphor.NewClient(apiKey)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &API{
 		client: client,
 	}, nil
@@ -165,15 +165,15 @@ func (tool *API) Description() string {
 // if the Operation is not supported.
 func (tool *API) Call(ctx context.Context, input string) (string, error) {
 	var toolInput ToolInput
-
+	
 	re := regexp.MustCompile(`(?s)\{.*\}`)
 	jsonString := re.FindString(input)
-
+	
 	err := json.Unmarshal([]byte(jsonString), &toolInput)
 	if err != nil {
 		return "", err
 	}
-
+	
 	switch toolInput.Operation {
 	case "Search":
 		return tool.performSearch(ctx, toolInput)
@@ -182,7 +182,7 @@ func (tool *API) Call(ctx context.Context, input string) (string, error) {
 	case "GetContents":
 		return tool.getContents(ctx, toolInput)
 	}
-
+	
 	return "", nil
 }
 
@@ -221,7 +221,7 @@ func (tool *API) getContents(ctx context.Context, toolInput ToolInput) (string, 
 	for i, id := range ids {
 		ids[i] = strings.TrimSpace(id)
 	}
-
+	
 	response, err := tool.client.GetContents(ctx, ids)
 	if err != nil {
 		if errors.Is(err, metaphor.ErrNoContentExtracted) {
@@ -229,26 +229,26 @@ func (tool *API) getContents(ctx context.Context, toolInput ToolInput) (string, 
 		}
 		return "", err
 	}
-
+	
 	return tool.formatContents(response), err
 }
 
 func (tool *API) formatResults(response *metaphor.SearchResponse) string {
 	formattedResults := ""
-
+	
 	for _, result := range response.Results {
 		formattedResults += fmt.Sprintf("Title: %s\nURL: %s\nID: %s\n\n", result.Title, result.URL, result.ID)
 	}
-
+	
 	return formattedResults
 }
 
 func (tool *API) formatContents(response *metaphor.ContentsResponse) string {
 	formattedResults := ""
-
+	
 	for _, result := range response.Contents {
 		formattedResults += fmt.Sprintf("Title: %s\nContent: %s\nURL: %s\n\n", result.Title, result.Extract, result.URL)
 	}
-
+	
 	return formattedResults
 }

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -16,24 +16,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Sending initial message to the model, with a list of available tools.
 	ctx := context.Background()
 	messageHistory := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Boston and Chicago?"),
 	}
-
+	
 	fmt.Println("Querying for weather in Boston and Chicago..")
 	resp, err := llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
 		log.Fatal(err)
 	}
 	messageHistory = updateMessageHistory(messageHistory, resp)
-
+	
 	// Execute tool calls requested by the model
 	messageHistory = executeToolCalls(ctx, llm, messageHistory, resp)
 	messageHistory = append(messageHistory, llms.TextParts(llms.ChatMessageTypeHuman, "Can you compare the two?"))
-
+	
 	// Send query to the model again, this time with a history containing its
 	// request to invoke a tool and our response to the tool call.
 	fmt.Println("Querying with tool response...")
@@ -48,7 +48,7 @@ func main() {
 // response and requested tool calls.
 func updateMessageHistory(messageHistory []llms.MessageContent, resp *llms.ContentResponse) []llms.MessageContent {
 	respchoice := resp.Choices[0]
-
+	
 	assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respchoice.Content)
 	for _, tc := range respchoice.ToolCalls {
 		assistantResponse.Parts = append(assistantResponse.Parts, tc)
@@ -70,12 +70,12 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 			if err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
 				log.Fatal(err)
 			}
-
+			
 			response, err := getCurrentWeather(args.Location, args.Unit)
 			if err != nil {
 				log.Fatal(err)
 			}
-
+			
 			weatherCallResponse := llms.MessageContent{
 				Role: llms.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{
@@ -91,7 +91,7 @@ func executeToolCalls(ctx context.Context, llm llms.Model, messageHistory []llms
 			log.Fatalf("Unsupported tool: %s", toolCall.FunctionCall.Name)
 		}
 	}
-
+	
 	return messageHistory
 }
 
@@ -100,17 +100,17 @@ func getCurrentWeather(location string, unit string) (string, error) {
 		"boston":  "72 and sunny",
 		"chicago": "65 and windy",
 	}
-
+	
 	weatherInfo, ok := weatherResponses[strings.ToLower(location)]
 	if !ok {
 		return "", fmt.Errorf("no weather info for %q", location)
 	}
-
+	
 	b, err := json.Marshal(weatherInfo)
 	if err != nil {
 		return "", err
 	}
-
+	
 	return string(b), nil
 }
 

@@ -6,31 +6,31 @@ import (
 	"strings"
 	"testing"
 	"time"
-
+	
 	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcopensearch "github.com/testcontainers/testcontainers-go/modules/opensearch"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/opensearch"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/opensearch"
 )
 
 func getEnvVariables(t *testing.T) (string, string, string) {
 	t.Helper()
-
+	
 	var osUser string
 	var osPassword string
-
+	
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	if openaiKey == "" {
 		t.Skipf("Must set %s to run test", "OPENAI_API_KEY")
 	}
-
+	
 	opensearchEndpoint := os.Getenv("OPENSEARCH_ENDPOINT")
 	if opensearchEndpoint == "" {
 		openseachContainer, err := tcopensearch.RunContainer(context.Background(), testcontainers.WithImage("opensearchproject/opensearch:2.11.1"))
@@ -41,17 +41,17 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 		t.Cleanup(func() {
 			require.NoError(t, openseachContainer.Terminate(context.Background()))
 		})
-
+		
 		address, err := openseachContainer.Address(context.Background())
 		if err != nil {
 			t.Skipf("cannot get address of opensearch container: %v\n", err)
 		}
-
+		
 		opensearchEndpoint = address
 		osUser = openseachContainer.User
 		osPassword = openseachContainer.Password
 	}
-
+	
 	opensearchUser := os.Getenv("OPENSEARCH_USER")
 	if opensearchUser == "" {
 		opensearchUser = osUser
@@ -59,7 +59,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 			t.Skipf("Must set %s to run test", "OPENSEARCH_USER")
 		}
 	}
-
+	
 	opensearchPassword := os.Getenv("OPENSEARCH_PASSWORD")
 	if opensearchPassword == "" {
 		opensearchPassword = osPassword
@@ -67,7 +67,7 @@ func getEnvVariables(t *testing.T) (string, string, string) {
 			t.Skipf("Must set %s to run test", "OPENSEARCH_PASSWORD")
 		}
 	}
-
+	
 	return opensearchEndpoint, opensearchUser, opensearchPassword
 }
 
@@ -90,7 +90,7 @@ func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 func setLLM(t *testing.T) *openai.LLM {
 	t.Helper()
 	openaiOpts := []openai.Option{}
-
+	
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
 		openaiOpts = append(openaiOpts,
 			openai.WithBaseURL(openAIBaseURL),
@@ -99,12 +99,12 @@ func setLLM(t *testing.T) *openai.LLM {
 			openai.WithModel("gpt-4"),
 		)
 	}
-
+	
 	llm, err := openai.New(openaiOpts...)
 	if err != nil {
 		t.Fatalf("error setting openAI embedded: %v\n", err)
 	}
-
+	
 	return llm
 }
 
@@ -133,16 +133,16 @@ func TestOpensearchStoreRest(t *testing.T) {
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
 		opensearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
@@ -159,20 +159,20 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
 		opensearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -200,20 +200,20 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
 		opensearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -224,9 +224,9 @@ func TestOpensearchAsRetriever(t *testing.T) {
 		vectorstores.WithNameSpace(indexName),
 	)
 	require.NoError(t, err)
-
+	
 	time.Sleep(time.Second)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -243,20 +243,20 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
 		opensearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -281,7 +281,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }

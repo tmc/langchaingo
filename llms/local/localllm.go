@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/local/internal/localclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/local/internal/localclient"
 )
 
 var (
@@ -59,22 +59,22 @@ func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
 
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
 	}
-
+	
 	// If o.client.GlobalAsArgs is true
 	if o.client.GlobalAsArgs {
 		// Then add the option to the args in --key=value format
 		o.appendGlobalsToArgs(*opts)
 	}
-
+	
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
@@ -84,7 +84,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if err != nil {
 		return nil, err
 	}
-
+	
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
@@ -92,11 +92,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		},
 	}
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
 	}
-
+	
 	return resp, nil
 }
 
@@ -106,16 +106,16 @@ func New(opts ...Option) (*LLM, error) {
 		bin:  os.Getenv(localLLMBinVarName),
 		args: os.Getenv(localLLMArgsVarName),
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	path, err := exec.LookPath(options.bin)
 	if err != nil {
 		return nil, errors.Join(ErrMissingBin, err)
 	}
-
+	
 	c, err := localclient.New(path, options.globalAsArgs, strings.Split(options.args, " ")...)
 	return &LLM{
 		client: c,

@@ -3,9 +3,9 @@ package agents
 import (
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 Answer the following questions as best you can. You have access to the following tools:
 
 {{.tool_descriptions}}`
-
+	
 	_defaultMrklFormatInstructions = `Use the following format:
 
 Question: the input question you must answer
@@ -24,7 +24,7 @@ Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question`
-
+	
 	_defaultMrklSuffix = `Begin!
 
 Question: {{.input}}
@@ -33,7 +33,7 @@ Question: {{.input}}
 
 func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
 	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
-
+	
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
@@ -53,7 +53,7 @@ func toolNames(tools []tools.Tool) string {
 		}
 		tn.WriteString(tool.Name())
 	}
-
+	
 	return tn.String()
 }
 
@@ -62,6 +62,6 @@ func toolDescriptions(tools []tools.Tool) string {
 	for _, tool := range tools {
 		ts.WriteString(fmt.Sprintf("- %s: %s\n", tool.Name(), tool.Description()))
 	}
-
+	
 	return ts.String()
 }

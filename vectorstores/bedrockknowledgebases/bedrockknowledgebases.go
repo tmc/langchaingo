@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
@@ -15,8 +15,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	smithyDocument "github.com/aws/smithy-go/document"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 type bedrockAgentAPI interface {
@@ -51,11 +51,11 @@ func New(ctx context.Context, knowledgeBaseID string) (*KnowledgeBase, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load aws config: %w", err)
 	}
-
+	
 	bedrockAgent := bedrockagent.NewFromConfig(cfg)
 	bedrockAgentRuntime := bedrockagentruntime.NewFromConfig(cfg)
 	s3Client := s3.NewFromConfig(cfg)
-
+	
 	return newFromClients(knowledgeBaseID, bedrockAgent, bedrockAgentRuntime, s3Client), nil
 }
 
@@ -104,7 +104,7 @@ func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
 					delete(doc.Document.Metadata, k)
 					continue
 				}
-
+				
 				rv := reflect.ValueOf(v)
 				switch rv.Kind() {
 				case reflect.Map:
@@ -121,11 +121,11 @@ func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
 					}
 				}
 			}
-
+			
 			if len(doc.Document.Metadata) == 0 {
 				doc.Document.Metadata = nil
 			}
-
+			
 			docs[i] = doc
 		}
 	}
@@ -133,7 +133,7 @@ func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
 
 func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
 	opts := kb.getOptions(options...)
-
+	
 	kb.filterMetadata(docs)
 	if err := kb.checkKnowledgeBase(ctx); err != nil {
 		return nil, fmt.Errorf("failed to validate knowledge base: %w", err)
@@ -155,7 +155,7 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 			)
 		}
 	}
-
+	
 	var datasourceID string
 	var bucketARN string
 	if opts.NameSpace != "" {
@@ -175,16 +175,16 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 	} else {
 		return nil, fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
 	}
-
+	
 	if err := kb.addToS3(ctx, bucketARN, docs); err != nil {
 		return nil, fmt.Errorf("failed to upload documents to S3: %w", err)
 	}
-
+	
 	if err := kb.ingestDocuments(ctx, datasourceID, bucketARN, docs); err != nil {
 		kb.removeFromS3(ctx, bucketARN, docs)
 		return nil, fmt.Errorf("failed to ingest documents: %w", err)
 	}
-
+	
 	ingestionJobID, err := kb.startIngestionJob(ctx, datasourceID)
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -192,14 +192,14 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 			err,
 		)
 	}
-
+	
 	if err := kb.checkIngestionJobStatus(ctx, datasourceID, ingestionJobID); err != nil {
 		return nil, fmt.Errorf(
 			"failed to check ingestion status. Documents are correctly loaded, please retry or manually sync the knowledgebase from the AWS console. error: %w",
 			err,
 		)
 	}
-
+	
 	names := make([]string, len(docs))
 	for i, doc := range docs {
 		names[i] = doc.Name
@@ -211,10 +211,10 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 	[]schema.Document, error,
 ) {
 	opts := kb.getOptions(options...)
-
+	
 	query = strings.TrimSpace(query)
 	docs := []schema.Document{}
-
+	
 	retrieveInput := bedrockagentruntime.RetrieveInput{
 		KnowledgeBaseId: aws.String(kb.knowledgeBaseID),
 		RetrievalQuery: &types.KnowledgeBaseQuery{
@@ -226,29 +226,29 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 			},
 		},
 	}
-
+	
 	if filters, err := kb.getFilters(opts.Filters); err != nil {
 		return nil, err
 	} else if filters != nil {
 		retrieveInput.RetrievalConfiguration.VectorSearchConfiguration.Filter = filters
 	}
-
+	
 	p := bedrockagentruntime.NewRetrievePaginator(kb.bedrockAgentRuntime, &retrieveInput)
-
+	
 	for p.HasMorePages() {
 		page, err := p.NextPage(ctx)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		for _, result := range page.RetrievalResults {
 			metadata, err := kb.parseMetadata(result)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse metadata: %w", err)
 			}
-
+			
 			score := float32(*result.Score)
-
+			
 			if opts.ScoreThreshold > 0 && score < opts.ScoreThreshold {
 				continue
 			}
@@ -259,7 +259,7 @@ func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, num
 			})
 		}
 	}
-
+	
 	return docs, nil
 }
 
@@ -333,13 +333,13 @@ func (kb *KnowledgeBase) getFilters(filters any) (types.RetrievalFilter, error) 
 			return nil, fmt.Errorf("unsupported filter type: %T", filters)
 		}
 	}
-
+	
 	return nil, nil
 }
 
 func (kb *KnowledgeBase) parseMetadata(retrievalResult types.KnowledgeBaseRetrievalResult) (map[string]any, error) {
 	var res map[string]any
-
+	
 	if retrievalResult.Metadata != nil {
 		res = make(map[string]any)
 		keyCount := 0
@@ -357,7 +357,7 @@ func (kb *KnowledgeBase) parseMetadata(retrievalResult types.KnowledgeBaseRetrie
 			res["metadata-source-uri"] = aws.ToString(retrievalResult.Location.S3Location.Uri) + _metadataSuffix
 		}
 	}
-
+	
 	return res, nil
 }
 

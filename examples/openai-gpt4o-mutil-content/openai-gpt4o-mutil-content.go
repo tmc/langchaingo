@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 	"log"
 )
 
@@ -14,16 +14,16 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, "You are a ocr assistant."),
 		llms.TextParts(llms.ChatMessageTypeHuman, "which image is this?"),
 		{
 			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.ImageURLPart("https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true")},
+			Parts: []llms.ContentPart{llms.ImageURLPart("https://github.com/yincongcyincong/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true")},
 		},
 	}
-
+	
 	completion, err := llm.GenerateContent(ctx, content, llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 		fmt.Print(string(chunk))
 		return nil

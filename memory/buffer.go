@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // ErrInvalidInputValues is returned when input values given to a memory in save context are invalid.
@@ -15,7 +15,7 @@ var ErrInvalidInputValues = errors.New("invalid input values")
 // ConversationBuffer is a simple form of memory that remembers previous conversational back and forth directly.
 type ConversationBuffer struct {
 	ChatHistory schema.ChatMessageHistory
-
+	
 	ReturnMessages bool
 	InputKey       string
 	OutputKey      string
@@ -48,18 +48,18 @@ func (m *ConversationBuffer) LoadMemoryVariables(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if m.ReturnMessages {
 		return map[string]any{
 			m.MemoryKey: messages,
 		}, nil
 	}
-
+	
 	bufferString, err := llms.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return map[string]any{
 		m.MemoryKey: bufferString,
 	}, nil
@@ -85,7 +85,7 @@ func (m *ConversationBuffer) SaveContext(
 	if err != nil {
 		return err
 	}
-
+	
 	aiOutputValue, err := GetInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func (m *ConversationBuffer) SaveContext(
 	if err != nil {
 		return err
 	}
-
+	
 	return nil
 }
 
@@ -119,10 +119,10 @@ func GetInputValue(inputValues map[string]any, inputKey string) (string, error) 
 				inputKey,
 			)
 		}
-
+		
 		return getInputValueReturnToString(inputValue)
 	}
-
+	
 	// Otherwise error if length of map isn't one, or return the only entry in the map.
 	if len(inputValues) > 1 {
 		return "", fmt.Errorf(
@@ -130,11 +130,11 @@ func GetInputValue(inputValues map[string]any, inputKey string) (string, error) 
 			ErrInvalidInputValues,
 		)
 	}
-
+	
 	for _, inputValue := range inputValues {
 		return getInputValueReturnToString(inputValue)
 	}
-
+	
 	return "", fmt.Errorf("%w: 0 keys", ErrInvalidInputValues)
 }
 

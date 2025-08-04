@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms/googleai"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 func TestLLMChain(t *testing.T) {
@@ -21,15 +21,15 @@ func TestLLMChain(t *testing.T) {
 	model, err := openai.New()
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
-
+	
 	prompt := prompts.NewPromptTemplate(
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
 	require.NoError(t, err)
-
+	
 	chain := NewLLMChain(model, prompt)
-
+	
 	result, err := Predict(context.Background(), chain,
 		map[string]any{
 			"country": "France",
@@ -41,7 +41,7 @@ func TestLLMChain(t *testing.T) {
 
 func TestLLMChainWithChatPromptTemplate(t *testing.T) {
 	t.Parallel()
-
+	
 	c := NewLLMChain(
 		&testLanguageModel{},
 		prompts.NewChatPromptTemplate([]prompts.MessageFormatter{
@@ -67,17 +67,17 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, err)
 	model.CallbacksHandler = callbacks.LogHandler{}
-
+	
 	prompt := prompts.NewPromptTemplate(
 		"What is the capital of {{.country}}",
 		[]string{"country"},
 	)
 	require.NoError(t, err)
-
+	
 	chain := NewLLMChain(model, prompt)
-
+	
 	// chains tramples over defaults for options, so setting these options
-	// explicitly is required until https://github.com/tmc/langchaingo/issues/626
+	// explicitly is required until https://github.com/yincongcyincong/langchaingo/issues/626
 	// is fully resolved.
 	result, err := Predict(context.Background(), chain,
 		map[string]any{

@@ -3,9 +3,9 @@ package prompts
 import (
 	"errors"
 	"fmt"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 var (
@@ -21,16 +21,16 @@ var (
 type PromptTemplate struct {
 	// Template is the prompt template.
 	Template string
-
+	
 	// A list of variable names the prompt template expects.
 	InputVariables []string
-
+	
 	// TemplateFormat is the format of the prompt template.
 	TemplateFormat TemplateFormat
-
+	
 	// OutputParser is a function that parses the output of the prompt template.
 	OutputParser schema.OutputParser[any]
-
+	
 	// PartialVariables represents a map of variable names to values or functions
 	// that return values. If the value is a function, it will be called when the
 	// prompt template is rendered.
@@ -57,7 +57,7 @@ func (p PromptTemplate) Format(values map[string]any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	
 	return RenderTemplate(p.Template, p.TemplateFormat, resolvedValues)
 }
 
@@ -67,7 +67,7 @@ func (p PromptTemplate) FormatPrompt(values map[string]any) (llms.PromptValue, e
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return StringPromptValue(f), nil //nolint:ireturn
 }
 

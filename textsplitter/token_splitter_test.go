@@ -2,10 +2,10 @@ package textsplitter
 
 import (
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 func TestTokenSplitter(t *testing.T) {
@@ -80,7 +80,7 @@ Bye!
 	for _, tc := range testCases {
 		splitter.ChunkOverlap = tc.chunkOverlap
 		splitter.ChunkSize = tc.chunkSize
-
+		
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)

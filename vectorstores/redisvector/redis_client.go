@@ -7,10 +7,10 @@ import (
 	"log/slog"
 	"reflect"
 	"strconv"
-
+	
 	"github.com/google/uuid"
 	"github.com/redis/rueidis"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/schema"
 	"golang.org/x/exp/maps"
 )
 
@@ -63,11 +63,11 @@ func (c RueidisClient) CreateIndexIfNotExists(ctx context.Context, index string,
 	if index == "" {
 		return ErrEmptyIndexName
 	}
-
+	
 	if c.CheckIndexExists(ctx, index) {
 		return nil
 	}
-
+	
 	redisIndex := NewIndex(index, []string{getPrefix(index)}, HASHIndexType, *schema)
 	createIndexCmd, err := redisIndex.AsCommand()
 	if err != nil {
@@ -106,7 +106,7 @@ func (c RueidisClient) Search(ctx context.Context, search IndexVectorSearch) (in
 	if err != nil {
 		return 0, nil, err
 	}
-
+	
 	return total, convertFTSearchResIntoDocSchema(docs), nil
 }
 

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/documentloaders"
-	"github.com/tmc/langchaingo/llms/googleai/vertex"
-	"github.com/tmc/langchaingo/textsplitter"
+	
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/documentloaders"
+	"github.com/yincongcyincong/langchaingo/llms/googleai/vertex"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	llmSummarizationChain := chains.LoadRefineSummarization(llm)
 	doc := `AI applications are summarizing articles, writing stories and 
 	engaging in long conversations — and large language models are doing 
@@ -44,7 +44,7 @@ func main() {
 	}
 	out := outputValues["text"].(string)
 	fmt.Println(out)
-
+	
 	// Output:
 	// Large language models are a type of deep learning model that can understand, learn,
 	// summarize, translate, predict, and generate text and other content based on knowledge

@@ -7,29 +7,29 @@ import (
 	"strings"
 	"testing"
 	"time"
-
+	
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/googleai"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/pgvector"
 )
 
 func preCheckEnvSetting(t *testing.T) string {
 	t.Helper()
-
+	
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	pgvectorURL := os.Getenv("PGVECTOR_CONNECTION_STRING")
 	if pgvectorURL == "" {
 		pgVectorContainer, err := tcpostgres.RunContainer(
@@ -50,13 +50,13 @@ func preCheckEnvSetting(t *testing.T) string {
 		t.Cleanup(func() {
 			require.NoError(t, pgVectorContainer.Terminate(context.Background()))
 		})
-
+		
 		str, err := pgVectorContainer.ConnectionString(context.Background(), "sslmode=disable")
 		require.NoError(t, err)
-
+		
 		pgvectorURL = str
 	}
-
+	
 	return pgvectorURL
 }
 
@@ -66,15 +66,15 @@ func makeNewCollectionName() string {
 
 func cleanupTestArtifacts(ctx context.Context, t *testing.T, s pgvector.Store, pgvectorURL string) {
 	t.Helper()
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	tx, err := conn.Begin(ctx)
 	require.NoError(t, err)
-
+	
 	require.NoError(t, s.RemoveCollection(ctx, tx))
-
+	
 	require.NoError(t, tx.Commit(ctx))
 }
 
@@ -82,17 +82,17 @@ func TestPgvectorStoreRest(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -101,9 +101,9 @@ func TestPgvectorStoreRest(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
@@ -111,7 +111,7 @@ func TestPgvectorStoreRest(t *testing.T) {
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(ctx, "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -123,17 +123,17 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -142,9 +142,9 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -158,7 +158,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := store.SimilaritySearch(
 		ctx,
@@ -168,7 +168,7 @@ func TestPgvectorStoreRestWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
-
+	
 	// test with a score threshold of 0, expected all 10 documents
 	docs, err = store.SimilaritySearch(
 		ctx,
@@ -183,17 +183,17 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -202,16 +202,16 @@ func TestPgvectorStoreSimilarityScore(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo is the capital city of Japan."},
 		{PageContent: "Paris is the city of love."},
 		{PageContent: "I like to visit London."},
 	})
 	require.NoError(t, err)
-
+	
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := store.SimilaritySearch(
 		ctx,
@@ -228,17 +228,17 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -247,9 +247,9 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -263,7 +263,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	_, err = store.SimilaritySearch(
 		ctx,
 		"Which of these are cities in Japan",
@@ -271,7 +271,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		vectorstores.WithScoreThreshold(-0.8),
 	)
 	require.Error(t, err)
-
+	
 	_, err = store.SimilaritySearch(
 		ctx,
 		"Which of these are cities in Japan",
@@ -292,16 +292,16 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 		t.Skip("GENAI_API_KEY not set")
 	}
 	collectionName := makeNewCollectionName()
-
+	
 	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
 	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(googleLLM)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -310,14 +310,14 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 		pgvector.WithCollectionName(collectionName),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Beijing"},
 	})
 	require.NoError(t, err)
-
+	
 	// use openai embedding (now default model is text-embedding-ada-002, with dimensions:1536) to add some data to same collection (same table)
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
@@ -325,7 +325,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	require.NoError(t, err)
 	e, err = embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	store, err = pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -334,9 +334,9 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 		pgvector.WithCollectionName(collectionName),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -350,7 +350,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(
 		ctx,
 		"Which of these are cities in Japan",
@@ -364,17 +364,17 @@ func TestPgvectorAsRetriever(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -383,9 +383,9 @@ func TestPgvectorAsRetriever(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(
 		ctx,
 		[]schema.Document{
@@ -395,7 +395,7 @@ func TestPgvectorAsRetriever(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -412,17 +412,17 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -431,9 +431,9 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -445,7 +445,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -455,7 +455,7 @@ func TestPgvectorAsRetrieverWithScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
@@ -465,17 +465,17 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -484,9 +484,9 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(
 		ctx,
 		[]schema.Document{
@@ -523,7 +523,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -534,7 +534,7 @@ func TestPgvectorAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 	)
 	require.NoError(t, err)
 	result = strings.ToLower(result)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "blue", "expected blue in result")
 	require.Contains(t, result, "orange", "expected orange in result")
@@ -546,17 +546,17 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -565,9 +565,9 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -595,9 +595,9 @@ func TestPgvectorAsRetrieverWithMetadataFilters(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	filter := map[string]any{"location": "sitting room"}
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -617,17 +617,17 @@ func TestDeduplicater(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -636,9 +636,9 @@ func TestDeduplicater(t *testing.T) {
 		pgvector.WithCollectionName(makeNewCollectionName()),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"type": "city",
@@ -652,7 +652,7 @@ func TestDeduplicater(t *testing.T) {
 		},
 	))
 	require.NoError(t, err)
-
+	
 	docs, err := store.Search(ctx, 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -664,7 +664,7 @@ func TestWithAllOptions(t *testing.T) {
 	t.Parallel()
 	pgvectorURL := preCheckEnvSetting(t)
 	ctx := context.Background()
-
+	
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
@@ -675,7 +675,7 @@ func TestWithAllOptions(t *testing.T) {
 	conn, err := pgx.Connect(ctx, pgvectorURL)
 	require.NoError(t, err)
 	defer conn.Close(ctx)
-
+	
 	store, err := pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -691,9 +691,9 @@ func TestWithAllOptions(t *testing.T) {
 		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
@@ -701,13 +701,13 @@ func TestWithAllOptions(t *testing.T) {
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(ctx, "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 	require.Equal(t, "tokyo", docs[0].PageContent)
 	require.Equal(t, "japan", docs[0].Metadata["country"])
-
+	
 	store, err = pgvector.New(
 		ctx,
 		pgvector.WithConn(conn),
@@ -723,9 +723,9 @@ func TestWithAllOptions(t *testing.T) {
 		pgvector.WithHNSWIndex(16, 64, "vector_l2_ops"),
 	)
 	require.NoError(t, err)
-
+	
 	defer cleanupTestArtifacts(ctx, t, store, pgvectorURL)
-
+	
 	_, err = store.AddDocuments(ctx, []schema.Document{
 		{PageContent: "tokyo", Metadata: map[string]any{
 			"country": "japan",
@@ -733,7 +733,7 @@ func TestWithAllOptions(t *testing.T) {
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err = store.SimilaritySearch(ctx, "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)

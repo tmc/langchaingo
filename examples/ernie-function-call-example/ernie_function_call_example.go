@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms/ernie"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms/ernie"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	ctx := context.Background()
 	resp, err := llm.GenerateContent(ctx,
 		[]llms.MessageContent{
@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	choice1 := resp.Choices[0]
 	if choice1.FuncCall != nil {
 		fmt.Printf("Function call: %v\n", choice1.FuncCall)

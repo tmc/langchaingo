@@ -3,10 +3,10 @@ package bedrockclient
 import (
 	"context"
 	"encoding/json"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Ref: https://docs.ai21.com/reference/j2-complete-ref
@@ -21,7 +21,7 @@ type ai21TextGenerationInput struct {
 	MaxTokens int `json:"maxTokens,omitempty"`
 	// Stops decoding if any of the strings is generated. Optional.
 	StopSequences []string `json:"stopSequences,omitempty"`
-
+	
 	// The scale factor for the count penalty
 	CountPenalty struct {
 		Scale float64 `json:"scale"`
@@ -34,7 +34,7 @@ type ai21TextGenerationInput struct {
 	FrequencyPenalty struct {
 		Scale float64 `json:"scale"`
 	} `json:"frequencyPenalty"`
-
+	
 	// The number of results to generate. Optional, default = 1
 	NumResults int `json:"numResults,omitempty"`
 }
@@ -42,13 +42,13 @@ type ai21TextGenerationOutput struct {
 	// The ID of the request
 	ID any `json:"id"` // Docs say it's a string, got number
 	// The prompt that was used for the request
-
+	
 	// The input fields of the request (minified)
 	Prompt struct {
 		// The input tokens
 		Tokens []struct{} `json:"tokens"` // for counting only
 	} `json:"prompt"`
-
+	
 	// The completions of the request (minified)
 	Completions []struct {
 		// The generated data
@@ -58,7 +58,7 @@ type ai21TextGenerationOutput struct {
 			// The generated tokens
 			Tokens []struct{} `json:"tokens"` // for counting only
 		} `json:"data"`
-
+		
 		// The reason the generation was stopped
 		FinishReason struct {
 			// The reason the generation was stopped
@@ -94,30 +94,30 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 		}{Scale: 0},
 		NumResults: options.CandidateCount,
 	}
-
+	
 	body, err := json.Marshal(inputContent)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	modelInput := bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Body:        body,
 		Accept:      aws.String("*/*"),
 		ContentType: aws.String("application/json"),
 	}
-
+	
 	resp, err := client.InvokeModel(ctx, &modelInput)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var output ai21TextGenerationOutput
 	err = json.Unmarshal(resp.Body, &output)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	choices := make([]*llms.ContentChoice, len(output.Completions))
 	for i, completion := range output.Completions {
 		choices[i] = &llms.ContentChoice{
@@ -130,6 +130,6 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 			},
 		}
 	}
-
+	
 	return &llms.ContentResponse{Choices: choices}, nil
 }

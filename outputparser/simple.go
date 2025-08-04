@@ -2,9 +2,9 @@ package outputparser
 
 import (
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // Simple is an output parser that does nothing.

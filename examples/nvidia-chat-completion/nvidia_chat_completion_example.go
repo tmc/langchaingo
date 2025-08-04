@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func main() {
@@ -22,12 +22,12 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, "You are a golang expert"),
 		llms.TextParts(llms.ChatMessageTypeHuman, "explain why go is a great fit for ai based products"),
 	}
-
+	
 	if _, err = llm.GenerateContent(ctx, content,
 		llms.WithMaxTokens(4096),
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {

@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/tmc/langchaingo/llms"
+import "github.com/yincongcyincong/langchaingo/llms"
 
 // ChatMessageHistoryOption is a function for creating new chat message history
 // with other than the default values.
@@ -18,10 +18,10 @@ func applyChatOptions(options ...ChatMessageHistoryOption) *ChatMessageHistory {
 	h := &ChatMessageHistory{
 		messages: make([]llms.ChatMessage, 0),
 	}
-
+	
 	for _, option := range options {
 		option(h)
 	}
-
+	
 	return h
 }

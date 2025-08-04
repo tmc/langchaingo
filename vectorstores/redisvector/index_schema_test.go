@@ -3,15 +3,15 @@ package redisvector
 import (
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 func TestGenerateSchema(t *testing.T) {
 	t.Parallel()
-
+	
 	testYamlFile := "./testdata/schema.yml"
 	generatorYAML := schemaGenerator{
 		format:   YAMLSchemaFormat,
@@ -26,7 +26,7 @@ func TestGenerateSchema(t *testing.T) {
 	assert.Empty(t, schemaWithYAML.Tag)
 	assert.Len(t, schemaWithYAML.Text, 4)
 	assert.Len(t, schemaWithYAML.Numeric, 1)
-
+	
 	testJSONFile := "./testdata/schema.json"
 	generatorJSON := schemaGenerator{
 		format:   JSONSchemaFormat,
@@ -41,7 +41,7 @@ func TestGenerateSchema(t *testing.T) {
 	assert.Empty(t, schemaWithJSON.Tag)
 	assert.Len(t, schemaWithJSON.Text, 4)
 	assert.Len(t, schemaWithJSON.Numeric, 1)
-
+	
 	data := []schema.Document{
 		{
 			PageContent: "Tokyo",
@@ -69,7 +69,7 @@ func TestGenerateSchema(t *testing.T) {
 
 func TestSchemaAsCommand(t *testing.T) {
 	t.Parallel()
-
+	
 	tests := []struct {
 		name string
 		args RedisIndexSchemaField
@@ -131,7 +131,7 @@ func TestSchemaAsCommand(t *testing.T) {
 			"vector VECTOR HNSW 6 TYPE FLOAT32 DIM 1024 DISTANCE_METRIC COSINE",
 		},
 	}
-
+	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -142,13 +142,13 @@ func TestSchemaAsCommand(t *testing.T) {
 
 func TestIndexSearchAsCommand(t *testing.T) {
 	t.Parallel()
-
+	
 	type Args struct {
 		name   string
 		vector []float32
 		opts   []SearchOption
 	}
-
+	
 	tests := []struct {
 		name string
 		args Args
@@ -180,7 +180,7 @@ func TestIndexSearchAsCommand(t *testing.T) {
 			"FT.SEARCH demo (@job{engineer}) @content_vector:[VECTOR_RANGE $distance_threshold $vector]=>{$yield_distance_as: distance} SORTBY distance ASC DIALECT 2 LIMIT 0 1 PARAMS 4 vector \xf8S\xe3= distance_threshold 0.5",
 		},
 	}
-
+	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()

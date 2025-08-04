@@ -3,12 +3,12 @@ package bedrock
 import (
 	"context"
 	"errors"
-
+	
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/bedrock/internal/bedrockclient"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/bedrock/internal/bedrockclient"
 )
 
 const defaultModel = ModelAmazonTitanTextLiteV1
@@ -37,11 +37,11 @@ func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
 	options := &options{
 		modelID: defaultModel,
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	if options.client == nil {
 		cfg, err := config.LoadDefaultConfig(context.Background())
 		if err != nil {
@@ -49,7 +49,7 @@ func newClient(opts ...Option) (*options, *bedrockclient.Client, error) {
 		}
 		options.client = bedrockruntime.NewFromConfig(cfg)
 	}
-
+	
 	return options, bedrockclient.NewClient(options.client), nil
 }
 
@@ -63,19 +63,19 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if l.CallbacksHandler != nil {
 		l.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{
 		Model: l.modelID,
 	}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	m, err := processMessages(messages)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	res, err := l.client.CreateCompletion(ctx, opts.Model, m, opts)
 	if err != nil {
 		if l.CallbacksHandler != nil {
@@ -83,17 +83,17 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	if l.CallbacksHandler != nil {
 		l.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, res)
 	}
-
+	
 	return res, nil
 }
 
 func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, error) {
 	bedrockMsgs := make([]bedrockclient.Message, 0, len(messages))
-
+	
 	for _, m := range messages {
 		for _, part := range m.Parts {
 			switch part := part.(type) {

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 var flagModel = flag.String("model", "o1-preview", "model to use (e.g. 'o1-preview', 'o1-mini')")
@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	ctx := context.Background()
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, `
@@ -42,7 +42,7 @@ at the beginning and end, not throughout the code.`),
 		log.Fatal(err)
 	}
 	fmt.Println(output.Choices[0].Content)
-
+	
 	fmt.Println("\ngeneration info:")
 	json.NewEncoder(os.Stdout).Encode(output.Choices[0].GenerationInfo)
 }

@@ -2,9 +2,9 @@ package inmemory
 
 import (
 	"time"
-
+	
 	cache "github.com/Code-Hex/go-generics-cache"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Option is a functional argument that configures the Options.
@@ -22,7 +22,7 @@ type Options struct {
 func WithCacheOptions(opts ...cache.Option[string, *llms.ContentResponse]) Option {
 	return func(o *Options) error {
 		o.CacheOptions = append(o.CacheOptions, opts...)
-
+		
 		return nil
 	}
 }
@@ -34,7 +34,7 @@ func WithCacheOptions(opts ...cache.Option[string, *llms.ContentResponse]) Optio
 func WithItemOptions(opts ...cache.ItemOption) Option {
 	return func(o *Options) error {
 		o.ItemOptions = append(o.ItemOptions, opts...)
-
+		
 		return nil
 	}
 }
@@ -44,19 +44,19 @@ func WithItemOptions(opts ...cache.ItemOption) Option {
 func WithExpiration(expiration time.Duration) Option {
 	return func(o *Options) error {
 		o.ItemOptions = append(o.ItemOptions, cache.WithExpiration(expiration))
-
+		
 		return nil
 	}
 }
 
 func applyOptions(opts ...Option) (*Options, error) {
 	o := new(Options)
-
+	
 	for _, opt := range opts {
 		if err := opt(o); err != nil {
 			return nil, err
 		}
 	}
-
+	
 	return o, nil
 }

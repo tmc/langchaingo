@@ -3,8 +3,8 @@ package redisvector
 import (
 	"errors"
 	"fmt"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 type RedisIndexAlgorithm string
@@ -82,19 +82,19 @@ func WithIndexSchema(format SchemaFormat, schemaFilePath string, schemaBytes []b
 
 func applyClientOptions(opts ...Option) (*Store, error) {
 	s := &Store{}
-
+	
 	for _, opt := range opts {
 		opt(s)
 	}
-
+	
 	if s.embedder == nil {
 		return nil, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	if s.indexName == "" {
 		return nil, fmt.Errorf("%w: missing index name", ErrInvalidOptions)
 	}
-
+	
 	if s.schemaGenerator != nil {
 		schema, err := s.schemaGenerator.generate()
 		if err != nil {
@@ -104,6 +104,6 @@ func applyClientOptions(opts ...Option) (*Store, error) {
 		// clear generator buf
 		s.schemaGenerator = nil
 	}
-
+	
 	return s, nil
 }

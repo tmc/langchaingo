@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/mistral"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/mistral"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	// The full string response will be available in completionWithStreaming after the streaming is complete.
 	// (The Go compiler mandates declared variables be used at least once, hence the `_` assignment. https://go.dev/ref/spec#Blank_identifier)
 	_ = completionWithStreaming
-
+	
 	completionWithoutStreaming, err := llms.GenerateFromSinglePrompt(ctx, llm, "Who was the first man to go to space?",
 		llms.WithTemperature(0.2),
 		llms.WithModel("mistral-small-latest"),

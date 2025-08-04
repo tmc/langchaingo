@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"strings"
-
+	
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Client is a Bedrock client.

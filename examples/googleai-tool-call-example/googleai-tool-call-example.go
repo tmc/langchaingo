@@ -7,9 +7,9 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/googleai"
 )
 
 func main() {
@@ -17,14 +17,14 @@ func main() {
 	if genaiKey == "" {
 		log.Fatal("please set GOOGLE_API_KEY")
 	}
-
+	
 	ctx := context.Background()
-
+	
 	llm, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Start by sending an initial question about the weather to the model, adding
 	// "available tools" that include a getCurrentWeather function.
 	// Thoroughout this sample, messageHistory collects the conversation history
@@ -37,7 +37,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Translate the model's response into a MessageContent element that can be
 	// added to messageHistory.
 	respchoice := resp.Choices[0]
@@ -46,7 +46,7 @@ func main() {
 		assistantResponse.Parts = append(assistantResponse.Parts, tc)
 	}
 	messageHistory = append(messageHistory, assistantResponse)
-
+	
 	// "Execute" tool calls by calling requested function
 	for _, tc := range respchoice.ToolCalls {
 		switch tc.FunctionCall.Name {
@@ -73,12 +73,12 @@ func main() {
 			log.Fatalf("got unexpected function call: %v", tc.FunctionCall.Name)
 		}
 	}
-
+	
 	resp, err = llm.GenerateContent(ctx, messageHistory, llms.WithTools(availableTools))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println("Response after tool call:")
 	b, _ := json.MarshalIndent(resp.Choices[0], " ", "  ")
 	fmt.Println(string(b))

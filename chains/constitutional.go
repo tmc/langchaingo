@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 var (
@@ -473,7 +473,7 @@ func getConstitutionalExample() []ConstitutionalExample {
 func initCritiqueRevision() (*prompts.FewShotPrompt, *prompts.FewShotPrompt) {
 	critiqueExamples := make([]map[string]string, 0)
 	revisionExamples := make([]map[string]string, 0)
-
+	
 	var critiquePrompt *prompts.FewShotPrompt
 	var revisionPrompt *prompts.FewShotPrompt
 	critiqueExample := prompts.NewPromptTemplate(`Human: {{ .inputPrompt }}
@@ -490,7 +490,7 @@ Critique: {{ .critique }}`,
 			"critique",
 		},
 	)
-
+	
 	for _, ex := range getConstitutionalExample() {
 		exampleMap := map[string]string{
 			"inputPrompt":     ex.inputPrompt,
@@ -511,7 +511,7 @@ Critique: {{ .critique }}`,
 		revisionExampleMap["revisionRequest"] = ex.revisionRequest
 		revisionExamples = append(revisionExamples, revisionExampleMap)
 	}
-
+	
 	critiquePrompt, _ = prompts.NewFewShotPrompt(critiqueExample, critiqueExamples, nil,
 		"Below is a conversation between a human and an AI model. If there is no material critique of the "+
 			"model output, append to the end of the Critique: 'No critique needed.' If there is material critique of "+
@@ -522,7 +522,7 @@ Critique: {{ .critique }}`,
 			"outputFromModel",
 			"critiqueRequest",
 		}, nil, "\n === \n", prompts.TemplateFormatGoTemplate, false)
-
+	
 	revisionPrompt, _ = prompts.NewFewShotPrompt(critiqueExample, revisionExamples, nil,
 		`Below is a conversation between a human and an AI model.`, "Human: {{ .inputPrompt }}\n\nModel:"+
 			" {{ .outputFromModel }}\n\nCritique Request: {{ .critiqueRequest }}\n\nCritique: {{ .critique }}\n\nIf "+
@@ -537,7 +537,7 @@ Critique: {{ .critique }}`,
 			"critique",
 			"revisionRequest",
 		}, nil, "\n === \n", prompts.TemplateFormatGoTemplate, false)
-
+	
 	return critiquePrompt, revisionPrompt
 }
 
@@ -576,10 +576,10 @@ func NewConstitutional(llm llms.Model, chain LLMChain, constitutionalPrinciples 
 			revisionPrompt = RevisionPrompt
 		}
 	}
-
+	
 	critiqueChain := *NewLLMChain(llm, critiquePrompt)
 	revisionChain := *NewLLMChain(llm, revisionPrompt)
-
+	
 	return &Constitutional{
 		chain:                    chain,
 		critiqueChain:            critiqueChain,
@@ -599,7 +599,7 @@ func (c *Constitutional) Call(ctx context.Context, inputs map[string]any, option
 	if err != nil {
 		return nil, err
 	}
-
+	
 	response, ok := result["text"]
 	if !ok {
 		return nil, ErrNotFound
@@ -650,12 +650,12 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			return nil, ErrConvert
 		}
 		critique := parseCritique(stringOutput)
-
+		
 		critique = strings.Trim(critique, " ")
 		if critique == "no critique needed" {
 			continue
 		}
-
+		
 		if strings.Contains(strings.ToLower(critique), "no critique needed") {
 			critiquesAndRevisions = append(critiquesAndRevisions, Pair{
 				first:  critique,
@@ -663,7 +663,7 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			})
 			continue
 		}
-
+		
 		result, err := c.revisionChain.Call(ctx, map[string]any{
 			"inputPrompt":     inputPrompt,
 			"outputFromModel": response,

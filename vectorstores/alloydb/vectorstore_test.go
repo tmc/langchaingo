@@ -7,12 +7,12 @@ import (
 	"log"
 	"os"
 	"testing"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/alloydbutil"
-	"github.com/tmc/langchaingo/vectorstores/alloydb"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/alloydbutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores/alloydb"
 )
 
 type EnvVariables struct {
@@ -28,7 +28,7 @@ type EnvVariables struct {
 
 func getEnvVariables(t *testing.T) EnvVariables {
 	t.Helper()
-
+	
 	username := os.Getenv("ALLOYDB_USERNAME")
 	if username == "" {
 		t.Skip("env variable ALLOYDB_USERNAME is empty")
@@ -68,7 +68,7 @@ func getEnvVariables(t *testing.T) EnvVariables {
 	if table == "" {
 		t.Skip("env variable ALLOYDB_TABLE is empty")
 	}
-
+	
 	envVariables := EnvVariables{
 		Username:  username,
 		Password:  password,
@@ -79,7 +79,7 @@ func getEnvVariables(t *testing.T) EnvVariables {
 		Cluster:   cluster,
 		Table:     table,
 	}
-
+	
 	return envVariables
 }
 
@@ -95,7 +95,7 @@ func setEngine(t *testing.T, envVariables EnvVariables) alloydbutil.PostgresEngi
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
 	}
-
+	
 	return pgEngine
 }
 
@@ -131,7 +131,7 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, 
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	cleanUpTableFn := func() error {
 		_, err := pgEngine.Pool.Exec(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", envVariables.Table))
 		return err
@@ -142,9 +142,9 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, 
 func TestPingToDB(t *testing.T) {
 	envVariables := getEnvVariables(t)
 	engine := setEngine(t, envVariables)
-
+	
 	defer engine.Close()
-
+	
 	if err := engine.Pool.Ping(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +202,7 @@ func TestAddDocuments(t *testing.T) {
 			t.Fatal("Cleanup failed:", err)
 		}
 	})
-
+	
 	_, err := vs.AddDocuments(ctx, []schema.Document{
 		{
 			PageContent: "Tokyo",

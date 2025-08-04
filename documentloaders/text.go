@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"context"
 	"io"
-
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 // Text loads text data from an io.Reader.
@@ -30,7 +30,7 @@ func (l Text) Load(_ context.Context) ([]schema.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return []schema.Document{
 		{
 			PageContent: buf.String(),
@@ -46,6 +46,6 @@ func (l Text) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitt
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return textsplitter.SplitDocuments(splitter, docs)
 }

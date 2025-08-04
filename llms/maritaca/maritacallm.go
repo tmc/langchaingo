@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/maritaca/internal/maritacaclient"
 )
 
 var (
@@ -30,16 +30,16 @@ func New(opts ...Option) (*LLM, error) {
 	for _, opt := range opts {
 		opt(&o)
 	}
-
+	
 	if o.httpClient == nil {
 		o.httpClient = http.DefaultClient
 	}
-
+	
 	client, err := maritacaclient.NewClient(o.httpClient)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &LLM{client: client, options: o}, nil
 }
 
@@ -54,18 +54,18 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	// Override LLM model if set as llms.CallOption
 	model := o.options.model
 	if opts.Model != "" {
 		model = opts.Model
 	}
-
+	
 	// Our input is a sequence of MessageContent, each of which potentially has
 	// a sequence of Part that could be text, images etc.
 	// We have to convert it to a format maritaca undestands: ChatRequest, which
@@ -74,12 +74,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	chatMsgs := make([]*maritacaclient.Message, 0, len(messages))
 	for _, mc := range messages {
 		msg := &maritacaclient.Message{Role: typeToRole(mc.Role)}
-
+		
 		// Look at all the parts in mc; expect to find a single Text part and
 		// any number of binary parts.
 		var text string
 		foundText := false
-
+		
 		for _, p := range mc.Parts {
 			switch pt := p.(type) {
 			case llms.TextContent:
@@ -88,22 +88,22 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				}
 				foundText = true
 				text = pt.Text
-
+			
 			default:
 				return nil, errors.New("only support Text and BinaryContent parts right now")
 			}
 		}
-
+		
 		msg.Content = text
-
+		
 		chatMsgs = append(chatMsgs, msg)
 	}
-
+	
 	format := o.options.format
 	if opts.JSONMode {
 		format = "json"
 	}
-
+	
 	// Get our maritacaOptions from llms.CallOptions
 	maritacaOptions := makemaritacaOptionsFromOptions(o.options.maritacaOptions, opts)
 	req := &maritacaclient.ChatRequest{
@@ -113,11 +113,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Options:  maritacaOptions,
 		Stream:   func(b bool) *bool { return &b }(opts.StreamingFunc != nil),
 	}
-
+	
 	var fn maritacaclient.ChatResponseFunc
 	streamedResponse := ""
 	var resp maritacaclient.ChatResponse
-
+	
 	fn = func(response maritacaclient.ChatResponse) error {
 		if opts.StreamingFunc != nil && response.Text != "" {
 			if err := opts.StreamingFunc(ctx, []byte(response.Text)); err != nil {
@@ -132,7 +132,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		case "nostream":
 			resp = response
 		}
-
+		
 		return nil
 	}
 	o.client.Token = o.options.maritacaOptions.Token
@@ -143,15 +143,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		return nil, err
 	}
-
+	
 	choices := createChoice(resp)
-
+	
 	response := &llms.ContentResponse{Choices: choices}
-
+	
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
-
+	
 	return response, nil
 }
 
@@ -181,7 +181,7 @@ func makemaritacaOptionsFromOptions(maritacaOptions maritacaclient.Options, opts
 	maritacaOptions.RepetitionPenalty = opts.RepetitionPenalty
 	maritacaOptions.StoppingTokens = opts.StopWords
 	maritacaOptions.Stream = opts.StreamingFunc != nil
-
+	
 	return maritacaOptions
 }
 

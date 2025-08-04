@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/jsonschema"
+	
+	"github.com/yincongcyincong/langchaingo/jsonschema"
 )
 
 func TestDefinition_MarshalJSON(t *testing.T) { //nolint:funlen
@@ -170,7 +170,7 @@ func TestDefinition_MarshalJSON(t *testing.T) { //nolint:funlen
 }`,
 		},
 	}
-
+	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -181,10 +181,10 @@ func TestDefinition_MarshalJSON(t *testing.T) { //nolint:funlen
 				t.Errorf("Failed to Unmarshal JSON: error = %v", err)
 				return
 			}
-
+			
 			got := structToMap(t, tt.def)
 			gotPtr := structToMap(t, &tt.def) //#nosec G601 -- false positive now that we're on go 1.22+
-
+			
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("MarshalJSON() got = %v, want %v", got, want)
 			}
@@ -202,7 +202,7 @@ func structToMap(t *testing.T, v any) map[string]any {
 		t.Errorf("Failed to Marshal JSON: error = %v", err)
 		return nil
 	}
-
+	
 	var got map[string]interface{}
 	err = json.Unmarshal(gotBytes, &got)
 	if err != nil {

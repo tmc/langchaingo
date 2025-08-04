@@ -3,9 +3,9 @@ package chains
 import (
 	"context"
 	"fmt"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const (
@@ -18,35 +18,35 @@ const (
 type ConversationalRetrievalQA struct {
 	// Retriever used to retrieve the relevant documents.
 	Retriever schema.Retriever
-
+	
 	// Memory that remembers previous conversational back and forths directly.
 	Memory schema.Memory
-
+	
 	// CombineDocumentsChain The chain used to combine any retrieved documents.
 	CombineDocumentsChain Chain
-
+	
 	// CondenseQuestionChain The chain the documents and query is given to.
 	// The chain used to generate a new question for the sake of retrieval.
 	// This chain will take in the current question (with variable `question`)
 	// and any chat history (with variable `chat_history`) and will produce
 	// a new standalone question to be used later on.
 	CondenseQuestionChain Chain
-
+	
 	// OutputKey The output key to return the final answer of this chain in.
 	OutputKey string
-
+	
 	// RephraseQuestion Whether to pass the new generated question to the CombineDocumentsChain.
 	// If true, will pass the new generated question along.
 	// If false, will only use the new generated question for retrieval and pass the
 	// original question along to the CombineDocumentsChain.
 	RephraseQuestion bool
-
+	
 	// ReturnGeneratedQuestion Return the generated question as part of the final result.
 	ReturnGeneratedQuestion bool
-
+	
 	// InputKey The input key to get the query from, by default "query".
 	InputKey string
-
+	
 	// ReturnSourceDocuments Return the retrieved source documents as part of the final result.
 	ReturnSourceDocuments bool
 }
@@ -99,25 +99,25 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 		if !ok {
 			return nil, fmt.Errorf("%w: %w", ErrMissingMemoryKeyValues, ErrMemoryValuesWrongType)
 		}
-
+		
 		bufferStr, err := llms.GetBufferString(chatHistory, "Human", "AI")
 		if err != nil {
 			return nil, err
 		}
-
+		
 		chatHistoryStr = bufferStr
 	}
-
+	
 	question, err := c.getQuestion(ctx, query, chatHistoryStr)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	docs, err := c.Retriever.GetRelevantDocuments(ctx, question)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	result, err := Predict(ctx, c.CombineDocumentsChain, map[string]any{
 		"question":        c.rephraseQuestion(query, question),
 		"input_documents": docs,
@@ -125,9 +125,9 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 	if err != nil {
 		return nil, err
 	}
-
+	
 	output := make(map[string]any)
-
+	
 	output[_llmChainDefaultOutputKey] = result
 	if c.ReturnSourceDocuments {
 		output[_conversationalRetrievalQADefaultSourceDocumentKey] = docs
@@ -135,7 +135,7 @@ func (c ConversationalRetrievalQA) Call(ctx context.Context, values map[string]a
 	if c.ReturnGeneratedQuestion {
 		output[_conversationalRetrievalQADefaultGeneratedQuestionKey] = question
 	}
-
+	
 	return output, nil
 }
 
@@ -152,7 +152,7 @@ func (c ConversationalRetrievalQA) GetOutputKeys() []string {
 	if c.ReturnSourceDocuments {
 		outputKeys = append(outputKeys, _conversationalRetrievalQADefaultSourceDocumentKey)
 	}
-
+	
 	return outputKeys
 }
 
@@ -164,7 +164,7 @@ func (c ConversationalRetrievalQA) getQuestion(
 	if len(chatHistoryStr) == 0 {
 		return question, nil
 	}
-
+	
 	results, err := Call(
 		ctx,
 		c.CondenseQuestionChain,
@@ -176,12 +176,12 @@ func (c ConversationalRetrievalQA) getQuestion(
 	if err != nil {
 		return "", err
 	}
-
+	
 	newQuestion, ok := results[c.OutputKey].(string)
 	if !ok {
 		return "", ErrInvalidOutputValues
 	}
-
+	
 	return newQuestion, nil
 }
 
@@ -189,6 +189,6 @@ func (c ConversationalRetrievalQA) rephraseQuestion(question string, newQuestion
 	if c.RephraseQuestion {
 		return newQuestion
 	}
-
+	
 	return question
 }

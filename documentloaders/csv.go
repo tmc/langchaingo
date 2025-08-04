@@ -8,9 +8,9 @@ import (
 	"io"
 	"slices"
 	"strings"
-
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 // CSV represents a CSV document loader.
@@ -34,7 +34,7 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 	var header []string
 	var docs []schema.Document
 	var rown int
-
+	
 	rd := csv.NewReader(c.r)
 	for {
 		row, err := rd.Read()
@@ -48,25 +48,25 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 			header = append(header, row...)
 			continue
 		}
-
+		
 		var content []string
 		for i, value := range row {
 			if len(c.columns) > 0 &&
 				!slices.Contains(c.columns, header[i]) {
 				continue
 			}
-
+			
 			line := fmt.Sprintf("%s: %s", header[i], value)
 			content = append(content, line)
 		}
-
+		
 		rown++
 		docs = append(docs, schema.Document{
 			PageContent: strings.Join(content, "\n"),
 			Metadata:    map[string]any{"row": rown},
 		})
 	}
-
+	
 	return docs, nil
 }
 
@@ -77,6 +77,6 @@ func (c CSV) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitte
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return textsplitter.SplitDocuments(splitter, docs)
 }

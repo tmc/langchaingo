@@ -1,8 +1,8 @@
 package openai
 
 import (
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms/openai/internal/openaiclient"
 )
 
 const (
@@ -32,13 +32,13 @@ type options struct {
 	organization string
 	apiType      APIType
 	httpClient   openaiclient.Doer
-
+	
 	responseFormat *ResponseFormat
-
+	
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion     string
 	embeddingModel string
-
+	
 	callbackHandler callbacks.Handler
 }
 

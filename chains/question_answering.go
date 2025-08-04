@@ -1,8 +1,8 @@
 package chains
 
 import (
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 //nolint:lll
@@ -106,11 +106,11 @@ func LoadStuffQA(llm llms.Model) StuffDocuments {
 		_defaultStuffQATemplate,
 		[]string{"context", "question"},
 	)
-
+	
 	qaPromptSelector := ConditionalPromptSelector{
 		DefaultPrompt: defaultQAPromptTemplate,
 	}
-
+	
 	prompt := qaPromptSelector.GetPrompt(llm)
 	llmChain := NewLLMChain(llm, prompt)
 	return NewStuffDocuments(llmChain)
@@ -127,7 +127,7 @@ func LoadRefineQA(llm llms.Model) RefineDocuments {
 		_defaultRefineQATemplate,
 		[]string{"question", "existing_answer", "context"},
 	)
-
+	
 	return NewRefineDocuments(
 		NewLLMChain(llm, questionPrompt),
 		NewLLMChain(llm, refinePrompt),
@@ -145,12 +145,12 @@ func LoadMapReduceQA(llm llms.Model) MapReduceDocuments {
 		_defaultMapReduceCombineQATemplate,
 		[]string{"question", "context"},
 	)
-
+	
 	mapChain := NewLLMChain(llm, getInfoPrompt)
 	reduceChain := NewStuffDocuments(
 		NewLLMChain(llm, combinePrompt),
 	)
-
+	
 	return NewMapReduceDocuments(mapChain, reduceChain)
 }
 
@@ -161,10 +161,10 @@ func LoadMapRerankQA(llm llms.Model) MapRerankDocuments {
 		_defaultMapRerankTemplate,
 		[]string{"context", "question"},
 	)
-
+	
 	mapRerankLLMChain := NewLLMChain(llm, mapRerankPrompt)
-
+	
 	mapRerank := NewMapRerankDocuments(mapRerankLLMChain)
-
+	
 	return *mapRerank
 }

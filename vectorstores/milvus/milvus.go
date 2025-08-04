@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-
+	
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 // Store is a wrapper around the milvus client.
@@ -41,7 +41,7 @@ type Store struct {
 
 var (
 	_ vectorstores.VectorStore = Store{}
-
+	
 	ErrEmbedderWrongNumberVectors = errors.New(
 		"number of vectors from embedder does not match number of documents",
 	)
@@ -63,14 +63,14 @@ func New(ctx context.Context, config client.Config, opts ...Option) (Store, erro
 	if err != nil {
 		return s, err
 	}
-
+	
 	if s.collectionExists && s.dropOld {
 		if err := s.dropCollection(ctx, s.collectionName); err != nil {
 			return s, err
 		}
 		s.collectionExists = false
 	}
-
+	
 	return s, s.init(ctx, 0)
 }
 
@@ -146,7 +146,7 @@ func (s *Store) createCollection(ctx context.Context, dim int) error {
 			},
 		},
 	}
-
+	
 	err := s.client.CreateCollection(ctx, s.schema, s.shardNum, client.WithMetricsType(s.metricType))
 	if err != nil {
 		return err
@@ -159,7 +159,7 @@ func (s *Store) createIndex(ctx context.Context) error {
 	if !s.collectionExists {
 		return nil
 	}
-
+	
 	return s.client.CreateIndex(ctx, s.collectionName, s.vectorField, s.index, s.async)
 }
 
@@ -183,7 +183,7 @@ func (s *Store) load(ctx context.Context) error {
 	if s.loaded || !s.collectionExists {
 		return nil
 	}
-
+	
 	err := s.client.LoadCollection(ctx, s.collectionName, s.async)
 	if err == nil {
 		s.loaded = true
@@ -200,19 +200,19 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
 	if err := s.init(ctx, len(vectors[0])); err != nil {
 		return nil, err
 	}
-
+	
 	colsData := make([]interface{}, 0, len(docs))
 	for i, doc := range docs {
 		docMap := map[string]any{
@@ -222,8 +222,8 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 		}
 		colsData = append(colsData, docMap)
 	}
-
-	_, err = s.client.InsertRows(ctx, s.collectionName, s.partitionName, colsData)
+	
+	idsColumn, err := s.client.InsertRows(ctx, s.collectionName, s.partitionName, colsData)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,14 @@ func (s Store) AddDocuments(ctx context.Context, docs []schema.Document,
 			return nil, err
 		}
 	}
-	return nil, nil
+	
+	idsInt := idsColumn.(*entity.ColumnInt64).Data()
+	ids := make([]string, len(idsInt))
+	for i, id := range idsInt {
+		ids[i] = strconv.FormatInt(id, 10)
+	}
+	
+	return ids, nil
 }
 
 func (s *Store) getSearchFields() []string {
@@ -257,7 +264,7 @@ func (s Store) getOptions(options ...vectorstores.Option) vectorstores.Options {
 func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]schema.Document, error) {
 	docs := []schema.Document{}
 	var err error
-
+	
 	for _, res := range searchResult {
 		if res.ResultCount == 0 {
 			continue
@@ -272,7 +279,7 @@ func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]sc
 		}
 		for i := 0; i < res.ResultCount; i++ {
 			doc := schema.Document{}
-
+			
 			doc.PageContent, err = textcol.ValueByIdx(i)
 			if err != nil {
 				return nil, err
@@ -281,7 +288,7 @@ func (s Store) convertResultToDocument(searchResult []client.SearchResult) ([]sc
 			if err != nil {
 				return nil, err
 			}
-
+			
 			if err := json.Unmarshal(metaStr, &doc.Metadata); err != nil {
 				return nil, err
 			}
@@ -333,7 +340,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return s.convertResultToDocument(searchResult)
 }
 

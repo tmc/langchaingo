@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // Defined parses JSON output from an LLM into Go structs. By providing
@@ -25,7 +25,7 @@ type Defined[T any] struct {
 // generate data, helpful when the field's name is insufficient.
 func NewDefined[T any](source T) (Defined[T], error) {
 	var empty Defined[T]
-
+	
 	sourceType := reflect.TypeOf(source)
 	if k := sourceType.Kind(); k != reflect.Struct {
 		return empty, fmt.Errorf("expected a struct; got %s", k)
@@ -34,7 +34,7 @@ func NewDefined[T any](source T) (Defined[T], error) {
 	if numFields == 0 {
 		return empty, errors.New("schema source has no fields")
 	}
-
+	
 	var result bytes.Buffer
 	switch sourceType.Kind() { // nolint:exhaustive
 	case reflect.Struct:
@@ -60,7 +60,7 @@ func (p Defined[T]) GetFormatInstructions() string {
 // Parse parses the output of an LLM call.
 func (p Defined[T]) Parse(text string) (T, error) {
 	var target T
-
+	
 	// Removes '```json' and '```' from the start and end of the text.
 	const opening = "```json"
 	const closing = "```"

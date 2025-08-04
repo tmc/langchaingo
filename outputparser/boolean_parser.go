@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // BooleanParser is an output parser used to parse the output of an LLM as a boolean.
@@ -33,15 +33,15 @@ func (p BooleanParser) GetFormatInstructions() string {
 
 func (p BooleanParser) parse(text string) (bool, error) {
 	text = normalize(text)
-
+	
 	if slices.Contains(p.TrueStrings, text) {
 		return true, nil
 	}
-
+	
 	if slices.Contains(p.FalseStrings, text) {
 		return false, nil
 	}
-
+	
 	return false, ParseError{
 		Text:   text,
 		Reason: fmt.Sprintf("Expected output to one of %v, received %s", append(p.TrueStrings, p.FalseStrings...), text),
@@ -52,7 +52,7 @@ func normalize(text string) string {
 	text = strings.TrimSpace(text)
 	text = strings.Trim(text, "'\"`")
 	text = strings.ToUpper(text)
-
+	
 	return text
 }
 

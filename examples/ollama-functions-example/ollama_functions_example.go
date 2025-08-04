@@ -8,9 +8,9 @@ import (
 	"log"
 	"os"
 	"slices"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ollama"
 )
 
 var flagVerbose = flag.Bool("v", false, "verbose mode")
@@ -23,7 +23,7 @@ func main() {
 	if v := os.Getenv("OLLAMA_TEST_MODEL"); v != "" {
 		model = v
 	}
-
+	
 	llm, err := ollama.New(
 		ollama.WithModel(model),
 		ollama.WithFormat("json"),
@@ -31,24 +31,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	var msgs []llms.MessageContent
-
+	
 	// system message defines the available tools.
 	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeSystem, systemMessage()))
 	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather like in Beijing?"))
-
+	
 	ctx := context.Background()
-
+	
 	for retries := 3; retries > 0; retries = retries - 1 {
 		resp, err := llm.GenerateContent(ctx, msgs)
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		
 		choice1 := resp.Choices[0]
 		msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeAI, choice1.Content))
-
+		
 		if c := unmarshalCall(choice1.Content); c != nil {
 			log.Printf("Call: %v", c.Tool)
 			if *flagVerbose {
@@ -64,7 +64,7 @@ func main() {
 			log.Printf("Not a call: %v", choice1.Content)
 			msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
 		}
-
+		
 		if retries == 0 {
 			log.Fatal("retries exhausted")
 		}
@@ -92,7 +92,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		return llms.TextParts(llms.ChatMessageTypeHuman,
 			"Tool does not exist, please try again."), true
 	}
-
+	
 	// we could make this more dynamic, by parsing the function schema.
 	switch c.Tool {
 	case "getCurrentWeather":
@@ -104,7 +104,7 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if !ok {
 			log.Fatal("invalid input")
 		}
-
+		
 		weather, err := getCurrentWeather(loc, unit)
 		if err != nil {
 			log.Fatal(err)
@@ -115,9 +115,9 @@ func dispatchCall(c *Call) (llms.MessageContent, bool) {
 		if !ok {
 			log.Fatal("invalid input")
 		}
-
+		
 		log.Printf("Final response: %v", resp)
-
+		
 		return llms.MessageContent{}, false
 	default:
 		// we already checked above if we had a valid tool.
@@ -138,7 +138,7 @@ func systemMessage() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	return fmt.Sprintf(`You have access to the following tools:
 
 %s
@@ -161,7 +161,7 @@ func getCurrentWeather(location string, unit string) (string, error) {
 	if unit == "fahrenheit" {
 		weatherInfo["temperature"] = 43
 	}
-
+	
 	b, err := json.Marshal(weatherInfo)
 	if err != nil {
 		return "", err

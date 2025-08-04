@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -47,11 +47,11 @@ func New(coll *mongo.Collection, embedder embeddings.Embedder, opts ...Option) S
 		index:    defaultIndex,
 		path:     defaultPath,
 	}
-
+	
 	for _, opt := range opts {
 		opt(&store)
 	}
-
+	
 	return store
 }
 
@@ -60,19 +60,19 @@ func mergeAddOpts(store *Store, opts ...vectorstores.Option) (*vectorstores.Opti
 	for _, set := range opts {
 		set(mopts)
 	}
-
+	
 	if mopts.ScoreThreshold != 0 || mopts.Filters != nil || mopts.NameSpace != "" || mopts.Deduplicater != nil {
 		return nil, ErrUnsupportedOptions
 	}
-
+	
 	if mopts.Embedder == nil {
 		mopts.Embedder = store.embedder
 	}
-
+	
 	if mopts.Embedder == nil {
 		return nil, fmt.Errorf("embedder is unset")
 	}
-
+	
 	return mopts, nil
 }
 
@@ -87,22 +87,22 @@ func (store *Store) AddDocuments(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Collect the page contents for embedding.
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := cfg.Embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-
+	
 	bdocs := []bson.D{}
 	for i := range vectors {
 		bdocs = append(bdocs, bson.D{
@@ -111,12 +111,12 @@ func (store *Store) AddDocuments(
 			{Key: metadataName, Value: docs[i].Metadata},
 		})
 	}
-
+	
 	res, err := store.coll.InsertMany(ctx, bdocs)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Since we don't allow user-defined ids, the InsertedIDs list will always
 	// be primitive objects.
 	ids := make([]string, 0, len(docs))
@@ -125,10 +125,10 @@ func (store *Store) AddDocuments(
 		if !ok {
 			return nil, fmt.Errorf("expected id for embedding to be a stringer")
 		}
-
+		
 		ids = append(ids, id.String())
 	}
-
+	
 	return ids, nil
 }
 
@@ -137,36 +137,36 @@ func mergeSearchOpts(store *Store, opts ...vectorstores.Option) (*vectorstores.O
 	for _, set := range opts {
 		set(mopts)
 	}
-
+	
 	// Validate that the score threshold is in [0, 1]
 	if mopts.ScoreThreshold > 1 || mopts.ScoreThreshold < 0 {
 		return nil, ErrInvalidScoreThreshold
 	}
-
+	
 	if mopts.Deduplicater != nil {
 		return nil, ErrUnsupportedOptions
 	}
-
+	
 	// Created an llm-specific-n-dimensional vector for searching the vector
 	// space
 	if mopts.Embedder == nil {
 		mopts.Embedder = store.embedder
 	}
-
+	
 	if mopts.Embedder == nil {
 		return nil, fmt.Errorf("embedder is unset")
 	}
-
+	
 	// If the user provides a method-level index, update.
 	if mopts.NameSpace == "" {
 		mopts.NameSpace = store.index
 	}
-
+	
 	// If filters are unset, use an empty document.
 	if mopts.Filters == nil {
 		mopts.Filters = bson.D{}
 	}
-
+	
 	return mopts, nil
 }
 
@@ -188,17 +188,17 @@ func (store *Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	vector, err := cfg.Embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	numCandidates := defaultNumCandidatesScalar * numDocuments
 	if store.numCandidates == 0 {
 		numCandidates = numDocuments
 	}
-
+	
 	// Create the pipeline for performing the similarity search.
 	stage := struct {
 		Index         string    `bson:"index"`         // Name of Atlas Vector Search Index tied to Collection
@@ -215,7 +215,7 @@ func (store *Store) SimilaritySearch(
 		Limit:         numDocuments,
 		Filter:        cfg.Filters,
 	}
-
+	
 	pipeline := mongo.Pipeline{
 		bson.D{
 			{Key: "$vectorSearch", Value: stage},
@@ -224,13 +224,13 @@ func (store *Store) SimilaritySearch(
 			{Key: "$set", Value: bson.D{{Key: scoreName, Value: bson.D{{Key: "$meta", Value: "vectorSearchScore"}}}}},
 		},
 	}
-
+	
 	// Execute the aggregation.
 	cur, err := store.coll.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	found := []schema.Document{}
 	for cur.Next(ctx) {
 		doc := schema.Document{}
@@ -238,13 +238,13 @@ func (store *Store) SimilaritySearch(
 		if err != nil {
 			return nil, err
 		}
-
+		
 		if doc.Score < cfg.ScoreThreshold {
 			continue
 		}
-
+		
 		found = append(found, doc)
 	}
-
+	
 	return found, nil
 }

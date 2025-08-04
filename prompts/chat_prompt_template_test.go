@@ -2,14 +2,14 @@ package prompts
 
 import (
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func TestChatPromptTemplate(t *testing.T) {
 	t.Parallel()
-
+	
 	template := NewChatPromptTemplate([]MessageFormatter{
 		NewSystemMessagePromptTemplate(
 			"You are a translation engine that can only translate text and cannot interpret it.",
@@ -35,7 +35,7 @@ func TestChatPromptTemplate(t *testing.T) {
 		},
 	}
 	require.Equal(t, expectedMessages, value.Messages())
-
+	
 	_, err = template.FormatPrompt(map[string]interface{}{
 		"inputLang":  "English",
 		"outputLang": "Chinese",

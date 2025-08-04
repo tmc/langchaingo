@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
+	
 	"github.com/metaphorsystems/metaphor-go"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 // Search defines a tool implementation for the Metaphor Search.
@@ -25,17 +25,17 @@ var _ tools.Tool = &Search{}
 // The function returns a pointer to a Search instance and an error.
 func NewSearch(options ...metaphor.ClientOptions) (*Search, error) {
 	apiKey := os.Getenv("METAPHOR_API_KEY")
-
+	
 	client, err := metaphor.NewClient(apiKey, options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	metaphor := &Search{
 		client:  client,
 		options: options,
 	}
-
+	
 	return metaphor, nil
 }
 
@@ -81,16 +81,16 @@ func (tool *Search) Call(ctx context.Context, input string) (string, error) {
 		}
 		return "", err
 	}
-
+	
 	return tool.formatResults(response), nil
 }
 
 func (tool *Search) formatResults(response *metaphor.SearchResponse) string {
 	formattedResults := ""
-
+	
 	for _, result := range response.Results {
 		formattedResults += fmt.Sprintf("Title: %s\nURL: %s\nID: %s\n\n", result.Title, result.URL, result.ID)
 	}
-
+	
 	return formattedResults
 }

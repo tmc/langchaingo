@@ -4,44 +4,44 @@ import (
 	"context"
 	"errors"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 var errDummy = errors.New("boom")
 
 func TestSimpleSequential(t *testing.T) {
 	t.Parallel()
-
+	
 	// Build and execute a simple sequential chain with two LLMChains
 	testLLM1 := &testLanguageModel{expResult: "the chicken crossed the road"}
 	testLLM2 := &testLanguageModel{expResult: "The chicken made it to the other side"}
-
+	
 	chains := []Chain{
 		NewLLMChain(testLLM1, prompts.NewPromptTemplate("{{.input}}", []string{"input"})),
 		NewLLMChain(testLLM2, prompts.NewPromptTemplate("What happened after {{.output}}?", []string{"output"})),
 	}
 	simpleSeqChain, err := NewSimpleSequentialChain(chains)
 	require.NoError(t, err)
-
+	
 	res, err := Run(context.Background(), simpleSeqChain, "What did the chicken do?")
 	require.NoError(t, err)
-
+	
 	// Assert that the second LLMChain received the output of the first LLMChain
 	expPrompt := "What happened after the chicken crossed the road?"
 	assert.Equal(t, expPrompt, testLLM2.recordedPrompt[0].String())
-
+	
 	// Assert that the output of the second LLMChain is the output of the entire chain
 	assert.Equal(t, "The chicken made it to the other side", res)
 }
 
 func TestSimpleSequentialErrors(t *testing.T) {
 	t.Parallel()
-
+	
 	testCases := []struct {
 		name    string
 		chain   Chain
@@ -64,7 +64,7 @@ func TestSimpleSequentialErrors(t *testing.T) {
 			execErr: errDummy,
 		},
 	}
-
+	
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -82,12 +82,12 @@ func TestSimpleSequentialErrors(t *testing.T) {
 
 func TestSequentialChain(t *testing.T) {
 	t.Parallel()
-
+	
 	// Build and execute a sequential chain with three LLMChains
 	testLLM1 := &testLanguageModel{expResult: "In the year 3000, chickens have taken over the world"}
 	testLLM2 := &testLanguageModel{expResult: "An egg-citing adventure"}
 	testLLM3 := &testLanguageModel{expResult: "Vey legit"}
-
+	
 	chain1 := NewLLMChain(
 		testLLM1,
 		prompts.NewPromptTemplate("Write a story titled {{.title}} set in the year {{.year}}", []string{"title", "year"}),
@@ -99,30 +99,30 @@ func TestSequentialChain(t *testing.T) {
 		testLLM3,
 		prompts.NewPromptTemplate("Tell me if this review is legit: {{.review}}", []string{"review"}),
 	)
-
+	
 	chains := []Chain{chain1, chain2, chain3}
-
+	
 	seqChain, err := NewSequentialChain(chains, []string{"title", "year"}, []string{_llmChainDefaultOutputKey})
 	require.NoError(t, err)
-
+	
 	res, err := Call(context.Background(), seqChain, map[string]any{"title": "Chicken Takeover", "year": 3000})
 	require.NoError(t, err)
-
+	
 	// Assert that the second LLMChain received the output of the first LLMChain
 	expPrompt := "Review this story: In the year 3000, chickens have taken over the world"
 	assert.Equal(t, expPrompt, testLLM2.recordedPrompt[0].String())
-
+	
 	// Assert that the third LLMChain received the output of the second LLMChain
 	expPrompt = "Tell me if this review is legit: An egg-citing adventure"
 	assert.Equal(t, expPrompt, testLLM3.recordedPrompt[0].String())
-
+	
 	// Assert that the output of the third LLMChain is the output of the entire chain
 	assert.Equal(t, "Vey legit", res[_llmChainDefaultOutputKey])
 }
 
 func TestSequentialChainErrors(t *testing.T) {
 	t.Parallel()
-
+	
 	testCases := []struct {
 		name         string
 		chains       []Chain
@@ -176,7 +176,7 @@ func TestSequentialChainErrors(t *testing.T) {
 			)},
 		},
 	}
-
+	
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()

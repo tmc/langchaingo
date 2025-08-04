@@ -6,29 +6,29 @@ import (
 	"log"
 	"os"
 	"strings"
-
+	
 	"github.com/chewxy/math32"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/embeddings/cybertron"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/weaviate"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/embeddings/cybertron"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/weaviate"
 )
 
 func cosineSimilarity(x, y []float32) float32 {
 	if len(x) != len(y) {
 		log.Fatal("x and y have different lengths")
 	}
-
+	
 	var dot, nx, ny float32
-
+	
 	for i := range x {
 		nx += x[i] * x[i]
 		ny += y[i] * y[i]
 		dot += x[i] * y[i]
 	}
-
+	
 	return dot / (math32.Sqrt(nx) * math32.Sqrt(ny))
 }
 
@@ -44,14 +44,14 @@ func exampleInMemory(ctx context.Context, emb embeddings.Embedder) {
 		"japan",
 		"potato",
 	}
-
+	
 	vecs, err := emb.EmbedDocuments(ctx, docs)
 	if err != nil {
 		log.Fatal("embed query", err)
 	}
-
+	
 	fmt.Println("Similarities:")
-
+	
 	for i := range docs {
 		for j := range docs {
 			fmt.Printf("%6s ~ %6s = %0.2f\n", docs[i], docs[j], cosineSimilarity(vecs[i], vecs[j]))
@@ -62,13 +62,13 @@ func exampleInMemory(ctx context.Context, emb embeddings.Embedder) {
 func exampleWeaviate(ctx context.Context, emb embeddings.Embedder) {
 	scheme := os.Getenv("WEAVIATE_SCHEME")
 	host := os.Getenv("WEAVIATE_HOST")
-
+	
 	if scheme == "" || host == "" {
 		log.Print("Set WEAVIATE_HOST and WEAVIATE_SCHEME to run the weaviate example")
-
+		
 		return
 	}
-
+	
 	// Create a new Weaviate vector store with the Cybertron Embedder to generate embeddings.
 	store, err := weaviate.New(
 		weaviate.WithEmbedder(emb),
@@ -79,7 +79,7 @@ func exampleWeaviate(ctx context.Context, emb embeddings.Embedder) {
 	if err != nil {
 		log.Fatal("create weaviate store", err)
 	}
-
+	
 	// Add some documents to the vector store. This will use the Cybertron Embedder to create
 	// embeddings for the documents.
 	_, err = store.AddDocuments(ctx, []schema.Document{
@@ -90,7 +90,7 @@ func exampleWeaviate(ctx context.Context, emb embeddings.Embedder) {
 	if err != nil {
 		log.Fatal("add documents", err)
 	}
-
+	
 	// Perform a similarity search, returning at most three results with similarity scores of
 	// at least 0.8. This again uses the Cybertron Embedder to create an embedding for the
 	// search query.
@@ -100,7 +100,7 @@ func exampleWeaviate(ctx context.Context, emb embeddings.Embedder) {
 	if err != nil {
 		log.Fatal("similarity search", err)
 	}
-
+	
 	fmt.Println("Matches:")
 	for _, match := range matches {
 		fmt.Printf(" japan ~ %6s = %0.2f\n", match.PageContent, match.Score)
@@ -109,7 +109,7 @@ func exampleWeaviate(ctx context.Context, emb embeddings.Embedder) {
 
 func main() {
 	ctx := context.Background()
-
+	
 	// Create an embedder client that uses the "BAAI/bge-small-en-v1.5" model and caches it in
 	// the "models" directory. Cybertron will automatically download the model from HuggingFace
 	// and convert it when needed.
@@ -123,7 +123,7 @@ func main() {
 	if err != nil {
 		log.Fatal("create embedder client", err)
 	}
-
+	
 	// Create an embedder from the previously created client.
 	emb, err := embeddings.NewEmbedder(emc,
 		embeddings.WithStripNewLines(false),
@@ -131,10 +131,10 @@ func main() {
 	if err != nil {
 		log.Fatal("create embedder", err)
 	}
-
+	
 	// Example: use the Embedder to do an in-memory comparison between some documents.
 	exampleInMemory(ctx, emb)
-
+	
 	// Example: use the Embedder together with a Vector Store.
 	exampleWeaviate(ctx, emb)
 }

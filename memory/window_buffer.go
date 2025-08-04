@@ -2,9 +2,9 @@ package memory
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const (
@@ -35,7 +35,7 @@ func NewConversationWindowBuffer(
 		ConversationWindowSize: conversationWindowSize,
 		ConversationBuffer:     *applyBufferOptions(options...),
 	}
-
+	
 	return tb
 }
 
@@ -51,18 +51,18 @@ func (wb *ConversationWindowBuffer) LoadMemoryVariables(ctx context.Context, _ m
 		return nil, err
 	}
 	messages, _ = wb.cutMessages(messages)
-
+	
 	if wb.ReturnMessages {
 		return map[string]any{
 			wb.MemoryKey: messages,
 		}, nil
 	}
-
+	
 	bufferString, err := llms.GetBufferString(messages, wb.HumanPrefix, wb.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return map[string]any{
 		wb.MemoryKey: bufferString,
 	}, nil

@@ -3,9 +3,9 @@ package chains
 import (
 	"context"
 	"fmt"
-
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const (
@@ -23,15 +23,15 @@ const (
 type StuffDocuments struct {
 	// LLMChain is the LLMChain called after formatting the documents.
 	LLMChain *LLMChain
-
+	
 	// Input key is the input key the StuffDocuments chain expects the
 	//  documents to be in.
 	InputKey string
-
+	
 	// DocumentVariableName is the variable name used in the llm_chain to put
 	// the documents in.
 	DocumentVariableName string
-
+	
 	// Separator is the string used to join the documents.
 	Separator string
 }
@@ -43,7 +43,7 @@ var _ Chain = StuffDocuments{}
 func NewStuffDocuments(llmChain *LLMChain) StuffDocuments {
 	return StuffDocuments{
 		LLMChain: llmChain,
-
+		
 		InputKey:             _combineDocumentsDefaultInputKey,
 		DocumentVariableName: _combineDocumentsDefaultDocumentVariableName,
 		Separator:            _stuffDocumentsDefaultSeparator,
@@ -58,12 +58,12 @@ func (c StuffDocuments) Call(
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
+	
 	inputValues := make(map[string]any)
 	for key, value := range values {
 		inputValues[key] = value
 	}
-
+	
 	inputValues[c.DocumentVariableName] = c.joinDocuments(docs)
 	return Call(ctx, c.LLMChain, inputValues, options...)
 }

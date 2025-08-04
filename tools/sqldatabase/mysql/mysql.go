@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-
+	
 	_ "github.com/go-sql-driver/mysql" // mysql driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "mysql"
@@ -31,7 +31,7 @@ func NewMySQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 		return nil, err
 	}
 	db.SetMaxOpenConns(32) //nolint:gomnd
-
+	
 	return &MySQL{
 		db: db,
 	}, nil
@@ -97,7 +97,7 @@ func (m MySQL) TableInfo(ctx context.Context, table string) (string, error) {
 	if len(result[0]) < 2 { //nolint:gomnd
 		return "", sqldatabase.ErrInvalidResult
 	}
-
+	
 	return result[0][1], nil //nolint:gomnd
 }
 

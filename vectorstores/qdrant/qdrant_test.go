@@ -8,34 +8,34 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
+	
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcqdrant "github.com/testcontainers/testcontainers-go/modules/qdrant"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/qdrant"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/qdrant"
 )
 
 func TestQdrantStore(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -45,13 +45,13 @@ func TestQdrantStore(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	})
 	require.NoError(t, err)
-
+	
 	docs, err := store.SimilaritySearch(context.Background(), "japan", 1)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -60,20 +60,20 @@ func TestQdrantStore(t *testing.T) {
 
 func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
+	
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -83,7 +83,7 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -97,14 +97,14 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	// test with a score threshold of 0.8, expected 6 documents
 	docs, err := store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(0.8))
 	require.NoError(t, err)
 	require.Len(t, docs, 6)
-
+	
 	// test with a score threshold of 0, expected all 10 documents
 	docs, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
@@ -115,20 +115,20 @@ func TestQdrantStoreWithScoreThreshold(t *testing.T) {
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
+	
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -138,7 +138,7 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -152,12 +152,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		{PageContent: "New York"},
 	})
 	require.NoError(t, err)
-
+	
 	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(-0.8))
 	require.Error(t, err)
-
+	
 	_, err = store.SimilaritySearch(context.Background(),
 		"Which of these are cities in Japan", 10,
 		vectorstores.WithScoreThreshold(1.8))
@@ -166,20 +166,20 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 
 func TestQdrantAsRetriever(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
+	
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -189,7 +189,7 @@ func TestQdrantAsRetriever(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -199,7 +199,7 @@ func TestQdrantAsRetriever(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -214,20 +214,20 @@ func TestQdrantAsRetriever(t *testing.T) {
 
 func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
+	
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -237,7 +237,7 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -249,7 +249,7 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -259,27 +259,27 @@ func TestQdrantRetrieverScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }
 
 func TestQdrantRetrieverFilter(t *testing.T) {
 	t.Parallel()
-
+	
 	qdrantURL, apiKey, dimension, distance := getValues(t)
 	collectionName := setupCollection(t, qdrantURL, apiKey, dimension, distance)
-
+	
 	opts := []openai.Option{
 		openai.WithModel("gpt-3.5-turbo-0125"),
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	}
-
+	
 	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
 	store, err := qdrant.New(
@@ -289,7 +289,7 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 		qdrant.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -301,7 +301,7 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	_, err = store.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -332,7 +332,7 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-
+	
 	filter := map[string]interface{}{
 		"must": []map[string]interface{}{
 			{
@@ -343,7 +343,7 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 			},
 		},
 	}
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -358,11 +358,11 @@ func TestQdrantRetrieverFilter(t *testing.T) {
 
 func getValues(t *testing.T) (string, string, int, string) {
 	t.Helper()
-
+	
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	qdrantURL := os.Getenv("QDRANT_URL")
 	if qdrantURL == "" {
 		qdrantContainer, err := tcqdrant.RunContainer(context.Background(), testcontainers.WithImage("qdrant/qdrant:v1.7.4"))
@@ -373,16 +373,16 @@ func getValues(t *testing.T) (string, string, int, string) {
 		t.Cleanup(func() {
 			require.NoError(t, qdrantContainer.Terminate(context.Background()))
 		})
-
+		
 		qdrantURL, err = qdrantContainer.RESTEndpoint(context.Background())
 		if err != nil {
 			t.Skipf("Failed to get qdrant container endpoint: %s", err)
 		}
 	}
-
+	
 	// Can be empty if using a local Qdrant deployment
 	apiKey := os.Getenv("QDRANT_API_KEY")
-
+	
 	// Reference: https://qdrant.tech/documentation/concepts/search/#metrics
 	distance := os.Getenv("QDRANT_DISTANCE_METRIC")
 	if distance == "" {
@@ -398,26 +398,26 @@ func getValues(t *testing.T) (string, string, int, string) {
 func setupCollection(t *testing.T, qdrantURL, apiKey string, dimension int, distance string) string {
 	t.Helper()
 	collectionName := uuid.NewString()
-
+	
 	collectionConfig := map[string]interface{}{
 		"vectors": map[string]interface{}{
 			"size":     dimension,
 			"distance": distance,
 		},
 	}
-
+	
 	url, err := url.Parse(qdrantURL)
 	require.NoError(t, err)
-
+	
 	url = url.JoinPath("collections", collectionName)
 	_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodPut, collectionConfig)
-
+	
 	require.Equal(t, http.StatusOK, status)
 	require.NoError(t, err)
-
+	
 	t.Cleanup(func() {
 		_, status, err := qdrant.DoRequest(context.TODO(), *url, apiKey, http.MethodDelete, nil)
-
+		
 		require.Equal(t, http.StatusOK, status)
 		require.NoError(t, err)
 	})

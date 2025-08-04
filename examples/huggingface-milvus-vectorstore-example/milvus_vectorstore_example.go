@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
+	
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/milvus"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/milvus"
 )
 
 const (
@@ -43,7 +43,7 @@ func newStore() (vectorstores.VectorStore, error) {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	milvusConfig := client.Config{
 		Address: "http://localhost:19530",
 	}
@@ -56,7 +56,7 @@ func newStore() (vectorstores.VectorStore, error) {
 		milvus.WithIndex(idx),
 		milvus.WithEmbedder(embedder),
 	)
-
+	
 	return store, errNs
 }
 
@@ -81,16 +81,16 @@ func citiesExample(store vectorstores.VectorStore) {
 	if errAd != nil {
 		log.Fatalf("AddDocument: %v\n", errAd)
 	}
-
+	
 	type exampleCase struct {
 		name         string
 		query        string
 		numDocuments int
 		options      []vectorstores.Option
 	}
-
+	
 	type filter = map[string]any
-
+	
 	exampleCases := []exampleCase{
 		{
 			name:         "Up to 5 Cities in Japan",
@@ -127,7 +127,7 @@ func citiesExample(store vectorstores.VectorStore) {
 		}
 		results[ecI] = docs
 	}
-
+	
 	// print out the results of the run
 	fmt.Printf("Results:\n")
 	for ecI, ec := range exampleCases {
@@ -137,6 +137,6 @@ func citiesExample(store vectorstores.VectorStore) {
 		}
 		fmt.Printf("%d. case: %s\n", ecI+1, ec.name)
 		fmt.Printf("    result: %s\n", strings.Join(texts, ", "))
-
+		
 	}
 }

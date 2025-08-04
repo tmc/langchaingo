@@ -2,13 +2,13 @@ package outputparser_test
 
 import (
 	"testing"
-
-	"github.com/tmc/langchaingo/outputparser"
+	
+	"github.com/yincongcyincong/langchaingo/outputparser"
 )
 
 func TestBooleanParser(t *testing.T) {
 	t.Parallel()
-
+	
 	testCases := []struct {
 		input    string
 		err      error
@@ -69,22 +69,22 @@ func TestBooleanParser(t *testing.T) {
 			expected: true,
 		},
 	}
-
+	
 	for _, tc := range testCases {
 		parser := outputparser.NewBooleanParser()
-
+		
 		t.Run(tc.input, func(t *testing.T) {
 			t.Parallel()
-
+			
 			result, err := parser.Parse(tc.input)
 			if err != nil && tc.err == nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
-
+			
 			if err == nil && tc.err != nil {
 				t.Errorf("Expected error %v, got nil", tc.err)
 			}
-
+			
 			if result != tc.expected {
 				t.Errorf("Expected %v, but got %v", tc.expected, result)
 			}

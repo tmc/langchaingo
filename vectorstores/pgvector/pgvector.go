@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
+	
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pgvector/pgvector-go"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 const (
@@ -110,7 +110,7 @@ func (s *Store) init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
+	
 	if err := s.createVectorExtensionIfNotExists(ctx, tx); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (s *Store) init(ctx context.Context) error {
 	if err := s.createOrGetCollection(ctx, tx); err != nil {
 		return err
 	}
-
+	
 	return tx.Commit(ctx)
 }
 
@@ -183,12 +183,12 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock($1)", pgLockIDEmbeddingTable); err != nil {
 		return err
 	}
-
+	
 	vectorDimensions := ""
 	if s.vectorDimensions > 0 {
 		vectorDimensions = fmt.Sprintf("(%d)", s.vectorDimensions)
 	}
-
+	
 	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
 	collection_id uuid,
 	embedding vector%s,
@@ -205,7 +205,7 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 	if _, err := tx.Exec(ctx, sql); err != nil {
 		return err
 	}
-
+	
 	// See this for more details on HNWS indexes: https://github.com/pgvector/pgvector#hnsw
 	if s.hnswIndex != nil {
 		sql = fmt.Sprintf(
@@ -219,7 +219,7 @@ func (s Store) createEmbeddingTableIfNotExists(ctx context.Context, tx pgx.Tx) e
 			return err
 		}
 	}
-
+	
 	return nil
 }
 
@@ -234,14 +234,14 @@ func (s Store) AddDocuments(
 	if opts.ScoreThreshold != 0 || opts.Filters != nil || opts.NameSpace != "" {
 		return nil, ErrUnsupportedOptions
 	}
-
+	
 	docs = s.deduplicate(ctx, opts, docs)
-
+	
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	embedder := s.embedder
 	if opts.Embedder != nil {
 		embedder = opts.Embedder
@@ -250,15 +250,15 @@ func (s Store) AddDocuments(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-
+	
 	b := &pgx.Batch{}
 	sql := fmt.Sprintf(`INSERT INTO %s (uuid, document, embedding, cmetadata, collection_id)
 		VALUES($1, $2, $3, $4, $5)`, s.embeddingTableName)
-
+	
 	ids := make([]string, len(docs))
 	for docIdx, doc := range docs {
 		id := uuid.New().String()
@@ -337,7 +337,7 @@ LIMIT $3`, s.embeddingTableName,
 		return nil, err
 	}
 	defer rows.Close()
-
+	
 	docs := make([]schema.Document, 0)
 	for rows.Next() {
 		doc := schema.Document{}
@@ -384,7 +384,7 @@ LIMIT $1`, s.embeddingTableName, s.embeddingTableName, s.embeddingTableName,
 	}
 	docs := make([]schema.Document, 0)
 	defer rows.Close()
-
+	
 	for rows.Next() {
 		doc := schema.Document{}
 		if err := rows.Scan(&doc.PageContent, &doc.Metadata); err != nil {
@@ -465,13 +465,13 @@ func (s Store) deduplicate(
 	if opts.Deduplicater == nil {
 		return docs
 	}
-
+	
 	filtered := make([]schema.Document, 0, len(docs))
 	for _, doc := range docs {
 		if !opts.Deduplicater(ctx, doc) {
 			filtered = append(filtered, doc)
 		}
 	}
-
+	
 	return filtered
 }

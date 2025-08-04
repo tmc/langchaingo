@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-
+	
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/auth"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/filters"
@@ -40,22 +40,22 @@ var (
 type Store struct {
 	embedder embeddings.Embedder
 	client   *weaviate.Client
-
+	
 	textKey      string
 	nameSpaceKey string
-
+	
 	indexName string
 	nameSpace string
 	host      string
 	scheme    string
-
+	
 	// optional
 	apiKey *string
 	// optional
 	authConfig auth.Config
 	// optional
 	connectionClient *http.Client
-
+	
 	// optional
 	queryAttrs       []string
 	additionalFields []string
@@ -82,7 +82,7 @@ func New(opts ...Option) (Store, error) {
 		AuthConfig:       s.authConfig,
 		ConnectionClient: s.connectionClient,
 	})
-
+	
 	return s, err
 }
 
@@ -95,29 +95,29 @@ func (s Store) AddDocuments(ctx context.Context,
 ) ([]string, error) {
 	opts := s.getOptions(options...)
 	nameSpace := s.getNameSpace(opts)
-
+	
 	docs = s.deduplicate(ctx, opts, docs)
-
+	
 	if len(docs) == 0 {
 		// nothing to add (perhaps all documents were duplicates). This is not
 		// an error.
 		return nil, nil
 	}
-
+	
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := opts.Embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(vectors) != len(docs) {
 		return nil, ErrEmbedderWrongNumberVectors
 	}
-
+	
 	metadatas := make([]map[string]any, 0, len(docs))
 	for i := 0; i < len(docs); i++ {
 		metadata := make(map[string]any, len(docs[i].Metadata))
@@ -126,10 +126,10 @@ func (s Store) AddDocuments(ctx context.Context,
 		}
 		metadata[s.textKey] = texts[i]
 		metadata[s.nameSpaceKey] = nameSpace
-
+		
 		metadatas = append(metadatas, metadata)
 	}
-
+	
 	objects := make([]*models.Object, 0, len(docs))
 	ids := make([]string, len(docs))
 	for i := range docs {
@@ -165,12 +165,12 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	vector, err := opts.Embedder.EmbedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	res, err := s.client.GraphQL().
 		Get().
 		WithNearVector(s.client.GraphQL().
@@ -213,7 +213,7 @@ func (s Store) MetadataSearch(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return s.parseDocumentsByGraphQLResponse(res)
 }
 
@@ -226,13 +226,13 @@ func (s Store) parseDocumentsByGraphQLResponse(res *models.GraphQLResponse) ([]s
 		}
 		return nil, fmt.Errorf("%w: %s", ErrInvalidResponse, strings.Join(messages, ", "))
 	}
-
+	
 	data, ok := res.Data["Get"].(map[string]any)[s.indexName]
 	if !ok || data == nil {
 		return nil, ErrEmptyResponse
 	}
 	items, ok := data.([]any)
-
+	
 	docs := make([]schema.Document, 0, len(items))
 	if !ok || len(items) == 0 {
 		return docs, nil
@@ -268,14 +268,14 @@ func (s Store) deduplicate(ctx context.Context,
 	if opts.Deduplicater == nil {
 		return docs
 	}
-
+	
 	filtered := make([]schema.Document, 0, len(docs))
 	for _, doc := range docs {
 		if !opts.Deduplicater(ctx, doc) {
 			filtered = append(filtered, doc)
 		}
 	}
-
+	
 	return filtered
 }
 
@@ -316,7 +316,7 @@ func (s Store) createWhereBuilder(namespace string, filter any) (*filters.WhereB
 	if filter == nil {
 		return filters.Where().WithPath([]string{s.nameSpaceKey}).WithOperator(filters.Equal).WithValueString(namespace), nil
 	}
-
+	
 	whereFilter, ok := filter.(*filters.WhereBuilder)
 	if !ok {
 		return nil, ErrInvalidFilter
@@ -334,18 +334,18 @@ func (s Store) createFields() []graphql.Field {
 			Name: attr,
 		})
 	}
-
+	
 	additionalFields := make([]graphql.Field, 0, len(s.additionalFields))
 	for _, attr := range s.additionalFields {
 		additionalFields = append(additionalFields, graphql.Field{
 			Name: attr,
 		})
 	}
-
+	
 	fields = append(fields, graphql.Field{
 		Name:   "_additional",
 		Fields: additionalFields,
 	})
-
+	
 	return fields
 }

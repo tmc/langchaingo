@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory/alloydb"
-	"github.com/tmc/langchaingo/util/alloydbutil"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory/alloydb"
+	"github.com/yincongcyincong/langchaingo/util/alloydbutil"
 )
 
 type chatMsg struct{}
@@ -23,7 +23,7 @@ func (chatMsg) GetContent() string {
 
 func getEnvVariables(t *testing.T) (string, string, string, string, string, string, string) {
 	t.Helper()
-
+	
 	username := os.Getenv("ALLOYDB_USERNAME")
 	if username == "" {
 		t.Skip("ALLOYDB_USERNAME environment variable not set")
@@ -52,21 +52,21 @@ func getEnvVariables(t *testing.T) (string, string, string, string, string, stri
 	if cluster == "" {
 		t.Skip("ALLOYDB_CLUSTER environment variable not set")
 	}
-
+	
 	return username, password, database, projectID, region, instance, cluster
 }
 
 func setEngine(ctx context.Context, t *testing.T) (alloydbutil.PostgresEngine, error) {
 	t.Helper()
 	username, password, database, projectID, region, instance, cluster := getEnvVariables(t)
-
+	
 	pgEngine, err := alloydbutil.NewPostgresEngine(ctx,
 		alloydbutil.WithUser(username),
 		alloydbutil.WithPassword(password),
 		alloydbutil.WithDatabase(database),
 		alloydbutil.WithAlloyDBInstance(projectID, region, cluster, instance),
 	)
-
+	
 	return pgEngine, err
 }
 
@@ -104,7 +104,7 @@ func TestValidateTable(t *testing.T) {
 			err:       "session ID must be provided",
 		},
 	}
-
+	
 	for _, tc := range tcs {
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()

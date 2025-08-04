@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai/internal/openaiclient"
 )
 
 func TestStructuredOutputObjectSchema(t *testing.T) {
@@ -36,7 +36,7 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 		WithModel("gpt-4o-2024-08-06"),
 		WithResponseFormat(responseFormat),
 	)
-
+	
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeSystem,
@@ -47,10 +47,10 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 			Parts: []llms.ContentPart{llms.TextContent{Text: "Solve 2 + 2"}},
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "\"final_answer\":", strings.ToLower(c1.Content))
@@ -86,7 +86,7 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 		WithModel("gpt-4o-2024-08-06"),
 		WithResponseFormat(responseFormat),
 	)
-
+	
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeSystem,
@@ -97,10 +97,10 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 			Parts: []llms.ContentPart{llms.TextContent{Text: "Solve 2 + 2"}},
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "\"steps\":", strings.ToLower(c1.Content))
@@ -112,7 +112,7 @@ func TestStructuredOutputFunctionCalling(t *testing.T) {
 		t,
 		WithModel("gpt-4o-2024-08-06"),
 	)
-
+	
 	toolList := []llms.Tool{
 		{
 			Type: string(openaiclient.ToolTypeFunction),
@@ -138,7 +138,7 @@ func TestStructuredOutputFunctionCalling(t *testing.T) {
 			},
 		},
 	}
-
+	
 	content := []llms.MessageContent{
 		{
 			Role:  llms.ChatMessageTypeSystem,
@@ -149,14 +149,14 @@ func TestStructuredOutputFunctionCalling(t *testing.T) {
 			Parts: []llms.ContentPart{llms.TextContent{Text: "What is the age of Bob Odenkirk, a famous comedy screenwriter and an actor."}},
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(
 		context.Background(),
 		content,
 		llms.WithTools(toolList),
 	)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "\"search_engine\":", c1.ToolCalls[0].FunctionCall.Arguments)

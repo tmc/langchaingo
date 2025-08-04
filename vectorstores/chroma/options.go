@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-
+	
 	chromagov2 "github.com/amikos-tech/chroma-go/pkg/api/v2"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	DefaultNameSpace       = "langchain"
 	DefaultNameSpaceKey    = "nameSpace"
 	DefaultDistanceFunc    = chromatypes.L2
-
+	
 	ChromaV1 = "v1"
 	ChromaV2 = "v2"
 )
@@ -101,11 +101,11 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		openaiAPIKey:       os.Getenv(OpenAIAPIKeyEnvVarName),
 		openaiOrganization: os.Getenv(OpenAIOrgIDEnvVarName),
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.chromaURL == "" {
 		o.chromaURL = os.Getenv(ChromaURLKeyEnvVarName)
 		if o.chromaURL == "" {
@@ -114,11 +114,11 @@ func applyClientOptions(opts ...Option) (Store, error) {
 				ErrInvalidOptions, ChromaURLKeyEnvVarName)
 		}
 	}
-
+	
 	// a embedder or an openai api key must be provided
 	if o.openaiAPIKey == "" && o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder or openai api key", ErrInvalidOptions)
 	}
-
+	
 	return *o, nil
 }

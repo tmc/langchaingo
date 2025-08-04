@@ -1,8 +1,8 @@
 package chains
 
 import (
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
 )
 
 // PromptSelector is the interface for selecting a formatter depending on the
@@ -29,6 +29,6 @@ func (s ConditionalPromptSelector) GetPrompt(llm llms.Model) prompts.PromptTempl
 			return conditional.Prompt
 		}
 	}
-
+	
 	return s.DefaultPrompt
 }

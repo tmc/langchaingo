@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 // Model represents a Perplexity AI model type.
@@ -60,15 +60,15 @@ func New(opts ...Option) (*Tool, error) {
 		apiKey: os.Getenv("PERPLEXITY_API_KEY"),
 		model:  ModelLlamaSonarSmall, // Default model
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	if options.apiKey == "" {
 		return nil, fmt.Errorf("PERPLEXITY_API_KEY key not set")
 	}
-
+	
 	llm, err := openai.New(
 		openai.WithModel(string(options.model)),
 		openai.WithBaseURL("https://api.perplexity.ai"),
@@ -77,7 +77,7 @@ func New(opts ...Option) (*Tool, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &Tool{
 		llm: llm,
 	}, nil
@@ -98,11 +98,11 @@ func (t *Tool) Call(ctx context.Context, input string) (string, error) {
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolStart(ctx, input)
 	}
-
+	
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, input),
 	}
-
+	
 	var generatedText string
 	_, err := t.llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
@@ -115,10 +115,10 @@ func (t *Tool) Call(ctx context.Context, input string) (string, error) {
 		}
 		return "", err
 	}
-
+	
 	if t.CallbacksHandler != nil {
 		t.CallbacksHandler.HandleToolEnd(ctx, generatedText)
 	}
-
+	
 	return generatedText, nil
 }

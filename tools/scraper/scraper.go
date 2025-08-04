@@ -8,9 +8,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	
 	"github.com/gocolly/colly"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 const (
@@ -56,11 +56,11 @@ func New(options ...Options) (*Scraper, error) {
 			"redirect",
 		},
 	}
-
+	
 	for _, opt := range options {
 		opt(scraper)
 	}
-
+	
 	return scraper, nil
 }
 
@@ -95,12 +95,12 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)
 	}
-
+	
 	c := colly.NewCollector(
 		colly.MaxDepth(s.MaxDepth),
 		colly.Async(s.Async),
 	)
-
+	
 	err = c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Parallelism: s.Parallels,
@@ -109,49 +109,49 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)
 	}
-
+	
 	var siteData strings.Builder
 	homePageLinks := make(map[string]bool)
 	scrapedLinks := make(map[string]bool)
 	scrapedLinksMutex := sync.RWMutex{}
-
+	
 	c.OnRequest(func(r *colly.Request) {
 		if ctx.Err() != nil {
 			r.Abort()
 		}
 	})
-
+	
 	c.OnHTML("html", func(e *colly.HTMLElement) {
 		currentURL := e.Request.URL.String()
-
+		
 		// Only process the page if it hasn't been visited yet
 		scrapedLinksMutex.Lock()
 		if !scrapedLinks[currentURL] {
 			scrapedLinks[currentURL] = true
 			scrapedLinksMutex.Unlock()
-
+			
 			siteData.WriteString("\n\nPage URL: " + currentURL)
-
+			
 			title := e.ChildText("title")
 			if title != "" {
 				siteData.WriteString("\nPage Title: " + title)
 			}
-
+			
 			description := e.ChildAttr("meta[name=description]", "content")
 			if description != "" {
 				siteData.WriteString("\nPage Description: " + description)
 			}
-
+			
 			siteData.WriteString("\nHeaders:")
 			e.ForEach("h1, h2, h3, h4, h5, h6", func(_ int, el *colly.HTMLElement) {
 				siteData.WriteString("\n" + el.Text)
 			})
-
+			
 			siteData.WriteString("\nContent:")
 			e.ForEach("p", func(_ int, el *colly.HTMLElement) {
 				siteData.WriteString("\n" + el.Text)
 			})
-
+			
 			if currentURL == input {
 				e.ForEach("a", func(_ int, el *colly.HTMLElement) {
 					link := el.Attr("href")
@@ -165,35 +165,35 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 			scrapedLinksMutex.Unlock()
 		}
 	})
-
+	
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		absoluteLink := e.Request.AbsoluteURL(link)
-
+		
 		// Parse the link to get the hostname
 		u, err := url.Parse(absoluteLink)
 		if err != nil {
 			// Handle the error appropriately
 			return
 		}
-
+		
 		// Check if the link's hostname matches the current request's hostname
 		if u.Hostname() != e.Request.URL.Hostname() {
 			return
 		}
-
+		
 		// Check for redundant pages
 		for _, item := range s.Blacklist {
 			if strings.Contains(u.Path, item) {
 				return
 			}
 		}
-
+		
 		// Normalize the path to treat '/' and '/index.html' as the same path
 		if u.Path == "/index.html" || u.Path == "" {
 			u.Path = "/"
 		}
-
+		
 		// Only visit the page if it hasn't been visited yet
 		scrapedLinksMutex.RLock()
 		if !scrapedLinks[u.String()] {
@@ -206,24 +206,24 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 			scrapedLinksMutex.RUnlock()
 		}
 	})
-
+	
 	err = c.Visit(input)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)
 	}
-
+	
 	select {
 	case <-ctx.Done():
 		return "", ctx.Err()
 	default:
 		c.Wait()
 	}
-
+	
 	// Append all scraped links
 	siteData.WriteString("\n\nScraped Links:")
 	for link := range scrapedLinks {
 		siteData.WriteString("\n" + link)
 	}
-
+	
 	return siteData.String(), nil
 }

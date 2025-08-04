@@ -3,10 +3,10 @@ package bedrockclient
 import (
 	"context"
 	"encoding/json"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-cohere-command.html
@@ -68,7 +68,7 @@ func createCohereCompletion(ctx context.Context,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
 	txt := processInputMessagesGeneric(messages)
-
+	
 	input := &cohereTextGenerationInput{
 		Prompt:         txt,
 		Temperature:    options.Temperature,
@@ -78,12 +78,12 @@ func createCohereCompletion(ctx context.Context,
 		StopSequences:  options.StopWords,
 		NumGenerations: options.CandidateCount,
 	}
-
+	
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	modelInput := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Accept:      aws.String("*/*"),
@@ -94,16 +94,16 @@ func createCohereCompletion(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var output cohereTextGenerationOutput
-
+	
 	err = json.Unmarshal(resp.Body, &output)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	choices := make([]*llms.ContentChoice, len(output.Generations))
-
+	
 	for i, gen := range output.Generations {
 		choices[i] = &llms.ContentChoice{
 			Content:    gen.Text,
@@ -114,7 +114,7 @@ func createCohereCompletion(ctx context.Context,
 			},
 		}
 	}
-
+	
 	return &llms.ContentResponse{
 		Choices: choices,
 	}, nil

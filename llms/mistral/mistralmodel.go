@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"os"
-
+	
 	sdk "github.com/gage-technologies/mistral-go"
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Model encapsulates an instantiated Mistral client, the client options used to instantiate the client, and a callback handler provided by Langchain Go.
@@ -29,11 +29,11 @@ func New(opts ...Option) (*Model, error) {
 		timeout:    sdk.DefaultTimeout,
 		model:      sdk.ModelOpenMistral7b,
 	}
-
+	
 	for _, opt := range opts {
 		opt(options)
 	}
-
+	
 	return &Model{
 		clientOptions:    options,
 		client:           sdk.NewMistralClient(options.apiKey, options.endpoint, options.maxRetries, options.timeout),
@@ -46,7 +46,7 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
 	mistralChatParams := mistralChatParamsFromCallOptions(callOptions)
-
+	
 	messages := make([]sdk.ChatMessage, 0)
 	messages = append(messages, sdk.ChatMessage{
 		Role:    "user",
@@ -61,7 +61,7 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return "", errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
 	}
-
+	
 	return res.Choices[0].Message.Content, nil
 }
 
@@ -70,14 +70,14 @@ func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.Me
 	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
 	m.CallbacksHandler.HandleLLMGenerateContentStart(ctx, langchainMessages)
-
+	
 	chatOpts := mistralChatParamsFromCallOptions(callOptions)
-
+	
 	messages, err := convertToMistralChatMessages(langchainMessages)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if callOptions.StreamingFunc != nil {
 		return generateStreamingContent(ctx, m, callOptions, messages, chatOpts)
 	}
@@ -150,12 +150,12 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
 	}
-
+	
 	if len(res.Choices) < 1 {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, errors.New("unexpected response from Mistral SDK, length of the Choices slice must be greater than or equal 1")
 	}
-
+	
 	langchainContentResponse := &llms.ContentResponse{
 		Choices: make([]*llms.ContentChoice, 0),
 	}
@@ -185,7 +185,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		}
 	}
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
-
+	
 	return langchainContentResponse, nil
 }
 
@@ -202,7 +202,7 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		Content:        "",
 		GenerationInfo: map[string]any{},
 	}
-
+	
 	for chatResChunk := range chatResChan {
 		chunkStr := ""
 		langchainContentResponse.Choices[0].GenerationInfo["created"] = chatResChunk.Created
@@ -235,7 +235,7 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 			return langchainContentResponse, chatResChunk.Error
 		}
 	}
-
+	
 	return langchainContentResponse, nil
 }
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html
@@ -63,7 +63,7 @@ func createAmazonCompletion(ctx context.Context,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
 	txt := processInputMessagesGeneric(messages)
-
+	
 	inputContent := amazonTextGenerationInput{
 		InputText: txt,
 		TextGenerationConfig: amazonTextGenerationConfigInput{
@@ -73,12 +73,12 @@ func createAmazonCompletion(ctx context.Context,
 			StopSequences: options.StopWords,
 		},
 	}
-
+	
 	body, err := json.Marshal(inputContent)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	modelInput := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(modelID),
 		Accept:      aws.String("*/*"),
@@ -89,19 +89,19 @@ func createAmazonCompletion(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var output amazonTextGenerationOutput
 	err = json.Unmarshal(resp.Body, &output)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if len(output.Results) == 0 {
 		return nil, errors.New("no results")
 	}
-
+	
 	contentChoices := make([]*llms.ContentChoice, len(output.Results))
-
+	
 	for i, result := range output.Results {
 		contentChoices[i] = &llms.ContentChoice{
 			Content:    result.OutputText,
@@ -112,7 +112,7 @@ func createAmazonCompletion(ctx context.Context,
 			},
 		}
 	}
-
+	
 	return &llms.ContentResponse{
 		Choices: contentChoices,
 	}, nil

@@ -5,9 +5,9 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/anthropic"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/anthropic"
 )
 
 //go:embed image.png
@@ -47,7 +47,7 @@ func main() {
 	if len(choices) < 1 {
 		log.Fatal("empty response from model")
 	}
-
+	
 	log.Printf(
 		"input_tokens: %d, output_tokens: %d",
 		choices[0].GenerationInfo["InputTokens"],

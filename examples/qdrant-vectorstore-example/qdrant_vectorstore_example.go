@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/qdrant"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/qdrant"
 )
 
 func main() {
@@ -19,14 +19,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	e, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	ctx := context.Background()
-
+	
 	// Create a new Qdrant vector store.
 	url, err := url.Parse("YOUR_QDRANT_URL")
 	if err != nil {
@@ -40,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Add documents to the Qdrant vector store.
 	_, err = store.AddDocuments(context.Background(), []schema.Document{
 		{
@@ -89,15 +89,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Search for similar documents.
 	docs, err := store.SimilaritySearch(ctx, "england", 1)
 	fmt.Println(docs)
-
+	
 	// Search for similar documents using score threshold.
 	docs, err = store.SimilaritySearch(ctx, "american places", 10, vectorstores.WithScoreThreshold(0.80))
 	fmt.Println(docs)
-
+	
 	// Search for similar documents using score threshold and metadata filter.
 	filter := map[string]interface{}{
 		"must": []map[string]interface{}{
@@ -109,7 +109,7 @@ func main() {
 			},
 		},
 	}
-
+	
 	docs, err = store.SimilaritySearch(ctx, "only cities in south america",
 		10,
 		vectorstores.WithScoreThreshold(0.80),

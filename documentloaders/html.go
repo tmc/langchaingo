@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 	"strings"
-
+	
 	"github.com/PuerkitoBio/goquery"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 // HTML loads parses and sanitizes html content from an io.Reader.
@@ -29,17 +29,17 @@ func (h HTML) Load(_ context.Context) ([]schema.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var sel *goquery.Selection
 	if doc.Has("body") != nil {
 		sel = doc.Find("body").Contents()
 	} else {
 		sel = doc.Contents()
 	}
-
+	
 	sanitized := bluemonday.UGCPolicy().Sanitize(sel.Text())
 	pagecontent := strings.TrimSpace(sanitized)
-
+	
 	return []schema.Document{
 		{
 			PageContent: pagecontent,

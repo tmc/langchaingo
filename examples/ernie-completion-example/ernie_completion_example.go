@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ernie"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ernie"
 )
 
 func main() {
@@ -29,12 +29,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	_ = completion
-
+	
 	// embedding
 	embedding, _ := embeddings.NewEmbedder(llm)
-
+	
 	emb, err := embedding.EmbedDocuments(ctx, []string{"你好"})
 	if err != nil {
 		log.Fatal(err)

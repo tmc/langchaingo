@@ -1,12 +1,12 @@
 package prompts
 
-import "github.com/tmc/langchaingo/llms"
+import "github.com/yincongcyincong/langchaingo/llms"
 
 // ChatPromptTemplate is a prompt template for chat messages.
 type ChatPromptTemplate struct {
 	// Messages is the list of the messages to be formatted.
 	Messages []MessageFormatter
-
+	
 	// PartialVariables represents a map of variable names to values or functions
 	// that return values. If the value is a function, it will be called when the
 	// prompt template is rendered.
@@ -25,17 +25,17 @@ func (p ChatPromptTemplate) FormatPrompt(values map[string]any) (llms.PromptValu
 	if err != nil {
 		return nil, err
 	}
-
+	
 	formattedMessages := make([]llms.ChatMessage, 0, len(p.Messages))
 	for _, m := range p.Messages {
 		curFormattedMessages, err := m.FormatMessages(resolvedValues)
 		if err != nil {
 			return nil, err
 		}
-
+		
 		formattedMessages = append(formattedMessages, curFormattedMessages...)
 	}
-
+	
 	return ChatPromptValue(formattedMessages), nil
 }
 
@@ -62,7 +62,7 @@ func (p ChatPromptTemplate) GetInputVariables() []string {
 			inputVariablesMap[variable] = true
 		}
 	}
-
+	
 	inputVariables := make([]string, 0, len(inputVariablesMap))
 	for variable := range inputVariablesMap {
 		inputVariables = append(inputVariables, variable)

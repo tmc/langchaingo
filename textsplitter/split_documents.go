@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 	"strings"
-
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // ErrMismatchMetadatasAndText is returned when the number of texts and metadatas
@@ -21,7 +21,7 @@ func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]s
 		texts = append(texts, document.PageContent)
 		metadatas = append(metadatas, document.Metadata)
 	}
-
+	
 	return CreateDocuments(textSplitter, texts, metadatas)
 }
 
@@ -32,33 +32,33 @@ func CreateDocuments(textSplitter TextSplitter, texts []string, metadatas []map[
 	if len(metadatas) == 0 {
 		metadatas = make([]map[string]any, len(texts))
 	}
-
+	
 	if len(texts) != len(metadatas) {
 		return nil, ErrMismatchMetadatasAndText
 	}
-
+	
 	documents := make([]schema.Document, 0)
-
+	
 	for i := 0; i < len(texts); i++ {
 		chunks, err := textSplitter.SplitText(texts[i])
 		if err != nil {
 			return nil, err
 		}
-
+		
 		for _, chunk := range chunks {
 			// Copy the document metadata
 			curMetadata := make(map[string]any, len(metadatas[i]))
 			for key, value := range metadatas[i] {
 				curMetadata[key] = value
 			}
-
+			
 			documents = append(documents, schema.Document{
 				PageContent: chunk,
 				Metadata:    curMetadata,
 			})
 		}
 	}
-
+	
 	return documents, nil
 }
 
@@ -72,20 +72,20 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 	docs := make([]string, 0)
 	currentDoc := make([]string, 0)
 	total := 0
-
+	
 	for _, split := range splits {
 		totalWithSplit := total + lenFunc(split)
 		if len(currentDoc) != 0 {
 			totalWithSplit += lenFunc(separator)
 		}
-
+		
 		maybePrintWarning(total, chunkSize)
 		if totalWithSplit > chunkSize && len(currentDoc) > 0 {
 			doc := joinDocs(currentDoc, separator)
 			if doc != "" {
 				docs = append(docs, doc)
 			}
-
+			
 			for shouldPop(chunkOverlap, chunkSize, total, lenFunc(split), lenFunc(separator), len(currentDoc)) {
 				total -= lenFunc(currentDoc[0]) //nolint:gosec
 				if len(currentDoc) > 1 {
@@ -94,19 +94,19 @@ func mergeSplits(splits []string, separator string, chunkSize int, chunkOverlap 
 				currentDoc = currentDoc[1:] //nolint:gosec
 			}
 		}
-
+		
 		currentDoc = append(currentDoc, split)
 		total += lenFunc(split)
 		if len(currentDoc) > 1 {
 			total += lenFunc(separator)
 		}
 	}
-
+	
 	doc := joinDocs(currentDoc, separator)
 	if doc != "" {
 		docs = append(docs, doc)
 	}
-
+	
 	return docs
 }
 
@@ -128,6 +128,6 @@ func shouldPop(chunkOverlap, chunkSize, total, splitLen, separatorLen, currentDo
 	if currentDocLen < docsNeededToAddSep {
 		separatorLen = 0
 	}
-
+	
 	return currentDocLen > 0 && (total > chunkOverlap || (total+splitLen+separatorLen > chunkSize && total > 0))
 }

@@ -3,10 +3,10 @@ package openai
 import (
 	"context"
 	"fmt"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai/internal/openaiclient"
 )
 
 type ChatMessage = openaiclient.ChatMessage
@@ -48,12 +48,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
-
+	
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	chatMsgs := make([]*ChatMessage, 0, len(messages))
 	for _, mc := range messages {
 		msg := &ChatMessage{MultiContent: mc.Parts}
@@ -71,7 +71,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		case llms.ChatMessageTypeTool:
 			msg.Role = RoleTool
 			// Here we extract tool calls from the message and populate the ToolCalls field.
-
+			
 			// parse mc.Parts (which should have one entry of type ToolCallResponse) and populate msg.Content and msg.ToolCallID
 			if len(mc.Parts) != 1 {
 				return nil, fmt.Errorf("expected exactly one part for role %v, got %v", mc.Role, len(mc.Parts))
@@ -83,16 +83,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			default:
 				return nil, fmt.Errorf("expected part of type ToolCallResponse for role %v, got %T", mc.Role, mc.Parts[0])
 			}
-
+		
 		default:
 			return nil, fmt.Errorf("role %v not supported", mc.Role)
 		}
-
+		
 		// Here we extract tool calls from the message and populate the ToolCalls field.
 		newParts, toolCalls := ExtractToolParts(msg)
 		msg.MultiContent = newParts
 		msg.ToolCalls = toolCallsFromToolCalls(toolCalls)
-
+		
 		chatMsgs = append(chatMsgs, msg)
 	}
 	req := &openaiclient.ChatRequest{
@@ -105,9 +105,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		N:                      opts.N,
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
-
+		
 		MaxCompletionTokens: opts.MaxTokens,
-
+		
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
@@ -116,7 +116,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
 	}
-
+	
 	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
 		req.Tools = append(req.Tools, openaiclient.Tool{
@@ -137,12 +137,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		req.Tools = append(req.Tools, t)
 	}
-
+	
 	// if o.client.ResponseFormat is set, use it for the request
 	if o.client.ResponseFormat != nil {
 		req.ResponseFormat = o.client.ResponseFormat
 	}
-
+	
 	result, err := o.client.CreateChat(ctx, req)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if len(result.Choices) == 0 {
 		return nil, ErrEmptyResponse
 	}
-
+	
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
@@ -163,7 +163,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
 			},
 		}
-
+		
 		// Legacy function call handling
 		if c.FinishReason == "function_call" {
 			choices[i].FuncCall = &llms.FunctionCall{

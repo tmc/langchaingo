@@ -3,9 +3,9 @@ package embeddings_test
 import (
 	"context"
 	"log"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 )
 
 func Example() { //nolint:testableexamples
@@ -13,19 +13,19 @@ func Example() { //nolint:testableexamples
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Create a new Embedder from the given LLM.
 	embedder, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	docs := []string{"doc 1", "another doc"}
 	embs, err := embedder.EmbedDocuments(context.Background(), docs)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	// Consume embs
 	_ = embs
 }

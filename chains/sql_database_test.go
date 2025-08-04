@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools/sqldatabase"
-	"github.com/tmc/langchaingo/tools/sqldatabase/mysql"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase/mysql"
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
@@ -16,10 +16,10 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
-
+	
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
 	mysqlURI := os.Getenv("LANGCHAINGO_TEST_MYSQL")
 	if mysqlURI == "" {
@@ -27,10 +27,10 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	}
 	engine, err := mysql.NewMySQL(mysqlURI)
 	require.NoError(t, err)
-
+	
 	db, err := sqldatabase.NewSQLDatabase(engine, nil)
 	require.NoError(t, err)
-
+	
 	chain := NewSQLDatabaseChain(llm, 5, db)
 	input := map[string]interface{}{
 		"query":              "How many cards are there?",
@@ -38,17 +38,17 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 	}
 	result, err := chain.Call(context.Background(), input)
 	require.NoError(t, err)
-
+	
 	ret, ok := result["result"].(string)
 	require.True(t, ok)
 	require.NotEmpty(t, ret)
-
+	
 	t.Log(ret)
 }
 
 func TestExtractSQLQuery(t *testing.T) {
 	t.Parallel()
-
+	
 	cases := []struct {
 		inputStr string
 		expected string
@@ -130,7 +130,7 @@ ORDER BY
 orders.order_date;`,
 		},
 	}
-
+	
 	for _, tc := range cases {
 		filterQuerySyntax := extractSQLQuery(tc.inputStr)
 		require.Equal(t, tc.expected, filterQuerySyntax)

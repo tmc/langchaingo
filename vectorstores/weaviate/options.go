@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/auth"
 )
 
@@ -118,27 +118,27 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		nameSpaceKey: _defaultNameSpaceKey,
 		nameSpace:    _defaultNameSpace,
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.indexName == "" {
 		return Store{}, fmt.Errorf("%w: missing indexName", ErrInvalidOptions)
 	}
-
+	
 	if o.scheme == "" {
 		return Store{}, fmt.Errorf("%w: missing scheme", ErrInvalidOptions)
 	}
-
+	
 	if o.host == "" {
 		return Store{}, fmt.Errorf("%w: missing host", ErrInvalidOptions)
 	}
-
+	
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	// add default Attributes
 	if o.queryAttrs == nil {
 		o.queryAttrs = []string{o.textKey, o.nameSpaceKey}
@@ -149,32 +149,32 @@ func applyClientOptions(opts ...Option) (Store, error) {
 	if !slices.Contains(o.queryAttrs, o.nameSpaceKey) {
 		o.queryAttrs = append(o.queryAttrs, o.nameSpaceKey)
 	}
-
+	
 	// add additional fields
 	defaultAdditionalFields := []string{"certainty"}
-
+	
 	if o.additionalFields == nil {
 		o.additionalFields = defaultAdditionalFields
 	} else {
 		o.additionalFields = mergeValuesAsUnique(defaultAdditionalFields, o.additionalFields)
 	}
-
+	
 	return *o, nil
 }
 
 func mergeValuesAsUnique(collections ...[]string) []string {
 	valueMap := make(map[string]bool)
-
+	
 	for _, collection := range collections {
 		for _, value := range collection {
 			valueMap[value] = true
 		}
 	}
-
+	
 	uniqueValues := make([]string, 0, len(valueMap))
 	for k := range valueMap {
 		uniqueValues = append(uniqueValues, k)
 	}
-
+	
 	return uniqueValues
 }

@@ -2,9 +2,9 @@ package outputparser
 
 import (
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // CommaSeparatedList is an output parser used to parse the output of an LLM as a
@@ -30,7 +30,7 @@ func (p CommaSeparatedList) Parse(text string) ([]string, error) {
 	for i := 0; i < len(values); i++ {
 		values[i] = strings.TrimSpace(values[i])
 	}
-
+	
 	return values, nil
 }
 

@@ -4,11 +4,11 @@ package cloudsql_test
 import (
 	"context"
 	"fmt"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores/cloudsql"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/cloudsqlutil"
+	"github.com/yincongcyincong/langchaingo/vectorstores/cloudsql"
 	"os"
 	"testing"
 )
@@ -26,7 +26,7 @@ type EnvVariables struct {
 
 func getEnvVariables(t *testing.T) EnvVariables {
 	t.Helper()
-
+	
 	username := os.Getenv("CLOUDSQL_USERNAME")
 	if username == "" {
 		t.Skip("env variable CLOUDSQL_USERNAME is empty")
@@ -66,7 +66,7 @@ func getEnvVariables(t *testing.T) EnvVariables {
 	if table == "" {
 		t.Skip("env variable CLOUDSQL_TABLE is empty")
 	}
-
+	
 	envVariables := EnvVariables{
 		Username:  username,
 		Password:  password,
@@ -77,7 +77,7 @@ func getEnvVariables(t *testing.T) EnvVariables {
 		Cluster:   cluster,
 		Table:     table,
 	}
-
+	
 	return envVariables
 }
 
@@ -93,7 +93,7 @@ func setEngine(t *testing.T, envVariables EnvVariables) cloudsqlutil.PostgresEng
 	if err != nil {
 		t.Fatal("Could not set Engine: ", err)
 	}
-
+	
 	return pgEngine
 }
 
@@ -115,7 +115,7 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore,
 	llm, err := openai.New(
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
 	)
-
+	
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore,
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	cleanUpTableFn := func() error {
 		_, err := pgEngine.Pool.Exec(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", envVariables.Table))
 		return err
@@ -165,12 +165,12 @@ func TestIsValidIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	_, err = vs.IsValidIndex(ctx, "testindex")
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	err = vs.DropVectorIndex(ctx, "testindex")
 	if err != nil {
 		t.Fatal(err)
@@ -186,7 +186,7 @@ func TestAddDocuments(t *testing.T) {
 	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
-
+	
 	_, err := vs.AddDocuments(ctx, []schema.Document{
 		{
 			PageContent: "Tokyo",

@@ -3,15 +3,15 @@ package chains
 import (
 	"context"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 func TestMapReduceInputVariables(t *testing.T) {
 	t.Parallel()
-
+	
 	c := MapReduceDocuments{
 		LLMChain: NewLLMChain(
 			&testLanguageModel{},
@@ -25,7 +25,7 @@ func TestMapReduceInputVariables(t *testing.T) {
 		LLMChainInputVariableName:  "text",
 		InputKey:                   "input",
 	}
-
+	
 	inputKeys := c.GetInputKeys()
 	expectedLength := 3
 	require.Len(t, inputKeys, expectedLength)
@@ -33,7 +33,7 @@ func TestMapReduceInputVariables(t *testing.T) {
 
 func TestMapReduce(t *testing.T) {
 	t.Parallel()
-
+	
 	c := NewMapReduceDocuments(
 		NewLLMChain(
 			&testLanguageModel{},
@@ -46,7 +46,7 @@ func TestMapReduce(t *testing.T) {
 			),
 		),
 	)
-
+	
 	result, err := Run(context.Background(), c, []schema.Document{
 		{PageContent: "foo"},
 		{PageContent: "boo"},

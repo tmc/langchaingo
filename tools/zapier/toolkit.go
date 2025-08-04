@@ -2,9 +2,9 @@ package zapier
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/tools"
-	"github.com/tmc/langchaingo/tools/zapier/internal"
+	
+	"github.com/yincongcyincong/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/tools/zapier/internal"
 )
 
 type ToolkitOpts struct {
@@ -42,14 +42,14 @@ func Toolkit(ctx context.Context, opts ToolkitOpts) ([]tools.Tool, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	listResponse, err := c.List(ctx)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	tools := make([]tools.Tool, len(listResponse))
-
+	
 	for i, result := range listResponse {
 		tool, err := New(ToolOptions{
 			Name:        result.Description,
@@ -63,9 +63,9 @@ func Toolkit(ctx context.Context, opts ToolkitOpts) ([]tools.Tool, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		
 		tools[i] = tool
 	}
-
+	
 	return tools, nil
 }

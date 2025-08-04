@@ -2,8 +2,8 @@ package mongovector
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 // mockLLM will create consistent text embeddings mocking the OpenAI
@@ -21,18 +21,18 @@ func (emb *mockLLM) CreateEmbedding(_ context.Context, texts []string) ([][]floa
 	if emb.seen == nil {
 		emb.seen = map[string][]float32{}
 	}
-
+	
 	vectors := make([][]float32, len(texts))
 	for i, text := range texts {
 		if f32s := emb.seen[text]; len(f32s) > 0 {
 			vectors[i] = f32s
-
+			
 			continue
 		}
-
+		
 		vectors[i] = newNormalizedVector(emb.dim)
 		emb.seen[text] = vectors[i] // ensure consistency
 	}
-
+	
 	return vectors, nil
 }

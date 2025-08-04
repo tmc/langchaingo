@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"strings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
 )
 
 //nolint:lll
@@ -79,7 +79,7 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
+	
 	var tables []string
 	if ts, ok := inputs[_sqlChainDefaultInputKeyTableNames]; ok {
 		if tables, ok = ts.([]string); !ok {
@@ -88,13 +88,13 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 	} else {
 		tables = nil
 	}
-
+	
 	// Get tables infos
 	tableInfos, err := s.Database.TableInfo(ctx, tables)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	const (
 		queryPrefixWith = "\nSQLQuery:"  //nolint:gosec
 		stopWord        = "\nSQLResult:" //nolint:gosec
@@ -105,40 +105,40 @@ func (s SQLDatabaseChain) Call(ctx context.Context, inputs map[string]any, optio
 		"dialect":    s.Database.Dialect(),
 		"table_info": tableInfos,
 	}
-
+	
 	// Predict sql query
 	opt := append(options, WithStopWords([]string{stopWord})) //nolint:cyclop
 	out, err := Predict(ctx, s.LLMChain, llmInputs, opt...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	sqlQuery := extractSQLQuery(out)
-
+	
 	if sqlQuery == "" {
 		return nil, fmt.Errorf("no sql query generated")
 	}
-
+	
 	// Execute sql query
 	queryResult, err := s.Database.Query(ctx, sqlQuery)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Generate answer
 	llmInputs["input"] = query + queryPrefixWith + sqlQuery + stopWord + queryResult
 	out, err = Predict(ctx, s.LLMChain, llmInputs, options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Hack answer string
 	strs := strings.Split(strings.Split(out, "\n\n")[0], "Answer:")
 	out = strs[0]
 	if len(strs) > 1 {
 		out = strings.TrimSpace(strs[1])
 	}
-
+	
 	return map[string]any{s.OutputKey: out}, nil
 }
 
@@ -161,24 +161,24 @@ func (s SQLDatabaseChain) GetOutputKeys() []string {
 // nolint:cyclop
 func extractSQLQuery(rawOut string) string {
 	outStrings := strings.Split(rawOut, "\n")
-
+	
 	var sqlQuery string
 	containSQLQuery := strings.Contains(rawOut, "SQLQuery:")
 	findSQLQuery := false
-
+	
 	for _, v := range outStrings {
 		line := strings.TrimSpace(v)
-
+		
 		// filter empty line and markdown symbols
 		if line == "" || strings.HasPrefix(line, "```") {
 			continue
 		}
-
+		
 		// stop when we find SQLResult: or Answer:
 		if strings.HasPrefix(line, "SQLResult:") || strings.HasPrefix(line, "Answer:") {
 			break
 		}
-
+		
 		var currentLine string
 		switch {
 		case containSQLQuery && strings.HasPrefix(line, "SQLQuery:"):
@@ -193,9 +193,9 @@ func extractSQLQuery(rawOut string) string {
 		default:
 			currentLine = line
 		}
-
+		
 		sqlQuery += currentLine + "\n"
 	}
-
+	
 	return strings.TrimSpace(sqlQuery)
 }

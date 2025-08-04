@@ -4,10 +4,10 @@ package googleai
 
 import (
 	"context"
-
+	
 	"github.com/google/generative-ai-go/genai"
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // GoogleAI is a type that represents a Google AI API client.
@@ -26,16 +26,16 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		opt(&clientOptions)
 	}
 	clientOptions.EnsureAuthPresent()
-
+	
 	gi := &GoogleAI{
 		opts: clientOptions,
 	}
-
+	
 	client, err := genai.NewClient(ctx, clientOptions.ClientOptions...)
 	if err != nil {
 		return gi, err
 	}
-
+	
 	gi.client = client
 	return gi, nil
 }

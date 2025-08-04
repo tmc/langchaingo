@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
-
+	
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent/types"
@@ -13,10 +13,10 @@ import (
 	runtimetypes "github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 type testModel struct{}
@@ -191,12 +191,12 @@ func (t *testS3Client) DeleteObject(ctx context.Context, params *s3.DeleteObject
 
 func TestKnowledgeBaseAddDocuments(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.NoError(t, err)
 	require.Equal(t, 6, testBedrockAgent.calls, "expected 6 calls to testBedrockAgent")
@@ -206,36 +206,36 @@ func TestKnowledgeBaseAddDocuments(t *testing.T) {
 
 func TestKnowledgeBaseAddDocumentsWithoutDs(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithoutDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.Error(t, err, "expected error because knowledge base has no datasources")
 }
 
 func TestKnowledgeBaseAddDocumentsWithWrongDsId(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("wrongDatasourceID"))
 	require.Error(t, err, "expected error because wrongDatasourceID is not valid")
 }
 
 func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithTwoS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("testS3DatasourceID"))
 	require.NoError(t, err)
 	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
@@ -245,12 +245,12 @@ func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
 
 func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithTwoMixedDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.NoError(t, err)
 	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
@@ -260,22 +260,22 @@ func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
 
 func TestKnowledgeBaseAddDocumentsWithMultipleS3DsAndWithoutDsID(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithTwoS3Datasource", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
-
+	
 	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.Error(t, err, "expected error because vectorstores.WithNameSpace is required")
 }
 
 func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
 	t.Parallel()
-
+	
 	testBedrockAgent := &testBedrockAgent{}
 	s3Client := &testS3Client{}
 	ctx := context.TODO()
 	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
-
+	
 	ids, err := kb.AddNamedDocuments(
 		ctx,
 		[]NamedDocument{
@@ -294,10 +294,10 @@ func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
 
 func TestKnowledgeBaseSimilaritySearch(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
-
+	
 	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5)
 	require.NoError(t, err)
 	require.Len(t, docs, 3, "expected 3 documents")
@@ -308,10 +308,10 @@ func TestKnowledgeBaseSimilaritySearch(t *testing.T) {
 
 func TestKnowledgeBaseSimilaritySearchWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
-
+	
 	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithScoreThreshold(0.8))
 	require.NoError(t, err)
 	require.Len(t, docs, 2, "expected 2 documents")
@@ -321,20 +321,20 @@ func TestKnowledgeBaseSimilaritySearchWithScoreThreshold(t *testing.T) {
 
 func TestKnowledgeBaseSimilaritySearchWithFilter(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
-
+	
 	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters(EqualsFilter{Key: "color", Value: "orange"}))
 	require.NoError(t, err)
 }
 
 func TestKnowledgeBaseSimilaritySearchWrongWithFilter(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
-
+	
 	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters("wrongFilter"))
 	require.Error(t, err, "expected error because of wrong filter format")
 }
@@ -361,11 +361,11 @@ func (t *trackSearchResults) SimilaritySearch(ctx context.Context, query string,
 
 func TestKnowledgeBaseAsRetriever(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
 	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -385,11 +385,11 @@ func TestKnowledgeBaseAsRetriever(t *testing.T) {
 
 func TestKnowledgeBaseAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
-
+	
 	ctx := context.TODO()
 	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
 	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(

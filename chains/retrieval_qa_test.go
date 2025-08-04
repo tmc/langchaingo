@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 type testRetriever struct{}
@@ -28,21 +28,21 @@ func TestRetrievalQA(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	llm, err := openai.New()
 	require.NoError(t, err)
-
+	
 	prompt := prompts.NewPromptTemplate(
 		"answer this question {{.question}} with this context {{.context}}",
 		[]string{"question", "context"},
 	)
 	require.NoError(t, err)
-
+	
 	combineChain := NewStuffDocuments(NewLLMChain(llm, prompt))
 	r := testRetriever{}
-
+	
 	chain := NewRetrievalQA(combineChain, r)
-
+	
 	result, err := Run(context.Background(), chain, "what is foo? ")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "34"), "expected 34 in result")
@@ -53,11 +53,11 @@ func TestRetrievalQAFromLLM(t *testing.T) {
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-
+	
 	r := testRetriever{}
 	llm, err := openai.New()
 	require.NoError(t, err)
-
+	
 	chain := NewRetrievalQAFromLLM(llm, r)
 	result, err := Run(context.Background(), chain, "what is foo? ")
 	require.NoError(t, err)

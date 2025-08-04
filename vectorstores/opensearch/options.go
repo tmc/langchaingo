@@ -2,9 +2,9 @@ package opensearch
 
 import (
 	"errors"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/vectorstores"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 var (
@@ -42,14 +42,14 @@ func applyClientOptions(s *Store, opts ...Option) error {
 	for _, opt := range opts {
 		opt(s)
 	}
-
+	
 	if s.embedder == nil {
 		return ErrMissingEmbedded
 	}
-
+	
 	if s.client == nil {
 		return ErrMissingOpensearchClient
 	}
-
+	
 	return nil
 }

@@ -3,9 +3,9 @@ package milvus
 import (
 	"errors"
 	"fmt"
-
+	
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 const (
@@ -151,15 +151,15 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		ef:               _defaultEF,
 		shardNum:         entity.DefaultShardNumber,
 	}
-
+	
 	for _, opt := range opts {
 		opt(&s)
 	}
-
+	
 	if s.embedder == nil {
 		return s, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	if s.index == nil {
 		return s, fmt.Errorf("%w: missing index function", ErrInvalidOptions)
 	}

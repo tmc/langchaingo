@@ -3,13 +3,13 @@ package outputparser_test
 import (
 	"reflect"
 	"testing"
-
-	"github.com/tmc/langchaingo/outputparser"
+	
+	"github.com/yincongcyincong/langchaingo/outputparser"
 )
 
 func TestRegexDict(t *testing.T) {
 	t.Parallel()
-
+	
 	testText := `We have just received a new result from the LLM, and our next step is
 to filter and read its format using regular expressions to identify specific fields,
 such as:
@@ -30,7 +30,7 @@ we expect the result to only contain the following fields:
  {key = action, value = search}
  {key = action_input, value = "How to use this class?"}.
 }`
-
+	
 	testCases := []struct {
 		noUpdateValue string
 		outputKeys    map[string]string
@@ -58,15 +58,15 @@ we expect the result to only contain the following fields:
 			},
 		},
 	}
-
+	
 	for _, tc := range testCases {
 		parser := outputparser.NewRegexDict(tc.outputKeys, tc.noUpdateValue)
-
+		
 		actual, err := parser.Parse(testText)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
-
+		
 		if !reflect.DeepEqual(actual, tc.expected) {
 			t.Errorf("Expected %v, got %v", tc.expected, actual)
 		}

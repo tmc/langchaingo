@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 const (
@@ -45,7 +45,7 @@ func NewConversationalAgent(llm llms.Model, tools []tools.Tool, opts ...Option) 
 	for _, opt := range opts {
 		opt(&options)
 	}
-
+	
 	return &ConversationalAgent{
 		Chain: chains.NewLLMChain(
 			llm,
@@ -68,18 +68,18 @@ func (a *ConversationalAgent) Plan(
 	for key, value := range inputs {
 		fullInputs[key] = value
 	}
-
+	
 	fullInputs["agent_scratchpad"] = constructScratchPad(intermediateSteps)
-
+	
 	var stream func(ctx context.Context, chunk []byte) error
-
+	
 	if a.CallbacksHandler != nil {
 		stream = func(ctx context.Context, chunk []byte) error {
 			a.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
 			return nil
 		}
 	}
-
+	
 	output, err := chains.Predict(
 		ctx,
 		a.Chain,
@@ -90,13 +90,13 @@ func (a *ConversationalAgent) Plan(
 	if err != nil {
 		return nil, nil, err
 	}
-
+	
 	return a.parseOutput(output)
 }
 
 func (a *ConversationalAgent) GetInputKeys() []string {
 	chainInputs := a.Chain.GetInputKeys()
-
+	
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
@@ -105,7 +105,7 @@ func (a *ConversationalAgent) GetInputKeys() []string {
 		}
 		agentInput = append(agentInput, v)
 	}
-
+	
 	return agentInput
 }
 
@@ -126,30 +126,30 @@ func constructScratchPad(steps []schema.AgentStep) string {
 		}
 		scratchPad += "\n" + "Thought:"
 	}
-
+	
 	return scratchPad
 }
 
 func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	if strings.Contains(output, _conversationalFinalAnswerAction) {
 		splits := strings.Split(output, _conversationalFinalAnswerAction)
-
+		
 		finishAction := &schema.AgentFinish{
 			ReturnValues: map[string]any{
 				a.OutputKey: splits[len(splits)-1],
 			},
 			Log: output,
 		}
-
+		
 		return nil, finishAction, nil
 	}
-
+	
 	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
 	}
-
+	
 	return []schema.AgentAction{
 		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
 	}, nil, nil
@@ -166,7 +166,7 @@ var _defaultConversationalSuffix string //nolint:gochecknoglobals
 
 func createConversationalPrompt(tools []tools.Tool, prefix, instructions, suffix string) prompts.PromptTemplate {
 	template := strings.Join([]string{prefix, instructions, suffix}, "\n\n")
-
+	
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,

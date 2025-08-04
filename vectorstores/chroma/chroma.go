@@ -5,16 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-
+	
 	chromago "github.com/amikos-tech/chroma-go"
 	chromagov2 "github.com/amikos-tech/chroma-go/pkg/api/v2"
 	chromaembedding "github.com/amikos-tech/chroma-go/pkg/embeddings"
 	"github.com/amikos-tech/chroma-go/pkg/embeddings/openai"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 )
 
 var (
@@ -35,12 +35,12 @@ type Store struct {
 	chromaURL          string
 	openaiAPIKey       string
 	openaiOrganization string
-
+	
 	nameSpace    string
 	nameSpaceKey string
 	embedder     embeddings.Embedder
 	includes     []chromatypes.QueryEnum
-
+	
 	clientV2     chromagov2.Client
 	collectionV2 chromagov2.Collection
 	includesV2   []chromagov2.Include
@@ -55,11 +55,11 @@ func New(opts ...Option) (Store, error) {
 	if coErr != nil {
 		return s, coErr
 	}
-
+	
 	if s.version == ChromaV1 {
 		return NewV1(s)
 	}
-
+	
 	return NewV2(s)
 }
 
@@ -68,12 +68,12 @@ func NewV2(s Store) (Store, error) {
 	if err != nil {
 		return s, err
 	}
-
+	
 	if errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
 		return s, errHb
 	}
 	s.clientV2 = chromaClient
-
+	
 	// inject user's embedding function, if provided
 	var embeddingFunction chromaembedding.EmbeddingFunction
 	if s.embedder != nil {
@@ -90,13 +90,13 @@ func NewV2(s Store) (Store, error) {
 			return s, err
 		}
 	}
-
+	
 	col, errCc := s.clientV2.GetOrCreateCollection(context.Background(), s.nameSpace,
 		chromagov2.WithEmbeddingFunctionCreate(embeddingFunction))
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
 	}
-
+	
 	s.collectionV2 = col
 	return s, nil
 }
@@ -107,12 +107,12 @@ func NewV1(s Store) (Store, error) {
 	if err != nil {
 		return s, err
 	}
-
+	
 	if _, errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
 		return s, errHb
 	}
 	s.client = chromaClient
-
+	
 	var embeddingFunction chromatypes.EmbeddingFunction
 	if s.embedder != nil {
 		// inject user's embedding function, if provided
@@ -120,7 +120,7 @@ func NewV1(s Store) (Store, error) {
 	} else {
 		// otherwise use standard langchaingo OpenAI embedding function
 		var options []openai.Option
-
+		
 		if s.openaiOrganization != "" {
 			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
 		}
@@ -128,18 +128,18 @@ func NewV1(s Store) (Store, error) {
 		if err != nil {
 			return s, err
 		}
-
+		
 		embeddingFunction = chromatypes.NewV2EmbeddingFunctionAdapter(openAiEmbeddingFunc)
 	}
-
+	
 	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
 		embeddingFunction, s.distanceFunction)
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
 	}
-
+	
 	s.collection = col
-
+	
 	return s, nil
 }
 
@@ -150,7 +150,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	if s.version == ChromaV1 {
 		return s.AddDocumentsV1(ctx, docs, options...)
 	}
-
+	
 	return s.AddDocumentsV2(ctx, docs, options...)
 }
 
@@ -160,7 +160,7 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	if s.version == ChromaV1 {
 		return s.SimilaritySearchV1(ctx, query, numDocuments, options...)
 	}
-
+	
 	return s.SimilaritySearchV2(ctx, query, numDocuments, options...)
 }
 
@@ -168,7 +168,7 @@ func (s Store) RemoveCollection() error {
 	if s.version == ChromaV1 {
 		return s.RemoveCollectionV1()
 	}
-
+	
 	return s.RemoveCollectionV2()
 }
 
@@ -182,12 +182,12 @@ func (s Store) AddDocumentsV1(ctx context.Context,
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
 		return nil, ErrUnsupportedOptions
 	}
-
+	
 	nameSpace := s.getNameSpace(opts)
 	if nameSpace != "" && s.nameSpaceKey == "" {
 		return nil, fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
 	}
-
+	
 	ids := make([]string, len(docs))
 	texts := make([]string, len(docs))
 	metadatas := make([]map[string]any, len(docs))
@@ -201,7 +201,7 @@ func (s Store) AddDocumentsV1(ctx context.Context,
 			metadatas[docIdx][s.nameSpaceKey] = nameSpace
 		}
 	}
-
+	
 	col := s.collection
 	if _, addErr := col.Add(ctx, nil, metadatas, texts, ids); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
@@ -215,23 +215,23 @@ func (s Store) SimilaritySearchV1(ctx context.Context, query string, numDocument
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
-
+	
 	if opts.Embedder != nil {
 		// embedder is not used by this method, so shouldn't ever be specified
 		return nil, fmt.Errorf("%w: Embedder", ErrUnsupportedOptions)
 	}
-
+	
 	scoreThreshold, stErr := s.getScoreThreshold(opts)
 	if stErr != nil {
 		return nil, stErr
 	}
-
+	
 	filter := s.getNamespacedFilter(opts)
 	qr, queryErr := s.collection.Query(ctx, []string{query}, safeIntToInt32(numDocuments), filter, nil, s.includes)
 	if queryErr != nil {
 		return nil, queryErr
 	}
-
+	
 	if len(qr.Documents) != len(qr.Metadatas) || len(qr.Metadatas) != len(qr.Distances) {
 		return nil, fmt.Errorf("%w: qr.Documents[%d], qr.Metadatas[%d], qr.Distances[%d]",
 			ErrUnexpectedResponseLength, len(qr.Documents), len(qr.Metadatas), len(qr.Distances))
@@ -248,7 +248,7 @@ func (s Store) SimilaritySearchV1(ctx context.Context, query string, numDocument
 			}
 		}
 	}
-
+	
 	return sDocs, nil
 }
 
@@ -288,17 +288,17 @@ func (s Store) getNameSpace(opts vectorstores.Options) string {
 
 func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 	filter, _ := opts.Filters.(map[string]any)
-
+	
 	nameSpace := s.getNameSpace(opts)
 	if nameSpace == "" || s.nameSpaceKey == "" {
 		return filter
 	}
-
+	
 	nameSpaceFilter := map[string]any{s.nameSpaceKey: nameSpace}
 	if filter == nil {
 		return nameSpaceFilter
 	}
-
+	
 	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
 }
 
@@ -316,12 +316,12 @@ func (s Store) AddDocumentsV2(ctx context.Context,
 	if opts.Embedder != nil || opts.ScoreThreshold != 0 || opts.Filters != nil {
 		return nil, ErrUnsupportedOptions
 	}
-
+	
 	nameSpace := s.getNameSpace(opts)
 	if nameSpace != "" && s.nameSpaceKey == "" {
 		return nil, fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
 	}
-
+	
 	ids := make([]chromagov2.DocumentID, len(docs))
 	texts := make([]string, len(docs))
 	metadatas := make([]chromagov2.DocumentMetadata, len(docs))
@@ -337,17 +337,17 @@ func (s Store) AddDocumentsV2(ctx context.Context,
 			metadatas[docIdx].SetString(s.nameSpaceKey, nameSpace)
 		}
 	}
-
+	
 	col := s.collectionV2
 	if addErr := col.Add(ctx, chromagov2.WithMetadatas(metadatas...), chromagov2.WithTexts(texts...), chromagov2.WithIDs(ids...)); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
-
+	
 	idsStr := make([]string, len(ids))
 	for i, id := range ids {
 		idsStr[i] = string(id)
 	}
-
+	
 	return idsStr, nil
 }
 
@@ -357,24 +357,24 @@ func (s Store) SimilaritySearchV2(ctx context.Context, query string, numDocument
 	options ...vectorstores.Option,
 ) ([]schema.Document, error) {
 	opts := s.getOptions(options...)
-
+	
 	if opts.Embedder != nil {
 		// embedder is not used by this method, so shouldn't ever be specified
 		return nil, fmt.Errorf("%w: Embedder", ErrUnsupportedOptions)
 	}
-
+	
 	scoreThreshold, stErr := s.getScoreThreshold(opts)
 	if stErr != nil {
 		return nil, stErr
 	}
-
+	
 	filter := s.getNamespacedFilterV2(opts)
 	qr, queryErr := s.collectionV2.Query(ctx, chromagov2.WithQueryTexts(query), chromagov2.WithNResults(numDocuments),
 		chromagov2.WithWhereQuery(filter), chromagov2.WithIncludeQuery(s.includesV2...))
 	if queryErr != nil {
 		return nil, queryErr
 	}
-
+	
 	if len(qr.GetDocumentsGroups()) != len(qr.GetMetadatasGroups()) || len(qr.GetMetadatasGroups()) != len(qr.GetDistancesGroups()) {
 		return nil, fmt.Errorf("%w: qr.Documents[%d], qr.Metadatas[%d], qr.Distances[%d]",
 			ErrUnexpectedResponseLength, len(qr.GetDocumentsGroups()), len(qr.GetMetadatasGroups()), len(qr.GetDistancesGroups()))
@@ -398,7 +398,7 @@ func (s Store) SimilaritySearchV2(ctx context.Context, query string, numDocument
 			}
 		}
 	}
-
+	
 	return sDocs, nil
 }
 
@@ -416,16 +416,16 @@ func (s Store) RemoveCollectionV2() error {
 
 func (s Store) getNamespacedFilterV2(opts vectorstores.Options) chromagov2.WhereFilter {
 	filter, _ := opts.Filters.(chromagov2.WhereClause)
-
+	
 	nameSpace := s.getNameSpace(opts)
 	if nameSpace == "" || s.nameSpaceKey == "" {
 		return filter
 	}
-
+	
 	nameSpaceFilter := chromagov2.EqString(s.nameSpaceKey, nameSpace)
 	if filter == nil {
 		return nameSpaceFilter
 	}
-
+	
 	return chromagov2.And([]chromagov2.WhereClause{nameSpaceFilter, filter}...)
 }

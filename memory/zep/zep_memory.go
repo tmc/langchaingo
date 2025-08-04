@@ -2,12 +2,12 @@ package zep
 
 import (
 	"context"
-
+	
 	"github.com/getzep/zep-go"
 	zepClient "github.com/getzep/zep-go/client"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // Memory is a simple form of memory that remembers previous conversational back and forth directly.
@@ -59,18 +59,18 @@ func (m *Memory) LoadMemoryVariables(
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if m.ReturnMessages {
 		return map[string]any{
 			m.MemoryKey: messages,
 		}, nil
 	}
-
+	
 	bufferString, err := llms.GetBufferString(messages, m.HumanPrefix, m.AIPrefix)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return map[string]any{
 		m.MemoryKey: bufferString,
 	}, nil
@@ -96,7 +96,7 @@ func (m *Memory) SaveContext(
 	if err != nil {
 		return err
 	}
-
+	
 	aiOutputValue, err := memory.GetInputValue(outputValues, m.OutputKey)
 	if err != nil {
 		return err
@@ -105,7 +105,7 @@ func (m *Memory) SaveContext(
 	if err != nil {
 		return err
 	}
-
+	
 	return nil
 }
 

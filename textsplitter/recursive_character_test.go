@@ -3,17 +3,17 @@ package textsplitter
 import (
 	"strings"
 	"testing"
-
+	
 	"github.com/pkoukk/tiktoken-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 //nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
 	tokenEncoder, _ := tiktoken.GetEncoding("cl100k_base")
-
+	
 	t.Parallel()
 	type testCase struct {
 		text          string
@@ -145,7 +145,7 @@ Bye!
 		if tc.LenFunc != nil {
 			splitter.LenFunc = tc.LenFunc
 		}
-
+		
 		docs, err := CreateDocuments(splitter, []string{tc.text}, nil)
 		require.NoError(t, err)
 		assert.Equal(t, tc.expectedDocs, docs)

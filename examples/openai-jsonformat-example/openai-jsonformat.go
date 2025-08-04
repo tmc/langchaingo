@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
 	"log"
 )
 
@@ -44,12 +44,12 @@ func main() {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
-
+	
 	content := []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeSystem, "You are an expert at structured data extraction. You will be given unstructured text from a research paper and should convert it into the given structure."),
 		llms.TextParts(llms.ChatMessageTypeHuman, "please tell me the most famous people in history"),
 	}
-
+	
 	completion, err := llm.GenerateContent(ctx, content, llms.WithJSONMode())
 	if err != nil {
 		log.Fatal(err)

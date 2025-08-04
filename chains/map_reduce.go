@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"maps"
-
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // MapReduceDocuments is a chain that combines documents by mapping a chain over them, then
@@ -14,28 +14,28 @@ import (
 type MapReduceDocuments struct {
 	// The chain to apply to each documents individually.
 	LLMChain *LLMChain
-
+	
 	// The chain to combine the mapped results of the LLMChain.
 	ReduceChain Chain
-
+	
 	// The memory of the chain.
 	Memory schema.Memory
-
+	
 	// The variable name of where to put the results from the LLMChain into the collapse chain.
 	// Only needed if the reduce chain has more then one expected input.
 	ReduceDocumentVariableName string
-
+	
 	// The input variable where the documents should be placed int the LLMChain. Only needed if
 	// the reduce chain has more then one expected input.
 	LLMChainInputVariableName string
-
+	
 	// MaxNumberOfConcurrent represents the max number of concurrent calls done simultaneously to
 	// the llm chain.
 	MaxNumberOfConcurrent int
-
+	
 	// The input key where the documents to be combined should be.
 	InputKey string
-
+	
 	// Whether to add the intermediate steps to the output.
 	ReturnIntermediateSteps bool
 }
@@ -62,19 +62,19 @@ func (c MapReduceDocuments) Call(ctx context.Context, values map[string]any, opt
 	if !ok {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidInputValues, ErrInputValuesWrongType)
 	}
-
+	
 	// Execute the chain with each of the documents asynchronously.
 	mapResults, err := Apply(ctx, c.LLMChain, c.getApplyInputs(values, docs), c.MaxNumberOfConcurrent, options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Create a document for each of map results and create input values for each of the document.
 	reduceInputs, err := c.mapResultsToReduceInputs(docs, mapResults, values)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	result, err := Call(ctx, c.ReduceChain, reduceInputs, options...)
 	return c.maybeAddIntermediateSteps(result, mapResults), err
 }
@@ -85,7 +85,7 @@ func (c MapReduceDocuments) getInputVariable(givenInputName string, chainInputVa
 	if len(chainInputVariables) == 1 {
 		return chainInputVariables[0]
 	}
-
+	
 	return givenInputName
 }
 
@@ -93,7 +93,7 @@ func (c MapReduceDocuments) maybeAddIntermediateSteps(result map[string]any, int
 	if !c.ReturnIntermediateSteps {
 		return result
 	}
-
+	
 	result[_intermediateStepsOutputKey] = intermediateSteps
 	return result
 }
@@ -106,7 +106,7 @@ func (c MapReduceDocuments) getApplyInputs(values map[string]any, docs []schema.
 		curInput[llmChainInputVariable] = d.PageContent
 		inputs = append(inputs, curInput)
 	}
-
+	
 	return inputs
 }
 
@@ -121,17 +121,17 @@ func (c MapReduceDocuments) mapResultsToReduceInputs(
 		if !ok {
 			return nil, ErrInvalidOutputValues
 		}
-
+		
 		resultDocs = append(resultDocs, schema.Document{
 			PageContent: curResult,
 			Metadata:    docs[i].Metadata,
 		})
 	}
-
+	
 	documentInputVariable := c.getInputVariable(c.ReduceDocumentVariableName, c.ReduceChain.GetInputKeys())
 	reduceInputs := c.copyInputValuesWithoutInputKey(inputValues)
 	reduceInputs[documentInputVariable] = resultDocs
-
+	
 	return reduceInputs, nil
 }
 
@@ -150,14 +150,14 @@ func (c MapReduceDocuments) GetInputKeys() []string {
 		}
 		inputKeys[key] = true
 	}
-
+	
 	for _, key := range c.ReduceChain.GetInputKeys() {
 		if key == c.ReduceDocumentVariableName {
 			continue
 		}
 		inputKeys[key] = true
 	}
-
+	
 	result := make([]string, 0, len(inputKeys))
 	for k := range inputKeys {
 		result = append(result, k)
@@ -170,7 +170,7 @@ func (c MapReduceDocuments) GetOutputKeys() []string {
 	if c.ReturnIntermediateSteps {
 		outputKeys = append(outputKeys, _intermediateStepsOutputKey)
 	}
-
+	
 	return outputKeys
 }
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/cohere"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/cohere"
 )
 
 func main() {
@@ -20,11 +20,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println(completion)
-
+	
 	inputToken := llms.CountTokens("", input)
 	outputToken := llms.CountTokens("", completion)
-
+	
 	fmt.Printf("%v/%v\n", inputToken, outputToken)
 }

@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 // agentScratchpad "agent_scratchpad" for the agent to put its thoughts in.
@@ -38,7 +38,7 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 	for _, opt := range opts {
 		opt(&options)
 	}
-
+	
 	return &OpenAIFunctionsAgent{
 		LLM:              llm,
 		Prompt:           createOpenAIFunctionPrompt(options),
@@ -77,28 +77,28 @@ func (o *OpenAIFunctionsAgent) Plan(
 		fullInputs[key] = value
 	}
 	fullInputs[agentScratchpad] = o.constructScratchPad(intermediateSteps)
-
+	
 	var stream func(ctx context.Context, chunk []byte) error
-
+	
 	if o.CallbacksHandler != nil {
 		stream = func(ctx context.Context, chunk []byte) error {
 			o.CallbacksHandler.HandleStreamingFunc(ctx, chunk)
 			return nil
 		}
 	}
-
+	
 	prompt, err := o.Prompt.FormatPrompt(fullInputs)
 	if err != nil {
 		return nil, nil, err
 	}
-
+	
 	mcList := make([]llms.MessageContent, len(prompt.Messages()))
 	for i, msg := range prompt.Messages() {
 		role := msg.GetType()
 		text := msg.GetContent()
-
+		
 		var mc llms.MessageContent
-
+		
 		switch p := msg.(type) {
 		case llms.ToolChatMessage:
 			mc = llms.MessageContent{
@@ -108,7 +108,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 					Content:    p.Content,
 				}},
 			}
-
+		
 		case llms.AIChatMessage:
 			mc = llms.MessageContent{
 				Role: role,
@@ -128,19 +128,19 @@ func (o *OpenAIFunctionsAgent) Plan(
 		}
 		mcList[i] = mc
 	}
-
+	
 	result, err := o.LLM.GenerateContent(ctx, mcList,
 		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
 	if err != nil {
 		return nil, nil, err
 	}
-
+	
 	return o.ParseOutput(result)
 }
 
 func (o *OpenAIFunctionsAgent) GetInputKeys() []string {
 	chainInputs := o.Prompt.GetInputVariables()
-
+	
 	// Remove inputs given in plan.
 	agentInput := make([]string, 0, len(chainInputs))
 	for _, v := range chainInputs {
@@ -149,7 +149,7 @@ func (o *OpenAIFunctionsAgent) GetInputKeys() []string {
 		}
 		agentInput = append(agentInput, v)
 	}
-
+	
 	return agentInput
 }
 
@@ -168,7 +168,7 @@ func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
 	messageFormatters = append(messageFormatters, prompts.MessagesPlaceholder{
 		VariableName: agentScratchpad,
 	})
-
+	
 	tmpl := prompts.NewChatPromptTemplate(messageFormatters)
 	return tmpl
 }
@@ -177,7 +177,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 	if len(steps) == 0 {
 		return nil
 	}
-
+	
 	messages := make([]llms.ChatMessage, 0)
 	for _, step := range steps {
 		messages = append(messages, llms.FunctionChatMessage{
@@ -185,7 +185,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 			Content: step.Observation,
 		})
 	}
-
+	
 	return messages
 }
 
@@ -193,7 +193,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
 	choice := contentResp.Choices[0]
-
+	
 	// finish
 	if choice.FuncCall == nil {
 		return nil, &schema.AgentFinish{
@@ -203,7 +203,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			Log: choice.Content,
 		}, nil
 	}
-
+	
 	// action
 	functionCall := choice.FuncCall
 	functionName := functionCall.Name
@@ -213,7 +213,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	if err != nil {
 		return nil, nil, err
 	}
-
+	
 	toolInput := toolInputStr
 	if arg1, ok := toolInputMap["__arg1"]; ok {
 		toolInputCheck, ok := arg1.(string)
@@ -221,12 +221,12 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			toolInput = toolInputCheck
 		}
 	}
-
+	
 	contentMsg := "\n"
 	if choice.Content != "" {
 		contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
 	}
-
+	
 	return []schema.AgentAction{
 		{
 			Tool:      functionName,

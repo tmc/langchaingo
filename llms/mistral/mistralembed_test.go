@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 	"testing"
-
+	
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.
@@ -38,12 +38,12 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 			expected: []float32{0.0, 0.0, 0.0},
 		},
 	}
-
+	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			output := convertFloat64ToFloat32(tt.input)
-
+			
 			require.Equal(t, len(tt.expected), len(output), "length mismatch")
 			for i := range output {
 				require.Equal(t, tt.expected[i], output[i], "at index %d", i)
@@ -55,25 +55,25 @@ func TestConvertFloat64ToFloat32(t *testing.T) {
 func TestMistralEmbed(t *testing.T) {
 	t.Parallel()
 	envVar := "MISTRAL_API_KEY"
-
+	
 	// Get the value of the environment variable
 	value := os.Getenv(envVar)
-
+	
 	// Check if it is set (non-empty)
 	if value == "" {
 		t.Skipf("Environment variable %s is not set, so skipping the test", envVar)
 		return
 	}
-
+	
 	model, err := New()
 	require.NoError(t, err)
-
+	
 	e, err := embeddings.NewEmbedder(model)
 	require.NoError(t, err)
-
+	
 	_, err = e.EmbedDocuments(context.Background(), []string{"Hello world"})
 	require.NoError(t, err)
-
+	
 	_, err = e.EmbedQuery(context.Background(), "Hello world")
 	require.NoError(t, err)
 }

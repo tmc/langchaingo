@@ -3,10 +3,10 @@ package redisvector
 import (
 	"context"
 	"errors"
-
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
 	"golang.org/x/exp/maps"
 )
 
@@ -42,19 +42,19 @@ var _ vectorstores.VectorStore = &Store{}
 func New(ctx context.Context, opts ...Option) (*Store, error) {
 	var s *Store
 	var err error
-
+	
 	s, err = applyClientOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	client, err := NewRueidisClient(s.redisURL)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	s.client = client
-
+	
 	if !s.client.CheckIndexExists(ctx, s.indexName) {
 		if !s.createIndexIfNotExists {
 			return nil, ErrNotExistedIndex
@@ -65,7 +65,7 @@ func New(ctx context.Context, opts ...Option) (*Store, error) {
 			}
 		}
 	}
-
+	
 	return s, nil
 }
 
@@ -81,27 +81,27 @@ func (s *Store) AddDocuments(ctx context.Context, docs []schema.Document, _ ...v
 	if err != nil {
 		return nil, err
 	}
-
+	
 	indexSchema, err := generateSchemaWithMetadata(docs[0].Metadata)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if s.indexSchema == nil {
 		s.indexSchema = indexSchema
 	}
-
+	
 	if s.createIndexIfNotExists && !s.client.CheckIndexExists(ctx, s.indexName) {
 		if err := s.client.CreateIndexIfNotExists(ctx, s.indexName, indexSchema); err != nil {
 			return nil, err
 		}
 	}
-
+	
 	docIDs, err := s.client.AddDocsWithHash(ctx, getPrefix(s.indexName), docs)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return docIDs, nil
 }
 
@@ -132,12 +132,12 @@ func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments
 	if err != nil {
 		return nil, err
 	}
-
+	
 	searchOpts := []SearchOption{WithScoreThreshold(scoreThreshold), WithOffsetLimit(0, numDocuments), WithPreFilters(filter)}
 	if s.indexSchema != nil {
 		searchOpts = append(searchOpts, WithReturns(maps.Keys(s.indexSchema.MetadataKeys())))
 	}
-
+	
 	search, err := NewIndexVectorSearch(
 		s.indexName,
 		embedderData,
@@ -146,7 +146,7 @@ func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments
 	if err != nil {
 		return nil, err
 	}
-
+	
 	_, docs, err := s.client.Search(ctx, *search)
 	if err != nil {
 		return nil, err
@@ -192,12 +192,12 @@ func (s Store) appendDocumentsWithVectors(ctx context.Context, docs []schema.Doc
 	if len(docs) == 0 {
 		return nil
 	}
-
+	
 	texts := make([]string, 0, len(docs))
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)
 	}
-
+	
 	vectors, err := s.embedder.EmbedDocuments(ctx, texts)
 	if err != nil {
 		return err
@@ -205,7 +205,7 @@ func (s Store) appendDocumentsWithVectors(ctx context.Context, docs []schema.Doc
 	if len(vectors) != len(docs) {
 		return ErrInvalidEmbeddingVector
 	}
-
+	
 	// append content & content_vector info metadata
 	for i := range docs {
 		if docs[i].Metadata == nil {
@@ -214,7 +214,7 @@ func (s Store) appendDocumentsWithVectors(ctx context.Context, docs []schema.Doc
 		docs[i].Metadata[defaultContentFieldKey] = docs[i].PageContent
 		docs[i].Metadata[defaultContentVectorFieldKey] = vectors[i]
 	}
-
+	
 	// vectorDimension := len(vectors[0])
 	return nil
 }

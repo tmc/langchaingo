@@ -3,10 +3,10 @@ package documentloaders
 import (
 	"context"
 	"io"
-
+	
 	"github.com/ledongthuc/pdf"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/textsplitter"
 )
 
 // PDF loads text data from an io.Reader.
@@ -54,7 +54,7 @@ func (p *PDF) getPassword() string {
 func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 	var reader *pdf.Reader
 	var err error
-
+	
 	if p.password != "" {
 		reader, err = pdf.NewReaderEncrypted(p.r, p.s, p.getPassword)
 		if err != nil {
@@ -66,11 +66,11 @@ func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 			return nil, err
 		}
 	}
-
+	
 	numPages := reader.NumPage()
-
+	
 	docs := []schema.Document{}
-
+	
 	// fonts to be used when getting plain text from pages
 	fonts := make(map[string]*pdf.Font)
 	for i := 1; i < numPages+1; i++ {
@@ -87,7 +87,7 @@ func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		
 		// add the document to the doc list
 		docs = append(docs, schema.Document{
 			PageContent: text,
@@ -97,7 +97,7 @@ func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 			},
 		})
 	}
-
+	
 	return docs, nil
 }
 
@@ -108,6 +108,6 @@ func (p PDF) LoadAndSplit(ctx context.Context, splitter textsplitter.TextSplitte
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return textsplitter.SplitDocuments(splitter, docs)
 }

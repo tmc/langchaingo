@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"sync"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // Key name used to store the intermediate steps in the output, when configured.
@@ -32,21 +32,21 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 	for key, value := range inputValues {
 		fullValues[key] = value
 	}
-
+	
 	newValues, err := c.GetMemory().LoadMemoryVariables(ctx, inputValues)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	for key, value := range newValues {
 		fullValues[key] = value
 	}
-
+	
 	callbacksHandler := getChainCallbackHandler(c)
 	if callbacksHandler != nil {
 		callbacksHandler.HandleChainStart(ctx, inputValues)
 	}
-
+	
 	outputValues, err := callChain(ctx, c, fullValues, options...)
 	if err != nil {
 		if callbacksHandler != nil {
@@ -54,15 +54,15 @@ func Call(ctx context.Context, c Chain, inputValues map[string]any, options ...C
 		}
 		return outputValues, err
 	}
-
+	
 	if callbacksHandler != nil {
 		callbacksHandler.HandleChainEnd(ctx, outputValues)
 	}
-
+	
 	if err = c.GetMemory().SaveContext(ctx, inputValues, outputValues); err != nil {
 		return outputValues, err
 	}
-
+	
 	return outputValues, nil
 }
 
@@ -75,7 +75,7 @@ func callChain(
 	if err := validateInputs(c, fullValues); err != nil {
 		return nil, err
 	}
-
+	
 	outputValues, err := c.Call(ctx, fullValues, options...)
 	if err != nil {
 		return outputValues, err
@@ -83,7 +83,7 @@ func callChain(
 	if err := validateOutputs(c, outputValues); err != nil {
 		return outputValues, err
 	}
-
+	
 	return outputValues, nil
 }
 
@@ -93,7 +93,7 @@ func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (s
 	inputKeys := c.GetInputKeys()
 	memoryKeys := c.GetMemory().MemoryVariables(ctx)
 	neededKeys := make([]string, 0, len(inputKeys))
-
+	
 	// Remove keys gotten from the memory.
 	for _, inputKey := range inputKeys {
 		isInMemory := false
@@ -111,23 +111,23 @@ func Run(ctx context.Context, c Chain, input any, options ...ChainCallOption) (s
 	if len(neededKeys) != 1 {
 		return "", ErrMultipleInputsInRun
 	}
-
+	
 	outputKeys := c.GetOutputKeys()
 	if len(outputKeys) != 1 {
 		return "", ErrMultipleOutputsInRun
 	}
-
+	
 	inputValues := map[string]any{neededKeys[0]: input}
 	outputValues, err := Call(ctx, c, inputValues, options...)
 	if err != nil {
 		return "", err
 	}
-
+	
 	outputValue, ok := outputValues[outputKeys[0]].(string)
 	if !ok {
 		return "", ErrWrongOutputTypeInRun
 	}
-
+	
 	return outputValue, nil
 }
 
@@ -137,17 +137,17 @@ func Predict(ctx context.Context, c Chain, inputValues map[string]any, options .
 	if err != nil {
 		return "", err
 	}
-
+	
 	outputKeys := c.GetOutputKeys()
 	if len(outputKeys) != 1 {
 		return "", ErrMultipleOutputsInPredict
 	}
-
+	
 	outputValue, ok := outputValues[outputKeys[0]].(string)
 	if !ok {
 		return "", ErrOutputNotStringInPredict
 	}
-
+	
 	return outputValue, nil
 }
 
@@ -169,13 +169,13 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 	if maxWorkers <= 0 {
 		maxWorkers = _defaultApplyMaxNumberWorkers
 	}
-
+	
 	inputJobs := make(chan applyInputJob, len(inputValues))
 	resultsChan := make(chan applyResult, len(inputValues))
-
+	
 	var wg sync.WaitGroup
 	wg.Add(maxWorkers)
-
+	
 	for w := 0; w < maxWorkers; w++ {
 		go func() {
 			defer wg.Done()
@@ -197,12 +197,12 @@ func Apply(ctx context.Context, c Chain, inputValues []map[string]any, maxWorker
 			}
 		}()
 	}
-
+	
 	go func() {
 		wg.Wait()
 		close(resultsChan)
 	}()
-
+	
 	sendApplyInputJobs(inputJobs, inputValues)
 	return getApplyResults(ctx, resultsChan, inputValues)
 }
@@ -230,7 +230,7 @@ func getApplyResults(ctx context.Context, resultsChan chan applyResult, inputVal
 			results[r.i] = r.result
 		}
 	}
-
+	
 	return results, nil
 }
 

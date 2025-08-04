@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/tmc/langchaingo/schema"
+import "github.com/yincongcyincong/langchaingo/schema"
 
 // ConversationBufferOption is a function for creating new buffer
 // with other than the default values.
@@ -64,14 +64,14 @@ func applyBufferOptions(opts ...ConversationBufferOption) *ConversationBuffer {
 		AIPrefix:       "AI",
 		MemoryKey:      "history",
 	}
-
+	
 	for _, opt := range opts {
 		opt(m)
 	}
-
+	
 	if m.ChatHistory == nil {
 		m.ChatHistory = NewChatMessageHistory()
 	}
-
+	
 	return m
 }

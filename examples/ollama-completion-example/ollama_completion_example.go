@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ollama"
 )
 
 func main() {
@@ -28,6 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	_ = completion
 }

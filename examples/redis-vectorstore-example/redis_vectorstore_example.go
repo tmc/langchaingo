@@ -5,24 +5,24 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
-
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/redisvector"
+	
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/ollama"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/redisvector"
 )
 
 func main() {
 	redisURL := "redis://127.0.0.1:6379"
 	index := "test_redis_vectorstore"
-
+	
 	llm, e := getEmbedding("gemma:2b", "http://127.0.0.1:11434")
 	ctx := context.Background()
-
+	
 	store, err := redisvector.New(ctx,
 		redisvector.WithConnectionURL(redisURL),
 		redisvector.WithIndexName(index, true),
@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
+	
 	data := []schema.Document{
 		{PageContent: "Tokyo", Metadata: map[string]any{"population": 9.7, "area": 622}},
 		{PageContent: "Kyoto", Metadata: map[string]any{"population": 1.46, "area": 828}},
@@ -47,13 +47,13 @@ func main() {
 		{PageContent: "Rio de Janeiro", Metadata: map[string]any{"population": 13.7, "area": 1200}},
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
-
+	
 	_, err = store.AddDocuments(ctx, data)
 	docs, err := store.SimilaritySearch(ctx, "Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5),
 	)
 	fmt.Println(docs)
-
+	
 	result, err := chains.Run(
 		ctx,
 		chains.NewRetrievalQAFromLLM(
@@ -74,7 +74,7 @@ func getEmbedding(model string, connectionStr ...string) (llms.Model, *embedding
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	e, err := embeddings.NewEmbedder(llm)
 	if err != nil {
 		log.Fatal(err)

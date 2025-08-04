@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
-
-	"github.com/tmc/langchaingo/llms/maritaca"
+	
+	"github.com/yincongcyincong/langchaingo/llms/maritaca"
 )
 
 func main() {
 	token := os.Getenv("MARITACA_KEY")
-
+	
 	opts := []maritaca.Option{
 		maritaca.WithToken(token),
 		maritaca.WithModel("sabia-2-medium"),
@@ -19,9 +19,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	
 	prompt := "How many people live in Brazil?"
-
+	
 	resp, err := llm.Call(context.Background(), prompt)
 	if err != nil {
 		panic(err)

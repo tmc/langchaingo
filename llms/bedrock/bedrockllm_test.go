@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 	"testing"
-
+	
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/bedrock"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms/bedrock"
 )
 
 func setUpTest() (*bedrockruntime.Client, error) {
@@ -22,11 +22,11 @@ func setUpTest() (*bedrockruntime.Client, error) {
 
 func TestAmazonOutput(t *testing.T) {
 	t.Parallel()
-
+	
 	if os.Getenv("TEST_AWS") != "true" {
 		t.Skip("Skipping test, requires AWS access")
 	}
-
+	
 	client, err := setUpTest()
 	if err != nil {
 		t.Fatal(err)
@@ -35,7 +35,7 @@ func TestAmazonOutput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	
 	msgs := []llms.MessageContent{
 		{
 			Role: llms.ChatMessageTypeSystem,
@@ -50,7 +50,7 @@ func TestAmazonOutput(t *testing.T) {
 			},
 		},
 	}
-
+	
 	// All the test models.
 	models := []string{
 		bedrock.ModelAi21J2MidV1,
@@ -69,12 +69,12 @@ func TestAmazonOutput(t *testing.T) {
 		bedrock.ModelMetaLlama38bInstructV1,
 		bedrock.ModelMetaLlama370bInstructV1,
 	}
-
+	
 	ctx := context.Background()
-
+	
 	for _, model := range models {
 		t.Logf("Model output for %s:-", model)
-
+		
 		resp, err := llm.GenerateContent(ctx, msgs, llms.WithModel(model), llms.WithMaxTokens(512))
 		if err != nil {
 			t.Fatal(err)

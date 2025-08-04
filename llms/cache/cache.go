@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-
-	"github.com/tmc/langchaingo/llms"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 // Backend is the interface that needs to be implemented by cache backends.
@@ -54,12 +54,12 @@ func (c *Cacher) GenerateContent(ctx context.Context, messages []llms.MessageCon
 	for _, opt := range options {
 		opt(&opts)
 	}
-
+	
 	key, err := hashKeyForCache(messages, opts)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if response := c.cache.Get(ctx, key); response != nil {
 		if opts.StreamingFunc != nil && len(response.Choices) > 0 {
 			// only stream the first choice.
@@ -67,17 +67,17 @@ func (c *Cacher) GenerateContent(ctx context.Context, messages []llms.MessageCon
 				return nil, err
 			}
 		}
-
+		
 		return response, nil
 	}
-
+	
 	response, err := c.llm.GenerateContent(ctx, messages, options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	c.cache.Put(ctx, key, response)
-
+	
 	return response, nil
 }
 

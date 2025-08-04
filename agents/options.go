@@ -1,11 +1,11 @@
 package agents
 
 import (
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/tools"
 )
 
 type Options struct {
@@ -19,7 +19,7 @@ type Options struct {
 	promptPrefix            string
 	formatInstructions      string
 	promptSuffix            string
-
+	
 	// openai
 	systemMessage string
 	extraMessages []prompts.MessageFormatter
@@ -66,7 +66,7 @@ func (co Options) getMrklPrompt(tools []tools.Tool) prompts.PromptTemplate {
 	if co.prompt.Template != "" {
 		return co.prompt
 	}
-
+	
 	return createMRKLPrompt(
 		tools,
 		co.promptPrefix,
@@ -79,7 +79,7 @@ func (co Options) getConversationalPrompt(tools []tools.Tool) prompts.PromptTemp
 	if co.prompt.Template != "" {
 		return co.prompt
 	}
-
+	
 	return createConversationalPrompt(
 		tools,
 		co.promptPrefix,

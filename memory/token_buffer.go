@@ -2,9 +2,9 @@ package memory
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // ConversationTokenBuffer for storing conversation memory.
@@ -28,7 +28,7 @@ func NewConversationTokenBuffer(
 		MaxTokenLimit:      maxTokenLimit,
 		ConversationBuffer: *applyBufferOptions(options...),
 	}
-
+	
 	return tb
 }
 
@@ -56,7 +56,7 @@ func (tb *ConversationTokenBuffer) SaveContext(
 	if err != nil {
 		return err
 	}
-
+	
 	if currBufferLength > tb.MaxTokenLimit {
 		// while currBufferLength is greater than MaxTokenLimit we keep removing messages from the memory
 		// from the oldest
@@ -65,23 +65,23 @@ func (tb *ConversationTokenBuffer) SaveContext(
 			if err != nil {
 				return err
 			}
-
+			
 			if len(messages) == 0 {
 				break
 			}
-
+			
 			err = tb.ChatHistory.SetMessages(ctx, append(messages[:0], messages[1:]...))
 			if err != nil {
 				return err
 			}
-
+			
 			currBufferLength, err = tb.getNumTokensFromMessages(ctx)
 			if err != nil {
 				return err
 			}
 		}
 	}
-
+	
 	return nil
 }
 
@@ -95,7 +95,7 @@ func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context)
 	if err != nil {
 		return 0, err
 	}
-
+	
 	bufferString, err := llms.GetBufferString(
 		messages,
 		tb.HumanPrefix,
@@ -104,6 +104,6 @@ func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context)
 	if err != nil {
 		return 0, err
 	}
-
+	
 	return llms.CountTokens("", bufferString), nil
 }

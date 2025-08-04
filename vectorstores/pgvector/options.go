@@ -3,8 +3,8 @@ package pgvector
 import (
 	"errors"
 	"fmt"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 const (
@@ -109,18 +109,18 @@ func applyClientOptions(opts ...Option) (Store, error) {
 		embeddingTableName:  DefaultEmbeddingStoreTableName,
 		collectionTableName: DefaultCollectionStoreTableName,
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.conn == nil && o.connURL == "" {
 		return Store{}, fmt.Errorf("%w: missing postgres connection", ErrInvalidOptions)
 	}
-
+	
 	if o.embedder == nil {
 		return Store{}, fmt.Errorf("%w: missing embedder", ErrInvalidOptions)
 	}
-
+	
 	return *o, nil
 }

@@ -2,9 +2,9 @@ package vectorstores
 
 import (
 	"context"
-
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/callbacks"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 // VectorStore is the interface for saving and querying documents in the
@@ -29,16 +29,16 @@ func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]sc
 	if r.CallbacksHandler != nil {
 		r.CallbacksHandler.HandleRetrieverStart(ctx, query)
 	}
-
+	
 	docs, err := r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if r.CallbacksHandler != nil {
 		r.CallbacksHandler.HandleRetrieverEnd(ctx, query, docs)
 	}
-
+	
 	return docs, nil
 }
 

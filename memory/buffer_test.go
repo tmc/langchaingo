@@ -3,55 +3,55 @@ package memory
 import (
 	"context"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 func TestBufferMemory(t *testing.T) {
 	t.Parallel()
-
+	
 	m := NewConversationBuffer()
 	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	expected1 := map[string]any{"history": ""}
 	assert.Equal(t, expected1, result1)
-
+	
 	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
-
+	
 	result2, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
-
+	
 	expected2 := map[string]any{"history": "Human: bar\nAI: foo"}
 	assert.Equal(t, expected2, result2)
 }
 
 func TestBufferMemoryReturnMessage(t *testing.T) {
 	t.Parallel()
-
+	
 	m := NewConversationBuffer()
 	m.ReturnMessages = true
 	expected1 := map[string]any{"history": []llms.ChatMessage{}}
 	result1, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	assert.Equal(t, expected1, result1)
-
+	
 	err = m.SaveContext(context.Background(), map[string]any{"foo": "bar"}, map[string]any{"bar": "foo"})
 	require.NoError(t, err)
-
+	
 	result2, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
-
+	
 	expectedChatHistory := NewChatMessageHistory(
 		WithPreviousMessages([]llms.ChatMessage{
 			llms.HumanChatMessage{Content: "bar"},
 			llms.AIChatMessage{Content: "foo"},
 		}),
 	)
-
+	
 	messages, err := expectedChatHistory.Messages(context.Background())
 	require.NoError(t, err)
 	expected2 := map[string]any{"history": messages}
@@ -60,14 +60,14 @@ func TestBufferMemoryReturnMessage(t *testing.T) {
 
 func TestBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	t.Parallel()
-
+	
 	m := NewConversationBuffer(WithChatHistory(NewChatMessageHistory(
 		WithPreviousMessages([]llms.ChatMessage{
 			llms.HumanChatMessage{Content: "bar"},
 			llms.AIChatMessage{Content: "foo"},
 		}),
 	)))
-
+	
 	result, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
@@ -107,10 +107,10 @@ func (t testChatMessageHistory) Messages(context.Context) ([]llms.ChatMessage, e
 
 func TestBufferMemoryWithChatHistoryOption(t *testing.T) {
 	t.Parallel()
-
+	
 	chatMessageHistory := testChatMessageHistory{}
 	m := NewConversationBuffer(WithChatHistory(chatMessageHistory))
-
+	
 	result, err := m.LoadMemoryVariables(context.Background(), map[string]any{})
 	require.NoError(t, err)
 	expected := map[string]any{"history": "Human: user message test\nAI: ai message test"}

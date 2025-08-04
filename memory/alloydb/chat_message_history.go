@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
+	
 	"github.com/jackc/pgx/v5"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/alloydbutil"
+	"github.com/yincongcyincong/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/util/alloydbutil"
 )
 
 type ChatMessageHistory struct {
@@ -45,7 +45,7 @@ func NewChatMessageHistory(ctx context.Context,
 		sessionID: sessionID,
 	}
 	cmh = applyChatMessageHistoryOptions(cmh, opts...)
-
+	
 	err = cmh.validateTable(ctx)
 	if err != nil {
 		return ChatMessageHistory{}, fmt.Errorf("error validating table '%s' in schema '%s': %w", tableName, cmh.schemaName, err)
@@ -59,7 +59,7 @@ func (c *ChatMessageHistory) validateTable(ctx context.Context) error {
 	tableExistsQuery := `SELECT EXISTS (
 		SELECT FROM information_schema.tables
 		WHERE table_schema = $1 AND table_name = $2);`
-
+	
 	var exists bool
 	err := c.engine.Pool.QueryRow(ctx, tableExistsQuery, c.schemaName, c.tableName).Scan(&exists)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *ChatMessageHistory) validateTable(ctx context.Context) error {
 	if !exists {
 		return fmt.Errorf("table '%s' does not exist in schema '%s'", c.tableName, c.schemaName)
 	}
-
+	
 	// Required columns with their types
 	requiredColumns := map[string]string{
 		"id":         "integer",
@@ -76,21 +76,21 @@ func (c *ChatMessageHistory) validateTable(ctx context.Context) error {
 		"data":       "jsonb",
 		"type":       "text",
 	}
-
+	
 	columns := make(map[string]string)
-
+	
 	// Get the columns from the table
 	columnsQuery := `
     	 	SELECT column_name, data_type
     	 	FROM information_schema.columns
    	 		WHERE table_schema = $1 AND table_name = $2;`
-
+	
 	rows, err := c.engine.Pool.Query(ctx, columnsQuery, c.schemaName, c.tableName)
 	if err != nil {
 		return fmt.Errorf("error fetching columns from table '%s' in schema '%s': %w", c.tableName, c.schemaName, err)
 	}
 	defer rows.Close()
-
+	
 	for rows.Next() {
 		var columnName, dataType string
 		if err := rows.Scan(&columnName, &dataType); err != nil {
@@ -98,7 +98,7 @@ func (c *ChatMessageHistory) validateTable(ctx context.Context) error {
 		}
 		columns[columnName] = dataType
 	}
-
+	
 	// Validate column names and types
 	for reqColumn, expectedType := range requiredColumns {
 		actualType, found := columns[reqColumn]
@@ -122,7 +122,7 @@ func (c *ChatMessageHistory) addMessage(ctx context.Context, content string, mes
 	}
 	query := fmt.Sprintf(`INSERT INTO %q.%q (session_id, data, type) VALUES ($1, $2, $3)`,
 		c.schemaName, c.tableName)
-
+	
 	_, err = c.engine.Pool.Exec(ctx, query, c.sessionID, data, messageType)
 	if err != nil {
 		return fmt.Errorf("failed to add message to database: %w", err)
@@ -150,7 +150,7 @@ func (c *ChatMessageHistory) AddUserMessage(ctx context.Context, content string)
 func (c *ChatMessageHistory) Clear(ctx context.Context) error {
 	query := fmt.Sprintf(`DELETE FROM %q.%q WHERE session_id = $1`,
 		c.schemaName, c.tableName)
-
+	
 	_, err := c.engine.Pool.Exec(ctx, query, c.sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to clear session %s: %w", c.sessionID, err)
@@ -164,7 +164,7 @@ func (c *ChatMessageHistory) AddMessages(ctx context.Context, messages []llms.Ch
 	b := &pgx.Batch{}
 	query := fmt.Sprintf(`INSERT INTO %q.%q (session_id, data, type) VALUES ($1, $2, $3)`,
 		c.schemaName, c.tableName)
-
+	
 	for _, message := range messages {
 		data, err := json.Marshal(message.GetContent())
 		if err != nil {
@@ -182,25 +182,25 @@ func (c *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 		`SELECT id, session_id, data, type FROM %q.%q WHERE session_id = $1 ORDER BY id`,
 		c.schemaName, c.tableName,
 	)
-
+	
 	rows, err := c.engine.Pool.Query(ctx, query, c.sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve messages: %w", err)
 	}
 	defer rows.Close()
-
+	
 	var messages []llms.ChatMessage
 	for rows.Next() {
 		var id int
 		var sessionID, data, messageType string
-
+		
 		if err := rows.Scan(&id, &sessionID, &data, &messageType); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-
+		
 		// Variable to hold the deserialized content
 		var content string
-
+		
 		// Unmarshal the JSON data into the content variable
 		err := json.Unmarshal([]byte(data), &content)
 		if err != nil {
@@ -217,11 +217,11 @@ func (c *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 			return nil, fmt.Errorf("unsupported message type: %s", messageType)
 		}
 	}
-
+	
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("failed to iterate over rows: %w", err)
 	}
-
+	
 	return messages, nil
 }
 
@@ -232,11 +232,11 @@ func (c *ChatMessageHistory) SetMessages(ctx context.Context, messages []llms.Ch
 	if err != nil {
 		return err
 	}
-
+	
 	b := &pgx.Batch{}
 	query := fmt.Sprintf(`INSERT INTO %q.%q (session_id, data, type) VALUES ($1, $2, $3)`,
 		c.schemaName, c.tableName)
-
+	
 	for _, message := range messages {
 		data, err := json.Marshal(message.GetContent())
 		if err != nil {

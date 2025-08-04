@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+	
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/yincongcyincong/langchaingo/llms"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
@@ -19,9 +19,9 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 		t.Skip("OLLAMA_TEST_MODEL not set")
 		return nil
 	}
-
+	
 	opts = append([]Option{WithModel(ollamaModel)}, opts...)
-
+	
 	c, err := New(opts...)
 	require.NoError(t, err)
 	return c
@@ -30,7 +30,7 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 func TestGenerateContent(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
@@ -40,10 +40,10 @@ func TestGenerateContent(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
@@ -52,7 +52,7 @@ func TestGenerateContent(t *testing.T) {
 func TestWithFormat(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t, WithFormat("json"))
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
@@ -62,14 +62,14 @@ func TestWithFormat(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	rsp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
-
+	
 	// check whether we got *any* kind of JSON object.
 	var result map[string]any
 	err = json.Unmarshal([]byte(c1.Content), &result)
@@ -79,7 +79,7 @@ func TestWithFormat(t *testing.T) {
 func TestWithStreaming(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t)
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
@@ -89,7 +89,7 @@ func TestWithStreaming(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	var sb strings.Builder
 	rsp, err := llm.GenerateContent(context.Background(), content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
@@ -97,7 +97,7 @@ func TestWithStreaming(t *testing.T) {
 			return nil
 		}))
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, rsp.Choices)
 	c1 := rsp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
@@ -107,7 +107,7 @@ func TestWithStreaming(t *testing.T) {
 func TestWithKeepAlive(t *testing.T) {
 	t.Parallel()
 	llm := newTestClient(t, WithKeepAlive("1m"))
-
+	
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
 	}
@@ -117,14 +117,14 @@ func TestWithKeepAlive(t *testing.T) {
 			Parts: parts,
 		},
 	}
-
+	
 	resp, err := llm.GenerateContent(context.Background(), content)
 	require.NoError(t, err)
-
+	
 	assert.NotEmpty(t, resp.Choices)
 	c1 := resp.Choices[0]
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
-
+	
 	vector, err := llm.CreateEmbedding(context.Background(), []string{"test embedding with keep_alive"})
 	require.NoError(t, err)
 	assert.NotEmpty(t, vector)

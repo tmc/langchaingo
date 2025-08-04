@@ -1,7 +1,7 @@
 package anthropic
 
 import (
-	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
+	"github.com/yincongcyincong/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 const (
@@ -17,9 +17,9 @@ type options struct {
 	model      string
 	baseURL    string
 	httpClient anthropicclient.Doer
-
+	
 	useLegacyTextCompletionsAPI bool
-
+	
 	// If supplied, the 'anthropic-beta' header will be added to the request with the given value.
 	anthropicBetaHeader string
 }

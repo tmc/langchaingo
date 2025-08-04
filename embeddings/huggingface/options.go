@@ -1,7 +1,7 @@
 package huggingface
 
 import (
-	"github.com/tmc/langchaingo/llms/huggingface"
+	"github.com/yincongcyincong/langchaingo/llms/huggingface"
 )
 
 const (
@@ -56,11 +56,11 @@ func applyOptions(opts ...Option) (*Huggingface, error) {
 		Model:         _defaultModel,
 		Task:          _defaultTask,
 	}
-
+	
 	for _, opt := range opts {
 		opt(o)
 	}
-
+	
 	if o.client == nil {
 		client, err := huggingface.New()
 		if err != nil {
@@ -68,6 +68,6 @@ func applyOptions(opts ...Option) (*Huggingface, error) {
 		}
 		o.client = client
 	}
-
+	
 	return o, nil
 }

@@ -6,30 +6,30 @@ import (
 	"strings"
 	"testing"
 	"time"
-
+	
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/azureaisearch"
+	"github.com/yincongcyincong/langchaingo/chains"
+	"github.com/yincongcyincong/langchaingo/embeddings"
+	"github.com/yincongcyincong/langchaingo/llms/openai"
+	"github.com/yincongcyincong/langchaingo/schema"
+	"github.com/yincongcyincong/langchaingo/vectorstores"
+	"github.com/yincongcyincong/langchaingo/vectorstores/azureaisearch"
 )
 
 func checkEnvVariables(t *testing.T) {
 	t.Helper()
-
+	
 	azureaisearchEndpoint := os.Getenv(azureaisearch.EnvironmentVariableEndpoint)
 	if azureaisearchEndpoint == "" {
 		t.Skipf("Must set %s to run test", azureaisearch.EnvironmentVariableEndpoint)
 	}
-
+	
 	azureaisearchAPIKey := os.Getenv(azureaisearch.EnvironmentVariableAPIKey)
 	if azureaisearchAPIKey == "" {
 		t.Skipf("Must set %s to run test", azureaisearch.EnvironmentVariableAPIKey)
 	}
-
+	
 	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
@@ -52,7 +52,7 @@ func removeIndex(t *testing.T, storer azureaisearch.Store, indexName string) {
 func setLLM(t *testing.T) *openai.LLM {
 	t.Helper()
 	openaiOpts := []openai.Option{}
-
+	
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
 		openaiOpts = append(openaiOpts,
 			openai.WithBaseURL(openAIBaseURL),
@@ -61,12 +61,12 @@ func setLLM(t *testing.T) *openai.LLM {
 			openai.WithModel("gpt-4"),
 		)
 	}
-
+	
 	llm, err := openai.New(openaiOpts...)
 	if err != nil {
 		t.Fatalf("error setting openAI embedded: %v\n", err)
 	}
-
+	
 	return llm
 }
 
@@ -74,25 +74,25 @@ func TestAzureaiSearchStoreRest(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := azureaisearch.New(
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "tokyo"},
 		{PageContent: "potato"},
 	}, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
-
+	
 	docs, err := storer.SimilaritySearch(context.Background(), "japan", 1, vectorstores.WithNameSpace(indexName))
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
@@ -103,19 +103,19 @@ func TestAzureaiSearchStoreRestWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := azureaisearch.New(
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(context.Background(), []schema.Document{
 		{PageContent: "Tokyo"},
 		{PageContent: "Yokohama"},
@@ -143,19 +143,19 @@ func TestAzureaiSearchAsRetriever(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := azureaisearch.New(
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -166,9 +166,9 @@ func TestAzureaiSearchAsRetriever(t *testing.T) {
 		vectorstores.WithNameSpace(indexName),
 	)
 	require.NoError(t, err)
-
+	
 	time.Sleep(time.Second)
-
+	
 	result, err := chains.Run(
 		context.TODO(),
 		chains.NewRetrievalQAFromLLM(
@@ -185,19 +185,19 @@ func TestAzureaiSearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	t.Parallel()
 	checkEnvVariables(t)
 	indexName := uuid.New().String()
-
+	
 	llm := setLLM(t)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
-
+	
 	storer, err := azureaisearch.New(
 		azureaisearch.WithEmbedder(e),
 	)
 	require.NoError(t, err)
-
+	
 	setIndex(t, storer, indexName)
 	defer removeIndex(t, storer, indexName)
-
+	
 	_, err = storer.AddDocuments(
 		context.Background(),
 		[]schema.Document{
@@ -222,7 +222,7 @@ func TestAzureaiSearchAsRetrieverWithScoreThreshold(t *testing.T) {
 		"What colors is each piece of furniture next to the desk?",
 	)
 	require.NoError(t, err)
-
+	
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }

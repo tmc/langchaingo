@@ -3,9 +3,9 @@ package postgresql
 import (
 	"context"
 	"database/sql"
-
+	
 	_ "github.com/jackc/pgx/v5/stdlib" // postgresql driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	"github.com/yincongcyincong/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "pgx"
@@ -34,7 +34,7 @@ func NewPostgreSQL(dsn string) (sqldatabase.Engine, error) { //nolint:ireturn
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return &PostgreSQL{
 		db: db,
 	}, nil
@@ -118,7 +118,7 @@ func (p PostgreSQL) TableInfo(ctx context.Context, table string) (string, error)
 	if len(result[0]) < 2 { //nolint:gomnd
 		return "", sqldatabase.ErrInvalidResult
 	}
-
+	
 	return result[0][1], nil //nolint:gomnd
 }
 

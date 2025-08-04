@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/tmc/langchaingo/embeddings"
+	
+	"github.com/yincongcyincong/langchaingo/embeddings"
 )
 
 type Jina struct {
@@ -44,7 +44,7 @@ var _ embeddings.Embedder = &Jina{}
 
 func NewJina(opts ...Option) (*Jina, error) {
 	v := applyOptions(opts...)
-
+	
 	return v, nil
 }
 
@@ -53,7 +53,7 @@ func (j *Jina) EmbedDocuments(ctx context.Context, texts []string) ([][]float32,
 		embeddings.MaybeRemoveNewLines(texts, j.StripNewLines),
 		j.BatchSize,
 	)
-
+	
 	emb := make([][]float32, 0, len(texts))
 	for _, batch := range batchedTexts {
 		curBatchEmbeddings, err := j.CreateEmbedding(ctx, batch)
@@ -62,7 +62,7 @@ func (j *Jina) EmbedDocuments(ctx context.Context, texts []string) ([][]float32,
 		}
 		emb = append(emb, curBatchEmbeddings...)
 	}
-
+	
 	return emb, nil
 }
 
@@ -70,12 +70,12 @@ func (j *Jina) EmbedQuery(ctx context.Context, text string) ([]float32, error) {
 	if j.StripNewLines {
 		text = strings.ReplaceAll(text, "\n", " ")
 	}
-
+	
 	emb, err := j.CreateEmbedding(ctx, []string{text})
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return emb[0], nil
 }
 
@@ -89,41 +89,41 @@ func (j *Jina) CreateEmbedding(ctx context.Context, texts []string) ([][]float32
 	if err != nil {
 		return nil, err
 	}
-
+	
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, j.APIBaseURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
-
+	
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+j.APIKey)
-
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
+	
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("API request failed with status: " + resp.Status)
 	}
-
+	
 	var embeddingResponse EmbeddingResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	err = json.Unmarshal(body, &embeddingResponse)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	embs := make([][]float32, 0, len(embeddingResponse.Data))
 	for _, data := range embeddingResponse.Data {
 		embs = append(embs, data.Embedding)
 	}
-
+	
 	return embs, nil
 }

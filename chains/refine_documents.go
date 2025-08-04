@@ -3,10 +3,10 @@ package chains
 import (
 	"context"
 	"fmt"
-
-	"github.com/tmc/langchaingo/memory"
-	"github.com/tmc/langchaingo/prompts"
-	"github.com/tmc/langchaingo/schema"
+	
+	"github.com/yincongcyincong/langchaingo/memory"
+	"github.com/yincongcyincong/langchaingo/prompts"
+	"github.com/yincongcyincong/langchaingo/schema"
 )
 
 const (
@@ -21,15 +21,15 @@ const (
 type RefineDocuments struct {
 	// Chain used to construct the first text using the first document.
 	LLMChain *LLMChain
-
+	
 	// Chain used to refine the first text using the additional documents.
 	RefineLLMChain *LLMChain
-
+	
 	// Prompt to format the documents. Documents are given in the variable
 	// with the name "page_content". All metadata from the documents are
 	// also given to the prompt template.
 	DocumentPrompt prompts.PromptTemplate
-
+	
 	InputKey             string
 	OutputKey            string
 	DocumentVariableName string
@@ -66,7 +66,7 @@ func (c RefineDocuments) Call(ctx context.Context, values map[string]any, option
 	if len(docs) == 0 {
 		return nil, fmt.Errorf("%w: documents slice has no elements", ErrInvalidInputValues)
 	}
-
+	
 	// Get the rest of the input variables.
 	rest := make(map[string]any, len(values))
 	for key, value := range values {
@@ -75,7 +75,7 @@ func (c RefineDocuments) Call(ctx context.Context, values map[string]any, option
 		}
 		rest[key] = value
 	}
-
+	
 	// Create a text using the first document.
 	initialInputs, err := c.constructInitialInputs(docs[0], rest)
 	if err != nil {
@@ -85,7 +85,7 @@ func (c RefineDocuments) Call(ctx context.Context, values map[string]any, option
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// Refine the text using the rest of the documents.
 	for i := 1; i < len(docs); i++ {
 		refineInputs, err := c.constructRefineInputs(docs[i], response, rest)
@@ -97,7 +97,7 @@ func (c RefineDocuments) Call(ctx context.Context, values map[string]any, option
 			return nil, err
 		}
 	}
-
+	
 	return map[string]any{
 		c.OutputKey: response,
 	}, nil
@@ -112,7 +112,7 @@ func (c RefineDocuments) constructRefineInputs(doc schema.Document, lastResponse
 	if err != nil {
 		return nil, err
 	}
-
+	
 	inputs[c.InitialResponseName] = lastResponse
 	return inputs, nil
 }
@@ -126,7 +126,7 @@ func (c RefineDocuments) getBaseInputs(doc schema.Document, rest map[string]any)
 	for key, value := range doc.Metadata {
 		baseInfo[key] = value
 	}
-
+	
 	documentInfo := make(map[string]any, 0)
 	for _, promptVariable := range c.DocumentPrompt.InputVariables {
 		if _, ok := baseInfo[promptVariable]; !ok {
@@ -137,13 +137,13 @@ func (c RefineDocuments) getBaseInputs(doc schema.Document, rest map[string]any)
 		}
 		documentInfo[promptVariable] = baseInfo[promptVariable]
 	}
-
+	
 	inputs := make(map[string]any, len(rest))
 	inputs[c.DocumentVariableName], err = c.DocumentPrompt.Format(documentInfo)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	for key, value := range rest {
 		inputs[key] = value
 	}
@@ -158,7 +158,7 @@ func (c RefineDocuments) GetInputKeys() []string {
 		}
 		inputKeys = append(inputKeys, key)
 	}
-
+	
 	return inputKeys
 }
 
