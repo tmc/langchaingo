@@ -27,6 +27,13 @@ func TestNew(t *testing.T) {
 			},
 		},
 		{
+			name: "with custom model provider",
+			opts: []Option{
+				WithClient(&bedrockruntime.Client{}),
+				WithModelProvider("anthropic"),
+			},
+		},
+		{
 			name: "with callback handler",
 			opts: []Option{
 				WithClient(&bedrockruntime.Client{}),
