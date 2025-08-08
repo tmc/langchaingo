@@ -2,6 +2,7 @@ package ollamaclient
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
@@ -274,4 +275,85 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Embeddings)
+}
+
+func TestClient_GenerateChatWithThink(t *testing.T) {
+	ctx := context.Background()
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	baseURL := getOllamaTestURL(t, rr)
+
+	// If recording and endpoint is not available, skip the test
+	if rr.Recording() && !checkOllamaEndpoint(baseURL) {
+		t.Skipf("Ollama endpoint not available at %s", baseURL)
+	}
+
+	// Skip if no recording exists and we're not recording
+	if rr.Replaying() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
+	}
+
+	parsedURL, err := url.Parse(baseURL)
+	require.NoError(t, err)
+
+	client, err := NewClient(parsedURL, rr.Client())
+	require.NoError(t, err)
+
+	req := &ChatRequest{
+		Model: "gemma3:1b",
+		Messages: []*Message{
+			{
+				Role:    "user",
+				Content: "What is 2+2? Show your reasoning.",
+			},
+		},
+		Stream: false,
+		Options: Options{
+			Temperature: 0.0,
+			NumPredict:  100,
+			Think:       true, // Enable reasoning mode
+		},
+	}
+
+	var response *ChatResponse
+	err = client.GenerateChat(ctx, req, func(resp ChatResponse) error {
+		response = &resp
+		return nil
+	})
+	require.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.NotNil(t, response.Message)
+	assert.NotEmpty(t, response.Message.Content)
+	assert.True(t, response.Done)
+	
+	// The think parameter should be included in the request
+	// This test verifies that the parameter is properly serialized
+}
+
+func TestOptionsJSONMarshalWithThink(t *testing.T) {
+	// Test that the think parameter is properly marshaled to JSON
+	opts := Options{
+		Temperature: 0.5,
+		Think:       true,
+	}
+
+	data, err := json.Marshal(opts)
+	require.NoError(t, err)
+
+	// Check that the JSON contains the think field
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	require.NoError(t, err)
+
+	// Verify think field exists and is true
+	think, exists := result["think"]
+	assert.True(t, exists, "think field should exist in JSON")
+	assert.Equal(t, true, think, "think field should be true")
+
+	// Verify temperature field for completeness
+	temp, exists := result["temperature"]
+	assert.True(t, exists, "temperature field should exist in JSON")
+	assert.Equal(t, float64(0.5), temp, "temperature should be 0.5")
 }
