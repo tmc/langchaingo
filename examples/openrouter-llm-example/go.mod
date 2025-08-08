@@ -1,12 +1,11 @@
 module openrouter-llm-example
 
-go 1.23.0
+go 1.23.8
 
-toolchain go1.24.1
+toolchain go1.24.6
 
-require github.com/tmc/langchaingo v0.1.13
+require github.com/tmc/langchaingo v0.1.14-pre.0
 
-replace github.com/tmc/langchaingo => ../..
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

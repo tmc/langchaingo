@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/getzep/zep-go v1.0.4
-	github.com/tmc/langchaingo v0.1.13
+	github.com/tmc/langchaingo v0.1.14-pre.0
 )
 
 require (
@@ -37,4 +37,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/tmc/langchaingo => ../..
