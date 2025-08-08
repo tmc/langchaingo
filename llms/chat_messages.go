@@ -22,6 +22,8 @@ const (
 	ChatMessageTypeHuman ChatMessageType = "human"
 	// ChatMessageTypeSystem is a message sent by the system.
 	ChatMessageTypeSystem ChatMessageType = "system"
+	// ChatMessageTypeDeveloper is a message sent by the developer.
+	ChatMessageTypeDeveloper ChatMessageType = "developer"
 	// ChatMessageTypeGeneric is a message sent by a generic user.
 	ChatMessageTypeGeneric ChatMessageType = "generic"
 	// ChatMessageTypeFunction is a message sent by a function.
@@ -48,6 +50,7 @@ var (
 	_ ChatMessage = AIChatMessage{}
 	_ ChatMessage = HumanChatMessage{}
 	_ ChatMessage = SystemChatMessage{}
+	_ ChatMessage = DeveloperChatMessage{}
 	_ ChatMessage = GenericChatMessage{}
 	_ ChatMessage = FunctionChatMessage{}
 	_ ChatMessage = ToolChatMessage{}
@@ -87,6 +90,14 @@ type SystemChatMessage struct {
 
 func (m SystemChatMessage) GetType() ChatMessageType { return ChatMessageTypeSystem }
 func (m SystemChatMessage) GetContent() string       { return m.Content }
+
+// DeveloperChatMessage is a chat message representing information that should be instructions from developer to the AI system.
+type DeveloperChatMessage struct {
+	Content string
+}
+
+func (m DeveloperChatMessage) GetType() ChatMessageType { return ChatMessageTypeDeveloper }
+func (m DeveloperChatMessage) GetContent() string       { return m.Content }
 
 // GenericChatMessage is a chat message with an arbitrary speaker.
 type GenericChatMessage struct {
@@ -154,6 +165,8 @@ func getMessageRole(m ChatMessage, humanPrefix, aiPrefix string) (string, error)
 		role = aiPrefix
 	case ChatMessageTypeSystem:
 		role = "system"
+	case ChatMessageTypeDeveloper:
+		role = "developer"
 	case ChatMessageTypeGeneric:
 		cgm, ok := m.(GenericChatMessage)
 		if !ok {
