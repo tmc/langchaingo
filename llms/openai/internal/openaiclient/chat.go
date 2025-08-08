@@ -454,9 +454,10 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
-				responseChan <- streamPayload
-				return
+				// Skip non-JSON lines that some providers (e.g., OpenRouter) send as prefixes
+				// These are typically in the format ":provider" or other non-standard SSE data
+				// This allows the stream to continue processing valid JSON chunks
+				continue
 			}
 			responseChan <- streamPayload
 		}
