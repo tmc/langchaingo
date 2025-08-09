@@ -731,8 +731,12 @@ github.com/temoto/robotstxt v1.1.2 h1:W2pOjSJ6SWvldyEuiFXNxz3xZ8aiWX5LbfDiOFd7Fx
 github.com/temoto/robotstxt v1.1.2/go.mod h1:+1AmkuG3IYkh1kv0d2qEB9Le88ehNO0zwOr3ujewlOo=
 github.com/testcontainers/testcontainers-go v0.37.0 h1:L2Qc0vkTw2EHWQ08djon0D2uw7Z/PtHS/QzZZ5Ra/hg=
 github.com/testcontainers/testcontainers-go v0.37.0/go.mod h1:QPzbxZhQ6Bclip9igjLFj6z0hs01bU8lrl2dHQmgFGM=
+github.com/testcontainers/testcontainers-go v0.38.0 h1:d7uEapLcv2P8AvH8ahLqDMMxda2W9gQN1nRbHS28HBw=
+github.com/testcontainers/testcontainers-go v0.38.0/go.mod h1:C52c9MoHpWO+C4aqmgSU+hxlR5jlEayWtgYrb8Pzz1w=
 github.com/testcontainers/testcontainers-go/modules/chroma v0.37.0 h1:vb9fb1mogtlQuF3l0vSAu6rqv3y2j9wozve4xnhVyz8=
 github.com/testcontainers/testcontainers-go/modules/chroma v0.37.0/go.mod h1:IWJavzQy7rxM40OqOgSN5iyckgAw21wDyE+NhSctatk=
+github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0 h1:RfilPieRalCavWFa+XQtatazPn1L57Do/tRxe/B45I8=
+github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0/go.mod h1:26mrWngnaRhxmgy942aVfUihLnihbIGsuIds6gGBnIE=
 github.com/testcontainers/testcontainers-go/modules/milvus v0.37.0 h1:q+gx0A10DM0VJMJjo9VOXOB1t8Dv3B6EgxXZf2TIzOw=
 github.com/testcontainers/testcontainers-go/modules/milvus v0.37.0/go.mod h1:bCdLqxjPKax120BMl4aO/A0gs9+4FeJkLBVf9WpjFoQ=
 github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0 h1:drGy4LJOVkIKpKGm1YKTfVzb1qRhN/konVpmuUphq0k=
