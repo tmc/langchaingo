@@ -156,9 +156,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
+	// Handle case where Message might be nil (e.g., context cancelled during streaming)
+	content := ""
+	if resp.Message != nil {
+		content = resp.Message.Content
+	}
+
 	choices := []*llms.ContentChoice{
 		{
-			Content: resp.Message.Content,
+			Content: content,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
