@@ -9,6 +9,7 @@ import (
 type Option func(*options)
 
 type options struct {
+	modelProvider   string
 	modelID         string
 	client          *bedrockruntime.Client
 	callbackHandler callbacks.Handler
@@ -21,6 +22,16 @@ type options struct {
 func WithModel(modelID string) Option {
 	return func(o *options) {
 		o.modelID = modelID
+	}
+}
+
+// WithModelProvider allows setting a custom model provider.
+//
+// If not set, the default model provider is used
+// i.e. "anthropic".
+func WithModelProvider(modelProvider string) Option {
+	return func(o *options) {
+		o.modelProvider = modelProvider
 	}
 }
 
