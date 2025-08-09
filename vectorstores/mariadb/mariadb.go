@@ -69,7 +69,7 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 	if err = store.db.PingContext(ctx); err != nil {
 		return Store{}, err
 	}
-	if err = store.init(ctx); err != nil {
+	if err = (&store).init(ctx); err != nil {
 		return Store{}, err
 	}
 	return store, nil
@@ -86,7 +86,7 @@ func (s Store) Close() error {
 	return nil
 }
 
-func (s Store) init(ctx context.Context) error {
+func (s *Store) init(ctx context.Context) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -387,19 +387,32 @@ func (s Store) RemoveDatabase(ctx context.Context, tx *sql.Tx) error {
 	return err
 }
 
-func (s Store) createOrGetDatabase(ctx context.Context, tx *sql.Tx) error {
+func (s *Store) createOrGetDatabase(ctx context.Context, tx *sql.Tx) error {
 	jsonMetadata, err := json.Marshal(s.databaseMetadata)
 	if err != nil {
 		return err
 	}
-	//nolint:gosec
-	sql := fmt.Sprintf(`INSERT INTO %s (`+"`uuid`"+`, name, cmetadata)
-		VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE cmetadata = ?`, s.collectionTableName)
-	if _, err := tx.ExecContext(ctx, sql, uuid.New().String(), s.databaseName, jsonMetadata, jsonMetadata); err != nil {
+
+	// First, try to get existing UUID for this database name
+	//nolint:gosec // Table name is controlled internally, not user input
+	query := fmt.Sprintf(`SELECT `+"`uuid`"+` FROM %s WHERE name = ? ORDER BY name limit 1`, s.collectionTableName)
+	err = tx.QueryRowContext(ctx, query, s.databaseName).Scan(&s.databaseUUID)
+
+	if err == sql.ErrNoRows {
+		// Database doesn't exist, create it with new UUID
+		s.databaseUUID = uuid.New().String()
+		query = fmt.Sprintf(`INSERT INTO %s (`+"`uuid`"+`, name, cmetadata)
+			VALUES(?, ?, ?)`, s.collectionTableName)
+		_, err = tx.ExecContext(ctx, query, s.databaseUUID, s.databaseName, jsonMetadata)
+		return err
+	} else if err != nil {
 		return err
 	}
-	sql = fmt.Sprintf(`SELECT `+"`uuid`"+` FROM %s WHERE name = ? ORDER BY name limit 1`, s.collectionTableName)
-	return tx.QueryRowContext(ctx, sql, s.databaseName).Scan(&s.databaseUUID)
+
+	// Database exists, update metadata if needed
+	query = fmt.Sprintf(`UPDATE %s SET cmetadata = ? WHERE `+"`uuid`"+` = ?`, s.collectionTableName)
+	_, err = tx.ExecContext(ctx, query, jsonMetadata, s.databaseUUID)
+	return err
 }
 
 // getOptions applies given options to default Options and returns it
