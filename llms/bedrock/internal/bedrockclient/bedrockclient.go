@@ -33,9 +33,9 @@ func getProvider(modelID string) string {
 	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
 		return "nova"
 	}
-	
+
 	parts := strings.Split(modelID, ".")
-	
+
 	// For backward compatibility with the original provider detection
 	switch {
 	case strings.Contains(modelID, "ai21"):
@@ -54,7 +54,7 @@ func getProvider(modelID string) string {
 	if len(parts) > 0 {
 		return parts[0]
 	}
-	
+
 	return ""
 }
 
