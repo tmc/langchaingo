@@ -252,93 +252,81 @@ func TestCreateAmazonCompletion_RequestStructure(t *testing.T) {
 }
 
 // Anthropic provider tests
+// TestProcessInputMessagesAnthropic tests the processInputMessagesAnthropic function
 func TestProcessInputMessagesAnthropic(t *testing.T) {
-	tests := []struct {
-		name           string
-		messages       []Message
-		expectedMsgs   int
-		expectedSystem string
-		expectError    bool
-		errorContains  string
-	}{
-		{
-			name: "simple user message",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
-			},
-			expectedMsgs:   1,
-			expectedSystem: "",
-		},
-		{
-			name: "system message extracted",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "You are helpful"},
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hi"},
-			},
-			expectedMsgs:   1,
-			expectedSystem: "You are helpful",
-		},
-		{
-			name: "multiple system messages concatenated",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "First system"},
-				{Role: llms.ChatMessageTypeSystem, Type: "text", Content: " Second system"},
-			},
-			expectedMsgs:   0,
-			expectedSystem: "First system Second system",
-		},
-		{
-			name: "system message with non-text content",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeSystem, Type: "image", Content: "image data"},
-			},
-			expectError:   true,
-			errorContains: "system prompt must be text",
-		},
-		{
-			name: "conversation with alternating roles",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
-				{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Hi there"},
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "How are you?"},
-			},
-			expectedMsgs:   3,
-			expectedSystem: "",
-		},
-		{
-			name: "multiple messages same role chunked together",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "First"},
-				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Second"},
-				{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Response"},
-			},
-			expectedMsgs:   2,
-			expectedSystem: "",
-		},
-		{
-			name: "unsupported role",
-			messages: []Message{
-				{Role: llms.ChatMessageTypeFunction, Type: "text", Content: "Function call"},
-			},
-			expectError:   true,
-			errorContains: "role not supported",
-		},
-	}
+	t.Run("simple user message", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
+		}
+		msgs, system, err := processInputMessagesAnthropic(messages)
+		require.NoError(t, err)
+		require.Len(t, msgs, 1)
+		require.Equal(t, "", system)
+	})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			msgs, system, err := processInputMessagesAnthropic(tt.messages)
+	t.Run("system message extracted", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "You are helpful"},
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hi"},
+		}
+		msgs, system, err := processInputMessagesAnthropic(messages)
+		require.NoError(t, err)
+		require.Len(t, msgs, 1)
+		require.Equal(t, "You are helpful", system)
+	})
 
-			if tt.expectError {
-				require.Error(t, err)
-				require.Contains(t, err.Error(), tt.errorContains)
-			} else {
-				require.NoError(t, err)
-				require.Len(t, msgs, tt.expectedMsgs)
-				require.Equal(t, tt.expectedSystem, system)
-			}
-		})
-	}
+	t.Run("multiple system messages concatenated", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "First system"},
+			{Role: llms.ChatMessageTypeSystem, Type: "text", Content: " Second system"},
+		}
+		msgs, system, err := processInputMessagesAnthropic(messages)
+		require.NoError(t, err)
+		require.Len(t, msgs, 0)
+		require.Equal(t, "First system Second system", system)
+	})
+
+	t.Run("system message with non-text content", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeSystem, Type: "image", Content: "image data"},
+		}
+		_, _, err := processInputMessagesAnthropic(messages)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "system prompt must be text")
+	})
+
+	t.Run("conversation with alternating roles", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
+			{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Hi there"},
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "How are you?"},
+		}
+		msgs, system, err := processInputMessagesAnthropic(messages)
+		require.NoError(t, err)
+		require.Len(t, msgs, 3)
+		require.Equal(t, "", system)
+	})
+
+	t.Run("multiple messages same role chunked together", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "First"},
+			{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Second"},
+			{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Response"},
+		}
+		msgs, system, err := processInputMessagesAnthropic(messages)
+		require.NoError(t, err)
+		require.Len(t, msgs, 2)
+		require.Equal(t, "", system)
+	})
+
+	t.Run("unsupported role", func(t *testing.T) {
+		messages := []Message{
+			{Role: llms.ChatMessageTypeFunction, Type: "text", Content: "Function call"},
+		}
+		_, _, err := processInputMessagesAnthropic(messages)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "role not supported")
+	})
 }
 
 func TestGetAnthropicRole(t *testing.T) {
