@@ -268,6 +268,14 @@ func WithPredictPenalizeNewline(val bool) Option {
 	}
 }
 
+// WithThink enables reasoning mode for models that support it (Ollama 0.9.0+).
+// When enabled, the model will show its internal reasoning process.
+func WithThink(val bool) Option {
+	return func(opts *options) {
+		opts.ollamaOptions.Think = val
+	}
+}
+
 // WithPullModel enables automatic model pulling before use.
 // When enabled, the client will check if the model exists and pull it if not available.
 func WithPullModel() Option {

@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/google-alloydb-chat-message-history-e
 
 go 1.24.3
 
-require github.com/tmc/langchaingo v0.1.13
+require github.com/tmc/langchaingo v0.1.14-pre.0
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
@@ -48,4 +48,3 @@ require (
 	google.golang.org/protobuf v1.36.3 // indirect
 )
 
-replace github.com/tmc/langchaingo => ../..

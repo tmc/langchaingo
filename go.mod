@@ -1,8 +1,8 @@
 module github.com/tmc/langchaingo
 
-go 1.23.0
+go 1.23.8
 
-toolchain go1.24.3
+toolchain go1.24.6
 
 // Note: Thanks to Go's module graph pruning (https://go.dev/ref/mod#graph-pruning),
 // importing langchaingo does NOT pull in all dependencies listed below. You only

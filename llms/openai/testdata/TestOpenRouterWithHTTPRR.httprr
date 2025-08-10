@@ -1,0 +1,33 @@
+httprr trace v1
+433 1986
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 228
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"meta-llama/llama-3.2-3b-instruct:free","messages":[{"role":"user","content":"Reply with exactly 'OK' and nothing else"}],"temperature":0,"max_completion_tokens":10,"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 1504
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Fri, 08 Aug 2025 16:10:55 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1754669454-aYJhI6K2Oss8Nif9NiYy","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754669454,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1754669454-aYJhI6K2Oss8Nif9NiYy","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754669454,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1754669454-aYJhI6K2Oss8Nif9NiYy","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754669454,"choices":[{"index":0,"delta":{"role":"assistant","content":"OK"},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}]}
+
+data: {"id":"gen-1754669454-aYJhI6K2Oss8Nif9NiYy","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754669454,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":586,"completion_tokens":2,"total_tokens":588,"cost":0,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":null},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
