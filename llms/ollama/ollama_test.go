@@ -173,6 +173,32 @@ func TestWithKeepAlive(t *testing.T) {
 	// Use TestCreateEmbedding for embedding tests
 }
 
+func TestWithThink(t *testing.T) {
+	ctx := context.Background()
+
+	// Test that WithThink option correctly sets the think parameter
+	llm := newTestClient(t, WithThink(true))
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "What is 2+2? Explain your reasoning step by step."},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	// The request should include think:true in options
+	resp, err := llm.GenerateContent(ctx, content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, resp.Choices)
+	c1 := resp.Choices[0]
+	// The response should contain the answer
+	assert.Contains(t, strings.ToLower(c1.Content), "4")
+}
+
 func TestWithPullModel(t *testing.T) {
 	ctx := context.Background()
 

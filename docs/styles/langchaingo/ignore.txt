@@ -53,3 +53,4 @@ IVFFlat
 godotenv
 api
 testcontainers
+untrusted
