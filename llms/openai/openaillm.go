@@ -18,6 +18,7 @@ type LLM struct {
 
 const (
 	RoleSystem    = "system"
+	RoleDeveloper = "developer"
 	RoleAssistant = "assistant"
 	RoleUser      = "user"
 	RoleFunction  = "function"
@@ -60,6 +61,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		switch mc.Role {
 		case llms.ChatMessageTypeSystem:
 			msg.Role = RoleSystem
+		case llms.ChatMessageTypeDeveloper:
+			msg.Role = RoleDeveloper
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
 		case llms.ChatMessageTypeHuman:
@@ -102,13 +105,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		chatMsgs = append(chatMsgs, msg)
 	}
+
 	req := &openaiclient.ChatRequest{
 		Model:                  opts.Model,
 		StopWords:              opts.StopWords,
 		Messages:               chatMsgs,
 		StreamingFunc:          opts.StreamingFunc,
 		StreamingReasoningFunc: opts.StreamingReasoningFunc,
-		Temperature:            opts.Temperature,
+		Temperature:            &opts.Temperature,
+		TopP:                   &opts.TopP,
 		N:                      opts.N,
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
@@ -122,6 +127,20 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
+	}
+	// Retain current behaviour of omitting zero values from payload.
+	// This is needed because as of now llms.CallOptions cannot really distinguish between 0 and absent values.
+	if opts.Temperature == 0 {
+		req.Temperature = nil
+	}
+	if opts.TopP == 0 {
+		req.TopP = nil
+	}
+	if opts.Reasoning != nil && opts.Reasoning.IsEnabled && opts.Reasoning.Mode == llms.ReasoningModeLevel && opts.Reasoning.Level != "" {
+		req.ReasoningEffort = opts.Reasoning.Level
+		// Omit temperature and topP when thinking
+		req.Temperature = nil
+		req.TopP = nil
 	}
 
 	// since req.Functions is deprecated, we need to use the new Tools API.
