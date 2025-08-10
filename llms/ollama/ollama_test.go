@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/jsonschema"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -112,6 +113,46 @@ func TestWithFormat(t *testing.T) {
 
 	// check whether we got *any* kind of JSON object.
 	var result map[string]any
+	err = json.Unmarshal([]byte(c1.Content), &result)
+	require.NoError(t, err)
+	// The JSON should contain some information about feet or the answer
+	assert.NotEmpty(t, result)
+}
+
+func TestWithJSONSchema(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+	llm := newTestClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "How many feet are in a nautical mile? Respond with JSON containing the answer."},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	schema := &jsonschema.Definition{
+		Type: jsonschema.Object,
+		Properties: map[string]jsonschema.Definition{
+			"feet": {
+				Type: jsonschema.Number,
+			},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(ctx, content, llms.WithJSONSchema(schema))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+
+	// check whether we got *any* kind of JSON object.
+	var result struct {
+		Feet float64 `json:"feet"`
+	}
 	err = json.Unmarshal([]byte(c1.Content), &result)
 	require.NoError(t, err)
 	// The JSON should contain some information about feet or the answer
