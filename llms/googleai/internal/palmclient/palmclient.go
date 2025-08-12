@@ -120,13 +120,17 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 
 // EmbeddingRequest is a request to create an embedding.
 type EmbeddingRequest struct {
-	Input []string `json:"input"`
+	Input     []string `json:"input"`
+	Dimension int      `json:"dimension,omitempty"`
 }
 
 // CreateEmbedding creates embeddings.
 func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	params := map[string]interface{}{}
-	responses, err := c.batchPredict(ctx, c.embeddingModelName, r.Input, params)
+	if r.Dimension > 0 {
+		params["outputDimensionality"] = r.Dimension
+	}
+	responses, err := c.batchPredict(ctx, embeddingModelName, r.Input, params)
 	if err != nil {
 		return nil, err
 	}

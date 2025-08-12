@@ -12,32 +12,34 @@ import (
 
 // Options is a set of options for GoogleAI and Vertex clients.
 type Options struct {
-	CloudProject          string
-	CloudLocation         string
-	DefaultModel          string
-	DefaultEmbeddingModel string
-	DefaultCandidateCount int
-	DefaultMaxTokens      int
-	DefaultTemperature    float64
-	DefaultTopK           int
-	DefaultTopP           float64
-	HarmThreshold         HarmBlockThreshold
+	CloudProject            string
+	CloudLocation           string
+	DefaultModel            string
+	DefaultEmbeddingModel   string
+	DefaultEmbeddingDimension int
+	DefaultCandidateCount   int
+	DefaultMaxTokens        int
+	DefaultTemperature      float64
+	DefaultTopK             int
+	DefaultTopP             float64
+	HarmThreshold           HarmBlockThreshold
 
 	ClientOptions []option.ClientOption
 }
 
 func DefaultOptions() Options {
 	return Options{
-		CloudProject:          "",
-		CloudLocation:         "",
-		DefaultModel:          "gemini-2.0-flash",
-		DefaultEmbeddingModel: "embedding-001",
-		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      2048,
-		DefaultTemperature:    0.5,
-		DefaultTopK:           3,
-		DefaultTopP:           0.95,
-		HarmThreshold:         HarmBlockOnlyHigh,
+		CloudProject:            "",
+		CloudLocation:           "",
+		DefaultModel:            "gemini-2.0-flash",
+		DefaultEmbeddingModel:   "embedding-001",
+		DefaultEmbeddingDimension: 0, // 0 means use model default
+		DefaultCandidateCount:   1,
+		DefaultMaxTokens:        2048,
+		DefaultTemperature:      0.5,
+		DefaultTopK:             3,
+		DefaultTopP:             0.95,
+		HarmThreshold:           HarmBlockOnlyHigh,
 	}
 }
 
@@ -138,6 +140,18 @@ func WithDefaultModel(defaultModel string) Option {
 func WithDefaultEmbeddingModel(defaultEmbeddingModel string) Option {
 	return func(opts *Options) {
 		opts.DefaultEmbeddingModel = defaultEmbeddingModel
+	}
+}
+
+// WithDefaultEmbeddingDimension sets the default embedding dimension.
+// Supported values are 768, 1536, 3072, or 0 for model default.
+func WithDefaultEmbeddingDimension(dimension int) Option {
+	return func(opts *Options) {
+		if dimension != 0 && dimension != 768 && dimension != 1536 && dimension != 3072 {
+			// Invalid dimension, keep the default
+			return
+		}
+		opts.DefaultEmbeddingDimension = dimension
 	}
 }
 

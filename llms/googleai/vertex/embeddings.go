@@ -11,7 +11,8 @@ import (
 // CreateEmbedding creates embeddings from texts.
 func (g *Vertex) CreateEmbedding(ctx context.Context, texts []string) ([][]float32, error) {
 	embeddings, err := g.palmClient.CreateEmbedding(ctx, &palmclient.EmbeddingRequest{
-		Input: texts,
+		Input:     texts,
+		Dimension: g.opts.DefaultEmbeddingDimension,
 	})
 	if err != nil {
 		return [][]float32{}, err
