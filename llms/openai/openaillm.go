@@ -168,6 +168,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"PromptTokens":     result.Usage.PromptTokens,
 				"TotalTokens":      result.Usage.TotalTokens,
 				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CachedTokens":     result.Usage.PromptTokensDetails.CachedTokens,
 			},
 		}
 
