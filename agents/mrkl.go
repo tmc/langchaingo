@@ -151,13 +151,13 @@ func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *sc
 		"the final answer is:",
 		"the answer is:",
 	}
-	
+
 	for _, variation := range finalAnswerVariations {
 		if idx := strings.Index(lowerOutput, variation); idx != -1 {
 			// Extract the answer after the variation phrase
 			answerStart := idx + len(variation)
 			answer := strings.TrimSpace(output[answerStart:])
-			
+
 			// Make sure this isn't followed by an Action (which would indicate it's not really done)
 			if !strings.Contains(strings.ToLower(answer), "\naction:") {
 				return nil, &schema.AgentFinish{

@@ -195,12 +195,12 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 	}
 
 	messages := make([]llms.ChatMessage, 0)
-	
+
 	// Group steps by their position to handle multiple tool calls
 	// that might be executed in parallel
 	var currentToolCalls []llms.ToolCall
 	var currentLog string
-	
+
 	for i, step := range steps {
 		// Check if this step is part of a group of parallel tool calls
 		// by looking at the log content
@@ -223,7 +223,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 			}
 			currentLog = step.Action.Log
 		}
-		
+
 		// Add this tool call to the current group
 		currentToolCalls = append(currentToolCalls, llms.ToolCall{
 			ID:   step.Action.ToolID,
@@ -234,7 +234,7 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 			},
 		})
 	}
-	
+
 	// Don't forget the last group
 	if len(currentToolCalls) > 0 {
 		messages = append(messages, llms.AIChatMessage{
@@ -262,13 +262,13 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	if len(choice.ToolCalls) > 0 {
 		// Handle multiple tool calls properly
 		actions := make([]schema.AgentAction, 0, len(choice.ToolCalls))
-		
+
 		for _, toolCall := range choice.ToolCalls {
 			functionName := toolCall.FunctionCall.Name
 			toolInputStr := toolCall.FunctionCall.Arguments
 			toolInputMap := make(map[string]any, 0)
 			err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
-			
+
 			toolInput := toolInputStr
 			if err == nil {
 				// Successfully parsed JSON, check for __arg1 pattern
@@ -281,12 +281,12 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			}
 			// If JSON parsing failed, use the raw string as tool input
 			// This handles cases like calculator expressions
-			
+
 			contentMsg := "\n"
 			if choice.Content != "" {
 				contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
 			}
-			
+
 			actions = append(actions, schema.AgentAction{
 				Tool:      functionName,
 				ToolInput: toolInput,
@@ -294,7 +294,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 				ToolID:    toolCall.ID,
 			})
 		}
-		
+
 		return actions, nil, nil
 	}
 
