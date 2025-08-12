@@ -316,12 +316,12 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 			expectedSystem: "",
 		},
 		{
-			name: "unsupported role",
+			name: "function role supported",
 			messages: []Message{
 				{Role: llms.ChatMessageTypeFunction, Type: "text", Content: "Function call"},
 			},
-			expectError:   true,
-			errorContains: "role not supported",
+			expectedMsgs:   1,
+			expectedSystem: "",
 		},
 	}
 
@@ -369,14 +369,14 @@ func TestGetAnthropicRole(t *testing.T) {
 			expected: AnthropicRoleUser,
 		},
 		{
-			name:        "function role not supported",
-			role:        llms.ChatMessageTypeFunction,
-			expectError: true,
+			name:     "function role",
+			role:     llms.ChatMessageTypeFunction,
+			expected: AnthropicRoleUser,
 		},
 		{
-			name:        "tool role not supported",
-			role:        llms.ChatMessageTypeTool,
-			expectError: true,
+			name:     "tool role",
+			role:     llms.ChatMessageTypeTool,
+			expected: AnthropicRoleUser,
 		},
 	}
 
@@ -663,7 +663,11 @@ func TestAnthropicResponseParsing(t *testing.T) {
 		Role: "assistant",
 		Content: []struct {
 			Type string `json:"type"`
-			Text string `json:"text"`
+			Text string `json:"text,omitempty"`
+			// Tool use fields
+			ID string `json:"id,omitempty"`
+			Name string `json:"name,omitempty"`
+			Input interface{} `json:"input,omitempty"`
 		}{
 			{
 				Type: "text",
@@ -720,7 +724,11 @@ func TestEmptyResponses(t *testing.T) {
 			Role: "assistant",
 			Content: []struct {
 				Type string `json:"type"`
-				Text string `json:"text"`
+				Text string `json:"text,omitempty"`
+				// Tool use fields
+				ID string `json:"id,omitempty"`
+				Name string `json:"name,omitempty"`
+				Input interface{} `json:"input,omitempty"`
 			}{},
 			StopReason: AnthropicCompletionReasonEndTurn,
 		}
