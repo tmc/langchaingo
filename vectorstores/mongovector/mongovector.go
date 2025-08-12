@@ -225,11 +225,11 @@ func (store *Store) SimilaritySearch(
 		},
 	}
 
-	// Execute the aggregation.
 	cur, err := store.coll.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
 	found := []schema.Document{}
 	for cur.Next(ctx) {
