@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/tmc/langchaingo/internal/mongodb"
 	"github.com/tmc/langchaingo/llms"
@@ -27,8 +26,13 @@ type ChatMessageHistory struct {
 }
 
 type chatMessageModel struct {
-	SessionID string `bson:"SessionId" json:"SessionId"`
-	History   string `bson:"History"   json:"History"`
+	SessionID string                  `bson:"SessionId"`
+	History   chatMessageModelHistory `bson:"History"`
+}
+
+type chatMessageModelHistory struct {
+	Type    string `bson:"type"`
+	Content string `bson:"content"`
 }
 
 // Statically assert that MongoDBChatMessageHistory implement the chat message history interface.
@@ -71,9 +75,11 @@ func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, 
 		return messages, err
 	}
 	for _, message := range _messages {
-		m := llms.ChatMessageModel{}
-		if err := json.Unmarshal([]byte(message.History), &m); err != nil {
-			return messages, err
+		m := llms.ChatMessageModel{
+			Type: message.History.Type,
+			Data: llms.ChatMessageModelData{
+				Content: message.History.Content,
+			},
 		}
 		messages = append(messages, m.ToChatMessage())
 	}
@@ -100,14 +106,12 @@ func (h *ChatMessageHistory) Clear(ctx context.Context) error {
 
 // AddMessage adds a message to the store.
 func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMessage) error {
-	_message, err := json.Marshal(llms.ConvertChatMessageToModel(message))
-	if err != nil {
-		return err
-	}
-
-	_, err = h.collection.InsertOne(ctx, chatMessageModel{
+	_, err := h.collection.InsertOne(ctx, chatMessageModel{
 		SessionID: h.sessionID,
-		History:   string(_message),
+		History: chatMessageModelHistory{
+			Type:    string(message.GetType()),
+			Content: string(message.GetContent()),
+		},
 	})
 
 	return err
@@ -117,13 +121,12 @@ func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMe
 func (h *ChatMessageHistory) SetMessages(ctx context.Context, messages []llms.ChatMessage) error {
 	_messages := []interface{}{}
 	for _, message := range messages {
-		_message, err := json.Marshal(llms.ConvertChatMessageToModel(message))
-		if err != nil {
-			return err
-		}
 		_messages = append(_messages, chatMessageModel{
 			SessionID: h.sessionID,
-			History:   string(_message),
+			History: chatMessageModelHistory{
+				Type:    string(message.GetType()),
+				Content: string(message.GetContent()),
+			},
 		})
 	}
 
