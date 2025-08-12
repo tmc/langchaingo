@@ -90,6 +90,7 @@ func (g *Vertex) GenerateContent(
 	if model.Tools, err = convertTools(opts.Tools); err != nil {
 		return nil, err
 	}
+	model.ToolConfig = convertToolConfig(opts.ToolChoice)
 
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
@@ -121,6 +122,43 @@ func (g *Vertex) GenerateContent(
 	}
 
 	return response, nil
+}
+
+// convertToolConfig converts a ToolChoice to a genai.ToolConfig.
+func convertToolConfig(config any) *genai.ToolConfig {
+	if config == nil {
+		return nil
+	}
+
+	var mode genai.FunctionCallingMode
+	var allowedFunctionNames []string
+
+	if c, ok := config.(string); ok {
+		switch strings.ToLower(c) {
+		case "any":
+			mode = genai.FunctionCallingAny
+		case "none":
+			mode = genai.FunctionCallingNone
+		default:
+			mode = genai.FunctionCallingAuto
+		}
+	} else if c, ok := config.([]string); ok {
+		if len(c) > 0 {
+			mode = genai.FunctionCallingAny
+			allowedFunctionNames = c
+		} else {
+			mode = genai.FunctionCallingAuto
+		}
+	} else {
+		mode = genai.FunctionCallingAuto
+	}
+
+	return &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode:                 mode,
+			AllowedFunctionNames: allowedFunctionNames,
+		},
+	}
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
@@ -375,7 +413,7 @@ DoStream:
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	genaiTools := make([]*genai.Tool, 0, len(tools))
+	genaiFuncDecls := make([]*genai.FunctionDeclaration, 0, len(tools))
 	for i, tool := range tools {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
@@ -452,10 +490,12 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		}
 		genaiFuncDecl.Parameters = schema
 
-		genaiTools = append(genaiTools, &genai.Tool{
-			FunctionDeclarations: []*genai.FunctionDeclaration{genaiFuncDecl},
-		})
+		// google genai only support one tool, multiple tools must be embedded into function declarations:
+		// https://github.com/GoogleCloudPlatform/generative-ai/issues/636
+		// https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#chat-samples
+		genaiFuncDecls = append(genaiFuncDecls, genaiFuncDecl)
 	}
+	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
 
 	return genaiTools, nil
 }

@@ -222,7 +222,7 @@ require (
 	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.4.1
-	github.com/pkoukk/tiktoken-go v0.1.6
+	github.com/pkoukk/tiktoken-go v0.1.7
 	github.com/redis/rueidis v1.0.34
 	github.com/weaviate/weaviate v1.24.1
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1

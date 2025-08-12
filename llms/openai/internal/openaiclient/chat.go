@@ -78,6 +78,12 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+	User string `json:"user,omitempty"`
+
+	// Whether to enable parallel function calling during tool use.
+	ParallelToolCalls bool `json:"parallel_tool_calls,omitempty"`
 }
 
 // ToolType is the type of a tool.
@@ -302,6 +308,9 @@ type ChatUsage struct {
 	CompletionTokensDetails struct {
 		ReasoningTokens int `json:"reasoning_tokens"`
 	} `json:"completion_tokens_details"`
+	PromptTokensDetails struct {
+		CachedTokens int `json:"cached_tokens"`
+	} `json:"prompt_tokens_details"`
 }
 
 // ChatCompletionResponse is a response to a chat request.

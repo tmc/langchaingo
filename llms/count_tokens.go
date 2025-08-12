@@ -11,6 +11,11 @@ const (
 )
 
 const (
+	_gpt41NanoContextSize    = 1047576
+	_gpt41MiniContextSize    = 1047576
+	_gpt41ContextSize        = 1047576
+	_gpt4oContextSize        = 128000
+	_gpt4oMiniContextSize    = 128000
 	_gpt35TurboContextSize   = 4096
 	_gpt432KContextSize      = 32768
 	_gpt4ContextSize         = 8192
@@ -27,6 +32,11 @@ const (
 
 // nolint:gochecknoglobals
 var modelToContextSize = map[string]int{
+	"gpt-4.1-nano":     _gpt41NanoContextSize,
+	"gpt-4.1-mini":     _gpt41MiniContextSize,
+	"gpt-4.1":          _gpt41ContextSize,
+	"gpt-4o-mini":      _gpt4oMiniContextSize,
+	"gpt-4o":           _gpt4oContextSize,
 	"gpt-3.5-turbo":    _gpt35TurboContextSize,
 	"gpt-4-32k":        _gpt432KContextSize,
 	"gpt-4":            _gpt4ContextSize,
@@ -52,7 +62,7 @@ func GetModelContextSize(model string) int {
 func CountTokens(model, text string) int {
 	e, err := tiktoken.EncodingForModel(model)
 	if err != nil {
-		e, err = tiktoken.GetEncoding("gpt2")
+		e, err = tiktoken.GetEncoding("o200k_base")
 		if err != nil {
 			log.Printf("[WARN] Failed to calculate number of tokens for model, falling back to approximate count")
 			return len([]rune(text)) / _tokenApproximation
