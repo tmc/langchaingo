@@ -240,9 +240,12 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 				Parts: []ContentPart{
 					TextContent{Text: "Hello there!"},
 					ToolCall{
-						ID:           "t42",
-						Type:         "function",
-						FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`},
+						ID:   "t42",
+						Type: "function",
+						FunctionCall: &FunctionCall{
+							Name:      "get_current_weather",
+							Arguments: `{ "location": "New York" }`,
+						},
 					},
 				},
 			},
@@ -397,7 +400,14 @@ role: user
 			in: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
-					ToolCall{Type: "function", ID: "t01", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`}},
+					ToolCall{
+						Type: "function",
+						ID:   "t01",
+						FunctionCall: &FunctionCall{
+							Name:      "get_current_weather",
+							Arguments: `{ "location": "New York" }`,
+						},
+					},
 				},
 			},
 		},
@@ -406,8 +416,19 @@ role: user
 			in: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
-					ToolCall{Type: "function", ID: "tc01", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "New York" }`}},
-					ToolCall{Type: "function", ID: "tc02", FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "Berlin" }`}},
+					ToolCall{
+						Type: "function",
+						ID:   "tc01",
+						FunctionCall: &FunctionCall{
+							Name:      "get_current_weather",
+							Arguments: `{ "location": "New York" }`,
+						},
+					},
+					ToolCall{
+						Type:         "function",
+						ID:           "tc02",
+						FunctionCall: &FunctionCall{Name: "get_current_weather", Arguments: `{ "location": "Berlin" }`},
+					},
 				},
 			},
 			assertedJSON: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"get_current_weather","arguments":"{ \"location\": \"New York\" }"},"id":"tc01","type":"function"}},{"type":"tool_call","tool_call":{"function":{"name":"get_current_weather","arguments":"{ \"location\": \"Berlin\" }"},"id":"tc02","type":"function"}}]}`,
@@ -443,7 +464,10 @@ role: assistant
 			in: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
-					ToolCall{Type: "hammer", FunctionCall: &FunctionCall{Name: "hit", Arguments: `{ "force": 10, "direction": "down" }`}},
+					ToolCall{
+						Type:         "hammer",
+						FunctionCall: &FunctionCall{Name: "hit", Arguments: `{ "force": 10, "direction": "down" }`},
+					},
 				},
 			},
 		},
@@ -531,5 +555,29 @@ role: assistant
 				t.Errorf("Roundtrip YAML mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestToolCallSerialization(t *testing.T) {
+	t.Parallel()
+	toolCall := ToolCall{
+		ID:   "test_id",
+		Type: "tool_call",
+		FunctionCall: &FunctionCall{
+			Name:      "getIpLocation",
+			Arguments: `{"ip":"8.8.8.8"}`,
+		},
+	}
+	b, err := json.Marshal(toolCall)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var unmarshalToolCall ToolCall
+	if e := json.Unmarshal(b, &unmarshalToolCall); e != nil {
+		t.Fatal(e)
+	}
+	if diff := cmp.Diff(toolCall, unmarshalToolCall); diff != "" {
+		t.Errorf("")
 	}
 }
