@@ -5,57 +5,56 @@ sidebar_position: 2
 import CodeBlock from "@theme/CodeBlock";
 import ExampleOpenAI from "@examples/openai-completion-example/openai_completion_example.go";
 
-# Quickstart: LangChainGo with OpenAI
+# 快速入门：LangChainGo 与 OpenAI
 
-Get started by running your first program with LangChainGo and [OpenAI](https://openai.com/). OpenAI's GPT models are renowned for their proficiency and expansive capabilities.
+通过运行您的第一个 LangChainGo 和 [OpenAI](https://openai.com/) 程序来开始。OpenAI 的 GPT 模型以其卓越的性能和广泛的功能而闻名。
 
-## Prerequisites
+## 前提条件
 
-1. **OpenAI API Key**: Sign up on [OpenAI](https://openai.com/) and retrieve your API key.
-2. **Go**: [Download and install Go](https://go.dev/doc/install).
+1.  **OpenAI API 密钥**：在 [OpenAI](https://openai.com/) 上注册并获取您的 API 密钥。
+2.  **Go**：[下载并安装 Go](https://go.dev/doc/install)。
 
-## Setup
+## 设置
 
-Before interacting with the OpenAI API, you need to set up your API key as an environment variable.
+在与 OpenAI API 交互之前，您需要将 API 密钥设置为环境变量。
 
 ### Linux/macOS (bash/zsh)
 ```bash
-export OPENAI_API_KEY="your_openai_api_key_here"
+export OPENAI_API_KEY="此处填写您的OpenAI_API密钥"
 ```
 
-### Windows (Command Prompt)
+### Windows (命令提示符)
 ```cmd
-set OPENAI_API_KEY=your_openai_api_key_here
+set OPENAI_API_KEY=此处填写您的OpenAI_API密钥
 ```
 
 ### Windows (PowerShell)
 ```powershell
-$env:OPENAI_API_KEY="your_openai_api_key_here"
+$env:OPENAI_API_KEY="此处填写您的OpenAI_API密钥"
 ```
 
-For permanent setup, add the environment variable to your shell's profile file (`~/.bashrc`, `~/.zshrc`, etc.) or system environment variables on Windows.
+要进行永久设置，请将环境变量添加到您 shell 的配置文件（`~/.bashrc`、`~/.zshrc` 等）或 Windows 的系统环境变量中。
 
-## Steps
+## 步骤
 
-1. **Set up your OpenAI API Key**: Follow the setup instructions above to configure your API key.
+1.  **设置您的 OpenAI API 密钥**：按照上面的设置说明配置您的 API 密钥。
 
-2. **Run the example**: Execute the following command:
+2.  **运行示例**：执行以下命令：
 
 ```shell
 go run github.com/tmc/langchaingo/examples/openai-completion-example@main
 ```
 
-You should see output similar to the following:
+您应该会看到类似以下的输出：
 
 ```shell
-The first man to walk on the moon was Neil
+第一个登上月球的人是尼尔
 ```
+*(译者注：输出内容已部分翻译，原文只显示了部分句子。)*
 
-Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using OpenAI's cloud-based inference.
+恭喜！您已成功构建并执行了第一个使用 OpenAI 云端推理的 LangChainGo LLM 支持程序。
 
 
-Here is the entire program (from [openai-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)):
+这是完整的程序（来自 [openai-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)）：
 
 <CodeBlock language="go">{ExampleOpenAI}</CodeBlock>
-
-

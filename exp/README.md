@@ -1,8 +1,5 @@
-# exp
+# exp (实验性功能)
 
-Experimental packages.
+实验性软件包。
 
-We have this source tree to accept ideas before they're ready to be included. Ideally code quality
-is high enough from the get go to be accepted directly and this directory will see little use over
-time. 
-
+我们设立这个源码目录是为了在一些想法尚未完全成熟到可以被正式接纳之前，有一个存放和试验它们的地方。理想情况下，代码从一开始就应该具有足够高的质量，可以直接被主项目接纳，这样随着时间的推移，这个目录的使用频率会逐渐降低。

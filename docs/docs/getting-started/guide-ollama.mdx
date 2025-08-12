@@ -5,45 +5,46 @@ sidebar_position: 1
 import CodeBlock from "@theme/CodeBlock";
 import ExampleOllama from "@examples/ollama-completion-example/ollama_completion_example.go";
 
-# Quickstart: LangChainGo with Ollama
+# 快速入门：LangChainGo 与 Ollama
 
-Get started by running your first program with LangChainGo and [Ollama](https://ollama.ai/). Ollama provides the most straightforward method for local LLM inference across all computer platforms.
+通过运行您的第一个 LangChainGo 和 [Ollama](https://ollama.ai/) 程序来开始。Ollama 提供了在所有计算机平台上进行本地 LLM 推理的最直接方法。
 
-## Prerequisites
+## 前提条件
 
-1. **Ollama**: [Download and install Ollama](https://ollama.ai/).
-2. **Go**: [Download and install Go](https://go.dev/doc/install).
+1.  **Ollama**：[下载并安装 Ollama](https://ollama.ai/)。
+2.  **Go**：[下载并安装 Go](https://go.dev/doc/install)。
 
-## Setup
+## 设置
 
-Ollama runs locally on your machine and doesn't require API keys. However, you need to have Ollama installed and a model downloaded.
+Ollama 在您的本地计算机上运行，不需要 API 密钥。但是，您需要安装 Ollama 并下载一个模型。
 
-### Install Ollama
-Follow the installation instructions for your operating system at [ollama.ai](https://ollama.ai/).
+### 安装 Ollama
+请在 [ollama.ai](https://ollama.ai/) 上按照您操作系统的安装说明进行操作。
 
-### Download a model
-Before running the example, you need to download a model. The example uses the `llama2` model:
+### 下载模型
+在运行示例之前，您需要下载一个模型。该示例使用 `llama2` 模型：
 
 ```bash
 ollama pull llama2
 ```
 
-## Steps
+## 步骤
 
-1. **Initialize Ollama**: In your terminal, execute the command `ollama run llama2`. The first run might take some time as the model needs to be fetched to your computer.
-2. **Run the example**: Enter the command:
-   ```shell
-   go run github.com/tmc/langchaingo/examples/ollama-completion-example@main
-   ```
+1.  **初始化 Ollama**：在您的终端中，执行命令 `ollama run llama2`。第一次运行可能需要一些时间，因为模型需要下载到您的计算机上。
+2.  **运行示例**：输入命令：
+    ```shell
+    go run github.com/tmc/langchaingo/examples/ollama-completion-example@main
+    ```
 
-You should see output similar to the following:
+您应该会看到类似以下的输出：
 
 ```shell
-The first human to set foot on the moon was Neil Armstrong, an American astronaut, who stepped onto the lunar surface during the Apollo 11 mission on July 20, 1969.
+第一个踏上月球的人是美国宇航员尼尔·阿姆斯特朗，他于1969年7月20日在阿波罗11号任务期间踏上了月球表面。
 ```
+*(译者注：输出内容已翻译)*
 
-Congratulations! You have successfully built and executed your first open-source LLM-based program using local inference.
+恭喜！您已成功构建并执行了第一个使用本地推理的开源 LLM 程序。
 
-Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)):
+这是完整的程序（来自 [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)）：
 
 <CodeBlock language="go">{ExampleOllama}</CodeBlock>

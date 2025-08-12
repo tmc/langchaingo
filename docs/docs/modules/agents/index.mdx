@@ -1,85 +1,86 @@
 ---
 sidebar_position: 5
 hide_table_of_contents: true
+sidebar_label: 代理
 ---
 
 import DocCardList from "@theme/DocCardList";
 
-# Agents
+# 代理
 
 :::info
-[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
+[概念指南](../../concepts/) • [操作指南](../../how-to/)
 :::
 
-Agents enable autonomous behavior by allowing language models to dynamically choose which tools to use based on user input. Unlike predetermined chains, agents make real-time decisions about their actions.
+代理通过允许语言模型根据用户输入动态选择使用哪些工具来实现自主行为。与预定的链不同，代理对其行动做出实时决策。
 
-## Core Concepts
+## 核心概念
 
-An agent system consists of several key components:
+代理系统由几个关键组件组成：
 
-- **Agent**: The decision-making component that chooses which tools to use
-- **Tools**: The available functions/APIs the agent can invoke
-- **Executor**: Manages the agent's execution loop and tool invocation
-- **Memory**: Maintains conversation context across agent interactions
+- **代理**：选择使用哪些工具的决策组件
+- **工具**：代理可以调用的可用函数/API
+- **执行器**：管理代理的执行循环和工具调用
+- **内存**：在代理交互中维护对话上下文
 
-## How Agents Work
+## 代理工作原理
 
-1. **Receive Input**: Agent receives a user query or task
-2. **Plan Action**: Agent analyzes the input and decides which tool(s) to use
-3. **Execute Tool**: Agent invokes the selected tool with appropriate parameters
-4. **Process Result**: Agent evaluates the tool's output
-5. **Decide Next Step**: Agent determines if more actions are needed or if the task is complete
-6. **Respond**: Agent provides a final response to the user
+1. **接收输入**：代理接收用户查询或任务
+2. **规划行动**：代理分析输入并决定使用哪些工具
+3. **执行工具**：代理使用适当的参数调用选定的工具
+4. **处理结果**：代理评估工具的输出
+5. **决定下一步**：代理确定是否需要更多行动或任务是否完成
+6. **响应**：代理向用户提供最终响应
 
-## Agent Types
+## 代理类型
 
-### MRKL Agent (ReAct)
-Uses a Reasoning and Acting pattern where the agent alternates between thinking about what to do and taking actions.
+### MRKL 代理 (ReAct)
+使用推理和行动模式，代理在思考要做什么和采取行动之间交替。
 
-### OpenAI Functions Agent
-Leverages OpenAI's function calling capabilities for more structured tool usage and parameter passing.
+### OpenAI 函数代理
+利用 OpenAI 的函数调用功能进行更结构化的工具使用和参数传递。
 
-### Conversational Agent
-Designed for multi-turn conversations, maintaining context while using tools to assist with tasks.
+### 对话代理
+专为多轮对话设计，在使用工具协助任务时保持上下文。
 
-### Plan-and-Execute Agent
-Creates a plan of actions first, then executes each step systematically.
+### 计划和执行代理
+首先创建行动计划，然后系统地执行每个步骤。
 
-## Available Tools
+## 可用工具
 
-LangChainGo provides several built-in tools:
+LangChainGo 提供了几个内置工具：
 
-- **Calculator**: Perform mathematical calculations
-- **Web Search**: Search the internet for information
-- **File Operations**: Read, write, and manipulate files
-- **Database Query**: Execute database operations
-- **API Calls**: Make HTTP requests to external services
-- **Custom Tools**: Create your own tools for specific use cases
+- **计算器**：执行数学计算
+- **网络搜索**：在互联网上搜索信息
+- **文件操作**：读取、写入和操作文件
+- **数据库查询**：执行数据库操作
+- **API 调用**：对外部服务进行 HTTP 请求
+- **自定义工具**：为特定用例创建您自己的工具
 
-## Building Agents
+## 构建代理
 
-### Basic Agent Setup
+### 基本代理设置
 
 ```go
-// Create tools
+// 创建工具
 tools := []tools.Tool{
     tools.Calculator{},
     tools.WebSearch{APIKey: "your-api-key"},
 }
 
-// Create agent
+// 创建代理
 agent := agents.NewOneShotAgent(llm, tools)
 
-// Create executor
+// 创建执行器
 executor := agents.NewExecutor(agent)
 
-// Execute
+// 执行
 result, err := executor.Call(ctx, map[string]any{
-    "input": "What is 25 * 4 and what's the weather like today?",
+    "input": "25 * 4 等于多少，今天的天气如何？",
 })
 ```
 
-### Custom Tools
+### 自定义工具
 
 ```go
 type CustomTool struct{}
@@ -89,24 +90,24 @@ func (c CustomTool) Name() string {
 }
 
 func (c CustomTool) Description() string {
-    return "Performs custom operations"
+    return "执行自定义操作"
 }
 
 func (c CustomTool) Call(ctx context.Context, input string) (string, error) {
-    // Your custom logic here
-    return "Tool result", nil
+    // 您的自定义逻辑在这里
+    return "工具结果", nil
 }
 ```
 
-## Best Practices
+## 最佳实践
 
-1. **Tool Selection**: Choose tools that complement each other and cover your use case
-2. **Prompt Engineering**: Design clear tool descriptions and agent prompts
-3. **Error Recovery**: Implement fallback strategies for tool failures
-4. **Resource Management**: Set timeouts and limits on tool execution
-5. **Security**: Validate tool inputs and sanitize outputs
-6. **Monitoring**: Track agent performance and decision quality
+1. **工具选择**：选择相互补充并覆盖您用例的工具
+2. **提示工程**：设计清晰的工具描述和代理提示
+3. **错误恢复**：为工具故障实施回退策略
+4. **资源管理**：设置工具执行的超时和限制
+5. **安全性**：验证工具输入并清理输出
+6. **监控**：跟踪代理性能和决策质量
 
-## Agent Components
+## 代理组件
 
 <DocCardList />
