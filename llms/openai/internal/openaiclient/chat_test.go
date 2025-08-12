@@ -122,3 +122,32 @@ func TestChatMessage_MarshalUnmarshal_WithReasoning(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, msg, msg2)
 }
+
+func TestParseStreamingChatResponse_SSEComment(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+	mockBody := `data: {"id":"cmpl-1305b94c570f447fbde3180560736287","object":"chat.completion.chunk","created":1698999575,"model":"deepseek-v3","choices":[{"index":0,"delta":{"content":"hello"},"finish_reason":null}]}
+: OPENROUTER PROCESSING
+: OPENROUTER PROCESSING
+data: {"id":"cmpl-1305b94c570f447fbde3180560736287","object":"chat.completion.chunk","created":1698999575,"model":"deepseek-v3","choices":[{"index":0,"delta":{"content":" world!"},"finish_reason":null}]}
+data: {"id":"cmpl-1305b94c570f447fbde3180560736287","object":"chat.completion.chunk","created":1698999575,"model":"deepseek-v3","choices":[{"index":0,"delta":{},"finish_reason":"stop","usage":{"prompt_tokens":19,"completion_tokens":13,"total_tokens":32}}]}
+data: [DONE]
+	`
+	r := &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(mockBody)),
+	}
+
+	req := &ChatRequest{
+		StreamingFunc: func(_ context.Context, _ []byte) error {
+			return nil
+		},
+	}
+
+	resp, err := parseStreamingChatResponse(ctx, r, req)
+
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, FinishReason("stop"), resp.Choices[0].FinishReason)
+	assert.Equal(t, "hello world!", resp.Choices[0].Message.Content)
+}
