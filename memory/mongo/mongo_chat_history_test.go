@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms"
 )
 
 func runTestContainer() (string, error) {

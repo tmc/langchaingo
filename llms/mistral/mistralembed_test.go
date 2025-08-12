@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/embeddings"
 )
 
 // TestConvertFloat64ToFloat32 tests the ConvertFloat64ToFloat32 function using table-driven tests.

@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
+	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms/ollama"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/vectorstores"
 )
 
 func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {

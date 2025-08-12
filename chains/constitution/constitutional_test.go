@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/prompts"
+	"github.com/vendasta/langchaingo/chains"
+	"github.com/vendasta/langchaingo/llms/openai"
+	"github.com/vendasta/langchaingo/prompts"
 )
 
 func TestConstitutionCritiqueParsing(t *testing.T) {

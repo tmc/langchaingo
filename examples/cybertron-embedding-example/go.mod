@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/chewxy/math32 v1.10.1
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.13-pre.1
+	github.com/vendasta/langchaingo v0.1.13-pre.1
 )
 
 require (

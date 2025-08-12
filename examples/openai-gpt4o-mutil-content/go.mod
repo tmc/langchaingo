@@ -1,8 +1,8 @@
-module github.com/tmc/langchaingo/examples/openai-gpt4o-mutil-content
+module github.com/vendasta/langchaingo/examples/openai-gpt4o-mutil-content
 
 go 1.23
 
-require github.com/tmc/langchaingo v0.1.13-pre.1
+require github.com/vendasta/langchaingo v0.1.13-pre.1
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

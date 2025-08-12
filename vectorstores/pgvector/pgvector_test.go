@@ -14,13 +14,13 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/pgvector"
+	"github.com/vendasta/langchaingo/chains"
+	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/llms/googleai"
+	"github.com/vendasta/langchaingo/llms/openai"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/vectorstores"
+	"github.com/vendasta/langchaingo/vectorstores/pgvector"
 )
 
 func preCheckEnvSetting(t *testing.T) string {

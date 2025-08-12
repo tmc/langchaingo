@@ -1,4 +1,4 @@
-module github.com/tmc/langchaingo/examples/chroma-vectorstore-example
+module github.com/vendasta/langchaingo/examples/chroma-vectorstore-example
 
 go 1.22.0
 
@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/amikos-tech/chroma-go v0.1.2
 	github.com/google/uuid v1.6.0
-	github.com/tmc/langchaingo v0.1.13-pre.1
+	github.com/vendasta/langchaingo v0.1.13-pre.1
 )
 
 require (

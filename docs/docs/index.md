@@ -14,7 +14,7 @@ The LangChain framework is designed with the above principles in mind.
 
 ## Getting Started
 
-_**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo). For documentation on [the Python version](https://github.com/langchain-ai/langchain), [head here](https://python.langchain.com/docs)._
+_**Note**: These docs are for [LangChainGo](https://github.com/vendasta/langchaingo). For documentation on [the Python version](https://github.com/langchain-ai/langchain), [head here](https://python.langchain.com/docs)._
 
 Checkout the guide below for a walkthrough of how to get started using LangChain to create a Language Model application.
 
@@ -41,7 +41,7 @@ These modules are, in increasing order of complexity:
 
 ## API Reference
 
-[Here](https://pkg.go.dev/github.com/tmc/langchaingo) you can find the API reference for all of the modules in LangChain, as well as full documentation for all exported classes and functions.
+[Here](https://pkg.go.dev/github.com/vendasta/langchaingo) you can find the API reference for all of the modules in LangChain, as well as full documentation for all exported classes and functions.
 
 ## Additional Resources
 

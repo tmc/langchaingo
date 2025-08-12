@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
+	"github.com/vendasta/langchaingo/callbacks"
+	"github.com/vendasta/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 var (

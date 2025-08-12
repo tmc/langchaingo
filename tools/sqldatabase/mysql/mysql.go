@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql" // mysql driver
-	"github.com/tmc/langchaingo/tools/sqldatabase"
+	"github.com/vendasta/langchaingo/tools/sqldatabase"
 )
 
 const EngineName = "mysql"

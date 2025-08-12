@@ -7,8 +7,8 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/textsplitter"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/textsplitter"
 )
 
 // HTML loads parses and sanitizes html content from an io.Reader.

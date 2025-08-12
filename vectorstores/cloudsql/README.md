@@ -35,7 +35,7 @@ import (
   "context"
   "fmt"
 
-  "github.com/tmc/langchaingo/internal/cloudsqlutil"
+  "github.com/vendasta/langchaingo/internal/cloudsqlutil"
 )
 
 func NewCloudSQLEngine(ctx context.Context) (*cloudsqlutil.PostgresEngine, error) {
@@ -61,7 +61,7 @@ func main() {
 }
 ```
 
-See the full [Vector Store example and tutorial](https://github.com/tmc/langchaingo/tree/main/examples/google-cloudsql-chat-message-history-example).
+See the full [Vector Store example and tutorial](https://github.com/vendasta/langchaingo/tree/main/examples/google-cloudsql-chat-message-history-example).
 
 ## Engine Creation WithPool
 
@@ -76,7 +76,7 @@ import (
   "fmt"
 
   "github.com/jackc/pgx/v5/pgxpool"
-  "github.com/tmc/langchaingo/internal/cloudsqlutil"
+  "github.com/vendasta/langchaingo/internal/cloudsqlutil"
 )
 
 func NewCloudSQLWithPoolEngine(ctx context.Context) (*cloudsqlutil.PostgresEngine, error) {
@@ -112,10 +112,10 @@ import (
   "context"
   "fmt"
 
-  "github.com/tmc/langchaingo/embeddings"
-  "github.com/tmc/langchaingo/internal/cloudsqlutil"
-  "github.com/tmc/langchaingo/llms/googleai/vertex"
-  "github.com/tmc/langchaingo/vectorstores/cloudsql"
+  "github.com/vendasta/langchaingo/embeddings"
+  "github.com/vendasta/langchaingo/internal/cloudsqlutil"
+  "github.com/vendasta/langchaingo/llms/googleai/vertex"
+  "github.com/vendasta/langchaingo/vectorstores/cloudsql"
 )
 
 func main() {
