@@ -3,11 +3,11 @@ package mongo
 import (
 	"context"
 
-	"github.com/tmc/langchaingo/internal/mongodb"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	mongoOpt "go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 const (
@@ -44,15 +44,14 @@ func NewMongoDBChatMessageHistory(ctx context.Context, options ...ChatMessageHis
 	if err != nil {
 		return nil, err
 	}
-
-	client, err := mongodb.NewClient(ctx, h.url)
-	if err != nil {
-		return nil, err
+	if h.client == nil {
+		h.client, err = mongo.Connect(mongoOpt.Client().ApplyURI(h.url))
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	h.client = client
-
-	h.collection = client.Database(h.databaseName).Collection(h.collectionName)
+	h.collection = h.client.Database(h.databaseName).Collection(h.collectionName)
 	// create session id index
 	if _, err := h.collection.Indexes().CreateOne(ctx, mongo.IndexModel{Keys: bson.D{{Key: mongoSessionIDKey, Value: 1}}}); err != nil {
 		return nil, err

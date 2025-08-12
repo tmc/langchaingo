@@ -2,6 +2,8 @@ package mongo
 
 import (
 	"errors"
+
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 const (
@@ -26,14 +28,23 @@ func applyMongoDBChatOptions(options ...ChatMessageHistoryOption) (*ChatMessageH
 		option(h)
 	}
 
-	if h.url == "" {
-		return nil, errMongoInvalidURL
-	}
-	if h.sessionID == "" {
-		return nil, errMongoInvalidSessionID
+	if h.client == nil {
+
+		if h.url == "" {
+			return nil, errMongoInvalidURL
+		}
+		if h.sessionID == "" {
+			return nil, errMongoInvalidSessionID
+		}
 	}
 
 	return h, nil
+}
+
+func WithMongoClient(client *mongo.Client) ChatMessageHistoryOption {
+	return func(p *ChatMessageHistory) {
+		p.client = client
+	}
 }
 
 // WithConnectionURL is an option for specifying the MongoDB connection URL. Must be set.
