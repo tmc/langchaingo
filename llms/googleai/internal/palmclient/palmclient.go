@@ -185,6 +185,8 @@ func (m ChatMessage) GetType() llms.ChatMessageType {
 	switch m.Author {
 	case "user":
 		return llms.ChatMessageTypeHuman
+	case "system":
+		return llms.ChatMessageTypeSystem
 	default:
 		return llms.ChatMessageTypeAI
 	}
