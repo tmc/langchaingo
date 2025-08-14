@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {

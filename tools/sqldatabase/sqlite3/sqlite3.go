@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	_ "github.com/mattn/go-sqlite3" // sqlite3 driver
 	"github.com/0xDezzy/langchaingo/tools/sqldatabase"
+	_ "github.com/mattn/go-sqlite3" // sqlite3 driver
 )
 
 const EngineName = "sqlite3"

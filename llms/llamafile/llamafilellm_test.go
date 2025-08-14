@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/llms"
 	"github.com/0xDezzy/langchaingo/llms/llamafile/internal/llamafileclient"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // isLlamafileAvailable checks if the llamafile server is available

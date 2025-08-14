@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/llms"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCache_hashKeyForCache(t *testing.T) {

@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/httputil"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // MockEmbedder is a mock embedder for testing.

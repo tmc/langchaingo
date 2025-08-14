@@ -7,11 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/log"
-	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/0xDezzy/langchaingo/chains"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/httputil"
@@ -20,6 +15,11 @@ import (
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
+	tcweaviate "github.com/testcontainers/testcontainers-go/modules/weaviate"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/filters"
 	"github.com/weaviate/weaviate/entities/models"
 )

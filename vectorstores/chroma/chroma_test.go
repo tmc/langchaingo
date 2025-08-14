@@ -8,12 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	chromatypes "github.com/amikos-tech/chroma-go/types"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/log"
-	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/0xDezzy/langchaingo/chains"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
@@ -22,6 +16,12 @@ import (
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
 	"github.com/0xDezzy/langchaingo/vectorstores/chroma"
+	chromatypes "github.com/amikos-tech/chroma-go/types"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
+	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 )
 
 // TODO (noodnik2):

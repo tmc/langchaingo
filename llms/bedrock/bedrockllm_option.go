@@ -1,8 +1,8 @@
 package bedrock
 
 import (
-	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/0xDezzy/langchaingo/callbacks"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
 
 // Option is an option for the Bedrock LLM.

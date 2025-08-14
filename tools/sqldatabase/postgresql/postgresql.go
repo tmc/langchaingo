@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	_ "github.com/jackc/pgx/v5/stdlib" // postgresql driver
 	"github.com/0xDezzy/langchaingo/tools/sqldatabase"
+	_ "github.com/jackc/pgx/v5/stdlib" // postgresql driver
 )
 
 const EngineName = "pgx"

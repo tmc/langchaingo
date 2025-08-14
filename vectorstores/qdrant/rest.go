@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/google/uuid"
 	"github.com/0xDezzy/langchaingo/httputil"
 	"github.com/0xDezzy/langchaingo/schema"
+	"github.com/google/uuid"
 )
 
 // upsertPoints updates or inserts points into the Qdrant collection.

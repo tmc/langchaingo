@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/google/uuid"
-	opensearchgo "github.com/opensearch-project/opensearch-go"
-	"github.com/opensearch-project/opensearch-go/opensearchapi"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
+	"github.com/google/uuid"
+	opensearchgo "github.com/opensearch-project/opensearch-go"
+	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
 // Store is a wrapper around the chromaGo API and client.

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/prompts"
 	"github.com/0xDezzy/langchaingo/schema"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStuffDocuments(t *testing.T) {

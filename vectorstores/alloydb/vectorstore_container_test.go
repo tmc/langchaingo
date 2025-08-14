@@ -9,12 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/log"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/internal/testutil/testctr"
@@ -22,6 +16,12 @@ import (
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/util/alloydbutil"
 	"github.com/0xDezzy/langchaingo/vectorstores/alloydb"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
+	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func preCheckEnvSetting(t *testing.T) string {

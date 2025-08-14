@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/textsplitter"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 // HTML loads parses and sanitizes html content from an io.Reader.

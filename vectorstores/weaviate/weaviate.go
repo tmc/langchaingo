@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-openapi/strfmt"
-	"github.com/google/uuid"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
+	"github.com/go-openapi/strfmt"
+	"github.com/google/uuid"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/auth"
 	"github.com/weaviate/weaviate-go-client/v5/weaviate/filters"

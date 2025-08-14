@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	z "github.com/getzep/zep-go/v2"
-	zClient "github.com/getzep/zep-go/v2/client"
-	zOption "github.com/getzep/zep-go/v2/option"
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/memory"
 	"github.com/0xDezzy/langchaingo/memory/zep"
+	z "github.com/getzep/zep-go/v2"
+	zClient "github.com/getzep/zep-go/v2/client"
+	zOption "github.com/getzep/zep-go/v2/option"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConversation(t *testing.T) {

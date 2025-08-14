@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/metaphorsystems/metaphor-go"
 	"github.com/0xDezzy/langchaingo/tools"
+	"github.com/metaphorsystems/metaphor-go"
 )
 
 // Search defines a tool implementation for the Metaphor Search.
