@@ -318,17 +318,23 @@ require (
 	github.com/FalkorDB/falkordb-go v1.0.0
 	github.com/getzep/zep-go/v2 v2.22.0
 	github.com/gomodule/redigo v1.7.1-0.20190724094224-574c33c3df38
+	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
+	github.com/timsims/pamphlet v0.1.6
 )
 
 require (
-	github.com/fatih/color v1.17.0 // indirect
-	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 // indirect
+	github.com/anush008/fastembed-go v1.0.0 // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/olekukonko/errors v1.1.0 // indirect
-	github.com/olekukonko/ll v0.0.9 // indirect
+	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
+	github.com/schollz/progressbar/v2 v2.15.0 // indirect
+	github.com/schollz/progressbar/v3 v3.14.1 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/timsims/pamphlet v0.1.6 // indirect
+	github.com/sugarme/regexpset v0.0.0-20200920021344-4d4ec8eaf93c // indirect
+	github.com/sugarme/tokenizer v0.2.3-0.20230829214935-448e79b1ed65 // indirect
+	github.com/yalue/onnxruntime_go v1.7.0 // indirect
+	golang.org/x/term v0.32.0 // indirect
 )
