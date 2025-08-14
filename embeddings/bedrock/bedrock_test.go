@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/embeddings/bedrock"
 	"github.com/0xDezzy/langchaingo/httputil"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEmbedQuery(t *testing.T) {

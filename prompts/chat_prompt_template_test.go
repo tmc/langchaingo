@@ -3,8 +3,8 @@ package prompts
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/llms"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChatPromptTemplate(t *testing.T) {

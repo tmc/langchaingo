@@ -3,8 +3,8 @@ package huggingface
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/0xDezzy/langchaingo/llms/huggingface"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOptions(t *testing.T) {

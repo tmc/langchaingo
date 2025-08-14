@@ -7,12 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/milvus-io/milvus-sdk-go/v2/client"
-	"github.com/milvus-io/milvus-sdk-go/v2/entity"
-	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	tclog "github.com/testcontainers/testcontainers-go/log"
-	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/internal/testutil/testctr"
@@ -20,6 +14,12 @@ import (
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/vectorstores"
+	"github.com/milvus-io/milvus-sdk-go/v2/client"
+	"github.com/milvus-io/milvus-sdk-go/v2/entity"
+	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
+	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 )
 
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/0xDezzy/langchaingo/llms"
 	"github.com/getzep/zep-go/v2"
 	zepClient "github.com/getzep/zep-go/v2/client"
-	"github.com/0xDezzy/langchaingo/llms"
 )
 
 // MockZepClient implements a simple mock for testing

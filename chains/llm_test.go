@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/callbacks"
 	"github.com/0xDezzy/langchaingo/httputil"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms/googleai"
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/prompts"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLLMChain(t *testing.T) {

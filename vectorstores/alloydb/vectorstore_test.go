@@ -8,13 +8,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/util/alloydbutil"
 	"github.com/0xDezzy/langchaingo/vectorstores/alloydb"
+	"github.com/stretchr/testify/require"
 )
 
 type EnvVariables struct {

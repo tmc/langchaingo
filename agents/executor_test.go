@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/agents"
 	"github.com/0xDezzy/langchaingo/chains"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
@@ -15,6 +14,7 @@ import (
 	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/0xDezzy/langchaingo/tools"
 	"github.com/0xDezzy/langchaingo/tools/serpapi"
+	"github.com/stretchr/testify/require"
 )
 
 type testAgent struct {

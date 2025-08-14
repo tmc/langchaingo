@@ -3,9 +3,9 @@ package cybertron
 import (
 	"context"
 
+	"github.com/0xDezzy/langchaingo/embeddings"
 	"github.com/nlpodyssey/cybertron/pkg/models/bert"
 	"github.com/nlpodyssey/cybertron/pkg/tasks/textencoding"
-	"github.com/0xDezzy/langchaingo/embeddings"
 )
 
 // Cybertron is the embedder using Cybertron to run embedding models locally.

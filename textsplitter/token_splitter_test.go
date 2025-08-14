@@ -3,9 +3,9 @@ package textsplitter
 import (
 	"testing"
 
+	"github.com/0xDezzy/langchaingo/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/0xDezzy/langchaingo/schema"
 )
 
 func TestTokenSplitter(t *testing.T) {

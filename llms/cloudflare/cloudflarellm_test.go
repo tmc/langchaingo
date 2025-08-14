@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/0xDezzy/langchaingo/llms"
 	"github.com/0xDezzy/langchaingo/llms/cloudflare/internal/cloudflareclient"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {

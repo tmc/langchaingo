@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/0xDezzy/langchaingo/textsplitter"
 	"github.com/ledongthuc/pdf"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/0xDezzy/langchaingo/textsplitter"
 )
 
 func TestPDFLoader(t *testing.T) {

@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/0xDezzy/langchaingo/agents"
 	"github.com/0xDezzy/langchaingo/chains"
 	"github.com/0xDezzy/langchaingo/internal/httprr"
 	"github.com/0xDezzy/langchaingo/llms/openai"
 	"github.com/0xDezzy/langchaingo/prompts"
 	"github.com/0xDezzy/langchaingo/tools"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOpenAIFunctionsAgentWithHTTPRR(t *testing.T) {

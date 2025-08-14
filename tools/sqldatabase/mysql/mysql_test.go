@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0xDezzy/langchaingo/internal/testutil/testctr"
+	"github.com/0xDezzy/langchaingo/tools/sqldatabase"
+	_ "github.com/0xDezzy/langchaingo/tools/sqldatabase/mysql"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/log"
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
-	"github.com/0xDezzy/langchaingo/internal/testutil/testctr"
-	"github.com/0xDezzy/langchaingo/tools/sqldatabase"
-	_ "github.com/0xDezzy/langchaingo/tools/sqldatabase/mysql"
 )
 
 func Test(t *testing.T) {
