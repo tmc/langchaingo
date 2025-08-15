@@ -113,6 +113,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
 
+		MaxTokens:           opts.MaxTokens,
 		MaxCompletionTokens: opts.MaxTokens,
 
 		ToolChoice:           opts.ToolChoice,
