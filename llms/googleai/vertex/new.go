@@ -58,3 +58,15 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 	}
 	return v, nil
 }
+
+// Close closes the underlying genai and palm clients.
+// This should be called when the Vertex instance is no longer needed
+// to prevent memory leaks from the underlying gRPC connections.
+func (v *Vertex) Close() error {
+	var err error
+	if v.client != nil {
+		err = v.client.Close()
+	}
+	// Note: palmClient doesn't have a Close method based on the codebase
+	return err
+}

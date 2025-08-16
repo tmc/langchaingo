@@ -4,6 +4,10 @@ go 1.24.3
 
 require github.com/tmc/langchaingo v0.1.14-pre.0
 
+// Temporary replace directive for testing Close() method changes
+// TODO: Remove after next release includes the Close() methods
+replace github.com/tmc/langchaingo => ../..
+
 require (
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/ai v0.7.0 // indirect
