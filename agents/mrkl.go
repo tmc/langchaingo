@@ -130,19 +130,59 @@ func constructMrklScratchPad(steps []schema.AgentStep) string {
 }
 
 func (a *OneShotZeroAgent) parseOutput(output string) ([]schema.AgentAction, *schema.AgentFinish, error) {
+	// First check for the standard "Final Answer:" format for backward compatibility
 	if strings.Contains(output, _finalAnswerAction) {
 		splits := strings.Split(output, _finalAnswerAction)
 
 		return nil, &schema.AgentFinish{
 			ReturnValues: map[string]any{
-				a.OutputKey: splits[len(splits)-1],
+				a.OutputKey: strings.TrimSpace(splits[len(splits)-1]),
 			},
 			Log: output,
 		}, nil
 	}
 
-	r := regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s(?s)*(.+)`)
+	// Check for case-insensitive variations of final answer
+	// This helps with models that may use different casing
+	lowerOutput := strings.ToLower(output)
+	finalAnswerVariations := []string{
+		"final answer:",
+		"final answer :",
+		"the final answer is:",
+		"the answer is:",
+	}
+
+	for _, variation := range finalAnswerVariations {
+		if idx := strings.Index(lowerOutput, variation); idx != -1 {
+			// Extract the answer after the variation phrase
+			answerStart := idx + len(variation)
+			answer := strings.TrimSpace(output[answerStart:])
+
+			// Make sure this isn't followed by an Action (which would indicate it's not really done)
+			if !strings.Contains(strings.ToLower(answer), "\naction:") {
+				return nil, &schema.AgentFinish{
+					ReturnValues: map[string]any{
+						a.OutputKey: answer,
+					},
+					Log: output,
+				}, nil
+			}
+		}
+	}
+
+	// Try to match Action/Action Input pattern with more flexibility
+	// Support both "Action Input:" and "Action input:" (case variations)
+	r := regexp.MustCompile(`(?i)Action:\s*(.+?)\s*Action\s+Input:\s*(?s)(.+)`)
 	matches := r.FindStringSubmatch(output)
+	if len(matches) == 3 {
+		return []schema.AgentAction{
+			{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
+		}, nil, nil
+	}
+
+	// Fallback to original regex for backward compatibility
+	r = regexp.MustCompile(`Action:\s*(.+)\s*Action Input:\s(?s)*(.+)`)
+	matches = r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
 	}
