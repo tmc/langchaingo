@@ -39,9 +39,7 @@ func getProvider(modelID string) string {
 	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
 		return "nova"
 	}
-
 	parts := strings.Split(modelID, ".")
-
 	// For backward compatibility with the original provider detection
 	switch {
 	case strings.Contains(modelID, "ai21"):
@@ -74,11 +72,14 @@ func NewClient(client *bedrockruntime.Client) *Client {
 // CreateCompletion creates a new completion response from the provider
 // after sending the messages to the provider.
 func (c *Client) CreateCompletion(ctx context.Context,
+	provider string,
 	modelID string,
 	messages []Message,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	provider := getProvider(modelID)
+	if provider == "" {
+		provider = getProvider(modelID)
+	}
 	switch provider {
 	case "ai21":
 		return createAi21Completion(ctx, c.client, modelID, messages, options)
