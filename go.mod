@@ -17,7 +17,7 @@ require github.com/google/uuid v1.6.0
 // Testing
 require (
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go v0.37.0
+	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/chroma v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/milvus v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
@@ -315,4 +315,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require github.com/stretchr/objx v0.5.2 // indirect
+require (
+	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0 // indirect
+)
