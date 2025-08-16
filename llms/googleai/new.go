@@ -39,3 +39,13 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 	gi.client = client
 	return gi, nil
 }
+
+// Close closes the underlying genai client.
+// This should be called when the GoogleAI instance is no longer needed
+// to prevent memory leaks from the underlying gRPC connections.
+func (g *GoogleAI) Close() error {
+	if g.client != nil {
+		return g.client.Close()
+	}
+	return nil
+}

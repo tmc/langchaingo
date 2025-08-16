@@ -438,9 +438,21 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 ) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan StreamedChatResponsePayload)
+	
+	// Create a context that can be cancelled to stop the goroutine
+	readerCtx, cancelReader := context.WithCancel(ctx)
+	defer cancelReader()
+	
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
+			// Check if context is cancelled
+			select {
+			case <-readerCtx.Done():
+				return
+			default:
+			}
+			
 			line := scanner.Text()
 			if line == "" {
 				continue
@@ -459,15 +471,25 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				// This allows the stream to continue processing valid JSON chunks
 				continue
 			}
-			responseChan <- streamPayload
+			
+			// Non-blocking send with context check
+			select {
+			case <-readerCtx.Done():
+				return
+			case responseChan <- streamPayload:
+			}
 		}
 		if err := scanner.Err(); err != nil {
-			responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}
+			select {
+			case <-readerCtx.Done():
+				return
+			case responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}:
+			}
 			return
 		}
 	}()
 	// Combine response
-	return combineStreamingChatResponse(ctx, payload, responseChan)
+	return combineStreamingChatResponse(readerCtx, payload, responseChan)
 }
 
 func combineStreamingChatResponse(
