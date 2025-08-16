@@ -22,10 +22,16 @@ type Client struct {
 type Message struct {
 	Role    llms.ChatMessageType
 	Content string
-	// Type may be "text" or "image"
+	// Type may be "text", "image", "tool_call", or "tool_result"
 	Type string
 	// MimeType is the MIME type
 	MimeType string
+	// Tool call fields
+	ToolCallID string `json:"tool_call_id,omitempty"`
+	ToolName   string `json:"tool_name,omitempty"`
+	ToolArgs   string `json:"tool_args,omitempty"`
+	// Tool result fields
+	ToolUseID string `json:"tool_use_id,omitempty"`
 }
 
 func getProvider(modelID string) string {
@@ -33,9 +39,7 @@ func getProvider(modelID string) string {
 	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
 		return "nova"
 	}
-	
 	parts := strings.Split(modelID, ".")
-	
 	// For backward compatibility with the original provider detection
 	switch {
 	case strings.Contains(modelID, "ai21"):
@@ -54,7 +58,7 @@ func getProvider(modelID string) string {
 	if len(parts) > 0 {
 		return parts[0]
 	}
-	
+
 	return ""
 }
 
@@ -68,11 +72,14 @@ func NewClient(client *bedrockruntime.Client) *Client {
 // CreateCompletion creates a new completion response from the provider
 // after sending the messages to the provider.
 func (c *Client) CreateCompletion(ctx context.Context,
+	provider string,
 	modelID string,
 	messages []Message,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	provider := getProvider(modelID)
+	if provider == "" {
+		provider = getProvider(modelID)
+	}
 	switch provider {
 	case "ai21":
 		return createAi21Completion(ctx, c.client, modelID, messages, options)
