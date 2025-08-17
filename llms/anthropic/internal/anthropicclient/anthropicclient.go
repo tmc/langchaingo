@@ -33,6 +33,10 @@ type Client struct {
 
 	// UseLegacyTextCompletionsAPI is a flag to use the legacy text completions API.
 	UseLegacyTextCompletionsAPI bool
+
+	cacheTools         bool
+	cacheSystemMessage bool
+	cacheChat          bool
 }
 
 // Option is an option for the Anthropic client.
@@ -64,6 +68,16 @@ func WithLegacyTextCompletionsAPI(val bool) Option {
 func WithAnthropicBetaHeader(val string) Option {
 	return func(opts *Client) error {
 		opts.anthropicBetaHeader = val
+		return nil
+	}
+}
+
+// WithCache set the cache settings for the client.
+func WithCache(tools, system, chat bool) Option {
+	return func(opts *Client) error {
+		opts.cacheTools = tools
+		opts.cacheSystemMessage = system
+		opts.cacheTools = chat
 		return nil
 	}
 }
@@ -127,21 +141,22 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 }
 
 type MessageRequest struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	Temperature float64       `json:"temperature"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
+	Model       string              `json:"model"`
+	Messages    []ChatMessage       `json:"messages"`
+	System      []SystemTextMessage `json:"system,omitempty"`
+	Temperature float64             `json:"temperature"`
+	MaxTokens   int                 `json:"max_tokens,omitempty"`
+	TopP        float64             `json:"top_p,omitempty"`
+	Tools       []Tool              `json:"tools,omitempty"`
+	StopWords   []string            `json:"stop_sequences,omitempty"`
+	Stream      bool                `json:"stream,omitempty"`
 
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 // CreateMessage creates message for the messages api.
 func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*MessageResponsePayload, error) {
+	c.applyCacheSettings(r)
 	resp, err := c.createMessage(ctx, &messagePayload{
 		Model:         r.Model,
 		Messages:      r.Messages,
@@ -158,6 +173,60 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c *Client) applyCacheSettings(r *MessageRequest) {
+	if c.cacheSystemMessage && len(r.System) > 0 {
+		// mark the last system message with cache control (see https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#large-context-caching-example)
+		r.System[len(r.System)-1].CacheControl = &ephemeralCache
+	}
+
+	if c.cacheTools && len(r.Tools) > 0 {
+		// mark the last tool with cache control (see https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#caching-tool-definitions)
+		r.Tools[len(r.Tools)-1].CacheControl = &ephemeralCache
+	}
+
+	if c.cacheChat {
+		// mark the last chat message (part) with cache control (see https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#caching-chat-messages)
+		// so here we traverse the messages in reverse order and mark the first part of the last message that has a cacheable part
+		for m := len(r.Messages) - 1; m >= 0; m-- {
+			found := false
+			for p := len(r.Messages[m].Content) - 1; p >= 0; p-- {
+				foundPart := true
+
+				switch part := r.Messages[m].Content[p].(type) {
+				// https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#what-can-be-cached
+				case TextContent:
+					if part.Text == "" {
+						foundPart = false // empty text parts are not cacheable
+					} else {
+						part.CacheControl = &ephemeralCache
+						r.Messages[m].Content[p] = part
+					}
+				case ImageContent:
+					part.CacheControl = &ephemeralCache
+					r.Messages[m].Content[p] = part
+				case ToolResultContent:
+					part.CacheControl = &ephemeralCache
+					r.Messages[m].Content[p] = part
+				case ToolUseContent:
+					part.CacheControl = &ephemeralCache
+					r.Messages[m].Content[p] = part
+				default:
+					foundPart = false
+				}
+
+				if foundPart {
+					found = true
+					break
+				}
+			}
+
+			if found {
+				break
+			}
+		}
+	}
 }
 
 func (c *Client) setHeaders(req *http.Request) {

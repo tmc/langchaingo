@@ -27,30 +27,43 @@ var (
 )
 
 type ChatMessage struct {
-	Role    string      `json:"role"`
-	Content interface{} `json:"content"`
+	Role    string    `json:"role"`
+	Content []Content `json:"content"`
+}
+
+type SystemTextMessage struct {
+	Type         string        `json:"type"`
+	Text         string        `json:"text"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 type messagePayload struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
-	Temperature float64       `json:"temperature"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
+	Model       string              `json:"model"`
+	Messages    []ChatMessage       `json:"messages"`
+	System      []SystemTextMessage `json:"system,omitempty"`
+	MaxTokens   int                 `json:"max_tokens,omitempty"`
+	StopWords   []string            `json:"stop_sequences,omitempty"`
+	Stream      bool                `json:"stream,omitempty"`
+	Temperature float64             `json:"temperature"`
+	Tools       []Tool              `json:"tools,omitempty"`
+	TopP        float64             `json:"top_p,omitempty"`
 
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
 // Tool used for the request message payload.
 type Tool struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	InputSchema any    `json:"input_schema,omitempty"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description,omitempty"`
+	InputSchema  any           `json:"input_schema,omitempty"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
+
+type CacheControl struct {
+	Type string `json:"type"`
+}
+
+var ephemeralCache = CacheControl{Type: "ephemeral"}
 
 // Content can be TextContent or ToolUseContent depending on the type.
 type Content interface {
@@ -58,8 +71,9 @@ type Content interface {
 }
 
 type TextContent struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type         string        `json:"type"`
+	Text         string        `json:"text"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (tc TextContent) GetType() string {
@@ -67,8 +81,9 @@ func (tc TextContent) GetType() string {
 }
 
 type ImageContent struct {
-	Type   string      `json:"type"`
-	Source ImageSource `json:"source"`
+	Type         string        `json:"type"`
+	Source       ImageSource   `json:"source"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (ic ImageContent) GetType() string {
@@ -82,10 +97,11 @@ type ImageSource struct {
 }
 
 type ToolUseContent struct {
-	Type  string                 `json:"type"`
-	ID    string                 `json:"id"`
-	Name  string                 `json:"name"`
-	Input map[string]interface{} `json:"input"`
+	Type         string                 `json:"type"`
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name"`
+	Input        map[string]interface{} `json:"input"`
+	CacheControl *CacheControl          `json:"cache_control,omitempty"`
 }
 
 func (tuc ToolUseContent) GetType() string {
@@ -93,9 +109,10 @@ func (tuc ToolUseContent) GetType() string {
 }
 
 type ToolResultContent struct {
-	Type      string `json:"type"`
-	ToolUseID string `json:"tool_use_id"`
-	Content   string `json:"content"`
+	Type         string        `json:"type"`
+	ToolUseID    string        `json:"tool_use_id"`
+	Content      string        `json:"content"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (trc ToolResultContent) GetType() string {
@@ -111,8 +128,10 @@ type MessageResponsePayload struct {
 	StopSequence string    `json:"stop_sequence"`
 	Type         string    `json:"type"`
 	Usage        struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
+		InputTokens              int `json:"input_tokens"`
+		OutputTokens             int `json:"output_tokens"`
+		CacheCreationInputTokens int `json:"cache_creation_input_tokens"`
+		CacheReadInputTokens     int `json:"cache_read_input_tokens"`
 	} `json:"usage"`
 }
 
@@ -307,11 +326,16 @@ func handleMessageStartEvent(event map[string]interface{}, response MessageRespo
 		return response, err
 	}
 
+	cacheCreationInputTokens, _ := getFloat64(usage, "cache_creation_input_tokens")
+	cacheReadInputTokens, _ := getFloat64(usage, "cache_read_input_tokens")
+
 	response.ID = getString(message, "id")
 	response.Model = getString(message, "model")
 	response.Role = getString(message, "role")
 	response.Type = getString(message, "type")
 	response.Usage.InputTokens = int(inputTokens)
+	response.Usage.CacheCreationInputTokens = int(cacheCreationInputTokens)
+	response.Usage.CacheReadInputTokens = int(cacheReadInputTokens)
 
 	return response, nil
 }
