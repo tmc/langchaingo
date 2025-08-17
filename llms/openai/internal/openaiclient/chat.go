@@ -426,23 +426,23 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
-		return parseStreamingChatResponse(ctx, r, payload)
+		return c.parseStreamingChatResponse(ctx, r, payload)
 	}
 	// Parse response
 	var response ChatCompletionResponse
 	return &response, json.NewDecoder(r.Body).Decode(&response)
 }
 
-func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatCompletionResponse,
+func (c *Client) parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *ChatRequest) (*ChatCompletionResponse,
 	error,
 ) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan StreamedChatResponsePayload)
-	
+
 	// Create a context that can be cancelled to stop the goroutine
 	readerCtx, cancelReader := context.WithCancel(ctx)
 	defer cancelReader()
-	
+
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -452,7 +452,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				return
 			default:
 			}
-			
+
 			line := scanner.Text()
 			if line == "" {
 				continue
@@ -471,7 +471,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				// This allows the stream to continue processing valid JSON chunks
 				continue
 			}
-			
+
 			// Non-blocking send with context check
 			select {
 			case <-readerCtx.Done():
@@ -489,10 +489,10 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 		}
 	}()
 	// Combine response
-	return combineStreamingChatResponse(readerCtx, payload, responseChan)
+	return c.combineStreamingChatResponse(readerCtx, payload, responseChan)
 }
 
-func combineStreamingChatResponse(
+func (c *Client) combineStreamingChatResponse(
 	ctx context.Context,
 	payload *ChatRequest,
 	responseChan chan StreamedChatResponsePayload,
@@ -534,13 +534,18 @@ func combineStreamingChatResponse(
 				choice.Delta.ToolCalls)
 		}
 
-		if payload.StreamingFunc != nil {
+		shouldCallStreamingFunc := true
+		if c.streamingChunkFilter != nil {
+			shouldCallStreamingFunc = c.streamingChunkFilter(streamResponse)
+		}
+
+		if payload.StreamingFunc != nil && shouldCallStreamingFunc {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}
-		if payload.StreamingReasoningFunc != nil {
+		if payload.StreamingReasoningFunc != nil && shouldCallStreamingFunc {
 			err := payload.StreamingReasoningFunc(ctx, reasoningChunk, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming reasoning func returned an error: %w", err)
