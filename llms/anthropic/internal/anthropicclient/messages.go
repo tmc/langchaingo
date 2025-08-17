@@ -66,6 +66,15 @@ func (tc TextContent) GetType() string {
 	return tc.Type
 }
 
+type PartialJSONContent struct {
+	Type        string `json:"type"`
+	PartialJSON string `json:"partial_json"`
+}
+
+func (tc PartialJSONContent) GetType() string {
+	return tc.Type
+}
+
 type ImageContent struct {
 	Type   string      `json:"type"`
 	Source ImageSource `json:"source"`
@@ -82,10 +91,34 @@ type ImageSource struct {
 }
 
 type ToolUseContent struct {
-	Type  string                 `json:"type"`
-	ID    string                 `json:"id"`
-	Name  string                 `json:"name"`
-	Input map[string]interface{} `json:"input"`
+	Type           string                 `json:"type"`
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name"`
+	Input          map[string]interface{} `json:"input"`
+	rawStreamInput string
+}
+
+func (tuc *ToolUseContent) AppendStreamChunk(chunk string) {
+	tuc.rawStreamInput += chunk
+}
+
+func (tuc *ToolUseContent) GetStreamInput() string {
+	return tuc.rawStreamInput
+}
+
+func (tuc *ToolUseContent) DecodeStream() error {
+	if tuc.rawStreamInput == "" {
+		return nil
+	}
+
+	m := make(map[string]interface{})
+	err := json.Unmarshal([]byte(tuc.rawStreamInput), &m)
+	if err != nil {
+		return err
+	}
+
+	tuc.Input = m
+	return nil
 }
 
 func (tuc ToolUseContent) GetType() string {
@@ -276,7 +309,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "content_block_delta":
 		return handleContentBlockDeltaEvent(ctx, event, response, payload)
 	case "content_block_stop":
-		// Nothing to do here
+		return handleContentBlockStopEvent(response)
 	case "message_delta":
 		return handleMessageDeltaEvent(event, response)
 	case "message_stop":
@@ -324,15 +357,38 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 	index := int(indexValue)
 
 	var eventType string
-	if cb, ok := event["content_block"].(map[string]any); ok {
+	cb, ok := event["content_block"].(map[string]any)
+	if ok {
 		typ, _ := cb["type"].(string)
 		eventType = typ
 	}
 
 	if len(response.Content) <= index {
-		response.Content = append(response.Content, &TextContent{
-			Type: eventType,
-		})
+		switch eventType {
+		case "text":
+			response.Content = append(response.Content, &TextContent{
+				Type: eventType,
+			})
+		case "tool_use":
+			toolID, ok := cb["id"].(string)
+			if !ok {
+				return response, fmt.Errorf("missing tool id field in content block [start]")
+			}
+
+			toolName, ok := cb["name"].(string)
+			if !ok {
+				return response, fmt.Errorf("missing name field in content block [start]")
+			}
+
+			response.Content = append(response.Content, &ToolUseContent{
+				Type:  eventType,
+				Input: make(map[string]interface{}),
+				ID:    toolID,
+				Name:  toolName,
+			})
+		default:
+			return response, fmt.Errorf("unknown content block type: %s", eventType)
+		}
 	}
 	return response, nil
 }
@@ -353,29 +409,95 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		return response, ErrInvalidDeltaTypeField
 	}
 
-	if deltaType == "text_delta" {
-		text, ok := delta["text"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaTextField
-		}
-		if len(response.Content) <= index {
-			return response, ErrContentIndexOutOfRange
-		}
-		textContent, ok := response.Content[index].(*TextContent)
-		if !ok {
-			return response, ErrFailedCastToTextContent
-		}
-		textContent.Text += text
+	var err error
+	streamOutput := true
+
+	switch deltaType {
+	case "text_delta":
+		err = handleTextDelta(index, delta, response)
+	case "input_json_delta":
+		err = handleInputJSONDelta(index, delta, response)
+		streamOutput = false
 	}
 
-	if payload.StreamingFunc != nil {
-		text, ok := delta["text"].(string)
-		if !ok {
-			return response, ErrInvalidDeltaTextField
-		}
-		err := payload.StreamingFunc(ctx, []byte(text))
+	if err != nil {
+		return response, err
+	}
+
+	if payload.StreamingFunc != nil && streamOutput {
+		err = handleStreaming(ctx, delta, payload)
+	}
+	return response, err
+}
+
+func handleTextDelta(index int, delta map[string]interface{}, response MessageResponsePayload) error {
+	text, ok := delta["text"].(string)
+	if !ok {
+		return ErrInvalidDeltaTextField
+	}
+
+	if len(response.Content) <= index {
+		return ErrContentIndexOutOfRange
+	}
+
+	textContent, ok := response.Content[index].(*TextContent)
+	if !ok {
+		return ErrFailedCastToTextContent
+	}
+
+	textContent.Text += text
+	return nil
+}
+
+func handleInputJSONDelta(index int, delta map[string]interface{}, response MessageResponsePayload) error {
+	partial, ok := delta["partial_json"].(string)
+	if !ok {
+		return fmt.Errorf("partial_json field missing")
+	}
+
+	if len(response.Content) <= index {
+		return ErrContentIndexOutOfRange
+	}
+
+	tuc, ok := response.Content[index].(*ToolUseContent)
+	if !ok {
+		asJSON, err := json.MarshalIndent(response, "", "  ")
 		if err != nil {
-			return response, fmt.Errorf("streaming func returned an error: %w", err)
+			return fmt.Errorf("failed to marshal response: %w", err)
+		}
+		return fmt.Errorf("failed to cast index %v to ToolUseContent: \n%s", index, string(asJSON))
+	}
+
+	tuc.AppendStreamChunk(partial)
+	return nil
+}
+
+func handleStreaming(ctx context.Context, delta map[string]interface{}, payload *messagePayload) error {
+	text, ok := delta["text"].(string)
+	if !ok {
+		return ErrInvalidDeltaTextField
+	}
+
+	if err := payload.StreamingFunc(ctx, []byte(text)); err != nil {
+		return fmt.Errorf("streaming func returned an error: %w", err)
+	}
+
+	return nil
+}
+
+func handleContentBlockStopEvent(response MessageResponsePayload) (MessageResponsePayload, error) {
+	for _, content := range response.Content {
+		if content == nil {
+			continue
+		}
+		tuc, ok := content.(*ToolUseContent)
+		if !ok {
+			continue
+		}
+
+		err := tuc.DecodeStream()
+		if err != nil {
+			return response, fmt.Errorf("error decoding stream tool data: %w", err)
 		}
 	}
 	return response, nil
