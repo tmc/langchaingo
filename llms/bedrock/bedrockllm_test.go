@@ -225,7 +225,7 @@ func TestAnthropicNovaImage(t *testing.T) {
 	}
 }
 
-func TestBedrockWithTools(t *testing.T) {
+func TestBedrockWithTools(t *testing.T) { //nolint:funlen
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -351,7 +351,7 @@ func TestBedrockWithTools(t *testing.T) {
 	}
 }
 
-func TestBedrockToolCallMultipleIterations(t *testing.T) {
+func TestBedrockToolCallMultipleIterations(t *testing.T) { //nolint:funlen
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
