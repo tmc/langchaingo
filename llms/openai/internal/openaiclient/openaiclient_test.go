@@ -136,6 +136,34 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	assert.NotEmpty(t, resp[0])
 }
 
+func TestClient_CreateEmbeddingWithDimensions(t *testing.T) {
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("OPENAI_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
+	}
+
+	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-ada-002", nil, WithEmbeddingDimensions(1234))
+	require.NoError(t, err)
+
+	req := &EmbeddingRequest{
+		Model: "text-embedding-ada-002",
+		Input: []string{"Hello world"},
+	}
+
+	resp, err := client.CreateEmbedding(ctx, req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp)
+	assert.Len(t, resp, 1)
+	assert.NotEmpty(t, resp[0])
+}
+
 func TestClient_FunctionCall(t *testing.T) {
 	ctx := context.Background()
 
@@ -218,4 +246,23 @@ func TestClient_WithResponseFormat(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Choices)
 	assert.NotEmpty(t, resp.Choices[0].Message.Content)
+}
+
+func TestMakeEmbeddingRequest(t *testing.T) {
+	t.Run("without dimensions", func(t *testing.T) {
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
+		require.NoError(t, err)
+
+		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model"})
+		assert.Equal(t, "some_model", request.Model)
+		assert.Equal(t, 0, request.Dimensions)
+	})
+	t.Run("with dimensions", func(t *testing.T) {
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
+		require.NoError(t, err)
+
+		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model", Dimensions: 1234})
+		assert.Equal(t, "some_model", request.Model)
+		assert.Equal(t, 1234, request.Dimensions)
+	})
 }

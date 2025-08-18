@@ -14,8 +14,9 @@ const (
 )
 
 type embeddingPayload struct {
-	Model string   `json:"model"`
-	Input []string `json:"input"`
+	Model      string   `json:"model"`
+	Input      []string `json:"input"`
+	Dimensions int      `json:"dimensions,omitempty"`
 }
 
 type embeddingResponsePayload struct {
@@ -36,12 +37,6 @@ type embeddingResponsePayload struct {
 func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload) (*embeddingResponsePayload, error) {
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
-	}
-	if c.Model == "" {
-		payload.Model = c.EmbeddingModel
-	}
-	if payload.Model == "" {
-		payload.Model = defaultEmbeddingModel
 	}
 
 	payloadBytes, err := json.Marshal(payload)
