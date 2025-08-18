@@ -15,6 +15,7 @@ const defaultModel = ModelAmazonTitanTextLiteV1
 
 // LLM is a Bedrock LLM implementation.
 type LLM struct {
+	modelProvider    string
 	modelID          string
 	client           *bedrockclient.Client
 	CallbacksHandler callbacks.Handler
@@ -33,6 +34,7 @@ func NewWithContext(ctx context.Context, opts ...Option) (*LLM, error) {
 	}
 	return &LLM{
 		client:           c,
+		modelProvider:    o.modelProvider,
 		modelID:          o.modelID,
 		CallbacksHandler: o.callbackHandler,
 	}, nil
@@ -81,7 +83,7 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	res, err := l.client.CreateCompletion(ctx, opts.Model, m, opts)
+	res, err := l.client.CreateCompletion(ctx, l.modelProvider, opts.Model, m, opts)
 	if err != nil {
 		if l.CallbacksHandler != nil {
 			l.CallbacksHandler.HandleLLMError(ctx, err)
