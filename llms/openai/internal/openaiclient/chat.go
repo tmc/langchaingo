@@ -458,6 +458,19 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				continue
 			}
 
+			// Skip SSE comment lines (any line starting with ':')
+			// According to SSE spec: https://www.w3.org/TR/eventsource/
+			// "Lines that start with a U+003A COLON character (:) are comments"
+			if strings.HasPrefix(line, ":") {
+				continue
+			}
+
+			// Only process lines that start with "data:"
+			if !strings.HasPrefix(line, "data:") {
+				// Skip any other non-data lines (like event:, id:, retry:, etc.)
+				continue
+			}
+
 			data := strings.TrimPrefix(line, "data:") // here use `data:` instead of `data: ` for compatibility
 			data = strings.TrimSpace(data)
 			if data == "[DONE]" {
@@ -466,9 +479,8 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				// Skip non-JSON lines that some providers (e.g., OpenRouter) send as prefixes
-				// These are typically in the format ":provider" or other non-standard SSE data
-				// This allows the stream to continue processing valid JSON chunks
+				// Skip non-JSON data values that some providers might send
+				// This could happen if the data field contains non-JSON content
 				continue
 			}
 			
