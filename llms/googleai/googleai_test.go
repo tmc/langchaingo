@@ -14,25 +14,6 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-// apiKeyTransport adds the API key to requests
-// This is needed because the Google API library doesn't add the API key
-// when WithHTTPClient is used with WithAPIKey
-type apiKeyTransport struct {
-	wrapped http.RoundTripper
-	apiKey  string
-}
-
-func (t *apiKeyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Clone the request to avoid modifying the original
-	newReq := req.Clone(req.Context())
-	q := newReq.URL.Query()
-	if q.Get("key") == "" && t.apiKey != "" {
-		q.Set("key", t.apiKey)
-		newReq.URL.RawQuery = q.Encode()
-	}
-	return t.wrapped.RoundTrip(newReq)
-}
-
 func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	t.Helper()
 
@@ -45,9 +26,9 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	apiKey := os.Getenv("GOOGLE_API_KEY")
 	transport := httputil.DefaultTransport
 	if apiKey != "" {
-		transport = &apiKeyTransport{
-			wrapped: transport,
-			apiKey:  apiKey,
+		transport = &httputil.ApiKeyTransport{
+			Transport: transport,
+			APIKey:    apiKey,
 		}
 	}
 
@@ -227,6 +208,8 @@ func TestGoogleAIWithStreaming(t *testing.T) {
 	// Check for cat-related content (the AI might use the cat's name instead of "cat")
 	catRelated := strings.Contains(strings.ToLower(streamedContent), "cat") ||
 		strings.Contains(streamedContent, "Clementine") ||
+		strings.Contains(streamedContent, "Whiskers") ||
+		strings.Contains(streamedContent, "Peaches") ||
 		strings.Contains(streamedContent, "purr") ||
 		strings.Contains(streamedContent, "meow")
 	assert.True(t, catRelated, "Response should contain cat-related content")
