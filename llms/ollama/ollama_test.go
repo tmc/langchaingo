@@ -89,6 +89,64 @@ func TestGenerateContent(t *testing.T) {
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 }
 
+func TestToolCall(t *testing.T) {
+	t.Parallel()
+	llm := newTestClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: "Which date do we have today?"},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+	toolOption := llms.WithTools([]llms.Tool{{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getTime",
+			Description: "Get the current time.",
+			Parameters: map[string]any{
+				"type":       "object",
+				"properties": map[string]any{},
+				"required":   []string{},
+			},
+			Strict: true,
+		},
+	}})
+
+	rsp, err := llm.GenerateContent(context.Background(), content, toolOption)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	require.NotEmpty(t, c1.ToolCalls)
+	t1 := c1.ToolCalls[0]
+	require.Equal(t, "getTime", t1.FunctionCall.Name)
+
+	content = append(content, llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{t1},
+	}, llms.MessageContent{
+		Role: llms.ChatMessageTypeTool,
+		Parts: []llms.ContentPart{
+			llms.ToolCallResponse{
+				ToolCallID: t1.ID,
+				Name:       t1.FunctionCall.Name,
+				Content:    "2010-08-13 20:15:00.033067589 +0100 CET m=+32.849928139",
+			},
+		},
+	})
+
+	rsp, err = llm.GenerateContent(context.Background(), content, toolOption)
+	require.NoError(t, err)
+	require.NotEmpty(t, rsp.Choices)
+	c1 = rsp.Choices[0]
+	assert.Regexp(t, "2010", c1.Content)
+	assert.Regexp(t, "13", c1.Content)
+}
+
 func TestWithFormat(t *testing.T) {
 	ctx := context.Background()
 

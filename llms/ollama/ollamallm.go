@@ -2,12 +2,16 @@ package ollama
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 
+	"github.com/ollama/ollama/api"
+	"github.com/ollama/ollama/envconfig"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 )
 
 var (
@@ -20,7 +24,7 @@ var (
 // LLM is a ollama LLM implementation.
 type LLM struct {
 	CallbacksHandler callbacks.Handler
-	client           *ollamaclient.Client
+	client           *api.Client
 	options          options
 }
 
@@ -28,15 +32,15 @@ var _ llms.Model = (*LLM)(nil)
 
 // New creates a new ollama LLM implementation.
 func New(opts ...Option) (*LLM, error) {
-	o := options{}
+	o := options{
+		ollamaServerURL: envconfig.Host(),
+		httpClient:      http.DefaultClient,
+	}
 	for _, opt := range opts {
 		opt(&o)
 	}
 
-	client, err := ollamaclient.NewClient(o.ollamaServerURL, o.httpClient)
-	if err != nil {
-		return nil, err
-	}
+	client := api.NewClient(o.ollamaServerURL, o.httpClient)
 
 	return &LLM{client: client, options: o}, nil
 }
@@ -75,15 +79,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// We have to convert it to a format Ollama undestands: ChatRequest, which
 	// has a sequence of Message, each of which has a role and content - single
 	// text + potential images.
-	chatMsgs := make([]*ollamaclient.Message, 0, len(messages))
+	chatMsgs := make([]api.Message, 0, len(messages))
 	for _, mc := range messages {
-		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
+		msg := api.Message{Role: typeToRole(mc.Role)}
 
 		// Look at all the parts in mc; expect to find a single Text part and
 		// any number of binary parts.
 		var text string
 		foundText := false
-		var images []ollamaclient.ImageData
+		var images []api.ImageData
+		var toolCalls []api.ToolCall
 
 		for _, p := range mc.Parts {
 			switch pt := p.(type) {
@@ -94,7 +99,28 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				foundText = true
 				text = pt.Text
 			case llms.BinaryContent:
-				images = append(images, ollamaclient.ImageData(pt.Data))
+				images = append(images, pt.Data)
+			case llms.ToolCall:
+				tc := api.ToolCall{
+					Function: api.ToolCallFunction{
+						Name: pt.FunctionCall.Name,
+					},
+				}
+
+				var err error
+				tc.Function.Index, err = strconv.Atoi(pt.ID)
+				if err != nil {
+					return nil, fmt.Errorf("error converting tool call ID to int: %w", err)
+				}
+
+				err = json.Unmarshal([]byte(pt.FunctionCall.Arguments), &tc.Function.Arguments)
+				if err != nil {
+					return nil, fmt.Errorf("error unmarshalling tool call arguments: %w", err)
+				}
+
+				toolCalls = append(toolCalls, tc)
+			case llms.ToolCallResponse:
+				text = pt.Content
 			default:
 				return nil, errors.New("only support Text and BinaryContent parts right now")
 			}
@@ -102,6 +128,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		msg.Content = text
 		msg.Images = images
+		msg.ToolCalls = toolCalls
 		chatMsgs = append(chatMsgs, msg)
 	}
 
@@ -111,44 +138,72 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	// Get our ollamaOptions from llms.CallOptions
-	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
-	req := &ollamaclient.ChatRequest{
+	ollamaOptions, err := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
+	if err != nil {
+		return nil, fmt.Errorf("error creating ollama options: %w", err)
+	}
+
+	stream := opts.StreamingFunc != nil
+
+	req := &api.ChatRequest{
 		Model:    model,
-		Format:   format,
+		Format:   json.RawMessage(fmt.Sprintf(`"%s"`, format)),
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
-		Stream:   opts.StreamingFunc != nil,
+		Stream:   &stream,
+		Think:    o.options.thinking,
+		Tools:    make(api.Tools, len(opts.Tools)),
+	}
+
+	for i := range opts.Tools {
+		jt, err := json.Marshal(opts.Tools[i])
+		if err != nil {
+			return nil, fmt.Errorf("error marshalling tool: %w", err)
+		}
+
+		var tool api.Tool
+		err = json.Unmarshal(jt, &tool)
+		if err != nil {
+			return nil, fmt.Errorf("error unmarshalling tool: %w", err)
+		}
+
+		req.Tools[i] = tool
 	}
 
 	keepAlive := o.options.keepAlive
-	if keepAlive != "" {
-		req.KeepAlive = keepAlive
+	if keepAlive > 0 {
+		req.KeepAlive = &api.Duration{Duration: keepAlive}
 	}
 
-	var fn ollamaclient.ChatResponseFunc
+	var fn api.ChatResponseFunc
 	streamedResponse := ""
-	var resp ollamaclient.ChatResponse
+	var streamedToolCalls []api.ToolCall
+	var resp api.ChatResponse
 
-	fn = func(response ollamaclient.ChatResponse) error {
-		if opts.StreamingFunc != nil && response.Message != nil {
+	fn = func(response api.ChatResponse) error {
+		if opts.StreamingFunc != nil && response.Message.Content != "" {
 			if err := opts.StreamingFunc(ctx, []byte(response.Message.Content)); err != nil {
 				return err
 			}
 		}
-		if response.Message != nil {
+		if response.Message.Content != "" {
 			streamedResponse += response.Message.Content
 		}
-		if !req.Stream || response.Done {
+		streamedToolCalls = append(streamedToolCalls, response.Message.ToolCalls...)
+
+		rs := req.Stream != nil && *req.Stream
+		if !rs || response.Done {
 			resp = response
-			resp.Message = &ollamaclient.Message{
-				Role:    "assistant",
-				Content: streamedResponse,
+			resp.Message = api.Message{
+				Role:      "assistant",
+				Content:   streamedResponse,
+				ToolCalls: streamedToolCalls,
 			}
 		}
 		return nil
 	}
 
-	err := o.client.GenerateChat(ctx, req, fn)
+	err = o.client.Chat(ctx, req, fn)
 	if err != nil {
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
@@ -158,13 +213,24 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	choices := []*llms.ContentChoice{
 		{
-			Content: resp.Message.Content,
+			Content:    resp.Message.Content,
+			StopReason: resp.DoneReason,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
 				"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
 			},
 		},
+	}
+	for _, tc := range resp.Message.ToolCalls {
+		choices[0].ToolCalls = append(choices[0].ToolCalls, llms.ToolCall{
+			ID:   fmt.Sprintf("%d", tc.Function.Index),
+			Type: "function",
+			FunctionCall: &llms.FunctionCall{
+				Name:      tc.Function.Name,
+				Arguments: tc.Function.Arguments.String(),
+			},
+		})
 	}
 
 	response := &llms.ContentResponse{Choices: choices}
@@ -187,24 +253,29 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
-		req := &ollamaclient.EmbeddingRequest{
-			Input: input,
-			Model: o.options.model,
+		req := &api.EmbeddingRequest{
+			Prompt: input,
+			Model:  o.options.model,
 		}
-		if o.options.keepAlive != "" {
-			req.KeepAlive = o.options.keepAlive
+		if o.options.keepAlive > 0 {
+			req.KeepAlive = &api.Duration{Duration: o.options.keepAlive}
 		}
 
-		embedding, err := o.client.CreateEmbedding(ctx, req)
+		eResp, err := o.client.Embeddings(ctx, req)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(embedding.Embeddings) == 0 {
+		if len(eResp.Embedding) == 0 {
 			return nil, ErrEmptyResponse
 		}
 
-		embeddings = append(embeddings, embedding.Embeddings...)
+		embedding := make([]float32, len(eResp.Embedding))
+		for i := range eResp.Embedding {
+			embedding = append(embedding, float32(eResp.Embedding[i]))
+		}
+
+		embeddings = append(embeddings, embedding)
 	}
 
 	if len(inputTexts) != len(embeddings) {
@@ -232,7 +303,7 @@ func typeToRole(typ llms.ChatMessageType) string {
 	return ""
 }
 
-func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.CallOptions) ollamaclient.Options {
+func makeOllamaOptionsFromOptions(ollamaOptions api.Options, opts llms.CallOptions) (map[string]any, error) {
 	// Load back CallOptions as ollamaOptions
 	ollamaOptions.NumPredict = opts.MaxTokens
 	ollamaOptions.Temperature = float32(opts.Temperature)
@@ -244,7 +315,18 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
-	return ollamaOptions
+	os, err := json.Marshal(ollamaOptions)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling ollama options: %w", err)
+	}
+
+	var result map[string]any
+	err = json.Unmarshal(os, &result)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling ollama options: %w", err)
+	}
+
+	return result, nil
 }
 
 // pullModelIfNeeded pulls the model if it's not already available.
@@ -268,12 +350,20 @@ func (o *LLM) pullModelIfNeeded(ctx context.Context, model string) error {
 
 	// For now, we'll just pull the model without checking.
 	// This ensures the model is available but may result in unnecessary pulls.
-	req := &ollamaclient.PullRequest{
+	f := false
+	req := &api.PullRequest{
 		Model:  model,
-		Stream: false,
+		Stream: &f,
 	}
 
-	err := o.client.Pull(pullCtx, req)
+	observeProgress := o.options.pullModelObserver
+	if observeProgress == nil {
+		observeProgress = func(_ api.ProgressResponse) error {
+			return nil
+		}
+	}
+
+	err := o.client.Pull(pullCtx, req, observeProgress)
 	if err != nil {
 		// Check if the error is due to context timeout
 		if errors.Is(err, context.DeadlineExceeded) {
