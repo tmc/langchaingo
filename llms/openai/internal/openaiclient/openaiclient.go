@@ -208,3 +208,8 @@ func (c *Client) buildAzureURL(suffix string, model string) string {
 		baseURL, model, suffix, c.apiVersion,
 	)
 }
+
+// GetBaseURL returns the base URL being used by the client.
+func (c *Client) GetBaseURL() string {
+	return c.baseURL
+}

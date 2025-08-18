@@ -43,6 +43,19 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
+// IsUsingCustomBaseURL returns true if the client is configured with a custom base URL
+// (not the default OpenAI API URL). This can be helpful to determine if you're working
+// with an OpenAI-compatible provider that might require deprecated API fields.
+func (o *LLM) IsUsingCustomBaseURL() bool {
+	return o.client.GetBaseURL() != "https://api.openai.com/v1"
+}
+
+// GetBaseURL returns the base URL being used by the client.
+// This can be useful for debugging or determining which provider you're connecting to.
+func (o *LLM) GetBaseURL() string {
+	return o.client.GetBaseURL()
+}
+
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, funlen
 	if o.CallbacksHandler != nil {
@@ -113,12 +126,35 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
 
-		MaxCompletionTokens: opts.MaxTokens,
+		MaxCompletionTokens: func() int {
+			// Check if this should explicitly use max_completion_tokens field
+			if opts.Metadata != nil {
+				if useMaxCompletion, ok := opts.Metadata["_openai_use_max_completion_tokens"].(bool); ok && useMaxCompletion {
+					return opts.MaxTokens
+				}
+			}
+			// Default for backward compatibility: use max_completion_tokens if no deprecated flag is set
+			if opts.Metadata == nil || opts.Metadata["_openai_use_deprecated_max_tokens"] == nil {
+				if opts.MaxTokens > 0 {
+					return opts.MaxTokens
+				}
+			}
+			return 0
+		}(),
+		MaxTokens: func() int {
+			// Only use the deprecated max_tokens field when explicitly requested
+			if opts.Metadata != nil {
+				if useDeprecated, ok := opts.Metadata["_openai_use_deprecated_max_tokens"].(bool); ok && useDeprecated {
+					return opts.MaxTokens
+				}
+			}
+			return 0
+		}(),
 
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
-		Metadata:             opts.Metadata,
+		Metadata:             filterInternalMetadata(opts.Metadata),
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
@@ -276,4 +312,24 @@ func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
 			Arguments: tc.FunctionCall.Arguments,
 		},
 	}
+}
+
+// filterInternalMetadata removes internal OpenAI-specific metadata flags that should not be sent to the API.
+func filterInternalMetadata(metadata map[string]interface{}) map[string]interface{} {
+	if metadata == nil {
+		return nil
+	}
+
+	filtered := make(map[string]interface{})
+	for key, value := range metadata {
+		// Filter out internal OpenAI metadata flags
+		if key != "_openai_use_max_completion_tokens" && key != "_openai_use_deprecated_max_tokens" {
+			filtered[key] = value
+		}
+	}
+
+	if len(filtered) == 0 {
+		return nil
+	}
+	return filtered
 }
