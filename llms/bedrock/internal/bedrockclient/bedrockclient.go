@@ -22,10 +22,16 @@ type Client struct {
 type Message struct {
 	Role    llms.ChatMessageType
 	Content string
-	// Type may be "text" or "image"
+	// Type may be "text", "image", "tool_call", or "tool_result"
 	Type string
 	// MimeType is the MIME type
 	MimeType string
+	// Tool call fields
+	ToolCallID string `json:"tool_call_id,omitempty"`
+	ToolName   string `json:"tool_name,omitempty"`
+	ToolArgs   string `json:"tool_args,omitempty"`
+	// Tool result fields
+	ToolUseID string `json:"tool_use_id,omitempty"`
 }
 
 func getProvider(modelID string) string {
