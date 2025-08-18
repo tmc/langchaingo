@@ -257,7 +257,7 @@ func TestMakeEmbeddingRequest(t *testing.T) {
 		assert.Equal(t, "some_model", request.Model)
 		assert.Equal(t, 0, request.Dimensions)
 	})
-	t.Run("without dimensions", func(t *testing.T) {
+	t.Run("with dimensions", func(t *testing.T) {
 		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
 		require.NoError(t, err)
 
