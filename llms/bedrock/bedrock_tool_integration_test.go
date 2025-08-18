@@ -13,7 +13,7 @@ import (
 	"github.com/tmc/langchaingo/llms/bedrock"
 )
 
-func TestBedrockAnthropicToolCalling(t *testing.T) {
+func TestBedrockAnthropicToolCalling(t *testing.T) { //nolint:funlen
 	ctx := context.Background()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -87,19 +87,19 @@ func TestBedrockAnthropicToolCalling(t *testing.T) {
 		choice := resp.Choices[0]
 		if len(choice.ToolCalls) > 0 {
 			t.Logf("Model requested tool call: %+v", choice.ToolCalls[0])
-			
+
 			// Verify tool call structure
 			toolCall := choice.ToolCalls[0]
 			require.Equal(t, "function", toolCall.Type)
 			require.NotNil(t, toolCall.FunctionCall)
 			require.Equal(t, "get_weather", toolCall.FunctionCall.Name)
-			
+
 			// Parse arguments
 			var args map[string]interface{}
 			err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args)
 			require.NoError(t, err)
 			require.Contains(t, args, "location")
-			
+
 			// Simulate tool response
 			toolResponse := llms.MessageContent{
 				Role: llms.ChatMessageTypeTool,
@@ -111,10 +111,10 @@ func TestBedrockAnthropicToolCalling(t *testing.T) {
 					},
 				},
 			}
-			
+
 			// Continue conversation with tool response
 			msgs = append(msgs, toolResponse)
-			
+
 			resp2, err := llm.GenerateContent(ctx, msgs,
 				llms.WithModel(bedrock.ModelAnthropicClaudeV3Haiku),
 				llms.WithMaxTokens(512),
@@ -122,7 +122,7 @@ func TestBedrockAnthropicToolCalling(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp2)
 			require.NotEmpty(t, resp2.Choices)
-			
+
 			t.Logf("Final response: %s", resp2.Choices[0].Content)
 		} else {
 			t.Logf("Model response without tool call: %s", choice.Content)
@@ -168,7 +168,7 @@ func TestBedrockAnthropicToolCalling(t *testing.T) {
 
 		require.NotNil(t, resp)
 		require.NotEmpty(t, resp.Choices)
-		
+
 		// Check for multiple tool calls
 		choice := resp.Choices[0]
 		t.Logf("Number of tool calls: %d", len(choice.ToolCalls))
