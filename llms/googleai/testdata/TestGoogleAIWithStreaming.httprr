@@ -1,20 +1,20 @@
 httprr trace v1
-798 11563
+782 12612
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 372
+Content-Length: 357
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"Tell me a short story about a cat"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
-Content-Length: 11183
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"Tell me a short story about a cat"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 12232
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Mon, 16 Jun 2025 13:08:04 GMT
+Date: Mon, 18 Aug 2025 12:40:52 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=267
+Server-Timing: gfet4t7; dur=434
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -46,7 +46,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -55,7 +55,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "lementine wasn't your average tabby. Sure, she had the classic orange stripes"
+            "text": "lementine, a calico with a perpetually grumpy face, considered herself the queen of Willow"
           }
         ],
         "role": "model"
@@ -91,7 +91,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -100,7 +100,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " and a perpetually grumpy face, but her heart held a secret yearning for adventure. While"
+            "text": " Creek. Her kingdom consisted of Mrs. Higgins' sun-drenched porch, the"
           }
         ],
         "role": "model"
@@ -136,7 +136,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -145,7 +145,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " the other cats of Willow Creek napped in sunbeams and chased dust bunnies, Clementine dreamt of mountains, forests, and the thrill of the unknown.\n\nOne"
+            "text": " neighbor's meticulously manicured rose bushes (perfect for napping), and the occasional unsuspecting mouse that dared to cross her path.\n\nClementine wasn't fond"
           }
         ],
         "role": "model"
@@ -181,7 +181,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -190,7 +190,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " crisp autumn morning, Clementine decided she'd had enough of routine. She slipped out the slightly ajar back door, her tail held high, and ventured"
+            "text": " of people. They were loud, clumsy, and often smelled of citrus, a scent she found deeply offensive. Mrs. Higgins, however, was tolerated. She provided food"
           }
         ],
         "role": "model"
@@ -226,7 +226,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -235,7 +235,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " beyond the familiar rose bushes. The world exploded with new smells: damp earth, decaying leaves, and the tantalizing scent of something wild.\n\nShe followed the scent, her paws padding softly on the fallen leaves. The journey led her to the"
+            "text": ", a warm bed, and understood the sacredness of Clementine's naps.\n\nOne blustery autumn afternoon, a small, shivering creature appeared on Mrs. Higgins' porch. It was a kitten, a scrawny, grey"
           }
         ],
         "role": "model"
@@ -271,7 +271,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -280,7 +280,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " edge of the woods, a place she'd only glimpsed from the safety of the porch. Hesitation flickered in her emerald eyes, but the call of adventure was too strong to resist.\n\nThe woods were a symphony of rustling leaves"
+            "text": " thing with wide, pleading eyes. Clementine, usually quick to chase away any interloper, found herself frozen. The kitten was pathetic.\n\nShe sniffed it cautiously. It smelled of rain and something faintly…milky. Clementine"
           }
         ],
         "role": "model"
@@ -316,7 +316,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -325,7 +325,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " and chirping birds. Clementine stalked through the undergrowth, her instincts sharpening with every step. She chased butterflies, startled squirrels, and even had a brief standoff with a grumpy robin.\n\nAs dusk began to settle, painting the sky in hues of orange and purple, Clementine found herself lost. Panic began to creep"
+            "text": " wrinkled her nose. Disgusting. But the kitten, instead of running, rubbed against her leg, purring weakly.\n\nClementine hissed. A reflex. But the hiss lacked its usual venom.\n\nDays turned into weeks. The kitten, whom Mrs. Higgins had named \"Dusty,\" followed Clementine everywhere,"
           }
         ],
         "role": "model"
@@ -361,7 +361,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -370,7 +370,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " in. The woods, once enchanting, now seemed menacing. She called out, a plaintive meow that was swallowed by the rustling trees.\n\nJust as despair threatened to overwhelm her, she heard a faint sound. A familiar meow, closer this time. She followed the sound, her heart pounding with hope.\n\nEmer"
+            "text": " a tiny, grey shadow. Clementine, despite her best efforts to maintain her regal aloofness, found herself grooming Dusty, sharing her food, and even, on particularly cold nights, allowing the kitten to snuggle against her for warmth.\n\nOne morning, Dusty was gone. Clementine searched the porch, the rose"
           }
         ],
         "role": "model"
@@ -406,7 +406,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -415,7 +415,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "ging from the trees, she saw him: Barnaby, the scruffy tomcat from next door, sitting patiently on the edge of the woods. He wasn't a mountain or a forest, but he was familiar, safe.\n\nBarnaby gave a short, almost imperceptible nod. Clementine, humbled"
+            "text": " bushes, even the dreaded citrus-scented neighbor's yard. Panic, a foreign and unpleasant sensation, clawed at her chest.\n\nJust as despair began to set in, she heard a faint meow. Dusty was perched precariously on the highest branch of the ancient oak tree in Mrs. Higgins' yard, looking"
           }
         ],
         "role": "model"
@@ -451,7 +451,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -460,7 +460,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " and exhausted, rubbed against his leg. He led her back to Willow Creek, back to the familiar scent of home.\n\nThat night, curled up on her favorite cushion, Clementine dreamt not of grand adventures, but of the comfort of a warm lap and a bowl of tuna. She realized that adventure wasn't always"
+            "text": " down with wide, frightened eyes.\n\nClementine, ignoring her own fear of heights, began to climb. She scrambled up the rough bark, her claws digging in, fueled by a primal need to protect the small, grey creature that had somehow, inexplicably, wormed its way into her grumpy heart.\n\nRe"
           }
         ],
         "role": "model"
@@ -496,7 +496,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ,
 {
@@ -505,7 +505,52 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " about faraway places. Sometimes, it was about finding your way back home, and appreciating the familiar comfort waiting there. And maybe, just maybe, having a grumpy tomcat to guide you along the way.\n"
+            "text": "aching Dusty, she nudged him gently. He nestled against her, trembling. Together, they slowly, carefully, descended.\n\nBack on solid ground, Clementine licked Dusty's head, a rare display of affection. He purred, loud and strong. Clementine, queen of Willow Creek, felt a warmth spread through"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " her, a feeling far more satisfying than any sunbeam or mouse. Perhaps, she thought, a queen could use a loyal subject, especially one who smelled faintly of milk. And perhaps, just perhaps, she wasn't quite as grumpy as she thought she was.\n"
           }
         ],
         "role": "model"
@@ -533,8 +578,8 @@ X-Xss-Protection: 0
   ],
   "usageMetadata": {
     "promptTokenCount": 8,
-    "candidatesTokenCount": 497,
-    "totalTokenCount": 505,
+    "candidatesTokenCount": 578,
+    "totalTokenCount": 586,
     "promptTokensDetails": [
       {
         "modality": 1,
@@ -544,11 +589,11 @@ X-Xss-Protection: 0
     "candidatesTokensDetails": [
       {
         "modality": 1,
-        "tokenCount": 497
+        "tokenCount": 578
       }
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "NBdQaPiAB4iugLUP2Pbb4A0"
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
 }
 ]

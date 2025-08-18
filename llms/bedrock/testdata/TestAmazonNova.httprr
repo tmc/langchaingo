@@ -1,71 +1,21 @@
 httprr trace v1
-590 633
-POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/invoke HTTP/1.1
-Host: bedrock-runtime.us-east-2.amazonaws.com
+589 342
+POST https://bedrock-runtime.us-west-2.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-west-2.amazonaws.com
 User-Agent: langchaingo-httprr
 Content-Length: 167
 Accept: */*
-Amz-Sdk-Invocation-Id: bb478801-f62c-417f-811f-5d77a64b4751
+Amz-Sdk-Invocation-Id: ee742d2e-8d90-4297-953b-7a9af18ad2e5
 Amz-Sdk-Request: attempt=1; max=3
 Authorization: AWS4-HMAC-SHA256 test-api-key
 Content-Type: application/json
-X-Amz-Date: 20250628T185029Z
+X-Amz-Date: 20250818T121112Z
 
-{"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 255
+{"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 403 Forbidden
+Content-Length: 77
 Content-Type: application/json
-Date: Sat, 28 Jun 2025 18:50:34 GMT
-X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
-X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
-X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 280
-X-Amzn-Bedrock-Output-Token-Count: 7
-X-Amzn-Requestid: e773e41c-5416-4a08-94b1-59b9efa1c540
+Date: Mon, 18 Aug 2025 12:11:20 GMT
+X-Amzn-Errortype: AccessDeniedException:http://internal.amazon.com/coral/com.amazon.bedrock/
+X-Amzn-Requestid: 63e33e55-4ca9-49ef-9744-86ae82e7fb7e
 
-{"output":{"message":{"content":[{"text":"Machines learn and mimic human intelligence."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":7,"totalTokens":23,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}589 634
-POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/invoke HTTP/1.1
-Host: bedrock-runtime.us-east-2.amazonaws.com
-User-Agent: langchaingo-httprr
-Content-Length: 167
-Accept: */*
-Amz-Sdk-Invocation-Id: c7f534bc-f3db-4c79-bfeb-4e051741a3d6
-Amz-Sdk-Request: attempt=1; max=3
-Authorization: AWS4-HMAC-SHA256 test-api-key
-Content-Type: application/json
-X-Amz-Date: 20250628T185034Z
-
-{"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 256
-Content-Type: application/json
-Date: Sat, 28 Jun 2025 18:50:35 GMT
-X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
-X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
-X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 313
-X-Amzn-Bedrock-Output-Token-Count: 9
-X-Amzn-Requestid: f97402e2-522d-4132-8744-e84b27e298a2
-
-{"output":{"message":{"content":[{"text":"AI: Intelligent machines, learning, evolving."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":9,"totalTokens":25,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}588 647
-POST https://bedrock-runtime.us-east-2.amazonaws.com/model/us.amazon.nova-pro-v1%3A0/invoke HTTP/1.1
-Host: bedrock-runtime.us-east-2.amazonaws.com
-User-Agent: langchaingo-httprr
-Content-Length: 167
-Accept: */*
-Amz-Sdk-Invocation-Id: 6d16a23b-b57c-40f1-a5c9-12ac64aa0c32
-Amz-Sdk-Request: attempt=1; max=3
-Authorization: AWS4-HMAC-SHA256 test-api-key
-Content-Type: application/json
-X-Amz-Date: 20250628T185036Z
-
-{"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 269
-Content-Type: application/json
-Date: Sat, 28 Jun 2025 18:50:37 GMT
-X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
-X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
-X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 360
-X-Amzn-Bedrock-Output-Token-Count: 9
-X-Amzn-Requestid: 070db5e7-3c5c-4cff-9c39-0ebd520706fe
-
-{"output":{"message":{"content":[{"text":"Intelligent machines learning from data to solve problems."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":9,"totalTokens":25,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}
+{"message":"You don't have access to the model with the specified model ID."}

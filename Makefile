@@ -21,6 +21,7 @@ help:
 	@echo ""
 	@echo "Other:"
 	@echo "  build-examples - Build all example projects to verify they compile"
+	@echo "  update-examples - Update langchaingo version in all examples"
 	@echo "  docs           - Generate documentation"
 	@echo "  clean          - Clean lint cache"
 	@echo "  help           - Show this help message"
@@ -108,6 +109,15 @@ clean-lint-cache:
 build-examples:
 	for example in $(shell find ./examples -mindepth 1 -maxdepth 1 -type d); do \
 		(cd $$example; echo Build $$example; go mod tidy; go build -o /dev/null) || exit 1; done
+
+.PHONY: update-examples
+update-examples:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make update-examples VERSION=v0.1.14-pre.1"; \
+		exit 1; \
+	fi
+	@echo "Updating examples to $(VERSION)..."
+	@go run ./internal/devtools/examples-updater -version $(VERSION)
 
 .PHONY: add-go-work
 add-go-work:

@@ -1,5 +1,5 @@
 httprr trace v1
-856 2124
+855 2111
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,39 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful math assistant."},{"role":"user","content":"Please show your work step by step."},{"role":"user","content":"If I have 3 groups of 7 items, and I add 9 more items, how many items do I have in total?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 1399
+Content-Length: 1339
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Wed, 04 Jun 2025 16:02:27 GMT
+Date: Mon, 18 Aug 2025 12:47:13 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 4080
+Openai-Processing-Ms: 4119
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 4085
+X-Envoy-Upstream-Service-Time: 4213
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999956
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_802121dd1e53e6544c533ffb3428ac15
+X-Request-Id: req_6884fae54e3344799952232832c03e3d
 
 {
-  "id": "chatcmpl-BekrHxtW1bgR2U7XU1n5hWA6llIEZ",
+  "id": "chatcmpl-C5tYTqCwufXop3C3uD0VRj3o0DyYc",
   "object": "chat.completion",
-  "created": 1749052943,
+  "created": 1755521229,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "To find the total number of items, we can break down the problem into two steps:\n\n1. **Calculate the number of items in the 3 groups:**\n   - Each group has 7 items.\n   - So, for 3 groups, the total number of items is \\(3 \\times 7\\).\n\n2. **Add the additional 9 items:**\n   - After finding the total from the groups, add the 9 extra items to this total.\n\nLet's calculate each step:\n\n1. Calculate the number of items in the 3 groups:\n   \\[\n   3 \\times 7 = 21\n   \\]\n\n2. Add the 9 additional items:\n   \\[\n   21 + 9 = 30\n   \\]\n\nTherefore, the total number of items is 30.",
+        "content": "To find the total number of items, we can break down the problem into two main steps:\n\n1. **Calculate the total number of items in the 3 groups of 7 items each.**\n\n   Each group has 7 items, and there are 3 groups. So, we multiply the number of items per group by the number of groups:\n   \\[\n   3 \\times 7 = 21\n   \\]\n\n2. **Add the 9 additional items to the total from step 1.**\n\n   We take the total from the groups and add the 9 more items:\n   \\[\n   21 + 9 = 30\n   \\]\n\nTherefore, the total number of items is 30.",
         "refusal": null,
         "annotations": []
       },
@@ -49,8 +50,8 @@ X-Request-Id: req_802121dd1e53e6544c533ffb3428ac15
   ],
   "usage": {
     "prompt_tokens": 122,
-    "completion_tokens": 168,
-    "total_tokens": 290,
+    "completion_tokens": 150,
+    "total_tokens": 272,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -63,5 +64,5 @@ X-Request-Id: req_802121dd1e53e6544c533ffb3428ac15
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
+  "system_fingerprint": "fp_80956533cb"
 }

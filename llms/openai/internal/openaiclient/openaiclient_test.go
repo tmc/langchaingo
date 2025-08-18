@@ -148,11 +148,11 @@ func TestClient_CreateEmbeddingWithDimensions(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-ada-002", nil, WithEmbeddingDimensions(1234))
+	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-3-small", nil, WithEmbeddingDimensions(256))
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
-		Model: "text-embedding-ada-002",
+		Model: "text-embedding-3-small",
 		Input: []string{"Hello world"},
 	}
 

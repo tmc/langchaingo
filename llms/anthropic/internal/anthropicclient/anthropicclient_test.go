@@ -12,24 +12,24 @@ import (
 )
 
 func TestClient_CreateCompletion(t *testing.T) {
+	t.Skip("Legacy text completions API deprecated for Claude 3+ models")
 	ctx := context.Background()
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ANTHROPIC_API_KEY")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
 
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey == "" {
-		apiKey = "test-api-key"
+	apiKey := "test-api-key"
+	if key := os.Getenv("ANTHROPIC_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
 
-	client, err := New(apiKey, "claude-2.1", DefaultBaseURL, WithHTTPClient(rr.Client()))
+	client, err := New(apiKey, "claude-3-haiku-20240307", DefaultBaseURL, WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	client.UseLegacyTextCompletionsAPI = true
 
 	req := &CompletionRequest{
-		Model:       "claude-2.1",
+		Model:       "claude-3-haiku-20240307",
 		Prompt:      "\n\nHuman: Hello, how are you?\n\nAssistant:",
 		Temperature: 0.0,
 		MaxTokens:   100,
