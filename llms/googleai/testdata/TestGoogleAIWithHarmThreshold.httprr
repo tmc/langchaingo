@@ -1,20 +1,20 @@
 httprr trace v1
-788 3085
+772 3490
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 368
+Content-Length: 353
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"Tell me about safety features"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":4}, {"category":7, "threshold":4}, {"category":8, "threshold":4}, {"category":9, "threshold":4}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
-Content-Length: 2705
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"Tell me about safety features"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":4},{"category":7,"threshold":4},{"category":8,"threshold":4},{"category":9,"threshold":4}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 3110
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Mon, 16 Jun 2025 13:08:23 GMT
+Date: Mon, 18 Aug 2025 12:41:11 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=3436
+Server-Timing: gfet4t7; dur=3614
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -28,7 +28,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "Okay, let's talk about safety features! To give you the most helpful information, I need a little more direction.  Safety features are found in many different contexts.  Could you tell me what you're interested in?  For example, are you interested in:\n\n*   **Cars?** (e.g., airbags, ABS, lane departure warning, automatic emergency braking)\n*   **Home?** (e.g., smoke detectors, carbon monoxide detectors, security systems, fire extinguishers)\n*   **Workplace?** (e.g., machine guards, safety training, personal protective equipment)\n*   **Software/Online?** (e.g., two-factor authentication, encryption, firewalls, privacy settings)\n*   **Toys?** (e.g., non-toxic materials, size restrictions to prevent choking, rounded edges)\n*   **Something else entirely?**\n\nOnce you tell me the context, I can provide a much more detailed and relevant answer.\n\nIn the meantime, here are some general points about safety features:\n\n*   **Purpose:** The primary goal of safety features is to reduce the risk of harm, injury, or damage. They can help prevent accidents from happening in the first place, or minimize the severity of the consequences if an accident does occur.\n*   **Types:** Safety features can be active (requiring user intervention or automatic activation) or passive (always in effect).\n*   **Importance:** Understanding and utilizing safety features is crucial for protecting yourself and others.\n*   **Limitations:** It's important to remember that safety features are not foolproof. They are designed to reduce risk, but they cannot eliminate it entirely.  It's still important to exercise caution and follow safety guidelines.\n\nI look forward to hearing from you so I can give you a more specific and helpful response!\n"
+            "text": "Okay, let's talk about safety features! To give you the most relevant information, I need a little more direction.  Safety features can be found in many different contexts.  To help me narrow it down, tell me:\n\n**1. What are you interested in?**\n\n*   **Vehicles:** (Cars, trucks, motorcycles, etc.) This is a very common topic for safety features.\n*   **Homes:** (Fire safety, security, etc.)\n*   **Workplaces:** (Construction, manufacturing, offices, etc.)\n*   **Software/Technology:** (Data security, privacy, etc.)\n*   **Medical Devices:** (Safety mechanisms, alarms, etc.)\n*   **Consumer Products:** (Toys, appliances, etc.)\n*   **Something else entirely?**\n\n**2.  If it's about a specific product or item, what is it?**\n\nFor example, instead of just \"vehicles\", you could say \"a 2023 Toyota Camry\" or \"electric scooters\".\n\n**3. What kind of information are you looking for?**\n\n*   **A general overview of common safety features?**\n*   **How a specific safety feature works?**\n*   **The effectiveness of certain safety features?**\n*   **Regulations or standards related to safety features?**\n*   **The history or evolution of safety features?**\n*   **Tips for using safety features properly?**\n\nOnce I have a better understanding of what you're interested in, I can provide you with much more specific and helpful information.\n\n**In the meantime, here are some general examples of safety features in different areas:**\n\n*   **Vehicles:** Airbags, anti-lock brakes (ABS), electronic stability control (ESC), lane departure warning systems, blind-spot monitoring, rearview cameras, automatic emergency braking (AEB), seatbelts.\n*   **Homes:** Smoke detectors, carbon monoxide detectors, fire extinguishers, security systems, childproof locks, GFCI outlets.\n*   **Workplaces:** Machine guards, personal protective equipment (PPE), emergency exits, safety training programs, hazard communication systems.\n*   **Software/Technology:** Firewalls, antivirus software, encryption, multi-factor authentication, data backups.\n\nI look forward to hearing from you so I can give you a more detailed and relevant answer!\n"
           }
         ],
         "role": "model"
@@ -52,13 +52,13 @@ X-Xss-Protection: 0
           "probability": 1
         }
       ],
-      "avgLogprobs": -0.18729964974000282
+      "avgLogprobs": -0.17248249629613618
     }
   ],
   "usageMetadata": {
     "promptTokenCount": 5,
-    "candidatesTokenCount": 388,
-    "totalTokenCount": 393,
+    "candidatesTokenCount": 497,
+    "totalTokenCount": 502,
     "promptTokensDetails": [
       {
         "modality": 1,
@@ -68,10 +68,10 @@ X-Xss-Protection: 0
     "candidatesTokensDetails": [
       {
         "modality": 1,
-        "tokenCount": 388
+        "tokenCount": 497
       }
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "RBdQaKfJAf6ShMIPm7P8iAY"
+  "responseId": "Yx-jaIrdGYHZkdUP0sDX0QQ"
 }

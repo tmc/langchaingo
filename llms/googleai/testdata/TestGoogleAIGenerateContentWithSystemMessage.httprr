@@ -1,20 +1,20 @@
 httprr trace v1
-915 2560
+897 2562
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 489
+Content-Length: 472
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-1.5-flash
 
-{"model":"models/gemini-1.5-flash", "systemInstruction":{"parts":[{"text":"You are a helpful assistant that always responds in haiku format."}], "role":"system"}, "contents":[{"parts":[{"text":"Tell me about the ocean"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
-Content-Length: 2181
+{"model":"models/gemini-1.5-flash","systemInstruction":{"parts":[{"text":"You are a helpful assistant that always responds in haiku format."}],"role":"system"},"contents":[{"parts":[{"text":"Tell me about the ocean"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 2183
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Mon, 16 Jun 2025 13:07:57 GMT
+Date: Mon, 18 Aug 2025 12:40:46 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=234
+Server-Timing: gfet4t7; dur=269
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -46,7 +46,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-1.5-flash",
-  "responseId": "LRdQaL7yILPQhMIP372DoQ0"
+  "responseId": "Th-jaIKZKbCMqsMP3O2RkAo"
 }
 ,
 {
@@ -55,7 +55,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": " blue mystery,\nWaves crash on the sandy shore,\nLife thrives deep below"
+            "text": " and deep it lies,\nCreatures swim in sunlit waves,\nSecrets"
           }
         ],
         "role": "model"
@@ -91,7 +91,7 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-1.5-flash",
-  "responseId": "LRdQaL7yILPQhMIP372DoQ0"
+  "responseId": "Th-jaIKZKbCMqsMP3O2RkAo"
 }
 ,
 {
@@ -100,7 +100,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": ".\n"
+            "text": " it holds deep.\n"
           }
         ],
         "role": "model"
@@ -128,8 +128,8 @@ X-Xss-Protection: 0
   ],
   "usageMetadata": {
     "promptTokenCount": 17,
-    "candidatesTokenCount": 19,
-    "totalTokenCount": 36,
+    "candidatesTokenCount": 22,
+    "totalTokenCount": 39,
     "promptTokensDetails": [
       {
         "modality": 1,
@@ -139,11 +139,11 @@ X-Xss-Protection: 0
     "candidatesTokensDetails": [
       {
         "modality": 1,
-        "tokenCount": 19
+        "tokenCount": 22
       }
     ]
   },
   "modelVersion": "gemini-1.5-flash",
-  "responseId": "LRdQaL7yILPQhMIP372DoQ0"
+  "responseId": "Th-jaIKZKbCMqsMP3O2RkAo"
 }
 ]

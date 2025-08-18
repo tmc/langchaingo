@@ -1,5 +1,5 @@
 httprr trace v1
-326 3385
+325 873
 POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
 Host: api-inference.huggingface.co
 User-Agent: langchaingo-httprr
@@ -7,35 +7,22 @@ Content-Length: 80
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"inputs":"Hello, say hi back","parameters":{"temperature":0.5,"max_length":20}}HTTP/2.0 200 OK
-Content-Length: 2046
+{"inputs":"Hello, say hi back","parameters":{"temperature":0.5,"max_length":20}}HTTP/2.0 404 Not Found
+Content-Length: 9
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
-Content-Type: application/json
+Content-Type: text/plain; charset=utf-8
 Cross-Origin-Opener-Policy: same-origin
-Date: Tue, 03 Jun 2025 13:02:45 GMT
+Date: Mon, 18 Aug 2025 12:37:01 GMT
 Referrer-Policy: strict-origin-when-cross-origin
-Vary: origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers, origin, access-control-request-method, access-control-request-headers
-Via: 1.1 943eef8bcb9ae2cbd9546c9e3bf846e2.cloudfront.net (CloudFront)
-X-Amz-Cf-Id: jQif20Fiz1rPY9SQty7bflOHie3SauCJBe4xcQ5CIHsf-untt8HWMg==
-X-Amz-Cf-Pop: SFO53-P3
-X-Cache: Miss from cloudfront
-X-Compute-Characters: 18
-X-Compute-Time: 32.305025311
-X-Compute-Type: 1-nvida-l4
-X-Generated-Tokens: 530
-X-Inference-Id: aa3fd0f1-660e-4aa9-a5f5-91a0974fcb52
-X-Inference-Time: 32292
+Vary: origin, access-control-request-method, access-control-request-headers
+Via: 1.1 09d324ff4ef3ad9ee0e07d2d9be971c8.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: KpCHCJmPy4y8dPFkhSsUPFL4JxYibD8JQ8hIvnAd254Wfs2GMr1tig==
+X-Amz-Cf-Pop: CDG55-P3
+X-Cache: Error from cloudfront
+X-Inference-Provider: hf-inference
 X-Powered-By: huggingface-moon
-X-Prompt-Tokens: 6
-X-Proxied-Host: http://10.101.83.249
-X-Proxied-Path: /
-X-Proxied-Replica: qhz2zash-53tb4
-X-Queue-Time: 12
-X-Request-Id: Root=1-683ef254-3abc7815659ed6a51307a911
-X-Time-Per-Token: 60
-X-Total-Time: 32305
-X-Validation-Time: 0
+X-Request-Id: Root=1-68a31e6d-2b6c0a240c504c04298015bb
 
-[{"generated_text":"Hello, say hi back if you can hear me.\n\nMy name is Lily, and I'm a survivor. I don't know how long it's been since the world as we knew it ended, but it's been long enough for me to accept that I'm alone. And that's okay. It's just me, my radio, and the memories of the life I used to have.\n\nThe world outside is a different place now. The air is thick with dust and the sky is a sickly orange. The sun is barely visible, hidden behind a thick layer of smog. It's a world that's been destroyed by fire, by the very thing that once brought us warmth and light.\n\nThe fires started small, just a few here and there. But then they spread, like a wildfire that couldn't be contained. The flames reached the cities, the forests, the coastlines. Everything was consumed by the blaze.\n\nThe cause of the fires is still unknown, but it doesn't matter anymore. The damage has been done, and there's no going back.\n\nI've learned to live in this new world, to adapt to the new realities. I've learned to scavenge, to find food and water where there's nothing but barren land. I've learned to be resourceful, to make do with what I have.\n\nBut sometimes, I still long for the old world. The world that was full of color and life. The world that was full of people.\n\nI remember the sound of laughter, the smell of freshly baked bread, the feel of a warm embrace. I remember the way the sun used to shine, the way the leaves used to rustle in the wind.\n\nBut those memories are fading, like a photograph that's been left out in the rain. They're becoming harder and harder to hold onto.\n\nAnd so, I cling to the present. I cling to the hope that someday, somehow, the world will be reborn. That the fires will be extinguished, and the earth will be renewed.\n\nUntil then, I'll keep walking, keep searching, keep surviving. Because that's all I can do.\n\nGoodnight, world. Until tomorrow, when I'll try to find a little bit of light in this dark, dark place.\n\n[The sound of static fades in and out as the broadcast ends.]"}]
+Not Found

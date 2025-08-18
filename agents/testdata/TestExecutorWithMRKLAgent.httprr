@@ -1,5 +1,5 @@
 httprr trace v1
-1375 1638
+1374 1685
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,27 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:00:14 GMT
+Date: Mon, 18 Aug 2025 12:47:11 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 2084
+Openai-Processing-Ms: 1857
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 2087
+X-Envoy-Upstream-Service-Time: 2526
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 999744
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 15ms
-X-Request-Id: req_d1d8f3373247434a997767ae8e7de4d8
+X-Request-Id: req_f2650eb5eee54909afd6b2d0fe33a25d
 
 {
-  "id": "chatcmpl-BizzIFy61nJfvvAOFhhZgInyJrZS7",
+  "id": "chatcmpl-C5tYT3pvaJbtNYkzj8AuekFBz6Eye",
   "object": "chat.completion",
-  "created": 1750064412,
+  "created": 1755521229,
   "model": "gpt-4-0613",
   "choices": [
     {
@@ -65,7 +66,7 @@ X-Request-Id: req_d1d8f3373247434a997767ae8e7de4d8
   "service_tier": "default",
   "system_fingerprint": null
 }
-1524 1578
+1523 1622
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -74,38 +75,39 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4","messages":[{"role":"user","content":"Answer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A wrapper around Google Search. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Always one of the first options when you need to find information on internet\"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic problem. I can use the calculator tool to solve it.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"temperature":0,"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 855
+Content-Length: 854
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:00:17 GMT
+Date: Mon, 18 Aug 2025 12:47:13 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1139
+Openai-Processing-Ms: 877
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1142
+X-Envoy-Upstream-Service-Time: 976
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 999707
+X-Ratelimit-Remaining-Tokens: 999708
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 17ms
-X-Request-Id: req_022f49f29086b26e175bd28ec4943306
+X-Request-Id: req_b87a3934c78c45a293877082fa2a6abe
 
 {
-  "id": "chatcmpl-BizzMQ9yeGwOq55akCi3pR1lbeVPY",
+  "id": "chatcmpl-C5tYXrnm33bGrlwQU7DjJtce5OgO7",
   "object": "chat.completion",
-  "created": 1750064416,
+  "created": 1755521233,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Thought: I now know the final answer.\nFinal Answer: The answer is 8.",
+        "content": "Thought: I now know the final answer\nFinal Answer: The answer is 8.",
         "refusal": null,
         "annotations": []
       },
