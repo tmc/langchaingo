@@ -3,7 +3,7 @@ module github.com/tmc/langchaingo/examples/google-cloudsql-chat-message-history-
 go 1.24.3
 
 
-require github.com/tmc/langchaingo v0.1.14-pre.0
+require github.com/tmc/langchaingo v0.1.14-pre.1
 
 require (
 	cloud.google.com/go/auth v0.14.0 // indirect
