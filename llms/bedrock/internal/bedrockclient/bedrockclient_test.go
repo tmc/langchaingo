@@ -158,7 +158,7 @@ func TestCreateCompletion_UnsupportedProvider(t *testing.T) {
 	}
 	options := llms.CallOptions{}
 
-	_, err = client.CreateCompletion(context.Background(), "unsupported.model", messages, options)
+	_, err = client.CreateCompletion(context.Background(), "unsupported", "unsupported.model", messages, options)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "unsupported provider")
 }
