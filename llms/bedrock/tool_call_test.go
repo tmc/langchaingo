@@ -50,15 +50,15 @@ func TestToolCallProcessing(t *testing.T) {
 	require.Equal(t, "text", bedrockMsgs[0].Type)
 	require.Equal(t, "What's the weather like?", bedrockMsgs[0].Content)
 
-	// Second message should be tool_use
+	// Second message should be tool_call
 	require.Equal(t, llms.ChatMessageTypeAI, bedrockMsgs[1].Role)
-	require.Equal(t, "tool_use", bedrockMsgs[1].Type)
-	require.Contains(t, bedrockMsgs[1].Content, "call_123")
-	require.Contains(t, bedrockMsgs[1].Content, "get_weather")
+	require.Equal(t, "tool_call", bedrockMsgs[1].Type)
+	require.Equal(t, "call_123", bedrockMsgs[1].ToolCallID)
+	require.Equal(t, "get_weather", bedrockMsgs[1].ToolName)
 
 	// Third message should be tool_result
 	require.Equal(t, llms.ChatMessageTypeTool, bedrockMsgs[2].Role)
 	require.Equal(t, "tool_result", bedrockMsgs[2].Type)
-	require.Contains(t, bedrockMsgs[2].Content, "call_123")
-	require.Contains(t, bedrockMsgs[2].Content, "It's sunny and 72°F in New York")
+	require.Equal(t, "call_123", bedrockMsgs[2].ToolUseID)
+	require.Equal(t, "It's sunny and 72°F in New York", bedrockMsgs[2].Content)
 }

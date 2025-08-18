@@ -136,8 +136,10 @@ const (
 
 // Type attribute for the anthropic message.
 const (
-	AnthropicMessageTypeText  = "text"
-	AnthropicMessageTypeImage = "image"
+	AnthropicMessageTypeText       = "text"
+	AnthropicMessageTypeImage      = "image"
+	AnthropicMessageTypeToolUse    = "tool_use"
+	AnthropicMessageTypeToolResult = "tool_result"
 )
 
 func createAnthropicCompletion(ctx context.Context,

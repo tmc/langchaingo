@@ -31,35 +31,20 @@ func TestAnthropicToolCallSupport(t *testing.T) {
 		}
 
 		// Test that our conversion works
-		var anthropicTools []anthropicTool
-		for _, tool := range tools {
-			if tool.Function != nil {
-				anthropicTools = append(anthropicTools, anthropicTool{
-					Name:        tool.Function.Name,
-					Description: tool.Function.Description,
-					InputSchema: tool.Function.Parameters,
-				})
-			}
-		}
+		bedrockTools, err := convertToolsToBedrockTools(tools)
+		require.NoError(t, err)
+		require.Len(t, bedrockTools, 1)
 
-		require.Len(t, anthropicTools, 1)
-		require.Equal(t, "get_weather", anthropicTools[0].Name)
-		require.Equal(t, "Get the current weather for a location", anthropicTools[0].Description)
-		require.NotNil(t, anthropicTools[0].InputSchema)
+		require.Equal(t, "get_weather", bedrockTools[0].Name)
+		require.Equal(t, "Get the current weather for a location", bedrockTools[0].Description)
+		require.NotNil(t, bedrockTools[0].InputSchema)
 	})
 
 	t.Run("Tool use output is parsed correctly", func(t *testing.T) {
 		output := anthropicTextGenerationOutput{
 			Type: "message",
 			Role: "assistant",
-			Content: []struct {
-				Type string `json:"type"`
-				Text string `json:"text,omitempty"`
-				// Tool use fields
-				ID string `json:"id,omitempty"`
-				Name string `json:"name,omitempty"`
-				Input interface{} `json:"input,omitempty"`
-			}{
+			Content: []anthropicContentBlock{
 				{
 					Type: "tool_use",
 					ID:   "toolu_123",
@@ -106,13 +91,15 @@ func TestAnthropicToolCallSupport(t *testing.T) {
 
 	t.Run("Tool result input content is processed", func(t *testing.T) {
 		message := Message{
-			Role:    llms.ChatMessageTypeTool,
-			Type:    AnthropicMessageTypeToolResult,
-			Content: `{"tool_use_id": "toolu_123", "content": "It's 72°F and sunny in San Francisco"}`,
+			Role:      llms.ChatMessageTypeTool,
+			Type:      AnthropicMessageTypeToolResult,
+			Content:   "It's 72°F and sunny in San Francisco",
+			ToolUseID: "toolu_123",
 		}
 
 		content := getAnthropicInputContent(message)
 		require.Equal(t, AnthropicMessageTypeToolResult, content.Type)
 		require.Equal(t, "It's 72°F and sunny in San Francisco", content.Content)
+		require.Equal(t, "toolu_123", content.ToolUseID)
 	})
 }
