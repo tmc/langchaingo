@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo/examples/llmsummarization-chain-example
 
 go 1.24.3
 
-require github.com/tmc/langchaingo v0.1.14-pre.1
+require github.com/tmc/langchaingo v0.1.14-pre.2
 
 require (
 	cloud.google.com/go v0.116.0 // indirect

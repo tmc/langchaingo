@@ -4,7 +4,7 @@ go 1.23.8
 
 toolchain go1.24.6
 
-require github.com/tmc/langchaingo v0.1.14-pre.1
+require github.com/tmc/langchaingo v0.1.14-pre.2
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
@@ -26,5 +26,3 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 )
-
-replace github.com/tmc/langchaingo => ../..
