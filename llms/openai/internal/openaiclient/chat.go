@@ -34,7 +34,8 @@ type ChatRequest struct {
 	Temperature float64        `json:"temperature"`
 	TopP        float64        `json:"top_p,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
-	MaxTokens           int      `json:"-"`
+	// Note: Some OpenAI-compatible servers still require this field
+	MaxTokens           int      `json:"max_tokens,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	StopWords           []string `json:"stop,omitempty"`
@@ -78,6 +79,35 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+}
+
+// MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
+// OpenAI's API returns an error if both fields are present.
+func (r ChatRequest) MarshalJSON() ([]byte, error) {
+	type Alias ChatRequest
+	aux := struct {
+		*Alias
+		MaxTokens           *int `json:"max_tokens,omitempty"`
+		MaxCompletionTokens *int `json:"max_completion_tokens,omitempty"`
+	}{
+		Alias: (*Alias)(&r),
+	}
+
+	// Ensure only one token field is sent
+	if r.MaxCompletionTokens > 0 && r.MaxTokens > 0 {
+		// Both are set - this shouldn't happen with our logic,
+		// but if it does, prefer MaxCompletionTokens (modern field)
+		aux.MaxCompletionTokens = &r.MaxCompletionTokens
+		aux.MaxTokens = nil
+	} else if r.MaxCompletionTokens > 0 {
+		aux.MaxCompletionTokens = &r.MaxCompletionTokens
+		aux.MaxTokens = nil
+	} else if r.MaxTokens > 0 {
+		aux.MaxTokens = &r.MaxTokens
+		aux.MaxCompletionTokens = nil
+	}
+
+	return json.Marshal(&aux)
 }
 
 // ToolType is the type of a tool.
@@ -438,11 +468,11 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 ) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan StreamedChatResponsePayload)
-	
+
 	// Create a context that can be cancelled to stop the goroutine
 	readerCtx, cancelReader := context.WithCancel(ctx)
 	defer cancelReader()
-	
+
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
@@ -452,7 +482,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				return
 			default:
 			}
-			
+
 			line := scanner.Text()
 			if line == "" {
 				continue
@@ -483,7 +513,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 				// This could happen if the data field contains non-JSON content
 				continue
 			}
-			
+
 			// Non-blocking send with context check
 			select {
 			case <-readerCtx.Done():
