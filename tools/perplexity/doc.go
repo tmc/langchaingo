@@ -17,7 +17,7 @@
 //
 //	// Create a new Perplexity instance
 //	perpl, err := perplexity.New(
-//		perplexity.WithModel(perplexity.ModelLlamaSonarSmall),
+//		perplexity.WithModel(perplexity.ModelSonar),
 //		perplexity.WithAPIKey("your-api-key"), // Optional: defaults to PERPLEXITY_API_KEY env var
 //	)
 //	if err != nil {
