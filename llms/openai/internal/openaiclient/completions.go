@@ -10,7 +10,7 @@ type CompletionRequest struct {
 	Prompt      string  `json:"prompt"`
 	Temperature float64 `json:"temperature"`
 	// Deprecated: Use MaxCompletionTokens
-	MaxTokens           int      `json:"-,omitempty"`
+	MaxTokens           int      `json:"-"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	FrequencyPenalty    float64  `json:"frequency_penalty,omitempty"`
