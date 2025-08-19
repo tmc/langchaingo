@@ -12,34 +12,34 @@ import (
 
 // Options is a set of options for GoogleAI and Vertex clients.
 type Options struct {
-	CloudProject            string
-	CloudLocation           string
-	DefaultModel            string
-	DefaultEmbeddingModel   string
+	CloudProject              string
+	CloudLocation             string
+	DefaultModel              string
+	DefaultEmbeddingModel     string
 	DefaultEmbeddingDimension int
-	DefaultCandidateCount   int
-	DefaultMaxTokens        int
-	DefaultTemperature      float64
-	DefaultTopK             int
-	DefaultTopP             float64
-	HarmThreshold           HarmBlockThreshold
+	DefaultCandidateCount     int
+	DefaultMaxTokens          int
+	DefaultTemperature        float64
+	DefaultTopK               int
+	DefaultTopP               float64
+	HarmThreshold             HarmBlockThreshold
 
 	ClientOptions []option.ClientOption
 }
 
 func DefaultOptions() Options {
 	return Options{
-		CloudProject:            "",
-		CloudLocation:           "",
-		DefaultModel:            "gemini-2.0-flash",
-		DefaultEmbeddingModel:   "embedding-001",
+		CloudProject:              "",
+		CloudLocation:             "",
+		DefaultModel:              "gemini-2.0-flash",
+		DefaultEmbeddingModel:     "gemini-embedding-001",
 		DefaultEmbeddingDimension: 0, // 0 means use model default
-		DefaultCandidateCount:   1,
-		DefaultMaxTokens:        2048,
-		DefaultTemperature:      0.5,
-		DefaultTopK:             3,
-		DefaultTopP:             0.95,
-		HarmThreshold:           HarmBlockOnlyHigh,
+		DefaultCandidateCount:     1,
+		DefaultMaxTokens:          2048,
+		DefaultTemperature:        0.5,
+		DefaultTopK:               3,
+		DefaultTopP:               0.95,
+		HarmThreshold:             HarmBlockOnlyHigh,
 	}
 }
 

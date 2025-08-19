@@ -244,7 +244,9 @@ func (store *Store) SimilaritySearch(
 		}
 
 		found = append(found, doc)
+		fmt.Println(doc.Metadata)
 	}
+	fmt.Println("found documents:", len(found))
 
 	return found, nil
 }

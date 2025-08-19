@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	embeddingModelName = "text-embedding-005"
+	embeddingModelName = "gemini-embedding-001"
 	TextModelName      = "text-bison"
 	ChatModelName      = "chat-bison"
 )
