@@ -1,1 +1,69 @@
 httprr trace v1
+325 6711
+POST http://localhost:11434/api/chat HTTP/1.1
+Host: localhost:11434
+User-Agent: langchaingo-httprr
+Content-Length: 139
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gemma3:1b","messages":[{"role":"user","content":"Hello, how are you?"}],"format":"","options":{"num_predict":50,"temperature":0}}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Type: application/x-ndjson
+Date: Wed, 20 Aug 2025 13:48:23 GMT
+
+19b2
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.241046Z","message":{"role":"assistant","content":"Hello"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.24606Z","message":{"role":"assistant","content":" there"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.250995Z","message":{"role":"assistant","content":"!"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.255923Z","message":{"role":"assistant","content":" I"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.260884Z","message":{"role":"assistant","content":"’"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.26582Z","message":{"role":"assistant","content":"m"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.270774Z","message":{"role":"assistant","content":" doing"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.276796Z","message":{"role":"assistant","content":" well"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.281977Z","message":{"role":"assistant","content":","},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.28694Z","message":{"role":"assistant","content":" thanks"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.291861Z","message":{"role":"assistant","content":" for"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.296769Z","message":{"role":"assistant","content":" asking"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.301727Z","message":{"role":"assistant","content":"."},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.306666Z","message":{"role":"assistant","content":" As"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.311544Z","message":{"role":"assistant","content":" an"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.316478Z","message":{"role":"assistant","content":" AI"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.32135Z","message":{"role":"assistant","content":","},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.326342Z","message":{"role":"assistant","content":" I"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.331307Z","message":{"role":"assistant","content":" don"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.33628Z","message":{"role":"assistant","content":"’"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.341166Z","message":{"role":"assistant","content":"t"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.346351Z","message":{"role":"assistant","content":" really"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.351353Z","message":{"role":"assistant","content":" *"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.356259Z","message":{"role":"assistant","content":"feel"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.361135Z","message":{"role":"assistant","content":"*"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.366002Z","message":{"role":"assistant","content":" in"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.370893Z","message":{"role":"assistant","content":" the"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.37586Z","message":{"role":"assistant","content":" same"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.38076Z","message":{"role":"assistant","content":" way"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.38564Z","message":{"role":"assistant","content":" humans"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.390495Z","message":{"role":"assistant","content":" do"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.395532Z","message":{"role":"assistant","content":","},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.400427Z","message":{"role":"assistant","content":" but"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.405319Z","message":{"role":"assistant","content":" I"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.410199Z","message":{"role":"assistant","content":"’"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.416054Z","message":{"role":"assistant","content":"m"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.420168Z","message":{"role":"assistant","content":" functioning"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.425098Z","message":{"role":"assistant","content":" perfectly"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.430047Z","message":{"role":"assistant","content":" and"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.434963Z","message":{"role":"assistant","content":" ready"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.439873Z","message":{"role":"assistant","content":" to"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.44478Z","message":{"role":"assistant","content":" help"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.449696Z","message":{"role":"assistant","content":" you"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.454579Z","message":{"role":"assistant","content":" with"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.459559Z","message":{"role":"assistant","content":" whatever"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.464529Z","message":{"role":"assistant","content":" you"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.469541Z","message":{"role":"assistant","content":" need"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.474453Z","message":{"role":"assistant","content":"."},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.479406Z","message":{"role":"assistant","content":" 😊"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.484598Z","message":{"role":"assistant","content":" "},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:23.484603Z","message":{"role":"assistant","content":""},"done_reason":"length","done":true,"total_duration":313801125,"load_duration":41717917,"prompt_eval_count":15,"prompt_eval_duration":27758541,"eval_count":50,"eval_duration":243926334}
+
+0
+
