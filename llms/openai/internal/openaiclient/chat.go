@@ -83,14 +83,26 @@ type ChatRequest struct {
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
 // OpenAI's API returns an error if both fields are present.
+// Also omits temperature for reasoning models (GPT-5, o1, o3) that only accept default temperature.
 func (r ChatRequest) MarshalJSON() ([]byte, error) {
 	type Alias ChatRequest
 	aux := struct {
 		*Alias
-		MaxTokens           *int `json:"max_tokens,omitempty"`
-		MaxCompletionTokens *int `json:"max_completion_tokens,omitempty"`
+		MaxTokens           *int     `json:"max_tokens,omitempty"`
+		MaxCompletionTokens *int     `json:"max_completion_tokens,omitempty"`
+		Temperature         *float64 `json:"temperature,omitempty"`
 	}{
 		Alias: (*Alias)(&r),
+	}
+
+	// Handle temperature for reasoning models
+	if isReasoningModel(r.Model) {
+		// Reasoning models (GPT-5, o1, o3) only accept temperature=1 (default)
+		// Omit temperature field to let API use its default value
+		aux.Temperature = nil
+	} else {
+		// For regular models, always send temperature
+		aux.Temperature = &r.Temperature
 	}
 
 	// Ensure only one token field is sent
@@ -108,6 +120,24 @@ func (r ChatRequest) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&aux)
+}
+
+// isReasoningModel returns true if the model is a reasoning model that has temperature constraints.
+// Reasoning models (GPT-5, o1, o3) only accept temperature=1 and reject other values.
+func isReasoningModel(model string) bool {
+	// o1 series: o1-preview, o1-mini
+	if strings.HasPrefix(model, "o1-") {
+		return true
+	}
+	// o3 series: o3, o3-mini (note: "o3" without suffix is also valid)
+	if model == "o3" || strings.HasPrefix(model, "o3-") {
+		return true
+	}
+	// GPT-5 series (when released)
+	if strings.HasPrefix(model, "gpt-5") {
+		return true
+	}
+	return false
 }
 
 // ToolType is the type of a tool.
