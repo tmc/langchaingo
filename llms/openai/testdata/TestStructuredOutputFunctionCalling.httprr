@@ -1,5 +1,5 @@
 httprr trace v1
-767 2462
+767 1895
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7,33 +7,33 @@ Content-Length: 565
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a helpful assistant"},{"role":"user","content":"What is the age of Bob Odenkirk, a famous comedy screenwriter and an actor."}],"temperature":0,"tools":[{"type":"function","function":{"name":"search","description":"Search by the web search engine","parameters":{"type":"object","properties":{"search_engine":{"type":"string","enum":["google","duckduckgo","bing"]},"search_query":{"type":"string"}},"required":["search_engine","search_query"],"additionalProperties":false},"strict":true}}]}HTTP/2.0 200 OK
-Content-Length: 1690
+{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a helpful assistant"},{"role":"user","content":"What is the age of Bob Odenkirk, a famous comedy screenwriter and an actor."}],"tools":[{"type":"function","function":{"name":"search","description":"Search by the web search engine","parameters":{"type":"object","properties":{"search_engine":{"type":"string","enum":["google","duckduckgo","bing"]},"search_query":{"type":"string"}},"required":["search_engine","search_query"],"additionalProperties":false},"strict":true}}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1123
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 18 Aug 2025 14:27:31 GMT
+Date: Wed, 20 Aug 2025 13:06:55 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 5048
+Openai-Processing-Ms: 6313
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 5142
+X-Envoy-Upstream-Service-Time: 6327
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 29999971
+X-Ratelimit-Remaining-Tokens: 29999970
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_76e955ceee6f44e0aeffeea56d355757
+X-Request-Id: req_7702a9ad41564533bcc1c01b9d2793d3
 
 {
-  "id": "chatcmpl-C5v7XwQQuM1WPv2zx3cHE3vNUKrVs",
+  "id": "chatcmpl-C6coa6H3VOeZJ1Q8mfF0fnd09rNed",
   "object": "chat.completion",
-  "created": 1755527247,
+  "created": 1755695208,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -43,27 +43,11 @@ X-Request-Id: req_76e955ceee6f44e0aeffeea56d355757
         "content": null,
         "tool_calls": [
           {
-            "id": "call_eg0ses9sNKmFxqkXUxlqJnhH",
+            "id": "call_ZK1sabbcL4sfbbcqmN9YALA7",
             "type": "function",
             "function": {
               "name": "search",
-              "arguments": "{\"search_engine\": \"google\", \"search_query\": \"Bob Odenkirk age\"}"
-            }
-          },
-          {
-            "id": "call_v4Ox9VXOliEGKVSYxAW7B4I1",
-            "type": "function",
-            "function": {
-              "name": "search",
-              "arguments": "{\"search_engine\": \"duckduckgo\", \"search_query\": \"Bob Odenkirk age\"}"
-            }
-          },
-          {
-            "id": "call_vT5ZxyN1aUaRfcnSN2sE8jd9",
-            "type": "function",
-            "function": {
-              "name": "search",
-              "arguments": "{\"search_engine\": \"bing\", \"search_query\": \"Bob Odenkirk age\"}"
+              "arguments": "{\"search_engine\":\"google\",\"search_query\":\"Bob Odenkirk age\"}"
             }
           }
         ],
@@ -76,8 +60,8 @@ X-Request-Id: req_76e955ceee6f44e0aeffeea56d355757
   ],
   "usage": {
     "prompt_tokens": 85,
-    "completion_tokens": 87,
-    "total_tokens": 172,
+    "completion_tokens": 23,
+    "total_tokens": 108,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
