@@ -7,33 +7,33 @@ Content-Length: 463
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"What is the weather like in Boston?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"What is the weather like in Boston?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 1080
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Wed, 20 Aug 2025 12:06:38 GMT
+Date: Wed, 20 Aug 2025 13:06:40 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 425
+Openai-Processing-Ms: 437
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 519
+X-Envoy-Upstream-Service-Time: 466
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999989
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_291db3c27d694ec6b32ef867344ae43f
+X-Request-Id: req_b0e29abccfdc4d798f989feba1d6262b
 
 {
-  "id": "chatcmpl-C6bsMIVmRZ2O2GQV1QfQumPkz6O38",
+  "id": "chatcmpl-C6coS1jncfSG1hcFv7v36PkpgHlBq",
   "object": "chat.completion",
-  "created": 1755691598,
+  "created": 1755695200,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -43,7 +43,7 @@ X-Request-Id: req_291db3c27d694ec6b32ef867344ae43f
         "content": null,
         "tool_calls": [
           {
-            "id": "call_brEAAYfAUXI3n3MY4ks4UobV",
+            "id": "call_olc8qHf1RDItRqwuEBNjsu3B",
             "type": "function",
             "function": {
               "name": "getCurrentWeather",

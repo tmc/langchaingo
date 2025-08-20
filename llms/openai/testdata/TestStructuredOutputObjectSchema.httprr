@@ -7,33 +7,33 @@ Content-Length: 419
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a student taking a math exam."},{"role":"user","content":"Solve 2 + 2"}],"temperature":0,"response_format":{"type":"json_schema","json_schema":{"name":"math_schema","strict":true,"schema":{"type":"object","properties":{"final_answer":{"type":"string","additionalProperties":false}},"additionalProperties":false,"required":["final_answer"]}}}}HTTP/2.0 200 OK
+{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a student taking a math exam."},{"role":"user","content":"Solve 2 + 2"}],"response_format":{"type":"json_schema","json_schema":{"name":"math_schema","strict":true,"schema":{"type":"object","properties":{"final_answer":{"type":"string","additionalProperties":false}},"additionalProperties":false,"required":["final_answer"]}}},"temperature":0}HTTP/2.0 200 OK
 Content-Length: 825
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Wed, 20 Aug 2025 12:07:18 GMT
+Date: Wed, 20 Aug 2025 13:06:44 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 272
+Openai-Processing-Ms: 530
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 294
+X-Envoy-Upstream-Service-Time: 585
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999985
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_baa6b544b97b4f4d8ee9ea5ef23db41f
+X-Request-Id: req_f5f9b1ec728547fd91f025bb50801b4a
 
 {
-  "id": "chatcmpl-C6bt0ob6TPzuf4hxy4xfOaqRyrfnJ",
+  "id": "chatcmpl-C6coVnCXLoW5x80BoWWrkccMpvrEC",
   "object": "chat.completion",
-  "created": 1755691638,
+  "created": 1755695203,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
