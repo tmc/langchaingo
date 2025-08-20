@@ -452,7 +452,27 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	}
 	// Build request payload
 
+	// Filter out internal metadata that shouldn't be sent to the API
+	originalMetadata := payload.Metadata
+	if payload.Metadata != nil {
+		filteredMetadata := make(map[string]any)
+		for k, v := range payload.Metadata {
+			// Skip internal openai: prefixed metadata fields
+			if !strings.HasPrefix(k, "openai:") {
+				filteredMetadata[k] = v
+			}
+		}
+		if len(filteredMetadata) > 0 {
+			payload.Metadata = filteredMetadata
+		} else {
+			payload.Metadata = nil
+		}
+	}
+
 	payloadBytes, err := json.Marshal(payload)
+	
+	// Restore original metadata
+	payload.Metadata = originalMetadata
 	if err != nil {
 		return nil, err
 	}
