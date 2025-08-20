@@ -7,33 +7,33 @@ Content-Length: 552
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 1082
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 18 Aug 2025 12:47:09 GMT
+Date: Wed, 20 Aug 2025 12:17:40 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 504
+Openai-Processing-Ms: 778
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 587
+X-Envoy-Upstream-Service-Time: 837
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999975
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_548c168a502842bb94fd5e2391640450
+X-Request-Id: req_25743ba8d0f24b9c8410ea87c2d180dc
 
 {
-  "id": "chatcmpl-C5tYT1lejU5HDjVQBLTAyqHWGgSjU",
+  "id": "chatcmpl-C6c31Vb8URTNFDYlvFWAtRyMf4ZFf",
   "object": "chat.completion",
-  "created": 1755521229,
+  "created": 1755692259,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -43,7 +43,7 @@ X-Request-Id: req_548c168a502842bb94fd5e2391640450
         "content": null,
         "tool_calls": [
           {
-            "id": "call_sgvhmmuASadOaDtd93TmrUsY",
+            "id": "call_X14YCAuvZVCQY9WbxLRN4OTW",
             "type": "function",
             "function": {
               "name": "calculator",
@@ -84,33 +84,33 @@ Content-Length: 790
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_sgvhmmuASadOaDtd93TmrUsY","type":"function","function":{"name":"calculator","arguments":"15 * 4"}}]},{"role":"tool","content":"60","tool_call_id":"call_sgvhmmuASadOaDtd93TmrUsY"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_X14YCAuvZVCQY9WbxLRN4OTW","type":"function","function":{"name":"calculator","arguments":"15 * 4"}}]},{"role":"tool","content":"60","tool_call_id":"call_X14YCAuvZVCQY9WbxLRN4OTW"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}],"temperature":0}HTTP/2.0 200 OK
 Content-Length: 829
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 18 Aug 2025 12:47:11 GMT
+Date: Wed, 20 Aug 2025 12:17:42 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 419
+Openai-Processing-Ms: 372
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 502
+X-Envoy-Upstream-Service-Time: 437
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999973
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ed82ddd09b52482fbaa51e7138991c8e
+X-Request-Id: req_6fc142ce677945a49a3f6247c17258ca
 
 {
-  "id": "chatcmpl-C5tYVx3jHrQWYj301DQkDQhBsSXbN",
+  "id": "chatcmpl-C6c337tynMV3jVukKNP8TtYKRfRMv",
   "object": "chat.completion",
-  "created": 1755521231,
+  "created": 1755692261,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {

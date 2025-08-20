@@ -1,5 +1,5 @@
 httprr trace v1
-855 2111
+855 2286
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7,40 +7,40 @@ Content-Length: 653
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful math assistant."},{"role":"user","content":"Please show your work step by step."},{"role":"user","content":"If I have 3 groups of 7 items, and I add 9 more items, how many items do I have in total?"}],"temperature":0,"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 1339
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful math assistant."},{"role":"user","content":"Please show your work step by step."},{"role":"user","content":"If I have 3 groups of 7 items, and I add 9 more items, how many items do I have in total?"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1514
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 18 Aug 2025 12:47:13 GMT
+Date: Wed, 20 Aug 2025 12:17:55 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 4119
+Openai-Processing-Ms: 3086
 Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 4213
+X-Envoy-Upstream-Service-Time: 3191
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999956
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_6884fae54e3344799952232832c03e3d
+X-Request-Id: req_fff9d7930ae9404bb0886d7cdb93aa6a
 
 {
-  "id": "chatcmpl-C5tYTqCwufXop3C3uD0VRj3o0DyYc",
+  "id": "chatcmpl-C6c3EooydqfQFBnCBxCg6OJZQKClM",
   "object": "chat.completion",
-  "created": 1755521229,
+  "created": 1755692272,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "To find the total number of items, we can break down the problem into two main steps:\n\n1. **Calculate the total number of items in the 3 groups of 7 items each.**\n\n   Each group has 7 items, and there are 3 groups. So, we multiply the number of items per group by the number of groups:\n   \\[\n   3 \\times 7 = 21\n   \\]\n\n2. **Add the 9 additional items to the total from step 1.**\n\n   We take the total from the groups and add the 9 more items:\n   \\[\n   21 + 9 = 30\n   \\]\n\nTherefore, the total number of items is 30.",
+        "content": "To find the total number of items, we can break down the problem into two steps:\n\n1. Calculate the total number of items in the 3 groups of 7 items each.\n2. Add the 9 additional items to the result from step 1.\n\nLet's go through these steps:\n\n1. **Calculate the total number of items in the 3 groups:**\n\n   Each group has 7 items, and there are 3 groups. So, we multiply the number of items per group by the number of groups:\n\n   \\[\n   3 \\times 7 = 21\n   \\]\n\n   So, there are 21 items in the 3 groups.\n\n2. **Add the 9 additional items:**\n\n   Now, we add the 9 items to the 21 items we calculated in step 1:\n\n   \\[\n   21 + 9 = 30\n   \\]\n\nTherefore, the total number of items is 30.",
         "refusal": null,
         "annotations": []
       },
@@ -50,8 +50,8 @@ X-Request-Id: req_6884fae54e3344799952232832c03e3d
   ],
   "usage": {
     "prompt_tokens": 122,
-    "completion_tokens": 150,
-    "total_tokens": 272,
+    "completion_tokens": 197,
+    "total_tokens": 319,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0

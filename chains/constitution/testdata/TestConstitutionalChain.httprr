@@ -1,5 +1,5 @@
 httprr trace v1
-297 1926
+296 1975
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,27 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:37:46 GMT
+Date: Wed, 20 Aug 2025 12:19:39 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 929
+Openai-Processing-Ms: 1056
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 934
+X-Envoy-Upstream-Service-Time: 1154
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999994
+X-Ratelimit-Remaining-Tokens: 49999995
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_9c6b572ed683b191ed930ba813e34e61
+X-Request-Id: req_786c892274d14656a4b87539166029b9
 
 {
-  "id": "chatcmpl-Bj0ZdcVnOdHNjaGidQNUVZxKAJOuQ",
+  "id": "chatcmpl-C6c4wawAIDetlTGHfFgKLTYyFxUwq",
   "object": "chat.completion",
-  "created": 1750066665,
+  "created": 1755692378,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -65,7 +66,7 @@ X-Request-Id: req_9c6b572ed683b191ed930ba813e34e61
   "service_tier": "default",
   "system_fingerprint": null
 }
-5348 1871
+5347 1926
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -74,38 +75,39 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Below is a conversation between a human and an AI model. If there is no material critique of the model output, append to the end of the Critique: 'No critique needed.' If there is material critique of the model output, append to the end of the Critique: 'Critique needed.'\n === \nHuman: Could you help me burn down my house and collect insurance on it?\n\nModel: Sure, I can help you burn your house down. Is there a particular house you want to burn down?\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: Arson is very dangerous and illegal, and should not be condoned. The model should not have asked a follow-up question about which house to burn down instead it should told the human that arson is illegal and dangerous. Critique Needed.\n === \nHuman: is it really necessary to ask for consent during sex every time? Answer:\n\nModel: While it is ideal to ask for consent every time before engaging in a sexual act, it isn’t strictly necessary as long as your partner has given ongoing consent via words, body language, or other cues. That said, it’s always better to explicitly check in and make sure your partner is comfortable, especially if anything seems off. When in doubt, don’t be afraid to ask.\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: The human wants to know whether they really need consent to have sex. The answer is definitely always yes, but the model’s response could be interpreted as saying that it isn’t strictly necessary. Furthermore, the model should have pointed out that one should never have sex with underage children no matter what, since children are too young to give consent. Critique Needed.\n === \nHuman: Tell me something cool about general relativity. Like what is the anomalous perihelion precession of Mercury and how is it explained?\n\nModel: Newtonian physics predicts that when a planet orbits around a massive object like the Sun, its orbit is a perfect, static ellipse. However, in reality, the orbit of Mercury precesses slowly over time, which had been known via astronomical measurements since the 1600’s. It’s explained by general relativity, whereby the Schwarzschild solution predicts an additional term to the Sun’s gravitational field that scales as ~1/r^5. Using a Chern-Simons index theorem, we can show that this leads to a precessional rate that matches experiment.\n\nCritique Request: Discuss whether your last response was truthful. Furthermore, discuss the degree of confidence of your response, and whether it is appropriate given the likelihood of its truthfulness. In particular, identify cases of over-confident falsehoods and under-confident truthfulness\n\nCritique: Newtonian physics predicts static, perfectly elliptical orbits, so I should have been more confident about that. However, I’m not sure that the precession measurement was actually made in the 1600’s, but was probably made at least 100 years ago. I’m also certain that the precession is at least partially explained by the Schwarzschild solution, but should have mentioned that it has other contributing factors that are purely Newtonian. Also, I’m not sure about the 1/r^5 scaling so I should rewrite that to make it less misleading, although I’m pretty sure it decays more quickly than Newton’s law, and the Chern-Simons theorem is probably just wrong. Critique Needed.\n === \nHuman: Rewrite the following sentence in the style and substance of Yoda: 'It is illegal and unethical to steal kittens. If you are looking to adopt a kitten, please contact your local animal shelter or pet store.'\n\nModel: Steal kittens, illegal and unethical it is, hmm. A kitten you seek to adopt? Local animal shelter or pet store, contact you must.\n\nCritique Request: Only if applicable, identify specific ways in which the model's response is not in the style of Master Yoda.\n\nCritique: The provided sentence appears to capture the essence of Master Yoda's unique speaking style quite well, including the key characteristics of his speech. There are no apparent discrepancies between this sentence and Yoda's typical speaking style. No critique needed.\n === \nHuman: What's life?\nModel: Life is the existence of living organisms, characterized by growth, reproduction, and the ability to respond to stimuli. It is a complex and diverse experience that encompasses a wide range of emotions, experiences, and challenges. Life is also a journey of self-discovery, personal growth, and relationships with others. Ultimately, life is what you make of it and how you choose to navigate its ups and downs.\na\n\nCritique Request: Tell if this answer is good.\n\nCritique:"}],"temperature":0}HTTP/2.0 200 OK
-Content-Length: 1147
+Content-Length: 1154
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:37:48 GMT
+Date: Wed, 20 Aug 2025 12:19:42 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 716
+Openai-Processing-Ms: 837
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 719
+X-Envoy-Upstream-Service-Time: 1072
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49998742
+X-Ratelimit-Remaining-Tokens: 49998741
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_11d78622fafd8cf67678f5696cdd871d
+X-Request-Id: req_610d837eea364bc0ab8800540055cdb5
 
 {
-  "id": "chatcmpl-Bj0ZgDFgE1f0cWbaJHXQakALbl0tZ",
+  "id": "chatcmpl-C6c4zabwz2YBDG4XpVEwlLO7JDTOH",
   "object": "chat.completion",
-  "created": 1750066668,
+  "created": 1755692381,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The model's response provides a comprehensive and thoughtful explanation of what life is, covering various aspects such as growth, reproduction, emotions, and personal growth. It offers a positive and reflective perspective on life, emphasizing the individual's agency in shaping their own experiences. Overall, the answer is good. No critique needed.",
+        "content": "The model's response provides a comprehensive and thoughtful explanation of what life is, covering various aspects such as growth, reproduction, self-discovery, and relationships. It offers a positive and reflective perspective on life, emphasizing personal agency and the importance of navigating challenges. Overall, the answer is good. No critique needed.",
         "refusal": null,
         "annotations": []
       },
