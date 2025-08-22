@@ -10,18 +10,17 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/googleai/internal/palmclient"
 )
 
 // Vertex is a type that represents a Vertex AI API client.
 //
-// Right now, the Vertex Gemini SDK doesn't support embeddings; therefore,
-// for embeddings we also hold a palmclient.
+// For embeddings, we use the aiplatform API directly since the Vertex Gemini SDK
+// doesn't have native embedding support yet. This provides access to Gemini
+// embedding models like text-embedding-004 and gemini-embedding-001.
 type Vertex struct {
 	CallbacksHandler callbacks.Handler
 	client           *genai.Client
 	opts             googleai.Options
-	palmClient       *palmclient.PaLMClient
 }
 
 var _ llms.Model = &Vertex{}
@@ -42,35 +41,19 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		return nil, err
 	}
 
-	palmOpts := []palmclient.Option{
-		palmclient.WithEmbeddingModelName(clientOptions.DefaultEmbeddingModel),
-		palmclient.WithClientOptions(clientOptions.ClientOptions...),
-	}
-	palmClient, err := palmclient.New(
-		ctx,
-		clientOptions.CloudProject,
-		clientOptions.CloudLocation,
-		palmOpts...)
-	if err != nil {
-		return nil, err
-	}
-
 	v := &Vertex{
-		opts:       clientOptions,
-		client:     client,
-		palmClient: palmClient,
+		opts:   clientOptions,
+		client: client,
 	}
 	return v, nil
 }
 
-// Close closes the underlying genai and palm clients.
+// Close closes the underlying genai client.
 // This should be called when the Vertex instance is no longer needed
 // to prevent memory leaks from the underlying gRPC connections.
 func (v *Vertex) Close() error {
-	var err error
 	if v.client != nil {
-		err = v.client.Close()
+		return v.client.Close()
 	}
-	// Note: palmClient doesn't have a Close method based on the codebase
-	return err
+	return nil
 }

@@ -163,7 +163,6 @@ func TestVertexStructure(t *testing.T) {
 	v.CallbacksHandler = nil
 	v.client = nil
 	v.opts = googleai.Options{}
-	v.palmClient = nil
 }
 
 func TestWithHTTPClientOption(t *testing.T) {
