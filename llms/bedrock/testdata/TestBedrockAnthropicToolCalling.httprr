@@ -1,0 +1,40 @@
+httprr trace v1
+942 342
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 507
+Accept: */*
+Amz-Sdk-Invocation-Id: e4872db8-47bf-49a7-bbe2-4451f056b47b
+Amz-Sdk-Request: attempt=1; max=3
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+X-Amz-Date: 20250820T134559Z
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like in New York?"}]}],"tools":[{"name":"get_weather","description":"Get the current weather for a location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 403 Forbidden
+Content-Length: 77
+Content-Type: application/json
+Date: Wed, 20 Aug 2025 13:46:01 GMT
+X-Amzn-Errortype: AccessDeniedException:http://internal.amazon.com/coral/com.amazon.bedrock/
+X-Amzn-Requestid: f3070fed-7086-4c5f-b137-6aad63918364
+
+{"message":"You don't have access to the model with the specified model ID."}1187 342
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 752
+Accept: */*
+Amz-Sdk-Invocation-Id: 38ce66d6-9f2e-42fa-a5bc-70e0cd93afa7
+Amz-Sdk-Request: attempt=1; max=3
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+X-Amz-Date: 20250820T134602Z
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"What's 123 * 456 and what's the weather in Paris?"}]}],"tools":[{"name":"get_weather","description":"Get the current weather for a location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}},{"name":"calculate","description":"Perform mathematical calculations","input_schema":{"properties":{"expression":{"description":"The mathematical expression to evaluate","type":"string"}},"required":["expression"],"type":"object"}}]}HTTP/2.0 403 Forbidden
+Content-Length: 77
+Content-Type: application/json
+Date: Wed, 20 Aug 2025 13:46:02 GMT
+X-Amzn-Errortype: AccessDeniedException:http://internal.amazon.com/coral/com.amazon.bedrock/
+X-Amzn-Requestid: 16049fb0-4bd2-45de-9bc2-7f06b9fcab4b
+
+{"message":"You don't have access to the model with the specified model ID."}
