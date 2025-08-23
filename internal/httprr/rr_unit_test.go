@@ -516,18 +516,18 @@ func TestTestWriter(t *testing.T) {
 }
 
 func TestSetRecordForTesting(t *testing.T) {
-	t.Parallel()
+	// Cannot run in parallel because it modifies global record flag
 
 	// Get original value
-	originalValue := *record
+	originalValue := getRecordForTesting()
 
 	// Set test value
 	restore := setRecordForTesting("test-value")
-	assert.Equal(t, "test-value", *record)
+	assert.Equal(t, "test-value", getRecordForTesting())
 
 	// Restore original value
 	restore()
-	assert.Equal(t, originalValue, *record)
+	assert.Equal(t, originalValue, getRecordForTesting())
 }
 
 func TestRecordReplayClose(t *testing.T) {
