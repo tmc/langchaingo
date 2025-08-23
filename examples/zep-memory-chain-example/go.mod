@@ -4,7 +4,7 @@ go 1.24.3
 
 require (
 	github.com/getzep/zep-go v1.0.4
-	github.com/tmc/langchaingo v0.1.14-pre.2
+	github.com/tmc/langchaingo v0.1.14-pre.3
 )
 
 require (
