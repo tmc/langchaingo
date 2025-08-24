@@ -1254,6 +1254,7 @@ func TestConcurrentOperations(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		requestCount++
+		currentCount := requestCount
 		mu.Unlock()
 
 		// Simulate some processing time
@@ -1262,7 +1263,7 @@ func TestConcurrentOperations(t *testing.T) {
 				Value: []map[string]interface{}{
 					{
 						"@search.score": 0.9,
-						"content":       fmt.Sprintf("Result %d", requestCount),
+						"content":       fmt.Sprintf("Result %d", currentCount),
 						"metadata":      `{}`,
 					},
 				},

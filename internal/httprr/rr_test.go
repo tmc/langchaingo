@@ -190,7 +190,7 @@ var badResponseTrace = []byte("httprr trace v1\n" +
 	"\r\n")
 
 func TestErrors(t *testing.T) {
-	t.Parallel()
+	// Cannot run in parallel because it modifies global record flag
 	dir := t.TempDir()
 	var resp *http.Response
 	var err error

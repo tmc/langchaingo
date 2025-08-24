@@ -167,6 +167,13 @@ func Recording(file string) (bool, error) {
 	return false, nil
 }
 
+// getRecordForTesting safely gets the current record flag value for testing.
+func getRecordForTesting() string {
+	recordMu.Lock()
+	defer recordMu.Unlock()
+	return *record
+}
+
 // setRecordForTesting sets the record flag value for testing purposes.
 // It returns a function that restores the original value.
 func setRecordForTesting(value string) func() {
