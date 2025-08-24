@@ -1,12 +1,10 @@
+<!-- 感谢您为 LangChain 做出贡献！
 
-### PR Checklist
+请将此评论替换为以下内容：
+  - **变更描述：** 对您所做变更的说明。
+  - **相关问题：** 此拉取请求修复的问题编号（如果适用）。
+  - **新增依赖：** 此拉取请求引入的任何新依赖项。
+  - **Twitter账号：** 如果方便，我们会在合并此拉取请求后通过Twitter提及您。
 
-- [ ] Read the [Contributing documentation](https://github.com/tmc/langchaingo/blob/main/CONTRIBUTING.md).
-- [ ] Read the [Code of conduct documentation](https://github.com/tmc/langchaingo/blob/main/CODE_OF_CONDUCT.md).
-- [ ] Name your Pull Request title clearly, concisely, and prefixed with the name of the primarily affected package you changed according to [Good commit messages](https://go.dev/doc/contribute#commit_messages) (such as `memory: add interfaces for X, Y` or `util: add whizzbang helpers`).
-- [ ] Check that there isn't already a PR that solves the problem the same way to avoid creating a duplicate.
-- [ ] Provide a description in this PR that addresses **what** the PR is solving, or reference the issue that it solves (e.g. `Fixes #123`).
-- [ ] Describes the source of new concepts.
-- [ ] References existing implementations as appropriate.
-- [ ] Contains test coverage for new functions.
-- [ ] Passes all [`golangci-lint`](https://golangci-lint.run/) checks.
+欢迎加入我们的 Discord 服务器！https://discord.gg/jN2VhrHwI2
+-->
