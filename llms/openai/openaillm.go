@@ -187,10 +187,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			ReasoningContent: c.Message.ReasoningContent,
 			StopReason:       fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
-				"CompletionTokens": result.Usage.CompletionTokens,
-				"PromptTokens":     result.Usage.PromptTokens,
-				"TotalTokens":      result.Usage.TotalTokens,
-				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionTokens":                   result.Usage.CompletionTokens,
+				"PromptTokens":                       result.Usage.PromptTokens,
+				"TotalTokens":                        result.Usage.TotalTokens,
+				"ReasoningTokens":                    result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"PromptAudioTokens":                  result.Usage.PromptTokensDetails.AudioTokens,
+				"PromptCachedTokens":                 result.Usage.PromptTokensDetails.CachedTokens,
+				"CompletionAudioTokens":              result.Usage.CompletionTokensDetails.AudioTokens,
+				"CompletionReasoningTokens":          result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionAcceptedPredictionTokens": result.Usage.CompletionTokensDetails.AcceptedPredictionTokens,
+				"CompletionRejectedPredictionTokens": result.Usage.CompletionTokensDetails.RejectedPredictionTokens,
 			},
 		}
 
