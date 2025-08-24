@@ -153,7 +153,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	if result == nil {
+	if result == nil || len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
