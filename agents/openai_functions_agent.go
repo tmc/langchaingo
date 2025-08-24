@@ -120,15 +120,17 @@ func (o *OpenAIFunctionsAgent) Plan(
 
 		case llms.AIChatMessage:
 			if len(p.ToolCalls) > 0 {
+				toolCallParts := make([]llms.ContentPart, 0, len(p.ToolCalls))
+				for _, tc := range p.ToolCalls {
+					toolCallParts = append(toolCallParts, llms.ToolCall{
+						ID:           tc.ID,
+						Type:         tc.Type,
+						FunctionCall: tc.FunctionCall,
+					})
+				}
 				mc = llms.MessageContent{
-					Role: role,
-					Parts: []llms.ContentPart{
-						llms.ToolCall{
-							ID:           p.ToolCalls[0].ID,
-							Type:         p.ToolCalls[0].Type,
-							FunctionCall: p.ToolCalls[0].FunctionCall,
-						},
-					},
+					Role:  role,
+					Parts: toolCallParts,
 				}
 			} else {
 				mc = llms.MessageContent{
@@ -256,6 +258,9 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
+	if contentResp == nil || len(contentResp.Choices) == 0 {
+		return nil, nil, fmt.Errorf("no choices in response")
+	}
 	choice := contentResp.Choices[0]
 
 	// Check for new-style tool calls first
