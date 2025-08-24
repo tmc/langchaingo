@@ -105,9 +105,9 @@ func (g *GoogleAI) GenerateContent(
 		if theMessage.Role != llms.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
+		response, err = g.generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
 	} else {
-		response, err = generateFromMessages(ctx, model, messages, &opts)
+		response, err = g.generateFromMessages(ctx, model, messages, &opts)
 	}
 	if err != nil {
 		return nil, err
@@ -161,6 +161,7 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 		if usage != nil {
 			metadata["input_tokens"] = usage.PromptTokenCount
 			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["cached_tokens"] = usage.CachedContentTokenCount
 			metadata["total_tokens"] = usage.TotalTokenCount
 		}
 
@@ -249,7 +250,7 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 
 // generateFromSingleMessage generates content from the parts of a single
 // message.
-func generateFromSingleMessage(
+func (g *GoogleAI) generateFromSingleMessage(
 	ctx context.Context,
 	model *genai.GenerativeModel,
 	parts []llms.ContentPart,
@@ -258,6 +259,17 @@ func generateFromSingleMessage(
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
+	}
+
+	if g.opts.PreSendingHook != nil {
+		g.opts.PreSendingHook(
+			ctx,
+			model,
+			PreSendingHookMetadata{
+				Options: *opts,
+				Parts:   convertedParts,
+			},
+		)
 	}
 
 	if opts.StreamingFunc == nil {
@@ -277,7 +289,7 @@ func generateFromSingleMessage(
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-func generateFromMessages(
+func (g *GoogleAI) generateFromMessages(
 	ctx context.Context,
 	model *genai.GenerativeModel,
 	messages []llms.MessageContent,
@@ -301,6 +313,18 @@ func generateFromMessages(
 	n := len(history)
 	reqContent := history[n-1]
 	history = history[:n-1]
+
+	if g.opts.PreSendingHook != nil {
+		g.opts.PreSendingHook(
+			ctx,
+			model,
+			PreSendingHookMetadata{
+				Options: *opts,
+				History: history,
+				Parts:   reqContent.Parts,
+			},
+		)
+	}
 
 	session := model.StartChat()
 	session.History = history
