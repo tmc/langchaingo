@@ -21,6 +21,9 @@ type CallOptions struct {
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	// StreamingSkipLines is a list of lines to skip in a streaming response.
+	// This is useful for skipping lines that are not part of the generated text.
+	StreamingSkipLines []string `json:"streaming_skip_lines,omitempty"`
 	// StreamingReasoningFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
@@ -288,5 +291,11 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
+	}
+}
+
+func WithStreamingSkipLines(streamingSkipLines []string) CallOption {
+	return func(o *CallOptions) {
+		o.StreamingSkipLines = streamingSkipLines
 	}
 }
