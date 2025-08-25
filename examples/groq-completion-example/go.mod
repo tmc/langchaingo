@@ -7,6 +7,8 @@ require (
 	github.com/tmc/langchaingo v0.1.14-pre.3
 )
 
+replace github.com/tmc/langchaingo => ../..
+
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
