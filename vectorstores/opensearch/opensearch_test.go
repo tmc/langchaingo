@@ -101,17 +101,25 @@ func removeIndex(t *testing.T, storer opensearch.Store, indexName string) {
 	}
 }
 
-// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
-func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+// createOpenAIEmbedder creates an OpenAI embedder using the provided httprr client.
+func createOpenAIEmbedder(t *testing.T, httpClient *http.Client) *embeddings.EmbedderImpl {
 	t.Helper()
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
-
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	openaiOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithHTTPClient(rr.Client()),
+		openai.WithHTTPClient(httpClient),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	// When httpClient is not DefaultClient, we need to check if we're recording
+	// If we're replaying (not recording), use fake token
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+	if httpClient != http.DefaultClient {
+		// This is during test - but we need to know if we're recording or replaying
+		// For now, assume if no OPENAI_API_KEY is set, we're replaying
+		if os.Getenv("OPENAI_API_KEY") == "" {
+			openaiOpts = append(openaiOpts, openai.WithToken("test-api-key"))
+		}
 	}
 
 	if openAIBaseURL := os.Getenv("OPENAI_BASE_URL"); openAIBaseURL != "" {
@@ -129,18 +137,15 @@ func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	return e
 }
 
-// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for testing.
-func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
+// createOpenAILLMAndEmbedder creates both LLM and embedder using the provided httprr client.
+func createOpenAILLMAndEmbedder(t *testing.T, httpClient *http.Client, recording bool) (*openai.LLM, *embeddings.EmbedderImpl) {
 	t.Helper()
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
-
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	t.Cleanup(func() { rr.Close() })
 
 	llmOpts := []openai.Option{
-		openai.WithHTTPClient(rr.Client()),
+		openai.WithHTTPClient(httpClient),
 	}
-	if !rr.Recording() {
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !recording {
 		llmOpts = append(llmOpts, openai.WithToken("test-api-key"))
 	}
 
@@ -157,9 +162,10 @@ func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.Embedder
 
 	embeddingOpts := []openai.Option{
 		openai.WithEmbeddingModel("text-embedding-ada-002"),
-		openai.WithHTTPClient(rr.Client()),
+		openai.WithHTTPClient(httpClient),
 	}
-	if !rr.Recording() {
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !recording {
 		embeddingOpts = append(embeddingOpts, openai.WithToken("test-api-key"))
 	}
 
@@ -208,7 +214,7 @@ func TestOpensearchStoreRest(t *testing.T) {
 	ctx := context.Background()
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
-	e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t, rr.Client())
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -244,7 +250,7 @@ func TestOpensearchStoreRestWithScoreThreshold(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t, rr.Client())
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -291,7 +297,7 @@ func TestOpensearchAsRetriever(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	llm, e := createOpenAILLMAndEmbedder(t)
+	llm, e := createOpenAILLMAndEmbedder(t, rr.Client(), rr.Recording())
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),
@@ -340,7 +346,7 @@ func TestOpensearchAsRetrieverWithScoreThreshold(t *testing.T) {
 	opensearchEndpoint, opensearchUser, opensearchPassword := getEnvVariables(t)
 	indexName := uuid.New().String()
 
-	llm, e := createOpenAILLMAndEmbedder(t)
+	llm, e := createOpenAILLMAndEmbedder(t, rr.Client(), rr.Recording())
 
 	storer, err := opensearch.New(
 		setOpensearchClient(t, opensearchEndpoint, opensearchUser, opensearchPassword),

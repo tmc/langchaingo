@@ -1,9 +1,11 @@
 module github.com/tmc/langchaingo/examples/mongovector-vectorstore-example
 
-go 1.23.1
+go 1.23.8
+
+toolchain go1.24.6
 
 require (
-	github.com/tmc/langchaingo v0.1.13
+	github.com/tmc/langchaingo v0.1.14-pre.3
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 )
 
@@ -22,4 +24,3 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 )
 
-replace github.com/tmc/langchaingo => ../..

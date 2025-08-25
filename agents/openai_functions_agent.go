@@ -195,26 +195,59 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 	}
 
 	messages := make([]llms.ChatMessage, 0)
-	for _, step := range steps {
-		// First add the AI message with the tool call
-		messages = append(messages, llms.AIChatMessage{
-			Content: step.Action.Log,
-			ToolCalls: []llms.ToolCall{
-				{
-					ID:   step.Action.ToolID,
-					Type: "function",
-					FunctionCall: &llms.FunctionCall{
-						Name:      step.Action.Tool,
-						Arguments: step.Action.ToolInput,
-					},
-				},
+
+	// Group steps by their position to handle multiple tool calls
+	// that might be executed in parallel
+	var currentToolCalls []llms.ToolCall
+	var currentLog string
+
+	for i, step := range steps {
+		// Check if this step is part of a group of parallel tool calls
+		// by looking at the log content
+		if i == 0 || step.Action.Log != steps[i-1].Action.Log {
+			// Start a new group
+			if len(currentToolCalls) > 0 {
+				// Add the previous group as an AI message
+				messages = append(messages, llms.AIChatMessage{
+					Content:   currentLog,
+					ToolCalls: currentToolCalls,
+				})
+				// Add tool responses for the previous group
+				for j := i - len(currentToolCalls); j < i; j++ {
+					messages = append(messages, llms.ToolChatMessage{
+						ID:      steps[j].Action.ToolID,
+						Content: steps[j].Observation,
+					})
+				}
+				currentToolCalls = nil
+			}
+			currentLog = step.Action.Log
+		}
+
+		// Add this tool call to the current group
+		currentToolCalls = append(currentToolCalls, llms.ToolCall{
+			ID:   step.Action.ToolID,
+			Type: "function",
+			FunctionCall: &llms.FunctionCall{
+				Name:      step.Action.Tool,
+				Arguments: step.Action.ToolInput,
 			},
 		})
-		// Then add the tool response message
-		messages = append(messages, llms.ToolChatMessage{
-			ID:      step.Action.ToolID,
-			Content: step.Observation,
+	}
+
+	// Don't forget the last group
+	if len(currentToolCalls) > 0 {
+		messages = append(messages, llms.AIChatMessage{
+			Content:   currentLog,
+			ToolCalls: currentToolCalls,
 		})
+		// Add tool responses for the last group
+		for j := len(steps) - len(currentToolCalls); j < len(steps); j++ {
+			messages = append(messages, llms.ToolChatMessage{
+				ID:      steps[j].Action.ToolID,
+				Content: steps[j].Observation,
+			})
+		}
 	}
 
 	return messages
@@ -227,45 +260,42 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 
 	// Check for new-style tool calls first
 	if len(choice.ToolCalls) > 0 {
-		toolCall := choice.ToolCalls[0]
-		functionName := toolCall.FunctionCall.Name
-		toolInputStr := toolCall.FunctionCall.Arguments
-		toolInputMap := make(map[string]any, 0)
-		err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
-		if err != nil {
-			// If it's not valid JSON, it might be a raw expression for the calculator
-			// Try to use it directly as tool input
-			return []schema.AgentAction{
-				{
-					Tool:      functionName,
-					ToolInput: toolInputStr,
-					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
-					ToolID:    toolCall.ID,
-				},
-			}, nil, nil
-		}
+		// Handle multiple tool calls properly
+		actions := make([]schema.AgentAction, 0, len(choice.ToolCalls))
 
-		toolInput := toolInputStr
-		if arg1, ok := toolInputMap["__arg1"]; ok {
-			toolInputCheck, ok := arg1.(string)
-			if ok {
-				toolInput = toolInputCheck
+		for _, toolCall := range choice.ToolCalls {
+			functionName := toolCall.FunctionCall.Name
+			toolInputStr := toolCall.FunctionCall.Arguments
+			toolInputMap := make(map[string]any, 0)
+			err := json.Unmarshal([]byte(toolInputStr), &toolInputMap)
+
+			toolInput := toolInputStr
+			if err == nil {
+				// Successfully parsed JSON, check for __arg1 pattern
+				if arg1, ok := toolInputMap["__arg1"]; ok {
+					toolInputCheck, ok := arg1.(string)
+					if ok {
+						toolInput = toolInputCheck
+					}
+				}
 			}
-		}
+			// If JSON parsing failed, use the raw string as tool input
+			// This handles cases like calculator expressions
 
-		contentMsg := "\n"
-		if choice.Content != "" {
-			contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
-		}
+			contentMsg := "\n"
+			if choice.Content != "" {
+				contentMsg = fmt.Sprintf("responded: %s\n", choice.Content)
+			}
 
-		return []schema.AgentAction{
-			{
+			actions = append(actions, schema.AgentAction{
 				Tool:      functionName,
 				ToolInput: toolInput,
-				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				Log:       fmt.Sprintf("Invoking: %s with %s %s", functionName, toolInputStr, contentMsg),
 				ToolID:    toolCall.ID,
-			},
-		}, nil, nil
+			})
+		}
+
+		return actions, nil, nil
 	}
 
 	// Check for legacy function call

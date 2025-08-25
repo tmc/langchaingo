@@ -44,4 +44,35 @@ exceptions:
   - UX
   - ID
   - DB
+  - PromptTemplate
+  - ChatPromptTemplate
+  - MessageFormatter
+  - HumanMessagePromptTemplate
+  - SystemMessagePromptTemplate
+  - AIMessagePromptTemplate
+  - FString
+  - RenderTemplate
+  - RenderTemplateFS
+  - FormatPrompt
+  - CodeBlock
+  - DocCardList
+  - Jinja2
+  - CheckValidTemplate
+  - NewPromptTemplate
+  - NewChatPromptTemplate
+  - NewHumanMessagePromptTemplate
+  - NewSystemMessagePromptTemplate
+  - InputVariables
+  - PartialVariables
+  - TemplateFormat
+  - TemplateFormatGoTemplate
+  - TemplateFormatJinja2
+  - GenerateFromSingle
+  - F-string
+  - F-strings
+  - Python-style
+  - LangChain
+  - Co-Authored-By
+  - ReadFile
+  - XSS
 

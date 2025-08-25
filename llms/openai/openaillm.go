@@ -102,6 +102,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		chatMsgs = append(chatMsgs, msg)
 	}
+	// Check if we should use the legacy max_tokens field
+	useLegacyMaxTokens := false
+	if opts.Metadata != nil {
+		if v, ok := opts.Metadata["openai:use_legacy_max_tokens"].(bool); ok {
+			useLegacyMaxTokens = v
+		}
+	}
+
 	req := &openaiclient.ChatRequest{
 		Model:                  opts.Model,
 		StopWords:              opts.StopWords,
@@ -113,7 +121,21 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
 
-		MaxCompletionTokens: opts.MaxTokens,
+		// Token handling: check metadata flag for legacy behavior
+		// By default use max_completion_tokens (modern field)
+		// If WithLegacyMaxTokensField() is used, use max_tokens instead
+		MaxCompletionTokens: func() int {
+			if useLegacyMaxTokens {
+				return 0 // Don't set max_completion_tokens
+			}
+			return opts.MaxTokens
+		}(),
+		MaxTokens: func() int {
+			if useLegacyMaxTokens {
+				return opts.MaxTokens // Set the legacy field
+			}
+			return 0 // Don't set max_tokens
+		}(),
 
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
@@ -161,13 +183,20 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
-			Content:    c.Message.Content,
-			StopReason: fmt.Sprint(c.FinishReason),
+			Content:          c.Message.Content,
+			ReasoningContent: c.Message.ReasoningContent,
+			StopReason:       fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
-				"CompletionTokens": result.Usage.CompletionTokens,
-				"PromptTokens":     result.Usage.PromptTokens,
-				"TotalTokens":      result.Usage.TotalTokens,
-				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionTokens":                   result.Usage.CompletionTokens,
+				"PromptTokens":                       result.Usage.PromptTokens,
+				"TotalTokens":                        result.Usage.TotalTokens,
+				"ReasoningTokens":                    result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"PromptAudioTokens":                  result.Usage.PromptTokensDetails.AudioTokens,
+				"PromptCachedTokens":                 result.Usage.PromptTokensDetails.CachedTokens,
+				"CompletionAudioTokens":              result.Usage.CompletionTokensDetails.AudioTokens,
+				"CompletionReasoningTokens":          result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionAcceptedPredictionTokens": result.Usage.CompletionTokensDetails.AcceptedPredictionTokens,
+				"CompletionRejectedPredictionTokens": result.Usage.CompletionTokensDetails.RejectedPredictionTokens,
 			},
 		}
 

@@ -1,5 +1,5 @@
 httprr trace v1
-220 1239
+219 1950
 POST https://api.cohere.ai/v1/generate HTTP/1.1
 Host: api.cohere.ai
 User-Agent: langchaingo-httprr
@@ -8,25 +8,27 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"prompt":"test","model":""}HTTP/2.0 200 OK
-Content-Length: 516
+Content-Length: 819
 Access-Control-Expose-Headers: X-Debug-Trace-ID
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:59:06 GMT
-Expires: Thu, 01 Jan 1970 00:00:00 UTC
-Num_chars: 265
-Num_tokens: 63
+Date: Mon, 18 Aug 2025 12:24:43 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 176
+Num_tokens: 47
 Pragma: no-cache
 Server: envoy
 Vary: Origin
 Via: 1.1 google
 X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
 X-Api-Warning: unknown field: parameter 'model' is not a valid field
-X-Debug-Trace-Id: 0725b5069e15b368b42216fe4bc787c8
+X-Debug-Trace-Id: a6d64c716655ccc7a7e1586b3e139480
 X-Endpoint-Monthly-Call-Limit: 1000
-X-Envoy-Upstream-Service-Time: 1798
+X-Envoy-Upstream-Service-Time: 4041
 X-Trial-Endpoint-Call-Limit: 40
 X-Trial-Endpoint-Call-Remaining: 38
 
-{"id":"9a08ed33-e28e-49f6-a8e2-1bf3b56c3c6b","generations":[{"id":"2da643f8-071f-4a0a-9149-f2cb49d88037","text":" This is a test of the Cohere conversational AI model! How can I help you today? \nLet me know if you'd like me to assist with anything specific, or provide answers to your questions. \n\nI'm ready to respond to your queries, and look forward to our conversation. ","finish_reason":"COMPLETE"}],"prompt":"test","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":1,"output_tokens":62}}}
+{"id":"094121f2-2cc2-4cff-a28a-22ac5410f376","generations":[{"id":"80620956-f783-4df5-b6ee-990648954eed","text":" Alright, let's get started! If you would be so kind to introduce yourself, I'd be more than happy to get to know you better. \n\nUntil then, stay safe and have a great day! ","finish_reason":"COMPLETE"}],"prompt":"test","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":1,"output_tokens":46}}}

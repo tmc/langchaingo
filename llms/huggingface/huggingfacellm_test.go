@@ -21,12 +21,22 @@ func TestHuggingFaceLLMWithProvider(t *testing.T) {
 
 	rr := httprr.OpenForTest(t, nil)
 	defer rr.Close()
+	apiKey := "test-api-key"
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
+	}
+
 	// Create LLM with provider
 	opts := []Option{
 		WithModel("deepseek-ai/DeepSeek-R1-0528"),
 		WithInferenceProvider("hyperbolic"),
 		WithHTTPClient(rr.Client()),
-		WithToken("test-api-key"),
+		WithToken(apiKey),
 	}
 
 	llm, err := New(opts...)
@@ -66,11 +76,22 @@ func TestHuggingFaceLLMStandardInference(t *testing.T) {
 
 	rr := httprr.OpenForTest(t, nil)
 	defer rr.Close()
+
+	apiKey := "test-api-key"
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
+	}
+
 	// Create standard LLM without provider
 	opts := []Option{
 		WithModel("HuggingFaceH4/zephyr-7b-beta"),
 		WithHTTPClient(rr.Client()),
-		WithToken("test-api-key"),
+		WithToken(apiKey),
 	}
 
 	llm, err := New(opts...)
@@ -107,11 +128,22 @@ func TestHuggingFaceLLMGenerateContent(t *testing.T) {
 
 	rr := httprr.OpenForTest(t, nil)
 	defer rr.Close()
+
+	apiKey := "test-api-key"
+	if rr.Recording() {
+		// Try HF_TOKEN first, then fall back to HUGGINGFACEHUB_API_TOKEN
+		if key := os.Getenv("HF_TOKEN"); key != "" {
+			apiKey = key
+		} else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+			apiKey = key
+		}
+	}
+
 	// Create LLM
 	llm, err := New(
 		WithModel("HuggingFaceH4/zephyr-7b-beta"),
 		WithHTTPClient(rr.Client()),
-		WithToken("test-api-key"),
+		WithToken(apiKey),
 	)
 	if err != nil {
 		t.Fatal(err)

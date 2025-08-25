@@ -17,12 +17,16 @@ type Model string
 
 // Model pricing overview: https://docs.perplexity.ai/guides/pricing
 const (
-	// ModelLlamaSonarSmall is the small version of the Llama Sonar model.
-	ModelLlamaSonarSmall Model = "llama-3.1-sonar-small-128k-online"
-	// ModelLlamaSonarLarge is the large version of the Llama Sonar model.
-	ModelLlamaSonarLarge Model = "llama-3.1-sonar-large-128k-online"
-	// ModelLlamaSonarHuge is the huge version of the Llama Sonar model.
-	ModelLlamaSonarHuge Model = "llama-3.1-sonar-huge-128k-online"
+	// ModelSonar is the lightweight, cost-effective search model with grounding.
+	ModelSonar Model = "sonar"
+	// ModelSonarReasoning is the fast, real-time reasoning model for quick problem-solving.
+	ModelSonarReasoning Model = "sonar-reasoning"
+	// ModelSonarDeepResearch is the expert-level research model for comprehensive reports.
+	ModelSonarDeepResearch Model = "sonar-deep-research"
+	// Deprecated models - kept for backward compatibility
+	ModelLlamaSonarSmall Model = "sonar"               // Redirects to sonar
+	ModelLlamaSonarLarge Model = "sonar-reasoning"     // Redirects to sonar-reasoning
+	ModelLlamaSonarHuge  Model = "sonar-deep-research" // Redirects to sonar-deep-research
 )
 
 // Option is a function that modifies the options for the Perplexity AI tool.
@@ -67,7 +71,7 @@ var _ tools.Tool = (*Tool)(nil)
 func New(opts ...Option) (*Tool, error) {
 	options := &options{
 		apiKey: os.Getenv("PERPLEXITY_API_KEY"),
-		model:  ModelLlamaSonarSmall, // Default model
+		model:  ModelSonar, // Default model
 	}
 
 	for _, opt := range opts {

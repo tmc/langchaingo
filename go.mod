@@ -1,8 +1,8 @@
 module github.com/tmc/langchaingo
 
-go 1.23.0
+go 1.23.8
 
-toolchain go1.24.3
+toolchain go1.24.6
 
 // Note: Thanks to Go's module graph pruning (https://go.dev/ref/mod#graph-pruning),
 // importing langchaingo does NOT pull in all dependencies listed below. You only
@@ -17,7 +17,7 @@ require github.com/google/uuid v1.6.0
 // Testing
 require (
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go v0.37.0
+	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/chroma v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/milvus v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
@@ -107,8 +107,8 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/nikolalohinski/gonja v1.5.3
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/sync v0.15.0
-	golang.org/x/tools v0.33.0
+	golang.org/x/sync v0.16.0
+	golang.org/x/tools v0.35.0
 	sigs.k8s.io/yaml v1.3.0
 )
 
@@ -220,7 +220,6 @@ require (
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.1.0 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
-	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
@@ -305,14 +304,16 @@ require (
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/yargevad/filepathx v1.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/crypto v0.39.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+require github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
 
 require github.com/stretchr/objx v0.5.2 // indirect

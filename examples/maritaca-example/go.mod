@@ -2,9 +2,8 @@ module github.com/tmc/langchaingo/examples/maritaca-example
 
 go 1.24.3
 
-require github.com/tmc/langchaingo v0.1.13
+require github.com/tmc/langchaingo v0.1.14-pre.3
 
-replace github.com/tmc/langchaingo => ../..
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

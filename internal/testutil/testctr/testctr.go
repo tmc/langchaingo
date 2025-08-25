@@ -48,6 +48,7 @@ import (
 //		os.Exit(code)
 //	}
 func EnsureTestEnv() int {
+	verbose := os.Getenv("TESTCONTAINERS_VERBOSE") == "true"
 	// Check if docker is available in PATH
 	_, err := exec.LookPath("docker")
 	if err != nil {
@@ -68,18 +69,48 @@ func EnsureTestEnv() int {
 		if err == nil {
 			dockerHost := strings.TrimSpace(string(output))
 
-			// Only set DOCKER_HOST if using Colima (works around testcontainers bug)
-			if dockerHost != "" && strings.Contains(dockerHost, "colima") {
+			// Set DOCKER_HOST if using non-standard Docker socket paths (Colima, Lima, etc.)
+			// This works around testcontainers bug where it doesn't properly detect non-standard sockets
+			if dockerHost != "" && (strings.Contains(dockerHost, "colima") || 
+				strings.Contains(dockerHost, ".lima") || 
+				!strings.Contains(dockerHost, "/var/run/docker.sock")) {
 				os.Setenv("DOCKER_HOST", dockerHost)
+				if verbose {
+					fmt.Fprintf(os.Stderr, "testctr: Set DOCKER_HOST=%s\n", dockerHost)
+				}
+			} else if verbose && dockerHost != "" {
+				fmt.Fprintf(os.Stderr, "testctr: Using standard Docker socket: %s\n", dockerHost)
 			}
 		}
 		// If docker context inspect fails, just continue without setting DOCKER_HOST
 		// This is common when using standard Docker Desktop
 	}
 
+	// Disable Ryuk reaper if not explicitly enabled to reduce resource usage
+	// Ryuk is used for cleanup but can cause issues with limited Docker resources
+	if os.Getenv("TESTCONTAINERS_RYUK_DISABLED") == "" {
+		os.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
+		if verbose {
+			fmt.Fprintf(os.Stderr, "testctr: Disabled Ryuk reaper for resource efficiency\n")
+		}
+	}
+
 	// Set the testcontainers Docker socket override if not already set
+	// This tells testcontainers where to find the actual Docker socket
 	if os.Getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE") == "" {
-		os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
+		dockerSocket := "/var/run/docker.sock"  // default
+		
+		// For Colima and other non-standard setups, extract socket path from DOCKER_HOST
+		if dockerHost := os.Getenv("DOCKER_HOST"); dockerHost != "" {
+			if strings.HasPrefix(dockerHost, "unix://") {
+				dockerSocket = strings.TrimPrefix(dockerHost, "unix://")
+			}
+		}
+		
+		os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocket)
+		if verbose {
+			fmt.Fprintf(os.Stderr, "testctr: Set TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=%s\n", dockerSocket)
+		}
 	}
 
 	return 0

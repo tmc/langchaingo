@@ -370,20 +370,97 @@ DoStream:
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
+// convertSchemaRecursive recursively converts a schema map to a genai.Schema
+func convertSchemaRecursive(schemaMap map[string]any, toolIndex int, propertyPath string) (*genai.Schema, error) {
+	schema := &genai.Schema{}
+
+	if ty, ok := schemaMap["type"]; ok {
+		tyString, ok := ty.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected string for type", toolIndex, propertyPath)
+		}
+		schema.Type = convertToolSchemaType(tyString)
+	}
+
+	if desc, ok := schemaMap["description"]; ok {
+		descString, ok := desc.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected string for description", toolIndex, propertyPath)
+		}
+		schema.Description = descString
+	}
+
+	// Handle object properties recursively
+	if properties, ok := schemaMap["properties"]; ok {
+		propMap, ok := properties.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected map for properties", toolIndex, propertyPath)
+		}
+
+		schema.Properties = make(map[string]*genai.Schema)
+		for propName, propValue := range propMap {
+			valueMap, ok := propValue.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("tool [%d], property [%s.%s]: expect to find a value map", toolIndex, propertyPath, propName)
+			}
+
+			nestedPath := propName
+			if propertyPath != "" {
+				nestedPath = propertyPath + "." + propName
+			}
+
+			nestedSchema, err := convertSchemaRecursive(valueMap, toolIndex, nestedPath)
+			if err != nil {
+				return nil, err
+			}
+			schema.Properties[propName] = nestedSchema
+		}
+	} else if schema.Type == genai.TypeObject && propertyPath == "" {
+		// For top-level object schemas without properties, this is an error
+		return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", toolIndex)
+	}
+
+	// Handle array items recursively
+	if items, ok := schemaMap["items"]; ok && schema.Type == genai.TypeArray {
+		itemMap, ok := items.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expect to find a map for array items", toolIndex, propertyPath)
+		}
+
+		itemsPath := propertyPath + "[]"
+		itemsSchema, err := convertSchemaRecursive(itemMap, toolIndex, itemsPath)
+		if err != nil {
+			return nil, err
+		}
+		schema.Items = itemsSchema
+	}
+
+	// Handle required fields
+	if required, ok := schemaMap["required"]; ok {
+		if rs, ok := required.([]string); ok {
+			schema.Required = rs
+		} else if ri, ok := required.([]interface{}); ok {
+			rs := make([]string, 0, len(ri))
+			for _, r := range ri {
+				rString, ok := r.(string)
+				if !ok {
+					return nil, fmt.Errorf("tool [%d], property [%s]: expected string for required", toolIndex, propertyPath)
+				}
+				rs = append(rs, rString)
+			}
+			schema.Required = rs
+		} else {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected array for required", toolIndex, propertyPath)
+		}
+	}
+
+	return schema, nil
+}
+
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	if len(tools) == 0 {
-		return nil, nil
-	}
-
-	// Initialize a single genaiTool to hold all function declarations.
-	// This approach is used because the GoogleAI API expects a single tool
-	// with multiple function declarations, rather than multiple tools each with
-	// a single function declaration.
-	genaiTool := genai.Tool{
-		FunctionDeclarations: make([]*genai.FunctionDeclaration, 0, len(tools)),
-	}
+	genaiFuncDecls := make([]*genai.FunctionDeclaration, 0, len(tools))
 	for i, tool := range tools {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
@@ -403,67 +480,26 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
 		}
 
-		schema := &genai.Schema{}
-		if ty, ok := params["type"]; ok {
-			tyString, ok := ty.(string)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-			}
-			schema.Type = convertToolSchemaType(tyString)
-		}
-
-		paramProperties, ok := params["properties"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
-		}
-
-		schema.Properties = make(map[string]*genai.Schema)
-		for propName, propValue := range paramProperties {
-			valueMap, ok := propValue.(map[string]any)
-			if !ok {
-				return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
-			}
-			schema.Properties[propName] = &genai.Schema{}
-
-			if ty, ok := valueMap["type"]; ok {
-				tyString, ok := ty.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
-				}
-				schema.Properties[propName].Type = convertToolSchemaType(tyString)
-			}
-			if desc, ok := valueMap["description"]; ok {
-				descString, ok := desc.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for description", i)
-				}
-				schema.Properties[propName].Description = descString
-			}
-		}
-
-		if required, ok := params["required"]; ok {
-			if rs, ok := required.([]string); ok {
-				schema.Required = rs
-			} else if ri, ok := required.([]interface{}); ok {
-				rs := make([]string, 0, len(ri))
-				for _, r := range ri {
-					rString, ok := r.(string)
-					if !ok {
-						return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-					}
-					rs = append(rs, rString)
-				}
-				schema.Required = rs
-			} else {
-				return nil, fmt.Errorf("tool [%d]: expected string for required", i)
-			}
+		schema, err := convertSchemaRecursive(params, i, "")
+		if err != nil {
+			return nil, err
 		}
 		genaiFuncDecl.Parameters = schema
 
-		genaiTool.FunctionDeclarations = append(genaiTool.FunctionDeclarations, genaiFuncDecl)
+		// google genai only support one tool, multiple tools must be embedded into function declarations:
+		// https://github.com/GoogleCloudPlatform/generative-ai/issues/636
+		// https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#chat-samples
+		genaiFuncDecls = append(genaiFuncDecls, genaiFuncDecl)
 	}
 
-	return []*genai.Tool{&genaiTool}, nil
+	// Return nil if no tools are provided
+	if len(genaiFuncDecls) == 0 {
+		return nil, nil
+	}
+
+	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
+
+	return genaiTools, nil
 }
 
 // convertToolSchemaType converts a tool's schema type from its langchaingo

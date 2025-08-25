@@ -166,10 +166,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 			mockResponse: anthropicTextGenerationOutput{
 				Type: "message",
 				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{
+				Content: []anthropicContentBlock{
 					{
 						Type: "text",
 						Text: "Hello! I'm Claude.",
@@ -641,12 +638,9 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
 			},
 			mockResponse: anthropicTextGenerationOutput{
-				Type: "message",
-				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{},
+				Type:       "message",
+				Role:       "assistant",
+				Content:    []anthropicContentBlock{},
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
 			expectedError: "no results",
@@ -660,10 +654,7 @@ func TestClient_CreateCompletion_EdgeCases(t *testing.T) {
 			mockResponse: anthropicTextGenerationOutput{
 				Type: "message",
 				Role: "assistant",
-				Content: []struct {
-					Type string `json:"type"`
-					Text string `json:"text"`
-				}{
+				Content: []anthropicContentBlock{
 					{
 						Type: "text",
 						Text: "Once upon a time...",

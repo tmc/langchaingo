@@ -1,5 +1,5 @@
 httprr trace v1
-259 1458
+258 2762
 POST https://api.cohere.ai/v1/generate HTTP/1.1
 Host: api.cohere.ai
 User-Agent: langchaingo-httprr
@@ -8,25 +8,27 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"prompt":"What is the capital of France?","model":"command-light"}HTTP/2.0 200 OK
-Content-Length: 735
+Content-Length: 1623
 Access-Control-Expose-Headers: X-Debug-Trace-ID
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
 Content-Type: application/json
-Date: Tue, 03 Jun 2025 08:46:55 GMT
-Expires: Thu, 01 Jan 1970 00:00:00 UTC
-Num_chars: 482
-Num_tokens: 103
+Date: Mon, 18 Aug 2025 12:24:55 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 968
+Num_tokens: 179
 Pragma: no-cache
 Server: envoy
 Vary: Origin
 Via: 1.1 google
 X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command-light' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
 X-Api-Warning: unknown field: parameter 'model' is not a valid field
-X-Debug-Trace-Id: 62adf2f99fbbbac8328549cac6ea798f
+X-Debug-Trace-Id: e58539fcddbb624fc74c729dc23fae0f
 X-Endpoint-Monthly-Call-Limit: 1000
-X-Envoy-Upstream-Service-Time: 961
+X-Envoy-Upstream-Service-Time: 1704
 X-Trial-Endpoint-Call-Limit: 40
-X-Trial-Endpoint-Call-Remaining: 39
+X-Trial-Endpoint-Call-Remaining: 36
 
-{"id":"39765e59-02b9-482f-b21a-226dbb831f0a","generations":[{"id":"9e80c1a6-6463-41dd-9b38-36546c8a756b","text":" Paris, France's capital, serves as the nation's cultural and commercial center and is famously known worldwide for its artistic heritage, Park of Versailles, and culinary delights. It is one of the Roman baths and hosts many iconic landmarks, museums, and other tourist attractions. \n\nWould you like me to provide details about Paris? Many places are associated with Paris, like the Eiffel Tower, the Louvre, the Musée d'Orsestry, the Champs Élysées? ","finish_reason":"COMPLETE"}],"prompt":"What is the capital of France?","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":7,"output_tokens":96}}}
+{"id":"081fca6f-8b38-4ea1-8b11-e811276ebcf2","generations":[{"id":"ef38df82-83fb-49e0-9b9a-15b53ac6c25d","text":" The capital of France, officially named the Région Capital of France, is Paris, which is also the most populated city and cultural capital of the country. It has been the Automated regional capital and the central role in the political and administrative entities of France since the Middle Ages. \n\nAdditionally, Paris consistently ranks as the most visited city in France and around the world, due to the countless iconic landmarks and sites it contains, ranging from historical monuments to cultural attractions. \n\nThe city's iconic symbol is the Eiffel Tower, although it has many other notable attractions, including numerous fine dining restaurants, galleries and museums, parks and gardens, theaters and numerous historical buildings. \n\nFurthermore, Paris is considered to have a unique character with many small streets, quaint cafes and small shops, and the mix of historical grandeur and contemporary design makes it stand out. ","finish_reason":"COMPLETE"}],"prompt":"What is the capital of France?","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command-light' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":7,"output_tokens":172}}}
