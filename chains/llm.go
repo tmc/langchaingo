@@ -56,7 +56,7 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
+	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), GetLLMCallOptions(options...)...)
 	if err != nil {
 		return nil, err
 	}
