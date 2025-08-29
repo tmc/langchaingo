@@ -212,11 +212,18 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		return "", fmt.Errorf("%s: %w", ErrScrapingFailed, err)
 	}
 
+	// Wait for scraping to complete with context cancellation support
+	done := make(chan struct{})
+	go func() {
+		c.Wait()
+		close(done)
+	}()
+
 	select {
 	case <-ctx.Done():
 		return "", ctx.Err()
-	default:
-		c.Wait()
+	case <-done:
+		// Scraping completed normally
 	}
 
 	// Append all scraped links
