@@ -49,3 +49,8 @@ func (g *GoogleAI) Close() error {
 	}
 	return nil
 }
+
+// GetGenaiClient returns the underlying [genai.Client] which is used for communication with the Google AI API.
+func (g *GoogleAI) GetGenaiClient() *genai.Client {
+	return g.client
+}
