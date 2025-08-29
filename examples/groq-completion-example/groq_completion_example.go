@@ -33,6 +33,7 @@ func main() {
 		"Write a long poem about how golang is a fantastic language.",
 		llms.WithTemperature(0.8),
 		llms.WithMaxTokens(4096),
+		openai.WithLegacyMaxTokensField(), // Groq requires max_tokens field
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			fmt.Print(string(chunk))
 			return nil
