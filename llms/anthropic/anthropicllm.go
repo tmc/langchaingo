@@ -34,7 +34,9 @@ type LLM struct {
 	client           *anthropicclient.Client
 }
 
-var _ llms.Model = (*LLM)(nil)
+var (
+	_ llms.Model = (*LLM)(nil)
+)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -136,6 +138,15 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	tools := toolsToTools(opts.Tools)
+	
+	// Extract beta headers for prompt caching support
+	var betaHeaders []string
+	if opts.Metadata != nil {
+		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
+			betaHeaders = headers
+		}
+	}
+	
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
 		Messages:      chatMessages,
@@ -145,6 +156,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
 		Tools:         tools,
+		BetaHeaders:   betaHeaders,
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
@@ -166,8 +178,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					Content:    textContent.Text,
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				}
 			} else {
@@ -191,8 +205,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				}
 			} else {
@@ -271,6 +287,36 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
+		case llms.CachedContent:
+			// Handle cached content with cache control
+			var cacheControl *anthropicclient.CacheControl
+			if p.CacheControl != nil {
+				cacheControl = &anthropicclient.CacheControl{
+					Type: p.CacheControl.Type,
+				}
+			}
+			
+			// Process the wrapped content
+			switch wrapped := p.ContentPart.(type) {
+			case llms.TextContent:
+				contents = append(contents, &anthropicclient.TextContent{
+					Type:         "text",
+					Text:         wrapped.Text,
+					CacheControl: cacheControl,
+				})
+			case llms.BinaryContent:
+				contents = append(contents, &anthropicclient.ImageContent{
+					Type: "image",
+					Source: anthropicclient.ImageSource{
+						Type:      "base64",
+						MediaType: wrapped.MIMEType,
+						Data:      base64.StdEncoding.EncodeToString(wrapped.Data),
+					},
+					CacheControl: cacheControl,
+				})
+			default:
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported cached content part type: %T", wrapped)
+			}
 		case llms.TextContent:
 			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",

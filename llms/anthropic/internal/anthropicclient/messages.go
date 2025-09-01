@@ -54,14 +54,20 @@ type Tool struct {
 	InputSchema any    `json:"input_schema,omitempty"`
 }
 
+// CacheControl represents Anthropic's prompt caching configuration.
+type CacheControl struct {
+	Type string `json:"type"`
+}
+
 // Content can be TextContent or ToolUseContent depending on the type.
 type Content interface {
 	GetType() string
 }
 
 type TextContent struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type         string       `json:"type"`
+	Text         string       `json:"text"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (tc TextContent) GetType() string {
@@ -69,8 +75,9 @@ func (tc TextContent) GetType() string {
 }
 
 type ImageContent struct {
-	Type   string      `json:"type"`
-	Source ImageSource `json:"source"`
+	Type         string       `json:"type"`
+	Source       ImageSource  `json:"source"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (ic ImageContent) GetType() string {
@@ -84,10 +91,11 @@ type ImageSource struct {
 }
 
 type ToolUseContent struct {
-	Type  string                 `json:"type"`
-	ID    string                 `json:"id"`
-	Name  string                 `json:"name"`
-	Input map[string]interface{} `json:"input"`
+	Type         string                 `json:"type"`
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name"`
+	Input        map[string]interface{} `json:"input"`
+	CacheControl *CacheControl          `json:"cache_control,omitempty"`
 
 	inputData string `json:"-"` // Used to gather input data when streaming
 }
@@ -97,9 +105,10 @@ func (tuc ToolUseContent) GetType() string {
 }
 
 type ToolResultContent struct {
-	Type      string `json:"type"`
-	ToolUseID string `json:"tool_use_id"`
-	Content   string `json:"content"`
+	Type         string       `json:"type"`
+	ToolUseID    string       `json:"tool_use_id"`
+	Content      string       `json:"content"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (trc ToolResultContent) GetType() string {
@@ -115,8 +124,10 @@ type MessageResponsePayload struct {
 	StopSequence string    `json:"stop_sequence"`
 	Type         string    `json:"type"`
 	Usage        struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
+		InputTokens               int `json:"input_tokens"`
+		OutputTokens              int `json:"output_tokens"`
+		CacheCreationInputTokens  int `json:"cache_creation_input_tokens,omitempty"`
+		CacheReadInputTokens      int `json:"cache_read_input_tokens,omitempty"`
 	} `json:"usage"`
 }
 
@@ -187,7 +198,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	}
 }
 
-func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*MessageResponsePayload, error) {
+func (c *Client) createMessage(ctx context.Context, payload *messagePayload, betaHeaders []string) (*MessageResponsePayload, error) {
 	c.setMessageDefaults(payload)
 
 	payloadBytes, err := json.Marshal(payload)
@@ -195,7 +206,7 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*M
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	resp, err := c.do(ctx, "/messages", payloadBytes)
+	resp, err := c.doWithHeaders(ctx, "/messages", payloadBytes, betaHeaders)
 	if err != nil {
 		return nil, err
 	}
@@ -316,6 +327,14 @@ func handleMessageStartEvent(event map[string]interface{}, response MessageRespo
 	response.Role = getString(message, "role")
 	response.Type = getString(message, "type")
 	response.Usage.InputTokens = int(inputTokens)
+	
+	// Capture cache token information if present
+	if cacheCreationTokens, err := getFloat64(usage, "cache_creation_input_tokens"); err == nil {
+		response.Usage.CacheCreationInputTokens = int(cacheCreationTokens)
+	}
+	if cacheReadTokens, err := getFloat64(usage, "cache_read_input_tokens"); err == nil {
+		response.Usage.CacheReadInputTokens = int(cacheReadTokens)
+	}
 
 	return response, nil
 }
@@ -472,6 +491,16 @@ func handleMessageDeltaEvent(event map[string]interface{}, response MessageRespo
 	}
 	if outputTokens, ok := usage["output_tokens"].(float64); ok {
 		response.Usage.OutputTokens = int(outputTokens)
+	}
+	// Also capture cache tokens in the final message_delta event
+	if inputTokens, err := getFloat64(usage, "input_tokens"); err == nil {
+		response.Usage.InputTokens = int(inputTokens)
+	}
+	if cacheCreationTokens, err := getFloat64(usage, "cache_creation_input_tokens"); err == nil {
+		response.Usage.CacheCreationInputTokens = int(cacheCreationTokens)
+	}
+	if cacheReadTokens, err := getFloat64(usage, "cache_read_input_tokens"); err == nil {
+		response.Usage.CacheReadInputTokens = int(cacheReadTokens)
 	}
 	return response, nil
 }
