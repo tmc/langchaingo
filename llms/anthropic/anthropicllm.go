@@ -330,36 +330,6 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
-		case llms.CachedContent:
-			// Handle cached content with cache control
-			var cacheControl *anthropicclient.CacheControl
-			if p.CacheControl != nil {
-				cacheControl = &anthropicclient.CacheControl{
-					Type: p.CacheControl.Type,
-				}
-			}
-			
-			// Process the wrapped content
-			switch wrapped := p.ContentPart.(type) {
-			case llms.TextContent:
-				contents = append(contents, &anthropicclient.TextContent{
-					Type:         "text",
-					Text:         wrapped.Text,
-					CacheControl: cacheControl,
-				})
-			case llms.BinaryContent:
-				contents = append(contents, &anthropicclient.ImageContent{
-					Type: "image",
-					Source: anthropicclient.ImageSource{
-						Type:      "base64",
-						MediaType: wrapped.MIMEType,
-						Data:      base64.StdEncoding.EncodeToString(wrapped.Data),
-					},
-					CacheControl: cacheControl,
-				})
-			default:
-				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported cached content part type: %T", wrapped)
-			}
 		case llms.TextContent:
 			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",
