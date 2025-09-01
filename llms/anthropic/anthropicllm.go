@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/httputil"
@@ -32,9 +33,13 @@ const (
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *anthropicclient.Client
+	model            string // Track current model for reasoning detection
 }
 
-var _ llms.Model = (*LLM)(nil)
+var (
+	_ llms.Model          = (*LLM)(nil)
+	_ llms.ReasoningModel = (*LLM)(nil)
+)
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -44,6 +49,7 @@ func New(opts ...Option) (*LLM, error) {
 	}
 	return &LLM{
 		client: c,
+		model:  c.Model, // Store the model for reasoning detection
 	}, nil
 }
 
@@ -83,6 +89,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	opts := &llms.CallOptions{}
 	for _, opt := range options {
 		opt(opts)
+	}
+	
+	// Update model if overridden
+	if opts.Model != "" {
+		o.model = opts.Model
 	}
 
 	if o.client.UseLegacyTextCompletionsAPI {
@@ -136,6 +147,42 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	tools := toolsToTools(opts.Tools)
+	
+	// Extract beta headers for prompt caching support
+	var betaHeaders []string
+	if opts.Metadata != nil {
+		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
+			betaHeaders = headers
+		}
+	}
+	
+	// Extract thinking configuration
+	var budgetTokens int
+	if opts.Metadata != nil {
+		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+			// Only set budget_tokens for models that support extended thinking
+			// Claude 3.7+ and Claude 4+ support this feature
+			if o.SupportsReasoning() {
+				if config.BudgetTokens > 0 {
+					budgetTokens = config.BudgetTokens
+				} else if config.Mode != llms.ThinkingModeNone {
+					// Calculate budget based on mode
+					budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
+				}
+				
+				// Ensure minimum budget for Claude 3.7+ if thinking is enabled
+				if budgetTokens > 0 && budgetTokens < 1024 {
+					budgetTokens = 1024 // Minimum for Claude
+				}
+			}
+			
+			// Add interleaved thinking header if requested (Claude 4+)
+			if config.InterleaveThinking && o.SupportsReasoning() {
+				betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
+			}
+		}
+	}
+	
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
 		Messages:      chatMessages,
@@ -145,6 +192,8 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		Temperature:   opts.Temperature,
 		TopP:          opts.TopP,
 		Tools:         tools,
+		BudgetTokens:  budgetTokens,
+		BetaHeaders:   betaHeaders,
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
@@ -162,12 +211,20 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		switch content.GetType() {
 		case "text":
 			if textContent, ok := content.(*anthropicclient.TextContent); ok {
+				// Extract thinking content from the response text
+				thinkingContent, outputContent := extractThinkingFromText(textContent.Text)
+				
 				choices[i] = &llms.ContentChoice{
 					Content:    textContent.Text,
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+						// Standardized fields for cross-provider compatibility
+						"ThinkingContent":          thinkingContent, // Standardized field
+						"OutputContent":            outputContent,   // Standardized field
 					},
 				}
 			} else {
@@ -191,8 +248,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				}
 			} else {
@@ -271,6 +330,36 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
+		case llms.CachedContent:
+			// Handle cached content with cache control
+			var cacheControl *anthropicclient.CacheControl
+			if p.CacheControl != nil {
+				cacheControl = &anthropicclient.CacheControl{
+					Type: p.CacheControl.Type,
+				}
+			}
+			
+			// Process the wrapped content
+			switch wrapped := p.ContentPart.(type) {
+			case llms.TextContent:
+				contents = append(contents, &anthropicclient.TextContent{
+					Type:         "text",
+					Text:         wrapped.Text,
+					CacheControl: cacheControl,
+				})
+			case llms.BinaryContent:
+				contents = append(contents, &anthropicclient.ImageContent{
+					Type: "image",
+					Source: anthropicclient.ImageSource{
+						Type:      "base64",
+						MediaType: wrapped.MIMEType,
+						Data:      base64.StdEncoding.EncodeToString(wrapped.Data),
+					},
+					CacheControl: cacheControl,
+				})
+			default:
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported cached content part type: %T", wrapped)
+			}
 		case llms.TextContent:
 			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",
@@ -351,4 +440,73 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 		}, nil
 	}
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+}
+
+// SupportsReasoning implements the ReasoningModel interface.
+// Returns true if the current model supports extended thinking capabilities.
+func (o *LLM) SupportsReasoning() bool {
+	// Check the current model (may have been overridden by WithModel option)
+	model := o.model
+	if model == "" {
+		model = o.client.Model
+	}
+	
+	modelLower := strings.ToLower(model)
+	
+	// Claude 3.7+ supports extended thinking
+	if strings.Contains(modelLower, "claude-3-7") ||
+		strings.Contains(modelLower, "claude-3.7") {
+		return true
+	}
+	
+	// Claude 4+ supports extended thinking with interleaving
+	if strings.Contains(modelLower, "claude-4") ||
+		strings.Contains(modelLower, "claude-opus-4") ||
+		strings.Contains(modelLower, "claude-sonnet-4") {
+		return true
+	}
+	
+	// Future Claude 5+ expected to support reasoning
+	if strings.Contains(modelLower, "claude-5") ||
+		strings.Contains(modelLower, "claude-opus-5") ||
+		strings.Contains(modelLower, "claude-sonnet-5") {
+		return true
+	}
+	
+	return false
+}
+
+// extractThinkingFromText extracts thinking content from Anthropic responses
+// Anthropic models often embed thinking in <thinking> tags
+func extractThinkingFromText(fullText string) (thinkingContent, outputContent string) {
+	// Look for <thinking> tags in the text
+	if strings.Contains(fullText, "<thinking>") {
+		start := strings.Index(fullText, "<thinking>")
+		end := strings.Index(fullText, "</thinking>")
+		if start >= 0 && end > start {
+			// Extract thinking content between tags
+			thinkingContent = fullText[start+10:end] // +10 for "<thinking>"
+			
+			// Extract output content (everything before and after thinking tags)
+			beforeThinking := strings.TrimSpace(fullText[:start])
+			afterThinking := ""
+			if end+12 < len(fullText) { // +12 for "</thinking>"
+				afterThinking = strings.TrimSpace(fullText[end+12:])
+			}
+			
+			// Combine non-thinking content
+			if beforeThinking != "" && afterThinking != "" {
+				outputContent = beforeThinking + "\n\n" + afterThinking
+			} else if beforeThinking != "" {
+				outputContent = beforeThinking
+			} else {
+				outputContent = afterThinking
+			}
+			
+			return strings.TrimSpace(thinkingContent), strings.TrimSpace(outputContent)
+		}
+	}
+	
+	// If no thinking tags found, treat entire text as output
+	return "", fullText
 }

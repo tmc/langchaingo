@@ -250,6 +250,16 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
+	// Extract thinking configuration for models that support it
+	if opts.Metadata != nil {
+		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+			// Enable thinking mode if not explicitly disabled
+			if config.Mode != llms.ThinkingModeNone {
+				ollamaOptions.Think = true
+			}
+		}
+	}
+
 	return ollamaOptions
 }
 
