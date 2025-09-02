@@ -38,7 +38,8 @@ type Client struct {
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion string
 
-	ResponseFormat *ResponseFormat
+	ResponseFormat  *ResponseFormat
+	ReasoningEffort ReasoningEffort
 }
 
 // Option is an option for the OpenAI client.
@@ -60,19 +61,20 @@ type Doer interface {
 // New returns a new OpenAI client.
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
-	responseFormat *ResponseFormat,
+	responseFormat *ResponseFormat, reasoningEffort ReasoningEffort,
 	opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:          token,
-		Model:          model,
-		EmbeddingModel: embeddingModel,
-		baseURL:        strings.TrimSuffix(baseURL, "/"),
-		organization:   organization,
-		apiType:        apiType,
-		apiVersion:     apiVersion,
-		httpClient:     httpClient,
-		ResponseFormat: responseFormat,
+		token:           token,
+		Model:           model,
+		EmbeddingModel:  embeddingModel,
+		baseURL:         strings.TrimSuffix(baseURL, "/"),
+		organization:    organization,
+		apiType:         apiType,
+		apiVersion:      apiVersion,
+		httpClient:      httpClient,
+		ResponseFormat:  responseFormat,
+		ReasoningEffort: reasoningEffort,
 	}
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL
@@ -162,6 +164,9 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletio
 		} else {
 			r.Model = c.Model
 		}
+	}
+	if r.ReasoningEffort == "" && c.ReasoningEffort != "" {
+		r.ReasoningEffort = c.ReasoningEffort
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {

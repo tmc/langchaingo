@@ -52,7 +52,7 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 	}
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
 		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel,
-		options.responseFormat, clientOptions...,
+		options.responseFormat, openaiclient.ReasoningEffort(options.reasoningEffort), clientOptions...,
 	)
 	return options, cli, err
 }
