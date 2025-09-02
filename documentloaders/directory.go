@@ -43,7 +43,6 @@ func WithPDFOpts(pwd string) Option {
 	return func(c *RecursiveDirectoryLoader) { c.PDFPassword = pwd }
 }
 
-
 // RecursiveDirectoryLoader is a document loader that loads documents with allowed extensions from a directory.
 type RecursiveDirectoryLoader struct {
 	root     string
