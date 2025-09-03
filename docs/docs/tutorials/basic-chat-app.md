@@ -143,7 +143,7 @@ func main() {
     chatMemory := memory.NewConversationBuffer()
 
     // Create conversation chain
-    chain := chains.NewConversationChain(llm, chatMemory)
+    chain := chains.NewConversation(llm, chatMemory)
 
     fmt.Println("Enhanced Chat Application Started! Type 'quit' to exit.")
     
