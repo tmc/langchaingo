@@ -137,7 +137,7 @@ func (e *Executor) doAction(
 		e.CallbacksHandler.HandleToolStart(ctx, fmt.Sprintf("%s::(%s)", action.Tool, action.ToolInput))
 	}
 
-	observation, err := tool.Call(ctx, action.ToolInput)
+	observation, err := tool.Call(ctx, strings.TrimSuffix(action.ToolInput, "\nObservation:"))
 	if err != nil {
 		if e.CallbacksHandler != nil {
 			e.CallbacksHandler.HandleToolError(ctx, err)

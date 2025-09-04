@@ -1,0 +1,68 @@
+httprr trace v1
+331 1676
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 129
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello, how are you?"}],"max_completion_tokens":50,"temperature":0}HTTP/2.0 200 OK
+Content-Length: 907
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Wed, 20 Aug 2025 11:55:54 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 509
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 607
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999992
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_7997c69c86b744538a2884c8d777754b
+
+{
+  "id": "chatcmpl-C6bhxDl79vlojU2DYKbzyDh0FmLZY",
+  "object": "chat.completion",
+  "created": 1755690953,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! I'm just a computer program, so I don't have feelings, but I'm here to help you. How can I assist you today?",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 31,
+    "total_tokens": 44,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

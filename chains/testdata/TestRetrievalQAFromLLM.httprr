@@ -1,0 +1,68 @@
+httprr trace v1
+516 1569
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 314
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\nfoo is 34\n\nbar is 1\n\nQuestion: what is foo? \nHelpful Answer:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 800
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:33:41 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 270
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 351
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999942
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_501517cc2aa8477c8e9f175dbfa4ec3f
+
+{
+  "id": "chatcmpl-C5uHV9JIIZQEtVWkPnTr0Fc3xDKw2",
+  "object": "chat.completion",
+  "created": 1755524021,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "foo is 34",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 67,
+    "completion_tokens": 4,
+    "total_tokens": 71,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

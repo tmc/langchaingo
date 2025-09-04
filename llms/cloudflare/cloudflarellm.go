@@ -3,9 +3,9 @@ package cloudflare
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cloudflare/internal/cloudflareclient"
 )
@@ -27,17 +27,23 @@ var _ llms.Model = (*LLM)(nil)
 // New creates a new cloudflare LLM implementation.
 func New(opts ...Option) (*LLM, error) {
 	o := options{
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {
 		opt(&o)
 	}
 
+	// Default URL if not provided
+	serverURL := ""
+	if o.cloudflareServerURL != nil {
+		serverURL = o.cloudflareServerURL.String()
+	}
+
 	client := cloudflareclient.NewClient(
 		o.httpClient,
 		o.cloudflareAccountID,
-		o.cloudflareServerURL.String(),
+		serverURL,
 		o.cloudflareToken,
 		o.model,
 		o.embeddingModel,
@@ -52,7 +58,7 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen, goerr113
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}

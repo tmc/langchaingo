@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -69,9 +71,10 @@ func WithAnthropicBetaHeader(val string) Option {
 // New returns a new Anthropic client.
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:   model,
-		token:   token,
-		baseURL: strings.TrimSuffix(baseURL, "/"),
+		Model:      model,
+		token:      token,
+		baseURL:    strings.TrimSuffix(baseURL, "/"),
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -202,7 +205,7 @@ func (c *Client) decodeError(resp *http.Response) error {
 
 	var errResp errorMessage
 	if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
-		return errors.New(msg) // nolint:goerr113
+		return errors.New(msg)
 	}
-	return fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
+	return fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 }

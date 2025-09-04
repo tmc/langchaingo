@@ -33,7 +33,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/fake"
 )
 
@@ -50,7 +49,7 @@ func main() {
 	ctx := context.Background()
 	response, err := llm.Call(ctx, "Hi there!")
 	if err != nil {
-		fmt.Printf("Error calling LLM: %v\n", err)
+		log.Printf("Error calling LLM: %v\n", err)
 	} else {
 		fmt.Println("LLM Response:", response)
 	}
@@ -59,7 +58,7 @@ func main() {
 	llm.AddResponse("Goodbye!")
 	response, err = llm.Call(ctx, "See you later!")
 	if err != nil {
-		fmt.Printf("Error calling LLM: %v\n", err)
+		log.Printf("Error calling LLM: %v\n", err)
 	} else {
 		fmt.Println("LLM Response:", response)
 	}
@@ -67,20 +66,37 @@ func main() {
 ```
 
 # API Reference
-`NewFakeLLM(responses []string) *LLM`
 
+## Constructor
+```go
+func NewFakeLLM(responses []string) *LLM
+```
 Creates a new instance of the fake LLM with the provided responses.
 
-`LLM.Call(ctx context.Context, prompt string) (string, error)`
+## Methods
 
-Simulates calling the model with a specific prompt and returns a fictional response.
+### Call
+```go
+func (f *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error)
+```
+Simulates calling the model with a specific prompt and returns a predefined response. Supports all standard LLM options like `WithTemperature`, `WithMaxTokens`, etc.
 
-`LLM.Reset()`
+### GenerateContent  
+```go
+func (f *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error)
+```
+Simulates generating content from message sequences. This is the modern interface that supports multi-modal inputs.
 
-Resets the fake LLM, allowing responses to cycle through again.
+### Reset
+```go
+func (f *LLM) Reset()
+```
+Resets the internal response index, allowing responses to cycle through from the beginning again.
 
-`LLM.AddResponse(response string)`
-
+### AddResponse
+```go
+func (f *LLM) AddResponse(response string)
+```
 Adds a new response to the list of possible responses of the fake LLM.
 
 # Purpose

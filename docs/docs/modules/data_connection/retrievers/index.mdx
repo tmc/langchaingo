@@ -61,19 +61,13 @@ After it chose a storage vector like pinecone, postgres, Qdrant, in example I'll
 
 Now Create a retriever
 ```go
-    searchQuery := "how to make a cake"
- 	optionsVector := []vectorstores.Option{
-		vectorstores.WithScoreThreshold(0.80), // use for precision, when you want to get only the most relevant documents
-		//vectorstores.WithNameSpace(""),            // use for set a namespace in the storage
-		//vectorstores.WithFilters(map[string]interface{}{"language": "en"}), // use for filter the documents
-		//vectorstores.WithEmbedder(embedder), // use when you want add documents or doing similarity search
-		//vectorstores.WithDeduplicater(vectorstores.NewSimpleDeduplicater()), //  This is useful to prevent wasting time on creating an embedding
-	}
-
-	retriever := vectorstores.ToRetriever(store, 10, optionsVector...)
-	// search
+	searchQuery := "how to make a cake"
+	
+	// Create retriever with basic configuration
+	retriever := vectorstores.ToRetriever(store, 10)
+	
+	// Search for relevant documents
 	resDocs, err := retriever.GetRelevantDocuments(context.Background(), searchQuery)
-
 	if err != nil {
 		log.Fatal(err)
 	}

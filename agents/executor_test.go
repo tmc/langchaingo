@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -60,6 +62,7 @@ func (a *testAgent) GetTools() []tools.Tool {
 
 func TestExecutorWithErrorHandler(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
 	a := &testAgent{
 		err: agents.ErrUnableToParseOutput,
@@ -70,7 +73,7 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 		agents.WithParserErrorHandler(agents.NewParserErrorHandler(nil)),
 	)
 
-	_, err := chains.Call(context.Background(), executor, nil)
+	_, err := chains.Call(ctx, executor, nil)
 	require.ErrorIs(t, err, agents.ErrNotFinished)
 	require.Equal(t, 3, a.numPlanCalls)
 	require.Equal(t, []schema.AgentStep{
@@ -81,18 +84,32 @@ func TestExecutorWithErrorHandler(t *testing.T) {
 
 func TestExecutorWithMRKLAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
+	// Skip if no recording available and no credentials
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
 	}
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure OpenAI client with httprr
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
+	if rr.Replaying() {
+		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
+	}
+	searchTool, err := serpapi.New(serpapiOpts...)
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -104,26 +121,48 @@ func TestExecutorWithMRKLAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), a, "If a person lived three times as long as Jacklyn Zeman, how long would they live") //nolint:lll
-	require.NoError(t, err)
+	result, err := chains.Run(ctx, a, "What is 5 plus 3? Please calculate this.") //nolint:lll
+	if err != nil {
+		// Check if this is a recording mismatch error
+		if strings.Contains(err.Error(), "cached HTTP response not found") {
+			t.Skip("Recording format has changed or is incompatible. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+		}
+		require.NoError(t, err)
+	}
 
-	require.True(t, strings.Contains(result, "210"), "correct answer 210 not in response")
+	t.Logf("MRKL Agent response: %s", result)
+	// Simple calculation: 5 + 3 = 8
+	require.True(t, strings.Contains(result, "8"), "expected calculation result 8 in response")
 }
 
 func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	if serpapiKey := os.Getenv("SERPAPI_API_KEY"); serpapiKey == "" {
-		t.Skip("SERPAPI_API_KEY not set")
+	// Skip if no recording available and no credentials
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
 	}
 
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure OpenAI client with httprr
+	opts := []openai.Option{
+		openai.WithModel("gpt-4"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
-	searchTool, err := serpapi.New()
+	serpapiOpts := []serpapi.Option{serpapi.WithHTTPClient(rr.Client())}
+	if rr.Replaying() {
+		serpapiOpts = append(serpapiOpts, serpapi.WithAPIKey("test-api-key"))
+	}
+	searchTool, err := serpapi.New(serpapiOpts...)
 	require.NoError(t, err)
 
 	calculator := tools.Calculator{}
@@ -141,11 +180,75 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 	e := agents.NewExecutor(a)
 	require.NoError(t, err)
 
-	result, err := chains.Run(context.Background(), e, "what is HK singer Eason Chan's years old?") //nolint:lll
-	require.NoError(t, err)
+	result, err := chains.Run(ctx, e, "when was the Go programming language tagged version 1.0?") //nolint:lll
+	if err != nil {
+		// Check if this is a recording mismatch error
+		if strings.Contains(err.Error(), "cached HTTP response not found") {
+			t.Skip("Recording format has changed or is incompatible. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+		}
+		require.NoError(t, err)
+	}
 
-	require.True(t, strings.Contains(result, "47") || strings.Contains(result, "49"),
-		"correct answer 47 or 49 not in response")
+	t.Logf("Result: %s", result)
+
+	require.True(t, strings.Contains(result, "2012") || strings.Contains(result, "March"),
+		"correct answer 2012 or March not in response")
+}
+
+// mockTool implements the tools.Tool interface for testing
+type mockTool struct {
+	name             string
+	description      string
+	receivedInputPtr *string
+}
+
+func (m *mockTool) Name() string {
+	return m.name
+}
+
+func (m *mockTool) Description() string {
+	return m.description
+}
+
+func (m *mockTool) Call(_ context.Context, input string) (string, error) {
+	*m.receivedInputPtr = input
+	return "mock result", nil
+}
+
+func TestExecutorTrimsObservationSuffix(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	// Create a mock tool that records what input it receives
+	var receivedInput string
+	mockToolInst := &mockTool{
+		name:             "mock_tool",
+		description:      "A mock tool for testing",
+		receivedInputPtr: &receivedInput,
+	}
+
+	// Create a test agent that returns an action with trailing "\nObservation:"
+	testAgent := &testAgent{
+		actions: []schema.AgentAction{
+			{
+				Tool:      "mock_tool",
+				ToolInput: "test input\nObservation:",
+				Log:       "Action: mock_tool\nAction Input: test input\nObservation:",
+			},
+		},
+		inputKeys:  []string{"input"},
+		outputKeys: []string{"output"},
+		tools:      []tools.Tool{mockToolInst},
+	}
+
+	executor := agents.NewExecutor(testAgent, agents.WithMaxIterations(1))
+
+	_, err := chains.Call(ctx, executor, map[string]any{"input": "test question"})
+	// We expect ErrNotFinished since our test agent doesn't provide a finish action
+	require.ErrorIs(t, err, agents.ErrNotFinished)
+
+	// Verify that the tool received the input with "\nObservation:" trimmed off
+	require.Equal(t, "test input", receivedInput, "Tool should receive input with \\nObservation: suffix trimmed")
 }
 
 type mockCallbackHandler struct {

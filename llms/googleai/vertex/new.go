@@ -42,11 +42,15 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		return nil, err
 	}
 
+	palmOpts := []palmclient.Option{
+		palmclient.WithEmbeddingModelName(clientOptions.DefaultEmbeddingModel),
+		palmclient.WithClientOptions(clientOptions.ClientOptions...),
+	}
 	palmClient, err := palmclient.New(
 		ctx,
 		clientOptions.CloudProject,
 		clientOptions.CloudLocation,
-		clientOptions.ClientOptions...)
+		palmOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,4 +61,16 @@ func New(ctx context.Context, opts ...googleai.Option) (*Vertex, error) {
 		palmClient: palmClient,
 	}
 	return v, nil
+}
+
+// Close closes the underlying genai and palm clients.
+// This should be called when the Vertex instance is no longer needed
+// to prevent memory leaks from the underlying gRPC connections.
+func (v *Vertex) Close() error {
+	var err error
+	if v.client != nil {
+		err = v.client.Close()
+	}
+	// Note: palmClient doesn't have a Close method based on the codebase
+	return err
 }

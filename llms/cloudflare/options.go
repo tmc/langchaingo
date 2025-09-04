@@ -53,6 +53,13 @@ func WithServerURL(rawURL string) Option {
 	}
 }
 
+// WithCloudflareServerURL Set the URL of the cloudflare Workers AI service.
+func WithCloudflareServerURL(serverURL *url.URL) Option {
+	return func(opts *options) {
+		opts.cloudflareServerURL = serverURL
+	}
+}
+
 // WithToken Set the token to use.
 func WithToken(token string) Option {
 	return func(opts *options) {

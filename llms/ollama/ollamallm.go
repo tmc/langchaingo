@@ -3,6 +3,7 @@ package ollama
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -12,6 +13,8 @@ import (
 var (
 	ErrEmptyResponse       = errors.New("no response")
 	ErrIncompleteEmbedding = errors.New("not all input got embedded")
+	ErrPullError           = errors.New("ollama model pull error")
+	ErrPullTimeout         = errors.New("ollama model pull deadline exceeded")
 )
 
 // LLM is a ollama LLM implementation.
@@ -44,7 +47,6 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-// nolint: goerr113
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -59,6 +61,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	model := o.options.model
 	if opts.Model != "" {
 		model = opts.Model
+	}
+
+	// Pull model if enabled
+	if o.options.pullModel {
+		if err := o.pullModelIfNeeded(ctx, model); err != nil {
+			return nil, fmt.Errorf("%w: %w", ErrPullError, err)
+		}
 	}
 
 	// Our input is a sequence of MessageContent, each of which potentially has
@@ -147,9 +156,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
+	// Handle case where Message might be nil (e.g., context cancelled during streaming)
+	content := ""
+	if resp.Message != nil {
+		content = resp.Message.Content
+	}
+
 	choices := []*llms.ContentChoice{
 		{
-			Content: resp.Message.Content,
+			Content: content,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
@@ -168,12 +183,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 }
 
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
+	// Pull model if enabled
+	if o.options.pullModel {
+		if err := o.pullModelIfNeeded(ctx, o.options.model); err != nil {
+			return nil, err
+		}
+	}
+
 	embeddings := [][]float32{}
 
 	for _, input := range inputTexts {
 		req := &ollamaclient.EmbeddingRequest{
-			Prompt: input,
-			Model:  o.options.model,
+			Input: input,
+			Model: o.options.model,
 		}
 		if o.options.keepAlive != "" {
 			req.KeepAlive = o.options.keepAlive
@@ -184,11 +206,11 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 			return nil, err
 		}
 
-		if len(embedding.Embedding) == 0 {
+		if len(embedding.Embeddings) == 0 {
 			return nil, ErrEmptyResponse
 		}
 
-		embeddings = append(embeddings, embedding.Embedding)
+		embeddings = append(embeddings, embedding.Embeddings...)
 	}
 
 	if len(inputTexts) != len(embeddings) {
@@ -229,4 +251,44 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
 	return ollamaOptions
+}
+
+// pullModelIfNeeded pulls the model if it's not already available.
+func (o *LLM) pullModelIfNeeded(ctx context.Context, model string) error {
+	// Try to use the model first. If it fails with a model not found error,
+	// then pull the model.
+	// This is a simple implementation. In production, you might want to
+	// implement a more sophisticated check (e.g., using a list endpoint).
+
+	// Apply timeout if configured
+	pullCtx := ctx
+	if o.options.pullTimeout > 0 {
+		var cancel context.CancelFunc
+		pullCtx, cancel = context.WithTimeoutCause(ctx, o.options.pullTimeout, ErrPullTimeout)
+		defer func() {
+			if cancel != nil {
+				cancel()
+			}
+		}()
+	}
+
+	// For now, we'll just pull the model without checking.
+	// This ensures the model is available but may result in unnecessary pulls.
+	req := &ollamaclient.PullRequest{
+		Model:  model,
+		Stream: false,
+	}
+
+	err := o.client.Pull(pullCtx, req)
+	if err != nil {
+		// Check if the error is due to context timeout
+		if errors.Is(err, context.DeadlineExceeded) {
+			return err
+		}
+		// Check if the context has a cause
+		if cause := context.Cause(pullCtx); cause != nil {
+			return fmt.Errorf("%w: %w", cause, err)
+		}
+	}
+	return err
 }

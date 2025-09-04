@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
@@ -51,7 +51,7 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	options := &options{
 		token:      os.Getenv(tokenEnvVarName),
 		baseURL:    anthropicclient.DefaultBaseURL,
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -153,7 +153,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	if result == nil {
+	if result == nil || len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
@@ -196,7 +196,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 				}
 			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message", ErrInvalidContentType)
+				return nil, fmt.Errorf("anthropic: %w for tool use message %T", ErrInvalidContentType, content)
 			}
 		default:
 			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())

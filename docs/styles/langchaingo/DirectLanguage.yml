@@ -1,0 +1,19 @@
+extends: existence
+message: "Avoid flowery or marketing language"
+level: error
+ignorecase: true
+tokens:
+  - amazing
+  - awesome
+  - revolutionary
+  - game-changing
+  - cutting-edge
+  - state-of-the-art
+  - best-in-class
+  - world-class
+  - enterprise-grade
+  - blazing fast
+  - lightning fast
+  - super easy
+  - dead simple
+

@@ -1,0 +1,77 @@
+httprr trace v1
+773 1369
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 354
+Content-Type: application/json
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What is the capital of France?"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 991
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Aug 2025 12:40:44 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=408
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The capital of France is **Paris**.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ],
+      "avgLogprobs": -0.050683832830852933
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 7,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 16,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 7
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "Sx-jaI-JN6bFnsEPv9TJkQU"
+}
