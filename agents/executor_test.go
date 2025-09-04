@@ -195,21 +195,21 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 }
 
 // mockTool implements the tools.Tool interface for testing
-type mockTool struct {
+type mockTool2 struct {
 	name             string
 	description      string
 	receivedInputPtr *string
 }
 
-func (m *mockTool) Name() string {
+func (m *mockTool2) Name() string {
 	return m.name
 }
 
-func (m *mockTool) Description() string {
+func (m *mockTool2) Description() string {
 	return m.description
 }
 
-func (m *mockTool) Call(_ context.Context, input string) (string, error) {
+func (m *mockTool2) Call(_ context.Context, input string) (string, error) {
 	*m.receivedInputPtr = input
 	return "mock result", nil
 }
@@ -220,7 +220,7 @@ func TestExecutorTrimsObservationSuffix(t *testing.T) {
 
 	// Create a mock tool that records what input it receives
 	var receivedInput string
-	mockToolInst := &mockTool{
+	mockToolInst := &mockTool2{
 		name:             "mock_tool",
 		description:      "A mock tool for testing",
 		receivedInputPtr: &receivedInput,
