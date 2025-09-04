@@ -195,24 +195,6 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 }
 
 // mockTool implements the tools.Tool interface for testing
-type mockTool2 struct {
-	name             string
-	description      string
-	receivedInputPtr *string
-}
-
-func (m *mockTool2) Name() string {
-	return m.name
-}
-
-func (m *mockTool2) Description() string {
-	return m.description
-}
-
-func (m *mockTool2) Call(_ context.Context, input string) (string, error) {
-	*m.receivedInputPtr = input
-	return "mock result", nil
-}
 
 func TestExecutorTrimsObservationSuffix(t *testing.T) {
 	t.Parallel()
@@ -220,9 +202,8 @@ func TestExecutorTrimsObservationSuffix(t *testing.T) {
 
 	// Create a mock tool that records what input it receives
 	var receivedInput string
-	mockToolInst := &mockTool2{
+	mockToolInst := &mockTool{
 		name:             "mock_tool",
-		description:      "A mock tool for testing",
 		receivedInputPtr: &receivedInput,
 	}
 
@@ -286,14 +267,20 @@ func (m *mockCallbackHandler) HandleRetrieverEnd(_ context.Context, _ string, _ 
 func (m *mockCallbackHandler) HandleStreamingFunc(_ context.Context, _ []byte)                     {}
 
 type mockTool struct {
-	name     string
-	response string
-	err      error
+	name             string
+	response         string
+	receivedInputPtr *string
+	err              error
 }
 
-func (m mockTool) Name() string                                     { return m.name }
-func (m mockTool) Description() string                              { return "A mock tool for testing" }
-func (m mockTool) Call(_ context.Context, _ string) (string, error) { return m.response, m.err }
+func (m mockTool) Name() string        { return m.name }
+func (m mockTool) Description() string { return "A mock tool for testing" }
+func (m mockTool) Call(_ context.Context, input string) (string, error) {
+	if m.receivedInputPtr != nil {
+		*m.receivedInputPtr = input
+	}
+	return m.response, m.err
+}
 
 func TestExecutorToolCallbacks(t *testing.T) {
 	t.Parallel()
