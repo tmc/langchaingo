@@ -178,28 +178,28 @@ func TestIsReasoningModel(t *testing.T) {
 		{"gpt-4-turbo", false},
 		{"gpt-4o", false},
 		{"text-davinci-003", false},
-		
+
 		// GPT-5 models - should be reasoning models
 		{"gpt-5", true},
 		{"gpt-5-preview", true},
 		{"gpt-5-mini", true},
 		{"gpt-5-turbo", true},
-		
+
 		// o1 models - should be reasoning models
 		{"o1-preview", true},
 		{"o1-mini", true},
 		{"o1-large", true},
-		
+
 		// o3 models - should be reasoning models
 		{"o3", true}, // Base o3 model
 		{"o3-mini", true},
 		{"o3-preview", true},
 		{"o3-large", true},
-		
+
 		// Edge cases
 		{"", false},
 		{"o10-preview", false}, // Doesn't start with "o1-"
-		{"o30-mini", false}, // Doesn't start with "o3-"
+		{"o30-mini", false},    // Doesn't start with "o3-"
 	}
 
 	for _, tt := range tests {

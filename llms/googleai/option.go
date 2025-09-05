@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"cloud.google.com/go/vertexai/genai"
+	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 )
@@ -181,6 +182,18 @@ func WithDefaultTopP(defaultTopP float64) Option {
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	return func(opts *Options) {
 		opts.HarmThreshold = ht
+	}
+}
+
+// WithCachedContent enables the use of pre-created cached content.
+// The cached content must be created separately using Client.CreateCachedContent.
+// This is different from Anthropic's inline cache control.
+func WithCachedContent(name string) llms.CallOption {
+	return func(o *llms.CallOptions) {
+		if o.Metadata == nil {
+			o.Metadata = make(map[string]interface{})
+		}
+		o.Metadata["CachedContentName"] = name
 	}
 }
 

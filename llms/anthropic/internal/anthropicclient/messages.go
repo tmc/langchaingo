@@ -44,7 +44,16 @@ type messagePayload struct {
 	Tools       []Tool        `json:"tools,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 
+	// Extended thinking parameters (Claude 3.7+)
+	Thinking *ThinkingConfig `json:"thinking,omitempty"`
+
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+}
+
+// ThinkingConfig represents the thinking configuration for Claude 3.7+
+type ThinkingConfig struct {
+	Type         string `json:"type"`           // "enabled" or "disabled"
+	BudgetTokens int    `json:"budget_tokens,omitempty"`
 }
 
 // Tool used for the request message payload.
@@ -54,14 +63,20 @@ type Tool struct {
 	InputSchema any    `json:"input_schema,omitempty"`
 }
 
+// CacheControl represents Anthropic's prompt caching configuration.
+type CacheControl struct {
+	Type string `json:"type"`
+}
+
 // Content can be TextContent or ToolUseContent depending on the type.
 type Content interface {
 	GetType() string
 }
 
 type TextContent struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type         string        `json:"type"`
+	Text         string        `json:"text"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (tc TextContent) GetType() string {
@@ -69,8 +84,9 @@ func (tc TextContent) GetType() string {
 }
 
 type ImageContent struct {
-	Type   string      `json:"type"`
-	Source ImageSource `json:"source"`
+	Type         string        `json:"type"`
+	Source       ImageSource   `json:"source"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (ic ImageContent) GetType() string {
@@ -84,10 +100,11 @@ type ImageSource struct {
 }
 
 type ToolUseContent struct {
-	Type  string                 `json:"type"`
-	ID    string                 `json:"id"`
-	Name  string                 `json:"name"`
-	Input map[string]interface{} `json:"input"`
+	Type         string                 `json:"type"`
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name"`
+	Input        map[string]interface{} `json:"input"`
+	CacheControl *CacheControl          `json:"cache_control,omitempty"`
 
 	inputData string `json:"-"` // Used to gather input data when streaming
 }
@@ -97,13 +114,25 @@ func (tuc ToolUseContent) GetType() string {
 }
 
 type ToolResultContent struct {
-	Type      string `json:"type"`
-	ToolUseID string `json:"tool_use_id"`
-	Content   string `json:"content"`
+	Type         string        `json:"type"`
+	ToolUseID    string        `json:"tool_use_id"`
+	Content      string        `json:"content"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 func (trc ToolResultContent) GetType() string {
 	return trc.Type
+}
+
+// ThinkingContent represents Claude's thinking/reasoning content
+type ThinkingContent struct {
+	Type      string `json:"type"`
+	Thinking  string `json:"thinking"`
+	Signature string `json:"signature,omitempty"`
+}
+
+func (tc ThinkingContent) GetType() string {
+	return tc.Type
 }
 
 type MessageResponsePayload struct {
@@ -115,8 +144,10 @@ type MessageResponsePayload struct {
 	StopSequence string    `json:"stop_sequence"`
 	Type         string    `json:"type"`
 	Usage        struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
+		InputTokens              int `json:"input_tokens"`
+		OutputTokens             int `json:"output_tokens"`
+		CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+		CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 	} `json:"usage"`
 }
 
@@ -153,6 +184,12 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			m.Content = append(m.Content, tuc)
+		case "thinking":
+			tc := &ThinkingContent{}
+			if err := json.Unmarshal(raw, tc); err != nil {
+				return err
+			}
+			m.Content = append(m.Content, tc)
 		default:
 			return fmt.Errorf("unknown content type: %s\n%v", typeStruct.Type, string(raw))
 		}
@@ -187,7 +224,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	}
 }
 
-func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*MessageResponsePayload, error) {
+func (c *Client) createMessage(ctx context.Context, payload *messagePayload, betaHeaders []string) (*MessageResponsePayload, error) {
 	c.setMessageDefaults(payload)
 
 	payloadBytes, err := json.Marshal(payload)
@@ -195,7 +232,7 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload) (*M
 		return nil, fmt.Errorf("marshal payload: %w", err)
 	}
 
-	resp, err := c.do(ctx, "/messages", payloadBytes)
+	resp, err := c.doWithHeaders(ctx, "/messages", payloadBytes, betaHeaders)
 	if err != nil {
 		return nil, err
 	}
@@ -317,6 +354,14 @@ func handleMessageStartEvent(event map[string]interface{}, response MessageRespo
 	response.Type = getString(message, "type")
 	response.Usage.InputTokens = int(inputTokens)
 
+	// Capture cache token information if present
+	if cacheCreationTokens, err := getFloat64(usage, "cache_creation_input_tokens"); err == nil {
+		response.Usage.CacheCreationInputTokens = int(cacheCreationTokens)
+	}
+	if cacheReadTokens, err := getFloat64(usage, "cache_read_input_tokens"); err == nil {
+		response.Usage.CacheReadInputTokens = int(cacheReadTokens)
+	}
+
 	return response, nil
 }
 
@@ -357,6 +402,10 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 				Name:  getString(contentBlock, "name"),
 				Input: input,
 			})
+		case "thinking":
+			response.Content = append(response.Content, &ThinkingContent{
+				Type: eventType,
+			})
 		default:
 			return response, fmt.Errorf("%w: unknown content block type: %s", ErrInvalidDeltaField, eventType)
 		}
@@ -390,6 +439,8 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 		return handleTextDelta(ctx, delta, response, payload, index)
 	case "input_json_delta":
 		return handleJSONDelta(delta, response, index)
+	case "thinking_delta":
+		return handleThinkingDelta(delta, response, index)
 	}
 
 	return response, nil
@@ -433,6 +484,20 @@ func handleJSONDelta(delta map[string]interface{}, response MessageResponsePaylo
 	return response, nil
 }
 
+// handleThinkingDelta processes thinking delta events for content blocks.
+func handleThinkingDelta(delta map[string]interface{}, response MessageResponsePayload, index int) (MessageResponsePayload, error) {
+	thinking, ok := delta["thinking"].(string)
+	if !ok {
+		return response, ErrInvalidDeltaTextField
+	}
+	thinkingContent, ok := response.Content[index].(*ThinkingContent)
+	if !ok {
+		return response, fmt.Errorf("failed to cast to ThinkingContent at index %d", index)
+	}
+	thinkingContent.Thinking += thinking
+	return response, nil
+}
+
 func handleContentBlockStop(event map[string]interface{}, response MessageResponsePayload) (MessageResponsePayload, error) {
 	indexValue, ok := event["index"].(float64)
 	if !ok {
@@ -472,6 +537,16 @@ func handleMessageDeltaEvent(event map[string]interface{}, response MessageRespo
 	}
 	if outputTokens, ok := usage["output_tokens"].(float64); ok {
 		response.Usage.OutputTokens = int(outputTokens)
+	}
+	// Also capture cache tokens in the final message_delta event
+	if inputTokens, err := getFloat64(usage, "input_tokens"); err == nil {
+		response.Usage.InputTokens = int(inputTokens)
+	}
+	if cacheCreationTokens, err := getFloat64(usage, "cache_creation_input_tokens"); err == nil {
+		response.Usage.CacheCreationInputTokens = int(cacheCreationTokens)
+	}
+	if cacheReadTokens, err := getFloat64(usage, "cache_read_input_tokens"); err == nil {
+		response.Usage.CacheReadInputTokens = int(cacheReadTokens)
 	}
 	return response, nil
 }
