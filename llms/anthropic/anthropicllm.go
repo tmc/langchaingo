@@ -143,57 +143,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	tools := toolsToTools(opts.Tools)
 
-	// Extract beta headers for prompt caching support
-	var betaHeaders []string
-	if opts.Metadata != nil {
-		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
-			betaHeaders = headers
-		}
-	}
-
-	// Extract thinking configuration
-	var budgetTokens int
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Only set budget_tokens for models that support extended thinking
-			// Claude 3.7+ and Claude 4+ support this feature
-			currentModel := opts.Model
-			if currentModel == "" {
-				currentModel = o.model
-			}
-			if supportsReasoningForModel(currentModel) {
-				if config.BudgetTokens > 0 {
-					budgetTokens = config.BudgetTokens
-				} else if config.Mode != llms.ThinkingModeNone {
-					// Calculate budget based on mode
-					budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
-				}
-
-				// Ensure budget is within valid range for Claude 3.7+
-				if budgetTokens > 0 {
-					if budgetTokens < 1024 {
-						budgetTokens = 1024 // Minimum for Claude
-					} else if budgetTokens > 128000 {
-						budgetTokens = 128000 // Maximum for Claude (128K)
-					}
-				}
-			}
-
-			// Add interleaved thinking header if requested (Claude 4+)
-			if config.InterleaveThinking && supportsReasoningForModel(currentModel) {
-				betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
-			}
-		}
-	}
-
-	// Create thinking configuration if we have a budget
-	var thinking *anthropicclient.ThinkingConfig
-	if budgetTokens > 0 {
-		thinking = &anthropicclient.ThinkingConfig{
-			Type:         "enabled",
-			BudgetTokens: budgetTokens,
-		}
-	}
+	betaHeaders, thinking := extractThinkingOptions(o, opts)
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
@@ -214,6 +164,11 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
+	return processAnthropicResponse(result)
+}
+
+// processAnthropicResponse converts Anthropic API response to standard ContentResponse
+func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
 	if result == nil || len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
@@ -291,10 +246,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	resp := &llms.ContentResponse{
+	return &llms.ContentResponse{
 		Choices: choices,
-	}
-	return resp, nil
+	}, nil
 }
 
 func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
@@ -350,17 +304,17 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 func handleSystemMessage(msg llms.MessageContent) (string, error) {
 	// Handle both direct TextContent and CachedContent wrapper
 	part := msg.Parts[0]
-	
+
 	// If it's cached content, unwrap it
 	if cached, ok := part.(llms.CachedContent); ok {
 		part = cached.ContentPart
 	}
-	
+
 	// Extract text from the part
 	if textContent, ok := part.(llms.TextContent); ok {
 		return textContent.Text, nil
 	}
-	
+
 	return "", fmt.Errorf("anthropic: %w for system message", ErrInvalidContentType)
 }
 
@@ -518,6 +472,63 @@ func supportsReasoningForModel(model string) bool {
 	}
 
 	return false
+}
+
+// extractThinkingOptions extracts thinking configuration and beta headers from call options
+func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropicclient.ThinkingConfig) {
+	// Extract beta headers for prompt caching support
+	var betaHeaders []string
+	if opts.Metadata != nil {
+		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
+			betaHeaders = headers
+		}
+	}
+
+	// Extract thinking configuration
+	var budgetTokens int
+	if opts.Metadata != nil {
+		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+			// Only set budget_tokens for models that support extended thinking
+			// Claude 3.7+ and Claude 4+ support this feature
+			currentModel := opts.Model
+			if currentModel == "" {
+				currentModel = o.model
+			}
+			if supportsReasoningForModel(currentModel) {
+				if config.BudgetTokens > 0 {
+					budgetTokens = config.BudgetTokens
+				} else if config.Mode != llms.ThinkingModeNone {
+					// Calculate budget based on mode
+					budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
+				}
+
+				// Ensure budget is within valid range for Claude 3.7+
+				if budgetTokens > 0 {
+					if budgetTokens < 1024 {
+						budgetTokens = 1024 // Minimum for Claude
+					} else if budgetTokens > 128000 {
+						budgetTokens = 128000 // Maximum for Claude (128K)
+					}
+				}
+			}
+
+			// Add interleaved thinking header if requested (Claude 4+)
+			if config.InterleaveThinking && supportsReasoningForModel(currentModel) {
+				betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
+			}
+		}
+	}
+
+	// Create thinking configuration if we have a budget
+	var thinking *anthropicclient.ThinkingConfig
+	if budgetTokens > 0 {
+		thinking = &anthropicclient.ThinkingConfig{
+			Type:         "enabled",
+			BudgetTokens: budgetTokens,
+		}
+	}
+
+	return betaHeaders, thinking
 }
 
 // extractThinkingFromText extracts thinking content from Anthropic responses

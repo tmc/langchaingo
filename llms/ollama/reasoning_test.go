@@ -117,7 +117,7 @@ func TestOllama_ContextCache(t *testing.T) {
 	// Test multiple accesses
 	cache.Get(messages1)
 	cache.Get(messages1)
-	
+
 	entries, totalHits, avgTokensSaved := cache.Stats()
 	if entries != 1 {
 		t.Errorf("Expected 1 entry, got %d", entries)
@@ -215,7 +215,7 @@ func TestOllama_CachingIntegration(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// Create context cache
 	cache := NewContextCache(5, 10*time.Minute)
 

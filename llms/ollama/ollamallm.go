@@ -50,7 +50,7 @@ func New(opts ...Option) (*LLM, error) {
 func (o *LLM) SupportsReasoning() bool {
 	// Check if the model supports reasoning based on model name patterns
 	model := strings.ToLower(o.options.model)
-	
+
 	// Ollama models that support reasoning/thinking:
 	// - deepseek-r1 models (DeepSeek reasoning models)
 	// - qwq models (Alibaba's QwQ reasoning models)
@@ -61,7 +61,7 @@ func (o *LLM) SupportsReasoning() bool {
 		strings.Contains(model, "thinking") {
 		return true
 	}
-	
+
 	// Future: could check model capabilities via Ollama API when available
 	return false
 }
@@ -81,7 +81,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	for _, opt := range options {
 		opt(&opts)
 	}
-	
+
 	// Check if context caching is enabled
 	var contextCache *ContextCache
 	if opts.Metadata != nil {
@@ -145,7 +145,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
-	
+
 	// Handle thinking mode if specified via metadata
 	if opts.Metadata != nil {
 		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
@@ -214,7 +214,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		"ThinkingContent": "", // Ollama doesn't separate thinking content
 		"ThinkingTokens":  0,  // Ollama doesn't track thinking tokens separately
 	}
-	
+
 	// If context caching is enabled, track cache usage
 	if contextCache != nil {
 		if cacheEntry, hit := contextCache.Get(messages); hit {
@@ -228,13 +228,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			genInfo["CacheHit"] = false
 		}
 	}
-	
+
 	// Note: Ollama may include thinking in the main content when Think mode is enabled
 	// Future versions may provide separate thinking content
 	if ollamaOptions.Think && o.SupportsReasoning() {
 		genInfo["ThinkingEnabled"] = true
 	}
-	
+
 	choices := []*llms.ContentChoice{
 		{
 			Content:        content,

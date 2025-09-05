@@ -14,7 +14,7 @@ func TestLLM(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	llm, err := New(ctx, 
+	llm, err := New(ctx,
 		WithAPIKey(os.Getenv("GOOGLE_API_KEY")),
 		WithDefaultModel("gemini-1.5-flash"),
 	)

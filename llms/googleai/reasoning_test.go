@@ -22,7 +22,7 @@ func TestGoogleAI_SupportsReasoning(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "Gemini 2.0 Pro supports reasoning", 
+			name:     "Gemini 2.0 Pro supports reasoning",
 			model:    "gemini-2.0-pro",
 			expected: true,
 		},
@@ -85,9 +85,9 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// Test with Gemini 2.0 Flash (reasoning model)
-	client, err := New(ctx, 
+	client, err := New(ctx,
 		WithAPIKey(apiKey),
 		WithDefaultModel("gemini-2.0-flash"),
 	)
@@ -135,7 +135,7 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 }
 
 func TestGoogleAI_CachingSupport(t *testing.T) {
-	apiKey := os.Getenv("GOOGLE_API_KEY") 
+	apiKey := os.Getenv("GOOGLE_API_KEY")
 	if apiKey == "" {
 		t.Skip("GOOGLE_API_KEY not set")
 	}
@@ -153,7 +153,7 @@ func TestGoogleAI_CachingSupport(t *testing.T) {
 	Always consider performance, security, and maintainability in your reviews.
 	` + strings.Repeat("This is padding text to ensure we have enough tokens for caching. ", 100)
 
-	cached, err := helper.CreateCachedContent(ctx, "gemini-2.0-flash", 
+	cached, err := helper.CreateCachedContent(ctx, "gemini-2.0-flash",
 		[]llms.MessageContent{
 			{
 				Role: llms.ChatMessageTypeSystem,
@@ -161,13 +161,17 @@ func TestGoogleAI_CachingSupport(t *testing.T) {
 					llms.TextPart(longContext),
 				},
 			},
-		}, 
+		},
 		5*time.Minute,
 	)
 	if err != nil {
 		t.Fatalf("Failed to create cached content: %v", err)
 	}
-	defer helper.DeleteCachedContent(ctx, cached.Name) // Clean up
+	defer func() {
+		if err := helper.DeleteCachedContent(ctx, cached.Name); err != nil {
+			t.Logf("Failed to delete cached content: %v", err)
+		}
+	}()
 
 	// Use the cached content in a request
 	client, err := New(ctx, WithAPIKey(apiKey))

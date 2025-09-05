@@ -22,7 +22,7 @@ func TestMockLLM(t *testing.T) {
 			},
 		},
 	}
-	
+
 	TestLLM(t, mock)
 }
 
@@ -32,7 +32,7 @@ func TestValidateLLM(t *testing.T) {
 	if err := ValidateLLM(nil); err == nil {
 		t.Error("ValidateLLM should fail with nil model")
 	}
-	
+
 	// Test with valid mock
 	mock := &MockLLM{
 		CallResponse: "OK",
@@ -44,7 +44,7 @@ func TestValidateLLM(t *testing.T) {
 			},
 		},
 	}
-	
+
 	if err := ValidateLLM(mock); err != nil {
 		t.Errorf("ValidateLLM failed with valid mock: %v", err)
 	}
@@ -56,11 +56,11 @@ func TestAnthropicIntegration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test")
 	}
-	
+
 	if os.Getenv("ANTHROPIC_API_KEY") == "" {
 		t.Skip("ANTHROPIC_API_KEY not set")
 	}
-	
+
 	// Import is handled in the actual test files for each provider
 }
 
@@ -68,10 +68,10 @@ func TestOpenAIIntegration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test")
 	}
-	
+
 	if os.Getenv("OPENAI_API_KEY") == "" {
 		t.Skip("OPENAI_API_KEY not set")
 	}
-	
+
 	// Import is handled in the actual test files for each provider
 }

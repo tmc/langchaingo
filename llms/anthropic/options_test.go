@@ -114,11 +114,11 @@ func TestWithBetaHeader(t *testing.T) {
 
 func TestMultipleBetaHeaders(t *testing.T) {
 	var opts llms.CallOptions
-	
+
 	// Apply multiple options
 	anthropic.WithPromptCaching()(&opts)
 	anthropic.WithExtendedOutput()(&opts)
-	
+
 	headers, ok := opts.Metadata["anthropic:beta_headers"].([]string)
 	if !ok {
 		t.Fatal("anthropic:beta_headers should be a []string")

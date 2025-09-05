@@ -37,7 +37,7 @@ func TestLLM(t *testing.T, model llms.Model) {
 	// Run core tests as subtests - these should always work
 	t.Run("Core", func(t *testing.T) {
 		t.Parallel()
-		
+
 		t.Run("Call", func(t *testing.T) {
 			t.Parallel()
 			testCall(t, model)
@@ -52,7 +52,7 @@ func TestLLM(t *testing.T, model llms.Model) {
 	// Discover and test capabilities
 	t.Run("Capabilities", func(t *testing.T) {
 		t.Parallel()
-		
+
 		// Test streaming if supported
 		if supportsStreaming(model) {
 			t.Run("Streaming", func(t *testing.T) {
@@ -249,7 +249,7 @@ func testCall(t *testing.T, model llms.Model) {
 	t.Helper()
 	ctx := context.Background()
 
-	result, err := model.Call(ctx, "Reply with 'OK' and nothing else", llms.WithMaxTokens(10))
+	result, err := llms.GenerateFromSinglePrompt(ctx, model, "Reply with 'OK' and nothing else", llms.WithMaxTokens(10))
 	if err != nil {
 		t.Fatalf("Call failed: %v", err)
 	}
@@ -274,7 +274,7 @@ func testCallWithContext(t *testing.T, tctx *testContext) {
 	}
 
 	opts := append([]llms.CallOption{llms.WithMaxTokens(10)}, tctx.options.CallOptions...)
-	result, err := tctx.model.Call(ctx, prompt, opts...)
+	result, err := llms.GenerateFromSinglePrompt(ctx, tctx.model, prompt, opts...)
 	if err != nil {
 		t.Fatalf("Call failed: %v", err)
 	}
@@ -372,7 +372,7 @@ func testStreaming(t *testing.T, model llms.Model) {
 
 	var chunks []string
 	for chunk := range stream {
-		if chunk.Choices != nil && len(chunk.Choices) > 0 {
+		if len(chunk.Choices) > 0 {
 			chunks = append(chunks, chunk.Choices[0].Content)
 		}
 	}
@@ -424,7 +424,7 @@ func testStreamingWithContext(t *testing.T, tctx *testContext) {
 
 	var chunks []string
 	for chunk := range stream {
-		if chunk.Choices != nil && len(chunk.Choices) > 0 {
+		if len(chunk.Choices) > 0 {
 			chunks = append(chunks, chunk.Choices[0].Content)
 		}
 	}
@@ -637,7 +637,7 @@ func ValidateLLM(model llms.Model) error {
 	ctx := context.Background()
 
 	// Try a simple call
-	_, err := model.Call(ctx, "test", llms.WithMaxTokens(1))
+	_, err := llms.GenerateFromSinglePrompt(ctx, model, "test", llms.WithMaxTokens(1))
 	if err != nil {
 		return fmt.Errorf("Call method failed: %w", err)
 	}

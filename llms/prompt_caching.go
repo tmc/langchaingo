@@ -27,7 +27,6 @@ func WithCacheControl(content ContentPart, control *CacheControl) CachedContent 
 	}
 }
 
-
 // WithPromptCaching adds cache control metadata to call options.
 // This is a generic option that can be used by any provider that supports caching.
 // Providers should check for this metadata and handle it appropriately.
