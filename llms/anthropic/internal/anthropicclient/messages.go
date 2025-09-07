@@ -52,7 +52,7 @@ type messagePayload struct {
 
 // ThinkingConfig represents the thinking configuration for Claude 3.7+
 type ThinkingConfig struct {
-	Type         string `json:"type"`           // "enabled" or "disabled"
+	Type         string `json:"type"` // "enabled" or "disabled"
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
 }
 
