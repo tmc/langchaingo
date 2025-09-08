@@ -1,9 +1,9 @@
 // Package milvus provides a vectorstore implementation for Milvus.
 //
 // Deprecated: This package uses github.com/milvus-io/milvus-sdk-go/v2 which has been
-// deprecated by the Milvus maintainers. For new projects, consider using the newer
-// Go SDK at https://github.com/milvus-io/milvus/tree/master/client or an alternative
-// vectorstore implementation.
+// archived by the Milvus maintainers. The new SDK is available at
+// github.com/milvus-io/milvus/client/v2. Migration to the new SDK is planned
+// while maintaining backward compatibility. See issue #1334 for tracking.
 package milvus
 
 import (
