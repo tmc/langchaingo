@@ -41,6 +41,7 @@ type options struct {
 	embeddingDimensions int
 
 	callbackHandler callbacks.Handler
+	reasoningEffort openaiclient.ReasoningEffort
 }
 
 // Option is a functional option for the OpenAI client.
@@ -55,8 +56,19 @@ type ResponseFormatJSONSchema = openaiclient.ResponseFormatJSONSchema
 // ResponseFormatJSONSchemaProperty is the JSON Schema property in structured output.
 type ResponseFormatJSONSchemaProperty = openaiclient.ResponseFormatJSONSchemaProperty
 
+// ReasoningEffort constrains effort on reasoning for reasoning models.
+type ReasoningEffort = openaiclient.ReasoningEffort
+
 // ResponseFormatJSON is the JSON response format.
 var ResponseFormatJSON = &ResponseFormat{Type: "json_object"} //nolint:gochecknoglobals
+
+// Reasoning effort constants
+const (
+	ReasoningEffortMinimal = ReasoningEffort(openaiclient.ReasoningEffortMinimal)
+	ReasoningEffortLow     = ReasoningEffort(openaiclient.ReasoningEffortLow)
+	ReasoningEffortMedium  = ReasoningEffort(openaiclient.ReasoningEffortMedium)
+	ReasoningEffortHigh    = ReasoningEffort(openaiclient.ReasoningEffortHigh)
+)
 
 // WithToken passes the OpenAI API token to the client. If not set, the token
 // is read from the OPENAI_API_KEY environment variable.
@@ -144,5 +156,14 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WithReasoningEffort constrains effort on reasoning for reasoning models.
+// Currently supported values are minimal, low, medium, and high.
+// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning.
+func WithReasoningEffort(reasoningEffort ReasoningEffort) Option {
+	return func(opts *options) {
+		opts.reasoningEffort = reasoningEffort
 	}
 }

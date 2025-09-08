@@ -17,6 +17,20 @@ const (
 	defaultChatModel = "gpt-3.5-turbo"
 )
 
+// ReasoningEffort constrains effort on reasoning for reasoning models.
+type ReasoningEffort string
+
+const (
+	// ReasoningEffortMinimal reduces reasoning effort to minimum level
+	ReasoningEffortMinimal ReasoningEffort = "minimal"
+	// ReasoningEffortLow uses low reasoning effort
+	ReasoningEffortLow ReasoningEffort = "low"
+	// ReasoningEffortMedium uses medium reasoning effort (default)
+	ReasoningEffortMedium ReasoningEffort = "medium"
+	// ReasoningEffortHigh uses high reasoning effort
+	ReasoningEffortHigh ReasoningEffort = "high"
+)
+
 var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
 
 type StreamOptions struct {
@@ -83,6 +97,11 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// ReasoningEffort constrains effort on reasoning for reasoning models.
+	// Currently supported values are minimal, low, medium, and high.
+	// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning.
+	ReasoningEffort ReasoningEffort `json:"reasoning_effort,omitempty"`
 }
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
