@@ -58,6 +58,12 @@ func (g *GoogleAI) GenerateContent(
 		opt(&opts)
 	}
 
+	// Update the tracked model if it was overridden
+	effectiveModel := opts.Model
+	if effectiveModel != "" && effectiveModel != g.model {
+		g.model = effectiveModel
+	}
+
 	model := g.client.GenerativeModel(opts.Model)
 	model.SetCandidateCount(int32(opts.CandidateCount))
 	model.SetMaxOutputTokens(int32(opts.MaxTokens))
@@ -65,6 +71,12 @@ func (g *GoogleAI) GenerateContent(
 	model.SetTopP(float32(opts.TopP))
 	model.SetTopK(int32(opts.TopK))
 	model.StopSequences = opts.StopWords
+
+	// Support for cached content (if provided through metadata)
+	// Note: This requires the cached content to be pre-created using Client.CreateCachedContent
+	if cachedContentName, ok := opts.Metadata["CachedContentName"].(string); ok && cachedContentName != "" {
+		model.CachedContentName = cachedContentName
+	}
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -162,7 +174,26 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 			metadata["input_tokens"] = usage.PromptTokenCount
 			metadata["output_tokens"] = usage.CandidatesTokenCount
 			metadata["total_tokens"] = usage.TotalTokenCount
+			// Standardized field names for cross-provider compatibility
+			metadata["PromptTokens"] = usage.PromptTokenCount
+			metadata["CompletionTokens"] = usage.CandidatesTokenCount
+			metadata["TotalTokens"] = usage.TotalTokenCount
+
+			// Cache-related token information (if available)
+			if usage.CachedContentTokenCount > 0 {
+				metadata["CachedTokens"] = usage.CachedContentTokenCount
+				metadata["CacheReadInputTokens"] = usage.CachedContentTokenCount // Anthropic compatibility
+				// Google AI includes cached tokens in the prompt count, calculate non-cached
+				metadata["NonCachedInputTokens"] = usage.PromptTokenCount - usage.CachedContentTokenCount
+			}
 		}
+
+		// Google AI doesn't separate thinking content like OpenAI o1, but we provide empty standardized fields
+		metadata["ThinkingContent"] = "" // Google models don't separate thinking content
+		metadata["ThinkingTokens"] = 0   // Google models don't track thinking tokens separately
+
+		// Note: Google AI's CachedContent requires pre-created cached content via API,
+		// not inline cache control like Anthropic. Use Client.CreateCachedContent() for caching.
 
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{

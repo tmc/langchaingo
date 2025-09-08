@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -24,7 +25,10 @@ type LLM struct {
 	options          options
 }
 
-var _ llms.Model = (*LLM)(nil)
+var (
+	_ llms.Model          = (*LLM)(nil)
+	_ llms.ReasoningModel = (*LLM)(nil)
+)
 
 // New creates a new ollama LLM implementation.
 func New(opts ...Option) (*LLM, error) {
@@ -41,6 +45,27 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{client: client, options: o}, nil
 }
 
+// SupportsReasoning implements the ReasoningModel interface.
+// Returns true if the current model supports reasoning/thinking.
+func (o *LLM) SupportsReasoning() bool {
+	// Check if the model supports reasoning based on model name patterns
+	model := strings.ToLower(o.options.model)
+
+	// Ollama models that support reasoning/thinking:
+	// - deepseek-r1 models (DeepSeek reasoning models)
+	// - qwq models (Alibaba's QwQ reasoning models)
+	// - Models with "reasoning" or "thinking" in the name
+	if strings.Contains(model, "deepseek-r1") ||
+		strings.Contains(model, "qwq") ||
+		strings.Contains(model, "reasoning") ||
+		strings.Contains(model, "thinking") {
+		return true
+	}
+
+	// Future: could check model capabilities via Ollama API when available
+	return false
+}
+
 // Call Implement the call interface for LLM.
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
@@ -55,6 +80,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
+	}
+
+	// Check if context caching is enabled
+	var contextCache *ContextCache
+	if opts.Metadata != nil {
+		if cache, ok := opts.Metadata["context_cache"].(*ContextCache); ok {
+			contextCache = cache
+		}
 	}
 
 	// Override LLM model if set as llms.CallOption
@@ -112,6 +145,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
+
+	// Handle thinking mode if specified via metadata
+	if opts.Metadata != nil {
+		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+			if config.Mode != llms.ThinkingModeNone && o.SupportsReasoning() {
+				// Enable thinking for models that support it
+				ollamaOptions.Think = true
+			}
+		}
+	}
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
 		Format:   format,
@@ -162,14 +205,40 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		content = resp.Message.Content
 	}
 
+	// Build generation info with standardized fields
+	genInfo := map[string]any{
+		"CompletionTokens": resp.EvalCount,
+		"PromptTokens":     resp.PromptEvalCount,
+		"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
+		// Add empty thinking fields for cross-provider compatibility
+		"ThinkingContent": "", // Ollama doesn't separate thinking content
+		"ThinkingTokens":  0,  // Ollama doesn't track thinking tokens separately
+	}
+
+	// If context caching is enabled, track cache usage
+	if contextCache != nil {
+		if cacheEntry, hit := contextCache.Get(messages); hit {
+			// Cache hit - we reused cached context
+			genInfo["CachedTokens"] = cacheEntry.ContextTokens
+			genInfo["CacheHit"] = true
+		} else {
+			// Cache miss - store for future use
+			contextCache.Put(messages, resp.PromptEvalCount)
+			genInfo["CachedTokens"] = 0
+			genInfo["CacheHit"] = false
+		}
+	}
+
+	// Note: Ollama may include thinking in the main content when Think mode is enabled
+	// Future versions may provide separate thinking content
+	if ollamaOptions.Think && o.SupportsReasoning() {
+		genInfo["ThinkingEnabled"] = true
+	}
+
 	choices := []*llms.ContentChoice{
 		{
-			Content: content,
-			GenerationInfo: map[string]any{
-				"CompletionTokens": resp.EvalCount,
-				"PromptTokens":     resp.PromptEvalCount,
-				"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
-			},
+			Content:        content,
+			GenerationInfo: genInfo,
 		},
 	}
 
@@ -249,6 +318,16 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.RepeatPenalty = float32(opts.RepetitionPenalty)
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
+
+	// Extract thinking configuration for models that support it
+	if opts.Metadata != nil {
+		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+			// Enable thinking mode if not explicitly disabled
+			if config.Mode != llms.ThinkingModeNone {
+				ollamaOptions.Think = true
+			}
+		}
+	}
 
 	return ollamaOptions
 }
