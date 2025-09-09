@@ -83,6 +83,9 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// StreamingSkipLines is a list of lines to skip in the streaming response.
+	StreamingSkipLines []string `json:"streaming_skip_lines,omitempty"`
 }
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
@@ -574,6 +577,20 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if data == "[DONE]" {
 				return
 			}
+
+			skipped := false
+			for _, skip := range payload.StreamingSkipLines {
+				if strings.EqualFold(skip, data) {
+					// Skip this line
+					skipped = true
+					break
+				}
+			}
+
+			if skipped {
+				continue
+			}
+
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
