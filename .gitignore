@@ -32,3 +32,7 @@ service-account.json
 
 embeddings/cybertron/models/*
 examples/cybertron-embedding-example/models/*
+
+# CLI binary
+/langchain
+/cmd/langchain/langchain
