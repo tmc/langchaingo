@@ -22,14 +22,14 @@ func main() {
 	}
 
 	// if _, err := llm.GenerateContent(ctx, content,
-	// 	llms.WithMaxTokens(104),
+	// 	llms.WithMaxTokens(1024),
 	// 	llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 	// 		fmt.Print(string(chunk))
 	// 		return nil
 	// 	})); err != nil {
 	// 	log.Fatal(err)
 	// }
-	r, err := llm.GenerateContent(ctx, content, llms.WithMaxTokens(104))
+	r, err := llm.GenerateContent(ctx, content, llms.WithMaxTokens(1024))
 	if err != nil {
 		log.Fatal(err)
 	}
