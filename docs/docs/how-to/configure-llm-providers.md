@@ -96,12 +96,15 @@ llm, err := googleai.New(
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/vertexai"
+import (
+    "github.com/tmc/langchaingo/llms/googleai"
+    "github.com/tmc/langchaingo/llms/googleai/vertex"
+)
 
-llm, err := vertexai.New(
+llm, err := vertex.New(
     context.Background(),
-    vertexai.WithProjectID("your-project-id"),
-    vertexai.WithLocation("us-central1"),
+    googleai.WithCloudProject("your-project-id"),
+    googleai.WithCloudLocation("us-central1"),
 )
 ```
 
