@@ -1,60 +1,60 @@
-# LangChainGo Features
+# LangChainGo 功能特性
 
-This page provides a list of features and their status indicators for LangChainGo, a natural language processing library built in Golang. Our main focus at the moment is to reach parity with the Python version of LangChain.
+本页面列出了 LangChainGo (一个用 Golang 构建的自然语言处理库) 的功能及其状态指示。我们目前的主要目标是与 Python 版本的 LangChain 功能保持一致。
 
-Please note that this page lists the current state of the LangChainGo project as of January 2025, and some features may still be under development or planned for future releases. The Python LangChain ecosystem has evolved significantly with LangChain Expression Language (LCEL), LangGraph for complex workflows, and modular architecture improvements. If you are interested in contributing to a specific integration or feature, feel free to choose from the list of features that are not yet done and let us know so we can help you get started.
+请注意，本页面列出的是截至 2025 年 1 月 LangChainGo 项目的当前状态，部分功能可能仍在开发中或计划在未来版本中发布。Python LangChain 生态系统已经通过 LangChain 表达式语言 (LCEL)、用于复杂工作流的 LangGraph 以及模块化架构的改进而显著发展。如果您有兴趣为特定的集成或功能做出贡献，请随时从尚未完成的功能列表中选择，并告知我们，以便我们帮助您开始。
 
-## Prompt Templates
-| Feature                            | Status |
+## 提示模板 (Prompt Templates)
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| Prompt Templates                   | ✅     |
-| Few Shot Prompt Template           | ✅     |
-| Output Parsers                     | ✅     |
-| Example Selectors                  | ✅     |
+| 提示模板 (Prompt Templates)        | ✅     |
+| 少样本提示模板 (Few Shot Prompt Template) | ✅     |
+| 输出解析器 (Output Parsers)          | ✅     |
+| 示例选择器 (Example Selectors)     | ✅     |
 
 
-## Text Splitters
+## 文本分割器 (Text Splitters)
 
-| Feature                           | Status |
+| 功能特性                           | 状态 |
 | --------------------------------- | ------ |
-| Character Text Splitter           | ✅     |
-| Recursive Character Text Splitter | ✅     |
-| Markdown Text Splitter            | ✅     |
+| 字符文本分割器 (Character Text Splitter) | ✅     |
+| 递归字符文本分割器 (Recursive Character Text Splitter) | ✅     |
+| Markdown 文本分割器 (Markdown Text Splitter) | ✅     |
 
-## Chains
+## 链 (Chains)
 
-| Feature                                | Status |
+| 功能特性                                | 状态 |
 | -------------------------------------- | ------ |
-| LLM Chain                              | ✅     |
-| Stuff Combine Documents Chain          | ✅     |
-| Retrieval QA Chain                     | ✅     |
-| Map Reduce Combine Documents Chain     | ✅     |
-| Refine Combine Documents Chain         | ✅     |
-| Map Rerank Combine Documents Chain     | ✅     |
-| Chat Vector DB Chain                   | ❌     |
-| Vector DB QA Chain                     | ❌     |
-| Analyze Document Chain                 | ❌     |
-| Question Answering Chains              | ✅     |
-| Summarization Chains                   | ✅     |
-| Question Answering With Sources Chains | ❌     |
-| SQL Database Chain                     | ✅     |
-| API Chain                              | ✅     |
-| Transformation Chain                   | ✅     |
-| Constitutional Chain                   | ✅     |
-| Conversational Chain                   | ✅     |
-| Graph QA Chain                         | ❌     |
-| HyDE Chain                             | ❌     |
-| LLM Bash Chain                         | ❌     |
-| LLM Math Chain                         | ✅     |
-| PAL Chain                              | ❌     |
-| LLM Requests Chain                     | ❌     |
-| Moderation Chain                       | ❌     |
-| Sequential Chain                       | ✅     |
-| Simple Sequential Chain                | ✅     |
+| LLM 链 (LLM Chain)                     | ✅     |
+| Stuff 合并文档链 (Stuff Combine Documents Chain) | ✅     |
+| 检索问答链 (Retrieval QA Chain)          | ✅     |
+| Map Reduce 合并文档链 (Map Reduce Combine Documents Chain) | ✅     |
+| Refine 合并文档链 (Refine Combine Documents Chain) | ✅     |
+| Map Rerank 合并文档链 (Map Rerank Combine Documents Chain) | ✅     |
+| 聊天向量数据库链 (Chat Vector DB Chain)    | ❌     |
+| 向量数据库问答链 (Vector DB QA Chain)    | ❌     |
+| 分析文档链 (Analyze Document Chain)      | ❌     |
+| 问答链 (Question Answering Chains)     | ✅     |
+| 摘要链 (Summarization Chains)          | ✅     |
+| 带来源的问答链 (Question Answering With Sources Chains) | ❌     |
+| SQL 数据库链 (SQL Database Chain)        | ✅     |
+| API 链 (API Chain)                     | ✅     |
+| 转换链 (Transformation Chain)          | ✅     |
+| 宪法链 (Constitutional Chain)          | ✅     |
+| 对话链 (Conversational Chain)          | ✅     |
+| 图问答链 (Graph QA Chain)                | ❌     |
+| HyDE 链 (HyDE Chain)                   | ❌     |
+| LLM Bash 链 (LLM Bash Chain)           | ❌     |
+| LLM 数学链 (LLM Math Chain)            | ✅     |
+| PAL 链 (PAL Chain)                     | ❌     |
+| LLM 请求链 (LLM Requests Chain)        | ❌     |
+| 审查链 (Moderation Chain)              | ❌     |
+| 顺序链 (Sequential Chain)              | ✅     |
+| 简单顺序链 (Simple Sequential Chain)   | ✅     |
 
-## Agents
+## 代理 (Agents)
 
-| Feature                             | Status |
+| 功能特性                             | 状态 |
 | ----------------------------------- | ------ |
 | zero-shot-react-description         | ✅     |
 | chat-zero-shot-react-description    | ❌     |
@@ -63,85 +63,85 @@ Please note that this page lists the current state of the LangChainGo project as
 | conversational-react-description    | ✅     |
 | chat-conversational-react-description | ❌   |
 
-## Memory
+## 记忆 (Memory)
 
-| Feature                     | Status |
+| 功能特性                     | 状态 |
 | ----------------------------| ------ |
-| Buffer Memory               | ✅     |
-| Buffer Window Memory        | ✅     |
-| Summary Memory              | ❌     |
-| Entity Memory               | ❌     |
-| Summary Buffer Memory       | ❌     |
-| Knowledge Graph Memory      | ❌     |
+| 缓冲区记忆 (Buffer Memory)        | ✅     |
+| 缓冲区窗口记忆 (Buffer Window Memory) | ✅     |
+| 摘要记忆 (Summary Memory)         | ❌     |
+| 实体记忆 (Entity Memory)          | ❌     |
+| 摘要缓冲区记忆 (Summary Buffer Memory) | ❌     |
+| 知识图谱记忆 (Knowledge Graph Memory) | ❌     |
 
-## Output Parsers
+## 输出解析器 (Output Parsers)
 
-| Feature                      | Status |
+| 功能特性                      | 状态 |
 | ----------------------------| ------ |
-| Simple                      | ✅     |
-| Structured                  | ✅     |
-| Boolean                     | ✅     |
-| Combining Parsers           | ✅     |
-| Regex                       | ✅     |
-| Regex Dictionary            | ✅     |
-| Comma separated list        | ✅     |
-| Parser fixer                | ❌     |
-| Retry                       | ❌     |
-| Guardrail                   | ❌     |
+| 简单解析器 (Simple)             | ✅     |
+| 结构化解析器 (Structured)       | ✅     |
+| 布尔值解析器 (Boolean)          | ✅     |
+| 组合解析器 (Combining Parsers)  | ✅     |
+| 正则表达式解析器 (Regex)        | ✅     |
+| 正则表达式字典解析器 (Regex Dictionary) | ✅     |
+| 逗号分隔列表解析器 (Comma separated list) | ✅     |
+| 解析器修复器 (Parser fixer)     | ❌     |
+| 重试解析器 (Retry)              | ❌     |
+| 防护栏解析器 (Guardrail)        | ❌     |
 
-## Document Loaders
+## 文档加载器 (Document Loaders)
 
-| Feature                         | Status |
+| 功能特性                         | 状态 |
 |---------------------------------|--------|
 | AssemblyAI                      | ✅      |
-| Blob Loaders                    | ❌      |
+| Blob 加载器 (Blob Loaders)        | ❌      |
 | Airbyte JSON                    | ❌      |
-| Apify Dataset                   | ❌      |
-| Arxiv Document Loader           | ❌      |
+| Apify 数据集 (Apify Dataset)      | ❌      |
+| Arxiv 文档加载器 (Arxiv Document Loader) | ❌      |
 | Azlyrics                        | ❌      |
-| Azure Blob Storage              | ❌      |
+| Azure Blob 存储 (Azure Blob Storage) | ❌      |
 | BigQuery                        | ❌      |
 | Bilibili                        | ❌      |
 | Blackboard                      | ❌      |
-| Blockchain                      | ❌      |
+| 区块链 (Blockchain)             | ❌      |
 | ChatGPT                         | ❌      |
 | College Confidential            | ❌      |
 | Confluence                      | ❌      |
 | CoNLL-U                         | ❌      |
-| CSV Loader                      | ✅      |
-| Dataframe                       | ❌      |
+| CSV 加载器 (CSV Loader)           | ✅      |
+| 数据帧 (Dataframe)                | ❌      |
 | Diffbot                         | ❌      |
-| Directory                       | ❌      |
+| 目录 (Directory)                  | ❌      |
 | Discord                         | ❌      |
-| DuckDB Loader                   | ❌      |
-| Email                           | ❌      |
+| DuckDB 加载器 (DuckDB Loader)     | ❌      |
+| 电子邮件 (Email)                  | ❌      |
 | EPUB                            | ❌      |
 | Evernote                        | ❌      |
-| Facebook Chat                   | ❌      |
+| Facebook 聊天 (Facebook Chat)   | ❌      |
 | Figma                           | ❌      |
-| GCS Directory                   | ❌      |
-| GCS File                        | ❌      |
+| GCS 目录 (GCS Directory)          | ❌      |
+| GCS 文件 (GCS File)             | ❌      |
 | Git                             | ❌      |
 | Gitbook                         | ❌      |
 | Google Drive                    | ❌      |
-| Gutenberg Books                 | ❌      |
-| HN                              | ❌      |
+| 古腾堡图书 (Gutenberg Books)      | ❌      |
+| HN (Hacker News)                | ❌      |
 | HTML                            | ✅      |
-| HTML BS                         | ❌      |
-| Hugging Face Dataset            | ❌      |
+| HTML BS (Beautiful Soup)        | ❌      |
+| Hugging Face 数据集 (Hugging Face Dataset) | ❌      |
 | iFixit                          | ❌      |
-| Image                           | ❌      |
-| Image Captions                  | ❌      |
+| 图像 (Image)                      | ❌      |
+| 图像描述 (Image Captions)       | ❌      |
 | IMSDb                           | ❌      |
 | Markdown                        | ✅      |
 | MediaWiki XML                   | ❌      |
 | Modern Treasury                 | ❌      |
-| Notebook                        | ❌      |
+| Notebook (Jupyter)              | ❌      |
 | Notion                          | ✅      |
-| Notion Database                 | ❌      |
+| Notion 数据库 (Notion Database)   | ❌      |
 | Obsidian                        | ❌      |
 | OneDrive                        | ❌      |
-| OneDrive File                   | ❌      |
+| OneDrive 文件 (OneDrive File)   | ❌      |
 | PDF                             | ✅      |
 | PowerPoint                      | ❌      |
 | Python                          | ❌      |
@@ -149,64 +149,64 @@ Please note that this page lists the current state of the LangChainGo project as
 | Reddit                          | ❌      |
 | Roam                            | ❌      |
 | RTF                             | ❌      |
-| S3 Directory                    | ❌      |
-| S3 File                         | ❌      |
+| S3 目录 (S3 Directory)          | ❌      |
+| S3 文件 (S3 File)               | ❌      |
 | Sitemap                         | ❌      |
-| Slack Directory                 | ❌      |
+| Slack 目录 (Slack Directory)    | ❌      |
 | Spreedly                        | ❌      |
-| SRT                             | ❌      |
+| SRT (字幕格式)                    | ❌      |
 | Stripe                          | ❌      |
 | Telegram                        | ❌      |
-| Text                            | ✅      |
+| 文本 (Text)                       | ✅      |
 | TOML                            | ❌      |
 | Twitter                         | ❌      |
-| Unstructured                    | ❌      |
+| Unstructured (非结构化数据)       | ❌      |
 | URL                             | ❌      |
 | URL Playwright                  | ❌      |
 | URL Selenium                    | ❌      |
-| Web Base                        | ❌      |
+| Web Base (网页基础加载器)         | ❌      |
 | WhatsApp                        | ❌      |
-| Word Document                   | ❌      |
+| Word 文档 (Word Document)       | ❌      |
 | YouTube                         | ❌      |
 
-## Modern LangChain Features (Python v0.3+)
+## 现代 LangChain 功能 (Python v0.3+)
 
-These are newer features from LangChain Python that represent the current direction of the framework:
+这些是 LangChain Python 中较新的功能，代表了该框架当前的发展方向：
 
-| Feature                            | Go Status | Notes |
+| 功能特性                            | Go 状态 | 说明 |
 |------------------------------------|-----------|-------|
-| LangChain Expression Language (LCEL) | ❌      | Declarative chain composition with optimized execution |
-| LangGraph Integration              | ❌      | Complex workflows with state management and branching |
-| Async/Streaming Support            | ✅      | Partial - Basic async support available |
-| Modular Architecture (langchain-core) | ❌  | Separated core abstractions and integrations |
-| Production Memory Management       | ❌      | ChatMessageHistory and long-term memory |
-| Enhanced Agent Framework           | ❌      | Tool calling and multi-agent orchestration |
-| Vector Store RAG Patterns          | ✅      | Partial - Basic RAG supported |
-| Structured Output Parsing          | ✅      | JSON, XML, YAML parsing available |
+| LangChain 表达式语言 (LCEL)       | ❌      | 声明式链组合与优化执行 |
+| LangGraph 集成                     | ❌      | 具有状态管理和分支的复杂工作流 |
+| 异步/流式支持 (Async/Streaming Support) | ✅      | 部分 - 提供基本异步支持 |
+| 模块化架构 (langchain-core)       | ❌  | 分离的核心抽象和集成 |
+| 生产级记忆管理 (Production Memory Management) | ❌      | ChatMessageHistory 和长期记忆 |
+| 增强型代理框架 (Enhanced Agent Framework) | ❌      | 工具调用和多代理编排 |
+| 向量存储 RAG 模式 (Vector Store RAG Patterns) | ✅      | 部分 - 支持基本 RAG |
+| 结构化输出解析 (Structured Output Parsing) | ✅      | 提供 JSON、XML、YAML 解析 |
 
-## Vector Stores
+## 向量存储 (Vector Stores)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
 | AlloyDB (PostgreSQL + pgvector)    | ✅     |
-| Azure AI Search                    | ✅     |
-| AWS Bedrock Knowledge Bases        | ✅     |
+| Azure AI 搜索 (Azure AI Search)    | ✅     |
+| AWS Bedrock 知识库 (AWS Bedrock Knowledge Bases) | ✅     |
 | Chroma                             | ✅     |
 | Cloud SQL (PostgreSQL + pgvector)  | ✅     |
 | Milvus                             | ✅     |
-| MongoDB Atlas Vector Search        | ✅     |
+| MongoDB Atlas 向量搜索 (MongoDB Atlas Vector Search) | ✅     |
 | OpenSearch                         | ✅     |
 | PGVector (PostgreSQL)              | ✅     |
 | Pinecone                           | ✅     |
 | Qdrant                             | ✅     |
-| Redis Vector                       | ✅     |
+| Redis 向量 (Redis Vector)          | ✅     |
 | Weaviate                           | ✅     |
 | FAISS                              | ❌     |
 | Elastic Search                     | ❌     |
 
-## LLM Providers
+## LLM 提供商 (LLM Providers)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
 | OpenAI                             | ✅     |
 | Anthropic (Claude)                 | ✅     |
@@ -218,105 +218,105 @@ These are newer features from LangChain Python that represent the current direct
 | Hugging Face                       | ✅     |
 | Ollama                             | ✅     |
 | LlamaFile                          | ✅     |
-| Local LLM                          | ✅     |
+| 本地 LLM (Local LLM)               | ✅     |
 | Groq                               | ✅     |
 | WatsonX                            | ✅     |
-| Ernie (Baidu)                      | ✅     |
+| Ernie (百度文心)                   | ✅     |
 | Cloudflare Workers AI              | ✅     |
 | Maritaca AI                        | ✅     |
 | NVIDIA                             | ✅     |
 | Perplexity                         | ✅     |
 | DeepSeek                           | ✅     |
-| Fake LLM (for testing)             | ✅     |
+| 伪 LLM (Fake LLM, 用于测试)        | ✅     |
 
-## Embeddings
+## 嵌入 (Embeddings)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
 | OpenAI                             | ✅     |
 | AWS Bedrock                        | ✅     |
 | Google Vertex AI                   | ✅     |
 | Hugging Face                       | ✅     |
-| Cybertron (local)                  | ✅     |
+| Cybertron (本地)                   | ✅     |
 | Jina AI                            | ✅     |
 | VoyageAI                           | ✅     |
 | Mistral                            | ✅     |
 | Cohere                             | ❌     |
 | Azure OpenAI                       | ❌     |
 
-## Tools
+## 工具 (Tools)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| Calculator                         | ✅     |
-| DuckDuckGo Search                  | ✅     |
+| 计算器 (Calculator)                 | ✅     |
+| DuckDuckGo 搜索 (DuckDuckGo Search) | ✅     |
 | SerpAPI                            | ✅     |
-| Wikipedia                          | ✅     |
-| Web Scraper                        | ✅     |
-| SQL Database                       | ✅     |
+| 维基百科 (Wikipedia)                | ✅     |
+| 网页抓取器 (Web Scraper)            | ✅     |
+| SQL 数据库 (SQL Database)           | ✅     |
 | Zapier                             | ✅     |
-| Metaphor Search                    | ✅     |
-| Perplexity Search                  | ✅     |
+| Metaphor 搜索 (Metaphor Search)    | ✅     |
+| Perplexity 搜索 (Perplexity Search)| ✅     |
 | Python REPL                        | ❌     |
 | Bash                               | ❌     |
-| File System                        | ❌     |
-| Human Tool                         | ❌     |
+| 文件系统 (File System)              | ❌     |
+| 人工工具 (Human Tool)               | ❌     |
 
-## Callbacks
+## 回调 (Callbacks)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| Basic Callbacks                    | ✅     |
-| Streaming Callbacks                | ✅     |
-| Log Callbacks                      | ✅     |
-| Combining Callbacks                | ✅     |
-| Agent Final Stream                 | ✅     |
-| Custom Callbacks                   | ✅     |
-| LangSmith Integration              | ❌     |
-| Wandb Integration                  | ❌     |
-| MLflow Integration                 | ❌     |
+| 基本回调 (Basic Callbacks)          | ✅     |
+| 流式回调 (Streaming Callbacks)      | ✅     |
+| 日志回调 (Log Callbacks)            | ✅     |
+| 组合回调 (Combining Callbacks)      | ✅     |
+| 代理最终流 (Agent Final Stream)     | ✅     |
+| 自定义回调 (Custom Callbacks)       | ✅     |
+| LangSmith 集成                     | ❌     |
+| Wandb 集成                         | ❌     |
+| MLflow 集成                        | ❌     |
 
-## Chat Message History
+## 聊天消息历史 (Chat Message History)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| In-Memory History                  | ✅     |
-| SQLite3 History                    | ✅     |
-| MongoDB History                    | ✅     |
-| AlloyDB History                    | ✅     |
-| Cloud SQL History                  | ✅     |
-| Zep Memory                         | ✅     |
-| Redis History                      | ❌     |
-| DynamoDB History                   | ❌     |
-| Cassandra History                  | ❌     |
+| 内存历史 (In-Memory History)        | ✅     |
+| SQLite3 历史 (SQLite3 History)    | ✅     |
+| MongoDB 历史 (MongoDB History)      | ✅     |
+| AlloyDB 历史 (AlloyDB History)    | ✅     |
+| Cloud SQL 历史 (Cloud SQL History)| ✅     |
+| Zep 记忆 (Zep Memory)               | ✅     |
+| Redis 历史 (Redis History)        | ❌     |
+| DynamoDB 历史 (DynamoDB History)  | ❌     |
+| Cassandra 历史 (Cassandra History)| ❌     |
 
-## Retrievers
+## 检索器 (Retrievers)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| Vector Store Retriever             | ✅     |
-| Contextual Compression             | ❌     |
-| Multi Query Retriever              | ❌     |
-| Parent Document Retriever          | ❌     |
-| Self Query Retriever               | ❌     |
-| Time Weighted Retriever            | ❌     |
-| Ensemble Retriever                 | ❌     |
+| 向量存储检索器 (Vector Store Retriever) | ✅     |
+| 上下文压缩 (Contextual Compression) | ❌     |
+| 多查询检索器 (Multi Query Retriever)| ❌     |
+| 父文档检索器 (Parent Document Retriever) | ❌     |
+| 自查询检索器 (Self Query Retriever)| ❌     |
+| 时间加权检索器 (Time Weighted Retriever) | ❌     |
+| 集成检索器 (Ensemble Retriever)     | ❌     |
 
-## Experimental Features
+## 实验性功能 (Experimental Features)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| Experimental Package               | ✅     |
-| Community Contributions            | ✅     |
+| 实验性包 (Experimental Package)     | ✅     |
+| 社区贡献 (Community Contributions)| ✅     |
 
-## Additional Components
+## 附加组件 (Additional Components)
 
-| Feature                            | Status |
+| 功能特性                            | 状态 |
 |------------------------------------|--------|
-| JSON Schema Support                | ✅     |
-| HTTP Utilities                     | ✅     |
-| Image Utilities                    | ✅     |
-| Caching (LLM responses)            | ✅     |
-| Token Counting                     | ✅     |
-| Async Support                      | ✅     |
-| Streaming Support                  | ✅     |
+| JSON Schema 支持                   | ✅     |
+| HTTP 工具 (HTTP Utilities)        | ✅     |
+| 图像工具 (Image Utilities)        | ✅     |
+| 缓存 (LLM 响应) (Caching (LLM responses)) | ✅     |
+| Token 计数 (Token Counting)       | ✅     |
+| 异步支持 (Async Support)            | ✅     |
+| 流式支持 (Streaming Support)        | ✅     |

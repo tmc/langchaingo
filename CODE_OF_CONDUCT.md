@@ -1,69 +1,43 @@
-# Code of Conduct - langchaingo
+# langchaingo 行为准则
 
-## Our Pledge
+## 我们的承诺
 
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to make participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, sex characteristics, gender identity and expression,
-level of experience, education, socio-economic status, nationality, personal
-appearance, race, religion, or sexual identity and orientation.
+为了营造一个开放和热情的环境，我们作为贡献者和维护者承诺，使参与我们的项目和社区成为每个人都免受骚扰的体验，无论其年龄、体型、残疾、种族、性别特征、性别认同和表达、经验水平、教育程度、社会经济地位、国籍、个人外貌、种族、宗教或性认同和取向如何。
 
-## Our Standards
+## 我们的标准
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+有助于为我们的社区创造积极环境的行为示例包括：
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the
-  overall community
+* 对他人表现出同情和善意
+* 尊重不同的意见、观点和经历
+* 给予并优雅地接受建设性的反馈
+* 对我们的错误承担责任并向受影响的人道歉，并从中吸取教训
+* 关注的不仅是我们个人的最佳利益，更是整个社区的最佳利益
 
-Examples of unacceptable behavior include:
+不可接受的行为示例包括：
 
-* The use of sexualized language or imagery, and sexual attention or
-  advances
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email
-  address, without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+* 使用性暗示的语言或图像，以及性关注或挑逗
+* 恶意挑衅、侮辱性或贬损性评论，以及人身或政治攻击
+* 公开或私下的骚扰行为
+* 未经明确许可发布他人的私人信息，例如实际地址或电子邮件地址
+* 其他在专业场合可以被合理地认为不恰当的行为
 
-## Our Responsibilities
+## 我们的责任
 
-Project maintainers are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
+项目维护者负责阐明和执行我们可接受行为的标准，并将对任何不可接受行为的实例采取适当且公平的纠正措施。
 
-Project maintainers have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, or to ban
-temporarily or permanently any contributor for other behaviors that they deem
-inappropriate, threatening, offensive, or harmful.
+项目维护者有权利和责任删除、编辑或拒绝不符合本行为准则的评论、提交、代码、维基编辑、问题和其他贡献，或者暂时或永久禁止任何他们认为行为不当、具有威胁性、冒犯性或有害的贡献者。
 
-## Scope
+## 适用范围
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+本行为准则适用于所有社区空间，也适用于个人在公共场所正式代表社区的情况。代表我们社区的示例包括使用官方电子邮件地址、通过官方社交媒体帐户发帖，或作为指定代表出席线上或线下活动。
 
-## Enforcement
+## 执行
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at <travis.cline@gmail.com>.
-All complaints will be reviewed and investigated promptly and fairly.
+如遇辱骂、骚扰或其他不可接受的行为，可向负责执行的社区负责人报告：<travis.cline@gmail.com>。所有投诉都将得到及时、公正的审查和调查。
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+所有社区负责人都必须尊重任何事件报告者的隐私和安全。
 
-## Attribution
+## 来源
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://contributor-covenant.org/), version
-[1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md) and
-[2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md).
+本行为准则改编自 [贡献者契约 (Contributor Covenant)](https://contributor-covenant.org/) 的 [1.4 版本](https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md) 和 [2.0 版本](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md)。

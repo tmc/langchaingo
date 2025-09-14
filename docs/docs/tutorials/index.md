@@ -1,47 +1,47 @@
-# Tutorials
+# 教程
 
-Welcome to the LangChainGo tutorials! These step-by-step guides help you build complete applications using LangChainGo.
+欢迎来到 LangChainGo 教程！这些分步指南帮助您使用 LangChainGo 构建完整的应用程序。
 
-## Learning path
+## 学习路径
 
-Follow these tutorials in order to progressively learn LangChainGo:
+按顺序学习这些教程，逐步掌握 LangChainGo：
 
-### 1. Foundation applications
-- [Building a simple chat application](./basic-chat-app) - Learn the basics with conversation memory
-- [AI Code Reviewer](./code-reviewer) - Analyze Go code for bugs, style, and performance issues
-- [Intelligent Log Analyzer](./log-analyzer) - Parse and analyze application logs with AI insights
+### 1. 基础应用程序
+- [构建简单的聊天应用程序](./basic-chat-app) - 通过对话内存学习基础知识
+- [AI 代码审查器](./code-reviewer) - 分析 Go 代码的错误、风格和性能问题
+- [智能日志分析器](./log-analyzer) - 使用 AI 洞察解析和分析应用程序日志
 
-### 2. Advanced applications  
-- [Smart documentation generator](./smart-documentation) - Auto-generate API docs from your codebase
+### 2. 高级应用程序
+- [智能文档生成器](./smart-documentation) - 从您的代码库自动生成 API 文档
 
-### 3. Coming soon
+### 3. 即将推出
 
-Want to help? Check our [documentation contribution guide](/docs/contributing/documentation) to write these tutorials:
+想要帮助吗？查看我们的[文档贡献指南](/docs/contributing/documentation)来编写这些教程：
 
-- Building a RAG (retrieval-augmented generation) system
-- Creating an agent with tools  
-- Multi-modal applications
-- Deploying LangChainGo applications
-- Performance optimization
-- Error handling and monitoring
+- 构建 RAG（检索增强生成）系统
+- 创建带工具的代理
+- 多模态应用程序
+- 部署 LangChainGo 应用程序
+- 性能优化
+- 错误处理和监控
 
-## Prerequisites
+## 前提条件
 
-Before starting these tutorials, ensure you have:
+在开始这些教程之前，请确保您具备：
 
-- Go 1.21 or later installed
-- An API key for at least one LLM provider (OpenAI, Anthropic, etc.)
-- Basic familiarity with Go programming
+- 安装了 Go 1.21 或更高版本
+- 至少一个 LLM 提供商的 API 密钥（OpenAI、Anthropic 等）
+- 对 Go 编程的基本熟悉
 
-## What you'll learn
+## 您将学到什么
 
-These tutorials go beyond simple chatbots to show practical applications:
+这些教程超越了简单的聊天机器人，展示了实际应用：
 
-- **Code analysis**: Build tools that understand and improve code quality
-- **Log intelligence**: Extract insights from application logs and detect anomalies  
-- **Documentation automation**: Generate and maintain technical documentation
-- **Core patterns**: Master LangChainGo's interfaces and Go idioms
-- **Production skills**: Deploy, monitor, and scale AI-powered applications
-- **Integration techniques**: Connect with external tools and services
+- **代码分析**：构建理解和改进代码质量的工具
+- **日志智能**：从应用程序日志中提取洞察并检测异常
+- **文档自动化**：生成和维护技术文档
+- **核心模式**：掌握 LangChainGo 的接口和 Go 惯用法
+- **生产技能**：部署、监控和扩展 AI 驱动的应用程序
+- **集成技术**：与外部工具和服务连接
 
-Let's get started with your first LangChainGo application!
+让我们开始您的第一个 LangChainGo 应用程序！
