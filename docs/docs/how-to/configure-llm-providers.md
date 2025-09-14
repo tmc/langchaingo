@@ -69,7 +69,10 @@ llm, err := anthropic.New(
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/googleai"
+import (
+    "context"
+    "github.com/tmc/langchaingo/llms/googleai"
+)
 
 // Using environment variable GOOGLE_API_KEY
 llm, err := googleai.New(context.Background())
@@ -97,6 +100,7 @@ llm, err := googleai.New(
 
 ```go
 import (
+    "context"
     "github.com/tmc/langchaingo/llms/googleai"
     "github.com/tmc/langchaingo/llms/googleai/vertex"
 )
@@ -111,11 +115,17 @@ llm, err := vertex.New(
 ### With service account
 
 ```go
-llm, err := vertexai.New(
+import (
+    "context"
+    "github.com/tmc/langchaingo/llms/googleai"
+    "github.com/tmc/langchaingo/llms/googleai/vertex"
+)
+
+llm, err := vertex.New(
     context.Background(),
-    vertexai.WithProjectID("your-project-id"),
-    vertexai.WithLocation("us-central1"),
-    vertexai.WithCredentialsFile("path/to/service-account.json"),
+    googleai.WithCloudProject("your-project-id"),
+    googleai.WithCloudLocation("us-central1"),
+    googleai.WithCredentialsFile("path/to/service-account.json"),
 )
 ```
 
