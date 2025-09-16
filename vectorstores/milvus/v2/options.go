@@ -226,7 +226,7 @@ func convertV1IndexToV2(v1Index oldentity.Index) index.Index {
 		return index.NewIvfFlatIndex(defaultMetric, nlist)
 	case oldentity.HNSW:
 		// Extract M and efConstruction parameters
-		m := 16           // default
+		m := 16               // default
 		efConstruction := 200 // default
 		if mVal, ok := params["M"]; ok {
 			if mInt, err := strconv.Atoi(mVal); err == nil {

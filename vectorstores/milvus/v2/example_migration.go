@@ -263,7 +263,7 @@ func exampleMixedUsage(ctx context.Context, embedder *embeddings.EmbedderImpl) e
 	store, err := newmilvus.New(ctx, oldConfig, // v1 config automatically converted
 		newmilvus.WithEmbedder(embedder),
 		newmilvus.WithCollectionName("my_collection"),
-		newmilvus.WithIndexV1(oldIndex), // v1 index with compatibility function
+		newmilvus.WithIndexV1(oldIndex),          // v1 index with compatibility function
 		newmilvus.WithMetricTypeV1(oldentity.L2), // v1 metric type
 	)
 	if err != nil {
