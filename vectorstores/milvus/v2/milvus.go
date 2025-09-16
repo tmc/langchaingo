@@ -21,7 +21,6 @@ import (
 // Store is a wrapper around the milvus client using the new SDK.
 type Store struct {
 	dropOld          bool
-	async            bool
 	loaded           bool
 	collectionExists bool
 	shardNum         int32
