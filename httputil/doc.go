@@ -17,15 +17,15 @@
 //
 //	resp, err := httputil.DefaultClient.Get("https://api.example.com/data")
 //
-// # Logging and Debugging
+// # Debugging
 //
-// For development and debugging, the package provides logging clients:
+// For development and debugging:
+//
+//	// DebugClient pretty-prints JSON and SSE streams with colors to stderr
+//	client := httputil.DebugClient
 //
 //	// LoggingClient logs full HTTP requests and responses using slog
 //	client := httputil.LoggingClient
-//
-//	// JSONDebugClient pretty-prints JSON payloads and SSE streams with ANSI colors
-//	client := httputil.JSONDebugClient
 //
 // # Custom Transports
 //

@@ -28,34 +28,29 @@ var LoggingClient = &http.Client{ //nolint:gochecknoglobals
 	},
 }
 
-// JSONDebugClient is an [http.Client] designed for debugging JSON APIs and Server-Sent Events.
-// It provides comprehensive debugging output including HTTP headers, JSON payloads, and real-time
-// SSE event parsing. All debug output is written to stderr with ANSI colors:
-// requests in blue, responses in green, SSE events in green, and parsed data in purple/yellow.
-//
-// Key features:
-//   - Pretty-prints JSON request and response bodies
-//   - Displays HTTP headers with sensitive values scrubbed
-//   - Streams SSE events in real-time as they arrive
-//   - Parses token usage from streaming APIs
-//
-// Unlike [LoggingClient], this client writes directly to stderr rather than
-// using structured logging.
-var JSONDebugClient = &http.Client{ //nolint:gochecknoglobals
+// DebugClient is an [http.Client] for debugging HTTP APIs.
+// It pretty-prints JSON, streams SSE events, and colors output for readability.
+// All output goes to stderr.
+var DebugClient = &http.Client{ //nolint:gochecknoglobals
 	Transport: &Transport{
-		Transport: &jsonDebugTransport{},
+		Transport: &debugTransport{},
 	},
 }
+
+// JSONDebugClient is a deprecated alias for [DebugClient].
+//
+// Deprecated: Use [DebugClient] instead.
+var JSONDebugClient = DebugClient //nolint:gochecknoglobals
 
 // DebugHTTPClient is a deprecated alias for [LoggingClient].
 //
 // Deprecated: Use [LoggingClient] instead.
-var DebugHTTPClient = LoggingClient
+var DebugHTTPClient = LoggingClient //nolint:gochecknoglobals
 
-// DebugHTTPColorJSON is a deprecated alias for [JSONDebugClient].
+// DebugHTTPColorJSON is a deprecated alias for [DebugClient].
 //
-// Deprecated: Use [JSONDebugClient] instead.
-var DebugHTTPColorJSON = JSONDebugClient //nolint:gochecknoglobals
+// Deprecated: Use [DebugClient] instead.
+var DebugHTTPColorJSON = DebugClient //nolint:gochecknoglobals
 
 // LoggingTransport logs complete HTTP requests and responses using structured logging.
 // Logs are emitted at DEBUG level.
@@ -110,7 +105,7 @@ const (
 	colorReset  = "\033[0m"
 )
 
-type jsonDebugTransport struct {
+type debugTransport struct {
 	Transport http.RoundTripper
 }
 
@@ -126,7 +121,7 @@ func scrubSensitive(key, value string) string {
 	return value
 }
 
-func (t *jsonDebugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *debugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	transport := t.Transport
 	if transport == nil {
 		transport = http.DefaultTransport
@@ -172,7 +167,7 @@ func (t *jsonDebugTransport) RoundTrip(req *http.Request) (*http.Response, error
 	return resp, nil
 }
 
-func (t *jsonDebugTransport) wrapSSEResponse(resp *http.Response) *http.Response {
+func (t *debugTransport) wrapSSEResponse(resp *http.Response) *http.Response {
 	pr, pw := io.Pipe()
 
 	go func() {
@@ -213,7 +208,7 @@ func (t *jsonDebugTransport) wrapSSEResponse(resp *http.Response) *http.Response
 	return &newResp
 }
 
-func (t *jsonDebugTransport) parseEvent(text string) {
+func (t *debugTransport) parseEvent(text string) {
 	var data map[string]interface{}
 	if json.Unmarshal([]byte(text), &data) != nil {
 		return
@@ -250,7 +245,7 @@ func (t *jsonDebugTransport) parseEvent(text string) {
 	}
 }
 
-func (t *jsonDebugTransport) logJSON(contentType string, body *io.ReadCloser, color, label string) error {
+func (t *debugTransport) logJSON(contentType string, body *io.ReadCloser, color, label string) error {
 	if !strings.Contains(contentType, "application/json") || *body == nil {
 		return nil
 	}
@@ -267,7 +262,7 @@ func (t *jsonDebugTransport) logJSON(contentType string, body *io.ReadCloser, co
 	return nil
 }
 
-func (t *jsonDebugTransport) printUsage(usage map[string]interface{}) {
+func (t *debugTransport) printUsage(usage map[string]interface{}) {
 	if n, ok := usage["input_tokens"].(float64); ok {
 		fmt.Fprintf(os.Stderr, "input=%d ", int(n))
 	}
