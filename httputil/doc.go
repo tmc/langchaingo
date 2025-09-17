@@ -1,26 +1,19 @@
 // Package httputil provides HTTP transport and client utilities for LangChainGo.
 //
-// The package offers several key features:
-//
 // # User-Agent Management
 //
-// All HTTP clients and transports in this package automatically add a User-Agent
-// header that identifies the LangChainGo library, the calling program, and
-// system information. This helps API providers understand client usage patterns
-// and aids in debugging.
-//
-// The User-Agent format is:
+// All transports automatically add a User-Agent header identifying
+// LangChainGo, the calling program, and system information:
 //
 //	program/version langchaingo/version Go/version (GOOS GOARCH)
 //
-// For example:
+// Example:
 //
 //	openai-chat-example/devel langchaingo/v0.1.8 Go/go1.21.0 (darwin arm64)
 //
-// # Default HTTP Client
+// # Default Client
 //
-// The package provides DefaultClient, which is a pre-configured http.Client
-// that includes the User-Agent header:
+// DefaultClient includes the LangChainGo User-Agent:
 //
 //	resp, err := httputil.DefaultClient.Get("https://api.example.com/data")
 //
@@ -36,8 +29,7 @@
 //
 // # Custom Transports
 //
-// The Transport type implements http.RoundTripper and can be used to add
-// the LangChainGo User-Agent to any HTTP client:
+// Use Transport to add the User-Agent to any HTTP client:
 //
 //	client := &http.Client{
 //	    Transport: &httputil.Transport{
@@ -45,9 +37,8 @@
 //	    },
 //	}
 //
-// # Integration with httprr
+// # Testing with httprr
 //
-// The transports in this package are designed to work with the httprr
-// HTTP record/replay system used in tests. When using httprr, pass
-// httputil.DefaultTransport to ensure proper request interception.
+// The transports work with httprr for HTTP record/replay.
+// Use httputil.DefaultTransport for proper request interception.
 package httputil

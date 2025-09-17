@@ -57,12 +57,10 @@ var DebugHTTPClient = LoggingClient
 // Deprecated: Use [JSONDebugClient] instead.
 var DebugHTTPColorJSON = JSONDebugClient //nolint:gochecknoglobals
 
-// LoggingTransport is an [http.RoundTripper] that logs complete HTTP requests
-// and responses using structured logging. It's designed for debugging and
-// development purposes.
+// LoggingTransport logs complete HTTP requests and responses using structured logging.
+// Logs are emitted at DEBUG level.
 //
-// The transport logs at DEBUG level, so ensure your logger is configured
-// appropriately to see the output.
+// The zero value is a valid LoggingTransport that uses [http.DefaultTransport] and [slog.Default].
 type LoggingTransport struct {
 	// Transport is the underlying [http.RoundTripper] to use.
 	// If nil, [http.DefaultTransport] is used.
@@ -73,10 +71,6 @@ type LoggingTransport struct {
 	Logger *slog.Logger
 }
 
-// RoundTrip implements the [http.RoundTripper] interface. It logs the complete
-// HTTP request (including headers and body) before sending it, executes the
-// request using the underlying transport, then logs the complete response.
-// Both request and response are logged at DEBUG level.
 func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	logger := t.Logger
 	if logger == nil {
@@ -86,21 +80,19 @@ func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	// Dump the request
-	requestDump, err := httputil.DumpRequestOut(req, true)
-	if err != nil {
+
+	if requestDump, err := httputil.DumpRequestOut(req, true); err != nil {
 		logger.Error("Failed to dump request", "error", err)
 	} else {
 		logger.Debug(string(requestDump))
 	}
-	// Perform the actual request
+
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to round trip request: %w", err)
 	}
-	// Dump the response
-	responseDump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
+
+	if responseDump, err := httputil.DumpResponse(resp, true); err != nil {
 		logger.Error("Failed to dump response", "error", err)
 	} else {
 		logger.Debug(string(responseDump))

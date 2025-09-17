@@ -133,7 +133,7 @@ func TestDefaultClient(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
-func TestApiKeyTransport_RoundTrip(t *testing.T) {
+func TestAPIKeyTransport_RoundTrip(t *testing.T) {
 	tests := []struct {
 		name           string
 		existingKey    string
@@ -174,7 +174,7 @@ func TestApiKeyTransport_RoundTrip(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &mockRoundTripper{}
-			transport := &ApiKeyTransport{
+			transport := &APIKeyTransport{
 				Transport: mock,
 				APIKey:    tt.transportKey,
 			}
@@ -204,7 +204,7 @@ func TestApiKeyTransport_RoundTrip(t *testing.T) {
 	}
 }
 
-func TestApiKeyTransport_NilTransport(t *testing.T) {
+func TestAPIKeyTransport_NilTransport(t *testing.T) {
 	// Create a test server to verify the request reaches it with API key
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		key := r.URL.Query().Get("key")
@@ -213,7 +213,7 @@ func TestApiKeyTransport_NilTransport(t *testing.T) {
 	}))
 	defer server.Close()
 
-	transport := &ApiKeyTransport{
+	transport := &APIKeyTransport{
 		Transport: nil, // Should use http.DefaultTransport
 		APIKey:    "test-api-key",
 	}
@@ -225,9 +225,9 @@ func TestApiKeyTransport_NilTransport(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
-func TestApiKeyTransport_PreservesOtherParams(t *testing.T) {
+func TestAPIKeyTransport_PreservesOtherParams(t *testing.T) {
 	mock := &mockRoundTripper{}
-	transport := &ApiKeyTransport{
+	transport := &APIKeyTransport{
 		Transport: mock,
 		APIKey:    "my-api-key",
 	}
