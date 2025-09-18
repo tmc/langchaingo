@@ -479,8 +479,24 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 	// Extract beta headers for prompt caching support
 	var betaHeaders []string
 	if opts.Metadata != nil {
+		// Check for Anthropic-specific beta headers
 		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
 			betaHeaders = headers
+		}
+
+		// Also check for generic prompt caching flag
+		if enabled, ok := opts.Metadata["prompt_caching"].(bool); ok && enabled {
+			// Add prompt caching header if not already present
+			hasPromptCaching := false
+			for _, h := range betaHeaders {
+				if h == "prompt-caching-2024-07-31" {
+					hasPromptCaching = true
+					break
+				}
+			}
+			if !hasPromptCaching {
+				betaHeaders = append(betaHeaders, "prompt-caching-2024-07-31")
+			}
 		}
 	}
 
