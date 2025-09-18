@@ -497,6 +497,21 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 			if !hasPromptCaching {
 				betaHeaders = append(betaHeaders, "prompt-caching-2024-07-31")
 			}
+
+			// Handle advanced cache options if present
+			if advancedOpts, ok := opts.Metadata["prompt_caching_advanced"].(llms.CacheControlOptions); ok {
+				// Note: Anthropic currently only supports ephemeral caching with fixed duration.
+				// Advanced options like custom duration, priority, scope, and tags are not yet
+				// supported by the Anthropic API. For now, we log these for future implementation.
+
+				// Future implementation could:
+				// - Map duration presets to provider-specific cache types
+				// - Use priority for cache allocation hints
+				// - Implement scope through cache key prefixing
+				// - Support tags for grouped invalidation
+
+				_ = advancedOpts // Acknowledge the options for future use
+			}
 		}
 	}
 
