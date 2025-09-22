@@ -64,6 +64,10 @@ type ChatRequest struct {
 	// Options for streaming response. Only set this when you set stream: true.
 	StreamOptions *StreamOptions `json:"stream_options,omitempty"`
 
+	// ReasoningEffort controls thinking effort for reasoning models (o1, o3, GPT-5).
+	// Valid values: "minimal" (GPT-5 only), "low", "medium", "high"
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
@@ -484,7 +488,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	}
 
 	payloadBytes, err := json.Marshal(payload)
-	
+
 	// Restore original metadata
 	payload.Metadata = originalMetadata
 	if err != nil {

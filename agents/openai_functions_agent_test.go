@@ -12,6 +12,7 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
@@ -138,5 +139,73 @@ func TestOpenAIFunctionsAgentComplexCalculation(t *testing.T) {
 	// Verify the result contains 30 (3*7 + 9 = 21 + 9 = 30)
 	if !strings.Contains(result, "30") {
 		t.Errorf("expected calculation result 30 in response, got: %s", result)
+	}
+}
+
+// TestOpenAIFunctionsAgent_ParseOutput_NilResponse tests that ParseOutput handles nil response gracefully
+func TestOpenAIFunctionsAgent_ParseOutput_NilResponse(t *testing.T) {
+	t.Parallel()
+	agent := &agents.OpenAIFunctionsAgent{}
+
+	// Test with nil response - should return error instead of panic
+	_, _, err := agent.ParseOutput(nil)
+	if err == nil {
+		t.Error("expected error for nil response")
+	}
+}
+
+// TestOpenAIFunctionsAgent_ParseOutput_EmptyChoices tests that ParseOutput handles empty choices gracefully
+func TestOpenAIFunctionsAgent_ParseOutput_EmptyChoices(t *testing.T) {
+	t.Parallel()
+	agent := &agents.OpenAIFunctionsAgent{}
+
+	// Test with empty choices - should return error instead of panic
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{},
+	}
+	_, _, err := agent.ParseOutput(resp)
+	if err == nil {
+		t.Error("expected error for empty choices")
+	}
+}
+
+// TestOpenAIFunctionsAgent_ParseOutput_MultipleToolCalls tests multiple tool calls handling
+func TestOpenAIFunctionsAgent_ParseOutput_MultipleToolCalls(t *testing.T) {
+	t.Parallel()
+	agent := &agents.OpenAIFunctionsAgent{}
+
+	// Test multiple tool calls - should handle all calls, not just first one
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				ToolCalls: []llms.ToolCall{
+					{
+						ID: "call1",
+						FunctionCall: &llms.FunctionCall{
+							Name:      "calculator",
+							Arguments: `{"__arg1": "2+2"}`,
+						},
+					},
+					{
+						ID: "call2",
+						FunctionCall: &llms.FunctionCall{
+							Name:      "weather",
+							Arguments: `{"__arg1": "Seattle"}`,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	actions, finish, err := agent.ParseOutput(resp)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if finish != nil {
+		t.Error("expected actions, got finish")
+	}
+	if len(actions) != 2 {
+		t.Errorf("expected 2 actions, got %d", len(actions))
 	}
 }

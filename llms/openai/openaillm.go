@@ -3,6 +3,8 @@ package openai
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -14,6 +16,7 @@ type ChatMessage = openaiclient.ChatMessage
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *openaiclient.Client
+	model            string // Track current model for reasoning detection
 }
 
 const (
@@ -24,7 +27,60 @@ const (
 	RoleTool      = "tool"
 )
 
-var _ llms.Model = (*LLM)(nil)
+// ModelCapability defines what a model supports
+type ModelCapability struct {
+	Pattern          string // Regex pattern to match model names
+	SupportsSystem   bool   // If true, supports system messages
+	SupportsThinking bool   // If true, supports reasoning/thinking
+	SupportsCaching  bool   // If true, supports prompt caching
+	// Add more capabilities as needed
+}
+
+// modelCapabilities defines capabilities for different model patterns
+var modelCapabilities = []ModelCapability{
+	// OpenAI reasoning models (o1, o3 series) - no system message support
+	{
+		Pattern:          `(?i)^o[13](-mini|-preview)?$`, // Matches o1, o1-mini, o1-preview, o3, o3-mini
+		SupportsSystem:   false,                          // O1 models don't support system messages
+		SupportsThinking: true,
+		SupportsCaching:  false,
+	},
+	// GPT-4 models
+	{
+		Pattern:          `(?i)^gpt-4`, // Matches gpt-4, gpt-4-turbo, etc.
+		SupportsSystem:   true,
+		SupportsThinking: false,
+		SupportsCaching:  false, // OpenAI caching coming soon
+	},
+	// GPT-3.5 models
+	{
+		Pattern:          `(?i)^gpt-3\.5`,
+		SupportsSystem:   true,
+		SupportsThinking: false,
+		SupportsCaching:  false,
+	},
+	// Future models can be added here
+}
+
+// getModelCapabilities returns the capabilities for a given model
+func getModelCapabilities(model string) ModelCapability {
+	for _, cap := range modelCapabilities {
+		if matched, _ := regexp.MatchString(cap.Pattern, model); matched {
+			return cap
+		}
+	}
+	// Default capabilities - assume standard model
+	return ModelCapability{
+		SupportsSystem:   true,
+		SupportsThinking: false,
+		SupportsCaching:  false,
+	}
+}
+
+var (
+	_ llms.Model          = (*LLM)(nil)
+	_ llms.ReasoningModel = (*LLM)(nil)
+)
 
 // New returns a new OpenAI LLM.
 func New(opts ...Option) (*LLM, error) {
@@ -35,6 +91,7 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
+		model:            c.Model, // Store the model for reasoning detection
 	}, err
 }
 
@@ -54,8 +111,40 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
+	// Determine the effective model for this request (don't mutate o.model to avoid races)
+	effectiveModel := opts.Model
+	if effectiveModel == "" {
+		effectiveModel = o.model
+	}
+
+	// Get capabilities for this model
+	modelCaps := getModelCapabilities(effectiveModel)
+
+	// For models that don't support system messages, we need to merge them into user messages
+	var systemContent string
+	if !modelCaps.SupportsSystem {
+		for _, mc := range messages {
+			if mc.Role == llms.ChatMessageTypeSystem {
+				// Extract system message content
+				for _, part := range mc.Parts {
+					if textPart, ok := part.(llms.TextContent); ok {
+						if systemContent != "" {
+							systemContent += "\n\n"
+						}
+						systemContent += textPart.Text
+					}
+				}
+			}
+		}
+	}
+
 	chatMsgs := make([]*ChatMessage, 0, len(messages))
 	for _, mc := range messages {
+		// Skip system messages for models that don't support them
+		if mc.Role == llms.ChatMessageTypeSystem && !modelCaps.SupportsSystem {
+			continue
+		}
+
 		msg := &ChatMessage{MultiContent: mc.Parts}
 		switch mc.Role {
 		case llms.ChatMessageTypeSystem:
@@ -64,6 +153,17 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			msg.Role = RoleAssistant
 		case llms.ChatMessageTypeHuman:
 			msg.Role = RoleUser
+			// For models without system support, prepend system content to first user message
+			if systemContent != "" && !modelCaps.SupportsSystem {
+				// Prepend system content to the user message
+				newParts := []llms.ContentPart{}
+				if systemContent != "" {
+					newParts = append(newParts, llms.TextContent{Text: systemContent + "\n\n"})
+				}
+				newParts = append(newParts, mc.Parts...)
+				msg.MultiContent = newParts
+				systemContent = "" // Clear after using
+			}
 		case llms.ChatMessageTypeGeneric:
 			msg.Role = RoleUser
 		case llms.ChatMessageTypeFunction:
@@ -110,6 +210,57 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
+	// Extract reasoning effort for thinking models
+	// Note: OpenAI o1/o3 models have built-in reasoning and don't support reasoning_effort parameter
+	// This is kept for future models that might support it (like GPT-5)
+	var reasoningEffort string
+	// Commented out for now since current o1 models don't support this parameter
+	/*
+		if opts.Metadata != nil {
+			if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
+				// Map thinking mode to reasoning effort
+				switch config.Mode {
+				case llms.ThinkingModeLow:
+					reasoningEffort = "low"
+				case llms.ThinkingModeMedium:
+					reasoningEffort = "medium"
+				case llms.ThinkingModeHigh:
+					reasoningEffort = "high"
+				}
+
+				// Handle streaming for thinking
+				if config.StreamThinking && opts.StreamingReasoningFunc == nil && opts.StreamingFunc != nil {
+					// Set up default reasoning streaming if requested but not provided
+					// Wrap the single-param streaming func into a reasoning func
+					opts.StreamingReasoningFunc = func(ctx context.Context, reasoningChunk []byte, chunk []byte) error {
+						// For default behavior, we might want to stream both or just the main content
+						// Here we'll just stream the main content chunk
+						if len(chunk) > 0 {
+							return opts.StreamingFunc(ctx, chunk)
+						}
+						return nil
+					}
+				}
+			}
+		}
+	*/
+
+	// Filter out internal metadata that shouldn't be sent to API
+	apiMetadata := make(map[string]any)
+	if opts.Metadata != nil {
+		for k, v := range opts.Metadata {
+			// Skip internal metadata keys
+			if k == "thinking_config" || strings.HasPrefix(k, "openai:") {
+				continue
+			}
+			apiMetadata[k] = v
+		}
+	}
+	// Only include metadata if there are actual values to send
+	if len(apiMetadata) == 0 {
+		apiMetadata = nil
+	}
+
 	req := &openaiclient.ChatRequest{
 		Model:                  opts.Model,
 		StopWords:              opts.StopWords,
@@ -120,6 +271,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		N:                      opts.N,
 		FrequencyPenalty:       opts.FrequencyPenalty,
 		PresencePenalty:        opts.PresencePenalty,
+		ReasoningEffort:        reasoningEffort,
 
 		// Token handling: check metadata flag for legacy behavior
 		// By default use max_completion_tokens (modern field)
@@ -140,7 +292,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
-		Metadata:             opts.Metadata,
+		Metadata:             apiMetadata,
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
@@ -187,11 +339,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			ReasoningContent: c.Message.ReasoningContent,
 			StopReason:       fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
-				"CompletionTokens":                   result.Usage.CompletionTokens,
-				"PromptTokens":                       result.Usage.PromptTokens,
-				"TotalTokens":                        result.Usage.TotalTokens,
-				"ReasoningTokens":                    result.Usage.CompletionTokensDetails.ReasoningTokens,
-				"PromptAudioTokens":                  result.Usage.PromptTokensDetails.AudioTokens,
+				"CompletionTokens":  result.Usage.CompletionTokens,
+				"PromptTokens":      result.Usage.PromptTokens,
+				"TotalTokens":       result.Usage.TotalTokens,
+				"ReasoningTokens":   result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"PromptAudioTokens": result.Usage.PromptTokensDetails.AudioTokens,
+				// Standardized fields for cross-provider compatibility
+				"ThinkingContent":                    c.Message.ReasoningContent,                           // Standardized field
+				"ThinkingTokens":                     result.Usage.CompletionTokensDetails.ReasoningTokens, // Standardized field
 				"PromptCachedTokens":                 result.Usage.PromptTokensDetails.CachedTokens,
 				"CompletionAudioTokens":              result.Usage.CompletionTokensDetails.AudioTokens,
 				"CompletionReasoningTokens":          result.Usage.CompletionTokensDetails.ReasoningTokens,
@@ -227,6 +382,44 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 	return response, nil
+}
+
+// SupportsReasoning implements the ReasoningModel interface.
+// Returns true if the current model supports reasoning/thinking tokens.
+func (o *LLM) SupportsReasoning() bool {
+	// Check the current model (may have been overridden by WithModel option)
+	model := o.model
+	if model == "" {
+		model = o.client.Model
+	}
+
+	modelLower := strings.ToLower(model)
+
+	// OpenAI o1 series (reasoning models)
+	if strings.HasPrefix(modelLower, "o1-") ||
+		strings.Contains(modelLower, "o1-preview") ||
+		strings.Contains(modelLower, "o1-mini") {
+		return true
+	}
+
+	// OpenAI o3 series
+	if strings.HasPrefix(modelLower, "o3-") ||
+		strings.Contains(modelLower, "o3-mini") {
+		return true
+	}
+
+	// Future o4+ series
+	if strings.HasPrefix(modelLower, "o4-") ||
+		strings.HasPrefix(modelLower, "o5-") {
+		return true
+	}
+
+	// GPT-5 series (expected to have reasoning capabilities)
+	if strings.HasPrefix(modelLower, "gpt-5") {
+		return true
+	}
+
+	return false
 }
 
 // CreateEmbedding creates embeddings for the given input texts.

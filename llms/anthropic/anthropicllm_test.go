@@ -223,3 +223,10 @@ func TestCall(t *testing.T) {
 	// Test that Call delegates to GenerateContent
 	t.Skip("Call() requires integration testing with mock client")
 }
+
+func TestGenerateMessagesContent_EmptyContent(t *testing.T) {
+	// This test demonstrates the need for checking len(result.Content) == 0
+	// Without the fix, accessing result.Content[0] would panic when Anthropic
+	// returns a response with nil or empty content (addresses issue #993)
+	t.Skip("Requires mock client - would demonstrate panic without len(result.Content) == 0 check")
+}

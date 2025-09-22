@@ -285,7 +285,7 @@ func TestInternalMetadataFiltering(t *testing.T) {
 				return nil, err
 			}
 			capturedRequestBody = body
-			
+
 			// Return a minimal valid response to avoid errors
 			responseBody := `{"choices":[{"message":{"content":"test"}}],"usage":{"total_tokens":10}}`
 			return &http.Response{
@@ -303,8 +303,8 @@ func TestInternalMetadataFiltering(t *testing.T) {
 			{Role: "user", Content: "test"},
 		},
 		Metadata: map[string]any{
-			"openai:use_legacy_max_tokens": true,     // Should be filtered out
-			"custom_field":                 "value",  // Should be preserved
+			"openai:use_legacy_max_tokens": true,    // Should be filtered out
+			"custom_field":                 "value", // Should be preserved
 		},
 	}
 
