@@ -74,7 +74,7 @@ func (m AIChatMessage) GetFunctionCall() *FunctionCall { return m.FunctionCall }
 
 // HumanChatMessage is a message sent by a human.
 type HumanChatMessage struct {
-	Content string
+	Content string `json:"content"`
 }
 
 func (m HumanChatMessage) GetType() ChatMessageType { return ChatMessageTypeHuman }
@@ -82,7 +82,7 @@ func (m HumanChatMessage) GetContent() string       { return m.Content }
 
 // SystemChatMessage is a chat message representing information that should be instructions to the AI system.
 type SystemChatMessage struct {
-	Content string
+	Content string `json:"content"`
 }
 
 func (m SystemChatMessage) GetType() ChatMessageType { return ChatMessageTypeSystem }
@@ -90,9 +90,9 @@ func (m SystemChatMessage) GetContent() string       { return m.Content }
 
 // GenericChatMessage is a chat message with an arbitrary speaker.
 type GenericChatMessage struct {
-	Content string
-	Role    string
-	Name    string
+	Content string `json:"content"`
+	Role    string `json:"role"`
+	Name    string `json:"name"`
 }
 
 func (m GenericChatMessage) GetType() ChatMessageType { return ChatMessageTypeGeneric }
