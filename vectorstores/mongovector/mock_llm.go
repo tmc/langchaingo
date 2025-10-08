@@ -3,7 +3,7 @@ package mongovector
 import (
 	"context"
 
-	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/embeddings"
 )
 
 // mockLLM will create consistent text embeddings mocking the OpenAI

@@ -1,8 +1,8 @@
 package chains
 
 import (
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/prompts"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/prompts"
 )
 
 // PromptSelector is the interface for selecting a formatter depending on the

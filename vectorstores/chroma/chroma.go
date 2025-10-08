@@ -10,9 +10,9 @@ import (
 	"github.com/amikos-tech/chroma-go/openai"
 	chromatypes "github.com/amikos-tech/chroma-go/types"
 	"github.com/google/uuid"
-	"github.com/vendasta/langchaingo/embeddings"
-	"github.com/vendasta/langchaingo/schema"
-	"github.com/vendasta/langchaingo/vectorstores"
+	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/vectorstores"
 )
 
 var (

@@ -4,11 +4,11 @@ package cloudsql_test
 import (
 	"context"
 	"fmt"
-	"github.com/vendasta/langchaingo/embeddings"
-	"github.com/vendasta/langchaingo/llms/openai"
-	"github.com/vendasta/langchaingo/schema"
-	"github.com/vendasta/langchaingo/util/cloudsqlutil"
-	"github.com/vendasta/langchaingo/vectorstores/cloudsql"
+	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/util/cloudsqlutil"
+	"github.com/tmc/langchaingo/vectorstores/cloudsql"
 	"os"
 	"testing"
 )

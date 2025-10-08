@@ -5,9 +5,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/vendasta/langchaingo/callbacks"
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/llms/maritaca/internal/maritacaclient"
+	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
 )
 
 var (

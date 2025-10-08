@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/llms/llamafile"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/llamafile"
 )
 
 func main() {

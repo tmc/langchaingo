@@ -11,7 +11,7 @@ This example:
 
 ## 🔑 Key Components
 
-- We're using the `github.com/vendasta/langchaingo/llms/maritaca` package to interact with Maritaca AI.
+- We're using the `github.com/tmc/langchaingo/llms/maritaca` package to interact with Maritaca AI.
 - The program reads your Maritaca API key from an environment variable called `MARITACA_KEY`.
 - We're using the "sabia-2-medium" model, which is pretty smart!
 

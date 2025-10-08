@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/llms/anthropic"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/anthropic"
 )
 
 //go:embed image.png

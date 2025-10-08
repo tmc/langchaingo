@@ -19,7 +19,7 @@ This example demonstrates how to use Pinecone, a powerful vector database, in co
 
 ## Key Points
 
-- The example uses the `github.com/vendasta/langchaingo` library for LangChain functionality in Go.
+- The example uses the `github.com/tmc/langchaingo` library for LangChain functionality in Go.
 - It demonstrates how to handle errors and set up the necessary clients and stores.
 - The code shows how to use metadata filters to refine search results based on specific criteria.
 

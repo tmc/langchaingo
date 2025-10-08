@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/vendasta/langchaingo/llms"
+import "github.com/tmc/langchaingo/llms"
 
 // ChatMessageHistoryOption is a function for creating new chat message history
 // with other than the default values.

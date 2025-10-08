@@ -1,10 +1,10 @@
-module github.com/vendasta/langchaingo/examples/sql-database-chain-example
+module github.com/tmc/langchaingo/examples/sql-database-chain-example
 
 go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/vendasta/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

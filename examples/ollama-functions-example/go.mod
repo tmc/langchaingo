@@ -1,8 +1,8 @@
-module github.com/vendasta/langchaingo/examples/ollama-functions-example
+module github.com/tmc/langchaingo/examples/ollama-functions-example
 
 go 1.22.0
 
-require github.com/vendasta/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

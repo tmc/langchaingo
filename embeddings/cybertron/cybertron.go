@@ -5,7 +5,7 @@ import (
 
 	"github.com/nlpodyssey/cybertron/pkg/models/bert"
 	"github.com/nlpodyssey/cybertron/pkg/tasks/textencoding"
-	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/embeddings"
 )
 
 // Cybertron is the embedder using Cybertron to run embedding models locally.

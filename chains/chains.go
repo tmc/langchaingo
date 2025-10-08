@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vendasta/langchaingo/callbacks"
-	"github.com/vendasta/langchaingo/schema"
+	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/schema"
 )
 
 // Key name used to store the intermediate steps in the output, when configured.

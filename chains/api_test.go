@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vendasta/langchaingo/llms/openai"
+	"github.com/tmc/langchaingo/llms/openai"
 )
 
 // nolint

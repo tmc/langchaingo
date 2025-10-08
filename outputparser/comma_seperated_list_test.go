@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vendasta/langchaingo/outputparser"
+	"github.com/tmc/langchaingo/outputparser"
 )
 
 func TestCommaSeparatedList(t *testing.T) {

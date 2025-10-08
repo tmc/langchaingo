@@ -24,7 +24,7 @@ Here's what happens in this fun little program:
 
 ## Cool Features 🌟
 
-- Uses the `github.com/vendasta/langchaingo` library to interact with Google AI
+- Uses the `github.com/tmc/langchaingo` library to interact with Google AI
 - Demonstrates how to set up and use custom tools with the AI
 - Shows how to maintain a conversation history for context
 - Handles tool calls and responses in a neat way

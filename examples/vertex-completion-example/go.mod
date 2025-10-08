@@ -1,10 +1,10 @@
-module github.com/vendasta/langchaingo/examples/vertex-completion-example
+module github.com/tmc/langchaingo/examples/vertex-completion-example
 
 go 1.22.0
 
 toolchain go1.22.1
 
-require github.com/vendasta/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 require (
 	cloud.google.com/go v0.116.0 // indirect
@@ -50,4 +50,4 @@ require (
 )
 
 // test for new pkg version
-replace github.com/vendasta/langchaingo => ../..
+replace github.com/tmc/langchaingo => ../..

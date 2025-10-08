@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/llms/huggingface"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/huggingface"
 )
 
 func main() {

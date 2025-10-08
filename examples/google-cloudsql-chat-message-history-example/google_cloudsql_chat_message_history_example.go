@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/vendasta/langchaingo/llms"
-	"github.com/vendasta/langchaingo/memory/cloudsql"
-	"github.com/vendasta/langchaingo/util/cloudsqlutil"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/memory/cloudsql"
+	"github.com/tmc/langchaingo/util/cloudsqlutil"
 )
 
 // getEnvVariables loads the necessary environment variables for the CloudSQL connection

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vendasta/langchaingo/schema"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func TestNotionDirectoryLoader_Load(t *testing.T) {

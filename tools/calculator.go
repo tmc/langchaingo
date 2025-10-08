@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vendasta/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/callbacks"
 	"go.starlark.net/lib/math"
 	"go.starlark.net/starlark"
 )

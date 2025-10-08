@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/vendasta/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms"
 )
 
 type LLM struct {

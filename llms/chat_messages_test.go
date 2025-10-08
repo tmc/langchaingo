@@ -3,7 +3,7 @@ package llms_test
 import (
 	"testing"
 
-	"github.com/vendasta/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms"
 )
 
 func TestGetBufferString(t *testing.T) {

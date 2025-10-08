@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/vendasta/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms"
 )
 
 const (

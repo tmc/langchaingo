@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 
-	"github.com/vendasta/langchaingo/callbacks"
-	"github.com/vendasta/langchaingo/tools"
-	"github.com/vendasta/langchaingo/tools/duckduckgo/internal"
+	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/tools"
+	"github.com/tmc/langchaingo/tools/duckduckgo/internal"
 )
 
 // DefaultUserAgent defines a default value for user-agent header.
-const DefaultUserAgent = "github.com/vendasta/langchaingo/tools/duckduckgo"
+const DefaultUserAgent = "github.com/tmc/langchaingo/tools/duckduckgo"
 
 // Tool defines a tool implementation for the DuckDuckGo Search.
 type Tool struct {

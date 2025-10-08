@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"maps"
 
-	"github.com/vendasta/langchaingo/memory"
-	"github.com/vendasta/langchaingo/schema"
+	"github.com/tmc/langchaingo/memory"
+	"github.com/tmc/langchaingo/schema"
 )
 
 // MapReduceDocuments is a chain that combines documents by mapping a chain over them, then

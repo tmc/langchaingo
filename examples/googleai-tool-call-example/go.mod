@@ -1,8 +1,8 @@
-module github.com/vendasta/langchaingo/examples/googleai-tool-call-example
+module github.com/tmc/langchaingo/examples/googleai-tool-call-example
 
 go 1.22.2
 
-require github.com/vendasta/langchaingo v0.1.13-pre.1
+require github.com/tmc/langchaingo v0.1.13-pre.1
 
 require (
 	cloud.google.com/go v0.114.0 // indirect

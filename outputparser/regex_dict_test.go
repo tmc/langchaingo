@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vendasta/langchaingo/outputparser"
+	"github.com/tmc/langchaingo/outputparser"
 )
 
 func TestRegexDict(t *testing.T) {
