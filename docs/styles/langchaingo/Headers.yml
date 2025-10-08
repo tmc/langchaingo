@@ -1,0 +1,78 @@
+extends: capitalization
+message: "Use sentence case for headers, not Title Case"
+level: suggestion
+match: $heading
+style: sentence
+exceptions:
+  - API
+  - APIs
+  - URL
+  - URLs
+  - JSON
+  - YAML
+  - LLM
+  - LLMs
+  - AI
+  - Go
+  - LangChainGo
+  - GitHub
+  - PR
+  - OpenAI
+  - Ollama
+  - Mistral
+  - HTTP
+  - HTTPS
+  - REST
+  - SDK
+  - CLI
+  - UUID
+  - OAuth
+  - JWT
+  - SQL
+  - NoSQL
+  - gRPC
+  - WebSocket
+  - TCP
+  - UDP
+  - TLS
+  - SSL
+  - CPU
+  - GPU
+  - RAM
+  - OS
+  - UI
+  - UX
+  - ID
+  - DB
+  - PromptTemplate
+  - ChatPromptTemplate
+  - MessageFormatter
+  - HumanMessagePromptTemplate
+  - SystemMessagePromptTemplate
+  - AIMessagePromptTemplate
+  - FString
+  - RenderTemplate
+  - RenderTemplateFS
+  - FormatPrompt
+  - CodeBlock
+  - DocCardList
+  - Jinja2
+  - CheckValidTemplate
+  - NewPromptTemplate
+  - NewChatPromptTemplate
+  - NewHumanMessagePromptTemplate
+  - NewSystemMessagePromptTemplate
+  - InputVariables
+  - PartialVariables
+  - TemplateFormat
+  - TemplateFormatGoTemplate
+  - TemplateFormatJinja2
+  - GenerateFromSingle
+  - F-string
+  - F-strings
+  - Python-style
+  - LangChain
+  - Co-Authored-By
+  - ReadFile
+  - XSS
+

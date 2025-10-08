@@ -1,0 +1,11 @@
+extends: existence
+message: "Avoid incomplete code examples (use complete, runnable code)"
+level: warning
+tokens:
+  - '// ... magic happens here'
+  - '// ... rest of'
+  - '// TODO:'
+  - '// FIXME:'
+  - '// ...'
+  - '/* ... */'
+

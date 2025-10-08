@@ -30,6 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer llm.Close() // Clean up client when done
 
 	prompt := "Who was the second person to walk on the moon?"
 	answer, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)

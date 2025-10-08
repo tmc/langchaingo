@@ -26,6 +26,13 @@ All types of contributions are encouraged and valued. See the [Table of Contents
     - [Make Changes](#make-changes)
       - [Make changes in the UI](#make-changes-in-the-ui)
       - [Make changes locally](#make-changes-locally)
+    - [Running Tests](#running-tests)
+    - [Testing with httprr](#testing-with-httprr)
+      - [How httprr works](#how-httprr-works)
+      - [Writing tests with httprr](#writing-tests-with-httprr)
+      - [Recording new tests](#recording-new-tests)
+      - [Important notes about httprr](#important-notes-about-httprr)
+      - [Debugging httprr issues](#debugging-httprr-issues)
     - [Commit your update](#commit-your-update)
     - [Pull Request](#pull-request)
     - [Your PR is merged!](#your-pr-is-merged)
@@ -141,6 +148,313 @@ Click **Make a contribution** at the bottom of any docs page to make small chang
 
 3. Create a working branch and start with your changes!
 
+##### Recent Updates and Dependencies
+
+Be aware of these recent changes when contributing:
+
+- **HTTP Client Standardization**: All HTTP clients now use `httputil.DefaultClient` with custom User-Agent headers (`langchaingo/{version}`)
+- **HuggingFace Environment Variables**: Supports multiple token sources in priority order: `HF_TOKEN`, `HUGGINGFACEHUB_API_TOKEN`, token file from `HF_TOKEN_PATH`, or default `~/.cache/huggingface/token`
+- **OpenAI Functions Agent**: Updated to handle OpenAI's new tool calling API while maintaining backward compatibility
+- **Chroma Vector Store**: Updated to use `github.com/amikos-tech/chroma-go` v0.1.4+
+- **Testcontainers Migration**: New testcontainers API using `Run()` instead of deprecated `RunContainer()` where supported
+- **HTTPRR Files**: No longer compressed - commit `.httprr` files directly to the repository
+
+##### Project Structure and Conventions
+
+When making changes, follow these architectural conventions:
+
+- **HTTP Clients**: Use `httputil.DefaultClient` instead of `http.DefaultClient` for all HTTP operations to ensure proper User-Agent headers
+- **Interface-based Design**: Core functionality is defined through interfaces (Model, Chain, Memory, etc.)
+- **Provider Isolation**: Each LLM/embedding provider has its own package with internal client implementation
+- **Options Pattern**: Use functional options for configuration (see existing examples)
+- **Context Propagation**: All operations should accept `context.Context` for cancellation and deadlines
+- **Error Handling**: Use standardized error types and mapping (see `llms.Error` and provider error mappers)
+
+##### Adding a New LLM Provider
+
+When adding a new LLM provider:
+
+1. Create a new package under `/llms/your-provider`
+2. Implement the `llms.Model` interface
+3. Create an internal client package for HTTP interactions
+4. Use `httputil.DefaultClient` for HTTP requests
+5. Add compliance tests: `compliance.NewSuite("yourprovider", model).Run(t)`
+6. Add tests with httprr recordings for HTTP calls
+7. Follow the existing provider patterns for options and error handling
+
+##### Adding a New Vector Store
+
+When adding a new vector store:
+
+1. Create a new package under `/vectorstores/your-store`
+2. Implement the vector store interface
+3. Use testcontainers for integration tests where possible
+4. Follow existing patterns for distance strategies and metadata filtering
+
+#### Running Tests
+
+Before submitting your changes, make sure all tests pass:
+
+```bash
+# Run all tests
+make test
+
+# Run tests for a specific package
+go test ./chains
+
+# Run a specific test
+go test -run TestLLMChain ./chains
+
+# Run tests with race detection
+make test-race
+
+# Run tests with coverage
+make test-cover
+
+# Test separation scripts
+./scripts/run_unit_tests.sh      # Run only unit tests (no external dependencies)
+./scripts/run_all_tests.sh       # Run complete test suite
+./scripts/run_integration_tests.sh # Run only integration tests (requires Docker)
+
+# Record HTTP interactions for tests (when adding new tests)
+go test -httprecord=. -v ./path/to/package
+```
+
+Also ensure your code passes linting:
+
+```bash
+# Run linter
+make lint
+
+# Run linter with auto-fix
+make lint-fix
+
+# Run experimental linter configuration
+make lint-exp
+
+# Run all linters including experimental
+make lint-all
+
+# Clean lint cache
+make clean-lint-cache
+
+# Development tools
+make build-examples         # Build all examples to verify they compile  
+make docs                  # Generate documentation
+make run-pkgsite          # Run local documentation server
+make install-git-hooks    # Install git hooks (sets up pre-push hook)
+make pre-push             # Run lint and fast tests (suitable for git pre-push hook)
+```
+
+##### Additional Development Tools
+
+The project includes several development tools in `/internal/devtools`:
+
+```bash
+# Custom linting tools
+make lint-devtools         # Run custom architectural lints
+make lint-devtools-fix     # Run custom lints with auto-fix
+make lint-architecture     # Run architectural validation
+make lint-prepush          # Run pre-push lints
+make lint-prepush-fix      # Run pre-push lints with auto-fix
+
+# HTTPRR management
+go run ./internal/devtools/rrtool list-packages  # List packages using httprr
+make test-record           # Re-record all HTTP interactions
+
+# Test pattern validation
+make lint-testing          # Check for incorrect httprr test patterns
+make lint-testing-fix      # Attempt to fix httprr test patterns automatically
+```
+
+#### Testing with httprr
+
+This project uses a custom HTTP record/replay system (httprr) for testing HTTP interactions with external APIs. This allows tests to run deterministically without requiring actual API credentials or making real API calls.
+
+##### How httprr works
+
+- **Recording mode**: When tests run with real API credentials, httprr records all HTTP requests and responses to `.httprr` files in the `testdata` directory.
+- **Replay mode**: When tests run without credentials, httprr replays the recorded HTTP interactions from the `.httprr` files.
+- **Automatic mode switching**: Tests automatically skip if no credentials and no recording are available, with a helpful message.
+
+##### Writing tests with httprr
+
+When writing tests that make HTTP calls to external APIs, follow this pattern:
+
+```go
+func TestMyFeature(t *testing.T) {
+    t.Parallel()
+    ctx := context.Background()
+    
+    // Skip if no credentials and no recording
+    httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+    
+    // Set up httprr (automatically cleaned up via t.Cleanup)
+    // Use httputil.DefaultTransport for User-Agent headers, or http.DefaultTransport for simpler cases
+    rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+    
+    var opts []openai.Option
+    opts = append(opts, openai.WithHTTPClient(rr.Client()))
+    
+    // Use test token when replaying
+    if !rr.Recording() {
+        opts = append(opts, openai.WithToken("test-api-key"))
+    }
+    // When recording, the client will use the real API key from environment
+    
+    client, err := openai.New(opts...)
+    require.NoError(t, err)
+    
+    // Run your test
+    result, err := client.Call(ctx, "test input")
+    require.NoError(t, err)
+    // ... assertions ...
+}
+```
+
+This pattern ensures:
+- **When recording**: Uses real API key from environment to capture valid responses
+- **When replaying**: Uses "test-api-key" to satisfy client validation (httprr intercepts before actual API calls)
+
+For other providers, use their specific options:
+
+```go
+// HuggingFace example (supports multiple environment variables)
+func TestHuggingFace(t *testing.T) {
+    // HuggingFace supports both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN
+    if os.Getenv("HF_TOKEN") == "" && os.Getenv("HUGGINGFACEHUB_API_TOKEN") == "" {
+        httprr.SkipIfNoCredentialsAndRecordingMissing(t, "HF_TOKEN")
+    }
+    
+    rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+    
+    apiKey := "test-api-key"
+    if rr.Recording() {
+        if key := os.Getenv("HF_TOKEN"); key != "" {
+            apiKey = key
+        } else if key := os.Getenv("HUGGINGFACEHUB_API_TOKEN"); key != "" {
+            apiKey = key
+        }
+    }
+    
+    llm, err := huggingface.New(
+        huggingface.WithHTTPClient(rr.Client()),
+        huggingface.WithToken(apiKey),
+    )
+    // ...
+}
+
+// Perplexity example  
+var opts []perplexity.Option
+opts = append(opts, perplexity.WithHTTPClient(rr.Client()))
+if !rr.Recording() {
+    opts = append(opts, perplexity.WithAPIKey("test-api-key"))
+}
+tool, err := perplexity.New(opts...)
+
+// SerpAPI example with request scrubbing
+rr.ScrubReq(func(req *http.Request) error {
+    if req.URL != nil {
+        q := req.URL.Query()
+        q.Set("api_key", "test-api-key")
+        req.URL.RawQuery = q.Encode()
+    }
+    return nil
+})
+```
+
+For tests that need to create clients multiple times, consider using a helper function:
+
+```go
+func newOpenAILLM(t *testing.T) *openai.LLM {
+    t.Helper()
+    httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+    
+    rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+    
+    // Only run tests in parallel when not recording (to avoid rate limits)
+    if !rr.Recording() {
+        t.Parallel()
+    }
+    
+    var opts []openai.Option
+    opts = append(opts, openai.WithHTTPClient(rr.Client()))
+    
+    if !rr.Recording() {
+        opts = append(opts, openai.WithToken("test-api-key"))
+    }
+    // When recording, openai.New() will read OPENAI_API_KEY from environment
+    
+    llm, err := openai.New(opts...)
+    require.NoError(t, err)
+    return llm
+}
+```
+
+##### Recording new tests
+
+To record HTTP interactions for new tests:
+
+1. Set the required environment variables (e.g., `OPENAI_API_KEY`)
+2. Run the test with recording enabled:
+   ```bash
+   go test -v -httprecord=. ./path/to/package
+   
+   # To avoid rate limits, you can control parallelism:
+   go test -v -httprecord=. -p 1 -parallel=1 ./path/to/package
+   
+   # Or use the Makefile target to record all packages
+   make test-record
+   ```
+3. The test will create `.httprr` files in the `testdata` directory
+4. Commit these recording files with your PR
+5. For tests that require API key scrubbing, add request scrubbing functions
+
+##### Important notes about httprr
+
+- **Transport choice**: Use `httputil.DefaultTransport` for User-Agent headers, or `http.DefaultTransport` for simpler cases
+- **Check rr.Recording()**: Use this to conditionally add test tokens only when replaying
+- **httprr handles cleanup**: OpenForTest automatically registers cleanup with t.Cleanup()
+- **Real keys for recording**: When recording, let the client use the real API key from environment
+- **Test tokens for replay**: When replaying, use "test-api-key" to satisfy client validation
+- **Parallel testing**: Only run `t.Parallel()` when not recording to avoid hitting API rate limits
+- **Multiple credential sources**: For HuggingFace, check both `HF_TOKEN` and `HUGGINGFACEHUB_API_TOKEN`
+- **Request scrubbing**: Use `rr.ScrubReq()` for APIs that need URL parameter scrubbing (like SerpAPI)
+- **Recordings are deterministic**: The same inputs should produce the same outputs
+- **Sensitive data is scrubbed**: httprr automatically removes authorization headers and other sensitive data from recordings
+- **Commit recording files**: Always commit the `.httprr` files so tests can run in CI without credentials
+- **Delete invalid recordings**: If a test fails due to an invalid recording (e.g., 401 error), delete the recording file and re-record with valid credentials
+
+##### Debugging httprr issues
+
+- Use `-httprecord-debug` flag for detailed recording information
+- Use `-httpdebug` flag to see actual HTTP traffic
+- Check if recordings exist: `ls testdata/*.httprr`
+- Verify recording contents: `head testdata/TestName.httprr`
+- Use test separation scripts to isolate unit vs integration test issues:
+  ```bash
+  ./scripts/run_unit_tests.sh      # Fast tests without external dependencies
+  ./scripts/run_integration_tests.sh # Tests requiring Docker/external services
+  ```
+
+##### Automated httprr pattern validation
+
+The project includes a custom linter to detect incorrect httprr usage patterns:
+
+```bash
+# Check for incorrect patterns
+make lint-testing
+
+# See specific issues found
+go run ./internal/devtools/lint -testing -v
+```
+
+The linter detects:
+- **Hardcoded test tokens**: `WithToken("test-api-key")` called unconditionally (should be conditional on `!rr.Recording()`)  
+- **Incorrect parallel execution**: `t.Parallel()` called before httprr setup (should be conditional on `!rr.Recording()`)
+
+These issues cause authentication errors during recording and race conditions during testing.
+
 #### Commit your update
 
 Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process:zap:.
@@ -148,7 +462,9 @@ Commit the changes once you are happy with them. Don't forget to self-review to 
 #### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
-- Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such as `memory: added interfaces` or `util: added helpers`)
+- Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such as `memory: add interfaces` or `util: add helpers`)
+- Run all linters and ensure tests pass: `make lint && make test`
+- If you added new HTTP-based functionality, include httprr recordings
 - **We strive to conceptually align with the Python and TypeScript versions of Langchain. Please link/reference the associated concepts in those codebases when introducing a new concept.**
 - Fill the "Ready for review" template so that we can review your PR. This template helps reviewers understand your changes as well as the purpose of your pull request.
 - Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.

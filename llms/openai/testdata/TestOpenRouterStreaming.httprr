@@ -1,0 +1,58 @@
+httprr trace v1
+410 2302
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 205
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"meta-llama/llama-3.2-3b-instruct:free","messages":[{"role":"user","content":"Say exactly 'test response' and nothing else"}],"temperature":0,"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 1820
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Fri, 08 Aug 2025 15:40:32 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1754667632-NNYO7FUAFP6cwNW8jL7x","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754667632,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1754667632-NNYO7FUAFP6cwNW8jL7x","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754667632,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1754667632-NNYO7FUAFP6cwNW8jL7x","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754667632,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1754667632-NNYO7FUAFP6cwNW8jL7x","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754667632,"choices":[{"index":0,"delta":{"role":"assistant","content":"test response"},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}]}
+
+data: {"id":"gen-1754667632-NNYO7FUAFP6cwNW8jL7x","provider":"Venice","model":"meta-llama/llama-3.2-3b-instruct:free","object":"chat.completion.chunk","created":1754667632,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":586,"completion_tokens":3,"total_tokens":589,"cost":0,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":null},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+
+356 993
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 151
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"meta-llama/llama-3.2-3b-instruct:free","messages":[{"role":"user","content":"Say exactly 'test response' and nothing else"}],"temperature":0}HTTP/2.0 429 Too Many Requests
+Content-Length: 441
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Fri, 08 Aug 2025 15:40:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+X-Ratelimit-Limit: 1
+X-Ratelimit-Remaining: 0
+X-Ratelimit-Reset: 1754667660000
+
+{"error":{"message":"Rate limit exceeded: limit_rpm/meta-llama/llama-3.2-3b-instruct/e8440b11-29fb-4887-a222-eff9ba33dfbf. High demand for meta-llama/llama-3.2-3b-instruct:free on OpenRouter - limited to 1 requests per minute. Please retry shortly.","code":429,"metadata":{"headers":{"X-RateLimit-Limit":"1","X-RateLimit-Remaining":"0","X-RateLimit-Reset":"1754667660000"},"provider_name":null}},"user_id":"user_2g27FbGqkGs5rDR6kxYqEb3sJSR"}

@@ -1,0 +1,15 @@
+extends: existence
+message: "Use active voice: '%s'"
+level: warning
+ignorecase: true
+tokens:
+  - should be configured
+  - should be used
+  - should be avoided
+  - will be created
+  - will be returned
+  - can be found
+  - must be provided
+  - has been added
+  - have been updated
+

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -69,9 +71,10 @@ func WithAnthropicBetaHeader(val string) Option {
 // New returns a new Anthropic client.
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
-		Model:   model,
-		token:   token,
-		baseURL: strings.TrimSuffix(baseURL, "/"),
+		Model:      model,
+		token:      token,
+		baseURL:    strings.TrimSuffix(baseURL, "/"),
+		httpClient: httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {
@@ -134,6 +137,11 @@ type MessageRequest struct {
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
 
+	// Extended thinking parameters (Claude 3.7+)
+	Thinking *ThinkingConfig `json:"thinking,omitempty"`
+
+	// BetaHeaders are additional beta feature headers to include
+	BetaHeaders   []string                                      `json:"-"`
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
 }
 
@@ -149,27 +157,38 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		TopP:          r.TopP,
 		Tools:         r.Tools,
 		Stream:        r.Stream,
+		Thinking:      r.Thinking,
 		StreamingFunc: r.StreamingFunc,
-	})
+	}, r.BetaHeaders)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func (c *Client) setHeaders(req *http.Request) {
+func (c *Client) setHeaders(req *http.Request, betaHeaders []string) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-api-key", c.token) //nolint:canonicalheader
 
 	// This is necessary as per https://docs.anthropic.com/en/api/versioning
 	// If this changes frequently enough we should expose it as an option..
 	req.Header.Set("anthropic-version", "2023-06-01") // nolint:canonicalheader
-	if c.anthropicBetaHeader != "" {
+
+	// Set beta headers from request, falling back to client default
+	if len(betaHeaders) > 0 {
+		for _, header := range betaHeaders {
+			req.Header.Add("anthropic-beta", header) // nolint:canonicalheader
+		}
+	} else if c.anthropicBetaHeader != "" {
 		req.Header.Set("anthropic-beta", c.anthropicBetaHeader) // nolint:canonicalheader
 	}
 }
 
 func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*http.Response, error) {
+	return c.doWithHeaders(ctx, path, payloadBytes, nil)
+}
+
+func (c *Client) doWithHeaders(ctx context.Context, path string, payloadBytes []byte, betaHeaders []string) (*http.Response, error) {
 	if c.baseURL == "" {
 		c.baseURL = DefaultBaseURL
 	}
@@ -181,7 +200,7 @@ func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*htt
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	c.setHeaders(req)
+	c.setHeaders(req, betaHeaders)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -202,7 +221,7 @@ func (c *Client) decodeError(resp *http.Response) error {
 
 	var errResp errorMessage
 	if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
-		return errors.New(msg) // nolint:goerr113
+		return errors.New(msg)
 	}
-	return fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
+	return fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 }

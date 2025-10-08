@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 var (
@@ -12,20 +15,47 @@ var (
 )
 
 type Client struct {
-	Token string
-	Model string
-	url   string
+	Token      string
+	Model      string
+	url        string
+	httpClient *http.Client
+	provider   string // Inference provider for router-based requests
 }
 
-func New(token, model, url string) (*Client, error) {
+func New(token, model, url string, opts ...Option) (*Client, error) {
 	if token == "" {
 		return nil, ErrInvalidToken
 	}
-	return &Client{
-		Token: token,
-		Model: model,
-		url:   url,
-	}, nil
+
+	client := &Client{
+		Token:      token,
+		Model:      model,
+		url:        url,
+		httpClient: httputil.DefaultClient,
+	}
+
+	for _, opt := range opts {
+		opt(client)
+	}
+
+	return client, nil
+}
+
+// Option configures a HuggingFace client.
+type Option func(*Client)
+
+// WithHTTPClient sets a custom HTTP client for the HuggingFace client.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(c *Client) {
+		c.httpClient = httpClient
+	}
+}
+
+// WithProvider sets the inference provider for router-based requests.
+func WithProvider(provider string) Option {
+	return func(c *Client) {
+		c.provider = provider
+	}
 }
 
 type InferenceRequest struct {

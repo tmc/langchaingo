@@ -10,10 +10,10 @@ import (
 )
 
 func TestFakeLLM_CallMethod(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
-	ctx := context.Background()
 
 	if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[0] {
 		t.Errorf("Expected 'Resposta 1', got '%s'", output)
@@ -34,10 +34,10 @@ func TestFakeLLM_CallMethod(t *testing.T) {
 }
 
 func TestFakeLLM_GenerateContentMethod(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
-	ctx := context.Background()
 	msg := llms.MessageContent{
 		Role:  llms.ChatMessageTypeHuman,
 		Parts: []llms.ContentPart{llms.TextContent{Text: "Teste"}},
@@ -69,10 +69,10 @@ func TestFakeLLM_GenerateContentMethod(t *testing.T) {
 }
 
 func TestFakeLLM_ResetMethod(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
-	ctx := context.Background()
 
 	fakeLLM.Reset()
 	if output, _ := fakeLLM.Call(ctx, "Teste"); output != responses[0] {
@@ -81,10 +81,10 @@ func TestFakeLLM_ResetMethod(t *testing.T) {
 }
 
 func TestFakeLLM_AddResponseMethod(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
-	ctx := context.Background()
 
 	fakeLLM.AddResponse("Resposta 4")
 	fakeLLM.Reset()
@@ -107,10 +107,10 @@ func TestFakeLLM_AddResponseMethod(t *testing.T) {
 }
 
 func TestFakeLLM_WithChain(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	responses := setupResponses()
 	fakeLLM := NewFakeLLM(responses)
-	ctx := context.Background()
 
 	fakeLLM.AddResponse("My name is Alexandre")
 

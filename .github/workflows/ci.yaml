@@ -1,49 +1,178 @@
-# GitHub Actions CI workflow for Go project
+# GitHub Actions CI workflow for langchaingo.
 name: CI
 on:
   push:
     branches:
       - main
+      - 'test-*'
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: read
+
 jobs:
   lint:
-    name: Lint
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: true
+          check-latest: false
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.0.2
+          version: v2.1.6
           args: --timeout=5m
-  build-examples:
-    name: Build Examples
+          skip-cache: false
+  
+  build:
+    name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: stable
-      - name: Build examples
-        run: make build-examples
-  build-test:
-    name: Build and Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
+          go-version-file: go.mod
+          cache: true
+          check-latest: false
       - name: Build
         run: go build -v ./...
+  
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          check-latest: false
+      - name: Get Go version
+        id: go-version
+        run: |
+          GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+          echo "Go version: $GO_VERSION"
+          echo "version=$GO_VERSION" >> $GITHUB_OUTPUT
       - name: Test
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
-        run: go test -v ./... -race
-
+        run: |
+          go test -v -json -coverprofile=coverage-${{ steps.go-version.outputs.version }}.out ./... | tee test-results-${{ steps.go-version.outputs.version }}.ndjson
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-go${{ steps.go-version.outputs.version }}.ndjson
+          path: |
+            test-results-${{ steps.go-version.outputs.version }}.ndjson
+            coverage-${{ steps.go-version.outputs.version }}.out
+  
+  test-race:
+    name: test -race
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+          check-latest: false
+      - name: Test with Race Detector
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
+        run: go test -v -json ./... -race | tee test-results-race-${{ steps.go-version.outputs.version }}.ndjson
+      - name: Upload race test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-race-go${{ steps.go-version.outputs.version }}.ndjson
+          path: test-results-race-${{ steps.go-version.outputs.version }}.ndjson
+  
+  coverage:
+    name: coverage
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+          check-latest: false
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          path: test-results
+      - name: Generate coverage report
+        run: |
+          # Find the latest Go version coverage file (highest version number)
+          COVERAGE_FILE=$(find test-results -name "coverage-*.out" -type f | sort -V | tail -1)
+          
+          if [ -z "$COVERAGE_FILE" ]; then
+            echo "No coverage file found"
+            exit 1
+          fi
+          
+          # Extract Go version from filename
+          GO_VERSION=$(basename "$COVERAGE_FILE" | sed 's/coverage-//' | sed 's/.out//')
+          
+          # Generate coverage reports
+          go tool cover -html="$COVERAGE_FILE" -o coverage.html
+          go tool cover -func="$COVERAGE_FILE" -o coverage.txt
+          
+          # Extract total coverage percentage
+          TOTAL_COVERAGE=$(go tool cover -func="$COVERAGE_FILE" | grep total | awk '{print $3}')
+          
+          # Get all tested Go versions
+          TESTED_VERSIONS=$(find test-results -name "coverage-*.out" -type f | sed 's/.*coverage-//' | sed 's/.out//' | sort -V | paste -sd, -)
+          
+          # Get workflow run URL
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+          # Create markdown summary
+          cat > coverage-summary.md << EOF
+          ## Test Coverage: ${TOTAL_COVERAGE}
+          
+          **Go versions tested:** ${TESTED_VERSIONS}
+          
+          [Download Coverage Report](${WORKFLOW_URL}#artifacts) • [View Workflow](${WORKFLOW_URL})
+          EOF
+          
+          # Output to GitHub Actions summary
+          cat coverage-summary.md >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        id: coverage-artifact
+        with:
+          name: coverage-report-html
+          path: |
+            coverage.html
+            coverage.txt
+            coverage-summary.md
+            test-results/**/coverage-*.out
+      
+      - name: Add artifact URL to summary
+        if: steps.coverage-artifact.outputs.artifact-url != ''
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          
+          ---
+          ### Direct Artifact Link
+          
+          [**Download Coverage Report**](${{ steps.coverage-artifact.outputs.artifact-url }})
+          
+          > **Note:** You must be logged in to GitHub to download this artifact.
+          EOF

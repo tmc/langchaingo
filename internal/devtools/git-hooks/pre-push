@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-push hook for langchaingo
+make pre-push
+# Exit with the make command's exit code
+exit $?
