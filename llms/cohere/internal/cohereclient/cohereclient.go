@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cohere-ai/tokenizer"
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 var (
@@ -51,7 +52,7 @@ func New(token string, baseURL string, model string, opts ...Option) (*Client, e
 		token:      token,
 		baseURL:    baseURL,
 		model:      model,
-		httpClient: http.DefaultClient,
+		httpClient: httputil.DefaultClient,
 		encoder:    encoder,
 	}
 
@@ -112,7 +113,7 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 	}
 
 	req.Header.Set("content-type", "application/json")
-	req.Header.Set("authorization", "bearer "+c.token)
+	req.Header.Set("authorization", "Bearer "+c.token)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {

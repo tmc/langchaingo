@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo/examples/openai-gpt4o-mutil-content
 
-go 1.23
+go 1.24.3
 
 require github.com/vendasta/langchaingo v0.1.13-pre.1
 

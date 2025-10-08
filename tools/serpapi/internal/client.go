@@ -9,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 const _url = "https://serpapi.com/search"
@@ -19,12 +21,17 @@ var (
 )
 
 type Client struct {
-	apiKey string
+	apiKey     string
+	httpClient *http.Client
 }
 
-func New(apiKey string) *Client {
+func New(apiKey string, httpClient *http.Client) *Client {
+	if httpClient == nil {
+		httpClient = httputil.DefaultClient
+	}
 	return &Client{
-		apiKey: apiKey,
+		apiKey:     apiKey,
+		httpClient: httpClient,
 	}
 }
 
@@ -42,7 +49,7 @@ func (s *Client) Search(ctx context.Context, query string) (string, error) {
 		return "", fmt.Errorf("creating request in serpapi: %w", err)
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := s.httpClient.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("doing response in serpapi: %w", err)
 	}

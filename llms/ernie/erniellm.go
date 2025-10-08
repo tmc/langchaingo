@@ -54,9 +54,16 @@ export ERNIE_SECRET_KEY={Secret Key}
 doc: https://cloud.baidu.com/doc/WENXINWORKSHOP/s/flfmc9do2`, ernieclient.ErrNotSetAuth)
 	}
 
-	return ernieclient.New(
+	clientOpts := []ernieclient.Option{
 		ernieclient.WithAccessToken(opts.accessToken),
-		ernieclient.WithAKSK(opts.apiKey, opts.secretKey))
+		ernieclient.WithAKSK(opts.apiKey, opts.secretKey),
+	}
+
+	if opts.httpClient != nil {
+		clientOpts = append(clientOpts, ernieclient.WithHTTPClient(opts.httpClient))
+	}
+
+	return ernieclient.New(clientOpts...)
 }
 
 func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {

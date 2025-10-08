@@ -2,7 +2,7 @@ package maritaca
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -13,13 +13,13 @@ import (
 
 func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
-	var token string
-	if token = os.Getenv("MARITACA_KEY"); token == "" {
-		t.Skip("MARITACA_KEY not set")
-		return nil
-	}
 
-	opts = append([]Option{WithToken(token), WithModel("sabia-2-medium")}, opts...)
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MARITACA_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure with httprr HTTP client
+	opts = append([]Option{WithHTTPClient(rr.Client()), WithModel("sabia-2-medium")}, opts...)
 
 	c, err := New(opts...)
 	require.NoError(t, err)
@@ -27,6 +27,7 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 }
 
 func TestGenerateContent(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -40,7 +41,7 @@ func TestGenerateContent(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 
 	require.NoError(t, err)
 
@@ -50,6 +51,7 @@ func TestGenerateContent(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	llm := newTestClient(t)
 
@@ -64,7 +66,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil

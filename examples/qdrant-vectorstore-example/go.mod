@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo/examples/qdrant-vectorstore-example
 
-go 1.22.0
+go 1.24.3
 
 toolchain go1.22.1
 
@@ -11,3 +11,4 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 )
+

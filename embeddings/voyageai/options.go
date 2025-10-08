@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"os"
+
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 const (
@@ -24,6 +26,7 @@ func WithModel(model string) Option {
 }
 
 // WithClient is an option for providing a custom http client.
+// FIXME: This should accept *http.Client instead of http.Client to match Go conventions.
 func WithClient(client http.Client) Option {
 	return func(v *VoyageAI) {
 		v.client = &client
@@ -62,7 +65,7 @@ func applyOptions(opts ...Option) (*VoyageAI, error) {
 		opt(o)
 	}
 	if o.client == nil {
-		o.client = http.DefaultClient
+		o.client = httputil.DefaultClient
 	}
 	if o.token == "" {
 		token := os.Getenv("VOYAGEAI_API_KEY")

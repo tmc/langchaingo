@@ -1,0 +1,34 @@
+httprr trace v1
+271 3462
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 80
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Once upon a time in a magical forest, there lived","model":"command"}HTTP/2.0 200 OK
+Content-Length: 2328
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 12:25:03 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 1675
+Num_tokens: 332
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: a447831124158f16aafd3449aca4def3
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 9449
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 37
+
+{"id":"df0d8117-b88d-42b9-b87e-105d0087e6eb","generations":[{"id":"c0e39a2b-1c4e-4b28-88c5-28d56e3627e0","text":" a wise old owl. He had lived there for as long as he could remember and had seen many changes in the forest. His large, round eyes were always alert and observant, missing nothing that happened in his serene and enchanting homeland. \n\nThe wise old owl gazed upon the magical forest with admiration. He felt a profound connection to the serene landscape of flourishing flora, twittering birds, and mischievous squirrels. The golden glow of sunrise or the silvery shimmer of the moon dancing on the forest canopy filled him with a sense of peace and inspiration. \n\nBut more than anything, the wise old owl loved the diverse community of creatures that called the magical forest home. He cherished the moments when all the inhabitants would come together in harmony, whether it was the lively birdsong echoing through the trees or the subdued hoots of presence and community. \n\nAlthough the wise old owl had seen difficult times, he never lost his hope and optimism. He believed that even through darkness and uncertainty, the light of resilience and compassion would guide the forest's inhabitants toward a brighter future. The magical forest, with all its charming creatures and natural beauty, would forever hold a special place in his wise, old heart. \n\nAnd so, the wise old owl continued to watch over the magical forest, serving as a guardian and a guide to all who sought his wisdom, protecting its secrets, and ensuring that harmony and beauty would forever flourish within its serene boundaries. \n\nHow's that? Should I continue the story from a different perspective, such as one of the creatures living in the forest? ","finish_reason":"COMPLETE"}],"prompt":"Once upon a time in a magical forest, there lived","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":11,"output_tokens":321}}}

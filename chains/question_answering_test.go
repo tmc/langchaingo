@@ -2,7 +2,7 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -10,20 +10,43 @@ import (
 	"github.com/vendasta/langchaingo/llms/openai"
 )
 
-func TestRefineQA(t *testing.T) {
-	t.Parallel()
+// createOpenAILLMForQA creates an OpenAI LLM with httprr support for testing.
+func createOpenAILLMForQA(t *testing.T) *openai.LLM {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording
+	if !rr.Recording() {
+		t.Parallel()
 	}
-	llm, err := openai.New()
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
+	return llm
+}
+
+func TestRefineQA(t *testing.T) {
+	ctx := context.Background()
+
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	qaChain := LoadRefineQA(llm)
 
 	results, err := Call(
-		context.Background(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -37,19 +60,15 @@ func TestRefineQA(t *testing.T) {
 }
 
 func TestMapReduceQA(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	qaChain := LoadMapReduceQA(llm)
 
 	result, err := Predict(
-		context.Background(),
+		ctx,
 		qaChain,
 		map[string]any{
 			"input_documents": docs,
@@ -64,18 +83,15 @@ func TestMapReduceQA(t *testing.T) {
 func TestMapRerankQA(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForQA(t)
 
 	docs := loadTestData(t)
 	mapRerankChain := LoadMapRerankQA(llm)
 
 	results, err := Call(
-		context.Background(),
+		ctx,
 		mapRerankChain,
 		map[string]any{
 			"input_documents": docs,

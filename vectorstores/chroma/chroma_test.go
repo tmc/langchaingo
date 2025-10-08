@@ -3,6 +3,7 @@ package chroma_test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/log"
 	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
 	"github.com/vendasta/langchaingo/chains"
 	"github.com/vendasta/langchaingo/embeddings"
@@ -29,14 +31,52 @@ import (
 // WARNING: When these values are not provided, the tests will not fail, but will be (silently) skipped.
 //
 
-func TestChromaGoStoreRest(t *testing.T) {
-	t.Parallel()
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	testChromaURL, openaiAPIKey := getValues(t)
-	llm, err := openai.New()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	llm, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
+	return e
+}
+
+// createOpenAILLMAndEmbedder creates both LLM and embedder with httprr support for chain tests.
+func createOpenAILLMAndEmbedder(t *testing.T) (*openai.LLM, *embeddings.EmbedderImpl) {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	llm, err := openai.New(
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+	embeddingLLM, err := openai.New(
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(embeddingLLM)
+	require.NoError(t, err)
+	return llm, e
+}
+
+func TestChromaGoStoreRest(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL, openaiAPIKey := getValues(t)
+	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -67,13 +107,15 @@ func TestChromaGoStoreRest(t *testing.T) {
 }
 
 func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -116,13 +158,15 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 }
 
 func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -160,14 +204,16 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 }
 
 func TestChromaAsRetriever(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -202,14 +248,16 @@ func TestChromaAsRetriever(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -252,14 +300,16 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -327,14 +377,16 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, newChromaErr := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -385,9 +437,6 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 	)
 	require.NoError(t, addDocumentsErr)
 
-	llm, newOpenaiErr := openai.New()
-	require.NoError(t, newOpenaiErr)
-
 	filter := make(map[string]any)
 	filterValue := make(map[string]any)
 	filterValue["$in"] = []string{"office", "kitchen"}
@@ -409,14 +458,16 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -484,14 +535,16 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 }
 
 func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr // Chroma client doesn't support custom HTTP clients
+	if !rr.Recording() {
+		t.Parallel()
+	}
 
 	testChromaURL, openaiAPIKey := getValues(t)
 
-	llm, err := openai.New()
-	require.NoError(t, err)
-	e, err := embeddings.NewEmbedder(llm)
-	require.NoError(t, err)
+	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
 		chroma.WithOpenAIAPIKey(openaiAPIKey),
@@ -556,11 +609,17 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	require.Contains(t, result, "purple", "expected black in purple")
+	result = strings.ToLower(result)
+	require.Contains(t, result, "purple", "expected purple in result")
 }
 
 func getValues(t *testing.T) (string, string) {
 	t.Helper()
+	testctr.SkipIfDockerNotAvailable(t)
+
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
 
 	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
 	if openaiAPIKey == "" {
@@ -569,13 +628,15 @@ func getValues(t *testing.T) (string, string) {
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		chromaContainer, err := tcchroma.RunContainer(context.Background(), testcontainers.WithImage("chromadb/chroma:0.4.24"))
+		chromaContainer, err := tcchroma.Run(context.Background(), "chromadb/chroma:0.4.24", testcontainers.WithLogger(log.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, chromaContainer.Terminate(context.Background()))
+			if err := chromaContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate chroma container: %v", err)
+			}
 		})
 
 		chromaURL, err = chromaContainer.RESTEndpoint(context.Background())

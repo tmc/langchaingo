@@ -3,7 +3,7 @@ package openai
 import (
 	"context"
 	"encoding/json"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -14,18 +14,36 @@ import (
 
 func newTestClient(t *testing.T, opts ...Option) llms.Model {
 	t.Helper()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-		return nil
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording
+	if !rr.Recording() {
+		t.Parallel()
 	}
 
-	llm, err := New(opts...)
+	// Configure OpenAI client based on recording vs replay mode
+	clientOpts := []Option{WithHTTPClient(rr.Client())}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		clientOpts = append(clientOpts, WithToken("fake-api-key-for-testing"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	// Add any additional options passed to the function
+	clientOpts = append(clientOpts, opts...)
+
+	t.Logf("Creating OpenAI client with recording=%v", rr.Recording())
+	llm, err := New(clientOpts...)
 	require.NoError(t, err)
 	return llm
 }
 
 func TestMultiContentText(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -39,7 +57,7 @@ func TestMultiContentText(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -48,7 +66,7 @@ func TestMultiContentText(t *testing.T) {
 }
 
 func TestMultiContentTextChatSequence(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	content := []llms.MessageContent{
@@ -66,7 +84,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content)
+	rsp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -75,7 +93,7 @@ func TestMultiContentTextChatSequence(t *testing.T) {
 }
 
 func TestMultiContentImage(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
 	llm := newTestClient(t, WithModel("gpt-4o"))
 
@@ -90,7 +108,7 @@ func TestMultiContentImage(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content, llms.WithMaxTokens(300))
+	rsp, err := llm.GenerateContent(ctx, content, llms.WithMaxTokens(300))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)
@@ -99,7 +117,7 @@ func TestMultiContentImage(t *testing.T) {
 }
 
 func TestWithStreaming(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -114,7 +132,7 @@ func TestWithStreaming(t *testing.T) {
 	}
 
 	var sb strings.Builder
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 			sb.Write(chunk)
 			return nil
@@ -130,7 +148,7 @@ func TestWithStreaming(t *testing.T) {
 
 //nolint:lll
 func TestFunctionCall(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 	llm := newTestClient(t)
 
 	parts := []llms.ContentPart{
@@ -151,7 +169,7 @@ func TestFunctionCall(t *testing.T) {
 		},
 	}
 
-	rsp, err := llm.GenerateContent(context.Background(), content,
+	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithFunctions(functions))
 	require.NoError(t, err)
 
@@ -159,12 +177,4 @@ func TestFunctionCall(t *testing.T) {
 	c1 := rsp.Choices[0]
 	assert.Equal(t, "tool_calls", c1.StopReason)
 	assert.NotNil(t, c1.FuncCall)
-}
-
-func showResponse(rsp any) string { //nolint:golint,unused
-	b, err := json.MarshalIndent(rsp, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
 }

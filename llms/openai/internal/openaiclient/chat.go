@@ -34,7 +34,8 @@ type ChatRequest struct {
 	Temperature float64        `json:"temperature"`
 	TopP        float64        `json:"top_p,omitempty"`
 	// Deprecated: Use MaxCompletionTokens
-	MaxTokens           int      `json:"-,omitempty"`
+	// Note: Some OpenAI-compatible servers still require this field
+	MaxTokens           int      `json:"max_tokens,omitempty"`
 	MaxCompletionTokens int      `json:"max_completion_tokens,omitempty"`
 	N                   int      `json:"n,omitempty"`
 	StopWords           []string `json:"stop,omitempty"`
@@ -63,6 +64,10 @@ type ChatRequest struct {
 	// Options for streaming response. Only set this when you set stream: true.
 	StreamOptions *StreamOptions `json:"stream_options,omitempty"`
 
+	// ReasoningEffort controls thinking effort for reasoning models (o1, o3, GPT-5).
+	// Valid values: "minimal" (GPT-5 only), "low", "medium", "high"
+	ReasoningEffort string `json:"reasoning_effort,omitempty"`
+
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
@@ -84,6 +89,65 @@ type ChatRequest struct {
 
 	// Whether to enable parallel function calling during tool use.
 	ParallelToolCalls bool `json:"parallel_tool_calls,omitempty"`
+}
+
+// MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
+// OpenAI's API returns an error if both fields are present.
+// Also omits temperature for reasoning models (GPT-5, o1, o3) that only accept default temperature.
+func (r ChatRequest) MarshalJSON() ([]byte, error) {
+	type Alias ChatRequest
+	aux := struct {
+		*Alias
+		MaxTokens           *int     `json:"max_tokens,omitempty"`
+		MaxCompletionTokens *int     `json:"max_completion_tokens,omitempty"`
+		Temperature         *float64 `json:"temperature,omitempty"`
+	}{
+		Alias: (*Alias)(&r),
+	}
+
+	// Handle temperature for reasoning models
+	if isReasoningModel(r.Model) {
+		// Reasoning models (GPT-5, o1, o3) only accept temperature=1 (default)
+		// Omit temperature field to let API use its default value
+		aux.Temperature = nil
+	} else {
+		// For regular models, always send temperature
+		aux.Temperature = &r.Temperature
+	}
+
+	// Ensure only one token field is sent
+	if r.MaxCompletionTokens > 0 && r.MaxTokens > 0 {
+		// Both are set - this shouldn't happen with our logic,
+		// but if it does, prefer MaxCompletionTokens (modern field)
+		aux.MaxCompletionTokens = &r.MaxCompletionTokens
+		aux.MaxTokens = nil
+	} else if r.MaxCompletionTokens > 0 {
+		aux.MaxCompletionTokens = &r.MaxCompletionTokens
+		aux.MaxTokens = nil
+	} else if r.MaxTokens > 0 {
+		aux.MaxTokens = &r.MaxTokens
+		aux.MaxCompletionTokens = nil
+	}
+
+	return json.Marshal(&aux)
+}
+
+// isReasoningModel returns true if the model is a reasoning model that has temperature constraints.
+// Reasoning models (GPT-5, o1, o3) only accept temperature=1 and reject other values.
+func isReasoningModel(model string) bool {
+	// o1 series: o1-preview, o1-mini
+	if strings.HasPrefix(model, "o1-") {
+		return true
+	}
+	// o3 series: o3, o3-mini (note: "o3" without suffix is also valid)
+	if model == "o3" || strings.HasPrefix(model, "o3-") {
+		return true
+	}
+	// GPT-5 series (when released)
+	if strings.HasPrefix(model, "gpt-5") {
+		return true
+	}
+	return false
 }
 
 // ToolType is the type of a tool.
@@ -302,11 +366,18 @@ type ChatCompletionChoice struct {
 
 // ChatUsage is the usage of a chat completion request.
 type ChatUsage struct {
-	PromptTokens            int `json:"prompt_tokens"`
-	CompletionTokens        int `json:"completion_tokens"`
-	TotalTokens             int `json:"total_tokens"`
+	PromptTokens        int `json:"prompt_tokens"`
+	CompletionTokens    int `json:"completion_tokens"`
+	TotalTokens         int `json:"total_tokens"`
+	PromptTokensDetails struct {
+		CachedTokens int `json:"cached_tokens"`
+		AudioTokens  int `json:"audio_tokens"`
+	} `json:"prompt_tokens_details"`
 	CompletionTokensDetails struct {
-		ReasoningTokens int `json:"reasoning_tokens"`
+		ReasoningTokens          int `json:"reasoning_tokens"`
+		AudioTokens              int `json:"audio_tokens"`
+		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
+		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
 	PromptTokensDetails struct {
 		CachedTokens int `json:"cached_tokens"`
@@ -325,11 +396,18 @@ type ChatCompletionResponse struct {
 }
 
 type Usage struct {
-	PromptTokens            int `json:"prompt_tokens"`
-	CompletionTokens        int `json:"completion_tokens"`
-	TotalTokens             int `json:"total_tokens"`
+	PromptTokens        int `json:"prompt_tokens"`
+	CompletionTokens    int `json:"completion_tokens"`
+	TotalTokens         int `json:"total_tokens"`
+	PromptTokensDetails struct {
+		CachedTokens int `json:"cached_tokens"`
+		AudioTokens  int `json:"audio_tokens"`
+	} `json:"prompt_tokens_details"`
 	CompletionTokensDetails struct {
-		ReasoningTokens int `json:"reasoning_tokens"`
+		ReasoningTokens          int `json:"reasoning_tokens"`
+		AudioTokens              int `json:"audio_tokens"`
+		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
+		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
 }
 
@@ -401,7 +479,27 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	}
 	// Build request payload
 
+	// Filter out internal metadata that shouldn't be sent to the API
+	originalMetadata := payload.Metadata
+	if payload.Metadata != nil {
+		filteredMetadata := make(map[string]any)
+		for k, v := range payload.Metadata {
+			// Skip internal openai: prefixed metadata fields
+			if !strings.HasPrefix(k, "openai:") {
+				filteredMetadata[k] = v
+			}
+		}
+		if len(filteredMetadata) > 0 {
+			payload.Metadata = filteredMetadata
+		} else {
+			payload.Metadata = nil
+		}
+	}
+
 	payloadBytes, err := json.Marshal(payload)
+
+	// Restore original metadata
+	payload.Metadata = originalMetadata
 	if err != nil {
 		return nil, err
 	}
@@ -429,10 +527,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:goerr113
+			return nil, errors.New(msg)
 		}
 
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:goerr113
+		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)
@@ -447,11 +545,36 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 ) { //nolint:cyclop,lll
 	scanner := bufio.NewScanner(r.Body)
 	responseChan := make(chan StreamedChatResponsePayload)
+
+	// Create a context that can be cancelled to stop the goroutine
+	readerCtx, cancelReader := context.WithCancel(ctx)
+	defer cancelReader()
+
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
+			// Check if context is cancelled
+			select {
+			case <-readerCtx.Done():
+				return
+			default:
+			}
+
 			line := scanner.Text()
 			if line == "" {
+				continue
+			}
+
+			// Skip SSE comment lines (any line starting with ':')
+			// According to SSE spec: https://www.w3.org/TR/eventsource/
+			// "Lines that start with a U+003A COLON character (:) are comments"
+			if strings.HasPrefix(line, ":") {
+				continue
+			}
+
+			// Only process lines that start with "data:"
+			if !strings.HasPrefix(line, "data:") {
+				// Skip any other non-data lines (like event:, id:, retry:, etc.)
 				continue
 			}
 
@@ -463,19 +586,29 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
-				responseChan <- streamPayload
-				return
+				// Skip non-JSON data values that some providers might send
+				// This could happen if the data field contains non-JSON content
+				continue
 			}
-			responseChan <- streamPayload
+
+			// Non-blocking send with context check
+			select {
+			case <-readerCtx.Done():
+				return
+			case responseChan <- streamPayload:
+			}
 		}
 		if err := scanner.Err(); err != nil {
-			responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}
+			select {
+			case <-readerCtx.Done():
+				return
+			case responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}:
+			}
 			return
 		}
 	}()
 	// Combine response
-	return combineStreamingChatResponse(ctx, payload, responseChan)
+	return combineStreamingChatResponse(readerCtx, payload, responseChan)
 }
 
 func combineStreamingChatResponse(
@@ -498,6 +631,11 @@ func combineStreamingChatResponse(
 			response.Usage.CompletionTokens = streamResponse.Usage.CompletionTokens
 			response.Usage.PromptTokens = streamResponse.Usage.PromptTokens
 			response.Usage.TotalTokens = streamResponse.Usage.TotalTokens
+			response.Usage.PromptTokensDetails.AudioTokens = streamResponse.Usage.PromptTokensDetails.AudioTokens
+			response.Usage.PromptTokensDetails.CachedTokens = streamResponse.Usage.PromptTokensDetails.CachedTokens
+			response.Usage.CompletionTokensDetails.AudioTokens = streamResponse.Usage.CompletionTokensDetails.AudioTokens
+			response.Usage.CompletionTokensDetails.AcceptedPredictionTokens = streamResponse.Usage.CompletionTokensDetails.AcceptedPredictionTokens
+			response.Usage.CompletionTokensDetails.RejectedPredictionTokens = streamResponse.Usage.CompletionTokensDetails.RejectedPredictionTokens
 			response.Usage.CompletionTokensDetails.ReasoningTokens = streamResponse.Usage.CompletionTokensDetails.ReasoningTokens
 		}
 

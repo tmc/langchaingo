@@ -91,7 +91,16 @@ func WithAuthConfig(authConfig auth.Config) Option {
 	}
 }
 
+// WithHTTPClient is an option for setting the HTTP client of the weaviate server.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(p *Store) {
+		p.connectionClient = httpClient
+	}
+}
+
 // WithConnectionClient is an option for setting the connection client of the weaviate server.
+//
+// Deprecated: Use WithHTTPClient instead.
 func WithConnectionClient(connectionClient *http.Client) Option {
 	return func(p *Store) {
 		p.connectionClient = connectionClient

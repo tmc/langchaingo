@@ -28,6 +28,18 @@ type Model interface {
 	Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 }
 
+// ReasoningModel is an interface for models that support extended reasoning/thinking.
+// Models implementing this interface can generate internal reasoning tokens that are
+// used to improve response quality but may not be included in the final output.
+type ReasoningModel interface {
+	Model
+
+	// SupportsReasoning returns true if the model supports reasoning/thinking tokens.
+	// This capability allows models to "think" through problems internally before
+	// generating a response, improving quality for complex tasks.
+	SupportsReasoning() bool
+}
+
 // GenerateFromSinglePrompt is a convenience function for calling an LLM with
 // a single string prompt, expecting a single string response. It's useful for
 // simple, string-only interactions and provides a slightly more ergonomic API

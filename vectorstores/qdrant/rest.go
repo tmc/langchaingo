@@ -142,7 +142,7 @@ func DoRequest(ctx context.Context,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("api-Key", apiKey)
 
-	r, err := http.DefaultClient.Do(req)
+	r, err := httputil.DefaultClient.Do(req)
 	if err != nil {
 		return nil, 0, err
 	}

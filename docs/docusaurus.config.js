@@ -12,12 +12,9 @@ const examplesPath = path.resolve(__dirname, "..", "examples");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "🦜️🔗 LangchainGo",
-  tagline: "LangChain Go Docs",
+  title: "🦜️🔗 LangChainGo",
+  tagline: "LangChainGo Docs",
   favicon: "img/favicon.ico",
-  customFields: {
-    mendableAnonKey: process.env.MENDABLE_ANON_KEY,
-  },
   // Set the production url of your site here
   url: "https://tmc.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -34,6 +31,7 @@ const config = {
         plugins: [
           new ProvidePlugin({
             process: require.resolve("process/browser"),
+            React: "react",
           }),
         ],
         resolve: {
@@ -125,38 +123,28 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      // Color mode configuration
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['go', 'bash', 'json', 'yaml'],
       },
       image: "img/parrot-chainlink-icon.png",
       navbar: {
         title: "🦜️🔗 LangChainGo",
         items: [
           {
-            href: "https://python.langchain.com/docs/get_started/introduction/",
-            label: "Concepts",
-            position: "left",
-          },
-          {
-            href: "https://python.langchain.com/en/latest/",
-            label: "Python Docs",
-            position: "left",
-          },
-          {
-            href: "https://js.langchain.com/docs/",
-            label: "JS/TS Docs",
-            position: "left",
-          },
-          {
             to: "/docs/",
-            label: "Go Docs",
+            label: "Documentation",
             position: "left",
           },
-          // Please keep GitHub link to the right for consistency.
           {
-            href: "https://github.com/tmc/langchaingo",
-            label: "GitHub",
+            type: "search",
             position: "right",
           },
         ],

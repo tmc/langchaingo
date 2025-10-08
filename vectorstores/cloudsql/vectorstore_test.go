@@ -27,6 +27,9 @@ type EnvVariables struct {
 func getEnvVariables(t *testing.T) EnvVariables {
 	t.Helper()
 
+	// Check for OpenAI API key since we use OpenAI embeddings
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
 	username := os.Getenv("CLOUDSQL_USERNAME")
 	if username == "" {
 		t.Skip("env variable CLOUDSQL_USERNAME is empty")
@@ -99,6 +102,9 @@ func setEngine(t *testing.T, envVariables EnvVariables) cloudsqlutil.PostgresEng
 
 func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore, func() error) {
 	t.Helper()
+	if testing.Short() {
+		t.Skip("skipping cloudsql tests in short mode")
+	}
 	pgEngine := setEngine(t, envVariables)
 	ctx := context.Background()
 	vectorstoreTableoptions := cloudsqlutil.VectorstoreTableOptions{
@@ -111,18 +117,8 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (cloudsql.VectorStore,
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Initialize VertexAI LLM
-	llm, err := openai.New(
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Initialize OpenAI embedder with httprr
+	e := createOpenAIEmbedder(t)
 	vs, err := cloudsql.NewVectorStore(pgEngine, e, envVariables.Table)
 	if err != nil {
 		t.Fatal(err)
@@ -182,7 +178,13 @@ func TestIsValidIndex(t *testing.T) {
 }
 
 func TestAddDocuments(t *testing.T) {
-	t.Parallel()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
 	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)

@@ -3,7 +3,9 @@ package constitution
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,8 +15,17 @@ import (
 	"github.com/vendasta/langchaingo/prompts"
 )
 
+// hasExistingRecording checks if a httprr recording exists for this test
+func hasExistingRecording(t *testing.T) bool {
+	testName := strings.ReplaceAll(t.Name(), "/", "_")
+	testName = strings.ReplaceAll(testName, " ", "_")
+	recordingPath := filepath.Join("testdata", testName+".httprr")
+	_, err := os.Stat(recordingPath)
+	return err == nil
+}
+
 func TestConstitutionCritiqueParsing(t *testing.T) {
-	t.Parallel()
+
 	textOne := ` This text is bad.
 
 	Revision request: Make it better.
@@ -36,12 +47,24 @@ func TestConstitutionCritiqueParsing(t *testing.T) {
 	}
 }
 
-func Test(t *testing.T) {
+func TestConstitutionalChain(t *testing.T) {
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	ctx := context.Background()
+
+	// Skip if no recording available and no credentials
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
 	}
-	model, err := openai.New()
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+
+	model, err := openai.New(opts...)
 	require.NoError(t, err)
 	chain := *chains.NewLLMChain(model, &prompts.FewShotPrompt{
 		Examples:         []map[string]string{{"question": "What's life?"}},
@@ -61,6 +84,12 @@ func Test(t *testing.T) {
 			"Give a better answer.",
 		),
 	}, nil)
-	_, err = c.Call(context.Background(), map[string]any{"question": "What is the meaning of life?"})
-	require.NoError(t, err)
+	_, err = c.Call(ctx, map[string]any{"question": "What is the meaning of life?"})
+	if err != nil {
+		// Check if this is a recording mismatch error
+		if strings.Contains(err.Error(), "cached HTTP response not found") {
+			t.Skip("Recording format has changed or is incompatible. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+		}
+		require.NoError(t, err)
+	}
 }

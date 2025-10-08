@@ -36,6 +36,16 @@ func TestMRKLOutputParser(t *testing.T) {
 			expectedFinish: nil,
 			expectedErr:    nil,
 		},
+		{
+			input: "Action: calculator\nAction Input: 5 + 3\nObservation:",
+			expectedActions: []schema.AgentAction{{
+				Tool:      "calculator",
+				ToolInput: "5 + 3\nObservation:",
+				Log:       "Action: calculator\nAction Input: 5 + 3\nObservation:",
+			}},
+			expectedFinish: nil,
+			expectedErr:    nil,
+		},
 	}
 
 	a := OneShotZeroAgent{}

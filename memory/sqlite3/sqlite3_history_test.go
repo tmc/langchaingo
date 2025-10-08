@@ -11,9 +11,8 @@ import (
 )
 
 func TestSqliteChatMessageHistory(t *testing.T) {
-	t.Parallel()
-
 	ctx := context.Background()
+	t.Parallel()
 	h := sqlite3.NewSqliteChatMessageHistory(sqlite3.WithContext(ctx))
 
 	err := h.AddAIMessage(ctx, "foo")

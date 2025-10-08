@@ -497,6 +497,13 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 	}
 	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
 
+	// Return nil if no tools are provided
+	if len(genaiFuncDecls) == 0 {
+		return nil, nil
+	}
+
+	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
+
 	return genaiTools, nil
 }
 

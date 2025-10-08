@@ -45,7 +45,7 @@ var (
 // and returns the `Store` object needed by the other accessors.
 func New(opts ...Option) (Store, error) {
 	s := Store{
-		client: http.DefaultClient,
+		client: httputil.DefaultClient,
 	}
 
 	if err := applyClientOptions(&s, opts...); err != nil {

@@ -2,7 +2,7 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,12 +12,28 @@ import (
 )
 
 func TestStuffDocuments(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording
+	if rr.Replaying() {
+		t.Parallel()
 	}
-	model, err := openai.New()
+
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	model, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	prompt := prompts.NewPromptTemplate(
@@ -35,7 +51,7 @@ func TestStuffDocuments(t *testing.T) {
 		{PageContent: "baz"},
 	}
 
-	result, err := Call(context.Background(), chain, map[string]any{
+	result, err := Call(ctx, chain, map[string]any{
 		"input_documents": docs,
 	})
 	require.NoError(t, err)

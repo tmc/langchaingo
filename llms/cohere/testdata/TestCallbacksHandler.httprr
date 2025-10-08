@@ -1,0 +1,34 @@
+httprr trace v1
+219 1950
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 28
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"test","model":""}HTTP/2.0 200 OK
+Content-Length: 819
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 12:24:43 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 176
+Num_tokens: 47
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: a6d64c716655ccc7a7e1586b3e139480
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 4041
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 38
+
+{"id":"094121f2-2cc2-4cff-a28a-22ac5410f376","generations":[{"id":"80620956-f783-4df5-b6ee-990648954eed","text":" Alright, let's get started! If you would be so kind to introduce yourself, I'd be more than happy to get to know you better. \n\nUntil then, stay safe and have a great day! ","finish_reason":"COMPLETE"}],"prompt":"test","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":1,"output_tokens":46}}}

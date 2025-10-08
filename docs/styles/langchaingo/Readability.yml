@@ -1,0 +1,8 @@
+extends: readability
+message: "Try to keep sentences shorter and clearer"
+level: suggestion
+grade: 9
+metrics:
+  - Flesch-Kincaid
+  - Gunning Fog
+

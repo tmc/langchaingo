@@ -1,0 +1,13 @@
+extends: substitution
+message: "Use present tense: '%s' instead of '%s'"
+level: warning
+swap:
+  'will return': 'returns'
+  'will create': 'creates'
+  'will configure': 'configures'
+  'will build': 'builds'
+  'will show': 'shows'
+  'will explain': 'explains'
+  'will help': 'helps'
+  'will solve': 'solves'
+

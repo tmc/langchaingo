@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo/examples/basic-llm-example
 
-go 1.22.0
+go 1.24.3
 
 toolchain go1.22.1
 

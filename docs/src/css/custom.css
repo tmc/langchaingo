@@ -13,27 +13,80 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/* pkg.go.dev inspired theme colors */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Light theme - inspired by pkg.go.dev */
+  --ifm-color-primary: #007d9c;
+  --ifm-color-primary-dark: #006b87;
+  --ifm-color-primary-darker: #00657f;
+  --ifm-color-primary-darkest: #00536a;
+  --ifm-color-primary-light: #008fb1;
+  --ifm-color-primary-lighter: #0095b7;
+  --ifm-color-primary-lightest: #00a7cb;
+  
+  /* Go-inspired color palette */
+  --go-blue: #007d9c;
+  --go-light-blue: #5dc9e2;
+  --go-dark-blue: #002a2e;
+  --go-cyan: #00add8;
+  --go-yellow: #fddd00;
+  --go-fuchsia: #ce3262;
+  
+  /* Typography */
   --ifm-code-font-size: 95%;
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --ifm-font-family-monospace: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  
+  /* Layout */
+  --ifm-global-radius: 6px;
+  --ifm-code-border-radius: 4px;
+  
+  /* Colors inspired by pkg.go.dev light theme */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f8f9fa;
+  --ifm-color-content: #202124;
+  --ifm-color-content-secondary: #5f6368;
+  --ifm-toc-border-color: #dee2e6;
+  --ifm-color-emphasis-300: #dee2e6;
+  --ifm-hr-border-color: #e8eaed;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* Dark theme - inspired by pkg.go.dev dark mode */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  /* Primary colors for dark theme */
+  --ifm-color-primary: #5dc9e2;
+  --ifm-color-primary-dark: #3fc0dd;
+  --ifm-color-primary-darker: #32bbdb;
+  --ifm-color-primary-darkest: #0ba5c7;
+  --ifm-color-primary-light: #7bd2e7;
+  --ifm-color-primary-lighter: #88d7ea;
+  --ifm-color-primary-lightest: #b0e4f1;
+  
+  /* Dark theme background and text colors inspired by pkg.go.dev */
+  --ifm-background-color: #0d1117;
+  --ifm-background-surface-color: #161b22;
+  --ifm-color-content: #f0f6fc;
+  --ifm-color-content-secondary: #8b949e;
+  --ifm-navbar-background-color: #0d1117;
+  --ifm-navbar-text-color: #f0f6fc;
+  --ifm-footer-background-color: #0d1117;
+  --ifm-footer-color: #8b949e;
+  
+  /* Borders and dividers */
+  --ifm-toc-border-color: #30363d;
+  --ifm-color-emphasis-300: #30363d;
+  --ifm-hr-border-color: #21262d;
+  --ifm-table-border-color: #30363d;
+  
+  /* Sidebar */
+  --ifm-menu-color: #f0f6fc;
+  --ifm-menu-color-background-active: #21262d;
+  --ifm-menu-color-background-hover: #161b22;
+  
+  /* Code blocks */
+  --ifm-code-background: #161b22;
+  --ifm-pre-background: #0d1117;
+  --ifm-blockquote-border-left-color: var(--ifm-color-primary);
 }
 
 /* Reduce width on mobile for Mendable Search */
@@ -135,4 +188,115 @@
 .markdown > h5 {
   margin-bottom: 0.2rem;
   font-weight: 600;
+}
+
+/* Additional pkg.go.dev inspired styling */
+
+/* Go gopher styling for dark mode */
+[data-theme='dark'] img[alt="gopher"] {
+  filter: brightness(0.8) contrast(1.2);
+}
+
+/* Enhanced code styling similar to pkg.go.dev */
+code {
+  background-color: var(--ifm-code-background);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-code-border-radius);
+  font-family: var(--ifm-font-family-monospace);
+}
+
+[data-theme='dark'] code {
+  background-color: #161b22;
+  border-color: #30363d;
+  color: #e6edf3;
+}
+
+/* Navigation enhancements */
+.navbar__title {
+  font-weight: 600;
+  color: var(--ifm-navbar-text-color);
+}
+
+/* Footer styling to match pkg.go.dev */
+.footer {
+  background-color: var(--ifm-footer-background-color);
+  color: var(--ifm-footer-color);
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .footer {
+  border-top-color: #30363d;
+}
+
+/* Table styling similar to pkg.go.dev */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+table th,
+table td {
+  border: 1px solid var(--ifm-table-border-color);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+table th {
+  background-color: var(--ifm-background-surface-color);
+  font-weight: 600;
+}
+
+[data-theme='dark'] table th {
+  background-color: #161b22;
+}
+
+/* Enhanced sidebar styling */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-toc-border-color);
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container {
+  border-right-color: #30363d;
+}
+
+/* Alert/admonition styling similar to pkg.go.dev */
+.alert {
+  border-left: 4px solid var(--ifm-color-primary);
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+[data-theme='dark'] .alert {
+  background-color: #161b22;
+  border-left-color: var(--ifm-color-primary);
+}
+
+/* Enhanced search styling */
+.navbar__search-input {
+  background-color: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  color: var(--ifm-color-content);
+}
+
+[data-theme='dark'] .navbar__search-input {
+  background-color: #161b22;
+  border-color: #30363d;
+  color: #f0f6fc;
+}
+
+/* Go-specific accent colors for highlights */
+.go-highlight {
+  color: var(--go-cyan);
+  font-weight: 600;
+}
+
+.go-accent {
+  color: var(--go-blue);
+}
+
+[data-theme='dark'] .go-accent {
+  color: var(--go-light-blue);
 }

@@ -4,22 +4,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/vendasta/langchaingo/httputil"
 )
 
-var (
-	ErrNoGoodResult = errors.New("no good search results found")
-	ErrAPIResponse  = errors.New("duckduckgo api responded with error")
-)
+var ErrNoGoodResult = errors.New("no good search results found")
 
 // Client defines an HTTP client for communicating with duckduckgo.
 type Client struct {
 	maxResults int
 	userAgent  string
+	httpClient *http.Client
 }
 
 // Result defines a search query result type.
@@ -39,7 +39,13 @@ func New(maxResults int, userAgent string) *Client {
 	return &Client{
 		maxResults: maxResults,
 		userAgent:  userAgent,
+		httpClient: &http.Client{Transport: httputil.DefaultTransport},
 	}
+}
+
+// SetHTTPClient sets a custom HTTP client for the DuckDuckGo client.
+func (client *Client) SetHTTPClient(httpClient *http.Client) {
+	client.httpClient = httpClient
 }
 
 func (client *Client) newRequest(ctx context.Context, queryURL string) (*http.Request, error) {
@@ -65,14 +71,15 @@ func (client *Client) Search(ctx context.Context, query string) (string, error) 
 		return "", err
 	}
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := client.httpClient.Do(request)
 	if err != nil {
 		return "", fmt.Errorf("get %s error: %w", queryURL, err)
 	}
 
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return "", ErrAPIResponse
+		b, _ := io.ReadAll(response.Body) // body just used to populate an error message. No point capturing any errors reading from body
+		return "", fmt.Errorf("duckduckgo api responded with %d: %s", response.StatusCode, string(b))
 	}
 
 	doc, err := goquery.NewDocumentFromReader(response.Body)

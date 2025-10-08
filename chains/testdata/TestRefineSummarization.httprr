@@ -1,0 +1,872 @@
+httprr trace v1
+713 1711
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 511
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Write a concise summary of the following:\n\n\n\"Once upon a time, in a charming little village nestled deep within the enchanted forest, lived a small mouse named Oliver. Oliver was unlike the other mice in the village. While they scurried and chattered happily amongst themselves, Oliver felt a longing for something more, a yearning for adventure and new friendships beyond the familiar mouse tunnels.\"\n\n\nCONCISE SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 942
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:34:56 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 543
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 573
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999893
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_e3bdd8377d3144938b6de74e1c236709
+
+{
+  "id": "chatcmpl-C5uIiyMc2fNR55X7BeoEYqjrKxb8m",
+  "object": "chat.completion",
+  "created": 1755524096,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 89,
+    "completion_tokens": 29,
+    "total_tokens": 118,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1152 1930
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 950
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"One sunny morning, as the golden rays of the sun danced through the treetops, Oliver decided it was time to embark on a grand journey to find new friends who shared his thirst for excitement. With a determined gleam in his eye, he packed a tiny satchel filled with cheese, a sturdy walking stick, and bid farewell to his mouse friends.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1159
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:34:59 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 958
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1064
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999785
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_d346e4f9ab1745ecb86c5a90084fa8bf
+
+{
+  "id": "chatcmpl-C5uIkizxHOjcsi68QycV3vB8dqfI9",
+  "object": "chat.completion",
+  "created": 1755524098,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. One sunny morning, with a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 182,
+    "completion_tokens": 75,
+    "total_tokens": 257,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1366 2100
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1163
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. One sunny morning, with a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"Venturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1328
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:02 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1673
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1707
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999731
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_57aaed371689445a9671648429b6bcfb
+
+{
+  "id": "chatcmpl-C5uIm30SgySaZAsh6b5l1SlFObAfl",
+  "object": "chat.completion",
+  "created": 1755524100,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver's heart raced with anticipation as he marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 224,
+    "completion_tokens": 107,
+    "total_tokens": 331,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1636 2182
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1433
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver's heart raced with anticipation as he marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"As Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1410
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:05 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1798
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1824
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999664
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_97fe056e06f34009b07089d3523f4b71
+
+{
+  "id": "chatcmpl-C5uIpnhU85pQZvuKrS9KoUJlUWXuh",
+  "object": "chat.completion",
+  "created": 1755524103,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, sparking excitement and hope for a new friendship.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 281,
+    "completion_tokens": 123,
+    "total_tokens": 404,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1554 2270
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1351
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, sparking excitement and hope for a new friendship.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"Leo raised his magnificent head, his golden eyes sparkling with curiosity. \"Greetings, Oliver! I must admit, I've never met a mouse with such courage. I would be honored to accompany you on your noble quest. Together, we shall forge an unbreakable bond of friendship!\"\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1498
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:07 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1312
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1346
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999685
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_f4f4fbe0983b41a5b351f6c96b890ac1
+
+{
+  "id": "chatcmpl-C5uIsq3Ynu6v8cNYK9eYl0FabVIXH",
+  "object": "chat.completion",
+  "created": 1755524106,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest, forging a new and unbreakable bond of friendship.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 262,
+    "completion_tokens": 141,
+    "total_tokens": 403,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1674 2574
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1471
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest, forging a new and unbreakable bond of friendship.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"With Leo by his side, Oliver's adventure took on a new dimension. The unlikely duo traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1802
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:10 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1708
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1737
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999654
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_00739f2787f14816a61d5fea988fbf04
+
+{
+  "id": "chatcmpl-C5uIua7j2bl9whwebsML7FRl7ibMv",
+  "object": "chat.completion",
+  "created": 1755524108,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 285,
+    "completion_tokens": 202,
+    "total_tokens": 487,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+2191 2843
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1988
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"Freddie, with his emerald-green skin and mischievous grin, eagerly joined their quest. \"Ribbit! Oliver, my dear fellow, it seems that fate has brought us together. Allow me to lend my amphibious skills to our merry group. Together, we shall make quite the team!\"\n\nWith Oliver, Leo, and Freddie united, their bond grew stronger with each passing day. They shared laughter, sang songs, and told tales around the campfire. Oliver had finally found the true meaning of friendship, and his heart was filled with joy.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 2071
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:15 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 3300
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 3337
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999525
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_88c50d8c19a64f88927caab747ac2f1e
+
+{
+  "id": "chatcmpl-C5uIxBk3nRkn90rkuQrBBNSvcD5TK",
+  "object": "chat.completion",
+  "created": 1755524111,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement. Freddie eagerly joined their quest, adding his amphibious skills to the group. Together, Oliver, Leo, and Freddie formed a strong bond, sharing laughter, songs, and tales around the campfire, and Oliver found the true meaning of friendship, filling his heart with joy.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 395,
+    "completion_tokens": 257,
+    "total_tokens": 652,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+2424 2999
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 2221
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement. Freddie eagerly joined their quest, adding his amphibious skills to the group. Together, Oliver, Leo, and Freddie formed a strong bond, sharing laughter, songs, and tales around the campfire, and Oliver found the true meaning of friendship, filling his heart with joy.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"But their adventure was far from over. As they ventured deeper into the forest, they stumbled upon a towering volcano, spewing molten lava into the sky. From the fiery depths emerged a fearsome lava monster, its fiery eyes glaring with malevolence.\n\nOliver, Leo, and Freddie stood face to face with the menacing creature, their hearts pounding with a mixture of fear and determination. Oliver's quick wit came to the forefront, and he hatched a plan to defeat the lava monster.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 2227
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:18 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 2185
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 2215
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999466
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_3a23e541f76c4716b6589916e9fa950d
+
+{
+  "id": "chatcmpl-C5uJ26kPMssT1ZNb59n0jdp6iIuC0",
+  "object": "chat.completion",
+  "created": 1755524116,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement. Freddie eagerly joined their quest, adding his amphibious skills to the group. Together, Oliver, Leo, and Freddie formed a strong bond, sharing laughter, songs, and tales around the campfire, and Oliver found the true meaning of friendship, filling his heart with joy. As their adventure continued, they faced a towering volcano and a fearsome lava monster, prompting Oliver to devise a plan to defeat the menacing creature.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 437,
+    "completion_tokens": 286,
+    "total_tokens": 723,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+2456 2084
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 2253
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in a charming village in an enchanted forest, longs for adventure and new friendships beyond the familiar mouse tunnels. With a determined gleam in his eye, he packed a tiny satchel filled with cheese and a sturdy walking stick, ready to embark on a grand journey to find friends who shared his thirst for excitement. Venturing deeper into the forest, Oliver marveled at the vibrant flora and stumbled upon a clearing where a small pond shimmered under the sunlight. As he approached the pond, he encountered a majestic lion named Leo, who expressed admiration for Oliver's courage and offered to accompany him on his quest. With Leo by his side, Oliver's adventure took on a new dimension as they traversed verdant meadows, climbed towering trees, and braved treacherous rivers. Along their journey, they encountered a whimsical frog named Freddie, who was a skilled hopper and an expert in finding hidden treasures, further enriching their quest for friendship and excitement. Freddie eagerly joined their quest, adding his amphibious skills to the group. Together, Oliver, Leo, and Freddie formed a strong bond, sharing laughter, songs, and tales around the campfire, and Oliver found the true meaning of friendship, filling his heart with joy. As their adventure continued, they faced a towering volcano and a fearsome lava monster, prompting Oliver to devise a plan to defeat the menacing creature.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"\"Listen, my friends! We must work together, combining our unique strengths and abilities,\" Oliver declared with conviction. \"Leo, with your strength and courage, distract the monster while Freddie and I search for its vulnerable spot. Freddie, your agility and quick reflexes will guide us through the treacherous terrain. Together, we shall triumph!\"\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1312
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:21 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1697
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1735
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999460
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_f41874e868414adb82f507d1b15560e6
+
+{
+  "id": "chatcmpl-C5uJ5jNfSpZPqTHNjRxAxzzzKtrus",
+  "object": "chat.completion",
+  "created": 1755524119,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature and continue their journey filled with friendship and excitement.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 436,
+    "completion_tokens": 105,
+    "total_tokens": 541,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1675 2136
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1472
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature and continue their journey filled with friendship and excitement.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"And so, the courageous trio battled the lava monster. Leo roared, drawing the monster's attention, while Freddie and Oliver scurried through the maze of fiery rocks, narrowly dodging molten lava. Finally, they discovered the creature's weak spot—a tiny gem embedded in its chest.\n\nWith their combined efforts, they struck the vulnerable spot, causing the monster to crumble and dissolve into a cascade of ash. The forest rejoiced, as the once-threatening presence was banished forever.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1365
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:23 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 995
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1023
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999655
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_856fb5c711fb4843bd456129f10b2f23
+
+{
+  "id": "chatcmpl-C5uJ87yLG4TWbjz3KGcKUBDFaRJV8",
+  "object": "chat.completion",
+  "created": 1755524122,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever, continuing their journey filled with friendship and excitement.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 284,
+    "completion_tokens": 115,
+    "total_tokens": 399,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1501 2227
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1298
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever, continuing their journey filled with friendship and excitement.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"As Oliver, Leo, and Freddie emerged victorious, the animals of the enchanted forest gathered to celebrate their bravery. The mouse who had set out on a journey to find new friends had not only discovered the true meaning of friendship but had also become a hero.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1455
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:27 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 2317
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 2340
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999698
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_c45b9d4b0d2b4179a866b1036a60d21d
+
+{
+  "id": "chatcmpl-C5uJBCp0KslMJk4WccVDL8UhH2HhF",
+  "object": "chat.completion",
+  "created": 1755524125,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever. As they emerge victorious, the animals of the enchanted forest gather to celebrate their bravery, turning Oliver from a seeker of friendship into a hero.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 246,
+    "completion_tokens": 134,
+    "total_tokens": 380,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1679 2578
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1476
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever. As they emerge victorious, the animals of the enchanted forest gather to celebrate their bravery, turning Oliver from a seeker of friendship into a hero.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1806
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:30 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1513
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1544
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999652
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_e8911c05cbcc403a8c0a044c3e6fe7db
+
+{
+  "id": "chatcmpl-C5uJEaSeJMSCQpMm61q7vLDDfNb9B",
+  "object": "chat.completion",
+  "created": 1755524128,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever. As they emerge victorious, the animals of the enchanted forest gather to celebrate their bravery, turning Oliver from a seeker of friendship into a hero. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 278,
+    "completion_tokens": 197,
+    "total_tokens": 475,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}
+1878 2515
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 1675
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Your job is to produce a final concise summary\nWe have provided an existing summary up to a certain point: \"Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever. As they emerge victorious, the animals of the enchanted forest gather to celebrate their bravery, turning Oliver from a seeker of friendship into a hero. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Their adventures continued, and their friendships blossomed, reminding everyone in the enchanted forest that no matter how small or different you may be, true friendship knows no bounds.\"\nWe have the opportunity to refine the existing summary\n(only if needed) with some more context below.\n------------\n\"And so, Oliver's story, filled with magic, friendship, and bravery, spread far and wide, becoming a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.\"\n------------\n\nGiven the new context, refine the original summary\nIf the context isn't useful, return the original summary.\n\nREFINED SUMMARY:"}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1743
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 13:35:33 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 1838
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 1883
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 49999602
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_0679ef9911f44290b41927b4c2687c5b
+
+{
+  "id": "chatcmpl-C5uJHLP5zqUfnUOhrelnt3mIFlGxR",
+  "object": "chat.completion",
+  "created": 1755524131,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Oliver, a small mouse living in an enchanted forest, embarks on a grand adventure to find friends who share his thirst for excitement. Along the way, he meets Leo, a majestic lion, and Freddie, a whimsical frog, who join him on his quest. Together, they form a strong bond and face challenges, including a fearsome lava monster. With Oliver's leadership and the combined strengths of Leo and Freddie, they devise a plan to defeat the menacing creature by discovering its weak spot and banishing it forever. As they emerge victorious, the animals of the enchanted forest gather to celebrate their bravery, turning Oliver from a seeker of friendship into a hero. From that day forward, Oliver, Leo, and Freddie became inseparable companions, sharing their tales of triumph and inspiring others with their courage and kindness. Oliver's story becomes a timeless legend, whispered by generations of forest dwellers, enchanting both young and old alike.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 319,
+    "completion_tokens": 188,
+    "total_tokens": 507,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

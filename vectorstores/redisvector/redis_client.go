@@ -111,7 +111,7 @@ func (c RueidisClient) Search(ctx context.Context, search IndexVectorSearch) (in
 }
 
 func (c RueidisClient) generateHSetCMD(prefix string, doc schema.Document) (string, rueidis.Completed) {
-	kvs := make([]string, 0, len(maps.Keys(doc.Metadata))*2)
+	kvs := make([]string, 0, len(doc.Metadata)*2)
 	for k, v := range doc.Metadata {
 		kvs = append(kvs, k)
 		if k == defaultContentVectorFieldKey {

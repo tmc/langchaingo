@@ -2,22 +2,30 @@ package perplexity
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vendasta/langchaingo/internal/httprr"
 )
 
-func TestTool_Integration(t *testing.T) {
-	t.Parallel()
+func TestPerplexityTool(t *testing.T) {
+	ctx := context.Background()
 
-	apiKey := os.Getenv("PERPLEXITY_API_KEY")
-	if apiKey == "" {
-		t.Skip("PERPLEXITY_API_KEY not set")
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "PERPLEXITY_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	var opts []Option
+	opts = append(opts, WithHTTPClient(rr.Client()))
+
+	// Use test token when replaying
+	if rr.Replaying() {
+		opts = append(opts, WithAPIKey("test-api-key"))
 	}
 
-	tool, err := New()
+	tool, err := New(opts...)
 	require.NoError(t, err)
 	require.NotNil(t, tool)
 
@@ -25,7 +33,6 @@ func TestTool_Integration(t *testing.T) {
 	assert.NotEmpty(t, tool.Description())
 
 	// Test Call functionality
-	ctx := context.Background()
 	response, err := tool.Call(ctx, "what is the largest country in the world by total area?")
 	require.NoError(t, err)
 	assert.Contains(t, response, "Russia")

@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	_defaultMrklPrefix = `Today is {{.today}}.
-Answer the following questions as best you can. You have access to the following tools:
+	_defaultMrklPrefix = `Answer the following questions as best you can. You have access to the following tools:
 
 {{.tool_descriptions}}`
 
@@ -37,7 +36,7 @@ func createMRKLPrompt(tools []tools.Tool, prefix, instructions, suffix string) p
 	return prompts.PromptTemplate{
 		Template:       template,
 		TemplateFormat: prompts.TemplateFormatGoTemplate,
-		InputVariables: []string{"input", "agent_scratchpad", "today"},
+		InputVariables: []string{"input", "agent_scratchpad"},
 		PartialVariables: map[string]any{
 			"tool_names":        toolNames(tools),
 			"tool_descriptions": toolDescriptions(tools),

@@ -1,8 +1,8 @@
 module github.com/vendasta/langchaingo/examples/mistral-embedding-example
 
-go 1.22.0
+go 1.23.8
 
-toolchain go1.22.1
+toolchain go1.24.6
 
 require github.com/vendasta/langchaingo v0.1.13-pre.1
 
