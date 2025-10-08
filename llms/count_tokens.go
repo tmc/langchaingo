@@ -11,13 +11,14 @@ const (
 )
 
 const (
-	_gpt35TurboContextSize    = 16385  // gpt-3.5-turbo default context
-	_gpt35Turbo16KContextSize = 16385  // gpt-3.5-turbo-16k
-	_gpt4ContextSize          = 8192   // gpt-4
-	_gpt432KContextSize       = 32768  // gpt-4-32k
-	_gpt4TurboContextSize     = 128000 // gpt-4-turbo models
-	_gpt4oContextSize         = 128000 // gpt-4o models
-	_gpt4oMiniContextSize     = 128000 // gpt-4o-mini
+	_gpt35TurboContextSize    = 16385   // gpt-3.5-turbo default context
+	_gpt35Turbo16KContextSize = 16385   // gpt-3.5-turbo-16k
+	_gpt4ContextSize          = 8192    // gpt-4
+	_gpt432KContextSize       = 32768   // gpt-4-32k
+	_gpt4TurboContextSize     = 128000  // gpt-4-turbo models
+	_gpt4oContextSize         = 128000  // gpt-4o models
+	_gpt4oMiniContextSize     = 128000  // gpt-4o-mini
+	_gpt41ContextSize         = 1047576 // gpt-4.1 models (200k+ context)
 	_textDavinci3ContextSize  = 4097
 	_textBabbage1ContextSize  = 2048
 	_textAda1ContextSize      = 2048
@@ -51,6 +52,10 @@ var modelToContextSize = map[string]int{
 	"gpt-4o-2024-08-06":      _gpt4oContextSize,
 	"gpt-4o-mini":            _gpt4oMiniContextSize,
 	"gpt-4o-mini-2024-07-18": _gpt4oMiniContextSize,
+	// GPT-4.1 models (newer models with extended context)
+	"gpt-4.1":      _gpt41ContextSize,
+	"gpt-4.1-mini": _gpt41ContextSize,
+	"gpt-4.1-nano": _gpt41ContextSize,
 	// Legacy models
 	"text-davinci-003": _textDavinci3ContextSize,
 	"text-curie-001":   _textCurie1ContextSize,
