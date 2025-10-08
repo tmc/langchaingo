@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 
+	"github.com/vendasta/langchaingo/httputil"
 	"github.com/vendasta/langchaingo/llms/openai/internal/openaiclient"
 )
 

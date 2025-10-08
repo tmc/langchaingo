@@ -41,9 +41,8 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/nikolalohinski/gonja"
 	"github.com/vendasta/langchaingo/prompts/internal/fstring"
-	"golang.org/x/exp/maps"
+	"github.com/vendasta/langchaingo/prompts/internal/sanitization"
 )
 
 // ErrInvalidTemplateFormat is the error when the template format is invalid and

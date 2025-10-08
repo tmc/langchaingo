@@ -682,6 +682,8 @@ github.com/testcontainers/testcontainers-go/modules/qdrant v0.39.0 h1:rSZRYrFnrW
 github.com/testcontainers/testcontainers-go/modules/qdrant v0.39.0/go.mod h1:hNGF7bi+xnGe6ROQ9UsF9KJ5zDIZLyrqJ4yAO1DigGY=
 github.com/testcontainers/testcontainers-go/modules/redis v0.37.0 h1:9HIY28I9ME/Zmb+zey1p/I1mto5+5ch0wLX+nJdOsQ4=
 github.com/testcontainers/testcontainers-go/modules/redis v0.37.0/go.mod h1:Abu9g/25Qv+FkYVx3U4Voaynou1c+7D0HIhaQJXvk6E=
+github.com/testcontainers/testcontainers-go/modules/weaviate v0.35.0 h1:EW++7BzylHWM9rT8lCAH+JQcG2Zi/81FS5k/zRVCkTs=
+github.com/testcontainers/testcontainers-go/modules/weaviate v0.35.0/go.mod h1:IjJrS40xL7Zvb1Faw4C5d7t34MJ3qlDahbT949Fu0vs=
 github.com/testcontainers/testcontainers-go/modules/weaviate v0.37.0 h1:Ou+qJTuaNK1cbT3c13ZQQUnq6VSmDjpMXrE6vVZQmFY=
 github.com/testcontainers/testcontainers-go/modules/weaviate v0.37.0/go.mod h1:VdjCqOCJGzlGLS2p4NdLjN5rqN3/53mle+Gb+irCbOE=
 github.com/tidwall/gjson v1.14.4 h1:uo0p8EbA09J7RQaflQ1aBRffTR7xedD2bcIVSYxLnkM=
@@ -725,8 +727,12 @@ github.com/vmihailenco/tagparser v0.1.2 h1:gnjoVuB/kljJ5wICEEOpx98oXMWPLj22G67Vb
 github.com/vmihailenco/tagparser v0.1.2/go.mod h1:OeAg3pn3UbLjkWt+rN9oFYB6u/cQgqMEUPoW2WPyhdI=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
+github.com/weaviate/weaviate v1.24.1 h1:Cl/NnqgFlNfyC7KcjFtETf1bwtTQPLF3oz5vavs+Jq0=
+github.com/weaviate/weaviate v1.24.1/go.mod h1:wcg1vJgdIQL5MWBN+871DFJQa+nI2WzyXudmGjJ8cG4=
 github.com/weaviate/weaviate v1.29.0 h1:bVPZlUqlsa7qp1LazxR0r1cJNrddm6xKVXPlMEEXi6E=
 github.com/weaviate/weaviate v1.29.0/go.mod h1:UsnbM1Kmm5Om+UPU6DTo421SDeMD8SqCJqsBs/nwgcI=
+github.com/weaviate/weaviate-go-client/v4 v4.13.1 h1:7PuK/hpy6Q0b9XaVGiUg5OD1MI/eF2ew9CJge9XdBEE=
+github.com/weaviate/weaviate-go-client/v4 v4.13.1/go.mod h1:B2m6g77xWDskrCq1GlU6CdilS0RG2+YXEgzwXRADad0=
 github.com/weaviate/weaviate-go-client/v4 v4.16.1 h1:jkDYuRCYly6zG2ngqTpv6z8azzbqiMUXcmaJHJmAV0Q=
 github.com/weaviate/weaviate-go-client/v4 v4.16.1/go.mod h1:XmoRpzNpWrTW5/TE07dUtxy5kMZbG3uAG/3b69nuwFk=
 github.com/weaviate/weaviate-go-client/v5 v5.0.2 h1:aptmTJy6d4OxGHBTGnqHheJe0WDbzH2SVmQkvy7+EGY=

@@ -25,7 +25,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/opensearch v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/redis v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/weaviate v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/weaviate v0.35.0
 )
 
 // LLM providers
@@ -45,7 +45,7 @@ require (
 	github.com/pgvector/pgvector-go v0.1.1
 	github.com/pinecone-io/go-pinecone v0.4.1
 	github.com/redis/rueidis v1.0.34
-	github.com/weaviate/weaviate v1.29.0
+	github.com/weaviate/weaviate v1.24.1
 	go.mongodb.org/mongo-driver v1.14.0
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 )
@@ -314,7 +314,7 @@ require (
 require (
 	github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/qdrant v0.39.0
-	github.com/weaviate/weaviate-go-client/v4 v4.16.1
+	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 )
 
 require (

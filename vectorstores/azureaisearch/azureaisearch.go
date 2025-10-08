@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/httputil"
 	"github.com/vendasta/langchaingo/schema"
 	"github.com/vendasta/langchaingo/vectorstores"
 )

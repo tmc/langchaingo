@@ -495,7 +495,6 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 		// https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#chat-samples
 		genaiFuncDecls = append(genaiFuncDecls, genaiFuncDecl)
 	}
-	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
 
 	// Return nil if no tools are provided
 	if len(genaiFuncDecls) == 0 {
