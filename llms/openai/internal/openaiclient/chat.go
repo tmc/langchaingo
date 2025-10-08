@@ -379,9 +379,6 @@ type ChatUsage struct {
 		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
 		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
-	PromptTokensDetails struct {
-		CachedTokens int `json:"cached_tokens"`
-	} `json:"prompt_tokens_details"`
 }
 
 // ChatCompletionResponse is a response to a chat request.
