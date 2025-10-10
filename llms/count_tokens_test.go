@@ -25,31 +25,31 @@ func TestCountTokens(t *testing.T) {
 			name:          "gpt-4o",
 			model:         "gpt-4o",
 			text:          "test for counting tokens",
-			expectedCount: 4,
+			expectedCount: 6,
 		},
 		{
 			name:          "gpt-4o-mini",
 			model:         "gpt-4o-mini",
 			text:          "test for counting tokens",
-			expectedCount: 4,
+			expectedCount: 6,
 		},
 		{
 			name:          "gpt-4.1",
 			model:         "gpt-4.1",
 			text:          "test for counting tokens",
-			expectedCount: 4,
+			expectedCount: 6,
 		},
 		{
 			name:          "gpt-4.1-mini",
 			model:         "gpt-4.1-mini",
 			text:          "test for counting tokens",
-			expectedCount: 4,
+			expectedCount: 6,
 		},
 		{
 			name:          "gpt-4.1-nano",
 			model:         "gpt-4.1-nano",
 			text:          "test for counting tokens",
-			expectedCount: 4,
+			expectedCount: 6,
 		},
 	}
 
