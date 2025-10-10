@@ -3,6 +3,7 @@ package perplexity
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -16,20 +17,25 @@ type Model string
 
 // Model pricing overview: https://docs.perplexity.ai/guides/pricing
 const (
-	// ModelLlamaSonarSmall is the small version of the Llama Sonar model.
-	ModelLlamaSonarSmall Model = "llama-3.1-sonar-small-128k-online"
-	// ModelLlamaSonarLarge is the large version of the Llama Sonar model.
-	ModelLlamaSonarLarge Model = "llama-3.1-sonar-large-128k-online"
-	// ModelLlamaSonarHuge is the huge version of the Llama Sonar model.
-	ModelLlamaSonarHuge Model = "llama-3.1-sonar-huge-128k-online"
+	// ModelSonar is the lightweight, cost-effective search model with grounding.
+	ModelSonar Model = "sonar"
+	// ModelSonarReasoning is the fast, real-time reasoning model for quick problem-solving.
+	ModelSonarReasoning Model = "sonar-reasoning"
+	// ModelSonarDeepResearch is the expert-level research model for comprehensive reports.
+	ModelSonarDeepResearch Model = "sonar-deep-research"
+	// Deprecated models - kept for backward compatibility
+	ModelLlamaSonarSmall Model = "sonar"               // Redirects to sonar
+	ModelLlamaSonarLarge Model = "sonar-reasoning"     // Redirects to sonar-reasoning
+	ModelLlamaSonarHuge  Model = "sonar-deep-research" // Redirects to sonar-deep-research
 )
 
 // Option is a function that modifies the options for the Perplexity AI tool.
 type Option func(*options)
 
 type options struct {
-	apiKey string
-	model  Model
+	apiKey     string
+	model      Model
+	httpClient *http.Client
 }
 
 // WithAPIKey sets the API key for Perplexity AI.
@@ -46,6 +52,13 @@ func WithModel(model Model) Option {
 	}
 }
 
+// WithHTTPClient sets the HTTP client for Perplexity AI.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(o *options) {
+		o.httpClient = httpClient
+	}
+}
+
 // Tool implements the Perplexity AI integration.
 type Tool struct {
 	llm              *openai.LLM
@@ -58,7 +71,7 @@ var _ tools.Tool = (*Tool)(nil)
 func New(opts ...Option) (*Tool, error) {
 	options := &options{
 		apiKey: os.Getenv("PERPLEXITY_API_KEY"),
-		model:  ModelLlamaSonarSmall, // Default model
+		model:  ModelSonar, // Default model
 	}
 
 	for _, opt := range opts {
@@ -69,11 +82,17 @@ func New(opts ...Option) (*Tool, error) {
 		return nil, fmt.Errorf("PERPLEXITY_API_KEY key not set")
 	}
 
-	llm, err := openai.New(
+	openaiOpts := []openai.Option{
 		openai.WithModel(string(options.model)),
 		openai.WithBaseURL("https://api.perplexity.ai"),
 		openai.WithToken(options.apiKey),
-	)
+	}
+
+	if options.httpClient != nil {
+		openaiOpts = append(openaiOpts, openai.WithHTTPClient(options.httpClient))
+	}
+
+	llm, err := openai.New(openaiOpts...)
 	if err != nil {
 		return nil, err
 	}

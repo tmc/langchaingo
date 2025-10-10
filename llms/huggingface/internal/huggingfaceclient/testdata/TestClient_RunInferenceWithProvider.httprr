@@ -1,0 +1,31 @@
+httprr trace v1
+377 1415
+POST https://router.huggingface.co/hyperbolic/v1/chat/completions HTTP/1.1
+Host: router.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 150
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek-ai/DeepSeek-R1-0528","messages":[{"role":"user","content":"Hello, how are you?"}],"stream":false,"temperature":0.5,"max_tokens":50}HTTP/2.0 200 OK
+Content-Length: 543
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Cross-Origin-Opener-Policy: same-origin
+Date: Mon, 18 Aug 2025 12:36:33 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Origin
+Via: 1.1 1fa1875b2f656fdf295eee39e2e48938.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: mvICymAg-bob__Fg_u7m29NnYNFOjgikEfH8cBXFCj0-zKwwOo-Jgw==
+X-Amz-Cf-Pop: CDG55-P3
+X-Cache: Miss from cloudfront
+X-Inference-Provider: hyperbolic
+X-Inference-Request-Id: d9f5d13a-d5be-42a7-a12b-d732727f6f26
+X-Powered-By: huggingface-moon
+X-Request-Id: Root=1-68a31e4f-780072141deebdec43d640b2
+X-Robots-Tag: none
+
+{"id":"chatcmpl-4f43tP4oAhXSiVPDdcoCjp","object":"chat.completion","created":1755520593,"model":"deepseek-ai/DeepSeek-R1-0528","choices":[{"index":0,"message":{"role":"assistant","content":"<think>Okay, the user just greeted me with a simple “Hello, how are you?”. Hmm, this is a very common social opener – probably not a real inquiry about my status since I'm an AI, but more likely just being polite or","tool_calls":[]},"finish_reason":"length","logprobs":null}],"usage":{"prompt_tokens":12,"total_tokens":62,"completion_tokens":50}}

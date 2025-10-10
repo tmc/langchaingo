@@ -1,0 +1,34 @@
+httprr trace v1
+229 2106
+POST https://api.cohere.ai/v1/generate HTTP/1.1
+Host: api.cohere.ai
+User-Agent: langchaingo-httprr
+Content-Length: 38
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"prompt":"Hello, Cohere!","model":""}HTTP/2.0 200 OK
+Content-Length: 975
+Access-Control-Expose-Headers: X-Debug-Trace-ID
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 12:24:38 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 332
+Num_tokens: 81
+Pragma: no-cache
+Server: envoy
+Vary: Origin
+Via: 1.1 google
+X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
+X-Api-Warning: unknown field: parameter 'model' is not a valid field
+X-Debug-Trace-Id: c0f24814d3f7f0e05a2ec056a184b650
+X-Endpoint-Monthly-Call-Limit: 1000
+X-Envoy-Upstream-Service-Time: 2223
+X-Trial-Endpoint-Call-Limit: 40
+X-Trial-Endpoint-Call-Remaining: 39
+
+{"id":"4d735daf-780d-4a7a-b719-2deefff1b7e3","generations":[{"id":"7c0e0bab-887c-4411-a68e-669c5a1cebaa","text":" Hi! I'm Cohere, an AI-assistant chatbot trained to assist human users by providing thorough responses. How can I help you today? \n\nPlease ask me a question or let me know how I can assist you if you're looking for information or insights on a specific topic. I'm here to help however I can, so feel free to ask away! ","finish_reason":"COMPLETE"}],"prompt":"Hello, Cohere!","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":5,"output_tokens":76}}}

@@ -67,13 +67,13 @@ type Metrics struct {
 
 type EmbeddingRequest struct {
 	Model     string  `json:"model"`
-	Prompt    string  `json:"prompt"`
+	Input     string  `json:"input"`
 	Options   Options `json:"options"`
 	KeepAlive string  `json:"keep_alive,omitempty"`
 }
 
 type EmbeddingResponse struct {
-	Embedding []float32 `json:"embedding"`
+	Embeddings [][]float32 `json:"embeddings"`
 }
 
 type GenerateResponse struct {
@@ -167,4 +167,19 @@ type Options struct {
 	MirostatEta      float32 `json:"mirostat_eta,omitempty"`
 	TopP             float32 `json:"top_p,omitempty"`
 	PenalizeNewline  bool    `json:"penalize_newline,omitempty"`
+	Think            bool    `json:"think,omitempty"` // Ollama 0.9.0+ reasoning mode
+}
+
+type PullRequest struct {
+	Model  string `json:"model"`
+	Stream bool   `json:"stream,omitempty"`
+}
+
+type PullResponse struct {
+	Status          string  `json:"status"`
+	Digest          string  `json:"digest,omitempty"`
+	Total           int64   `json:"total,omitempty"`
+	Completed       int64   `json:"completed,omitempty"`
+	DownloadPercent float64 `json:"percent,omitempty"`
+	Error           string  `json:"error,omitempty"`
 }

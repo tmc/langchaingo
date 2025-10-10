@@ -1,0 +1,71 @@
+httprr trace v1
+489 2160
+POST https://api.openai.com/v1/chat/completions HTTP/1.1
+Host: api.openai.com
+User-Agent: langchaingo-httprr
+Content-Length: 287
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"gpt-4o","messages":[{"role":"user","content":[{"type":"image_url","image_url":{"url":"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true"}},{"text":"describe this image in detail","type":"text"}]}],"max_completion_tokens":300,"temperature":0}HTTP/2.0 200 OK
+Content-Length: 1267
+Access-Control-Expose-Headers: X-Request-ID
+Alt-Svc: h3=":443"; ma=86400
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Wed, 20 Aug 2025 13:06:37 GMT
+Openai-Organization: lcgo-tst
+Openai-Processing-Ms: 5129
+Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Version: 2020-10-01
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Envoy-Upstream-Service-Time: 5167
+X-Ratelimit-Limit-Input-Images: 250000
+X-Ratelimit-Limit-Requests: 10000
+X-Ratelimit-Limit-Tokens: 30000000
+X-Ratelimit-Remaining-Input-Images: 249999
+X-Ratelimit-Remaining-Requests: 9999
+X-Ratelimit-Remaining-Tokens: 29999225
+X-Ratelimit-Reset-Input-Images: 0s
+X-Ratelimit-Reset-Requests: 6ms
+X-Ratelimit-Reset-Tokens: 1ms
+X-Request-Id: req_7978c2f69c1a43bfbb9f846e0b00ef1c
+
+{
+  "id": "chatcmpl-C6coLhcmqwXQ9sZnQ0UvmXGGVNcYU",
+  "object": "chat.completion",
+  "created": 1755695193,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The image is an emoji of a parrot. The parrot is depicted in a side view, facing to the left. It has a vibrant green body with a gradient that transitions to yellow and orange on its wings and tail. The head is primarily yellow with a hint of red on the top. The parrot has a dark gray beak and feet, and its eye is black with a small white highlight, giving it a lively appearance. The background is black, which makes the bright colors of the parrot stand out.",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 267,
+    "completion_tokens": 106,
+    "total_tokens": 373,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": "fp_80956533cb"
+}

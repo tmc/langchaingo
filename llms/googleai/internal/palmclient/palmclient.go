@@ -28,40 +28,48 @@ var defaultParameters = map[string]interface{}{ //nolint:gochecknoglobals
 }
 
 const (
-	embeddingModelName = "textembedding-gecko"
-	TextModelName      = "text-bison"
-	ChatModelName      = "chat-bison"
-
 	defaultMaxConns = 4
 )
 
 // PaLMClient represents a Vertex AI based PaLM API client.
 type PaLMClient struct {
-	client    *aiplatform.PredictionClient
-	projectID string
+	client             *aiplatform.PredictionClient
+	projectID          string
+	embeddingModelName string
+	textModelName      string
+	chatModelName      string
 }
 
 // New returns a new Vertex AI based PaLM API client.
-func New(ctx context.Context, projectID, location string, opts ...option.ClientOption) (*PaLMClient, error) {
+func New(ctx context.Context, projectID, location string, opts ...Option) (*PaLMClient, error) {
 	numConns := runtime.GOMAXPROCS(0)
 	if numConns > defaultMaxConns {
 		numConns = defaultMaxConns
 	}
+
+	pOpt := defaultOptions()
+	for _, o := range opts {
+		o(&pOpt)
+	}
+
 	o := []option.ClientOption{
 		option.WithGRPCConnectionPool(numConns),
 		option.WithEndpoint(fmt.Sprintf("%s-aiplatform.googleapis.com:443", location)),
 	}
-	opts = append(o, opts...)
+	pOpt.ClientOptions = append(o, pOpt.ClientOptions...)
 	// PredictionClient only support GRPC.
-	opts = append(opts, option.WithHTTPClient(nil))
+	pOpt.ClientOptions = append(pOpt.ClientOptions, option.WithHTTPClient(nil))
 
-	client, err := aiplatform.NewPredictionClient(ctx, opts...)
+	client, err := aiplatform.NewPredictionClient(ctx, pOpt.ClientOptions...)
 	if err != nil {
 		return nil, err
 	}
 	return &PaLMClient{
-		client:    client,
-		projectID: projectID,
+		client:             client,
+		projectID:          projectID,
+		embeddingModelName: pOpt.EmbeddingModelName,
+		textModelName:      pOpt.TextModelName,
+		chatModelName:      pOpt.ChatModelName,
 	}, nil
 }
 
@@ -92,7 +100,7 @@ func (c *PaLMClient) CreateCompletion(ctx context.Context, r *CompletionRequest)
 		"top_k":           r.TopK,
 		"stopSequences":   convertArray(r.StopSequences),
 	}
-	predictions, err := c.batchPredict(ctx, TextModelName, r.Prompts, params)
+	predictions, err := c.batchPredict(ctx, c.textModelName, r.Prompts, params)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +126,7 @@ type EmbeddingRequest struct {
 // CreateEmbedding creates embeddings.
 func (c *PaLMClient) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
 	params := map[string]interface{}{}
-	responses, err := c.batchPredict(ctx, embeddingModelName, r.Input, params)
+	responses, err := c.batchPredict(ctx, c.embeddingModelName, r.Input, params)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +243,13 @@ func mergeParams(defaultParams, params map[string]interface{}) *structpb.Struct 
 				mergedParams[paramKey] = value
 			}
 		case int:
+			if value != 0 {
+				mergedParams[paramKey] = value
+			}
 		case int32:
+			if value != 0 {
+				mergedParams[paramKey] = value
+			}
 		case int64:
 			if value != 0 {
 				mergedParams[paramKey] = value
@@ -321,7 +335,7 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 		structpb.NewStructValue(instance),
 	}
 	resp, err := c.client.Predict(ctx, &aiplatformpb.PredictRequest{
-		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", ChatModelName),
+		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", c.chatModelName),
 		Instances:  instances,
 		Parameters: structpb.NewStructValue(mergedParams),
 	})

@@ -11,8 +11,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"runtime"
 	"strings"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 type Client struct {
@@ -58,11 +59,7 @@ func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
 	}
 
 	if ohttp == nil {
-		ohttp = &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyFromEnvironment,
-			},
-		}
+		ohttp = httputil.DefaultClient
 	}
 
 	client := Client{
@@ -93,8 +90,6 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo/ (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	respObj, err := c.httpClient.Do(request)
 	if err != nil {
@@ -140,8 +135,6 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/x-ndjson")
-	request.Header.Set("User-Agent",
-		fmt.Sprintf("langchaingo (%s %s) Go/%s", runtime.GOARCH, runtime.GOOS, runtime.Version()))
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
@@ -164,7 +157,7 @@ func (c *Client) stream(ctx context.Context, method, path string, data any, fn f
 		}
 
 		if errorResponse.Error != "" {
-			return fmt.Errorf(errorResponse.Error) //nolint
+			return fmt.Errorf("%s", errorResponse.Error)
 		}
 
 		if response.StatusCode >= http.StatusBadRequest {
@@ -189,6 +182,38 @@ type (
 )
 
 func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn GenerateResponseFunc) error {
+	if req == nil {
+		return fmt.Errorf("request cannot be nil")
+	}
+	// If streaming is disabled, accumulate all chunks and call fn once with the complete response
+	if req.Stream != nil && !*req.Stream {
+		var finalResp GenerateResponse
+		var accumulatedResponse string
+		return c.stream(ctx, http.MethodPost, "/api/generate", req, func(bts []byte) error {
+			var resp GenerateResponse
+			if err := json.Unmarshal(bts, &resp); err != nil {
+				return err
+			}
+
+			// Copy the response structure
+			finalResp = resp
+
+			// Accumulate response
+			if resp.Response != "" {
+				accumulatedResponse += resp.Response
+			}
+
+			// If this is the final chunk, set the complete response and call fn
+			if resp.Done {
+				finalResp.Response = accumulatedResponse
+				return fn(finalResp)
+			}
+
+			return nil
+		})
+	}
+
+	// For streaming, pass through each chunk
 	return c.stream(ctx, http.MethodPost, "/api/generate", req, func(bts []byte) error {
 		var resp GenerateResponse
 		if err := json.Unmarshal(bts, &resp); err != nil {
@@ -200,6 +225,38 @@ func (c *Client) Generate(ctx context.Context, req *GenerateRequest, fn Generate
 }
 
 func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResponseFunc) error {
+	// If streaming is disabled, accumulate all chunks and call fn once with the complete response
+	if !req.Stream {
+		var finalResp ChatResponse
+		var accumulatedContent string
+		return c.stream(ctx, http.MethodPost, "/api/chat", req, func(bts []byte) error {
+			var resp ChatResponse
+			if err := json.Unmarshal(bts, &resp); err != nil {
+				return err
+			}
+
+			// Copy the response structure
+			finalResp = resp
+
+			// Accumulate content
+			if resp.Message != nil && resp.Message.Content != "" {
+				accumulatedContent += resp.Message.Content
+			}
+
+			// If this is the final chunk, set the complete content and call fn
+			if resp.Done {
+				if finalResp.Message == nil {
+					finalResp.Message = &Message{}
+				}
+				finalResp.Message.Content = accumulatedContent
+				return fn(finalResp)
+			}
+
+			return nil
+		})
+	}
+
+	// For streaming, pass through each chunk
 	return c.stream(ctx, http.MethodPost, "/api/chat", req, func(bts []byte) error {
 		var resp ChatResponse
 		if err := json.Unmarshal(bts, &resp); err != nil {
@@ -212,8 +269,42 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 
 func (c *Client) CreateEmbedding(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 	resp := &EmbeddingResponse{}
-	if err := c.do(ctx, http.MethodPost, "/api/embeddings", req, &resp); err != nil {
+	if err := c.do(ctx, http.MethodPost, "/api/embed", req, &resp); err != nil {
 		return resp, err
 	}
 	return resp, nil
+}
+
+func (c *Client) Pull(ctx context.Context, req *PullRequest) error {
+	// Use streaming to handle the pull properly
+	req.Stream = true
+
+	var lastResponse PullResponse
+	err := c.stream(ctx, http.MethodPost, "/api/pull", req, func(bts []byte) error {
+		var resp PullResponse
+		if err := json.Unmarshal(bts, &resp); err != nil {
+			return err
+		}
+
+		// Store the last response
+		lastResponse = resp
+
+		// Check if there was an error in the response
+		if resp.Error != "" {
+			return fmt.Errorf("pull failed: %s", resp.Error)
+		}
+
+		// Continue processing
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("error during pull: %w", err)
+	}
+
+	// Check the final status if we have a response
+	if lastResponse.Error != "" {
+		return fmt.Errorf("pull failed: %s", lastResponse.Error)
+	}
+
+	return nil
 }

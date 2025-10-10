@@ -176,3 +176,10 @@ func WithToken(token string) Option {
 		opts.maritacaOptions.Token = token
 	}
 }
+
+// WithOptions Set the maritaca options.
+func WithOptions(maritacaOptions maritacaclient.Options) Option {
+	return func(opts *options) {
+		opts.maritacaOptions = maritacaOptions
+	}
+}

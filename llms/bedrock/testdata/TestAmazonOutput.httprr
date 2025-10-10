@@ -1,0 +1,21 @@
+httprr trace v1
+604 342
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/ai21.j2-mid-v1/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 195
+Accept: */*
+Amz-Sdk-Invocation-Id: d19478dd-214d-4507-9eb7-eb8bdd4c40a1
+Amz-Sdk-Request: attempt=1; max=3
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+X-Amz-Date: 20250818T121009Z
+
+{"prompt":"\nsystem: You know all about AI.\nhuman: Explain AI in 10 words or less.\nAI: ","maxTokens":512,"countPenalty":{"scale":0},"presencePenalty":{"scale":0},"frequencyPenalty":{"scale":0}}HTTP/2.0 403 Forbidden
+Content-Length: 77
+Content-Type: application/json
+Date: Mon, 18 Aug 2025 12:10:10 GMT
+X-Amzn-Errortype: AccessDeniedException:http://internal.amazon.com/coral/com.amazon.bedrock/
+X-Amzn-Requestid: 483997a5-e09e-41ae-9d87-0b8cd8ef6035
+
+{"message":"You don't have access to the model with the specified model ID."}
