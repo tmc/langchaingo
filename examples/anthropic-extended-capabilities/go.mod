@@ -1,8 +1,8 @@
-module github.com/tmc/langchaingo/examples/anthropic-extended-capabilities
+module github.com/vendasta/langchaingo/examples/anthropic-extended-capabilities
 
 go 1.23.8
 
-require github.com/tmc/langchaingo v0.1.14-pre.4
+require github.com/vendasta/langchaingo v0.1.14-pre.4
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect

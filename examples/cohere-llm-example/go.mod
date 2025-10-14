@@ -1,8 +1,8 @@
-module github.com/tmc/langchaingo/examples/cohere-llm-example
+module github.com/vendasta/langchaingo/examples/cohere-llm-example
 
 go 1.24.3
 
-require github.com/tmc/langchaingo v0.1.14-pre.4
+require github.com/vendasta/langchaingo v0.1.14-pre.4
 
 require (
 	github.com/cohere-ai/tokenizer v1.1.2 // indirect

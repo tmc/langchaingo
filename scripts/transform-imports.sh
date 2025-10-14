@@ -177,7 +177,7 @@ fi
 print_info "Transforming Go source files..."
 while IFS= read -r -d '' file; do
     transform_file "$file"
-done < <(find "$REPO_ROOT" -name "*.go" -type f -print0 | grep -v "/vendor/" | grep -v "/.git/")
+done < <(find "$REPO_ROOT" -name "*.go" -type f ! -path "*/vendor/*" ! -path "*/.git/*" -print0)
 
 # 3. Transform example go.mod files
 print_info "Transforming example go.mod files..."
@@ -189,7 +189,7 @@ done < <(find "$REPO_ROOT/examples" -name "go.mod" -type f -print0 2>/dev/null |
 print_info "Transforming documentation files..."
 while IFS= read -r -d '' file; do
     transform_file "$file"
-done < <(find "$REPO_ROOT" -type f \( -name "*.md" -o -name "*.mdx" \) -print0 | grep -v "/vendor/" | grep -v "/.git/" | grep -v "/node_modules/")
+done < <(find "$REPO_ROOT" -type f \( -name "*.md" -o -name "*.mdx" \) ! -path "*/vendor/*" ! -path "*/.git/*" ! -path "*/node_modules/*" -print0)
 
 # Summary
 echo ""
@@ -229,7 +229,7 @@ if ! $DRY_RUN && [[ $FILES_CHANGED -gt 0 ]]; then
     echo ""
 elif $DRY_RUN && [[ $FILES_CHANGED -gt 0 ]]; then
     echo "To apply these changes, run without --dry-run:"
-    echo "  $0 ${TO_ORG##*-}"
+    echo "  $0 to-${TO_ORG##*-}"
     echo ""
 elif [[ $FILES_CHANGED -eq 0 ]]; then
     print_warning "No files needed transformation"

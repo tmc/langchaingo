@@ -1,10 +1,10 @@
-module github.com/tmc/langchaingo/examples/prompt-template-example
+module github.com/vendasta/langchaingo/examples/prompt-template-example
 
 go 1.23.8
 
 toolchain go1.24.6
 
-require github.com/tmc/langchaingo v0.1.14-pre.4
+require github.com/vendasta/langchaingo v0.1.14-pre.4
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect

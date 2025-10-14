@@ -1,10 +1,10 @@
-module github.com/tmc/langchaingo/examples/chains-conversation-memory-sqlite
+module github.com/vendasta/langchaingo/examples/chains-conversation-memory-sqlite
 
 go 1.24.3
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.28
-	github.com/tmc/langchaingo v0.1.14-pre.4
+	github.com/vendasta/langchaingo v0.1.14-pre.4
 )
 
 require (
