@@ -3,8 +3,8 @@ package outputparser
 import (
 	"strings"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/vendasta/langchaingo/llms"
+	"github.com/vendasta/langchaingo/schema"
 )
 
 // Simple is an output parser that does nothing.

@@ -32,5 +32,5 @@ go run openai_o1_chat_example.go -model o1-mini
 
 ## Learn More
 
-- [LangChain Go Documentation](https://github.com/tmc/langchaingo)
+- [LangChain Go Documentation](https://github.com/vendasta/langchaingo)
 - [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)

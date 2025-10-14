@@ -3,8 +3,8 @@ package compliance_test
 import (
 	"testing"
 
-	"github.com/tmc/langchaingo/llms/compliance"
-	"github.com/tmc/langchaingo/llms/fake"
+	"github.com/vendasta/langchaingo/llms/compliance"
+	"github.com/vendasta/langchaingo/llms/fake"
 )
 
 // ExampleCompliance demonstrates how to use the compliance test suite
@@ -48,7 +48,7 @@ func TestOpenAIComplianceExample(t *testing.T) {
 
 	// This is how you would test a real provider:
 	//
-	// import "github.com/tmc/langchaingo/llms/openai"
+	// import "github.com/vendasta/langchaingo/llms/openai"
 	//
 	// llm, err := openai.New()
 	// if err != nil {

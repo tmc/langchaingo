@@ -431,7 +431,7 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []MessageContent
 
 ### HTTP testing with httprr
 
-For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](https://pkg.go.dev/github.com/tmc/langchaingo/internal/httprr) for recording and replaying HTTP interactions. This is an internal testing tool used by LangChainGo's own test suite to ensure reliable, fast tests without hitting real APIs.
+For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](https://pkg.go.dev/github.com/vendasta/langchaingo/internal/httprr) for recording and replaying HTTP interactions. This is an internal testing tool used by LangChainGo's own test suite to ensure reliable, fast tests without hitting real APIs.
 
 #### Setting up httprr
 

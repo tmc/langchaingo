@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/schema"
+	"github.com/vendasta/langchaingo/schema"
 )
 
 func TestTokenSplitter(t *testing.T) {

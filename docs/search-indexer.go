@@ -106,8 +106,8 @@ func parseFlags() Config {
 	flag.StringVar(&config.SourceDir, "source", "../", "Path to Go source code directory")
 	flag.StringVar(&config.OutputFile, "output", "./build/search-index.json", "Output file path")
 	flag.StringVar(&config.BaseURL, "base-url", "/langchaingo", "Base URL for documentation links")
-	flag.StringVar(&config.PkgGoDevURL, "pkg-url", "https://pkg.go.dev/github.com/tmc/langchaingo", "pkg.go.dev base URL")
-	flag.StringVar(&config.ModulePath, "module", "github.com/tmc/langchaingo", "Go module path")
+	flag.StringVar(&config.PkgGoDevURL, "pkg-url", "https://pkg.go.dev/github.com/vendasta/langchaingo", "pkg.go.dev base URL")
+	flag.StringVar(&config.ModulePath, "module", "github.com/vendasta/langchaingo", "Go module path")
 	flag.BoolVar(&config.Debug, "debug", false, "Enable debug logging")
 
 	flag.Parse()

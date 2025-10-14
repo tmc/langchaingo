@@ -7,7 +7,7 @@ This guide shows you how to configure and use different LLM providers with LangC
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/openai"
+import "github.com/vendasta/langchaingo/llms/openai"
 
 // Using environment variable OPENAI_API_KEY
 llm, err := openai.New()
@@ -31,7 +31,7 @@ llm, err := openai.New(
 ### Azure OpenAI
 
 ```go
-import "github.com/tmc/langchaingo/llms/openai"
+import "github.com/vendasta/langchaingo/llms/openai"
 
 llm, err := openai.New(
     openai.WithToken("your-azure-api-key"),
@@ -46,7 +46,7 @@ llm, err := openai.New(
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/anthropic"
+import "github.com/vendasta/langchaingo/llms/anthropic"
 
 // Using environment variable ANTHROPIC_API_KEY
 llm, err := anthropic.New()
@@ -71,7 +71,7 @@ llm, err := anthropic.New(
 ```go
 import (
     "context"
-    "github.com/tmc/langchaingo/llms/googleai"
+    "github.com/vendasta/langchaingo/llms/googleai"
 )
 
 // Using environment variable GOOGLE_API_KEY
@@ -101,8 +101,8 @@ llm, err := googleai.New(
 ```go
 import (
     "context"
-    "github.com/tmc/langchaingo/llms/googleai"
-    "github.com/tmc/langchaingo/llms/googleai/vertex"
+    "github.com/vendasta/langchaingo/llms/googleai"
+    "github.com/vendasta/langchaingo/llms/googleai/vertex"
 )
 
 llm, err := vertex.New(
@@ -117,8 +117,8 @@ llm, err := vertex.New(
 ```go
 import (
     "context"
-    "github.com/tmc/langchaingo/llms/googleai"
-    "github.com/tmc/langchaingo/llms/googleai/vertex"
+    "github.com/vendasta/langchaingo/llms/googleai"
+    "github.com/vendasta/langchaingo/llms/googleai/vertex"
 )
 
 llm, err := vertex.New(
@@ -134,7 +134,7 @@ llm, err := vertex.New(
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/ollama"
+import "github.com/vendasta/langchaingo/llms/ollama"
 
 // Default configuration (localhost:11434)
 llm, err := ollama.New(ollama.WithModel("llama2"))
@@ -151,7 +151,7 @@ llm, err := ollama.New(
 ### Basic configuration
 
 ```go
-import "github.com/tmc/langchaingo/llms/huggingface"
+import "github.com/vendasta/langchaingo/llms/huggingface"
 
 // Using environment variable HF_TOKEN
 llm, err := huggingface.New()

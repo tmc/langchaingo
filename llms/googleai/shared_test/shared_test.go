@@ -20,12 +20,12 @@ import (
 	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/httputil"
-	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/googleai/vertex"
+	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/httputil"
+	"github.com/vendasta/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms/googleai"
+	"github.com/vendasta/langchaingo/llms/googleai/vertex"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -293,7 +293,7 @@ func testMultiContentImageLink(t *testing.T, llm llms.Model) {
 
 	parts := []llms.ContentPart{
 		llms.ImageURLPart(
-			"https://github.com/tmc/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true",
+			"https://github.com/vendasta/langchaingo/blob/main/docs/static/img/parrot-icon.png?raw=true",
 		),
 		llms.TextPart("describe this image in detail"),
 	}

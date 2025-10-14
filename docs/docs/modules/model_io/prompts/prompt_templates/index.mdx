@@ -87,7 +87,7 @@ template := "Create a {type} summary of {content} in {language}"
 Here's an example of creating and using a prompt template:
 
 ```go
-import "github.com/tmc/langchaingo/prompts"
+import "github.com/vendasta/langchaingo/prompts"
 
 func main() {
     // Create a prompt template
@@ -237,7 +237,7 @@ The model is supposed to follow instruction from system chat message more closel
 You are encouraged to use these chat related prompt templates instead of PromptTemplate when querying chat models to fully exploit the potential of underlying chat model.
 
 ```go
-import "github.com/tmc/langchaingo/prompts"
+import "github.com/vendasta/langchaingo/prompts"
 
 func main() {
    prompt := prompts.NewChatPromptTemplate([]prompts.MessageFormatter{

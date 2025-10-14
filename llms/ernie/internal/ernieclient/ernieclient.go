@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tmc/langchaingo/httputil"
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 var (

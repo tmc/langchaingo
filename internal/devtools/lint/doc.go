@@ -52,8 +52,8 @@
 // Core packages (chains, agents, memory) should not depend on specific provider
 // implementations. Dependencies should flow from specific to general.
 //
-//	❌ import "github.com/tmc/langchaingo/llms/openai" in chains package
-//	✅ import "github.com/tmc/langchaingo/llms" in chains package
+//	❌ import "github.com/vendasta/langchaingo/llms/openai" in chains package
+//	✅ import "github.com/vendasta/langchaingo/llms" in chains package
 //
 // TODO: Global State Avoidance
 // Avoid global mutable state. Prefer dependency injection and explicit configuration.

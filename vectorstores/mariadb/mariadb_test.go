@@ -15,13 +15,13 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	tcmariadb "github.com/testcontainers/testcontainers-go/modules/mariadb"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/llms/googleai"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/mariadb"
+	"github.com/vendasta/langchaingo/chains"
+	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/llms/googleai"
+	"github.com/vendasta/langchaingo/llms/openai"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/vectorstores"
+	"github.com/vendasta/langchaingo/vectorstores/mariadb"
 )
 
 func preCheckEnvSetting(t *testing.T) string {

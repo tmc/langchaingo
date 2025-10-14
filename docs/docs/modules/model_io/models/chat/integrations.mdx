@@ -12,7 +12,7 @@ LangChainGo offers a number of Chat Models implementations that integrate with v
 ## OpenAI
 
 ```go
-import "github.com/tmc/langchaingo/llms/openai"
+import "github.com/vendasta/langchaingo/llms/openai"
 
 llm, err := openai.New()
 ```
@@ -20,7 +20,7 @@ llm, err := openai.New()
 ## Anthropic
 
 ```go
-import "github.com/tmc/langchaingo/llms/anthropic"
+import "github.com/vendasta/langchaingo/llms/anthropic"
 
 llm, err := anthropic.New()
 ```
@@ -28,7 +28,7 @@ llm, err := anthropic.New()
 ## Google AI (Gemini)
 
 ```go
-import "github.com/tmc/langchaingo/llms/googleai"
+import "github.com/vendasta/langchaingo/llms/googleai"
 
 llm, err := googleai.New(ctx)
 ```
@@ -36,7 +36,7 @@ llm, err := googleai.New(ctx)
 ## Ollama (Local Models)
 
 ```go
-import "github.com/tmc/langchaingo/llms/ollama"
+import "github.com/vendasta/langchaingo/llms/ollama"
 
 llm, err := ollama.New()
 ```

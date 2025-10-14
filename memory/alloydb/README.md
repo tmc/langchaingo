@@ -36,7 +36,7 @@ import (
   "context"
   "fmt"
 
-  "github.com/tmc/langchaingo/internal/alloydbutil"
+  "github.com/vendasta/langchaingo/internal/alloydbutil"
 )
 
 func NewAlloyDBEngine(ctx context.Context) (*alloydbutil.PostgresEngine, error) {
@@ -62,7 +62,7 @@ func main() {
 }
 ```
 
-See the full [Chat Message History example and tutorial](https://github.com/tmc/langchaingo/tree/main/examples/google-alloydb-chat-message-history-example).
+See the full [Chat Message History example and tutorial](https://github.com/vendasta/langchaingo/tree/main/examples/google-alloydb-chat-message-history-example).
 
 ## Engine Creation WithPool
 
@@ -77,7 +77,7 @@ import (
   "fmt"
 
   "github.com/jackc/pgx/v5/pgxpool"
-  "github.com/tmc/langchaingo/internal/alloydbutil"
+  "github.com/vendasta/langchaingo/internal/alloydbutil"
 )
 
 func NewAlloyDBWithPoolEngine(ctx context.Context) (*alloydbutil.PostgresEngine, error) {
@@ -113,9 +113,9 @@ import (
   "context"
   "fmt"
 
-  "github.com/tmc/langchaingo/internal/alloydbutil"
-  "github.com/tmc/langchaingo/llms"
-  "github.com/tmc/langchaingo/memory/alloydb"
+  "github.com/vendasta/langchaingo/internal/alloydbutil"
+  "github.com/vendasta/langchaingo/llms"
+  "github.com/vendasta/langchaingo/memory/alloydb"
 )
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/anthropic"
+	"github.com/vendasta/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms/anthropic"
 )
 
 func TestAnthropicPromptCaching(t *testing.T) {

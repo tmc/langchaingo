@@ -148,7 +148,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/tmc/langchaingo/llms/openai"
+    "github.com/vendasta/langchaingo/llms/openai"
 )
 
 func main() {
@@ -296,7 +296,7 @@ Vale checks for:
 ## Need help?
 
 - Check existing documentation for style examples
-- Open a [GitHub Discussion](https://github.com/tmc/langchaingo/discussions) for questions
+- Open a [GitHub Discussion](https://github.com/vendasta/langchaingo/discussions) for questions
 - Tag your PR with `documentation` for faster review
 
 ## Recognition

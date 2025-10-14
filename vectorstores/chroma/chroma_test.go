@@ -14,14 +14,14 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/log"
 	tcchroma "github.com/testcontainers/testcontainers-go/modules/chroma"
-	"github.com/tmc/langchaingo/chains"
-	"github.com/tmc/langchaingo/embeddings"
-	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/internal/testutil/testctr"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/vectorstores"
-	"github.com/tmc/langchaingo/vectorstores/chroma"
+	"github.com/vendasta/langchaingo/chains"
+	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/internal/testutil/testctr"
+	"github.com/vendasta/langchaingo/llms/openai"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/vectorstores"
+	"github.com/vendasta/langchaingo/vectorstores/chroma"
 )
 
 // TODO (noodnik2):

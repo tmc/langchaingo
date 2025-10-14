@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/internal/httprr"
 )
 
 func TestClient_Generate(t *testing.T) {

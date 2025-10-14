@@ -8,7 +8,7 @@ import (
 
 	"github.com/nikolalohinski/gonja"
 	"github.com/nikolalohinski/gonja/config"
-	"github.com/tmc/langchaingo/prompts/internal/loader"
+	"github.com/vendasta/langchaingo/prompts/internal/loader"
 )
 
 var (

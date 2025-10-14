@@ -31,7 +31,7 @@ func UserAgent() string {
 			// Add langchaingo version
 			langchainVer := "devel"
 			for _, dep := range info.Deps {
-				if dep.Path == "github.com/tmc/langchaingo" {
+				if dep.Path == "github.com/vendasta/langchaingo" {
 					langchainVer = strings.Trim(dep.Version, "()")
 					break
 				}

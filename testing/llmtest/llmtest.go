@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/vendasta/langchaingo/llms"
 )
 
 // TestLLM tests an LLM implementation.

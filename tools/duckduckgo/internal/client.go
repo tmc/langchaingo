@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/tmc/langchaingo/httputil"
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 var ErrNoGoodResult = errors.New("no good search results found")

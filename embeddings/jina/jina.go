@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tmc/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/embeddings"
 )
 
 type Jina struct {

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tmc/langchaingo/httputil"
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 const _baseURL = "https://%s.wikipedia.org/w/api.php"

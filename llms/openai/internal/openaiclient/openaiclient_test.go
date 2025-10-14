@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/internal/httprr"
 )
 
 // setupTestClient creates a test client with httprr recording/replay

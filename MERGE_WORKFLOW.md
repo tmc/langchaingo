@@ -4,7 +4,7 @@ This document describes the process for merging changes from `tmc/langchaingo` (
 
 ## Why We Fork Differently
 
-Unlike most forks, we replace all imports from `github.com/tmc/langchaingo` to `github.com/vendasta/langchaingo`. This eliminates the need for `replace` directives in consuming services, but creates massive merge conflicts when syncing upstream.
+Unlike most forks, we replace all imports from `github.com/vendasta/langchaingo` to `github.com/vendasta/langchaingo`. This eliminates the need for `replace` directives in consuming services, but creates massive merge conflicts when syncing upstream.
 
 **Our Solution:** Temporarily transform imports back to `tmc` before merging, then transform to `vendasta` after merging.
 
@@ -81,7 +81,7 @@ git commit -m "Transform imports: vendasta → tmc for upstream merge"
 If not already configured:
 
 ```bash
-git remote add upstream https://github.com/tmc/langchaingo.git
+git remote add upstream https://github.com/vendasta/langchaingo.git
 ```
 
 Verify:
@@ -382,7 +382,7 @@ After merge, verify:
 
 - Transformation script: `scripts/transform-imports.sh`
 - Script documentation: `scripts/README.md`
-- Upstream repository: https://github.com/tmc/langchaingo
+- Upstream repository: https://github.com/vendasta/langchaingo
 - Fork repository: https://github.com/vendasta/langchaingo
 
 ## Questions?

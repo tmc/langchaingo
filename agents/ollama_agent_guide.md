@@ -74,9 +74,9 @@ import (
     "fmt"
     "log"
     
-    "github.com/tmc/langchaingo/agents"
-    "github.com/tmc/langchaingo/llms/ollama"
-    "github.com/tmc/langchaingo/tools"
+    "github.com/vendasta/langchaingo/agents"
+    "github.com/vendasta/langchaingo/llms/ollama"
+    "github.com/vendasta/langchaingo/tools"
 )
 
 func main() {

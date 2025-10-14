@@ -13,7 +13,7 @@ The LangChain framework is designed with the above principles in mind.
 
 ## Documentation Structure
 
-_**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo)._
+_**Note**: These docs are for [LangChainGo](https://github.com/vendasta/langchaingo)._
 
 Our documentation follows a structured approach to help you learn and use LangChainGo effectively:
 
@@ -52,10 +52,10 @@ Technical reference for all LangChainGo modules and their capabilities.
 
 ## API Reference
 
-[Here](https://pkg.go.dev/github.com/tmc/langchaingo) you can find the API reference for all of the modules in LangChain, as well as full documentation for all exported classes and functions.
+[Here](https://pkg.go.dev/github.com/vendasta/langchaingo) you can find the API reference for all of the modules in LangChain, as well as full documentation for all exported classes and functions.
 
 ## Get Involved
 
 - **[Contributing Guide](/docs/contributing)**: Learn how to contribute code and documentation
-- **[GitHub Discussions](https://github.com/tmc/langchaingo/discussions)**: Join the conversation about LangChainGo
-- **[GitHub Issues](https://github.com/tmc/langchaingo/issues)**: Report bugs or request features
+- **[GitHub Discussions](https://github.com/vendasta/langchaingo/discussions)**: Join the conversation about LangChainGo
+- **[GitHub Issues](https://github.com/vendasta/langchaingo/issues)**: Report bugs or request features

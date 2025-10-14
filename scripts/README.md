@@ -41,7 +41,7 @@ git add -A
 git commit -m "Transform imports: vendasta → tmc for upstream merge"
 
 # 3. Add upstream remote (if not already added)
-git remote add upstream https://github.com/tmc/langchaingo.git || true
+git remote add upstream https://github.com/vendasta/langchaingo.git || true
 git fetch upstream
 
 # 4. Merge from upstream (conflicts will be minimal!)
@@ -100,7 +100,7 @@ Scanning repository...
 Summary:
   Files transformed: 387
   Total replacements: 774
-  Direction: github.com/vendasta/langchaingo → github.com/tmc/langchaingo
+  Direction: github.com/vendasta/langchaingo → github.com/vendasta/langchaingo
 ```
 
 #### After Upstream Merge
@@ -119,7 +119,7 @@ Scanning repository...
 Summary:
   Files transformed: 387
   Total replacements: 774
-  Direction: github.com/tmc/langchaingo → github.com/vendasta/langchaingo
+  Direction: github.com/vendasta/langchaingo → github.com/vendasta/langchaingo
 ```
 
 #### Dry Run

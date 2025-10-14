@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	wx "github.com/IBM/watsonx-go/pkg/models"
-	"github.com/tmc/langchaingo/testing/llmtest"
+	"github.com/vendasta/langchaingo/testing/llmtest"
 )
 
 func TestLLM(t *testing.T) {

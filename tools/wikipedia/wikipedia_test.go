@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/internal/httprr"
 )
 
-const _userAgent = "langchaingo test (https://github.com/tmc/langchaingo)"
+const _userAgent = "langchaingo test (https://github.com/vendasta/langchaingo)"
 
 func TestWikipedia(t *testing.T) {
 	ctx := context.Background()

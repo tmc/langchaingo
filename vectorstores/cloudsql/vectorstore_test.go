@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tmc/langchaingo/internal/httprr"
-	"github.com/tmc/langchaingo/schema"
-	"github.com/tmc/langchaingo/util/cloudsqlutil"
-	"github.com/tmc/langchaingo/vectorstores/cloudsql"
+	"github.com/vendasta/langchaingo/internal/httprr"
+	"github.com/vendasta/langchaingo/schema"
+	"github.com/vendasta/langchaingo/util/cloudsqlutil"
+	"github.com/vendasta/langchaingo/vectorstores/cloudsql"
 )
 
 type EnvVariables struct {
