@@ -81,7 +81,7 @@ git commit -m "Transform imports: vendasta → tmc for upstream merge"
 If not already configured:
 
 ```bash
-git remote add upstream https://github.com/vendasta/langchaingo.git
+git remote add upstream https://github.com/tmc/langchaingo.git
 ```
 
 Verify:
