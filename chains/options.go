@@ -161,7 +161,10 @@ func WithCallback(callbackHandler callbacks.Handler) ChainCallOption {
 	}
 }
 
-func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:cyclop
+// GetLLMCallOptions converts ChainCallOption slice to llms.CallOption slice.
+// This is useful for agents and other code that needs to propagate chain options
+// to direct LLM calls.
+func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:cyclop
 	opts := &chainCallOption{}
 	for _, option := range options {
 		option(opts)
@@ -208,4 +211,9 @@ func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
 
 	return chainCallOption
+}
+
+// getLLMCallOptions is a backward-compatibility wrapper for GetLLMCallOptions.
+func getLLMCallOptions(options ...ChainCallOption) []llms.CallOption {
+	return GetLLMCallOptions(options...)
 }
