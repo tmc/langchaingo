@@ -47,7 +47,8 @@ type messagePayload struct {
 	// Extended thinking parameters (Claude 3.7+)
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
-	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                      `json:"-"`
+	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
 // ThinkingConfig represents the thinking configuration for Claude 3.7+
@@ -219,7 +220,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	default:
 		payload.Model = defaultModel
 	}
-	if payload.StreamingFunc != nil {
+	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		payload.Stream = true
 	}
 }
@@ -440,7 +441,7 @@ func handleContentBlockDeltaEvent(ctx context.Context, event map[string]interfac
 	case "input_json_delta":
 		return handleJSONDelta(delta, response, index)
 	case "thinking_delta":
-		return handleThinkingDelta(delta, response, index)
+		return handleThinkingDelta(ctx, delta, response, payload, index)
 	}
 
 	return response, nil
@@ -485,7 +486,7 @@ func handleJSONDelta(delta map[string]interface{}, response MessageResponsePaylo
 }
 
 // handleThinkingDelta processes thinking delta events for content blocks.
-func handleThinkingDelta(delta map[string]interface{}, response MessageResponsePayload, index int) (MessageResponsePayload, error) {
+func handleThinkingDelta(ctx context.Context, delta map[string]interface{}, response MessageResponsePayload, payload *messagePayload, index int) (MessageResponsePayload, error) {
 	thinking, ok := delta["thinking"].(string)
 	if !ok {
 		return response, ErrInvalidDeltaTextField
@@ -495,6 +496,17 @@ func handleThinkingDelta(delta map[string]interface{}, response MessageResponseP
 		return response, fmt.Errorf("failed to cast to ThinkingContent at index %d", index)
 	}
 	thinkingContent.Thinking += thinking
+
+	// Call StreamingReasoningFunc if provided (similar to OpenAI pattern)
+	if payload.StreamingReasoningFunc != nil {
+		reasoningChunk := []byte(thinking)
+		// For thinking deltas, the content chunk is empty since this is pure reasoning
+		err := payload.StreamingReasoningFunc(ctx, reasoningChunk, []byte{})
+		if err != nil {
+			return response, fmt.Errorf("streaming reasoning func returned an error: %w", err)
+		}
+	}
+
 	return response, nil
 }
 

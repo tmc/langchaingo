@@ -141,24 +141,26 @@ type MessageRequest struct {
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
 	// BetaHeaders are additional beta feature headers to include
-	BetaHeaders   []string                                      `json:"-"`
-	StreamingFunc func(ctx context.Context, chunk []byte) error `json:"-"`
+	BetaHeaders            []string                                                      `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                `json:"-"`
+	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
 // CreateMessage creates message for the messages api.
 func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*MessageResponsePayload, error) {
 	resp, err := c.createMessage(ctx, &messagePayload{
-		Model:         r.Model,
-		Messages:      r.Messages,
-		System:        r.System,
-		Temperature:   r.Temperature,
-		MaxTokens:     r.MaxTokens,
-		StopWords:     r.StopWords,
-		TopP:          r.TopP,
-		Tools:         r.Tools,
-		Stream:        r.Stream,
-		Thinking:      r.Thinking,
-		StreamingFunc: r.StreamingFunc,
+		Model:                  r.Model,
+		Messages:               r.Messages,
+		System:                 r.System,
+		Temperature:            r.Temperature,
+		MaxTokens:              r.MaxTokens,
+		StopWords:              r.StopWords,
+		TopP:                   r.TopP,
+		Tools:                  r.Tools,
+		Stream:                 r.Stream,
+		Thinking:               r.Thinking,
+		StreamingFunc:          r.StreamingFunc,
+		StreamingReasoningFunc: r.StreamingReasoningFunc,
 	}, r.BetaHeaders)
 	if err != nil {
 		return nil, err
