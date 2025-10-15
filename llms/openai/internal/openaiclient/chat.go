@@ -507,7 +507,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	// Send request
 	r, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, sanitizeHTTPError(err)
 	}
 	defer r.Body.Close()
 
