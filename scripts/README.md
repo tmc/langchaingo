@@ -184,3 +184,72 @@ The script is self-contained and requires no external dependencies. It uses:
 
 All tools are available on standard Unix/Linux/macOS systems.
 
+## update-example-modules.sh
+
+**Purpose:** Ensure all example modules use local `replace` directives to prevent module path mismatches during development and CI.
+
+### Why This Exists
+
+After transforming imports back to `vendasta`, examples need to use the local codebase instead of trying to download specific versions from GitHub. Without `replace` directives, you'll get errors like:
+
+```
+module declares its path as: github.com/tmc/langchaingo
+        but was required as: github.com/vendasta/langchaingo
+```
+
+### Usage
+
+```bash
+# Update all example go.mod files to use local code
+./scripts/update-example-modules.sh
+```
+
+### What It Does
+
+For each example in `examples/*/go.mod`:
+
+1. **Adds or updates replace directive:**
+   ```go
+   replace github.com/vendasta/langchaingo => ../..
+   ```
+
+2. **Updates module paths:**
+   - Ensures module name uses `vendasta` organization
+   - Ensures require statements use `vendasta` organization
+
+3. **Tidies dependencies:**
+   - Runs `go mod tidy` in each example directory
+
+### When to Run
+
+- After running `./scripts/transform-imports.sh to-vendasta`
+- Before building or testing examples
+- Before running CI/CD pipelines
+- After resolving upstream merge conflicts
+
+### Example Output
+
+```
+════════════════════════════════════════════════════════════════
+  Update Example Modules
+════════════════════════════════════════════════════════════════
+
+ℹ Processing: openai-completion-example
+ℹ Processing: anthropic-completion-example
+ℹ Processing: chroma-vectorstore-example
+...
+
+════════════════════════════════════════════════════════════════
+✓ Updated 75 example modules
+════════════════════════════════════════════════════════════════
+
+All examples now use: replace github.com/vendasta/langchaingo => ../..
+```
+
+### Compatibility
+
+- Works on macOS and Linux
+- Uses `sed -i.bak` for cross-platform compatibility
+- Automatically cleans up `.bak` files
+- Safe to run multiple times (idempotent)
+

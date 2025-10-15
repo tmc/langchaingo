@@ -25,7 +25,8 @@ make merge-upstream
 git add -A && git commit -m "Transform to tmc"  # Step 2: Commit
 git merge upstream/main                         # Step 3: Merge
 ./scripts/transform-imports.sh to-vendasta      # Step 4: Transform back
-git add -A && git commit -m "Transform to vendasta"  # Step 5: Commit
+./scripts/update-example-modules.sh             # Step 5: Update examples
+git add -A && git commit -m "Transform to vendasta"  # Step 6: Commit
 ```
 
 ## Detailed Workflow
@@ -176,10 +177,14 @@ Now restore fork's import naming:
 
 # Apply transformation
 ./scripts/transform-imports.sh to-vendasta
+
+# Update examples to use local replace directives
+./scripts/update-example-modules.sh
 ```
 
 **What happens:**
 - All `tmc` references → `vendasta`
+- Examples use `replace` directives pointing to local code
 - Fork ready for deployment
 
 ### Step 11: Commit Final State
@@ -267,6 +272,7 @@ Use this checklist for each merge:
 - [ ] Conflicts resolved (if any)
 - [ ] Build succeeds: `go build ./...`
 - [ ] Transformed to vendasta: `./scripts/transform-imports.sh to-vendasta`
+- [ ] Examples updated: `./scripts/update-example-modules.sh`
 - [ ] Final transformation committed
 - [ ] Fork-specific features restored (if needed)
 - [ ] Tests pass: `go test ./...`

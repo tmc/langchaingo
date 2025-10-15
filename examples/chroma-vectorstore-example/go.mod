@@ -17,3 +17,5 @@ require (
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 )
 
+
+replace github.com/vendasta/langchaingo => ../..

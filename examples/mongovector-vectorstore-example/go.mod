@@ -24,3 +24,5 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 )
 
+
+replace github.com/vendasta/langchaingo => ../..

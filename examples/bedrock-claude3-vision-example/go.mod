@@ -22,5 +22,7 @@ require (
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 )
+
+replace github.com/vendasta/langchaingo => ../..
