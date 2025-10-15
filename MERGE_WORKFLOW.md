@@ -4,7 +4,7 @@ This document describes the process for merging changes from `tmc/langchaingo` (
 
 ## Why We Fork Differently
 
-Unlike most forks, we replace all imports from `github.com/vendasta/langchaingo` to `github.com/vendasta/langchaingo`. This eliminates the need for `replace` directives in consuming services, but creates massive merge conflicts when syncing upstream.
+Unlike most forks, we replace all imports from `github.com/tmc/langchaingo` to `github.com/vendasta/langchaingo`. This eliminates the need for `replace` directives in consuming services, but creates massive merge conflicts when syncing upstream.
 
 **Our Solution:** Temporarily transform imports back to `tmc` before merging, then transform to `vendasta` after merging.
 
