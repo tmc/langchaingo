@@ -146,17 +146,18 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	betaHeaders, thinking := extractThinkingOptions(o, opts)
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
-		Model:         opts.Model,
-		Messages:      chatMessages,
-		System:        systemPrompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
-		Tools:         tools,
-		Thinking:      thinking,
-		BetaHeaders:   betaHeaders,
-		StreamingFunc: opts.StreamingFunc,
+		Model:                  opts.Model,
+		Messages:               chatMessages,
+		System:                 systemPrompt,
+		MaxTokens:              opts.MaxTokens,
+		StopWords:              opts.StopWords,
+		Temperature:            opts.Temperature,
+		TopP:                   opts.TopP,
+		Tools:                  tools,
+		Thinking:               thinking,
+		BetaHeaders:            betaHeaders,
+		StreamingFunc:          opts.StreamingFunc,
+		StreamingReasoningFunc: opts.StreamingReasoningFunc,
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {
