@@ -1,7 +1,10 @@
 package jina
 
 import (
+	"net/http"
 	"os"
+
+	"github.com/vendasta/langchaingo/httputil"
 )
 
 const (
@@ -52,6 +55,13 @@ func WithAPIKey(apiKey string) Option {
 	}
 }
 
+// WithClient is an option for providing a custom HTTP client.
+func WithClient(client *http.Client) Option {
+	return func(p *Jina) {
+		p.client = client
+	}
+}
+
 func applyOptions(opts ...Option) *Jina {
 	_models := map[string]int{
 		"jina-embeddings-v2-small-en": 512,
@@ -65,6 +75,7 @@ func applyOptions(opts ...Option) *Jina {
 		Model:         _defaultModel,
 		APIBaseURL:    APIBaseURL,
 		APIKey:        os.Getenv("JINA_API_KEY"),
+		client:        httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {

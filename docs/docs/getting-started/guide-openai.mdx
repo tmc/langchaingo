@@ -2,67 +2,60 @@
 sidebar_position: 2
 ---
 
+import CodeBlock from "@theme/CodeBlock";
+import ExampleOpenAI from "@examples/openai-completion-example/openai_completion_example.go";
+
 # Quickstart: LangChainGo with OpenAI
 
-Dive right into executing your first program utilizing LangChainGo in tandem with [OpenAI](https://openai.com/). OpenAI's GPT models are renowned for their proficiency and expansive capabilities.
+Get started by running your first program with LangChainGo and [OpenAI](https://openai.com/). OpenAI's GPT models are renowned for their proficiency and expansive capabilities.
 
-## Pre-requisites
+## Prerequisites
 
 1. **OpenAI API Key**: Sign up on [OpenAI](https://openai.com/) and retrieve your API key.
 2. **Go**: [Download and install Go](https://go.dev/doc/install).
 
+## Setup
+
+Before interacting with the OpenAI API, you need to set up your API key as an environment variable.
+
+### Linux/macOS (bash/zsh)
+```bash
+export OPENAI_API_KEY="your_openai_api_key_here"
+```
+
+### Windows (Command Prompt)
+```cmd
+set OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Windows (PowerShell)
+```powershell
+$env:OPENAI_API_KEY="your_openai_api_key_here"
+```
+
+For permanent setup, add the environment variable to your shell's profile file (`~/.bashrc`, `~/.zshrc`, etc.) or system environment variables on Windows.
+
 ## Steps
 
-1. **Set up your OpenAI API Key**: Before interacting with the OpenAI API, ensure that you've set up your API key. Typically, this is done by setting an environment variable. In your terminal, run the command:
-```shell
-export OPENAI_API_KEY=your_openai_api_key_here
-```
+1. **Set up your OpenAI API Key**: Follow the setup instructions above to configure your API key.
 
-2. Run the Example: Execute the following command:
+2. **Run the example**: Execute the following command:
 
 ```shell
-go run github.com/tmc/langchaingo/examples/openai-completion-example@main
+go run github.com/vendasta/langchaingo/examples/openai-completion-example@main
 ```
 
-Anticipate an output similar to the one below:
+You should see output similar to the following:
 
 ```shell
 The first man to walk on the moon was Neil
 ```
 
-Congratulations! You've successfully built and executed your first LangChainGo LLM-backed program using OpenAI's cloud-based inference.
+Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using OpenAI's cloud-based inference.
 
 
-Here is the entire program (from [openai-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)).
+Here is the entire program (from [openai-completion-example](https://github.com/vendasta/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)):
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-)
-
-func main() {
-	llm, err := openai.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx := context.Background()
-	completion, err := llm.Call(ctx, "The first man to walk on the moon",
-		llms.WithTemperature(0.8),
-		llms.WithStopWords([]string{"Armstrong"}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(completion)
-}
-```
+<CodeBlock language="go">{ExampleOpenAI}</CodeBlock>
 
 

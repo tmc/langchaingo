@@ -2,11 +2,12 @@ package chains
 
 import (
 	"context"
-	"os"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vendasta/langchaingo/internal/httprr"
 	"github.com/vendasta/langchaingo/llms/openai"
 	"github.com/vendasta/langchaingo/memory"
 	"github.com/vendasta/langchaingo/schema"
@@ -58,17 +59,29 @@ func (t testConversationalRetriever) GetRelevantDocuments(_ context.Context, que
 
 var _ schema.Retriever = testConversationalRetriever{}
 
+func createOpenAILLMForConversationalRetrievalQA(t *testing.T) *openai.LLM {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	llm, err := openai.New(opts...)
+	require.NoError(t, err)
+	return llm
+}
+
 func TestConversationalRetrievalQA(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
 
 	ctx := context.Background()
 
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
 	combinedStuffQAChain := LoadStuffQA(llm)
 	combinedQuestionGeneratorChain := LoadCondenseQuestionGenerator(llm)
@@ -92,14 +105,10 @@ func TestConversationalRetrievalQA(t *testing.T) {
 func TestConversationalRetrievalQAWithReturnMessages(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
 
 	ctx := context.Background()
 
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
 	combinedStuffQAChain := LoadStuffQA(llm)
 	combinedQuestionGeneratorChain := LoadCondenseQuestionGenerator(llm)
@@ -123,18 +132,14 @@ func TestConversationalRetrievalQAWithReturnMessages(t *testing.T) {
 func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
 
 	ctx := context.Background()
 
 	r := testConversationalRetriever{}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
 	chain := NewConversationalRetrievalQAFromLLM(llm, r, memory.NewConversationBuffer())
-	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
+	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 
@@ -146,22 +151,18 @@ func TestConversationalRetrievalQAFromLLM(t *testing.T) {
 func TestConversationalRetrievalQAFromLLMWithConversationTokenBuffer(t *testing.T) {
 	t.Skip("Test currently fails; see #415")
 	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
 
 	ctx := context.Background()
 
 	r := testConversationalRetriever{}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForConversationalRetrievalQA(t)
 
 	chain := NewConversationalRetrievalQAFromLLM(
 		llm,
 		r,
 		memory.NewConversationTokenBuffer(llm, 2000),
 	)
-	result, err := Run(context.Background(), chain, "What did the president say about Ketanji Brown Jackson")
+	result, err := Run(ctx, chain, "What did the president say about Ketanji Brown Jackson")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Ketanji Brown Jackson"), "expected Ketanji Brown Jackson in result")
 

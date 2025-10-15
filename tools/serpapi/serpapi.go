@@ -35,7 +35,7 @@ func New(opts ...Option) (*Tool, error) {
 	}
 
 	return &Tool{
-		client: internal.New(options.apiKey),
+		client: internal.New(options.apiKey, options.httpClient),
 	}, nil
 }
 

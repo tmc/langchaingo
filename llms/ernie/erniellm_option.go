@@ -1,6 +1,10 @@
 package ernie
 
-import "github.com/vendasta/langchaingo/callbacks"
+import (
+	"net/http"
+
+	"github.com/vendasta/langchaingo/callbacks"
+)
 
 const (
 	ernieAPIKey    = "ERNIE_API_KEY"    //nolint:gosec
@@ -25,6 +29,10 @@ type options struct {
 	accessToken      string
 	modelName        ModelName
 	callbacksHandler callbacks.Handler
+	baseURL          string
+	modelPath        string
+	cacheType        string
+	httpClient       *http.Client
 }
 
 type Option func(*options)
@@ -63,5 +71,54 @@ func WithModelName(modelName ModelName) Option {
 func WithCallbackHandler(callbacksHandler callbacks.Handler) Option {
 	return func(opts *options) {
 		opts.callbacksHandler = callbacksHandler
+	}
+}
+
+// WithAPIKey passes the ERNIE API Key to the client.
+func WithAPIKey(apiKey string) Option {
+	return func(opts *options) {
+		opts.apiKey = apiKey
+	}
+}
+
+// WithSecretKey passes the ERNIE Secret Key to the client.
+func WithSecretKey(secretKey string) Option {
+	return func(opts *options) {
+		opts.secretKey = secretKey
+	}
+}
+
+// WithModel passes the Model Name to the client. Alias for WithModelName.
+func WithModel(modelName string) Option {
+	return func(opts *options) {
+		opts.modelName = ModelName(modelName)
+	}
+}
+
+// WithBaseURL passes the base URL to the client.
+func WithBaseURL(baseURL string) Option {
+	return func(opts *options) {
+		opts.baseURL = baseURL
+	}
+}
+
+// WithModelPath passes the model path to the client.
+func WithModelPath(modelPath string) Option {
+	return func(opts *options) {
+		opts.modelPath = modelPath
+	}
+}
+
+// WithCacheType passes the cache type to the client.
+func WithCacheType(cacheType string) Option {
+	return func(opts *options) {
+		opts.cacheType = cacheType
+	}
+}
+
+// WithHTTPClient passes a custom HTTP client to the client.
+func WithHTTPClient(client *http.Client) Option {
+	return func(opts *options) {
+		opts.httpClient = client
 	}
 }

@@ -2,144 +2,94 @@ package cloudflareclient
 
 import (
 	"context"
-	"io"
 	"net/http"
-	"reflect"
-	"strings"
+	"os"
 	"testing"
+
+	"github.com/vendasta/langchaingo/internal/httprr"
 )
 
-type mockHTTPClient struct {
-	response *http.Response
-	err      error
-}
+func TestClient_GenerateContent(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CLOUDFLARE_API_KEY")
 
-func (m *mockHTTPClient) Do(_ *http.Request) (*http.Response, error) {
-	return m.response, m.err
-}
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
 
-func TestClient_GenerateContent(t *testing.T) { // nolint:funlen
-	t.Parallel()
-
-	type fields struct {
-		httpClient         httpClient
-		accountID          string
-		token              string
-		baseURL            string
-		modelName          string
-		embeddingModelName string
-		endpointURL        string
-		bearerToken        string
+	if !rr.Recording() {
+		t.Parallel()
 	}
-	type args struct {
-		ctx     context.Context // nolint:containedctx
-		request *GenerateContentRequest
+
+	ctx := context.Background()
+
+	// Use test credentials when not recording
+	accountID := "test-account-id"
+	token := "test-api-token"
+	baseURL := "https://api.cloudflare.com/client/v4/accounts"
+	modelName := "test-model"
+
+	// Use real credentials when recording
+	if rr.Recording() {
+		if id := os.Getenv("CLOUDFLARE_ACCOUNT_ID"); id != "" {
+			accountID = id
+		}
+		if tok := os.Getenv("CLOUDFLARE_API_KEY"); tok != "" {
+			token = tok
+		}
+		if model := os.Getenv("CLOUDFLARE_MODEL_NAME"); model != "" {
+			modelName = model
+		}
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *GenerateContentResponse
-		wantErr bool
-	}{
-		{
-			name: "test generate content success",
-			fields: fields{
-				httpClient: &mockHTTPClient{
-					response: &http.Response{
-						StatusCode: http.StatusOK,
-						Body:       io.NopCloser(strings.NewReader(`{"result": {"response": "response"}}`)),
-					},
-				},
-				accountID:          "accountID",
-				token:              "token",
-				baseURL:            "baseURL",
-				modelName:          "modelName",
-				embeddingModelName: "embeddingModelName",
-			},
-			args: args{
-				ctx: context.Background(),
-				request: &GenerateContentRequest{
-					Messages: []Message{
-						{Role: "system", Content: "systemPrompt"},
-						{Role: "user", Content: "userPrompt"},
-					},
-				},
-			},
-			want: &GenerateContentResponse{
-				Result: struct {
-					Response string `json:"response"`
-				}{
-					Response: "response",
-				},
-			},
-		},
-		{
-			name: "test generate content stream success",
-			fields: fields{
-				httpClient: &mockHTTPClient{
-					response: &http.Response{
-						StatusCode: http.StatusOK,
-						Body:       io.NopCloser(strings.NewReader(`{"result": {"response": "response"}}`)),
-					},
-				},
-				accountID:          "accountID",
-				token:              "token",
-				baseURL:            "baseURL",
-				modelName:          "modelName",
-				embeddingModelName: "embeddingModelName",
-			},
-			args: args{
-				ctx: context.Background(),
-				request: &GenerateContentRequest{
-					Messages: []Message{
-						{Role: "system", Content: "systemPrompt"},
-						{Role: "user", Content: "userPrompt"},
-					},
-					Stream: true,
-					StreamingFunc: func(_ context.Context, chunk []byte) error {
-						if string(chunk) != `{"result": {"response": "response"}}` {
-							return io.EOF
-						}
-						return nil
-					},
-				},
-			},
-			want: &GenerateContentResponse{
-				Result: struct {
-					Response string `json:"response"`
-				}{
-					Response: "",
-				},
-			},
-		},
-	}
-	for i := range tests {
-		tt := tests[i]
 
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+	client := NewClient(rr.Client(), accountID, baseURL, token, modelName, "")
 
-			c := Client{
-				httpClient:         tt.fields.httpClient,
-				accountID:          tt.fields.accountID,
-				token:              tt.fields.token,
-				baseURL:            tt.fields.baseURL,
-				modelName:          tt.fields.modelName,
-				embeddingModelName: tt.fields.embeddingModelName,
-				endpointURL:        tt.fields.endpointURL,
-				bearerToken:        tt.fields.bearerToken,
-			}
+	t.Run("test generate content success", func(t *testing.T) {
+		request := &GenerateContentRequest{
+			Messages: []Message{
+				{Role: "system", Content: "You are a helpful assistant."},
+				{Role: "user", Content: "Hello, how are you?"},
+			},
+		}
 
-			got, err := c.GenerateContent(context.Background(), tt.args.request)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GenerateContent() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+		response, err := client.GenerateContent(ctx, request)
+		if err != nil {
+			t.Fatalf("GenerateContent() error = %v", err)
+		}
 
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GenerateContent() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
+		if response == nil {
+			t.Fatal("GenerateContent() response is nil")
+		}
+
+		if response.Result.Response == "" {
+			t.Error("GenerateContent() response is empty")
+		}
+	})
+
+	t.Run("test generate content stream success", func(t *testing.T) {
+		var chunks []string
+		request := &GenerateContentRequest{
+			Messages: []Message{
+				{Role: "system", Content: "You are a helpful assistant."},
+				{Role: "user", Content: "Count from 1 to 3"},
+			},
+			Stream: true,
+			StreamingFunc: func(_ context.Context, chunk []byte) error {
+				chunks = append(chunks, string(chunk))
+				return nil
+			},
+		}
+
+		response, err := client.GenerateContent(ctx, request)
+		if err != nil {
+			t.Fatalf("GenerateContent() streaming error = %v", err)
+		}
+
+		if response == nil {
+			t.Fatal("GenerateContent() streaming response is nil")
+		}
+
+		// For streaming, we expect chunks to be collected
+		if len(chunks) == 0 && rr.Recording() {
+			t.Log("Warning: No streaming chunks received during recording")
+		}
+	})
 }

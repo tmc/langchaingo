@@ -61,7 +61,7 @@ func main() {
 }
 ```
 
-See the full [Vector Store example and tutorial](https://github.com/vendasta/langchaingo/tree/main/examples/google-cloudsql-chat-message-history-example).
+See the full [Vector Store example and tutorial](https://github.com/vendasta/langchaingo/tree/main/examples/google-cloudsql-vectorstore-example).
 
 ## Engine Creation WithPool
 

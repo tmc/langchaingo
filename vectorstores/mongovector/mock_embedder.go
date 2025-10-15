@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/vendasta/langchaingo/embeddings"
 	"github.com/vendasta/langchaingo/schema"
@@ -97,11 +96,6 @@ func flushMockDocuments(ctx context.Context, store Store, emb *mockEmbedder) err
 	if err != nil {
 		return err
 	}
-
-	// Consistency on indexes is not synchronous.
-	// nolint:mnd
-	time.Sleep(10 * time.Second)
-
 	return nil
 }
 

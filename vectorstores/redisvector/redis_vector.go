@@ -7,7 +7,6 @@ import (
 	"github.com/vendasta/langchaingo/embeddings"
 	"github.com/vendasta/langchaingo/schema"
 	"github.com/vendasta/langchaingo/vectorstores"
-	"golang.org/x/exp/maps"
 )
 
 const (
@@ -135,7 +134,11 @@ func (s *Store) SimilaritySearch(ctx context.Context, query string, numDocuments
 
 	searchOpts := []SearchOption{WithScoreThreshold(scoreThreshold), WithOffsetLimit(0, numDocuments), WithPreFilters(filter)}
 	if s.indexSchema != nil {
-		searchOpts = append(searchOpts, WithReturns(maps.Keys(s.indexSchema.MetadataKeys())))
+		var keys []string
+		for k := range s.indexSchema.MetadataKeys() {
+			keys = append(keys, k)
+		}
+		searchOpts = append(searchOpts, WithReturns(keys))
 	}
 
 	search, err := NewIndexVectorSearch(

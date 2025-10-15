@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/vendasta/langchaingo/llms"
 	"github.com/vendasta/langchaingo/llms/openai"
-	"log"
 )
 
 func main() {

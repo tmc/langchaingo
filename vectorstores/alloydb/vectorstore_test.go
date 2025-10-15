@@ -4,11 +4,13 @@ package alloydb_test
 import (
 	"context"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/vendasta/langchaingo/embeddings"
+	"github.com/vendasta/langchaingo/internal/httprr"
 	"github.com/vendasta/langchaingo/llms/openai"
 	"github.com/vendasta/langchaingo/schema"
 	"github.com/vendasta/langchaingo/util/alloydbutil"
@@ -99,6 +101,27 @@ func setEngine(t *testing.T, envVariables EnvVariables) alloydbutil.PostgresEngi
 	return pgEngine
 }
 
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	opts := []openai.Option{
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	}
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	llm, err := openai.New(opts...)
+	require.NoError(t, err)
+	e, err := embeddings.NewEmbedder(llm)
+	require.NoError(t, err)
+	return e
+}
+
 func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, func() error) {
 	t.Helper()
 	pgEngine := setEngine(t, envVariables)
@@ -113,20 +136,8 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, 
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Initialize VertexAI LLM
-	llm, err := openai.New(
-		openai.WithEmbeddingModel("text-embedding-ada-002"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err != nil {
-		t.Fatal(err)
-	}
-	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Initialize OpenAI embedder with httprr support
+	e := createOpenAIEmbedder(t)
 	vs, err := alloydb.NewVectorStore(pgEngine, e, envVariables.Table)
 	if err != nil {
 		t.Fatal(err)
@@ -140,20 +151,21 @@ func vectorStore(t *testing.T, envVariables EnvVariables) (alloydb.VectorStore, 
 }
 
 func TestPingToDB(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	engine := setEngine(t, envVariables)
 
 	defer engine.Close()
 
-	if err := engine.Pool.Ping(context.Background()); err != nil {
+	if err := engine.Pool.Ping(ctx); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestApplyVectorIndexAndDropIndex(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
-	ctx := context.Background()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -170,9 +182,9 @@ func TestApplyVectorIndexAndDropIndex(t *testing.T) {
 }
 
 func TestIsValidIndex(t *testing.T) {
+	ctx := context.Background()
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
-	ctx := context.Background()
 	idx := vs.NewBaseIndex("testindex", "hnsw", alloydb.CosineDistance{}, []string{}, alloydb.HNSWOptions{M: 4, EfConstruction: 16})
 	err := vs.ApplyVectorIndex(ctx, idx, "testindex", false)
 	if err != nil {
@@ -195,6 +207,11 @@ func TestIsValidIndex(t *testing.T) {
 
 func TestAddDocuments(t *testing.T) {
 	ctx := context.Background()
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
 	envVariables := getEnvVariables(t)
 	vs, cleanUpTableFn := vectorStore(t, envVariables)
 	t.Cleanup(func() {

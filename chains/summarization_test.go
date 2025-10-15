@@ -2,11 +2,13 @@ package chains
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vendasta/langchaingo/documentloaders"
+	"github.com/vendasta/langchaingo/internal/httprr"
 	"github.com/vendasta/langchaingo/llms/openai"
 	"github.com/vendasta/langchaingo/schema"
 	"github.com/vendasta/langchaingo/textsplitter"
@@ -14,12 +16,13 @@ import (
 
 func loadTestData(t *testing.T) []schema.Document {
 	t.Helper()
+	ctx := context.Background()
 
 	file, err := os.Open("./testdata/mouse_story.txt")
 	require.NoError(t, err)
 
 	docs, err := documentloaders.NewText(file).LoadAndSplit(
-		context.Background(),
+		ctx,
 		textsplitter.NewRecursiveCharacter(),
 	)
 	require.NoError(t, err)
@@ -27,21 +30,43 @@ func loadTestData(t *testing.T) []schema.Document {
 	return docs
 }
 
-func TestStuffSummarization(t *testing.T) {
-	t.Parallel()
+// createOpenAILLMForTest creates an OpenAI LLM with httprr support for testing.
+func createOpenAILLMForTest(t *testing.T) *openai.LLM {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording
+	if !rr.Recording() {
+		t.Parallel()
 	}
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
+	return llm
+}
+
+func TestStuffSummarization(t *testing.T) {
+	ctx := context.Background()
+
+	llm := createOpenAILLMForTest(t)
 
 	docs := loadTestData(t)
 
 	chain := LoadStuffSummarization(llm)
-	_, err = Call(
-		context.Background(),
+	_, err := Call(
+		ctx,
 		chain,
 		map[string]any{"input_documents": docs},
 	)
@@ -49,19 +74,15 @@ func TestStuffSummarization(t *testing.T) {
 }
 
 func TestRefineSummarization(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForTest(t)
 
 	docs := loadTestData(t)
 
 	chain := LoadRefineSummarization(llm)
-	_, err = Call(
-		context.Background(),
+	_, err := Call(
+		ctx,
 		chain,
 		map[string]any{"input_documents": docs},
 	)
@@ -69,19 +90,15 @@ func TestRefineSummarization(t *testing.T) {
 }
 
 func TestMapReduceSummarization(t *testing.T) {
-	t.Parallel()
+	ctx := context.Background()
 
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
-	}
-	llm, err := openai.New()
-	require.NoError(t, err)
+	llm := createOpenAILLMForTest(t)
 
 	docs := loadTestData(t)
 
 	chain := LoadMapReduceSummarization(llm)
-	_, err = Run(
-		context.Background(),
+	_, err := Run(
+		ctx,
 		chain,
 		docs,
 	)

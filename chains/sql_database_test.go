@@ -2,22 +2,39 @@ package chains
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vendasta/langchaingo/internal/httprr"
 	"github.com/vendasta/langchaingo/llms/openai"
 	"github.com/vendasta/langchaingo/tools/sqldatabase"
 	"github.com/vendasta/langchaingo/tools/sqldatabase/mysql"
 )
 
 func TestSQLDatabaseChain_Call(t *testing.T) {
-	t.Parallel()
-	if openaiKey := os.Getenv("OPENAI_API_KEY"); openaiKey == "" {
-		t.Skip("OPENAI_API_KEY not set")
+	ctx := context.Background()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run tests in parallel when not recording (to avoid rate limits)
+	if rr.Replaying() {
+		t.Parallel()
 	}
 
-	llm, err := openai.New()
+	opts := []openai.Option{
+		openai.WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("test-api-key"))
+	}
+	// When recording, openai.New() will read OPENAI_API_KEY from environment
+	llm, err := openai.New(opts...)
 	require.NoError(t, err)
 
 	// export LANGCHAINGO_TEST_MYSQL=user:p@ssw0rd@tcp(localhost:3306)/test
@@ -36,7 +53,7 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 		"query":              "How many cards are there?",
 		"table_names_to_use": []string{"AllianceAuthority", "AllianceGift", "Card"},
 	}
-	result, err := chain.Call(context.Background(), input)
+	result, err := chain.Call(ctx, input)
 	require.NoError(t, err)
 
 	ret, ok := result["result"].(string)
@@ -47,7 +64,6 @@ func TestSQLDatabaseChain_Call(t *testing.T) {
 }
 
 func TestExtractSQLQuery(t *testing.T) {
-	t.Parallel()
 
 	cases := []struct {
 		inputStr string

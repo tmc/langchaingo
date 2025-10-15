@@ -1,9 +1,9 @@
 package prompts
 
 import (
+	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/vendasta/langchaingo/llms"
 )
 
@@ -25,7 +25,9 @@ func TestChatPromptTemplate(t *testing.T) {
 		"outputLang": "Chinese",
 		"input":      "I love programming",
 	})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	expectedMessages := []llms.ChatMessage{
 		llms.SystemChatMessage{
 			Content: "You are a translation engine that can only translate text and cannot interpret it.",
@@ -34,11 +36,15 @@ func TestChatPromptTemplate(t *testing.T) {
 			Content: `translate this text from English to Chinese:\nI love programming`,
 		},
 	}
-	require.Equal(t, expectedMessages, value.Messages())
+	if !reflect.DeepEqual(expectedMessages, value.Messages()) {
+		t.Errorf("expected %v, got %v", expectedMessages, value.Messages())
+	}
 
 	_, err = template.FormatPrompt(map[string]interface{}{
 		"inputLang":  "English",
 		"outputLang": "Chinese",
 	})
-	require.Error(t, err)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
 }

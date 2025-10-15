@@ -12,6 +12,7 @@ import (
 )
 
 func TestPDFLoader(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 
 	page1Content := " A Simple PDF File  This is a small demonstration .pdf file -  " +
@@ -44,7 +45,7 @@ func TestPDFLoader(t *testing.T) {
 		finfo, err := f.Stat()
 		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size())
-		docs, err := p.Load(context.Background())
+		docs, err := p.Load(ctx)
 		require.NoError(t, err)
 
 		assert.Len(t, docs, 2)
@@ -63,7 +64,7 @@ func TestPDFLoader(t *testing.T) {
 		finfo, err := f.Stat()
 		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size(), WithPassword("password"))
-		docs, err := p.Load(context.Background())
+		docs, err := p.Load(ctx)
 		require.NoError(t, err)
 
 		assert.Len(t, docs, 2)
@@ -82,7 +83,7 @@ func TestPDFLoader(t *testing.T) {
 		finfo, err := f.Stat()
 		require.NoError(t, err)
 		p := NewPDF(f, finfo.Size(), WithPassword("password1"))
-		docs, err := p.Load(context.Background())
+		docs, err := p.Load(ctx)
 		require.Errorf(t, err, pdf.ErrInvalidPassword.Error())
 
 		assert.Empty(t, docs)
@@ -90,6 +91,7 @@ func TestPDFLoader(t *testing.T) {
 }
 
 func TestPDFTextSplit(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	page1_1Content := "A Simple PDF File  This is a small demonstration .pdf file -  " +
 		"just for use in the Virtual Mechanics tutorials. More text. And more  text. And more " +
@@ -127,7 +129,7 @@ func TestPDFTextSplit(t *testing.T) {
 		split := textsplitter.NewRecursiveCharacter()
 		split.ChunkSize = 300
 		split.ChunkOverlap = 30
-		docs, err := p.LoadAndSplit(context.Background(), split)
+		docs, err := p.LoadAndSplit(ctx, split)
 		require.NoError(t, err)
 
 		assert.Len(t, docs, 4)

@@ -2,6 +2,9 @@
 sidebar_label: Hugging Face
 ---
 
+import CodeBlock from "@theme/CodeBlock";
+import ExampleHuggingFace from "@examples/huggingface-llm-example/huggingface_example.go";
+
 # Hugging Face
 
 ## Overview
@@ -15,7 +18,7 @@ A valid Hugging Face API token. Obtain it by creating an account on the Hugging 
 ## Installation
 
 ```bash
-go get github.com/tmc/langchaingo
+go get github.com/vendasta/langchaingo
 ```
 Ensure that your Hugging Face API token is set as an environment variable:
 
@@ -23,72 +26,6 @@ Ensure that your Hugging Face API token is set as an environment variable:
 export HUGGINGFACEHUB_API_TOKEN='your_hugging_face_api_token'
 ```
 
-## Implementation
-Below is the step-by-step guide to implementing the LangchainGo with Hugging Face integration.
-### Importing Required Packages
-Start by creating a new Go file and import the necessary packages:
+## Usage
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/huggingface"
-)
-```
-
-### Initializing the Hugging Face Model
-In your `main` function, initialize the Hugging Face model by specifying the desired pre-trained model. In this example, we use "google/gemma-7b":
-```go
-func main() {
-	llm, err := huggingface.New(huggingface.WithModel("google/gemma-7b"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Continue implementation...
-}
-```
-
-### Generating Text from a Prompt
-```go 
-	ctx := context.Background()
-	prompt := "What is Golang?"
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(completion)
-```
-
-## Complete Example
-Here is the complete code sample for generating text using LangchainGo integrated with Hugging Face:
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/huggingface"
-)
-
-func main() {
-	llm, err := huggingface.New(huggingface.WithModel("google/gemma"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx := context.Background()
-	prompt := "What is Golang?"
-	completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(completion)
-}
-```
+<CodeBlock language="go">{ExampleHuggingFace}</CodeBlock>

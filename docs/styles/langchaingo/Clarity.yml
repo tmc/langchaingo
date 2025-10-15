@@ -1,0 +1,13 @@
+extends: existence
+message: "Be more specific than '%s'"
+level: suggestion
+tokens:
+  - 'easy'
+  - 'simple'
+  - 'just'
+  - 'simply'
+  - 'obviously'
+  - 'clearly'
+  - 'basically'
+  - 'actually'
+

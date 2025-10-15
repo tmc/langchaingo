@@ -68,6 +68,13 @@ func WithAPIKey(azureAISearchAPIKey string) Option {
 	}
 }
 
+// WithEndpoint is an option for setting the azure AI search endpoint.
+func WithEndpoint(endpoint string) Option {
+	return func(s *Store) {
+		s.azureAISearchEndpoint = strings.TrimSuffix(endpoint, "/")
+	}
+}
+
 func applyClientOptions(s *Store, opts ...Option) error {
 	for _, opt := range opts {
 		opt(s)

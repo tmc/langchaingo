@@ -52,7 +52,7 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		Role:    "user",
 		Content: prompt,
 	})
-	res, err := m.client.Chat("", messages, &mistralChatParams)
+	res, err := m.client.Chat(callOptions.Model, messages, &mistralChatParams)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return "", err

@@ -1,16 +1,16 @@
 module github.com/vendasta/langchaingo/examples/perplexity-completion-example
 
-go 1.22.0
-
-toolchain go1.22.1
+go 1.24.3
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/vendasta/langchaingo v0.1.13-pre.1
+	github.com/vendasta/langchaingo v0.1.14-pre.4
 )
 
 require (
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 )
+
+replace github.com/vendasta/langchaingo => ../..
