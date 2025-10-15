@@ -32,7 +32,7 @@ func setupTestClient(t *testing.T, model string) *Client {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, model, "", "", APITypeOpenAI, "", rr.Client(), "", nil)
+	client, err := New(apiKey, model, "", "", APITypeOpenAI, "", rr.Client(), "", nil, "", false)
 	require.NoError(t, err)
 	return client
 }
@@ -50,7 +50,7 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil)
+	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil, "", false)
 	require.NoError(t, err)
 
 	req := &ChatRequest{
@@ -84,7 +84,7 @@ func TestClient_CreateChatCompletionStream(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil)
+	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil, "", false)
 	require.NoError(t, err)
 
 	var chunks []string
@@ -123,7 +123,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-ada-002", nil)
+	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-ada-002", nil, "", false)
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
@@ -151,7 +151,7 @@ func TestClient_CreateEmbeddingWithDimensions(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-3-small", nil, WithEmbeddingDimensions(256))
+	client, err := New(apiKey, "", "", "", APITypeOpenAI, "", rr.Client(), "text-embedding-3-small", nil, "", false, WithEmbeddingDimensions(256))
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
@@ -179,7 +179,7 @@ func TestClient_FunctionCall(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil)
+	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", nil, "", false)
 	require.NoError(t, err)
 
 	req := &ChatRequest{
@@ -228,7 +228,7 @@ func TestClient_WithResponseFormat(t *testing.T) {
 	}
 
 	responseFormat := &ResponseFormat{Type: "json_object"}
-	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", responseFormat)
+	client, err := New(apiKey, "gpt-3.5-turbo", "", "", APITypeOpenAI, "", rr.Client(), "", responseFormat, "", false)
 	require.NoError(t, err)
 
 	req := &ChatRequest{
@@ -253,7 +253,7 @@ func TestClient_WithResponseFormat(t *testing.T) {
 
 func TestMakeEmbeddingRequest(t *testing.T) {
 	t.Run("without dimensions", func(t *testing.T) {
-		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, "", false)
 		require.NoError(t, err)
 
 		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model"})
@@ -261,7 +261,7 @@ func TestMakeEmbeddingRequest(t *testing.T) {
 		assert.Equal(t, 0, request.Dimensions)
 	})
 	t.Run("with dimensions", func(t *testing.T) {
-		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, "", false)
 		require.NoError(t, err)
 
 		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model", Dimensions: 1234})
@@ -272,7 +272,7 @@ func TestMakeEmbeddingRequest(t *testing.T) {
 
 func TestInternalMetadataFiltering(t *testing.T) {
 	// Test that internal openai: prefixed metadata is filtered out from requests
-	client, err := New("test-api-key", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil)
+	client, err := New("test-api-key", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, "", false)
 	require.NoError(t, err)
 
 	// Create a mock HTTP client to capture the request body
