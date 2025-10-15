@@ -21,7 +21,7 @@ func TestWithUserAndParallelToolCallsOptions(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, llm)
-		
+
 		// Verify the user is set on the client
 		assert.Equal(t, "test-user-123", llm.client.User)
 	})
@@ -35,7 +35,7 @@ func TestWithUserAndParallelToolCallsOptions(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, llm)
-		
+
 		// Verify ParallelToolCalls is set on the client
 		assert.True(t, llm.client.ParallelToolCalls)
 	})
@@ -50,10 +50,9 @@ func TestWithUserAndParallelToolCallsOptions(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.NotNil(t, llm)
-		
+
 		// Verify both are set correctly
 		assert.Equal(t, "test-user-456", llm.client.User)
 		assert.False(t, llm.client.ParallelToolCalls)
 	})
 }
-

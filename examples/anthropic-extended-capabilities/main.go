@@ -86,12 +86,12 @@ who want to deeply understand distributed systems architecture.`
 	// Display response summary
 	content := resp.Choices[0].Content
 	contentLen := len(content)
-	
+
 	fmt.Println("\n" + strings.Repeat("=", 60))
 	fmt.Println("RESPONSE SUMMARY")
 	fmt.Println(strings.Repeat("=", 60))
 	fmt.Printf("Total response length: %d characters\n", contentLen)
-	
+
 	// Show first 1000 chars as preview
 	preview := content
 	if len(preview) > 1000 {
@@ -106,7 +106,7 @@ who want to deeply understand distributed systems architecture.`
 	fmt.Println("\n" + strings.Repeat("=", 60))
 	fmt.Println("TOKEN METRICS")
 	fmt.Println(strings.Repeat("=", 60))
-	
+
 	if genInfo := resp.Choices[0].GenerationInfo; genInfo != nil {
 		var inputTokens, outputTokens, totalTokens int
 		if v, ok := genInfo["PromptTokens"].(int); ok {
@@ -150,7 +150,7 @@ who want to deeply understand distributed systems architecture.`
 	fmt.Println("• Extended thinking for complex reasoning about distributed systems")
 	fmt.Println("• Extended output allowing comprehensive, detailed responses")
 	fmt.Println("• Combined capabilities working together seamlessly")
-	
+
 	// Optionally save full response to file
 	if contentLen > 10000 {
 		filename := "distributed-systems-guide.md"

@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 
-	// Initialize Anthropic client  
+	// Initialize Anthropic client
 	llm, err := anthropic.New(anthropic.WithModel("claude-3-5-sonnet-20241022"))
 	if err != nil {
 		fmt.Printf("Error initializing Anthropic: %v\n", err)
