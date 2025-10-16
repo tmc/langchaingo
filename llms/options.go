@@ -1,6 +1,10 @@
 package llms
 
-import "context"
+import (
+	"context"
+
+	"github.com/tmc/langchaingo/jsonschema"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
@@ -45,6 +49,10 @@ type CallOptions struct {
 
 	// JSONMode is a flag to enable JSON mode.
 	JSONMode bool `json:"json"`
+
+	// JSONSchema defines the JSON schema.
+	// Only used for ollama and openai currently.
+	JSONSchema *jsonschema.Definition `json:"json_schema"`
 
 	// Tools is a list of tools to use. Each tool can be a specific tool or a function.
 	Tools []Tool `json:"tools,omitempty"`
@@ -273,6 +281,15 @@ func WithTools(tools []Tool) CallOption {
 func WithJSONMode() CallOption {
 	return func(o *CallOptions) {
 		o.JSONMode = true
+	}
+}
+
+// WithJSONSchema specifies the JSON schema.
+// Only used for ollama and openai currently.
+func WithJSONSchema(schema *jsonschema.Definition) CallOption {
+	return func(o *CallOptions) {
+		o.JSONMode = true
+		o.JSONSchema = schema
 	}
 }
 

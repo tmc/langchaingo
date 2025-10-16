@@ -2,8 +2,10 @@ package ollama
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
@@ -138,9 +140,23 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		chatMsgs = append(chatMsgs, msg)
 	}
 
-	format := o.options.format
+	var format json.RawMessage
+	if o.options.format != "" {
+		format = json.RawMessage(strconv.Quote(o.options.format))
+	}
 	if opts.JSONMode {
-		format = "json"
+		format = json.RawMessage(`"json"`)
+	}
+	if opts.JSONSchema != nil {
+		formatB, err := opts.JSONSchema.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		format = json.RawMessage(formatB)
+	}
+	if len(format) == 0 {
+		// `""`, not `null`, for backward compatibility
+		format = json.RawMessage(`""`)
 	}
 
 	// Get our ollamaOptions from llms.CallOptions
