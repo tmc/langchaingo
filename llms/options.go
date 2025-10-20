@@ -74,6 +74,10 @@ type CallOptions struct {
 	// When set, the model will return JSON conforming to the given schema.
 	// Provider support: OpenAI (native), Google (native), Anthropic (simulated via tools).
 	StructuredOutput *StructuredOutputDefinition `json:"structured_output,omitempty"`
+
+	// Reasoning configures reasoning/thinking behavior for supported models.
+	// Provider support: Anthropic Claude 4 (thinking), OpenAI o1/o3 (reasoning), Google Gemini 2.0+ (thinking).
+	Reasoning *ReasoningOptions `json:"reasoning,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
