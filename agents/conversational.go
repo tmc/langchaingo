@@ -151,7 +151,7 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		return nil, finishAction, nil
 	}
 
-	r := regexp.MustCompile(`Action: (.*?)[\n]*Action Input: (.*)`)
+	r := regexp.MustCompile(`Action: (.*?)[\n]*(?s)Action Input: (.*)`)
 	matches := r.FindStringSubmatch(output)
 	if len(matches) == 0 {
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
