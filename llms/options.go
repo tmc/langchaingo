@@ -69,6 +69,11 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// StructuredOutput specifies a schema for structured JSON output.
+	// When set, the model will return JSON conforming to the given schema.
+	// Provider support: OpenAI (native), Google (native), Anthropic (simulated via tools).
+	StructuredOutput *StructuredOutputDefinition `json:"structured_output,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
