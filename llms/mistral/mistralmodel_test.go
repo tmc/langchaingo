@@ -478,3 +478,83 @@ func TestGenerateContent(t *testing.T) {
 	// This test requires mocking the Mistral SDK client
 	t.Skip("GenerateContent() requires integration testing with mock Mistral client")
 }
+
+// TestModelNamePropagation verifies that the model name is correctly propagated
+// from client options and call options to the final API call parameters.
+// This is a regression test for issue #1233 where an empty string was being
+// passed as the model parameter, causing "Invalid model: " errors.
+func TestModelNamePropagation(t *testing.T) {
+	tests := []struct {
+		name              string
+		clientModel       string
+		callOptionModel   string
+		expectedModel     string
+	}{
+		{
+			name:            "default model from client options",
+			clientModel:     "mistral-small",
+			callOptionModel: "",
+			expectedModel:   "mistral-small",
+		},
+		{
+			name:            "override with call option",
+			clientModel:     "mistral-small",
+			callOptionModel: "mistral-large",
+			expectedModel:   "mistral-large",
+		},
+		{
+			name:            "use SDK default when not specified",
+			clientModel:     sdk.ModelOpenMistral7b,
+			callOptionModel: "",
+			expectedModel:   sdk.ModelOpenMistral7b,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create client options with the test model
+			clientOpts := &clientOptions{
+				model: tt.clientModel,
+			}
+
+			// Resolve call options (simulates what happens in Call/GenerateContent)
+			callOpts := resolveDefaultOptions(sdk.DefaultChatRequestParams, clientOpts)
+
+			// Apply call option override if specified
+			if tt.callOptionModel != "" {
+				setCallOptions([]llms.CallOption{
+					llms.WithModel(tt.callOptionModel),
+				}, callOpts)
+			}
+
+			// Verify the model is set correctly and is not empty
+			if callOpts.Model == "" {
+				t.Error("Model in callOptions is empty string - this would cause 'Invalid model' error")
+			}
+
+			if callOpts.Model != tt.expectedModel {
+				t.Errorf("Model = %q, want %q", callOpts.Model, tt.expectedModel)
+			}
+		})
+	}
+}
+
+// TestModelNotEmpty ensures that a model is always set and never an empty string.
+// This prevents the "Invalid model: " error reported in issue #1233.
+func TestModelNotEmpty(t *testing.T) {
+	// Test with default initialization
+	model, err := New(WithAPIKey("test-key"))
+	if err != nil {
+		t.Fatalf("Failed to create model: %v", err)
+	}
+
+	if model.clientOptions.model == "" {
+		t.Error("Model is empty string after New() with defaults - this would cause API errors")
+	}
+
+	// Test that resolveDefaultOptions always provides a model
+	callOpts := resolveDefaultOptions(sdk.DefaultChatRequestParams, model.clientOptions)
+	if callOpts.Model == "" {
+		t.Error("CallOptions.Model is empty string - this would cause 'Invalid model' error")
+	}
+}
