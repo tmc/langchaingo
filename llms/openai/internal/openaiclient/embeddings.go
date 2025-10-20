@@ -52,7 +52,7 @@ func (c *Client) createEmbedding(ctx context.Context, payload *embeddingPayload)
 
 	r, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("send request: %w", err)
+		return nil, sanitizeHTTPError(err)
 	}
 	defer r.Body.Close()
 
