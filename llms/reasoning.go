@@ -132,8 +132,3 @@ func ExtractReasoningUsage(genInfo map[string]any) *ReasoningUsage {
 
 	return usage
 }
-
-// ReasoningModel is an interface for models that support reasoning capabilities.
-type ReasoningModel interface {
-	SupportsReasoning() bool
-}

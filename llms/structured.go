@@ -179,4 +179,4 @@ func ValidateSchema(schema *StructuredOutputSchema) error {
 }
 
 // ErrInvalidSchema is returned when a schema is invalid
-var ErrInvalidSchema = NewError("invalid schema", "the provided schema is not valid")
+var ErrInvalidSchema = NewError(ErrCodeInvalidRequest, "structured", "the provided schema is not valid")

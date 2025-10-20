@@ -210,40 +210,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
-	// Extract reasoning effort for thinking models
-	// Note: OpenAI o1/o3 models have built-in reasoning and don't support reasoning_effort parameter
-	// This is kept for future models that might support it (like GPT-5)
+	// Extract reasoning effort for o1/o3 models
 	var reasoningEffort string
-	// Commented out for now since current o1 models don't support this parameter
-	/*
-		if opts.Metadata != nil {
-			if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-				// Map thinking mode to reasoning effort
-				switch config.Mode {
-				case llms.ThinkingModeLow:
-					reasoningEffort = "low"
-				case llms.ThinkingModeMedium:
-					reasoningEffort = "medium"
-				case llms.ThinkingModeHigh:
-					reasoningEffort = "high"
-				}
-
-				// Handle streaming for thinking
-				if config.StreamThinking && opts.StreamingReasoningFunc == nil && opts.StreamingFunc != nil {
-					// Set up default reasoning streaming if requested but not provided
-					// Wrap the single-param streaming func into a reasoning func
-					opts.StreamingReasoningFunc = func(ctx context.Context, reasoningChunk []byte, chunk []byte) error {
-						// For default behavior, we might want to stream both or just the main content
-						// Here we'll just stream the main content chunk
-						if len(chunk) > 0 {
-							return opts.StreamingFunc(ctx, chunk)
-						}
-						return nil
-					}
-				}
-			}
+	if opts.Reasoning != nil && opts.Reasoning.Strength != nil {
+		// Map 0.0-1.0 strength to OpenAI's reasoning_effort
+		strength := *opts.Reasoning.Strength
+		if strength < 0.34 {
+			reasoningEffort = "low"
+		} else if strength < 0.67 {
+			reasoningEffort = "medium"
+		} else {
+			reasoningEffort = "high"
 		}
-	*/
+	}
 
 	// Filter out internal metadata that shouldn't be sent to API
 	apiMetadata := make(map[string]any)
@@ -319,8 +298,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		req.Tools = append(req.Tools, t)
 	}
 
-	// if o.client.ResponseFormat is set, use it for the request
-	if o.client.ResponseFormat != nil {
+	// Handle structured output - this takes precedence over client-level ResponseFormat
+	if opts.StructuredOutput != nil {
+		responseFormat, err := convertStructuredOutputToResponseFormat(opts.StructuredOutput)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert structured output: %w", err)
+		}
+		req.ResponseFormat = responseFormat
+	} else if o.client.ResponseFormat != nil {
+		// Fall back to client-level ResponseFormat if no structured output option
 		req.ResponseFormat = o.client.ResponseFormat
 	}
 
@@ -343,6 +329,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"PromptTokens":      result.Usage.PromptTokens,
 				"TotalTokens":       result.Usage.TotalTokens,
 				"ReasoningTokens":   result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"ReasoningContent":  c.Message.ReasoningContent, // OpenAI format for ExtractReasoningUsage
 				"PromptAudioTokens": result.Usage.PromptTokensDetails.AudioTokens,
 				// Standardized fields for cross-provider compatibility
 				"ThinkingContent":                    c.Message.ReasoningContent,                           // Standardized field
@@ -403,7 +390,8 @@ func (o *LLM) SupportsReasoning() bool {
 	}
 
 	// OpenAI o3 series
-	if strings.HasPrefix(modelLower, "o3-") ||
+	if modelLower == "o3" ||
+		strings.HasPrefix(modelLower, "o3-") ||
 		strings.Contains(modelLower, "o3-mini") {
 		return true
 	}

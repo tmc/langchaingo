@@ -142,8 +142,32 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	tools := toolsToTools(opts.Tools)
+	var toolChoice any
+
+	// Handle structured output by simulating with tool calling
+	var structuredOutputToolName string
+	if opts.StructuredOutput != nil {
+		// Convert schema to tool definition
+		structuredTool := schemaToTool(opts.StructuredOutput)
+		tools = append(tools, structuredTool)
+		structuredOutputToolName = structuredTool.Name
+
+		// Force the model to use this tool
+		toolChoice = map[string]any{
+			"type": "tool",
+			"name": structuredTool.Name,
+		}
+	} else if opts.ToolChoice != nil {
+		toolChoice = opts.ToolChoice
+	}
 
 	betaHeaders, thinking := extractThinkingOptions(o, opts)
+
+	// Enforce temperature = 1.0 when thinking is enabled (Anthropic requirement)
+	temperature := opts.Temperature
+	if thinking != nil && temperature != 1.0 {
+		temperature = 1.0
+	}
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:                  opts.Model,
@@ -151,9 +175,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		System:                 systemPrompt,
 		MaxTokens:              opts.MaxTokens,
 		StopWords:              opts.StopWords,
-		Temperature:            opts.Temperature,
+		Temperature:            temperature,
 		TopP:                   opts.TopP,
 		Tools:                  tools,
+		ToolChoice:             toolChoice,
 		Thinking:               thinking,
 		BetaHeaders:            betaHeaders,
 		StreamingFunc:          opts.StreamingFunc,
@@ -165,38 +190,32 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	return processAnthropicResponse(result)
+
+	// If structured output was requested, extract JSON from tool call
+	if structuredOutputToolName != "" {
+		return extractStructuredOutput(result, structuredOutputToolName)
+	}
+
+	return processAnthropicResponse(result, thinking)
 }
 
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse
-func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
+func processAnthropicResponse(result *anthropicclient.MessageResponsePayload, thinkingConfig *anthropicclient.ThinkingConfig) (*llms.ContentResponse, error) {
 	if result == nil || len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
-	choices := make([]*llms.ContentChoice, len(result.Content))
-	for i, content := range result.Content {
+	// Collect all content blocks and separate thinking from output
+	var textParts []string
+	var thinkingParts []string
+	var toolCalls []llms.ToolCall
+	var thinkingTokens int
+
+	for _, content := range result.Content {
 		switch content.GetType() {
 		case "text":
 			if textContent, ok := content.(*anthropicclient.TextContent); ok {
-				// Extract thinking content from the response text
-				thinkingContent, outputContent := extractThinkingFromText(textContent.Text)
-
-				choices[i] = &llms.ContentChoice{
-					Content:    textContent.Text,
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-						// Standardized fields for cross-provider compatibility
-						"ThinkingContent": thinkingContent, // Standardized field
-						"OutputContent":   outputContent,   // Standardized field
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for text message", ErrInvalidContentType)
+				textParts = append(textParts, textContent.Text)
 			}
 		case "tool_use":
 			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
@@ -204,51 +223,55 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 				if err != nil {
 					return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
 				}
-				choices[i] = &llms.ContentChoice{
-					ToolCalls: []llms.ToolCall{
-						{
-							ID: toolUseContent.ID,
-							FunctionCall: &llms.FunctionCall{
-								Name:      toolUseContent.Name,
-								Arguments: string(argumentsJSON),
-							},
-						},
+				toolCalls = append(toolCalls, llms.ToolCall{
+					ID: toolUseContent.ID,
+					FunctionCall: &llms.FunctionCall{
+						Name:      toolUseContent.Name,
+						Arguments: string(argumentsJSON),
 					},
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message %T", ErrInvalidContentType, content)
+				})
 			}
 		case "thinking":
 			if thinkingContent, ok := content.(*anthropicclient.ThinkingContent); ok {
-				choices[i] = &llms.ContentChoice{
-					Content:    "", // Thinking content is not included in output
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"ThinkingContent":          thinkingContent.Thinking,
-						"ThinkingSignature":        thinkingContent.Signature,
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for thinking message %T", ErrInvalidContentType, content)
+				thinkingParts = append(thinkingParts, thinkingContent.Thinking)
+				// Estimate thinking tokens (rough approximation: 1 token ~= 4 chars)
+				thinkingTokens += len(thinkingContent.Thinking) / 4
 			}
-		default:
-			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
 		}
 	}
 
+	// Combine all text parts
+	combinedText := strings.Join(textParts, "\n")
+	combinedThinking := strings.Join(thinkingParts, "\n")
+
+	// Build generation info with thinking token details
+	genInfo := map[string]any{
+		"InputTokens":              result.Usage.InputTokens,
+		"OutputTokens":             result.Usage.OutputTokens,
+		"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+		"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+	}
+
+	// Add thinking-specific fields if thinking was enabled
+	if len(thinkingParts) > 0 {
+		genInfo["ThinkingContent"] = combinedThinking
+		genInfo["ThinkingTokens"] = thinkingTokens
+		if thinkingConfig != nil {
+			genInfo["ThinkingBudgetAllocated"] = thinkingConfig.BudgetTokens
+			genInfo["ThinkingBudgetUsed"] = thinkingTokens
+		}
+	}
+
+	// Create the choice
+	choice := &llms.ContentChoice{
+		Content:        combinedText,
+		ToolCalls:      toolCalls,
+		StopReason:     result.StopReason,
+		GenerationInfo: genInfo,
+	}
+
 	return &llms.ContentResponse{
-		Choices: choices,
+		Choices: []*llms.ContentChoice{choice},
 	}, nil
 }
 
@@ -485,39 +508,55 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 		}
 	}
 
-	// Extract thinking configuration
+	// Check if reasoning is enabled via new unified API
+	if opts.Reasoning == nil {
+		return betaHeaders, nil
+	}
+
+	// Determine current model
+	currentModel := opts.Model
+	if currentModel == "" {
+		currentModel = o.model
+	}
+
+	// Only configure thinking for models that support extended thinking
+	if !supportsReasoningForModel(currentModel) {
+		return betaHeaders, nil
+	}
+
+	// Calculate budget tokens
 	var budgetTokens int
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Only set budget_tokens for models that support extended thinking
-			// Claude 3.7+ and Claude 4+ support this feature
-			currentModel := opts.Model
-			if currentModel == "" {
-				currentModel = o.model
-			}
-			if supportsReasoningForModel(currentModel) {
-				if config.BudgetTokens > 0 {
-					budgetTokens = config.BudgetTokens
-				} else if config.Mode != llms.ThinkingModeNone {
-					// Calculate budget based on mode
-					budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
-				}
-
-				// Ensure budget is within valid range for Claude 3.7+
-				if budgetTokens > 0 {
-					if budgetTokens < 1024 {
-						budgetTokens = 1024 // Minimum for Claude
-					} else if budgetTokens > 128000 {
-						budgetTokens = 128000 // Maximum for Claude (128K)
-					}
-				}
-			}
-
-			// Add interleaved thinking header if requested (Claude 4+)
-			if config.InterleaveThinking && supportsReasoningForModel(currentModel) {
-				betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
-			}
+	if opts.Reasoning.BudgetTokens != nil && *opts.Reasoning.BudgetTokens > 0 {
+		budgetTokens = *opts.Reasoning.BudgetTokens
+	} else if opts.Reasoning.Mode != "" {
+		// Map ThinkingMode to token budget
+		switch opts.Reasoning.Mode {
+		case llms.ThinkingModeLow:
+			budgetTokens = 2000
+		case llms.ThinkingModeMedium:
+			budgetTokens = 8000
+		case llms.ThinkingModeHigh:
+			budgetTokens = 16000
 		}
+	}
+
+	// Ensure budget is within valid range for Claude 3.7+
+	if budgetTokens > 0 {
+		if budgetTokens < 1024 {
+			budgetTokens = 1024 // Minimum for Claude
+		} else if budgetTokens > 128000 {
+			budgetTokens = 128000 // Maximum for Claude (128K)
+		}
+	}
+
+	// Add interleaved thinking header if requested (Claude 4+)
+	if opts.Reasoning.Interleaved {
+		betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
+	}
+
+	// Add extended thinking header
+	if budgetTokens > 0 {
+		betaHeaders = append(betaHeaders, "extended-thinking-2025-01-01")
 	}
 
 	// Create thinking configuration if we have a budget
@@ -565,4 +604,126 @@ func extractThinkingFromText(fullText string) (thinkingContent, outputContent st
 
 	// If no thinking tags found, treat entire text as output
 	return "", fullText
+}
+
+// schemaToTool converts a StructuredOutputSchema to an Anthropic tool definition.
+// This is used to simulate structured output via tool calling.
+func schemaToTool(def *llms.StructuredOutputDefinition) anthropicclient.Tool {
+	return anthropicclient.Tool{
+		Name:        def.Name,
+		Description: def.Description,
+		InputSchema: convertSchemaToJSONSchema(def.Schema),
+	}
+}
+
+// convertSchemaToJSONSchema converts llms.StructuredOutputSchema to JSON Schema format
+func convertSchemaToJSONSchema(schema *llms.StructuredOutputSchema) map[string]any {
+	if schema == nil {
+		return nil
+	}
+
+	result := map[string]any{
+		"type": string(schema.Type),
+	}
+
+	if schema.Description != "" {
+		result["description"] = schema.Description
+	}
+
+	// Handle object properties
+	if schema.Type == llms.SchemaTypeObject && len(schema.Properties) > 0 {
+		properties := make(map[string]any)
+		for name, prop := range schema.Properties {
+			properties[name] = convertSchemaToJSONSchema(prop)
+		}
+		result["properties"] = properties
+
+		if len(schema.Required) > 0 {
+			result["required"] = schema.Required
+		}
+
+		if !schema.AdditionalProperties {
+			result["additionalProperties"] = false
+		}
+	}
+
+	// Handle array items
+	if schema.Type == llms.SchemaTypeArray && schema.Items != nil {
+		result["items"] = convertSchemaToJSONSchema(schema.Items)
+
+		if schema.MinItems != nil {
+			result["minItems"] = *schema.MinItems
+		}
+		if schema.MaxItems != nil {
+			result["maxItems"] = *schema.MaxItems
+		}
+	}
+
+	// Handle string constraints
+	if schema.Type == llms.SchemaTypeString {
+		if len(schema.Enum) > 0 {
+			result["enum"] = schema.Enum
+		}
+		if schema.MinLength != nil {
+			result["minLength"] = *schema.MinLength
+		}
+		if schema.MaxLength != nil {
+			result["maxLength"] = *schema.MaxLength
+		}
+		if schema.Pattern != "" {
+			result["pattern"] = schema.Pattern
+		}
+	}
+
+	// Handle number/integer constraints
+	if schema.Type == llms.SchemaTypeNumber || schema.Type == llms.SchemaTypeInteger {
+		if schema.Minimum != nil {
+			result["minimum"] = *schema.Minimum
+		}
+		if schema.Maximum != nil {
+			result["maximum"] = *schema.Maximum
+		}
+	}
+
+	return result
+}
+
+// extractStructuredOutput extracts JSON from a tool call response when using structured output
+func extractStructuredOutput(result *anthropicclient.MessageResponsePayload, toolName string) (*llms.ContentResponse, error) {
+	if result == nil || len(result.Content) == 0 {
+		return nil, ErrEmptyResponse
+	}
+
+	// Look for the tool_use content block with our structured output tool
+	for _, content := range result.Content {
+		if content.GetType() == "tool_use" {
+			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
+				if toolUseContent.Name == toolName {
+					// Convert the tool input to JSON string
+					jsonBytes, err := json.Marshal(toolUseContent.Input)
+					if err != nil {
+						return nil, fmt.Errorf("anthropic: failed to marshal structured output: %w", err)
+					}
+
+					return &llms.ContentResponse{
+						Choices: []*llms.ContentChoice{
+							{
+								Content:    string(jsonBytes),
+								StopReason: result.StopReason,
+								GenerationInfo: map[string]any{
+									"InputTokens":              result.Usage.InputTokens,
+									"OutputTokens":             result.Usage.OutputTokens,
+									"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+									"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+									"StructuredOutput":         true,
+								},
+							},
+						},
+					}, nil
+				}
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("anthropic: structured output tool call not found in response")
 }

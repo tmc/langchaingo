@@ -42,6 +42,7 @@ type messagePayload struct {
 	Stream      bool          `json:"stream,omitempty"`
 	Temperature float64       `json:"temperature"`
 	Tools       []Tool        `json:"tools,omitempty"`
+	ToolChoice  any           `json:"tool_choice,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 
 	// Extended thinking parameters (Claude 3.7+)

@@ -100,14 +100,64 @@ func (g *GoogleAI) GenerateContent(
 		return nil, err
 	}
 
-	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
-	switch {
-	case opts.ResponseMIMEType != "" && opts.JSONMode:
-		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
-	case opts.ResponseMIMEType != "" && !opts.JSONMode:
-		model.ResponseMIMEType = opts.ResponseMIMEType
-	case opts.ResponseMIMEType == "" && opts.JSONMode:
+	// Handle structured output (takes precedence over JSONMode and ResponseMIMEType)
+	if opts.StructuredOutput != nil {
+		// Validate the schema
+		if err := llms.ValidateSchema(opts.StructuredOutput.Schema); err != nil {
+			return nil, fmt.Errorf("invalid structured output schema: %w", err)
+		}
+
+		// Convert schema to Google's ResponseSchema format
+		responseSchema, err := convertToResponseSchema(opts.StructuredOutput.Schema)
+		if err != nil {
+			return nil, fmt.Errorf("convert structured output schema: %w", err)
+		}
+
+		// Set ResponseMIMEType to application/json and ResponseSchema
 		model.ResponseMIMEType = ResponseMIMETypeJson
+		model.ResponseSchema = responseSchema
+	} else {
+		// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
+		switch {
+		case opts.ResponseMIMEType != "" && opts.JSONMode:
+			return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
+		case opts.ResponseMIMEType != "" && !opts.JSONMode:
+			model.ResponseMIMEType = opts.ResponseMIMEType
+		case opts.ResponseMIMEType == "" && opts.JSONMode:
+			model.ResponseMIMEType = ResponseMIMETypeJson
+		}
+	}
+
+	// Apply reasoning options if provided
+	if opts.Reasoning != nil {
+		// Check if model supports reasoning
+		if !g.SupportsReasoning() {
+			return nil, fmt.Errorf("reasoning not supported for model %s (requires Gemini 2.0+)", opts.Model)
+		}
+
+		// Note: Google's Gemini 2.0+ models have inherent reasoning capabilities,
+		// but don't expose explicit thinking mode configuration like Anthropic.
+		// We accept the reasoning options for API consistency, but may not
+		// be able to control the thinking mode directly.
+		//
+		// The thinking mode (low/medium/high) is noted for potential future use
+		// when Google exposes more granular control over reasoning behavior.
+		_ = opts.Reasoning.Mode
+
+		// Google AI doesn't support budget tokens or interleaved thinking
+		// like Anthropic, so we log if these are requested
+		if opts.Reasoning.BudgetTokens != nil {
+			// Note: Google doesn't support budget tokens, this option is ignored
+		}
+		if opts.Reasoning.Interleaved {
+			// Note: Google doesn't support interleaved thinking, this option is ignored
+		}
+
+		// Google's reasoning strength mapping (if Strength is provided, like OpenAI)
+		// is not applicable as Google doesn't expose this parameter yet
+		if opts.Reasoning.Strength != nil {
+			// Note: Google doesn't support reasoning strength parameter yet
+		}
 	}
 
 	var response *llms.ContentResponse
@@ -549,6 +599,74 @@ func convertToolSchemaType(ty string) genai.Type {
 		return genai.TypeBoolean
 	case "array":
 		return genai.TypeArray
+	default:
+		return genai.TypeUnspecified
+	}
+}
+
+// convertToResponseSchema converts llms.StructuredOutputSchema to genai.Schema.
+// This is used for structured output via ResponseSchema.
+func convertToResponseSchema(schema *llms.StructuredOutputSchema) (*genai.Schema, error) {
+	if schema == nil {
+		return nil, errors.New("schema is nil")
+	}
+
+	genaiSchema := &genai.Schema{
+		Type:        convertSchemaType(schema.Type),
+		Description: schema.Description,
+	}
+
+	// Handle object properties
+	if schema.Type == llms.SchemaTypeObject && len(schema.Properties) > 0 {
+		genaiSchema.Properties = make(map[string]*genai.Schema)
+		for propName, propSchema := range schema.Properties {
+			convertedProp, err := convertToResponseSchema(propSchema)
+			if err != nil {
+				return nil, fmt.Errorf("convert property %s: %w", propName, err)
+			}
+			genaiSchema.Properties[propName] = convertedProp
+		}
+
+		// Set required fields
+		if len(schema.Required) > 0 {
+			genaiSchema.Required = schema.Required
+		}
+	}
+
+	// Handle array items
+	if schema.Type == llms.SchemaTypeArray && schema.Items != nil {
+		convertedItems, err := convertToResponseSchema(schema.Items)
+		if err != nil {
+			return nil, fmt.Errorf("convert array items: %w", err)
+		}
+		genaiSchema.Items = convertedItems
+	}
+
+	// Handle enum values
+	if len(schema.Enum) > 0 {
+		genaiSchema.Enum = schema.Enum
+	}
+
+	return genaiSchema, nil
+}
+
+// convertSchemaType converts llms.SchemaType to genai.Type.
+func convertSchemaType(ty llms.SchemaType) genai.Type {
+	switch ty {
+	case llms.SchemaTypeObject:
+		return genai.TypeObject
+	case llms.SchemaTypeArray:
+		return genai.TypeArray
+	case llms.SchemaTypeString:
+		return genai.TypeString
+	case llms.SchemaTypeNumber:
+		return genai.TypeNumber
+	case llms.SchemaTypeInteger:
+		return genai.TypeInteger
+	case llms.SchemaTypeBoolean:
+		return genai.TypeBoolean
+	case llms.SchemaTypeNull:
+		return genai.TypeUnspecified // Google doesn't have explicit null type
 	default:
 		return genai.TypeUnspecified
 	}
