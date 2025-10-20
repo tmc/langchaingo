@@ -146,14 +146,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 
-	// Handle thinking mode if specified via metadata
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			if config.Mode != llms.ThinkingModeNone && o.SupportsReasoning() {
-				// Enable thinking for models that support it
-				ollamaOptions.Think = true
-			}
-		}
+	// Handle thinking mode if specified via reasoning options
+	if opts.Reasoning != nil && o.SupportsReasoning() {
+		// Enable thinking for models that support it (Ollama deepseek-r1)
+		ollamaOptions.Think = true
 	}
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
@@ -320,13 +316,9 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
 	// Extract thinking configuration for models that support it
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Enable thinking mode if not explicitly disabled
-			if config.Mode != llms.ThinkingModeNone {
-				ollamaOptions.Think = true
-			}
-		}
+	if opts.Reasoning != nil {
+		// Enable thinking mode (for deepseek-r1 and other reasoning models)
+		ollamaOptions.Think = true
 	}
 
 	return ollamaOptions
