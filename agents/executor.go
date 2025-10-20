@@ -61,6 +61,19 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, options
 		if finish != nil || err != nil {
 			return finish, err
 		}
+
+		// Check for potential infinite loops where the agent keeps repeating the same action
+		if err := e.checkForLoop(steps); err != nil {
+			if e.CallbacksHandler != nil {
+				e.CallbacksHandler.HandleAgentFinish(ctx, schema.AgentFinish{
+					ReturnValues: map[string]any{"output": err.Error()},
+				})
+			}
+			return e.getReturn(
+				&schema.AgentFinish{ReturnValues: make(map[string]any)},
+				steps,
+			), err
+		}
 	}
 
 	if e.CallbacksHandler != nil {
@@ -68,10 +81,14 @@ func (e *Executor) Call(ctx context.Context, inputValues map[string]any, options
 			ReturnValues: map[string]any{"output": ErrNotFinished.Error()},
 		})
 	}
+
+	// Provide more helpful error message based on the steps taken
+	err = e.buildNotFinishedError(steps)
+
 	return e.getReturn(
 		&schema.AgentFinish{ReturnValues: make(map[string]any)},
 		steps,
-	), ErrNotFinished
+	), err
 }
 
 func (e *Executor) doIteration( // nolint
@@ -198,4 +215,74 @@ func getNameToTool(t []tools.Tool) map[string]tools.Tool {
 	}
 
 	return nameToTool
+}
+
+// checkForLoop detects if the agent is stuck in a loop by checking if the same
+// tool is being called repeatedly with the same input.
+func (e *Executor) checkForLoop(steps []schema.AgentStep) error {
+	if len(steps) < 3 {
+		return nil
+	}
+
+	// Check the last 3 steps for identical tool calls
+	lastStep := steps[len(steps)-1]
+	if lastStep.Action.Tool == "" {
+		return nil // Skip steps without actions (e.g., parser errors)
+	}
+
+	identicalCount := 1
+	for i := len(steps) - 2; i >= 0 && i >= len(steps)-3; i-- {
+		step := steps[i]
+		if step.Action.Tool == lastStep.Action.Tool &&
+			step.Action.ToolInput == lastStep.Action.ToolInput {
+			identicalCount++
+		}
+	}
+
+	// If the same tool with the same input was called 3 times in a row, it's likely a loop
+	if identicalCount >= 3 {
+		return fmt.Errorf("%w: agent is repeating the same action (%s with input %q). This usually means the LLM is not generating a 'Final Answer'. Consider using a different model or adjusting the prompt",
+			ErrNotFinished,
+			lastStep.Action.Tool,
+			lastStep.Action.ToolInput)
+	}
+
+	return nil
+}
+
+// buildNotFinishedError creates a more helpful error message when the agent doesn't finish.
+func (e *Executor) buildNotFinishedError(steps []schema.AgentStep) error {
+	if len(steps) == 0 {
+		return fmt.Errorf("%w: agent took no actions. Check if the LLM is generating valid output", ErrNotFinished)
+	}
+
+	// Count how many steps had actions vs parser errors
+	actionCount := 0
+	parseErrorCount := 0
+	for _, step := range steps {
+		if step.Action.Tool != "" {
+			actionCount++
+		} else if strings.Contains(step.Observation, "unable to parse") {
+			parseErrorCount++
+		}
+	}
+
+	if parseErrorCount > 0 {
+		return fmt.Errorf("%w: agent failed to parse LLM output %d/%d times. The LLM may not be following the expected format. Consider using a different model or adjusting the prompt",
+			ErrNotFinished, parseErrorCount, len(steps))
+	}
+
+	if actionCount > 0 {
+		lastAction := ""
+		for i := len(steps) - 1; i >= 0; i-- {
+			if steps[i].Action.Tool != "" {
+				lastAction = steps[i].Action.Tool
+				break
+			}
+		}
+		return fmt.Errorf("%w: agent executed %d actions (last: %s) but never generated a 'Final Answer'. This usually means the LLM is not instruction-following well. Consider using a more capable model",
+			ErrNotFinished, actionCount, lastAction)
+	}
+
+	return ErrNotFinished
 }
