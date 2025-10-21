@@ -491,7 +491,17 @@ func convertSchemaRecursive(schemaMap map[string]any, toolIndex int, propertyPat
 // convertTools converts from a list of langchaingo tools to a list of genai
 // tools.
 func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
-	genaiFuncDecls := make([]*genai.FunctionDeclaration, 0, len(tools))
+	if len(tools) == 0 {
+		return nil, nil
+	}
+
+	// Initialize a single genaiTool to hold all function declarations.
+	// This approach is used because the GoogleAI API expects a single tool
+	// with multiple function declarations, rather than multiple tools each with
+	// a single function declaration.
+	genaiTool := genai.Tool{
+		FunctionDeclarations: make([]*genai.FunctionDeclaration, 0, len(tools)),
+	}
 	for i, tool := range tools {
 		if tool.Type != "function" {
 			return nil, fmt.Errorf("tool [%d]: unsupported type %q, want 'function'", i, tool.Type)
@@ -504,33 +514,145 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			Description: tool.Function.Description,
 		}
 
-		// Expect the Parameters field to be a map[string]any, from which we will
-		// extract properties to populate the schema.
-		params, ok := tool.Function.Parameters.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", i, tool.Function.Parameters)
-		}
-
-		schema, err := convertSchemaRecursive(params, i, "")
+		schema, err := convertToSchema(tool.Function.Parameters, true)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("tool [%d]: %w", i, err)
 		}
 		genaiFuncDecl.Parameters = schema
 
-		// google genai only support one tool, multiple tools must be embedded into function declarations:
-		// https://github.com/GoogleCloudPlatform/generative-ai/issues/636
-		// https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#chat-samples
-		genaiFuncDecls = append(genaiFuncDecls, genaiFuncDecl)
+		genaiTool.FunctionDeclarations = append(genaiTool.FunctionDeclarations, genaiFuncDecl)
 	}
 
-	// Return nil if no tools are provided
-	if len(genaiFuncDecls) == 0 {
-		return nil, nil
+	return []*genai.Tool{&genaiTool}, nil
+}
+
+// convert map[any]any to map[string]any if possible
+func convertMaps(i any) any {
+	switch v := i.(type) {
+	case map[any]any:
+		m := make(map[string]any)
+		for key, val := range v {
+			sKey, ok := key.(string)
+			if !ok {
+				return v
+			}
+			m[sKey] = convertMaps(val)
+		}
+		return m
+	case []any:
+		s := make([]any, len(v))
+		for idx, val := range v {
+			s[idx] = convertMaps(val)
+		}
+		return s
+	}
+	return i
+}
+
+func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
+	e = convertMaps(e)
+	schema := &genai.Schema{}
+
+	eMap, ok := e.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("tool: unsupported type %T of Parameters", e)
 	}
 
-	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
+	if ty, ok := eMap["type"]; ok {
+		tyString, ok := ty.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected string for type")
+		}
+		schema.Type = convertToolSchemaType(tyString)
 
-	return genaiTools, nil
+		if topLevel && schema.Type != genai.TypeObject {
+			return nil, fmt.Errorf("tool: top-level schema must be an object")
+		}
+	}
+
+	_, ok = eMap["properties"]
+	if ok {
+		paramProperties, ok := eMap["properties"].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected map[string]any for properties")
+		}
+		schema.Properties = make(map[string]*genai.Schema)
+		for propName, propValue := range paramProperties {
+			recSchema, err := convertToSchema(propValue, false)
+			if err != nil {
+				return nil, fmt.Errorf("tool, property [%v]: %w", propName, err)
+			}
+			schema.Properties[propName] = recSchema
+		}
+	} else if schema.Type == genai.TypeObject {
+		return nil, fmt.Errorf("tool: object schema must have properties")
+	}
+
+	items, ok := eMap["items"]
+	if ok {
+		itemsSchema, err := convertToSchema(items, false)
+		if err != nil {
+			return nil, fmt.Errorf("tool: %w", err)
+		}
+		schema.Items = itemsSchema
+	} else if schema.Type == genai.TypeArray {
+		return nil, fmt.Errorf("tool: array schema must have items")
+	}
+
+	if description, ok := eMap["description"]; ok {
+		descString, ok := description.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected string for description")
+		}
+		schema.Description = descString
+	}
+
+	if nullable, ok := eMap["nullable"]; ok {
+		nullableBool, ok := nullable.(bool)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected bool for nullable")
+		}
+		schema.Nullable = nullableBool
+	}
+
+	if enum, ok := eMap["enum"]; ok {
+		enumSlice, err := convertToSliceOfStrings(enum)
+		if err != nil {
+			return nil, fmt.Errorf("tool: %w", err)
+		}
+		schema.Enum = enumSlice
+
+	}
+
+	if required, ok := eMap["required"]; ok {
+		requiredSlice, err := convertToSliceOfStrings(required)
+		if err != nil {
+			return nil, fmt.Errorf("tool: %w", err)
+		}
+		schema.Required = requiredSlice
+	}
+
+	return schema, nil
+}
+
+func convertToSliceOfStrings(e any) ([]string, error) {
+	if rs, ok := e.([]string); ok {
+		return rs, nil
+	}
+
+	ri, ok := e.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("tool: expected []interface{} for required")
+	}
+	rs := make([]string, 0, len(ri))
+	for _, r := range ri {
+		rString, ok := r.(string)
+		if !ok {
+			return nil, fmt.Errorf("tool: expected string for required")
+		}
+		rs = append(rs, rString)
+	}
+	return rs, nil
 }
 
 // convertToolSchemaType converts a tool's schema type from its langchaingo
