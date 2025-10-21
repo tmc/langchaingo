@@ -60,7 +60,7 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			TemplateFormatGoTemplate,
 			true,
 			true,
-			`template: template:1:12: executing "template" at <.foo>: map has no entry for key "foo"`,
+			`template validation failed: template execution failure: template: template:1:12: executing "template" at <.foo>: map has no entry for key "foo"`,
 		},
 		{
 			"inputVariables neither Examples nor ExampleSelector w err",
@@ -116,7 +116,7 @@ func TestFewShotPrompt_Format(t *testing.T) {
 			TemplateFormatGoTemplate,
 			true,
 			true,
-			"template: template:1:23: executing \"template\" at <.wrong_content>: map has no entry for key " +
+			"template validation failed: template execution failure: template: template:1:23: executing \"template\" at <.wrong_content>: map has no entry for key " +
 				"\"wrong_content\"",
 		},
 	}

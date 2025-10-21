@@ -1,0 +1,599 @@
+httprr trace v1
+782 12612
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 357
+Content-Type: application/json
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
+x-goog-request-params: model=models%2Fgemini-2.0-flash
+
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"Tell me a short story about a cat"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 12232
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Aug 2025 12:40:52 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=434
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+[{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "C"
+          }
+        ],
+        "role": "model"
+      }
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "lementine, a calico with a perpetually grumpy face, considered herself the queen of Willow"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " Creek. Her kingdom consisted of Mrs. Higgins' sun-drenched porch, the"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " neighbor's meticulously manicured rose bushes (perfect for napping), and the occasional unsuspecting mouse that dared to cross her path.\n\nClementine wasn't fond"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " of people. They were loud, clumsy, and often smelled of citrus, a scent she found deeply offensive. Mrs. Higgins, however, was tolerated. She provided food"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": ", a warm bed, and understood the sacredness of Clementine's naps.\n\nOne blustery autumn afternoon, a small, shivering creature appeared on Mrs. Higgins' porch. It was a kitten, a scrawny, grey"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " thing with wide, pleading eyes. Clementine, usually quick to chase away any interloper, found herself frozen. The kitten was pathetic.\n\nShe sniffed it cautiously. It smelled of rain and something faintly…milky. Clementine"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " wrinkled her nose. Disgusting. But the kitten, instead of running, rubbed against her leg, purring weakly.\n\nClementine hissed. A reflex. But the hiss lacked its usual venom.\n\nDays turned into weeks. The kitten, whom Mrs. Higgins had named \"Dusty,\" followed Clementine everywhere,"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " a tiny, grey shadow. Clementine, despite her best efforts to maintain her regal aloofness, found herself grooming Dusty, sharing her food, and even, on particularly cold nights, allowing the kitten to snuggle against her for warmth.\n\nOne morning, Dusty was gone. Clementine searched the porch, the rose"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " bushes, even the dreaded citrus-scented neighbor's yard. Panic, a foreign and unpleasant sensation, clawed at her chest.\n\nJust as despair began to set in, she heard a faint meow. Dusty was perched precariously on the highest branch of the ancient oak tree in Mrs. Higgins' yard, looking"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " down with wide, frightened eyes.\n\nClementine, ignoring her own fear of heights, began to climb. She scrambled up the rough bark, her claws digging in, fueled by a primal need to protect the small, grey creature that had somehow, inexplicably, wormed its way into her grumpy heart.\n\nRe"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "aching Dusty, she nudged him gently. He nestled against her, trembling. Together, they slowly, carefully, descended.\n\nBack on solid ground, Clementine licked Dusty's head, a rare display of affection. He purred, loud and strong. Clementine, queen of Willow Creek, felt a warmth spread through"
+          }
+        ],
+        "role": "model"
+      },
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 9,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 9
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+,
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": " her, a feeling far more satisfying than any sunbeam or mouse. Perhaps, she thought, a queen could use a loyal subject, especially one who smelled faintly of milk. And perhaps, just perhaps, she wasn't quite as grumpy as she thought she was.\n"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": 1,
+      "safetyRatings": [
+        {
+          "category": 8,
+          "probability": 1
+        },
+        {
+          "category": 10,
+          "probability": 1
+        },
+        {
+          "category": 7,
+          "probability": 1
+        },
+        {
+          "category": 9,
+          "probability": 1
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 8,
+    "candidatesTokenCount": 578,
+    "totalTokenCount": 586,
+    "promptTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 8
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": 1,
+        "tokenCount": 578
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.0-flash",
+  "responseId": "VB-jaN_BCZuThMIPnryvyAg"
+}
+]

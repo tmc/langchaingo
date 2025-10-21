@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 )
@@ -17,6 +18,8 @@ type options struct {
 	system              string
 	format              string
 	keepAlive           string
+	pullModel           bool
+	pullTimeout         time.Duration
 }
 
 type Option func(*options)
@@ -262,5 +265,30 @@ func WithPredictMirostatEta(val float32) Option {
 func WithPredictPenalizeNewline(val bool) Option {
 	return func(opts *options) {
 		opts.ollamaOptions.PenalizeNewline = val
+	}
+}
+
+// WithThink enables reasoning mode for models that support it (Ollama 0.9.0+).
+// When enabled, the model will show its internal reasoning process.
+func WithThink(val bool) Option {
+	return func(opts *options) {
+		opts.ollamaOptions.Think = val
+	}
+}
+
+// WithPullModel enables automatic model pulling before use.
+// When enabled, the client will check if the model exists and pull it if not available.
+func WithPullModel() Option {
+	return func(opts *options) {
+		opts.pullModel = true
+	}
+}
+
+// WithPullTimeout sets a timeout for model pulling operations.
+// If not set or if duration is 0, pull operations will use the request context without additional timeout.
+// This option only takes effect when WithPullModel is also enabled.
+func WithPullTimeout(timeout time.Duration) Option {
+	return func(opts *options) {
+		opts.pullTimeout = timeout
 	}
 }

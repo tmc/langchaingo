@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,24 +17,58 @@ import (
 	"strings"
 	"testing"
 
+	"cloud.google.com/go/aiplatform/apiv1/aiplatformpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/googleai/vertex"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/bufconn"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI {
 	t.Helper()
 
-	genaiKey := os.Getenv("GENAI_API_KEY")
-	if genaiKey == "" {
-		t.Skip("GENAI_API_KEY not set")
-		return nil
+	// Always check for recordings first - prefer recordings over environment variables
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
 	}
 
-	opts = append(opts, googleai.WithAPIKey(genaiKey))
+	// Temporarily unset Google API key environment variable to prevent bypass
+	oldKey := os.Getenv("GOOGLE_API_KEY")
+	os.Unsetenv("GOOGLE_API_KEY")
+	t.Cleanup(func() {
+		if oldKey != "" {
+			os.Setenv("GOOGLE_API_KEY", oldKey)
+		}
+	})
+
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Scrub API key for security in recordings
+	rr.ScrubReq(func(req *http.Request) error {
+		q := req.URL.Query()
+		if q.Get("key") != "" {
+			q.Set("key", "test-api-key")
+			req.URL.RawQuery = q.Encode()
+		}
+		return nil
+	})
+
+	// Configure client with httprr and test credentials
+	opts = append(opts,
+		googleai.WithRest(),
+		googleai.WithAPIKey("test-api-key"),
+		googleai.WithHTTPClient(rr.Client()),
+	)
+
 	llm, err := googleai.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
@@ -42,29 +77,41 @@ func newGoogleAIClient(t *testing.T, opts ...googleai.Option) *googleai.GoogleAI
 func newVertexClient(t *testing.T, opts ...googleai.Option) *vertex.Vertex {
 	t.Helper()
 
-	// If credentials are set, use them. Otherwise, look for project env var.
-	if creds := os.Getenv("VERTEX_CREDENTIALS"); creds != "" {
-		opts = append(opts, googleai.WithCredentialsFile(creds))
-	} else {
-		project := os.Getenv("VERTEX_PROJECT")
-		if project == "" {
-			t.Skip("VERTEX_PROJECT not set")
-			return nil
-		}
-		location := os.Getenv("VERTEX_LOCATION")
-		if location == "" {
-			location = "us-central1"
-		}
-
-		opts = append(opts,
-			googleai.WithCloudProject(project),
-			googleai.WithCloudLocation(location),
-		)
+	// Always check for recordings first - prefer recordings over environment variables
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
 	}
+
+	// Temporarily unset Google API key environment variable to prevent bypass
+	oldKey := os.Getenv("GOOGLE_API_KEY")
+	os.Unsetenv("GOOGLE_API_KEY")
+	t.Cleanup(func() {
+		if oldKey != "" {
+			os.Setenv("GOOGLE_API_KEY", oldKey)
+		}
+	})
+
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
+
+	// Configure client with httprr and test credentials
+	opts = append(opts,
+		googleai.WithHTTPClient(rr.Client()),
+		googleai.WithCloudProject("test-project"),
+		googleai.WithCloudLocation("us-central1"),
+	)
 
 	llm, err := vertex.New(context.Background(), opts...)
 	require.NoError(t, err)
 	return llm
+}
+
+// hasExistingRecording checks if a httprr recording exists for this test
+func hasExistingRecording(t *testing.T) bool {
+	testName := strings.ReplaceAll(t.Name(), "/", "_")
+	testName = strings.ReplaceAll(testName, " ", "_")
+	recordingPath := filepath.Join("testdata", testName+".httprr")
+	_, err := os.Stat(recordingPath)
+	return err == nil
 }
 
 // funcName obtains the name of the given function value, without a package
@@ -118,6 +165,21 @@ func TestVertexShared(t *testing.T) {
 			c.testFunc(t, llm)
 		})
 	}
+}
+
+// TestVertex_WithCustomEmbeddingModel tests custom embedding models passed as an option.
+// TODO: refactor testConfig to have a opts provider func so it this can be moved to a test config.
+func TestVertex_WithCustomEmbeddingModel(t *testing.T) {
+	t.Helper()
+	t.Parallel()
+	const modelName = "custom-embedding-model"
+	opts := getCustomEmbeddingModelTestOptionsWithGRPC(t, modelName)
+
+	llm, err := vertex.New(context.Background(), opts...)
+	require.NoError(t, err)
+
+	_, err = llm.CreateEmbedding(context.Background(), []string{"test"})
+	require.NoError(t, err)
 }
 
 func testMultiContentText(t *testing.T, llm llms.Model) {
@@ -577,6 +639,41 @@ func getHTTPTestClientOptions() []googleai.Option {
 	return []googleai.Option{googleai.WithRest(), googleai.WithHTTPClient(client)}
 }
 
+// getCustomEmbeddingModelTestOptionsWithGRPC creates options to connect to a fake gRPC server.
+func getCustomEmbeddingModelTestOptionsWithGRPC(t *testing.T, model string) []googleai.Option {
+	t.Helper()
+
+	// Create an in-memory "network connection"
+	lis := bufconn.Listen(1024 * 1024)
+	// Create the mock gRPC server and register the fake prediction service
+	grpcServer := grpc.NewServer()
+	mockPredictionServer := &mockPredictionServer{
+		predictFunc: getPredictHandlerFuncWithCustomEmbeddingModel(model)}
+	aiplatformpb.RegisterPredictionServiceServer(grpcServer, mockPredictionServer)
+
+	go func() {
+		if err := grpcServer.Serve(lis); err != nil {
+			t.Logf("gRPC server exited with error: %v", err)
+		}
+	}()
+
+	t.Cleanup(func() { grpcServer.Stop() })
+
+	// Create a client connection to the fake server
+	conn, err := grpc.DialContext(context.Background(), "bufnet",
+		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
+			return lis.Dial()
+		}),
+		grpc.WithInsecure(),
+	)
+	require.NoError(t, err)
+
+	return []googleai.Option{
+		googleai.WithDefaultEmbeddingModel(model),
+		googleai.WithGRPCConn(conn),
+	}
+}
+
 type testRequestInterceptor struct{}
 
 func (i *testRequestInterceptor) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -624,5 +721,59 @@ func checkMatch(t *testing.T, got string, wants ...string) {
 		if !re.MatchString(got) {
 			t.Errorf("\ngot %q\nwanted to match %q", got, want)
 		}
+	}
+}
+
+// PredictHandlerFunc is a handler func that matches the gRPC Predict method.
+type PredictHandlerFunc func(context.Context, *aiplatformpb.PredictRequest) (*aiplatformpb.PredictResponse, error)
+
+// mockPredictionServer is a mock gRPC prediction server.
+type mockPredictionServer struct {
+	aiplatformpb.UnimplementedPredictionServiceServer
+	predictFunc PredictHandlerFunc
+}
+
+// NewMockPredictionServer creates a new server with a custom Predict handler.
+func NewMockPredictionServer(handler PredictHandlerFunc) *mockPredictionServer {
+	return &mockPredictionServer{
+		predictFunc: handler,
+	}
+}
+
+// Predict implements the UnimplementedPredictionServiceServer. It calls predictFunc.
+func (s *mockPredictionServer) Predict(ctx context.Context, req *aiplatformpb.PredictRequest) (*aiplatformpb.PredictResponse, error) {
+	if s.predictFunc == nil {
+		return nil, status.Error(codes.Unimplemented, "Predict handler was not provided")
+	}
+
+	return s.predictFunc(ctx, req)
+}
+
+// getPredictHandlerFuncWithCustomEmbeddingModel returns a predictFunc which checks that the embedding request has been made
+// with the custom provided embedding model.
+func getPredictHandlerFuncWithCustomEmbeddingModel(embeddingModel string) func(ctx context.Context, req *aiplatformpb.PredictRequest) (*aiplatformpb.PredictResponse, error) {
+	return func(ctx context.Context, req *aiplatformpb.PredictRequest) (*aiplatformpb.PredictResponse, error) {
+		expectedEndpointSuffix := "/models/" + embeddingModel
+		if !strings.HasSuffix(req.Endpoint, expectedEndpointSuffix) {
+			return nil, status.Errorf(codes.InvalidArgument, "model name mismatch, expected suffix '%s'", expectedEndpointSuffix)
+		}
+
+		// Create a dummy embedding response that the client code will accept.
+		// The client expects a structure like: { "embeddings": { "values": [0.1, 0.2, ...] } }
+		embeddingStruct, err := structpb.NewStruct(map[string]interface{}{
+			"embeddings": map[string]interface{}{
+				"values": []interface{}{0.1, 0.2, 0.3, 0.4},
+			},
+		})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to create embedding struct: %v", err)
+		}
+
+		predictionValue := structpb.NewStructValue(embeddingStruct)
+		response := &aiplatformpb.PredictResponse{
+			Predictions: []*structpb.Value{predictionValue},
+		}
+
+		return response, nil
 	}
 }

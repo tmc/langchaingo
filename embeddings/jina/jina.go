@@ -19,6 +19,7 @@ type Jina struct {
 	BatchSize     int
 	APIBaseURL    string
 	APIKey        string
+	client        *http.Client
 }
 
 type EmbeddingRequest struct {
@@ -98,8 +99,7 @@ func (j *Jina) CreateEmbedding(ctx context.Context, texts []string) ([][]float32
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+j.APIKey)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := j.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,2 @@
+# Mark go.sum as binary to avoid unnecessary diffs
+go.sum binary

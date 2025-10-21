@@ -1,0 +1,28 @@
+httprr trace v1
+324 873
+POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
+Host: api-inference.huggingface.co
+User-Agent: langchaingo-httprr
+Content-Length: 79
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"inputs":"Hello, my name is","parameters":{"temperature":0.5,"max_length":20}}HTTP/2.0 404 Not Found
+Content-Length: 9
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: X-Repo-Commit,X-Request-Id,X-Error-Code,X-Error-Message,X-Total-Count,ETag,Link,Accept-Ranges,Content-Range,X-Linked-Size,X-Linked-ETag,X-Xet-Hash
+Content-Type: text/plain; charset=utf-8
+Cross-Origin-Opener-Policy: same-origin
+Date: Mon, 18 Aug 2025 12:36:28 GMT
+Referrer-Policy: strict-origin-when-cross-origin
+Vary: origin, access-control-request-method, access-control-request-headers
+Via: 1.1 4d87a1e7909a1a7d7668982112e840ba.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: DhbjL6m2RbLCqaFnwOco16Owkdw-ma0KPUnu2svT6Pr_PHGZwSkj2A==
+X-Amz-Cf-Pop: CDG55-P3
+X-Cache: Error from cloudfront
+X-Inference-Provider: hf-inference
+X-Powered-By: huggingface-moon
+X-Request-Id: Root=1-68a31e4c-64caec96543b308231f88adf
+
+Not Found

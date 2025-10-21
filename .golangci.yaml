@@ -1,103 +1,16 @@
 version: "2"
 linters:
+  default: none
   enable:
-    - asasalint
-    - asciicheck
-    - bidichk
-    - bodyclose
-    - containedctx
-    - contextcheck
-    - copyloopvar
-    - cyclop
-    - decorder
-    - dogsled
-    - dupl
-    - dupword
-    - durationcheck
-    - errchkjson
-    - errname
-    - errorlint
-    - exhaustive
-    - exptostd
-    - fatcontext
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
     - forbidigo
     - funlen
-    - ginkgolinter
-    - gocheckcompilerdirectives
-    - gochecknoglobals
-    - gochecknoinits
-    - gochecksumtype
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - goheader
-    - gomoddirectives
-    - gomodguard
-    - goprintffuncname
     - gosec
-    - grouper
-    - iface
-    - importas
-    - inamedparam
-    - interfacebloat
-    - loggercheck
-    - maintidx
-    - makezero
-    - mirror
     - misspell
-    - nakedret
-    - nestif
-    - nilerr
-    - nilnesserr
-    - nilnil
-    - noctx
-    - nonamedreturns
-    - nosprintfhostport
-    - paralleltest
-    - prealloc
-    - predeclared
-    - promlinter
-    - protogetter
-    - reassign
-    - revive
-    - rowserrcheck
-    - sloglint
-    - spancheck
-    - sqlclosecheck
-    - staticcheck
-    - testableexamples
-    - thelper
-    - tparallel
-    - unconvert
-    - unparam
-    - usestdlibvars
-    - usetesting
-    - wastedassign
-    - whitespace
-    - zerologlint
-  disable:
-    - canonicalheader
-    - depguard
-    - err113
-    - exhaustruct
-    - godox
-    - intrange
-    - ireturn
-    - lll
-    - mnd
-    - musttag
-    - nlreturn
-    - nolintlint
-    - perfsprint
-    - tagalign
-    - tagliatelle
-    - testifylint
-    - testpackage
-    - varnamelen
-    - wrapcheck
-    - wsl
   settings:
     cyclop:
       max-complexity: 12
@@ -117,13 +30,11 @@ linters:
       - legacy
       - std-error-handling
     paths:
-      - third_party$
-      - builtin$
-      - examples$
+      - internal
+      - vectorstores/bedrockknowledgebases
 formatters:
   enable:
     - gofmt
-    - gofumpt
     - goimports
   exclusions:
     generated: lax

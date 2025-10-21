@@ -4,6 +4,7 @@ hide_table_of_contents: true
 sidebar_label: Prompts
 ---
 
+import React from "react";
 import DocCardList from "@theme/DocCardList";
 
 # Prompts
@@ -12,7 +13,103 @@ import DocCardList from "@theme/DocCardList";
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/prompts)
 :::
 
-A prompt refers to the input to a language model. This input is often constructed from multiple components. 
-LangChain provides several utilities to make constructing and working with prompts easy. 
+A prompt refers to the input to a language model. This input is often constructed from multiple components.
+LangChain Go provides utilities for creating and managing these prompts with support for multiple template formats.
+
+## Quick start
+
+The simplest way to use prompts is with prompt templates:
+
+```go
+import "github.com/tmc/langchaingo/prompts"
+
+// Create a prompt template
+template := prompts.NewPromptTemplate(
+    "Write a {{.style}} summary of: {{.content}}",
+    []string{"style", "content"},
+)
+
+// Format with values
+result, err := template.Format(map[string]any{
+    "style": "technical",
+    "content": "recent AI advances",
+})
+// Result: "Write a technical summary of: recent AI advances"
+```
+
+## Key features
+
+- **Multiple template formats**: Go templates (default), Jinja2, and F-strings
+- **Chat prompts**: Structured prompts for conversational AI
+- **Partial variables**: Pre-fill template values
+- **Optional security**: HTML escaping for untrusted input
+- **Template inheritance**: Load templates from filesystems
+
+## Template formats
+
+### Go templates (recommended)
+Native Go text/template syntax with sprig functions - the preferred choice for Go applications:
+
+```go
+template := `
+Dear {{ .customer_name | title }},
+{{ if eq .order_status "shipped" }}
+    Your order has been shipped!
+{{ else }}
+    Your order is being processed.
+{{ end }}
+`
+```
+
+### Jinja2 templates
+Full-featured templating with filters, conditionals, loops, and inheritance:
+
+```go
+template := `
+Dear {{ customer_name | title }},
+{% if order_status == "shipped" %}
+    Your order has been shipped!
+{% else %}
+    Your order is being processed.
+{% endif %}
+`
+```
+
+### F-strings
+Simple Python-style variable substitution:
+
+```go
+template := "Process {document} using {method} with {params}"
+```
+
+## Working with untrusted input
+
+When handling user-provided data, enable HTML escaping:
+
+```go
+// Enable sanitization for untrusted data
+result, err := prompts.RenderTemplate(
+    "User said: {{.input}}",
+    prompts.TemplateFormatGoTemplate,
+    map[string]any{"input": userInput},
+    prompts.WithSanitization(), // Escapes HTML special characters
+)
+```
+
+## Loading templates from files
+
+For templates that need to include other templates:
+
+```go
+//go:embed templates/*
+var templateFS embed.FS
+
+result, err := prompts.RenderTemplateFS(
+    templateFS,
+    "email.j2",
+    prompts.TemplateFormatJinja2,
+    data,
+)
+```
 
 <DocCardList />

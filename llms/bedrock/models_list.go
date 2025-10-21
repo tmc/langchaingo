@@ -39,6 +39,39 @@ const (
 	// Languages: English (GA), Multilingual in 100+ languages (Preview).
 	ModelAmazonTitanTextExpressV1 = "amazon.titan-text-express-v1"
 
+	// Amazon Nova Micro is a text only model that delivers the lowest latency responses at very low cost.
+	// It is highly performant at language understanding, translation, reasoning, code completion,
+	// brainstorming, and mathematical problem-solving. With its generation speed of over 200 tokens per second,
+	// Amazon Nova Micro is ideal for applications that require fast responses.
+	//
+	// Max tokens: 128k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
+
+	// Amazon Nova Lite is a very low-cost multimodal model that is lightning fast for
+	// processing image, video, and text inputs. Amazon Nova Lite’s accuracy across a
+	// breadth of tasks, coupled with its lightning-fast speed, makes it suitable for
+	// a wide range of interactive and high-volume applications where cost is a key
+	// consideration.
+	//
+	// Max tokens: 300k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaLiteV1 = "us.amazon.nova-lite-v1:0"
+
+	// Amazon Nova Pro is a highly capable multimodal model with the best combination of
+	// accuracy, speed, and cost for a wide range of tasks. Amazon Nova Pro’s capabilities,
+	// coupled with its industry-leading speed and cost efficiency, makes it a compelling
+	// model for almost any task, including video summarization, Q&A, mathematical reasoning,
+	// software development, and AI agents that can execute multi-step workflows. In
+	// addition to state-of-the-art accuracy on text and visual intelligence benchmarks,
+	// Amazon Nova Pro excels at instruction following and agentic workflows as measured by
+	// Comprehensive RAG Benchmark (CRAG), the Berkeley Function Calling Leaderboard, and
+	// Mind2Web.
+	//
+	// Max tokens: 300k
+	// Languages: English, Multilingual in 200+ languages.
+	ModelAmazonNovaProV1 = "us.amazon.nova-pro-v1:0"
+
 	// Claude 3 Sonnet by Anthropic strikes the ideal balance between intelligence and
 	// speed—particularly for enterprise workloads. It offers maximum utility at a lower
 	// price than competitors, and is engineered to be the dependable, high-endurance
