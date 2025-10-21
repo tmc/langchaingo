@@ -363,7 +363,7 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		}
 		result, err := convertTools(tools)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "expected to find a map of properties")
+		assert.Contains(t, err.Error(), "object schema must have properties")
 		assert.Nil(t, result)
 	})
 
