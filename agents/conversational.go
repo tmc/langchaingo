@@ -157,8 +157,10 @@ func (a *ConversationalAgent) parseOutput(output string) ([]schema.AgentAction, 
 		return nil, nil, fmt.Errorf("%w: %s", ErrUnableToParseOutput, output)
 	}
 
+	toolInput := strings.TrimSuffix(matches[2], "\nObservation:")
+	toolInput = strings.TrimSuffix(toolInput, "\nObservation")
 	return []schema.AgentAction{
-		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(matches[2]), Log: output},
+		{Tool: strings.TrimSpace(matches[1]), ToolInput: strings.TrimSpace(toolInput), Log: output},
 	}, nil, nil
 }
 
