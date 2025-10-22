@@ -5,7 +5,7 @@ go 1.23.8
 toolchain go1.24.6
 
 require (
-	github.com/tmc/langchaingo v0.1.14-pre.0
+	github.com/tmc/langchaingo v0.1.14-pre.4
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 )
 

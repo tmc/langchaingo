@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -33,7 +34,8 @@ type Client struct {
 	apiType      APIType
 	httpClient   Doer
 
-	EmbeddingModel string
+	EmbeddingModel      string
+	EmbeddingDimensions int
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion string
 
@@ -42,6 +44,14 @@ type Client struct {
 
 // Option is an option for the OpenAI client.
 type Option func(*Client) error
+
+// WithEmbeddingDimensions allows to setup specific dimensions for embedding's vector
+func WithEmbeddingDimensions(dimensions int) Option {
+	return func(c *Client) error {
+		c.EmbeddingDimensions = dimensions
+		return nil
+	}
+}
 
 // Doer performs a HTTP request.
 type Doer interface {
@@ -99,8 +109,27 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 
 // EmbeddingRequest is a request to create an embedding.
 type EmbeddingRequest struct {
-	Model string   `json:"model"`
-	Input []string `json:"input"`
+	Model      string   `json:"model"`
+	Input      []string `json:"input"`
+	Dimensions int      `json:"dimensions"`
+}
+
+func (c *Client) makeEmbeddingPayload(r *EmbeddingRequest) *embeddingPayload {
+	payload := &embeddingPayload{
+		Model:      c.EmbeddingModel,
+		Dimensions: c.EmbeddingDimensions,
+		Input:      r.Input,
+	}
+	if r.Model != "" {
+		payload.Model = r.Model
+	}
+	if payload.Model == "" {
+		payload.Model = defaultEmbeddingModel
+	}
+	if r.Dimensions > 0 {
+		payload.Dimensions = r.Dimensions
+	}
+	return payload
 }
 
 // CreateEmbedding creates embeddings.
@@ -109,10 +138,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 		r.Model = defaultEmbeddingModel
 	}
 
-	resp, err := c.createEmbedding(ctx, &embeddingPayload{
-		Model: r.Model,
-		Input: r.Input,
-	})
+	resp, err := c.createEmbedding(ctx, c.makeEmbeddingPayload(r))
 	if err != nil {
 		return nil, err
 	}
@@ -182,4 +208,37 @@ func (c *Client) buildAzureURL(suffix string, model string) string {
 	return fmt.Sprintf("%s/openai/deployments/%s%s?api-version=%s",
 		baseURL, model, suffix, c.apiVersion,
 	)
+}
+
+// sanitizeHTTPError sanitizes HTTP client errors to prevent leaking sensitive information.
+// It checks for context deadline/cancellation errors and returns generic timeout messages
+// instead of potentially exposing request details, headers, or other sensitive data.
+func sanitizeHTTPError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	// Check for context deadline exceeded
+	if errors.Is(err, context.DeadlineExceeded) {
+		return errors.New("request timeout: API call exceeded deadline")
+	}
+
+	// Check for context cancellation
+	if errors.Is(err, context.Canceled) {
+		return errors.New("request cancelled")
+	}
+
+	// Check for network timeout errors
+	var netErr net.Error
+	if errors.As(err, &netErr) && netErr.Timeout() {
+		return errors.New("request timeout: network operation exceeded timeout")
+	}
+
+	// For other network errors, provide generic message without exposing details
+	if _, ok := err.(net.Error); ok {
+		return errors.New("network error: failed to reach API server")
+	}
+
+	// Return original error if it's not a sensitive type
+	return err
 }

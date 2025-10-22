@@ -167,6 +167,13 @@ func Recording(file string) (bool, error) {
 	return false, nil
 }
 
+// getRecordForTesting safely gets the current record flag value for testing.
+func getRecordForTesting() string {
+	recordMu.Lock()
+	defer recordMu.Unlock()
+	return *record
+}
+
 // setRecordForTesting sets the record flag value for testing purposes.
 // It returns a function that restores the original value.
 func setRecordForTesting(value string) func() {
@@ -321,6 +328,13 @@ func (b *Body) Close() error {
 // and then responds with the previously logged response.
 // If the log does not contain req, RoundTrip returns an error.
 func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Debug: log headers at RoundTrip entry
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: RoundTrip entry",
+			"User-Agent", req.Header.Get("User-Agent"),
+			"x-goog-api-client", req.Header.Get("x-goog-api-client"))
+	}
+
 	// Log the request if httpdebug is enabled
 	if rr.logger != nil && *httpDebug {
 		if reqDump, err := nethttputil.DumpRequestOut(req, true); err == nil {
@@ -328,9 +342,34 @@ func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 	}
 
+	// Save the body before calling reqWire since it consumes it
+	// This is needed because reqWire consumes the body and we need it for both
+	// the replay lookup and the recording
+	var bodyBytes []byte
+	hasBody := false
+	if req.Body != nil {
+		var err error
+		bodyBytes, err = io.ReadAll(req.Body)
+		req.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		hasBody = true
+		// Set body as a Body type that can be reused
+		req.Body = &Body{Data: bodyBytes}
+	}
+
 	reqWire, err := rr.reqWire(req)
 	if err != nil {
 		return nil, err
+	}
+
+	// Reset the body's read position for the actual request
+	if hasBody {
+		// Reset the read offset so the body can be read again
+		if body, ok := req.Body.(*Body); ok {
+			body.ReadOffset = 0
+		}
 	}
 
 	// If we're in replay mode, replay a response.
@@ -378,12 +417,33 @@ func (rr *RecordReplay) RoundTrip(req *http.Request) (*http.Response, error) {
 		time.Sleep(delay)
 	}
 
+	// Recompute reqWire after real RoundTrip to capture any headers that were added
+	// The real transport may have modified the request (e.g., added headers)
+	// Debug: Check if headers were added by real RoundTrip
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: After real RoundTrip",
+			"User-Agent", req.Header.Get("User-Agent"),
+			"x-goog-api-client", req.Header.Get("x-goog-api-client"))
+	}
+
+	// Reset body read position before second reqWire call
+	if hasBody {
+		if body, ok := req.Body.(*Body); ok {
+			body.ReadOffset = 0
+		}
+	}
+
+	reqWireForSaving, err := rr.reqWire(req)
+	if err != nil {
+		return nil, err
+	}
+
 	// Encode resp and decode to get a copy for our caller.
 	respWire, err := rr.respWire(resp)
 	if err != nil {
 		return nil, err
 	}
-	if err := rr.writeLog(reqWire, respWire); err != nil {
+	if err := rr.writeLog(reqWireForSaving, respWire); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -408,10 +468,23 @@ func (rr *RecordReplay) reqWire(req *http.Request) (string, error) {
 	}
 
 	// Canonicalize and scrub request key.
+	// Debug: log the number of scrubbers and headers before scrubbing
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: before scrubbing",
+			"scrubber_count", len(rr.reqScrub),
+			"User-Agent", rkey.Header.Get("User-Agent"),
+			"x-goog-api-client", rkey.Header.Get("x-goog-api-client"))
+	}
 	for _, scrub := range rr.reqScrub {
 		if err := scrub(rkey); err != nil {
 			return "", err
 		}
+	}
+	// Debug: log headers after scrubbing
+	if rr.logger != nil && *debug {
+		rr.logger.Debug("httprr: after scrubbing",
+			"User-Agent", rkey.Header.Get("User-Agent"),
+			"x-goog-api-client", rkey.Header.Get("x-goog-api-client"))
 	}
 
 	// Now that scrubbers are done potentially modifying body, set length.
@@ -420,12 +493,32 @@ func (rr *RecordReplay) reqWire(req *http.Request) (string, error) {
 	}
 
 	// Serialize rkey to produce the log entry.
-	// Use WriteProxy instead of Write to preserve the URL's scheme.
+	// Use WriteProxy to preserve the URL's scheme and format correctly
 	var key strings.Builder
 	if err := rkey.WriteProxy(&key); err != nil {
 		return "", err
 	}
-	return key.String(), nil
+
+	// Apply string-based scrubbing to normalize headers that may have been added during serialization
+	result := key.String()
+
+	// Normalize User-Agent header in the serialized request
+	result = regexp.MustCompile(`(?m)^User-Agent: .*$`).ReplaceAllString(result, "User-Agent: langchaingo-httprr")
+
+	// Remove OpenAI-Project header for consistency across recordings
+	result = regexp.MustCompile(`(?m)^openai-project: .*\n`).ReplaceAllString(result, "")
+
+	// Normalize x-goog-api-client header with version information
+	result = regexp.MustCompile(`(?m)^x-goog-api-client: (.*)$`).ReplaceAllStringFunc(result, func(match string) string {
+		parts := strings.SplitN(match, ": ", 2)
+		if len(parts) == 2 {
+			normalized := normalizeGoogleAPIClientHeader(parts[1])
+			return parts[0] + ": " + normalized
+		}
+		return match
+	})
+
+	return result, nil
 }
 
 // respWire returns the wire-format HTTP response log entry.
@@ -814,6 +907,113 @@ func hasExistingRecording(t *testing.T) bool {
 	return uncompressedErr == nil || compressedErr == nil
 }
 
+// normalizeGoogleAPIClientHeader normalizes version information in the x-goog-api-client header
+// to avoid test failures when dependencies are updated. It preserves the exact byte count
+// by padding with spaces to maintain httprr recording integrity.
+//
+// Example input:  "gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN"
+// Example output: "gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN"
+func normalizeGoogleAPIClientHeader(header string) string {
+	originalLen := len(header)
+
+	// Replace each version segment while preserving its length
+	versionPattern := regexp.MustCompile(`(/v?)(\d+\.\d+(?:\.\d+)?)`)
+
+	normalized := versionPattern.ReplaceAllStringFunc(header, func(match string) string {
+		// Find the slash and optional 'v'
+		slashIdx := strings.Index(match, "/")
+		prefix := match[:slashIdx+1]
+		if strings.HasPrefix(match[slashIdx+1:], "v") {
+			prefix += "v"
+		}
+
+		// Calculate how many characters we need for the version part
+		versionPart := match[len(prefix):]
+		versionLen := len(versionPart)
+
+		// Create a normalized version string that matches the exact length
+		// Count the dots in the original to preserve structure
+		dotCount := strings.Count(versionPart, ".")
+
+		var replacement string
+		if dotCount == 0 {
+			// No dots, just replace with X's
+			replacement = strings.Repeat("X", versionLen)
+		} else if dotCount == 1 {
+			// Format: X.X or XX.X etc
+			if versionLen == 3 {
+				replacement = "X.X"
+			} else {
+				// Distribute X's around the dot
+				xBefore := (versionLen - 1) / 2
+				xAfter := versionLen - 1 - xBefore
+				replacement = strings.Repeat("X", xBefore) + "." + strings.Repeat("X", xAfter)
+			}
+		} else if dotCount == 2 {
+			// Format: X.X.X, X.XX.X, etc.
+			// Distribute X's around the dots fairly
+			switch versionLen {
+			case 5:
+				replacement = "X.X.X"
+			case 6:
+				replacement = "X.XX.X"
+			case 7:
+				replacement = "X.XX.XX"
+			default:
+				// Generic case: distribute evenly
+				segLen := (versionLen - 2) / 3
+				remainder := (versionLen - 2) % 3
+				seg1 := segLen + min(1, remainder)
+				seg2 := segLen + min(1, max(0, remainder-1))
+				seg3 := segLen
+				replacement = strings.Repeat("X", seg1) + "." + strings.Repeat("X", seg2) + "." + strings.Repeat("X", seg3)
+			}
+		} else {
+			// More than 2 dots or other format, just preserve length with X's
+			replacement = strings.Repeat("X", versionLen)
+		}
+
+		return prefix + replacement
+	})
+
+	// Ensure the result has the exact same length
+	if len(normalized) < originalLen {
+		normalized += strings.Repeat(" ", originalLen-len(normalized))
+	} else if len(normalized) > originalLen {
+		normalized = normalized[:originalLen]
+	}
+
+	return normalized
+}
+
+// normalizeVersionHeader is a general-purpose version normalizer for headers containing
+// version information in various formats.
+func normalizeVersionHeader(header string) string {
+	normalized := header
+
+	// Pattern 1: Go version format (go1.21.0) - handle first to avoid conflict with semver
+	goVersionPattern := regexp.MustCompile(`\bgo\d+\.\d+(\.\d+)?\b`)
+	normalized = goVersionPattern.ReplaceAllString(normalized, "goX.X.X")
+
+	// Pattern 2: Date-based versions with dots (2024.08.15)
+	dotDatePattern := regexp.MustCompile(`\b20\d{2}\.\d{2}\.\d{2}\b`)
+	normalized = dotDatePattern.ReplaceAllString(normalized, "XXXX.XX.XX")
+
+	// Pattern 3: Date-based versions with dashes (2024-08-15)
+	dashDatePattern := regexp.MustCompile(`\b20\d{2}-\d{2}-\d{2}\b`)
+	normalized = dashDatePattern.ReplaceAllString(normalized, "XXXX.XX.XX")
+
+	// Pattern 4: Compact date versions (20240815)
+	compactDatePattern := regexp.MustCompile(`\b20\d{6}\b`)
+	normalized = compactDatePattern.ReplaceAllString(normalized, "XXXX.XX.XX")
+
+	// Pattern 5: Semantic versions (1.2.3, v1.2.3, 1.2, etc.) - do this last
+	semverPattern := regexp.MustCompile(`\bv?\d+\.\d+(\.\d+)?(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?\b`)
+	normalized = semverPattern.ReplaceAllString(normalized, "X.X.X")
+
+	return normalized
+}
+
 // getDefaultRequestScrubbers returns the default request scrubbing functions to remove
 // sensitive headers and API keys from request recordings.
 func getDefaultRequestScrubbers() []func(*http.Request) error {
@@ -864,7 +1064,33 @@ func getDefaultRequestScrubbers() []func(*http.Request) error {
 			if req.Header.Get("openai-organization") != "" {
 				req.Header.Set("openai-organization", "lcgo-tst")
 			}
-			req.Header.Set("User-Agent", "langchaingo-httprr")
+
+			// Normalize User-Agent to avoid version-specific differences
+			// Many Go libraries include version information in User-Agent
+			if ua := req.Header.Get("User-Agent"); ua != "" {
+				// Set to a consistent value, removing all version information
+				req.Header.Set("User-Agent", "langchaingo-httprr")
+			}
+
+			// Normalize version information in x-goog-api-client header
+			// This header contains library version information that changes with dependency updates
+			if googClient := req.Header.Get("x-goog-api-client"); googClient != "" {
+				normalized := normalizeGoogleAPIClientHeader(googClient)
+				req.Header.Set("x-goog-api-client", normalized)
+			}
+
+			// Normalize other potential version headers
+			// AWS SDK version headers
+			if amzSdk := req.Header.Get("x-amz-user-agent"); amzSdk != "" {
+				normalized := normalizeVersionHeader(amzSdk)
+				req.Header.Set("x-amz-user-agent", normalized)
+			}
+
+			// Azure SDK version headers
+			if azureSdk := req.Header.Get("x-ms-client-request-id"); azureSdk != "" {
+				// Azure uses UUIDs, just set to a consistent value
+				req.Header.Set("x-ms-client-request-id", "test-request-id")
+			}
 
 			return nil
 		},

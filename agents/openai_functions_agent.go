@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -71,6 +72,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
@@ -120,15 +122,17 @@ func (o *OpenAIFunctionsAgent) Plan(
 
 		case llms.AIChatMessage:
 			if len(p.ToolCalls) > 0 {
+				toolCallParts := make([]llms.ContentPart, 0, len(p.ToolCalls))
+				for _, tc := range p.ToolCalls {
+					toolCallParts = append(toolCallParts, llms.ToolCall{
+						ID:           tc.ID,
+						Type:         tc.Type,
+						FunctionCall: tc.FunctionCall,
+					})
+				}
 				mc = llms.MessageContent{
-					Role: role,
-					Parts: []llms.ContentPart{
-						llms.ToolCall{
-							ID:           p.ToolCalls[0].ID,
-							Type:         p.ToolCalls[0].Type,
-							FunctionCall: p.ToolCalls[0].FunctionCall,
-						},
-					},
+					Role:  role,
+					Parts: toolCallParts,
 				}
 			} else {
 				mc = llms.MessageContent{
@@ -145,8 +149,11 @@ func (o *OpenAIFunctionsAgent) Plan(
 		mcList[i] = mc
 	}
 
-	result, err := o.LLM.GenerateContent(ctx, mcList,
-		llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream))
+	// Build LLM call options, including user-provided options
+	llmOptions := []llms.CallOption{llms.WithFunctions(o.functions()), llms.WithStreamingFunc(stream)}
+	llmOptions = append(llmOptions, chains.GetLLMCallOptions(options...)...)
+
+	result, err := o.LLM.GenerateContent(ctx, mcList, llmOptions...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -256,6 +263,9 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
+	if contentResp == nil || len(contentResp.Choices) == 0 {
+		return nil, nil, fmt.Errorf("no choices in response")
+	}
 	choice := contentResp.Choices[0]
 
 	// Check for new-style tool calls first

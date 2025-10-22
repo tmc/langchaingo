@@ -21,6 +21,7 @@ help:
 	@echo ""
 	@echo "Other:"
 	@echo "  build-examples - Build all example projects to verify they compile"
+	@echo "  update-examples - Update langchaingo version in all examples"
 	@echo "  docs           - Generate documentation"
 	@echo "  clean          - Clean lint cache"
 	@echo "  help           - Show this help message"
@@ -55,13 +56,13 @@ lint-all:
 lint-deps:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo >&2 "golangci-lint not found. Installing..."; \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.0; \
 		command -v golangci-lint >/dev/null 2>&1 || { \
 			echo >&2 "Failed to detect golangci-lint after installation. Please check your Go installation and PATH."; \
 			exit 1; \
 		} \
 	}
-	@golangci-lint version | grep -q "version v2" || { echo "Error: golangci-lint v2.x.x required, found:" && golangci-lint version && exit 1; }
+	@golangci-lint version | grep -qE "version v?2" || { echo "Error: golangci-lint v2.x.x required, found:" && golangci-lint version && exit 1; }
 
 .PHONY: docs
 docs:
@@ -108,6 +109,15 @@ clean-lint-cache:
 build-examples:
 	for example in $(shell find ./examples -mindepth 1 -maxdepth 1 -type d); do \
 		(cd $$example; echo Build $$example; go mod tidy; go build -o /dev/null) || exit 1; done
+
+.PHONY: update-examples
+update-examples:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make update-examples VERSION=v0.1.14-pre.1"; \
+		exit 1; \
+	fi
+	@echo "Updating examples to $(VERSION)..."
+	@go run ./internal/devtools/examples-updater -version $(VERSION)
 
 .PHONY: add-go-work
 add-go-work:

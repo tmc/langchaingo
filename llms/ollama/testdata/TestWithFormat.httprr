@@ -1,5 +1,5 @@
 httprr trace v1
-372 1419
+371 1419
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -10,18 +10,18 @@ Content-Type: application/json
 {"model":"gemma3:1b","messages":[{"role":"user","content":"How many feet are in a nautical mile? Respond with JSON containing the answer."}],"format":"json","options":{"temperature":0}}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
-Date: Thu, 26 Jun 2025 14:33:11 GMT
+Date: Wed, 20 Aug 2025 13:47:53 GMT
 
 507
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.383639Z","message":{"role":"assistant","content":"{\""},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.391298Z","message":{"role":"assistant","content":"answer"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.398982Z","message":{"role":"assistant","content":"\":"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.408592Z","message":{"role":"assistant","content":" \""},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.415021Z","message":{"role":"assistant","content":"6"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.422645Z","message":{"role":"assistant","content":"0"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.430031Z","message":{"role":"assistant","content":"0"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.437438Z","message":{"role":"assistant","content":"\"}"},"done":false}
-{"model":"gemma3:1b","created_at":"2025-06-26T14:33:11.481257Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":275917458,"load_duration":24036750,"prompt_eval_count":25,"prompt_eval_duration":28090375,"eval_count":9,"eval_duration":125564125}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.398465Z","message":{"role":"assistant","content":"{\""},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.404215Z","message":{"role":"assistant","content":"answer"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.409837Z","message":{"role":"assistant","content":"\":"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.415163Z","message":{"role":"assistant","content":" \""},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.420373Z","message":{"role":"assistant","content":"6"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.425569Z","message":{"role":"assistant","content":"0"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.430605Z","message":{"role":"assistant","content":"0"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.435638Z","message":{"role":"assistant","content":"\"}"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:47:53.473471Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":246778792,"load_duration":39831125,"prompt_eval_count":25,"prompt_eval_duration":18102375,"eval_count":9,"eval_duration":104431583}
 
 0
 

@@ -1,20 +1,20 @@
 httprr trace v1
-773 1345
+757 1345
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 353
+Content-Length: 338
 Content-Type: application/json
-x-goog-api-client: gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN
+x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
 x-goog-request-params: model=models%2Fgemini-2.0-flash
 
-{"model":"models/gemini-2.0-flash", "contents":[{"parts":[{"text":"What is 2 + 2?"}], "role":"user"}], "safetySettings":[{"category":10, "threshold":3}, {"category":7, "threshold":3}, {"category":8, "threshold":3}, {"category":9, "threshold":3}], "generationConfig":{"candidateCount":1, "maxOutputTokens":2048, "temperature":0.5, "topP":0.95, "topK":3}}HTTP/2.0 200 OK
+{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What is 2 + 2?"}],"role":"user"}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
 Content-Length: 967
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Mon, 16 Jun 2025 13:07:59 GMT
+Date: Mon, 18 Aug 2025 12:40:48 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=339
+Server-Timing: gfet4t7; dur=415
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -52,7 +52,7 @@ X-Xss-Protection: 0
           "probability": 1
         }
       ],
-      "avgLogprobs": -0.00012145316577516496
+      "avgLogprobs": -0.00011148199700983241
     }
   ],
   "usageMetadata": {
@@ -73,5 +73,5 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "LhdQaNuLO7qFsbQPqNrRqAQ"
+  "responseId": "Tx-jaPj4NoO8kdUPvb7JwAc"
 }

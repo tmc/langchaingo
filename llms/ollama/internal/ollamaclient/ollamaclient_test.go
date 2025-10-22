@@ -327,7 +327,7 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	assert.NotNil(t, response.Message)
 	assert.NotEmpty(t, response.Message.Content)
 	assert.True(t, response.Done)
-	
+
 	// The think parameter should be included in the request
 	// This test verifies that the parameter is properly serialized
 }

@@ -132,3 +132,122 @@ func TestDefaultClient(t *testing.T) {
 	defer resp.Body.Close()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
+
+func TestApiKeyTransport_RoundTrip(t *testing.T) {
+	tests := []struct {
+		name           string
+		existingKey    string
+		transportKey   string
+		expectedKey    string
+		expectKeyAdded bool
+	}{
+		{
+			name:           "adds API key when none exists",
+			existingKey:    "",
+			transportKey:   "test-key-123",
+			expectedKey:    "test-key-123",
+			expectKeyAdded: true,
+		},
+		{
+			name:           "preserves existing API key",
+			existingKey:    "existing-key",
+			transportKey:   "transport-key",
+			expectedKey:    "existing-key",
+			expectKeyAdded: false,
+		},
+		{
+			name:           "no key added when transport key is empty",
+			existingKey:    "",
+			transportKey:   "",
+			expectedKey:    "",
+			expectKeyAdded: false,
+		},
+		{
+			name:           "empty transport key doesn't override existing",
+			existingKey:    "existing-key",
+			transportKey:   "",
+			expectedKey:    "existing-key",
+			expectKeyAdded: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &mockRoundTripper{}
+			transport := &ApiKeyTransport{
+				Transport: mock,
+				APIKey:    tt.transportKey,
+			}
+
+			req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
+			require.NoError(t, err)
+
+			// Set existing API key if specified
+			if tt.existingKey != "" {
+				q := req.URL.Query()
+				q.Set("key", tt.existingKey)
+				req.URL.RawQuery = q.Encode()
+			}
+
+			resp, err := transport.RoundTrip(req)
+			require.NoError(t, err)
+			assert.NotNil(t, resp)
+
+			// Check the API key in the processed request
+			actualKey := mock.lastRequest.URL.Query().Get("key")
+			assert.Equal(t, tt.expectedKey, actualKey)
+
+			// Verify original request wasn't modified
+			originalKey := req.URL.Query().Get("key")
+			assert.Equal(t, tt.existingKey, originalKey)
+		})
+	}
+}
+
+func TestApiKeyTransport_NilTransport(t *testing.T) {
+	// Create a test server to verify the request reaches it with API key
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		key := r.URL.Query().Get("key")
+		assert.Equal(t, "test-api-key", key)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	transport := &ApiKeyTransport{
+		Transport: nil, // Should use http.DefaultTransport
+		APIKey:    "test-api-key",
+	}
+	client := &http.Client{Transport: transport}
+
+	resp, err := client.Get(server.URL)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestApiKeyTransport_PreservesOtherParams(t *testing.T) {
+	mock := &mockRoundTripper{}
+	transport := &ApiKeyTransport{
+		Transport: mock,
+		APIKey:    "my-api-key",
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data?foo=bar&baz=qux", nil)
+	require.NoError(t, err)
+
+	resp, err := transport.RoundTrip(req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	// Check that all query parameters are preserved
+	query := mock.lastRequest.URL.Query()
+	assert.Equal(t, "bar", query.Get("foo"))
+	assert.Equal(t, "qux", query.Get("baz"))
+	assert.Equal(t, "my-api-key", query.Get("key"))
+
+	// Verify original request wasn't modified
+	originalQuery := req.URL.Query()
+	assert.Equal(t, "bar", originalQuery.Get("foo"))
+	assert.Equal(t, "qux", originalQuery.Get("baz"))
+	assert.Empty(t, originalQuery.Get("key"))
+}
