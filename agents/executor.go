@@ -135,7 +135,9 @@ func (e *Executor) doAction(
 		}), nil
 	}
 
-	observation, err := tool.Call(ctx, strings.TrimSuffix(action.ToolInput, "\nObservation:"))
+	toolInput := strings.TrimSuffix(action.ToolInput, "\nObservation:")
+	toolInput = strings.TrimSuffix(toolInput, "\nObservation")
+	observation, err := tool.Call(ctx, toolInput)
 	if err != nil {
 		return nil, err
 	}
