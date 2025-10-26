@@ -491,3 +491,266 @@ func TestVertexMultipleToolCalls(t *testing.T) {
 		}
 	})
 }
+
+func TestVertexUsageInformation(t *testing.T) {
+	// Check for API key
+	apiKey := os.Getenv("VERTEX_API_KEY")
+	if apiKey == "" {
+		apiKey = os.Getenv("GOOGLE_API_KEY")
+	}
+	if apiKey == "" {
+		t.Skip("SKIP: VERTEX_API_KEY or GOOGLE_API_KEY not set")
+	}
+
+	ctx := context.Background()
+
+	client, err := New(ctx)
+	if err != nil {
+		t.Fatalf("Failed to create Vertex client: %v", err)
+	}
+	defer client.Close()
+
+	// Test 1: Simple completion with usage info
+	t.Run("SimpleCompletionUsage", func(t *testing.T) {
+		response, err := client.GenerateContent(ctx, []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "Say hello in one word"),
+		}, llms.WithModel("gemini-2.5-flash"))
+
+		if err != nil {
+			t.Fatalf("GenerateContent failed: %v", err)
+		}
+
+		if len(response.Choices) == 0 {
+			t.Fatal("No choices returned")
+		}
+
+		choice := response.Choices[0]
+		if len(choice.Content) == 0 {
+			t.Error("Empty response content")
+		}
+
+		// Check usage metadata
+		if choice.GenerationInfo == nil {
+			t.Fatal("GenerationInfo is nil")
+		}
+
+		// Verify usage fields exist (can be int32 or int64 depending on API)
+		var inputTokensVal, outputTokensVal, totalTokensVal int64
+
+		inputTokens, ok := choice.GenerationInfo["input_tokens"]
+		if !ok {
+			t.Error("input_tokens not found in GenerationInfo")
+		} else {
+			switch v := inputTokens.(type) {
+			case int32:
+				inputTokensVal = int64(v)
+			case int64:
+				inputTokensVal = v
+			default:
+				t.Errorf("input_tokens has unexpected type: %T", inputTokens)
+			}
+			if inputTokensVal <= 0 {
+				t.Errorf("input_tokens should be > 0, got %d", inputTokensVal)
+			} else {
+				t.Logf("Input tokens: %d", inputTokensVal)
+			}
+		}
+
+		outputTokens, ok := choice.GenerationInfo["output_tokens"]
+		if !ok {
+			t.Error("output_tokens not found in GenerationInfo")
+		} else {
+			switch v := outputTokens.(type) {
+			case int32:
+				outputTokensVal = int64(v)
+			case int64:
+				outputTokensVal = v
+			default:
+				t.Errorf("output_tokens has unexpected type: %T", outputTokens)
+			}
+			if outputTokensVal <= 0 {
+				t.Errorf("output_tokens should be > 0, got %d", outputTokensVal)
+			} else {
+				t.Logf("Output tokens: %d", outputTokensVal)
+			}
+		}
+
+		totalTokens, ok := choice.GenerationInfo["total_tokens"]
+		if !ok {
+			t.Error("total_tokens not found in GenerationInfo")
+		} else {
+			switch v := totalTokens.(type) {
+			case int32:
+				totalTokensVal = int64(v)
+			case int64:
+				totalTokensVal = v
+			default:
+				t.Errorf("total_tokens has unexpected type: %T", totalTokens)
+			}
+			if totalTokensVal <= 0 {
+				t.Errorf("total_tokens should be > 0, got %d", totalTokensVal)
+			} else {
+				t.Logf("Total tokens: %d", totalTokensVal)
+			}
+		}
+
+		// Verify total is reasonable (may include overhead from system prompts, etc.)
+		if inputTokensVal > 0 && outputTokensVal > 0 && totalTokensVal > 0 {
+			if totalTokensVal < inputTokensVal+outputTokensVal {
+				t.Errorf("total_tokens (%d) should be >= input_tokens (%d) + output_tokens (%d)",
+					totalTokensVal, inputTokensVal, outputTokensVal)
+			}
+		}
+	})
+
+	// Test 2: Conversation with usage tracking across multiple turns
+	t.Run("ConversationUsageTracking", func(t *testing.T) {
+		var totalInputTokens int64
+		var totalOutputTokens int64
+
+		messages := []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "What is 2+2?"),
+		}
+
+		// First turn
+		response1, err := client.GenerateContent(ctx, messages, llms.WithModel("gemini-2.5-flash"))
+		if err != nil {
+			t.Fatalf("First GenerateContent failed: %v", err)
+		}
+
+		if len(response1.Choices) > 0 && response1.Choices[0].GenerationInfo != nil {
+			if inputTokens := response1.Choices[0].GenerationInfo["input_tokens"]; inputTokens != nil {
+				switch v := inputTokens.(type) {
+				case int32:
+					totalInputTokens += int64(v)
+					t.Logf("Turn 1 input tokens: %d", v)
+				case int64:
+					totalInputTokens += v
+					t.Logf("Turn 1 input tokens: %d", v)
+				}
+			}
+			if outputTokens := response1.Choices[0].GenerationInfo["output_tokens"]; outputTokens != nil {
+				switch v := outputTokens.(type) {
+				case int32:
+					totalOutputTokens += int64(v)
+					t.Logf("Turn 1 output tokens: %d", v)
+				case int64:
+					totalOutputTokens += v
+					t.Logf("Turn 1 output tokens: %d", v)
+				}
+			}
+		}
+
+		// Add AI response to conversation
+		messages = append(messages, llms.TextParts(llms.ChatMessageTypeAI, response1.Choices[0].Content))
+		messages = append(messages, llms.TextParts(llms.ChatMessageTypeHuman, "What about 3+3?"))
+
+		// Second turn
+		response2, err := client.GenerateContent(ctx, messages, llms.WithModel("gemini-2.5-flash"))
+		if err != nil {
+			t.Fatalf("Second GenerateContent failed: %v", err)
+		}
+
+		if len(response2.Choices) > 0 && response2.Choices[0].GenerationInfo != nil {
+			if inputTokens := response2.Choices[0].GenerationInfo["input_tokens"]; inputTokens != nil {
+				switch v := inputTokens.(type) {
+				case int32:
+					totalInputTokens += int64(v)
+					t.Logf("Turn 2 input tokens: %d", v)
+				case int64:
+					totalInputTokens += v
+					t.Logf("Turn 2 input tokens: %d", v)
+				}
+			}
+			if outputTokens := response2.Choices[0].GenerationInfo["output_tokens"]; outputTokens != nil {
+				switch v := outputTokens.(type) {
+				case int32:
+					totalOutputTokens += int64(v)
+					t.Logf("Turn 2 output tokens: %d", v)
+				case int64:
+					totalOutputTokens += v
+					t.Logf("Turn 2 output tokens: %d", v)
+				}
+			}
+		}
+
+		t.Logf("Total input tokens across conversation: %d", totalInputTokens)
+		t.Logf("Total output tokens across conversation: %d", totalOutputTokens)
+	})
+
+	// Test 3: Tool call usage tracking
+	t.Run("ToolCallUsageTracking", func(t *testing.T) {
+		testTools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name:        "get_weather",
+					Description: "Get the current weather in a given location",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"location": map[string]any{
+								"type":        "string",
+								"description": "The city and state",
+							},
+						},
+						"required": []string{"location"},
+					},
+				},
+			},
+		}
+
+		response, err := client.GenerateContent(ctx, []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather in Paris?"),
+		}, llms.WithModel("gemini-2.5-flash"), llms.WithTools(testTools))
+
+		if err != nil {
+			t.Fatalf("GenerateContent failed: %v", err)
+		}
+
+		if len(response.Choices) == 0 {
+			t.Fatal("No choices returned")
+		}
+
+		choice := response.Choices[0]
+
+		// Check usage metadata exists even with tool calls
+		if choice.GenerationInfo == nil {
+			t.Fatal("GenerationInfo is nil")
+		}
+
+		if inputTokens := choice.GenerationInfo["input_tokens"]; inputTokens != nil {
+			switch v := inputTokens.(type) {
+			case int32:
+				if v > 0 {
+					t.Logf("Tool call input tokens: %d", v)
+				} else {
+					t.Error("input_tokens should be > 0")
+				}
+			case int64:
+				if v > 0 {
+					t.Logf("Tool call input tokens: %d", v)
+				} else {
+					t.Error("input_tokens should be > 0")
+				}
+			default:
+				t.Errorf("input_tokens has unexpected type: %T", inputTokens)
+			}
+		} else {
+			t.Error("input_tokens missing in tool call response")
+		}
+
+		if outputTokens := choice.GenerationInfo["output_tokens"]; outputTokens != nil {
+			switch v := outputTokens.(type) {
+			case int32:
+				// Output tokens might be 0 if model requested a tool call
+				t.Logf("Tool call output tokens: %d", v)
+			case int64:
+				t.Logf("Tool call output tokens: %d", v)
+			}
+		}
+
+		t.Logf("Stop reason: %s", choice.StopReason)
+		t.Logf("Has tool calls: %v", len(choice.ToolCalls) > 0)
+	})
+}
