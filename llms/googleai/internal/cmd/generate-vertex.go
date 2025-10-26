@@ -51,7 +51,7 @@ const preamble = `
 
 func rewriteImport(x *ast.ImportSpec) {
 	if strings.Index(x.Path.Value, "generative-ai-go/genai") > 0 {
-		x.Path.Value = `"cloud.google.com/go/vertexai/genai"`
+		x.Path.Value = `"google.golang.org/genai"`
 	}
 }
 

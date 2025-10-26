@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/llms"
+	"google.golang.org/genai"
 )
 
 func TestConvertToolSchemaType(t *testing.T) {
@@ -40,7 +40,7 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 		name    string
 		parts   []llms.ContentPart
 		wantErr bool
-		check   func(t *testing.T, result []genai.Part)
+		check   func(t *testing.T, result []*genai.Part)
 	}{
 		{
 			name: "text content",
@@ -48,16 +48,12 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 				llms.TextContent{Text: "Hello, world!"},
 			},
 			wantErr: false,
-			check: func(t *testing.T, result []genai.Part) {
+			check: func(t *testing.T, result []*genai.Part) {
 				if len(result) != 1 {
 					t.Fatalf("expected 1 part, got %d", len(result))
 				}
-				text, ok := result[0].(genai.Text)
-				if !ok {
-					t.Fatalf("expected genai.Text, got %T", result[0])
-				}
-				if string(text) != "Hello, world!" {
-					t.Errorf("expected text 'Hello, world!', got %q", text)
+				if result[0].Text != "Hello, world!" {
+					t.Errorf("expected text 'Hello, world!', got %q", result[0].Text)
 				}
 			},
 		},
@@ -70,14 +66,14 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 				},
 			},
 			wantErr: false,
-			check: func(t *testing.T, result []genai.Part) {
+			check: func(t *testing.T, result []*genai.Part) {
 				if len(result) != 1 {
 					t.Fatalf("expected 1 part, got %d", len(result))
 				}
-				blob, ok := result[0].(genai.Blob)
-				if !ok {
-					t.Fatalf("expected genai.Blob, got %T", result[0])
+				if result[0].InlineData == nil {
+					t.Fatal("expected InlineData, got nil")
 				}
+				blob := result[0].InlineData
 				if blob.MIMEType != "image/png" {
 					t.Errorf("expected MIME type 'image/png', got %q", blob.MIMEType)
 				}
@@ -97,14 +93,14 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 				},
 			},
 			wantErr: false,
-			check: func(t *testing.T, result []genai.Part) {
+			check: func(t *testing.T, result []*genai.Part) {
 				if len(result) != 1 {
 					t.Fatalf("expected 1 part, got %d", len(result))
 				}
-				fc, ok := result[0].(genai.FunctionCall)
-				if !ok {
-					t.Fatalf("expected genai.FunctionCall, got %T", result[0])
+				if result[0].FunctionCall == nil {
+					t.Fatal("expected FunctionCall, got nil")
 				}
+				fc := result[0].FunctionCall
 				if fc.Name != "test_function" {
 					t.Errorf("expected function name 'test_function', got %q", fc.Name)
 				}
@@ -125,14 +121,14 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 				},
 			},
 			wantErr: false,
-			check: func(t *testing.T, result []genai.Part) {
+			check: func(t *testing.T, result []*genai.Part) {
 				if len(result) != 1 {
 					t.Fatalf("expected 1 part, got %d", len(result))
 				}
-				fr, ok := result[0].(genai.FunctionResponse)
-				if !ok {
-					t.Fatalf("expected genai.FunctionResponse, got %T", result[0])
+				if result[0].FunctionResponse == nil {
+					t.Fatal("expected FunctionResponse, got nil")
 				}
+				fr := result[0].FunctionResponse
 				if fr.Name != "test_function" {
 					t.Errorf("expected function name 'test_function', got %q", fr.Name)
 				}
@@ -165,17 +161,17 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //no
 				llms.BinaryContent{MIMEType: "image/jpeg", Data: []byte{0xFF, 0xD8}},
 			},
 			wantErr: false,
-			check: func(t *testing.T, result []genai.Part) {
+			check: func(t *testing.T, result []*genai.Part) {
 				if len(result) != 3 {
 					t.Fatalf("expected 3 parts, got %d", len(result))
 				}
-				if text, ok := result[0].(genai.Text); !ok || string(text) != "First part" {
-					t.Errorf("expected first part to be 'First part', got %v", result[0])
+				if result[0].Text != "First part" {
+					t.Errorf("expected first part to be 'First part', got %q", result[0].Text)
 				}
-				if text, ok := result[1].(genai.Text); !ok || string(text) != "Second part" {
-					t.Errorf("expected second part to be 'Second part', got %v", result[1])
+				if result[1].Text != "Second part" {
+					t.Errorf("expected second part to be 'Second part', got %q", result[1].Text)
 				}
-				if blob, ok := result[2].(genai.Blob); !ok || blob.MIMEType != "image/jpeg" {
+				if result[2].InlineData == nil || result[2].InlineData.MIMEType != "image/jpeg" {
 					t.Errorf("expected third part to be image/jpeg blob, got %v", result[2])
 				}
 			},
@@ -298,7 +294,7 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 	tests := []struct {
 		name       string
 		candidates []*genai.Candidate
-		usage      *genai.UsageMetadata
+		usage      *genai.GenerateContentResponseUsageMetadata
 		wantErr    bool
 		check      func(t *testing.T, result *llms.ContentResponse)
 	}{
@@ -307,11 +303,11 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.Text("Response text"),
+						Parts: []*genai.Part{
+							{Text: "Response text"},
 						},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: "Stop",
 				},
 			},
 			check: func(t *testing.T, result *llms.ContentResponse) {
@@ -321,9 +317,9 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 				if result.Choices[0].Content != "Response text" {
 					t.Errorf("expected content 'Response text', got %q", result.Choices[0].Content)
 				}
-				// The FinishReason.String() method returns the full enum name
-				if result.Choices[0].StopReason != "FinishReasonStop" {
-					t.Errorf("expected stop reason 'FinishReasonStop', got %q", result.Choices[0].StopReason)
+				// The new API uses string-based finish reasons
+				if result.Choices[0].StopReason != "Stop" {
+					t.Errorf("expected stop reason 'Stop', got %q", result.Choices[0].StopReason)
 				}
 			},
 		},
@@ -332,9 +328,9 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.Text("Part 1"),
-							genai.Text(" Part 2"),
+						Parts: []*genai.Part{
+							{Text: "Part 1"},
+							{Text: " Part 2"},
 						},
 					},
 				},
@@ -350,10 +346,12 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.FunctionCall{
-								Name: "test_function",
-								Args: map[string]any{"x": 1, "y": 2},
+						Parts: []*genai.Part{
+							{
+								FunctionCall: &genai.FunctionCall{
+									Name: "test_function",
+									Args: map[string]any{"x": 1, "y": 2},
+								},
 							},
 						},
 					},
@@ -381,11 +379,11 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{genai.Text("Response")},
+						Parts: []*genai.Part{{Text: "Response"}},
 					},
 				},
 			},
-			usage: &genai.UsageMetadata{
+			usage: &genai.GenerateContentResponseUsageMetadata{
 				PromptTokenCount:     10,
 				CandidatesTokenCount: 5,
 				TotalTokenCount:      15,
@@ -408,10 +406,10 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{genai.Text("Safe response")},
+						Parts: []*genai.Part{{Text: "Safe response"}},
 					},
 					SafetyRatings: []*genai.SafetyRating{
-						{Category: genai.HarmCategoryHateSpeech, Probability: genai.HarmProbabilityLow},
+						{Category: "HATE_SPEECH", Probability: "LOW"},
 					},
 					CitationMetadata: &genai.CitationMetadata{
 						Citations: []*genai.Citation{
@@ -598,11 +596,11 @@ func TestShowContent(t *testing.T) {
 	contents := []*genai.Content{
 		{
 			Role: "user",
-			Parts: []genai.Part{
-				genai.Text("Hello"),
-				genai.Blob{MIMEType: "image/png", Data: []byte{1, 2, 3}},
-				genai.FunctionCall{Name: "test", Args: map[string]any{"x": 1}},
-				genai.FunctionResponse{Name: "test", Response: map[string]any{"result": "ok"}},
+			Parts: []*genai.Part{
+				{Text: "Hello"},
+				{InlineData: &genai.Blob{MIMEType: "image/png", Data: []byte{1, 2, 3}}},
+				{FunctionCall: &genai.FunctionCall{Name: "test", Args: map[string]any{"x": 1}}},
+				{FunctionResponse: &genai.FunctionResponse{Name: "test", Response: map[string]any{"result": "ok"}}},
 			},
 		},
 	}

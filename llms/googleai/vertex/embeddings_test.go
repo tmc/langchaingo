@@ -83,8 +83,8 @@ func TestCreateEmbedding(t *testing.T) {
 
 			// Since we can't directly test CreateEmbedding without modifying
 			// the production code, we'll test what we can
-			if v.opts.DefaultEmbeddingModel != "embedding-001" {
-				t.Errorf("expected default embedding model 'embedding-001', got %q", v.opts.DefaultEmbeddingModel)
+			if v.opts.DefaultEmbeddingModel != "text-embedding-004" {
+				t.Errorf("expected default embedding model 'text-embedding-004', got %q", v.opts.DefaultEmbeddingModel)
 			}
 		})
 	}
