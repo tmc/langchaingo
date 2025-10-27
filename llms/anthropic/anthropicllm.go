@@ -43,13 +43,24 @@ var (
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
+	options := &options{
+		token:      os.Getenv(tokenEnvVarName),
+		baseURL:    anthropicclient.DefaultBaseURL,
+		httpClient: httputil.DefaultClient,
+	}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
 	c, err := newClient(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to create client: %w", err)
 	}
 	return &LLM{
-		client: c,
-		model:  c.Model, // Store the model for reasoning detection
+		client:           c,
+		model:            c.Model, // Store the model for reasoning detection
+		CallbacksHandler: options.callbackHandler,
 	}, nil
 }
 
@@ -165,7 +176,17 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	return processAnthropicResponse(result)
+
+	response, err := processAnthropicResponse(result)
+	if err != nil {
+		return nil, err
+	}
+
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
+	}
+
+	return response, nil
 }
 
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse

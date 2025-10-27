@@ -1,10 +1,11 @@
 package anthropic
 
 import (
-	"os"
+	"context"
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func TestNew(t *testing.T) {
@@ -42,11 +43,19 @@ func TestNew(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:     "with callback handler",
+			envToken: "test-token",
+			opts: []Option{
+				WithCallback(&testCallbackHandler{}),
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("ANTHROPIC_API_KEY", tt.envToken)
+			t.Setenv("ANTHROPIC_API_KEY", tt.envToken)
 
 			llm, err := New(tt.opts...)
 			if (err != nil) != tt.wantErr {
@@ -57,6 +66,18 @@ func TestNew(t *testing.T) {
 				t.Error("New() returned nil LLM without error")
 			}
 		})
+	}
+}
+
+func TestNew_CallbackHandlerWiring(t *testing.T) {
+	handler := &testCallbackHandler{}
+	llm, err := New(WithCallback(handler))
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	if llm.CallbacksHandler != handler {
+		t.Error("New() did not wire callback handler to LLM.CallbacksHandler")
 	}
 }
 
@@ -217,6 +238,15 @@ func TestOptions(t *testing.T) {
 			t.Error("WithLegacyTextCompletionsAPI() did not set flag")
 		}
 	})
+
+	t.Run("WithCallback", func(t *testing.T) {
+		opts := &options{}
+		handler := &testCallbackHandler{}
+		WithCallback(handler)(opts)
+		if opts.callbackHandler != handler {
+			t.Error("WithCallback() did not set handler")
+		}
+	})
 }
 
 func TestCall(t *testing.T) {
@@ -230,3 +260,36 @@ func TestGenerateMessagesContent_EmptyContent(t *testing.T) {
 	// returns a response with nil or empty content (addresses issue #993)
 	t.Skip("Requires mock client - would demonstrate panic without len(result.Content) == 0 check")
 }
+
+type testCallbackHandler struct {
+	startCalled bool
+	endCalled   bool
+	errorCalled bool
+}
+
+func (h *testCallbackHandler) HandleLLMGenerateContentStart(ctx context.Context, messages []llms.MessageContent) {
+	h.startCalled = true
+}
+
+func (h *testCallbackHandler) HandleLLMGenerateContentEnd(ctx context.Context, resp *llms.ContentResponse) {
+	h.endCalled = true
+}
+
+func (h *testCallbackHandler) HandleLLMError(ctx context.Context, err error) {
+	h.errorCalled = true
+}
+
+func (h *testCallbackHandler) HandleText(ctx context.Context, text string)                      {}
+func (h *testCallbackHandler) HandleLLMStart(ctx context.Context, prompts []string)             {}
+func (h *testCallbackHandler) HandleChainStart(ctx context.Context, inputs map[string]any)      {}
+func (h *testCallbackHandler) HandleChainEnd(ctx context.Context, outputs map[string]any)       {}
+func (h *testCallbackHandler) HandleChainError(ctx context.Context, err error)                  {}
+func (h *testCallbackHandler) HandleToolStart(ctx context.Context, input string)                {}
+func (h *testCallbackHandler) HandleToolEnd(ctx context.Context, output string)                 {}
+func (h *testCallbackHandler) HandleToolError(ctx context.Context, err error)                   {}
+func (h *testCallbackHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {}
+func (h *testCallbackHandler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {}
+func (h *testCallbackHandler) HandleRetrieverStart(ctx context.Context, query string)           {}
+func (h *testCallbackHandler) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
+}
+func (h *testCallbackHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {}
