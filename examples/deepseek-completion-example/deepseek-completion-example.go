@@ -13,6 +13,7 @@ func main() {
 	// Initialize the OpenAI client with Deepseek model
 	llm, err := openai.New(
 		openai.WithModel("deepseek-reasoner"),
+		openai.WithBaseURL("https://api.deepseek.com"),
 	)
 	if err != nil {
 		log.Fatal(err)
