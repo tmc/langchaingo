@@ -86,6 +86,16 @@ type Tool struct {
 	Type string `json:"type"`
 	// Function is the function to call.
 	Function *FunctionDefinition `json:"function,omitempty"`
+	// WebSearch is the web search configuration (OpenAI only).
+	WebSearch *WebSearchConfig `json:"web_search,omitempty"`
+}
+
+// WebSearchConfig configures the web search tool for OpenAI models.
+type WebSearchConfig struct {
+	// SearchContextSize controls how much information the tool gathers from the web.
+	// Valid values: "high", "medium", "low"
+	// Higher settings provide better answers but are slower and cost more.
+	SearchContextSize string `json:"search_context_size,omitempty"`
 }
 
 // FunctionDefinition is a definition of a function that can be called by the model.

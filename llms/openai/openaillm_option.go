@@ -2,6 +2,7 @@ package openai
 
 import (
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
@@ -144,5 +145,29 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WebSearchContextSize represents the size of search context for web search tool.
+type WebSearchContextSize string
+
+const (
+	// WebSearchContextSizeHigh provides better answers but is slower and costs more.
+	WebSearchContextSizeHigh WebSearchContextSize = "high"
+	// WebSearchContextSizeMedium balances quality, speed, and cost.
+	WebSearchContextSizeMedium WebSearchContextSize = "medium"
+	// WebSearchContextSizeLow is faster and cheaper but may provide less detailed answers.
+	WebSearchContextSizeLow WebSearchContextSize = "low"
+)
+
+// NewWebSearchTool creates a new web search tool for OpenAI models.
+// contextSize controls how much information the tool gathers (high, medium, or low).
+// Higher settings provide better answers but are slower and cost more.
+func NewWebSearchTool(contextSize WebSearchContextSize) llms.Tool {
+	return llms.Tool{
+		Type: "web_search",
+		WebSearch: &llms.WebSearchConfig{
+			SearchContextSize: string(contextSize),
+		},
 	}
 }
