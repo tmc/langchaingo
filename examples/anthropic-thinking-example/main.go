@@ -45,7 +45,7 @@ func run() error {
 		return fmt.Errorf("model does not support reasoning")
 	}
 
-	fmt.Println("=== Anthropic Extended Thinking Example ===\n")
+	fmt.Println("=== Anthropic Extended Thinking Example ===")
 
 	// Example 1: Basic thinking with medium mode
 	if err := exampleBasicThinking(ctx, llm); err != nil {
@@ -109,7 +109,7 @@ Think through this carefully and show your reasoning.`),
 		}
 	}
 
-	fmt.Println("---\n")
+	fmt.Println("---")
 	return nil
 }
 
@@ -146,7 +146,7 @@ Explain your reasoning process.`),
 		fmt.Printf("  Efficiency: %.1f%%\n\n", float64(usage.BudgetUsed)/float64(usage.BudgetAllocated)*100)
 	}
 
-	fmt.Println("---\n")
+	fmt.Println("---")
 	return nil
 }
 
@@ -187,7 +187,7 @@ func exampleThinkingModes(ctx context.Context, llm llms.Model) error {
 		}
 	}
 
-	fmt.Println("---\n")
+	fmt.Println("---")
 	return nil
 }
 
@@ -266,7 +266,7 @@ and finally calculate the total cost. Show your reasoning at each step.`),
 		// In a real application, you would execute these tools and continue the conversation
 		fmt.Println("Note: With interleaved thinking, Claude reasons about which tools to use,")
 		fmt.Println("their order, and how to interpret results. This uses additional thinking tokens")
-		fmt.Println("but produces more reliable multi-step workflows.\n")
+		fmt.Println("but produces more reliable multi-step workflows.")
 	}
 
 	usage := llms.ExtractReasoningUsage(resp.Choices[0].GenerationInfo)
@@ -278,7 +278,7 @@ and finally calculate the total cost. Show your reasoning at each step.`),
 		}
 	}
 
-	fmt.Println("---\n")
+	fmt.Println("---")
 	return nil
 }
 
