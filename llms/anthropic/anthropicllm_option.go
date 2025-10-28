@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
@@ -22,6 +23,8 @@ type options struct {
 
 	// If supplied, the 'anthropic-beta' header will be added to the request with the given value.
 	anthropicBetaHeader string
+
+	callbackHandler callbacks.Handler
 }
 
 type Option func(*options)
@@ -68,5 +71,12 @@ func WithLegacyTextCompletionsAPI() Option {
 func WithAnthropicBetaHeader(value string) Option {
 	return func(opts *options) {
 		opts.anthropicBetaHeader = value
+	}
+}
+
+// WithCallback allows setting a custom Callback Handler.
+func WithCallback(callbackHandler callbacks.Handler) Option {
+	return func(opts *options) {
+		opts.callbackHandler = callbackHandler
 	}
 }

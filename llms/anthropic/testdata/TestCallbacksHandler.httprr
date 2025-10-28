@@ -1,0 +1,36 @@
+httprr trace v1
+363 1577
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 143
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-3-5-sonnet-20240620","messages":[{"role":"user","content":[{"type":"text","text":"test"}]}],"max_tokens":2048,"temperature":0}HTTP/2.0 200 OK
+Content-Length: 545
+Anthropic-Organization-Id: 27796668-7351-40ac-acc4-024aee8995a5
+Anthropic-Ratelimit-Input-Tokens-Limit: 8000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 8000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2025-10-28T01:28:45Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 1600000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 1600000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2025-10-28T01:28:46Z
+Anthropic-Ratelimit-Requests-Limit: 7000
+Anthropic-Ratelimit-Requests-Remaining: 6999
+Anthropic-Ratelimit-Requests-Reset: 2025-10-28T01:28:45Z
+Anthropic-Ratelimit-Tokens-Limit: 9600000
+Anthropic-Ratelimit-Tokens-Remaining: 9600000
+Anthropic-Ratelimit-Tokens-Reset: 2025-10-28T01:28:45Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Tue, 28 Oct 2025 01:28:46 GMT
+Request-Id: req_011CUYjF9xbqccQaBV2CiacU
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Via: 1.1 google
+X-Envoy-Upstream-Service-Time: 1385
+X-Robots-Tag: none
+
+{"model":"claude-3-5-sonnet-20240620","id":"msg_013c6Lg9yEVks4fKNineCdwR","type":"message","role":"assistant","content":[{"type":"text","text":"This is a test response. How can I assist you today? Feel free to ask any questions or let me know if you need help with something specific."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":8,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":34,"service_tier":"standard"}}
