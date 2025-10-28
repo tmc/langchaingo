@@ -125,7 +125,7 @@ func (e *Executor) doIteration( // nolint
 	}
 
 	for _, action := range actions {
-		steps, err = e.doAction(ctx, steps, nameToTool, action)
+		steps, err = e.doAction(ctx, steps, nameToTool, action, options...)
 		if err != nil {
 			return steps, nil, err
 		}
@@ -139,6 +139,7 @@ func (e *Executor) doAction(
 	steps []schema.AgentStep,
 	nameToTool map[string]tools.Tool,
 	action schema.AgentAction,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentStep, error) {
 	if e.CallbacksHandler != nil {
 		e.CallbacksHandler.HandleAgentAction(ctx, action)
@@ -152,9 +153,24 @@ func (e *Executor) doAction(
 		}), nil
 	}
 
-	observation, err := tool.Call(ctx, strings.TrimSuffix(action.ToolInput, "\nObservation:"))
+	// Call HandleToolStart before executing the tool
+	toolInput := strings.TrimSuffix(action.ToolInput, "\nObservation:")
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleToolStart(ctx, toolInput)
+	}
+
+	observation, err := tool.Call(ctx, toolInput)
 	if err != nil {
+		// Call HandleToolError if tool execution fails
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return nil, err
+	}
+
+	// Call HandleToolEnd after successful tool execution
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleToolEnd(ctx, observation)
 	}
 
 	return append(steps, schema.AgentStep{
