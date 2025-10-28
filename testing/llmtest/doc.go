@@ -32,12 +32,27 @@
 //   - Streaming (if model implements streaming interface)
 //   - Tool/Function calling (probed with test tool)
 //   - Reasoning/Thinking mode (if supported)
+//   - Structured/JSON output (if WithJSONMode is supported)
+//   - Multimodal/Vision input (if image content parts are supported)
 //   - Token counting (if usage information provided)
 //   - Context caching (if implemented)
+//   - Error handling (cancelled contexts, invalid parameters)
 //
 // # Mock Implementation
 //
 // A MockLLM is provided for testing without making actual API calls:
+//
+//	mock := &llmtest.MockLLM{
+//	    CallResponse: "OK",
+//	    GenerateResponse: &llms.ContentResponse{
+//	        Choices: []*llms.ContentChoice{{Content: "Hello"}},
+//	    },
+//	    SupportsToolCalls: true,
+//	    SupportsReasoningMode: true,
+//	}
+//	llmtest.TestLLM(t, mock)
+//
+// For dynamic behavior, use custom functions:
 //
 //	mock := &llmtest.MockLLM{
 //	    CallFunc: func(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
@@ -45,6 +60,22 @@
 //	    },
 //	}
 //	llmtest.TestLLM(t, mock)
+//
+// # Benchmarking
+//
+// Performance benchmarks are available:
+//
+//	func BenchmarkMyLLM(b *testing.B) {
+//	    llm, _ := mylllm.New()
+//	    llmtest.BenchmarkLLM(b, llm)
+//	}
+//
+// Or with custom options:
+//
+//	llmtest.BenchmarkLLMWithOptions(b, llm, llmtest.BenchmarkOptions{
+//	    Prompt: "Custom benchmark prompt",
+//	    MaxTokens: 100,
+//	})
 //
 // # Parallel Testing
 //
