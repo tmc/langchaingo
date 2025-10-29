@@ -485,10 +485,10 @@ func TestGenerateContent(t *testing.T) {
 // passed as the model parameter, causing "Invalid model: " errors.
 func TestModelNamePropagation(t *testing.T) {
 	tests := []struct {
-		name              string
-		clientModel       string
-		callOptionModel   string
-		expectedModel     string
+		name            string
+		clientModel     string
+		callOptionModel string
+		expectedModel   string
 	}{
 		{
 			name:            "default model from client options",

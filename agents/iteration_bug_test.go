@@ -219,11 +219,11 @@ func TestExecutorBetterErrorMessages(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name           string
-		agent          agents.Agent
-		expectedError  string
-		maxIterations  int
-		expectedCalls  int
+		name          string
+		agent         agents.Agent
+		expectedError string
+		maxIterations int
+		expectedCalls int
 	}{
 		{
 			name: "agent with varying actions",

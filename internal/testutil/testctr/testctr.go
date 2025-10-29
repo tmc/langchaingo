@@ -71,8 +71,8 @@ func EnsureTestEnv() int {
 
 			// Set DOCKER_HOST if using non-standard Docker socket paths (Colima, Lima, etc.)
 			// This works around testcontainers bug where it doesn't properly detect non-standard sockets
-			if dockerHost != "" && (strings.Contains(dockerHost, "colima") || 
-				strings.Contains(dockerHost, ".lima") || 
+			if dockerHost != "" && (strings.Contains(dockerHost, "colima") ||
+				strings.Contains(dockerHost, ".lima") ||
 				!strings.Contains(dockerHost, "/var/run/docker.sock")) {
 				os.Setenv("DOCKER_HOST", dockerHost)
 				if verbose {
@@ -98,15 +98,15 @@ func EnsureTestEnv() int {
 	// Set the testcontainers Docker socket override if not already set
 	// This tells testcontainers where to find the actual Docker socket
 	if os.Getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE") == "" {
-		dockerSocket := "/var/run/docker.sock"  // default
-		
+		dockerSocket := "/var/run/docker.sock" // default
+
 		// For Colima and other non-standard setups, extract socket path from DOCKER_HOST
 		if dockerHost := os.Getenv("DOCKER_HOST"); dockerHost != "" {
 			if strings.HasPrefix(dockerHost, "unix://") {
 				dockerSocket = strings.TrimPrefix(dockerHost, "unix://")
 			}
 		}
-		
+
 		os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocket)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "testctr: Set TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=%s\n", dockerSocket)

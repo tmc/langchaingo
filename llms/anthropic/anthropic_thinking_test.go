@@ -17,31 +17,31 @@ func TestExtractThinkingOptions(t *testing.T) {
 	}
 
 	tests := []struct {
-		name                string
-		reasoning           *llms.ReasoningOptions
-		wantBudget          int
-		wantInterleaved     bool
+		name                 string
+		reasoning            *llms.ReasoningOptions
+		wantBudget           int
+		wantInterleaved      bool
 		wantExtendedThinking bool
 	}{
 		{
-			name:                "Low thinking mode",
-			reasoning:           &llms.ReasoningOptions{Mode: llms.ThinkingModeLow},
-			wantBudget:          2000,
-			wantInterleaved:     false,
+			name:                 "Low thinking mode",
+			reasoning:            &llms.ReasoningOptions{Mode: llms.ThinkingModeLow},
+			wantBudget:           2000,
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 		{
-			name:                "Medium thinking mode",
-			reasoning:           &llms.ReasoningOptions{Mode: llms.ThinkingModeMedium},
-			wantBudget:          8000,
-			wantInterleaved:     false,
+			name:                 "Medium thinking mode",
+			reasoning:            &llms.ReasoningOptions{Mode: llms.ThinkingModeMedium},
+			wantBudget:           8000,
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 		{
-			name:                "High thinking mode",
-			reasoning:           &llms.ReasoningOptions{Mode: llms.ThinkingModeHigh},
-			wantBudget:          16000,
-			wantInterleaved:     false,
+			name:                 "High thinking mode",
+			reasoning:            &llms.ReasoningOptions{Mode: llms.ThinkingModeHigh},
+			wantBudget:           16000,
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 		{
@@ -49,8 +49,8 @@ func TestExtractThinkingOptions(t *testing.T) {
 			reasoning: &llms.ReasoningOptions{
 				BudgetTokens: ptrInt(5000),
 			},
-			wantBudget:          5000,
-			wantInterleaved:     false,
+			wantBudget:           5000,
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 		{
@@ -59,8 +59,8 @@ func TestExtractThinkingOptions(t *testing.T) {
 				Mode:        llms.ThinkingModeMedium,
 				Interleaved: true,
 			},
-			wantBudget:          8000,
-			wantInterleaved:     true,
+			wantBudget:           8000,
+			wantInterleaved:      true,
 			wantExtendedThinking: true,
 		},
 		{
@@ -68,8 +68,8 @@ func TestExtractThinkingOptions(t *testing.T) {
 			reasoning: &llms.ReasoningOptions{
 				BudgetTokens: ptrInt(500), // Below 1024 minimum
 			},
-			wantBudget:          1024, // Should be clamped to minimum
-			wantInterleaved:     false,
+			wantBudget:           1024, // Should be clamped to minimum
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 		{
@@ -77,8 +77,8 @@ func TestExtractThinkingOptions(t *testing.T) {
 			reasoning: &llms.ReasoningOptions{
 				BudgetTokens: ptrInt(200000), // Above 128K maximum
 			},
-			wantBudget:          128000, // Should be clamped to maximum
-			wantInterleaved:     false,
+			wantBudget:           128000, // Should be clamped to maximum
+			wantInterleaved:      false,
 			wantExtendedThinking: true,
 		},
 	}
@@ -276,11 +276,11 @@ func TestExtractReasoningUsage(t *testing.T) {
 	t.Parallel()
 
 	genInfo := map[string]any{
-		"ThinkingContent":          "Complex reasoning process...",
-		"ThinkingTokens":           500,
-		"ThinkingBudgetAllocated":  8000,
-		"ThinkingBudgetUsed":       500,
-		"OutputTokens":             100,
+		"ThinkingContent":         "Complex reasoning process...",
+		"ThinkingTokens":          500,
+		"ThinkingBudgetAllocated": 8000,
+		"ThinkingBudgetUsed":      500,
+		"OutputTokens":            100,
 	}
 
 	usage := llms.ExtractReasoningUsage(genInfo)
@@ -297,9 +297,9 @@ func TestSupportsReasoning(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name           string
-		model          string
-		wantSupported  bool
+		name          string
+		model         string
+		wantSupported bool
 	}{
 		{
 			name:          "Claude 4 Sonnet",

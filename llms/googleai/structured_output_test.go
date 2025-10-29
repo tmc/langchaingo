@@ -70,7 +70,7 @@ func TestConvertToResponseSchema(t *testing.T) {
 					"user": {
 						Type: llms.SchemaTypeObject,
 						Properties: map[string]*llms.StructuredOutputSchema{
-							"name": {Type: llms.SchemaTypeString},
+							"name":  {Type: llms.SchemaTypeString},
 							"email": {Type: llms.SchemaTypeString},
 						},
 						Required: []string{"name"},

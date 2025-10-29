@@ -154,9 +154,9 @@ const (
 
 // Tool is a tool to use in a chat request.
 type Tool struct {
-	Type      ToolType            `json:"type"`
-	Function  FunctionDefinition  `json:"function,omitempty"`
-	WebSearch *WebSearchConfig    `json:"web_search,omitempty"`
+	Type      ToolType           `json:"type"`
+	Function  FunctionDefinition `json:"function,omitempty"`
+	WebSearch *WebSearchConfig   `json:"web_search,omitempty"`
 }
 
 // WebSearchConfig configures the web search tool.
