@@ -1,5 +1,7 @@
 package llms
 
+import "fmt"
+
 // StructuredOutputDefinition defines the schema for structured output responses.
 // This provides a unified API across providers (OpenAI, Anthropic, Google) for
 // requesting JSON-structured responses that conform to a specific schema.
@@ -144,35 +146,35 @@ func WithStructuredOutput(schema *StructuredOutputDefinition) CallOption {
 // Returns an error if the schema is invalid.
 func ValidateSchema(schema *StructuredOutputSchema) error {
 	if schema == nil {
-		return ErrInvalidSchema
+		return NewError(ErrCodeInvalidRequest, "structured", "schema cannot be nil")
 	}
 
 	switch schema.Type {
 	case SchemaTypeObject:
 		if len(schema.Properties) == 0 {
-			return ErrInvalidSchema
+			return NewError(ErrCodeInvalidRequest, "structured", "object schema must have at least one property")
 		}
 		// Recursively validate nested schemas
-		for _, prop := range schema.Properties {
+		for name, prop := range schema.Properties {
 			if err := ValidateSchema(prop); err != nil {
-				return err
+				return NewError(ErrCodeInvalidRequest, "structured", fmt.Sprintf("invalid property %q: %v", name, err))
 			}
 		}
 
 	case SchemaTypeArray:
 		if schema.Items == nil {
-			return ErrInvalidSchema
+			return NewError(ErrCodeInvalidRequest, "structured", "array schema must specify items")
 		}
 		// Recursively validate items schema
 		if err := ValidateSchema(schema.Items); err != nil {
-			return err
+			return NewError(ErrCodeInvalidRequest, "structured", fmt.Sprintf("invalid array items: %v", err))
 		}
 
 	case SchemaTypeString, SchemaTypeNumber, SchemaTypeInteger, SchemaTypeBoolean, SchemaTypeNull:
 		// Primitive types are always valid
 
 	default:
-		return ErrInvalidSchema
+		return NewError(ErrCodeInvalidRequest, "structured", fmt.Sprintf("unknown schema type: %q", schema.Type))
 	}
 
 	return nil
