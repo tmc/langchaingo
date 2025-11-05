@@ -15,7 +15,7 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	defaultModel = "claude-3-5-sonnet-20240620"
+	defaultModel = "claude-sonnet-4-5-20250929"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.
@@ -142,7 +142,7 @@ type MessageRequest struct {
 
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders            []string                                                      `json:"-"`
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 

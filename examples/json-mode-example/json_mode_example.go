@@ -42,7 +42,7 @@ func initBackend(ctx context.Context) (llms.Model, error) {
 	case "ollama":
 		return ollama.New(ollama.WithModel("mistral"))
 	case "anthropic":
-		return anthropic.New(anthropic.WithModel("claude-3-5-sonnet-20240620"))
+		return anthropic.New(anthropic.WithModel("claude-sonnet-4-5-20250929"))
 	case "googleai":
 		return googleai.New(ctx, googleai.WithDefaultModel("gemini-1.5-flash"))
 	default:
