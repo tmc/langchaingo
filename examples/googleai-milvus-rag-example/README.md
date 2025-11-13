@@ -72,7 +72,7 @@ docker run -p 19530:19530 milvusdb/milvus:latest
 ### 2. Clone and Navigate
 ```bash
 git clone https://github.com/tmc/langchaingo.git
-cd langchaingo/examples/vectorstores/milvus_gemini_rag
+cd langchaingo/examples/googleai-milvus-rag-example
 ```
 ### 3. Set Environment Variables
 Linux / macOS
