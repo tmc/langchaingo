@@ -12,6 +12,7 @@ import (
 	"github.com/google/generative-ai-go/genai"
 	"github.com/vendasta/langchaingo/internal/imageutil"
 	"github.com/vendasta/langchaingo/llms"
+	googleaierrors "github.com/vendasta/langchaingo/llms/googleai/errors"
 	"google.golang.org/api/iterator"
 )
 
@@ -336,16 +337,24 @@ func generateFromSingleMessage(
 		// the complete response with a list of candidates.
 		resp, err := model.GenerateContent(ctx, convertedParts...)
 		if err != nil {
-			return nil, err
+			return nil, googleaierrors.MapError(err)
 		}
 
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates, resp.UsageMetadata)
+		response, err := convertCandidates(resp.Candidates, resp.UsageMetadata)
+		if err != nil {
+			return nil, googleaierrors.MapError(err)
+		}
+		return response, nil
 	}
 	iter := model.GenerateContentStream(ctx, convertedParts...)
-	return convertAndStreamFromIterator(ctx, iter, opts)
+	response, err := convertAndStreamFromIterator(ctx, iter, opts)
+	if err != nil {
+		return nil, googleaierrors.MapError(err)
+	}
+	return response, nil
 }
 
 func generateFromMessages(

@@ -92,7 +92,7 @@ func createCohereCompletion(ctx context.Context,
 	}
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output cohereTextGenerationOutput

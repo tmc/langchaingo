@@ -69,7 +69,7 @@ func MapError(err error) error {
 	for _, mapping := range mistralErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "mistral", mapping.message).WithCause(err)
+				return llms.NewError(mapping.code, "mistral", mapping.message, 0).WithCause(err)
 			}
 		}
 	}

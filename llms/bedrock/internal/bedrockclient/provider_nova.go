@@ -169,7 +169,7 @@ func createNovaCompletion(ctx context.Context,
 	}
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	output, err := parseNovaResponseBody(resp.Body)

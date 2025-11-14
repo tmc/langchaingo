@@ -524,10 +524,9 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg)
+			return nil, MapError(errors.New(msg), r.StatusCode)
 		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+		return nil, MapError(fmt.Errorf("%s: %s", msg, errResp.Error.Message), r.StatusCode)
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)

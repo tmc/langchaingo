@@ -1,4 +1,4 @@
-package bedrock
+package bedrockclient
 
 import (
 	"strings"
@@ -69,7 +69,7 @@ func MapError(err error) error {
 	for _, mapping := range bedrockErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "bedrock", mapping.message).WithCause(err)
+				return llms.NewError(mapping.code, "bedrock", mapping.message, 0).WithCause(err)
 			}
 		}
 	}

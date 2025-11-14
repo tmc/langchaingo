@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -120,6 +121,15 @@ func (c *Client) CreateGeneration(ctx context.Context, r *GenerationRequest) (*G
 		return nil, fmt.Errorf("send request: %w", err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("API returned unexpected status code: %d", res.StatusCode)
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, MapError(errors.New(msg), res.StatusCode)
+		}
+		return nil, MapError(errors.New(fmt.Sprintf("%d, %s", res.StatusCode, b)), res.StatusCode)
+	}
 
 	var response generateResponsePayload
 	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {

@@ -1,9 +1,12 @@
-package googleai
+package googleaierrors
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/vendasta/langchaingo/llms"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // errorMapping represents a mapping from error patterns to error codes.
@@ -62,6 +65,11 @@ func MapError(err error) error {
 	if err == nil {
 		return nil
 	}
+	var statusCode int
+	errStatus, ok := status.FromError(err)
+	if ok {
+		statusCode = grpcErrorToHTTPStatusCode(errStatus.Code())
+	}
 
 	errStr := strings.ToLower(err.Error())
 
@@ -69,7 +77,7 @@ func MapError(err error) error {
 	for _, mapping := range googleAIErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "googleai", mapping.message).WithCause(err)
+				return llms.NewError(mapping.code, "googleai", mapping.message, statusCode).WithCause(err)
 			}
 		}
 	}
@@ -77,4 +85,34 @@ func MapError(err error) error {
 	// Use the generic error mapper for unrecognized errors
 	mapper := llms.NewErrorMapper("googleai")
 	return mapper.Map(err)
+}
+
+// StatusCodeToGRPCError converts a http error into a grpc error
+func grpcErrorToHTTPStatusCode(statusCode codes.Code) int {
+	switch statusCode {
+	case codes.InvalidArgument:
+		return http.StatusBadRequest
+	case codes.Unauthenticated:
+		return http.StatusUnauthorized
+	case codes.PermissionDenied:
+		return http.StatusForbidden
+	case codes.NotFound:
+		return http.StatusNotFound
+	case codes.AlreadyExists:
+		return http.StatusConflict
+	case codes.FailedPrecondition:
+		return http.StatusPreconditionFailed
+	case codes.ResourceExhausted:
+		return http.StatusTooManyRequests
+	case codes.Unimplemented:
+		return http.StatusNotImplemented
+	case codes.Unavailable:
+		return http.StatusServiceUnavailable
+	case codes.DeadlineExceeded:
+		return http.StatusRequestTimeout
+	case codes.Internal:
+		return http.StatusInternalServerError
+	default:
+		return 0
+	}
 }

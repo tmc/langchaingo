@@ -109,7 +109,7 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 
 	resp, err := client.InvokeModel(ctx, &modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output ai21TextGenerationOutput

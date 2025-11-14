@@ -63,12 +63,21 @@ type Error struct {
 
 	// Cause is the underlying error, if any.
 	Cause error
+
+	// HTTPStatusCode is the HTTP status code returned with the error, if applicable.
+	HTTPStatusCode int
 }
 
 // Error implements the error interface.
 func (e *Error) Error() string {
 	if e.Provider != "" {
+		if e.HTTPStatusCode > 0 {
+			return fmt.Sprintf("%s: %s: %s (HTTP %d)", e.Provider, e.Code, e.Message, e.HTTPStatusCode)
+		}
 		return fmt.Sprintf("%s: %s: %s", e.Provider, e.Code, e.Message)
+	}
+	if e.HTTPStatusCode > 0 {
+		return fmt.Sprintf("%s: %s (HTTP %d)", e.Code, e.Message, e.HTTPStatusCode)
 	}
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
@@ -101,12 +110,13 @@ func (e *Error) Is(target error) bool {
 }
 
 // NewError creates a new standardized error.
-func NewError(code ErrorCode, provider, message string) *Error {
+func NewError(code ErrorCode, provider, message string, httpStatusCode int) *Error {
 	return &Error{
-		Code:     code,
-		Provider: provider,
-		Message:  message,
-		Details:  make(map[string]interface{}),
+		Code:           code,
+		Provider:       provider,
+		Message:        message,
+		Details:        make(map[string]interface{}),
+		HTTPStatusCode: httpStatusCode,
 	}
 }
 

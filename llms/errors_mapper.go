@@ -144,7 +144,7 @@ func (m *ErrorMapper) WrapError(err error) error {
 		}
 	}
 
-	return NewError(code, m.provider, message).WithCause(err)
+	return NewError(code, m.provider, message, 0).WithCause(err)
 }
 
 // Map is an alias for WrapError for consistency with provider error mappers.
