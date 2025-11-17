@@ -1,4 +1,4 @@
-package anthropic
+package anthropicclient
 
 import (
 	"strings"
@@ -58,7 +58,7 @@ var anthropicErrorMappings = []errorMapping{
 }
 
 // MapError maps Anthropic-specific errors to standardized error codes.
-func MapError(err error) error {
+func MapError(err error, statusCode int) error {
 	if err == nil {
 		return nil
 	}
@@ -69,7 +69,7 @@ func MapError(err error) error {
 	for _, mapping := range anthropicErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "anthropic", mapping.message).WithCause(err)
+				return llms.NewError(mapping.code, "anthropic", mapping.message, statusCode).WithCause(err)
 			}
 		}
 	}

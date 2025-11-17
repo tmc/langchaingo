@@ -18,26 +18,33 @@ func TestStandardError(t *testing.T) {
 	}{
 		{
 			name:     "basic error",
-			err:      llms.NewError(llms.ErrCodeAuthentication, "openai", "Invalid API key"),
+			err:      llms.NewError(llms.ErrCodeAuthentication, "openai", "Invalid API key", 0),
 			expected: "openai: authentication: Invalid API key",
 		},
 		{
 			name:     "error without provider",
-			err:      llms.NewError(llms.ErrCodeRateLimit, "", "Too many requests"),
+			err:      llms.NewError(llms.ErrCodeRateLimit, "", "Too many requests", 0),
 			expected: "rate_limit: Too many requests",
 		},
 		{
 			name: "error with cause",
-			err: llms.NewError(llms.ErrCodeTimeout, "anthropic", "Request timed out").
+			err: llms.NewError(llms.ErrCodeTimeout, "anthropic", "Request timed out", 0).
 				WithCause(context.DeadlineExceeded),
 			expected: "anthropic: timeout: Request timed out",
 		},
 		{
 			name: "error with details",
-			err: llms.NewError(llms.ErrCodeTokenLimit, "openai", "Token limit exceeded").
+			err: llms.NewError(llms.ErrCodeTokenLimit, "openai", "Token limit exceeded", 0).
 				WithDetail("limit", 4096).
 				WithDetail("used", 5000),
 			expected: "openai: token_limit: Token limit exceeded",
+		},
+		{
+			name: "error with details and status code",
+			err: llms.NewError(llms.ErrCodeTokenLimit, "openai", "Token limit exceeded", 429).
+				WithDetail("limit", 4096).
+				WithDetail("used", 5000),
+			expected: "openai: token_limit: Token limit exceeded (HTTP 429)",
 		},
 	}
 
@@ -51,8 +58,8 @@ func TestStandardError(t *testing.T) {
 }
 
 func TestErrorIs(t *testing.T) {
-	authErr := llms.NewError(llms.ErrCodeAuthentication, "test", "auth failed")
-	cancelErr := llms.NewError(llms.ErrCodeCanceled, "test", "canceled").WithCause(context.Canceled)
+	authErr := llms.NewError(llms.ErrCodeAuthentication, "test", "auth failed", 0)
+	cancelErr := llms.NewError(llms.ErrCodeCanceled, "test", "canceled", 0).WithCause(context.Canceled)
 
 	tests := []struct {
 		name   string
@@ -104,31 +111,31 @@ func TestErrorHelpers(t *testing.T) {
 	}{
 		{
 			name:  "IsAuthenticationError true",
-			err:   llms.NewError(llms.ErrCodeAuthentication, "test", "auth failed"),
+			err:   llms.NewError(llms.ErrCodeAuthentication, "test", "auth failed", 0),
 			check: llms.IsAuthenticationError,
 			want:  true,
 		},
 		{
 			name:  "IsAuthenticationError false",
-			err:   llms.NewError(llms.ErrCodeRateLimit, "test", "rate limited"),
+			err:   llms.NewError(llms.ErrCodeRateLimit, "test", "rate limited", 0),
 			check: llms.IsAuthenticationError,
 			want:  false,
 		},
 		{
 			name:  "IsRateLimitError wrapped",
-			err:   fmt.Errorf("provider error: %w", llms.NewError(llms.ErrCodeRateLimit, "test", "rate limited")),
+			err:   fmt.Errorf("provider error: %w", llms.NewError(llms.ErrCodeRateLimit, "test", "rate limited", 0)),
 			check: llms.IsRateLimitError,
 			want:  true,
 		},
 		{
 			name:  "IsTimeoutError",
-			err:   llms.NewError(llms.ErrCodeTimeout, "test", "timeout"),
+			err:   llms.NewError(llms.ErrCodeTimeout, "test", "timeout", 0),
 			check: llms.IsTimeoutError,
 			want:  true,
 		},
 		{
 			name:  "IsContentFilterError",
-			err:   llms.NewError(llms.ErrCodeContentFilter, "test", "blocked"),
+			err:   llms.NewError(llms.ErrCodeContentFilter, "test", "blocked", 0),
 			check: llms.IsContentFilterError,
 			want:  true,
 		},

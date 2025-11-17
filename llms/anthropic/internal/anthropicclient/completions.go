@@ -73,7 +73,7 @@ func (c *Client) createCompletion(ctx context.Context, payload *completionPayloa
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, c.decodeError(resp)
+		return nil, MapError(c.decodeError(resp), resp.StatusCode)
 	}
 
 	if payload.StreamingFunc != nil {

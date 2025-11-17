@@ -831,7 +831,7 @@ func testCreateAi21CompletionWithMock(ctx context.Context, client *mockBedrockCl
 
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output ai21TextGenerationOutput
@@ -887,7 +887,7 @@ func testCreateAmazonCompletionWithMock(ctx context.Context, client *mockBedrock
 
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output amazonTextGenerationOutput
@@ -953,7 +953,7 @@ func testCreateAnthropicCompletionWithMock(ctx context.Context, client *mockBedr
 
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output anthropicTextGenerationOutput
@@ -1011,7 +1011,7 @@ func testCreateCohereCompletionWithMock(ctx context.Context, client *mockBedrock
 
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output cohereTextGenerationOutput
@@ -1060,7 +1060,7 @@ func testCreateMetaCompletionWithMock(ctx context.Context, client *mockBedrockCl
 
 	resp, err := client.InvokeModel(ctx, modelInput)
 	if err != nil {
-		return nil, err
+		return nil, MapError(err)
 	}
 
 	var output metaTextGenerationOutput

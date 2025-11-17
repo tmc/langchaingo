@@ -404,10 +404,12 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
 		return anthropicclient.ChatMessage{
 			Role: RoleAssistant,
-			Content: []anthropicclient.Content{&anthropicclient.TextContent{
-				Type: "text",
-				Text: textContent.Text,
-			}},
+			Content: []anthropicclient.Content{
+				&anthropicclient.TextContent{
+					Type: "text",
+					Text: textContent.Text,
+				},
+			},
 		}, nil
 	}
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
