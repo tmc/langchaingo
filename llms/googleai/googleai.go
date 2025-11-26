@@ -373,7 +373,6 @@ DoStream:
 		if err != nil {
 			return nil, fmt.Errorf("error in stream mode: %w", err)
 		}
-
 		if len(resp.Candidates) != 1 {
 			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
 		}
@@ -398,6 +397,9 @@ DoStream:
 		}
 	}
 	mresp := iter.MergedResponse()
+	if mresp == nil {
+		return nil, fmt.Errorf("no merged response available from iterator (try to increase max output tokens)")
+	}
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
