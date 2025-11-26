@@ -210,12 +210,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
-	// Extract reasoning effort for thinking models
+	// Extract reasoning effort for GPT-5 models only
 	// Note: OpenAI o1/o3 models have built-in reasoning and don't support reasoning_effort parameter
-	// This is kept for future models that might support it (like GPT-5)
+	// GPT-5 models support the reasoning_effort parameter to control thinking intensity
 	var reasoningEffort string
-	// Commented out for now since current o1 models don't support this parameter
-	/*
+	if isGPT5Model(effectiveModel) {
 		if opts.Metadata != nil {
 			if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
 				// Map thinking mode to reasoning effort
@@ -226,6 +225,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 					reasoningEffort = "medium"
 				case llms.ThinkingModeHigh:
 					reasoningEffort = "high"
+					// ThinkingModeNone and ThinkingModeAuto don't set the parameter
 				}
 
 				// Handle streaming for thinking
@@ -243,7 +243,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				}
 			}
 		}
-	*/
+	}
 
 	// Filter out internal metadata that shouldn't be sent to API
 	apiMetadata := make(map[string]any)
@@ -499,4 +499,10 @@ func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
 			Arguments: tc.FunctionCall.Arguments,
 		},
 	}
+}
+
+// isGPT5Model checks if a model is a GPT-5 model that supports reasoning_effort parameter.
+func isGPT5Model(model string) bool {
+	modelLower := strings.ToLower(model)
+	return strings.HasPrefix(modelLower, "gpt-5")
 }
