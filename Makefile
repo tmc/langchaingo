@@ -56,7 +56,7 @@ lint-all:
 lint-deps:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
 		echo >&2 "golangci-lint not found. Installing..."; \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest; \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.55.2; \
 		command -v golangci-lint >/dev/null 2>&1 || { \
 			echo >&2 "Failed to detect golangci-lint after installation. Please check your Go installation and PATH."; \
 			exit 1; \
