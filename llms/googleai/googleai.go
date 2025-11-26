@@ -398,6 +398,11 @@ DoStream:
 		}
 	}
 	mresp := iter.MergedResponse()
+
+	if mresp == nil {
+		return nil, fmt.Errorf("no merged response available from iterator (try to increase max output tokens)")
+	}
+
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
