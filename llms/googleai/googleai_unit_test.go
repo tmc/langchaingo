@@ -570,3 +570,161 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Contains(t, customizationsProp.Items.Required, "value")
 	})
 }
+
+// TestSchemaTypeAliases tests the Schema type aliases exported from the package
+func TestSchemaTypeAliases(t *testing.T) {
+	t.Parallel()
+
+	// Test that Schema type alias works correctly
+	t.Run("Schema type alias", func(t *testing.T) {
+		schema := &Schema{
+			Type:        TypeObject,
+			Description: "A test object",
+			Properties: map[string]*Schema{
+				"name": {
+					Type:        TypeString,
+					Description: "The name field",
+				},
+				"age": {
+					Type:        TypeInteger,
+					Description: "The age field",
+				},
+				"score": {
+					Type:        TypeNumber,
+					Description: "The score field",
+				},
+				"active": {
+					Type:        TypeBoolean,
+					Description: "The active flag",
+				},
+				"tags": {
+					Type:        TypeArray,
+					Description: "List of tags",
+					Items:       &Schema{Type: TypeString},
+				},
+			},
+			Required: []string{"name"},
+		}
+
+		// Verify the schema is correctly constructed
+		assert.Equal(t, TypeObject, schema.Type)
+		assert.Equal(t, "A test object", schema.Description)
+		assert.Len(t, schema.Properties, 5)
+		assert.Equal(t, []string{"name"}, schema.Required)
+
+		// Verify nested properties
+		assert.Equal(t, TypeString, schema.Properties["name"].Type)
+		assert.Equal(t, TypeInteger, schema.Properties["age"].Type)
+		assert.Equal(t, TypeNumber, schema.Properties["score"].Type)
+		assert.Equal(t, TypeBoolean, schema.Properties["active"].Type)
+		assert.Equal(t, TypeArray, schema.Properties["tags"].Type)
+		assert.Equal(t, TypeString, schema.Properties["tags"].Items.Type)
+	})
+
+	// Test Type constants
+	t.Run("Type constants", func(t *testing.T) {
+		// Verify type constants are correctly exported
+		assert.NotEqual(t, TypeUnspecified, TypeString)
+		assert.NotEqual(t, TypeString, TypeNumber)
+		assert.NotEqual(t, TypeNumber, TypeInteger)
+		assert.NotEqual(t, TypeInteger, TypeBoolean)
+		assert.NotEqual(t, TypeBoolean, TypeArray)
+		assert.NotEqual(t, TypeArray, TypeObject)
+	})
+}
+
+// TestWithResponseSchemaOption tests the WithResponseSchema CallOption
+func TestWithResponseSchemaOption(t *testing.T) {
+	t.Parallel()
+
+	t.Run("sets ResponseSchema correctly", func(t *testing.T) {
+		schema := &Schema{
+			Type: TypeObject,
+			Properties: map[string]*Schema{
+				"result": {Type: TypeString},
+			},
+		}
+
+		opts := &llms.CallOptions{}
+		llms.WithResponseSchema(schema)(opts)
+
+		assert.NotNil(t, opts.ResponseSchema)
+		assert.Equal(t, schema, opts.ResponseSchema)
+	})
+
+	t.Run("nil schema", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		llms.WithResponseSchema(nil)(opts)
+
+		assert.Nil(t, opts.ResponseSchema)
+	})
+
+	// Test backward compatibility - existing options should still work
+	t.Run("backward compatibility with existing options", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+
+		// Apply multiple options including ResponseSchema
+		llms.WithModel("gemini-2.0-flash")(opts)
+		llms.WithTemperature(0.7)(opts)
+		llms.WithMaxTokens(1000)(opts)
+		llms.WithJSONMode()(opts)
+		llms.WithResponseSchema(&Schema{Type: TypeObject})(opts)
+
+		// Verify all options are set correctly
+		assert.Equal(t, "gemini-2.0-flash", opts.Model)
+		assert.Equal(t, 0.7, opts.Temperature)
+		assert.Equal(t, 1000, opts.MaxTokens)
+		assert.True(t, opts.JSONMode)
+		assert.NotNil(t, opts.ResponseSchema)
+	})
+
+	// Test ResponseSchema with ResponseMIMEType compatibility
+	t.Run("compatible with application/json MIME type", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		llms.WithResponseMIMEType("application/json")(opts)
+		llms.WithResponseSchema(&Schema{Type: TypeObject})(opts)
+
+		assert.Equal(t, "application/json", opts.ResponseMIMEType)
+		assert.NotNil(t, opts.ResponseSchema)
+	})
+
+	// Test complex nested schema
+	t.Run("complex nested schema", func(t *testing.T) {
+		schema := &Schema{
+			Type:        TypeObject,
+			Description: "User profile response",
+			Properties: map[string]*Schema{
+				"user": {
+					Type: TypeObject,
+					Properties: map[string]*Schema{
+						"id":    {Type: TypeInteger},
+						"name":  {Type: TypeString},
+						"email": {Type: TypeString},
+						"roles": {
+							Type:  TypeArray,
+							Items: &Schema{Type: TypeString},
+						},
+					},
+					Required: []string{"id", "name"},
+				},
+				"metadata": {
+					Type: TypeObject,
+					Properties: map[string]*Schema{
+						"created_at": {Type: TypeString},
+						"updated_at": {Type: TypeString},
+					},
+				},
+			},
+			Required: []string{"user"},
+		}
+
+		opts := &llms.CallOptions{}
+		llms.WithResponseSchema(schema)(opts)
+
+		assert.NotNil(t, opts.ResponseSchema)
+		s := opts.ResponseSchema.(*Schema)
+		assert.Equal(t, TypeObject, s.Type)
+		assert.Len(t, s.Properties, 2)
+		assert.Contains(t, s.Required, "user")
+	})
+}

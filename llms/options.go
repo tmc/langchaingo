@@ -69,6 +69,17 @@ type CallOptions struct {
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+
+	// ResponseSchema specifies the schema for structured output.
+	// The schema format is provider-specific:
+	//   - For Google AI: use *genai.Schema from github.com/google/generative-ai-go/genai
+	//     (or use the re-exported googleai.Schema type alias)
+	//   - For other providers: check provider documentation
+	//
+	// Note: Google API requires ResponseMIMEType to be "application/json" when using
+	// ResponseSchema. If not set, it will be auto-configured. If set to a different
+	// value, an error will be returned.
+	ResponseSchema any `json:"response_schema,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.
@@ -289,5 +300,19 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
+	}
+}
+
+// WithResponseSchema will add an option to set the ResponseSchema for structured output.
+// The schema format is provider-specific and must match the provider being used:
+//   - For Google AI: use *genai.Schema from github.com/google/generative-ai-go/genai
+//     (or use the re-exported googleai.Schema type alias)
+//   - For other providers: check provider documentation
+//
+// Passing an incorrect type will result in an error from the provider.
+// When using this option, ResponseMIMEType will typically be auto-set to "application/json".
+func WithResponseSchema(schema any) CallOption {
+	return func(o *CallOptions) {
+		o.ResponseSchema = schema
 	}
 }

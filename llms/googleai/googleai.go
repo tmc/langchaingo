@@ -110,6 +110,26 @@ func (g *GoogleAI) GenerateContent(
 		model.ResponseMIMEType = ResponseMIMETypeJson
 	}
 
+	// Support for ResponseSchema (structured output)
+	// Accepts *genai.Schema for native Google AI structured output
+	// Google API requires ResponseMIMEType to be "application/json" when using ResponseSchema
+	if opts.ResponseSchema != nil {
+		schema, ok := opts.ResponseSchema.(*genai.Schema)
+		if !ok {
+			return nil, fmt.Errorf("ResponseSchema must be *genai.Schema for Google AI, got %T", opts.ResponseSchema)
+		}
+		// Validate MIME type compatibility
+		if model.ResponseMIMEType != "" && model.ResponseMIMEType != ResponseMIMETypeJson {
+			return nil, fmt.Errorf("ResponseSchema requires ResponseMIMEType to be %q, got %q",
+				ResponseMIMETypeJson, model.ResponseMIMEType)
+		}
+		model.ResponseSchema = schema
+		// Auto-set ResponseMIMEType to JSON if not already set
+		if model.ResponseMIMEType == "" {
+			model.ResponseMIMEType = ResponseMIMETypeJson
+		}
+	}
+
 	var response *llms.ContentResponse
 
 	if len(messages) == 1 {
