@@ -110,6 +110,21 @@ func (g *GoogleAI) GenerateContent(
 		model.ResponseMIMEType = ResponseMIMETypeJson
 	}
 
+	if opts.ResponseSchema != nil {
+		schema, ok := opts.ResponseSchema.(*genai.Schema)
+		if !ok {
+			return nil, fmt.Errorf("response schema must be *genai.Schema, got %T", opts.ResponseSchema)
+		}
+		if model.ResponseMIMEType != "" && model.ResponseMIMEType != ResponseMIMETypeJson {
+			return nil, fmt.Errorf("response schema requires response MIME type %q, got %q",
+				ResponseMIMETypeJson, model.ResponseMIMEType)
+		}
+		model.ResponseSchema = schema
+		if model.ResponseMIMEType == "" {
+			model.ResponseMIMEType = ResponseMIMETypeJson
+		}
+	}
+
 	var response *llms.ContentResponse
 
 	if len(messages) == 1 {

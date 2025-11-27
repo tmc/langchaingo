@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/httputil"
@@ -352,6 +353,7 @@ func TestGoogleAIWithJSONMode(t *testing.T) {
 		context.Background(),
 		content,
 		llms.WithJSONMode(),
+		llms.WithResponseSchema(&genai.Schema{Type: genai.TypeArray, Items: &genai.Schema{Type: genai.TypeString}}),
 	)
 
 	if err != nil {

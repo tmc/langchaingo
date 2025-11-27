@@ -70,6 +70,10 @@ type CallOptions struct {
 	// application/json: JSON response in the response candidates.
 	ResponseMIMEType string `json:"response_mime_type,omitempty"`
 
+	// ResponseSchema specifies a provider-specific structured output schema.
+	// Google AI accepts *genai.Schema from github.com/google/generative-ai-go/genai.
+	ResponseSchema any `json:"response_schema,omitempty"`
+
 	// WebSearchOptions configures web search behavior for models that support it.
 	// Currently supported by OpenAI models like gpt-4o-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
@@ -326,6 +330,13 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
 		o.ResponseMIMEType = responseMIMEType
+	}
+}
+
+// WithResponseSchema sets a provider-specific structured output schema.
+func WithResponseSchema(schema any) CallOption {
+	return func(o *CallOptions) {
+		o.ResponseSchema = schema
 	}
 }
 
