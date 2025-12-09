@@ -23,6 +23,7 @@ type Options struct {
 	DefaultTopK           int
 	DefaultTopP           float64
 	HarmThreshold         HarmBlockThreshold
+	APIKey                string // Store API key directly for new SDK
 
 	ClientOptions []option.ClientOption
 }
@@ -57,6 +58,7 @@ type Option func(*Options)
 // googleai clients.
 func WithAPIKey(apiKey string) Option {
 	return func(opts *Options) {
+		opts.APIKey = apiKey // Store for new SDK
 		opts.ClientOptions = append(opts.ClientOptions, option.WithAPIKey(apiKey))
 	}
 }

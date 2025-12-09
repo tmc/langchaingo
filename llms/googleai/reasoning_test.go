@@ -32,6 +32,11 @@ func TestGoogleAI_SupportsReasoning(t *testing.T) {
 			expected: true,
 		},
 		{
+			name:     "Gemini 3.0 Pro Preview supports reasoning",
+			model:    "gemini-3-pro-preview",
+			expected: true,
+		},
+		{
 			name:     "Gemini experimental with thinking supports reasoning",
 			model:    "gemini-exp-thinking-1206",
 			expected: true,

@@ -4,11 +4,13 @@ package googleai
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strings"
 
-	"github.com/google/generative-ai-go/genai"
 	"github.com/vendasta/langchaingo/callbacks"
 	"github.com/vendasta/langchaingo/llms"
+	"google.golang.org/genai"
 )
 
 // GoogleAI is a type that represents a Google AI API client.
@@ -37,7 +39,23 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		model: clientOptions.DefaultModel, // Store the default model
 	}
 
-	client, err := genai.NewClient(ctx, clientOptions.ClientOptions...)
+	// Build ClientConfig for the new SDK
+	clientConfig := &genai.ClientConfig{}
+
+	// Use API key from Options if available
+	if clientOptions.APIKey != "" {
+		clientConfig.APIKey = clientOptions.APIKey
+		clientConfig.Backend = genai.BackendGeminiAPI
+	} else if apiKey := os.Getenv("GOOGLE_API_KEY"); apiKey != "" {
+		// Fall back to environment variable
+		clientConfig.APIKey = apiKey
+		clientConfig.Backend = genai.BackendGeminiAPI
+	} else {
+		// For now, require API key for Google AI (Vertex AI handled separately)
+		return gi, fmt.Errorf("API key required for Google AI client")
+	}
+
+	client, err := genai.NewClient(ctx, clientConfig)
 	if err != nil {
 		return gi, err
 	}
@@ -49,10 +67,10 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 // Close closes the underlying genai client.
 // This should be called when the GoogleAI instance is no longer needed
 // to prevent memory leaks from the underlying gRPC connections.
+// TODO: Check if new SDK has Close method
 func (g *GoogleAI) Close() error {
-	if g.client != nil {
-		return g.client.Close()
-	}
+	// New SDK may not have Close method - check documentation
+	// For now, return nil
 	return nil
 }
 
