@@ -152,16 +152,34 @@ func buildGenerateContentConfig(opts *llms.CallOptions, clientOpts Options) *gen
 		},
 	}
 
-	// Convert tools
-	if len(opts.Tools) > 0 {
-		if tools, err := convertTools(opts.Tools); err == nil && tools != nil {
-			config.Tools = tools
-		}
-	}
-
-	// Convert tool config
+	// Convert tool config and tools
+	// When ToolChoice is "none", don't include tools or ToolConfig
+	// as the behavior should be "same as when not passing any function declarations"
 	if opts.ToolChoice != nil {
-		config.ToolConfig = convertToolConfig(opts.ToolChoice)
+		// Check if ToolChoice is "none" - if so, skip both tools and ToolConfig
+		if tc, ok := opts.ToolChoice.(string); ok && strings.ToLower(strings.TrimSpace(tc)) == "none" {
+			// Explicitly ensure Tools and ToolConfig are not set when ToolChoice is "none"
+			// This matches the API behavior: "same as when not passing any function declarations"
+			config.Tools = nil
+			config.ToolConfig = nil
+		} else {
+			// Set ToolConfig for other ToolChoice values
+			config.ToolConfig = convertToolConfig(opts.ToolChoice)
+
+			// Convert tools (only if ToolChoice is not "none")
+			if len(opts.Tools) > 0 {
+				if tools, err := convertTools(opts.Tools); err == nil && tools != nil {
+					config.Tools = tools
+				}
+			}
+		}
+	} else {
+		// No ToolChoice specified, include tools if provided
+		if len(opts.Tools) > 0 {
+			if tools, err := convertTools(opts.Tools); err == nil && tools != nil {
+				config.Tools = tools
+			}
+		}
 	}
 
 	// Support for cached content
@@ -238,28 +256,35 @@ func convertThinkingConfig(config *llms.ThinkingConfig) *genai.ThinkingConfig {
 }
 
 // convertToolConfig converts a ToolChoice to a genai.ToolConfig.
-// TODO: Update when new SDK's ToolConfig API is confirmed
 func convertToolConfig(config any) *genai.ToolConfig {
 	if config == nil {
 		return nil
 	}
 
-	// TODO: Implement tool config conversion for new SDK
-	// The new SDK's ToolConfig structure may be different
-	// For now, return a basic ToolConfig
-	toolConfig := &genai.ToolConfig{}
+	toolConfig := &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{},
+	}
 
-	// Try to set function calling mode if config provides it
+	// Handle string-based tool choice (mode only)
 	if c, ok := config.(string); ok {
 		switch strings.ToLower(c) {
-		case "any", "none", "auto":
-			// Mode will be set based on the string value
-			// TODO: Map to correct enum values when confirmed
+		case "any":
+			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAny
+		case "none":
+			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeNone
+		case "auto":
+			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
+		default:
+			// Unknown mode, default to AUTO
+			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
 		}
 	} else if c, ok := config.([]string); ok && len(c) > 0 {
-		// Allowed function names provided
-		// TODO: Set allowed function names when API is confirmed
-		_ = c
+		// Array of function names provided - use ANY mode with allowed function names
+		toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAny
+		toolConfig.FunctionCallingConfig.AllowedFunctionNames = c
+	} else {
+		// Unknown type, default to AUTO mode
+		toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
 	}
 
 	return toolConfig
@@ -477,8 +502,9 @@ func generateFromSingleMessage(
 		}
 		return response, nil
 	}
-	// TODO: Implement streaming support for new SDK
-	return nil, fmt.Errorf("streaming not yet implemented for new SDK")
+
+	// Streaming is requested - use GenerateContentStream
+	return convertAndStreamFromIterator(ctx, client, model, contents, config, opts)
 }
 
 func generateFromMessages(
@@ -521,18 +547,70 @@ func generateFromMessages(
 		}
 		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
-	// TODO: Implement streaming support for new SDK
-	return nil, fmt.Errorf("streaming not yet implemented for new SDK")
+
+	// Streaming is requested - use GenerateContentStream
+	return convertAndStreamFromIterator(ctx, client, model, contents, config, opts)
 }
 
-// convertAndStreamFromIterator is not yet implemented for the new SDK.
-// TODO: Implement streaming support using the new SDK's streaming API.
+// convertAndStreamFromIterator handles streaming responses from the new SDK.
+// It iterates over the stream, calls the StreamingFunc for each chunk, and
+// accumulates the final response.
 func convertAndStreamFromIterator(
 	ctx context.Context,
-	iter interface{}, // Placeholder - will be updated when streaming is implemented
+	client *genai.Client,
+	model string,
+	contents []*genai.Content,
+	config *genai.GenerateContentConfig,
 	opts *llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	return nil, fmt.Errorf("streaming not yet implemented for new SDK")
+	// Get the streaming iterator
+	stream := client.Models.GenerateContentStream(ctx, model, contents, config)
+
+	// Track accumulated content and final response
+	var finalResponse *genai.GenerateContentResponse
+	var finalUsageMetadata *genai.GenerateContentResponseUsageMetadata
+	var accumulatedTextLen int
+
+	// Iterate over the stream
+	for response, err := range stream {
+		if err != nil {
+			return nil, googleaierrors.MapError(err)
+		}
+		if response == nil {
+			continue
+		}
+
+		// Store the final response (last one contains usage metadata)
+		finalResponse = response
+		if response.UsageMetadata != nil {
+			finalUsageMetadata = response.UsageMetadata
+		}
+
+		// Extract text from this chunk
+		// Note: response.Text() returns the full accumulated text from all parts
+		// We need to extract only the new incremental text
+		currentFullText := response.Text()
+		currentLen := len(currentFullText)
+
+		// If this response has more text than we've seen, extract the delta
+		if currentLen > accumulatedTextLen {
+			newText := currentFullText[accumulatedTextLen:]
+			if len(newText) > 0 {
+				// Call the streaming function with the new chunk
+				if err := opts.StreamingFunc(ctx, []byte(newText)); err != nil {
+					return nil, fmt.Errorf("streaming function error: %w", err)
+				}
+				accumulatedTextLen = currentLen
+			}
+		}
+	}
+
+	// Convert the final response to llms.ContentResponse
+	if finalResponse == nil || len(finalResponse.Candidates) == 0 {
+		return nil, ErrNoContentInResponse
+	}
+
+	return convertCandidates(finalResponse.Candidates, finalUsageMetadata)
 }
 
 // convertSchemaRecursive recursively converts a schema map to a genai.Schema

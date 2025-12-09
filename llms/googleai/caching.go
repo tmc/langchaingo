@@ -3,7 +3,6 @@ package googleai
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/vendasta/langchaingo/llms"
@@ -56,7 +55,7 @@ func (ch *CachingHelper) CreateCachedContent(
 ) (*genai.CachedContent, error) {
 	// Convert langchain messages to genai content
 	contents := make([]*genai.Content, 0, len(messages))
-	var _ *genai.Content // systemInstruction - not used yet in new SDK
+	var systemInstruction *genai.Content
 
 	for _, msg := range messages {
 		parts := make([]*genai.Part, 0, len(msg.Parts))
@@ -73,49 +72,49 @@ func (ch *CachingHelper) CreateCachedContent(
 			}
 		}
 
-		var role string
+		content := &genai.Content{
+			Parts: parts,
+		}
+
 		switch msg.Role {
 		case llms.ChatMessageTypeSystem:
-			role = "system"
-			_ = &genai.Content{
-				Parts: parts,
-				Role:  role,
-			} // systemInstruction - not used yet in new SDK
+			content.Role = "system"
+			systemInstruction = content
 		case llms.ChatMessageTypeHuman:
-			role = "user"
-			contents = append(contents, &genai.Content{
-				Parts: parts,
-				Role:  role,
-			})
+			content.Role = "user"
+			contents = append(contents, content)
 		case llms.ChatMessageTypeAI:
-			role = "model"
-			contents = append(contents, &genai.Content{
-				Parts: parts,
-				Role:  role,
-			})
+			content.Role = "model"
+			contents = append(contents, content)
 		}
 	}
 
 	// Create the cached content using the new SDK API
-	// TODO: Update when new SDK's caching API is available
-	// For now, return an error indicating caching needs to be implemented
-	return nil, fmt.Errorf("caching API not yet implemented for new SDK - please use the old SDK for caching features")
+	config := &genai.CreateCachedContentConfig{
+		TTL:               ttl,
+		Contents:          contents,
+		SystemInstruction: systemInstruction,
+	}
+
+	return ch.client.Caches.Create(ctx, modelName, config)
 }
 
 // GetCachedContent retrieves existing cached content by name.
-// TODO: Update when new SDK's caching API is available
 func (ch *CachingHelper) GetCachedContent(ctx context.Context, name string) (*genai.CachedContent, error) {
-	return nil, fmt.Errorf("caching API not yet implemented for new SDK")
+	return ch.client.Caches.Get(ctx, name, &genai.GetCachedContentConfig{})
 }
 
 // DeleteCachedContent removes cached content.
-// TODO: Update when new SDK's caching API is available
 func (ch *CachingHelper) DeleteCachedContent(ctx context.Context, name string) error {
-	return fmt.Errorf("caching API not yet implemented for new SDK")
+	_, err := ch.client.Caches.Delete(ctx, name, &genai.DeleteCachedContentConfig{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ListCachedContents returns an iterator for all cached content.
-// TODO: Update when new SDK's caching API is available
+// TODO: Implement if used?
 func (ch *CachingHelper) ListCachedContents(ctx context.Context) interface{} {
 	return nil
 }

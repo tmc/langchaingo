@@ -65,12 +65,11 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 }
 
 // Close closes the underlying genai client.
-// This should be called when the GoogleAI instance is no longer needed
-// to prevent memory leaks from the underlying gRPC connections.
-// TODO: Check if new SDK has Close method
+// The new SDK's Client doesn't expose a Close method as it uses HTTP clients
+// that are managed internally and don't require explicit cleanup.
+// This method is provided for API compatibility and to match the interface
+// expected by callers who may be used to closing clients.
 func (g *GoogleAI) Close() error {
-	// New SDK may not have Close method - check documentation
-	// For now, return nil
 	return nil
 }
 
