@@ -681,7 +681,7 @@ func updateToolCalls(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
 	}
 	for _, t := range delta {
 		// if we have arguments append to the last Tool call
-		if t.Type == `` && t.Function.Arguments != `` {
+		if t.Function.Name == `` && t.Function.Arguments != `` {
 			lindex := len(tools) - 1
 			if lindex < 0 {
 				continue
