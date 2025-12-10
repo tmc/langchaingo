@@ -1,6 +1,6 @@
 // This file contains integration tests for the MongoDB Atlas vector store implementation.
-// These tests demonstrate best practices for:
 // - Using testcontainers for MongoDB Atlas Local
+// These tests demonstrate best practices for:
 // - Creating and managing vector search indexes
 // - Handling eventual consistency in distributed systems
 // - Testing vector similarity search functionality
@@ -322,30 +322,30 @@ func TestNew(t *testing.T) {
 			opts:                nil,
 			wantIndex:           "vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name:                "no options",
 			opts:                []Option{},
 			wantIndex:           "vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name:                "mixed custom options",
 			opts:                []Option{WithIndex("custom_vector_index")},
 			wantIndex:           "custom_vector_index",
 			wantPageContentName: "page_content",
-			wantPath:            "plot_embedding",
+			wantPath:            "embeddings",
 		},
 		{
 			name: "all custom options",
 			opts: []Option{
 				WithIndex("custom_vector_index"),
-				WithPath("custom_plot_embedding"),
+				WithPath("custom_embeddings"),
 			},
 			wantIndex: "custom_vector_index",
-			wantPath:  "custom_plot_embedding",
+			wantPath:  "custom_embeddings",
 		},
 	}
 
