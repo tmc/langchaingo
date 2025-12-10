@@ -1,0 +1,408 @@
+package bedrockknowledgebases
+
+import (
+	"context"
+	"fmt"
+	"sync"
+	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockagent/types"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime"
+	runtimetypes "github.com/aws/aws-sdk-go-v2/service/bedrockagentruntime/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/chains"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/vectorstores"
+)
+
+type testModel struct{}
+
+var _ llms.Model = testModel{}
+
+func (testModel) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) {
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{Content: "orange"},
+		},
+	}, nil
+}
+
+func (testModel) Call(_ context.Context, _ string, _ ...llms.CallOption) (string, error) {
+	return "orange", nil
+}
+
+type testBedrockAgent struct {
+	calls int
+	mu    sync.Mutex
+}
+
+var _ bedrockAgentAPI = &testBedrockAgent{}
+
+func (t *testBedrockAgent) GetKnowledgeBase(_ context.Context, _ *bedrockagent.GetKnowledgeBaseInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetKnowledgeBaseOutput, error) {
+	t.calls++
+	return &bedrockagent.GetKnowledgeBaseOutput{
+		KnowledgeBase: &types.KnowledgeBase{
+			KnowledgeBaseId: aws.String("testKbId"),
+		},
+	}, nil
+}
+
+func (t *testBedrockAgent) ListDataSources(_ context.Context, params *bedrockagent.ListDataSourcesInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.ListDataSourcesOutput, error) {
+	t.calls++
+	switch aws.ToString(params.KnowledgeBaseId) {
+	case "testKbWithoutDatasources":
+		return &bedrockagent.ListDataSourcesOutput{}, nil
+	case "testKbWithOneS3Datasource":
+		return &bedrockagent.ListDataSourcesOutput{
+			DataSourceSummaries: []types.DataSourceSummary{
+				{
+					DataSourceId: aws.String("testS3DatasourceID"),
+				},
+			},
+		}, nil
+	case "testKbWithTwoS3Datasource":
+		return &bedrockagent.ListDataSourcesOutput{
+			DataSourceSummaries: []types.DataSourceSummary{
+				{
+					DataSourceId: aws.String("testS3DatasourceID"),
+				},
+				{
+					DataSourceId: aws.String("testS3DatasourceID"),
+				},
+			},
+		}, nil
+	case "testKbWithOneNotS3Datasource":
+		return &bedrockagent.ListDataSourcesOutput{
+			DataSourceSummaries: []types.DataSourceSummary{
+				{
+					DataSourceId: aws.String("testNotS3DatasourceID"),
+				},
+			},
+		}, nil
+	case "testKbWithTwoMixedDatasources":
+		return &bedrockagent.ListDataSourcesOutput{
+			DataSourceSummaries: []types.DataSourceSummary{
+				{
+					DataSourceId: aws.String("testS3DatasourceID"),
+				},
+				{
+					DataSourceId: aws.String("testNotS3DatasourceID"),
+				},
+			},
+		}, nil
+	default:
+		return nil, fmt.Errorf("unknown knowledge base id: %s", aws.ToString(params.KnowledgeBaseId))
+	}
+}
+
+func (t *testBedrockAgent) GetDataSource(_ context.Context, params *bedrockagent.GetDataSourceInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetDataSourceOutput, error) {
+	t.mu.Lock()
+	t.calls++
+	t.mu.Unlock()
+	if aws.ToString(params.DataSourceId) == "testS3DatasourceID" {
+		return &bedrockagent.GetDataSourceOutput{
+			DataSource: &types.DataSource{
+				DataSourceId: aws.String("testS3DatasourceID"),
+				DataSourceConfiguration: &types.DataSourceConfiguration{
+					Type: types.DataSourceTypeS3,
+					S3Configuration: &types.S3DataSourceConfiguration{
+						BucketArn: aws.String("arn:aws:s3:::testBucket"),
+					},
+				},
+			},
+		}, nil
+	}
+	return &bedrockagent.GetDataSourceOutput{
+		DataSource: &types.DataSource{
+			DataSourceConfiguration: &types.DataSourceConfiguration{},
+		},
+	}, nil
+}
+
+func (t *testBedrockAgent) IngestKnowledgeBaseDocuments(_ context.Context, _ *bedrockagent.IngestKnowledgeBaseDocumentsInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.IngestKnowledgeBaseDocumentsOutput, error) {
+	t.calls++
+	return &bedrockagent.IngestKnowledgeBaseDocumentsOutput{}, nil
+}
+
+func (t *testBedrockAgent) StartIngestionJob(_ context.Context, _ *bedrockagent.StartIngestionJobInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.StartIngestionJobOutput, error) {
+	t.calls++
+	return &bedrockagent.StartIngestionJobOutput{
+		IngestionJob: &types.IngestionJob{
+			IngestionJobId: aws.String("testIngestionJobId"),
+		},
+	}, nil
+}
+
+func (t *testBedrockAgent) GetIngestionJob(_ context.Context, _ *bedrockagent.GetIngestionJobInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.GetIngestionJobOutput, error) {
+	t.calls++
+	return &bedrockagent.GetIngestionJobOutput{
+		IngestionJob: &types.IngestionJob{
+			Status: types.IngestionJobStatusComplete,
+		},
+	}, nil
+}
+
+type testBedrockAgentRuntime struct{ calls int }
+
+var _ bedrockAgentRuntimeAPI = &testBedrockAgentRuntime{}
+
+func (t *testBedrockAgentRuntime) Retrieve(_ context.Context, _ *bedrockagentruntime.RetrieveInput, _ ...func(*bedrockagentruntime.Options)) (*bedrockagentruntime.RetrieveOutput, error) {
+	t.calls++
+	return &bedrockagentruntime.RetrieveOutput{
+		RetrievalResults: []runtimetypes.KnowledgeBaseRetrievalResult{
+			{
+				Content: &runtimetypes.RetrievalResultContent{
+					Text: aws.String("The color of the house is blue."),
+				},
+				Score: aws.Float64(0.9),
+			},
+			{
+				Content: &runtimetypes.RetrievalResultContent{
+					Text: aws.String("The color of the car is red."),
+				},
+				Score: aws.Float64(0.8),
+			},
+			{
+				Content: &runtimetypes.RetrievalResultContent{
+					Text: aws.String("The color of the desk is orange."),
+				},
+				Score: aws.Float64(0.7),
+			},
+		},
+	}, nil
+}
+
+type testS3Client struct{ calls int }
+
+var _ s3API = &testS3Client{}
+
+func (t *testS3Client) PutObject(_ context.Context, _ *s3.PutObjectInput, _ ...func(*s3.Options)) (*s3.PutObjectOutput, error) {
+	t.calls++
+	return &s3.PutObjectOutput{}, nil
+}
+
+func (t *testS3Client) DeleteObject(_ context.Context, _ *s3.DeleteObjectInput, _ ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+	t.calls++
+	return &s3.DeleteObjectOutput{}, nil
+}
+
+func TestKnowledgeBaseAddDocuments(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.NoError(t, err)
+	require.Equal(t, 6, testBedrockAgent.calls, "expected 6 calls to testBedrockAgent")
+	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
+	require.Len(t, ids, 1, "expected 1 id")
+}
+
+func TestKnowledgeBaseAddDocumentsWithoutDs(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithoutDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.Error(t, err, "expected error because knowledge base has no datasources")
+}
+
+func TestKnowledgeBaseAddDocumentsWithWrongDsId(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("wrongDatasourceID"))
+	require.Error(t, err, "expected error because wrongDatasourceID is not valid")
+}
+
+func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithTwoS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("testS3DatasourceID"))
+	require.NoError(t, err)
+	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
+	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
+	require.Len(t, ids, 1, "expected 1 id")
+}
+
+func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithTwoMixedDatasources", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.NoError(t, err)
+	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
+	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
+	require.Len(t, ids, 1, "expected 1 id")
+}
+
+func TestKnowledgeBaseAddDocumentsWithMultipleS3DsAndWithoutDsID(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	kb := newFromClients("testKbWithTwoS3Datasource", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
+
+	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.Error(t, err, "expected error because vectorstores.WithNameSpace is required")
+}
+
+func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgent := &testBedrockAgent{}
+	s3Client := &testS3Client{}
+	kb := newFromClients("testKbWithOneS3Datasource", testBedrockAgent, &testBedrockAgentRuntime{}, s3Client)
+
+	ids, err := kb.AddNamedDocuments(
+		ctx,
+		[]NamedDocument{
+			{
+				Document: schema.Document{PageContent: "Mock"},
+				Name:     "Mock",
+			},
+		},
+	)
+	require.NoError(t, err)
+	require.Equal(t, 6, testBedrockAgent.calls, "expected 6 calls to testBedrockAgent")
+	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
+	require.Len(t, ids, 1, "expected 1 id")
+	require.Equal(t, "Mock", ids[0], "expected id to be 'Mock'")
+}
+
+func TestKnowledgeBaseSimilaritySearch(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
+
+	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5)
+	require.NoError(t, err)
+	require.Len(t, docs, 3, "expected 3 documents")
+	require.Equal(t, "The color of the house is blue.", docs[0].PageContent, "expected content to be 'The color of the house is blue.'")
+	require.Equal(t, "The color of the car is red.", docs[1].PageContent, "expected content to be 'The color of the car is red.'")
+	require.Equal(t, "The color of the desk is orange.", docs[2].PageContent, "expected content to be 'The color of the desk is orange.'")
+}
+
+func TestKnowledgeBaseSimilaritySearchWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
+
+	docs, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithScoreThreshold(0.8))
+	require.NoError(t, err)
+	require.Len(t, docs, 2, "expected 2 documents")
+	require.Equal(t, "The color of the house is blue.", docs[0].PageContent, "expected content to be 'The color of the house is blue.'")
+	require.Equal(t, "The color of the car is red.", docs[1].PageContent, "expected content to be 'The color of the car is red.'")
+}
+
+func TestKnowledgeBaseSimilaritySearchWithFilter(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
+
+	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters(EqualsFilter{Key: "color", Value: "orange"}))
+	require.NoError(t, err)
+}
+
+func TestKnowledgeBaseSimilaritySearchWrongWithFilter(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	kb := newFromClients("testKbId", &testBedrockAgent{}, &testBedrockAgentRuntime{}, &testS3Client{})
+
+	_, err := kb.SimilaritySearch(ctx, "What color is the desk?", 5, vectorstores.WithFilters("wrongFilter"))
+	require.Error(t, err, "expected error because of wrong filter format")
+}
+
+type trackSearchResults struct {
+	*KnowledgeBase
+	track []schema.Document
+}
+
+var _ vectorstores.VectorStore = &trackSearchResults{}
+
+func newTrackSearchResults(kb *KnowledgeBase) *trackSearchResults {
+	return &trackSearchResults{kb, nil}
+}
+
+func (t *trackSearchResults) SimilaritySearch(ctx context.Context, query string, k int, options ...vectorstores.Option) ([]schema.Document, error) {
+	res, err := t.KnowledgeBase.SimilaritySearch(ctx, query, k, options...)
+	if err != nil {
+		return nil, err
+	}
+	t.track = res
+	return res, nil
+}
+
+func TestKnowledgeBaseAsRetriever(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
+	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
+
+	result, err := chains.Run(
+		ctx,
+		chains.NewRetrievalQAFromLLM(
+			testModel{},
+			vectorstores.ToRetriever(kb, 1),
+		),
+		"What color is the desk?",
+	)
+	require.NoError(t, err)
+	require.Equal(t, "orange", result, "expected result to be orange")
+	require.Equal(t, 1, testBedrockAgentRuntime.calls, "expected testBedrockAgentRuntime to be called once")
+	require.Len(t, kb.track, 3, "expected 3 documents")
+	require.Equal(t, "The color of the house is blue.", kb.track[0].PageContent, "expected content to be 'The color of the house is blue.'")
+	require.Equal(t, "The color of the car is red.", kb.track[1].PageContent, "expected content to be 'The color of the car is red.'")
+	require.Equal(t, "The color of the desk is orange.", kb.track[2].PageContent, "expected content to be 'The color of the desk is orange.'")
+}
+
+func TestKnowledgeBaseAsRetrieverWithScoreThreshold(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	testBedrockAgentRuntime := &testBedrockAgentRuntime{}
+	kb := newTrackSearchResults(newFromClients("testKbId", &testBedrockAgent{}, testBedrockAgentRuntime, &testS3Client{}))
+
+	result, err := chains.Run(
+		ctx,
+		chains.NewRetrievalQAFromLLM(
+			testModel{},
+			vectorstores.ToRetriever(kb, 1, vectorstores.WithScoreThreshold(0.8)),
+		),
+		"What color is the desk?",
+	)
+	require.NoError(t, err)
+	require.Equal(t, "orange", result, "expected result to be orange")
+	require.Equal(t, 1, testBedrockAgentRuntime.calls, "expected testBedrockAgentRuntime to be called once")
+	require.Len(t, kb.track, 2, "expected 2 documents")
+	require.Equal(t, "The color of the house is blue.", kb.track[0].PageContent, "expected content to be 'The color of the house is blue.'")
+	require.Equal(t, "The color of the car is red.", kb.track[1].PageContent, "expected content to be 'The color of the car is red.'")
+}

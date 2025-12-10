@@ -22,14 +22,44 @@ type Client struct {
 type Message struct {
 	Role    llms.ChatMessageType
 	Content string
-	// Type may be "text" or "image"
+	// Type may be "text", "image", "tool_call", or "tool_result"
 	Type string
 	// MimeType is the MIME type
 	MimeType string
+	// Tool call fields
+	ToolCallID string `json:"tool_call_id,omitempty"`
+	ToolName   string `json:"tool_name,omitempty"`
+	ToolArgs   string `json:"tool_args,omitempty"`
+	// Tool result fields
+	ToolUseID string `json:"tool_use_id,omitempty"`
 }
 
 func getProvider(modelID string) string {
-	return strings.Split(modelID, ".")[0]
+	// Check for Nova models (including inference profiles like us.amazon.nova-*)
+	if strings.Contains(modelID, ".nova-") || strings.Contains(modelID, "amazon.nova-") {
+		return "nova"
+	}
+	parts := strings.Split(modelID, ".")
+	// For backward compatibility with the original provider detection
+	switch {
+	case strings.Contains(modelID, "ai21"):
+		return "ai21"
+	case strings.Contains(modelID, "amazon"):
+		return "amazon"
+	case strings.Contains(modelID, "anthropic"):
+		return "anthropic"
+	case strings.Contains(modelID, "cohere"):
+		return "cohere"
+	case strings.Contains(modelID, "meta"):
+		return "meta"
+	}
+
+	// Default to using the first part of the model ID
+	if len(parts) > 0 {
+		return parts[0]
+	}
+
+	return ""
 }
 
 // NewClient creates a new Bedrock client.
@@ -42,16 +72,21 @@ func NewClient(client *bedrockruntime.Client) *Client {
 // CreateCompletion creates a new completion response from the provider
 // after sending the messages to the provider.
 func (c *Client) CreateCompletion(ctx context.Context,
+	provider string,
 	modelID string,
 	messages []Message,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	provider := getProvider(modelID)
+	if provider == "" {
+		provider = getProvider(modelID)
+	}
 	switch provider {
 	case "ai21":
 		return createAi21Completion(ctx, c.client, modelID, messages, options)
 	case "amazon":
 		return createAmazonCompletion(ctx, c.client, modelID, messages, options)
+	case "nova":
+		return createNovaCompletion(ctx, c.client, modelID, messages, options)
 	case "anthropic":
 		return createAnthropicCompletion(ctx, c.client, modelID, messages, options)
 	case "cohere":

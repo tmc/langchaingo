@@ -1,68 +1,44 @@
+version: "2"
 linters:
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    - import
-    - metalinter
-    - module
-    - performance
-    - sql
-    - style
-    - test
-    - unused
+  default: none
   enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
     - forbidigo
-  disable:
-    - gci # We don't use gci.
-    - godox # We allow TODO lines.
-    - tagliatelle # As we're dealing with third parties we must accept snake case.
-    - wsl # We don't agree with wsl's style rules
-    - exhaustruct
-    - lll
-    - varnamelen
-    - nlreturn
-    - gomnd
-    - err113
-    - wrapcheck # TODO: we should probably enable this one (at least for new code).
-    - testpackage
-    - nolintlint # see https://github.com/golangci/golangci-lint/issues/3228.
-    - depguard # disabling temporarily
-    - ireturn # disabling temporarily
-    - perfsprint
-    - musttag
-    - tagalign # Impractical for schema-defined output parser, which relies heavily on struct tagging.
-    - mnd
-    - canonicalheader
-    - intrange
-    - testifylint
-
-linters-settings:
-  cyclop:
-    max-complexity: 12
-  funlen:
-    lines: 90
-  depguard:
-    list-type: denylist
-    packages:
-      - github.com/samber/lo # Use exp packages or internal utilities instead.
-    additional-guards:
-      - list-type: denylist
-        include-go-root: false
-        packages:
-          - github.com/stretchr/testify
-        # Specify rules by which the linter ignores certain files for consideration.
-        ignore-file-rules:
-          - "**/*_test.go"
-          - "**/mock/**/*.go"
-  forbidigo:
-    forbid:
-      - 'import "[^"]+/(util|common|helpers)"'
-  gosec:
-    excludes:
-    - G115 # https://github.com/securego/gosec/issues/1212
-run:
-  exclude-dirs:
-    - 'exp'
+    - funlen
+    - gosec
+    - misspell
+  settings:
+    cyclop:
+      max-complexity: 12
+    forbidigo:
+      forbid:
+        - pattern: import "[^"]+/(util|common|helpers)"
+    funlen:
+      lines: 90
+    gosec:
+      excludes:
+        - G115
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - internal
+      - vectorstores/bedrockknowledgebases
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

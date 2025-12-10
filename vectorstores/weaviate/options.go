@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/tmc/langchaingo/embeddings"
-	"github.com/weaviate/weaviate-go-client/v4/weaviate/auth"
-	"golang.org/x/exp/slices"
+	"github.com/weaviate/weaviate-go-client/v5/weaviate/auth"
 )
 
 const (
@@ -91,7 +91,16 @@ func WithAuthConfig(authConfig auth.Config) Option {
 	}
 }
 
+// WithHTTPClient is an option for setting the HTTP client of the weaviate server.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(p *Store) {
+		p.connectionClient = httpClient
+	}
+}
+
 // WithConnectionClient is an option for setting the connection client of the weaviate server.
+//
+// Deprecated: Use WithHTTPClient instead.
 func WithConnectionClient(connectionClient *http.Client) Option {
 	return func(p *Store) {
 		p.connectionClient = connectionClient

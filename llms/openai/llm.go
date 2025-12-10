@@ -2,9 +2,9 @@ package openai
 
 import (
 	"errors"
-	"net/http"
 	"os"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
@@ -25,13 +25,12 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 		baseURL:      getEnvs(baseURLEnvVarName, baseAPIBaseEnvVarName),
 		organization: os.Getenv(organizationEnvVarName),
 		apiType:      APIType(openaiclient.APITypeOpenAI),
-		httpClient:   http.DefaultClient,
+		httpClient:   httputil.DefaultClient,
 	}
 
 	for _, opt := range opts {
 		opt(options)
 	}
-
 	// set of options needed for Azure client
 	if openaiclient.IsAzure(openaiclient.APIType(options.apiType)) && options.apiVersion == "" {
 		options.apiVersion = DefaultAPIVersion
@@ -47,9 +46,13 @@ func newClient(opts ...Option) (*options, *openaiclient.Client, error) {
 		return options, nil, ErrMissingToken
 	}
 
+	var clientOptions []openaiclient.Option
+	if options.embeddingDimensions != 0 {
+		clientOptions = append(clientOptions, openaiclient.WithEmbeddingDimensions(options.embeddingDimensions))
+	}
 	cli, err := openaiclient.New(options.token, options.model, options.baseURL, options.organization,
 		openaiclient.APIType(options.apiType), options.apiVersion, options.httpClient, options.embeddingModel,
-		options.responseFormat,
+		options.responseFormat, clientOptions...,
 	)
 	return options, cli, err
 }

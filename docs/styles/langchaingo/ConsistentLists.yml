@@ -1,0 +1,9 @@
+extends: consistency
+message: "Inconsistent list punctuation"
+level: warning
+scope: list
+either:
+  ':': ':'
+  '.': '.'
+  '': ''
+

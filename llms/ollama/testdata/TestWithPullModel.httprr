@@ -1,0 +1,56 @@
+httprr trace v1
+220 987
+POST http://localhost:11434/api/pull HTTP/1.1
+Host: localhost:11434
+User-Agent: langchaingo-httprr
+Content-Length: 35
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gemma3:1b","stream":true}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Type: application/x-ndjson
+Date: Wed, 20 Aug 2025 13:47:57 GMT
+
+357
+{"status":"pulling manifest"}
+{"status":"pulling 7cd4618c1faf","digest":"sha256:7cd4618c1faf8b7233c6c906dac1694b6a47684b37b8895d470ac688520b9c01","total":815310432,"completed":815310432}
+{"status":"pulling e0a42594d802","digest":"sha256:e0a42594d802e5d31cdc786deb4823edb8adff66094d49de8fffe976d753e348","total":358,"completed":358}
+{"status":"pulling dd084c7d92a3","digest":"sha256:dd084c7d92a3c1c14cc09ae77153b903fd2024b64a100a0cc8ec9316063d2dbc","total":8432,"completed":8432}
+{"status":"pulling 3116c5225075","digest":"sha256:3116c52250752e00dd06b16382e952bd33c34fd79fc4fe3a5d2c77cf7de1b14b","total":77,"completed":77}
+{"status":"pulling 120007c81bf8","digest":"sha256:120007c81bf8b4eb54e896a4a3e5ff9949f124b0ea42295277c8523f7fa9c7f6","total":492,"completed":492}
+{"status":"verifying sha256 digest"}
+{"status":"writing manifest"}
+{"status":"success"}
+
+0
+
+298 1807
+POST http://localhost:11434/api/chat HTTP/1.1
+Host: localhost:11434
+User-Agent: langchaingo-httprr
+Content-Length: 112
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gemma3:1b","messages":[{"role":"user","content":"Say hello"}],"format":"","options":{"temperature":0}}HTTP/1.1 200 OK
+Transfer-Encoding: chunked
+Content-Type: application/x-ndjson
+Date: Wed, 20 Aug 2025 13:48:02 GMT
+
+68b
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.294374Z","message":{"role":"assistant","content":"Hello"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.299526Z","message":{"role":"assistant","content":" there"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.304555Z","message":{"role":"assistant","content":"!"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.309634Z","message":{"role":"assistant","content":" How"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.314583Z","message":{"role":"assistant","content":" can"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.319563Z","message":{"role":"assistant","content":" I"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.324811Z","message":{"role":"assistant","content":" help"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.330011Z","message":{"role":"assistant","content":" you"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.336538Z","message":{"role":"assistant","content":" today"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.341717Z","message":{"role":"assistant","content":"?"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.347147Z","message":{"role":"assistant","content":" 😊"},"done":false}
+{"model":"gemma3:1b","created_at":"2025-08-20T13:48:02.352639Z","message":{"role":"assistant","content":""},"done_reason":"stop","done":true,"total_duration":142639084,"load_duration":44742834,"prompt_eval_count":11,"prompt_eval_duration":38787583,"eval_count":12,"eval_duration":58775042}
+
+0
+

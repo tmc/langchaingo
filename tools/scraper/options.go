@@ -101,3 +101,15 @@ func WithBlacklist(blacklist []string) Options {
 		o.Blacklist = append(o.Blacklist, blacklist...)
 	}
 }
+
+// WithMaxPages sets the maximum number of pages to scrape.
+//
+// Default value: 0 (no limit)
+//
+// maxPages: the maximum number of pages to scrape. Set to 0 for no limit.
+// Returns: an Options function.
+func WithMaxPages(maxPages int) Options {
+	return func(o *Scraper) {
+		o.MaxPages = maxPages
+	}
+}

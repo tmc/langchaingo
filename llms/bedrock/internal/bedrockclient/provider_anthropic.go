@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -32,12 +33,19 @@ type anthropicBinGenerationInputSource struct {
 // anthropicTextGenerationInputContent is a single message in the input.
 type anthropicTextGenerationInputContent struct {
 	// The type of the content. Required.
-	// One of: "text", "image"
+	// One of: "text", "image", "tool_result", "tool_use"
 	Type string `json:"type"`
 	// The source of the content. Required if type is "image"
 	Source *anthropicBinGenerationInputSource `json:"source,omitempty"`
 	// The text content. Required if type is "text"
 	Text string `json:"text,omitempty"`
+	// Tool result fields
+	ToolUseID string `json:"tool_use_id,omitempty"`
+	Content   string `json:"content,omitempty"`
+	// Tool use fields (for tool calls from AI)
+	ID    string      `json:"id,omitempty"`
+	Name  string      `json:"name,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 }
 
 type anthropicTextGenerationInputMessage struct {
@@ -69,6 +77,10 @@ type anthropicTextGenerationInput struct {
 	TopK int `json:"top_k,omitempty"`
 	// Sequences that will cause the model to stop generating tokens. Optional
 	StopSequences []string `json:"stop_sequences,omitempty"`
+	// Tools available to the model. Optional
+	Tools []BedrockTool `json:"tools,omitempty"`
+	// Tool choice configuration. Optional
+	ToolChoice *BedrockToolChoice `json:"tool_choice,omitempty"`
 }
 
 // anthropicTextGenerationOutput is the generated output.
@@ -80,13 +92,10 @@ type anthropicTextGenerationOutput struct {
 	// This will always be "assistant".
 	Role string `json:"role"`
 	// This is an array of content blocks, each of which has a type that determines its shape.
-	// Currently, the only type in responses is "text".
-	Content []struct {
-		Type string `json:"type"`
-		Text string `json:"text"`
-	} `json:"content"`
+	// Can be "text" or "tool_use"
+	Content []anthropicContentBlock `json:"content"`
 	// The reason for the completion of the generation.
-	// One of: ["end_turn", "max_tokens", "stop_sequence"]
+	// One of: ["end_turn", "max_tokens", "stop_sequence", "tool_use"]
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
@@ -94,6 +103,16 @@ type anthropicTextGenerationOutput struct {
 		InputTokens  int `json:"input_tokens"`
 		OutputTokens int `json:"output_tokens"`
 	} `json:"usage"`
+}
+
+// anthropicContentBlock represents a content block in Anthropic response
+type anthropicContentBlock struct {
+	Type string `json:"type"` // "text" or "tool_use"
+	Text string `json:"text,omitempty"`
+	// Tool use fields
+	ID    string      `json:"id,omitempty"`
+	Name  string      `json:"name,omitempty"`
+	Input interface{} `json:"input,omitempty"`
 }
 
 // Finish reason for the completion of the generation.
@@ -117,8 +136,10 @@ const (
 
 // Type attribute for the anthropic message.
 const (
-	AnthropicMessageTypeText  = "text"
-	AnthropicMessageTypeImage = "image"
+	AnthropicMessageTypeText       = "text"
+	AnthropicMessageTypeImage      = "image"
+	AnthropicMessageTypeToolUse    = "tool_use"
+	AnthropicMessageTypeToolResult = "tool_result"
 )
 
 func createAnthropicCompletion(ctx context.Context,
@@ -141,6 +162,24 @@ func createAnthropicCompletion(ctx context.Context,
 		TopP:             options.TopP,
 		TopK:             options.TopK,
 		StopSequences:    options.StopWords,
+	}
+
+	// Add tools if provided
+	if len(options.Tools) > 0 {
+		bedrockTools, err := convertToolsToBedrockTools(options.Tools)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert tools: %w", err)
+		}
+		input.Tools = bedrockTools
+
+		// Add tool choice if provided
+		if options.ToolChoice != nil {
+			toolChoice, err := convertToolChoiceToBedrockToolChoice(options.ToolChoice)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert tool choice: %w", err)
+			}
+			input.ToolChoice = toolChoice
+		}
 	}
 
 	body, err := json.Marshal(input)
@@ -177,22 +216,50 @@ func createAnthropicCompletion(ctx context.Context,
 
 	if len(output.Content) == 0 {
 		return nil, errors.New("no results")
-	} else if stopReason := output.StopReason; stopReason != AnthropicCompletionReasonEndTurn && stopReason != AnthropicCompletionReasonStopSequence {
+	} else if stopReason := output.StopReason; stopReason != AnthropicCompletionReasonEndTurn && stopReason != AnthropicCompletionReasonStopSequence && stopReason != "tool_use" {
 		return nil, errors.New("completed due to " + stopReason + ". Maybe try increasing max tokens")
 	}
-	Contentchoices := make([]*llms.ContentChoice, len(output.Content))
-	for i, c := range output.Content {
-		Contentchoices[i] = &llms.ContentChoice{
-			Content:    c.Text,
-			StopReason: output.StopReason,
-			GenerationInfo: map[string]interface{}{
-				"input_tokens":  output.Usage.InputTokens,
-				"output_tokens": output.Usage.OutputTokens,
-			},
+
+	// Process content blocks and build a single ContentChoice
+	choice := &llms.ContentChoice{
+		StopReason: output.StopReason,
+		GenerationInfo: map[string]interface{}{
+			"input_tokens":  output.Usage.InputTokens,
+			"output_tokens": output.Usage.OutputTokens,
+		},
+	}
+
+	var textContent string
+	var toolCalls []llms.ToolCall
+
+	for _, block := range output.Content {
+		switch block.Type {
+		case "text":
+			textContent += block.Text
+		case "tool_use":
+			toolCall, err := convertBedrockToolCallToLLMToolCall(BedrockToolCall{
+				Type:  block.Type,
+				ID:    block.ID,
+				Name:  block.Name,
+				Input: block.Input,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert tool call: %w", err)
+			}
+			toolCalls = append(toolCalls, toolCall)
 		}
 	}
+
+	choice.Content = textContent
+	choice.ToolCalls = toolCalls
+
+	// Set legacy FuncCall field for backward compatibility
+	if len(toolCalls) > 0 {
+		choice.FuncCall = toolCalls[0].FunctionCall
+	}
+
 	return &llms.ContentResponse{
-		Choices: Contentchoices,
+		Choices: []*llms.ContentChoice{choice},
 	}, nil
 }
 
@@ -342,7 +409,7 @@ func getAnthropicRole(role llms.ChatMessageType) (string, error) {
 	case llms.ChatMessageTypeHuman:
 		return AnthropicRoleUser, nil
 	case llms.ChatMessageTypeFunction, llms.ChatMessageTypeTool:
-		fallthrough
+		return AnthropicRoleUser, nil // Tool results are sent as user messages
 	default:
 		return "", errors.New("role not supported")
 	}
@@ -350,12 +417,13 @@ func getAnthropicRole(role llms.ChatMessageType) (string, error) {
 
 func getAnthropicInputContent(message Message) anthropicTextGenerationInputContent {
 	var c anthropicTextGenerationInputContent
-	if message.Type == AnthropicMessageTypeText {
+	switch message.Type {
+	case AnthropicMessageTypeText:
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
 			Text: message.Content,
 		}
-	} else if message.Type == AnthropicMessageTypeImage {
+	case AnthropicMessageTypeImage:
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
 			Source: &anthropicBinGenerationInputSource{
@@ -363,6 +431,35 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 				MediaType: message.MimeType,
 				Data:      base64.StdEncoding.EncodeToString([]byte(message.Content)),
 			},
+		}
+	case "tool_result":
+		// Handle tool results from tool response messages
+		c = anthropicTextGenerationInputContent{
+			Type:      "tool_result",
+			ToolUseID: message.ToolUseID,
+			Content:   message.Content,
+		}
+	case "tool_call":
+		// Handle tool calls from AI messages - convert to tool_use format for Anthropic
+		var input interface{}
+		if message.ToolArgs != "" {
+			// Try to parse the arguments as JSON
+			var args map[string]interface{}
+			if err := json.Unmarshal([]byte(message.ToolArgs), &args); err == nil {
+				input = args
+			} else {
+				// If parsing fails, wrap in a simple structure
+				input = map[string]interface{}{"arguments": message.ToolArgs}
+			}
+		} else {
+			input = map[string]interface{}{}
+		}
+
+		c = anthropicTextGenerationInputContent{
+			Type:  "tool_use",
+			ID:    message.ToolCallID,
+			Name:  message.ToolName,
+			Input: input,
 		}
 	}
 	return c

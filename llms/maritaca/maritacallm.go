@@ -3,9 +3,9 @@ package maritaca
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
 )
@@ -32,7 +32,7 @@ func New(opts ...Option) (*LLM, error) {
 	}
 
 	if o.httpClient == nil {
-		o.httpClient = http.DefaultClient
+		o.httpClient = httputil.DefaultClient
 	}
 
 	client, err := maritacaclient.NewClient(o.httpClient)
@@ -49,7 +49,6 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-// nolint: goerr113
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
@@ -190,9 +189,9 @@ func createChoice(resp maritacaclient.ChatResponse) []*llms.ContentChoice {
 		{
 			Content: resp.Answer,
 			GenerationInfo: map[string]any{
-				"CompletionTokens": resp.Metrics.Usage.CompletionTokens,
-				"PromptTokens":     resp.Metrics.Usage.PromptTokens,
-				"TotalTokens":      resp.Metrics.Usage.TotalTokens,
+				"CompletionTokens": resp.Usage.CompletionTokens,
+				"PromptTokens":     resp.Usage.PromptTokens,
+				"TotalTokens":      resp.Usage.TotalTokens,
 			},
 		},
 	}

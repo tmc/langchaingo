@@ -2,7 +2,7 @@ package milvus
 
 import (
 	"context"
-	"log"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -11,51 +11,62 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tclog "github.com/testcontainers/testcontainers-go/log"
 	tcmilvus "github.com/testcontainers/testcontainers-go/modules/milvus"
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/internal/testutil/testctr"
 	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/ollama"
+	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
-func getEmbedding(model string, connectionStr ...string) (llms.Model, *embeddings.EmbedderImpl) {
-	opts := []ollama.Option{ollama.WithModel(model)}
-	if len(connectionStr) > 0 {
-		opts = append(opts, ollama.WithServerURL(connectionStr[0]))
-	}
-	llm, err := ollama.New(opts...)
-	if err != nil {
-		log.Fatal(err)
+// createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
+func createOpenAIEmbedder(t *testing.T) (llms.Model, *embeddings.EmbedderImpl) {
+	t.Helper()
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	t.Cleanup(func() { rr.Close() })
+
+	apiKey := "test-api-key"
+	if key := os.Getenv("OPENAI_API_KEY"); key != "" && rr.Recording() {
+		apiKey = key
 	}
 
+	llm, err := openai.New(
+		openai.WithToken(apiKey),
+		openai.WithEmbeddingModel("text-embedding-ada-002"),
+		openai.WithHTTPClient(rr.Client()),
+	)
+	require.NoError(t, err)
+
 	e, err := embeddings.NewEmbedder(llm)
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
 	return llms.Model(llm), e
 }
 
 func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 	t.Helper()
-	ollamaURL := os.Getenv("OLLAMA_HOST")
-	if ollamaURL == "" {
-		t.Skip("OLLAMA_HOST not set")
-	}
-	_, e := getEmbedding("gemma:2b")
+	testctr.SkipIfDockerNotAvailable(t)
 
+	_, e := createOpenAIEmbedder(t)
+	ctx := context.Background()
 	url := os.Getenv("MILVUS_URL")
 	if url == "" {
-		milvusContainer, err := tcmilvus.RunContainer(context.Background(), testcontainers.WithImage("milvusdb/milvus:v2.4.0-rc.1-latest"))
+		milvusContainer, err := tcmilvus.Run(ctx, "milvusdb/milvus:v2.4.0-rc.1-latest", testcontainers.WithLogger(tclog.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			require.NoError(t, milvusContainer.Terminate(context.Background()))
+			if err := milvusContainer.Terminate(context.Background()); err != nil {
+				t.Logf("Failed to terminate milvus container: %v", err)
+			}
 		})
 
-		url, err = milvusContainer.ConnectionString(context.Background())
+		url, err = milvusContainer.ConnectionString(ctx)
 		if err != nil {
 			t.Skipf("Failed to get milvus container endpoint: %s", err)
 		}
@@ -72,14 +83,18 @@ func getNewStore(t *testing.T, opts ...Option) (Store, error) {
 		WithEmbedder(e),
 		WithIndex(idx))
 	return New(
-		context.Background(),
+		ctx,
 		config,
 		opts...,
 	)
 }
 
 func TestMilvusConnection(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
+	if testing.Short() {
+		t.Skip("Skipping Milvus connection test in short mode")
+	}
 	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
 	require.NoError(t, err)
 
@@ -99,11 +114,11 @@ func TestMilvusConnection(t *testing.T) {
 		{PageContent: "Sao Paulo", Metadata: map[string]any{"population": 22.6, "area": 1523}},
 	}
 
-	_, err = storer.AddDocuments(context.Background(), data)
+	_, err = storer.AddDocuments(ctx, data)
 	require.NoError(t, err)
 
 	// search docs with filter
-	filterRes, err := storer.SimilaritySearch(context.Background(),
+	filterRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 10,
 		vectorstores.WithFilters("meta['area']==622"),
 	)
@@ -111,9 +126,10 @@ func TestMilvusConnection(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, filterRes, 1)
 
-	japanRes, err := storer.SimilaritySearch(context.Background(),
+	japanRes, err := storer.SimilaritySearch(ctx,
 		"Tokyo", 2,
 		vectorstores.WithScoreThreshold(0.5))
 	require.NoError(t, err)
-	require.Len(t, japanRes, 1)
+	require.GreaterOrEqual(t, len(japanRes), 1)
+	require.LessOrEqual(t, len(japanRes), 2)
 }

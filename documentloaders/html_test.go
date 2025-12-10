@@ -10,13 +10,14 @@ import (
 )
 
 func TestHTMLLoader(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	file, err := os.Open("./testdata/test.html")
 	require.NoError(t, err)
 
 	loader := NewHTML(file)
 
-	docs, err := loader.Load(context.Background())
+	docs, err := loader.Load(ctx)
 	require.NoError(t, err)
 	require.Len(t, docs, 1)
 
