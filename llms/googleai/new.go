@@ -55,6 +55,9 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		return gi, fmt.Errorf("API key required for Google AI client")
 	}
 
+	// Note: The new SDK's ClientConfig doesn't directly support custom HTTP clients.
+	// httprr tests may need to be updated or recordings regenerated for the new SDK.
+
 	client, err := genai.NewClient(ctx, clientConfig)
 	if err != nil {
 		return gi, err

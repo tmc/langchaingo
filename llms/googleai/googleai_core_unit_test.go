@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/google/generative-ai-go/genai"
 	"github.com/stretchr/testify/assert"
 	"github.com/vendasta/langchaingo/llms"
+	"google.golang.org/genai"
 )
 
 func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test
@@ -104,15 +104,29 @@ func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test
 			assert.Len(t, result, len(tt.wantTypes))
 
 			for i, expectedType := range tt.wantTypes {
+				// In the new SDK, result[i] is *genai.Part, check its fields
+				assert.NotNil(t, result[i])
 				switch expectedType {
 				case "genai.Text":
-					assert.IsType(t, genai.Text(""), result[i])
+					assert.NotEmpty(t, result[i].Text)
+					assert.Nil(t, result[i].InlineData)
+					assert.Nil(t, result[i].FunctionCall)
+					assert.Nil(t, result[i].FunctionResponse)
 				case "genai.Blob":
-					assert.IsType(t, genai.Blob{}, result[i])
+					assert.NotNil(t, result[i].InlineData)
+					assert.Empty(t, result[i].Text)
+					assert.Nil(t, result[i].FunctionCall)
+					assert.Nil(t, result[i].FunctionResponse)
 				case "genai.FunctionCall":
-					assert.IsType(t, genai.FunctionCall{}, result[i])
+					assert.NotNil(t, result[i].FunctionCall)
+					assert.Empty(t, result[i].Text)
+					assert.Nil(t, result[i].InlineData)
+					assert.Nil(t, result[i].FunctionResponse)
 				case "genai.FunctionResponse":
-					assert.IsType(t, genai.FunctionResponse{}, result[i])
+					assert.NotNil(t, result[i].FunctionResponse)
+					assert.Empty(t, result[i].Text)
+					assert.Nil(t, result[i].InlineData)
+					assert.Nil(t, result[i].FunctionCall)
 				}
 			}
 		})
@@ -185,15 +199,15 @@ func TestConvertContent(t *testing.T) { //nolint:funlen // comprehensive test
 			wantErr:      false,
 		},
 		{
-			name: "function message (unsupported)",
+			name: "function message (now supported)",
 			content: llms.MessageContent{
 				Role: llms.ChatMessageTypeFunction,
 				Parts: []llms.ContentPart{
 					llms.TextContent{Text: "Function response"},
 				},
 			},
-			wantErr:     true,
-			errContains: "not supported",
+			expectedRole: RoleUser, // Function messages map to RoleUser
+			wantErr:      false,
 		},
 		{
 			name: "invalid parts",
@@ -235,10 +249,11 @@ func TestConvertContent(t *testing.T) { //nolint:funlen // comprehensive test
 func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 	t.Parallel()
 
+	finishReasonStop := genai.FinishReasonStop
 	tests := []struct {
 		name        string
 		candidates  []*genai.Candidate
-		usage       *genai.UsageMetadata
+		usage       *genai.GenerateContentResponseUsageMetadata
 		wantErr     bool
 		wantChoices int
 	}{
@@ -253,11 +268,11 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.Text("Hello world"),
+						Parts: []*genai.Part{
+							{Text: "Hello world"},
 						},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 			},
 			wantErr:     false,
@@ -268,14 +283,16 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.FunctionCall{
-								Name: "get_weather",
-								Args: map[string]any{"location": "Paris"},
+						Parts: []*genai.Part{
+							{
+								FunctionCall: &genai.FunctionCall{
+									Name: "get_weather",
+									Args: map[string]any{"location": "Paris"},
+								},
 							},
 						},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 			},
 			wantErr:     false,
@@ -286,14 +303,14 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							genai.Text("Response with usage"),
+						Parts: []*genai.Part{
+							{Text: "Response with usage"},
 						},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 			},
-			usage: &genai.UsageMetadata{
+			usage: &genai.GenerateContentResponseUsageMetadata{
 				PromptTokenCount:     10,
 				CandidatesTokenCount: 5,
 				TotalTokenCount:      15,
@@ -306,15 +323,15 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{genai.Text("First response")},
+						Parts: []*genai.Part{{Text: "First response"}},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{genai.Text("Second response")},
+						Parts: []*genai.Part{{Text: "Second response"}},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 			},
 			wantErr:     false,
@@ -325,13 +342,11 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			candidates: []*genai.Candidate{
 				{
 					Content: &genai.Content{
-						Parts: []genai.Part{
-							// This would be an unknown part type in practice
-							// but we can't easily create one for testing
-							genai.Text("Known type for now"),
+						Parts: []*genai.Part{
+							{Text: "Known type for now"},
 						},
 					},
-					FinishReason: genai.FinishReasonStop,
+					FinishReason: finishReasonStop,
 				},
 			},
 			wantErr:     false,
@@ -355,16 +370,15 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 			// Check metadata for usage information
 			if tt.usage != nil && len(result.Choices) > 0 {
 				metadata := result.Choices[0].GenerationInfo
-				assert.Equal(t, int32(10), metadata["input_tokens"])
-				assert.Equal(t, int32(5), metadata["output_tokens"])
-				assert.Equal(t, int32(15), metadata["total_tokens"])
+				// Token counts are stored as int in the new implementation
+				assert.Equal(t, 10, metadata["input_tokens"])
+				assert.Equal(t, 5, metadata["output_tokens"])
+				assert.Equal(t, 15, metadata["total_tokens"])
 			}
 
-			// Check that citations and safety are always present
-			for i, choice := range result.Choices {
-				assert.Contains(t, choice.GenerationInfo, CITATIONS, "Choice %d should have citations", i)
-				assert.Contains(t, choice.GenerationInfo, SAFETY, "Choice %d should have safety info", i)
-			}
+			// Citations and safety are only added if they exist (not nil)
+			// The test candidates don't have CitationMetadata or SafetyRatings set,
+			// so we don't check for them here
 		})
 	}
 }
@@ -440,7 +454,7 @@ func TestRoleMapping(t *testing.T) {
 		{llms.ChatMessageTypeHuman, RoleUser, true},
 		{llms.ChatMessageTypeGeneric, RoleUser, true},
 		{llms.ChatMessageTypeTool, RoleUser, true},
-		{llms.ChatMessageTypeFunction, "", false}, // Unsupported
+		{llms.ChatMessageTypeFunction, RoleUser, true}, // Now supported (maps to RoleUser)
 	}
 
 	for _, tt := range roleTests {
@@ -485,11 +499,12 @@ func TestFunctionCallConversion(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
 
-		funcCall, ok := result[0].(genai.FunctionCall)
-		assert.True(t, ok)
-		assert.Equal(t, "get_weather", funcCall.Name)
-		assert.Equal(t, "Paris", funcCall.Args["location"])
-		assert.Equal(t, "celsius", funcCall.Args["unit"])
+		// In the new SDK, Part is a struct, not an interface
+		assert.NotNil(t, result[0])
+		assert.NotNil(t, result[0].FunctionCall)
+		assert.Equal(t, "get_weather", result[0].FunctionCall.Name)
+		assert.Equal(t, "Paris", result[0].FunctionCall.Args["location"])
+		assert.Equal(t, "celsius", result[0].FunctionCall.Args["unit"])
 	})
 
 	t.Run("function response", func(t *testing.T) {
@@ -502,10 +517,11 @@ func TestFunctionCallConversion(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
 
-		funcResp, ok := result[0].(genai.FunctionResponse)
-		assert.True(t, ok)
-		assert.Equal(t, "get_weather", funcResp.Name)
-		assert.Equal(t, "It's 20°C and sunny", funcResp.Response["response"])
+		// In the new SDK, Part is a struct, not an interface
+		assert.NotNil(t, result[0])
+		assert.NotNil(t, result[0].FunctionResponse)
+		assert.Equal(t, "get_weather", result[0].FunctionResponse.Name)
+		assert.Equal(t, "It's 20°C and sunny", result[0].FunctionResponse.Response["response"])
 	})
 }
 
