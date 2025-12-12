@@ -290,22 +290,56 @@ func convertToolConfig(config any) *genai.ToolConfig {
 	return toolConfig
 }
 
+// convertCandidatesFromResponse converts a GenerateContentResponse to llms.ContentResponse.
+// This uses the SDK's Text() method to extract text content, which properly handles
+// reasoning models and thought parts.
+func convertCandidatesFromResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse, error) {
+	return convertCandidates(resp.Candidates, resp.UsageMetadata, resp)
+}
+
 // convertCandidates converts a sequence of genai.Candidate to a response.
-func convertCandidates(candidates []*genai.Candidate, usage *genai.GenerateContentResponseUsageMetadata) (*llms.ContentResponse, error) {
+// If response is provided, its Text() method is used for more reliable text extraction.
+func convertCandidates(candidates []*genai.Candidate, usage *genai.GenerateContentResponseUsageMetadata, response *genai.GenerateContentResponse) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
-	var toolCalls []llms.ToolCall
 
-	for _, candidate := range candidates {
-		buf := strings.Builder{}
-
-		if candidate.Content != nil {
-			for _, part := range candidate.Content.Parts {
-				if part.Text != "" {
-					_, err := buf.WriteString(part.Text)
-					if err != nil {
-						return nil, err
+	for i, candidate := range candidates {
+		var textContent string
+		var toolCalls []llms.ToolCall
+		
+		// Use the response's Text() method if available (more reliable, handles thoughts correctly)
+		// For multi-candidate responses, we need to extract text per candidate
+		if response != nil && i == 0 {
+			// For the first candidate, we can use the response's Text() method
+			// which handles all the edge cases properly
+			textContent = response.Text()
+		} else {
+			// Fallback to manual extraction for additional candidates or when response is nil
+			buf := strings.Builder{}
+			if candidate.Content != nil && candidate.Content.Parts != nil {
+				for _, part := range candidate.Content.Parts {
+					if part == nil {
+						continue
 					}
-				} else if part.FunctionCall != nil {
+					// Skip thought parts (reasoning models mark internal thinking as thoughts)
+					// Only include actual text content, matching the SDK's Text() method behavior
+					if part.Text != "" && !part.Thought {
+						_, err := buf.WriteString(part.Text)
+						if err != nil {
+							return nil, err
+						}
+					}
+				}
+			}
+			textContent = buf.String()
+		}
+
+		// Extract tool calls from parts (per candidate)
+		if candidate.Content != nil && candidate.Content.Parts != nil {
+			for _, part := range candidate.Content.Parts {
+				if part == nil {
+					continue
+				}
+				if part.FunctionCall != nil {
 					b, err := json.Marshal(part.FunctionCall.Args)
 					if err != nil {
 						return nil, err
@@ -368,7 +402,7 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.GenerateConte
 
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
-				Content:        buf.String(),
+				Content:        textContent,
 				StopReason:     finishReason,
 				GenerationInfo: metadata,
 				ToolCalls:      toolCalls,
@@ -496,7 +530,7 @@ func generateFromSingleMessage(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		response, err := convertCandidates(resp.Candidates, resp.UsageMetadata)
+		response, err := convertCandidatesFromResponse(resp)
 		if err != nil {
 			return nil, googleaierrors.MapError(err)
 		}
@@ -545,7 +579,7 @@ func generateFromMessages(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidates(resp.Candidates, resp.UsageMetadata)
+		return convertCandidatesFromResponse(resp)
 	}
 
 	// Streaming is requested - use GenerateContentStream
@@ -568,7 +602,6 @@ func convertAndStreamFromIterator(
 
 	// Track accumulated content and final response
 	var finalResponse *genai.GenerateContentResponse
-	var finalUsageMetadata *genai.GenerateContentResponseUsageMetadata
 	var accumulatedTextLen int
 
 	// Iterate over the stream
@@ -582,9 +615,6 @@ func convertAndStreamFromIterator(
 
 		// Store the final response (last one contains usage metadata)
 		finalResponse = response
-		if response.UsageMetadata != nil {
-			finalUsageMetadata = response.UsageMetadata
-		}
 
 		// Extract text from this chunk
 		// Note: response.Text() returns the full accumulated text from all parts
@@ -610,7 +640,7 @@ func convertAndStreamFromIterator(
 		return nil, ErrNoContentInResponse
 	}
 
-	return convertCandidates(finalResponse.Candidates, finalUsageMetadata)
+	return convertCandidatesFromResponse(finalResponse)
 }
 
 // convertSchemaRecursive recursively converts a schema map to a genai.Schema

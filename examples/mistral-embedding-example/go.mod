@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo/examples/mistral-embedding-example
 
-go 1.23.8
+go 1.24
 
 toolchain go1.24.6
 
@@ -14,9 +14,9 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.2 // indirect
 	github.com/pgvector/pgvector-go v0.1.1 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
-	golang.org/x/crypto v0.39.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 )
 
 replace github.com/vendasta/langchaingo => ../..

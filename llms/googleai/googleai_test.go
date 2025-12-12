@@ -76,11 +76,7 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	})
 
 	// Configure client with httprr
-	// Provide a test API key since the new SDK requires it
-	if apiKey == "" {
-		apiKey = "test-api-key"
-	}
-	opts = append(opts, WithAPIKey(apiKey), WithRest(), WithHTTPClient(rr.Client()))
+	opts = append(opts, WithRest(), WithHTTPClient(rr.Client()))
 
 	llm, err := New(context.Background(), opts...)
 	handleTestError(t, err)
@@ -132,7 +128,7 @@ func TestGoogleAIGenerateContentWithMultipleMessages(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-3-pro-preview"))
 	handleTestError(t, err)
 	require.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Choices)
@@ -158,7 +154,7 @@ func TestGoogleAIGenerateContentWithSystemMessage(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-3-pro-preview"))
 	handleTestError(t, err)
 	require.NotNil(t, resp)
 	assert.NotEmpty(t, resp.Choices)
@@ -199,7 +195,7 @@ func TestGoogleAICreateEmbedding(t *testing.T) {
 func TestGoogleAIWithOptions(t *testing.T) {
 
 	llm := newHTTPRRClient(t,
-		WithDefaultModel("gemini-1.5-flash"),
+		WithDefaultModel("gemini-3-pro-preview"),
 		WithDefaultMaxTokens(100),
 		WithDefaultTemperature(0.1),
 	)
@@ -393,7 +389,7 @@ func TestGoogleAIMultiModalContent(t *testing.T) {
 	resp, err := llm.GenerateContent(
 		context.Background(),
 		content,
-		llms.WithModel("gemini-1.5-flash"),
+		llms.WithModel("gemini-3-pro-preview"),
 	)
 
 	handleTestError(t, err)
