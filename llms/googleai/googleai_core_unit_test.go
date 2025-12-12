@@ -356,7 +356,11 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertCandidates(tt.candidates, tt.usage)
+			response := &genai.GenerateContentResponse{
+				Candidates:    tt.candidates,
+				UsageMetadata: tt.usage,
+			}
+			result, err := convertCandidates(tt.candidates, tt.usage, response)
 
 			if tt.wantErr {
 				assert.Error(t, err)
