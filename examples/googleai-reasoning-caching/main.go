@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/vendasta/langchaingo/llms"
 	"github.com/vendasta/langchaingo/llms/googleai"
-	"google.golang.org/genai"
 )
 
 func main() {

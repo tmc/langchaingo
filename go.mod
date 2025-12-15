@@ -315,7 +315,7 @@ require (
 )
 
 require (
-	github.com/google/generative-ai-go v0.12.0
+	github.com/google/generative-ai-go v0.15.1
 	github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
 )
 

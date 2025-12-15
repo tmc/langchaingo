@@ -9,10 +9,11 @@ import (
 	"io"
 	"strings"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/vendasta/langchaingo/internal/imageutil"
 	"github.com/vendasta/langchaingo/llms"
 	googleaierrors "github.com/vendasta/langchaingo/llms/googleai/errors"
-	"google.golang.org/genai"
+	"google.golang.org/api/iterator"
 )
 
 var (
@@ -64,17 +65,65 @@ func (g *GoogleAI) GenerateContent(
 		g.model = effectiveModel
 	}
 
+	model := g.client.GenerativeModel(opts.Model)
+	model.SetCandidateCount(int32(opts.CandidateCount))
+	model.SetMaxOutputTokens(int32(opts.MaxTokens))
+	model.SetTemperature(float32(opts.Temperature))
+	model.SetTopP(float32(opts.TopP))
+	model.SetTopK(int32(opts.TopK))
+	model.StopSequences = opts.StopWords
+
+	// Support for cached content (if provided through metadata)
+	// Note: This requires the cached content to be pre-created using Client.CreateCachedContent
+	if cachedContentName, ok := opts.Metadata["CachedContentName"].(string); ok && cachedContentName != "" {
+		model.CachedContentName = cachedContentName
+	}
+	model.SafetySettings = []*genai.SafetySetting{
+		{
+			Category:  genai.HarmCategoryDangerousContent,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHarassment,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategoryHateSpeech,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+		{
+			Category:  genai.HarmCategorySexuallyExplicit,
+			Threshold: genai.HarmBlockThreshold(g.opts.HarmThreshold),
+		},
+	}
+	var err error
+	if model.Tools, err = convertTools(opts.Tools); err != nil {
+		return nil, err
+	}
+
+	// set tool config
+	model.ToolConfig = convertToolConfig(opts.ToolChoice)
+
+	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
+	switch {
+	case opts.ResponseMIMEType != "" && opts.JSONMode:
+		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
+	case opts.ResponseMIMEType != "" && !opts.JSONMode:
+		model.ResponseMIMEType = opts.ResponseMIMEType
+	case opts.ResponseMIMEType == "" && opts.JSONMode:
+		model.ResponseMIMEType = ResponseMIMETypeJson
+	}
+
 	var response *llms.ContentResponse
 
-	var err error
 	if len(messages) == 1 {
 		theMessage := messages[0]
 		if theMessage.Role != llms.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-		response, err = generateFromSingleMessage(ctx, g.client, effectiveModel, theMessage.Parts, &opts, g.opts)
+		response, err = generateFromSingleMessage(ctx, model, theMessage.Parts, &opts)
 	} else {
-		response, err = generateFromMessages(ctx, g.client, effectiveModel, messages, &opts, g.opts)
+		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
 	if err != nil {
 		return nil, err
@@ -87,323 +136,110 @@ func (g *GoogleAI) GenerateContent(
 	return response, nil
 }
 
-// buildGenerateContentConfig builds a GenerateContentConfig from CallOptions and client Options.
-func buildGenerateContentConfig(opts *llms.CallOptions, clientOpts Options) *genai.GenerateContentConfig {
-	config := &genai.GenerateContentConfig{}
-
-	// Set generation parameters
-	if opts.CandidateCount > 0 {
-		count := int32(opts.CandidateCount)
-		config.CandidateCount = count
-	}
-	// Set MaxOutputTokens - this limits only the output/response tokens,
-	// not thinking tokens. Thinking tokens are controlled separately via ThinkingBudget.
-	if opts.MaxTokens > 0 {
-		tokens := int32(opts.MaxTokens)
-		config.MaxOutputTokens = tokens
-	}
-	if opts.Temperature > 0 {
-		temp := float32(opts.Temperature)
-		config.Temperature = &temp
-	}
-	if opts.TopP > 0 {
-		topP := float32(opts.TopP)
-		config.TopP = &topP
-	}
-	if opts.TopK > 0 {
-		topK := float32(opts.TopK)
-		config.TopK = &topK
-	}
-	if len(opts.StopWords) > 0 {
-		config.StopSequences = opts.StopWords
-	}
-
-	// Set response MIME type
-	switch {
-	case opts.ResponseMIMEType != "" && opts.JSONMode:
-		// Error handled in GenerateContent
-	case opts.ResponseMIMEType != "" && !opts.JSONMode:
-		config.ResponseMIMEType = opts.ResponseMIMEType
-	case opts.ResponseMIMEType == "" && opts.JSONMode:
-		config.ResponseMIMEType = ResponseMIMETypeJson
-	}
-
-	// Set safety settings
-	// Convert our HarmBlockThreshold (int32) to the new SDK's HarmBlockThreshold (string)
-	// The new SDK uses string-based enum constants, not int32 values
-	threshold := convertHarmBlockThreshold(clientOpts.HarmThreshold)
-
-	config.SafetySettings = []*genai.SafetySetting{
-		{
-			Category:  genai.HarmCategoryDangerousContent,
-			Threshold: threshold,
-		},
-		{
-			Category:  genai.HarmCategoryHarassment,
-			Threshold: threshold,
-		},
-		{
-			Category:  genai.HarmCategoryHateSpeech,
-			Threshold: threshold,
-		},
-		{
-			Category:  genai.HarmCategorySexuallyExplicit,
-			Threshold: threshold,
-		},
-	}
-
-	// Convert tool config and tools
-	// When ToolChoice is "none", don't include tools or ToolConfig
-	// as the behavior should be "same as when not passing any function declarations"
-	if opts.ToolChoice != nil {
-		// Check if ToolChoice is "none" - if so, skip both tools and ToolConfig
-		if tc, ok := opts.ToolChoice.(string); ok && strings.ToLower(strings.TrimSpace(tc)) == "none" {
-			// Explicitly ensure Tools and ToolConfig are not set when ToolChoice is "none"
-			// This matches the API behavior: "same as when not passing any function declarations"
-			config.Tools = nil
-			config.ToolConfig = nil
-		} else {
-			// Set ToolConfig for other ToolChoice values
-			config.ToolConfig = convertToolConfig(opts.ToolChoice)
-
-			// Convert tools (only if ToolChoice is not "none")
-			if len(opts.Tools) > 0 {
-				if tools, err := convertTools(opts.Tools); err == nil && tools != nil {
-					config.Tools = tools
-				}
-			}
-		}
-	} else {
-		// No ToolChoice specified, include tools if provided
-		if len(opts.Tools) > 0 {
-			if tools, err := convertTools(opts.Tools); err == nil && tools != nil {
-				config.Tools = tools
-			}
-		}
-	}
-
-	// Support for cached content
-	// TODO: Update when new SDK supports cached content in GenerateContentConfig
-	// For now, cached content support may need to be handled differently
-	_ = opts.Metadata["CachedContentName"] // Placeholder for future implementation
-
-	// Extract and set ThinkingConfig using the standard helper function
-	if thinkingConfig := llms.GetThinkingConfig(opts); thinkingConfig != nil && thinkingConfig.Mode != llms.ThinkingModeNone {
-		config.ThinkingConfig = convertThinkingConfig(thinkingConfig)
-	}
-
-	return config
-}
-
-// convertHarmBlockThreshold converts our int32-based HarmBlockThreshold to the new SDK's string-based enum.
-func convertHarmBlockThreshold(threshold HarmBlockThreshold) genai.HarmBlockThreshold {
-	switch threshold {
-	case HarmBlockUnspecified:
-		return genai.HarmBlockThresholdUnspecified
-	case HarmBlockLowAndAbove:
-		return genai.HarmBlockThresholdBlockLowAndAbove
-	case HarmBlockMediumAndAbove:
-		return genai.HarmBlockThresholdBlockMediumAndAbove
-	case HarmBlockOnlyHigh:
-		return genai.HarmBlockThresholdBlockOnlyHigh
-	case HarmBlockNone:
-		return genai.HarmBlockThresholdBlockNone
-	default:
-		// Default to HarmBlockOnlyHigh if unknown
-		return genai.HarmBlockThresholdBlockOnlyHigh
-	}
-}
-
-// convertThinkingConfig converts llms.ThinkingConfig to genai.ThinkingConfig.
-func convertThinkingConfig(config *llms.ThinkingConfig) *genai.ThinkingConfig {
-	if config == nil {
-		return nil
-	}
-
-	genaiConfig := &genai.ThinkingConfig{}
-
-	// Map ThinkingMode to ThinkingLevel
-	// Note: Google Gemini API only supports LOW and HIGH thinking levels.
-	// MEDIUM is not supported, so we map it to LOW as a middle ground.
-	var thinkingLevel genai.ThinkingLevel
-	switch config.Mode {
-	case llms.ThinkingModeLow:
-		thinkingLevel = genai.ThinkingLevelLow
-	case llms.ThinkingModeMedium:
-		// Medium is not supported by Gemini API, map to LOW as a moderate option
-		// This differentiates it from HIGH and provides a middle ground
-		thinkingLevel = genai.ThinkingLevelLow
-	case llms.ThinkingModeHigh:
-		thinkingLevel = genai.ThinkingLevelHigh
-	case llms.ThinkingModeAuto:
-		// Auto defaults to HIGH for maximum reasoning capability
-		thinkingLevel = genai.ThinkingLevelHigh
-	default:
-		return nil // ThinkingModeNone or unknown
-	}
-	genaiConfig.ThinkingLevel = thinkingLevel
-
-	// Set thinking budget if provided
-	if config.BudgetTokens > 0 {
-		budget := int32(config.BudgetTokens)
-		genaiConfig.ThinkingBudget = &budget
-	}
-
-	// Set IncludeThoughts based on ReturnThinking
-	genaiConfig.IncludeThoughts = config.ReturnThinking
-
-	return genaiConfig
-}
-
 // convertToolConfig converts a ToolChoice to a genai.ToolConfig.
 func convertToolConfig(config any) *genai.ToolConfig {
 	if config == nil {
 		return nil
 	}
 
-	toolConfig := &genai.ToolConfig{
-		FunctionCallingConfig: &genai.FunctionCallingConfig{},
-	}
+	var mode genai.FunctionCallingMode
+	var allowedFunctionNames []string
 
-	// Handle string-based tool choice (mode only)
 	if c, ok := config.(string); ok {
 		switch strings.ToLower(c) {
 		case "any":
-			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAny
+			mode = genai.FunctionCallingAny
 		case "none":
-			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeNone
-		case "auto":
-			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
+			mode = genai.FunctionCallingNone
 		default:
-			// Unknown mode, default to AUTO
-			toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
+			mode = genai.FunctionCallingAuto
 		}
-	} else if c, ok := config.([]string); ok && len(c) > 0 {
-		// Array of function names provided - use ANY mode with allowed function names
-		toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAny
-		toolConfig.FunctionCallingConfig.AllowedFunctionNames = c
+	} else if c, ok := config.([]string); ok {
+		if len(c) > 0 {
+			mode = genai.FunctionCallingAny
+			allowedFunctionNames = c
+		} else {
+			mode = genai.FunctionCallingAuto
+		}
 	} else {
-		// Unknown type, default to AUTO mode
-		toolConfig.FunctionCallingConfig.Mode = genai.FunctionCallingConfigModeAuto
+		mode = genai.FunctionCallingAuto
 	}
 
-	return toolConfig
-}
-
-// convertCandidatesFromResponse converts a GenerateContentResponse to llms.ContentResponse.
-// This uses the SDK's Text() method to extract text content, which properly handles
-// reasoning models and thought parts.
-func convertCandidatesFromResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse, error) {
-	return convertCandidates(resp.Candidates, resp.UsageMetadata, resp)
+	return &genai.ToolConfig{
+		FunctionCallingConfig: &genai.FunctionCallingConfig{
+			Mode:                 mode,
+			AllowedFunctionNames: allowedFunctionNames,
+		},
+	}
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
-// If response is provided, its Text() method is used for more reliable text extraction.
-func convertCandidates(candidates []*genai.Candidate, usage *genai.GenerateContentResponseUsageMetadata, response *genai.GenerateContentResponse) (*llms.ContentResponse, error) {
+func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
+	var toolCalls []llms.ToolCall
 
-	for i, candidate := range candidates {
-		var textContent string
-		var toolCalls []llms.ToolCall
-		
-		// Use the response's Text() method if available (more reliable, handles thoughts correctly)
-		// For multi-candidate responses, we need to extract text per candidate
-		if response != nil && i == 0 {
-			// For the first candidate, we can use the response's Text() method
-			// which handles all the edge cases properly
-			textContent = response.Text()
-		} else {
-			// Fallback to manual extraction for additional candidates or when response is nil
-			buf := strings.Builder{}
-			if candidate.Content != nil && candidate.Content.Parts != nil {
-				for _, part := range candidate.Content.Parts {
-					if part == nil {
-						continue
-					}
-					// Skip thought parts (reasoning models mark internal thinking as thoughts)
-					// Only include actual text content, matching the SDK's Text() method behavior
-					if part.Text != "" && !part.Thought {
-						_, err := buf.WriteString(part.Text)
-						if err != nil {
-							return nil, err
-						}
-					}
-				}
-			}
-			textContent = buf.String()
-		}
+	for _, candidate := range candidates {
+		buf := strings.Builder{}
 
-		// Extract tool calls from parts (per candidate)
-		if candidate.Content != nil && candidate.Content.Parts != nil {
+		if candidate.Content != nil {
 			for _, part := range candidate.Content.Parts {
-				if part == nil {
-					continue
-				}
-				if part.FunctionCall != nil {
-					b, err := json.Marshal(part.FunctionCall.Args)
+				switch v := part.(type) {
+				case genai.Text:
+					_, err := buf.WriteString(string(v))
+					if err != nil {
+						return nil, err
+					}
+				case genai.FunctionCall:
+					b, err := json.Marshal(v.Args)
 					if err != nil {
 						return nil, err
 					}
 					toolCall := llms.ToolCall{
 						FunctionCall: &llms.FunctionCall{
-							Name:      part.FunctionCall.Name,
+							Name:      v.Name,
 							Arguments: string(b),
 						},
 					}
 					toolCalls = append(toolCalls, toolCall)
+				default:
+					return nil, ErrUnknownPartInResponse
 				}
 			}
 		}
 
 		metadata := make(map[string]any)
-		if candidate.CitationMetadata != nil {
-			metadata[CITATIONS] = candidate.CitationMetadata
-		}
-		if candidate.SafetyRatings != nil {
-			metadata[SAFETY] = candidate.SafetyRatings
-		}
+		metadata[CITATIONS] = candidate.CitationMetadata
+		metadata[SAFETY] = candidate.SafetyRatings
 
 		if usage != nil {
-			// Extract token counts - field names may differ in new SDK
-			promptTokens := int(usage.PromptTokenCount)
-			outputTokens := int(usage.CandidatesTokenCount)
-			totalTokens := int(usage.TotalTokenCount)
-
-			metadata["input_tokens"] = promptTokens
-			metadata["output_tokens"] = outputTokens
-			metadata["total_tokens"] = totalTokens
+			metadata["input_tokens"] = usage.PromptTokenCount
+			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["total_tokens"] = usage.TotalTokenCount
 			// Standardized field names for cross-provider compatibility
-			metadata["PromptTokens"] = promptTokens
-			metadata["CompletionTokens"] = outputTokens
-			metadata["TotalTokens"] = totalTokens
-
-			// Extract thinking tokens from the new SDK
-			// ThoughtsTokenCount is an int32 field in GenerateContentResponseUsageMetadata
-			thinkingTokens := int(usage.ThoughtsTokenCount)
-			metadata["ThinkingTokens"] = thinkingTokens
+			metadata["PromptTokens"] = usage.PromptTokenCount
+			metadata["CompletionTokens"] = usage.CandidatesTokenCount
+			metadata["TotalTokens"] = usage.TotalTokenCount
 
 			// Cache-related token information (if available)
 			if usage.CachedContentTokenCount > 0 {
-				cachedCount := int(usage.CachedContentTokenCount)
-				metadata["CachedTokens"] = cachedCount
-				metadata["CacheReadInputTokens"] = cachedCount // Anthropic compatibility
+				metadata["CachedTokens"] = usage.CachedContentTokenCount
+				metadata["CacheReadInputTokens"] = usage.CachedContentTokenCount // Anthropic compatibility
 				// Google AI includes cached tokens in the prompt count, calculate non-cached
-				metadata["NonCachedInputTokens"] = promptTokens - cachedCount
+				metadata["NonCachedInputTokens"] = usage.PromptTokenCount - usage.CachedContentTokenCount
 			}
 		}
 
 		// Google AI doesn't separate thinking content like OpenAI o1, but we provide empty standardized fields
 		metadata["ThinkingContent"] = "" // Google models don't separate thinking content
+		metadata["ThinkingTokens"] = 0   // Google models don't track thinking tokens separately
 
 		// Note: Google AI's CachedContent requires pre-created cached content via API,
 		// not inline cache control like Anthropic. Use Client.CreateCachedContent() for caching.
 
-		finishReason := string(candidate.FinishReason)
-
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
-				Content:        textContent,
-				StopReason:     finishReason,
+				Content:        buf.String(),
+				StopReason:     candidate.FinishReason.String(),
 				GenerationInfo: metadata,
 				ToolCalls:      toolCalls,
 			})
@@ -412,54 +248,42 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.GenerateConte
 }
 
 // convertParts converts between a sequence of langchain parts and genai parts.
-func convertParts(parts []llms.ContentPart) ([]*genai.Part, error) {
-	convertedParts := make([]*genai.Part, 0, len(parts))
+func convertParts(parts []llms.ContentPart) ([]genai.Part, error) {
+	convertedParts := make([]genai.Part, 0, len(parts))
 	for _, part := range parts {
-		var out *genai.Part
+		var out genai.Part
 
 		switch p := part.(type) {
 		case llms.TextContent:
-			out = &genai.Part{Text: p.Text}
+			out = genai.Text(p.Text)
 		case llms.BinaryContent:
-			inlineData := &genai.Blob{
-				MIMEType: p.MIMEType,
-				Data:     p.Data,
-			}
-			out = &genai.Part{InlineData: inlineData}
+			out = genai.Blob{MIMEType: p.MIMEType, Data: p.Data}
 		case llms.ImageURLContent:
 			typ, data, err := imageutil.DownloadImageData(p.URL)
 			if err != nil {
 				return nil, err
 			}
-			inlineData := &genai.Blob{
-				MIMEType: typ,
-				Data:     data,
-			}
-			out = &genai.Part{InlineData: inlineData}
+			out = genai.ImageData(typ, data)
 		case llms.ToolCall:
 			fc := p.FunctionCall
 			var argsMap map[string]any
 			if err := json.Unmarshal([]byte(fc.Arguments), &argsMap); err != nil {
 				return convertedParts, err
 			}
-			functionCall := &genai.FunctionCall{
+			out = genai.FunctionCall{
 				Name: fc.Name,
 				Args: argsMap,
 			}
-			out = &genai.Part{FunctionCall: functionCall}
 		case llms.ToolCallResponse:
-			functionResponse := &genai.FunctionResponse{
+			out = genai.FunctionResponse{
 				Name: p.Name,
 				Response: map[string]any{
 					"response": p.Content,
 				},
 			}
-			out = &genai.Part{FunctionResponse: functionResponse}
 		}
 
-		if out != nil {
-			convertedParts = append(convertedParts, out)
-		}
+		convertedParts = append(convertedParts, out)
 	}
 	return convertedParts, nil
 }
@@ -471,27 +295,25 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 		return nil, err
 	}
 
-	var role string
-	switch content.Role {
-	case llms.ChatMessageTypeSystem:
-		role = RoleSystem
-	case llms.ChatMessageTypeAI:
-		role = RoleModel
-	case llms.ChatMessageTypeHuman:
-		role = RoleUser
-	case llms.ChatMessageTypeGeneric:
-		role = RoleUser
-	case llms.ChatMessageTypeTool:
-		role = RoleUser
-	case llms.ChatMessageTypeFunction:
-		role = RoleUser
-	default:
-		return nil, fmt.Errorf("role %v not supported", content.Role)
-	}
-
 	c := &genai.Content{
 		Parts: parts,
-		Role:  role,
+	}
+
+	switch content.Role {
+	case llms.ChatMessageTypeSystem:
+		c.Role = RoleSystem
+	case llms.ChatMessageTypeAI:
+		c.Role = RoleModel
+	case llms.ChatMessageTypeHuman:
+		c.Role = RoleUser
+	case llms.ChatMessageTypeGeneric:
+		c.Role = RoleUser
+	case llms.ChatMessageTypeTool:
+		c.Role = RoleUser
+	case llms.ChatMessageTypeFunction:
+		fallthrough
+	default:
+		return nil, fmt.Errorf("role %v not supported", content.Role)
 	}
 
 	return c, nil
@@ -501,28 +323,19 @@ func convertContent(content llms.MessageContent) (*genai.Content, error) {
 // message.
 func generateFromSingleMessage(
 	ctx context.Context,
-	client *genai.Client,
-	model string,
+	model *genai.GenerativeModel,
 	parts []llms.ContentPart,
 	opts *llms.CallOptions,
-	clientOpts Options,
 ) (*llms.ContentResponse, error) {
 	convertedParts, err := convertParts(parts)
 	if err != nil {
 		return nil, err
 	}
 
-	contents := []*genai.Content{
-		{Parts: convertedParts},
-	}
-
-	// Build GenerateContentConfig
-	config := buildGenerateContentConfig(opts, clientOpts)
-
 	if opts.StreamingFunc == nil {
 		// When no streaming is requested, just call GenerateContent and return
 		// the complete response with a list of candidates.
-		resp, err := client.Models.GenerateContent(ctx, model, contents, config)
+		resp, err := model.GenerateContent(ctx, convertedParts...)
 		if err != nil {
 			return nil, googleaierrors.MapError(err)
 		}
@@ -530,117 +343,111 @@ func generateFromSingleMessage(
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		response, err := convertCandidatesFromResponse(resp)
+		response, err := convertCandidates(resp.Candidates, resp.UsageMetadata)
 		if err != nil {
 			return nil, googleaierrors.MapError(err)
 		}
 		return response, nil
 	}
-
-	// Streaming is requested - use GenerateContentStream
-	return convertAndStreamFromIterator(ctx, client, model, contents, config, opts)
+	iter := model.GenerateContentStream(ctx, convertedParts...)
+	response, err := convertAndStreamFromIterator(ctx, iter, opts)
+	if err != nil {
+		return nil, googleaierrors.MapError(err)
+	}
+	return response, nil
 }
 
 func generateFromMessages(
 	ctx context.Context,
-	client *genai.Client,
-	model string,
+	model *genai.GenerativeModel,
 	messages []llms.MessageContent,
 	opts *llms.CallOptions,
-	clientOpts Options,
 ) (*llms.ContentResponse, error) {
-	contents := make([]*genai.Content, 0, len(messages))
-	var systemInstruction *genai.Content
-
+	history := make([]*genai.Content, 0, len(messages))
 	for _, mc := range messages {
 		content, err := convertContent(mc)
 		if err != nil {
 			return nil, err
 		}
-		if mc.Role == llms.ChatMessageTypeSystem {
-			systemInstruction = content
+		if mc.Role == RoleSystem {
+			model.SystemInstruction = content
 			continue
 		}
-		contents = append(contents, content)
+		history = append(history, content)
 	}
 
-	// Build GenerateContentConfig
-	config := buildGenerateContentConfig(opts, clientOpts)
-	if systemInstruction != nil {
-		config.SystemInstruction = systemInstruction
-	}
+	// Given N total messages, genai's chat expects the first N-1 messages as
+	// history and the last message as the actual request.
+	n := len(history)
+	reqContent := history[n-1]
+	history = history[:n-1]
+
+	session := model.StartChat()
+	session.History = history
 
 	if opts.StreamingFunc == nil {
-		resp, err := client.Models.GenerateContent(ctx, model, contents, config)
+		resp, err := session.SendMessage(ctx, reqContent.Parts...)
 		if err != nil {
-			return nil, googleaierrors.MapError(err)
+			return nil, err
 		}
 
 		if len(resp.Candidates) == 0 {
 			return nil, ErrNoContentInResponse
 		}
-		return convertCandidatesFromResponse(resp)
+		return convertCandidates(resp.Candidates, resp.UsageMetadata)
 	}
-
-	// Streaming is requested - use GenerateContentStream
-	return convertAndStreamFromIterator(ctx, client, model, contents, config, opts)
+	iter := session.SendMessageStream(ctx, reqContent.Parts...)
+	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
-// convertAndStreamFromIterator handles streaming responses from the new SDK.
-// It iterates over the stream, calls the StreamingFunc for each chunk, and
-// accumulates the final response.
+// convertAndStreamFromIterator takes an iterator of GenerateContentResponse
+// and produces a llms.ContentResponse reply from it, while streaming the
+// resulting text into the opts-provided streaming function.
+// Note that this is tricky in the face of multiple
+// candidates, so this code assumes only a single candidate for now.
 func convertAndStreamFromIterator(
 	ctx context.Context,
-	client *genai.Client,
-	model string,
-	contents []*genai.Content,
-	config *genai.GenerateContentConfig,
+	iter *genai.GenerateContentResponseIterator,
 	opts *llms.CallOptions,
 ) (*llms.ContentResponse, error) {
-	// Get the streaming iterator
-	stream := client.Models.GenerateContentStream(ctx, model, contents, config)
-
-	// Track accumulated content and final response
-	var finalResponse *genai.GenerateContentResponse
-	var accumulatedTextLen int
-
-	// Iterate over the stream
-	for response, err := range stream {
+	candidate := &genai.Candidate{
+		Content: &genai.Content{},
+	}
+DoStream:
+	for {
+		resp, err := iter.Next()
+		if errors.Is(err, iterator.Done) {
+			break DoStream
+		}
 		if err != nil {
-			return nil, googleaierrors.MapError(err)
-		}
-		if response == nil {
-			continue
+			return nil, fmt.Errorf("error in stream mode: %w", err)
 		}
 
-		// Store the final response (last one contains usage metadata)
-		finalResponse = response
+		if len(resp.Candidates) != 1 {
+			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
+		}
+		respCandidate := resp.Candidates[0]
 
-		// Extract text from this chunk
-		// Note: response.Text() returns the full accumulated text from all parts
-		// We need to extract only the new incremental text
-		currentFullText := response.Text()
-		currentLen := len(currentFullText)
+		if respCandidate.Content == nil {
+			break DoStream
+		}
+		candidate.Content.Parts = append(candidate.Content.Parts, respCandidate.Content.Parts...)
+		candidate.Content.Role = respCandidate.Content.Role
+		candidate.FinishReason = respCandidate.FinishReason
+		candidate.SafetyRatings = respCandidate.SafetyRatings
+		candidate.CitationMetadata = respCandidate.CitationMetadata
+		candidate.TokenCount += respCandidate.TokenCount
 
-		// If this response has more text than we've seen, extract the delta
-		if currentLen > accumulatedTextLen {
-			newText := currentFullText[accumulatedTextLen:]
-			if len(newText) > 0 {
-				// Call the streaming function with the new chunk
-				if err := opts.StreamingFunc(ctx, []byte(newText)); err != nil {
-					return nil, fmt.Errorf("streaming function error: %w", err)
+		for _, part := range respCandidate.Content.Parts {
+			if text, ok := part.(genai.Text); ok {
+				if opts.StreamingFunc(ctx, []byte(text)) != nil {
+					break DoStream
 				}
-				accumulatedTextLen = currentLen
 			}
 		}
 	}
-
-	// Convert the final response to llms.ContentResponse
-	if finalResponse == nil || len(finalResponse.Candidates) == 0 {
-		return nil, ErrNoContentInResponse
-	}
-
-	return convertCandidatesFromResponse(finalResponse)
+	mresp := iter.MergedResponse()
+	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 
 // convertSchemaRecursive recursively converts a schema map to a genai.Schema
@@ -800,20 +607,20 @@ func convertToolSchemaType(ty string) genai.Type {
 func showContent(w io.Writer, cs []*genai.Content) {
 	fmt.Fprintf(w, "Content (len=%v)\n", len(cs))
 	for i, c := range cs {
-		role := c.Role
-		fmt.Fprintf(w, "[%d]: Role=%s\n", i, role)
+		fmt.Fprintf(w, "[%d]: Role=%s\n", i, c.Role)
 		for j, p := range c.Parts {
 			fmt.Fprintf(w, "  Parts[%v]: ", j)
-			if p.Text != "" {
-				fmt.Fprintf(w, "Text %q\n", p.Text)
-			} else if p.InlineData != nil {
-				fmt.Fprintf(w, "Blob MIME=%q, size=%d\n", p.InlineData.MIMEType, len(p.InlineData.Data))
-			} else if p.FunctionCall != nil {
-				fmt.Fprintf(w, "FunctionCall Name=%v, Args=%v\n", p.FunctionCall.Name, p.FunctionCall.Args)
-			} else if p.FunctionResponse != nil {
-				fmt.Fprintf(w, "FunctionResponse Name=%v Response=%v\n", p.FunctionResponse.Name, p.FunctionResponse.Response)
-			} else {
-				fmt.Fprintf(w, "unknown type\n")
+			switch pp := p.(type) {
+			case genai.Text:
+				fmt.Fprintf(w, "Text %q\n", pp)
+			case genai.Blob:
+				fmt.Fprintf(w, "Blob MIME=%q, size=%d\n", pp.MIMEType, len(pp.Data))
+			case genai.FunctionCall:
+				fmt.Fprintf(w, "FunctionCall Name=%v, Args=%v\n", pp.Name, pp.Args)
+			case genai.FunctionResponse:
+				fmt.Fprintf(w, "FunctionResponse Name=%v Response=%v\n", pp.Name, pp.Response)
+			default:
+				fmt.Fprintf(w, "unknown type %T\n", pp)
 			}
 		}
 	}

@@ -32,11 +32,6 @@ func TestGoogleAI_SupportsReasoning(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "Gemini 3.0 Pro Preview supports reasoning",
-			model:    "gemini-3-pro-preview",
-			expected: true,
-		},
-		{
 			name:     "Gemini experimental with thinking supports reasoning",
 			model:    "gemini-exp-thinking-1206",
 			expected: true,
@@ -95,7 +90,6 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 	client, err := New(ctx,
 		WithAPIKey(apiKey),
 		WithDefaultModel("gemini-2.0-flash"),
-		WithRest(), // Use REST API for consistency with other tests
 	)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
@@ -122,10 +116,9 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 		},
 	}
 
-	// Note: WithThinkingMode may not be fully supported yet by the API
-	// Test without it first to ensure basic reasoning works
 	resp, err := client.GenerateContent(ctx, messages,
 		llms.WithMaxTokens(200),
+		llms.WithThinkingMode(llms.ThinkingModeMedium), // Note: Google AI may not use this yet
 	)
 	if err != nil {
 		t.Fatalf("Failed to generate content: %v", err)
@@ -156,11 +149,9 @@ func TestGoogleAI_CachingSupport(t *testing.T) {
 	}
 
 	// Create cached content with a large system prompt
-	// Google AI requires at least 4096 tokens for cached content
-	// Each repetition is approximately 10 tokens, so we need ~400+ repetitions
 	longContext := `You are an expert code reviewer with deep knowledge of Go best practices.
 	Always consider performance, security, and maintainability in your reviews.
-	` + strings.Repeat("This is padding text to ensure we have enough tokens for caching. ", 500)
+	` + strings.Repeat("This is padding text to ensure we have enough tokens for caching. ", 100)
 
 	cached, err := helper.CreateCachedContent(ctx, "gemini-2.0-flash",
 		[]llms.MessageContent{
@@ -183,7 +174,7 @@ func TestGoogleAI_CachingSupport(t *testing.T) {
 	}()
 
 	// Use the cached content in a request
-	client, err := New(ctx, WithAPIKey(apiKey), WithRest())
+	client, err := New(ctx, WithAPIKey(apiKey))
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
 	}

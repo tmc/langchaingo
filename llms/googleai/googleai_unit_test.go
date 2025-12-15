@@ -289,21 +289,20 @@ func TestConvertToolSchemaType(t *testing.T) {
 		input    string
 		expected string // We'll compare the string representation
 	}{
-		{"object", "OBJECT"},
-		{"string", "STRING"},
-		{"number", "NUMBER"},
-		{"integer", "INTEGER"},
-		{"boolean", "BOOLEAN"},
-		{"array", "ARRAY"},
-		{"unknown", "TYPE_UNSPECIFIED"},
-		{"", "TYPE_UNSPECIFIED"},
+		{"object", "TypeObject"},
+		{"string", "TypeString"},
+		{"number", "TypeNumber"},
+		{"integer", "TypeInteger"},
+		{"boolean", "TypeBoolean"},
+		{"array", "TypeArray"},
+		{"unknown", "TypeUnspecified"},
+		{"", "TypeUnspecified"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			result := convertToolSchemaType(tt.input)
-			// Type is a string type in the new SDK, so convert to string for comparison
-			assert.Equal(t, tt.expected, string(result))
+			assert.Equal(t, tt.expected, result.String())
 		})
 	}
 }
