@@ -158,4 +158,3 @@ func (o *Options) EnsureAuthPresent() {
 		}
 	}
 }
-
