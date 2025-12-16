@@ -4,7 +4,6 @@ package googleai
 
 import (
 	"context"
-	"strings"
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/vendasta/langchaingo/callbacks"
@@ -57,28 +56,10 @@ func (g *GoogleAI) Close() error {
 }
 
 // SupportsReasoning implements the ReasoningModel interface.
-// Returns true if the current model supports reasoning/thinking tokens.
+// Returns false because the old SDK (github.com/google/generative-ai-go) does not
+// support the ThinkingConfig API. For reasoning/thinking support, use googleaiv2.
 func (g *GoogleAI) SupportsReasoning() bool {
-	// Check the current model (may have been overridden by WithModel option)
-	model := g.model
-	if model == "" {
-		model = g.opts.DefaultModel
-	}
-
-	// Gemini 2.0 models support reasoning/thinking capabilities
-	if strings.Contains(model, "gemini-2.0") {
-		return true
-	}
-
-	// Future Gemini 3+ models expected to support reasoning
-	if strings.Contains(model, "gemini-3") || strings.Contains(model, "gemini-4") {
-		return true
-	}
-
-	// Gemini Experimental models may have reasoning capabilities
-	if strings.Contains(model, "gemini-exp") && strings.Contains(model, "thinking") {
-		return true
-	}
-
+	// The old SDK doesn't support ThinkingConfig API
+	// Use googleaiv2 for models that require reasoning/thinking support
 	return false
 }

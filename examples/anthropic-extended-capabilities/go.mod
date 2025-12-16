@@ -1,6 +1,8 @@
 module github.com/vendasta/langchaingo/examples/anthropic-extended-capabilities
 
-go 1.23.8
+go 1.24
+
+toolchain go1.24.6
 
 require github.com/vendasta/langchaingo v0.1.14-pre.4
 

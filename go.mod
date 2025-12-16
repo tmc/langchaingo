@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo
 
-go 1.23.8
+go 1.24
 
 toolchain go1.24.3
 
@@ -33,8 +33,8 @@ require (
 	github.com/IBM/watsonx-go v1.0.0
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/gage-technologies/mistral-go v1.1.0
-	github.com/google/generative-ai-go v0.15.1
 	github.com/pkoukk/tiktoken-go v0.1.8
+	google.golang.org/genai v1.38.0
 )
 
 // Vector stores
@@ -314,9 +314,13 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
+require (
+	github.com/google/generative-ai-go v0.15.1
+	github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
+)
 
 require (
 	github.com/coder/websocket v1.8.12 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 )

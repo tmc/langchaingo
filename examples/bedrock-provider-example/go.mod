@@ -1,6 +1,6 @@
 module github.com/vendasta/langchaingo/examples/bedrock-provider-example
 
-go 1.23.8
+go 1.24
 
 toolchain go1.24.6
 
@@ -24,7 +24,7 @@ require (
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 )
 
 replace github.com/vendasta/langchaingo => ../..
