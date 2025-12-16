@@ -84,8 +84,6 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 }
 
 func TestGoogleAIGenerateContent(t *testing.T) {
-
-	os.Setenv("GOOGLE_API_KEY", "AIzaSyCmhtTKO6U5Lc7DJ8dicjSSzRojMlNic5s")
 	llm := newHTTPRRClient(t)
 
 	content := []llms.MessageContent{
