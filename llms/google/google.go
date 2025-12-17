@@ -1,8 +1,8 @@
 // Package google provides a unified interface for Google AI LLMs that automatically
 // selects the appropriate underlying provider based on the model being used.
 //
-// For gemini-3+ models, this package uses googleaiv2 (google.golang.org/genai SDK).
-// For older models (gemini-2.x, gemini-1.x, etc.), it uses googleai (github.com/google/generative-ai-go SDK).
+// For gemini-2.5+ models, this package uses googleaiv2 (google.golang.org/genai SDK).
+// For older models (gemini-2.0, gemini-1.x, etc.), it uses googleai (github.com/google/generative-ai-go SDK).
 //
 // This allows seamless migration to newer models without changing client code.
 package google
@@ -20,9 +20,9 @@ import (
 // GoogleAI is a unified client that automatically routes to the appropriate
 // underlying provider based on the model being used.
 type GoogleAI struct {
-	// The underlying v1 client (for gemini-2.x and older)
+	// The underlying v1 client (for gemini-2.0 and older)
 	v1Client *googleai.GoogleAI
-	// The underlying v2 client (for gemini-3+)
+	// The underlying v2 client (for gemini-2.5+)
 	v2Client *googleaiv2.GoogleAI
 	// Which client is active
 	useV2 bool
@@ -34,12 +34,16 @@ var (
 	_ llms.Model = &GoogleAI{}
 )
 
-// IsGemini3OrNewer returns true if the model name indicates gemini-3 or newer.
-func IsGemini3OrNewer(model string) bool {
+// UseV2Client returns true if the model should use the v2 SDK (google.golang.org/genai).
+// This includes gemini-2.5+ models which require the new SDK for proper response parsing
+// and thinking token support.
+func UseV2Client(model string) bool {
 	model = strings.ToLower(model)
 
-	// Check for gemini-3, gemini-4, etc.
-	if strings.Contains(model, "gemini-3") ||
+	// Check for gemini-2.5, gemini-3, gemini-4, etc.
+	// Gemini 2.5+ models require the new SDK for proper response parsing
+	if strings.Contains(model, "gemini-2.5") ||
+		strings.Contains(model, "gemini-3") ||
 		strings.Contains(model, "gemini-4") ||
 		strings.Contains(model, "gemini-5") {
 		return true
@@ -72,16 +76,16 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 
 	g := &GoogleAI{
 		opts:  options,
-		useV2: IsGemini3OrNewer(options.DefaultModel),
+		useV2: UseV2Client(options.DefaultModel),
 	}
 
 	var err error
 	if g.useV2 {
-		// Use the new SDK for gemini-3+
+		// Use the new SDK for gemini-2.5+
 		v2Opts := convertToV2Options(options)
 		g.v2Client, err = googleaiv2.New(ctx, v2Opts...)
 	} else {
-		// Use the original SDK for older models
+		// Use the original SDK for older models (gemini-2.0 and below)
 		v1Opts := convertToV1Options(options)
 		g.v1Client, err = googleai.New(ctx, v1Opts...)
 	}
@@ -123,7 +127,7 @@ func (g *GoogleAI) GenerateContent(ctx context.Context, messages []llms.MessageC
 		effectiveModel = g.opts.DefaultModel
 	}
 
-	useV2 := IsGemini3OrNewer(effectiveModel)
+	useV2 := UseV2Client(effectiveModel)
 
 	// If the model requires a different provider than what we have initialized,
 	// we need to use the appropriate client
