@@ -1,8 +1,8 @@
 // Package google provides a unified interface for Google AI LLMs that automatically
 // selects the appropriate underlying provider based on the model being used.
 //
-// For gemini-2.5+ models, this package uses googleaiv2 (google.golang.org/genai SDK).
-// For older models (gemini-2.0, gemini-1.x, etc.), it uses googleai (github.com/google/generative-ai-go SDK).
+// For gemini-3+ models, this package uses googleaiv2 (google.golang.org/genai SDK).
+// For older models (gemini-2.x, gemini-1.x, etc.), it uses googleai (github.com/google/generative-ai-go SDK).
 //
 // This allows seamless migration to newer models without changing client code.
 package google
