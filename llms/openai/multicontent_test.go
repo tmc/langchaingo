@@ -147,8 +147,12 @@ func TestWithStreaming(t *testing.T) {
 	assert.Regexp(t, "dog|canid", strings.ToLower(sb.String()))
 }
 
+// TestFunctionCallDeprecated tests the deprecated WithFunctions API.
+// This ensures backward compatibility for users who haven't migrated to WithTools.
+// Deprecated: This test covers the deprecated llms.WithFunctions option.
+//
 //nolint:lll
-func TestFunctionCall(t *testing.T) {
+func TestFunctionCallDeprecated(t *testing.T) {
 	ctx := context.Background()
 	llm := newTestClient(t)
 
@@ -172,6 +176,43 @@ func TestFunctionCall(t *testing.T) {
 
 	rsp, err := llm.GenerateContent(ctx, content,
 		llms.WithFunctions(functions))
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	assert.Equal(t, "tool_calls", c1.StopReason)
+	assert.NotNil(t, c1.FuncCall)
+}
+
+// TestFunctionCall tests function calling using the recommended WithTools API.
+//
+//nolint:lll
+func TestFunctionCall(t *testing.T) {
+	ctx := context.Background()
+	llm := newTestClient(t)
+
+	parts := []llms.ContentPart{
+		llms.TextPart("What is the weather like in Boston?"),
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters:  json.RawMessage(`{"type": "object", "properties": {"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}}, "required": ["location"]}`),
+			},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(ctx, content,
+		llms.WithTools(tools))
 	require.NoError(t, err)
 
 	assert.NotEmpty(t, rsp.Choices)

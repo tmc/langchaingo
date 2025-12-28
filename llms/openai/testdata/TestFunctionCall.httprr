@@ -1,5 +1,5 @@
 httprr trace v1
-665 1850
+665 1877
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,27 +13,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Wed, 20 Aug 2025 13:06:40 GMT
+Date: Sun, 28 Dec 2025 20:35:38 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 437
-Openai-Project: proj_qm9GQ7k7ESiwosypKZaDuaoq
+Openai-Processing-Ms: 258
+Openai-Project: proj_7vBEGvznb5V2H5RQiY5niu9q
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 466
+X-Envoy-Upstream-Service-Time: 536
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 49999989
+X-Ratelimit-Remaining-Tokens: 49999988
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_b0e29abccfdc4d798f989feba1d6262b
+X-Request-Id: req_d18be9910ddd446ea75f9181ef5ce91a
 
 {
-  "id": "chatcmpl-C6coS1jncfSG1hcFv7v36PkpgHlBq",
+  "id": "chatcmpl-CrrmEiTO4NWZASpQnfk8iEIEIwvXs",
   "object": "chat.completion",
-  "created": 1755695200,
+  "created": 1766954138,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {
@@ -43,7 +44,7 @@ X-Request-Id: req_b0e29abccfdc4d798f989feba1d6262b
         "content": null,
         "tool_calls": [
           {
-            "id": "call_olc8qHf1RDItRqwuEBNjsu3B",
+            "id": "call_fhduNHPjC1IX4a7JKY3Mxx1Y",
             "type": "function",
             "function": {
               "name": "getCurrentWeather",
