@@ -12,7 +12,7 @@ import (
 	"github.com/tmc/langchaingo/internal/httprr"
 )
 
-const testURL = "https://api-inference.huggingface.co"
+const testURL = "https://router.huggingface.co/hf-inference"
 
 func TestClient_RunInference(t *testing.T) {
 	ctx := context.Background()
