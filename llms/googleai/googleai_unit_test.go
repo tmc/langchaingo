@@ -347,24 +347,30 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Nil(t, result)
 	})
 
-	t.Run("missing properties in parameters", func(t *testing.T) {
+	t.Run("zero argument tool (no properties)", func(t *testing.T) {
 		tools := []llms.Tool{
 			{
 				Type: "function",
 				Function: &llms.FunctionDefinition{
-					Name:        "test",
-					Description: "test function",
+					Name:        "get_current_time",
+					Description: "Get the current time",
 					Parameters: map[string]any{
 						"type": "object",
-						// missing properties
+						// no properties for zero-argument tools
 					},
 				},
 			},
 		}
 		result, err := convertTools(tools)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "expected to find a map of properties")
-		assert.Nil(t, result)
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Len(t, result[0].FunctionDeclarations, 1)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		assert.Equal(t, "get_current_time", funcDecl.Name)
+		assert.Equal(t, "Get the current time", funcDecl.Description)
+		assert.NotNil(t, funcDecl.Parameters)
+		assert.Equal(t, 0, len(funcDecl.Parameters.Properties))
 	})
 
 	t.Run("valid function tool", func(t *testing.T) {
