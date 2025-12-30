@@ -224,7 +224,11 @@ func (mc *markdownContext) onMDHeader() {
 		return
 	}
 
-	mc.applyToChunks() // change header, apply to chunks
+	// Only apply to chunks if the current title has been used (prepended to content)
+	// This prevents creating empty chunks for consecutive headers
+	if mc.hTitlePrepended {
+		mc.applyToChunks() // change header, apply to chunks
+	}
 
 	hm := repeatString(header.HLevel, "#")
 	mc.hTitle = fmt.Sprintf("%s %s", hm, inline.Content)

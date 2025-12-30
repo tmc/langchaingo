@@ -45,15 +45,11 @@ community looks forward to your contributions. 🎉
 
 ---
 
-## Code of Conduct
+## I Have a Question
 This project and everyone participating in it is governed by the
 [langchaingo Code of Conduct](/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
 to <travis.cline@gmail.com>.
-
----
-
-## I Have a Question
 > If you want to ask a question, we assume that you have read the
 > available [Documentation](https://pkg.go.dev/github.com/tmc/langchaingo).
 
@@ -79,10 +75,6 @@ We will then take care of the issue as soon as possible.
 > ### Legal Notice
 > When contributing to this project, you must agree that you have authored 100% of the content, that you have the
 > necessary rights to the content and that the content you contribute may be provided under the project license.
-
----
-
-### Reporting Bugs
 
 ---
 
@@ -159,15 +151,15 @@ as `critical`), and the issue will be left to be [implemented by someone](#your-
 
 ---
 
-### Suggesting Enhancements
+#### Before Submitting an Enhancement
 This section guides you through submitting an enhancement suggestion for langchaingo, **including completely new
 features and minor improvements to existing functionality**. Following these guidelines will help maintainers and the
 community to understand your suggestion and find related suggestions.
+- Make sure that you are using the latest version.
 
 ---
 
 #### Before Submitting an Enhancement
-- Make sure that you are using the latest version.
 - Read the [documentation](https://pkg.go.dev/github.com/tmc/langchaingo) carefully and find out if the functionality is
 already covered, maybe by an individual configuration.
 - Perform a [search](https://github.com/tmc/langchaingo/issues) to see if the enhancement has already been suggested. If
@@ -214,23 +206,15 @@ associated concepts in those codebases when introducing a new concept.
 
 ---
 
-### Your First Code Contribution
-
----
-
-#### Make Changes
-
----
-
-##### Make changes in the UI
+##### Make changes locally
 Click **Make a contribution** at the bottom of any docs page to make small changes such as a typo, sentence fix, or a
 broken link. This takes you to the `.md` file where you can make your changes and [create a pull request](#pull-request)
 for a review.
+1. Fork the repository.
 
 ---
 
 ##### Make changes locally
-1. Fork the repository.
 - Using GitHub Desktop:
   - [Getting started with GitHub Desktop](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/getting-started-with-github-desktop)
   will guide you through setting up Desktop.
@@ -248,12 +232,8 @@ for a review.
 
 ---
 
-#### Commit your update
-Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process:zap:.
-
----
-
 #### Pull Request
+Commit the changes once you are happy with them. Don't forget to self-review to speed up the review process:zap:.
 When you're finished with the changes, create a pull request, also known as a PR.
 - Name your Pull Request title clearly, concisely, and prefixed with the name of primarily affected package you changed
 according to [Go Contribute Guideline](https://go.dev/doc/contribute#commit_messages). (such
