@@ -224,9 +224,9 @@ func (mc *markdownContext) onMDHeader() {
 		return
 	}
 
-	// Only apply to chunks if the current title has been used (prepended to content)
+	// Only apply to chunks if there's accumulated content
 	// This prevents creating empty chunks for consecutive headers
-	if mc.hTitlePrepended {
+	if mc.curSnippet != "" {
 		mc.applyToChunks() // change header, apply to chunks
 	}
 

@@ -41,8 +41,7 @@ Some content below h1>h2>h4.
 			expectedDocs: []schema.Document{
 				{
 					// After fix: consecutive headers are kept together with content
-					PageContent: `## Second header: h2
-### Third header: h3
+					PageContent: `## First header: h2
 Some content below the first h2.`,
 					Metadata: map[string]any{},
 				},
@@ -67,9 +66,13 @@ Some content below the first h2.`,
 				{
 					// After fix: consecutive headers are kept together with content
 					PageContent: `# Fourth header: h1
+Some content below the first h1.`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `# Fourth header: h1
 ## Fifth header: h2
 #### Sixth header: h4
-Some content below the first h1.
 Some content below h1>h2>h4.`,
 					Metadata: map[string]any{},
 				},
@@ -334,10 +337,14 @@ for a review.
 			expectedDocs: []schema.Document{
 				{
 					// After fix: consecutive headers are combined with their content
-					PageContent: `##### Make changes locally
+					PageContent: `##### Make changes in the UI
 Click **Make a contribution** at the bottom of any docs page to make small changes such as a typo, sentence fix, or a
 broken link. This takes you to the .md file where you can make your changes and [create a pull request](#pull-request)
-for a review.
+for a review.`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `##### Make changes locally
 1. Fork the repository.
 2. Install or make sure **Golang** is updated.
 3. Create a working branch and start with your changes!`, Metadata: map[string]any{},
