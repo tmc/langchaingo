@@ -210,6 +210,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
+	// Extract extra_body if provided
+	var extraBody map[string]any
+	if opts.Metadata != nil {
+		if v, ok := opts.Metadata["openai:extra_body"].(map[string]interface{}); ok {
+			extraBody = v
+		}
+	}
+
 	// Extract reasoning effort for thinking models
 	// Note: OpenAI o1/o3 models have built-in reasoning and don't support reasoning_effort parameter
 	// This is kept for future models that might support it (like GPT-5)
@@ -293,6 +301,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
+		ExtraBody:            extraBody,
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON

@@ -83,11 +83,17 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// ExtraBody allows passing custom parameters directly to the OpenAI API.
+	// This is useful for beta features or new parameters not yet supported by the library.
+	// Fields in ExtraBody will be merged into the JSON request body.
+	ExtraBody map[string]any `json:"-"`
 }
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
 // OpenAI's API returns an error if both fields are present.
 // Also omits temperature for reasoning models (GPT-5, o1, o3) that only accept default temperature.
+// Additionally, merges ExtraBody fields into the JSON request.
 func (r ChatRequest) MarshalJSON() ([]byte, error) {
 	type Alias ChatRequest
 	aux := struct {
@@ -123,7 +129,29 @@ func (r ChatRequest) MarshalJSON() ([]byte, error) {
 		aux.MaxCompletionTokens = nil
 	}
 
-	return json.Marshal(&aux)
+	// Marshal the base request
+	baseJSON, err := json.Marshal(&aux)
+	if err != nil {
+		return nil, err
+	}
+
+	// If no ExtraBody, return the base JSON
+	if len(r.ExtraBody) == 0 {
+		return baseJSON, nil
+	}
+
+	// Merge ExtraBody fields into the base JSON
+	var baseMap map[string]any
+	if err := json.Unmarshal(baseJSON, &baseMap); err != nil {
+		return nil, err
+	}
+
+	// Merge ExtraBody fields (ExtraBody takes precedence if there are conflicts)
+	for k, v := range r.ExtraBody {
+		baseMap[k] = v
+	}
+
+	return json.Marshal(baseMap)
 }
 
 // isReasoningModel returns true if the model is a reasoning model that has temperature constraints.
