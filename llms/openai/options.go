@@ -37,3 +37,26 @@ func WithLegacyMaxTokensField() llms.CallOption {
 		opts.Metadata["openai:use_legacy_max_tokens"] = true
 	}
 }
+
+// WithExtraBody allows passing custom parameters directly to the OpenAI API.
+// This is useful for beta features or new parameters not yet supported by the library.
+// Fields in extraBody will be merged into the JSON request body.
+//
+// Usage:
+//
+//	llm.GenerateContent(ctx, messages,
+//	    openai.WithExtraBody(map[string]interface{}{
+//	        "parallel_tool_calls": false,
+//	    }),
+//	)
+func WithExtraBody(extraBody map[string]interface{}) llms.CallOption {
+	return func(opts *llms.CallOptions) {
+		// Only set if extraBody is not empty
+		if len(extraBody) > 0 {
+			if opts.Metadata == nil {
+				opts.Metadata = make(map[string]interface{})
+			}
+			opts.Metadata["openai:extra_body"] = extraBody
+		}
+	}
+}

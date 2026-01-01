@@ -73,3 +73,48 @@ func TestWithLegacyMaxTokensField(t *testing.T) {
 		t.Error("expected openai:use_legacy_max_tokens to be true")
 	}
 }
+
+func TestWithExtraBody(t *testing.T) {
+	opts := &llms.CallOptions{}
+
+	// Test that WithExtraBody sets the metadata
+	extraBody := map[string]interface{}{
+		"parallel_tool_calls": false,
+		"custom_param":        "test_value",
+	}
+	WithExtraBody(extraBody)(opts)
+	if opts.Metadata == nil {
+		t.Fatal("expected Metadata to be initialized")
+	}
+	if v, ok := opts.Metadata["openai:extra_body"].(map[string]interface{}); !ok {
+		t.Error("expected openai:extra_body to be set")
+	} else {
+		if v["parallel_tool_calls"] != false {
+			t.Error("expected parallel_tool_calls to be false")
+		}
+		if v["custom_param"] != "test_value" {
+			t.Error("expected custom_param to be test_value")
+		}
+	}
+
+	// Test with empty extra body - should not set metadata
+	opts2 := &llms.CallOptions{}
+	emptyExtra := map[string]interface{}{}
+	WithExtraBody(emptyExtra)(opts2)
+	// Empty extra body should not create metadata
+	if opts2.Metadata != nil {
+		if _, exists := opts2.Metadata["openai:extra_body"]; exists {
+			t.Error("expected openai:extra_body to not be set for empty map")
+		}
+	}
+
+	// Test with nil extra body - should not set metadata
+	opts3 := &llms.CallOptions{}
+	WithExtraBody(nil)(opts3)
+	// Nil extra body should not create metadata
+	if opts3.Metadata != nil {
+		if _, exists := opts3.Metadata["openai:extra_body"]; exists {
+			t.Error("expected openai:extra_body to not be set for nil")
+		}
+	}
+}

@@ -211,3 +211,129 @@ func TestIsReasoningModel(t *testing.T) {
 		})
 	}
 }
+
+func TestChatRequest_ExtraBodyMarshalJSON(t *testing.T) {
+	tests := []struct {
+		name      string
+		request   ChatRequest
+		wantExtra map[string]interface{}
+	}{
+		{
+			name: "with extra_body",
+			request: ChatRequest{
+				Model: "gpt-4",
+				ExtraBody: map[string]any{
+					"parallel_tool_calls": false,
+					"custom_param":        "test_value",
+				},
+			},
+			wantExtra: map[string]interface{}{
+				"parallel_tool_calls": false,
+				"custom_param":        "test_value",
+			},
+		},
+		{
+			name: "without extra_body",
+			request: ChatRequest{
+				Model: "gpt-4",
+			},
+			wantExtra: nil,
+		},
+		{
+			name: "empty extra_body",
+			request: ChatRequest{
+				Model:     "gpt-4",
+				ExtraBody: map[string]any{},
+			},
+			wantExtra: nil,
+		},
+		{
+			name: "extra_body with nested objects",
+			request: ChatRequest{
+				Model: "gpt-4",
+				ExtraBody: map[string]any{
+					"nested": map[string]interface{}{
+						"key1": "value1",
+						"key2": 123,
+					},
+				},
+			},
+			wantExtra: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "value1",
+					"key2": float64(123),
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := json.Marshal(tt.request)
+			if err != nil {
+				t.Fatalf("failed to marshal: %v", err)
+			}
+
+			var result map[string]interface{}
+			if err := json.Unmarshal(data, &result); err != nil {
+				t.Fatalf("failed to unmarshal: %v", err)
+			}
+
+			if tt.wantExtra == nil {
+				// Check that extra_body fields are not present
+				for key := range tt.request.ExtraBody {
+					if _, exists := result[key]; exists {
+						t.Errorf("unexpected extra_body field %q in result", key)
+					}
+				}
+			} else {
+				// Check that all extra_body fields are present in result
+				for key, wantValue := range tt.wantExtra {
+					gotValue, exists := result[key]
+					if !exists {
+						t.Errorf("missing extra_body field %q in result", key)
+						continue
+					}
+
+					// For nested maps, need deep comparison
+					wantJSON, _ := json.Marshal(wantValue)
+					gotJSON, _ := json.Marshal(gotValue)
+					if string(wantJSON) != string(gotJSON) {
+						t.Errorf("extra_body field %q: got %v, want %v", key, gotValue, wantValue)
+					}
+				}
+			}
+
+			// Verify model field is still present
+			if result["model"] != tt.request.Model {
+				t.Errorf("model field: got %v, want %v", result["model"], tt.request.Model)
+			}
+		})
+	}
+}
+
+func TestChatRequest_ExtraBodyOverridesFields(t *testing.T) {
+	// Test that ExtraBody can override standard fields
+	request := ChatRequest{
+		Model:       "gpt-4",
+		Temperature: 0.7,
+		ExtraBody: map[string]any{
+			"temperature": 0.9,
+		},
+	}
+
+	data, err := json.Marshal(request)
+	if err != nil {
+		t.Fatalf("failed to marshal: %v", err)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(data, &result); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	// ExtraBody should take precedence
+	if temp := result["temperature"].(float64); temp != 0.9 {
+		t.Errorf("temperature: got %v, want 0.9 (from ExtraBody)", temp)
+	}
+}
