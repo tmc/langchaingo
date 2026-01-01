@@ -51,8 +51,8 @@ func WithLegacyMaxTokensField() llms.CallOption {
 //	)
 func WithExtraBody(extraBody map[string]interface{}) llms.CallOption {
 	return func(opts *llms.CallOptions) {
-		// Only set if extraBody is not nil and not empty
-		if extraBody != nil && len(extraBody) > 0 {
+		// Only set if extraBody is not empty
+		if len(extraBody) > 0 {
 			if opts.Metadata == nil {
 				opts.Metadata = make(map[string]interface{})
 			}
