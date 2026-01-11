@@ -406,9 +406,9 @@ func convertSchemaRecursive(schemaMap map[string]any, toolIndex int, propertyPat
 	schema := &genai.Schema{}
 
 	if ty, ok := schemaMap["type"]; ok {
-		tyString, ok := ty.(string)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d], property [%s]: expected string for type", toolIndex, propertyPath)
+		tyString := normalizeSchemaType(ty)
+		if tyString == "" {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected string for type, got %T", toolIndex, propertyPath, ty)
 		}
 		schema.Type = convertToolSchemaType(tyString)
 	}
@@ -531,6 +531,37 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 	genaiTools := []*genai.Tool{{FunctionDeclarations: genaiFuncDecls}}
 
 	return genaiTools, nil
+}
+
+// normalizeSchemaType handles JSON Schema type which can be either a string
+// ("string") or an array (["string", "null"]). Per JSON Schema specification,
+// the type keyword may be an array to allow multiple types. This commonly
+// occurs with nullable fields. When an array, we pick the first non-null type.
+// See: https://json-schema.org/understanding-json-schema/reference/type
+func normalizeSchemaType(ty any) string {
+	switch v := ty.(type) {
+	case string:
+		return v
+	case []any:
+		// Pick the first non-null type from the array
+		for _, t := range v {
+			if s, ok := t.(string); ok && s != "null" {
+				return s
+			}
+		}
+		// If only null, return empty
+		return ""
+	case []string:
+		// Handle typed string slice
+		for _, s := range v {
+			if s != "null" {
+				return s
+			}
+		}
+		return ""
+	default:
+		return ""
+	}
 }
 
 // convertToolSchemaType converts a tool's schema type from its langchaingo

@@ -307,6 +307,56 @@ func TestConvertToolSchemaType(t *testing.T) {
 	}
 }
 
+func TestNormalizeSchemaType(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    any
+		expected string
+	}{
+		// Simple string types
+		{"string type", "string", "string"},
+		{"object type", "object", "object"},
+		{"array type", "array", "array"},
+		{"number type", "number", "number"},
+		{"integer type", "integer", "integer"},
+		{"boolean type", "boolean", "boolean"},
+		{"empty string", "", ""},
+
+		// Nullable types ([]any - JSON unmarshaled)
+		{"nullable string []any", []any{"string", "null"}, "string"},
+		{"nullable number []any", []any{"number", "null"}, "number"},
+		{"nullable integer []any", []any{"integer", "null"}, "integer"},
+		{"nullable boolean []any", []any{"boolean", "null"}, "boolean"},
+		{"nullable object []any", []any{"object", "null"}, "object"},
+		{"nullable array []any", []any{"array", "null"}, "array"},
+		{"null first []any", []any{"null", "string"}, "string"},
+		{"only null []any", []any{"null"}, ""},
+		{"empty []any", []any{}, ""},
+
+		// Nullable types ([]string)
+		{"nullable string []string", []string{"string", "null"}, "string"},
+		{"nullable integer []string", []string{"integer", "null"}, "integer"},
+		{"null first []string", []string{"null", "boolean"}, "boolean"},
+		{"only null []string", []string{"null"}, ""},
+		{"empty []string", []string{}, ""},
+
+		// Edge cases
+		{"nil input", nil, ""},
+		{"invalid type int", 123, ""},
+		{"invalid type bool", true, ""},
+		{"invalid type float", 1.5, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := normalizeSchemaType(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
 func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //nolint:funlen // comprehensive test
 	t.Parallel()
 
@@ -568,5 +618,208 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Len(t, customizationsProp.Items.Properties, 2)
 		assert.Contains(t, customizationsProp.Items.Required, "option")
 		assert.Contains(t, customizationsProp.Items.Required, "value")
+	})
+
+	// Nullable type tests - JSON Schema allows type to be an array like ["string", "null"]
+	// See: https://json-schema.org/understanding-json-schema/reference/type
+	t.Run("nullable property type", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name:        "create_item",
+					Description: "Create an item with optional field",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"name": map[string]any{
+								"type":        "string",
+								"description": "Item name",
+							},
+							"description": map[string]any{
+								"type":        []any{"string", "null"}, // Nullable!
+								"description": "Optional description",
+							},
+						},
+						"required": []string{"name"},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		assert.Len(t, result, 1)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		assert.Equal(t, "create_item", funcDecl.Name)
+		// Verify the nullable field was converted to string type
+		descProp := funcDecl.Parameters.Properties["description"]
+		assert.NotNil(t, descProp)
+		assert.Equal(t, "TypeString", descProp.Type.String())
+	})
+
+	t.Run("nullable property with null first", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "test_func",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"field": map[string]any{
+								"type": []any{"null", "integer"}, // null comes first
+							},
+						},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		fieldProp := funcDecl.Parameters.Properties["field"]
+		assert.Equal(t, "TypeInteger", fieldProp.Type.String())
+	})
+
+	t.Run("nested nullable types", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "create_user",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"profile": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"nickname": map[string]any{
+										"type": []any{"string", "null"},
+									},
+									"age": map[string]any{
+										"type": []any{"integer", "null"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		profile := funcDecl.Parameters.Properties["profile"]
+		assert.Equal(t, "TypeString", profile.Properties["nickname"].Type.String())
+		assert.Equal(t, "TypeInteger", profile.Properties["age"].Type.String())
+	})
+
+	t.Run("array with nullable items", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "process_items",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"items": map[string]any{
+								"type": "array",
+								"items": map[string]any{
+									"type": []any{"string", "null"},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		items := funcDecl.Parameters.Properties["items"]
+		assert.Equal(t, "TypeArray", items.Type.String())
+		assert.Equal(t, "TypeString", items.Items.Type.String())
+	})
+
+	t.Run("deeply nested nullable", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "complex_func",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"level1": map[string]any{
+								"type": "object",
+								"properties": map[string]any{
+									"level2": map[string]any{
+										"type": "object",
+										"properties": map[string]any{
+											"level3": map[string]any{
+												"type": []any{"number", "null"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		level1 := funcDecl.Parameters.Properties["level1"]
+		level2 := level1.Properties["level2"]
+		level3 := level2.Properties["level3"]
+		assert.Equal(t, "TypeNumber", level3.Type.String())
+	})
+
+	t.Run("mixed nullable and non-nullable", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "mixed_func",
+					Parameters: map[string]any{
+						"type": "object",
+						"properties": map[string]any{
+							"required_field": map[string]any{
+								"type": "string",
+							},
+							"optional_string": map[string]any{
+								"type": []any{"string", "null"},
+							},
+							"optional_number": map[string]any{
+								"type": []any{"null", "number"},
+							},
+							"optional_bool": map[string]any{
+								"type": []any{"boolean", "null"},
+							},
+						},
+						"required": []string{"required_field"},
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+
+		params := result[0].FunctionDeclarations[0].Parameters
+		assert.Equal(t, "TypeString", params.Properties["required_field"].Type.String())
+		assert.Equal(t, "TypeString", params.Properties["optional_string"].Type.String())
+		assert.Equal(t, "TypeNumber", params.Properties["optional_number"].Type.String())
+		assert.Equal(t, "TypeBoolean", params.Properties["optional_bool"].Type.String())
+		assert.Contains(t, params.Required, "required_field")
 	})
 }

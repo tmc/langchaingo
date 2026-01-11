@@ -35,6 +35,58 @@ func TestConvertToolSchemaType(t *testing.T) {
 	}
 }
 
+func TestNormalizeSchemaType(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    any
+		expected string
+	}{
+		// Simple string types
+		{"string type", "string", "string"},
+		{"object type", "object", "object"},
+		{"array type", "array", "array"},
+		{"number type", "number", "number"},
+		{"integer type", "integer", "integer"},
+		{"boolean type", "boolean", "boolean"},
+		{"empty string", "", ""},
+
+		// Nullable types ([]any - JSON unmarshaled)
+		{"nullable string []any", []any{"string", "null"}, "string"},
+		{"nullable number []any", []any{"number", "null"}, "number"},
+		{"nullable integer []any", []any{"integer", "null"}, "integer"},
+		{"nullable boolean []any", []any{"boolean", "null"}, "boolean"},
+		{"nullable object []any", []any{"object", "null"}, "object"},
+		{"nullable array []any", []any{"array", "null"}, "array"},
+		{"null first []any", []any{"null", "string"}, "string"},
+		{"only null []any", []any{"null"}, ""},
+		{"empty []any", []any{}, ""},
+
+		// Nullable types ([]string)
+		{"nullable string []string", []string{"string", "null"}, "string"},
+		{"nullable integer []string", []string{"integer", "null"}, "integer"},
+		{"null first []string", []string{"null", "boolean"}, "boolean"},
+		{"only null []string", []string{"null"}, ""},
+		{"empty []string", []string{}, ""},
+
+		// Edge cases
+		{"nil input", nil, ""},
+		{"invalid type int", 123, ""},
+		{"invalid type bool", true, ""},
+		{"invalid type float", 1.5, ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := normalizeSchemaType(tt.input)
+			if result != tt.expected {
+				t.Errorf("normalizeSchemaType(%v) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestConvertParts(t *testing.T) { //nolint:funlen // comprehensive test //nolint:funlen // comprehensive test
 	tests := []struct {
 		name    string
@@ -573,6 +625,121 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 				fd := result[0].FunctionDeclarations[0]
 				if len(fd.Parameters.Required) != 1 || fd.Parameters.Required[0] != "field" {
 					t.Errorf("expected required=['field'], got %v", fd.Parameters.Required)
+				}
+			},
+		},
+		// Nullable type tests - JSON Schema allows type to be an array like ["string", "null"]
+		// See: https://json-schema.org/understanding-json-schema/reference/type
+		{
+			name: "nullable property type",
+			tools: []llms.Tool{
+				{
+					Type: "function",
+					Function: &llms.FunctionDefinition{
+						Name:        "create_item",
+						Description: "Create an item with optional field",
+						Parameters: map[string]any{
+							"type": "object",
+							"properties": map[string]any{
+								"name": map[string]any{
+									"type":        "string",
+									"description": "Item name",
+								},
+								"description": map[string]any{
+									"type":        []any{"string", "null"}, // Nullable!
+									"description": "Optional description",
+								},
+							},
+							"required": []string{"name"},
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, result []*genai.Tool) {
+				fd := result[0].FunctionDeclarations[0]
+				if fd.Name != "create_item" {
+					t.Errorf("expected function name 'create_item', got %q", fd.Name)
+				}
+				descProp := fd.Parameters.Properties["description"]
+				if descProp == nil {
+					t.Fatal("expected 'description' property to exist")
+				}
+				if descProp.Type != genai.TypeString {
+					t.Errorf("expected nullable string to convert to TypeString, got %v", descProp.Type)
+				}
+			},
+		},
+		{
+			name: "nullable property with null first",
+			tools: []llms.Tool{
+				{
+					Type: "function",
+					Function: &llms.FunctionDefinition{
+						Name: "test_func",
+						Parameters: map[string]any{
+							"type": "object",
+							"properties": map[string]any{
+								"field": map[string]any{
+									"type": []any{"null", "integer"}, // null comes first
+								},
+							},
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, result []*genai.Tool) {
+				fd := result[0].FunctionDeclarations[0]
+				fieldProp := fd.Parameters.Properties["field"]
+				if fieldProp.Type != genai.TypeInteger {
+					t.Errorf("expected nullable integer to convert to TypeInteger, got %v", fieldProp.Type)
+				}
+			},
+		},
+		{
+			name: "mixed nullable and non-nullable",
+			tools: []llms.Tool{
+				{
+					Type: "function",
+					Function: &llms.FunctionDefinition{
+						Name: "mixed_func",
+						Parameters: map[string]any{
+							"type": "object",
+							"properties": map[string]any{
+								"required_field": map[string]any{
+									"type": "string",
+								},
+								"optional_string": map[string]any{
+									"type": []any{"string", "null"},
+								},
+								"optional_number": map[string]any{
+									"type": []any{"null", "number"},
+								},
+								"optional_bool": map[string]any{
+									"type": []any{"boolean", "null"},
+								},
+							},
+							"required": []string{"required_field"},
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, result []*genai.Tool) {
+				fd := result[0].FunctionDeclarations[0]
+				props := fd.Parameters.Properties
+				if props["required_field"].Type != genai.TypeString {
+					t.Errorf("expected required_field to be TypeString, got %v", props["required_field"].Type)
+				}
+				if props["optional_string"].Type != genai.TypeString {
+					t.Errorf("expected optional_string to be TypeString, got %v", props["optional_string"].Type)
+				}
+				if props["optional_number"].Type != genai.TypeNumber {
+					t.Errorf("expected optional_number to be TypeNumber, got %v", props["optional_number"].Type)
+				}
+				if props["optional_bool"].Type != genai.TypeBoolean {
+					t.Errorf("expected optional_bool to be TypeBoolean, got %v", props["optional_bool"].Type)
+				}
+				if len(fd.Parameters.Required) != 1 || fd.Parameters.Required[0] != "required_field" {
+					t.Errorf("expected required=['required_field'], got %v", fd.Parameters.Required)
 				}
 			},
 		},
