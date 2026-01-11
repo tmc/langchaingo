@@ -7,11 +7,8 @@ This directory contains langchaingo provider for Google's models.
 * In the `palm` directory: provider for the legacy PaLM models.
 
 Both the `googleai` and `vertex` providers give access to Gemini-family
-multi-modal LLMs. The code between these providers is very similar; therefore,
-most of the `vertex` package is code-generated from the `googleai` package using
-a tool:
-
-    go run ./llms/googleai/internal/cmd/generate-vertex.go < llms/googleai/googleai.go > llms/googleai/vertex/vertex.go
+multi-modal LLMs. The `vertex` package implements Vertex AI functionality
+using `google.golang.org/genai` library.
 
 ----
 
