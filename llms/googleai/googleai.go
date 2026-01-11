@@ -447,8 +447,8 @@ func convertSchemaRecursive(schemaMap map[string]any, toolIndex int, propertyPat
 			schema.Properties[propName] = nestedSchema
 		}
 	} else if schema.Type == genai.TypeObject && propertyPath == "" {
-		// For top-level object schemas without properties, this is an error
-		return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", toolIndex)
+		// For top-level object schemas without properties, allow empty properties (zero-argument tools)
+		schema.Properties = make(map[string]*genai.Schema)
 	}
 
 	// Handle array items recursively

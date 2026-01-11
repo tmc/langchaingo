@@ -512,6 +512,43 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 			},
 		},
 		{
+			name: "zero argument tool (no properties)",
+			tools: []llms.Tool{
+				{
+					Type: "function",
+					Function: &llms.FunctionDefinition{
+						Name:        "get_current_time",
+						Description: "Get the current time",
+						Parameters: map[string]any{
+							"type": "object",
+							// no properties for zero-argument tools
+						},
+					},
+				},
+			},
+			check: func(t *testing.T, result []*genai.Tool) {
+				if len(result) != 1 {
+					t.Fatalf("expected 1 tool, got %d", len(result))
+				}
+				if len(result[0].FunctionDeclarations) != 1 {
+					t.Fatalf("expected 1 function declaration, got %d", len(result[0].FunctionDeclarations))
+				}
+				fd := result[0].FunctionDeclarations[0]
+				if fd.Name != "get_current_time" {
+					t.Errorf("expected function name 'get_current_time', got %q", fd.Name)
+				}
+				if fd.Description != "Get the current time" {
+					t.Errorf("expected description, got %q", fd.Description)
+				}
+				if fd.Parameters.Type != genai.TypeObject {
+					t.Errorf("expected object type, got %v", fd.Parameters.Type)
+				}
+				if len(fd.Parameters.Properties) != 0 {
+					t.Errorf("expected 0 properties for zero-argument tool, got %d", len(fd.Parameters.Properties))
+				}
+			},
+		},
+		{
 			name: "unsupported tool type",
 			tools: []llms.Tool{
 				{
