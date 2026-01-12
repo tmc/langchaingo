@@ -1,10 +1,14 @@
 package anthropic
 
 import (
+	"context"
+	"net/http"
 	"os"
 	"testing"
 
+	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/schema"
 )
 
 func TestNew(t *testing.T) {
@@ -42,6 +46,14 @@ func TestNew(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:     "with callback handler",
+			envToken: "test-token",
+			opts: []Option{
+				WithCallback(&testCallbackHandler{}),
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -57,6 +69,72 @@ func TestNew(t *testing.T) {
 				t.Error("New() returned nil LLM without error")
 			}
 		})
+	}
+}
+
+func TestNew_CallbackHandlerWiring(t *testing.T) {
+	handler := &testCallbackHandler{}
+	llm, err := New(WithCallback(handler))
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	if llm.CallbacksHandler != handler {
+		t.Error("New() did not wire callback handler to LLM.CallbacksHandler")
+	}
+}
+
+func TestCallbacksHandler(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ANTHROPIC_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Only run parallel when not recording
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	var opts []Option
+
+	// Use test token when replaying, real token when recording
+	if rr.Replaying() {
+		opts = append(opts, WithToken("test-api-key"))
+	}
+
+	opts = append(opts, WithHTTPClient(rr.Client()))
+
+	handler := &testCallbackHandler{}
+	opts = append(opts, WithCallback(handler))
+
+	llm, err := New(opts...)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextContent{Text: "test"},
+			},
+		},
+	}
+
+	_, err = llm.GenerateContent(context.Background(), messages)
+	// The callback handler should always be called for start
+	if !handler.startCalled {
+		t.Error("Expected HandleLLMGenerateContentStart to be called")
+	}
+
+	// For successful requests, end should be called; for errors, error should be called
+	if err != nil {
+		if !handler.errorCalled {
+			t.Error("Expected HandleLLMError to be called on error")
+		}
+	} else {
+		if !handler.endCalled {
+			t.Error("Expected HandleLLMGenerateContentEnd to be called on success")
+		}
 	}
 }
 
@@ -217,6 +295,15 @@ func TestOptions(t *testing.T) {
 			t.Error("WithLegacyTextCompletionsAPI() did not set flag")
 		}
 	})
+
+	t.Run("WithCallback", func(t *testing.T) {
+		opts := &options{}
+		handler := &testCallbackHandler{}
+		WithCallback(handler)(opts)
+		if opts.callbackHandler != handler {
+			t.Error("WithCallback() did not set handler")
+		}
+	})
 }
 
 func TestCall(t *testing.T) {
@@ -230,3 +317,36 @@ func TestGenerateMessagesContent_EmptyContent(t *testing.T) {
 	// returns a response with nil or empty content (addresses issue #993)
 	t.Skip("Requires mock client - would demonstrate panic without len(result.Content) == 0 check")
 }
+
+type testCallbackHandler struct {
+	startCalled bool
+	endCalled   bool
+	errorCalled bool
+}
+
+func (h *testCallbackHandler) HandleLLMGenerateContentStart(ctx context.Context, messages []llms.MessageContent) {
+	h.startCalled = true
+}
+
+func (h *testCallbackHandler) HandleLLMGenerateContentEnd(ctx context.Context, resp *llms.ContentResponse) {
+	h.endCalled = true
+}
+
+func (h *testCallbackHandler) HandleLLMError(ctx context.Context, err error) {
+	h.errorCalled = true
+}
+
+func (h *testCallbackHandler) HandleText(ctx context.Context, text string)                      {}
+func (h *testCallbackHandler) HandleLLMStart(ctx context.Context, prompts []string)             {}
+func (h *testCallbackHandler) HandleChainStart(ctx context.Context, inputs map[string]any)      {}
+func (h *testCallbackHandler) HandleChainEnd(ctx context.Context, outputs map[string]any)       {}
+func (h *testCallbackHandler) HandleChainError(ctx context.Context, err error)                  {}
+func (h *testCallbackHandler) HandleToolStart(ctx context.Context, input string)                {}
+func (h *testCallbackHandler) HandleToolEnd(ctx context.Context, output string)                 {}
+func (h *testCallbackHandler) HandleToolError(ctx context.Context, err error)                   {}
+func (h *testCallbackHandler) HandleAgentAction(ctx context.Context, action schema.AgentAction) {}
+func (h *testCallbackHandler) HandleAgentFinish(ctx context.Context, finish schema.AgentFinish) {}
+func (h *testCallbackHandler) HandleRetrieverStart(ctx context.Context, query string)           {}
+func (h *testCallbackHandler) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
+}
+func (h *testCallbackHandler) HandleStreamingFunc(ctx context.Context, chunk []byte) {}
