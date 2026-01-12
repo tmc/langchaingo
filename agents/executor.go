@@ -134,10 +134,19 @@ func (e *Executor) doAction(
 			Observation: fmt.Sprintf("%s is not a valid tool, try another one", action.Tool),
 		}), nil
 	}
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleToolStart(ctx, fmt.Sprintf("%s::(%s)", action.Tool, action.ToolInput))
+	}
 
 	observation, err := tool.Call(ctx, strings.TrimSuffix(action.ToolInput, "\nObservation:"))
 	if err != nil {
+		if e.CallbacksHandler != nil {
+			e.CallbacksHandler.HandleToolError(ctx, err)
+		}
 		return nil, err
+	}
+	if e.CallbacksHandler != nil {
+		e.CallbacksHandler.HandleToolEnd(ctx, observation)
 	}
 
 	return append(steps, schema.AgentStep{
