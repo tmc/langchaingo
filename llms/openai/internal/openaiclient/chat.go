@@ -717,8 +717,13 @@ func updateToolCalls(tools []ToolCall, delta []*ToolCall) ([]byte, []ToolCall) {
 		return []byte{}, tools
 	}
 	for _, t := range delta {
+		// skip empty tool calls (Sonnet does this when called via LiteLLM)
+		if t.Function.Name == "" && t.Function.Arguments == "" {
+			continue
+		}
+
 		// if we have arguments append to the last Tool call
-		if t.Type == `` && t.Function.Arguments != `` {
+		if t.Function.Name == `` && t.Function.Arguments != `` {
 			lindex := len(tools) - 1
 			if lindex < 0 {
 				continue
