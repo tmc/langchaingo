@@ -82,10 +82,6 @@ We will then take care of the issue as soon as possible.
 
 ---
 
-### Reporting Bugs
-
----
-
 #### Before Submitting a Bug Report
 A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to
 investigate carefully, collect information and describe the issue in detail in your report. Please complete the
@@ -211,14 +207,6 @@ associated concepts in those codebases when introducing a new concept.
 
 #### How Do I Submit a Good Enhancement Suggestion?
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
-
----
-
-### Your First Code Contribution
-
----
-
-#### Make Changes
 
 ---
 
