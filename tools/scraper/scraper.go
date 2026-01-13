@@ -215,7 +215,7 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 		scrapedLinksMutex.RLock()
 		if !scrapedLinks[u.String()] {
 			scrapedLinksMutex.RUnlock()
-			err := c.Visit(u.String())
+			err := e.Request.Visit(u.String())
 			if err != nil {
 				siteData.WriteString(fmt.Sprintf("\nError following link %s: %v", link, err))
 			}
