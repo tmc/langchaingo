@@ -2,6 +2,8 @@ package mongo
 
 import (
 	"errors"
+
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 const (
@@ -26,7 +28,7 @@ func applyMongoDBChatOptions(options ...ChatMessageHistoryOption) (*ChatMessageH
 		option(h)
 	}
 
-	if h.url == "" {
+	if h.url == "" && h.client == nil {
 		return nil, errMongoInvalidURL
 	}
 	if h.sessionID == "" {
@@ -62,5 +64,11 @@ func WithCollectionName(name string) ChatMessageHistoryOption {
 func WithDataBaseName(name string) ChatMessageHistoryOption {
 	return func(p *ChatMessageHistory) {
 		p.databaseName = name
+	}
+}
+
+func WithDataBaseClient(client *mongo.Client) ChatMessageHistoryOption {
+	return func(p *ChatMessageHistory) {
+		p.client = client
 	}
 }
