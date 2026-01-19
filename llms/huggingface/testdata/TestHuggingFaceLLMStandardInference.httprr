@@ -1,7 +1,7 @@
 httprr trace v1
-325 873
-POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
-Host: api-inference.huggingface.co
+324 873
+POST https://router.huggingface.co/hf-inference/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
+Host: router.huggingface.co
 User-Agent: langchaingo-httprr
 Content-Length: 80
 Authorization: Bearer test-api-key
