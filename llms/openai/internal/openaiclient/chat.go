@@ -681,12 +681,14 @@ func combineStreamingChatResponse(
 			chunk = updateFunctionCall(response.Choices[0].Message, choice.Delta.FunctionCall)
 		}
 
+		outputToTextStream := true
 		if len(choice.Delta.ToolCalls) > 0 {
 			chunk, response.Choices[0].Message.ToolCalls = updateToolCalls(response.Choices[0].Message.ToolCalls,
 				choice.Delta.ToolCalls)
+			outputToTextStream = false
 		}
 
-		if payload.StreamingFunc != nil {
+		if payload.StreamingFunc != nil && outputToTextStream {
 			err := payload.StreamingFunc(ctx, chunk)
 			if err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
