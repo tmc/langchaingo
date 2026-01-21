@@ -13,7 +13,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-func newTestClient(t *testing.T, opts ...Option) llms.Model {
+func newTestClient(t *testing.T, opts ...Option) *LLM {
 	t.Helper()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
