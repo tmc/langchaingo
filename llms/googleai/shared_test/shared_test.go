@@ -140,6 +140,7 @@ var testConfigs = []testConfig{
 	{testCandidateCountSetting, nil},
 	{testMaxTokensSetting, nil},
 	{testTools, nil},
+	{testMultipleTools, nil},
 	{testToolsWithInterfaceRequired, nil},
 	{
 		testMultiContentText,
@@ -413,7 +414,7 @@ func testWithStreaming(t *testing.T, llm llms.Model) {
 	checkMatch(t, sb.String(), "(dog|canid)")
 }
 
-func testTools(t *testing.T, llm llms.Model) {
+func testMultipleTools(t *testing.T, llm llms.Model) {
 	t.Helper()
 	t.Parallel()
 
@@ -429,6 +430,27 @@ func testTools(t *testing.T, llm llms.Model) {
 						"location": map[string]any{
 							"type":        "string",
 							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getWeatherForecast",
+				Description: "Get the weather forecast for the next 7 days in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+						"days": map[string]any{
+							"type":        "integer",
+							"description": "Number of days for the forecast, default is 7",
 						},
 					},
 					"required": []string{"location"},
@@ -533,6 +555,88 @@ func testToolsWithInterfaceRequired(t *testing.T, llm llms.Model) {
 	c1 := resp.Choices[0]
 	assert.Contains(t, c1.GenerationInfo, "output_tokens")
 	assert.NotZero(t, c1.GenerationInfo["output_tokens"])
+
+	// Update chat history with assistant's response, with its tool calls.
+	assistantResp := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+	}
+	for _, tc := range c1.ToolCalls {
+		assistantResp.Parts = append(assistantResp.Parts, tc)
+	}
+	content = append(content, assistantResp)
+
+	// "Execute" tool calls by calling requested function
+	for _, tc := range c1.ToolCalls {
+		switch tc.FunctionCall.Name {
+		case "getCurrentWeather":
+			var args struct {
+				Location string `json:"location"`
+			}
+			if err := json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Contains(args.Location, "Chicago") {
+				toolResponse := llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							Name:    tc.FunctionCall.Name,
+							Content: "64 and sunny",
+						},
+					},
+				}
+				content = append(content, toolResponse)
+			}
+		default:
+			t.Errorf("got unexpected function call: %v", tc.FunctionCall.Name)
+		}
+	}
+
+	resp, err = llm.GenerateContent(context.Background(), content, llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 = resp.Choices[0]
+	checkMatch(t, c1.Content, "(64 and sunny|64 degrees)")
+	assert.Contains(t, resp.Choices[0].GenerationInfo, "output_tokens")
+	assert.NotZero(t, resp.Choices[0].GenerationInfo["output_tokens"])
+}
+
+func testTools(t *testing.T, llm llms.Model) {
+	t.Helper()
+	t.Parallel()
+
+	availableTools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "getCurrentWeather",
+				Description: "Get the current weather in a given location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	content := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather like in Chicago?"),
+	}
+	resp, err := llm.GenerateContent(
+		context.Background(),
+		content,
+		llms.WithTools(availableTools))
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.Choices)
+
+	c1 := resp.Choices[0]
 
 	// Update chat history with assistant's response, with its tool calls.
 	assistantResp := llms.MessageContent{
