@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	defaultContentKey = "content"
+	defaultContentKey    = "content"
+	defaultWaitForInsert = true
 )
 
 // ErrInvalidOptions is returned when the options given are invalid.
@@ -56,9 +57,18 @@ func WithContentKey(contentKey string) Option {
 	}
 }
 
+// WithWaitForInsert returns an Option for setting whether to wait for the insert to complete.
+// Optional. Defaults to true.
+func WithWaitForInsert(wait bool) Option {
+	return func(p *Store) {
+		p.waitForInsert = wait
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
-		contentKey: defaultContentKey,
+		contentKey:    defaultContentKey,
+		waitForInsert: defaultWaitForInsert,
 	}
 
 	for _, opt := range opts {
