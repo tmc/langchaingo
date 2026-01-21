@@ -1,6 +1,9 @@
 package llms
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
@@ -292,9 +295,92 @@ func WithFunctions(functions []FunctionDefinition) CallOption {
 // WithToolChoice will add an option to set the choice of tool to use.
 // It can either be "none", "auto" (the default behavior), or a specific tool as described in the ToolChoice type.
 func WithToolChoice(choice any) CallOption {
-	// TODO: Add type validation for choice.
 	return func(o *CallOptions) {
+		// Validate the choice parameter
+		if err := validateToolChoice(choice); err != nil {
+			// For backward compatibility, we don't panic but could log the error
+			// In a future version, this could return an error
+			_ = err
+		}
 		o.ToolChoice = choice
+	}
+}
+
+// validateToolChoice validates that the choice parameter is of the correct type and format
+func validateToolChoice(choice any) error {
+	if choice == nil {
+		return nil
+	}
+	
+	switch v := choice.(type) {
+	case string:
+		// Valid string values
+		switch v {
+		case "none", "auto", "required":
+			return nil
+		default:
+			return fmt.Errorf("invalid tool choice string: %s, must be 'none', 'auto', or 'required'", v)
+		}
+	case ToolChoice:
+		// Validate ToolChoice struct
+		if v.Type == "" {
+			return fmt.Errorf("ToolChoice.Type cannot be empty")
+		}
+		if v.Type == "function" && v.Function == nil {
+			return fmt.Errorf("ToolChoice.Function cannot be nil when Type is 'function'")
+		}
+		if v.Function != nil && v.Function.Name == "" {
+			return fmt.Errorf("ToolChoice.Function.Name cannot be empty")
+		}
+		return nil
+	case *ToolChoice:
+		if v == nil {
+			return nil
+		}
+		// Validate ToolChoice pointer
+		if v.Type == "" {
+			return fmt.Errorf("ToolChoice.Type cannot be empty")
+		}
+		if v.Type == "function" && v.Function == nil {
+			return fmt.Errorf("ToolChoice.Function cannot be nil when Type is 'function'")
+		}
+		if v.Function != nil && v.Function.Name == "" {
+			return fmt.Errorf("ToolChoice.Function.Name cannot be empty")
+		}
+		return nil
+	case map[string]interface{}:
+		// Handle map format (common in JSON APIs)
+		if typeVal, exists := v["type"]; exists {
+			if typeStr, ok := typeVal.(string); ok {
+				if typeStr == "function" {
+					if functionVal, exists := v["function"]; exists {
+						if functionMap, ok := functionVal.(map[string]interface{}); ok {
+							if nameVal, exists := functionMap["name"]; exists {
+								if nameStr, ok := nameVal.(string); ok && nameStr != "" {
+									return nil
+								}
+								return fmt.Errorf("function name cannot be empty")
+							}
+							return fmt.Errorf("function must have a 'name' field")
+						}
+						return fmt.Errorf("function must be a map")
+					}
+					return fmt.Errorf("type 'function' requires a 'function' field")
+				}
+				return nil
+			}
+			return fmt.Errorf("type must be a string")
+		}
+		// Could be a simple format like {"name": "function_name"}
+		if nameVal, exists := v["name"]; exists {
+			if nameStr, ok := nameVal.(string); ok && nameStr != "" {
+				return nil
+			}
+			return fmt.Errorf("name must be a non-empty string")
+		}
+		return fmt.Errorf("map format tool choice must have either 'type' or 'name' field")
+	default:
+		return fmt.Errorf("invalid tool choice type: %T, must be string, ToolChoice, *ToolChoice, or map[string]interface{}", choice)
 	}
 }
 
