@@ -15,7 +15,7 @@ var image []byte
 
 func main() {
 	llm, err := anthropic.New(
-		anthropic.WithModel("claude-3-5-sonnet-20240620"),
+		anthropic.WithModel("claude-sonnet-4-5-20250929"),
 	)
 	if err != nil {
 		log.Fatal(err)
