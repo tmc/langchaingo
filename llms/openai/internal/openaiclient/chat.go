@@ -589,7 +589,7 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			}
 
 			line := scanner.Text()
-			if line == "" {
+			if line == "" || line == ": keep-alive" {
 				continue
 			}
 
