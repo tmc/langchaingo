@@ -145,7 +145,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			continue
 		}
 
-		msg := &ChatMessage{MultiContent: mc.Parts}
+		msg := &ChatMessage{}
 		switch mc.Role {
 		case llms.ChatMessageTypeSystem:
 			msg.Role = RoleSystem
@@ -161,7 +161,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 					newParts = append(newParts, llms.TextContent{Text: systemContent + "\n\n"})
 				}
 				newParts = append(newParts, mc.Parts...)
-				msg.MultiContent = newParts
+				mc.Parts = newParts
 				systemContent = "" // Clear after using
 			}
 		case llms.ChatMessageTypeGeneric:
@@ -196,7 +196,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 
 		// Here we extract tool calls from the message and populate the ToolCalls field.
-		newParts, toolCalls := ExtractToolParts(msg)
+		newParts, toolCalls := extractParts(mc.Parts)
 		msg.MultiContent = newParts
 		msg.ToolCalls = toolCallsFromToolCalls(toolCalls)
 
@@ -441,18 +441,17 @@ func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]flo
 	return embeddings, nil
 }
 
-// ExtractToolParts extracts the tool parts from a message.
-func ExtractToolParts(msg *ChatMessage) ([]llms.ContentPart, []llms.ToolCall) {
-	var content []llms.ContentPart
+func extractParts(parts []llms.ContentPart) ([]openaiclient.ContentPart, []llms.ToolCall) {
+	var content []openaiclient.ContentPart
 	var toolCalls []llms.ToolCall
-	for _, part := range msg.MultiContent {
+	for _, part := range parts {
 		switch p := part.(type) {
 		case llms.TextContent:
-			content = append(content, p)
+			content = append(content, openaiclient.ContentPart{ContentPart: p})
 		case llms.ImageURLContent:
-			content = append(content, p)
+			content = append(content, openaiclient.ContentPart{ContentPart: p})
 		case llms.BinaryContent:
-			content = append(content, p)
+			content = append(content, openaiclient.ContentPart{ContentPart: p})
 		case llms.ToolCall:
 			toolCalls = append(toolCalls, p)
 		}
