@@ -354,6 +354,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 				"CompletionAcceptedPredictionTokens": result.Usage.CompletionTokensDetails.AcceptedPredictionTokens,
 				"CompletionRejectedPredictionTokens": result.Usage.CompletionTokensDetails.RejectedPredictionTokens,
 			},
+			ReasoningContent: c.Message.ReasoningContent,
 		}
 
 		// Legacy function call handling
