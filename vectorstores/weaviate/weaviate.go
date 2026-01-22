@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-openapi/strfmt"
-	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
@@ -133,7 +132,7 @@ func (s Store) AddDocuments(ctx context.Context,
 	objects := make([]*models.Object, 0, len(docs))
 	ids := make([]string, len(docs))
 	for i := range docs {
-		id := strfmt.UUID(uuid.New().String())
+		id := strfmt.UUID(opts.GenerateDocumentID(ctx, docs[i], ids))
 		ids[i] = id.String()
 		objects = append(objects, &models.Object{
 			Class:      s.indexName,
