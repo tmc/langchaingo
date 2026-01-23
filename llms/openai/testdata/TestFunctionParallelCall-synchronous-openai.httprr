@@ -1,5 +1,5 @@
 httprr trace v1
-925 2067
+924 2143
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:22:00 GMT
+Date: Thu, 22 Jan 2026 19:58:40 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 608
+Openai-Processing-Ms: 650
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 615
+X-Envoy-Upstream-Service-Time: 670
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
+X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999986
+X-Ratelimit-Remaining-Tokens: 29999987
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_8e7ade5792b2d04ebdb1db83fd56076f
+X-Request-Id: req_a0e5a53b5431421886fa58e187ee739f
 
 {
-  "id": "chatcmpl-BleDgRx6KYrqtdoS4i6ZkPdRcWBqe",
+  "id": "chatcmpl-D0v79bJ1Zu2qgEifwpBz1gNBVVn1m",
   "object": "chat.completion",
-  "created": 1750695720,
+  "created": 1769111919,
   "model": "gpt-4.1-2025-04-14",
   "choices": [
     {
@@ -42,7 +44,7 @@ X-Request-Id: req_8e7ade5792b2d04ebdb1db83fd56076f
         "content": null,
         "tool_calls": [
           {
-            "id": "call_qg09hWVReOXoXP97AOv8SDrQ",
+            "id": "call_JaJBh0RuoBRAWsVg7GJaapPn",
             "type": "function",
             "function": {
               "name": "getCurrentWeather",
@@ -50,7 +52,7 @@ X-Request-Id: req_8e7ade5792b2d04ebdb1db83fd56076f
             }
           },
           {
-            "id": "call_5wcAN3hSC3JsPcgPUU40wEfT",
+            "id": "call_LL5AhwC7n5ncwKcnINwPLpal",
             "type": "function",
             "function": {
               "name": "getCurrentTime",
@@ -81,5 +83,5 @@ X-Request-Id: req_8e7ade5792b2d04ebdb1db83fd56076f
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_51e1070cf2"
+  "system_fingerprint": "fp_1a2c4a5ede"
 }

@@ -1,0 +1,73 @@
+httprr trace v1
+406 5496
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 202
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-pro","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning":{"effort":"high"}}HTTP/2.0 200 OK
+Content-Length: 5040
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:50:07 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111404-d9SkewHMv2eHp4IO1biP","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion","created":1769111404,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","index":0,"message":{"role":"assistant","content":"Of course. Let's break it down.\n\n### 1. What is a Factorial?\n\nA factorial, denoted by an exclamation mark (!), is the product of a whole number and all the whole numbers less than it, down to 1.\n\nThe formula is: **n! = n × (n-1) × (n-2) × ... × 1**\n\n### 2. Applying the Formula to 5\n\nTo find the factorial of 5 (written as 5!), we multiply 5 by every whole number below it.\n\n**5! = 5 × 4 × 3 × 2 × 1**\n\n### 3. Showing the Work (Step-by-Step Calculation)\n\n*   **Step 1:** Start with the first two numbers:\n    5 × 4 = 20\n\n*   **Step 2:** Multiply the result by the next number (3):\n    20 × 3 = 60\n\n*   **Step 3:** Multiply that result by the next number (2):\n    60 × 2 = 120\n\n*   **Step 4:** Multiply that result by the last number (1):\n    120 × 1 = 120\n\n### Final Answer\n\nThe factorial of 5 is **120**.","refusal":null,"reasoning":"**Calculating Factorial 5**\n\nI've zeroed in on the core question, \"What is the factorial of 5?\". I recognize the need to show my calculations, so I'll be sure to break down the process step-by-step. The user explicitly requests a demonstration of the process, which will influence the format of my response.\n\n\n**Analyzing the Core Concept**\n\nI'm now fully immersed in dissecting the concept of \"factorial.\" I've nailed down its definition: the product of all positive integers up to a given number *n*. I've also noted that 0! equals 1. My focus now is on how to present the formula and calculation in the most accessible and clear way for the user, remembering their \"show your work\" mandate.\n\n\n**Calculating the Solution Path**\n\nI'm presently building the answer's structure, focusing on clarity. I'll begin with a direct statement of the solution. Then, I'll define \"factorial,\" using the appropriate notation to ensure precision. Finally, I will clearly show the step-by-step calculation, meeting the user's specific requirement.\n\n\n**Outlining the Response Strategy**\n\nI'm now fully immersed in crafting the response. I've broken down the user's request, analyzed the concept of a factorial, and sketched out a meticulous, step-by-step approach. My framework includes a direct answer, a factorial definition, the specific formula, and a clear presentation of each calculation stage. I'll utilize formatting for optimal clarity and conclude with a final answer, making sure all user requirements are fulfilled.\n\n\n","reasoning_details":[{"format":"google-gemini-v1","index":0,"type":"reasoning.text","text":"**Calculating Factorial 5**\n\nI've zeroed in on the core question, \"What is the factorial of 5?\". I recognize the need to show my calculations, so I'll be sure to break down the process step-by-step. The user explicitly requests a demonstration of the process, which will influence the format of my response.\n\n\n**Analyzing the Core Concept**\n\nI'm now fully immersed in dissecting the concept of \"factorial.\" I've nailed down its definition: the product of all positive integers up to a given number *n*. I've also noted that 0! equals 1. My focus now is on how to present the formula and calculation in the most accessible and clear way for the user, remembering their \"show your work\" mandate.\n\n\n**Calculating the Solution Path**\n\nI'm presently building the answer's structure, focusing on clarity. I'll begin with a direct statement of the solution. Then, I'll define \"factorial,\" using the appropriate notation to ensure precision. Finally, I will clearly show the step-by-step calculation, meeting the user's specific requirement.\n\n\n**Outlining the Response Strategy**\n\nI'm now fully immersed in crafting the response. I've broken down the user's request, analyzed the concept of a factorial, and sketched out a meticulous, step-by-step approach. My framework includes a direct answer, a factorial definition, the specific formula, and a clear presentation of each calculation stage. I'll utilize formatting for optimal clarity and conclude with a final answer, making sure all user requirements are fulfilled.\n\n\n"}],"annotations":[]}}],"usage":{"prompt_tokens":17,"completion_tokens":1317,"total_tokens":1334,"cost":0.01319125,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00002125,"upstream_inference_completions_cost":0.01317},"completion_tokens_details":{"reasoning_tokens":1033,"image_tokens":0}}}

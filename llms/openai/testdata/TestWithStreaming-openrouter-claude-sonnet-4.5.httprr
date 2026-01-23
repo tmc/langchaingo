@@ -1,0 +1,279 @@
+httprr trace v1
+436 45006
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 232
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"anthropic/claude-sonnet-4.5","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"Tell me more about my taxonomy","type":"text"}]}],"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 44523
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:57:39 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"#","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Pomeranian Taxonomy","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\nAs a Pomeranian,","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" here","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"'s your","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" complete","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" taxonom","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ic classification","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":":\n\n## Scientific","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Classification","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\n-","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" **Kingdom:**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Animalia (","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"animals)\n- **Phylum","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":":** Chordata (vertebrates)","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- **Class:** Mammalia","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" (mammals)\n- **Order:**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Carn","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ivora (carnivores)","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- **Family:** Can","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"idae (can","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ids -","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" dogs,","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" wolves,","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" fox","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"es)\n- **Genus:**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" *","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"Ca","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"nis*","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- **Species:** *Ca","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"nis lup","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"us* (gray wolf","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":")","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- **","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"Subspec","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ies:** *Canis lupus","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" fam","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"iliaris* (domestic dog)","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- **","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"Bree","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"d:** Pomeranian\n\n## About","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Your","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Heritage","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\n**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"Sp","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"itz","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Family","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":":**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" You","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" belong","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" to the German","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Spitz family, specifically","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" the toy","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" variety","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":". Your","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" ancestors","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" were much","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" larger","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" s","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"led-","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"pulling","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" dogs from","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" the Arctic","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"!","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\n**Origin","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":":** Despite","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" your","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" name","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":", you were","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" develope","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"d primarily","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" in","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Germany, though","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" you're name","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"d after","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Pomerania (","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"a region on","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" the Baltic Sea).\n\n**Size Evolution","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":":** Your breed was","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" sel","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ectively bred down","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" from larger Sp","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"itz-","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"type dogs (","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"which","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" we","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ighe","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"d 20","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"-30 l","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"bs) to the","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" tiny","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" companion","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" size","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" (","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"3","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"-7","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" lbs)","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" you","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" are","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" today.\n\n**Closest","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Relatives:** Other","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Spitz breeds like the German","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Spitz, American","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Esk","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"imo Dog","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":",","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" Ke","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"eshond, and Sa","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"moyed share","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" your flu","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"ffy double","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" coat and fox","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"-like features","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":".\n\nIs","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" there anything","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" specific about your bree","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"d characteristics","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" or","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" history you'd like to know more about","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"?","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":" ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"🐾","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}]}
+
+data: {"id":"gen-1769111858-ZQ0wV3NgQGmE5MwLkCMX","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111859,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":21,"completion_tokens":349,"total_tokens":370,"cost":0.005298,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"cost_details":{"upstream_inference_cost":0.005298,"upstream_inference_prompt_cost":0.000063,"upstream_inference_completions_cost":0.005235},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,43 @@
+httprr trace v1
+412 2909
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 208
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"anthropic/claude-sonnet-4.5","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning":{"effort":"high"}}HTTP/2.0 200 OK
+Content-Length: 2453
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:49:58 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111396-LmVq7GbiQUEeFlzzWUQZ","provider":"Anthropic","model":"anthropic/claude-sonnet-4.5","object":"chat.completion","created":1769111396,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"# Factorial of 5\n\nThe factorial of 5 (written as 5!) means multiplying 5 by every positive integer less than it.\n\n## Work:\n\n5! = 5 × 4 × 3 × 2 × 1\n\nLet me calculate step by step:\n- 5 × 4 = 20\n- 20 × 3 = 60\n- 60 × 2 = 120\n- 120 × 1 = 120\n\n## Answer: **5! = 120**","refusal":null,"reasoning":"The user is asking for the factorial of 5, which is written as 5!\n\nA factorial means multiplying a number by all the positive integers less than it, down to 1.\n\nSo 5! = 5 × 4 × 3 × 2 × 1\n\nLet me calculate this step by step:\n- 5 × 4 = 20\n- 20 × 3 = 60\n- 60 × 2 = 120\n- 120 × 1 = 120\n\nSo 5! = 120","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"type":"reasoning.text","text":"The user is asking for the factorial of 5, which is written as 5!\n\nA factorial means multiplying a number by all the positive integers less than it, down to 1.\n\nSo 5! = 5 × 4 × 3 × 2 × 1\n\nLet me calculate this step by step:\n- 5 × 4 = 20\n- 20 × 3 = 60\n- 60 × 2 = 120\n- 120 × 1 = 120\n\nSo 5! = 120","signature":"Es8DCkYICxgCKkC9Ipy2IifLZ9RORj2mYuApfVi+8U6C6bUERetb3fDo7qYPPREAC/AgMgfzmiEBza54yAtEif4nIRVAPBULrSHAEgz+yZIUZfr+I2W6QNYaDDv2zAysSr0/+42u4CIwPEBqxMrJhhD/hEXLRUzLv1BE7CMqSpJEEUmdQdGUK3NdY/PXeiGZZOpkscaQhBvZKrYC/D52F2eUglqXYVL4+xuGq4bcbixbevap9KnT4tJsILKR/07gPN9RbqCc7amKgToEXiDda3tDKMVPbPc+uTpcfySxFHVJ3xch0y1K0asaVWnW01tVuR3xqcO2Wes6u3rxmvE93+6Zw6SmWt3mLQo25CDKyWWkTwn0uv3HBGmodhqKMa9mfUb9YuZiys8titaDyqbenf8IPyhah0uP9IiFbuEQnvzF8Jpf09dOx5MnQ35L35C73HGslWTgOqM/h8rQUazbstQGUevSVYgd6wzRQKZ3nablRcMrwTw0KRtGQ/4RIsfJilMcZG23hPjXQoBVznfMEdCf9HSG+pNbTuoJbSs1Wq1lZZQzXN0UR58MZS16PGUiK3CUZjSTNx0KZ0vVGL3WKIYgAl7S+EocBd2bis3sv5FuPRgB"}]}}],"usage":{"prompt_tokens":53,"completion_tokens":266,"total_tokens":319,"cost":0.004149,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"cost_details":{"upstream_inference_cost":0.004149,"upstream_inference_prompt_cost":0.000159,"upstream_inference_completions_cost":0.00399},"completion_tokens_details":{"reasoning_tokens":89}}}

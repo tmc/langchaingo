@@ -1,5 +1,5 @@
 httprr trace v1
-230 1325
+229 2106
 POST https://api.cohere.ai/v1/generate HTTP/1.1
 Host: api.cohere.ai
 User-Agent: langchaingo-httprr
@@ -8,25 +8,27 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"prompt":"Hello, Cohere!","model":""}HTTP/2.0 200 OK
-Content-Length: 602
+Content-Length: 975
 Access-Control-Expose-Headers: X-Debug-Trace-ID
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Cache-Control: no-cache, no-store, no-transform, must-revalidate, private, max-age=0
 Content-Type: application/json
-Date: Mon, 16 Jun 2025 09:59:03 GMT
-Expires: Thu, 01 Jan 1970 00:00:00 UTC
-Num_chars: 350
-Num_tokens: 88
+Date: Mon, 18 Aug 2025 12:24:38 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Num_chars: 332
+Num_tokens: 81
 Pragma: no-cache
 Server: envoy
 Vary: Origin
 Via: 1.1 google
 X-Accel-Expires: 0
+X-Api-Warning: Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.
+X-Api-Warning: model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions
 X-Api-Warning: unknown field: parameter 'model' is not a valid field
-X-Debug-Trace-Id: 71c0effc5b010368de8937b06184853c
+X-Debug-Trace-Id: c0f24814d3f7f0e05a2ec056a184b650
 X-Endpoint-Monthly-Call-Limit: 1000
-X-Envoy-Upstream-Service-Time: 2412
+X-Envoy-Upstream-Service-Time: 2223
 X-Trial-Endpoint-Call-Limit: 40
 X-Trial-Endpoint-Call-Remaining: 39
 
-{"id":"2a15312f-ca17-4175-895e-e074cd94654b","generations":[{"id":"804a32a9-162f-4df7-a276-15ecd246e2a2","text":" Hi! I'm Cohere, an AI-assistant chatbot trained to assist human users by providing thorough responses. How can I help you today? \n\nPlease ask me anything you like, and I will do my best to assist you. \n\nLet me know if you have any specific questions, or if you would like me to focus on anything specific, and I will be glad to do so! ","finish_reason":"COMPLETE"}],"prompt":"Hello, Cohere!","meta":{"api_version":{"version":"1"},"billed_units":{"input_tokens":5,"output_tokens":83}}}
+{"id":"4d735daf-780d-4a7a-b719-2deefff1b7e3","generations":[{"id":"7c0e0bab-887c-4411-a68e-669c5a1cebaa","text":" Hi! I'm Cohere, an AI-assistant chatbot trained to assist human users by providing thorough responses. How can I help you today? \n\nPlease ask me a question or let me know how I can assist you if you're looking for information or insights on a specific topic. I'm here to help however I can, so feel free to ask away! ","finish_reason":"COMPLETE"}],"prompt":"Hello, Cohere!","meta":{"api_version":{"version":"1"},"warnings":["Generate API is deprecated and will be removed September 15 2025. Please migrate to Chat API before then to prevent any interruptions of service. See https://docs.cohere.com/docs/migrating-from-cogenerate-to-cochat for details.","model 'command' is deprecated and will be removed September 15 2025. Please consider upgrading to a newer model to avoid future service disruptions"],"billed_units":{"input_tokens":5,"output_tokens":76}}}

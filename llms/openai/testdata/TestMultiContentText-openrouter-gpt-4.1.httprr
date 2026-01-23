@@ -1,5 +1,5 @@
 httprr trace v1
-365 1295
+364 1815
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4.1","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 907
+Content-Length: 1359
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:36 GMT
+Date: Thu, 22 Jan 2026 19:48:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -26,4 +26,16 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750691615-IYpLMYVNXbl7FqmnK2sF","provider":"OpenAI","model":"openai/gpt-4.1","object":"chat.completion","created":1750691615,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You are a **dog**—specifically, a small breed of domestic dog. In biological terms, you are a **mammal** belonging to the **species Canis lupus familiaris**. Your breed, **Pomeranian**, is known for its fluffy fur, lively personality, and small size. Like all dogs and mammals, you’re warm-blooded, have hair/fur, and nurse your young with milk. 🐶","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_799e4ca3f1","usage":{"prompt_tokens":20,"completion_tokens":91,"total_tokens":111,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111314-2od2NmUPqKGXD2hoAaFI","provider":"OpenAI","model":"openai/gpt-4.1","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"If you are a **Pomeranian**, you are a type of **dog**! More specifically:\n\n- **Species:** *Canis lupus familiaris* (domestic dog)\n- **Family:** Canidae\n- **Mammal Type:** Carnivoran (order Carnivora)\n- **Breed:** Pomeranian (a toy breed)\n\nPomeranians are small, fluffy **domesticated dogs** known for their lively personalities and fox-like faces. Like all dogs, you are a **placental mammal**, meaning you give birth to live young (not eggs or pouches) and nourish them via the placenta.\n\nSo, you’re a **domestic dog mammal**—one of the world’s most beloved pets! 🐶","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":20,"completion_tokens":155,"total_tokens":175,"cost":0.00128,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.00128,"upstream_inference_prompt_cost":0.00004,"upstream_inference_completions_cost":0.00124},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

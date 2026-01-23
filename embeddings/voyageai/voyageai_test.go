@@ -164,7 +164,7 @@ func TestVoyageAI_WithModel(t *testing.T) {
 	embedder, err := NewVoyageAI(
 		WithToken(apiKey),
 		WithClient(*rr.Client()),
-		WithModel("voyage-large-2"),
+		WithModel("voyage-4-large"),
 	)
 	require.NoError(t, err)
 

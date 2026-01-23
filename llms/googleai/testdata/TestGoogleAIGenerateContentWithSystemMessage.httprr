@@ -1,20 +1,20 @@
 httprr trace v1
-918 1007
-POST https://generativelanguage.googleapis.com//v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
+916 1005
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 596
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/1.15.0 gl-go/go1.24.0
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Tell me about the ocean"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"systemInstruction":{"parts":[{"text":"You are a helpful assistant that always responds in haiku format."}],"role":"system"}}HTTP/2.0 200 OK
-Content-Length: 628
+Content-Length: 627
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 11 Jul 2025 21:05:12 GMT
+Date: Fri, 23 Jan 2026 22:51:00 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=1263
+Server-Timing: gfet4t7; dur=882
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -28,7 +28,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "Deep blue, vast and wide,\nCreatures swim in salty depths,\nWaves kiss sandy shores."
+            "text": "Deep blue, vast and wide,\nWaves crash on sandy shores,\nLife thrives in its depths."
           }
         ],
         "role": "model"
@@ -40,15 +40,15 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 20,
     "candidatesTokenCount": 21,
-    "totalTokenCount": 216,
+    "totalTokenCount": 124,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 20
       }
     ],
-    "thoughtsTokenCount": 175
+    "thoughtsTokenCount": 83
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "iHxxaKydE9fC1MkP2qDW6A8"
+  "responseId": "VPtzaa3_FoLSjMcPkIK5qQI"
 }

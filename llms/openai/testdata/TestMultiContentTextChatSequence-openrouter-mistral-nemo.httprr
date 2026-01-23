@@ -1,5 +1,5 @@
 httprr trace v1
-405 1012
+404 1448
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"mistralai/mistral-nemo","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 624
+Content-Length: 993
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:10 GMT
+Date: Thu, 22 Jan 2026 19:57:01 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -24,4 +24,14 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750691650-1rUOqs5bhZRH3CU7o11w","provider":"DeepInfra","model":"mistralai/mistral-nemo","object":"chat.completion","created":1750691650,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho.\n\nHere are the approximate land areas for comparison:\n\n* Spain: 498,511 square kilometers (192,476 square miles)\n* Lesotho: 30,355 square kilometers (11,724 square miles)","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":24,"completion_tokens":63,"total_tokens":87}}
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111820-ErqCNnVYYEjmNFFKlMno","provider":"DeepInfra","model":"mistralai/mistral-nemo","object":"chat.completion","created":1769111821,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho. Here are their approximate land areas for comparison:\n\n* Spain: 505,990 square kilometers (195,360 square miles)\n* Lesotho: 30,355 square kilometers (11,720 square miles)","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":24,"completion_tokens":63,"total_tokens":87,"cost":0.000003,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":4.8e-7,"upstream_inference_completions_cost":0.00000252},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

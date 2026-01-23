@@ -93,6 +93,10 @@ type ChatRequest struct {
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// WebSearchOptions configures web search behavior for search-enabled models
+	// like gpt-4o-search-preview and gpt-4o-mini-search-preview.
+	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
 }
 
 // ToolType is the type of a tool.
@@ -101,6 +105,39 @@ type ToolType string
 const (
 	ToolTypeFunction ToolType = "function"
 )
+
+// WebSearchOptions configures web search behavior for OpenAI models.
+// This is used with search-enabled models like gpt-4o-search-preview.
+type WebSearchOptions struct {
+	// SearchContextSize controls how much context is gathered from web search.
+	// Valid values: "low", "medium", "high". Higher values provide more context
+	// but increase latency and cost.
+	SearchContextSize string `json:"search_context_size,omitempty"`
+
+	// UserLocation provides approximate user location for localized search results.
+	UserLocation *UserLocation `json:"user_location,omitempty"`
+}
+
+// UserLocation represents the user's approximate location for web search.
+type UserLocation struct {
+	// Type must be "approximate" for user-provided location.
+	Type string `json:"type"`
+
+	// Approximate contains the approximate location details.
+	Approximate *ApproximateLocation `json:"approximate,omitempty"`
+}
+
+// ApproximateLocation contains approximate location information.
+type ApproximateLocation struct {
+	// Country is the two-letter ISO country code (e.g., "US", "GB").
+	Country string `json:"country,omitempty"`
+
+	// City is the city name (e.g., "San Francisco", "London").
+	City string `json:"city,omitempty"`
+
+	// Region is the region or state (e.g., "California", "London").
+	Region string `json:"region,omitempty"`
+}
 
 // Tool is a tool to use in a chat request.
 type Tool struct {
@@ -328,11 +365,18 @@ type ChatCompletionChoice struct {
 
 // ChatUsage is the usage of a chat completion request.
 type ChatUsage struct {
-	PromptTokens            int `json:"prompt_tokens"`
-	CompletionTokens        int `json:"completion_tokens"`
-	TotalTokens             int `json:"total_tokens"`
+	PromptTokens        int `json:"prompt_tokens"`
+	CompletionTokens    int `json:"completion_tokens"`
+	TotalTokens         int `json:"total_tokens"`
+	PromptTokensDetails struct {
+		CachedTokens int `json:"cached_tokens"`
+		AudioTokens  int `json:"audio_tokens"`
+	} `json:"prompt_tokens_details"`
 	CompletionTokensDetails struct {
-		ReasoningTokens int `json:"reasoning_tokens"`
+		ReasoningTokens          int `json:"reasoning_tokens"`
+		AudioTokens              int `json:"audio_tokens"`
+		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
+		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
 }
 
@@ -348,11 +392,18 @@ type ChatCompletionResponse struct {
 }
 
 type Usage struct {
-	PromptTokens            int `json:"prompt_tokens"`
-	CompletionTokens        int `json:"completion_tokens"`
-	TotalTokens             int `json:"total_tokens"`
+	PromptTokens        int `json:"prompt_tokens"`
+	CompletionTokens    int `json:"completion_tokens"`
+	TotalTokens         int `json:"total_tokens"`
+	PromptTokensDetails struct {
+		CachedTokens int `json:"cached_tokens"`
+		AudioTokens  int `json:"audio_tokens"`
+	} `json:"prompt_tokens_details"`
 	CompletionTokensDetails struct {
-		ReasoningTokens int `json:"reasoning_tokens"`
+		ReasoningTokens          int `json:"reasoning_tokens"`
+		AudioTokens              int `json:"audio_tokens"`
+		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
+		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
 }
 
@@ -438,8 +489,27 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		}
 	}
 
-	// Build request payload
+	// Filter out internal metadata that shouldn't be sent to the API
+	originalMetadata := payload.Metadata
+	if payload.Metadata != nil {
+		filteredMetadata := make(map[string]any)
+		for k, v := range payload.Metadata {
+			// Skip internal openai: prefixed metadata fields
+			if !strings.HasPrefix(k, "openai:") {
+				filteredMetadata[k] = v
+			}
+		}
+		if len(filteredMetadata) > 0 {
+			payload.Metadata = filteredMetadata
+		} else {
+			payload.Metadata = nil
+		}
+	}
+
 	payloadBytes, err := json.Marshal(payload)
+
+	// Restore original metadata
+	payload.Metadata = originalMetadata
 	if err != nil {
 		return nil, err
 	}
@@ -456,7 +526,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	// Send request
 	r, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, sanitizeHTTPError(err)
 	}
 	defer r.Body.Close()
 
@@ -510,8 +580,28 @@ func parseStreamingChatResponse(
 	go func() {
 		defer close(responseChan)
 		for scanner.Scan() {
+			// Check if context is cancelled
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
 			line := scanner.Text()
 			if line == "" {
+				continue
+			}
+
+			// Skip SSE comment lines (any line starting with ':')
+			// According to SSE spec: https://www.w3.org/TR/eventsource/
+			// "Lines that start with a U+003A COLON character (:) are comments"
+			if strings.HasPrefix(line, ":") {
+				continue
+			}
+
+			// Only process lines that start with "data:"
+			if !strings.HasPrefix(line, "data:") {
+				// Skip any other non-data lines (like event:, id:, retry:, etc.)
 				continue
 			}
 
@@ -527,15 +617,24 @@ func parseStreamingChatResponse(
 			var streamPayload StreamedChatResponsePayload
 			err := json.NewDecoder(bytes.NewReader([]byte(data))).Decode(&streamPayload)
 			if err != nil {
-				streamPayload.Error = fmt.Errorf("error decoding streaming response: %w", err)
-				responseChan <- streamPayload
-				return
+				// Skip non-JSON data values that some providers might send
+				// This could happen if the data field contains non-JSON content
+				continue
 			}
 
-			responseChan <- streamPayload
+			// Non-blocking send with context check
+			select {
+			case <-ctx.Done():
+				return
+			case responseChan <- streamPayload:
+			}
 		}
 		if err := scanner.Err(); err != nil {
-			responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}
+			select {
+			case <-ctx.Done():
+				return
+			case responseChan <- StreamedChatResponsePayload{Error: fmt.Errorf("error reading streaming response: %w", err)}:
+			}
 			return
 		}
 	}()
@@ -659,6 +758,11 @@ func updateChatUsage(chatUsage *ChatUsage, streamUsage *Usage) {
 	chatUsage.CompletionTokens = streamUsage.CompletionTokens
 	chatUsage.PromptTokens = streamUsage.PromptTokens
 	chatUsage.TotalTokens = streamUsage.TotalTokens
+	chatUsage.PromptTokensDetails.AudioTokens = streamUsage.PromptTokensDetails.AudioTokens
+	chatUsage.PromptTokensDetails.CachedTokens = streamUsage.PromptTokensDetails.CachedTokens
+	chatUsage.CompletionTokensDetails.AudioTokens = streamUsage.CompletionTokensDetails.AudioTokens
+	chatUsage.CompletionTokensDetails.AcceptedPredictionTokens = streamUsage.CompletionTokensDetails.AcceptedPredictionTokens
+	chatUsage.CompletionTokensDetails.RejectedPredictionTokens = streamUsage.CompletionTokensDetails.RejectedPredictionTokens
 	chatUsage.CompletionTokensDetails.ReasoningTokens = streamUsage.CompletionTokensDetails.ReasoningTokens
 }
 

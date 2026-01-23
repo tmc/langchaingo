@@ -1,5 +1,5 @@
 httprr trace v1
-419 2929
+418 3151
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"anthropic/claude-3.7-sonnet:thinking","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 2540
+Content-Length: 2695
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:23 GMT
+Date: Thu, 22 Jan 2026 19:57:03 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -34,10 +34,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-{"id":"gen-1750691662-o9aSRRU0dOQG2vzSeM20","provider":"Anthropic","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1750691662,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is significantly larger than Lesotho.\n\nSpain has an area of approximately 505,990 square kilometers (195,360 square miles), while Lesotho has an area of about 30,355 square kilometers (11,720 square miles). This means Spain is roughly 16 times larger than Lesotho in terms of land area.\n\nSpain also has a much larger population of around 47 million people, compared to Lesotho's population of about 2 million.","refusal":null,"reasoning":"The question is asking which of the two countries I mentioned - Spain and Lesotho - is larger in terms of size.\n\nLet me compare the two:\n\nSpain:\n- Located in southwestern Europe\n- Area: approximately 505,990 square kilometers (195,360 square miles)\n- Population: around 47 million people\n\nLesotho:\n- A landlocked country within South Africa\n- Area: approximately 30,355 square kilometers (11,720 square miles)\n- Population: around 2 million people\n\nBased on these facts, Spain is significantly larger than Lesotho in terms of both land area and population. Spain is about 16.7 times larger than Lesotho in terms of land area.","reasoning_details":[{"type":"reasoning.text","text":"The question is asking which of the two countries I mentioned - Spain and Lesotho - is larger in terms of size.\n\nLet me compare the two:\n\nSpain:\n- Located in southwestern Europe\n- Area: approximately 505,990 square kilometers (195,360 square miles)\n- Population: around 47 million people\n\nLesotho:\n- A landlocked country within South Africa\n- Area: approximately 30,355 square kilometers (11,720 square miles)\n- Population: around 2 million people\n\nBased on these facts, Spain is significantly larger than Lesotho in terms of both land area and population. Spain is about 16.7 times larger than Lesotho in terms of land area.","signature":"ErUBCkYIBBgCIkC4PKpfzsLS6f/UzqDd6kkxxB9HZdOzkYCV2Y3opVJCtbkb4qG8pvEatPmxvgZ2WuaG/uaN0o07WnbYXToekJaPEgwvsPE2ceBZDXeObpQaDNGoICOb2WsaXyln5yIwPugohPHAS5DRgJtK3S+6GRyTM8x50LpZmjRaFjCK914hZ0jk1HzyLF0yYZITLnRWKh2o/qZ1f+nvh5djk82WDxuFSIM8ttT4OHlP5YK0CxgC"}]}}],"usage":{"prompt_tokens":56,"completion_tokens":283,"total_tokens":339}}
+{"id":"gen-1769111822-SP9VvnH34sx09IYmitVW","provider":"Google","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1769111822,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is significantly larger than Lesotho.\n\nSpain has a land area of approximately 505,990 square kilometers (195,360 square miles), while Lesotho has a land area of about 30,355 square kilometers (11,720 square miles). Spain is roughly 16 times larger than Lesotho.\n\nFor context, Lesotho is a small, landlocked country completely surrounded by South Africa, while Spain occupies most of the Iberian Peninsula in southwestern Europe.","refusal":null,"reasoning":"I need to compare the size of Spain and Lesotho in terms of land area.\n\nSpain is located in southwestern Europe and has a land area of approximately 505,990 square kilometers (195,360 square miles).\n\nLesotho is a small, landlocked country entirely surrounded by South Africa. It has a land area of approximately 30,355 square kilometers (11,720 square miles).\n\nComparing the two:\n- Spain: ~505,990 sq km\n- Lesotho: ~30,355 sq km\n\nSpain is significantly larger than Lesotho in terms of land area - about 16.7 times larger.","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"type":"reasoning.text","text":"I need to compare the size of Spain and Lesotho in terms of land area.\n\nSpain is located in southwestern Europe and has a land area of approximately 505,990 square kilometers (195,360 square miles).\n\nLesotho is a small, landlocked country entirely surrounded by South Africa. It has a land area of approximately 30,355 square kilometers (11,720 square miles).\n\nComparing the two:\n- Spain: ~505,990 sq km\n- Lesotho: ~30,355 sq km\n\nSpain is significantly larger than Lesotho in terms of land area - about 16.7 times larger.","signature":"ErkBCkoICxACGAIiQJ9slEWdYl/Swrul+WYUIQMZzGP1cyNECCTUir6fS8qt1kzd9uKAuXdk9mH5GlioerRa3Zih8wPIzlwcfV+lblMoARIM4czZbyKoyOzGmTw5GgxN8dSxIu22uFXnmnMiMHzCBkREgzqARsW2iaooD4239ZpLFvdDuV0LHGUpzGdQl4sZgneIfyQurUndOAQDLiodTwZdUoOYCkC/1I9Um7/QKNaxp4T3+oM484lk8B8YAg=="}]}}],"usage":{"prompt_tokens":57,"completion_tokens":264,"total_tokens":321,"cost":0.004131,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000171,"upstream_inference_completions_cost":0.00396},"completion_tokens_details":{"reasoning_tokens":138,"image_tokens":0}}}

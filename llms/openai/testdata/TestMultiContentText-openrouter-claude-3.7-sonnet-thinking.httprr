@@ -1,5 +1,5 @@
 httprr trace v1
-387 3021
+386 3263
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"anthropic/claude-3.7-sonnet:thinking","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 2632
+Content-Length: 2807
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:32 GMT
+Date: Thu, 22 Jan 2026 19:48:36 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -38,12 +38,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750691610-joAgX6sBO7gXCWi3lP1Y","provider":"Anthropic","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1750691610,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You're a Pomeranian, which is a breed of dog. As a Pomeranian, you are a canine mammal belonging to the family Canidae. Dogs are classified as mammals because they have fur, give birth to live young, produce milk to feed their offspring, are warm-blooded, and have other defining mammalian characteristics.","refusal":null,"reasoning":"The person is stating \"I'm a pomeranian\" and asking what kind of mammal they are.\n\nA Pomeranian is a breed of dog. Dogs are mammals that belong to the family Canidae, order Carnivora. Specifically, dogs (including Pomeranians) are of the species Canis lupus familiaris.\n\nSo to answer the question directly, if someone is a Pomeranian, they would be a dog, which is a mammal of the canine family.\n\nIn summary:\n- Kingdom: Animalia\n- Phylum: Chordata\n- Class: Mammalia\n- Order: Carnivora\n- Family: Canidae\n- Genus: Canis\n- Species: Canis lupus\n- Subspecies: Canis lupus familiaris (domestic dog)\n- Breed: Pomeranian\n\nSo the answer is that a Pomeranian is a canine mammal, specifically a breed of domestic dog.","reasoning_details":[{"type":"reasoning.text","text":"The person is stating \"I'm a pomeranian\" and asking what kind of mammal they are.\n\nA Pomeranian is a breed of dog. Dogs are mammals that belong to the family Canidae, order Carnivora. Specifically, dogs (including Pomeranians) are of the species Canis lupus familiaris.\n\nSo to answer the question directly, if someone is a Pomeranian, they would be a dog, which is a mammal of the canine family.\n\nIn summary:\n- Kingdom: Animalia\n- Phylum: Chordata\n- Class: Mammalia\n- Order: Carnivora\n- Family: Canidae\n- Genus: Canis\n- Species: Canis lupus\n- Subspecies: Canis lupus familiaris (domestic dog)\n- Breed: Pomeranian\n\nSo the answer is that a Pomeranian is a canine mammal, specifically a breed of domestic dog.","signature":"ErUBCkYIBBgCIkCoW6SXeXt8k4YaLSUC1/+L0EeX2+WTinGtpyvWQ4m4boxkwAGAGUF5Fv4JP1cy5JJS9LdLRs4p+Z4/WVAQC50uEgwftCFl5tZ0P9bX2UcaDPR/jRUeUoLSwjBtrSIwQPCxJPg+McHhT4AYT11SXRQEBK2QY0lgTA+jl1E2yAL+mdjiDwOZy/vK0zDDPcgwKh16MtXUmls+koKm5Xk9QTiTj2oxd9bmW7PCNvI5cRgC"}]}}],"usage":{"prompt_tokens":50,"completion_tokens":309,"total_tokens":359}}
+{"id":"gen-1769111315-Q1M6C3OYndgS8Q8qXC2m","provider":"Google","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1769111315,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You're a Pomeranian, which is a breed of dog. Dogs (Canis familiaris) are mammals belonging to the family Canidae within the order Carnivora. As a Pomeranian, you're specifically a small spitz-type breed known for your fluffy double coat and fox-like facial features.","refusal":null,"reasoning":"The person says \"I'm a pomeranian\". A pomeranian is a type of dog. Dogs are mammals, specifically they are in the canine family (Canidae), which is part of the order Carnivora within the class Mammalia.\n\nSo if someone says they are a pomeranian, they are saying they are a dog, which is a type of mammal.\n\nI should clarify that the Pomeranian is a small breed of dog named for the Pomerania region in north-west Poland and north-east Germany. They are known for their fluffy double coat, fox-like expression, and small size.\n\nSo the answer to \"What kind of mammal am I?\" is that they are a dog, which is a mammal in the order Carnivora, family Canidae.","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"type":"reasoning.text","text":"The person says \"I'm a pomeranian\". A pomeranian is a type of dog. Dogs are mammals, specifically they are in the canine family (Canidae), which is part of the order Carnivora within the class Mammalia.\n\nSo if someone says they are a pomeranian, they are saying they are a dog, which is a type of mammal.\n\nI should clarify that the Pomeranian is a small breed of dog named for the Pomerania region in north-west Poland and north-east Germany. They are known for their fluffy double coat, fox-like expression, and small size.\n\nSo the answer to \"What kind of mammal am I?\" is that they are a dog, which is a mammal in the order Carnivora, family Canidae.","signature":"ErkBCkoICxACGAIiQLJKhVOT71Ca1GvB56sYnr+kp1reVAWeL04YOlpyEhQzSWLrPU+bxLE90/0wFORn43OReqw6wp+I4hAMTe4gr2coARIMXL3YEevOTpjAU1tIGgzuGrLJ8wnzFSdvZQAiMCzrzWfOamFKYoS1wk6EhggSk4VCT134Ti9yYOOvP52nU2HeBqLHeNVPXX/Kclp7/iod2h/ObOY2Twb7pfNMTSt5YmWKe5/NBdz2l/bQVHwYAg=="}]}}],"usage":{"prompt_tokens":51,"completion_tokens":260,"total_tokens":311,"cost":0.004053,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000153,"upstream_inference_completions_cost":0.0039},"completion_tokens_details":{"reasoning_tokens":168,"image_tokens":0}}}

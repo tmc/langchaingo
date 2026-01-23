@@ -1,5 +1,5 @@
 httprr trace v1
-679 2150
+678 3082
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"anthropic/claude-3.7-sonnet:thinking","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 1761
+Content-Length: 2626
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:29 GMT
+Date: Thu, 22 Jan 2026 19:58:25 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -34,4 +34,6 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750695688-s2zlaZ0GcaFxGw1PhREx","provider":"Anthropic","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1750695688,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I can check the current weather in Boston, MA for you.","refusal":null,"reasoning":"The user is asking about the weather in Boston, MA. I can use the `getCurrentWeather` function to get this information.\n\nThe function requires:\n- location: This is provided as \"Boston, MA\"\n- unit: This is optional, so I don't need to ask about it. I'll use the default.\n\nI have all the required parameters to make the function call, so I can proceed.","tool_calls":[{"id":"toolu_018eFPxzVeDZb94GpTacf3EX","index":0,"type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}}],"reasoning_details":[{"type":"reasoning.text","text":"The user is asking about the weather in Boston, MA. I can use the `getCurrentWeather` function to get this information.\n\nThe function requires:\n- location: This is provided as \"Boston, MA\"\n- unit: This is optional, so I don't need to ask about it. I'll use the default.\n\nI have all the required parameters to make the function call, so I can proceed.","signature":"ErUBCkYIBBgCIkDhhI3tSf0NHMpRqywImVkVYua8PFdnlD8nWv3e7b7Ev2tS9TlS/L11Q7oiApPOgoOW47AXGAzKPJhhZzMI4/DxEgxy+Bz0By5xUyuh3ZsaDNtUm74CK0wfATCIQCIwFDl/sfLzpU0rqvzPQM/ziT3kkgJnrRKXrGO4FyPYEoBdCzUkr8j2MDU6Q2J1DRZ7Kh1BoIN6FtCBzGao/pxJI3laE8v+ZEX6IpzP7KKv9xgC"}]}}],"usage":{"prompt_tokens":453,"completion_tokens":165,"total_tokens":618}}
+
+         
+{"id":"gen-1769111904-Dsor1QvaQNdh0cJAuKNj","provider":"Google","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1769111904,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I can check the current weather in Boston for you.","refusal":null,"reasoning":"The user is asking about the weather in Boston, MA. I can help with this by using the getCurrentWeather function.\n\nLet's analyze the required parameters for getCurrentWeather:\n1. location - This is provided as \"Boston, MA\"\n2. unit - This is optional (not in the \"required\" array), and the user didn't specify a preference between celsius or fahrenheit\n\nSince I have all the required parameters, I'll call the getCurrentWeather function with the location \"Boston, MA\". Since the unit parameter is optional and the user didn't specify a preference, I'll omit it in my function call.","tool_calls":[{"type":"function","index":0,"id":"toolu_vrtx_01NQuquGHdegsMiCvu9PEgM6","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}}],"reasoning_details":[{"format":"anthropic-claude-v1","index":0,"type":"reasoning.text","text":"The user is asking about the weather in Boston, MA. I can help with this by using the getCurrentWeather function.\n\nLet's analyze the required parameters for getCurrentWeather:\n1. location - This is provided as \"Boston, MA\"\n2. unit - This is optional (not in the \"required\" array), and the user didn't specify a preference between celsius or fahrenheit\n\nSince I have all the required parameters, I'll call the getCurrentWeather function with the location \"Boston, MA\". Since the unit parameter is optional and the user didn't specify a preference, I'll omit it in my function call.","signature":"ErkBCkoICxACGAIiQN3QnwraZFcauC56bzHKoB6Z1BHlR7FjeABa7t/FVcocyVZbvwJAWTZHl1EdikOENIYh8V6OKr4Isop/jzQpaSEoARIMw6wBLPSOeicQz0okGgwy4bnssFfPFrIsUDoiMLg3uXhTja2tqvEMNu/XRkKW+H6VrEMC2XqLIXqDIvVAqAJq1578SP3UGO9cdtPFbSodW6LtxP4giLqV9jKidz1tRYoPVTtxgr8tEPO2+R8YAg=="}]}}],"usage":{"prompt_tokens":454,"completion_tokens":206,"total_tokens":660,"cost":0.004452,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.001362,"upstream_inference_completions_cost":0.00309},"completion_tokens_details":{"reasoning_tokens":150,"image_tokens":0}}}

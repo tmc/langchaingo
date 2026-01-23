@@ -1,0 +1,27 @@
+httprr trace v1
+414 1686
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 210
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"qwen/qwen3-next-80b-a3b-instruct","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 1230
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:57:01 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+{"id":"gen-1769111820-UxJm4dvHnxTyMy64TsqX","provider":"GMICloud","model":"qwen/qwen3-next-80b-a3b-instruct","object":"chat.completion","created":1769111820,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Between **Spain** and **Lesotho**, **Spain** is significantly larger.\n\nHere’s a quick comparison:\n\n- **Spain**: Approximately **505,992 square kilometers** (195,365 square miles)  \n- **Lesotho**: Approximately **30,355 square kilometers** (11,720 square miles)\n\n✅ So, **Spain is about 16.7 times larger** than Lesotho.\n\nSpain is a major country in southwestern Europe, while Lesotho is a small, landlocked country entirely surrounded by South Africa in southern Africa.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":32,"completion_tokens":128,"total_tokens":160,"cost":0.0001968,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000048,"upstream_inference_completions_cost":0.000192},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

@@ -1,35 +1,35 @@
 httprr trace v1
-374 1440
+368 1526
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
-Content-Length: 153
+Content-Length: 148
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":[{"type":"text","text":"Hello, how are you?"}]}],"max_tokens":100,"temperature":0}HTTP/2.0 200 OK
-Content-Length: 457
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Hello, how are you?"}]}],"max_tokens":100,"temperature":0}HTTP/2.0 200 OK
+Content-Length: 514
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
-Anthropic-Ratelimit-Input-Tokens-Limit: 80000
-Anthropic-Ratelimit-Input-Tokens-Remaining: 80000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2025-06-23T15:31:52Z
-Anthropic-Ratelimit-Output-Tokens-Limit: 16000
-Anthropic-Ratelimit-Output-Tokens-Remaining: 16000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2025-06-23T15:31:53Z
-Anthropic-Ratelimit-Requests-Limit: 2000
-Anthropic-Ratelimit-Requests-Remaining: 1999
-Anthropic-Ratelimit-Requests-Reset: 2025-06-23T15:31:51Z
-Anthropic-Ratelimit-Tokens-Limit: 96000
-Anthropic-Ratelimit-Tokens-Remaining: 96000
-Anthropic-Ratelimit-Tokens-Reset: 2025-06-23T15:31:52Z
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-23T16:54:11Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-23T16:54:12Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-23T16:54:11Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-23T16:54:11Z
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:31:53 GMT
-Request-Id: req_011CQRPonYBnSLEUt1w1xdx1
+Date: Fri, 23 Jan 2026 16:54:12 GMT
+Request-Id: req_011CXQfBuW35kL5jB9urFWU3
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: 1.1 google
+X-Envoy-Upstream-Service-Time: 816
 X-Robots-Tag: none
 
-{"id":"msg_01R8m1SK71yoTCrceG57JzBt","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"Hello! As an AI language model, I don't have feelings, but I'm functioning properly and ready to assist you. How can I help you today?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":35,"service_tier":"standard"}}
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01HANhNE44mMnbi8maUeFXES","type":"message","role":"assistant","content":[{"type":"text","text":"Hello! I'm doing well, thank you for asking. How are you doing today? Is there anything I can help you with?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":30,"service_tier":"standard"}}

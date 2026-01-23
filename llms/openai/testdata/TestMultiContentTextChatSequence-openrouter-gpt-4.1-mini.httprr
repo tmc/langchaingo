@@ -1,5 +1,5 @@
 httprr trace v1
-402 1029
+401 1167
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,22 +8,16 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4.1-mini","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 641
+Content-Length: 712
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:16 GMT
+Date: Thu, 22 Jan 2026 19:57:01 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
-
-         
-
-         
-
-         
-{"id":"gen-1750691655-24gQ5CO3sJ40NTkQnoxi","provider":"OpenAI","model":"openai/gpt-4.1-mini","object":"chat.completion","created":1750691655,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho. Spain has a much bigger land area compared to Lesotho.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_6f2eabb9a5","usage":{"prompt_tokens":28,"completion_tokens":19,"total_tokens":47,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+{"id":"gen-1769111820-Nf4fvJwk3LJaGHlmOgAB","provider":"OpenAI","model":"openai/gpt-4.1-mini","object":"chat.completion","created":1769111820,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":28,"completion_tokens":8,"total_tokens":36,"cost":0.000024,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.000024,"upstream_inference_prompt_cost":0.0000112,"upstream_inference_completions_cost":0.0000128},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

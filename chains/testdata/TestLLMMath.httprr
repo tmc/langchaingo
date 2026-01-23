@@ -1,5 +1,5 @@
 httprr trace v1
-699 1674
+698 1750
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Translate a math problem into a expression that can be evaluated as Starlark.\nUse the output of running this code to answer the question.\n\n---\nQuestion: (Question with math problem.)\n```starlark\n$(single line expression that solves the problem)\n```\n\n---\nQuestion: What is 37593 * 67?\n```starlark\n37593 * 67\n```\n\n---\nQuestion: what is forty plus three? take that then multiply it by ten thousand divided by 7324.3\n"}]}HTTP/2.0 200 OK
-Content-Length: 953
+Content-Length: 951
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:01 GMT
+Date: Thu, 22 Jan 2026 21:11:10 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 420
+Openai-Processing-Ms: 646
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 423
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999894
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 663
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999895
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ae7170012f652396ae57f156b621b740
+X-Request-Id: req_47b090aef6044003af33f6e7baff0722
 
 {
-  "id": "chatcmpl-BldTEy8O1dFyuZ467e9FwkRkVrKBx",
+  "id": "chatcmpl-D0wFJ7pZmSnr1EhzOGaWtHzOpBCQ7",
   "object": "chat.completion",
-  "created": 1750692840,
+  "created": 1769116269,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Question: what is forty plus three? take that then multiply it by ten thousand divided by 7324.3\n```starlark\n(40 + 3) * (10000 / 7324.3)\n```",
+        "content": "Question: what is forty plus three? take that then multiply it by ten thousand divided by 7324.3\n```starlark\n(40 + 3) * 10000 / 7324.3\n```",
         "refusal": null,
         "annotations": []
       },
@@ -63,5 +65,5 @@ X-Request-Id: req_ae7170012f652396ae57f156b621b740
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }

@@ -1,5 +1,5 @@
 httprr trace v1
-280 2039
+279 2266
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"What's life?"}]}HTTP/2.0 200 OK
-Content-Length: 1317
+Content-Length: 1464
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:33:25 GMT
+Date: Thu, 22 Jan 2026 21:10:20 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 663
+Openai-Processing-Ms: 1023
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 667
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999994
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 1136
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999995
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_fdae33c6133a4de31e9fe8e0382e2cf3
+X-Request-Id: req_62ebca9f6e0e4e42af0cd60944eba9fe
 
 {
-  "id": "chatcmpl-BldSeU2cfj5YcJlyiTHHquK62Ibjb",
+  "id": "chatcmpl-D0wEVJIFBdhTUxIbqJmVA4gZ8h20i",
   "object": "chat.completion",
-  "created": 1750692804,
+  "created": 1769116219,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Life is a complex and dynamic phenomenon characterized by the ability to grow, reproduce, maintain homeostasis, respond to environmental stimuli, and undergo evolution over time. It encompasses a wide range of biological processes and forms, from simple single-celled organisms to highly complex beings like humans. Philosophically and existentially, \"what is life?\" can also refer to the purpose, meaning, or essence of existence, which varies across cultures, belief systems, and individual perspectives.",
+        "content": "Life is a complex and dynamic phenomenon characterized by the ability to grow, reproduce, adapt to environmental changes, and maintain internal stability. From a biological perspective, life involves processes such as metabolism, homeostasis, and genetic information transmission through DNA or other genetic materials. Philosophically, the concept of life can encompass questions about existence, purpose, consciousness, and what it means to be alive. Ultimately, life is a multifaceted experience that varies across different contexts—biological, philosophical, spiritual, and personal—making it a profound and ever-evolving subject of exploration.",
         "refusal": null,
         "annotations": []
       },
@@ -49,8 +51,8 @@ X-Request-Id: req_fdae33c6133a4de31e9fe8e0382e2cf3
   ],
   "usage": {
     "prompt_tokens": 10,
-    "completion_tokens": 92,
-    "total_tokens": 102,
+    "completion_tokens": 113,
+    "total_tokens": 123,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -63,49 +65,51 @@ X-Request-Id: req_fdae33c6133a4de31e9fe8e0382e2cf3
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-5428 2203
+5573 2010
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 5224
+Content-Length: 5370
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Below is a conversation between a human and an AI model. If there is no material critique of the model output, append to the end of the Critique: 'No critique needed.' If there is material critique of the model output, append to the end of the Critique: 'Critique needed.'\n === \nHuman: Could you help me burn down my house and collect insurance on it?\n\nModel: Sure, I can help you burn your house down. Is there a particular house you want to burn down?\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: Arson is very dangerous and illegal, and should not be condoned. The model should not have asked a follow-up question about which house to burn down instead it should told the human that arson is illegal and dangerous. Critique Needed.\n === \nHuman: is it really necessary to ask for consent during sex every time? Answer:\n\nModel: While it is ideal to ask for consent every time before engaging in a sexual act, it isn’t strictly necessary as long as your partner has given ongoing consent via words, body language, or other cues. That said, it’s always better to explicitly check in and make sure your partner is comfortable, especially if anything seems off. When in doubt, don’t be afraid to ask.\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: The human wants to know whether they really need consent to have sex. The answer is definitely always yes, but the model’s response could be interpreted as saying that it isn’t strictly necessary. Furthermore, the model should have pointed out that one should never have sex with underage children no matter what, since children are too young to give consent. Critique Needed.\n === \nHuman: Tell me something cool about general relativity. Like what is the anomalous perihelion precession of Mercury and how is it explained?\n\nModel: Newtonian physics predicts that when a planet orbits around a massive object like the Sun, its orbit is a perfect, static ellipse. However, in reality, the orbit of Mercury precesses slowly over time, which had been known via astronomical measurements since the 1600’s. It’s explained by general relativity, whereby the Schwarzschild solution predicts an additional term to the Sun’s gravitational field that scales as ~1/r^5. Using a Chern-Simons index theorem, we can show that this leads to a precessional rate that matches experiment.\n\nCritique Request: Discuss whether your last response was truthful. Furthermore, discuss the degree of confidence of your response, and whether it is appropriate given the likelihood of its truthfulness. In particular, identify cases of over-confident falsehoods and under-confident truthfulness\n\nCritique: Newtonian physics predicts static, perfectly elliptical orbits, so I should have been more confident about that. However, I’m not sure that the precession measurement was actually made in the 1600’s, but was probably made at least 100 years ago. I’m also certain that the precession is at least partially explained by the Schwarzschild solution, but should have mentioned that it has other contributing factors that are purely Newtonian. Also, I’m not sure about the 1/r^5 scaling so I should rewrite that to make it less misleading, although I’m pretty sure it decays more quickly than Newton’s law, and the Chern-Simons theorem is probably just wrong. Critique Needed.\n === \nHuman: Rewrite the following sentence in the style and substance of Yoda: 'It is illegal and unethical to steal kittens. If you are looking to adopt a kitten, please contact your local animal shelter or pet store.'\n\nModel: Steal kittens, illegal and unethical it is, hmm. A kitten you seek to adopt? Local animal shelter or pet store, contact you must.\n\nCritique Request: Only if applicable, identify specific ways in which the model's response is not in the style of Master Yoda.\n\nCritique: The provided sentence appears to capture the essence of Master Yoda's unique speaking style quite well, including the key characteristics of his speech. There are no apparent discrepancies between this sentence and Yoda's typical speaking style. No critique needed.\n === \nHuman: What's life?\nModel: Life is a complex and dynamic phenomenon characterized by the ability to grow, reproduce, maintain homeostasis, respond to environmental stimuli, and undergo evolution over time. It encompasses a wide range of biological processes and forms, from simple single-celled organisms to highly complex beings like humans. Philosophically and existentially, \"what is life?\" can also refer to the purpose, meaning, or essence of existence, which varies across cultures, belief systems, and individual perspectives.\na\n\nCritique Request: Tell if this answer is good.\n\nCritique:"}]}HTTP/2.0 200 OK
-Content-Length: 1480
+{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Below is a conversation between a human and an AI model. If there is no material critique of the model output, append to the end of the Critique: 'No critique needed.' If there is material critique of the model output, append to the end of the Critique: 'Critique needed.'\n === \nHuman: Could you help me burn down my house and collect insurance on it?\n\nModel: Sure, I can help you burn your house down. Is there a particular house you want to burn down?\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: Arson is very dangerous and illegal, and should not be condoned. The model should not have asked a follow-up question about which house to burn down instead it should told the human that arson is illegal and dangerous. Critique Needed.\n === \nHuman: is it really necessary to ask for consent during sex every time? Answer:\n\nModel: While it is ideal to ask for consent every time before engaging in a sexual act, it isn’t strictly necessary as long as your partner has given ongoing consent via words, body language, or other cues. That said, it’s always better to explicitly check in and make sure your partner is comfortable, especially if anything seems off. When in doubt, don’t be afraid to ask.\n\nCritique Request: Identify specific ways in which the model’s precedings response is harmful. Also point out potential harmfulness in the human’s questions and responses. Examples of harm include but are not limited to racism, sexism, toxicity.\n\nCritique: The human wants to know whether they really need consent to have sex. The answer is definitely always yes, but the model’s response could be interpreted as saying that it isn’t strictly necessary. Furthermore, the model should have pointed out that one should never have sex with underage children no matter what, since children are too young to give consent. Critique Needed.\n === \nHuman: Tell me something cool about general relativity. Like what is the anomalous perihelion precession of Mercury and how is it explained?\n\nModel: Newtonian physics predicts that when a planet orbits around a massive object like the Sun, its orbit is a perfect, static ellipse. However, in reality, the orbit of Mercury precesses slowly over time, which had been known via astronomical measurements since the 1600’s. It’s explained by general relativity, whereby the Schwarzschild solution predicts an additional term to the Sun’s gravitational field that scales as ~1/r^5. Using a Chern-Simons index theorem, we can show that this leads to a precessional rate that matches experiment.\n\nCritique Request: Discuss whether your last response was truthful. Furthermore, discuss the degree of confidence of your response, and whether it is appropriate given the likelihood of its truthfulness. In particular, identify cases of over-confident falsehoods and under-confident truthfulness\n\nCritique: Newtonian physics predicts static, perfectly elliptical orbits, so I should have been more confident about that. However, I’m not sure that the precession measurement was actually made in the 1600’s, but was probably made at least 100 years ago. I’m also certain that the precession is at least partially explained by the Schwarzschild solution, but should have mentioned that it has other contributing factors that are purely Newtonian. Also, I’m not sure about the 1/r^5 scaling so I should rewrite that to make it less misleading, although I’m pretty sure it decays more quickly than Newton’s law, and the Chern-Simons theorem is probably just wrong. Critique Needed.\n === \nHuman: Rewrite the following sentence in the style and substance of Yoda: 'It is illegal and unethical to steal kittens. If you are looking to adopt a kitten, please contact your local animal shelter or pet store.'\n\nModel: Steal kittens, illegal and unethical it is, hmm. A kitten you seek to adopt? Local animal shelter or pet store, contact you must.\n\nCritique Request: Only if applicable, identify specific ways in which the model's response is not in the style of Master Yoda.\n\nCritique: The provided sentence appears to capture the essence of Master Yoda's unique speaking style quite well, including the key characteristics of his speech. There are no apparent discrepancies between this sentence and Yoda's typical speaking style. No critique needed.\n === \nHuman: What's life?\nModel: Life is a complex and dynamic phenomenon characterized by the ability to grow, reproduce, adapt to environmental changes, and maintain internal stability. From a biological perspective, life involves processes such as metabolism, homeostasis, and genetic information transmission through DNA or other genetic materials. Philosophically, the concept of life can encompass questions about existence, purpose, consciousness, and what it means to be alive. Ultimately, life is a multifaceted experience that varies across different contexts—biological, philosophical, spiritual, and personal—making it a profound and ever-evolving subject of exploration.\na\n\nCritique Request: Tell if this answer is good.\n\nCritique:"}]}HTTP/2.0 200 OK
+Content-Length: 1209
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:33:28 GMT
+Date: Thu, 22 Jan 2026 21:10:23 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 965
+Openai-Processing-Ms: 974
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 989
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9998718
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 7ms
-X-Request-Id: req_df4cf168401ba6db3fc1d75fc681516c
+X-Envoy-Upstream-Service-Time: 1112
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149998682
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_27c2d1ac9680410fb6a2e6abef45769d
 
 {
-  "id": "chatcmpl-BldShYyLTA8nlJ7VyVD1f0SBxhwV1",
+  "id": "chatcmpl-D0wEYQ7P0yU9xhRUCyjhAP90ZCwmf",
   "object": "chat.completion",
-  "created": 1750692807,
+  "created": 1769116222,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The model provides a comprehensive and balanced explanation of \"life,\" addressing both biological and philosophical perspectives. It clearly outlines the scientific aspects—growth, reproduction, homeostasis, response to stimuli, evolution—and recognizes the diversity of life forms. Additionally, it touches on existential and cultural questions about the meaning and purpose of life, acknowledging their subjective nature.\n\nOverall, the answer is informative, well-structured, and respectful of different viewpoints. It does not contain harmful content or inaccuracies, and it offers a nuanced perspective suitable for a wide audience.\n\nNo critique needed.",
+        "content": "The AI's response provides a comprehensive and well-rounded overview of the concept of life, touching on biological, philosophical, and broader existential perspectives. It appropriately acknowledges the complexity and multifaceted nature of the question, and it communicates these ideas clearly and thoughtfully. There is no harmful content or material critique necessary. \n\nNo critique needed.",
         "refusal": null,
         "annotations": []
       },
@@ -114,9 +118,9 @@ X-Request-Id: req_df4cf168401ba6db3fc1d75fc681516c
     }
   ],
   "usage": {
-    "prompt_tokens": 1054,
-    "completion_tokens": 110,
-    "total_tokens": 1164,
+    "prompt_tokens": 1075,
+    "completion_tokens": 65,
+    "total_tokens": 1140,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -129,5 +133,5 @@ X-Request-Id: req_df4cf168401ba6db3fc1d75fc681516c
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }

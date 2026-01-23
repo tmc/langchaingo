@@ -1,0 +1,37 @@
+httprr trace v1
+669 1469
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 465
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek/deepseek-chat-v3.1","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
+Content-Length: 1013
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:58:26 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111906-e37pl8p6xc7eVMoWzTcA","provider":"DeepInfra","model":"deepseek/deepseek-chat-v3.1","object":"chat.completion","created":1769111906,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I'll check the current weather in Boston, MA for you.","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"call_3299","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}}]}}],"usage":{"prompt_tokens":124,"completion_tokens":24,"total_tokens":148,"cost":0.000045,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00002604,"upstream_inference_completions_cost":0.00001896},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

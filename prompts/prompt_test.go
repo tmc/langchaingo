@@ -2,9 +2,6 @@ package prompts
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestStringPromptValueString(t *testing.T) {
@@ -12,11 +9,15 @@ func TestStringPromptValueString(t *testing.T) {
 
 	spv := StringPromptValue("")
 	str := spv.String()
-	assert.Empty(t, str)
+	if str != "" {
+		t.Errorf("expected empty string, got %q", str)
+	}
 
 	spv = StringPromptValue("test")
 	str = spv.String()
-	assert.Equal(t, "test", str)
+	if str != "test" {
+		t.Errorf("expected %q, got %q", "test", str)
+	}
 }
 
 func TestStringPromptValueMessages(t *testing.T) {
@@ -24,10 +25,16 @@ func TestStringPromptValueMessages(t *testing.T) {
 
 	spv := StringPromptValue("")
 	msgs := spv.Messages()
-	require.Len(t, msgs, 1)
+	if len(msgs) != 1 {
+		t.Fatalf("expected 1 message, got %d", len(msgs))
+	}
 
 	spv = StringPromptValue("test")
 	msgs = spv.Messages()
-	require.Len(t, msgs, 1)
-	assert.Equal(t, "test", msgs[0].GetContent())
+	if len(msgs) != 1 {
+		t.Fatalf("expected 1 message, got %d", len(msgs))
+	}
+	if msgs[0].GetContent() != "test" {
+		t.Errorf("expected %q, got %q", "test", msgs[0].GetContent())
+	}
 }

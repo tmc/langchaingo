@@ -1,5 +1,5 @@
 httprr trace v1
-367 3383
+366 2129
 POST https://api.deepseek.com/chat/completions HTTP/1.1
 Host: api.deepseek.com
 User-Agent: langchaingo-httprr
@@ -8,15 +8,18 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"deepseek-reasoner","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 2955
+Content-Length: 1537
 Access-Control-Allow-Credentials: true
-Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:44 GMT
-Server: cloudflare
+Date: Thu, 22 Jan 2026 19:48:37 GMT
+Server: elb
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 Vary: origin, access-control-request-method, access-control-request-headers
+Via: 1.1 8ca36406fe3aa11c1641e5bc917c8a74.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: dpXBqcieaeoThGVBe7tnX7trTsUnAy70eRk4uY5FrZYTPyi_Xrx6vA==
+X-Amz-Cf-Pop: JFK50-P2
+X-Cache: Miss from cloudfront
 X-Content-Type-Options: nosniff
-X-Ds-Trace-Id: c62a72167b7aeca13e45a84c91827838
+X-Ds-Trace-Id: f393440418c0363f9cf62744f7012c11
 
-{"id":"466030bd-3304-4c4a-b574-690f1620875f","object":"chat.completion","created":1750691624,"model":"deepseek-reasoner","choices":[{"index":0,"message":{"role":"assistant","content":"You, as a Pomeranian, are a **dog**! Specifically, you belong to the following mammalian groups:\n\n1.  **Class: Mammalia (Mammals)** - This is the broadest category. You share key mammalian traits:\n    *   You have fur (a *lot* of it!).\n    *   Females give birth to live young (viviparous) and produce milk to nurse them.\n    *   You are warm-blooded (endothermic).\n    *   You have specialized teeth (including carnassials adapted for shearing, though you likely eat prepared dog food now!).\n\n2.  **Order: Carnivora (Carnivores)** - This order includes animals whose ancestors were primarily meat-eaters. While modern dogs like you are omnivores, your teeth and digestive system show your carnivorous heritage. Other members include cats, bears, weasels, and seals.\n\n3.  **Family: Canidae (Canids / The Dog Family)** - This family includes dogs, wolves, foxes, coyotes, and jackals. You share common physical and behavioral traits with these relatives.\n\n4.  **Genus & Species: *Canis lupus familiaris*** - This is your full scientific name. You are a domesticated subspecies (*familiaris*) of the Gray Wolf (*Canis lupus*).\n\n**In short: You are a domesticated dog (Canis lupus familiaris), a member of the Canidae family within the order Carnivora, making you unequivocally a mammal!**\n\nAnd as a Pomeranian, you're a particularly fluffy, lively, and adorable type of **Toy Dog** breed within that mammal classification! Enjoy your luxurious fur and your status as man's best (and tiny, pom-pom-like) friend! 🐾","reasoning_content":"Okay, the user says they're a Pomeranian and asks what kind of mammal they are. First, I need to confirm that Pomeranians are indeed mammals. All dogs are mammals, so that's straightforward. They belong to the order Carnivora, family Canidae. \n\nThe user might be a kid or someone new to pet ownership, curious about basic biology. They might not just want the classification but also some fun facts about their breed. Pomeranians are small, fluffy, and descended from larger Spitz dogs. Including that could make the answer more engaging.\n\nI should mention their scientific name, Canis lupus familiaris, to be precise. Also, highlighting traits like live birth, fur, and milk production reinforces why they're mammals. Maybe add a playful note about their \"pom-pom\" appearance to connect with the user's possible affection for their pet. Keeping it simple but informative would work best here."},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":19,"completion_tokens":555,"total_tokens":574,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":188},"prompt_cache_hit_tokens":0,"prompt_cache_miss_tokens":19},"system_fingerprint":"fp_393bca965e_prod0425fp8"}
+{"id":"c4676d20-5848-4ba9-b86b-916fbbdbd2f3","object":"chat.completion","created":1769111317,"model":"deepseek-reasoner","choices":[{"index":0,"message":{"role":"assistant","content":"You are a **dog** — specifically, a domesticated canine (*Canis lupus familiaris*).\n\nMore broadly, you are a:\n\n- **Mammal** (class Mammalia)  \n- **Placental mammal** (infraclass Eutheria)  \n- **Carnivoran** (order Carnivora)  \n- **Canid** (family Canidae)  \n\nSo, as a Pomeranian, you’re a small, fluffy member of the dog breed group within the mammal family. 🐾","reasoning_content":"Hmm, the user says they’re a Pomeranian. That’s straightforward—Pomeranian is a breed of dog, so the broader classification would be a canine. \n\nDogs fall under the order Carnivora, family Canidae, species *Canis lupus familiaris*. Since the user is asking about the type of mammal, it’s important to highlight the taxonomic hierarchy without overcomplicating it. \n\nThe response should start with the most specific classification (dog/domestic dog) and then expand to the broader categories (canine, mammal). Keeping it concise but informative seems best—no need for extra details unless the user asks for more."},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":18,"completion_tokens":245,"total_tokens":263,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":136},"prompt_cache_hit_tokens":0,"prompt_cache_miss_tokens":18},"system_fingerprint":"fp_eaab8d114b_prod0820_fp8_kvcache"}

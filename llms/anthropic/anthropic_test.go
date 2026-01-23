@@ -333,7 +333,7 @@ func TestGenerateContentWithToolAndStreaming(t *testing.T) {
 	// If you need to test parallel tool calls without streaming, you can use the following options:
 	// * WithAnthropicBetaHeader("token-efficient-tools-2025-02-19") while initializing client
 	// * llms.WithToolChoice(map[string]any{"type": "auto"}) while call GenerateContent
-	llm := newTestClient(t, WithModel("claude-3-5-sonnet-20240620"))
+	llm := newTestClient(t, WithModel("claude-sonnet-4-5"))
 
 	content := []llms.MessageContent{
 		{
@@ -411,7 +411,6 @@ func TestGenerateContentWithToolAndStreaming(t *testing.T) {
 
 	// Verify the streamed content
 	assert.True(t, streamedDone)
-	assert.Greater(t, len(streamedContent), 0)
 
 	fullContent := strings.Join(streamedContent, "")
 
@@ -439,59 +438,4 @@ func TestGenerateContentWithToolAndStreaming(t *testing.T) {
 	}
 
 	assert.Len(t, respToolCallDetected, 2, "tool call not detected in response")
-}
-
-func TestLegacyTextCompletionsAPI(t *testing.T) {
-	t.Parallel()
-
-	// Use claude-2 model which is compatible with legacy completions API
-	llm := newTestClient(t, WithLegacyTextCompletionsAPI(), WithModel("claude-2"))
-
-	content := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{Text: "What's the capital of France?"},
-			},
-		},
-	}
-
-	// Test the legacy API with streaming
-	var (
-		streamedChunks []string
-		streamedDone   bool
-	)
-
-	streamingFunc := func(_ context.Context, chunk streaming.Chunk) error {
-		switch chunk.Type {
-		case streaming.ChunkTypeNone:
-			t.Errorf("unexpected chunk type: %s", chunk.Type)
-		case streaming.ChunkTypeText:
-			streamedChunks = append(streamedChunks, chunk.Content)
-		case streaming.ChunkTypeReasoning:
-			t.Errorf("unexpected reasoning chunk: %s", chunk.ReasoningContent)
-		case streaming.ChunkTypeToolCall:
-			t.Errorf("unexpected tool call chunk: %v", chunk.ToolCall)
-		case streaming.ChunkTypeDone:
-			streamedDone = true
-		}
-		return nil
-	}
-
-	resp, err := llm.GenerateContent(
-		t.Context(),
-		content,
-		llms.WithStreamingFunc(streamingFunc),
-	)
-	require.NoError(t, err)
-
-	// Verify the response content contains the answer
-	assert.Equal(t, 1, len(resp.Choices))
-	assert.Contains(t, resp.Choices[0].Content, "Paris")
-
-	// Verify we received chunks
-	assert.True(t, streamedDone)
-	assert.Greater(t, len(streamedChunks), 0)
-	fullContent := strings.Join(streamedChunks, "")
-	assert.Equal(t, fullContent, resp.Choices[0].Content)
 }

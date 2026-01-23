@@ -1,5 +1,5 @@
 httprr trace v1
-373 1279
+372 1335
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,36 +8,18 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"mistralai/mistral-nemo","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 891
+Content-Length: 880
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:34 GMT
+Date: Thu, 22 Jan 2026 19:48:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
 
          
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750691613-r0lxUOWvH9cvpMpoxYL2","provider":"Kluster","model":"mistralai/mistral-nemo","object":"chat.completion","created":1750691613,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Hello! You are a Canis lupus familiaris, which is the scientific name for the domestic dog. Pomeranians are a small breed of dog that originated from the Spitz-type dogs from Germany, Poland, and other European countries. So, while you may not be a real Pomeranian, you're a furry friend in the category of Canidae, which is the same family as wolves, foxes, and other breeds of dogs.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":17,"completion_tokens":90,"total_tokens":107}}
+{"id":"gen-1769111314-NucFZSplcvpUzIHJ6EGP","provider":"Novita","model":"mistralai/mistral-nemo","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You are a domestic dog, Canis lupus familiaris, which is a mammal from the family Canidae. Pomeranians are a small breed of the German Spitz breed group.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":28,"completion_tokens":38,"total_tokens":66,"cost":0.00000758,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00000112,"upstream_inference_completions_cost":0.00000646},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

@@ -1,0 +1,45 @@
+httprr trace v1
+462 4869
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 258
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"stream":true,"reasoning":{"effort":"high"},"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 4387
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:50:07 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Considering Factorials' Definition**\n\nI've got the factorial's definition locked in: it's the product of positive integers up to a given number. Now, I'm starting to visualize the calculations for 5!. I'm ready to lay out the multiplication steps.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Considering Factorials' Definition**\n\nI've got the factorial's definition locked in: it's the product of positive integers up to a given number. Now, I'm starting to visualize the calculations for 5!. I'm ready to lay out the multiplication steps.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Outlining the Computation**\n\nI'm translating the conceptual definition into the practical application for 5!. It seems straightforward: I have to multiply all integers from 1 to 5. Now, I'm mentally breaking down the multiplication steps to ensure no errors.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Outlining the Computation**\n\nI'm translating the conceptual definition into the practical application for 5!. It seems straightforward: I have to multiply all integers from 1 to 5. Now, I'm mentally breaking down the multiplication steps to ensure no errors.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":"To calculate the factorial of 5, denoted as 5!, we multiply all positive integers from","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":" 5 down to 1.\n\nHere's the work:\n\n$5! = 5 \\times 4 \\times 3 \\times 2 \\times 1$\n$5! = 20 \\times 3 \\","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":"times 2 \\times 1$\n$5! = 60 \\times 2 \\times 1$\n$5! = 120 \\times 1$\n$5! = 120","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":"$\n\nThe factorial of 5 is 120.","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+data: {"id":"gen-1769111405-nnkxDNMYI5ISyFeXqOdE","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111405,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":17,"completion_tokens":219,"total_tokens":236,"cost":0.0005526,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000051,"upstream_inference_completions_cost":0.0005475},"completion_tokens_details":{"reasoning_tokens":88,"image_tokens":0}}}
+
+data: [DONE]
+

@@ -1,5 +1,5 @@
 httprr trace v1
-377 1267
+376 1891
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"mistralai/mistral-medium-3","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 879
+Content-Length: 1435
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:36 GMT
+Date: Thu, 22 Jan 2026 19:48:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -26,4 +26,6 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750691616-DdhLPVVCuFSVIWQ3bcEL","provider":"Mistral","model":"mistralai/mistral-medium-3","object":"chat.completion","created":1750691616,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You are a **canine** (specifically a domestic dog), which makes you a **carnivorous mammal**! Pomeranians are a small breed of dog (*Canis lupus familiaris*) that belong to the family **Canidae**, along with wolves, foxes, and other dogs.\n\nSince you're a mammal, you share traits like having fur, being warm-blooded, and (in most cases) giving live birth. You’re also a social and intelligent companion animal—just like all dogs! 🐾🐶","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":17,"completion_tokens":116,"total_tokens":133}}
+
+         
+{"id":"gen-1769111314-fT5LgFyi1QJ6e4Oml7JH","provider":"Mistral","model":"mistralai/mistral-medium-3","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You are a **canine** (a type of mammal in the order **Carnivora** and the family **Canidae**). Specifically, you are a **domestic dog** (*Canis lupus familiaris*), and your breed is the **Pomeranian**, which is a small, fluffy, and energetic toy breed.\n\nAs a mammal, you share characteristics like:\n- Having fur (your Pomeranian coat is thick and double-layered!).\n- Being warm-blooded.\n- Giving birth to live young (though as a male or spayed female, you wouldn’t experience this directly).\n- Nursing your young with milk (if you were a mother).\n\nPomeranians are known for their fox-like faces, vibrant personalities, and loyalty to their humans. So, you’re a tiny but mighty mammal! 🐾","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":17,"completion_tokens":176,"total_tokens":193,"cost":0.0003588,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.0003588,"upstream_inference_prompt_cost":0.0000068,"upstream_inference_completions_cost":0.000352},"completion_tokens_details":{"reasoning_tokens":0}}}

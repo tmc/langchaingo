@@ -1,0 +1,23 @@
+httprr trace v1
+665 1370
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 461
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
+Content-Length: 915
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:58:28 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+{"id":"gen-1769111907-Xhk16eQzkiDMUxpJAELD","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion","created":1769111907,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"STOP","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"tool_getCurrentWeather_JlTBk8lshN85t8NUqAkx","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\"}"}}],"annotations":[]}}],"usage":{"prompt_tokens":43,"completion_tokens":6,"total_tokens":49,"cost":0.0000279,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000129,"upstream_inference_completions_cost":0.000015},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

@@ -1,5 +1,5 @@
 httprr trace v1
-254 34313
+253 34393
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -14,23 +14,25 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:16:48 GMT
+Date: Thu, 22 Jan 2026 19:20:58 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 100
+Openai-Processing-Ms: 52
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-678d5cbb58-rzp59
+Via: envoy-router-canary-575d947bfd-mn75j
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 102
+X-Envoy-Upstream-Service-Time: 71
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 5000000
+X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 4999998
+X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_6a23e88d5bf3a9fb07b62e9e3c4ffc10
+X-Request-Id: req_ab5023bd260b43a99f25b0c6ccf4ce76
 
 {
   "object": "list",

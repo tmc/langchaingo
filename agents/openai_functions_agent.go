@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
+	"github.com/vxcontrol/langchaingo/chains"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 	"github.com/vxcontrol/langchaingo/prompts"
@@ -78,6 +79,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	ctx context.Context,
 	intermediateSteps []schema.AgentStep,
 	inputs map[string]string,
+	options ...chains.ChainCallOption,
 ) ([]schema.AgentAction, *schema.AgentFinish, error) {
 	fullInputs := make(map[string]any, len(inputs))
 	for key, value := range inputs {
@@ -128,15 +130,17 @@ func (o *OpenAIFunctionsAgent) Plan(
 
 		case llms.AIChatMessage:
 			if len(p.ToolCalls) > 0 {
+				toolCallParts := make([]llms.ContentPart, 0, len(p.ToolCalls))
+				for _, tc := range p.ToolCalls {
+					toolCallParts = append(toolCallParts, llms.ToolCall{
+						ID:           tc.ID,
+						Type:         tc.Type,
+						FunctionCall: tc.FunctionCall,
+					})
+				}
 				mc = llms.MessageContent{
-					Role: role,
-					Parts: []llms.ContentPart{
-						llms.ToolCall{
-							ID:           p.ToolCalls[0].ID,
-							Type:         p.ToolCalls[0].Type,
-							FunctionCall: p.ToolCalls[0].FunctionCall,
-						},
-					},
+					Role:  role,
+					Parts: toolCallParts,
 				}
 			} else {
 				mc = llms.MessageContent{
@@ -153,8 +157,11 @@ func (o *OpenAIFunctionsAgent) Plan(
 		mcList[i] = mc
 	}
 
-	result, err := o.LLM.GenerateContent(ctx, mcList,
-		llms.WithTools(o.tools()), llms.WithStreamingFunc(stream))
+	// Build LLM call options, including user-provided options
+	llmOptions := []llms.CallOption{llms.WithTools(o.tools()), llms.WithStreamingFunc(stream)}
+	llmOptions = append(llmOptions, chains.GetLLMCallOptions(options...)...)
+
+	result, err := o.LLM.GenerateContent(ctx, mcList, llmOptions...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -203,27 +210,60 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 	}
 
 	messages := make([]llms.ChatMessage, 0)
-	for _, step := range steps {
-		// First add the AI message with the tool call
-		messages = append(messages, llms.AIChatMessage{
-			Content: step.Action.Log,
-			ToolCalls: []llms.ToolCall{
-				{
-					ID:   step.Action.ToolID,
-					Type: "function",
-					FunctionCall: &llms.FunctionCall{
-						Name:      step.Action.Tool,
-						Arguments: step.Action.ToolInput,
-					},
-				},
+
+	// Group steps by their position to handle multiple tool calls
+	// that might be executed in parallel
+	var currentToolCalls []llms.ToolCall
+	var currentLog string
+
+	for i, step := range steps {
+		// Check if this step is part of a group of parallel tool calls
+		// by looking at the log content
+		if i == 0 || step.Action.Log != steps[i-1].Action.Log {
+			// Start a new group
+			if len(currentToolCalls) > 0 {
+				// Add the previous group as an AI message
+				messages = append(messages, llms.AIChatMessage{
+					Content:   currentLog,
+					ToolCalls: currentToolCalls,
+				})
+				// Add tool responses for the previous group
+				for j := i - len(currentToolCalls); j < i; j++ {
+					messages = append(messages, llms.ToolChatMessage{
+						ID:      steps[j].Action.ToolID,
+						Content: steps[j].Observation,
+					})
+				}
+				currentToolCalls = nil
+			}
+			currentLog = step.Action.Log
+		}
+
+		// Add this tool call to the current group
+		currentToolCalls = append(currentToolCalls, llms.ToolCall{
+			ID:   step.Action.ToolID,
+			Type: "function",
+			FunctionCall: &llms.FunctionCall{
+				Name:      step.Action.Tool,
+				Arguments: step.Action.ToolInput,
 			},
 		})
-		// Then add the tool response message
-		messages = append(messages, llms.ToolChatMessage{
-			ID:      step.Action.ToolID,
-			Name:    step.Action.Tool,
-			Content: step.Observation,
+	}
+
+	// Don't forget the last group
+	if len(currentToolCalls) > 0 {
+		messages = append(messages, llms.AIChatMessage{
+			Content:   currentLog,
+			ToolCalls: currentToolCalls,
 		})
+		// Add tool responses for the last group
+		for j := len(steps) - len(currentToolCalls); j < len(steps); j++ {
+			messages = append(messages, llms.ToolChatMessage{
+				ID:      steps[j].Action.ToolID,
+				Name:    steps[j].Action.Tool,
+				Content: steps[j].Observation,
+			})
+		}
 	}
 
 	return messages
@@ -232,6 +272,14 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	[]schema.AgentAction, *schema.AgentFinish, error,
 ) {
+	if contentResp == nil {
+		return nil, nil, fmt.Errorf("content response is nil")
+	}
+
+	if len(contentResp.Choices) == 0 {
+		return nil, nil, fmt.Errorf("content response has no choices")
+	}
+
 	var actions []schema.AgentAction
 
 	for _, choice := range contentResp.Choices {

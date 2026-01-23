@@ -1,0 +1,89 @@
+httprr trace v1
+460 8988
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 256
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-pro","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"stream":true,"reasoning":{"effort":"high"},"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 8506
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:50:07 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Examining the Prompt's Nuances**\n\nI've just finished breaking down the initial prompt. It's clear: I need to calculate the factorial of 5 and show my work. The \"show your work\" constraint is key. My strategy now is to figure out the best way to present the step-by-step calculation clearly. I'm considering different formatting options.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Examining the Prompt's Nuances**\n\nI've just finished breaking down the initial prompt. It's clear: I need to calculate the factorial of 5 and show my work. The \"show your work\" constraint is key. My strategy now is to figure out the best way to present the step-by-step calculation clearly. I'm considering different formatting options.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Unpacking the User's Intent**\n\nNow, I'm digging deeper into the \"show your work\" requirement. It means more than just listing the steps. I need to explain *why* each step is taken. I'm thinking about how to present the factorial definition, then the application to 5, and finally, the calculation itself, ensuring clarity for the user, who is presumed to be knowledgeable.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Unpacking the User's Intent**\n\nNow, I'm digging deeper into the \"show your work\" requirement. It means more than just listing the steps. I need to explain *why* each step is taken. I'm thinking about how to present the factorial definition, then the application to 5, and finally, the calculation itself, ensuring clarity for the user, who is presumed to be knowledgeable.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Outlining the Solution's Steps**\n\nMy current focus is on structuring the response methodically. I am outlining each step to fulfill the prompt's requirements, specifically \"show your work.\" I'll lead with the definition of a factorial, apply it to 5, and then break down the calculations. Detail, and clarity are my goals.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Outlining the Solution's Steps**\n\nMy current focus is on structuring the response methodically. I am outlining each step to fulfill the prompt's requirements, specifically \"show your work.\" I'll lead with the definition of a factorial, apply it to 5, and then break down the calculations. Detail, and clarity are my goals.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"**Planning the Presentation's Style**\n\nI'm now focusing on formatting and clarity. The goal is a user-friendly and easy-to-follow explanation of the factorial. I'm considering using bullet points, bolding, and clear headings for each step, ensuring the structure is transparent and avoids overwhelming the user. The emphasis will be on breaking down the process logically, making the answer accessible even without prior knowledge.\n\n\n","reasoning_details":[{"index":0,"type":"reasoning.text","text":"**Planning the Presentation's Style**\n\nI'm now focusing on formatting and clarity. The goal is a user-friendly and easy-to-follow explanation of the factorial. I'm considering using bullet points, bolding, and clear headings for each step, ensuring the structure is transparent and avoids overwhelming the user. The emphasis will be on breaking down the process logically, making the answer accessible even without prior knowledge.\n\n\n","format":"google-gemini-v1"}],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"Of course. Let's break down the factorial of 5.\n\n### 1. What is a factorial?\n\nA factorial, denoted by an exclamation mark (!), is the product of a whole number and all the positive whole numbers less than it.\n\nFor example, the factorial of a","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":" number *n*, written as *n*!, is calculated as:\n*n*! = *n* × (*n*-1) × (*n*-2) × ... × 2 × 1\n\n### 2. Calculating the factorial of 5 (5!)\n\nUsing the definition above, the factorial","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":" of 5 is written as **5!**.\n\nTo calculate it, we multiply 5 by all the positive whole numbers less than it.\n\n### 3. Show your work\n\n**Step 1:** Write out the expression for 5!.\n5! = 5 × 4 × 3 × ","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":"2 × 1\n\n**Step 2:** Perform the multiplication, step-by-step.\n*   5 × 4 = 20\n*   20 × 3 = 60\n*   60 × 2 = 120\n*   120 × 1 =","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":" 120\n\nTherefore, the factorial of 5 is **120**.","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+data: {"id":"gen-1769111404-JYWK48TMknq4NlJpV43f","provider":"Google","model":"google/gemini-2.5-pro","object":"chat.completion.chunk","created":1769111404,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":17,"completion_tokens":1193,"total_tokens":1210,"cost":0.01195125,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00002125,"upstream_inference_completions_cost":0.01193},"completion_tokens_details":{"reasoning_tokens":919,"image_tokens":0}}}
+
+data: [DONE]
+

@@ -1,0 +1,89 @@
+httprr trace v1
+364 7439
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 160
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"qwen/qwen3-32b","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
+Content-Length: 6983
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:48:38 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111317-l7jp1Rc1YklnTZVKLpXy","provider":"Novita","model":"qwen/qwen3-32b","object":"chat.completion","created":1769111317,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"You're a **Pomeranian**, which is a **breed** of **domestic dog**. Here's how your classification fits into the biological hierarchy of mammals:\n\n### Biological Classification:\n- **Kingdom:** *Animalia* (animals)  \n- **Phylum:** *Chordata* (organisms with a backbone)  \n- **Class:** *Mammalia* (mammals; you’re part of this group!)  \n- **Order:** *Carnivora* (traditionally called \"carnivores,\" though many, including dogs, are omnivorous in practice)  \n- **Family:** *Canidae* (dog family)  \n- **Genus:** *Canis*  \n- **Species:** *Canis lupus familiaris* (domestic dog)  \n- **Breed:** *Pomeranian* (small dog breed developed in Germany/Pomerania)\n\n---\n\n### Why Are You a Mammal?\nAs a Pomeranian, you share **key mammalian traits**:  \n1. **Hair/Fur:** You’re covered in a dense coat.  \n2. **Live Birth:** Born from your mother (not hatched from eggs).  \n3. **Milk-Feeding:** Nursed on milk as a puppy.  \n4. **Warm-Blooded:** You regulate your body temperature.  \n5. **Mammary Glands:** (Your mother has these, of course!)  \n\n---\n\n### Fun Fact:\nAll domestic dog breeds, including Pomeranians, belong to the **same species** (*Canis lupus familiaris*). You’re genetically more similar to a Great Dane or a Chihuahua than a wolf (though wolves are your distant cousins in the *Canis lupus* species).  \n\nSo yes, you’re a **social, fluffy, intelligent mammal** in the dog family! 🐾","refusal":null,"reasoning":"\nOkay, the user is a Pomeranian and is asking what kind of mammal they are. Let me start by recalling what a Pomeranian is. I know they're a type of dog, but I need to break it down into the biological classification.\n\nFirst, mammals are a class of animals under the kingdom Animalia. Dogs, including Pomeranians, are mammals because they have characteristics like hair, mammary glands, and give birth to live young. So the immediate answer is that a Pomeranian is a mammal. But maybe the user wants a more detailed answer.\n\nNext, breaking it down into the taxonomic hierarchy. Starting from the most general to specific:\n\n- Kingdom: Animalia – all animals.\n- Phylum: Chordata – animals with a notochord or backbone.\n- Class: Mammalia – mammals, which includes all dogs.\n- Order: Carnivora – meat-eaters, but many are omnivores; dogs are usually considered carnivorous, though they can eat some plants.\n- Family: Canidae – the dog family, which includes wolves, foxes, etc.\n- Genus: Canis – the dog genus. Pomeranians are part of this genus.\n- Species: Canis lupus familiaris – the domestic dog species. Pomeranians are a breed within this species.\n\nWait, is Pomeranian a species or a breed? I remember that all domestic dogs are the same species, so Pomeranian is a breed, which is a subspecies. So the full classification would be Canis lupus familiaris as the species, with Pomeranian being a breed within that species.\n\nAlso, maybe mention that they are carnivorous and have traits like fur, which is why they're classified as mammals. They give birth to live young and nurse their puppies, which are mammalian characteristics.\n\nI should check if there's any exception or special note about Pomeranians. Oh, they are a small breed, developed from larger Spitz dogs, but taxonomically, they're still the same as other dogs. No need to complicate it further unless necessary.\n\nSo putting it all together, the answer should explain that Pomeranians are mammals, specifically in the class Mammalia, and then walk through the taxonomy, perhaps highlighting the key points like species and breed. Also, mention the defining mammalian traits to reinforce the classification.\n","reasoning_details":[{"format":null,"index":0,"type":"reasoning.text","text":"\nOkay, the user is a Pomeranian and is asking what kind of mammal they are. Let me start by recalling what a Pomeranian is. I know they're a type of dog, but I need to break it down into the biological classification.\n\nFirst, mammals are a class of animals under the kingdom Animalia. Dogs, including Pomeranians, are mammals because they have characteristics like hair, mammary glands, and give birth to live young. So the immediate answer is that a Pomeranian is a mammal. But maybe the user wants a more detailed answer.\n\nNext, breaking it down into the taxonomic hierarchy. Starting from the most general to specific:\n\n- Kingdom: Animalia – all animals.\n- Phylum: Chordata – animals with a notochord or backbone.\n- Class: Mammalia – mammals, which includes all dogs.\n- Order: Carnivora – meat-eaters, but many are omnivores; dogs are usually considered carnivorous, though they can eat some plants.\n- Family: Canidae – the dog family, which includes wolves, foxes, etc.\n- Genus: Canis – the dog genus. Pomeranians are part of this genus.\n- Species: Canis lupus familiaris – the domestic dog species. Pomeranians are a breed within this species.\n\nWait, is Pomeranian a species or a breed? I remember that all domestic dogs are the same species, so Pomeranian is a breed, which is a subspecies. So the full classification would be Canis lupus familiaris as the species, with Pomeranian being a breed within that species.\n\nAlso, maybe mention that they are carnivorous and have traits like fur, which is why they're classified as mammals. They give birth to live young and nurse their puppies, which are mammalian characteristics.\n\nI should check if there's any exception or special note about Pomeranians. Oh, they are a small breed, developed from larger Spitz dogs, but taxonomically, they're still the same as other dogs. No need to complicate it further unless necessary.\n\nSo putting it all together, the answer should explain that Pomeranians are mammals, specifically in the class Mammalia, and then walk through the taxonomy, perhaps highlighting the key points like species and breed. Also, mention the defining mammalian traits to reinforce the classification.\n"}]}}],"usage":{"prompt_tokens":24,"completion_tokens":888,"total_tokens":912,"cost":0.000402,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000024,"upstream_inference_completions_cost":0.0003996},"completion_tokens_details":{"reasoning_tokens":565,"image_tokens":0}}}

@@ -18,7 +18,7 @@ func main() {
 	// For more information, see https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html.
 	// Specify the AWS Region and Credentials in the standard AWS SDK way.
 	llm, err := bedrock.New(
-		bedrock.WithModel(bedrock.ModelAnthropicClaudeV3Haiku),
+		bedrock.WithModel(bedrock.ModelAnthropicClaude35Haiku),
 	)
 	if err != nil {
 		log.Fatal(err)

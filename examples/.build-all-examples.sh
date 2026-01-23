@@ -9,6 +9,7 @@ mkdir -p ../.build
 
 for gm in $(find . -name go.mod); do
   (
+    echo "Building $(dirname $gm)"
     cd $(dirname $gm)
     go build -o ../../.build/$(basename $(dirname $gm)) ./...
 ) &

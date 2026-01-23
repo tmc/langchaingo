@@ -1,11 +1,11 @@
 module github.com/vxcontrol/langchaingo/examples/cybertron-embedding-example
 
-go 1.24.0
+go 1.24.1
 
 require (
 	github.com/chewxy/math32 v1.11.1
 	github.com/google/uuid v1.6.0
-	github.com/vxcontrol/langchaingo v0.1.13-update.0
+	github.com/vxcontrol/langchaingo v0.1.14-update.1
 )
 
 require (
@@ -34,16 +34,16 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.7 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
-	github.com/weaviate/weaviate v1.30.2 // indirect
+	github.com/weaviate/weaviate v1.30.20 // indirect
 	github.com/weaviate/weaviate-go-client/v5 v5.0.2 // indirect
 	go.mongodb.org/mongo-driver v1.17.3 // indirect
-	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.73.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect

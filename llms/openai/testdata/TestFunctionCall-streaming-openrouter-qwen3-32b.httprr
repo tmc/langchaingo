@@ -1,0 +1,53 @@
+httprr trace v1
+710 7715
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 506
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"qwen/qwen3-32b","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"stream":true,"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}],"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 7233
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:58:23 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"Okay","reasoning_details":[{"type":"reasoning.text","text":"Okay","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":", the user is asking about the weather in Boston, MA. I need","reasoning_details":[{"type":"reasoning.text","text":", the user is asking about the weather in Boston, MA. I need","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" to use the getCurrentWeather function","reasoning_details":[{"type":"reasoning.text","text":" to use the getCurrentWeather function","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":". The function requires the location","reasoning_details":[{"type":"reasoning.text","text":". The function requires the location","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" parameter, which is provided as Boston,","reasoning_details":[{"type":"reasoning.text","text":" parameter, which is provided as Boston,","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" MA. The unit is optional, but since the user didn","reasoning_details":[{"type":"reasoning.text","text":" MA. The unit is optional, but since the user didn","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"'t specify, I'll default to celsius. So I","reasoning_details":[{"type":"reasoning.text","text":"'t specify, I'll default to celsius. So I","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"'ll call the function with location: \"","reasoning_details":[{"type":"reasoning.text","text":"'ll call the function with location: \"","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"Boston, MA\" and unit: \"celsius\".\n","reasoning_details":[{"type":"reasoning.text","text":"Boston, MA\" and unit: \"celsius\".\n","index":0,"format":null}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"","reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\", \"unit\": \"celsius\"}"},"type":"function","id":"34fef3aa6","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"tool_calls","native_finish_reason":"tool_calls","logprobs":null}],"system_fingerprint":"fp_f61cec6c8e7eb19c558b"}
+
+data: {"id":"gen-1769111902-Snmzjgi1ULLKdmqIWMEl","provider":"Cerebras","model":"qwen/qwen3-32b","object":"chat.completion.chunk","created":1769111902,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":199,"completion_tokens":112,"total_tokens":311,"cost":0.0001692,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000796,"upstream_inference_completions_cost":0.0000896},"completion_tokens_details":{"reasoning_tokens":82,"image_tokens":0}}}
+
+data: [DONE]
+

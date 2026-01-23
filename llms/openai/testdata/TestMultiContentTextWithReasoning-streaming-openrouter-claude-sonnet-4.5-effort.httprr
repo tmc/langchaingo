@@ -1,0 +1,139 @@
+httprr trace v1
+466 23135
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 262
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"anthropic/claude-sonnet-4.5","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"stream":true,"reasoning":{"effort":"high"},"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 22652
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:49:57 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[{"type":"reasoning.text","text":"","signature":"","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"The","reasoning_details":[{"type":"reasoning.text","text":"The","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" user is asking for","reasoning_details":[{"type":"reasoning.text","text":" user is asking for","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" the factorial of 5, an","reasoning_details":[{"type":"reasoning.text","text":" the factorial of 5, an","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"d wants","reasoning_details":[{"type":"reasoning.text","text":"d wants","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" me to show my work an","reasoning_details":[{"type":"reasoning.text","text":" me to show my work an","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"d think before answering.","reasoning_details":[{"type":"reasoning.text","text":"d think before answering.","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"\n\nThe factorial of a","reasoning_details":[{"type":"reasoning.text","text":"\n\nThe factorial of a","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" number n (written as n!) is","reasoning_details":[{"type":"reasoning.text","text":" number n (written as n!) is","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" the product of all positive integers from ","reasoning_details":[{"type":"reasoning.text","text":" the product of all positive integers from ","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"1 to n.\n\nSo","reasoning_details":[{"type":"reasoning.text","text":"1 to n.\n\nSo","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" for 5!, I need to calculate","reasoning_details":[{"type":"reasoning.text","text":" for 5!, I need to calculate","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":":\n5! = 5 ","reasoning_details":[{"type":"reasoning.text","text":":\n5! = 5 ","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"× 4 × 3 ","reasoning_details":[{"type":"reasoning.text","text":"× 4 × 3 ","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"× 2 × 1","reasoning_details":[{"type":"reasoning.text","text":"× 2 × 1","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":"\n\nLet me work","reasoning_details":[{"type":"reasoning.text","text":"\n\nLet me work","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" through this step by step:\n-","reasoning_details":[{"type":"reasoning.text","text":" through this step by step:\n-","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 5 × 4 =","reasoning_details":[{"type":"reasoning.text","text":" 5 × 4 =","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 20\n- 20 ×","reasoning_details":[{"type":"reasoning.text","text":" 20\n- 20 ×","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 3 = 60\n-","reasoning_details":[{"type":"reasoning.text","text":" 3 = 60\n-","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 60 × 2 =","reasoning_details":[{"type":"reasoning.text","text":" 60 × 2 =","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 120\n- 120 ×","reasoning_details":[{"type":"reasoning.text","text":" 120\n- 120 ×","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 1 = 120\n\nSo","reasoning_details":[{"type":"reasoning.text","text":" 1 = 120\n\nSo","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":" 5! = 120","reasoning_details":[{"type":"reasoning.text","text":" 5! = 120","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[{"type":"reasoning.text","text":"","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[{"type":"reasoning.text","signature":"EpsECkgICxACGAIqQH9oreotHvL1wzby2thf0iIKZJDkVL8r4KCciwoBnyo6HEvjgTlN7Nh6Tp1Zhvnt3rSJ7O2FGAVOa5w9DIQuqOUSDHJ6Oye+4Ybf6vgPrxoMCXc2v5f3dTN7jbltIjCZQO9USvTUD6+mvIMT429khvsiuCuQOjNKUT+9FXK55MnonbAc52y3irxnmTAvQgMqgANsBcp5uEth+3768fIysyWOCb2RjgpG2/qVq220FYL6LdJN70GgoxECBhXc9B0Eth8D8hxJUjloJo5bFsa6pCcM+7vLFk3nkLKLm0Qk149PYCAnUNwXqdte1xqS5GNwEJBNluY6JR/lluCFlXzPZGRxBaipbx/YvgKFENvWehK/w0aQVtFqeUHpSvTlGIMFBXvZXVse2ttYN93OH/aCSrnomXTQ/WDwTrY/bgz/fZU3jzS4Q4GJ4Ka2XuPO6v97IYE/ibKrgYtjW8bda7YNkWLSuubzsnszNYipzsZk+PzKm5BNvkKx+loRsNN+fmOMepFTcgx046RNEClRukUt1vNzlIgpTyETsCWPqEM1KKWGlkMZLVv0n6VJja0OwYGNqQIShMprp/D5PGBBRjVDhM9SRMCIzb5QS+PQjuXfUzH4YfLBrsZ89W/zllzVbhyxXbQI4mdrMhyIJ6WLa9zCHEuQ/Hd4FIz1kvUGr8Qep6jgenWJFPX959/JispqpJ75HbsYAQ==","format":"anthropic-claude-v1","index":0}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"#","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" Finding the Factorial of 5","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\nThe","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" factorial of a","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" number n (written as n!) is","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" the product of all positive integers from ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"1 to n.\n\n**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"For 5!,","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" I need to multiply","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":":**\n5","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"! = 5 × 4","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" × 3 × 2","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":" × 1\n\n**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"Step-by-step calculation:**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- 5 × 4 ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"= 20\n- 20 ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"× 3 = 60","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n- 60 × 2 ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"= 120\n- 120 ","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"× 1 = 120","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\n**Answer","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":": 5","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"! = 120**","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"stop","native_finish_reason":"stop","logprobs":null}]}
+
+data: {"id":"gen-1769111396-G2OUawG0BBr4qIuQT0xf","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111396,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":53,"completion_tokens":295,"total_tokens":348,"cost":0.004584,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000159,"upstream_inference_completions_cost":0.004425},"completion_tokens_details":{"reasoning_tokens":107,"image_tokens":0}}}
+
+data: [DONE]
+

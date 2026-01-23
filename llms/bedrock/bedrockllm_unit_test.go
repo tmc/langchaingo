@@ -27,7 +27,14 @@ func TestNew(t *testing.T) {
 			name: "with custom model",
 			opts: []Option{
 				WithClient(&bedrockruntime.Client{}),
-				WithModel(ModelAnthropicClaudeV3Sonnet),
+				WithModel(ModelAnthropicClaude37Sonnet),
+			},
+		},
+		{
+			name: "with custom model provider",
+			opts: []Option{
+				WithClient(&bedrockruntime.Client{}),
+				WithModelProvider("anthropic"),
 			},
 		},
 		{
@@ -139,9 +146,9 @@ func TestProcessMessages(t *testing.T) {
 func TestOptions(t *testing.T) {
 	t.Run("WithModel", func(t *testing.T) {
 		opts := &options{}
-		WithModel(ModelAnthropicClaudeV3Haiku)(opts)
-		if opts.modelID != ModelAnthropicClaudeV3Haiku {
-			t.Errorf("WithModel() got %s, want %s", opts.modelID, ModelAnthropicClaudeV3Haiku)
+		WithModel(ModelAnthropicClaude35Haiku)(opts)
+		if opts.modelID != ModelAnthropicClaude35Haiku {
+			t.Errorf("WithModel() got %s, want %s", opts.modelID, ModelAnthropicClaude35Haiku)
 		}
 	})
 
@@ -177,29 +184,27 @@ func TestModelConstants(t *testing.T) {
 	models := []string{
 		ModelAi21Jamba15LargeV1,
 		ModelAi21Jamba15MiniV1,
-		ModelAi21JambaInstructV1,
+		ModelAmazonNova2LiteV1,
 		ModelAmazonNovaPremiereV1,
 		ModelAmazonNovaProV1,
 		ModelAmazonNovaLiteV1,
 		ModelAmazonNovaMicroV1,
-		ModelAmazonTitanTextPremierV1,
+		ModelAnthropicClaudeOpus45,
+		ModelAnthropicClaudeHaiku45,
+		ModelAnthropicClaudeSonnet45,
+		ModelAnthropicClaudeOpus41,
 		ModelAnthropicClaudeOpus4,
 		ModelAnthropicClaudeSonnet4,
 		ModelAnthropicClaude37Sonnet,
 		ModelAnthropicClaude35Haiku,
-		ModelAnthropicClaude35SonnetV2,
-		ModelAnthropicClaude35SonnetV1,
-		ModelAnthropicClaude3Opus,
-		ModelAnthropicClaudeV3Sonnet,
-		ModelAnthropicClaudeV3Haiku,
 		ModelCohereCommandRV1,
 		ModelCohereCommandRPlusV1,
-		ModelCohereCommandTextV14,
-		ModelCohereCommandLightTextV14,
 		ModelMetaLlama4MaverickInstructV1,
 		ModelMetaLlama4ScoutInstructV1,
 		ModelMetaLlama3370bInstructV1,
 		ModelMetaLlama3211bInstructV1,
+		ModelMetaLlama3290bInstructV1,
+		ModelMetaLlama3170bInstructV1,
 		ModelMetaLlama318bInstructV1,
 		ModelMetaLlama370bInstructV1,
 		ModelMetaLlama38bInstructV1,

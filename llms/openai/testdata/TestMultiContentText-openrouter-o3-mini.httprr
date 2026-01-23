@@ -1,5 +1,5 @@
 httprr trace v1
-365 1584
+364 1672
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/o3-mini","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 1195
+Content-Length: 1216
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:31 GMT
+Date: Thu, 22 Jan 2026 19:48:38 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -28,14 +28,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750691611-eYMTMPoDd2gqm04cupuQ","provider":"OpenAI","model":"openai/o3-mini","object":"chat.completion","created":1750691611,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"A Pomeranian is a small breed of dog. Dogs are warm-blooded, furry mammals that belong to the Canidae family. So, as a Pomeranian, you're a type of dog, which is one kind of mammal.","refusal":null,"reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABoWW8ecFp0pbt6gmkT0RGIl9ufwBpfFdQdpaX7EV1S3xyResdhdW1SdBFz8JaZz7Fniw-HNxg0Ulo8ecrP9ZAh29tPbJ5rixVdqaZgHoWuShEvpPYNUHDsb5SRp2OkrITgnuZWFwz3vLgKEjxHqfMNszzbyrJ-u0ZKk1W2lY2mxPFJm5-jSTRQYgtqJmIWc4e75hzwsUa7LH2PMbzrtSkkFKqZhrn0iKZbeuGs34g-5VdCjhzpEtlc44lOWhoRznA9nufdp8pp8B7Hx06MKlepWkN7nq75nabnmH_v9emJQ4wEuLX43C-X2gwapq_4vTm29Fk4y1Jt_PTRIyF5iKCNL-wSjRNat6RgRK0L2OolOSUgh5ejraQWg9H3RAJDl1W3CV_9JENcyVzI-nqUYUEZDZ8GNA==","id":"rs_68596f1d0a90819085adfe209d8f4976"}]}}],"usage":{"prompt_tokens":19,"completion_tokens":179,"total_tokens":198}}
+{"id":"gen-1769111318-WIpyha4x5zJhvmEcARvI","provider":"OpenAI","model":"openai/o3-mini","object":"chat.completion","created":1769111318,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"As a Pomeranian, you're a type of domestic dog—a mammal belonging to the species Canis lupus familiaris. Pomeranians are part of the canine family, which includes everything from wolves to various dog breeds. They are known for their fluffy coats, lively personalities, and small size. Essentially, you're a furry friend from the animal kingdom's mammalian group, sharing many characteristics with other dogs, such as warm-bloodedness, live birth, and nurturing of your young with milk.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":19,"completion_tokens":230,"total_tokens":249,"cost":0.0010329,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.0010329,"upstream_inference_prompt_cost":0.0000209,"upstream_inference_completions_cost":0.001012},"completion_tokens_details":{"reasoning_tokens":128,"image_tokens":0}}}

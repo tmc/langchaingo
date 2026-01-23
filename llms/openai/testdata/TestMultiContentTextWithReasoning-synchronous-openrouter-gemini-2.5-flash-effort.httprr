@@ -1,0 +1,33 @@
+httprr trace v1
+408 3143
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 204
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning":{"effort":"high"}}HTTP/2.0 200 OK
+Content-Length: 2687
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:50:05 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111404-TKCx2f0lWzgbZgGXdeuC","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion","created":1769111404,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","index":0,"message":{"role":"assistant","content":"To find the factorial of 5, denoted as $5!$, we multiply all positive integers from 5 down to 1.\n\n**Definition of Factorial:**\nFor a positive integer $n$, the factorial of $n$ (denoted as $n!$) is the product of all positive integers less than or equal to $n$.\n$n! = n \\times (n-1) \\times (n-2) \\times \\dots \\times 3 \\times 2 \\times 1$\n\n**Applying the definition to 5!:**\n$5! = 5 \\times 4 \\times 3 \\times 2 \\times 1$\n\n**Step-by-step calculation:**\n1.  $5 \\times 4 = 20$\n2.  $20 \\times 3 = 60$\n3.  $60 \\times 2 = 120$\n4.  $120 \\times 1 = 120$\n\nTherefore, the factorial of 5 is 120.\n\n**Answer:**\n$5! = 120$","refusal":null,"reasoning":"**Calculating Factorial Steps**\n\nI've defined the factorial of a non-negative integer using the standard mathematical notation. Now, I'm setting up the actual calculation for 5!. It seems pretty straightforward so far. I'm ready to proceed with the multiplication.\n\n\n**Decomposing the Factorial**\n\nI've successfully recalled the factorial definition: the product of all positive integers up to $n$. Applying this to 5!, I've broken it down into a series of multiplications: 5 x 4 x 3 x 2 x 1. Now, I'm ready to present these steps logically to the user, ensuring clarity.\n\n\n","reasoning_details":[{"format":"google-gemini-v1","index":0,"type":"reasoning.text","text":"**Calculating Factorial Steps**\n\nI've defined the factorial of a non-negative integer using the standard mathematical notation. Now, I'm setting up the actual calculation for 5!. It seems pretty straightforward so far. I'm ready to proceed with the multiplication.\n\n\n**Decomposing the Factorial**\n\nI've successfully recalled the factorial definition: the product of all positive integers up to $n$. Applying this to 5!, I've broken it down into a series of multiplications: 5 x 4 x 3 x 2 x 1. Now, I'm ready to present these steps logically to the user, ensuring clarity.\n\n\n"}],"annotations":[]}}],"usage":{"prompt_tokens":17,"completion_tokens":508,"total_tokens":525,"cost":0.0012751,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000051,"upstream_inference_completions_cost":0.00127},"completion_tokens_details":{"reasoning_tokens":264,"image_tokens":0}}}

@@ -1,28 +1,28 @@
 httprr trace v1
-476 990
+461 1221
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
-Content-Length: 289
+Content-Length: 275
 Accept: application/x-ndjson
 Content-Type: application/json
 
-{"model":"qwen3:8b","messages":[{"role":"user","content":"Which date do we have today?"}],"stream":false,"format":"","tools":[{"type":"function","function":{"name":"getTime","description":"Get the current time.","parameters":{"type":"object","required":[],"properties":{}}}}],"options":{}}HTTP/1.1 200 OK
-Content-Length: 866
+{"model":"qwen3:8b","messages":[{"role":"user","content":"Which date do we have today?"}],"stream":false,"format":"","tools":[{"type":"function","function":{"name":"getTime","description":"Get the current time.","parameters":{"type":"object","properties":{}}}}],"options":{}}HTTP/1.1 200 OK
+Content-Length: 1096
 Content-Type: application/json; charset=utf-8
-Date: Mon, 23 Jun 2025 11:09:03 GMT
+Date: Fri, 23 Jan 2026 16:49:11 GMT
 
-{"model":"qwen3:8b","created_at":"2025-06-23T11:09:03.646108Z","message":{"role":"assistant","content":"\u003cthink\u003e\nOkay, the user is asking for today's date. Let me check which tools I have available. There's a function called getTime that gets the current time. Since the user wants the date, I should call that function. The function doesn't require any parameters, so I just need to trigger it. Once I get the time data, I can format it to show the date and respond to the user. Let me make sure I'm using the right tool. Yep, getTime is the correct function here. Let's call it.\n\u003c/think\u003e\n\n","tool_calls":[{"function":{"name":"getTime","arguments":{}}}]},"done_reason":"stop","done":true,"total_duration":3541460500,"load_duration":29513875,"prompt_eval_count":132,"prompt_eval_duration":385719500,"eval_count":126,"eval_duration":3125770166}656 1764
+{"model":"qwen3:8b","created_at":"2026-01-23T16:49:11.76416Z","message":{"role":"assistant","content":"","thinking":"Okay, the user is asking, \"Which date do we have today?\" So they want to know the current date. Let me check the tools provided.\n\nLooking at the tools section, there's a function called getTime. The description says it gets the current time. Even though the user asked for the date, the getTime function might return the current date and time. Since there's no separate date function listed, I should use getTime to retrieve the current date. \n\nWait, the function's parameters are empty, so I just need to call it without any arguments. The response from getTime should include the date. I'll proceed to call the getTime function to get the current date and then present it to the user.\n","tool_calls":[{"id":"call_u7elixy7","function":{"index":0,"name":"getTime","arguments":{}}}]},"done":true,"done_reason":"stop","total_duration":16017170959,"load_duration":10537234500,"prompt_eval_count":273,"prompt_eval_duration":362174417,"eval_count":15,"eval_duration":312529751}651 1965
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
-Content-Length: 469
+Content-Length: 465
 Accept: application/x-ndjson
 Content-Type: application/json
 
-{"model":"qwen3:8b","messages":[{"role":"user","content":"Which date do we have today?"},{"role":"assistant","content":"","tool_calls":[{"function":{"name":"getTime","arguments":{}}}]},{"role":"tool","content":"2010-08-13 20:15:00.033067589 +0100 CET m=+32.849928139"}],"stream":false,"format":"","tools":[{"type":"function","function":{"name":"getTime","description":"Get the current time.","parameters":{"type":"object","required":[],"properties":{}}}}],"options":{}}HTTP/1.1 200 OK
-Content-Length: 1639
+{"model":"qwen3:8b","messages":[{"role":"user","content":"Which date do we have today?"},{"role":"assistant","content":"","tool_calls":[{"function":{"index":0,"name":"getTime","arguments":{}}}]},{"role":"tool","content":"2010-08-13 20:15:00.033067589 +0100 CET m=+32.849928139"}],"stream":false,"format":"","tools":[{"type":"function","function":{"name":"getTime","description":"Get the current time.","parameters":{"type":"object","properties":{}}}}],"options":{}}HTTP/1.1 200 OK
+Content-Length: 1840
 Content-Type: application/json; charset=utf-8
-Date: Mon, 23 Jun 2025 11:09:15 GMT
+Date: Fri, 23 Jan 2026 16:49:26 GMT
 
-{"model":"qwen3:8b","created_at":"2025-06-23T11:09:15.128249Z","message":{"role":"assistant","content":"\u003cthink\u003e\nOkay, the user asked, \"Which date do we have today?\" So I need to figure out the current date. The tool provided is called getTime, which retrieves the current time. When I called that function, the response came back with a timestamp: \"2010-08-13 20:15:00.033067589 +0100 CET m=+32.849928139\".\n\nFirst, I should parse this timestamp to extract the date part. The timestamp starts with \"2010-08-13\", which is the date in YYYY-MM-DD format. The time part is \"20:15:00\", but the user only asked for the date. The timezone information is \"+0100 CET\", which indicates Central European Time, but that's not needed here.\n\nI need to make sure there's no confusion with the timestamp's format. The date is clearly listed first, so the answer should be straightforward. The user might just need the date, so I should present it in a simple format like \"August 13, 2010\" or keep it as \"2010-08-13\" depending on the user's preference. Since the original response uses the YYYY-MM-DD format, maybe sticking with that is better for consistency. However, the user might expect a more natural language date. Let me check if there's any additional context, but since there's none, I'll go with the parsed date from the timestamp. So the answer is August 13, 2010.\n\u003c/think\u003e\n\nThe current date is August 13, 2010."},"done_reason":"stop","done":true,"total_duration":10476379500,"load_duration":34038959,"prompt_eval_count":210,"prompt_eval_duration":248911667,"eval_count":365,"eval_duration":10187335333}
+{"model":"qwen3:8b","created_at":"2026-01-23T16:49:26.285571Z","message":{"role":"assistant","content":"Today's date is August 13, 2010.","thinking":"Okay, the user asked, \"Which date do we have today?\" So I need to figure out the current date. The assistant called the getTime function, which returned a timestamp: \"2010-08-13 20:15:00.033067589 +0100 CET m=+32.849928139\". \n\nFirst, I should parse this timestamp. The date part is straightforward: 2010-08-13. The time is 20:15, but the user only asked for the date. The timezone is CET (Central European Time), which is UTC+1. The timestamp includes a fractional part and a monotonic clock value, but those aren't necessary for the answer.\n\nI need to confirm if the date is correct. The timestamp seems to be in the past, but maybe the system clock is set to that time. However, the user's question is about the current date, so if the assistant's system time is set to 2010, that's an issue. But assuming the function returns the correct current time, the date would be August 13, 2010. \n\nWait, but the user is asking \"today,\" so the answer should be the current date based on the system's time. Since the function provided that timestamp, the date is 2010-08-13. I should present that in a clear format, maybe YYYY-MM-DD, and mention the time if needed. The user didn't specify needing the time, but including it might be helpful. Also, note the timezone if relevant. But the user might just want the date. Let me check the original query again: \"Which date do we have today?\" So the answer is the date part. Therefore, the response should be \"Today's date is August 13, 2010.\"\n"},"done":true,"done_reason":"stop","total_duration":13510707791,"load_duration":101283083,"prompt_eval_count":615,"prompt_eval_duration":1183883917,"eval_count":16,"eval_duration":346123001}

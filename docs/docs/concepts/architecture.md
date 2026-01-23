@@ -83,9 +83,11 @@ Error handling uses Go's standard patterns with typed errors:
 
 ```go
 type Error struct {
-    Code    ErrorCode
-    Message string
-    Cause   error
+    Code     ErrorCode                // Standardized error code
+    Message  string                   // Human-readable error message
+    Provider string                   // Name of the provider that generated the error
+    Details  map[string]interface{}   // Provider-specific error details
+    Cause    error                    // Underlying error, if any
 }
 
 // Check for specific error types
@@ -100,8 +102,13 @@ Functional options provide flexible configuration:
 ```go
 llm, err := openai.New(
     openai.WithModel("gpt-4"),
-    openai.WithTemperature(0.7),
-    openai.WithMaxTokens(1000),
+    openai.WithToken("your-api-key"),
+)
+
+// Temperature and MaxTokens are CallOptions, not constructor options
+response, err := llm.GenerateContent(ctx, messages,
+    llms.WithTemperature(0.7),
+    llms.WithMaxTokens(1000),
 )
 ```
 
@@ -247,7 +254,7 @@ for _, input := range inputs {
     wg.Add(1)
     go func(inp string) {
         defer wg.Done()
-        result, err := chain.Run(ctx, inp)
+        result, err := chains.Run(ctx, chain, inp)
         if err == nil {
             results <- result
         }
@@ -320,11 +327,11 @@ type CustomMemory struct {
     storage map[string][]MessageContent
 }
 
-func (m *CustomMemory) ChatHistory() schema.ChatMessageHistory {
+func (m *CustomMemory) ChatHistory(ctx context.Context) schema.ChatMessageHistory {
     // Return chat history implementation
 }
 
-func (m *CustomMemory) MemoryVariables() []string {
+func (m *CustomMemory) MemoryVariables(ctx context.Context) []string {
     return []string{"history"}
 }
 ```

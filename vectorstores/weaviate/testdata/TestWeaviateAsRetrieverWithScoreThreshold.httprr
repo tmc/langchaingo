@@ -1,5 +1,5 @@
 httprr trace v1
-442 167985
+441 168070
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -14,23 +14,25 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 14:32:54 GMT
+Date: Thu, 22 Jan 2026 20:24:18 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 49
+Openai-Processing-Ms: 252
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-5f5d5b84f-j7mnf
+Via: envoy-router-canary-84dc646964-jqm2x
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 54
+X-Envoy-Upstream-Service-Time: 275
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 5000000
-X-Ratelimit-Remaining-Requests: 9998
-X-Ratelimit-Remaining-Tokens: 4999953
-X-Ratelimit-Reset-Requests: 10ms
+X-Ratelimit-Limit-Tokens: 10000000
+X-Ratelimit-Remaining-Requests: 9996
+X-Ratelimit-Remaining-Tokens: 9999954
+X-Ratelimit-Reset-Requests: 21ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_b6acce37f95136d65bf60a7c75fbcfd6
+X-Request-Id: req_15603b1261fe422e97e1626ba1b7fff2
 
 {
   "object": "list",
@@ -7752,7 +7754,7 @@ X-Request-Id: req_b6acce37f95136d65bf60a7c75fbcfd6
     "total_tokens": 46
   }
 }
-325 34211
+324 34289
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7767,23 +7769,25 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 14:32:56 GMT
+Date: Thu, 22 Jan 2026 20:24:19 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 71
+Openai-Processing-Ms: 45
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-bf875f9-5c6zk
+Via: envoy-router-5c8d7bd656-hm6vb
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 80
+X-Envoy-Upstream-Service-Time: 74
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 5000000
+X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 4999980
+X-Ratelimit-Remaining-Tokens: 9999980
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_e2b5d26c93357e8d62fd9c8e989681e3
+X-Request-Id: req_16af74141db44904bfff45cebf92afbd
 
 {
   "object": "list",
@@ -9337,7 +9341,7 @@ X-Request-Id: req_e2b5d26c93357e8d62fd9c8e989681e3
     "total_tokens": 17
   }
 }
-1199 1622
+1198 1664
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -9346,38 +9350,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the chair beside the desk is beige.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the desk is orange.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the lamp beside the desk is black.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the house is blue.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the car is red.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\nQuestion: What colors are all the pieces of furniture next to the desk and the desk itself?\nHelpful Answer:"}]}HTTP/2.0 200 OK
-Content-Length: 900
+Content-Length: 865
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 14:32:57 GMT
+Date: Thu, 22 Jan 2026 20:24:21 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 219
+Openai-Processing-Ms: 235
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 221
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999824
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_d70939c1c2b274a6995e221f4ab49a4c
+X-Envoy-Upstream-Service-Time: 256
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999825
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_991fe64828dc4479bd7edb22d79e4f53
 
 {
-  "id": "chatcmpl-BlcW9e8XtCMaQhcnEXLPQEnMQeVEX",
+  "id": "chatcmpl-D0vW0YXt0x6HQdcsj6C2SNUOPlP05",
   "object": "chat.completion",
-  "created": 1750689177,
+  "created": 1769113460,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The desk is orange. The chair beside the desk is beige. The lamp beside the desk is black.",
+        "content": "The desk is orange. The chair beside the desk is beige.",
         "refusal": null,
         "annotations": []
       },
@@ -9387,8 +9393,8 @@ X-Request-Id: req_d70939c1c2b274a6995e221f4ab49a4c
   ],
   "usage": {
     "prompt_tokens": 161,
-    "completion_tokens": 21,
-    "total_tokens": 182,
+    "completion_tokens": 13,
+    "total_tokens": 174,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -9401,5 +9407,5 @@ X-Request-Id: req_d70939c1c2b274a6995e221f4ab49a4c
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }

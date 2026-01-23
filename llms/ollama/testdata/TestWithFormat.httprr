@@ -1,5 +1,5 @@
 httprr trace v1
-371 493
+370 2070
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -8,8 +8,8 @@ Accept: application/x-ndjson
 Content-Type: application/json
 
 {"model":"qwen3:8b","messages":[{"role":"user","content":"How many feet are in a nautical mile? Respond with JSON containing the answer."}],"stream":false,"format":"json","options":{}}HTTP/1.1 200 OK
-Content-Length: 369
+Content-Length: 1945
 Content-Type: application/json; charset=utf-8
-Date: Mon, 23 Jun 2025 11:09:16 GMT
+Date: Thu, 22 Jan 2026 21:15:09 GMT
 
-{"model":"qwen3:8b","created_at":"2025-06-23T11:09:16.952042Z","message":{"role":"assistant","content":"{\n\n\n  \"answer\": \"A nautical mile is defined as exactly 6076.12 feet.\"\n}"},"done_reason":"stop","done":true,"total_duration":815023417,"load_duration":28388125,"prompt_eval_count":25,"prompt_eval_duration":126260333,"eval_count":26,"eval_duration":659939125}
+{"model":"qwen3:8b","created_at":"2026-01-22T21:15:09.89995Z","message":{"role":"assistant","content":"{\n  \"nautical_mile_to_feet\": 6076.12\n}","thinking":"Okay, the user is asking how many feet are in a nautical mile. Let me recall. I know that a nautical mile is a unit used in navigation, right? It's based on the Earth's circumference. I think it's related to latitude. Wait, the exact definition... Oh yeah, a nautical mile is defined as one minute of arc along a great circle of the Earth. Since there are 60 minutes in a degree and 360 degrees in a circle, the total number of minutes is 360*60 = 21600. The Earth's circumference is about 21600 nautical miles. But how does that translate to feet?\n\nWait, the standard nautical mile is exactly 1852 meters. Oh right, that's the international agreement. So to convert meters to feet, I need to know that 1 meter is approximately 3.28084 feet. So 1852 meters * 3.28084 feet/meter equals... Let me calculate that. 1852 * 3.28084. Let me do the math. 1852 * 3 is 5556, 1852 * 0.28084 is... Hmm, maybe there's a more precise way. Alternatively, I remember that 1 nautical mile is exactly 6076.12 feet. Wait, but I should verify that. Let me check the exact conversion. Yes, the international nautical mile is exactly 1852 meters, and 1 meter is 3.28084 feet, so 1852 * 3.28084 = 6076.115... which rounds to 6076.12 feet. So the answer should be approximately 6076.12 feet. But sometimes it's rounded to 6076 feet. Wait, maybe the exact value is 6076.12 feet. Let me confirm. Yes, according to the international definition, 1 nautical mile is exactly 1852 meters, and converting that to feet gives exactly 6076.12 feet. So the answer is 6076.12 feet. Therefore, the JSON response should state that.\n"},"done":true,"done_reason":"stop","total_duration":17472336541,"load_duration":90366125,"prompt_eval_count":535,"prompt_eval_duration":1316280458,"eval_count":22,"eval_duration":497174665}

@@ -1,5 +1,5 @@
 httprr trace v1
-562 1678
+561 1756
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:37 GMT
+Date: Thu, 22 Jan 2026 21:11:43 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 345
+Openai-Processing-Ms: 408
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 384
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999958
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 424
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999960
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_0e3775e62df6480832b6d68e039a98c4
+X-Request-Id: req_afb4280ebbad4fb38ba36a712ad75def
 
 {
-  "id": "chatcmpl-BldTp69BrENJuo7OTTX4nQYvXzanD",
+  "id": "chatcmpl-D0wFqL6TqQNFJTlEKk3UICBv1JeNA",
   "object": "chat.completion",
-  "created": 1750692877,
+  "created": 1769116302,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -63,5 +65,5 @@ X-Request-Id: req_0e3775e62df6480832b6d68e039a98c4
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }

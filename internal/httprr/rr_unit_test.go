@@ -516,7 +516,7 @@ func TestTestWriter(t *testing.T) {
 }
 
 func TestSetRecordForTesting(t *testing.T) {
-	t.Parallel()
+	// Cannot run in parallel because it modifies global record flag
 
 	// Get original value
 	originalValue := getRecordForTesting()

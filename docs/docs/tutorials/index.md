@@ -29,7 +29,7 @@ Want to help? Check our [documentation contribution guide](/docs/contributing/do
 
 Before starting these tutorials, ensure you have:
 
-- Go 1.21 or later installed
+- Go 1.23 or later installed
 - An API key for at least one LLM provider (OpenAI, Anthropic, etc.)
 - Basic familiarity with Go programming
 

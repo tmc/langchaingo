@@ -1,5 +1,5 @@
 httprr trace v1
-1277 1634
+1276 1722
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4","messages":[{"role":"user","content":"Answer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A search engine from the internet. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n"}],"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 912
+Content-Length: 925
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:41 GMT
+Date: Thu, 22 Jan 2026 11:36:31 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1433
+Openai-Processing-Ms: 1349
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1435
+X-Envoy-Upstream-Service-Time: 1597
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 300000
+X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 299764
+X-Ratelimit-Remaining-Tokens: 999764
 X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 47ms
-X-Request-Id: req_38f97cc7e3a29a3f29457187a203e2ae
+X-Ratelimit-Reset-Tokens: 14ms
+X-Request-Id: req_af502bd24da948b99ae29d0f6d6eaf1d
 
 {
-  "id": "chatcmpl-BldYhCtjjfitsbc03YbHp4zLvS7LD",
+  "id": "chatcmpl-D0nHCVs0TThu2rtSzZKWvCvxgF1jC",
   "object": "chat.completion",
-  "created": 1750693179,
+  "created": 1769081790,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Thought: This is a simple arithmetic operation which can be solved using calculator. \nAction: calculator\nAction Input: 5 + 3",
+        "content": "Thought: This is a mathematical operation. Using the calculator tool will give an accurate answer.\nAction: calculator\nAction Input: 5 + 3",
         "refusal": null,
         "annotations": []
       },
@@ -49,8 +51,8 @@ X-Request-Id: req_38f97cc7e3a29a3f29457187a203e2ae
   ],
   "usage": {
     "prompt_tokens": 213,
-    "completion_tokens": 32,
-    "total_tokens": 245,
+    "completion_tokens": 34,
+    "total_tokens": 247,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -65,47 +67,49 @@ X-Request-Id: req_38f97cc7e3a29a3f29457187a203e2ae
   "service_tier": "default",
   "system_fingerprint": null
 }
-1423 1577
+1435 1634
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 1219
+Content-Length: 1232
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4","messages":[{"role":"user","content":"Answer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A search engine from the internet. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a simple arithmetic operation which can be solved using calculator. \nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
-Content-Length: 855
+{"model":"gpt-4","messages":[{"role":"user","content":"Answer the following questions as best you can. You have access to the following tools:\n\n- GoogleSearch: \n\t\"A search engine from the internet. \"\n\t\"Useful for when you need to answer questions about current events. \"\n\t\"Input should be a search query.\"\n- calculator: Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.\n\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [ GoogleSearch, calculator ]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question\n\nBegin!\n\nQuestion: What is 5 plus 3? Please calculate this.\n\nThought: This is a mathematical operation. Using the calculator tool will give an accurate answer.\nAction: calculator\nAction Input: 5 + 3\nObservation: 8\n"}],"stop":["\nObservation:","\n\tObservation:"]}HTTP/2.0 200 OK
+Content-Length: 839
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:43 GMT
+Date: Thu, 22 Jan 2026 11:36:33 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1115
+Openai-Processing-Ms: 747
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1117
+X-Envoy-Upstream-Service-Time: 970
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 300000
+X-Ratelimit-Limit-Tokens: 1000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 299729
+X-Ratelimit-Remaining-Tokens: 999725
 X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 54ms
-X-Request-Id: req_e777c6b380c2b02133324338c8470f3d
+X-Ratelimit-Reset-Tokens: 16ms
+X-Request-Id: req_bba4003f0af64b52a6fa01b6e04e95c0
 
 {
-  "id": "chatcmpl-BldYk02UqEQAN1ZXwsyaP1YbRlClU",
+  "id": "chatcmpl-D0nHEDkdDiAwUNmZ5BVWLnMZ9ZFvr",
   "object": "chat.completion",
-  "created": 1750693182,
+  "created": 1769081792,
   "model": "gpt-4-0613",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Thought: I now know the final answer.\nFinal Answer: The answer is 8.",
+        "content": "Thought: I now know the final answer\nFinal Answer: 8",
         "refusal": null,
         "annotations": []
       },
@@ -114,9 +118,9 @@ X-Request-Id: req_e777c6b380c2b02133324338c8470f3d
     }
   ],
   "usage": {
-    "prompt_tokens": 248,
-    "completion_tokens": 18,
-    "total_tokens": 266,
+    "prompt_tokens": 250,
+    "completion_tokens": 14,
+    "total_tokens": 264,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0

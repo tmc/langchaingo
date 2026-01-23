@@ -1,0 +1,29 @@
+httprr trace v1
+719 1738
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 515
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"stream":true,"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}],"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 1256
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:58:22 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111901-ivH8VwRK09ExfOXNgm0Z","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111901,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"reasoning":null,"reasoning_details":[],"tool_calls":[{"index":0,"id":"tool_getCurrentWeather_d0OzH7eohaP5Qh93fGh0","type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\"}"}}],"annotations":[]},"finish_reason":"tool_calls","native_finish_reason":"STOP","logprobs":null}]}
+
+data: {"id":"gen-1769111901-ivH8VwRK09ExfOXNgm0Z","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111901,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":43,"completion_tokens":6,"total_tokens":49,"cost":0.0000279,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000129,"upstream_inference_completions_cost":0.000015},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+data: [DONE]
+

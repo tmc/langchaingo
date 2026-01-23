@@ -1,21 +1,21 @@
 httprr trace v1
-139 31589
+138 35313
 GET https://html.duckduckgo.com/html/?q=golang+programming+language HTTP/1.1
 Host: html.duckduckgo.com
 User-Agent: langchaingo-httprr
 
 HTTP/2.0 200 OK
-Content-Length: 29401
+Content-Length: 33125
 Cache-Control: max-age=1
 Content-Security-Policy: default-src 'none' ; connect-src  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; manifest-src  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; media-src  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; script-src blob:  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; font-src data:  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; img-src data:  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; style-src  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; object-src 'none' ; worker-src blob: ; child-src blob:  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; frame-src blob:  https://duckduckgo.com https://*.duckduckgo.com https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/ https://spreadprivacy.com ; frame-ancestors 'self' ; base-uri 'self' ; block-all-mixed-content ;
 Content-Type: text/html; charset=UTF-8
-Date: Tue, 03 Jun 2025 17:14:54 GMT
+Date: Wed, 20 Aug 2025 13:45:19 GMT
 Expect-Ct: max-age=0
-Expires: Tue, 03 Jun 2025 17:14:55 GMT
+Expires: Wed, 20 Aug 2025 13:45:20 GMT
 Permissions-Policy: interest-cohort=()
 Referrer-Policy: origin
 Server: nginx
-Server-Timing: total;dur=788;desc="Backend Total [n]"
+Server-Timing: total;dur=658;desc="Backend Total [n]"
 Strict-Transport-Security: max-age=31536000
 Vary: Accept-Encoding
 Vary: Origin
@@ -46,7 +46,7 @@ X-Xss-Protection: 1;mode=block
   <link id="icon120" rel="apple-touch-icon" sizes="120x120" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_120x120.png?v=2"/>
   <link id="icon152" rel="apple-touch-icon" sizes="152x152" href="//duckduckgo.com/assets/icons/meta/DDG-iOS-icon_152x152.png?v=2"/>
   <link rel="image_src" href="//duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png">
-  <link rel="stylesheet" media="handheld, all" href="//duckduckgo.com/dist/h.cc8cf55055bb09f5b580.css" type="text/css"/>
+  <link rel="stylesheet" media="handheld, all" href="//duckduckgo.com/dist/h.5cdd129b369a4236564b.css" type="text/css"/>
 </head>
 
 <body class="body--html">
@@ -60,725 +60,594 @@ X-Xss-Protection: 1;mode=block
     <div class="site-wrapper-border"></div>
 
     <div id="header" class="header cw header--html">
-        <a title="DuckDuckGo" href="/html/" class="header__logo-wrap"></a>
+      <a title="DuckDuckGo" href="/html/" class="header__logo-wrap"></a>
 
-
-    <form name="x" class="header__form" action="/html/" method="post">
-
-      <div class="search search--header">
+      <form name="x" class="header__form" action="/html/" method="post">
+        <div class="search search--header">
           <input name="q" autocomplete="off" class="search__input" id="search_form_input_homepage" type="text" value="golang programming language" />
           <input name="b" id="search_button_homepage" class="search__button search__button--html" value="" title="Search" alt="Search" type="submit" />
-      </div>
-
-
-    
-    
-    
-    
-
-    <div class="frm__select">
-      <select name="kl">
-      
-        <option value="" >All Regions</option>
-      
-        <option value="ar-es" >Argentina</option>
-      
-        <option value="au-en" >Australia</option>
-      
-        <option value="at-de" >Austria</option>
-      
-        <option value="be-fr" >Belgium (fr)</option>
-      
-        <option value="be-nl" >Belgium (nl)</option>
-      
-        <option value="br-pt" >Brazil</option>
-      
-        <option value="bg-bg" >Bulgaria</option>
-      
-        <option value="ca-en" >Canada (en)</option>
-      
-        <option value="ca-fr" >Canada (fr)</option>
-      
-        <option value="ct-ca" >Catalonia</option>
-      
-        <option value="cl-es" >Chile</option>
-      
-        <option value="cn-zh" >China</option>
-      
-        <option value="co-es" >Colombia</option>
-      
-        <option value="hr-hr" >Croatia</option>
-      
-        <option value="cz-cs" >Czech Republic</option>
-      
-        <option value="dk-da" >Denmark</option>
-      
-        <option value="ee-et" >Estonia</option>
-      
-        <option value="fi-fi" >Finland</option>
-      
-        <option value="fr-fr" >France</option>
-      
-        <option value="de-de" >Germany</option>
-      
-        <option value="gr-el" >Greece</option>
-      
-        <option value="hk-tzh" >Hong Kong</option>
-      
-        <option value="hu-hu" >Hungary</option>
-      
-        <option value="is-is" >Iceland</option>
-      
-        <option value="in-en" >India (en)</option>
-      
-        <option value="id-en" >Indonesia (en)</option>
-      
-        <option value="ie-en" >Ireland</option>
-      
-        <option value="il-en" >Israel (en)</option>
-      
-        <option value="it-it" >Italy</option>
-      
-        <option value="jp-jp" >Japan</option>
-      
-        <option value="kr-kr" >Korea</option>
-      
-        <option value="lv-lv" >Latvia</option>
-      
-        <option value="lt-lt" >Lithuania</option>
-      
-        <option value="my-en" >Malaysia (en)</option>
-      
-        <option value="mx-es" >Mexico</option>
-      
-        <option value="nl-nl" >Netherlands</option>
-      
-        <option value="nz-en" >New Zealand</option>
-      
-        <option value="no-no" >Norway</option>
-      
-        <option value="pk-en" >Pakistan (en)</option>
-      
-        <option value="pe-es" >Peru</option>
-      
-        <option value="ph-en" >Philippines (en)</option>
-      
-        <option value="pl-pl" >Poland</option>
-      
-        <option value="pt-pt" >Portugal</option>
-      
-        <option value="ro-ro" >Romania</option>
-      
-        <option value="ru-ru" >Russia</option>
-      
-        <option value="xa-ar" >Saudi Arabia</option>
-      
-        <option value="sg-en" >Singapore</option>
-      
-        <option value="sk-sk" >Slovakia</option>
-      
-        <option value="sl-sl" >Slovenia</option>
-      
-        <option value="za-en" >South Africa</option>
-      
-        <option value="es-ca" >Spain (ca)</option>
-      
-        <option value="es-es" >Spain (es)</option>
-      
-        <option value="se-sv" >Sweden</option>
-      
-        <option value="ch-de" >Switzerland (de)</option>
-      
-        <option value="ch-fr" >Switzerland (fr)</option>
-      
-        <option value="tw-tzh" >Taiwan</option>
-      
-        <option value="th-en" >Thailand (en)</option>
-      
-        <option value="tr-tr" >Turkey</option>
-      
-        <option value="us-en" >US (English)</option>
-      
-        <option value="us-es" >US (Spanish)</option>
-      
-        <option value="ua-uk" >Ukraine</option>
-      
-        <option value="uk-en" >United Kingdom</option>
-      
-        <option value="vn-en" >Vietnam (en)</option>
-      
-      </select>
-    </div>
-
-    <div class="frm__select frm__select--last">
-      <select class="" name="df">
-      
-        <option value="" selected>Any Time</option>
-      
-        <option value="d" >Past Day</option>
-      
-        <option value="w" >Past Week</option>
-      
-        <option value="m" >Past Month</option>
-      
-        <option value="y" >Past Year</option>
-      
-      </select>
-    </div>
-
-    </form>
-
-    </div>
-
-
-
-
-
-<!-- Web results are present -->
-
-  <div>
-  <div class="serp__results">
-  <div id="links" class="results">
-
-      
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=d5fafded6f2b9e84ba3bbaaafb02205db3dc674b85d56bab1df924b708c98f35">The Go Programming Language</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=d5fafded6f2b9e84ba3bbaaafb02205db3dc674b85d56bab1df924b708c98f35">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/go.dev.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=d5fafded6f2b9e84ba3bbaaafb02205db3dc674b85d56bab1df924b708c98f35">
-                  go.dev
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=d5fafded6f2b9e84ba3bbaaafb02205db3dc674b85d56bab1df924b708c98f35">Learn why Go is an open-source <b>language</b> supported by Google that is easy to learn and great for teams. Explore use cases, resources, packages, and community for Go development.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
         </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=b9bfdd922b49ad4dd8b42c5ff10fba79bddfd9f816c0660e70790a8748845009">Go (programming language) - Wikipedia</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=b9bfdd922b49ad4dd8b42c5ff10fba79bddfd9f816c0660e70790a8748845009">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/en.wikipedia.org.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=b9bfdd922b49ad4dd8b42c5ff10fba79bddfd9f816c0660e70790a8748845009">
-                  en.wikipedia.org/wiki/Go_(programming_language)
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=b9bfdd922b49ad4dd8b42c5ff10fba79bddfd9f816c0660e70790a8748845009">Go is a compiled, concurrent, and garbage-collected <b>language</b> designed at Google in 2009. It has a simple syntax, a large standard library, and two major implementations: a self-hosting compiler and a C++ frontend.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2FGo%2F&amp;rut=f33e8728bf2945602154ebaacf65a315f803ce61cd9a8f5394447b02d1e5e88c">Go Tutorial - GeeksforGeeks</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2FGo%2F&amp;rut=f33e8728bf2945602154ebaacf65a315f803ce61cd9a8f5394447b02d1e5e88c">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.geeksforgeeks.org.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2FGo%2F&amp;rut=f33e8728bf2945602154ebaacf65a315f803ce61cd9a8f5394447b02d1e5e88c">
-                  www.geeksforgeeks.org/Go/
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2FGo%2F&amp;rut=f33e8728bf2945602154ebaacf65a315f803ce61cd9a8f5394447b02d1e5e88c">Go or <b>Golang</b> is a procedural and statically typed <b>language</b> with C-like syntax, developed by Google and used in its production systems. This tutorial covers the basics of Go, such as data types, control statements, functions, structures, slices, pointers, interfaces, and concurrency.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=b0ef14ec69ff8cff9fcf1d3837c395d6f2d11c81ebcbd0419ef7615d06faa986">What is Go? Golang Programming Language Meaning Explained</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=b0ef14ec69ff8cff9fcf1d3837c395d6f2d11c81ebcbd0419ef7615d06faa986">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.freecodecamp.org.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=b0ef14ec69ff8cff9fcf1d3837c395d6f2d11c81ebcbd0419ef7615d06faa986">
-                  www.freecodecamp.org/news/what-is-go-programming-language/
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=b0ef14ec69ff8cff9fcf1d3837c395d6f2d11c81ebcbd0419ef7615d06faa986">Learn the basics of Go, an open-source, compiled, and statically typed <b>language</b> designed by Google. Find out why you should learn it, how to install and run it on Windows 10, and how to write your first &quot;Hello World&quot; program in Go.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo%2F&amp;rut=5be8e92973d58019a4a11ded2f83395a099b63bb13c3325c76cce30f6ee17ce5">What Is Go? An Introduction to the Golang Programming Language - Codecademy</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo%2F&amp;rut=5be8e92973d58019a4a11ded2f83395a099b63bb13c3325c76cce30f6ee17ce5">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.codecademy.com.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo%2F&amp;rut=5be8e92973d58019a4a11ded2f83395a099b63bb13c3325c76cce30f6ee17ce5">
-                  www.codecademy.com/resources/blog/what-is-go/
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo%2F&amp;rut=5be8e92973d58019a4a11ded2f83395a099b63bb13c3325c76cce30f6ee17ce5">Go (<b>Golang</b>) is a <b>programming</b> <b>language</b> used for a variety of purposes, including servers, web development, cloud infrastructure, and command-line interfaces. It&#x27;s also beginner-friendly and easy to remember. Ahead, we&#x27;ll explore Go&#x27;s uses in different industries, and the pros and cons of using it compared to other <b>languages</b>.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=ec319b2fd3178f5d5cf4836a77e597a4dac831bbd5188ce9e7342a1ad2d87036">What Is the Go Programming Language (Golang)? | Definition ... - TechTarget</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=ec319b2fd3178f5d5cf4836a77e597a4dac831bbd5188ce9e7342a1ad2d87036">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.techtarget.com.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=ec319b2fd3178f5d5cf4836a77e597a4dac831bbd5188ce9e7342a1ad2d87036">
-                  www.techtarget.com/searchitoperations/definition/Go-programming-language
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=ec319b2fd3178f5d5cf4836a77e597a4dac831bbd5188ce9e7342a1ad2d87036">What is the Go or <b>Golang</b> <b>programming</b> <b>language</b>? Go, also called <b>Golang</b> or Go <b>language</b>, is an Open Source <b>programming</b> <b>language</b> that Google developed. Software developers use Go in an array of operating systems and frameworks to develop web applications, cloud and networking services, and other types of software. Go is statically typed, explicit ...</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwebreference.com%2Fgo%2F&amp;rut=157a55ae2f2b36f38ef2f9acefc9d486f0feba39050833d814c0d9a181422443">Complete Guide to Go (Golang) Programming Language - webreference.com</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwebreference.com%2Fgo%2F&amp;rut=157a55ae2f2b36f38ef2f9acefc9d486f0feba39050833d814c0d9a181422443">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/webreference.com.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwebreference.com%2Fgo%2F&amp;rut=157a55ae2f2b36f38ef2f9acefc9d486f0feba39050833d814c0d9a181422443">
-                  webreference.com/go/
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwebreference.com%2Fgo%2F&amp;rut=157a55ae2f2b36f38ef2f9acefc9d486f0feba39050833d814c0d9a181422443">Go (also known as <b>Golang</b>) is a powerful, efficient, and modern <b>programming</b> <b>language</b> developed by Google. This comprehensive guide covers everything you need to know about Go <b>programming</b>, from basic concepts to advanced techniques. Why Go? Go combines the best features of many <b>programming</b> <b>languages</b>: Simplicity: Clean syntax and minimal <b>language</b> ...</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Fdoc%2Finstall&amp;rut=7ddbfb404097edf961ab1cd53c0f967dc445b961f01ae611cff0db5af36ea36d">Download and install - The Go Programming Language</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Fdoc%2Finstall&amp;rut=7ddbfb404097edf961ab1cd53c0f967dc445b961f01ae611cff0db5af36ea36d">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/go.dev.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Fdoc%2Finstall&amp;rut=7ddbfb404097edf961ab1cd53c0f967dc445b961f01ae611cff0db5af36ea36d">
-                  go.dev/doc/install
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Fdoc%2Finstall&amp;rut=7ddbfb404097edf961ab1cd53c0f967dc445b961f01ae611cff0db5af36ea36d">Remove any previous Go installation by deleting the /usr/local/go folder (if it exists), then extract the archive you just downloaded into /usr/local, creating a fresh Go tree in /usr/local/go: $ rm -rf /usr/local/go &amp;&amp; tar -C /usr/local -xzf go1.14.3.linux-amd64.tar.gz (You may need to run each command separately with the necessary permissions, as root or through sudo.)</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.golang101.com%2F&amp;rut=54e08e7d5fce58928337d706e72812654009db1cb32a19bf25c1d2a5983afb35">Golang 101 - Learn the Go Programming Language Today</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.golang101.com%2F&amp;rut=54e08e7d5fce58928337d706e72812654009db1cb32a19bf25c1d2a5983afb35">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.golang101.com.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.golang101.com%2F&amp;rut=54e08e7d5fce58928337d706e72812654009db1cb32a19bf25c1d2a5983afb35">
-                  www.golang101.com
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.golang101.com%2F&amp;rut=54e08e7d5fce58928337d706e72812654009db1cb32a19bf25c1d2a5983afb35"><b>Golang</b> is similar to some other <b>languages</b> like Java or C++ but with a few more features. <b>Golang</b> does have garbage collection, explicit thread synchronization primitives and first-class reflection go allows go programmers to choose between statically go typed go or dynamically go typed go <b>programming</b>.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
-  
-
-
-            <div class="result results_links results_links_deep web-result ">
-
-
-          <div class="links_main links_deep result__body"> <!-- This is the visible part -->
-
-          <h2 class="result__title">
-          
-            <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dprogramming%2Dlanguage%2Dintroduction%2F&amp;rut=dca80c6b8fc0f115b807117d840fb2a8a30defa76e108088400477639f726e5c">Go Programming Language (Introduction) - GeeksforGeeks</a>
-          
-          </h2>
-
-      
-
-            <div class="result__extras">
-                <div class="result__extras__url">
-                  <span class="result__icon">
-                    
-                      <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dprogramming%2Dlanguage%2Dintroduction%2F&amp;rut=dca80c6b8fc0f115b807117d840fb2a8a30defa76e108088400477639f726e5c">
-                        <img class="result__icon__img" width="16" height="16" alt=""
-                          src="//external-content.duckduckgo.com/ip3/www.geeksforgeeks.org.ico" name="i15" />
-                      </a>
-                  
-                  </span>
-
-                  <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dprogramming%2Dlanguage%2Dintroduction%2F&amp;rut=dca80c6b8fc0f115b807117d840fb2a8a30defa76e108088400477639f726e5c">
-                  www.geeksforgeeks.org/go-programming-language-introduction/
-                  </a>
-
-                  
-
-                </div>
-            </div>
-
-            
-                  <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dprogramming%2Dlanguage%2Dintroduction%2F&amp;rut=dca80c6b8fc0f115b807117d840fb2a8a30defa76e108088400477639f726e5c">Learn the basics of Go, a simple, fast, and concurrent <b>language</b> created by Google. Find out how to install, write, and run Go programs, and explore its features and applications.</a>
-            
-
-            <div class="clear"></div>
-          </div>
-
-        </div>
-
-  
-
-
-
 
         
         
+        
+        
+
+        <div class="frm__select">
+          <select name="kl">
+            
+              <option value="" >All Regions</option>
+            
+              <option value="ar-es" >Argentina</option>
+            
+              <option value="au-en" >Australia</option>
+            
+              <option value="at-de" >Austria</option>
+            
+              <option value="be-fr" >Belgium (fr)</option>
+            
+              <option value="be-nl" >Belgium (nl)</option>
+            
+              <option value="br-pt" >Brazil</option>
+            
+              <option value="bg-bg" >Bulgaria</option>
+            
+              <option value="ca-en" >Canada (en)</option>
+            
+              <option value="ca-fr" >Canada (fr)</option>
+            
+              <option value="ct-ca" >Catalonia</option>
+            
+              <option value="cl-es" >Chile</option>
+            
+              <option value="cn-zh" >China</option>
+            
+              <option value="co-es" >Colombia</option>
+            
+              <option value="hr-hr" >Croatia</option>
+            
+              <option value="cz-cs" >Czech Republic</option>
+            
+              <option value="dk-da" >Denmark</option>
+            
+              <option value="ee-et" >Estonia</option>
+            
+              <option value="fi-fi" >Finland</option>
+            
+              <option value="fr-fr" >France</option>
+            
+              <option value="de-de" >Germany</option>
+            
+              <option value="gr-el" >Greece</option>
+            
+              <option value="hk-tzh" >Hong Kong</option>
+            
+              <option value="hu-hu" >Hungary</option>
+            
+              <option value="is-is" >Iceland</option>
+            
+              <option value="in-en" >India (en)</option>
+            
+              <option value="id-en" >Indonesia (en)</option>
+            
+              <option value="ie-en" >Ireland</option>
+            
+              <option value="il-en" >Israel (en)</option>
+            
+              <option value="it-it" >Italy</option>
+            
+              <option value="jp-jp" >Japan</option>
+            
+              <option value="kr-kr" >Korea</option>
+            
+              <option value="lv-lv" >Latvia</option>
+            
+              <option value="lt-lt" >Lithuania</option>
+            
+              <option value="my-en" >Malaysia (en)</option>
+            
+              <option value="mx-es" >Mexico</option>
+            
+              <option value="nl-nl" >Netherlands</option>
+            
+              <option value="nz-en" >New Zealand</option>
+            
+              <option value="no-no" >Norway</option>
+            
+              <option value="pk-en" >Pakistan (en)</option>
+            
+              <option value="pe-es" >Peru</option>
+            
+              <option value="ph-en" >Philippines (en)</option>
+            
+              <option value="pl-pl" >Poland</option>
+            
+              <option value="pt-pt" >Portugal</option>
+            
+              <option value="ro-ro" >Romania</option>
+            
+              <option value="ru-ru" >Russia</option>
+            
+              <option value="xa-ar" >Saudi Arabia</option>
+            
+              <option value="sg-en" >Singapore</option>
+            
+              <option value="sk-sk" >Slovakia</option>
+            
+              <option value="sl-sl" >Slovenia</option>
+            
+              <option value="za-en" >South Africa</option>
+            
+              <option value="es-ca" >Spain (ca)</option>
+            
+              <option value="es-es" >Spain (es)</option>
+            
+              <option value="se-sv" >Sweden</option>
+            
+              <option value="ch-de" >Switzerland (de)</option>
+            
+              <option value="ch-fr" >Switzerland (fr)</option>
+            
+              <option value="tw-tzh" >Taiwan</option>
+            
+              <option value="th-en" >Thailand (en)</option>
+            
+              <option value="tr-tr" >Turkey</option>
+            
+              <option value="us-en" >US (English)</option>
+            
+              <option value="us-es" >US (Spanish)</option>
+            
+              <option value="ua-uk" >Ukraine</option>
+            
+              <option value="uk-en" >United Kingdom</option>
+            
+              <option value="vn-en" >Vietnam (en)</option>
+            
+          </select>
+        </div>
+
+        <div class="frm__select frm__select--last">
+          <select class="" name="df">
+            
+              <option value="" selected>Any Time</option>
+            
+              <option value="d" >Past Day</option>
+            
+              <option value="w" >Past Week</option>
+            
+              <option value="m" >Past Month</option>
+            
+              <option value="y" >Past Year</option>
+            
+          </select>
+        </div>
+      </form>
+    </div>
+
+    
+
+    
+      <!-- Web results are present -->
+      <div>
+        <div class="serp__results">
+          <div id="links" class="results">
+            
+
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=9293203219021fe0e3c7c04b2adcbe2746cfb1f9d380c03978ec74e442294037">The Go Programming Language</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=9293203219021fe0e3c7c04b2adcbe2746cfb1f9d380c03978ec74e442294037">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/go.dev.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=9293203219021fe0e3c7c04b2adcbe2746cfb1f9d380c03978ec74e442294037">
+                            go.dev
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2F&amp;rut=9293203219021fe0e3c7c04b2adcbe2746cfb1f9d380c03978ec74e442294037">Go is an open source <b>programming</b> <b>language</b> that makes it simple to build secure, scalable systems.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=e0df7d1b60779bd0725468045f0f97cc47511316b846be5d684f8e4c40135070">Go (programming language) - Wikipedia</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=e0df7d1b60779bd0725468045f0f97cc47511316b846be5d684f8e4c40135070">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/en.wikipedia.org.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=e0df7d1b60779bd0725468045f0f97cc47511316b846be5d684f8e4c40135070">
+                            en.wikipedia.org/wiki/Go_(programming_language)
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FGo_(programming_language)&amp;rut=e0df7d1b60779bd0725468045f0f97cc47511316b846be5d684f8e4c40135070">Go is a compiled, concurrent, and garbage-collected <b>language</b> designed at Google in 2009. It has a simple syntax, a large standard library, and two major implementations: a self-hosting compiler and a C++ frontend.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgolang%2Dtutorial%2Dlearn%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=942609ae97f8ce3e6000fcf99a089856666b1a7b120a9e27fa73008442a9d756">Golang Tutorial - Learn Go Programming Language - GeeksforGeeks</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgolang%2Dtutorial%2Dlearn%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=942609ae97f8ce3e6000fcf99a089856666b1a7b120a9e27fa73008442a9d756">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.geeksforgeeks.org.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgolang%2Dtutorial%2Dlearn%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=942609ae97f8ce3e6000fcf99a089856666b1a7b120a9e27fa73008442a9d756">
+                            www.geeksforgeeks.org/go-language/golang-tutorial-learn-go-programming-language/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgolang%2Dtutorial%2Dlearn%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=942609ae97f8ce3e6000fcf99a089856666b1a7b120a9e27fa73008442a9d756">This <b>Golang</b> tutorial provides you with all the insights into Go <b>Language</b> <b>programming</b>, Here we provide the basics, from how to install <b>Golang</b> to advanced concepts of Go <b>programming</b> with stable examples. So, if you are a professional and a beginner, this free <b>Golang</b> tutorial is the best place for your learning.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=3e45a4ae146ca79c7a604209a22d2c74284cf57aacd1b5e88bee09d394e54b43">What is Go? Golang Programming Language Meaning Explained</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=3e45a4ae146ca79c7a604209a22d2c74284cf57aacd1b5e88bee09d394e54b43">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.freecodecamp.org.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=3e45a4ae146ca79c7a604209a22d2c74284cf57aacd1b5e88bee09d394e54b43">
+                            www.freecodecamp.org/news/what-is-go-programming-language/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.freecodecamp.org%2Fnews%2Fwhat%2Dis%2Dgo%2Dprogramming%2Dlanguage%2F&amp;rut=3e45a4ae146ca79c7a604209a22d2c74284cf57aacd1b5e88bee09d394e54b43">Learn the basics of Go, an open-source, compiled, and statically typed <b>language</b> designed by Google. Find out why you should learn it, how to install and run it on Windows 10, and how to write your first &quot;Hello World&quot; program in Go.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.coursera.org%2Farticles%2Fgo%2Dprogramming%2Dlanguage&amp;rut=f896ed28565766587c1d37c10231f5b02eb45beb96ef0e5ec6fb64c2d622bb10">What Is Go Programming Language and What Is It Used For?</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.coursera.org%2Farticles%2Fgo%2Dprogramming%2Dlanguage&amp;rut=f896ed28565766587c1d37c10231f5b02eb45beb96ef0e5ec6fb64c2d622bb10">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.coursera.org.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.coursera.org%2Farticles%2Fgo%2Dprogramming%2Dlanguage&amp;rut=f896ed28565766587c1d37c10231f5b02eb45beb96ef0e5ec6fb64c2d622bb10">
+                            www.coursera.org/articles/go-programming-language
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.coursera.org%2Farticles%2Fgo%2Dprogramming%2Dlanguage&amp;rut=f896ed28565766587c1d37c10231f5b02eb45beb96ef0e5ec6fb64c2d622bb10">Go is the shortened name for <b>Golang</b>, an open-source <b>programming</b> <b>language</b> Google developed and released in 2009. The creation of Go, as a Google <b>programming</b> <b>language</b>, came about to address the challenges of building large-scale software systems and complex codebases.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Flearn%2F&amp;rut=add12cf799fdca6a0f1c06d5168327b38ec3629a475cba285d2450dab1fe5d07">Get Started - The Go Programming Language</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Flearn%2F&amp;rut=add12cf799fdca6a0f1c06d5168327b38ec3629a475cba285d2450dab1fe5d07">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/go.dev.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Flearn%2F&amp;rut=add12cf799fdca6a0f1c06d5168327b38ec3629a475cba285d2450dab1fe5d07">
+                            go.dev/learn/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fgo.dev%2Flearn%2F&amp;rut=add12cf799fdca6a0f1c06d5168327b38ec3629a475cba285d2450dab1fe5d07">Find out how to install, use, and learn Go, a fast and reliable <b>programming</b> <b>language</b>. Explore tutorials, documentation, examples, books, and courses on the official website.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=58b91c4fac76d5c8bf1039ab397d737b2a27e62ee0df02fe4d333d361bbe8c33">What Is the Go Programming Language (Golang)? | Definition ... - TechTarget</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=58b91c4fac76d5c8bf1039ab397d737b2a27e62ee0df02fe4d333d361bbe8c33">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.techtarget.com.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=58b91c4fac76d5c8bf1039ab397d737b2a27e62ee0df02fe4d333d361bbe8c33">
+                            www.techtarget.com/searchitoperations/definition/Go-programming-language
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.techtarget.com%2Fsearchitoperations%2Fdefinition%2FGo%2Dprogramming%2Dlanguage&amp;rut=58b91c4fac76d5c8bf1039ab397d737b2a27e62ee0df02fe4d333d361bbe8c33">What is the Go or <b>Golang</b> <b>programming</b> <b>language</b>? Go, also called <b>Golang</b> or Go <b>language</b>, is an Open Source <b>programming</b> <b>language</b> that Google developed. Software developers use Go in an array of operating systems and frameworks to develop web applications, cloud and networking services, and other types of software.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcodilime.com%2Fblog%2Fwhat%2Dis%2Dgo%2Dlanguage%2F&amp;rut=60a30e642c582ef5207017ccefee240ca899658fed12e9e2849b1a3efbe068bf">The Go programming language — everything you should know</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcodilime.com%2Fblog%2Fwhat%2Dis%2Dgo%2Dlanguage%2F&amp;rut=60a30e642c582ef5207017ccefee240ca899658fed12e9e2849b1a3efbe068bf">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/codilime.com.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcodilime.com%2Fblog%2Fwhat%2Dis%2Dgo%2Dlanguage%2F&amp;rut=60a30e642c582ef5207017ccefee240ca899658fed12e9e2849b1a3efbe068bf">
+                            codilime.com/blog/what-is-go-language/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fcodilime.com%2Fblog%2Fwhat%2Dis%2Dgo%2Dlanguage%2F&amp;rut=60a30e642c582ef5207017ccefee240ca899658fed12e9e2849b1a3efbe068bf">The complex information about Go <b>programming</b> <b>language</b> - definition, features, Go strengths, tools and benefits of use. Read our article to learn more.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgo%2F&amp;rut=22197bd5519985b00d8399162bbe88048b78b729d6e4b6fc33e7ed3b9b769ed0">Go Tutorial - GeeksforGeeks</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgo%2F&amp;rut=22197bd5519985b00d8399162bbe88048b78b729d6e4b6fc33e7ed3b9b769ed0">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.geeksforgeeks.org.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgo%2F&amp;rut=22197bd5519985b00d8399162bbe88048b78b729d6e4b6fc33e7ed3b9b769ed0">
+                            www.geeksforgeeks.org/go-language/go/
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.geeksforgeeks.org%2Fgo%2Dlanguage%2Fgo%2F&amp;rut=22197bd5519985b00d8399162bbe88048b78b729d6e4b6fc33e7ed3b9b769ed0">Go or you say <b>Golang</b> is a procedural and statically typed <b>programming</b> <b>language</b> having the syntax similar to C <b>programming</b> <b>language</b>. It was developed in 2007 by Robert Griesemer, Rob Pike, and Ken Thompson at Google but launched in 2009 as an open-source <b>programming</b> <b>language</b> and mainly used in Google&#x27;s production systems.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+              
+                <div class="result results_links results_links_deep web-result ">
+                  <div class="links_main links_deep result__body"> <!-- This is the visible part -->
+                    
+                      <h2 class="result__title">
+                        <a rel="nofollow" class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo&amp;rut=f4a3b77f6de7cef5cf57e20e5c72f5a565662ce5a35258d3eef94066894b566a">What is Go (programming language)? How Is It Used? - Codecademy</a>
+                      </h2>
+
+                    
+
+                    
+                      <div class="result__extras">
+                        <div class="result__extras__url">
+                          <span class="result__icon">
+                            <a rel="nofollow" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo&amp;rut=f4a3b77f6de7cef5cf57e20e5c72f5a565662ce5a35258d3eef94066894b566a">
+                              <img class="result__icon__img" width="16" height="16" alt="" src="//external-content.duckduckgo.com/ip3/www.codecademy.com.ico" name="i15" />
+                            </a>
+                          </span>
+                          <a class="result__url" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo&amp;rut=f4a3b77f6de7cef5cf57e20e5c72f5a565662ce5a35258d3eef94066894b566a">
+                            www.codecademy.com/resources/blog/what-is-go
+                          </a>
+                          
+                        </div>
+                      </div>
+                    
+
+                    
+                      
+                        <a class="result__snippet" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.codecademy.com%2Fresources%2Fblog%2Fwhat%2Dis%2Dgo&amp;rut=f4a3b77f6de7cef5cf57e20e5c72f5a565662ce5a35258d3eef94066894b566a">Go (<b>Golang</b>) is a <b>programming</b> <b>language</b> used in a variety of settings including finance, gaming, and cybersecurity. Learn more about Go and what it&#x27;s used for.</a>
+                      
+                    
+
+                    <div class="clear"></div>
+                  </div>
+                </div>
+              
+            
+
+            
+              
+              
                 <div class="nav-link">
-        <form action="/html/" method="post">
-          <input type="submit" class='btn btn--alt' value="Next" />
-          <input type="hidden" name="q" value="golang programming language" />
-          <input type="hidden" name="s" value="10" />
-          <input type="hidden" name="nextParams" value="" />
-          <input type="hidden" name="v" value="l" />
-          <input type="hidden" name="o" value="json" />
-          <input type="hidden" name="dc" value="11" />
-          <input type="hidden" name="api" value="d.js" />
-          <input type="hidden" name="vqd" value="4-49990949450463962397406184431259980661" />
+                  <form action="/html/" method="post">
+                    <input type="submit" class='btn btn--alt' value="Next" />
+                    <input type="hidden" name="q" value="golang programming language" />
+                    <input type="hidden" name="s" value="10" />
+                    <input type="hidden" name="nextParams" value="" />
+                    <input type="hidden" name="v" value="l" />
+                    <input type="hidden" name="o" value="json" />
+                    <input type="hidden" name="dc" value="11" />
+                    <input type="hidden" name="api" value="d.js" />
+                    <input type="hidden" name="vqd" value="4-49186726556791212681539892655564357557" />
 
-        
-        
-        
-          <input name="kl" value="wt-wt" type="hidden" />
-        
-        
-        
-        
-        </form>
+                    
+                    
+                    
+                      <input name="kl" value="wt-wt" type="hidden" />
+                    
+                    
+                    
+                    
+                  </form>
                 </div>
-        
+              
+            
 
-
-
-        <div class=" feedback-btn">
-            <a rel="nofollow" href="//duckduckgo.com/feedback.html" target="_new">Feedback</a>
+            <div class="feedback-btn">
+              <a rel="nofollow" href="//duckduckgo.com/feedback.html" target="_new">Feedback</a>
+            </div>
+            <div class="clear"></div>
+          </div>
         </div>
-        <div class="clear"></div>
-  </div>
-  </div> <!-- links wrapper //-->
-
-
-
-    </div>
+      </div> <!-- links wrapper //-->
+    
   </div>
 
-    <div id="bottom_spacing2"></div>
+  <div id="bottom_spacing2"></div>
 
-    
-      <img src="//duckduckgo.com/t/sl_h"/>
-    
+  
+    <img src="//duckduckgo.com/t/sl_h"/>
+  
 </body>
 </html>

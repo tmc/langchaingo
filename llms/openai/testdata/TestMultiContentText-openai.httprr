@@ -1,5 +1,5 @@
 httprr trace v1
-361 1810
+360 1920
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-mini","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 1086
+Content-Length: 1118
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:39 GMT
+Date: Thu, 22 Jan 2026 19:48:35 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1558
+Openai-Processing-Ms: 1739
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1565
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999986
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 1759
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999987
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_2c54c852cf42f816263667c4728219b6
+X-Request-Id: req_f2a49ed22e734688877c2036571161e1
 
 {
-  "id": "chatcmpl-Bld9Vww278wXXmtsaRCqGFMyrTeKf",
+  "id": "chatcmpl-D0uxOCz0XqrVNiZvPmkNMJrhqeMzi",
   "object": "chat.completion",
-  "created": 1750691617,
+  "created": 1769111314,
   "model": "gpt-4.1-mini-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "If you are a Pomeranian, you are a dog, which means you are a mammal belonging to the species *Canis lupus familiaris*. Dogs are domesticated mammals that are part of the family Canidae. Pomeranians are a small breed of dog known for their fluffy coats and lively personalities.",
+        "content": "If you're a Pomeranian, you are a type of mammal known as a **dog**. More specifically, Pomeranians are a small breed of domestic dog (Canis lupus familiaris) known for their fluffy coats and lively personalities. Dogs belong to the family Canidae, which also includes wolves, foxes, and other similar animals.",
         "refusal": null,
         "annotations": []
       },
@@ -49,8 +51,8 @@ X-Request-Id: req_2c54c852cf42f816263667c4728219b6
   ],
   "usage": {
     "prompt_tokens": 20,
-    "completion_tokens": 63,
-    "total_tokens": 83,
+    "completion_tokens": 71,
+    "total_tokens": 91,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -63,5 +65,5 @@ X-Request-Id: req_2c54c852cf42f816263667c4728219b6
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_658b958c37"
+  "system_fingerprint": "fp_376a7ccef1"
 }

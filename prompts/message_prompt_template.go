@@ -16,7 +16,10 @@ var _ MessageFormatter = SystemMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p SystemMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []llms.ChatMessage{llms.SystemChatMessage{Content: text}}, err
+	if err != nil {
+		return nil, fmt.Errorf("formatting system message: %w", err)
+	}
+	return []llms.ChatMessage{llms.SystemChatMessage{Content: text}}, nil
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -41,7 +44,10 @@ var _ MessageFormatter = AIMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p AIMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []llms.ChatMessage{llms.AIChatMessage{Content: text}}, err
+	if err != nil {
+		return nil, fmt.Errorf("formatting AI message: %w", err)
+	}
+	return []llms.ChatMessage{llms.AIChatMessage{Content: text}}, nil
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -66,7 +72,10 @@ var _ MessageFormatter = HumanMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p HumanMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []llms.ChatMessage{llms.HumanChatMessage{Content: text}}, err
+	if err != nil {
+		return nil, fmt.Errorf("formatting human message: %w", err)
+	}
+	return []llms.ChatMessage{llms.HumanChatMessage{Content: text}}, nil
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -92,7 +101,10 @@ var _ MessageFormatter = GenericMessagePromptTemplate{}
 // FormatMessages formats the message with the values given.
 func (p GenericMessagePromptTemplate) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	text, err := p.Prompt.Format(values)
-	return []llms.ChatMessage{llms.GenericChatMessage{Content: text, Role: p.Role}}, err
+	if err != nil {
+		return nil, fmt.Errorf("formatting generic message with role %q: %w", p.Role, err)
+	}
+	return []llms.ChatMessage{llms.GenericChatMessage{Content: text, Role: p.Role}}, nil
 }
 
 // GetInputVariables returns the input variables the prompt expects.
@@ -116,11 +128,11 @@ type MessagesPlaceholder struct {
 func (p MessagesPlaceholder) FormatMessages(values map[string]any) ([]llms.ChatMessage, error) {
 	value, ok := values[p.VariableName]
 	if !ok {
-		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
+		return nil, fmt.Errorf("%w: variable %q not found", ErrNeedChatMessageList, p.VariableName)
 	}
 	baseMessages, ok := value.([]llms.ChatMessage)
 	if !ok {
-		return nil, fmt.Errorf("%w: %s should be a list of chat messages", ErrNeedChatMessageList, p.VariableName)
+		return nil, fmt.Errorf("%w: variable %q has type %T", ErrNeedChatMessageList, p.VariableName, value)
 	}
 	return baseMessages, nil
 }

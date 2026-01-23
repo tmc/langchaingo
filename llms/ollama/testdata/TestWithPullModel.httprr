@@ -1,5 +1,5 @@
 httprr trace v1
-259 128
+258 128
 POST http://localhost:11434/api/pull HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -10,9 +10,9 @@ Content-Type: application/json
 {"model":"qwen3:8b","username":"","password":"","stream":false,"name":""}HTTP/1.1 200 OK
 Content-Length: 20
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 11:11:37 GMT
+Date: Thu, 22 Jan 2026 21:16:44 GMT
 
-{"status":"success"}298 921
+{"status":"success"}297 906
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
@@ -21,8 +21,8 @@ Accept: application/x-ndjson
 Content-Type: application/json
 
 {"model":"qwen3:8b","messages":[{"role":"user","content":"Say hello"}],"stream":false,"format":"","options":{}}HTTP/1.1 200 OK
-Content-Length: 797
+Content-Length: 782
 Content-Type: application/json; charset=utf-8
-Date: Mon, 23 Jun 2025 11:11:41 GMT
+Date: Thu, 22 Jan 2026 21:16:48 GMT
 
-{"model":"qwen3:8b","created_at":"2025-06-23T11:11:41.456986Z","message":{"role":"assistant","content":"\u003cthink\u003e\nOkay, the user said \"Say hello.\" I need to respond appropriately. Since they asked me to say hello, I should greet them in a friendly manner. Let me make sure to use a welcoming tone. Maybe start with a simple \"Hello!\" and then offer assistance. I should keep it concise but polite. Let me check if there's anything else they might need. No, the request is straightforward. Just a greeting. Alright, that should do it.\n\u003c/think\u003e\n\nHello! How can I assist you today? 😊"},"done_reason":"stop","done":true,"total_duration":2737699875,"load_duration":32028583,"prompt_eval_count":10,"prompt_eval_duration":325496500,"eval_count":109,"eval_duration":2379491958}
+{"model":"qwen3:8b","created_at":"2026-01-22T21:16:48.68883Z","message":{"role":"assistant","content":"Hello! How can I assist you today? 😊","thinking":"Okay, the user just said \"Say hello /think\". Let me figure out how to respond. First, they might be testing if I can follow instructions. The /think part could mean they want me to process the request carefully. I should acknowledge their message and offer assistance. Maybe start with a friendly greeting and ask how I can help. Keep it simple and open-ended. Let me make sure the response is polite and invites further conversation.\n"},"done":true,"done_reason":"stop","total_duration":3569965042,"load_duration":85267083,"prompt_eval_count":104,"prompt_eval_duration":351182792,"eval_count":12,"eval_duration":276729459}

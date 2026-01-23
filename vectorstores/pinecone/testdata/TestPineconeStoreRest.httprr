@@ -1,5 +1,5 @@
 httprr trace v1
-257 67686
+256 67760
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -14,23 +14,25 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sat, 21 Jun 2025 16:58:25 GMT
+Date: Thu, 22 Jan 2026 20:18:51 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 185
+Openai-Processing-Ms: 65
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-5f5d5b84f-2rjdx
+Via: envoy-router-6b489b9458-wtsmk
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 192
+X-Envoy-Upstream-Service-Time: 84
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 5000000
+X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 4999998
+X-Ratelimit-Remaining-Tokens: 9999998
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_44f7a15b670dd5648f2a13406ff1cab1
+X-Request-Id: req_e93ef84381ca4bcb91013a49d4ab6ab7
 
 {
   "object": "list",
@@ -3126,7 +3128,7 @@ X-Request-Id: req_44f7a15b670dd5648f2a13406ff1cab1
     "total_tokens": 4
   }
 }
-248 34351
+247 34425
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -3141,23 +3143,25 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Sat, 21 Jun 2025 16:58:38 GMT
+Date: Thu, 22 Jan 2026 20:19:09 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 108
+Openai-Processing-Ms: 71
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-678d5cbb58-5c4px
+Via: envoy-router-66b64fd584-kmqzc
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 109
+X-Envoy-Upstream-Service-Time: 211
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 5000000
+X-Ratelimit-Limit-Tokens: 10000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 4999999
+X-Ratelimit-Remaining-Tokens: 9999999
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_1abe042d0f6a54236643d9b769d213c9
+X-Request-Id: req_96a6e463c15f4a28bd54dc1568af7663
 
 {
   "object": "list",

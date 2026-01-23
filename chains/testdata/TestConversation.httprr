@@ -1,5 +1,5 @@
 httprr trace v1
-551 1591
+550 1664
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\n\nHuman: Hi! I'm Jim\nAI:"}]}HTTP/2.0 200 OK
-Content-Length: 870
+Content-Length: 865
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:33:46 GMT
+Date: Thu, 22 Jan 2026 21:10:57 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 210
+Openai-Processing-Ms: 435
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 212
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999927
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 451
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999927
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_f3a9c66c5633f3f03b49423d7b62e033
+X-Request-Id: req_c080b93441a74fbcb184222818aea779
 
 {
-  "id": "chatcmpl-BldT0iOAt9wfZtcrqwPo0EadDFjCt",
+  "id": "chatcmpl-D0wF7XSFtOUqZ4KZjMNRnhO8drtyf",
   "object": "chat.completion",
-  "created": 1750692826,
+  "created": 1769116257,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Hello Jim! It's great to meet you. How can I assist you today?",
+        "content": "Hello, Jim! Nice to meet you. How can I assist you today?",
         "refusal": null,
         "annotations": []
       },
@@ -63,49 +65,51 @@ X-Request-Id: req_f3a9c66c5633f3f03b49423d7b62e033
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }
-642 1601
+636 1623
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 439
+Content-Length: 434
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\nHuman: Hi! I'm Jim\nAI: Hello Jim! It's great to meet you. How can I assist you today?\nHuman: What is my name?\nAI:"}]}HTTP/2.0 200 OK
-Content-Length: 880
+{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.\n\nCurrent conversation:\nHuman: Hi! I'm Jim\nAI: Hello, Jim! Nice to meet you. How can I assist you today?\nHuman: What is my name?\nAI:"}]}HTTP/2.0 200 OK
+Content-Length: 824
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:33:48 GMT
+Date: Thu, 22 Jan 2026 21:10:59 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 287
+Openai-Processing-Ms: 224
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 291
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999906
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 239
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999907
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_63e260605395912eeab7ccf4cd57959b
+X-Request-Id: req_7f94f7f8ad1f4a8ea662c2ba9cdde599
 
 {
-  "id": "chatcmpl-BldT1w7ENAcXWz70hkOMKRV0ye6pF",
+  "id": "chatcmpl-D0wF8FqYlRynMIng0qQVs3TTEErmA",
   "object": "chat.completion",
-  "created": 1750692827,
+  "created": 1769116258,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Your name is Jim! It's nice to meet you, Jim. How can I help you today?",
+        "content": "Your name is Jim.",
         "refusal": null,
         "annotations": []
       },
@@ -115,8 +119,8 @@ X-Request-Id: req_63e260605395912eeab7ccf4cd57959b
   ],
   "usage": {
     "prompt_tokens": 93,
-    "completion_tokens": 20,
-    "total_tokens": 113,
+    "completion_tokens": 5,
+    "total_tokens": 98,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -129,5 +133,5 @@ X-Request-Id: req_63e260605395912eeab7ccf4cd57959b
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }

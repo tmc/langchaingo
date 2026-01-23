@@ -5,6 +5,8 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/vxcontrol/langchaingo/llms"
+
 	"cloud.google.com/go/vertexai/genai"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -122,6 +124,15 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
+// WithGRPCConn appends a ClientOption that uses the provided gRPC client connection to
+// make requests.
+// This is useful for testing embeddings in vertex clients.
+func WithGRPCConn(conn *grpc.ClientConn) Option {
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, option.WithGRPCConn(conn))
+	}
+}
+
 // WithCloudProject passes the GCP cloud project name to the client. This is
 // useful for vertex clients.
 func WithCloudProject(p string) Option {
@@ -194,6 +205,18 @@ func WithDefaultTopP(defaultTopP float64) Option {
 func WithHarmThreshold(ht HarmBlockThreshold) Option {
 	return func(opts *Options) {
 		opts.HarmThreshold = ht
+	}
+}
+
+// WithCachedContent enables the use of pre-created cached content.
+// The cached content must be created separately using Client.CreateCachedContent.
+// This is different from Anthropic's inline cache control.
+func WithCachedContent(name string) llms.CallOption {
+	return func(o *llms.CallOptions) {
+		if o.Metadata == nil {
+			o.Metadata = make(map[string]any)
+		}
+		o.Metadata["CachedContentName"] = name
 	}
 }
 

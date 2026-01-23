@@ -1,5 +1,5 @@
 httprr trace v1
-655 1088
+654 1338
 POST https://api.deepseek.com/chat/completions HTTP/1.1
 Host: api.deepseek.com
 User-Agent: langchaingo-httprr
@@ -8,15 +8,18 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"deepseek-chat","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 661
+Content-Length: 746
 Access-Control-Allow-Credentials: true
-Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:32 GMT
-Server: cloudflare
+Date: Thu, 22 Jan 2026 19:58:21 GMT
+Server: elb
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 Vary: origin, access-control-request-method, access-control-request-headers
+Via: 1.1 2ae108ea5404064fac59010eedcd1806.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: O5eWX1T7jzPbehiZU5zpS4aB_gN6miHpPUpVKMfHMfILSI6GQIacRw==
+X-Amz-Cf-Pop: JFK50-P10
+X-Cache: Miss from cloudfront
 X-Content-Type-Options: nosniff
-X-Ds-Trace-Id: 260c66396fa4554d8dbabcb8d0b60887
+X-Ds-Trace-Id: 7cb75600f02d3c8f944b60bdeaf4aa1a
 
-{"id":"d2ab8a1d-3561-475d-8f7f-73f120adf441","object":"chat.completion","created":1750695692,"model":"deepseek-chat","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"index":0,"id":"call_0_2e5ae346-3394-4de5-b44d-0d57dc9e48d8","type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\",\"unit\":\"fahrenheit\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":163,"completion_tokens":26,"total_tokens":189,"prompt_tokens_details":{"cached_tokens":128},"prompt_cache_hit_tokens":128,"prompt_cache_miss_tokens":35},"system_fingerprint":"fp_8802369eaa_prod0425fp8"}
+{"id":"a10506da-bc12-4fc9-bb65-ffaaf27d05f8","object":"chat.completion","created":1769111901,"model":"deepseek-chat","choices":[{"index":0,"message":{"role":"assistant","content":"I can help you check the weather in Boston, MA. Let me get that information for you.","tool_calls":[{"index":0,"id":"call_00_I9iZGv2R1xo1fdR7AsWc18Fr","type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\", \"unit\": \"fahrenheit\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":347,"completion_tokens":82,"total_tokens":429,"prompt_tokens_details":{"cached_tokens":320},"prompt_cache_hit_tokens":320,"prompt_cache_miss_tokens":27},"system_fingerprint":"fp_eaab8d114b_prod0820_fp8_kvcache"}

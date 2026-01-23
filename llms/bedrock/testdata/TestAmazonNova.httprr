@@ -1,5 +1,5 @@
 httprr trace v1
-464 638
+463 648
 POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-micro-v1%3A0/invoke HTTP/1.1
 Host: bedrock-runtime.us-east-1.amazonaws.com
 User-Agent: langchaingo-httprr
@@ -9,17 +9,17 @@ Authorization: AWS4-HMAC-SHA256 test-api-key
 Content-Type: application/json
 
 {"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 260
+Content-Length: 269
 Content-Type: application/json
-Date: Fri, 11 Jul 2025 17:10:42 GMT
+Date: Fri, 23 Jan 2026 12:51:42 GMT
 X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
 X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
 X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 239
-X-Amzn-Bedrock-Output-Token-Count: 8
-X-Amzn-Requestid: 77a09b42-510d-4d9a-a5a9-4549896bb61c
+X-Amzn-Bedrock-Invocation-Latency: 245
+X-Amzn-Bedrock-Output-Token-Count: 11
+X-Amzn-Requestid: a9dea381-ca25-4666-b94e-5da1e0828a67
 
-{"output":{"message":{"content":[{"text":"Machines that learn and mimic human intelligence."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":8,"totalTokens":24,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}463 646
+{"output":{"message":{"content":[{"text":"Machines learn, mimic human intelligence, solve problems."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":11,"totalTokens":27,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}462 636
 POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-lite-v1%3A0/invoke HTTP/1.1
 Host: bedrock-runtime.us-east-1.amazonaws.com
 User-Agent: langchaingo-httprr
@@ -29,17 +29,17 @@ Authorization: AWS4-HMAC-SHA256 test-api-key
 Content-Type: application/json
 
 {"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 267
+Content-Length: 258
 Content-Type: application/json
-Date: Fri, 11 Jul 2025 17:10:43 GMT
+Date: Fri, 23 Jan 2026 12:51:44 GMT
 X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
 X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
 X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 381
-X-Amzn-Bedrock-Output-Token-Count: 11
-X-Amzn-Requestid: 7918f725-99e7-4520-8ffe-ea0f208c8be5
+X-Amzn-Bedrock-Invocation-Latency: 326
+X-Amzn-Bedrock-Output-Token-Count: 7
+X-Amzn-Requestid: e481229b-01fb-4e40-99b4-d1372c8d3177
 
-{"output":{"message":{"content":[{"text":"AI: Intelligent machines, learning, adapting, evolving."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":11,"totalTokens":27,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}462 656
+{"output":{"message":{"content":[{"text":"Artificial intelligence mimics human cognition."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":7,"totalTokens":23,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}461 648
 POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.amazon.nova-pro-v1%3A0/invoke HTTP/1.1
 Host: bedrock-runtime.us-east-1.amazonaws.com
 User-Agent: langchaingo-httprr
@@ -49,14 +49,14 @@ Authorization: AWS4-HMAC-SHA256 test-api-key
 Content-Type: application/json
 
 {"messages":[{"role":"user","content":[{"text":"Explain AI in 10 words or less."}]}],"inferenceConfig":{"maxTokens":4096},"system":[{"text":"You know all about AI."}]}HTTP/2.0 200 OK
-Content-Length: 278
+Content-Length: 269
 Content-Type: application/json
-Date: Fri, 11 Jul 2025 17:10:45 GMT
+Date: Fri, 23 Jan 2026 12:51:45 GMT
 X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
 X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
 X-Amzn-Bedrock-Input-Token-Count: 16
-X-Amzn-Bedrock-Invocation-Latency: 385
-X-Amzn-Bedrock-Output-Token-Count: 9
-X-Amzn-Requestid: 089666a2-e365-461b-8cab-8d3c84d5d6fe
+X-Amzn-Bedrock-Invocation-Latency: 447
+X-Amzn-Bedrock-Output-Token-Count: 10
+X-Amzn-Requestid: da3df8a3-66eb-4a97-9bca-23eea7c98fd1
 
-{"output":{"message":{"content":[{"text":"Intelligent machines learning and adapting through data processing."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":9,"totalTokens":25,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}
+{"output":{"message":{"content":[{"text":"Advanced algorithms enabling machines to learn and adapt."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":16,"outputTokens":10,"totalTokens":26,"cacheReadInputTokenCount":0,"cacheWriteInputTokenCount":0}}

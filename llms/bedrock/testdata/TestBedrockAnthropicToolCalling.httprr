@@ -1,0 +1,56 @@
+httprr trace v1
+821 762
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 507
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like in New York?"}]}],"tools":[{"name":"get_weather","description":"Get the current weather for a location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 479
+Content-Type: application/json
+Date: Fri, 23 Jan 2026 12:46:58 GMT
+X-Amzn-Bedrock-Input-Token-Count: 614
+X-Amzn-Bedrock-Invocation-Latency: 763
+X-Amzn-Bedrock-Output-Token-Count: 57
+X-Amzn-Requestid: be9df7d2-bf07-4936-a89d-5c9a2048fd12
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_bdrk_01WuVdmuVpN7jMutExtqSqDR","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_01NAFKQXKFq9KJcXYspsWJT2","name":"get_weather","input":{"location":"New York, NY"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":614,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":57}}787 793
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 473
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like in New York?"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_01NAFKQXKFq9KJcXYspsWJT2","name":"get_weather","input":{"location":"New York, NY"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_bdrk_01NAFKQXKFq9KJcXYspsWJT2","content":"It's currently 72°F and sunny in New York"}]}]}HTTP/2.0 200 OK
+Content-Length: 511
+Content-Type: application/json
+Date: Fri, 23 Jan 2026 12:47:00 GMT
+X-Amzn-Bedrock-Input-Token-Count: 97
+X-Amzn-Bedrock-Invocation-Latency: 790
+X-Amzn-Bedrock-Output-Token-Count: 35
+X-Amzn-Requestid: 4c43be74-cdfc-4462-a8a9-be68cad26a23
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_bdrk_01UXSrEUQrxZ8DSJNTGEW4SC","type":"message","role":"assistant","content":[{"type":"text","text":"It's currently **72°F and sunny** in New York. It's nice weather! Is there anything else you'd like to know about the weather?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":97,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":35}}1066 980
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 752
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":512,"messages":[{"role":"user","content":[{"type":"text","text":"What's 123 * 456 and what's the weather in Paris?"}]}],"tools":[{"name":"get_weather","description":"Get the current weather for a location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"description":"The unit of temperature","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}},{"name":"calculate","description":"Perform mathematical calculations","input_schema":{"properties":{"expression":{"description":"The mathematical expression to evaluate","type":"string"}},"required":["expression"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 696
+Content-Type: application/json
+Date: Fri, 23 Jan 2026 12:47:02 GMT
+X-Amzn-Bedrock-Input-Token-Count: 682
+X-Amzn-Bedrock-Invocation-Latency: 930
+X-Amzn-Bedrock-Output-Token-Count: 108
+X-Amzn-Requestid: 228f3dbd-385f-486b-b9b3-3b364932798f
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_bdrk_0122fRnppVApgaxwsVmbDSx9","type":"message","role":"assistant","content":[{"type":"text","text":"I'll calculate that multiplication and get the weather in Paris for you."},{"type":"tool_use","id":"toolu_bdrk_01X6jfbj9zs3QKzaXqnxgv6w","name":"calculate","input":{"expression":"123 * 456"}},{"type":"tool_use","id":"toolu_bdrk_01Qmb6fa8KLEBr2MVnKyAUWy","name":"get_weather","input":{"location":"Paris, France"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":682,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":108}}

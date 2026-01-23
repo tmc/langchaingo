@@ -6,15 +6,15 @@
     "type": "doc",
     "keywords": [
       "architecture",
-      "package",
       "langchaingo",
-      "adoption",
       "only",
-      "conventions",
-      "apps?**",
-      "selective",
-      "client?**",
-      "entire"
+      "package",
+      "adoption",
+      "your",
+      "`prompts`",
+      "philosophy",
+      "need",
+      "designed"
     ]
   },
   {
@@ -23,16 +23,16 @@
     "content": "Concepts Understanding the fundamental concepts behind LangChainGo helps you build better applications. Core architecture LangChainGo is built around several key architectural principles: Framework design - **Interface-driven design**: Every major component is defined by interfaces for modularity and testability - **Component architecture**: Clear separation between models, chains, memory, agents, and tools - **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and expl...",
     "type": "doc",
     "keywords": [
+      "concepts",
       "interfaces",
       "langchaingo",
-      "concepts",
-      "**component",
-      "understanding",
-      "component",
-      "goroutines",
+      "architectural",
+      "separation",
+      "modularity",
       "framework",
-      "defined",
-      "modularity"
+      "helps",
+      "design**",
+      "major"
     ]
   },
   {
@@ -43,14 +43,14 @@
     "keywords": [
       "documentation",
       "**purpose**",
-      "tutorials",
       "guide",
-      "appli",
-      "helps",
-      "design",
-      "help",
-      "guides",
-      "experiences"
+      "tutorials",
+      "our",
+      "concepts",
+      "real-world",
+      "background",
+      "especially",
+      "structure"
     ]
   },
   {
@@ -59,16 +59,16 @@
     "content": "Contributing to LangChainGo Thank you for your interest in contributing to LangChainGo! This guide helps you get started. Ways to contribute 1. Code contributions - **Bug fixes**: Help us squash bugs and improve stability - **New features**: Implement new LLM providers, tools, or chains - **Performance improvements**: Optimize existing code - **Tests**: Improve test coverage and add missing tests 2. Documentation contributions - **Tutorials**: Write step-by-step guides for common use cases - **H...",
     "type": "doc",
     "keywords": [
-      "langchaingo",
-      "improve",
+      "contributing",
       "code",
       "contributions",
-      "contributing",
-      "chains",
-      "add",
+      "improve",
+      "langchaingo",
+      "cases",
       "fixes**",
-      "bugs",
-      "implement"
+      "**tutorials**",
+      "tools",
+      "new"
     ]
   },
   {
@@ -80,13 +80,13 @@
       "models",
       "chat",
       "expose",
-      "language",
-      "langchain",
       "started",
       "interface",
-      "installation",
-      "few",
-      "\"text"
+      "langchain",
+      "language",
+      "get",
+      "following",
+      "under"
     ]
   },
   {
@@ -95,16 +95,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleMistral from \"@examples/mistral-completion-example/mistral_completion_example.go\"; Quickstart: LangChainGo with Mistral Get started by running your first program with LangChainGo and the Mistral Platform. Prerequisites 1. **Mistral API Key**: Sign up on Mistral and retrieve your API key. 2. **Go**: Download and install Go. Setup Before interacting with the Mistral API, you need to set up your API key as an environment variable. Linux/macOS ...",
     "type": "doc",
     "keywords": [
-      "mistral",
       "api",
+      "mistral",
       "your",
-      "key",
       "langchaingo",
       "import",
-      "program",
-      "before",
-      "environment",
-      "key**"
+      "key",
+      "\"@examples/mistral-completion-example/mistral_completion_example.go\"",
+      "examplemistral",
+      "key**",
+      "\"@theme/codeblock\""
     ]
   },
   {
@@ -114,15 +114,15 @@
     "type": "doc",
     "keywords": [
       "ollama",
+      "import",
+      "langchaingo",
+      "install",
       "download",
       "your",
-      "install",
-      "langchaingo",
-      "import",
-      "straightforward",
-      "setup",
-      "**ollama**",
-      "method"
+      "runs",
+      "first",
+      "locally",
+      "platforms"
     ]
   },
   {
@@ -133,14 +133,14 @@
     "keywords": [
       "openai",
       "api",
-      "your",
       "langchaingo",
       "import",
-      "first",
-      "proficiency",
-      "codeblock",
-      "retrieve",
-      "key**"
+      "your",
+      "download",
+      "renowned",
+      "openai's",
+      "capabilities",
+      "exampleopenai"
     ]
   },
   {
@@ -152,13 +152,13 @@
       "configuration",
       "basic",
       "model",
-      "selection",
-      "different",
-      "configure",
-      "how",
-      "openai",
+      "providers",
       "llm",
-      "providers"
+      "different",
+      "how",
+      "configure",
+      "selection",
+      "openai"
     ]
   },
   {
@@ -169,14 +169,14 @@
     "keywords": [
       "how",
       "guides",
-      "llms",
-      "llm",
-      "how-to",
       "providers",
-      "\"how",
-      "our",
-      "want",
-      "documentation"
+      "llms",
+      "how-to",
+      "llm",
+      "help",
+      "answer",
+      "handle",
+      "limits"
     ]
   },
   {
@@ -186,15 +186,15 @@
     "type": "doc",
     "keywords": [
       "language",
-      "langchain",
       "model",
+      "langchain",
       "_be",
       "langchaingo",
       "framework",
       "applications",
-      "api",
-      "above",
-      "via"
+      "agentic_",
+      "powered",
+      "api"
     ]
   },
   {
@@ -204,13 +204,13 @@
     "type": "doc",
     "keywords": [
       "agents",
+      "conceptual",
+      "guide",
       "\u003cdoccardlist",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
-      "info",
-      "conceptual",
-      "guide"
+      "info"
     ]
   },
   {
@@ -222,13 +222,13 @@
       "agents",
       "import",
       "order",
-      "should",
-      "powerful",
-      "started",
-      "executors",
-      "determine",
-      "user",
-      "codeblock"
+      "observing",
+      "\"@theme/codeblock\"",
+      "output",
+      "used",
+      "api",
+      "understa",
+      "its"
     ],
     "metadata": {
       "sidebar_label": "Getting Started"
@@ -242,14 +242,14 @@
     "keywords": [
       "example",
       "import",
-      "agent",
       "make",
-      "final",
-      "job",
-      "that's",
-      "\"miracle\")",
-      "language",
-      "codeblock"
+      "agent",
+      "\"@examples/mrkl-agent-example/mrkl_agent.go\"",
+      "guide",
+      "executors",
+      "times",
+      "them",
+      "iterative"
     ]
   },
   {
@@ -259,15 +259,15 @@
     "type": "doc",
     "keywords": [
       "agents",
+      "which",
       "tools",
       "agent",
-      "which",
-      "enable",
-      "guide",
-      "info",
-      "consists",
-      "input",
-      "decisions"
+      "allowing",
+      "actions",
+      "**tools**",
+      "components",
+      "their",
+      "decision-making"
     ]
   },
   {
@@ -293,14 +293,14 @@
     "keywords": [
       "chains",
       "other",
-      "import",
       "models",
       "language",
-      "provides",
-      "even",
-      "standard",
-      "how-to",
-      "apis"
+      "import",
+      "conceptual",
+      "calls",
+      "along",
+      "codeblock",
+      "info"
     ],
     "metadata": {
       "sidebar_label": "Chains"
@@ -312,16 +312,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLLM from \"@examples/llm-chain-example/llm_chain_example.go\"; Getting Started: LLMChain :::info Conceptual Guide ::: An `LLMChain` is a simple chain that adds some functionality around language models. It is used widely throughout LangChain, including in other chains and agents. An `LLMChain` consists of a `PromptTemplate` and a language model (either an LLM or chat model). Usage with LLMs We can construct an LLMChain which takes user input,...",
     "type": "doc",
     "keywords": [
-      "import",
       "`llmchain`",
-      "language",
+      "import",
       "llmchain",
-      "getting",
+      "language",
       "agents",
-      "other",
-      "takes",
-      "models",
-      "llm"
+      "some",
+      "started",
+      "getting",
+      "usage",
+      "user"
     ],
     "metadata": {
       "sidebar_label": "LLM Chain"
@@ -337,12 +337,12 @@
       "loaders",
       "documents",
       "implement",
-      "create",
       "loader",
-      "started",
-      "vector",
-      "import",
-      "\u003cdoccardlist"
+      "create",
+      "getting",
+      "\u003cdoccardlist",
+      "\"@theme/doccardlist\"",
+      "sources"
     ],
     "metadata": {
       "sidebar_label": "Document Loaders"
@@ -355,15 +355,15 @@
     "type": "doc",
     "keywords": [
       "data",
-      "load",
+      "many",
       "documents",
       "store",
       "your",
+      "load",
       "query",
-      "many",
-      "\u003cdoccardlist",
-      "info",
-      "import"
+      "applications",
+      "import",
+      "llm"
     ]
   },
   {
@@ -373,15 +373,15 @@
     "type": "doc",
     "keywords": [
       "blockchain",
-      "info",
-      "concept",
-      "language",
+      "designated",
+      "guide",
+      "gatew",
+      "mechanism",
+      "designed",
       "realm",
-      "involve",
-      "retriever",
-      "import",
-      "within",
-      "guide"
+      "contracts",
+      "accessibility**",
+      "\"retriever\""
     ]
   },
   {
@@ -391,14 +391,14 @@
     "type": "doc",
     "keywords": [
       "splitters",
-      "such",
-      "specific",
-      "texts",
       "into",
       "text",
-      "complex",
+      "specific",
+      "texts",
       "more",
-      "structures",
+      "such",
+      "complex",
+      "paragraphs",
       "divide"
     ],
     "metadata": {
@@ -412,15 +412,15 @@
     "type": "doc",
     "keywords": [
       "text",
-      "them",
-      "smaller",
-      "import",
       "chunks",
-      "\"@theme/doccardlist\"",
-      "utilities",
-      "match",
-      "models",
-      "therefore"
+      "import",
+      "smaller",
+      "them",
+      "results",
+      "more",
+      "several",
+      "improve",
+      "searches"
     ],
     "metadata": {
       "sidebar_label": "Text Splitters"
@@ -433,15 +433,15 @@
     "type": "doc",
     "keywords": [
       "vector",
-      "embeddings",
-      "import",
-      "query",
-      "most",
       "documents",
-      "particular",
+      "embeddings",
+      "most",
       "stores",
-      "react",
-      "optimized"
+      "query",
+      "import",
+      "particular",
+      "then",
+      "\"react\""
     ],
     "metadata": {
       "sidebar_label": "Vector Stores"
@@ -457,12 +457,12 @@
       "search",
       "import",
       "distance",
-      "langchaingo",
-      "postgres",
-      "cosine",
-      "hnsw",
-      "see",
-      "\"@examples/pgvector-vectorstore-example/pgvector_vectorstore_example.go\""
+      "embedder",
+      "examplepgvector",
+      "\"@theme/codeblock\"",
+      "started",
+      "similarity",
+      "ollama"
     ],
     "metadata": {
       "sidebar_label": "pgvector"
@@ -474,12 +474,12 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Examples: Memory \u003cDocCardList /\u003e",
     "type": "doc",
     "keywords": [
-      "doccardlist",
-      "\"@theme/doccardlist\"",
-      "examples",
       "memory",
       "\u003cdoccardlist",
-      "import"
+      "import",
+      "doccardlist",
+      "\"@theme/doccardlist\"",
+      "examples"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -492,15 +492,15 @@
     "type": "doc",
     "keywords": [
       "memory",
-      "interactions",
       "langchaingo",
+      "interactions",
       "context",
-      "management**",
-      "sophisticated",
-      "several",
-      "guide",
-      "history**",
-      "capabilities"
+      "conceptual",
+      "retrieve",
+      "enabling",
+      "multiple",
+      "messages",
+      "enables"
     ],
     "metadata": {
       "sidebar_label": "Memory"
@@ -515,13 +515,13 @@
       "model",
       "using",
       "package",
-      "output",
       "input",
-      "language",
-      "next",
-      "needs",
-      "extracted",
-      "doing"
+      "output",
+      "doccardlist",
+      "prompts",
+      "import",
+      "information",
+      "must"
     ],
     "metadata": {
       "sidebar_label": "Model I/O"
@@ -535,14 +535,14 @@
     "keywords": [
       "models",
       "chat",
-      "interface",
       "expose",
-      "import",
+      "interface",
       "language",
-      "doccardlist",
-      "while",
+      "import",
+      "\"@theme/codeblock\"",
       "\"text",
-      "inputs"
+      "different",
+      "than"
     ],
     "metadata": {
       "sidebar_label": "Chat Models"
@@ -551,19 +551,19 @@
   {
     "title": "Integrations",
     "url": "/langchaingo/docs/modules/model_io/models/chat/integrations",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Chat Models LangChain offers a number of Chat Models implementations that integrate with various model providers. These are: `ChatOpenAI`",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Chat Models LangChainGo offers a number of Chat Models implementations that integrate with various model providers. These include: OpenAI Anthropic Google AI (Gemini) Ollama (Local Models) For detailed configuration options for each provider, see the Configure LLM Providers guide.",
     "type": "doc",
     "keywords": [
-      "chat",
-      "models",
-      "import",
-      "codeblock",
-      "\"@theme/codeblock\"",
-      "langchain",
-      "these",
       "providers",
-      "offers",
-      "`chatopenai`"
+      "models",
+      "chat",
+      "options",
+      "llm",
+      "integrations",
+      "(gemini)",
+      "see",
+      "codeblock",
+      "offers"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -576,15 +576,15 @@
     "type": "doc",
     "keywords": [
       "import",
-      "example",
       "representation",
-      "embeddings",
+      "example",
       "numerical",
       "used",
-      "started",
-      "data",
-      "conceptual",
-      "language=\"go\"\u003e{example}\u003c/codeblock\u003e"
+      "embeddings",
+      "similar",
+      "getting",
+      "because",
+      "\"@theme/doccardlist\""
     ],
     "metadata": {
       "sidebar_label": "Embeddings"
@@ -593,19 +593,19 @@
   {
     "title": "Integrations",
     "url": "/langchaingo/docs/modules/model_io/models/embeddings/integrations",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Embeddings LangChain offers a number of Embeddings implementations that integrate with various model providers. These are: `OpenAIEmbeddings`",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Embeddings LangChainGo offers a number of Embeddings implementations that integrate with various model providers. These include: OpenAI Embeddings Google AI Embeddings Vertex AI Embeddings For more details on using embeddings, see the Embeddings documentation.",
     "type": "doc",
     "keywords": [
       "embeddings",
-      "various",
-      "codeblock",
-      "integrate",
+      "\"@theme/codeblock\"",
+      "more",
       "model",
+      "google",
+      "number",
+      "integrate",
       "providers",
-      "these",
-      "`openaiembeddings`",
-      "offers",
-      "integrations"
+      "openai",
+      "details"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -620,13 +620,13 @@
       "models",
       "langchain",
       "output",
-      "chat",
       "language",
-      "input",
-      "text-based",
       "provides",
-      "variety",
-      "\"@theme/doccardlist\""
+      "input",
+      "chat",
+      "text-based",
+      "provider",
+      "which"
     ],
     "metadata": {
       "sidebar_label": "Models"
@@ -639,15 +639,15 @@
     "type": "doc",
     "keywords": [
       "package",
-      "language",
-      "`fake`",
       "example",
       "overview",
+      "`fake`",
       "fake",
+      "language",
       "your",
-      "recommended)",
-      "higher",
-      "machine"
+      "applications",
+      "documentation",
+      "(version"
     ],
     "metadata": {
       "sidebar_label": "Fake LLM"
@@ -660,15 +660,15 @@
     "type": "doc",
     "keywords": [
       "overview",
-      "models",
       "import",
-      "integration",
-      "developers",
-      "examplegroq",
-      "pre-trained",
-      "language",
-      "groq's",
-      "environment"
+      "models",
+      "provides",
+      "detailed",
+      "various",
+      "machine",
+      "generation",
+      "mor",
+      "applications"
     ],
     "metadata": {
       "sidebar_label": "Groq"
@@ -680,16 +680,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleHuggingFace from \"@examples/huggingface-llm-example/huggingface_example.go\"; Hugging Face Overview This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, tex...",
     "type": "doc",
     "keywords": [
-      "models",
       "import",
       "overview",
-      "face",
       "hugging",
-      "natural",
+      "models",
+      "face",
       "\"@theme/codeblock\"",
-      "developers",
+      "provides",
+      "power",
       "library",
-      "documentation"
+      "programming"
     ],
     "metadata": {
       "sidebar_label": "Hugging Face"
@@ -701,16 +701,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLlamafile from \"@examples/llamafile-completion-example/llamafile_completion_example.go\"; Llamafile Running Server first you need have a server running. \u003cCodeBlock language=\"go\"\u003e{ExampleLlamafile}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
-      "server",
-      "import",
       "running",
+      "import",
+      "server",
+      "examplellamafile",
       "need",
-      "language=\"go\"\u003e{examplellamafile}\u003c/codeblock\u003e",
       "codeblock",
-      "\"@theme/codeblock\"",
-      "\"@examples/llamafile-completion-example/llamafile_completion_example.go\"",
+      "llamafile",
       "first",
-      "\u003ccodeblock"
+      "\u003ccodeblock",
+      "language=\"go\"\u003e{examplellamafile}\u003c/codeblock\u003e"
     ],
     "metadata": {
       "sidebar_label": "Llamafile"
@@ -723,14 +723,14 @@
     "type": "doc",
     "keywords": [
       "import",
+      "\"@theme/codeblock\"",
       "localexample",
       "\"@examples/local-llm-example/local_llm_example.go\"",
+      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e",
+      "codeblock",
       "local",
       "example",
-      "codeblock",
-      "\"@theme/codeblock\"",
-      "\u003ccodeblock",
-      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e"
+      "\u003ccodeblock"
     ],
     "metadata": {
       "sidebar_label": "Local"
@@ -743,15 +743,15 @@
     "type": "doc",
     "keywords": [
       "mistral",
-      "models",
       "import",
       "how",
-      "different",
       "example",
-      "suitable",
-      "over",
+      "models",
+      "different",
+      "\"@examples/mistral-completion-example/mistral_completion_example.go\"",
+      "spectrum",
       "codeblock",
-      "api"
+      "tasks"
     ],
     "metadata": {
       "sidebar_label": "Mistral"
@@ -764,15 +764,15 @@
     "type": "doc",
     "keywords": [
       "openai",
-      "different",
-      "models",
-      "key",
       "import",
-      "levels",
-      "api",
-      "langchain",
+      "different",
+      "key",
+      "models",
+      "set",
+      "environment",
       "there",
-      "setting"
+      "variable",
+      "initializing"
     ],
     "metadata": {
       "sidebar_label": "OpenAI"
@@ -784,16 +784,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleVertexAICompletion from \"@examples/vertex-completion-example/vertex-completion-example.go\"; Vertex AI To use the Vertex AI LLM you need to set the google project ID. You can do this by setting the `GOOGLE_CLOUD_PROJECT` environment variable or giving it as a variaic option when creating the wrapper. \u003cCodeBlock language=\"go\"\u003e{ExampleVertexAICompletion}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
-      "import",
       "vertex",
-      "codeblock",
-      "variaic",
-      "google",
-      "`google_cloud_project`",
+      "import",
+      "set",
+      "need",
+      "setting",
       "environment",
       "giving",
+      "examplevertexaicompletion",
       "\u003ccodeblock",
-      "language=\"go\"\u003e{examplevertexaicompletion}\u003c/codeblock\u003e"
+      "wrapper"
     ],
     "metadata": {
       "sidebar_label": "Vertex AI"
@@ -810,11 +810,11 @@
       "import",
       "your",
       "following",
-      "api",
-      "project",
-      "these",
-      "passed",
-      "into"
+      "`watsonx_project_id`",
+      "model",
+      "creation",
+      "`watsonx-go`",
+      "set"
     ],
     "metadata": {
       "sidebar_label": "watsonx"
@@ -829,13 +829,13 @@
       "llms",
       "interface",
       "provides",
-      "import",
       "langchain",
-      "conceptual",
-      "does",
-      "modern",
-      "message",
-      "\"@theme/codeblock\""
+      "import",
+      "different",
+      "supports",
+      "guide",
+      "methods",
+      "two"
     ],
     "metadata": {
       "sidebar_label": "LLMs"
@@ -849,14 +849,14 @@
     "keywords": [
       "output",
       "parsers",
-      "text",
       "language",
-      "guide",
-      "structs",
-      "info",
-      "conceptual",
-      "implement",
-      "times"
+      "text",
+      "three",
+      "want",
+      "models",
+      "back",
+      "there",
+      "responses"
     ],
     "metadata": {
       "sidebar_label": "Output Parsers"
@@ -865,82 +865,82 @@
   {
     "title": "Prompts",
     "url": "/langchaingo/docs/modules/model_io/prompts",
-    "content": "import React from \"react\"; import DocCardList from \"@theme/DocCardList\"; Prompts :::info Conceptual Guide ::: A prompt refers to the input to a language model. This input is often constructed from multiple components. LangChain provides several utilities to make constructing and working with prompts easy. \u003cDocCardList /\u003e",
+    "content": "import React from \"react\"; import DocCardList from \"@theme/DocCardList\"; Prompts :::info Conceptual Guide ::: A prompt refers to the input to a language model. This input is often constructed from multiple components. LangChain Go provides utilities for creating and managing these prompts with support for multiple template formats. Quick start The simplest way to use prompts is with prompt templates: Key features - **Multiple template formats**: Go templates (default), Jinja2, and F-strings - **...",
     "type": "doc",
     "keywords": [
       "prompts",
+      "prompt",
       "import",
       "input",
-      "info",
-      "constructed",
-      "langchain",
-      "model",
-      "refers",
-      "components",
-      "easy"
+      "templates",
+      "template",
+      "multiple",
+      "conceptual",
+      "formats**",
+      "features"
     ],
     "metadata": {
       "sidebar_label": "Prompts"
     }
   },
   {
-    "title": "Prompt Templates",
+    "title": "Prompt templates",
     "url": "/langchaingo/docs/modules/model_io/prompts/prompt_templates",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; import DocCardList from \"@theme/DocCardList\"; Prompt templates :::info Conceptual Guide ::: A fundamental part of working with language models is taking some input and formatting it in some way using a template. Doing this is simple using LangChain. Here is a simple example: A prompt template can take any number of inputs as shown belown. Creating prompt templates for chat messages Chat Models take a list of chat messages as input - this list is commonly...",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import DocCardList from \"@theme/DocCardList\"; Prompt templates :::info Conceptual Guide ::: Prompt templates are the foundation of effective prompt engineering. They allow you to create reusable, parameterized prompts that can be dynamically filled with data. LangChain Go provides powerful templating capabilities with built-in security and support for multiple template formats. Core concepts PromptTemplate A `PromptTemplate` wraps a template string with ...",
     "type": "doc",
     "keywords": [
-      "chat",
       "prompt",
-      "models",
-      "messages",
-      "simple",
-      "using",
-      "some",
+      "import",
       "template",
-      "take",
-      "templates"
+      "templates",
+      "capabilities",
+      "security",
+      "wraps",
+      "info",
+      "conceptual",
+      "allow"
     ],
     "metadata": {
-      "sidebar_label": "Prompt Templates"
+      "sidebar_label": "Prompt templates"
     }
   },
   {
-    "title": "Partial Values",
+    "title": "Partial values",
     "url": "/langchaingo/docs/modules/model_io/prompts/prompt_templates/partial_values",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExamplePartial from \"@examples/prompts-with-partial-example/propmts_with_partial_example.go\"; import ExamplePartialFunc from \"@examples/prompts-with-partial-func-example/propmts_with_partial_func_example.go\"; Partial Values It can often make sense to \"partial\" a prompt template - eg pass in a subset of the required values, as to create a new prompt template which expects only the remaining subset of values. LangChain supports this in two ways: 1. ...",
+    "content": "Partial values It can often make sense to \"partial\" a prompt template - passing in a subset of the required values to create a new prompt template which expects only the remaining subset of values. LangChain supports this in two ways: 1. Partial formatting with string values 2. Partial formatting with functions that return string values Partial with strings One common use case is when you get some variables before others. For example, if you have a prompt template requiring two variables, `foo` ...",
     "type": "doc",
     "keywords": [
       "values",
-      "import",
-      "template",
+      "partial",
       "prompt",
+      "template",
+      "string",
+      "two",
+      "formatting",
       "subset",
-      "examplepartial",
-      "pass",
-      "codeblock",
-      "examplepartialfunc",
-      "only"
+      "variables",
+      "return"
     ],
     "metadata": {
-      "sidebar_label": "Partial Values"
+      "sidebar_label": "Partial values"
     }
   },
   {
     "title": "Basic Chat App",
     "url": "/langchaingo/docs/tutorials/basic-chat-app",
-    "content": "Building a simple chat application In this tutorial, you'll build a basic chat application using LangChainGo. This application will demonstrate core concepts like LLM integration, conversation memory, and basic prompt templates. Prerequisites - Go 1.24+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Add LangChainGo as a dependency: Step 2: Basic chat implementation Create `main.go` with a basic chat loop: Step 3: Add envi...",
+    "content": "Building a Basic Chat Application This tutorial will guide you through building a simple chat application using LangChainGo. Step 1: Set Up Your Environment - Go 1.24+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Install LangChainGo: Step 2: Configure Your API Key Set your OpenAI API key as an environment variable: Step 3: Create the Basic Chat Application Let's start with a simple chat application: Step 4: Add Interact...",
     "type": "doc",
     "keywords": [
       "chat",
-      "basic",
-      "application",
       "step",
-      "langchaingo",
+      "application",
+      "your",
+      "api",
+      "basic",
+      "key",
       "create",
-      "add",
-      "1.24+",
-      "build",
-      "core"
+      "environment",
+      "openai"
     ]
   },
   {
@@ -950,15 +950,15 @@
     "type": "doc",
     "keywords": [
       "code",
-      "files",
-      "analyzes",
-      "step",
-      "reviewer",
-      "issues",
-      "improvements",
-      "review",
       "create",
-      "git"
+      "review",
+      "reviewer",
+      "analyzes",
+      "git",
+      "step",
+      "issues",
+      "files",
+      "improvements"
     ]
   },
   {
@@ -969,14 +969,14 @@
     "keywords": [
       "tutorials",
       "langchaingo",
-      "learn",
-      "code",
-      "analyze",
-      "application",
       "applications",
+      "learn",
+      "analyze",
+      "code",
+      "application",
       "these",
-      "insights",
-      "order"
+      "analyzer",
+      "learning"
     ]
   },
   {
@@ -986,15 +986,15 @@
     "type": "doc",
     "keywords": [
       "log",
-      "anomalies",
       "etc.)",
       "tool",
-      "patterns",
-      "identifies",
       "issues",
-      "alerts",
-      "trends",
-      "error"
+      "identifies",
+      "anomalies",
+      "patterns",
+      "1.24+",
+      "llm",
+      "generates"
     ]
   },
   {
@@ -1004,15 +1004,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
-      "code",
       "generates",
-      "api",
-      "automatically",
+      "code",
       "tool",
+      "automatically",
+      "api",
       "project",
-      "usage",
-      "comprehensive",
-      "smart"
+      "building",
+      "understand",
+      "document"
     ]
   },
   {
@@ -3900,9 +3900,23 @@
     ]
   },
   {
+    "title": "GetLLMCallOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/chains#GetLLMCallOptions",
+    "content": "GetLLMCallOptions converts ChainCallOption slice to llms.CallOption slice.\nThis is useful for agents and other code that needs to propagate chain options\nto direct LLM calls.\n",
+    "type": "function",
+    "package": "chains",
+    "signature": "GetLLMCallOptions()",
+    "external": true,
+    "keywords": [
+      "function",
+      "GetLLMCallOptions",
+      "chains"
+    ]
+  },
+  {
     "title": "getLLMCallOptions",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/chains#getLLMCallOptions",
-    "content": "",
+    "content": "getLLMCallOptions is a backward-compatibility wrapper for GetLLMCallOptions.\n",
     "type": "function",
     "package": "chains",
     "signature": "getLLMCallOptions()",
@@ -4844,6 +4858,79 @@
       "method",
       "LoadAndSplit",
       "CSV",
+      "documentloaders"
+    ]
+  },
+  {
+    "title": "Option",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/documentloaders#Option",
+    "content": "",
+    "type": "type",
+    "package": "documentloaders",
+    "signature": "type Option",
+    "external": true,
+    "keywords": [
+      "type",
+      "Option",
+      "documentloaders"
+    ]
+  },
+  {
+    "title": "RecursiveDirectoryLoader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/documentloaders#RecursiveDirectoryLoader",
+    "content": "RecursiveDirectoryLoader is a document loader that loads documents with allowed extensions from a directory.\n",
+    "type": "type",
+    "package": "documentloaders",
+    "signature": "type RecursiveDirectoryLoader",
+    "external": true,
+    "keywords": [
+      "type",
+      "RecursiveDirectoryLoader",
+      "documentloaders"
+    ]
+  },
+  {
+    "title": "RecursiveDirectoryLoader.Load",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/documentloaders#RecursiveDirectoryLoader.Load",
+    "content": "Load retrieves data from a Notion directory and returns a list of schema.Document objects.\n",
+    "type": "method",
+    "package": "documentloaders",
+    "signature": "Load()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Load",
+      "RecursiveDirectoryLoader",
+      "documentloaders"
+    ]
+  },
+  {
+    "title": "RecursiveDirectoryLoader.LoadAndSplit",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/documentloaders#RecursiveDirectoryLoader.LoadAndSplit",
+    "content": "LoadAndSplit loads from a source and splits the documents using a text splitter.\n",
+    "type": "method",
+    "package": "documentloaders",
+    "signature": "LoadAndSplit()",
+    "external": true,
+    "keywords": [
+      "method",
+      "LoadAndSplit",
+      "RecursiveDirectoryLoader",
+      "documentloaders"
+    ]
+  },
+  {
+    "title": "RecursiveDirectoryLoader.newLoader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/documentloaders#RecursiveDirectoryLoader.newLoader",
+    "content": "",
+    "type": "method",
+    "package": "documentloaders",
+    "signature": "newLoader()",
+    "external": true,
+    "keywords": [
+      "method",
+      "newLoader",
+      "RecursiveDirectoryLoader",
       "documentloaders"
     ]
   },
@@ -6116,6 +6203,91 @@
     ]
   },
   {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-extended-capabilities#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "convertToolCallsToParts",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-interleaved-thinking#convertToolCallsToParts",
+    "content": "convertToolCallsToParts converts tool calls to content parts\n",
+    "type": "function",
+    "package": "main",
+    "signature": "convertToolCallsToParts()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertToolCallsToParts",
+      "main"
+    ]
+  },
+  {
+    "title": "executeToolCall",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-interleaved-thinking#executeToolCall",
+    "content": "Simulate tool execution (in real use, these would call actual functions)\n",
+    "type": "function",
+    "package": "main",
+    "signature": "executeToolCall()",
+    "external": true,
+    "keywords": [
+      "function",
+      "executeToolCall",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-interleaved-thinking#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "debugTransport",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-interleaved-thinking#debugTransport",
+    "content": "debugTransport wraps http.RoundTripper to log requests and responses\n",
+    "type": "type",
+    "package": "main",
+    "signature": "type debugTransport",
+    "external": true,
+    "keywords": [
+      "type",
+      "debugTransport",
+      "main"
+    ]
+  },
+  {
+    "title": "debugTransport.RoundTrip",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-interleaved-thinking#debugTransport.RoundTrip",
+    "content": "",
+    "type": "method",
+    "package": "main",
+    "signature": "RoundTrip()",
+    "external": true,
+    "keywords": [
+      "method",
+      "RoundTrip",
+      "debugTransport",
+      "main"
+    ]
+  },
+  {
     "title": "executeToolCalls",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/anthropic-tool-call-example#executeToolCalls",
     "content": "executeToolCalls executes the tool calls in the response and returns the\nupdated message history.\n",
@@ -6174,6 +6346,20 @@
   {
     "title": "main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/bedrock-claude3-vision-example#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/bedrock-provider-example#main",
     "content": "",
     "type": "function",
     "package": "main",
@@ -6564,6 +6750,20 @@
     ]
   },
   {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-caching-example#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
     "title": "package main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-completion-example",
     "content": "Set the GOOGLE_API_KEY env var to your API key taken from ai.google.dev\n",
@@ -6586,6 +6786,90 @@
     "keywords": [
       "function",
       "main",
+      "main"
+    ]
+  },
+  {
+    "title": "createCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#createCachedContent",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "createCachedContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "createCachedContent",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateCaching",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#demonstrateCaching",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateCaching()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateCaching",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#demonstrateReasoning",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateReasoning",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "runCachedRequests",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#runCachedRequests",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "runCachedRequests()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runCachedRequests",
+      "main"
+    ]
+  },
+  {
+    "title": "setupCachingHelper",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-reasoning-caching#setupCachingHelper",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "setupCachingHelper()",
+    "external": true,
+    "keywords": [
+      "function",
+      "setupCachingHelper",
       "main"
     ]
   },
@@ -7474,6 +7758,20 @@
   },
   {
     "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/openrouter-llm-example#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/perplexity-completion-example#main",
     "content": "",
     "type": "function",
@@ -7558,6 +7856,48 @@
   },
   {
     "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/prompt-caching#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "CacheUsage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/prompt-caching#CacheUsage",
+    "content": "CacheUsage represents token usage with caching information\n",
+    "type": "type",
+    "package": "main",
+    "signature": "type CacheUsage",
+    "external": true,
+    "keywords": [
+      "type",
+      "CacheUsage",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/prompt-template-example#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/prompts-with-partial-example#main",
     "content": "",
     "type": "function",
@@ -7595,6 +7935,34 @@
     "keywords": [
       "function",
       "main",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/reasoning-tokens#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "testReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/reasoning-tokens#testReasoning",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "testReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testReasoning",
       "main"
     ]
   },
@@ -7711,6 +8079,132 @@
     ]
   },
   {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "runAdvancedChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#runAdvancedChat",
+    "content": "Step 6: Advanced Chat with Chains and Prompt Templates\n",
+    "type": "function",
+    "package": "main",
+    "signature": "runAdvancedChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runAdvancedChat",
+      "main"
+    ]
+  },
+  {
+    "title": "runBasicChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#runBasicChat",
+    "content": "Step 3: Basic Chat Application\n",
+    "type": "function",
+    "package": "main",
+    "signature": "runBasicChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runBasicChat",
+      "main"
+    ]
+  },
+  {
+    "title": "runChatWithMemory",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#runChatWithMemory",
+    "content": "Step 5: Chat with Memory\n",
+    "type": "function",
+    "package": "main",
+    "signature": "runChatWithMemory()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runChatWithMemory",
+      "main"
+    ]
+  },
+  {
+    "title": "runInteractiveChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#runInteractiveChat",
+    "content": "Step 4: Interactive Chat\n",
+    "type": "function",
+    "package": "main",
+    "signature": "runInteractiveChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runInteractiveChat",
+      "main"
+    ]
+  },
+  {
+    "title": "basicChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#basicChat",
+    "content": "Step 3: Basic Chat Application\n",
+    "type": "function",
+    "package": "main",
+    "signature": "basicChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "basicChat",
+      "main"
+    ]
+  },
+  {
+    "title": "interactiveChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#interactiveChat",
+    "content": "Step 4: Interactive Chat\n",
+    "type": "function",
+    "package": "main",
+    "signature": "interactiveChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "interactiveChat",
+      "main"
+    ]
+  },
+  {
+    "title": "chatWithMemory",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#chatWithMemory",
+    "content": "Step 5: Chat with Memory\n",
+    "type": "function",
+    "package": "main",
+    "signature": "chatWithMemory()",
+    "external": true,
+    "keywords": [
+      "function",
+      "chatWithMemory",
+      "main"
+    ]
+  },
+  {
+    "title": "advancedChat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/tutorial-basic-chat-app#advancedChat",
+    "content": "Step 6: Advanced Chat with Chains\n",
+    "type": "function",
+    "package": "main",
+    "signature": "advancedChat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "advancedChat",
+      "main"
+    ]
+  },
+  {
     "title": "package main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/vertex-completion-example",
     "content": "Set the VERTEX_PROJECT env var to your GCP project with Vertex AI APIs\nenabled. Set VERTEX_LOCATION to a GCP location (region); if you're not sure\nabout the location, set us-central1\nSet the VERTEX_CREDENTIALS env var to the path of your GCP service account\ncredentials JSON file.\n",
@@ -7819,12 +8313,26 @@
   {
     "title": "package httputil",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil",
-    "content": "Package httputil provides HTTP transport and client utilities for LangChainGo.\n\nThe package offers several key features:\n\n# User-Agent Management\n\nAll HTTP clients and transports in this package automatically add a User-Agent\nheader that identifies the LangChainGo library, the calling program, and\nsystem information. This helps API providers understand client usage patterns\nand aids in debugging.\n\nThe User-Agent format is:\n\n\tprogram/version langchaingo/version Go/version (GOOS GOARCH)\n\nFor example:\n\n\topenai-chat-example/devel langchaingo/v0.1.8 Go/go1.21.0 (darwin arm64)\n\n# Default HTTP Client\n\nThe package provides DefaultClient, which is a pre-configured http.Client\nthat includes the User-Agent header:\n\n\tresp, err := httputil.DefaultClient.Get(\"https://api.example.com/data\")\n\n# Logging and Debugging\n\nFor development and debugging, the package provides logging clients:\n\n\t// LoggingClient logs full HTTP requests and responses using slog\n\tclient := httputil.LoggingClient\n\n\t// JSONDebugClient pretty-prints JSON payloads with ANSI colors\n\tclient := httputil.JSONDebugClient\n\n# Custom Transports\n\nThe Transport type implements http.RoundTripper and can be used to add\nthe LangChainGo User-Agent to any HTTP client:\n\n\tclient := \u0026http.Client{\n\t    Transport: \u0026httputil.Transport{\n\t        Transport: myCustomTransport,\n\t    },\n\t}\n\n# Integration with httprr\n\nThe transports in this package are designed to work with the httprr\nHTTP record/replay system used in tests. When using httprr, pass\nhttputil.DefaultTransport to ensure proper request interception.\n",
+    "content": "Package httputil provides HTTP transport and client utilities for LangChainGo.\n\nThe package offers several key features:\n\n# User-Agent Management\n\nAll HTTP clients and transports in this package automatically add a User-Agent\nheader that identifies the LangChainGo library, the calling program, and\nsystem information. This helps API providers understand client usage patterns\nand aids in debugging.\n\nThe User-Agent format is:\n\n\tprogram/version langchaingo/version Go/version (GOOS GOARCH)\n\nFor example:\n\n\topenai-chat-example/devel langchaingo/v0.1.8 Go/go1.21.0 (darwin arm64)\n\n# Default HTTP Client\n\nThe package provides DefaultClient, which is a pre-configured http.Client\nthat includes the User-Agent header:\n\n\tresp, err := httputil.DefaultClient.Get(\"https://api.example.com/data\")\n\n# Logging and Debugging\n\nFor development and debugging, the package provides logging clients:\n\n\t// LoggingClient logs full HTTP requests and responses using slog\n\tclient := httputil.LoggingClient\n\n\t// JSONDebugClient pretty-prints JSON payloads and SSE streams with ANSI colors\n\tclient := httputil.JSONDebugClient\n\n# Custom Transports\n\nThe Transport type implements http.RoundTripper and can be used to add\nthe LangChainGo User-Agent to any HTTP client:\n\n\tclient := \u0026http.Client{\n\t    Transport: \u0026httputil.Transport{\n\t        Transport: myCustomTransport,\n\t    },\n\t}\n\n# Integration with httprr\n\nThe transports in this package are designed to work with the httprr\nHTTP record/replay system used in tests. When using httprr, pass\nhttputil.DefaultTransport to ensure proper request interception.\n",
     "type": "package",
     "package": "httputil",
     "external": true,
     "keywords": [
       "package",
+      "httputil"
+    ]
+  },
+  {
+    "title": "scrubSensitive",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#scrubSensitive",
+    "content": "",
+    "type": "function",
+    "package": "httputil",
+    "signature": "scrubSensitive()",
+    "external": true,
+    "keywords": [
+      "function",
+      "scrubSensitive",
       "httputil"
     ]
   },
@@ -7887,6 +8395,95 @@
     ]
   },
   {
+    "title": "jsonDebugTransport.logJSON",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#jsonDebugTransport.logJSON",
+    "content": "",
+    "type": "method",
+    "package": "httputil",
+    "signature": "logJSON()",
+    "external": true,
+    "keywords": [
+      "method",
+      "logJSON",
+      "jsonDebugTransport",
+      "httputil"
+    ]
+  },
+  {
+    "title": "jsonDebugTransport.parseEvent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#jsonDebugTransport.parseEvent",
+    "content": "",
+    "type": "method",
+    "package": "httputil",
+    "signature": "parseEvent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "parseEvent",
+      "jsonDebugTransport",
+      "httputil"
+    ]
+  },
+  {
+    "title": "jsonDebugTransport.printUsage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#jsonDebugTransport.printUsage",
+    "content": "",
+    "type": "method",
+    "package": "httputil",
+    "signature": "printUsage()",
+    "external": true,
+    "keywords": [
+      "method",
+      "printUsage",
+      "jsonDebugTransport",
+      "httputil"
+    ]
+  },
+  {
+    "title": "jsonDebugTransport.wrapSSEResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#jsonDebugTransport.wrapSSEResponse",
+    "content": "",
+    "type": "method",
+    "package": "httputil",
+    "signature": "wrapSSEResponse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "wrapSSEResponse",
+      "jsonDebugTransport",
+      "httputil"
+    ]
+  },
+  {
+    "title": "ApiKeyTransport",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#ApiKeyTransport",
+    "content": "ApiKeyTransport is an [http.RoundTripper] that adds API keys to URL query parameters.\nThis is commonly used with Google APIs and other services that accept API keys\nas query parameters. It wraps another RoundTripper and automatically adds\nthe API key if not already present in the request.\n\nThis transport is particularly useful when working with client libraries that\ndon't properly set API keys when using custom HTTP clients, such as the\nGoogle AI client library when used with httprr for testing.\n",
+    "type": "type",
+    "package": "httputil",
+    "signature": "type ApiKeyTransport",
+    "external": true,
+    "keywords": [
+      "type",
+      "ApiKeyTransport",
+      "httputil"
+    ]
+  },
+  {
+    "title": "ApiKeyTransport.RoundTrip",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#ApiKeyTransport.RoundTrip",
+    "content": "RoundTrip implements the [http.RoundTripper] interface. It adds the API key\nas a \"key\" query parameter if not already present, then delegates to the\nunderlying transport.\n",
+    "type": "method",
+    "package": "httputil",
+    "signature": "RoundTrip()",
+    "external": true,
+    "keywords": [
+      "method",
+      "RoundTrip",
+      "ApiKeyTransport",
+      "httputil"
+    ]
+  },
+  {
     "title": "Transport",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#Transport",
     "content": "Transport is an [http.RoundTripper] that adds LangChainGo User-Agent headers\nto outgoing HTTP requests. It wraps another RoundTripper (typically\n[http.DefaultTransport]) and can be used to add User-Agent headers to any\nHTTP client.\n\nIf the wrapped request already has a User-Agent header, the LangChainGo\nUser-Agent is appended to it rather than replacing it.\n",
@@ -7927,6 +8524,74 @@
       "function",
       "UserAgent",
       "httputil"
+    ]
+  },
+  {
+    "title": "package main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/examples-updater",
+    "content": "Package main provides a tool for updating example dependencies.\n",
+    "type": "package",
+    "package": "main",
+    "external": true,
+    "keywords": [
+      "package",
+      "main"
+    ]
+  },
+  {
+    "title": "findGoModFiles",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/examples-updater#findGoModFiles",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "findGoModFiles()",
+    "external": true,
+    "keywords": [
+      "function",
+      "findGoModFiles",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/examples-updater#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "removeReplaceDirective",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/examples-updater#removeReplaceDirective",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "removeReplaceDirective()",
+    "external": true,
+    "keywords": [
+      "function",
+      "removeReplaceDirective",
+      "main"
+    ]
+  },
+  {
+    "title": "updateExamples",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/examples-updater#updateExamples",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "updateExamples()",
+    "external": true,
+    "keywords": [
+      "function",
+      "updateExamples",
+      "main"
     ]
   },
   {
@@ -9205,6 +9870,88 @@
     ]
   },
   {
+    "title": "package main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings",
+    "content": "Package main provides a tool to normalize version information in httprr recordings.\n",
+    "type": "package",
+    "package": "main",
+    "external": true,
+    "keywords": [
+      "package",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "normalizeContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings#normalizeContent",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "normalizeContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "normalizeContent",
+      "main"
+    ]
+  },
+  {
+    "title": "normalizeHTTPRRFile",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings#normalizeHTTPRRFile",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "normalizeHTTPRRFile()",
+    "external": true,
+    "keywords": [
+      "function",
+      "normalizeHTTPRRFile",
+      "main"
+    ]
+  },
+  {
+    "title": "normalizeRecording",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings#normalizeRecording",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "normalizeRecording()",
+    "external": true,
+    "keywords": [
+      "function",
+      "normalizeRecording",
+      "main"
+    ]
+  },
+  {
+    "title": "showChanges",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/normalize-recordings#showChanges",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "showChanges()",
+    "external": true,
+    "keywords": [
+      "function",
+      "showChanges",
+      "main"
+    ]
+  },
+  {
     "title": "checkCmd",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/devtools/rrtool#checkCmd",
     "content": "",
@@ -9535,6 +10282,34 @@
     "keywords": [
       "function",
       "logWriter",
+      "httprr"
+    ]
+  },
+  {
+    "title": "normalizeGoogleAPIClientHeader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/httprr#normalizeGoogleAPIClientHeader",
+    "content": "normalizeGoogleAPIClientHeader normalizes version information in the x-goog-api-client header\nto avoid test failures when dependencies are updated. It preserves the exact byte count\nby padding with spaces to maintain httprr recording integrity.\n\nExample input:  \"gl-go/1.24.4 gccl/v0.15.1 genai-go/0.15.1 gapic/0.7.0 gax/2.14.1 rest/UNKNOWN\"\nExample output: \"gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN\"\n",
+    "type": "function",
+    "package": "httprr",
+    "signature": "normalizeGoogleAPIClientHeader()",
+    "external": true,
+    "keywords": [
+      "function",
+      "normalizeGoogleAPIClientHeader",
+      "httprr"
+    ]
+  },
+  {
+    "title": "normalizeVersionHeader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/httprr#normalizeVersionHeader",
+    "content": "normalizeVersionHeader is a general-purpose version normalizer for headers containing\nversion information in various formats.\n",
+    "type": "function",
+    "package": "httprr",
+    "signature": "normalizeVersionHeader()",
+    "external": true,
+    "keywords": [
+      "function",
+      "normalizeVersionHeader",
       "httprr"
     ]
   },
@@ -10013,6 +10788,34 @@
     ]
   },
   {
+    "title": "extractBetaHeaders",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#extractBetaHeaders",
+    "content": "extractBetaHeaders extracts beta headers from call options\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "extractBetaHeaders()",
+    "external": true,
+    "keywords": [
+      "function",
+      "extractBetaHeaders",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "extractThinkingFromText",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#extractThinkingFromText",
+    "content": "extractThinkingFromText extracts thinking content from Anthropic responses\nAnthropic models often embed thinking in \u003cthinking\u003e tags\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "extractThinkingFromText()",
+    "external": true,
+    "keywords": [
+      "function",
+      "extractThinkingFromText",
+      "anthropic"
+    ]
+  },
+  {
     "title": "generateCompletionsContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#generateCompletionsContent",
     "content": "",
@@ -10121,6 +10924,20 @@
     "keywords": [
       "function",
       "parseBase64URI",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "processAnthropicResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#processAnthropicResponse",
+    "content": "processAnthropicResponse converts Anthropic API response to standard ContentResponse\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "processAnthropicResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "processAnthropicResponse",
       "anthropic"
     ]
   },
@@ -10341,6 +11158,21 @@
     ]
   },
   {
+    "title": "Client.doWithHeaders",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#Client.doWithHeaders",
+    "content": "",
+    "type": "method",
+    "package": "anthropicclient",
+    "signature": "doWithHeaders()",
+    "external": true,
+    "keywords": [
+      "method",
+      "doWithHeaders",
+      "Client",
+      "anthropicclient"
+    ]
+  },
+  {
     "title": "Client.setHeaders",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#Client.setHeaders",
     "content": "",
@@ -10548,6 +11380,20 @@
     "keywords": [
       "function",
       "parseStreamEvent",
+      "anthropicclient"
+    ]
+  },
+  {
+    "title": "CacheControl",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#CacheControl",
+    "content": "CacheControl represents Anthropic's prompt caching configuration.\n",
+    "type": "type",
+    "package": "anthropicclient",
+    "signature": "type CacheControl",
+    "external": true,
+    "keywords": [
+      "type",
+      "CacheControl",
       "anthropicclient"
     ]
   },
@@ -10927,6 +11773,90 @@
     ]
   },
   {
+    "title": "EphemeralCache",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#EphemeralCache",
+    "content": "EphemeralCache creates a standard ephemeral cache control for Anthropic with 5-minute duration.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "EphemeralCache()",
+    "external": true,
+    "keywords": [
+      "function",
+      "EphemeralCache",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "EphemeralCacheOneHour",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#EphemeralCacheOneHour",
+    "content": "EphemeralCacheOneHour creates a 1-hour ephemeral cache control for Anthropic.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "EphemeralCacheOneHour()",
+    "external": true,
+    "keywords": [
+      "function",
+      "EphemeralCacheOneHour",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "WithBetaHeader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithBetaHeader",
+    "content": "WithBetaHeader adds a custom beta header for accessing Anthropic's experimental features.\nThis is useful for testing new features before dedicated support is added.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    anthropic.WithBetaHeader(\"new-feature-2025-01-01\"),\n\t)\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "WithBetaHeader()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithBetaHeader",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "WithExtendedOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithExtendedOutput",
+    "content": "WithExtendedOutput enables 128K token output for Claude 3.7+.\nStandard models are limited to 8K tokens, but this beta feature allows\ngenerating much longer responses.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithMaxTokens(50000),\n\t    anthropic.WithExtendedOutput(),\n\t)\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "WithExtendedOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithExtendedOutput",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "WithInterleavedThinking",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithInterleavedThinking",
+    "content": "WithInterleavedThinking enables thinking between tool calls for Claude 3.7+.\nThis allows the model to use reasoning tokens to plan tool usage and interpret results.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithTools(tools),\n\t    llms.WithThinkingMode(llms.ThinkingModeMedium),\n\t    anthropic.WithInterleavedThinking(),\n\t)\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "WithInterleavedThinking()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithInterleavedThinking",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "WithPromptCaching",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithPromptCaching",
+    "content": "WithPromptCaching enables Anthropic's prompt caching feature.\nThis allows frequently-used prompts and system messages to be cached for improved\nperformance and reduced costs.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    anthropic.WithPromptCaching(),\n\t)\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "WithPromptCaching()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithPromptCaching",
+      "anthropic"
+    ]
+  },
+  {
     "title": "processMessages",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock#processMessages",
     "content": "",
@@ -10980,6 +11910,36 @@
     "keywords": [
       "method",
       "GenerateContent",
+      "LLM",
+      "bedrock"
+    ]
+  },
+  {
+    "title": "LLM.generateContentWithConverseAPI",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock#LLM.generateContentWithConverseAPI",
+    "content": "generateContentWithConverseAPI uses the unified Converse API\n",
+    "type": "method",
+    "package": "bedrock",
+    "signature": "generateContentWithConverseAPI()",
+    "external": true,
+    "keywords": [
+      "method",
+      "generateContentWithConverseAPI",
+      "LLM",
+      "bedrock"
+    ]
+  },
+  {
+    "title": "LLM.generateContentWithLegacyAPI",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock#LLM.generateContentWithLegacyAPI",
+    "content": "generateContentWithLegacyAPI uses the original model-specific implementations\n",
+    "type": "method",
+    "package": "bedrock",
+    "signature": "generateContentWithLegacyAPI()",
+    "external": true,
+    "keywords": [
+      "method",
+      "generateContentWithLegacyAPI",
       "LLM",
       "bedrock"
     ]
@@ -11041,6 +12001,20 @@
     ]
   },
   {
+    "title": "GetProvider",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#GetProvider",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "GetProvider()",
+    "external": true,
+    "keywords": [
+      "function",
+      "GetProvider",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "getMaxTokens",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#getMaxTokens",
     "content": "",
@@ -11051,20 +12025,6 @@
     "keywords": [
       "function",
       "getMaxTokens",
-      "bedrockclient"
-    ]
-  },
-  {
-    "title": "getProvider",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#getProvider",
-    "content": "",
-    "type": "function",
-    "package": "bedrockclient",
-    "signature": "getProvider()",
-    "external": true,
-    "keywords": [
-      "function",
-      "getProvider",
       "bedrockclient"
     ]
   },
@@ -11126,6 +12086,312 @@
     ]
   },
   {
+    "title": "ToolCall",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ToolCall",
+    "content": "ToolCall represents a function call request from the model\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ToolCall",
+    "external": true,
+    "keywords": [
+      "type",
+      "ToolCall",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ToolResult",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ToolResult",
+    "content": "ToolResult represents the result of a function call execution\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ToolResult",
+    "external": true,
+    "keywords": [
+      "type",
+      "ToolResult",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "BedrockRuntimeClientInterface",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#BedrockRuntimeClientInterface",
+    "content": "BedrockRuntimeClientInterface defines the interface for bedrock runtime operations\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type BedrockRuntimeClientInterface",
+    "external": true,
+    "keywords": [
+      "type",
+      "BedrockRuntimeClientInterface",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient",
+    "content": "ConverseClient wraps the Bedrock Converse API client\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ConverseClient",
+    "external": true,
+    "keywords": [
+      "type",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.CreateCompletionConverse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.CreateCompletionConverse",
+    "content": "CreateCompletionConverse creates a completion using the Converse API\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "CreateCompletionConverse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "CreateCompletionConverse",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.buildConverseInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.buildConverseInput",
+    "content": "buildConverseInput converts our input to AWS Converse format\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "buildConverseInput()",
+    "external": true,
+    "keywords": [
+      "method",
+      "buildConverseInput",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertConverseResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertConverseResponse",
+    "content": "convertConverseResponse converts Converse response to ContentResponse\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertConverseResponse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertConverseResponse",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertMessages",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertMessages",
+    "content": "convertMessages converts our messages to Converse format\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertMessages()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertMessages",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertToolCallInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertToolCallInput",
+    "content": "",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertToolCallInput()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertToolCallInput",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertToolMessage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertToolMessage",
+    "content": "convertToolMessage converts tool result messages\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertToolMessage()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertToolMessage",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertToolsToToolConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertToolsToToolConfig",
+    "content": "convertToolsToToolConfig converts llms.Tool to Converse ToolConfiguration\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertToolsToToolConfig()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertToolsToToolConfig",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.convertUserOrAssistantMessage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertUserOrAssistantMessage",
+    "content": "convertUserOrAssistantMessage converts user or assistant messages\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "convertUserOrAssistantMessage()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertUserOrAssistantMessage",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.handleNonStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.handleNonStreamingResponse",
+    "content": "handleNonStreamingResponse handles non-streaming responses\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "handleNonStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "handleNonStreamingResponse",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.handleStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.handleStreamingResponse",
+    "content": "handleStreamingResponse handles streaming responses\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "handleStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "handleStreamingResponse",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.processStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.processStreamingResponse",
+    "content": "processStreamingResponse processes streaming events\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "processStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "processStreamingResponse",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.supportsReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.supportsReasoning",
+    "content": "supportsReasoning checks if the model supports reasoning\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "supportsReasoning()",
+    "external": true,
+    "keywords": [
+      "method",
+      "supportsReasoning",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseInput",
+    "content": "ConverseInput represents input for the Converse API\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ConverseInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "ConverseInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "converseAdditionalModelRequestFields",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#converseAdditionalModelRequestFields",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type converseAdditionalModelRequestFields",
+    "external": true,
+    "keywords": [
+      "type",
+      "converseAdditionalModelRequestFields",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "converseThinkingPayload",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#converseThinkingPayload",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type converseThinkingPayload",
+    "external": true,
+    "keywords": [
+      "type",
+      "converseThinkingPayload",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "isSimpleType",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#isSimpleType",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "isSimpleType()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isSimpleType",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "isSmithyValidObject",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#isSmithyValidObject",
+    "content": "isSmithyValidObject validates that an object contains only simple types\nor structs with proper document tags on all public fields\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "isSmithyValidObject()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isSmithyValidObject",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "createAi21Completion",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createAi21Completion",
     "content": "",
@@ -11136,6 +12402,90 @@
     "keywords": [
       "function",
       "createAi21Completion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "createAi21JambaCompletion",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createAi21JambaCompletion",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "createAi21JambaCompletion()",
+    "external": true,
+    "keywords": [
+      "function",
+      "createAi21JambaCompletion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "getAi21Role",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#getAi21Role",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "getAi21Role()",
+    "external": true,
+    "keywords": [
+      "function",
+      "getAi21Role",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseAi21StreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseAi21StreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseAi21StreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseAi21StreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ai21JambaInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ai21JambaInput",
+    "content": "Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-jamba.html\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ai21JambaInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "ai21JambaInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ai21JambaOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ai21JambaOutput",
+    "content": "AI21 Jamba response structure (OpenAI-like format)\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ai21JambaOutput",
+    "external": true,
+    "keywords": [
+      "type",
+      "ai21JambaOutput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ai21StreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ai21StreamingResponseChunk",
+    "content": "AI21 streaming response structure (for Jamba models)\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type ai21StreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "ai21StreamingResponseChunk",
       "bedrockclient"
     ]
   },
@@ -11156,7 +12506,7 @@
   {
     "title": "ai21TextGenerationOutput",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ai21TextGenerationOutput",
-    "content": "",
+    "content": "Legacy AI21 response structure for J2 models\n",
     "type": "type",
     "package": "bedrockclient",
     "signature": "type ai21TextGenerationOutput",
@@ -11178,6 +12528,34 @@
     "keywords": [
       "function",
       "createAmazonCompletion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseAmazonStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseAmazonStreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseAmazonStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseAmazonStreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "amazonStreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#amazonStreamingResponseChunk",
+    "content": "Amazon Titan streaming response structure\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type amazonStreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "amazonStreamingResponseChunk",
       "bedrockclient"
     ]
   },
@@ -11266,6 +12644,20 @@
     ]
   },
   {
+    "title": "supportsAnthropicReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#supportsAnthropicReasoning",
+    "content": "supportsAnthropicReasoning checks if the model supports reasoning\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "supportsAnthropicReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "supportsAnthropicReasoning",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "anthropicBinGenerationInputSource",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicBinGenerationInputSource",
     "content": "anthropicBinGenerationInputSource is the source of the content.\n",
@@ -11276,6 +12668,20 @@
     "keywords": [
       "type",
       "anthropicBinGenerationInputSource",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "anthropicContentBlock",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicContentBlock",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type anthropicContentBlock",
+    "external": true,
+    "keywords": [
+      "type",
+      "anthropicContentBlock",
       "bedrockclient"
     ]
   },
@@ -11336,6 +12742,34 @@
     ]
   },
   {
+    "title": "anthropicThinkingPayload",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicThinkingPayload",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type anthropicThinkingPayload",
+    "external": true,
+    "keywords": [
+      "type",
+      "anthropicThinkingPayload",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "anthropicTool",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicTool",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type anthropicTool",
+    "external": true,
+    "keywords": [
+      "type",
+      "anthropicTool",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "streamingCompletionResponseChunk",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#streamingCompletionResponseChunk",
     "content": "",
@@ -11346,6 +12780,20 @@
     "keywords": [
       "type",
       "streamingCompletionResponseChunk",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "createCohereCommandRCompletion",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createCohereCommandRCompletion",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "createCohereCommandRCompletion()",
+    "external": true,
+    "keywords": [
+      "function",
+      "createCohereCommandRCompletion",
       "bedrockclient"
     ]
   },
@@ -11364,9 +12812,65 @@
     ]
   },
   {
+    "title": "getCohereRole",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#getCohereRole",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "getCohereRole()",
+    "external": true,
+    "keywords": [
+      "function",
+      "getCohereRole",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseCohereStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseCohereStreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseCohereStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseCohereStreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "cohereCommandRInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#cohereCommandRInput",
+    "content": "Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-cohere-command-r-plus.html\ncohereCommandRInput is the input for Command R models\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type cohereCommandRInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "cohereCommandRInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "cohereStreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#cohereStreamingResponseChunk",
+    "content": "Cohere streaming response structure\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type cohereStreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "cohereStreamingResponseChunk",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "cohereTextGenerationInput",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#cohereTextGenerationInput",
-    "content": "cohereTextGenerationInput is the input for the text generation for Cohere Models.\n",
+    "content": "Ref: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-cohere-command.html\nLegacy cohereTextGenerationInput is the input for the text generation for legacy Cohere Models.\n",
     "type": "type",
     "package": "bedrockclient",
     "signature": "type cohereTextGenerationInput",
@@ -11406,6 +12910,90 @@
     ]
   },
   {
+    "title": "createDeepSeekCompletion",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createDeepSeekCompletion",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "createDeepSeekCompletion()",
+    "external": true,
+    "keywords": [
+      "function",
+      "createDeepSeekCompletion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "formatDeepSeekPrompt",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#formatDeepSeekPrompt",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "formatDeepSeekPrompt()",
+    "external": true,
+    "keywords": [
+      "function",
+      "formatDeepSeekPrompt",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseDeepSeekStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseDeepSeekStreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseDeepSeekStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseDeepSeekStreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "deepSeekStreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#deepSeekStreamingResponseChunk",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type deepSeekStreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "deepSeekStreamingResponseChunk",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "deepSeekTextGenerationInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#deepSeekTextGenerationInput",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type deepSeekTextGenerationInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "deepSeekTextGenerationInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "deepSeekTextGenerationOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#deepSeekTextGenerationOutput",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type deepSeekTextGenerationOutput",
+    "external": true,
+    "keywords": [
+      "type",
+      "deepSeekTextGenerationOutput",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "createMetaCompletion",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createMetaCompletion",
     "content": "",
@@ -11416,6 +13004,34 @@
     "keywords": [
       "function",
       "createMetaCompletion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseMetaStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseMetaStreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseMetaStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseMetaStreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "metaStreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#metaStreamingResponseChunk",
+    "content": "Meta streaming response structure\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type metaStreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "metaStreamingResponseChunk",
       "bedrockclient"
     ]
   },
@@ -11444,6 +13060,202 @@
     "keywords": [
       "type",
       "metaTextGenerationOutput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "createNovaCompletion",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createNovaCompletion",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "createNovaCompletion()",
+    "external": true,
+    "keywords": [
+      "function",
+      "createNovaCompletion",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "getNovaRole",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#getNovaRole",
+    "content": "process the role of the message to anthropic supported role.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "getNovaRole()",
+    "external": true,
+    "keywords": [
+      "function",
+      "getNovaRole",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "mimeTypeToFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#mimeTypeToFormat",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "mimeTypeToFormat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "mimeTypeToFormat",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaInputToJSON",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaInputToJSON",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "novaInputToJSON()",
+    "external": true,
+    "keywords": [
+      "function",
+      "novaInputToJSON",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "parseNovaStreamingResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#parseNovaStreamingResponse",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "parseNovaStreamingResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "parseNovaStreamingResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaBinGenerationInputSource",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaBinGenerationInputSource",
+    "content": "novaBinGenerationInputSource is the source of the content.\nIt is used for sending binary content such as images to the model.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaBinGenerationInputSource",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaBinGenerationInputSource",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaImageInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaImageInput",
+    "content": "novaImageInput is the input for the image content.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaImageInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaImageInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaInferenceConfigInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaInferenceConfigInput",
+    "content": "novaInferenceConfigInput is the input for the text generation configuration for Amazon Nova Models.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaInferenceConfigInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaInferenceConfigInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaStreamingResponseChunk",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaStreamingResponseChunk",
+    "content": "Nova streaming response structure\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaStreamingResponseChunk",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaStreamingResponseChunk",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaSystemPrompt",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaSystemPrompt",
+    "content": "novaSystemPrompt is the system prompt for the input.\nIt is used to provide instructions to the model.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaSystemPrompt",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaSystemPrompt",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaTextGenerationInput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaTextGenerationInput",
+    "content": "novaTextGenerationInput is the input for the text generation for Amazon Nova Models.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaTextGenerationInput",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaTextGenerationInput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaTextGenerationInputContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaTextGenerationInputContent",
+    "content": "novaTextGenerationInputContent is the content of a single input message.\nIt can be either a text or an image.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaTextGenerationInputContent",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaTextGenerationInputContent",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaTextGenerationInputMessage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaTextGenerationInputMessage",
+    "content": "novaTextGenerationInputMessage is a single message in the input.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaTextGenerationInputMessage",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaTextGenerationInputMessage",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "novaTextGenerationOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#novaTextGenerationOutput",
+    "content": "novaTextGenerationOutput is the output for the text generation for Amazon Nova Models.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type novaTextGenerationOutput",
+    "external": true,
+    "keywords": [
+      "type",
+      "novaTextGenerationOutput",
       "bedrockclient"
     ]
   },
@@ -13941,6 +15753,122 @@
     ]
   },
   {
+    "title": "package googleai",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai",
+    "content": "Package googleai provides caching support for Google AI models.\n",
+    "type": "package",
+    "package": "googleai",
+    "external": true,
+    "keywords": [
+      "package",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper",
+    "content": "CachingHelper provides utilities for working with Google AI's cached content feature.\nUnlike Anthropic which supports inline cache control, Google AI requires\npre-creating cached content through the API.\n\nGoogle AI caching is particularly useful for:\n- Large system prompts that are reused across multiple requests\n- Extensive context documents (e.g., knowledge bases, documentation)\n- Long conversation histories\n\nThe minimum cacheable content size is 32,768 tokens (~24,000 words).\nCached content has a TTL (time-to-live) and will be automatically deleted after expiration.\n",
+    "type": "type",
+    "package": "googleai",
+    "signature": "type CachingHelper",
+    "external": true,
+    "keywords": [
+      "type",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.AllCachedContents",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.AllCachedContents",
+    "content": "AllCachedContents returns an iterator that yields all cached contents.\nThis handles pagination automatically.\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "AllCachedContents()",
+    "external": true,
+    "keywords": [
+      "method",
+      "AllCachedContents",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.CreateCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.CreateCachedContent",
+    "content": "CreateCachedContent creates cached content that can be reused across multiple requests.\nThis is useful for caching large system prompts, context documents, or frequently used instructions.\n\nParameters:\n  - modelName: The model to use (e.g., \"gemini-2.0-flash-exp\")\n  - messages: The content to cache (must be at least 32,768 tokens)\n  - ttl: Time-to-live for the cached content (e.g., 1*time.Hour)\n  - displayName: Optional human-readable name for the cache\n\nExample usage:\n\n\thelper, _ := NewCachingHelper(ctx, WithAPIKey(apiKey))\n\tcached, _ := helper.CreateCachedContent(ctx, \"gemini-2.0-flash-exp\",\n\t    []llms.MessageContent{\n\t        {\n\t            Role: llms.ChatMessageTypeSystem,\n\t            Parts: []llms.ContentPart{\n\t                llms.TextPart(\"You are an expert assistant...\"),\n\t            },\n\t        },\n\t    },\n\t    1*time.Hour,\n\t    \"my-expert-system-prompt\",\n\t)\n\n\t// Use the cached content in requests\n\tmodel, _ := New(ctx, WithAPIKey(apiKey))\n\tresp, _ := model.GenerateContent(ctx, messages, WithCachedContent(cached.Name))\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "CreateCachedContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "CreateCachedContent",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.DeleteCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.DeleteCachedContent",
+    "content": "DeleteCachedContent removes cached content.\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "DeleteCachedContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "DeleteCachedContent",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.GetCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.GetCachedContent",
+    "content": "GetCachedContent retrieves existing cached content by name.\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "GetCachedContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "GetCachedContent",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.ListCachedContents",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.ListCachedContents",
+    "content": "ListCachedContents lists all cached content with pagination support.\nReturns a Page that can be iterated to fetch all cached contents.\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "ListCachedContents()",
+    "external": true,
+    "keywords": [
+      "method",
+      "ListCachedContents",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
+    "title": "CachingHelper.UpdateCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#CachingHelper.UpdateCachedContent",
+    "content": "UpdateCachedContent updates the TTL or expiration time of cached content.\n",
+    "type": "method",
+    "package": "googleai",
+    "signature": "UpdateCachedContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "UpdateCachedContent",
+      "CachingHelper",
+      "googleai"
+    ]
+  },
+  {
     "title": "MapError",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#MapError",
     "content": "MapError maps Google AI-specific errors to standardized error codes.\n",
@@ -13969,37 +15897,23 @@
     ]
   },
   {
-    "title": "convertAndStreamFromIterator",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertAndStreamFromIterator",
-    "content": "convertAndStreamFromIterator takes an iterator of GenerateContentResponse\nand produces a llms.ContentResponse reply from it, while streaming the\nresulting text into the opts-provided streaming function.\nNote that this is tricky in the face of multiple\ncandidates, so this code assumes only a single candidate for now.\n",
+    "title": "cleanFunctionCallID",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#cleanFunctionCallID",
+    "content": "cleanFunctionCallID removes generated ID prefix when sending to LLM backend.\nIf ID has the generated prefix, returns empty string; otherwise returns the original ID.\n",
     "type": "function",
     "package": "googleai",
-    "signature": "convertAndStreamFromIterator()",
+    "signature": "cleanFunctionCallID()",
     "external": true,
     "keywords": [
       "function",
-      "convertAndStreamFromIterator",
-      "googleai"
-    ]
-  },
-  {
-    "title": "convertCandidates",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertCandidates",
-    "content": "convertCandidates converts a sequence of genai.Candidate to a response.\n",
-    "type": "function",
-    "package": "googleai",
-    "signature": "convertCandidates()",
-    "external": true,
-    "keywords": [
-      "function",
-      "convertCandidates",
+      "cleanFunctionCallID",
       "googleai"
     ]
   },
   {
     "title": "convertContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertContent",
-    "content": "convertContent converts between a langchain MessageContent and genai content.\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "convertContent()",
@@ -14011,9 +15925,23 @@
     ]
   },
   {
+    "title": "convertHarmBlockThreshold",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertHarmBlockThreshold",
+    "content": "",
+    "type": "function",
+    "package": "googleai",
+    "signature": "convertHarmBlockThreshold()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertHarmBlockThreshold",
+      "googleai"
+    ]
+  },
+  {
     "title": "convertMaps",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertMaps",
-    "content": "convert map[any]any to map[string]any if possible\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "convertMaps()",
@@ -14027,7 +15955,7 @@
   {
     "title": "convertParts",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertParts",
-    "content": "convertParts converts between a sequence of langchain parts and genai parts.\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "convertParts()",
@@ -14035,6 +15963,20 @@
     "keywords": [
       "function",
       "convertParts",
+      "googleai"
+    ]
+  },
+  {
+    "title": "convertResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertResponse",
+    "content": "",
+    "type": "function",
+    "package": "googleai",
+    "signature": "convertResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertResponse",
       "googleai"
     ]
   },
@@ -14069,7 +16011,7 @@
   {
     "title": "convertToolSchemaType",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertToolSchemaType",
-    "content": "convertToolSchemaType converts a tool's schema type from its langchaingo\nrepresentation (string) to a genai enum.\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "convertToolSchemaType()",
@@ -14083,7 +16025,7 @@
   {
     "title": "convertTools",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#convertTools",
-    "content": "convertTools converts from a list of langchaingo tools to a list of genai\ntools.\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "convertTools()",
@@ -14095,37 +16037,23 @@
     ]
   },
   {
-    "title": "generateFromMessages",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#generateFromMessages",
-    "content": "",
+    "title": "ensureFunctionCallID",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#ensureFunctionCallID",
+    "content": "ensureFunctionCallID generates a unique ID if the provided ID is empty.\nGenerated IDs use the format \"fcall_{16_hex_chars}\" to distinguish them from backend-provided IDs.\n",
     "type": "function",
     "package": "googleai",
-    "signature": "generateFromMessages()",
+    "signature": "ensureFunctionCallID()",
     "external": true,
     "keywords": [
       "function",
-      "generateFromMessages",
-      "googleai"
-    ]
-  },
-  {
-    "title": "generateFromSingleMessage",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#generateFromSingleMessage",
-    "content": "generateFromSingleMessage generates content from the parts of a single\nmessage.\n",
-    "type": "function",
-    "package": "googleai",
-    "signature": "generateFromSingleMessage()",
-    "external": true,
-    "keywords": [
-      "function",
-      "generateFromSingleMessage",
+      "ensureFunctionCallID",
       "googleai"
     ]
   },
   {
     "title": "showContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#showContent",
-    "content": "showContent is a debugging helper for genai.Content.\n",
+    "content": "",
     "type": "function",
     "package": "googleai",
     "signature": "showContent()",
@@ -14230,6 +16158,34 @@
       "function",
       "rewriteReceiverName",
       "main"
+    ]
+  },
+  {
+    "title": "Option",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/palmclient#Option",
+    "content": "Option is an option\n",
+    "type": "type",
+    "package": "palmclient",
+    "signature": "type Option",
+    "external": true,
+    "keywords": [
+      "type",
+      "Option",
+      "palmclient"
+    ]
+  },
+  {
+    "title": "Options",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/palmclient#Options",
+    "content": "Options are the Palm client options\n",
+    "type": "type",
+    "package": "palmclient",
+    "signature": "type Options",
+    "external": true,
+    "keywords": [
+      "type",
+      "Options",
+      "palmclient"
     ]
   },
   {
@@ -14533,6 +16489,20 @@
     ]
   },
   {
+    "title": "WithCachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#WithCachedContent",
+    "content": "WithCachedContent enables the use of pre-created cached content.\nThe cached content must be created separately using Client.CreateCachedContent.\nThis is different from Anthropic's inline cache control.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "WithCachedContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithCachedContent",
+      "googleai"
+    ]
+  },
+  {
     "title": "hasAuthOptions",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#hasAuthOptions",
     "content": "helper to inspect incoming client options for auth options.\n",
@@ -14785,6 +16755,21 @@
     ]
   },
   {
+    "title": "Vertex.Close",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#Vertex.Close",
+    "content": "Close closes the underlying genai and palm clients.\nThis should be called when the Vertex instance is no longer needed\nto prevent memory leaks from the underlying gRPC connections.\n",
+    "type": "method",
+    "package": "vertex",
+    "signature": "Close()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Close",
+      "Vertex",
+      "vertex"
+    ]
+  },
+  {
     "title": "convertAndStreamFromIterator",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#convertAndStreamFromIterator",
     "content": "convertAndStreamFromIterator takes an iterator of GenerateContentResponse\nand produces a llms.ContentResponse reply from it, while streaming the\nresulting text into the opts-provided streaming function.\nNote that this is tricky in the face of multiple\ncandidates, so this code assumes only a single candidate for now.\n",
@@ -14865,6 +16850,20 @@
     "keywords": [
       "function",
       "convertTools",
+      "vertex"
+    ]
+  },
+  {
+    "title": "convertVertexHarmBlockThreshold",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#convertVertexHarmBlockThreshold",
+    "content": "",
+    "type": "function",
+    "package": "vertex",
+    "signature": "convertVertexHarmBlockThreshold()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertVertexHarmBlockThreshold",
       "vertex"
     ]
   },
@@ -16768,6 +18767,18 @@
     ]
   },
   {
+    "title": "package openai",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai",
+    "content": "Package openai provides an interface to OpenAI's language models.\n\n# Token Limits\n\nFor setting token limits with OpenAI models, use openai.WithMaxCompletionTokens()\nfor clarity. The OpenAI API now uses max_completion_tokens as the field for\nlimiting output tokens.\n\n\t// Recommended for clarity:\n\tllm.GenerateContent(ctx, messages,\n\t    openai.WithMaxCompletionTokens(100),\n\t)\n\n\t// Also works (backward compatible):\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithMaxTokens(100),\n\t)\n\nBoth options set the same underlying field. By default, the implementation sends\nmax_completion_tokens (modern field). For older OpenAI-compatible servers that\nonly support max_tokens, use WithLegacyMaxTokensField():\n\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithMaxTokens(100),\n\t    openai.WithLegacyMaxTokensField(), // Forces use of max_tokens field\n\t)\n",
+    "type": "package",
+    "package": "openai",
+    "external": true,
+    "keywords": [
+      "package",
+      "openai"
+    ]
+  },
+  {
     "title": "MapError",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#MapError",
     "content": "MapError maps OpenAI-specific errors to standardized error codes.\n",
@@ -16890,6 +18901,20 @@
     "keywords": [
       "function",
       "updateToolCall",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "ApproximateLocation",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ApproximateLocation",
+    "content": "ApproximateLocation contains approximate location information.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type ApproximateLocation",
+    "external": true,
+    "keywords": [
+      "type",
+      "ApproximateLocation",
       "openaiclient"
     ]
   },
@@ -17089,6 +19114,20 @@
     "keywords": [
       "type",
       "LogProbs",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "ReasoningOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ReasoningOptions",
+    "content": "ReasoningOptions is enabling reasoning if the model supports it.\nThere should have to use one of the fields: effort or max_tokens.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type ReasoningOptions",
+    "external": true,
+    "keywords": [
+      "type",
+      "ReasoningOptions",
       "openaiclient"
     ]
   },
@@ -17303,6 +19342,34 @@
     ]
   },
   {
+    "title": "UserLocation",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#UserLocation",
+    "content": "UserLocation represents the user's approximate location for web search.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type UserLocation",
+    "external": true,
+    "keywords": [
+      "type",
+      "UserLocation",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "WebSearchOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#WebSearchOptions",
+    "content": "WebSearchOptions configures web search behavior for OpenAI models.\nThis is used with search-enabled models like gpt-4o-search-preview.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type WebSearchOptions",
+    "external": true,
+    "keywords": [
+      "type",
+      "WebSearchOptions",
+      "openaiclient"
+    ]
+  },
+  {
     "title": "CompletionRequest",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#CompletionRequest",
     "content": "CompletionRequest is a request to complete a completion.\n",
@@ -17383,6 +19450,20 @@
     "keywords": [
       "function",
       "IsAzure",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "sanitizeHTTPError",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#sanitizeHTTPError",
+    "content": "sanitizeHTTPError sanitizes HTTP client errors to prevent leaking sensitive information.\nIt checks for context deadline/cancellation errors and returns generic timeout messages\ninstead of potentially exposing request details, headers, or other sensitive data.\n",
+    "type": "function",
+    "package": "openaiclient",
+    "signature": "sanitizeHTTPError()",
+    "external": true,
+    "keywords": [
+      "function",
+      "sanitizeHTTPError",
       "openaiclient"
     ]
   },
@@ -17485,6 +19566,21 @@
     "keywords": [
       "method",
       "buildURL",
+      "Client",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "Client.makeEmbeddingPayload",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#Client.makeEmbeddingPayload",
+    "content": "",
+    "type": "method",
+    "package": "openaiclient",
+    "signature": "makeEmbeddingPayload()",
+    "external": true,
+    "keywords": [
+      "method",
+      "makeEmbeddingPayload",
       "Client",
       "openaiclient"
     ]
@@ -17683,6 +19779,20 @@
     "keywords": [
       "function",
       "toolFromTool",
+      "openai"
+    ]
+  },
+  {
+    "title": "webSearchOptionsFromCallOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#webSearchOptionsFromCallOptions",
+    "content": "webSearchOptionsFromCallOptions converts llms.WebSearchOptions to openaiclient.WebSearchOptions.\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "webSearchOptionsFromCallOptions()",
+    "external": true,
+    "keywords": [
+      "function",
+      "webSearchOptionsFromCallOptions",
       "openai"
     ]
   },
@@ -17895,6 +20005,21 @@
     ]
   },
   {
+    "title": "LLM.setReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.setReasoning",
+    "content": "setReasoning sets reasoning options, depends on the client and request options.\n",
+    "type": "method",
+    "package": "openai",
+    "signature": "setReasoning()",
+    "external": true,
+    "keywords": [
+      "method",
+      "setReasoning",
+      "LLM",
+      "openai"
+    ]
+  },
+  {
     "title": "APIType",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#APIType",
     "content": "",
@@ -17976,6 +20101,48 @@
       "type",
       "options",
       "openai"
+    ]
+  },
+  {
+    "title": "WithLegacyMaxTokensField",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#WithLegacyMaxTokensField",
+    "content": "WithLegacyMaxTokensField forces the use of the max_tokens field instead of max_completion_tokens.\nThis is useful when connecting to older OpenAI-compatible inference servers that only\nsupport the max_tokens field and don't recognize max_completion_tokens.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithMaxTokens(100),\n\t    openai.WithLegacyMaxTokensField(), // Forces use of max_tokens field\n\t)\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "WithLegacyMaxTokensField()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithLegacyMaxTokensField",
+      "openai"
+    ]
+  },
+  {
+    "title": "WithMaxCompletionTokens",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#WithMaxCompletionTokens",
+    "content": "WithMaxCompletionTokens sets the max_completion_tokens field for token generation.\nThis is the recommended way to limit tokens with OpenAI models.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    openai.WithMaxCompletionTokens(100),\n\t)\n\nNote: While llms.WithMaxTokens() still works for backward compatibility,\nWithMaxCompletionTokens is preferred for clarity when using OpenAI.\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "WithMaxCompletionTokens()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithMaxCompletionTokens",
+      "openai"
+    ]
+  },
+  {
+    "title": "ApproximateLocation",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ApproximateLocation",
+    "content": "ApproximateLocation contains approximate location information.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ApproximateLocation",
+    "external": true,
+    "keywords": [
+      "type",
+      "ApproximateLocation",
+      "llms"
     ]
   },
   {
@@ -18150,6 +20317,77 @@
     ]
   },
   {
+    "title": "UserLocation",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#UserLocation",
+    "content": "UserLocation represents the user's approximate location for web search.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type UserLocation",
+    "external": true,
+    "keywords": [
+      "type",
+      "UserLocation",
+      "llms"
+    ]
+  },
+  {
+    "title": "WebSearchOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#WebSearchOptions",
+    "content": "WebSearchOptions configures web search behavior for models that support web search.\nThis is currently supported by OpenAI models like gpt-4o-search-preview.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type WebSearchOptions",
+    "external": true,
+    "keywords": [
+      "type",
+      "WebSearchOptions",
+      "llms"
+    ]
+  },
+  {
+    "title": "CacheControl",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CacheControl",
+    "content": "CacheControl represents prompt caching configuration for providers that support it.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type CacheControl",
+    "external": true,
+    "keywords": [
+      "type",
+      "CacheControl",
+      "llms"
+    ]
+  },
+  {
+    "title": "CachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CachedContent",
+    "content": "CachedContent represents content with caching instructions.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type CachedContent",
+    "external": true,
+    "keywords": [
+      "type",
+      "CachedContent",
+      "llms"
+    ]
+  },
+  {
+    "title": "CachedContent.isPart",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CachedContent.isPart",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "isPart()",
+    "external": true,
+    "keywords": [
+      "method",
+      "isPart",
+      "CachedContent",
+      "llms"
+    ]
+  },
+  {
     "title": "PromptValue",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#PromptValue",
     "content": "PromptValue is the interface that all prompt values must implement.\n",
@@ -18262,9 +20500,37 @@
     ]
   },
   {
+    "title": "DefaultIsReasoningModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#DefaultIsReasoningModel",
+    "content": "DefaultIsReasoningModel provides the default reasoning model detection logic.\nThis can be used by LLM implementations that want to extend rather than replace\nthe default detection logic.\n",
+    "type": "function",
+    "package": "llms",
+    "signature": "DefaultIsReasoningModel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "DefaultIsReasoningModel",
+      "llms"
+    ]
+  },
+  {
+    "title": "IsReasoningModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#IsReasoningModel",
+    "content": "IsReasoningModel returns true if the model is a reasoning/thinking model.\nThis includes OpenAI o1/o3/GPT-5 series, Anthropic Claude 3.7+, DeepSeek reasoner, etc.\nFor runtime checking of LLM instances, use SupportsReasoningModel instead.\n",
+    "type": "function",
+    "package": "llms",
+    "signature": "IsReasoningModel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "IsReasoningModel",
+      "llms"
+    ]
+  },
+  {
     "title": "package streaming",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/streaming",
-    "content": "Package streaming provides a streaming interface for LLMs.\n\nThis package implements utilities for handling streaming responses from language models,\nallowing for real-time processing of generated content. It supports three main types of chunks:\ntext chunks for regular content, reasoning chunks for step-by-step thinking processes,\nand tool call chunks for function/tool invocations.\n\nThe streaming interface uses a callback-based approach where each chunk is processed\nas it arrives, enabling applications to display partial results and interactive responses.\nThis is particularly useful for long-form content generation, reasoning steps visualization,\nand tool-using agents.\n\nBasic usage involves registering a callback function that handles chunks as they arrive:\n\n\tstreamingFunc := func(ctx context.Context, chunk streaming.Chunk) error {\n\t\tswitch chunk.Type {\n\t\tcase streaming.ChunkTypeText:\n\t\t\t// Process text content\n\t\t\tfmt.Print(chunk.Content)\n\t\tcase streaming.ChunkTypeReasoning:\n\t\t\t// Process reasoning/thinking content\n\t\t\tfmt.Print(chunk.ReasoningContent)\n\t\tcase streaming.ChunkTypeToolCall:\n\t\t\t// Process tool call\n\t\t\tfmt.Printf(\"Tool call: %s\\n\", chunk.ToolCall.String())\n\t\t}\n\t\treturn nil\n\t}\n\nThe callback function can be passed to LLM implementations that support streaming.\n",
+    "content": "Package streaming provides a streaming interface for LLMs.\n\nThis package implements utilities for handling streaming responses from language models,\nallowing for real-time processing of generated content. It supports five types of chunks:\ntext chunks for regular content, reasoning chunks for step-by-step thinking processes,\ntool call chunks for function/tool invocations, none chunks as a placeholder,\nand done chunks to signal the end of a streaming session.\n\nThe streaming interface uses a callback-based approach where each chunk is processed\nas it arrives, enabling applications to display partial results and interactive responses.\nThis is particularly useful for long-form content generation, reasoning steps visualization,\nand tool-using agents.\n\nBasic usage involves registering a callback function that handles chunks as they arrive:\n\n\tstreamingFunc := func(ctx context.Context, chunk streaming.Chunk) error {\n\t\tswitch chunk.Type {\n\t\tcase streaming.ChunkTypeNone:\n\t\t\t// It's not expected to receive this chunk type\n\t\t\t// but it's not an error to receive it\n\t\t\treturn nil\n\t\tcase streaming.ChunkTypeText:\n\t\t\t// Process text content\n\t\t\tfmt.Print(chunk.Content)\n\t\tcase streaming.ChunkTypeReasoning:\n\t\t\t// Process reasoning/thinking content\n\t\t\tfmt.Print(chunk.ReasoningContent)\n\t\tcase streaming.ChunkTypeToolCall:\n\t\t\t// Process tool call\n\t\t\tfmt.Printf(\"Tool call: %s\\n\", chunk.ToolCall.String())\n\t\tcase streaming.ChunkTypeDone:\n\t\t\t// Streaming is done - this signals the end of the stream\n\t\t\t// and can be used to finalize processing\n\t\t\tfmt.Println(\"Streaming is done\")\n\t\t}\n\t\treturn nil\n\t}\n\nThe callback function can be passed to LLM implementations that support streaming.\nWhen the LLM finishes generating all content, it should call the streaming.CallWithDone\nfunction to signal the end of the streaming session, allowing consumers to perform\nany necessary cleanup or finalization.\n",
     "type": "package",
     "package": "streaming",
     "external": true,
@@ -18284,6 +20550,20 @@
     "keywords": [
       "function",
       "AppendToolCall",
+      "streaming"
+    ]
+  },
+  {
+    "title": "CallWithDone",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/streaming#CallWithDone",
+    "content": "",
+    "type": "function",
+    "package": "streaming",
+    "signature": "CallWithDone()",
+    "external": true,
+    "keywords": [
+      "function",
+      "CallWithDone",
       "streaming"
     ]
   },
@@ -20858,7 +23138,7 @@
   {
     "title": "package prompts",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts",
-    "content": "Package prompts contains types, prompt templates, loading utilities, output\nparsers, example selectors, and other utilities for working with LLM prompts.\n",
+    "content": "Package prompts provides utilities for creating and managing prompts for Large Language Models (LLMs).\n\n# Basic Usage\n\nThe simplest way to use this package is with prompt templates:\n\n\t// Create a basic prompt template\n\ttemplate := prompts.NewPromptTemplate(\n\t\t\"Write a {{.style}} story about {{.topic}}.\",\n\t\t[]string{\"style\", \"topic\"},\n\t)\n\n\t// Format the template with values\n\tresult, err := template.Format(map[string]any{\n\t\t\"style\": \"funny\",\n\t\t\"topic\": \"a robot learning to cook\",\n\t})\n\t// Result: \"Write a funny story about a robot learning to cook.\"\n\n# Template Formats\n\nThree template formats are supported:\n\n  - Go Templates (default): `{{ .variable }}` - Native Go text/template with sprig functions\n  - Jinja2: `{{ variable }}` - Python-style templates with filters and logic\n  - F-Strings: `{variable}` - Simple Python-style variable substitution\n\nExample using different formats:\n\n\t// Go template (default)\n\tgoTemplate := prompts.NewPromptTemplate(\n\t\t\"Hello {{ .name }}!\",\n\t\t[]string{\"name\"},\n\t)\n\n\t// Jinja2 format\n\tjinja2Template := prompts.PromptTemplate{\n\t\tTemplate:       \"Hello {{ name }}!\",\n\t\tInputVariables: []string{\"name\"},\n\t\tTemplateFormat: prompts.TemplateFormatJinja2,\n\t}\n\n\t// F-string format\n\tfstringTemplate := prompts.PromptTemplate{\n\t\tTemplate:       \"Hello {name}!\",\n\t\tInputVariables: []string{\"name\"},\n\t\tTemplateFormat: prompts.TemplateFormatFString,\n\t}\n\n# Chat Prompts\n\nFor conversational AI, use ChatPromptTemplate:\n\n\tchatTemplate := prompts.NewChatPromptTemplate([]prompts.MessageFormatter{\n\t\tprompts.NewSystemMessagePromptTemplate(\n\t\t\t\"You are a helpful assistant.\",\n\t\t\tnil,\n\t\t),\n\t\tprompts.NewHumanMessagePromptTemplate(\n\t\t\t\"{{.question}}\",\n\t\t\t[]string{\"question\"},\n\t\t),\n\t})\n\n\tmessages, err := chatTemplate.FormatMessages(map[string]any{\n\t\t\"question\": \"What is the capital of France?\",\n\t})\n\n# Partial Variables\n\nPre-fill some template variables while leaving others for runtime:\n\n\ttemplate := prompts.PromptTemplate{\n\t\tTemplate:       \"{{.greeting}}, {{.name}}!\",\n\t\tInputVariables: []string{\"name\"},\n\t\tPartialVariables: map[string]any{\n\t\t\t\"greeting\": \"Welcome\",\n\t\t},\n\t}\n\n\tresult, err := template.Format(map[string]any{\n\t\t\"name\": \"Alice\",\n\t})\n\t// Result: \"Welcome, Alice!\"\n\n# Security\n\nBy default, templates render without sanitization for backward compatibility.\nWhen working with untrusted user input, enable HTML escaping:\n\n\t// Enable sanitization for untrusted data\n\tresult, err := prompts.RenderTemplate(\n\t\t\"User said: {{.input}}\",\n\t\tprompts.TemplateFormatGoTemplate,\n\t\tmap[string]any{\"input\": userInput},\n\t\tprompts.WithSanitization(), // Escapes HTML special characters\n\t)\n\nTemplates always block filesystem access for security. Use RenderTemplateFS\nfor controlled template inheritance:\n\n\t//go:embed templates/*\n\tvar templateFS embed.FS\n\n\tresult, err := prompts.RenderTemplateFS(\n\t\ttemplateFS,\n\t\t\"email.j2\",\n\t\tprompts.TemplateFormatJinja2,\n\t\tdata,\n\t)\n\n# Advanced Features\n\n# Few-Shot Learning\n\nCreate prompts with examples for better model performance:\n\n\tfewShot := \u0026prompts.FewShotPrompt{\n\t\tExamplePrompt: prompts.NewPromptTemplate(\n\t\t\t\"Q: {{.question}}\\nA: {{.answer}}\",\n\t\t\t[]string{\"question\", \"answer\"},\n\t\t),\n\t\tExamples: []map[string]string{\n\t\t\t{\"question\": \"What is 2+2?\", \"answer\": \"4\"},\n\t\t\t{\"question\": \"What is 3+3?\", \"answer\": \"6\"},\n\t\t},\n\t\tSuffix: \"\\nQ: {{.question}}\\nA:\",\n\t\tInputVariables: []string{\"question\"},\n\t}\n\n# Performance Considerations\n\n- Go templates are fastest and recommended for production\n- Template compilation is cached for repeated use\n- Use RenderTemplateFS with embed.FS for optimal production deployments\n",
     "type": "package",
     "package": "prompts",
     "external": true,
@@ -21128,6 +23408,219 @@
     ]
   },
   {
+    "title": "package loader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader",
+    "content": "Package loader provides secure filesystem access control for template engines.\n\nSecurity considerations:\n- Always validate custom fs.FS implementations before use\n- Ensure path traversal attacks are prevented at the fs.FS level\n- Consider implementing audit logging for all filesystem access\n- Use io/fs.Sub to create restricted filesystem views\n",
+    "type": "package",
+    "package": "loader",
+    "external": true,
+    "keywords": [
+      "package",
+      "loader"
+    ]
+  },
+  {
+    "title": "validatePath",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#validatePath",
+    "content": "validatePath performs basic path validation to prevent obvious attacks.\nThe fs.FS implementation should provide additional security measures.\n",
+    "type": "function",
+    "package": "loader",
+    "signature": "validatePath()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validatePath",
+      "loader"
+    ]
+  },
+  {
+    "title": "FSLoader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#FSLoader",
+    "content": "FSLoader wraps an fs.FS to provide controlled filesystem access.\nThis is used internally when explicit filesystem access is needed.\n\nSecurity note: The provided fs.FS should be pre-validated to ensure:\n- It doesn't allow access outside intended boundaries\n- Path traversal attempts are blocked\n- Symbolic links don't escape the filesystem root\n- Consider using fs.Sub() to create restricted views\n",
+    "type": "type",
+    "package": "loader",
+    "signature": "type FSLoader",
+    "external": true,
+    "keywords": [
+      "type",
+      "FSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "FSLoader.Get",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#FSLoader.Get",
+    "content": "Get opens a file from the controlled filesystem.\nThe path is passed directly to the underlying fs.FS, which should\nhandle its own path validation and normalization.\n",
+    "type": "method",
+    "package": "loader",
+    "signature": "Get()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Get",
+      "FSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "FSLoader.Path",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#FSLoader.Path",
+    "content": "Path validates that a path exists in the controlled filesystem.\n",
+    "type": "method",
+    "package": "loader",
+    "signature": "Path()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Path",
+      "FSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "NilFSLoader",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#NilFSLoader",
+    "content": "NilFSLoader is a template loader that provides no filesystem access.\nThis prevents template injection attacks like {% include \"/etc/passwd\" %}.\n",
+    "type": "type",
+    "package": "loader",
+    "signature": "type NilFSLoader",
+    "external": true,
+    "keywords": [
+      "type",
+      "NilFSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "NilFSLoader.Get",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#NilFSLoader.Get",
+    "content": "Get always returns an error to prevent filesystem access.\n",
+    "type": "method",
+    "package": "loader",
+    "signature": "Get()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Get",
+      "NilFSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "NilFSLoader.Path",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/loader#NilFSLoader.Path",
+    "content": "Path always returns an error to prevent filesystem access.\n",
+    "type": "method",
+    "package": "loader",
+    "signature": "Path()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Path",
+      "NilFSLoader",
+      "loader"
+    ]
+  },
+  {
+    "title": "ValidateAndSanitize",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#ValidateAndSanitize",
+    "content": "ValidateAndSanitize validates and sanitizes template data internally.\nThis is the only function exposed to the templates package.\n",
+    "type": "function",
+    "package": "sanitization",
+    "signature": "ValidateAndSanitize()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ValidateAndSanitize",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "isValidIdentifier",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#isValidIdentifier",
+    "content": "isValidIdentifier checks if a single identifier is valid.\nWe only enforce minimal validation - the template engine handles its own syntax.\n",
+    "type": "function",
+    "package": "sanitization",
+    "signature": "isValidIdentifier()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isValidIdentifier",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "isValidVariableName",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#isValidVariableName",
+    "content": "isValidVariableName checks if a variable name is safe to use in templates.\n",
+    "type": "function",
+    "package": "sanitization",
+    "signature": "isValidVariableName()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isValidVariableName",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "sanitizeString",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#sanitizeString",
+    "content": "sanitizeString applies string-specific sanitization.\n",
+    "type": "function",
+    "package": "sanitization",
+    "signature": "sanitizeString()",
+    "external": true,
+    "keywords": [
+      "function",
+      "sanitizeString",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "sanitizeValue",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#sanitizeValue",
+    "content": "sanitizeValue recursively sanitizes values.\n",
+    "type": "function",
+    "package": "sanitization",
+    "signature": "sanitizeValue()",
+    "external": true,
+    "keywords": [
+      "function",
+      "sanitizeValue",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "ValidationError",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#ValidationError",
+    "content": "ValidationError represents a validation failure.\n",
+    "type": "type",
+    "package": "sanitization",
+    "signature": "type ValidationError",
+    "external": true,
+    "keywords": [
+      "type",
+      "ValidationError",
+      "sanitization"
+    ]
+  },
+  {
+    "title": "ValidationError.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts/internal/sanitization#ValidationError.Error",
+    "content": "",
+    "type": "method",
+    "package": "sanitization",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ValidationError",
+      "sanitization"
+    ]
+  },
+  {
     "title": "AIMessagePromptTemplate",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#AIMessagePromptTemplate",
     "content": "AIMessagePromptTemplate is a message formatter that returns an AI message.\n",
@@ -21350,7 +23843,7 @@
   {
     "title": "resolvePartialValues",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#resolvePartialValues",
-    "content": "",
+    "content": "resolvePartialValues merges partial variables with provided values.\nPartial variable functions are called to get their current values.\nSupports string, int, float64, bool values and their corresponding function types.\n",
     "type": "function",
     "package": "prompts",
     "signature": "resolvePartialValues()",
@@ -21364,7 +23857,7 @@
   {
     "title": "PromptTemplate",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#PromptTemplate",
-    "content": "PromptTemplate contains common fields for all prompt templates.\n",
+    "content": "PromptTemplate is a template that can be rendered with dynamic variables.\nIt implements [Formatter] and [FormatPrompter] interfaces.\n\n[NewPromptTemplate] creates a template using Go template syntax by default.\nExample:\n\n\ttemplate := prompts.NewPromptTemplate(\n\t\t\"Summarize this {{.content}} in {{.style}} style\",\n\t\t[]string{\"content\", \"style\"},\n\t)\n\tprompt, err := template.FormatPrompt(data)\n",
     "type": "type",
     "package": "prompts",
     "signature": "type PromptTemplate",
@@ -21463,6 +23956,34 @@
     ]
   },
   {
+    "title": "RenderOption",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#RenderOption",
+    "content": "RenderOption configures template rendering behavior.\n",
+    "type": "type",
+    "package": "prompts",
+    "signature": "type RenderOption",
+    "external": true,
+    "keywords": [
+      "type",
+      "RenderOption",
+      "prompts"
+    ]
+  },
+  {
+    "title": "renderConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#renderConfig",
+    "content": "renderConfig holds internal configuration for rendering.\n",
+    "type": "type",
+    "package": "prompts",
+    "signature": "type renderConfig",
+    "external": true,
+    "keywords": [
+      "type",
+      "renderConfig",
+      "prompts"
+    ]
+  },
+  {
     "title": "StringPromptValue",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#StringPromptValue",
     "content": "StringPromptValue is a prompt value that is a string.\n",
@@ -21507,9 +24028,21 @@
     ]
   },
   {
+    "title": "package prompts",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts",
+    "content": "Package prompts provides template rendering with support for multiple formats.\n\nTemplate Formats:\n- Jinja2: Full Jinja2 syntax with controlled filesystem access\n- Go Templates: Standard text/template with sprig functions\n- F-Strings: Python-style string formatting\n\nBasic Usage:\n\n\t// Simple template rendering\n\tresult, err := prompts.RenderTemplate(\n\t    \"Hello {{ name }}!\",\n\t    prompts.TemplateFormatJinja2,\n\t    map[string]any{\"name\": \"World\"},\n\t)\n\nTemplate Files:\n\n\t// For templates with includes/inheritance, use RenderTemplateFS\n\t//go:embed templates/*\n\tvar templateFS embed.FS\n\tresult, err := prompts.RenderTemplateFS(\n\t    templateFS,\n\t    \"welcome.j2\",\n\t    prompts.TemplateFormatJinja2,\n\t    data,\n\t)\n\nThe RenderTemplate function is designed for inline templates and simple use cases.\nFor template files that need to include other templates, use RenderTemplateFS with\nan explicit fs.FS parameter to define the template file boundary.\n",
+    "type": "package",
+    "package": "prompts",
+    "external": true,
+    "keywords": [
+      "package",
+      "prompts"
+    ]
+  },
+  {
     "title": "CheckValidTemplate",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#CheckValidTemplate",
-    "content": "CheckValidTemplate checks if the template is valid through checking whether the given\nTemplateFormat is available and whether the template can be rendered.\n",
+    "content": "CheckValidTemplate checks if the template is valid through checking whether the given\nTemplateFormat is available and whether the template can be rendered.\n\nNote: This function blocks filesystem access for security. Templates using\ninclude, extends, import, or from statements will fail. Use RenderTemplateFS\nfor controlled filesystem access if needed.\n",
     "type": "function",
     "package": "prompts",
     "signature": "CheckValidTemplate()",
@@ -21523,7 +24056,7 @@
   {
     "title": "RenderTemplate",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#RenderTemplate",
-    "content": "RenderTemplate renders the template with the given values.\n",
+    "content": "RenderTemplate renders the template with the given values.\n\nThis function is designed for inline templates and simple use cases.\nIt supports variable interpolation, conditionals, loops, and filters.\nFor templates that need to include other template files, use RenderTemplateFS\nwith an explicit fs.FS parameter to specify the template file source.\n\nSupported features:\n- Variable interpolation: {{ variable }}\n- Conditional logic: {% if condition %}...{% endif %}\n- Loops: {% for item in list %}...{% endfor %}\n- Text filters: {{ text | filter }}\n\nSecurity: By default, this function renders templates without sanitization.\nTo enable HTML escaping for untrusted data, use the WithSanitization() option.\nThis function always blocks filesystem access for security - templates using\ninclude, extends, or import statements will fail. Use RenderTemplateFS for\ncontrolled filesystem access.\n\nExample:\n\n\tresult, err := RenderTemplate(\n\t    \"Hello {{ name }}! Score: {{ score }}%\",\n\t    TemplateFormatJinja2,\n\t    map[string]any{\"name\": \"Alice\", \"score\": 95},\n\t)\n",
     "type": "function",
     "package": "prompts",
     "signature": "RenderTemplate()",
@@ -21531,6 +24064,20 @@
     "keywords": [
       "function",
       "RenderTemplate",
+      "prompts"
+    ]
+  },
+  {
+    "title": "RenderTemplateFS",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#RenderTemplateFS",
+    "content": "RenderTemplateFS renders a template loaded from the provided filesystem.\nThis enables templates to use include, extends, and import statements\nto compose templates from multiple files.\n\nThe fs.FS parameter defines which files the template can access,\nproviding a clean boundary for template file organization.\n\nSupported fs.FS implementations:\n- embed.FS: Embed templates at compile time (recommended for production)\n- os.DirFS: Access a specific directory tree\n- testing/fstest.MapFS: In-memory filesystem for testing\n- Custom fs.FS implementations for specialized needs\n\nSecurity: Like RenderTemplate, this function optionally validates and sanitizes\ninput data to prevent template injection attacks. The fsys parameter acts as a\nsecurity boundary, limiting templates to only access files within that filesystem.\n\nExamples:\n\n\t// Production deployment with embedded templates:\n\t//go:embed templates/*\n\tvar templateFS embed.FS\n\tresult, err := RenderTemplateFS(templateFS, \"email/welcome.j2\", TemplateFormatJinja2, data)\n\n\t// Development with directory access:\n\tfsys := os.DirFS(\"./templates\")\n\tresult, err := RenderTemplateFS(fsys, \"report.j2\", TemplateFormatJinja2, data)\n\nTemplate composition features:\n- Jinja2: include, extends, import, from statements\n- Go templates: ParseFS functionality for template inheritance\n- F-strings: File reading from the specified filesystem\n",
+    "type": "function",
+    "package": "prompts",
+    "signature": "RenderTemplateFS()",
+    "external": true,
+    "keywords": [
+      "function",
+      "RenderTemplateFS",
       "prompts"
     ]
   },
@@ -21545,20 +24092,6 @@
     "keywords": [
       "function",
       "interpolateGoTemplate",
-      "prompts"
-    ]
-  },
-  {
-    "title": "interpolateJinja2",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#interpolateJinja2",
-    "content": "interpolateJinja2 interpolates the given template with the given values by using\njinja2(impl by https://github.com/NikolaLohinski/gonja).\n",
-    "type": "function",
-    "package": "prompts",
-    "signature": "interpolateJinja2()",
-    "external": true,
-    "keywords": [
-      "function",
-      "interpolateJinja2",
       "prompts"
     ]
   },
@@ -21601,6 +24134,62 @@
     "keywords": [
       "type",
       "interpolator",
+      "prompts"
+    ]
+  },
+  {
+    "title": "renderGoTemplateWithFS",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#renderGoTemplateWithFS",
+    "content": "renderGoTemplateWithFS renders a Go template from the filesystem.\n",
+    "type": "function",
+    "package": "prompts",
+    "signature": "renderGoTemplateWithFS()",
+    "external": true,
+    "keywords": [
+      "function",
+      "renderGoTemplateWithFS",
+      "prompts"
+    ]
+  },
+  {
+    "title": "getSecureGonjaEnv",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#getSecureGonjaEnv",
+    "content": "getSecureGonjaEnv returns a gonja environment that disables filesystem access.\nThis is a singleton that gets initialized once with secure defaults.\n",
+    "type": "function",
+    "package": "prompts",
+    "signature": "getSecureGonjaEnv()",
+    "external": true,
+    "keywords": [
+      "function",
+      "getSecureGonjaEnv",
+      "prompts"
+    ]
+  },
+  {
+    "title": "interpolateJinja2",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#interpolateJinja2",
+    "content": "interpolateJinja2 interpolates the given template with the given values by using\njinja2(impl by https://github.com/NikolaLohinski/gonja).\n\nSecurity: This function uses a secure gonja environment that disables filesystem\naccess by default to prevent template injection attacks such as:\n- {% include \"/etc/passwd\" %}\n- {% extends \"/sensitive/file\" %}\n- {% import \"/system/module\" %}\n- {% from \"/etc/shadow\" import passwords %}\n\nThe secure loader blocks all filesystem operations, ensuring templates can only\nperform safe variable interpolation, conditionals, loops, and built-in functions.\nFor controlled filesystem access, use RenderTemplateFS with an explicit fs.FS.\n",
+    "type": "function",
+    "package": "prompts",
+    "signature": "interpolateJinja2()",
+    "external": true,
+    "keywords": [
+      "function",
+      "interpolateJinja2",
+      "prompts"
+    ]
+  },
+  {
+    "title": "renderJinja2WithFS",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/prompts#renderJinja2WithFS",
+    "content": "renderJinja2WithFS renders a Jinja2 template from the filesystem with controlled access.\n",
+    "type": "function",
+    "package": "prompts",
+    "signature": "renderJinja2WithFS()",
+    "external": true,
+    "keywords": [
+      "function",
+      "renderJinja2WithFS",
       "prompts"
     ]
   },
@@ -21828,6 +24417,327 @@
       "type",
       "AgentStep",
       "schema"
+    ]
+  },
+  {
+    "title": "package llmtest",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest",
+    "content": "Package llmtest provides utilities for testing LLM implementations.\n\nInspired by Go's testing/fstest package, llmtest offers a simple,\nbackend-independent way to verify that LLM implementations conform\nto the expected interfaces and behaviors.\n\n# Design Philosophy\n\nFollowing the principles of testing/fstest:\n  - Minimal API surface - one main function (TestLLM)\n  - Automatic capability discovery - no configuration required\n  - Comprehensive by default - tests all detected capabilities\n  - Interface testing - works with any llms.Model implementation\n  - Simple usage pattern - just pass the model to test\n\n# Usage\n\nTesting an LLM implementation is straightforward:\n\n\tfunc TestMyLLM(t *testing.T) {\n\t    llm, err := mylllm.New()\n\t    if err != nil {\n\t        t.Fatal(err)\n\t    }\n\t    llmtest.TestLLM(t, llm)\n\t}\n\n# Automatic Capability Discovery\n\nThe package automatically detects and tests supported capabilities:\n  - Basic operations (Call, GenerateContent)\n  - Streaming (if model implements streaming interface)\n  - Tool/Function calling (probed with test tool)\n  - Reasoning/Thinking mode (if supported)\n  - Token counting (if usage information provided)\n  - Context caching (if implemented)\n\n# Mock Implementation\n\nA MockLLM is provided for testing without making actual API calls:\n\n\tmock := \u0026llmtest.MockLLM{\n\t    CallFunc: func(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {\n\t        return \"mocked response\", nil\n\t    },\n\t}\n\tllmtest.TestLLM(t, mock)\n\n# Parallel Testing\n\nAll tests run in parallel by default for better performance:\n  - Core tests (Call, GenerateContent) run concurrently\n  - Capability tests run in parallel when detected\n  - Safe for concurrent execution with independent contexts\n\n# Provider Coverage\n\nThe package is used to test all LangChain Go providers:\nanthropic, bedrock, cloudflare, cohere, ernie, fake, googleai,\nhuggingface, llamafile, local, maritaca, mistral, ollama, openai,\nwatsonx, and more.\n",
+    "type": "package",
+    "package": "llmtest",
+    "external": true,
+    "keywords": [
+      "package",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "package llmtest",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest",
+    "content": "Package llmtest provides support for testing LLM implementations.\n\nFollowing the design of testing/fstest, this package provides a simple\nTestLLM function that verifies an LLM implementation behaves correctly.\n",
+    "type": "package",
+    "package": "llmtest",
+    "external": true,
+    "keywords": [
+      "package",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "TestLLM",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#TestLLM",
+    "content": "TestLLM tests an LLM implementation.\nIt performs basic operations and checks that the model behaves correctly.\nIt automatically discovers and tests capabilities by probing the model.\n\nIf TestLLM finds any misbehaviors, it reports them via t.Error/t.Fatal.\n\nTypical usage inside a test:\n\n\tfunc TestLLM(t *testing.T) {\n\t    llm, err := mylllm.New(...)\n\t    if err != nil {\n\t        t.Fatal(err)\n\t    }\n\t    llmtest.TestLLM(t, llm)\n\t}\n",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "TestLLM()",
+    "external": true,
+    "keywords": [
+      "function",
+      "TestLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "TestLLMWithOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#TestLLMWithOptions",
+    "content": "TestLLMWithOptions tests an LLM with specific test options.\n",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "TestLLMWithOptions()",
+    "external": true,
+    "keywords": [
+      "function",
+      "TestLLMWithOptions",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "ValidateLLM",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#ValidateLLM",
+    "content": "ValidateLLM checks if a model satisfies basic requirements without running tests.\nIt returns an error describing what's wrong, or nil if the model is valid.\n",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "ValidateLLM()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ValidateLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "runTestsWithContext",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#runTestsWithContext",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "runTestsWithContext()",
+    "external": true,
+    "keywords": [
+      "function",
+      "runTestsWithContext",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "supportsStreaming",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#supportsStreaming",
+    "content": "supportsStreaming checks if the model supports streaming\n",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "supportsStreaming()",
+    "external": true,
+    "keywords": [
+      "function",
+      "supportsStreaming",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "supportsTools",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#supportsTools",
+    "content": "supportsTools probes if the model supports tool calls\n",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "supportsTools()",
+    "external": true,
+    "keywords": [
+      "function",
+      "supportsTools",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testCaching",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testCaching",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testCaching()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testCaching",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testCall",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testCall",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testCall()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testCall",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testCallWithContext",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testCallWithContext",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testCallWithContext()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testCallWithContext",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testGenerateContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testGenerateContent",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testGenerateContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testGenerateContent",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testGenerateContentWithContext",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testGenerateContentWithContext",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testGenerateContentWithContext()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testGenerateContentWithContext",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testStreaming",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testStreaming",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testStreaming()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testStreaming",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testStreamingWithContext",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testStreamingWithContext",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testStreamingWithContext()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testStreamingWithContext",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testTokenCounting",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testTokenCounting",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testTokenCounting()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testTokenCounting",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testToolCalls",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testToolCalls",
+    "content": "",
+    "type": "function",
+    "package": "llmtest",
+    "signature": "testToolCalls()",
+    "external": true,
+    "keywords": [
+      "function",
+      "testToolCalls",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "MockLLM",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#MockLLM",
+    "content": "MockLLM provides a simple mock implementation for testing.\n",
+    "type": "type",
+    "package": "llmtest",
+    "signature": "type MockLLM",
+    "external": true,
+    "keywords": [
+      "type",
+      "MockLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "MockLLM.Call",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#MockLLM.Call",
+    "content": "Call implements llms.Model\n",
+    "type": "method",
+    "package": "llmtest",
+    "signature": "Call()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Call",
+      "MockLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "MockLLM.GenerateContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#MockLLM.GenerateContent",
+    "content": "GenerateContent implements llms.Model\n",
+    "type": "method",
+    "package": "llmtest",
+    "signature": "GenerateContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "GenerateContent",
+      "MockLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "MockLLM.GenerateContentStream",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#MockLLM.GenerateContentStream",
+    "content": "GenerateContentStream implements streaming\n",
+    "type": "method",
+    "package": "llmtest",
+    "signature": "GenerateContentStream()",
+    "external": true,
+    "keywords": [
+      "method",
+      "GenerateContentStream",
+      "MockLLM",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "TestOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#TestOptions",
+    "content": "TestOptions configures test execution.\n",
+    "type": "type",
+    "package": "llmtest",
+    "signature": "type TestOptions",
+    "external": true,
+    "keywords": [
+      "type",
+      "TestOptions",
+      "llmtest"
+    ]
+  },
+  {
+    "title": "testContext",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/testing/llmtest#testContext",
+    "content": "Internal test context\n",
+    "type": "type",
+    "package": "llmtest",
+    "signature": "type testContext",
+    "external": true,
+    "keywords": [
+      "type",
+      "testContext",
+      "llmtest"
     ]
   },
   {
@@ -27362,6 +30272,299 @@
     ]
   },
   {
+    "title": "package dolt",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt",
+    "content": "Package dolt contains an implementation of the VectorStore\ninterface using Dolt.\n",
+    "type": "package",
+    "package": "dolt",
+    "external": true,
+    "keywords": [
+      "package",
+      "dolt"
+    ]
+  },
+  {
+    "title": "CloseNoErr",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#CloseNoErr",
+    "content": "",
+    "type": "type",
+    "package": "dolt",
+    "signature": "type CloseNoErr",
+    "external": true,
+    "keywords": [
+      "type",
+      "CloseNoErr",
+      "dolt"
+    ]
+  },
+  {
+    "title": "DB",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#DB",
+    "content": "DB represents both a sql.DB and sql.Tx.\n",
+    "type": "type",
+    "package": "dolt",
+    "signature": "type DB",
+    "external": true,
+    "keywords": [
+      "type",
+      "DB",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store",
+    "content": "Store is a wrapper around the dolt client.\n",
+    "type": "type",
+    "package": "dolt",
+    "signature": "type Store",
+    "external": true,
+    "keywords": [
+      "type",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.AddDocuments",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.AddDocuments",
+    "content": "AddDocuments adds documents to the Dolt database associated with 'Store'.\nand returns the ids of the added documents.\n",
+    "type": "method",
+    "package": "dolt",
+    "signature": "AddDocuments()",
+    "external": true,
+    "keywords": [
+      "method",
+      "AddDocuments",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.Close",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.Close",
+    "content": "Close closes the db.\n",
+    "type": "method",
+    "package": "dolt",
+    "signature": "Close()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Close",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.DropTables",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.DropTables",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "DropTables()",
+    "external": true,
+    "keywords": [
+      "method",
+      "DropTables",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.RemoveDatabase",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.RemoveDatabase",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "RemoveDatabase()",
+    "external": true,
+    "keywords": [
+      "method",
+      "RemoveDatabase",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.Search",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.Search",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "Search()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Search",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.SimilaritySearch",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.SimilaritySearch",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "SimilaritySearch()",
+    "external": true,
+    "keywords": [
+      "method",
+      "SimilaritySearch",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.createCollectionTableIfNotExists",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.createCollectionTableIfNotExists",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "createCollectionTableIfNotExists()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createCollectionTableIfNotExists",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.createEmbeddingTableIfNotExists",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.createEmbeddingTableIfNotExists",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "createEmbeddingTableIfNotExists()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createEmbeddingTableIfNotExists",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.createOrGetDatabase",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.createOrGetDatabase",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "createOrGetDatabase()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createOrGetDatabase",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.deduplicate",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.deduplicate",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "deduplicate()",
+    "external": true,
+    "keywords": [
+      "method",
+      "deduplicate",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.getDatabaseName",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.getDatabaseName",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "getDatabaseName()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getDatabaseName",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.getFilters",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.getFilters",
+    "content": "getFilters return metadata filters, now only support map[key]value pattern\nTODO: should support more types like {\"key1\": {\"key2\":\"values2\"}} or {\"key\": [\"value1\", \"values2\"]}.\n",
+    "type": "method",
+    "package": "dolt",
+    "signature": "getFilters()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getFilters",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.getOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.getOptions",
+    "content": "getOptions applies given options to default Options and returns it\nThis uses options pattern so clients can easily pass options without changing function signature.\n",
+    "type": "method",
+    "package": "dolt",
+    "signature": "getOptions()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getOptions",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.getScoreThreshold",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.getScoreThreshold",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "getScoreThreshold()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getScoreThreshold",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Store.init",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Store.init",
+    "content": "",
+    "type": "method",
+    "package": "dolt",
+    "signature": "init()",
+    "external": true,
+    "keywords": [
+      "method",
+      "init",
+      "Store",
+      "dolt"
+    ]
+  },
+  {
+    "title": "Option",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/dolt#Option",
+    "content": "Option is a function type that can be used to modify the client.\n",
+    "type": "type",
+    "package": "dolt",
+    "signature": "type Option",
+    "external": true,
+    "keywords": [
+      "type",
+      "Option",
+      "dolt"
+    ]
+  },
+  {
     "title": "package inmemory",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/inmemory",
     "content": "Package inmemory contains an implementation of the inmemory VectorStore\n",
@@ -27501,6 +30704,311 @@
       "type",
       "Option",
       "inmemory"
+    ]
+  },
+  {
+    "title": "package mariadb",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb",
+    "content": "Package mariadb contains an implementation of the VectorStore\ninterface using MariaDB.\n",
+    "type": "package",
+    "package": "mariadb",
+    "external": true,
+    "keywords": [
+      "package",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "CloseNoErr",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#CloseNoErr",
+    "content": "",
+    "type": "type",
+    "package": "mariadb",
+    "signature": "type CloseNoErr",
+    "external": true,
+    "keywords": [
+      "type",
+      "CloseNoErr",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "DB",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#DB",
+    "content": "DB represents both a sql.DB and sql.Tx.\n",
+    "type": "type",
+    "package": "mariadb",
+    "signature": "type DB",
+    "external": true,
+    "keywords": [
+      "type",
+      "DB",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store",
+    "content": "Store is a wrapper around the mariadb client.\n",
+    "type": "type",
+    "package": "mariadb",
+    "signature": "type Store",
+    "external": true,
+    "keywords": [
+      "type",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.AddDocuments",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.AddDocuments",
+    "content": "AddDocuments adds documents to the MariaDB database associated with 'Store'.\nand returns the ids of the added documents.\n",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "AddDocuments()",
+    "external": true,
+    "keywords": [
+      "method",
+      "AddDocuments",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.Close",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.Close",
+    "content": "Close closes the db.\n",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "Close()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Close",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.DropTables",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.DropTables",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "DropTables()",
+    "external": true,
+    "keywords": [
+      "method",
+      "DropTables",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.RemoveDatabase",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.RemoveDatabase",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "RemoveDatabase()",
+    "external": true,
+    "keywords": [
+      "method",
+      "RemoveDatabase",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.Search",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.Search",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "Search()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Search",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.SimilaritySearch",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.SimilaritySearch",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "SimilaritySearch()",
+    "external": true,
+    "keywords": [
+      "method",
+      "SimilaritySearch",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.createCollectionTableIfNotExists",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.createCollectionTableIfNotExists",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "createCollectionTableIfNotExists()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createCollectionTableIfNotExists",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.createEmbeddingTableIfNotExists",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.createEmbeddingTableIfNotExists",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "createEmbeddingTableIfNotExists()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createEmbeddingTableIfNotExists",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.createOrGetDatabase",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.createOrGetDatabase",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "createOrGetDatabase()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createOrGetDatabase",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.deduplicate",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.deduplicate",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "deduplicate()",
+    "external": true,
+    "keywords": [
+      "method",
+      "deduplicate",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.getDatabaseName",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.getDatabaseName",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "getDatabaseName()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getDatabaseName",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.getFilters",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.getFilters",
+    "content": "getFilters return metadata filters, now only support map[key]value pattern\nTODO: should support more types like {\"key1\": {\"key2\":\"values2\"}} or {\"key\": [\"value1\", \"values2\"]}.\n",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "getFilters()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getFilters",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.getOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.getOptions",
+    "content": "getOptions applies given options to default Options and returns it\nThis uses options pattern so clients can easily pass options without changing function signature.\n",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "getOptions()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getOptions",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.getScoreThreshold",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.getScoreThreshold",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "getScoreThreshold()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getScoreThreshold",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Store.init",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Store.init",
+    "content": "",
+    "type": "method",
+    "package": "mariadb",
+    "signature": "init()",
+    "external": true,
+    "keywords": [
+      "method",
+      "init",
+      "Store",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "Option",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/mariadb#Option",
+    "content": "Option is a function type that can be used to modify the client.\n",
+    "type": "type",
+    "package": "mariadb",
+    "signature": "type Option",
+    "external": true,
+    "keywords": [
+      "type",
+      "Option",
+      "mariadb"
+    ]
+  },
+  {
+    "title": "package milvus",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus",
+    "content": "Package milvus provides a vectorstore implementation for Milvus.\n\nDeprecated: This package uses github.com/milvus-io/milvus-sdk-go/v2 which has been\narchived by the Milvus maintainers on March 21, 2025. The new SDK is available at\ngithub.com/milvus-io/milvus/client/v2. Migration to the new SDK is planned but will\nrequire breaking changes in a future version. See issue #1397 for migration tracking.\n",
+    "type": "package",
+    "package": "milvus",
+    "external": true,
+    "keywords": [
+      "package",
+      "milvus"
     ]
   },
   {
@@ -27739,6 +31247,437 @@
       "type",
       "Option",
       "milvus"
+    ]
+  },
+  {
+    "title": "package main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2",
+    "content": "This file provides examples of how to migrate existing code from the deprecated\nvectorstores/milvus package to the new vectorstores/milvus/v2 package.\n",
+    "type": "package",
+    "package": "main",
+    "external": true,
+    "keywords": [
+      "package",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateBasicMigration",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#demonstrateBasicMigration",
+    "content": "demonstrateBasicMigration shows how basic configuration migrates from v1 to v2.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateBasicMigration()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateBasicMigration",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateCompatibilityLayer",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#demonstrateCompatibilityLayer",
+    "content": "demonstrateCompatibilityLayer shows the compatibility layer in action.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateCompatibilityLayer()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateCompatibilityLayer",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateIndexMigration",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#demonstrateIndexMigration",
+    "content": "demonstrateIndexMigration shows how index configuration migrates.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateIndexMigration()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateIndexMigration",
+      "main"
+    ]
+  },
+  {
+    "title": "demonstrateSearchParamMigration",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#demonstrateSearchParamMigration",
+    "content": "demonstrateSearchParamMigration shows search parameter migration.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "demonstrateSearchParamMigration()",
+    "external": true,
+    "keywords": [
+      "function",
+      "demonstrateSearchParamMigration",
+      "main"
+    ]
+  },
+  {
+    "title": "exampleMixedUsage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#exampleMixedUsage",
+    "content": "exampleMixedUsage shows using v2 with v1 configurations for gradual migration.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "exampleMixedUsage()",
+    "external": true,
+    "keywords": [
+      "function",
+      "exampleMixedUsage",
+      "main"
+    ]
+  },
+  {
+    "title": "exampleV1Usage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#exampleV1Usage",
+    "content": "exampleV1Usage shows typical v1 usage (deprecated).\n",
+    "type": "function",
+    "package": "main",
+    "signature": "exampleV1Usage()",
+    "external": true,
+    "keywords": [
+      "function",
+      "exampleV1Usage",
+      "main"
+    ]
+  },
+  {
+    "title": "exampleV2Usage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#exampleV2Usage",
+    "content": "exampleV2Usage shows new v2 usage (recommended).\n",
+    "type": "function",
+    "package": "main",
+    "signature": "exampleV2Usage()",
+    "external": true,
+    "keywords": [
+      "function",
+      "exampleV2Usage",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#main",
+    "content": "MigrationExample demonstrates how to migrate from v1 to v2.\n",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "package v2",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2",
+    "content": "Package v2 provides a vectorstore implementation for Milvus using the new SDK.\nThis package uses github.com/milvus-io/milvus/client/v2 which is actively maintained\nand replaces the archived milvus-sdk-go/v2 package.\n",
+    "type": "package",
+    "package": "v2",
+    "external": true,
+    "keywords": [
+      "package",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store",
+    "content": "Store is a wrapper around the milvus client using the new SDK.\n",
+    "type": "type",
+    "package": "v2",
+    "signature": "type Store",
+    "external": true,
+    "keywords": [
+      "type",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.AddDocuments",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.AddDocuments",
+    "content": "AddDocuments adds the text and metadata from the documents to the Milvus collection associated with 'Store'.\nand returns the ids of the added documents.\n",
+    "type": "method",
+    "package": "v2",
+    "signature": "AddDocuments()",
+    "external": true,
+    "keywords": [
+      "method",
+      "AddDocuments",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.SimilaritySearch",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.SimilaritySearch",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "SimilaritySearch()",
+    "external": true,
+    "keywords": [
+      "method",
+      "SimilaritySearch",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.convertResultToDocument",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.convertResultToDocument",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "convertResultToDocument()",
+    "external": true,
+    "keywords": [
+      "method",
+      "convertResultToDocument",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.createCollection",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.createCollection",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "createCollection()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createCollection",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.createIndex",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.createIndex",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "createIndex()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createIndex",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.createSearchParams",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.createSearchParams",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "createSearchParams()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createSearchParams",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.dropCollection",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.dropCollection",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "dropCollection()",
+    "external": true,
+    "keywords": [
+      "method",
+      "dropCollection",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.extractFields",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.extractFields",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "extractFields()",
+    "external": true,
+    "keywords": [
+      "method",
+      "extractFields",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.getFilters",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.getFilters",
+    "content": "getFilters return metadata filters.\n",
+    "type": "method",
+    "package": "v2",
+    "signature": "getFilters()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getFilters",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.getIndex",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.getIndex",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "getIndex()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getIndex",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.getOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.getOptions",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "getOptions()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getOptions",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.getSearchFields",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.getSearchFields",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "getSearchFields()",
+    "external": true,
+    "keywords": [
+      "method",
+      "getSearchFields",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.init",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.init",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "init()",
+    "external": true,
+    "keywords": [
+      "method",
+      "init",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "Store.load",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Store.load",
+    "content": "",
+    "type": "method",
+    "package": "v2",
+    "signature": "load()",
+    "external": true,
+    "keywords": [
+      "method",
+      "load",
+      "Store",
+      "v2"
+    ]
+  },
+  {
+    "title": "convertV1IndexToV2",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#convertV1IndexToV2",
+    "content": "",
+    "type": "function",
+    "package": "v2",
+    "signature": "convertV1IndexToV2()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertV1IndexToV2",
+      "v2"
+    ]
+  },
+  {
+    "title": "convertV1SearchParamToV2",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#convertV1SearchParamToV2",
+    "content": "",
+    "type": "function",
+    "package": "v2",
+    "signature": "convertV1SearchParamToV2()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertV1SearchParamToV2",
+      "v2"
+    ]
+  },
+  {
+    "title": "ConfigAdapter",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#ConfigAdapter",
+    "content": "ConfigAdapter handles conversion between v1 and v2 configurations\n",
+    "type": "type",
+    "package": "v2",
+    "signature": "type ConfigAdapter",
+    "external": true,
+    "keywords": [
+      "type",
+      "ConfigAdapter",
+      "v2"
+    ]
+  },
+  {
+    "title": "ConfigAdapter.ToV2Config",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#ConfigAdapter.ToV2Config",
+    "content": "ToV2Config converts various config types to milvusclient.ClientConfig\n",
+    "type": "method",
+    "package": "v2",
+    "signature": "ToV2Config()",
+    "external": true,
+    "keywords": [
+      "method",
+      "ToV2Config",
+      "ConfigAdapter",
+      "v2"
+    ]
+  },
+  {
+    "title": "Option",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/vectorstores/milvus/v2#Option",
+    "content": "Option is a function type that can be used to modify the client.\n",
+    "type": "type",
+    "package": "v2",
+    "signature": "type Option",
+    "external": true,
+    "keywords": [
+      "type",
+      "Option",
+      "v2"
     ]
   },
   {

@@ -1,0 +1,31 @@
+httprr trace v1
+409 1393
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 205
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"anthropic/claude-sonnet-4.5","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 938
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:57:03 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111822-afTmGp0aeJd9CPXmCZ9z","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion","created":1769111822,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger. \n\nSpain has an area of about 505,990 km², while Lesotho has an area of about 30,355 km². Spain is roughly 17 times larger than Lesotho.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":28,"completion_tokens":53,"total_tokens":81,"cost":0.000879,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000084,"upstream_inference_completions_cost":0.000795},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

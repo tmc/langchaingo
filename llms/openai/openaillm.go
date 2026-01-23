@@ -220,6 +220,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
+		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}
 
 	if opts.JSONMode {
@@ -313,10 +314,17 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 			ReasoningContent: c.Message.ReasoningContent,
 			StopReason:       fmt.Sprint(c.FinishReason),
 			GenerationInfo: map[string]any{
-				"CompletionTokens": result.Usage.CompletionTokens,
-				"PromptTokens":     result.Usage.PromptTokens,
-				"TotalTokens":      result.Usage.TotalTokens,
-				"ReasoningTokens":  result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionTokens":  result.Usage.CompletionTokens,
+				"PromptTokens":      result.Usage.PromptTokens,
+				"TotalTokens":       result.Usage.TotalTokens,
+				"ReasoningTokens":   result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"PromptAudioTokens": result.Usage.PromptTokensDetails.AudioTokens,
+				// Standardized fields for cross-provider compatibility
+				"PromptCachedTokens":                 result.Usage.PromptTokensDetails.CachedTokens,
+				"CompletionAudioTokens":              result.Usage.CompletionTokensDetails.AudioTokens,
+				"CompletionReasoningTokens":          result.Usage.CompletionTokensDetails.ReasoningTokens,
+				"CompletionAcceptedPredictionTokens": result.Usage.CompletionTokensDetails.AcceptedPredictionTokens,
+				"CompletionRejectedPredictionTokens": result.Usage.CompletionTokensDetails.RejectedPredictionTokens,
 			},
 		}
 
@@ -429,4 +437,27 @@ func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
 			Arguments: tc.FunctionCall.Arguments,
 		},
 	}
+}
+
+// webSearchOptionsFromCallOptions converts llms.WebSearchOptions to openaiclient.WebSearchOptions.
+func webSearchOptionsFromCallOptions(opts *llms.WebSearchOptions) *openaiclient.WebSearchOptions {
+	if opts == nil {
+		return nil
+	}
+	result := &openaiclient.WebSearchOptions{
+		SearchContextSize: opts.SearchContextSize,
+	}
+	if opts.UserLocation != nil {
+		result.UserLocation = &openaiclient.UserLocation{
+			Type: opts.UserLocation.Type,
+		}
+		if opts.UserLocation.Approximate != nil {
+			result.UserLocation.Approximate = &openaiclient.ApproximateLocation{
+				Country: opts.UserLocation.Approximate.Country,
+				City:    opts.UserLocation.Approximate.City,
+				Region:  opts.UserLocation.Approximate.Region,
+			}
+		}
+	}
+	return result
 }

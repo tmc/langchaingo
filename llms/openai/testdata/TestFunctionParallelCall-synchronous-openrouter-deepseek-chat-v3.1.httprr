@@ -1,0 +1,35 @@
+httprr trace v1
+946 1625
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 742
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek/deepseek-chat-v3.1","messages":[{"role":"user","content":"What are the weather and time in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}},{"type":"function","function":{"name":"getCurrentTime","description":"Get the current time in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"}},"required":["location"]}}}]}HTTP/2.0 200 OK
+Content-Length: 1169
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:58:40 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111919-Xu64pxujwIXTOHTcZcnY","provider":"Novita","model":"deepseek/deepseek-chat-v3.1","object":"chat.completion","created":1769111919,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"d4f9923b0a5142aeb6a692061755db7b","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\", \"unit\": \"celsius\"}"}},{"type":"function","index":1,"id":"51b7186e147249398bc6251e78e0e859","function":{"name":"getCurrentTime","arguments":"{\"location\": \"Boston, MA\"}"}}]}}],"system_fingerprint":"","usage":{"prompt_tokens":640,"completion_tokens":75,"total_tokens":715,"cost":0.00023916,"is_byok":false,"prompt_tokens_details":{"cached_tokens":64,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00016416,"upstream_inference_completions_cost":0.000075},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

@@ -1,5 +1,5 @@
 httprr trace v1
-396 1167
+395 1416
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,18 +8,18 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4o","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 779
+Content-Length: 961
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:15 GMT
+Date: Thu, 22 Jan 2026 19:57:01 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
 
          
-{"id":"gen-1750691654-edzbVsiUJ7F0VJJr44tV","provider":"OpenAI","model":"openai/gpt-4o","object":"chat.completion","created":1750691654,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho. Spain covers an area of approximately 505,990 square kilometers, making it one of the larger countries in Europe, while Lesotho covers about 30,355 square kilometers and is an enclaved country surrounded by South Africa.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_07871e2ad8","usage":{"prompt_tokens":28,"completion_tokens":52,"total_tokens":80,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+{"id":"gen-1769111820-zxuBcNdNAoSzsdDbKyCn","provider":"OpenAI","model":"openai/gpt-4o","object":"chat.completion","created":1769111820,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger than Lesotho. Spain covers an area of approximately 505,990 square kilometers, making it one of the larger countries in Europe. In contrast, Lesotho is much smaller, with an area of about 30,355 square kilometers.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_cbf1785567","usage":{"prompt_tokens":28,"completion_tokens":51,"total_tokens":79,"cost":0.00058,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.00058,"upstream_inference_prompt_cost":0.00007,"upstream_inference_completions_cost":0.00051},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0}}}

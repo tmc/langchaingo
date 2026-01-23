@@ -13,36 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestClient_CreateCompletion(t *testing.T) {
-	ctx := t.Context()
-	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "ANTHROPIC_API_KEY")
-
-	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	defer rr.Close()
-
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey == "" {
-		apiKey = "test-api-key"
-	}
-
-	client, err := New(apiKey, "claude-2.1", DefaultBaseURL, WithHTTPClient(rr.Client()))
-	require.NoError(t, err)
-
-	client.UseLegacyTextCompletionsAPI = true
-
-	req := &CompletionRequest{
-		Model:       "claude-2.1",
-		Prompt:      "\n\nHuman: Hello, how are you?\n\nAssistant:",
-		Temperature: 0.0,
-		MaxTokens:   100,
-	}
-
-	resp, err := client.CreateCompletion(ctx, req)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
-	assert.NotEmpty(t, resp.Text)
-}
-
 func TestClient_CreateMessage(t *testing.T) {
 	ctx := t.Context()
 
@@ -54,11 +24,11 @@ func TestClient_CreateMessage(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "claude-3-opus-20240229", DefaultBaseURL, WithHTTPClient(rr.Client()))
+	client, err := New(apiKey, "claude-sonnet-4-5", DefaultBaseURL, WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	req := &MessageRequest{
-		Model: "claude-3-opus-20240229",
+		Model: "claude-sonnet-4-5",
 		Messages: []ChatMessage{
 			{
 				Role: "user",
@@ -90,7 +60,7 @@ func TestClient_CreateMessageStream(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "claude-3-opus-20240229", DefaultBaseURL, WithHTTPClient(rr.Client()))
+	client, err := New(apiKey, "claude-sonnet-4-5", DefaultBaseURL, WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
 	var (
@@ -98,7 +68,7 @@ func TestClient_CreateMessageStream(t *testing.T) {
 		streamDone bool
 	)
 	req := &MessageRequest{
-		Model: "claude-3-opus-20240229",
+		Model: "claude-sonnet-4-5",
 		Messages: []ChatMessage{
 			{
 				Role: "user",
@@ -143,14 +113,14 @@ func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 		apiKey = key
 	}
 
-	client, err := New(apiKey, "claude-3-opus-20240229", DefaultBaseURL,
+	client, err := New(apiKey, "claude-sonnet-4-5", DefaultBaseURL,
 		WithHTTPClient(rr.Client()),
 		WithAnthropicBetaHeader("tools-2024-05-16"),
 	)
 	require.NoError(t, err)
 
 	req := &MessageRequest{
-		Model: "claude-3-opus-20240229",
+		Model: "claude-sonnet-4-5",
 		Messages: []ChatMessage{
 			{
 				Role: "user",

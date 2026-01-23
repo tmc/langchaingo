@@ -1,20 +1,20 @@
 httprr trace v1
-614 49798
-POST https://generativelanguage.googleapis.com//v1beta/models/embedding-001:batchEmbedContents HTTP/1.1
+612 49798
+POST https://generativelanguage.googleapis.com/v1beta/models/embedding-001:batchEmbedContents HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 292
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/1.15.0 gl-go/go1.24.0
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"requests":[{"content":{"parts":[{"text":"hello world"}],"role":"user"},"model":"models/embedding-001"},{"content":{"parts":[{"text":"goodbye world"}],"role":"user"},"model":"models/embedding-001"},{"content":{"parts":[{"text":"hello world"}],"role":"user"},"model":"models/embedding-001"}]}HTTP/2.0 200 OK
 Content-Length: 49418
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 11 Jul 2025 21:05:15 GMT
+Date: Fri, 23 Jan 2026 22:51:03 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=509
+Server-Timing: gfet4t7; dur=297
 Vary: Origin
 Vary: X-Origin
 Vary: Referer

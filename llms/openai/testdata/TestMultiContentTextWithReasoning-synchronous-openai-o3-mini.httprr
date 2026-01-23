@@ -1,5 +1,5 @@
 httprr trace v1
-387 1832
+386 1981
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"o3-mini","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning_effort":"high"}HTTP/2.0 200 OK
-Content-Length: 1108
+Content-Length: 1179
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:26:20 GMT
+Date: Thu, 22 Jan 2026 19:50:05 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 6335
+Openai-Processing-Ms: 6023
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 6344
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999980
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 6049
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999980
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_ce34090c07aa2cde8c737988848ed522
+X-Request-Id: req_d6260504e96c432f91ad1133d63e03c6
 
 {
-  "id": "chatcmpl-BleHlzUE8eIPujJyWAx95w9p62Xsl",
+  "id": "chatcmpl-D0uyld994ANMH8ZAgcNoSwlmRsixK",
   "object": "chat.completion",
-  "created": 1750695973,
+  "created": 1769111399,
   "model": "o3-mini-2025-01-31",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The factorial of a number n, denoted by n!, is the product of all positive integers from 1 up to n. For 5!, this means:\n\n1. Write out the product: 5! = 5 × 4 × 3 × 2 × 1.\n2. Multiply step by step:\n   • 5 × 4 = 20\n   • 20 × 3 = 60\n   • 60 × 2 = 120\n   • 120 × 1 = 120\n\nThus, the factorial of 5 is 120.",
+        "content": "The factorial of a number n (denoted as n!) is the product of all positive integers from n down to 1. For 5, the factorial is calculated as follows:\n\n1. Write out the product: 5! = 5 × 4 × 3 × 2 × 1.\n2. Multiply step by step:\n   - First, 5 × 4 = 20.\n   - Next, 20 × 3 = 60.\n   - Then, 60 × 2 = 120.\n   - Finally, 120 × 1 = 120.\n3. So, 5! = 120.\n\nThus, the factorial of 5 is 120.",
         "refusal": null,
         "annotations": []
       },
@@ -48,19 +50,19 @@ X-Request-Id: req_ce34090c07aa2cde8c737988848ed522
   ],
   "usage": {
     "prompt_tokens": 23,
-    "completion_tokens": 455,
-    "total_tokens": 478,
+    "completion_tokens": 733,
+    "total_tokens": 756,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 320,
+      "reasoning_tokens": 576,
       "audio_tokens": 0,
       "accepted_prediction_tokens": 0,
       "rejected_prediction_tokens": 0
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_e20469f047"
+  "system_fingerprint": "fp_d48b29c73d"
 }

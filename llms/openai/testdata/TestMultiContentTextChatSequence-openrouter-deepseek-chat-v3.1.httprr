@@ -1,0 +1,69 @@
+httprr trace v1
+409 1781
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 205
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek/deepseek-chat-v3.1","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 1325
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:57:05 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111822-xUXS0hRjguLi2HKvNedc","provider":"SambaNova","model":"deepseek/deepseek-chat-v3.1","object":"chat.completion","created":1769111822,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Based on land area, **Spain is significantly larger than Lesotho**.\n\n*   **Spain** has an area of approximately **505,990 square kilometers** (195,360 sq mi).\n*   **Lesotho** has an area of approximately **30,355 square kilometers** (11,720 sq mi).\n\nTherefore, Spain is more than **16 times larger** than Lesotho.","refusal":null,"reasoning":null}}],"system_fingerprint":"fastcoe","usage":{"prompt_tokens":21,"completion_tokens":78,"total_tokens":99,"cost":0.00006165,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00000315,"upstream_inference_completions_cost":0.0000585},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

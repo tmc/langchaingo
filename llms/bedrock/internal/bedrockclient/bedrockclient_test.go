@@ -254,6 +254,7 @@ func TestCreateAmazonCompletion_RequestStructure(t *testing.T) {
 }
 
 // Anthropic provider tests
+// TestProcessInputMessagesAnthropic tests the processInputMessagesAnthropic function
 func TestProcessInputMessagesAnthropic(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -333,10 +334,12 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 
 			if tt.expectError {
 				require.Error(t, err)
-				require.Contains(t, err.Error(), tt.errorContains)
+				if tt.errorContains != "" {
+					require.Contains(t, err.Error(), tt.errorContains)
+				}
 			} else {
 				require.NoError(t, err)
-				require.Len(t, msgs, tt.expectedMsgs)
+				require.Equal(t, tt.expectedMsgs, len(msgs))
 				require.Equal(t, tt.expectedSystem, system)
 			}
 		})
@@ -376,7 +379,7 @@ func TestGetAnthropicRole(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name:     "tool role",
+			name:     "tool role treated as user",
 			role:     llms.ChatMessageTypeTool,
 			expected: AnthropicRoleUser,
 		},

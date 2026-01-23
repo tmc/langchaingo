@@ -1,5 +1,5 @@
 httprr trace v1
-397 1289
+396 1517
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4.1","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 901
+Content-Length: 1061
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:22 GMT
+Date: Thu, 22 Jan 2026 19:57:02 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -24,8 +24,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-{"id":"gen-1750691662-zf3f7T1L4gjlarNtvpNU","provider":"OpenAI","model":"openai/gpt-4.1","object":"chat.completion","created":1750691662,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is significantly larger than Lesotho in both area and population.\n\n- **Area:**\n  - **Spain:** About 505,990 square kilometers\n  - **Lesotho:** About 30,355 square kilometers\n\n- **Population:**  \n  - **Spain:** Around 48 million people\n  - **Lesotho:** Around 2.3 million people\n\nSo, **Spain** is much larger than Lesotho.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_51e1070cf2","usage":{"prompt_tokens":28,"completion_tokens":87,"total_tokens":115,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+{"id":"gen-1769111822-HuL3kxDccDt2vr4Y8TdF","provider":"OpenAI","model":"openai/gpt-4.1","object":"chat.completion","created":1769111822,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"**Spain** is much larger than **Lesotho** in terms of both area and population.\n\n- **Spain**\n  - Area: About **505,990 km²**\n  - Population: Around **47 million** people\n\n- **Lesotho**\n  - Area: About **30,355 km²**\n  - Population: Around **2.2 million** people\n\nSo, **Spain** is both geographically and demographically much larger than **Lesotho**.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":28,"completion_tokens":96,"total_tokens":124,"cost":0.000824,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.000824,"upstream_inference_prompt_cost":0.000056,"upstream_inference_completions_cost":0.000768},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

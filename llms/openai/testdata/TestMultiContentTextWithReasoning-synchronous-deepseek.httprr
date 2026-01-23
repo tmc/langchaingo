@@ -1,5 +1,5 @@
 httprr trace v1
-372 3475
+371 1838
 POST https://api.deepseek.com/chat/completions HTTP/1.1
 Host: api.deepseek.com
 User-Agent: langchaingo-httprr
@@ -8,15 +8,18 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"deepseek-reasoner","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192}HTTP/2.0 200 OK
-Content-Length: 3047
+Content-Length: 1246
 Access-Control-Allow-Credentials: true
-Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:26:13 GMT
-Server: cloudflare
+Date: Thu, 22 Jan 2026 19:49:56 GMT
+Server: elb
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 Vary: origin, access-control-request-method, access-control-request-headers
+Via: 1.1 3c5c6d0ac004d7cc9b79e2835fc1f6a4.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: 7j8UnifCg2pPCGDuyoazJMDLVrXrw6z9BnZaFv8MhGbwPRkUHLNrLA==
+X-Amz-Cf-Pop: EWR53-P1
+X-Cache: Miss from cloudfront
 X-Content-Type-Options: nosniff
-X-Ds-Trace-Id: f5d071c3aef0d9d772223bfc7f8878f4
+X-Ds-Trace-Id: fe2c3f86b5588aecca618329af3db70e
 
-{"id":"ae9b0523-0c93-4ca9-b9cf-17fd6b7d3d95","object":"chat.completion","created":1750695973,"model":"deepseek-reasoner","choices":[{"index":0,"message":{"role":"assistant","content":"The factorial of a number \\(n\\), denoted \\(n!\\), is the product of all positive integers from 1 to \\(n\\). For \\(n = 5\\), this means:\n\n\\[\n5! = 5 \\times 4 \\times 3 \\times 2 \\times 1\n\\]\n\nNow, calculate step by step:\n\n- Start with \\(5 \\times 4 = 20\\)\n- Multiply the result by 3: \\(20 \\times 3 = 60\\)\n- Multiply the result by 2: \\(60 \\times 2 = 120\\)\n- Multiply the result by 1: \\(120 \\times 1 = 120\\)\n\nTherefore, the factorial of 5 is:\n\n\\[\n\\boxed{120}\n\\]","reasoning_content":"First, the question is: \"What is the factorial of 5?\" I need to show my work and think before I answer. So, I should recall what a factorial is.\n\nFactorial of a number n, denoted as n!, is the product of all positive integers from 1 up to n. For example, 5! means 5 × 4 × 3 × 2 × 1.\n\nNow, I need to calculate that step by step. Let me start from 5 and multiply down to 1.\n\nSo, 5! = 5 × 4 × 3 × 2 × 1\n\nI can multiply these numbers in sequence to make it easier.\n\nFirst, 5 × 4 = 20\n\nThen, 20 × 3 = 60\n\nThen, 60 × 2 = 120\n\nFinally, 120 × 1 = 120\n\nI know that multiplying by 1 doesn't change the number, so 120 is the result.\n\nI can also think of factorials recursively, but for this, direct multiplication is fine.\n\nJust to be thorough, let me list out the multiplication:\n\nStart with 5\n\nMultiply by 4: 5 × 4 = 20\n\nMultiply by 3: 20 × 3 = 60\n\nMultiply by 2: 60 × 2 = 120\n\nMultiply by 1: 120 × 1 = 120\n\nYes, that's consistent.\n\nI recall that 5! is 120. That's a common factorial value.\n\nFor example, 4! is 24, and 5! is 5 × 24 = 120. That's another way to check.\n\nWhat's 4!? 4 × 3 × 2 × 1 = 4 × 3 = 12, 12 × 2 = 24, 24 × 1 = 24. So, 4! = 24.\n\nThen 5! = 5 × 4! = 5 × 24 = 120.\n\nSame result.\n\nI think I'm confident with this.\n\nNow, the question says \"show your work,\" so I need to present this step by step in my response.\n\nAlso, \"think before you answer\" – I've done that by reasoning it out.\n\nSo, for the answer, I should write:\n\nThe factorial of 5, denoted as 5!, is calculated as follows:\n\n5! = 5 × 4 × 3 × 2 × 1\n\n= (5 × 4) × 3 × 2 × 1\n\n= 20 × 3 × 2 × 1\n\n= (20 × 3) × 2 × 1\n\n= 60 × 2 × 1\n\n= (60 × 2) × 1\n\n= 120 × 1\n\n= 120\n\nTherefore, 5! = 120.\n\nI could write it more concisely, but showing each multiplication step makes it clear.\n\nSince it's a simple calculation, I can just state it.\n\nBut to follow the instruction, I'll show the work.\n\nFinally, box the answer as is common in such responses."},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":22,"completion_tokens":820,"total_tokens":842,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":661},"prompt_cache_hit_tokens":0,"prompt_cache_miss_tokens":22},"system_fingerprint":"fp_393bca965e_prod0425fp8"}
+{"id":"fe63a758-c98a-4dc9-adb9-de006739d30e","object":"chat.completion","created":1769111396,"model":"deepseek-reasoner","choices":[{"index":0,"message":{"role":"assistant","content":"The factorial of 5, denoted as 5!, is calculated as follows:\n\n\\[\n5! = 5 \\times 4 \\times 3 \\times 2 \\times 1\n\\]\n\nStep-by-step multiplication:\n- \\( 5 \\times 4 = 20 \\)\n- \\( 20 \\times 3 = 60 \\)\n- \\( 60 \\times 2 = 120 \\)\n- \\( 120 \\times 1 = 120 \\)\n\nThus, \\( 5! = 120 \\).","reasoning_content":"We are asked: \"What is the factorial of 5? Show your work. Think before you answer.\" This is straightforward. The factorial of 5, denoted as 5!, is the product of all positive integers from 1 to 5. So, 5! = 5 × 4 × 3 × 2 × 1. We can compute step by step.\n\nLet's compute:\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nSo, 5! = 120.\n\nWe should show our work as requested. The answer is 120."},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":21,"completion_tokens":248,"total_tokens":269,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":138},"prompt_cache_hit_tokens":0,"prompt_cache_miss_tokens":21},"system_fingerprint":"fp_eaab8d114b_prod0820_fp8_kvcache"}

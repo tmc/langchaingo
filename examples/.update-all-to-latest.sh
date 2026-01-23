@@ -8,6 +8,7 @@ syncref="${1:-latest}"
 
 for gm in $(find . -name go.mod); do
   (
+  echo "Tidying $(dirname $gm)"
   cd $(dirname $gm)
   go mod tidy
 ) &

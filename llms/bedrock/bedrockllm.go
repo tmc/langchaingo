@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
 
-const defaultModel = ModelAmazonTitanTextPremierV1
+const defaultModel = ModelAnthropicClaudeHaiku45
 
 // LLM is a Bedrock LLM implementation.
 type LLM struct {

@@ -1,5 +1,5 @@
 httprr trace v1
-656 1106
+655 1379
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,16 +8,20 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4o","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 718
+Content-Length: 924
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:30 GMT
+Date: Thu, 22 Jan 2026 19:58:28 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
-{"id":"gen-1750695690-RshP8ulWoJCxBwg6RQtH","provider":"OpenAI","model":"openai/gpt-4o","object":"chat.completion","created":1750695690,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"index":0,"id":"call_75pm5WeLX4YpwHglAo0VblBi","type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\",\"unit\":\"celsius\"}"}}]}}],"system_fingerprint":"fp_07871e2ad8","usage":{"prompt_tokens":82,"completion_tokens":22,"total_tokens":104,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+         
+
+         
+{"id":"gen-1769111906-GXtXZZA18h9wQj1SdokW","provider":"OpenAI","model":"openai/gpt-4o","object":"chat.completion","created":1769111906,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"call_OKKxONkRou064ylsPjX0daYJ","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\"}"}}]}}],"system_fingerprint":"fp_deacdd5f6f","usage":{"prompt_tokens":82,"completion_tokens":17,"total_tokens":99,"cost":0.000375,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.000375,"upstream_inference_prompt_cost":0.000205,"upstream_inference_completions_cost":0.00017},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0}}}

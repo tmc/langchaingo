@@ -1,5 +1,5 @@
 httprr trace v1
-739 1803
+738 1879
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:40 GMT
+Date: Thu, 22 Jan 2026 11:36:30 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 714
+Openai-Processing-Ms: 608
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 717
+X-Envoy-Upstream-Service-Time: 849
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
+X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999975
+X-Ratelimit-Remaining-Tokens: 29999975
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_27a46ccab2846bc602ebeb20aefeb056
+X-Request-Id: req_176d0b02c64e43499a56aedc6739ba74
 
 {
-  "id": "chatcmpl-BldYh4qPXTDrj8T8l7H0Po4ixQ4Fg",
+  "id": "chatcmpl-D0nHCRkjyQkR7KpDSKN6YFMQdrAxT",
   "object": "chat.completion",
-  "created": 1750693179,
+  "created": 1769081790,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -42,7 +44,7 @@ X-Request-Id: req_27a46ccab2846bc602ebeb20aefeb056
         "content": null,
         "tool_calls": [
           {
-            "id": "call_bwqyMkrjOuFMVvuCDinYrnAh",
+            "id": "call_o2dTkUrpY6T0l3P88HyPatMG",
             "type": "function",
             "function": {
               "name": "calculator",
@@ -73,9 +75,9 @@ X-Request-Id: req_27a46ccab2846bc602ebeb20aefeb056
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
+  "system_fingerprint": "fp_deacdd5f6f"
 }
-997 1549
+996 1625
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -83,32 +85,34 @@ Content-Length: 794
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_bwqyMkrjOuFMVvuCDinYrnAh","type":"function","function":{"name":"calculator","arguments":"15 * 4"}}]},{"role":"tool","content":"60","name":"calculator","tool_call_id":"call_bwqyMkrjOuFMVvuCDinYrnAh"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
+{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful assistant that can perform calculations."},{"role":"user","content":"What is 15 multiplied by 4?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_o2dTkUrpY6T0l3P88HyPatMG","type":"function","function":{"name":"calculator","arguments":"15 * 4"}}]},{"role":"tool","content":"60","name":"calculator","tool_call_id":"call_o2dTkUrpY6T0l3P88HyPatMG"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
 Content-Length: 829
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:42 GMT
+Date: Thu, 22 Jan 2026 11:36:32 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 565
+Openai-Processing-Ms: 365
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 567
+X-Envoy-Upstream-Service-Time: 385
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
+X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999972
+X-Ratelimit-Remaining-Tokens: 29999973
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_225cdabd135da87b4d4dc551a045b221
+X-Request-Id: req_d657d8f72f304f458952c993412e742b
 
 {
-  "id": "chatcmpl-BldYj9VgXhWFd8M1sdfhlVOHcFWkk",
+  "id": "chatcmpl-D0nHDcLQNmg95cwEroFZIeou6TlpM",
   "object": "chat.completion",
-  "created": 1750693181,
+  "created": 1769081791,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -139,5 +143,5 @@ X-Request-Id: req_225cdabd135da87b4d4dc551a045b221
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
+  "system_fingerprint": "fp_deacdd5f6f"
 }

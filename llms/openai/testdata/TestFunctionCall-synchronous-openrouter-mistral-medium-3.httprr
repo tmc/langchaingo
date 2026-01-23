@@ -1,5 +1,5 @@
 httprr trace v1
-669 993
+668 1293
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,24 +8,14 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"mistralai/mistral-medium-3","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 605
+Content-Length: 838
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:32 GMT
+Date: Thu, 22 Jan 2026 19:58:28 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
-
-         
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750695690-7azjaQjeh4qEyB0N2FUo","provider":"Mistral","model":"mistralai/mistral-medium-3","object":"chat.completion","created":1750695690,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"id":"MDVMtfq49","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"},"index":0,"type":"function"}]}}],"usage":{"prompt_tokens":113,"completion_tokens":14,"total_tokens":127}}
+{"id":"gen-1769111908-QEvKZ0YZ1Jy6OA1yxoTh","provider":"Mistral","model":"mistralai/mistral-medium-3","object":"chat.completion","created":1769111908,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"zSQGWHWrx","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}}]}}],"usage":{"prompt_tokens":113,"completion_tokens":14,"total_tokens":127,"cost":0.0000732,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.0000732,"upstream_inference_prompt_cost":0.0000452,"upstream_inference_completions_cost":0.000028},"completion_tokens_details":{"reasoning_tokens":0}}}

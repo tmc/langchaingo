@@ -71,7 +71,7 @@ func NewFewShotPrompt(examplePrompt PromptTemplate, examples []map[string]string
 		err := CheckValidTemplate(prompt.Prefix+prompt.Suffix, prompt.TemplateFormat, append(input,
 			getMapKeys(partialInput)...))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("template validation failed: %w", err)
 		}
 	}
 	return prompt, nil
@@ -103,7 +103,7 @@ func (p *FewShotPrompt) getExamples(input map[string]string) ([]map[string]strin
 func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 	resolvedValues, err := resolvePartialValues(p.PartialVariables, values)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("resolving partial values: %w", err)
 	}
 	stringResolvedValues := map[string]string{}
 	for k, v := range resolvedValues {
@@ -111,7 +111,7 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 		if !ok {
 			strVal2, ok := v.(StringPromptValue)
 			if !ok {
-				return "", fmt.Errorf("%w: %T", ErrInvalidPartialVariableType, v)
+				return "", fmt.Errorf("%w: variable %q has type %T, expected string or StringPromptValue", ErrInvalidPartialVariableType, k, v)
 			}
 			strVal = strVal2.String()
 		}
@@ -119,10 +119,11 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 	}
 	examples, err := p.getExamples(stringResolvedValues)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("getting examples: %w", err)
 	}
 	exampleStrings := make([]string, len(examples))
 
+	var errs []error
 	for i, example := range examples {
 		exampleMap := make(map[string]interface{})
 		for k, v := range example {
@@ -131,13 +132,22 @@ func (p *FewShotPrompt) Format(values map[string]interface{}) (string, error) {
 
 		res, err := p.ExamplePrompt.Format(exampleMap)
 		if err != nil {
-			return "", err
+			errs = append(errs, fmt.Errorf("formatting example %d: %w", i, err))
+			continue
 		}
 		exampleStrings[i] = res
 	}
 
+	if len(errs) > 0 {
+		return "", fmt.Errorf("formatting examples: %w", errors.Join(errs...))
+	}
+
 	template := p.AssemblePieces(exampleStrings)
-	return defaultFormatterMapping[p.TemplateFormat](template, resolvedValues)
+	result, err := defaultFormatterMapping[p.TemplateFormat](template, resolvedValues)
+	if err != nil {
+		return "", fmt.Errorf("rendering template: %w", err)
+	}
+	return result, nil
 }
 
 // AssemblePieces assembles the pieces of the few-shot prompt.

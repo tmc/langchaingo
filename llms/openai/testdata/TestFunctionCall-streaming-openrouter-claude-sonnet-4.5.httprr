@@ -1,0 +1,47 @@
+httprr trace v1
+723 4247
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 519
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"anthropic/claude-sonnet-4.5","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"stream":true,"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}],"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 3765
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:58:27 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"id":"toolu_vrtx_01KmL1fDbGUEwwjkRVp4CkKc","index":0,"type":"function","function":{"name":"getCurrentWeather","arguments":""}}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"type":"function","function":{"arguments":""}}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"type":"function","function":{"arguments":"{\"loc"}}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"type":"function","function":{"arguments":"ation\": "}}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"type":"function","function":{"arguments":"\"Boston, MA\"}"}}]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":"","reasoning":null,"reasoning_details":[]},"finish_reason":"tool_calls","native_finish_reason":"tool_calls","logprobs":null}]}
+
+data: {"id":"gen-1769111906-Vj9pTXh3T1GNpe6WR2jp","provider":"Google","model":"anthropic/claude-sonnet-4.5","object":"chat.completion.chunk","created":1769111907,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":607,"completion_tokens":55,"total_tokens":662,"cost":0.002646,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.001821,"upstream_inference_completions_cost":0.000825},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+data: [DONE]
+

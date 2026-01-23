@@ -1,45 +1,47 @@
 httprr trace v1
-398 1546
+396 1638
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 195
+Content-Length: 194
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Return a JSON object with a 'greeting' field that says hello"}],"max_completion_tokens":50,"response_format":{"type":"json_object"}}HTTP/2.0 200 OK
-Content-Length: 825
+{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Return a JSON object with a 'greeting' field that says hello"}],"max_completion_tokens":50,"response_format":{"type":"json_object"}}HTTP/2.0 200 OK
+Content-Length: 839
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:16:52 GMT
+Date: Thu, 22 Jan 2026 19:21:03 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 277
+Openai-Processing-Ms: 548
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 281
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999982
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 561
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999982
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a4e5dc3404994f6452487fbb79559371
+X-Request-Id: req_aa5057b62a1f429bbd30d40bbd0db177
 
 {
-  "id": "chatcmpl-BldCdCbXhkYPDywUu1yjrzrU5m93H",
+  "id": "chatcmpl-D0uWlQcF8raluyud4UJU27ZNNEee9",
   "object": "chat.completion",
-  "created": 1750691811,
-  "model": "gpt-3.5-turbo-0125",
+  "created": 1769109663,
+  "model": "gpt-4.1-mini-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "{\n    \"greeting\": \"hello\"\n}",
+        "content": "{\n  \"greeting\": \"hello\"\n}",
         "refusal": null,
         "annotations": []
       },
@@ -63,5 +65,5 @@ X-Request-Id: req_a4e5dc3404994f6452487fbb79559371
     }
   },
   "service_tier": "default",
-  "system_fingerprint": null
+  "system_fingerprint": "fp_376a7ccef1"
 }

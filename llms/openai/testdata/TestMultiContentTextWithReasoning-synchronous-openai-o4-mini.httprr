@@ -1,5 +1,5 @@
 httprr trace v1
-387 1778
+386 1907
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,38 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"o4-mini","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning_effort":"high"}HTTP/2.0 200 OK
-Content-Length: 1054
+Content-Length: 1105
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:26:23 GMT
+Date: Thu, 22 Jan 2026 19:50:02 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 7525
+Openai-Processing-Ms: 5837
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 7530
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999980
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 5864
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999982
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_33e6367851aa6f634a072c2faaac3f8c
+X-Request-Id: req_d167ef2c252d4332b83bc8344b0b879e
 
 {
-  "id": "chatcmpl-BleHoPqUrtFyCFQtEQg8GbhhuvBpM",
+  "id": "chatcmpl-D0uyiQez6Z2hmp73Js4Z7KF8Yry56",
   "object": "chat.completion",
-  "created": 1750695976,
+  "created": 1769111396,
   "model": "o4-mini-2025-04-16",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The factorial of a positive integer n, written n!, is the product of all positive integers from 1 up to n.  \n\nSo for 5:  \n5! = 5 × 4 × 3 × 2 × 1  \n   = (5 × 4) × 3 × 2 × 1  \n   = 20 × 3 × 2 × 1  \n   = 60 × 2 × 1  \n   = 120 × 1  \n   = 120  \n\nAnswer: 5! = 120.",
+        "content": "Here’s how to compute 5! (“five factorial”):\n\n1. Recall the definition:  \n   n! = n × (n – 1) × (n – 2) × … × 2 × 1\n\n2. Apply it to n = 5:  \n   5! = 5 × 4 × 3 × 2 × 1\n\n3. Multiply step by step:  \n   • 5 × 4 = 20  \n   • 20 × 3 = 60  \n   • 60 × 2 = 120  \n   • 120 × 1 = 120\n\nSo, 5! = 120.",
         "refusal": null,
         "annotations": []
       },
@@ -48,14 +50,14 @@ X-Request-Id: req_33e6367851aa6f634a072c2faaac3f8c
   ],
   "usage": {
     "prompt_tokens": 23,
-    "completion_tokens": 517,
-    "total_tokens": 540,
+    "completion_tokens": 289,
+    "total_tokens": 312,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
     },
     "completion_tokens_details": {
-      "reasoning_tokens": 384,
+      "reasoning_tokens": 128,
       "audio_tokens": 0,
       "accepted_prediction_tokens": 0,
       "rejected_prediction_tokens": 0

@@ -1,5 +1,5 @@
 httprr trace v1
-840 2512
+839 2073
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,122 +8,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful math assistant."},{"role":"user","content":"Please show your work step by step."},{"role":"user","content":"If I have 3 groups of 7 items, and I add 9 more items, how many items do I have in total?"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 1788
+Content-Length: 1274
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:42 GMT
+Date: Thu, 22 Jan 2026 11:36:32 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 2935
+Openai-Processing-Ms: 2110
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 2986
+X-Envoy-Upstream-Service-Time: 2127
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
+X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999955
+X-Ratelimit-Remaining-Tokens: 29999955
 X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_aed730bdc85610f7afc6d5d0c7092758
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_263144075dc04f75badaddc19fb7ce8f
 
 {
-  "id": "chatcmpl-BldYhFhvlMgdBjcX8YpjnRv9fq9vN",
+  "id": "chatcmpl-D0nHBj8HcOj7SFcUAEYyiV4tjGFo9",
   "object": "chat.completion",
-  "created": 1750693179,
+  "created": 1769081789,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "To solve this problem, we need to perform the following steps:\n\n1. Calculate the total number of items in 3 groups of 7 items each.\n2. Add the 9 additional items to the result from the first step.\n\n**Step 1: Calculate the items in 3 groups of 7 items each.**\n\nThis is a multiplication problem: \\(3 \\times 7\\).\n\n**Step 2: Add the 9 additional items.**\n\nTake the result from Step 1 and add 9 to it.\n\nNow, let's calculate the values using the steps above:",
-        "tool_calls": [
-          {
-            "id": "call_yoy50Ks6PkiACYd6QjI0pOUX",
-            "type": "function",
-            "function": {
-              "name": "calculator",
-              "arguments": "{\"__arg1\": \"3 * 7\"}"
-            }
-          },
-          {
-            "id": "call_qQHOBqSqhY5tK9yLd2N8xq5Y",
-            "type": "function",
-            "function": {
-              "name": "calculator",
-              "arguments": "{\"__arg1\": \"21 + 9\"}"
-            }
-          }
-        ],
-        "refusal": null,
-        "annotations": []
-      },
-      "logprobs": null,
-      "finish_reason": "tool_calls"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 122,
-    "completion_tokens": 173,
-    "total_tokens": 295,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
-  },
-  "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
-}
-1356 1839
-POST https://api.openai.com/v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Content-Length: 1152
-Authorization: Bearer test-api-key
-Content-Type: application/json
-
-{"model":"gpt-4o","messages":[{"role":"system","content":"You are a helpful math assistant."},{"role":"user","content":"Please show your work step by step."},{"role":"user","content":"If I have 3 groups of 7 items, and I add 9 more items, how many items do I have in total?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_yoy50Ks6PkiACYd6QjI0pOUX","type":"function","function":{"name":"calculator","arguments":"3 * 7"}}]},{"role":"tool","content":"21","name":"calculator","tool_call_id":"call_yoy50Ks6PkiACYd6QjI0pOUX"},{"role":"assistant","content":"","tool_calls":[{"id":"call_qQHOBqSqhY5tK9yLd2N8xq5Y","type":"function","function":{"name":"calculator","arguments":"21 + 9"}}]},{"role":"tool","content":"30","name":"calculator","tool_call_id":"call_qQHOBqSqhY5tK9yLd2N8xq5Y"}],"tools":[{"type":"function","function":{"name":"calculator","description":"Useful for getting the result of a math expression. \n\tThe input to this tool should be a valid mathematical expression that could be executed by a starlark evaluator.","parameters":{"properties":{"__arg1":{"title":"__arg1","type":"string"}},"required":["__arg1"],"type":"object"}}}]}HTTP/2.0 200 OK
-Content-Length: 1115
-Access-Control-Expose-Headers: X-Request-ID
-Alt-Svc: h3=":443"; ma=86400
-Cf-Cache-Status: DYNAMIC
-Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:39:46 GMT
-Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 1878
-Openai-Version: 2020-10-01
-Server: cloudflare
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 1882
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999951
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_88ea7f90640fc8f154aec11c14e965d0
-
-{
-  "id": "chatcmpl-BldYmsXhuBB6DpbI0hIE7QGtj7zEZ",
-  "object": "chat.completion",
-  "created": 1750693184,
-  "model": "gpt-4o-2024-08-06",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Let's solve the problem step by step:\n\n1. You have 3 groups of 7 items.\n   - To find the total number of items in these groups, multiply: \\(3 \\times 7 = 21\\).\n\n2. You then add 9 more items to this total.\n   - So, you add 9 to the 21 items: \\(21 + 9 = 30\\).\n\nTherefore, you have a total of 30 items.",
+        "content": "To find the total number of items you have, you need to perform the following steps:\n\n1. **Calculate the number of items in the 3 groups**:\n   - You have 3 groups, each with 7 items.\n   - Multiply the number of groups by the number of items in each group:  \n     \\(3 \\times 7 = 21\\) items.\n\n2. **Add the additional items**:\n   - You then add 9 more items to the 21 items you already have:  \n     \\(21 + 9 = 30\\) items.\n\nSo, you have a total of 30 items.",
         "refusal": null,
         "annotations": []
       },
@@ -132,9 +50,9 @@ X-Request-Id: req_88ea7f90640fc8f154aec11c14e965d0
     }
   ],
   "usage": {
-    "prompt_tokens": 164,
-    "completion_tokens": 95,
-    "total_tokens": 259,
+    "prompt_tokens": 122,
+    "completion_tokens": 131,
+    "total_tokens": 253,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -147,5 +65,5 @@ X-Request-Id: req_88ea7f90640fc8f154aec11c14e965d0
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_07871e2ad8"
+  "system_fingerprint": "fp_deacdd5f6f"
 }

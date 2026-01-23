@@ -1,5 +1,5 @@
 httprr trace v1
-424 2370
+423 2419
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"anthropic/claude-3.7-sonnet:thinking","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning":{"max_tokens":2048}}HTTP/2.0 200 OK
-Content-Length: 1981
+Content-Length: 1963
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:26:04 GMT
+Date: Thu, 22 Jan 2026 19:49:56 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -32,12 +32,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750695963-IhzYpiykQ2KCQXs8afsa","provider":"Anthropic","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1750695963,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"# Factorial of 5\n\nThe factorial of a number n (written as n!) is the product of all positive integers less than or equal to n.\n\nFor 5 factorial (5!), I need to multiply: 5 × 4 × 3 × 2 × 1\n\nWorking through this step by step:\n- 5 × 4 = 20\n- 20 × 3 = 60\n- 60 × 2 = 120\n- 120 × 1 = 120\n\nTherefore, 5! = 120","refusal":null,"reasoning":"The factorial of a positive integer n, denoted by n!, is the product of all positive integers less than or equal to n.\n\nSo, the factorial of 5, or 5!, is:\n5! = 5 × 4 × 3 × 2 × 1\n\nLet's compute this step by step:\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nSo, 5! = 120.\n\nTo double-check:\n5! = 5 × 4 × 3 × 2 × 1 = 5 × 4 × 6 = 5 × 24 = 120\n\nYes, the factorial of 5 is 120.","reasoning_details":[{"type":"reasoning.text","text":"The factorial of a positive integer n, denoted by n!, is the product of all positive integers less than or equal to n.\n\nSo, the factorial of 5, or 5!, is:\n5! = 5 × 4 × 3 × 2 × 1\n\nLet's compute this step by step:\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nSo, 5! = 120.\n\nTo double-check:\n5! = 5 × 4 × 3 × 2 × 1 = 5 × 4 × 6 = 5 × 24 = 120\n\nYes, the factorial of 5 is 120.","signature":"ErUBCkYIBBgCIkCCE2JG/keYC8kyWrgltx0+BJQB5ButJOWcy5jye5AaaNi6tsfQYts1agYM87iJhkWCJQvCmmNq/XKhYog6O2C0EgxPoc6UBTqiBymq2b8aDAdENQum06D8AT5eiSIwBsCQzapraJDvUx/RAiXFX578FTZnikR+WW9bzqXEkt4ljwRBLxu51ivmVo8VNlKGKh3He997Hwv+q0OMXI+tFW/MHTazoqKF+H/5UfIF9hgC"}]}}],"usage":{"prompt_tokens":52,"completion_tokens":330,"total_tokens":382}}
+{"id":"gen-1769111396-BvKXKIdMpDyPQUOybNw2","provider":"Google","model":"anthropic/claude-3.7-sonnet:thinking","object":"chat.completion","created":1769111396,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"# Calculating the factorial of 5\n\nThe factorial of 5 is written as 5! and is calculated by multiplying all positive integers from 5 down to 1.\n\n5! = 5 × 4 × 3 × 2 × 1\n\nLet me calculate this step by step:\n\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nTherefore, 5! = 120","refusal":null,"reasoning":"The factorial of 5, written as 5!, is the product of all positive integers less than or equal to 5. \n\nSo 5! = 5 × 4 × 3 × 2 × 1\n\nLet's compute this step by step:\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nSo 5! = 120","reasoning_details":[{"format":"anthropic-claude-v1","index":0,"type":"reasoning.text","text":"The factorial of 5, written as 5!, is the product of all positive integers less than or equal to 5. \n\nSo 5! = 5 × 4 × 3 × 2 × 1\n\nLet's compute this step by step:\n5 × 4 = 20\n20 × 3 = 60\n60 × 2 = 120\n120 × 1 = 120\n\nSo 5! = 120","signature":"ErkBCkoICxACGAIiQJATnZr/e96Ar7QwtVvLq27omK26H5s7Pfw5Vz8e+1zWDkQ4P9j8eBvTwr+gAPEd8p0tL22V90Vn4iEPmlfFobUoARIMiKgy4GE/ecY5bKd9Ggx8wNZCzZp6zqzDrv4iMENq+V1qlIKtqL+/I3cV+v4mgDKhaldzOqdgauGdT6blKaKyf/+DMxLf5Xu3v8AyviodG2SQAPzSYmXAmOXWow8X4PHpm9tvDpJOJIuwPfMYAg=="}]}}],"usage":{"prompt_tokens":53,"completion_tokens":238,"total_tokens":291,"cost":0.003729,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000159,"upstream_inference_completions_cost":0.00357},"completion_tokens_details":{"reasoning_tokens":70,"image_tokens":0}}}

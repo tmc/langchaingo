@@ -1,0 +1,67 @@
+httprr trace v1
+396 4239
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 192
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"qwen/qwen3-32b","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 3783
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:57:05 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111825-JAmxkO59xGmn3wOqK7NW","provider":"Nebius","model":"qwen/qwen3-32b","object":"chat.completion","created":1769111825,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is significantly larger than Lesotho. \n\n- **Spain** has an area of approximately **505,990 km²** (195,499 square miles), making it one of the larger European countries.  \n- **Lesotho** is a small, landlocked nation in southern Africa with an area of just **30,355 km²** (11,718 square miles).  \n\nSpain is roughly **16.7 times larger** than Lesotho by land area.","refusal":null,"reasoning":"\nOkay, the user asked which country is larger between Spain and Lesotho. I remember Spain is in Europe and Lesotho is in Africa. The user probably wants to know the size comparison.\n\nFirst, I need to recall the areas of both countries. Spain is a well-known European country with a significant size. From what I remember, Spain's area is around 500,000 square kilometers. Lesotho, however, is a small, landlocked country in southern Africa. Lesotho's area is much smaller, maybe around 30,000 square kilometers.\n\nTo make sure, I should verify the exact numbers. Spain's total area is approximately 505,990 square kilometers. Lesotho's area is about 30,355 square kilometers. That makes Spain almost 17 times larger than Lesotho. \n\nThe user might be learning about geography, comparing countries for a project, or just curious. They might also want to know other aspects, like population or cultural facts, but the specific question here is about size. \n\nI should present the answer clearly, stating the areas of both countries and the comparison. It's important to mention that Spain is the larger one and by how much. Maybe adding a bit about their locations could add context.\n","reasoning_details":[{"format":null,"index":0,"type":"reasoning.text","text":"\nOkay, the user asked which country is larger between Spain and Lesotho. I remember Spain is in Europe and Lesotho is in Africa. The user probably wants to know the size comparison.\n\nFirst, I need to recall the areas of both countries. Spain is a well-known European country with a significant size. From what I remember, Spain's area is around 500,000 square kilometers. Lesotho, however, is a small, landlocked country in southern Africa. Lesotho's area is much smaller, maybe around 30,000 square kilometers.\n\nTo make sure, I should verify the exact numbers. Spain's total area is approximately 505,990 square kilometers. Lesotho's area is about 30,355 square kilometers. That makes Spain almost 17 times larger than Lesotho. \n\nThe user might be learning about geography, comparing countries for a project, or just curious. They might also want to know other aspects, like population or cultural facts, but the specific question here is about size. \n\nI should present the answer clearly, stating the areas of both countries and the comparison. It's important to mention that Spain is the larger one and by how much. Maybe adding a bit about their locations could add context.\n"}]}}],"usage":{"prompt_tokens":33,"completion_tokens":386,"total_tokens":419,"cost":0.0001191,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000033,"upstream_inference_completions_cost":0.0001158},"completion_tokens_details":{"reasoning_tokens":303,"image_tokens":0}}}

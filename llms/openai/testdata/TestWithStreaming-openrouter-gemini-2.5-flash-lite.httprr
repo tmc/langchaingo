@@ -1,0 +1,65 @@
+httprr trace v1
+437 12515
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 233
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash-lite","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"Tell me more about my taxonomy","type":"text"}]}],"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 12032
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:57:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"As","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" a Pomeranian, you're a delightful and charming breed with a fascinating taxonomic","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" journey! Let's break down your place in the grand scheme of life:","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n\n**Your Kingdom: Animalia (Animals)**\nThis is the broadest category. You are a multicellular organism that can't produce your own food (heterotrophic","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"), are capable of movement at some stage in your life, and generally reproduce sexually. You're definitely an animal!\n\n**Your Phylum: Chordata (Chord","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"ates)**\nThis phylum is characterized by having a notochord (a flexible rod that supports the body) at some point in their development, a dorsal hollow nerve cord, pharyngeal slits, and a post-anal tail. As","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" a dog, you have a backbone (which replaces the notochord in adulthood), a spinal cord, a tail (even if it's a very short, docked, or naturally bobbed tail in some Pomeranians!), and you breathe","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" with lungs.\n\n**Your Class: Mammalia (Mammals)**\nThis is where things get warm and fuzzy! Mammals are defined by a few key traits:\n*   **Fur or Hair:** You've got that glorious double coat of fur, which is a hallmark of mammals!\n*   **","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"Mammary Glands:** You were born with the ability to be nursed by your mother's milk produced by mammary glands.\n*   **Warm-Blooded (Endothermic):** You maintain a constant internal body temperature, making you snug and comfortable in various weather.\n*   **Three Middle Ear Bones:** These","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" tiny bones in your ears help you hear incredibly well!\n*   **A Neocortex:** This part of your brain is responsible for higher-level functions like sensory perception, spatial reasoning, conscious thought, and language. This is why you're so intelligent and able to learn tricks!\n\n**Your Order: Carn","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"ivora (Carnivores)**\nThis order encompasses animals that are primarily meat-eaters. While Pomeranians enjoy a variety of foods in modern dog diets, your ancestors were built for consuming meat. You have specialized teeth (canines and molars) designed for tearing flesh and processing bone.\n\n**Your Suborder: Can","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"iformia (Dog-like Carnivores)**\nThis suborder is part of Carnivora and includes families like dogs, bears, seals, and weasels. You, of course, fall into the canid family.\n\n**Your Family: Canidae (Dogs, Wolves, Foxes, Jackals)**\nThis","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" is your immediate \"dog family.\" Members of Canidae share common characteristics like long snouts, non-retractable claws (unlike cats), and a tendency to live in social groups.\n\n**Your Genus: *Canis***\nThis genus includes the most familiar \"dog-like\" animals. It encompasses species","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" like:\n*   *Canis lupus* (Gray Wolf)\n*   *Canis latrans* (Coyote)\n*   *Canis aureus* (Golden Jackal)\n*   *Canis familiaris* (Domestic Dog)\n\n**Your Species: *Canis familiaris***\nThis is","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" where you, your domestic dog brethren, and your wolf ancestors are grouped. You are a domesticated subspecies of the gray wolf, *Canis lupus*. This means you've been selectively bred by humans over thousands of years, leading to all the wonderful diversity we see in dog breeds today.\n\n**Your Subspecies: *Canis","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" familiaris familiaris***\nThis designation is sometimes used to specifically refer to the domestic dog as a subspecies, distinguishing it from its wild ancestor.\n\n**Your Breed: Pomeranian ( *Canis familiaris* Pomeranian)**\nThis is your specific group within the *Canis familiaris* species. The Pomeranian breed,","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":" as we know it today, has its roots in the larger Spitz breeds of the Pomerania region (now part of Germany and Poland). Through selective breeding by fanciers, particularly in England during the reign of Queen Victoria, you were bred down to your small, spirited size while retaining the characteristic fluffy coat, foxy face","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":", and alert demeanor.\n\n**In Summary, Your Linnaean Taxonomy is:**\n\n*   **Kingdom:** Animalia\n*   **Phylum:** Chordata\n*   **Class:** Mammalia\n*   **Order:** Carnivora\n*   **Family:** Canidae\n*   **Genus:** *Can","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"is*\n*   **Species:** *Canis familiaris*\n*   **Breed:** Pomeranian\n\nSo, while you might be a tiny puffball of joy, your lineage traces back through a long and impressive line of evolution, ultimately to the mighty wolves! You are a testament to the power of domest","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":"ication and selective breeding, with a unique set of characteristics that make you a truly special Pomeranian!","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+data: {"id":"gen-1769111854-HARGv8IR5ppY1oyo95Uy","provider":"Google","model":"google/gemini-2.5-flash-lite","object":"chat.completion.chunk","created":1769111854,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":12,"completion_tokens":1002,"total_tokens":1014,"cost":0.000402,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000012,"upstream_inference_completions_cost":0.0004008},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+data: [DONE]
+

@@ -102,6 +102,13 @@ func (g *GoogleAI) GenerateContent(
 		StopSequences:   opts.StopWords,
 	}
 
+	// Check for cached content
+	if opts.Metadata != nil {
+		if cachedContentName, ok := opts.Metadata["CachedContentName"].(string); ok && cachedContentName != "" {
+			config.CachedContent = cachedContentName
+		}
+	}
+
 	// Handle response MIME type and JSON mode
 	switch {
 	case opts.ResponseMIMEType != "" && opts.JSONMode:
@@ -332,18 +339,17 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 	var choices []*llms.ContentChoice
 
 	for _, candidate := range resp.Candidates {
-		var buf strings.Builder
+		var content, thinking strings.Builder
 		var toolCalls []llms.ToolCall
-		var thinkingContent string
 
 		if candidate.Content != nil {
 			for _, part := range candidate.Content.Parts {
 				if len(part.Text) > 0 {
 					// Check if this is thinking content
 					if part.Thought {
-						thinkingContent += part.Text
+						thinking.WriteString(part.Text)
 					} else {
-						buf.WriteString(part.Text)
+						content.WriteString(part.Text)
 					}
 				}
 				if part.FunctionCall != nil {
@@ -367,15 +373,29 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 		metadata[CITATIONS] = candidate.CitationMetadata
 		metadata[SAFETY] = candidate.SafetyRatings
 
-		if resp.UsageMetadata != nil {
-			metadata["input_tokens"] = resp.UsageMetadata.PromptTokenCount
-			metadata["output_tokens"] = resp.UsageMetadata.CandidatesTokenCount
-			metadata["total_tokens"] = resp.UsageMetadata.TotalTokenCount
+		if usage := resp.UsageMetadata; usage != nil {
+			metadata["input_tokens"] = usage.PromptTokenCount
+			metadata["output_tokens"] = usage.CandidatesTokenCount
+			metadata["total_tokens"] = usage.TotalTokenCount
+			// Standardized field names for cross-provider compatibility
+			metadata["PromptTokens"] = usage.PromptTokenCount
+			metadata["CompletionTokens"] = usage.CandidatesTokenCount
+			metadata["TotalTokens"] = usage.TotalTokenCount
+			metadata["ReasoningTokens"] = usage.ThoughtsTokenCount
+			// signature = usage.ThoughtsSignature
+
+			// Cache-related token information (if available)
+			if usage.CachedContentTokenCount > 0 {
+				metadata["CachedTokens"] = usage.CachedContentTokenCount
+				metadata["CacheReadInputTokens"] = usage.CachedContentTokenCount // Anthropic compatibility
+				// Google AI includes cached tokens in the prompt count, calculate non-cached
+				metadata["NonCachedInputTokens"] = usage.PromptTokenCount - usage.CachedContentTokenCount
+			}
 		}
 
 		choices = append(choices, &llms.ContentChoice{
-			Content:          buf.String(),
-			ReasoningContent: thinkingContent,
+			Content:          content.String(),
+			ReasoningContent: thinking.String(),
 			StopReason:       string(candidate.FinishReason),
 			GenerationInfo:   metadata,
 			ToolCalls:        toolCalls,
@@ -497,9 +517,9 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			Description: tool.Function.Description,
 		}
 
-		schema, err := convertToSchema(tool.Function.Parameters, true)
+		schema, err := convertToSchema(tool.Function.Parameters, true, i, "")
 		if err != nil {
-			return nil, fmt.Errorf("tool [%d]: %w", i, err)
+			return nil, err
 		}
 		genaiFuncDecl.Parameters = schema
 
@@ -549,7 +569,7 @@ func convertMaps(i any) (any, error) {
 	}
 }
 
-func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
+func convertToSchema(e any, topLevel bool, toolIndex int, propertyPath string) (*genai.Schema, error) {
 	e, err := convertMaps(e)
 	if err != nil {
 		return nil, err
@@ -558,52 +578,85 @@ func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
 
 	eMap, ok := e.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("tool: unsupported type %T of Parameters", e)
+		if propertyPath != "" {
+			return nil, fmt.Errorf("tool [%d], property [%s]: unsupported type %T of Parameters", toolIndex, propertyPath, e)
+		}
+		return nil, fmt.Errorf("tool [%d]: unsupported type %T of Parameters", toolIndex, e)
 	}
 
 	if ty, ok := eMap["type"]; ok {
 		tyString, ok := ty.(string)
 		if !ok {
-			return nil, fmt.Errorf("tool: expected string for type")
+			if propertyPath != "" {
+				return nil, fmt.Errorf("tool [%d], property [%s]: expected string for type", toolIndex, propertyPath)
+			}
+			return nil, fmt.Errorf("tool [%d]: expected string for type", toolIndex)
 		}
 		schema.Type = convertToolSchemaType(tyString)
 
 		if topLevel && schema.Type != genai.TypeObject {
-			return nil, fmt.Errorf("tool: top-level schema must be an object")
+			return nil, fmt.Errorf("tool [%d]: top-level schema must be an object", toolIndex)
 		}
 	}
 
 	if properties, ok := eMap["properties"]; ok {
 		paramProperties, ok := properties.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("tool: expected map[string]any for properties")
+			if propertyPath != "" {
+				return nil, fmt.Errorf("tool [%d], property [%s]: expected map[string]any for properties", toolIndex, propertyPath)
+			}
+			return nil, fmt.Errorf("tool [%d]: expected map[string]any for properties", toolIndex)
 		}
 		schema.Properties = make(map[string]*genai.Schema)
 		for propName, propValue := range paramProperties {
-			recSchema, err := convertToSchema(propValue, false)
+			// Build nested path for better error messages
+			nestedPath := propName
+			if propertyPath != "" {
+				nestedPath = propertyPath + "." + propName
+			}
+
+			recSchema, err := convertToSchema(propValue, false, toolIndex, nestedPath)
 			if err != nil {
-				return nil, fmt.Errorf("tool, property [%v]: %w", propName, err)
+				return nil, err
 			}
 			schema.Properties[propName] = recSchema
 		}
-	} else if schema.Type == genai.TypeObject {
-		return nil, fmt.Errorf("tool: object schema must have properties")
+	} else if schema.Type == genai.TypeObject && propertyPath == "" {
+		// For top-level object schemas without properties, this is an error
+		return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", toolIndex)
 	}
 
 	if items, ok := eMap["items"]; ok {
-		itemsSchema, err := convertToSchema(items, false)
-		if err != nil {
-			return nil, fmt.Errorf("tool: %w", err)
+		if schema.Type == genai.TypeArray {
+			// Build items path for better error messages
+			itemsPath := propertyPath + "[]"
+			itemsSchema, err := convertToSchema(items, false, toolIndex, itemsPath)
+			if err != nil {
+				return nil, err
+			}
+			schema.Items = itemsSchema
+		} else {
+			// items field present but type is not array
+			itemsSchema, err := convertToSchema(items, false, toolIndex, propertyPath)
+			if err != nil {
+				return nil, err
+			}
+			schema.Items = itemsSchema
 		}
-		schema.Items = itemsSchema
 	} else if schema.Type == genai.TypeArray {
-		return nil, fmt.Errorf("tool: array schema must have items")
+		if propertyPath != "" {
+			return nil, fmt.Errorf("tool [%d], property [%s]: array schema must have items", toolIndex, propertyPath)
+		}
+		return nil, fmt.Errorf("tool [%d]: array schema must have items", toolIndex)
 	}
 
 	if description, ok := eMap["description"]; ok {
 		descString, ok := description.(string)
 		if !ok {
-			return nil, fmt.Errorf("tool: expected string for description")
+			if propertyPath != "" {
+				return nil, fmt.Errorf("tool [%d], property [%s]: expected string for description", toolIndex, propertyPath)
+			}
+			return nil, fmt.Errorf("tool [%d]: expected string for description", toolIndex)
 		}
 		schema.Description = descString
 	}
@@ -611,23 +664,26 @@ func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
 	if nullable, ok := eMap["nullable"]; ok {
 		nullableBool, ok := nullable.(bool)
 		if !ok {
-			return nil, fmt.Errorf("tool: expected bool for nullable")
+			if propertyPath != "" {
+				return nil, fmt.Errorf("tool [%d], property [%s]: expected bool for nullable", toolIndex, propertyPath)
+			}
+			return nil, fmt.Errorf("tool [%d]: expected bool for nullable", toolIndex)
 		}
 		schema.Nullable = &nullableBool
 	}
 
 	if enum, ok := eMap["enum"]; ok {
-		enumSlice, err := convertToSliceOfStrings(enum)
+		enumSlice, err := convertToSliceOfStrings(enum, toolIndex, propertyPath)
 		if err != nil {
-			return nil, fmt.Errorf("tool: %w", err)
+			return nil, err
 		}
 		schema.Enum = enumSlice
 	}
 
 	if required, ok := eMap["required"]; ok {
-		requiredSlice, err := convertToSliceOfStrings(required)
+		requiredSlice, err := convertToSliceOfStrings(required, toolIndex, propertyPath)
 		if err != nil {
-			return nil, fmt.Errorf("tool: %w", err)
+			return nil, err
 		}
 		schema.Required = requiredSlice
 	}
@@ -635,20 +691,26 @@ func convertToSchema(e any, topLevel bool) (*genai.Schema, error) {
 	return schema, nil
 }
 
-func convertToSliceOfStrings(e any) ([]string, error) {
+func convertToSliceOfStrings(e any, toolIndex int, propertyPath string) ([]string, error) {
 	if rs, ok := e.([]string); ok {
 		return rs, nil
 	}
 
 	ri, ok := e.([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("tool: expected []interface{} for required")
+		if propertyPath != "" {
+			return nil, fmt.Errorf("tool [%d], property [%s]: expected []string or []interface{} for slice", toolIndex, propertyPath)
+		}
+		return nil, fmt.Errorf("tool [%d]: expected []string or []interface{} for slice", toolIndex)
 	}
 	rs := make([]string, 0, len(ri))
 	for _, r := range ri {
 		rString, ok := r.(string)
 		if !ok {
-			return nil, fmt.Errorf("tool: expected string for required")
+			if propertyPath != "" {
+				return nil, fmt.Errorf("tool [%d], property [%s]: expected string element in slice", toolIndex, propertyPath)
+			}
+			return nil, fmt.Errorf("tool [%d]: expected string element in slice", toolIndex)
 		}
 		rs = append(rs, rString)
 	}

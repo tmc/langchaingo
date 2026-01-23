@@ -106,7 +106,7 @@ type anthropicTextGenerationOutput struct {
 	// This will always be "assistant".
 	Role string `json:"role"`
 	// This is an array of content blocks, each of which has a type that determines its shape.
-	// Currently, the only type in responses is "text".
+	// Currently, the only type in responses is "text" or "tool_use".
 	Content []anthropicContentBlock `json:"content"`
 	// The reason for the completion of the generation.
 	// One of: ["end_turn", "max_tokens", "stop_sequence", "tool_use"]
@@ -257,7 +257,8 @@ func createAnthropicCompletion(ctx context.Context,
 				return nil, fmt.Errorf("failed to marshal tool use arguments: %w", err)
 			}
 			toolCalls = append(toolCalls, llms.ToolCall{
-				ID: c.ID,
+				ID:   c.ID,
+				Type: "function",
 				FunctionCall: &llms.FunctionCall{
 					Name:      c.Name,
 					Arguments: string(argumentsJSON),
@@ -402,7 +403,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 				if currentToolCall != nil {
 					// Add completed tool call to final response
 					toolCalls = append(toolCalls, llms.ToolCall{
-						ID: currentToolCall.ID,
+						ID:   currentToolCall.ID,
+						Type: "function",
 						FunctionCall: &llms.FunctionCall{
 							Name:      currentToolCall.Name,
 							Arguments: currentToolCall.Arguments,
@@ -545,6 +547,7 @@ func supportsAnthropicReasoning(modelID string) bool {
 	reasoningModels := []string{
 		"anthropic.claude-opus-4-",
 		"anthropic.claude-sonnet-4-",
+		"anthropic.claude-haiku-4-",
 		"anthropic.claude-3-7-",
 	}
 

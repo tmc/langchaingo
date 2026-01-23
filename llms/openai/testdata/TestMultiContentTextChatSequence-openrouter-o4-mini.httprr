@@ -1,5 +1,5 @@
 httprr trace v1
-397 3207
+396 6420
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/o4-mini","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
-Content-Length: 2818
+Content-Length: 5964
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:14:17 GMT
+Date: Thu, 22 Jan 2026 19:57:04 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -40,4 +40,24 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750691657-0at7NoHTKohFO3YnSuNh","provider":"OpenAI","model":"openai/o4-mini","object":"chat.completion","created":1750691657,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Spain is larger.  \n• Spain’s area: about 505,990 km²  \n• Lesotho’s area: about 30,355 km²","refusal":null,"reasoning":"**Comparing country sizes**\n\nThe user wants to know which country is larger: Spain or Lesotho. My answer is that Spain is indeed larger. Specifically, Spain has an area of about 505,990 km², whereas Lesotho covers approximately 30,355 km². So, Spain is roughly 17 times bigger than Lesotho! I’ll be sure to present this clearly, stating that Spain (505,990 km²) is larger than Lesotho (30,355 km²). That seems like a solid and straightforward answer!","reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABoWW9OrgsJsuCKGq8yQ7uIn4H6UD0lfOBo51rYIBRYs1qXzvc0InZQBnYa0GzU2GYflfbFqNAWIE-zMu_BMRLAeCHujQxyxNfDmKN82I8X1rS4InyKQPQFXNv32L3-AnZt0n0SZhGlSiLhGCLOxLtZu5pkxrslJcgoA-kNF33Yt8VnltOhpYZcCikSPRn05ZUqectn2XdHBHk_Pzf7Ah5zIy2ouIuHGma6lhLtflMfF5jfpUDli-PPjR0DBEcE1cg8HnOT3kxFY-rOb46Cp0pshSB9HGFJkhybxlzsajSZ53BBsBj3oe0hE4y0NBD5DYY6IOiowP5XAR91zcAVzYrlkkkv_-4k4iWMh4kt6zzdJsFRXBGhuV674GmybOXI_c6fsVMemeniDSQOmOuLJszp-ICNFmV3KJ0VBoclawHDysDSKKaFooEGK5uP2Jcr152qZH7r1A_d0DMkUylGdx0ekDHfxZlITnbTJtAoUxpOye13esWYG2nqia05XGpvPfmL3oHMCRQRAwfw0yCj-wny2ABh2CpsPqe-kAUtxC5azsz7PZaK5e1W7rmC_j1c9nsK6axIUKdO08Q4e7bPlzq2EMqrkG1anqEPgSV8-PrpaubcfMr-ANmC3poK711HXDQnx86rrRKDtGg-HUUZ4FQuOj9BjdOxLA3EqndvIaVWMb6ph1rszTtBKLB5UU4FxBkius5Frvtc7BvWMdn6D0TkFR8AKwJCQlkRyAw_taiCkS-OyP4_Y_nX-EA0qhd3ovyE9QFgFoiuB2QGKrdrd-wgFg9w0s_OygCUmnmbWKomtWy16WGGJjW2ebidEsEpnGadEDSQImhVRH5SXRJ57PwC12KGhjlA_4-u7lTOURja16U_cCqeUNli_ho72Miz44Bu2fHAnYw8RfIZVoRSWLvCDIkZWuEP70aqC_dnKY-45brt1tXyX6S0E07dYR_kIwy0nVa4XmKpGz8gbCKgoatsN55RYbo-Fe_nXNXHH-Ww6HTE787dkcWanaYz6eTwj4pM7JQZ2DVmGGCl0aGOa4uXHymrNpv8QPswndNyicfamDKAjzUgC-XC_si6uQu3MgnQACHSrMXE4pUTB40Rzjwuj18uSwPs_bHjz86qjnICVRytyRcTUACvmam-d_hmC4sipoK9ovE8IYaAuXHSOoEcUTW4p3tPseM8KUla8Asz5HxoUF6u_3DBX9R6aFoa-2J0HC6MMR8zlyWINY_lXNoUGeNuymGc18Cj-7_eWflUw2H-rhsrn_MwDW36y1abQ3_VwwIi8uo0IpcV-pjOvRc5qOoQAuui28Ynao43kidN9y7Y59rXZMscim8Plf4yPMACa6EcCDHsZGlD_FhwxxaRsDy0M9e465m_kVdMoRACS7Ui76rJOZIUmNeXFE3-zTCk968rWKwinKzDOqw9vzYSxgWHVc0bosjxb2iCnita9GJITCxMshwB6YL4XkSUXe1c84YOS1X4xsOUHKR99mcC8Ld_TPBSZe_g_C61uPL9SYCjnWQiHLL3XOZPrxFbqvde1QHlzH3a5FB1Ggitq4XuNR9XgQmEoeYO5AlTs_x90LXqGSm9Kc6OKz1W8frONx11vMxSBs8t_SBbOsqUJV7I4q0GuTP9mki5Kyv7vIN5UvPrpj4=","id":"rs_68596f4a36e88190943344ece9f87449"}]}}],"usage":{"prompt_tokens":29,"completion_tokens":167,"total_tokens":196}}
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111824-GYnFdiuOCYxsbWOPXEBR","provider":"OpenAI","model":"openai/o4-mini","object":"chat.completion","created":1769111824,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"Spain is larger.  \n- Area: Spain about 505,990 km² vs Lesotho about 30,355 km²  \n- Population: Spain roughly 47 million vs Lesotho around 2 million","refusal":null,"reasoning":"**Comparing country sizes**\n\nIn our conversation, the user mentioned \"countries\" and I named Spain and Lesotho. Now they're asking which is larger. Clearly, they're looking to compare these two countries, likely by area. Spain is considerably larger than Lesotho, both in area and population. Spain's area is approximately 505,990 km² compared to Lesotho's 30,355 km², making Spain about 16 times bigger. Population-wise, Spain has around 47 million people versus Lesotho's 2.1 million. So, Spain is definitely larger!**Identifying larger country**\n\nIf the user asks, \"Which of these is larger?\" my one-word answer would be \"Spain.\" However, they actually wrote, \"Which if these is larger?\" and I should point out that it should be \"Which of these is larger?\" So, my answer is that Spain is indeed larger than Lesotho. In terms of area, Spain is about 506,000 km² compared to Lesotho's roughly 30,000 km², and in population, Spain has around 47 million people, while Lesotho has about 2 million.","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Comparing country sizes**\n\nIn our conversation, the user mentioned \"countries\" and I named Spain and Lesotho. Now they're asking which is larger. Clearly, they're looking to compare these two countries, likely by area. Spain is considerably larger than Lesotho, both in area and population. Spain's area is approximately 505,990 km² compared to Lesotho's 30,355 km², making Spain about 16 times bigger. Population-wise, Spain has around 47 million people versus Lesotho's 2.1 million. So, Spain is definitely larger!**Identifying larger country**\n\nIf the user asks, \"Which of these is larger?\" my one-word answer would be \"Spain.\" However, they actually wrote, \"Which if these is larger?\" and I should point out that it should be \"Which of these is larger?\" So, my answer is that Spain is indeed larger than Lesotho. In terms of area, Spain is about 506,000 km² compared to Lesotho's roughly 30,000 km², and in population, Spain has around 47 million people, while Lesotho has about 2 million."},{"id":"rs_046314737aaf9ac7016972811130348196893acd62a8c9632a","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpcoEZ6CATu9Y-W-RA3M2EPO1RTQZHE0-6awcoFA2s9PoGz7Sfb-zX8E1X-sd_PFvdiEY1s3GkmfR4lWWw6K7garz1OvjT6EVbzW-yRNAx_aLjkvswML78WjUPRpre_UtxzR8JcRcyPmrpWlD_u8Dl6S7HIQunaijGAOhXM-7cpTNYkv3-Ugm2feZlrcNDU6vuMGwSkEgjkUnNT_sspPyuLBeqrmtRcVGhq1op0lWjro5UHNnhNy7cjNzG2Ej9Kx6JhmgyXzNvD1drY-29QwNpV8rRXFf69xNi8Z6qjOlKLT3_AwlXfD3ampm7unsN7V9Jrs6bIhguDwQfq0iEmOuyohDyAwRo4ThsCktbEU5bbqjkekhQWQnVuiRHjZMg325nsvjrbgTh8q6PN-t0bmoef34zTqrraGvmDUaHue9oqp75klvHoFn4DcdjJ-dK9mm0BnBRycvfL-DRlmd-P6W6rpUEQINW3oc14WaqglVa8GSWNfaSICTGO6C9xRBEIMh_jJhM1K5EKQDFe4rEmnsX_rPYzuYheC-lwnkYUpPGEg9ecGCEDbe-n7IZ70r2Upu6njoKWu0R_RdRepFXb6iF6WH4WNQwc_6OQ4IEWTQ46hXXWUFMeIpFTuQcYKnlInoZWcAy1A-Rfw2uNCJcZLnpHFsSShYnSZ1Ftv6ndgQgDDFaSupgMog2KrDIf8TIbbj6p-gOoD7Q2juPFZqdGRl0JJ3qcFit04j0NZ-al8NodQ8NiKcbVbXpdeepX27qLbh5u1uyz2zC4Q8aaHCaTUCZa-M8HMXBHQ2m1hiwm0DYhV0i-jzDha1Kg2Trz0aZH1pPvsstE4CLr4TsveT8OLQfwfkC4sPeTB6vk_49zdA85ZfOWdoyxqDI7O8dRUgEcI9QFfue_8VGSGo_C0xswZYN2CbKtWnRu7oNeWiiBdi40NpNuVp2sPmY_MWdXVBzOBnqk8LfrPh1So09q-rZ6fHNghUqwj2NMgJBrWDyOEwHloJFfWUYBT1GAGtPqIZblkoQrBUAjZCGB1tZdSkuMQ3er38R_x_wMjpmKfQ2lZzC1AUYDD2syMHsM3--oKkihhjZxZ4W8lCh9GMtsSfy1w7JYALr4xY9SKsA8Eq2QmoQFBCoLlscYBmozB2CeywxDPYaqHtbzhWw77zE3ONfzaS4lXn2HycQcdFy4-zIa5S2DpFr7Enjv6EL2IUavVz8mGsOEusp3mZQwbm0O01X3kk8RU8oQeQamakH5-RihTpfMVVIcc_jDR-2Wzqe8m1crt-nly0Ws3c9LZpXVwtWf0LUQhTYl3q7H7dKNEKd7Zb2YsWGJ6j2a3oduHK55ALnaYGq0nbnZy5R8M49sEJq2fxW3dygqAkpDVhDf7YNm21bMkK2Npx1HzMiTHPy_ZVKJl0MUg9KyVvwWJp0zPGatA4ExM_7skfDnJqfk4TmkmACGn0rflhSnqshPPNFGn3ixBhRSaQ5ATP4BSaB-9J40cnXKFFyE8b6FWPDLaS9p0sETU7442gC9Sy0rinQBRJt5YWpyP79FbXxaPh1MpFixTuvbl_cais8-vwcxSP4yTpfON5OngbCnTdKiVUauyGLbetGjxGFpE5q_zzlEsnhaXN6oZbiBx5LKF_xHE5gNrLeotdeEJvM5eZGs-rjhby2LwdnhmRG1z33_WC7OzJBItA_LK_brLxtHVodDKmq2O45qcUzFhHn5vmEQSy6CDOfcj9wXX-JkbRzk2Bu2TIfPt5o2eZpc9mUc2s9CcydqO5RSvK6MiH5x8oukec9e2qRzGmyoTYdXyrzIKwm641Va0eZLbm12r-zRWtANtTV0-0mQUASDcVTbb4cPeru0LFrfwjoMjP2ZQQajqHXud1j7OIqj5ea039ay0fZDCxvVtRKUGO5506HkQwGmJQWx3xmDw4HwayBO0wUgqsRTFXCDyPBPFB0QjPXJtPeLpTic0z2QKB3qKCM1iHpinWm3myBtoGnfvc1AbxOPeBN7NU6XmRyDsxYCnqqXTP4mj2o2aSdPYYxQbh_-yHA3ubRAFgOvTb2xJFtoUVzGkrVPe06zXE_2zuJn8VTGQ8OxIDvJyOAfkNn_KHS_4jWGqBH5ePxbfUmiJKxo48LpToNcu0lp7AZYHcajSEBbWyqGQiG5lVm1CbNNlifMEqEPngvucCcLajvtbZAQnuHDoBj2kzpSj15wquWGA8G8cVCnOAdlyCkqGcSF6qacyCbR6yhDuiQzu3710dxwsSy9IU6RzzCCRtKzCE9L8RDerMqTNHT06GadnxnOBFkOaRjvU5Ohu188WaEkOwbBJwKyYbmTzRJft1KJb6lZwKMNCTUvt5w7qFvZwQgyqrop-dlXubdXRDV6WBq9orSu0Lt0m6JzU7qCcFgaeZDuF928s4N6N09Q2BOQKAfnzNjz1oT0xrA7PXlrZ52oA8-yJkZFcKjEVQ031RofA0H2_iIkyZ3sx27NEruRrnFD39PTaPrw0lXQxn93hqwNq4jN42AjBmGp7Qg7kmnOXshxInLjqSzb5t-T4ooB6ibw4RJs8EgiqLbYo7lTPIgg4j2IZHVrx0bk7HLxpbjldh0HjYkHOrNWeBxSuPOIq4MCSeyTrda0jwfue8Ym-ln3s7G"}]}}],"usage":{"prompt_tokens":29,"completion_tokens":308,"total_tokens":337,"cost":0.0013871,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.0013871,"upstream_inference_prompt_cost":0.0000319,"upstream_inference_completions_cost":0.0013552},"completion_tokens_details":{"reasoning_tokens":256,"image_tokens":0}}}

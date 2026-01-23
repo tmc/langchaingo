@@ -1,36 +1,36 @@
 httprr trace v1
-642 1784
+636 1603
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
-Content-Length: 387
+Content-Length: 382
 Anthropic-Beta: tools-2024-05-16
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-3-opus-20240229","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like?"}]}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
-Content-Length: 801
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like?"}]}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 590
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
-Anthropic-Ratelimit-Input-Tokens-Limit: 80000
-Anthropic-Ratelimit-Input-Tokens-Remaining: 80000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2025-06-23T15:31:58Z
-Anthropic-Ratelimit-Output-Tokens-Limit: 16000
-Anthropic-Ratelimit-Output-Tokens-Remaining: 16000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2025-06-23T15:32:02Z
-Anthropic-Ratelimit-Requests-Limit: 2000
-Anthropic-Ratelimit-Requests-Remaining: 1999
-Anthropic-Ratelimit-Requests-Reset: 2025-06-23T15:31:57Z
-Anthropic-Ratelimit-Tokens-Limit: 96000
-Anthropic-Ratelimit-Tokens-Remaining: 96000
-Anthropic-Ratelimit-Tokens-Reset: 2025-06-23T15:31:58Z
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-23T16:54:16Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-23T16:54:17Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-23T16:54:16Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-23T16:54:16Z
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:32:02 GMT
-Request-Id: req_011CQRPpGvVMErUxrhk3K7XA
+Date: Fri, 23 Jan 2026 16:54:17 GMT
+Request-Id: req_011CXQfCGAk9s9LwwH7tpm8j
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: 1.1 google
+X-Envoy-Upstream-Service-Time: 1431
 X-Robots-Tag: none
 
-{"id":"msg_012KdDdQW43A1NjwNQ8ibu6e","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[{"type":"text","text":"<thinking>\nThe get_weather tool is relevant for answering this question about the weather. It requires a location parameter, but the user did not specify a location in their request. I don't have enough context to reasonably infer a location. Without a location, I cannot call the get_weather tool to answer the question.\n</thinking>\n\nTo get the weather forecast, I need to know the location you're interested in. Could you please provide the city or zip code you'd like"}],"stop_reason":"max_tokens","stop_sequence":null,"usage":{"input_tokens":611,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":100,"service_tier":"standard"}}
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01KDrMqfvPeutzPYRwksQafn","type":"message","role":"assistant","content":[{"type":"text","text":"I'd be happy to help you check the weather! However, I need to know which location you'd like to check the weather for. Could you please tell me the city or area you're interested in?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":574,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":45,"service_tier":"standard"}}

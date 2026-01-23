@@ -1,5 +1,5 @@
 httprr trace v1
-369 1269
+368 1523
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 881
+Content-Length: 1067
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:31 GMT
+Date: Thu, 22 Jan 2026 19:48:37 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -24,4 +24,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-{"id":"gen-1750691610-C7QWlKX0yD1R1W7QQT6A","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion","created":1750691611,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"As a Pomeranian, you are a small domesticated mammal belonging to the canine family, Canidae. More specifically, you are a breed of dog (Canis lupus familiaris). Pomeranians are known for their fluffy coats, small size, and lively personalities. They are a toy breed and are often characterized by their friendly and energetic behavior.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_34a54ae93c","usage":{"prompt_tokens":20,"completion_tokens":72,"total_tokens":92,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+{"id":"gen-1769111317-B79JPixmFOvkuTDRpEZ8","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion","created":1769111317,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"As a Pomeranian, you belong to the family Canidae, which makes you a member of the canine family. Specifically, you are a domesticated subspecies of the gray wolf (Canis lupus), known as Canis lupus familiaris. Pomeranians are small toy dogs known for their fluffy coats, lively personalities, and playful behavior.","refusal":null,"reasoning":null}}],"system_fingerprint":"fp_29330a9688","usage":{"prompt_tokens":20,"completion_tokens":70,"total_tokens":90,"cost":0.000045,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.000045,"upstream_inference_prompt_cost":0.000003,"upstream_inference_completions_cost":0.000042},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0}}}

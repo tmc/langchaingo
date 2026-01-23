@@ -1,5 +1,5 @@
 httprr trace v1
-850 1543
+849 1621
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -13,26 +13,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:08 GMT
+Date: Thu, 22 Jan 2026 21:11:15 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 128
+Openai-Processing-Ms: 153
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 130
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999854
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 175
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999855
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a54f4579b2330d88b6afc44c97a08fc6
+X-Request-Id: req_23d053eac51d4829a04885bca9908ec4
 
 {
-  "id": "chatcmpl-BldTMjRdKIzmx4KDK3FfEbgYYQiUP",
+  "id": "chatcmpl-D0wFPQVDHXpaVXzP7JNaM0FQj2wps",
   "object": "chat.completion",
-  "created": 1750692848,
+  "created": 1769116275,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -63,9 +65,9 @@ X-Request-Id: req_a54f4579b2330d88b6afc44c97a08fc6
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-996 1647
+995 1685
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -74,38 +76,40 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: I don't know.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nOne sunny morning, as the golden rays of the sun danced through the treetops, Oliver decided it was time to embark on a grand journey to find new friends who shared his thirst for excitement. With a determined gleam in his eye, he packed a tiny satchel filled with cheese, a sturdy walking stick, and bid farewell to his mouse friends.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}]}HTTP/2.0 200 OK
-Content-Length: 925
+Content-Length: 886
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:09 GMT
+Date: Thu, 22 Jan 2026 21:11:17 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 248
+Openai-Processing-Ms: 353
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 250
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999817
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_2ddeabb4b1c11b7e8074fb053f5beb17
+X-Envoy-Upstream-Service-Time: 371
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999817
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_466184182e354b4fba8e56e394a089fa
 
 {
-  "id": "chatcmpl-BldTNvfiIiJoS68E5HkSdI66Cjy83",
+  "id": "chatcmpl-D0wFQb6n8nWfZKcaD54TJ6ojguSOK",
   "object": "chat.completion",
-  "created": 1750692849,
+  "created": 1769116276,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The context does not provide information about the lion's name. Therefore, the original answer remains appropriate.",
+        "content": "The context provided does not specify the name of the lion, so I don't know.",
         "refusal": null,
         "annotations": []
       },
@@ -115,8 +119,8 @@ X-Request-Id: req_2ddeabb4b1c11b7e8074fb053f5beb17
   ],
   "usage": {
     "prompt_tokens": 155,
-    "completion_tokens": 20,
-    "total_tokens": 175,
+    "completion_tokens": 17,
+    "total_tokens": 172,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -129,49 +133,51 @@ X-Request-Id: req_2ddeabb4b1c11b7e8074fb053f5beb17
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-1095 1651
+1055 1685
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 892
+Content-Length: 853
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: The context does not provide information about the lion's name. Therefore, the original answer remains appropriate.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nVenturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}]}HTTP/2.0 200 OK
-Content-Length: 929
+{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: The context provided does not specify the name of the lion, so I don't know.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nVenturing deeper into the forest, Oliver's heart raced with anticipation. His tiny paws crunched on fallen leaves as he journeyed through the dense undergrowth, marveling at the vibrant flora and listening to the whimsical songs of birds. It was then that he stumbled upon a clearing where a small pond shimmered under the sunlight.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}]}HTTP/2.0 200 OK
+Content-Length: 886
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:11 GMT
+Date: Thu, 22 Jan 2026 21:11:18 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 357
+Openai-Processing-Ms: 324
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 360
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999793
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_3d19339dc1eb14328eb48520e4fe60d8
+X-Envoy-Upstream-Service-Time: 341
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999805
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_69cd51d4adbd43f0b88a2bd347b16bd8
 
 {
-  "id": "chatcmpl-BldTPsAXluhiYSROluirVigV5XDZH",
+  "id": "chatcmpl-D0wFSznPjXAfRCGzMzMIMasdLJXM4",
   "object": "chat.completion",
-  "created": 1750692851,
+  "created": 1769116278,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "The context does not provide any information about the lion's name. Therefore, the original answer remains appropriate.",
+        "content": "The context provided does not specify the name of the lion, so I don't know.",
         "refusal": null,
         "annotations": []
       },
@@ -180,9 +186,9 @@ X-Request-Id: req_3d19339dc1eb14328eb48520e4fe60d8
     }
   ],
   "usage": {
-    "prompt_tokens": 165,
-    "completion_tokens": 21,
-    "total_tokens": 186,
+    "prompt_tokens": 162,
+    "completion_tokens": 17,
+    "total_tokens": 179,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -195,42 +201,44 @@ X-Request-Id: req_3d19339dc1eb14328eb48520e4fe60d8
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_7f8eb7d1f9"
 }
-1201 1554
+1157 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 998
+Content-Length: 955
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: The context does not provide any information about the lion's name. Therefore, the original answer remains appropriate.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}]}HTTP/2.0 200 OK
+{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"The original question is as follows: What is the name of the lion?\nWe have provided an existing answer: The context provided does not specify the name of the lion, so I don't know.\nWe have the opportunity to refine the existing answer\n(only if needed) with some more context below.\n------------\nAs Oliver approached the pond, he noticed a majestic lion drinking from the water's edge. The lion, named Leo, had a regal presence and a gentle smile. Oliver's heart fluttered with excitement at the thought of making friends with such a magnificent creature.\n\n\"Hello there, noble lion! My name is Oliver, and I'm on a quest to find new friends. Might you be interested in joining me?\" Oliver squeaked, his voice filled with hope.\n------------\nGiven the new context, refine the original answer to better answer the question. \nIf the context isn't useful, return the original answer."}]}HTTP/2.0 200 OK
 Content-Length: 832
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:12 GMT
+Date: Thu, 22 Jan 2026 21:11:20 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 160
+Openai-Processing-Ms: 242
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 162
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999767
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_2df0062d6045b42c88d6e6cbe0bd074f
+X-Envoy-Upstream-Service-Time: 262
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999777
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_65032217542e44799196cc4ff04a9c24
 
 {
-  "id": "chatcmpl-BldTQu8kJJa8b7DDclMvmO7ZjAv9T",
+  "id": "chatcmpl-D0wFTSwE4MdHCxH6eZefQiS4Na7HM",
   "object": "chat.completion",
-  "created": 1750692852,
+  "created": 1769116279,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -246,9 +254,9 @@ X-Request-Id: req_2df0062d6045b42c88d6e6cbe0bd074f
     }
   ],
   "usage": {
-    "prompt_tokens": 192,
+    "prompt_tokens": 188,
     "completion_tokens": 7,
-    "total_tokens": 199,
+    "total_tokens": 195,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -261,9 +269,9 @@ X-Request-Id: req_2df0062d6045b42c88d6e6cbe0bd074f
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_f12167b370"
+  "system_fingerprint": "fp_7f8eb7d1f9"
 }
-941 1554
+940 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -277,26 +285,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:14 GMT
+Date: Thu, 22 Jan 2026 21:11:21 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 164
+Openai-Processing-Ms: 214
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 173
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999831
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_0d8cb4898f900d026f90bfb5e0c70164
+X-Envoy-Upstream-Service-Time: 236
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999832
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_5115847e8c2843fc97887e6d1a998ddc
 
 {
-  "id": "chatcmpl-BldTSskz1pj9pypA6vhafyUPDuSw4",
+  "id": "chatcmpl-D0wFVgSHyQ9cSgFiUcRSjh7fCUI3R",
   "object": "chat.completion",
-  "created": 1750692854,
+  "created": 1769116281,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -327,9 +337,9 @@ X-Request-Id: req_0d8cb4898f900d026f90bfb5e0c70164
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-973 1554
+972 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -343,26 +353,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:16 GMT
+Date: Thu, 22 Jan 2026 21:11:22 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 195
+Openai-Processing-Ms: 194
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 201
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999824
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_f614c4e837f2e35609b80ac2c1c38d15
+X-Envoy-Upstream-Service-Time: 210
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999825
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_0ec31d8e63f049968b322632169874c7
 
 {
-  "id": "chatcmpl-BldTUK7SJAr3zUseMyzyK9zkvioQT",
+  "id": "chatcmpl-D0wFWfoDKROfFj7ItkiXJPTrTfxIs",
   "object": "chat.completion",
-  "created": 1750692856,
+  "created": 1769116282,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -393,9 +405,9 @@ X-Request-Id: req_f614c4e837f2e35609b80ac2c1c38d15
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }
-1186 1554
+1185 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -409,26 +421,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:17 GMT
+Date: Thu, 22 Jan 2026 21:11:24 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 121
+Openai-Processing-Ms: 282
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 124
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999770
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_8d84b200eb269e4e38f3841910e4fd7e
+X-Envoy-Upstream-Service-Time: 298
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999770
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_71debcfa24fd40b29a50cb48e5f399be
 
 {
-  "id": "chatcmpl-BldTVDFYInJ4RaaY6WD6NotFjTPzE",
+  "id": "chatcmpl-D0wFYmUXqBxrVPXqBjzEPlMGe02Jm",
   "object": "chat.completion",
-  "created": 1750692857,
+  "created": 1769116284,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -459,9 +473,9 @@ X-Request-Id: req_8d84b200eb269e4e38f3841910e4fd7e
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_7f8eb7d1f9"
 }
-1150 1554
+1149 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -475,26 +489,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:19 GMT
+Date: Thu, 22 Jan 2026 21:11:25 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 168
+Openai-Processing-Ms: 229
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 174
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999779
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_c237bbf54c13615f9ada82a0e7831c47
+X-Envoy-Upstream-Service-Time: 246
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999780
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_fcca0359346e4cbd80c51726afea8581
 
 {
-  "id": "chatcmpl-BldTXKqV2bgnMtG7xqHCPg7Hcj5fH",
+  "id": "chatcmpl-D0wFZoIsGrWNj9ltGdT0x88RD97gZ",
   "object": "chat.completion",
-  "created": 1750692859,
+  "created": 1769116285,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -525,9 +541,9 @@ X-Request-Id: req_c237bbf54c13615f9ada82a0e7831c47
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }
-1026 1554
+1025 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -541,26 +557,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:20 GMT
+Date: Thu, 22 Jan 2026 21:11:27 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 163
+Openai-Processing-Ms: 166
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 171
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999810
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_4ee5a94df2adf42e81b7dfe206947a58
+X-Envoy-Upstream-Service-Time: 182
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999810
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_2398797159f649c5bcf51a430a3f6c86
 
 {
-  "id": "chatcmpl-BldTY0IBUhAOrSxS66nahMAx08rSG",
+  "id": "chatcmpl-D0wFahNOydoFSGuT9riJXIswjb6DB",
   "object": "chat.completion",
-  "created": 1750692860,
+  "created": 1769116286,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -591,9 +609,9 @@ X-Request-Id: req_4ee5a94df2adf42e81b7dfe206947a58
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-1160 1554
+1159 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -607,26 +625,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:22 GMT
+Date: Thu, 22 Jan 2026 21:11:28 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 280
+Openai-Processing-Ms: 218
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 286
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999777
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_fe4a5de851e3790226b61dac48223ce9
+X-Envoy-Upstream-Service-Time: 235
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999777
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_592dc34a61fc4d71adf9daed83c7d573
 
 {
-  "id": "chatcmpl-BldTa8dky3KjEX0PcYVkeP1XyJq5u",
+  "id": "chatcmpl-D0wFcKvA9O2HFvBkEfX9fNauZ6nwV",
   "object": "chat.completion",
-  "created": 1750692862,
+  "created": 1769116288,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -657,9 +677,9 @@ X-Request-Id: req_fe4a5de851e3790226b61dac48223ce9
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_f12167b370"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-933 1553
+932 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -673,26 +693,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:23 GMT
+Date: Thu, 22 Jan 2026 21:11:29 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 175
+Openai-Processing-Ms: 143
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 177
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999833
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 162
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999835
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_c8ced8ad67aff13c7ac5c1bbbe49d671
+X-Request-Id: req_5f38a40c30a14708bc8d73bd29830e9a
 
 {
-  "id": "chatcmpl-BldTbHb1Of0eG0yATvsKBSvheLSyn",
+  "id": "chatcmpl-D0wFdPKNo45kAmT78GahM2EufCAHu",
   "object": "chat.completion",
-  "created": 1750692863,
+  "created": 1769116289,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -723,9 +745,9 @@ X-Request-Id: req_c8ced8ad67aff13c7ac5c1bbbe49d671
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_f0bc439dc3"
 }
-1021 1554
+1020 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -739,26 +761,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:25 GMT
+Date: Thu, 22 Jan 2026 21:11:31 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 155
+Openai-Processing-Ms: 223
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 162
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999812
-X-Ratelimit-Reset-Requests: 6ms
-X-Ratelimit-Reset-Tokens: 1ms
-X-Request-Id: req_dd16c2d101a68b06879d9cb5ca25cfe1
+X-Envoy-Upstream-Service-Time: 238
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999812
+X-Ratelimit-Reset-Requests: 2ms
+X-Ratelimit-Reset-Tokens: 0s
+X-Request-Id: req_42dc5b16ace64fd4a11c216bd957f73a
 
 {
-  "id": "chatcmpl-BldTdaRKGwv5PnL81UCl7MBNHEgT5",
+  "id": "chatcmpl-D0wFf3hei7PbZubbLqORYibi0GgQP",
   "object": "chat.completion",
-  "created": 1750692865,
+  "created": 1769116291,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -789,9 +813,9 @@ X-Request-Id: req_dd16c2d101a68b06879d9cb5ca25cfe1
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }
-869 1553
+868 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -805,26 +829,28 @@ Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:34:26 GMT
+Date: Thu, 22 Jan 2026 21:11:32 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 192
+Openai-Processing-Ms: 235
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 200
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999850
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 257
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999850
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_8a08d68b6b207a8b58a401b9cbd2de89
+X-Request-Id: req_68d201444e234d2a91e79532c5e5a2fc
 
 {
-  "id": "chatcmpl-BldTeZxUvj6NYU55pQLMn7GQZbSu0",
+  "id": "chatcmpl-D0wFgzJLJNLFJdETazRTLgQjvBQtK",
   "object": "chat.completion",
-  "created": 1750692866,
+  "created": 1769116292,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -855,5 +881,5 @@ X-Request-Id: req_8a08d68b6b207a8b58a401b9cbd2de89
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_38343a2f8f"
+  "system_fingerprint": "fp_fe84ea9799"
 }

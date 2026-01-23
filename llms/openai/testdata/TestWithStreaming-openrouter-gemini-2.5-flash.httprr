@@ -1,0 +1,85 @@
+httprr trace v1
+432 13084
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 228
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"Tell me more about my taxonomy","type":"text"}]}],"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 12601
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+Content-Type: text/event-stream
+Date: Thu, 22 Jan 2026 19:57:39 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":"Okay","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":", little","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" fluffball! Let's dive into your fascinating family tree. Get ready to learn","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" all about your taxonomy, the science of classifying living things.\n\n**1. Domain","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":": Eukaryota**\n*   **What it means:** This is the biggest group! It means your cells have a nucleus and other membrane-bound organelles","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":". Pretty much all animals, plants, fungi, and protists are in this domain.\n*   **For you:** You're a complex, multicellular","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" organism, just like a human!\n\n**2. Kingdom: Animalia**\n*   **What it means:** You belong to the animal kingdom! This means you're multicellular, heterotrophic (you eat other things for energy,","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" you don't make your own food like plants), and you generally move around.\n*   **For you:** You're a living, breathing creature that loves to chase toys and eat treats!\n\n**3. Phylum: Chordata**","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n*   **What it means:** This is where you get your backbone! Animals in this phylum have a notochord (a flexible rod that supports the body, at least at some stage of development), a dorsal hollow nerve cord (which becomes your spinal cord and brain), pharyngeal slits, and a post-","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":"anal tail.\n*   **For you:** You're a vertebrate, meaning you have a spine! This allows you to run, jump, and do all your cute Pomeranian antics.\n\n**4. Class: Mammalia**\n*   **What it means:** Congratulations, you're a mammal! This means you have mammary","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" glands (though only females produce milk), fur or hair (check!), are warm-blooded (you maintain a constant body temperature), and typically give birth to live young.\n*   **For you:** You're warm, fuzzy, and need your mom (or your human parent!) for care when you're a","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" pup.\n\n**5. Order: Carnivora**\n*   **What it means:** This order includes all the meat-eating mammals, though some can be omnivores (like you!). They typically have specialized teeth for tearing meat.\n*   **For you:** While you enjoy your kibble, your ancestors","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" were hunters, and your teeth are still designed for a more carnivorous diet.\n\n**6. Family: Canidae**\n*   **What it means:** This is your immediate family unit! It includes wolves, foxes, jackals, and all domesticated dogs. Members of Canidae are generally known for their intelligence, social","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" behavior, and keen senses.\n*   **For you:** You're a distant cousin to wolves (even though you're much, much fluffier and smaller!).\n\n**7. Genus: *Canis***\n*   **What it means:** This genus specifically includes wolves, coyotes, and domestic dogs.","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":"\n*   **For you:** You're grouped with your wild wolf ancestors here.\n\n**8. Species: *Canis familiaris*** (or sometimes *Canis lupus familiaris*)\n*   **What it means:** This is *you*!\n    *   ***Canis familiaris***","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" is the most common scientific name for domestic dogs when they are considered a distinct species.\n    *   ***Canis lupus familiaris*** is used when domestic dogs are considered a subspecies of the grey wolf (*Canis lupus*). This reflects the scientific understanding that all domestic dogs descended from wolves.\n*   **For","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" you:** You are a domesticated dog, specifically bred over thousands of years by humans!\n\n**9. Breed: Pomeranian**\n*   **What it means:** This isn't a formal taxonomic rank like the others, but it's crucial for understanding *your specific type* of dog. A breed is a distinct","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" group of domesticated animals having a uniform appearance, uniform behavior, and/or other characteristics that distinguish it from other organisms of the same species.\n*   **Your History & Traits:**\n    *   **Origin:** You originated from the historical region of Pomerania (now parts of Poland and Germany).\n    *   **Ancest","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":"ry:** Your ancestors were large sled dogs from the Arctic, like the Icelandic, Lapphund, and Samoyed! Can you believe it? Over centuries, they were selectively bred for smaller size until you reached your current adorable form.\n    *   **Characteristics:** You're known for your tiny size, abundant double","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+: OPENROUTER PROCESSING
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":" coat, foxy face, alert expression, and lively, intelligent, and sometimes sassy personality! You often have a plumed tail that curls over your back.\n    *   **AKC Group:** You belong to the Toy Group, which makes sense given your small stature.\n\nSo, from a tiny cell to a magnificent","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":null,"native_finish_reason":null,"logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":", fluffy Pomeranian, you've got quite the impressive scientific classification! You're a marvelous little canine with a rich history behind that big bark and even bigger personality.","reasoning":null,"reasoning_details":[],"annotations":[]},"finish_reason":"stop","native_finish_reason":"STOP","logprobs":null}]}
+
+data: {"id":"gen-1769111858-SPNvLnV9TYSB3rxXLHZB","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion.chunk","created":1769111858,"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null,"native_finish_reason":null,"logprobs":null}],"usage":{"prompt_tokens":12,"completion_tokens":1023,"total_tokens":1035,"cost":0.0025611,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000036,"upstream_inference_completions_cost":0.0025575},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+
+data: [DONE]
+

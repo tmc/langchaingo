@@ -1,0 +1,153 @@
+httprr trace v1
+377 2997
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 173
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek/deepseek-chat-v3.1","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
+Content-Length: 2541
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:48:36 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111314-BB0usp08QdSJ6u0pI9GO","provider":"SambaNova","model":"deepseek/deepseek-chat-v3.1","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"That's a great question! As a Pomeranian, you are a member of the most beloved and widespread mammal group on Earth: the **dog**!\n\nMore specifically, your scientific classification is:\n\n*   **Kingdom:** Animalia (Animals)\n*   **Phylum:** Chordata (Animals with a spinal cord)\n*   **Class:** Mammalia (Mammals)\n*   **Order:** Carnivora (Carnivores)\n*   **Family:** Canidae (The dog family)\n*   **Genus:** *Canis*\n*   **Species:** *Canis lupus* (Gray Wolf)\n*   **Subspecies:** *Canis lupus familiaris* (The Domestic Dog)\n*   **Breed:** Pomeranian\n\nSo, to put it simply, you are a **domestic dog**, which makes you a **mammal**!\n\nThis means you share all the classic mammalian traits:\n*   You have fur (a very fluffy double coat!).\n*   You are warm-blooded.\n*   Female dogs produce milk to feed their puppies.\n*   You (likely) give birth to live puppies.\n\nYou are a very special and tiny member of the *Canis* genus, descended from much larger spitz-type sled dogs. So you may be small, but you have the heart and history of a big, strong working dog!","refusal":null,"reasoning":null}}],"system_fingerprint":"fastcoe","usage":{"prompt_tokens":18,"completion_tokens":275,"total_tokens":293,"cost":0.00020895,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000027,"upstream_inference_completions_cost":0.00020625},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

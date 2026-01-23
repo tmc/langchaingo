@@ -1,45 +1,47 @@
 httprr trace v1
-316 1661
+314 1668
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 113
+Content-Length: 112
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello, how are you?"}],"max_completion_tokens":50}HTTP/2.0 200 OK
-Content-Length: 940
+{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Hello, how are you?"}],"max_completion_tokens":50}HTTP/2.0 200 OK
+Content-Length: 869
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:16:45 GMT
+Date: Thu, 22 Jan 2026 19:20:54 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 656
+Openai-Processing-Ms: 638
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 660
-X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 10000000
-X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 9999993
-X-Ratelimit-Reset-Requests: 6ms
+X-Envoy-Upstream-Service-Time: 656
+X-Openai-Proxy-Wasm: v0.1
+X-Ratelimit-Limit-Requests: 30000
+X-Ratelimit-Limit-Tokens: 150000000
+X-Ratelimit-Remaining-Requests: 29999
+X-Ratelimit-Remaining-Tokens: 149999992
+X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_0cd19f8e7f0f0fc2e5397d2a16624fb2
+X-Request-Id: req_bf7ddcd0b0354ea9b395718393304dd3
 
 {
-  "id": "chatcmpl-BldCXNYUjHINb5BdMnubrMzTbVyAY",
+  "id": "chatcmpl-D0uWbcIctduS87aRJ9yHnWUoc71XO",
   "object": "chat.completion",
-  "created": 1750691805,
-  "model": "gpt-3.5-turbo-0125",
+  "created": 1769109653,
+  "model": "gpt-4.1-mini-2025-04-14",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "Hello! I'm just a computer program, so I don't have feelings, but I'm here and ready to help you with anything you need. How can I assist you today?",
+        "content": "Hello! I'm doing well, thank you. How can I assist you today?",
         "refusal": null,
         "annotations": []
       },
@@ -49,8 +51,8 @@ X-Request-Id: req_0cd19f8e7f0f0fc2e5397d2a16624fb2
   ],
   "usage": {
     "prompt_tokens": 13,
-    "completion_tokens": 37,
-    "total_tokens": 50,
+    "completion_tokens": 16,
+    "total_tokens": 29,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -63,5 +65,5 @@ X-Request-Id: req_0cd19f8e7f0f0fc2e5397d2a16624fb2
     }
   },
   "service_tier": "default",
-  "system_fingerprint": null
+  "system_fingerprint": "fp_376a7ccef1"
 }

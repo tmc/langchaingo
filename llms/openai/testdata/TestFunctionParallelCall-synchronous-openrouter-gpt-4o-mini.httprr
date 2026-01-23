@@ -1,5 +1,5 @@
 httprr trace v1
-938 1252
+937 1543
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,18 +8,20 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":"What are the weather and time in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}},{"type":"function","function":{"name":"getCurrentTime","description":"Get the current time in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 864
+Content-Length: 1087
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:58 GMT
+Date: Thu, 22 Jan 2026 19:58:40 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
 
          
-{"id":"gen-1750695717-IKzfjPbfWqqIPl4Nadyc","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion","created":1750695717,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"index":0,"id":"call_L9Fb6z7h9f4RzOgQzFT16Db6","type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}},{"index":1,"id":"call_oNIgwuIevRDRSj85pRcTuDyP","type":"function","function":{"name":"getCurrentTime","arguments":"{\"location\": \"Boston, MA\"}"}}]}}],"system_fingerprint":"fp_34a54ae93c","usage":{"prompt_tokens":121,"completion_tokens":50,"total_tokens":171,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens_details":{"reasoning_tokens":0}}}
+
+         
+{"id":"gen-1769111919-5TBLcWfsb2NTkr2H6BRq","provider":"OpenAI","model":"openai/gpt-4o-mini","object":"chat.completion","created":1769111919,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"call_Nfo0zt0ictzFo2vKMkKOzVbj","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\"}"}},{"type":"function","index":1,"id":"call_V6CWsoHok1YA62uiKi46Yql1","function":{"name":"getCurrentTime","arguments":"{\"location\": \"Boston, MA\"}"}}]}}],"system_fingerprint":"fp_29330a9688","usage":{"prompt_tokens":121,"completion_tokens":50,"total_tokens":171,"cost":0.00004815,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"cost_details":{"upstream_inference_cost":0.00004815,"upstream_inference_prompt_cost":0.00001815,"upstream_inference_completions_cost":0.00003},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0}}}

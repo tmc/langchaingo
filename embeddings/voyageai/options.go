@@ -12,7 +12,7 @@ const (
 	_defaultBaseURL       = "https://api.voyageai.com/v1"
 	_defaultBatchSize     = 512
 	_defaultStripNewLines = true
-	_defaultModel         = "voyage-2"
+	_defaultModel         = "voyage-4"
 )
 
 // Option is a function type that can be used to modify the client.

@@ -1,5 +1,5 @@
 httprr trace v1
-370 2081
+369 1564
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/o3-mini-high","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
-Content-Length: 1692
+Content-Length: 1108
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:13:31 GMT
+Date: Thu, 22 Jan 2026 19:48:38 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -34,64 +34,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750691610-XHBScwcTWgIZ1LpscaJN","provider":"OpenAI","model":"openai/o3-mini-high","object":"chat.completion","created":1750691611,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"As a Pomeranian, you're a dog—a domesticated canine, which is a type of mammal. Dogs are warm-blooded, have fur, and nurse their young with milk from mammary glands, all of which are classic mammalian traits. More specifically, dogs belong to the species Canis lupus familiaris, within the family Canidae, which also includes wolves, foxes, and similar animals.","refusal":null,"reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABoWW8o30Nj2Ho285IwxyJEPQZ_UDYCh3UJDb4HyqRo5LXKLzptc_OIkfHhvj_oa3Xke3rvloVVXRvWHW3QWrnZhIIsDzoj_kHUiC7WBfx9uYV_960JC-KknbJmKPuuO9WRQl8aDHnsdDL7fp0y651yUfP6kQk1otUuVsk8_cqjakOuNe0kNu8Pxtv2C1tu_DqB4yW1xeY1SvC5p4vH4bccseqoFuw4zXO56lDuRH1Bm-UeFuaLBXnez1apvEh1fbo0Qd4ORi7oP737pTwUEzYe1Bh5ksRo5017FXmG_MfoYtBbnNPlq030v105NIpIuBFWDnyPVLtFdc8ibV2bBi6yJJPegjReJ0t_wti_199izSi3-NBGXdleymng0hsgOoElEKcXt1gmNSiY2q7zs4zjPyIV_g==","id":"rs_68596f238e848190a1ce4adfb9cb92f6"}]}}],"usage":{"prompt_tokens":19,"completion_tokens":1237,"total_tokens":1256}}
+{"id":"gen-1769111318-FYS2WjMv7q5rhLLciPiB","provider":"OpenAI","model":"openai/o3-mini-high","object":"chat.completion","created":1769111318,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"A Pomeranian is a breed of dog, which is a type of mammal. More specifically, dogs (including Pomeranians) are part of the Canidae family and are classified under the species Canis lupus familiaris. As a mammal, you have characteristics like having fur, being warm-blooded, and nurturing your young with milk, all of which are true for dogs.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":19,"completion_tokens":273,"total_tokens":292,"cost":0.0012221,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.0012221,"upstream_inference_prompt_cost":0.0000209,"upstream_inference_completions_cost":0.0012012},"completion_tokens_details":{"reasoning_tokens":192,"image_tokens":0}}}

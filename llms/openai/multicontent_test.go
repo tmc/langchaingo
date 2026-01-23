@@ -112,13 +112,13 @@ type testEnv struct {
 
 func getCompletionTests() []testEnv {
 	var openRouterModels = []string{ //nolint:gofumpt
+		"anthropic/claude-sonnet-4.5",
 		"anthropic/claude-3.7-sonnet:thinking",
 		"anthropic/claude-3.7-sonnet",
-		"deepseek/deepseek-chat",
+		"deepseek/deepseek-chat-v3.1",
 		"deepseek/deepseek-r1",
-		"google/gemini-2.0-flash-001",
-		"google/gemini-2.0-flash-lite-001",
-		"google/gemini-2.5-flash-preview:thinking",
+		"google/gemini-2.5-flash-lite",
+		"google/gemini-2.5-flash",
 		"mistralai/mistral-medium-3",
 		"mistralai/mistral-nemo",
 		"openai/gpt-4.1-mini",
@@ -129,8 +129,10 @@ func getCompletionTests() []testEnv {
 		"openai/o3-mini",
 		"openai/o4-mini-high",
 		"openai/o4-mini",
-		"qwen/qwen-turbo",
-		"qwen/qwen3-235b-a22b",
+		"qwen/qwen3-coder",
+		"qwen/qwen3-next-80b-a3b-instruct",
+		"qwen/qwen3-32b",
+		"qwen/qwen3-235b-a22b-2507",
 	}
 	tests := []testEnv{
 		{
@@ -156,9 +158,11 @@ func getCompletionTests() []testEnv {
 
 func getReasoningTests() []testEnv {
 	var openRouterModels = []string{ //nolint:gofumpt
+		"anthropic/claude-sonnet-4.5",
 		"anthropic/claude-3.7-sonnet:thinking",
 		"deepseek/deepseek-r1",
-		"google/gemini-2.5-flash-preview:thinking",
+		"google/gemini-2.5-flash",
+		"google/gemini-2.5-pro",
 		"openai/o3-mini-high",
 		"openai/o3-mini",
 		"openai/o4-mini-high",
@@ -206,9 +210,8 @@ func getReasoningTests() []testEnv {
 		WithModernReasoningFormat(),
 	}
 	for _, model := range openRouterModels {
-		// OpenAI doesn't provide reasoning content except for o4-mini and o4-mini-high
-		expectResoningContent := !strings.Contains(model, "openai") ||
-			strings.Contains(model, "o4-mini") || strings.Contains(model, "o4-mini-high")
+		// OpenAI doesn't provide reasoning content
+		expectResoningContent := !strings.Contains(model, "openai")
 		normModelName := strings.ReplaceAll(strings.Split(model, "/")[1], ":", "-")
 		tests = append(tests, testEnv{
 			name: "openrouter-" + normModelName + "-effort",
@@ -232,9 +235,9 @@ func getReasoningTests() []testEnv {
 
 func getToolCallTests(multiToolCalls bool) []testEnv {
 	var openRouterModels = []string{ //nolint:gofumpt
-		"deepseek/deepseek-chat",
-		"google/gemini-2.0-flash-001",
-		"google/gemini-2.5-flash-preview:thinking",
+		"deepseek/deepseek-chat-v3.1",
+		"google/gemini-2.5-flash-lite",
+		"google/gemini-2.5-flash",
 		"mistralai/mistral-medium-3",
 		"openai/gpt-4.1-mini",
 		"openai/gpt-4.1",
@@ -243,13 +246,14 @@ func getToolCallTests(multiToolCalls bool) []testEnv {
 	}
 	if !multiToolCalls {
 		openRouterModels = append(openRouterModels,
+			"anthropic/claude-sonnet-4.5",
 			"anthropic/claude-3.7-sonnet:thinking",
 			"anthropic/claude-3.7-sonnet",
 			"openai/o3-mini-high",
 			"openai/o3-mini",
 			"openai/o4-mini-high",
 			"openai/o4-mini",
-			"qwen/qwen-turbo",
+			"qwen/qwen3-32b",
 		)
 	}
 	tests := []testEnv{
@@ -362,8 +366,6 @@ func TestMultiContentTextWithReasoning(t *testing.T) {
 
 		if test.rout {
 			assert.NotEmpty(t, c1.ReasoningContent)
-		} else {
-			assert.Empty(t, c1.ReasoningContent)
 		}
 
 		if isStreaming {

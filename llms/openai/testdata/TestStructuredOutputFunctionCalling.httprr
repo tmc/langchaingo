@@ -1,5 +1,5 @@
 httprr trace v1
-752 2411
+751 1925
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -8,31 +8,33 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a helpful assistant"},{"role":"user","content":"What is the age of Bob Odenkirk, a famous comedy screenwriter and an actor."}],"tools":[{"type":"function","function":{"name":"search","description":"Search by the web search engine","parameters":{"type":"object","properties":{"search_engine":{"type":"string","enum":["google","duckduckgo","bing"]},"search_query":{"type":"string"}},"required":["search_engine","search_query"],"additionalProperties":false},"strict":true}}]}HTTP/2.0 200 OK
-Content-Length: 1690
+Content-Length: 1128
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 15:16:37 GMT
+Date: Thu, 22 Jan 2026 20:01:53 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 963
+Openai-Processing-Ms: 734
+Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 967
+X-Envoy-Upstream-Service-Time: 752
+X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
-X-Ratelimit-Limit-Tokens: 2000000
+X-Ratelimit-Limit-Tokens: 30000000
 X-Ratelimit-Remaining-Requests: 9999
-X-Ratelimit-Remaining-Tokens: 1999970
+X-Ratelimit-Remaining-Tokens: 29999970
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_2ce04740e595d40b40c32f2c884ededa
+X-Request-Id: req_4f85cc64311c471b9d6a3ddf2afe595b
 
 {
-  "id": "chatcmpl-BldCOfU4t9c8KRc9S8zRIFOcbgOXG",
+  "id": "chatcmpl-D0vAGf2fxWftsjAovXEklZtrcUSVW",
   "object": "chat.completion",
-  "created": 1750691796,
+  "created": 1769112112,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
@@ -42,27 +44,11 @@ X-Request-Id: req_2ce04740e595d40b40c32f2c884ededa
         "content": null,
         "tool_calls": [
           {
-            "id": "call_dBeoDA3mPHAn1lmKkkQzlABy",
+            "id": "call_Izjlr6516UGeIg5rLtiSc4tA",
             "type": "function",
             "function": {
               "name": "search",
-              "arguments": "{\"search_engine\": \"google\", \"search_query\": \"Bob Odenkirk age\"}"
-            }
-          },
-          {
-            "id": "call_7QD8jwJHlICgtllZcOhUtV2q",
-            "type": "function",
-            "function": {
-              "name": "search",
-              "arguments": "{\"search_engine\": \"duckduckgo\", \"search_query\": \"Bob Odenkirk age\"}"
-            }
-          },
-          {
-            "id": "call_qYje51VbafYcjmjoA9ZQAEyt",
-            "type": "function",
-            "function": {
-              "name": "search",
-              "arguments": "{\"search_engine\": \"bing\", \"search_query\": \"Bob Odenkirk age\"}"
+              "arguments": "{\"search_engine\":\"google\",\"search_query\":\"Bob Odenkirk age 2023\"}"
             }
           }
         ],
@@ -75,8 +61,8 @@ X-Request-Id: req_2ce04740e595d40b40c32f2c884ededa
   ],
   "usage": {
     "prompt_tokens": 85,
-    "completion_tokens": 87,
-    "total_tokens": 172,
+    "completion_tokens": 26,
+    "total_tokens": 111,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -89,5 +75,5 @@ X-Request-Id: req_2ce04740e595d40b40c32f2c884ededa
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_a288987b44"
+  "system_fingerprint": "fp_deacdd5f6f"
 }

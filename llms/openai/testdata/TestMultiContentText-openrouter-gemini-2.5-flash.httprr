@@ -1,0 +1,23 @@
+httprr trace v1
+373 1357
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 169
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
+Content-Length: 902
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:48:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+{"id":"gen-1769111314-7nMn5CArwRnpnKDiD60d","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","index":0,"message":{"role":"assistant","content":"You're a **dog**, of the breed **Pomeranian**!\n\nWhile \"Pomeranian\" describes your specific type, at the core, you are a member of the canine family, which are mammals.","refusal":null,"reasoning":null,"annotations":[]}}],"usage":{"prompt_tokens":13,"completion_tokens":45,"total_tokens":58,"cost":0.0001164,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000039,"upstream_inference_completions_cost":0.0001125},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

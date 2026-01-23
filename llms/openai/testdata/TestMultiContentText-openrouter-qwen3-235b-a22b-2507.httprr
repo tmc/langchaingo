@@ -1,0 +1,43 @@
+httprr trace v1
+375 1833
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 171
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"qwen/qwen3-235b-a22b-2507","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
+Content-Length: 1377
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:48:34 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1769111314-oDx6mrC7kieqort1MENl","provider":"DeepInfra","model":"qwen/qwen3-235b-a22b-2507","object":"chat.completion","created":1769111314,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"Aww, hello there, little Pomeranian! 🐶\n\nYou're a **dog**—specifically, a small breed of dog known as a **Pomeranian**. Dogs are **mammals**, which means:\n\n- You're warm-blooded 🌡️  \n- You have fur (and *you* have a lovely fluffy coat!) 🐾  \n- You give birth to live puppies (not eggs) 🐣  \n- You nurse your babies with milk 🍼  \n\nSo as a Pomeranian, you're a **mammal**, a **canine**, and a beloved member of the **domestic dog** species (*Canis lupus familiaris*). And honestly, one of the cutest ones at that! 💖","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":23,"completion_tokens":160,"total_tokens":183,"cost":0.000075713,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.000001633,"upstream_inference_completions_cost":0.00007408},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

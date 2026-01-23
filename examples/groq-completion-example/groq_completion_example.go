@@ -9,20 +9,13 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/openai"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
 	apiKey := os.Getenv("GROQ_API_KEY")
 
 	llm, err := openai.New(
-		openai.WithModel("llama3-8b-8192"),
+		openai.WithModel("moonshotai/kimi-k2-instruct"),
 		openai.WithBaseURL("https://api.groq.com/openai/v1"),
 		openai.WithToken(apiKey),
 	)

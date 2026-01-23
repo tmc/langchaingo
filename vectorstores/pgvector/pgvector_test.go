@@ -398,26 +398,12 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 func TestSimilaritySearchWithDifferentDimensions(t *testing.T) { //nolint:funlen
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
-	transport := &transportWithAPIKey{
-		Key:       os.Getenv("GOOGLE_API_KEY"),
-		Transport: httputil.DefaultTransport,
-	}
-	rr := httprr.OpenForTest(t, transport)
+	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
 	defer rr.Close()
 	rr.ScrubResp(httprr.EmbeddingJSONFormatter())
 
 	// Avoid issue with different view of request bodies for Google AI SDK
 	rr.ScrubReq(httprr.JsonCompactScrubBody)
-
-	// Scrub Google AI API key for security in recordings
-	rr.ScrubReq(func(req *http.Request) error {
-		q := req.URL.Query()
-		if q.Get("key") != "" {
-			q.Set("key", "test-api-key")
-			req.URL.RawQuery = q.Encode()
-		}
-		return nil
-	})
 
 	if !rr.Recording() {
 		t.Parallel()
@@ -434,8 +420,11 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) { //nolint:funlen
 	if rr.Replaying() {
 		// Use test credentials during replay
 		opts = append(opts, googleai.WithAPIKey("test-api-key"))
-		// It needs to be set here because the client goes through WithHTTPClient
-		transport.Key = "test-api-key"
+	} else {
+		// Use real API key during recording to ensure consistent request format
+		if key := os.Getenv("GOOGLE_API_KEY"); key != "" {
+			opts = append(opts, googleai.WithAPIKey(key))
+		}
 	}
 
 	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
@@ -464,7 +453,6 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) { //nolint:funlen
 	require.NoError(t, err)
 
 	// use openai embedding (now default model is text-embedding-ada-002, with dimensions:1536) to add some data to same collection (same table)
-	transport.Key = ""
 	e = createOpenAIEmbedder(t, rr)
 
 	store, err = pgvector.New(

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/httputil"
@@ -164,6 +165,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	tools := toolsToTools(opts.Tools)
+
+	betaHeaders := extractBetaHeaders(o, opts)
+
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
 		Messages:      chatMessages,
@@ -175,6 +179,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		Tools:         tools,
 		ToolChoice:    opts.ToolChoice,
 		Thinking:      thinking,
+		BetaHeaders:   betaHeaders,
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
@@ -183,7 +188,12 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	if result == nil {
+	return processAnthropicResponse(result)
+}
+
+// processAnthropicResponse converts Anthropic API response to standard ContentResponse
+func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
+	if result == nil || len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
@@ -202,13 +212,19 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		switch content.GetType() {
 		case anthropicclient.EventTypeText:
 			if textContent, ok := content.(*anthropicclient.TextContent); ok {
+				thinkingContent, outputContent := reasoningContent, textContent.Text
+				if thinkingContent == "" {
+					thinkingContent, outputContent = extractThinkingFromText(textContent.Text)
+				}
 				choices = append(choices, &llms.ContentChoice{
-					Content:          textContent.Text,
-					ReasoningContent: reasoningContent,
+					Content:          outputContent,
+					ReasoningContent: thinkingContent,
 					StopReason:       result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				})
 			} else {
@@ -233,27 +249,39 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					},
 					StopReason: result.StopReason,
 					GenerationInfo: map[string]any{
-						"InputTokens":  result.Usage.InputTokens,
-						"OutputTokens": result.Usage.OutputTokens,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 					},
 				})
 			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message", ErrInvalidContentType)
+				return nil, fmt.Errorf("anthropic: %w for tool use message %T", ErrInvalidContentType, content)
 			}
 		case anthropicclient.EventTypeThinking:
 			// Skip this content block because the reasoning content was already extracted earlier
+			if thinkingContent, ok := content.(*anthropicclient.ThinkingContent); ok {
+				// TODO: handle thinking content
+				_ = thinkingContent
+			} else {
+				return nil, fmt.Errorf("anthropic: %w for thinking message %T", ErrInvalidContentType, content)
+			}
 		case anthropicclient.EventTypeRedactedThinking:
-			// skip redacted thinking block because we won't send the thinking block to the server
-			continue
+			// Skip this content block because we haven't sent the thinking block to the server yet
+			if redactedThinkingContent, ok := content.(*anthropicclient.RedactedThinkingContent); ok {
+				// TODO: handle redacted thinking content
+				_ = redactedThinkingContent
+			} else {
+				return nil, fmt.Errorf("anthropic: %w for redacted thinking message %T", ErrInvalidContentType, content)
+			}
 		default:
 			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
 		}
 	}
 
-	resp := &llms.ContentResponse{
+	return &llms.ContentResponse{
 		Choices: choices,
-	}
-	return resp, nil
+	}, nil
 }
 
 func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
@@ -318,9 +346,19 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 }
 
 func handleSystemMessage(msg llms.MessageContent) (string, error) {
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
+	// Handle both direct TextContent and CachedContent wrapper
+	part := msg.Parts[0]
+
+	// If it's cached content, unwrap it
+	if cached, ok := part.(llms.CachedContent); ok {
+		part = cached.ContentPart
+	}
+
+	// Extract text from the part
+	if textContent, ok := part.(llms.TextContent); ok {
 		return textContent.Text, nil
 	}
+
 	return "", fmt.Errorf("anthropic: %w for system message", ErrInvalidContentType)
 }
 
@@ -329,6 +367,36 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
+		case llms.CachedContent:
+			// Handle cached content with cache control
+			var cacheControl *anthropicclient.CacheControl
+			if p.CacheControl != nil {
+				cacheControl = &anthropicclient.CacheControl{
+					Type: p.CacheControl.Type,
+				}
+			}
+
+			// Process the wrapped content
+			switch wrapped := p.ContentPart.(type) {
+			case llms.TextContent:
+				contents = append(contents, &anthropicclient.TextContent{
+					Type:         "text",
+					Text:         wrapped.Text,
+					CacheControl: cacheControl,
+				})
+			case llms.BinaryContent:
+				contents = append(contents, &anthropicclient.ImageContent{
+					Type: "image",
+					Source: anthropicclient.ImageSource{
+						Type:      "base64",
+						MediaType: wrapped.MIMEType,
+						Data:      base64.StdEncoding.EncodeToString(wrapped.Data),
+					},
+					CacheControl: cacheControl,
+				})
+			default:
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: unsupported cached content part type: %T", wrapped)
+			}
 		case llms.TextContent:
 			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",
@@ -429,4 +497,52 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 		}, nil
 	}
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+}
+
+// extractBetaHeaders extracts beta headers from call options
+func extractBetaHeaders(o *LLM, opts *llms.CallOptions) []string {
+	// Extract beta headers for prompt caching support
+	var betaHeaders []string
+	if opts.Metadata != nil {
+		if headers, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
+			betaHeaders = headers
+		}
+	}
+
+	return betaHeaders
+}
+
+// extractThinkingFromText extracts thinking content from Anthropic responses
+// Anthropic models often embed thinking in <thinking> tags
+func extractThinkingFromText(fullText string) (thinkingContent, outputContent string) {
+	// Look for <thinking> tags in the text
+	if strings.Contains(fullText, "<thinking>") {
+		start := strings.Index(fullText, "<thinking>")
+		end := strings.Index(fullText, "</thinking>")
+		if start >= 0 && end > start {
+			// Extract thinking content between tags
+			thinkingContent = fullText[start+10 : end] // +10 for "<thinking>"
+
+			// Extract output content (everything before and after thinking tags)
+			beforeThinking := strings.TrimSpace(fullText[:start])
+			afterThinking := ""
+			if end+12 < len(fullText) { // +12 for "</thinking>"
+				afterThinking = strings.TrimSpace(fullText[end+12:])
+			}
+
+			// Combine non-thinking content
+			if beforeThinking != "" && afterThinking != "" {
+				outputContent = beforeThinking + "\n\n" + afterThinking
+			} else if beforeThinking != "" {
+				outputContent = beforeThinking
+			} else {
+				outputContent = afterThinking
+			}
+
+			return strings.TrimSpace(thinkingContent), strings.TrimSpace(outputContent)
+		}
+	}
+
+	// If no thinking tags found, treat entire text as output
+	return "", fullText
 }

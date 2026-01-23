@@ -1,20 +1,20 @@
 httprr trace v1
-799 3426
-POST https://generativelanguage.googleapis.com//v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+797 2382
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 477
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/1.15.0 gl-go/go1.24.0
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Tell me about safety features"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 3046
+Content-Length: 2002
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 11 Jul 2025 21:05:36 GMT
+Date: Fri, 23 Jan 2026 22:51:25 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=3156
+Server-Timing: gfet4t7; dur=1978
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -28,7 +28,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "Okay, let's talk about safety features! To give you the best information, I need a little more direction.  Are you interested in safety features for:\n\n*   **Cars?** (e.g., airbags, ABS, lane departure warning)\n*   **Homes?** (e.g., smoke detectors, security systems, fire extinguishers)\n*   **Workplaces?** (e.g., hard hats, machine guards, safety training)\n*   **Software/Online?** (e.g., firewalls, encryption, two-factor authentication)\n*   **Something else entirely?**\n\nIn the meantime, I can give you a general overview of the types of safety features and why they're important:\n\n**General Categories of Safety Features:**\n\n*   **Preventative:** These features aim to stop accidents or incidents from happening in the first place.\n*   **Protective:** These features are designed to minimize harm or damage if an accident does occur.\n*   **Warning:** These features alert you to potential dangers or hazards.\n\n**Common Characteristics of Effective Safety Features:**\n\n*   **Reliability:** They must function correctly when needed.\n*   **Usability:** They should be easy to understand and use, even in stressful situations.\n*   **Maintenance:** They require regular inspection and maintenance to ensure proper function.\n*   **Compliance:** They must meet relevant safety standards and regulations.\n\n**Why Safety Features are Important:**\n\n*   **Protecting Lives:** The primary goal is to prevent injuries and fatalities.\n*   **Reducing Risk:** They minimize the likelihood and severity of accidents.\n*   **Legal Compliance:** Many safety features are required by law.\n*   **Peace of Mind:** Knowing that safety measures are in place can reduce stress and anxiety.\n*   **Cost Savings:** Preventing accidents can save money on repairs, medical bills, and insurance premiums.\n\nOnce you tell me what area you're interested in, I can give you much more specific and helpful information."
+            "text": "Okay, let's talk about safety features! To give you the most relevant information, I need a little more direction.  Could you tell me what kind of safety features you're interested in?  For example, are you interested in:\n\n*   **Car Safety Features?** (e.g., airbags, ABS, lane departure warning)\n*   **Home Safety Features?** (e.g., smoke detectors, security systems, fire extinguishers)\n*   **Workplace Safety Features?** (e.g., machine guards, safety training, personal protective equipment)\n*   **Website Safety Features?** (e.g., firewalls, encryption, two-factor authentication)\n*   **Product Safety Features?** (e.g., childproof packaging, thermal cutoffs, grounding)\n*   **General Safety Tips?** (e.g., first aid, emergency preparedness)\n\nOnce you provide more details, I can give you a comprehensive overview of the safety features you're interested in."
           }
         ],
         "role": "model"
@@ -52,13 +52,13 @@ X-Xss-Protection: 0
           "probability": "NEGLIGIBLE"
         }
       ],
-      "avgLogprobs": -0.18269800458635602
+      "avgLogprobs": -0.19741936449734671
     }
   ],
   "usageMetadata": {
     "promptTokenCount": 5,
-    "candidatesTokenCount": 420,
-    "totalTokenCount": 425,
+    "candidatesTokenCount": 212,
+    "totalTokenCount": 217,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -68,10 +68,10 @@ X-Xss-Protection: 0
     "candidatesTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 420
+        "tokenCount": 212
       }
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "nXxxaITTLvy-gLUP6pjS0Qs"
+  "responseId": "a_tzaeuzB7jSjMcPpp24gQ4"
 }

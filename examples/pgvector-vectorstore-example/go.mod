@@ -1,8 +1,8 @@
 module github.com/vxcontrol/langchaingo/examples/pgvector-vectorstore-example
 
-go 1.24.0
+go 1.24.1
 
-require github.com/vxcontrol/langchaingo v0.1.13-update.0
+require github.com/vxcontrol/langchaingo v0.1.14-update.1
 
 require (
 	github.com/dlclark/regexp2 v1.11.4 // indirect
@@ -11,9 +11,9 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.2 // indirect
 	github.com/pgvector/pgvector-go v0.1.1 // indirect
-	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
-	golang.org/x/crypto v0.39.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
+	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 )
 
 replace github.com/vxcontrol/langchaingo => ../..

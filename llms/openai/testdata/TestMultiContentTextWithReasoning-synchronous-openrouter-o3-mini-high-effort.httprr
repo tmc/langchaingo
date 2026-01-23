@@ -1,5 +1,5 @@
 httprr trace v1
-405 1917
+404 1607
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"openai/o3-mini-high","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning":{"effort":"high"}}HTTP/2.0 200 OK
-Content-Length: 1528
+Content-Length: 1151
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:26:10 GMT
+Date: Thu, 22 Jan 2026 19:50:04 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -36,32 +36,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-
-         
-{"id":"gen-1750695969-VmUI714GWxjs7vlWhTIO","provider":"OpenAI","model":"openai/o3-mini-high","object":"chat.completion","created":1750695969,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop","index":0,"message":{"role":"assistant","content":"The factorial of 5, written as 5!, is the product of all positive integers from 1 to 5. Here's the step-by-step process:\n\n1. Write down the definition:\n  5! = 5 × 4 × 3 × 2 × 1\n\n2. Multiply step by step:\n  First, 5 × 4 = 20  \n  Next, 20 × 3 = 60  \n  Then, 60 × 2 = 120  \n  Finally, 120 × 1 = 120\n\nSo, the factorial of 5 is 120.","refusal":null,"reasoning":null,"reasoning_details":[{"type":"reasoning.encrypted","data":"gAAAAABoWYAp8hu594xWaslyg2ECZxdFJq29wt3DZ9KHOD3NomJJFKuXITthvN1Ihvc2sB52DUfR-W7VxnuLd2cqEUvpkmwj-IRYrnSRPnOV1htEX24fBeWvWe41Iyc71F36Xv5TT4S4BXQedkXBekyJGOh04oaxizFAMMuAM8GUnWAs6N4Em1mjJELuDoX0TEGo68ARn2XcGOvk90CPmMuGuTWfWfbLWOtx4P4letY613ouNEvXqt3PhqoQgw1eafxwdHCj63pwhGGtFP8AFXV6cAiuSs6FC7L0XEmZ4Q7g91cNYu8NDRf8yIBKGxSVX04HK2FUGg9z-cJ22wLldsJSH9UfU_QcRYTRJc2_k8H9d9r-ZCJ2c4qPUUUXWwqRVHmdVCZ0uKw6gJav93JgrpqStDa-Sr82Qg==","id":"rs_68598028061c8190bd3fa554d3bafb0a"}]}}],"usage":{"prompt_tokens":23,"completion_tokens":834,"total_tokens":857}}
+{"id":"gen-1769111404-gawzKCBOgVJN94mnRySK","provider":"OpenAI","model":"openai/o3-mini-high","object":"chat.completion","created":1769111404,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"completed","index":0,"message":{"role":"assistant","content":"The factorial of a number n (written as n!) is defined as the product of all positive integers from n down to 1. For 5, this is calculated as follows:\n\n1. Write out the product:\n  5! = 5 × 4 × 3 × 2 × 1\n\n2. Multiply step by step:\n  First, 5 × 4 = 20  \n  Next, 20 × 3 = 60  \n  Then, 60 × 2 = 120  \n  Finally, 120 × 1 = 120\n\nSo, 5! = 120.","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":23,"completion_tokens":325,"total_tokens":348,"cost":0.0014553,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0},"cost_details":{"upstream_inference_cost":0.0014553,"upstream_inference_prompt_cost":0.0000253,"upstream_inference_completions_cost":0.00143},"completion_tokens_details":{"reasoning_tokens":192,"image_tokens":0}}}

@@ -1,0 +1,25 @@
+httprr trace v1
+405 1417
+POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
+Host: openrouter.ai
+User-Agent: langchaingo-httprr
+Content-Length: 201
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"google/gemini-2.5-flash","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 962
+Access-Control-Allow-Origin: *
+Content-Type: application/json
+Date: Thu, 22 Jan 2026 19:57:01 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Vary: Accept-Encoding
+X-Content-Type-Options: nosniff
+
+
+         
+
+         
+{"id":"gen-1769111820-R07XZkEj7uSygut1Wkxs","provider":"Google","model":"google/gemini-2.5-flash","object":"chat.completion","created":1769111820,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"STOP","index":0,"message":{"role":"assistant","content":"**Spain** is significantly larger than Lesotho.\n\n* **Spain:** Approximately 505,990 square kilometers\n* **Lesotho:** Approximately 30,355 square kilometers\n\nSpain is roughly 16-17 times larger in terms of land area.","refusal":null,"reasoning":null,"annotations":[]}}],"usage":{"prompt_tokens":12,"completion_tokens":59,"total_tokens":71,"cost":0.0001511,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0000036,"upstream_inference_completions_cost":0.0001475},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}

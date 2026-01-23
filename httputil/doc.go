@@ -31,7 +31,7 @@
 //	// LoggingClient logs full HTTP requests and responses using slog
 //	client := httputil.LoggingClient
 //
-//	// JSONDebugClient pretty-prints JSON payloads with ANSI colors
+//	// JSONDebugClient pretty-prints JSON payloads and SSE streams with ANSI colors
 //	client := httputil.JSONDebugClient
 //
 // # Custom Transports

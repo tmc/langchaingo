@@ -1,20 +1,20 @@
 httprr trace v1
-784 1519
-POST https://generativelanguage.googleapis.com//v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+782 1519
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 462
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/1.15.0 gl-go/go1.24.0
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is 2 + 2?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
 Content-Length: 1140
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 11 Jul 2025 21:05:13 GMT
+Date: Fri, 23 Jan 2026 22:51:01 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=331
+Server-Timing: gfet4t7; dur=382
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -52,7 +52,7 @@ X-Xss-Protection: 0
           "probability": "NEGLIGIBLE"
         }
       ],
-      "avgLogprobs": -0.00014923886919859797
+      "avgLogprobs": -0.00013045943342149258
     }
   ],
   "usageMetadata": {
@@ -73,5 +73,5 @@ X-Xss-Protection: 0
     ]
   },
   "modelVersion": "gemini-2.0-flash",
-  "responseId": "iXxxaL39J4CFsbQPrvmkmQo"
+  "responseId": "VftzacDXJdaPjMcP4uqRiQI"
 }

@@ -1,5 +1,5 @@
 httprr trace v1
-670 1125
+669 1528
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
@@ -8,15 +8,15 @@ Authorization: Bearer test-api-key
 Content-Type: application/json
 
 {"model":"anthropic/claude-3.7-sonnet","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
-Content-Length: 737
+Content-Length: 1072
 Access-Control-Allow-Origin: *
 Content-Type: application/json
-Date: Mon, 23 Jun 2025 16:21:29 GMT
+Date: Thu, 22 Jan 2026 19:58:24 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
 Server: cloudflare
 Vary: Accept-Encoding
-X-Clerk-Auth-Message: Invalid JWT form. A JWT consists of three parts separated by dots. (reason=token-invalid, token-carrier=header)
-X-Clerk-Auth-Reason: token-invalid
-X-Clerk-Auth-Status: signed-out
+X-Content-Type-Options: nosniff
 
 
          
@@ -26,6 +26,4 @@ X-Clerk-Auth-Status: signed-out
          
 
          
-
-         
-{"id":"gen-1750695688-99mp2rlRIkn2AWgNlbCL","provider":"Google","model":"anthropic/claude-3.7-sonnet","object":"chat.completion","created":1750695688,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I can check the current weather in Boston, MA for you. Let me get that information.","refusal":null,"reasoning":null,"tool_calls":[{"id":"toolu_vrtx_017mg3Dm8LRAPEt22uuEUknj","index":0,"type":"function","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\", \"unit\": \"celsius\"}"}}]}}],"usage":{"prompt_tokens":424,"completion_tokens":92,"total_tokens":516}}
+{"id":"gen-1769111903-RqyatTJSfiZ9bwOzU1jm","provider":"Google","model":"anthropic/claude-3.7-sonnet","object":"chat.completion","created":1769111903,"choices":[{"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","index":0,"message":{"role":"assistant","content":"I can help you get the current weather in Boston, MA. Let me fetch that information for you.","refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"toolu_vrtx_01WLpgsrTAKuGjShgLhDXjDq","function":{"name":"getCurrentWeather","arguments":"{\"location\": \"Boston, MA\", \"unit\": \"celsius\"}"}}]}}],"usage":{"prompt_tokens":424,"completion_tokens":94,"total_tokens":518,"cost":0.002682,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.001272,"upstream_inference_completions_cost":0.00141},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
