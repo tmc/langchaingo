@@ -460,6 +460,26 @@ func TestOpenAIWithRecording(t *testing.T) {
     require.NoError(t, err)
     require.NotEmpty(t, response.Choices[0].Content)
 }
+
+// Testing with identical requests (e.g., cache testing)
+func TestCachingWithIdenticalRequests(t *testing.T) {
+    recorder := httprr.New("testdata/cache_test")
+    defer recorder.Stop()
+    
+    llm, err := openai.New(
+        openai.WithHTTPClient(&http.Client{Transport: recorder}),
+    )
+    require.NoError(t, err)
+    
+    // Make identical requests - each will be recorded with its unique response
+    for i := 0; i < 3; i++ {
+        response, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
+            llms.TextParts(llms.ChatMessageTypeHuman, "Same question"),
+        })
+        require.NoError(t, err)
+        // Each replay will return responses in the same order they were recorded
+    }
+}
 ```
 
 #### Recording guidelines
@@ -468,6 +488,7 @@ func TestOpenAIWithRecording(t *testing.T) {
 2. **Sensitive Data**: httprr automatically redacts common sensitive headers
 3. **Deterministic Tests**: Recordings ensure consistent test results across environments
 4. **Version Control**: Commit recording files for team consistency
+5. **Identical Requests**: When recording multiple identical requests (e.g., for cache testing), httprr preserves each response in order and replays them sequentially using a circular buffer
 
 #### Contributing with httprr
 

@@ -30,6 +30,16 @@ func TestMyAPI(t *testing.T) {
 - **Recording Mode** (`-httprecord=.`): Makes real HTTP requests and saves them to `.httprr` files
 - **Replay Mode** (default): Reads saved `.httprr` files and replays the responses
 
+### Circular Buffer for Identical Requests
+
+When multiple identical requests are recorded (e.g., for cache testing), httprr stores all responses in order and replays them sequentially using a circular buffer. This allows testing scenarios where:
+
+- The same request produces different responses (e.g., cache miss → cache hit)
+- Multiple identical requests need to be tested in sequence
+- Response ordering matters for test accuracy
+
+**Example**: Testing Google Gemini's implicit caching where 3 identical requests produce different `CachedTokens` values (0, then non-zero, then non-zero).
+
 ### Command-Line Flags
 
 - `-httprecord=<regexp>`: Re-record traces for files matching the regexp pattern (use "." to match all)
@@ -169,6 +179,41 @@ func TestMultiAPIIntegration(t *testing.T) {
     searchClient := serpapi.New(serpapi.WithHTTPClient(rr.Client()))
     
     // All HTTP calls are recorded/replayed together
+}
+```
+
+### Testing Identical Requests (Circular Buffer)
+
+When testing scenarios that require multiple identical requests with different responses (e.g., cache behavior):
+
+```go
+func TestImplicitCaching(t *testing.T) {
+    httprr.SkipIfNoCredentialsOrRecording(t, "API_KEY")
+    
+    rr, err := httprr.OpenForTest(t, http.DefaultTransport)
+    if err != nil {
+        t.Fatal(err)
+    }
+    defer rr.Close()
+    
+    client := NewAPIClient(WithHTTPClient(rr.Client()))
+    
+    // Make identical requests - each gets recorded with its actual response
+    // Request 1: Cache miss (no cached tokens)
+    r1, _ := client.Query("same query")
+    assert.Equal(t, 0, r1.CachedTokens)
+    
+    // Request 2: Cache hit (has cached tokens)
+    r2, _ := client.Query("same query")
+    assert.Greater(t, r2.CachedTokens, 0)
+    
+    // Request 3: Still cached
+    r3, _ := client.Query("same query")
+    assert.Greater(t, r3.CachedTokens, 0)
+    
+    // Replay mode: Responses are returned in order from circular buffer
+    // Re-running the test will get: r1 (no cache), r2 (cached), r3 (cached)
+    // A 4th identical request would cycle back to r1's response
 }
 ```
 
@@ -387,6 +432,19 @@ defer rr.Close()
 4. **Better Documentation**: Self-documenting function names
 
 ## Advanced Usage
+
+### Circular Buffer Internals
+
+When httprr encounters multiple identical requests during recording, it stores all responses in order. During replay:
+
+1. **First request**: Returns the first recorded response
+2. **Second request**: Returns the second recorded response
+3. **Subsequent requests**: Continue cycling through responses in order
+4. **After last response**: Cycles back to the first response (circular buffer)
+
+This behavior is automatic and transparent - no special configuration needed.
+
+**File Format**: Identical requests share the same request key but maintain separate response entries in the `.httprr` file, preserving recording order.
 
 ### Custom File Locations
 

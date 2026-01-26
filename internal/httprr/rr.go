@@ -73,6 +73,29 @@ func init() {
 	}
 }
 
+// replayEntry holds response data for a single request key.
+// It supports multiple responses for the same request (e.g., for cache testing)
+// and cycles through them in order.
+type replayEntry struct {
+	responses []string // list of responses for this request
+	mu        sync.Mutex
+	index     int // current response index
+}
+
+// next returns the next response in the cycle and advances the index.
+func (e *replayEntry) next() string {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	if len(e.responses) == 0 {
+		return ""
+	}
+
+	resp := e.responses[e.index]
+	e.index = (e.index + 1) % len(e.responses)
+	return resp
+}
+
 // A RecordReplay is an [http.RoundTripper] that can operate in two modes: record and replay.
 //
 // In record mode, the RecordReplay invokes another RoundTripper
@@ -80,6 +103,8 @@ func init() {
 //
 // In replay mode, the RecordReplay responds to requests by finding
 // an identical request in the log and sending the logged response.
+// If multiple identical requests were recorded, responses are returned
+// in order and cycle back to the beginning (circular buffer).
 type RecordReplay struct {
 	file string            // file being read or written
 	real http.RoundTripper // real HTTP connection
@@ -87,7 +112,7 @@ type RecordReplay struct {
 	mu        sync.Mutex
 	reqScrub  []func(*http.Request) error // scrubbers for logging requests
 	respScrub []func(*bytes.Buffer) error // scrubbers for logging responses
-	replay    map[string]string           // if replaying, the log
+	replay    map[string]*replayEntry     // if replaying, the log with circular response buffer
 	record    *os.File                    // if recording, the file being written
 	writeErr  error                       // if recording, any write error encountered
 	logger    *slog.Logger                // logger for debug output
@@ -274,7 +299,7 @@ func open(file string, rt http.RoundTripper) (*RecordReplay, error) {
 		return nil, fmt.Errorf("read %s: not an httprr trace", file)
 	}
 
-	replay := make(map[string]string)
+	replay := make(map[string]*replayEntry)
 	for data != "" {
 		// Each record starts with a line of the form "n1 n2\n" (or "n1 n2\r\n")
 		// followed by n1 bytes of request encoding and
@@ -289,7 +314,14 @@ func open(file string, rt http.RoundTripper) (*RecordReplay, error) {
 		}
 		var req, resp string
 		req, resp, data = data[:n1], data[n1:n1+n2], data[n1+n2:]
-		replay[req] = resp
+
+		// Support multiple responses for the same request (circular buffer)
+		entry := replay[req]
+		if entry == nil {
+			entry = &replayEntry{responses: make([]string, 0, 1)}
+			replay[req] = entry
+		}
+		entry.responses = append(entry.responses, resp)
 	}
 
 	rr := &RecordReplay{
@@ -626,7 +658,7 @@ func (rr *RecordReplay) replayRoundTrip(req *http.Request, reqLog string) (*http
 		}
 	}
 
-	respLog, ok := rr.replay[reqLog]
+	entry, ok := rr.replay[reqLog]
 	if !ok {
 		if rr.logger != nil && *debug {
 			rr.logger.Debug("httprr: request not found in replay cache",
@@ -638,12 +670,19 @@ func (rr *RecordReplay) replayRoundTrip(req *http.Request, reqLog string) (*http
 		return nil, fmt.Errorf("cached HTTP response not found for:\n%s\n\nHint: Re-run tests with -httprecord=. to record new HTTP interactions\nDebug flags: -httprecord-debug for recording details, -httpdebug for HTTP traffic", reqLog)
 	}
 
+	// Get the next response from the circular buffer
+	respLog := entry.next()
+	if respLog == "" {
+		return nil, fmt.Errorf("no responses available for request (empty entry)")
+	}
+
 	// Log that we found a match
 	if rr.logger != nil && *debug {
 		rr.logger.Debug("httprr: found matching request in replay cache",
 			"method", req.Method,
 			"url", req.URL.String(),
 			"file", rr.file,
+			"response_count", len(entry.responses),
 			"response_size", len(respLog),
 		)
 	}

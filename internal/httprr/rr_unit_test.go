@@ -119,7 +119,7 @@ func TestRecordReplayBasics(t *testing.T) {
 	// Test basic struct initialization
 	rr := &RecordReplay{
 		file:   "test.httprr",
-		replay: make(map[string]string),
+		replay: make(map[string]*replayEntry),
 	}
 
 	assert.Equal(t, "test.httprr", rr.file)
@@ -559,4 +559,54 @@ func TestInternalStructs(t *testing.T) {
 
 	assert.Equal(t, []byte("test data"), body.Data)
 	assert.Equal(t, 0, body.ReadOffset)
+}
+
+func TestReplayEntry(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty entry", func(t *testing.T) {
+		entry := &replayEntry{
+			responses: []string{},
+		}
+		result := entry.next()
+		assert.Equal(t, "", result)
+	})
+
+	t.Run("single response", func(t *testing.T) {
+		entry := &replayEntry{
+			responses: []string{"response1"},
+		}
+		// Should return the same response multiple times
+		assert.Equal(t, "response1", entry.next())
+		assert.Equal(t, "response1", entry.next())
+		assert.Equal(t, "response1", entry.next())
+	})
+
+	t.Run("multiple responses - circular", func(t *testing.T) {
+		entry := &replayEntry{
+			responses: []string{"response1", "response2", "response3"},
+		}
+		// First cycle
+		assert.Equal(t, "response1", entry.next())
+		assert.Equal(t, "response2", entry.next())
+		assert.Equal(t, "response3", entry.next())
+		// Second cycle (circular buffer)
+		assert.Equal(t, "response1", entry.next())
+		assert.Equal(t, "response2", entry.next())
+		assert.Equal(t, "response3", entry.next())
+		// Third cycle
+		assert.Equal(t, "response1", entry.next())
+	})
+
+	t.Run("two responses - alternating", func(t *testing.T) {
+		entry := &replayEntry{
+			responses: []string{"A", "B"},
+		}
+		// Should alternate between A and B
+		assert.Equal(t, "A", entry.next())
+		assert.Equal(t, "B", entry.next())
+		assert.Equal(t, "A", entry.next())
+		assert.Equal(t, "B", entry.next())
+		assert.Equal(t, "A", entry.next())
+	})
 }
