@@ -9,6 +9,7 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/anthropic"
 	"github.com/vxcontrol/langchaingo/llms/openai"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func main() {
@@ -87,7 +88,7 @@ How can the farmer get everything across safely? Think through this step-by-step
 
 func testReasoning(ctx context.Context, llm llms.Model, modelName string, prompt string, expectReasoning bool) {
 	// Check if model supports reasoning
-	supportsReasoning := llms.IsReasoningModel(modelName)
+	supportsReasoning := reasoning.IsReasoningModel(modelName)
 
 	fmt.Printf("Model: %s\n", modelName)
 	fmt.Printf("Reasoning Support: %v\n", supportsReasoning)

@@ -1,0 +1,114 @@
+httprr trace v1
+1095 1531
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 769
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Multiply two numbers together","name":"multiply","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 1151
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 17:48:21 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5646
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "multiply",
+              "args": {
+                "b": 9,
+                "a": 7
+              }
+            },
+            "thoughtSignature": "Eo0CCooCAXLI2nzAqCxtiXlgKxEFOmYrQHN/Gwlyc4f2hX9ZhaF+TFEFPGWKnbQkrVrmzDYXXJKzT7NyBY9zZ4JpVXTqeqBDb7UJicikqno3zABVfHrm8BICszyIRWnIJpdeVKG6co2rJnCk/V2tQ5HcQrBvjNB8+4KrcmoBsjc5xSE4WOrhVij01ovEnKZYhJoRCcLE+qG1g/7k6M1E7ArJHNDbtJLNVK2M/YBI9VbygNfVVqHSaYiqSwDNI2MZbr6DYbXTJk6XJ+22N+9KFDJPyL6KMtz5unHWZbSMtsjdqL5mhiv8Mp0Zh6524jBOoRdvx5m5NbYvrqJR3N046YvHef0aWQca9kIl43+vzUI="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "finishMessage": "Model generated function call(s)."
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 77,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 157,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 77
+      }
+    ],
+    "thoughtsTokenCount": 64
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "5QV1aceBEoaOjMcPxvPuwQ4"
+}
+1389 915
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 1062
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":7,"b":9},"name":"multiply"},"thoughtSignature":"Eo0CCooCAXLI2nzAqCxtiXlgKxEFOmYrQHN/Gwlyc4f2hX9ZhaF+TFEFPGWKnbQkrVrmzDYXXJKzT7NyBY9zZ4JpVXTqeqBDb7UJicikqno3zABVfHrm8BICszyIRWnIJpdeVKG6co2rJnCk/V2tQ5HcQrBvjNB8+4KrcmoBsjc5xSE4WOrhVij01ovEnKZYhJoRCcLE+qG1g/7k6M1E7ArJHNDbtJLNVK2M/YBI9VbygNfVVqHSaYiqSwDNI2MZbr6DYbXTJk6XJ+22N+9KFDJPyL6KMtz5unHWZbSMtsjdqL5mhiv8Mp0Zh6524jBOoRdvx5m5NbYvrqJR3N046YvHef0aWQca9kIl43+vzUI="}],"role":"model"},{"parts":[{"functionResponse":{"name":"multiply","response":{"response":"63"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 536
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 17:48:28 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5867
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "7 times 9 is 63."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 105,
+    "candidatesTokenCount": 9,
+    "totalTokenCount": 114,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 105
+      }
+    ]
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "7AV1aZzuEd6RjMcPpv2k-A0"
+}

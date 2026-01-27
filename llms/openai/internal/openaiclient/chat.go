@@ -369,8 +369,9 @@ type ChatUsage struct {
 	CompletionTokens    int `json:"completion_tokens"`
 	TotalTokens         int `json:"total_tokens"`
 	PromptTokensDetails struct {
-		CachedTokens int `json:"cached_tokens"`
-		AudioTokens  int `json:"audio_tokens"`
+		CachedTokens     int `json:"cached_tokens"`
+		CacheWriteTokens int `json:"cache_write_tokens,omitempty"`
+		AudioTokens      int `json:"audio_tokens,omitempty"`
 	} `json:"prompt_tokens_details"`
 	CompletionTokensDetails struct {
 		ReasoningTokens          int `json:"reasoning_tokens"`
@@ -378,6 +379,10 @@ type ChatUsage struct {
 		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
 		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
 	} `json:"completion_tokens_details"`
+	CostDetails struct {
+		UpstreamInferencePromptCost      *float64 `json:"upstream_inference_prompt_cost,omitempty"`
+		UpstreamInferenceCompletionsCost *float64 `json:"upstream_inference_completions_cost,omitempty"`
+	} `json:"cost_details,omitempty"`
 }
 
 // ChatCompletionResponse is a response to a chat request.
@@ -699,7 +704,8 @@ func combineStreamingChatResponse(
 			responseChoice.Message.Content += content
 			responseChoice.Message.ReasoningContent += reasoningContent
 
-			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoningContent); err != nil {
+			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
+			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
 				return nil, fmt.Errorf("streaming reasoning func returned an error: %w", err)
 			}
 			if err := streaming.CallWithText(ctx, payload.StreamingFunc, content); err != nil {

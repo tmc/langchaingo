@@ -1,0 +1,121 @@
+httprr trace v1
+1081 2019
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 755
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"What's the temperature in Paris and London?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the current temperature for a location","name":"get_temperature","parameters":{"properties":{"location":{"description":"The city name, e.g. Paris","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 1639
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 17:48:35 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5682
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "get_temperature",
+              "args": {
+                "location": "Paris"
+              }
+            },
+            "thoughtSignature": "EvEDCu4DAXLI2nydi2N0Mxujaa/L1LYsZvsSULj8hUcTLsvKsKKXpw3BSFrFDTxRHbg75/F+AWDKgtEkcIHR5G9H9tJYAp0VUBh2fvphY0jfIF+sL54kdsNGCgIcNgaoOGdcqGp61hszHL5TAaDyilP1jQcjL06d6uMzVyJ9ONMvvcXKdo1OqMbLjbQQ7MxFc9jzdl4q9s8O7CUWNMp4ngqKffw/2AOFrrq+I7FIC3bdYh3OKrWsI2HzxtG53WnoAZ+KrSTludUtswESuIY0a2vI04PtRBvIKrF9sUnMsadXgL9VstvL/dsLRXQd7yc7ANmVNQhpWgkQZtikySfKLgdkaZtORMj/0OYH+3Iy9N7ozkrzfaI/DnDFeUPM/OqMt9069hdpYkgiH2TzTs2sslrugm4SuuNgPk1nwjaq51BibcgHHnysX2iydAjyctJgW+kJ7a+ELrG2CLGz17AID8xgrioG42n+54xmI8wQnuN3QVEd556cC00JDC4jTH6mAC0oCJIsonaoq7gNQhiEC8FqdNKDa0DkDuN684lduqMU4vNLZYzzDwxMGa1+bkPrbkj+j3ijaB1Mt8iQKlT0fNX00SSv/XMHjgTmE7ZfGvpg9TnuiYt9UbhX3vMKFnvqQuVatJUdQdxgh8rGAvGgfUtQVMo="
+          },
+          {
+            "functionCall": {
+              "name": "get_temperature",
+              "args": {
+                "location": "London"
+              }
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0,
+      "finishMessage": "Model generated function call(s)."
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 69,
+    "candidatesTokenCount": 32,
+    "totalTokenCount": 209,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 69
+      }
+    ],
+    "thoughtsTokenCount": 108
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "8wV1acOiB8aPjMcPjKTaoQI"
+}
+1865 957
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 1538
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"What's the temperature in Paris and London?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Paris"},"name":"get_temperature"},"thoughtSignature":"EvEDCu4DAXLI2nydi2N0Mxujaa/L1LYsZvsSULj8hUcTLsvKsKKXpw3BSFrFDTxRHbg75/F+AWDKgtEkcIHR5G9H9tJYAp0VUBh2fvphY0jfIF+sL54kdsNGCgIcNgaoOGdcqGp61hszHL5TAaDyilP1jQcjL06d6uMzVyJ9ONMvvcXKdo1OqMbLjbQQ7MxFc9jzdl4q9s8O7CUWNMp4ngqKffw/2AOFrrq+I7FIC3bdYh3OKrWsI2HzxtG53WnoAZ+KrSTludUtswESuIY0a2vI04PtRBvIKrF9sUnMsadXgL9VstvL/dsLRXQd7yc7ANmVNQhpWgkQZtikySfKLgdkaZtORMj/0OYH+3Iy9N7ozkrzfaI/DnDFeUPM/OqMt9069hdpYkgiH2TzTs2sslrugm4SuuNgPk1nwjaq51BibcgHHnysX2iydAjyctJgW+kJ7a+ELrG2CLGz17AID8xgrioG42n+54xmI8wQnuN3QVEd556cC00JDC4jTH6mAC0oCJIsonaoq7gNQhiEC8FqdNKDa0DkDuN684lduqMU4vNLZYzzDwxMGa1+bkPrbkj+j3ijaB1Mt8iQKlT0fNX00SSv/XMHjgTmE7ZfGvpg9TnuiYt9UbhX3vMKFnvqQuVatJUdQdxgh8rGAvGgfUtQVMo="},{"functionCall":{"args":{"location":"London"},"name":"get_temperature"}}],"role":"model"},{"parts":[{"functionResponse":{"name":"get_temperature","response":{"response":"22°C"}}},{"functionResponse":{"name":"get_temperature","response":{"response":"22°C"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 578
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 17:48:42 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5864
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The current temperature is 22°C in both Paris and London."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 183,
+    "candidatesTokenCount": 15,
+    "totalTokenCount": 198,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 183
+      }
+    ]
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "-gV1aaiOBr-OjMcP4Zj2MA"
+}

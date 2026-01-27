@@ -1,5 +1,5 @@
 httprr trace v1
-368 1526
+368 1527
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
@@ -13,23 +13,23 @@ Content-Length: 514
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
 Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-23T16:54:11Z
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T16:10:46Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-23T16:54:12Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T16:10:47Z
 Anthropic-Ratelimit-Requests-Limit: 4000
 Anthropic-Ratelimit-Requests-Remaining: 3999
-Anthropic-Ratelimit-Requests-Reset: 2026-01-23T16:54:11Z
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T16:10:45Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
 Anthropic-Ratelimit-Tokens-Remaining: 2400000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-23T16:54:11Z
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T16:10:46Z
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Fri, 23 Jan 2026 16:54:12 GMT
-Request-Id: req_011CXQfBuW35kL5jB9urFWU3
+Date: Mon, 26 Jan 2026 16:10:47 GMT
+Request-Id: req_011CXWHJbMnDwJddmuU4VmjK
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 816
+X-Envoy-Upstream-Service-Time: 1250
 X-Robots-Tag: none
 
-{"model":"claude-sonnet-4-5-20250929","id":"msg_01HANhNE44mMnbi8maUeFXES","type":"message","role":"assistant","content":[{"type":"text","text":"Hello! I'm doing well, thank you for asking. How are you doing today? Is there anything I can help you with?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":30,"service_tier":"standard"}}
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01CwxKcvh9Xs9Puta9iy4hcg","type":"message","role":"assistant","content":[{"type":"text","text":"Hello! I'm doing well, thank you for asking. How are you doing today? Is there anything I can help you with?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":30,"service_tier":"standard"}}

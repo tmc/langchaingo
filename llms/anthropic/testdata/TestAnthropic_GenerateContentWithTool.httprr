@@ -1,0 +1,68 @@
+httprr trace v1
+695 1511
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 475
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-haiku-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What is the weather in Boston?"}]}],"max_tokens":2048,"temperature":0,"tools":[{"name":"getCurrentWeather","description":"Get the current weather in a given location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"enum":["fahrenheit","celsius"],"type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 499
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 4000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 4000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:27Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 800000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 800000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:27Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3998
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:26Z
+Anthropic-Ratelimit-Tokens-Limit: 4800000
+Anthropic-Ratelimit-Tokens-Remaining: 4800000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:27Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:27 GMT
+Request-Id: req_011CXWs8vFX3v24o6sipHk5h
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 588
+X-Robots-Tag: none
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_01PCLnFdYgzwikTmiYq6pVtP","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01XnSg3YrHqGYq2L7V184iUK","name":"getCurrentWeather","input":{"location":"Boston, MA"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":604,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":56,"service_tier":"standard"}}987 1495
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 767
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-haiku-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What is the weather in Boston?"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01XnSg3YrHqGYq2L7V184iUK","name":"getCurrentWeather","input":{"location":"Boston, MA"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01XnSg3YrHqGYq2L7V184iUK","content":"{\"Boston\",\"72 and sunny\"}"}]}],"max_tokens":2048,"temperature":0,"tools":[{"name":"getCurrentWeather","description":"Get the current weather in a given location","input_schema":{"properties":{"location":{"description":"The city and state, e.g. San Francisco, CA","type":"string"},"unit":{"enum":["fahrenheit","celsius"],"type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 483
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 4000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 4000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:28Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 800000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 800000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:28Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:28Z
+Anthropic-Ratelimit-Tokens-Limit: 4800000
+Anthropic-Ratelimit-Tokens-Remaining: 4800000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:28Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:28 GMT
+Request-Id: req_011CXWs93iEQ3uNJya8GokUE
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 597
+X-Robots-Tag: none
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_01159ZqKcPbBZPDmcu3b2YFk","type":"message","role":"assistant","content":[{"type":"text","text":"The weather in Boston is currently **72°F and sunny**. It's a beautiful day!"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":680,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":23,"service_tier":"standard"}}

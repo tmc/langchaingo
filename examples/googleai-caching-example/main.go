@@ -147,7 +147,7 @@ When reviewing code or answering questions, always:
 
 	fmt.Println(resp.Choices[0].Content)
 	if genInfo := resp.Choices[0].GenerationInfo; genInfo != nil {
-		if cachedTokens, ok := genInfo["CachedTokens"].(int32); ok {
+		if cachedTokens, ok := genInfo["PromptCachedTokens"].(int); ok {
 			fmt.Printf("\n[Cached tokens used: %d]\n", cachedTokens)
 		}
 	}
@@ -173,7 +173,7 @@ When reviewing code or answering questions, always:
 
 	fmt.Println(resp2.Choices[0].Content)
 	if genInfo := resp2.Choices[0].GenerationInfo; genInfo != nil {
-		if cachedTokens, ok := genInfo["CachedTokens"].(int32); ok {
+		if cachedTokens, ok := genInfo["PromptCachedTokens"].(int); ok {
 			fmt.Printf("\n[Cached tokens used: %d]\n", cachedTokens)
 		}
 	}

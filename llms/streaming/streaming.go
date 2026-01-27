@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 type ChunkType string
@@ -18,9 +20,10 @@ const (
 )
 
 type ToolCall struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Arguments string `json:"arguments"`
+	ID        string                      `json:"id"`
+	Name      string                      `json:"name"`
+	Arguments string                      `json:"arguments"`
+	Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
 }
 
 func (t *ToolCall) String() string {
@@ -39,10 +42,10 @@ func (t *ToolCall) Parse() (map[string]any, error) {
 }
 
 type Chunk struct {
-	Type             ChunkType `json:"type"`
-	Content          string    `json:"content"`
-	ReasoningContent string    `json:"reasoning_content"`
-	ToolCall         ToolCall  `json:"tool_call"`
+	Type      ChunkType                   `json:"type"`
+	Content   string                      `json:"content"`
+	Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
+	ToolCall  ToolCall                    `json:"tool_call"`
 }
 
 func (c *Chunk) String() string {
@@ -52,7 +55,7 @@ func (c *Chunk) String() string {
 	case ChunkTypeText:
 		return fmt.Sprintf("Text: %s", c.Content)
 	case ChunkTypeReasoning:
-		return fmt.Sprintf("Reasoning: %s", c.ReasoningContent)
+		return c.Reasoning.String()
 	case ChunkTypeToolCall:
 		return fmt.Sprintf("ToolCall: %s", c.ToolCall.String())
 	case ChunkTypeDone:
@@ -76,10 +79,17 @@ func NewTextChunk(text string) Chunk {
 	}
 }
 
-func NewReasoningChunk(reasoning string) Chunk {
+func NewReasoningChunk(reasoning *reasoning.ContentReasoning) Chunk {
 	return Chunk{
-		Type:             ChunkTypeReasoning,
-		ReasoningContent: reasoning,
+		Type:      ChunkTypeReasoning,
+		Reasoning: reasoning,
+	}
+}
+
+func NewReasoningChunkWithContent(content string) Chunk {
+	return Chunk{
+		Type:      ChunkTypeReasoning,
+		Reasoning: &reasoning.ContentReasoning{Content: content},
 	}
 }
 
@@ -95,6 +105,15 @@ func NewToolCall(id, name, arguments string) ToolCall {
 		ID:        id,
 		Name:      name,
 		Arguments: arguments,
+	}
+}
+
+func NewToolCallWithReasoning(id, name, arguments string, reasoning *reasoning.ContentReasoning) ToolCall {
+	return ToolCall{
+		ID:        id,
+		Name:      name,
+		Arguments: arguments,
+		Reasoning: reasoning,
 	}
 }
 
@@ -114,14 +133,24 @@ func CallWithText(ctx context.Context, cb Callback, text string) error {
 	return cb(ctx, NewTextChunk(text))
 }
 
-func CallWithReasoning(ctx context.Context, cb Callback, reasoning string) error {
+func CallWithReasoning(ctx context.Context, cb Callback, reasoning *reasoning.ContentReasoning) error {
 	if cb == nil {
 		return nil
 	}
-	if reasoning == "" {
+	if reasoning == nil || reasoning.IsEmpty() {
 		return nil
 	}
 	return cb(ctx, NewReasoningChunk(reasoning))
+}
+
+func CallWithReasoningContent(ctx context.Context, cb Callback, content string) error {
+	if cb == nil {
+		return nil
+	}
+	if content == "" {
+		return nil
+	}
+	return cb(ctx, NewReasoningChunkWithContent(content))
 }
 
 func CallWithToolCall(ctx context.Context, cb Callback, toolCall ToolCall) error {

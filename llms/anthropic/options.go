@@ -18,7 +18,7 @@ import (
 func WithPromptCaching() llms.CallOption {
 	return func(opts *llms.CallOptions) {
 		if opts.Metadata == nil {
-			opts.Metadata = make(map[string]interface{})
+			opts.Metadata = make(map[string]any)
 		}
 		opts.Metadata["anthropic:beta_headers"] = []string{"prompt-caching-2024-07-31"}
 	}
@@ -37,7 +37,7 @@ func WithPromptCaching() llms.CallOption {
 func WithExtendedOutput() llms.CallOption {
 	return func(opts *llms.CallOptions) {
 		if opts.Metadata == nil {
-			opts.Metadata = make(map[string]interface{})
+			opts.Metadata = make(map[string]any)
 		}
 		// Add to existing headers if present
 		if existing, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
@@ -61,7 +61,7 @@ func WithExtendedOutput() llms.CallOption {
 func WithInterleavedThinking() llms.CallOption {
 	return func(opts *llms.CallOptions) {
 		if opts.Metadata == nil {
-			opts.Metadata = make(map[string]interface{})
+			opts.Metadata = make(map[string]any)
 		}
 		// Add to existing headers if present
 		if existing, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
@@ -83,7 +83,7 @@ func WithInterleavedThinking() llms.CallOption {
 func WithBetaHeader(header string) llms.CallOption {
 	return func(opts *llms.CallOptions) {
 		if opts.Metadata == nil {
-			opts.Metadata = make(map[string]interface{})
+			opts.Metadata = make(map[string]any)
 		}
 		// Add to existing headers if present
 		if existing, ok := opts.Metadata["anthropic:beta_headers"].([]string); ok {
@@ -107,5 +107,60 @@ func EphemeralCacheOneHour() *llms.CacheControl {
 	return &llms.CacheControl{
 		Type:     "ephemeral",
 		Duration: time.Hour,
+	}
+}
+
+// CachedContent represents content with caching instructions for Anthropic.
+// This wraps any ContentPart and adds cache control metadata.
+type CachedContent struct {
+	llms.ContentPart
+	CacheControl *llms.CacheControl `json:"cache_control,omitempty"`
+}
+
+// WithCacheControl wraps content with cache control instructions for Anthropic.
+// This allows explicit control over what content should be cached.
+//
+// Usage:
+//
+//	anthropic.WithCacheControl(
+//	    llms.TextPart("long context..."),
+//	    anthropic.EphemeralCache(),
+//	)
+func WithCacheControl(content llms.ContentPart, control *llms.CacheControl) CachedContent {
+	return CachedContent{
+		ContentPart:  content,
+		CacheControl: control,
+	}
+}
+
+// CacheStrategy defines where to apply automatic caching.
+type CacheStrategy struct {
+	// CacheTools enables caching for tool definitions (placed after last tool).
+	CacheTools bool
+	// CacheSystem enables caching for system messages (placed after system content).
+	CacheSystem bool
+	// CacheMessages enables caching for conversation history (placed after last message).
+	CacheMessages bool
+	// TTL specifies cache duration ("5m" or "1h"). Defaults to "5m" if empty.
+	TTL string
+}
+
+// WithCacheStrategy enables automatic cache control placement based on strategy.
+// This option applies to a single GenerateContent/Call invocation.
+//
+// Example for AI agent with many tools:
+//
+//	llm.GenerateContent(ctx, messages,
+//	    anthropic.WithCacheStrategy(anthropic.CacheStrategy{
+//	        CacheTools: true,  // Cache tool definitions
+//	        CacheSystem: true, // Cache system prompt
+//	    }),
+//	)
+func WithCacheStrategy(strategy CacheStrategy) llms.CallOption {
+	return func(opts *llms.CallOptions) {
+		if opts.Metadata == nil {
+			opts.Metadata = make(map[string]any)
+		}
+		opts.Metadata["anthropic:cache_strategy"] = strategy
 	}
 }

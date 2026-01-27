@@ -43,4 +43,8 @@
 //
 //	fmt.Println("Reasoning:", reasoning)  // "First, I need to analyze the data. The pattern shows increasing values."
 //	fmt.Println("Content:", content)      // "Here's what I found: The trend is clearly upward."
+//
+// See also:
+//   - IsReasoningModel: Checks if a model supports reasoning
+//   - DefaultIsReasoningModel: Provides the default reasoning model detection logic
 package reasoning

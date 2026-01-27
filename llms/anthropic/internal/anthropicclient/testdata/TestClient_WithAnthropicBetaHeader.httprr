@@ -1,5 +1,5 @@
 httprr trace v1
-636 1603
+636 1605
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
@@ -10,27 +10,27 @@ Content-Type: application/json
 X-Api-Key: test-api-key
 
 {"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather like?"}]}],"max_tokens":100,"temperature":0,"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
-Content-Length: 590
+Content-Length: 592
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
 Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-23T16:54:16Z
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T16:10:51Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-23T16:54:17Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T16:10:52Z
 Anthropic-Ratelimit-Requests-Limit: 4000
 Anthropic-Ratelimit-Requests-Remaining: 3999
-Anthropic-Ratelimit-Requests-Reset: 2026-01-23T16:54:16Z
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T16:10:50Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
 Anthropic-Ratelimit-Tokens-Remaining: 2400000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-23T16:54:16Z
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T16:10:51Z
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Fri, 23 Jan 2026 16:54:17 GMT
-Request-Id: req_011CXQfCGAk9s9LwwH7tpm8j
+Date: Mon, 26 Jan 2026 16:10:52 GMT
+Request-Id: req_011CXWHJw7vTSjCgtZLFXpYt
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 1431
+X-Envoy-Upstream-Service-Time: 1818
 X-Robots-Tag: none
 
-{"model":"claude-sonnet-4-5-20250929","id":"msg_01KDrMqfvPeutzPYRwksQafn","type":"message","role":"assistant","content":[{"type":"text","text":"I'd be happy to help you check the weather! However, I need to know which location you'd like to check the weather for. Could you please tell me the city or area you're interested in?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":574,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":45,"service_tier":"standard"}}
+{"model":"claude-sonnet-4-5-20250929","id":"msg_014sxtks2dpKqdTsD1fKkDnE","type":"message","role":"assistant","content":[{"type":"text","text":"I'd be happy to help you check the weather! However, I need to know which location you'd like to get the weather for. Could you please tell me the city or location you're interested in?"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":574,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":45,"service_tier":"standard"}}

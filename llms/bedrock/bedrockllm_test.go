@@ -1126,7 +1126,11 @@ func testReasoningWorkflow(
 		streamingFunc := func(_ context.Context, chunk streaming.Chunk) error {
 			switch chunk.Type {
 			case streaming.ChunkTypeReasoning:
-				reasoningChunks = append(reasoningChunks, chunk.ReasoningContent)
+				if chunk.Reasoning != nil {
+					reasoningChunks = append(reasoningChunks, chunk.Reasoning.Content)
+				} else {
+					t.Log("reasoning chunk is nil")
+				}
 			default:
 				// Ignore other chunks in this test
 			}
@@ -1142,9 +1146,11 @@ func testReasoningWorkflow(
 				reasoningContent := strings.Join(reasoningChunks, "")
 				if choice == nil {
 					t.Errorf("No choice in response")
-				} else if choice.ReasoningContent != reasoningContent {
+				} else if choice.Reasoning == nil && reasoningContent != "" {
+					t.Errorf("Reasoning content mismatch: expected %s, got nil", reasoningContent)
+				} else if choice.Reasoning != nil && choice.Reasoning.Content != reasoningContent {
 					t.Errorf("Reasoning content mismatch: expected %s, got %s",
-						reasoningContent, choice.ReasoningContent)
+						reasoningContent, choice.Reasoning.Content)
 				}
 			}
 		}()
@@ -1169,8 +1175,8 @@ func testReasoningWorkflow(
 		return fmt.Errorf("expected final response to contain '391', got: %s", choice.Content)
 	}
 
-	if choice.ReasoningContent != "" {
-		preview := choice.ReasoningContent
+	if choice.Reasoning != nil && choice.Reasoning.Content != "" {
+		preview := choice.Reasoning.Content
 		if len(preview) > 50 {
 			preview = preview[:50] + "..."
 		}

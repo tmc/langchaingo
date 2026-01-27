@@ -3,6 +3,7 @@ package documentloaders
 import (
 	"context"
 	"io"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/schema"
 	"github.com/vxcontrol/langchaingo/textsplitter"
@@ -88,6 +89,9 @@ func (p PDF) Load(_ context.Context) ([]schema.Document, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// replace newlines with empty string as spaces are already present in the PDF text
+		text = strings.ReplaceAll(text, "\n", "")
 
 		// add the document to the doc list
 		docs = append(docs, schema.Document{

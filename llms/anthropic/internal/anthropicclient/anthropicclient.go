@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/httputil"
@@ -16,7 +17,7 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	defaultModel = "claude-3-7-sonnet-20250219"
+	defaultModel = "claude-sonnet-4-5"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.
@@ -30,7 +31,8 @@ type Client struct {
 
 	httpClient Doer
 
-	anthropicBetaHeader string
+	// Changed from single string to slice for multiple beta headers
+	anthropicBetaHeaders []string
 
 	// UseLegacyTextCompletionsAPI is a flag to use the legacy text completions API.
 	UseLegacyTextCompletionsAPI bool
@@ -61,10 +63,14 @@ func WithLegacyTextCompletionsAPI(val bool) Option {
 	}
 }
 
-// WithAnthropicBetaHeader sets the anthropic-beta header.
+// WithAnthropicBetaHeader adds an anthropic-beta header.
+// Can be called multiple times to add multiple beta headers.
 func WithAnthropicBetaHeader(val string) Option {
 	return func(opts *Client) error {
-		opts.anthropicBetaHeader = val
+		if opts.anthropicBetaHeaders == nil {
+			opts.anthropicBetaHeaders = []string{}
+		}
+		opts.anthropicBetaHeaders = append(opts.anthropicBetaHeaders, val)
 		return nil
 	}
 }
@@ -130,7 +136,7 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 type MessageRequest struct {
 	Model       string           `json:"model"`
 	Messages    []ChatMessage    `json:"messages"`
-	System      string           `json:"system,omitempty"`
+	System      any              `json:"system,omitempty"` // Can be string or []Content for caching
 	Temperature float64          `json:"temperature"`
 	MaxTokens   int              `json:"max_tokens,omitempty"`
 	TopP        float64          `json:"top_p,omitempty"`
@@ -176,12 +182,24 @@ func (c *Client) setHeaders(req *http.Request, betaHeaders []string) {
 	req.Header.Set("anthropic-version", "2023-06-01") // nolint:canonicalheader
 
 	// Set beta headers from request, falling back to client default
+	// Multiple beta features are combined in a single header with comma separation
+	var validHeaders []string
 	if len(betaHeaders) > 0 {
 		for _, header := range betaHeaders {
-			req.Header.Add("anthropic-beta", header) // nolint:canonicalheader
+			if header != "" && !slices.Contains(validHeaders, header) {
+				validHeaders = append(validHeaders, header)
+			}
 		}
-	} else if c.anthropicBetaHeader != "" {
-		req.Header.Set("anthropic-beta", c.anthropicBetaHeader) // nolint:canonicalheader
+	} else if len(c.anthropicBetaHeaders) > 0 {
+		for _, header := range c.anthropicBetaHeaders {
+			if header != "" && !slices.Contains(validHeaders, header) {
+				validHeaders = append(validHeaders, header)
+			}
+		}
+	}
+
+	if len(validHeaders) > 0 {
+		req.Header.Set("anthropic-beta", strings.Join(validHeaders, ",")) // nolint:canonicalheader
 	}
 }
 

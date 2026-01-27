@@ -1,0 +1,208 @@
+httprr trace v1
+7784 2810
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 7520
+Anthropic-Beta: prompt-caching-2024-07-31
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in Paris?","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"max_tokens":200,"stream":true,"temperature":0,"tools":[{"name":"get_weather","description":"ToolResultTestStreaming-v1 Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ","input_schema":{"properties":{"location":{"description":"City and state, e.g. San Francisco, CA, or city and country, e.g. London, UK","type":"string"},"units":{"description":"Temperature units: celsius or fahrenheit","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}},{"name":"get_time","description":"ToolResultTestStreaming-v1 Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. ","input_schema":{"properties":{"format":{"description":"Time format: 12h or 24h","enum":["12h","24h"],"type":"string"},"timezone":{"description":"IANA timezone name like America/New_York or Europe/London","type":"string"}},"required":["timezone"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}]}HTTP/2.0 200 OK
+Content-Length: 1755
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-27T19:27:50Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-27T19:27:50Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-27T19:27:50Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2399000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-27T19:27:50Z
+Cache-Control: no-cache
+Cf-Cache-Status: DYNAMIC
+Content-Type: text/event-stream; charset=utf-8
+Date: Tue, 27 Jan 2026 19:27:51 GMT
+Request-Id: req_011CXYS9Aaptbk1qKCgCcgbv
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 1084
+X-Robots-Tag: none
+
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01FSzqDYDTPLK3UNG2tMpcGg","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":3,"cache_creation_input_tokens":1881,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":1881,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}             }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_017gFQvN2ViSK2BLwq8bwwhc","name":"get_weather","input":{}} }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"locat"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ion\": \""}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"Paris, F"}        }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"rance\"}"}  }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":3,"cache_creation_input_tokens":1881,"cache_read_input_tokens":0,"output_tokens":55}           }
+
+event: message_stop
+data: {"type":"message_stop"            }
+
+8056 2842
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 7792
+Anthropic-Beta: prompt-caching-2024-07-31
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in Paris?"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_017gFQvN2ViSK2BLwq8bwwhc","name":"get_weather","input":{"location":"Paris, France"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_017gFQvN2ViSK2BLwq8bwwhc","content":"Sunny, 22°C","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"max_tokens":200,"stream":true,"temperature":0,"tools":[{"name":"get_weather","description":"ToolResultTestStreaming-v1 Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ","input_schema":{"properties":{"location":{"description":"City and state, e.g. San Francisco, CA, or city and country, e.g. London, UK","type":"string"},"units":{"description":"Temperature units: celsius or fahrenheit","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}},{"name":"get_time","description":"ToolResultTestStreaming-v1 Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. ","input_schema":{"properties":{"format":{"description":"Time format: 12h or 24h","enum":["12h","24h"],"type":"string"},"timezone":{"description":"IANA timezone name like America/New_York or Europe/London","type":"string"}},"required":["timezone"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}]}HTTP/2.0 200 OK
+Content-Length: 1787
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-27T19:27:53Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-27T19:27:53Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-27T19:27:53Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2399000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-27T19:27:53Z
+Cache-Control: no-cache
+Cf-Cache-Status: DYNAMIC
+Content-Type: text/event-stream; charset=utf-8
+Date: Tue, 27 Jan 2026 19:27:54 GMT
+Request-Id: req_011CXYS9LSQSgfPDS5DbEQsK
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 1051
+X-Robots-Tag: none
+
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01MTrWMuLwJ1QQWm3Y9hNQCq","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":6,"cache_creation_input_tokens":72,"cache_read_input_tokens":1881,"cache_creation":{"ephemeral_5m_input_tokens":72,"ephemeral_1h_input_tokens":0},"output_tokens":2,"service_tier":"standard"}}           }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"The current"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" weather in Paris,"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" France is sunny"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with a temperature of 22°C"}     }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" (approximately"}         }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" 72°F)."}      }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0         }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":6,"cache_creation_input_tokens":72,"cache_read_input_tokens":1881,"output_tokens":27} }
+
+event: message_stop
+data: {"type":"message_stop"      }
+
+8283 2798
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 8019
+Anthropic-Beta: prompt-caching-2024-07-31
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in Paris?"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_017gFQvN2ViSK2BLwq8bwwhc","name":"get_weather","input":{"location":"Paris, France"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_017gFQvN2ViSK2BLwq8bwwhc","content":"Sunny, 22°C"}]},{"role":"assistant","content":[{"type":"text","text":"The current weather in Paris, France is sunny with a temperature of 22°C (approximately 72°F)."}]},{"role":"user","content":[{"type":"text","text":"What about London?","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"max_tokens":200,"stream":true,"temperature":0,"tools":[{"name":"get_weather","description":"ToolResultTestStreaming-v1 Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ","input_schema":{"properties":{"location":{"description":"City and state, e.g. San Francisco, CA, or city and country, e.g. London, UK","type":"string"},"units":{"description":"Temperature units: celsius or fahrenheit","enum":["celsius","fahrenheit"],"type":"string"}},"required":["location"],"type":"object"}},{"name":"get_time","description":"ToolResultTestStreaming-v1 Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. Get the current time in any timezone around the world using IANA timezone identifiers. ","input_schema":{"properties":{"format":{"description":"Time format: 12h or 24h","enum":["12h","24h"],"type":"string"},"timezone":{"description":"IANA timezone name like America/New_York or Europe/London","type":"string"}},"required":["timezone"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}]}HTTP/2.0 200 OK
+Content-Length: 1743
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-27T19:27:55Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-27T19:27:55Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-27T19:27:55Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2399000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-27T19:27:55Z
+Cache-Control: no-cache
+Cf-Cache-Status: DYNAMIC
+Content-Type: text/event-stream; charset=utf-8
+Date: Tue, 27 Jan 2026 19:27:56 GMT
+Request-Id: req_011CXYS9WMDK7jsw3vXaGYrm
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 1298
+X-Robots-Tag: none
+
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01Uwq8F8Di4KkeQDfBGnjeKk","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":3,"cache_creation_input_tokens":37,"cache_read_input_tokens":1953,"cache_creation":{"ephemeral_5m_input_tokens":37,"ephemeral_1h_input_tokens":0},"output_tokens":8,"service_tier":"standard"}}           }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_019DHu8vHnnTfwnzfCP6RnN9","name":"get_weather","input":{}}    }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}         }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"location\":"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":" \""} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"London"} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":", UK\"}"}          }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0        }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":3,"cache_creation_input_tokens":37,"cache_read_input_tokens":1953,"output_tokens":55}      }
+
+event: message_stop
+data: {"type":"message_stop"    }
+

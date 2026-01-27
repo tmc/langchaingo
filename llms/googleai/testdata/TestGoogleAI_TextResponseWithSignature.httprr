@@ -1,0 +1,113 @@
+httprr trace v1
+874 3420
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 548
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"What is 15 + 27? Think step by step."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"thinkingConfig":{"includeThoughts":true,"thinkingBudget":1024},"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 3040
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 19:55:42 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=5028
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "**My Mental Math Journey: Adding 15 and 27**\n\nOkay, so the task is simple addition: 15 plus 27, and I need to walk through the steps, which I can certainly do. Let's start with a breakdown approach, as a good foundation.\n\nFirst, I'll decompose the numbers by place value. So, 15 becomes 10 and 5, and 27 breaks down to 20 and 7. Easy.\n\nNext, I'll handle the tens. Adding 10 and 20 gives me 30. That's straightforward.\n\nNow, the ones. 5 plus 7 equals 12. Got it.\n\nFinally, I'll combine the sums. 30 plus 12, well, that's just 42.\n\nAlternatively, I could have used the vertical addition method, which is pretty much the same at its core, but presented differently. I'd add the ones column: 5 plus 7 is 12. Write down the 2, and carry the 1. Then I'd add the tens, remembering to include the carried 1: 1 plus 2, plus the carried 1, makes 4. So the result is 42.\n\nUltimately, I want to clearly demonstrate each intermediary sum and arrive at the final, correct answer. 42.\n\n\n",
+            "thought": true
+          },
+          {
+            "text": "To find the sum of 15 + 27, we can break it down step by step:\n\n**Step 1: Break the numbers into tens and ones.**\n*   15 is **10 + 5**\n*   27 is **20 + 7**\n\n**Step 2: Add the tens together.**\n*   10 + 20 = **30**\n\n**Step 3: Add the ones together.**\n*   5 + 7 = **12**\n\n**Step 4: Add the two results together.**\n*   30 + 12 = **42**\n\n**Final Answer:**\n15 + 27 = **42**",
+            "thoughtSignature": "Eu4FCusFAXLI2nxmjtESBz4PoQ0UOchIb5qCs9c1IBvs5k31+yIcPkc/GnuyNTI5qr6mtbVtFYio+k67akz1z3Ej9ib1g710gyRbhl8rHXEdSqZlLKxkBy2SdZzPDus0i8YxqrX/82frnjA8K4FWKfVOl9UJcqREBKBg6jzA4bPvD4FahFQIjHamvxA56CJ9XJSrD4NZlBV4RJEmzIWBuCKE0vFTgnIZSaWYyQZWH05jadcePH3MXQSs7fu0zjWpHKAeYJQ1y70Q7EIm2WLdMCOTkUE4Ou7lpxqp2jw2X9mLwTkJQmqijhMRdEOMXX/GXbj8/GRV+28ceD/zzgPWeFXsBLArgDjdAdsvh8F6zx0SAtVVBzW8Yr8XQIPuTncVJdW3iI176+g2PINe7mXjPGiwCuTmjHU37ksO0jE9NWskrTxcl1pg4kDUd7t3DBiUbZTduaVBu3mqBoVcMcLuKH6in+NkNivpHqRaJCHPsTg1qoIqqKlHk0QVcKM7deuLboc/UHfWeJ7F+EtUUHlzSDfySI6eaHyK/dfjBbPYpe9Darp78kcEKh6bhHNYSCBpnLXyaAalYHVkAvevHAzD43r3vbF38bdgZRgr08RMYe9pgiYcD4mnD0wOHJ1xRfHmhQ5hJyiUCylRhEgcsEpmeK6o301ZqkkhSnve4xJPYncz9mKg7NJqqYu389X/G6g/IGdeyd055t2OB96Nh9vNkLLt0zpOztlWf8nYevAF2g2YeiT7FLIklWELl7ZhfYRQ32YDBAJdJTrwttN8CMmfLBiPTne7pRYnr8uoYhlnkP5NVRKvzMc5leqyKAzcISY8HGfWzYnneToA+enbaSrX/fv57io1VQxeS2lUhunUqR0e3kraHCOJ+YZzwcad/Olb300VjW19z1eVTHeKhKahVGlL9kK1+ls+v/m53pVITWfdnHSbxY/SMk1CPRyAHKKQOteXUSbleBiL07sBaW6491IpA5ynhBQmY1f1I7/ygA2D"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 16,
+    "candidatesTokenCount": 153,
+    "totalTokenCount": 417,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 16
+      }
+    ],
+    "thoughtsTokenCount": 248
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "viN1adTQM-XP-8YPhLiRgAo"
+}
+2326 1632
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 1999
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"What is 15 + 27? Think step by step."}],"role":"user"},{"parts":[{"text":"To find the sum of 15 + 27, we can break it down step by step:\n\n**Step 1: Break the numbers into tens and ones.**\n*   15 is **10 + 5**\n*   27 is **20 + 7**\n\n**Step 2: Add the tens together.**\n*   10 + 20 = **30**\n\n**Step 3: Add the ones together.**\n*   5 + 7 = **12**\n\n**Step 4: Add the two results together.**\n*   30 + 12 = **42**\n\n**Final Answer:**\n15 + 27 = **42**","thoughtSignature":"Eu4FCusFAXLI2nxmjtESBz4PoQ0UOchIb5qCs9c1IBvs5k31+yIcPkc/GnuyNTI5qr6mtbVtFYio+k67akz1z3Ej9ib1g710gyRbhl8rHXEdSqZlLKxkBy2SdZzPDus0i8YxqrX/82frnjA8K4FWKfVOl9UJcqREBKBg6jzA4bPvD4FahFQIjHamvxA56CJ9XJSrD4NZlBV4RJEmzIWBuCKE0vFTgnIZSaWYyQZWH05jadcePH3MXQSs7fu0zjWpHKAeYJQ1y70Q7EIm2WLdMCOTkUE4Ou7lpxqp2jw2X9mLwTkJQmqijhMRdEOMXX/GXbj8/GRV+28ceD/zzgPWeFXsBLArgDjdAdsvh8F6zx0SAtVVBzW8Yr8XQIPuTncVJdW3iI176+g2PINe7mXjPGiwCuTmjHU37ksO0jE9NWskrTxcl1pg4kDUd7t3DBiUbZTduaVBu3mqBoVcMcLuKH6in+NkNivpHqRaJCHPsTg1qoIqqKlHk0QVcKM7deuLboc/UHfWeJ7F+EtUUHlzSDfySI6eaHyK/dfjBbPYpe9Darp78kcEKh6bhHNYSCBpnLXyaAalYHVkAvevHAzD43r3vbF38bdgZRgr08RMYe9pgiYcD4mnD0wOHJ1xRfHmhQ5hJyiUCylRhEgcsEpmeK6o301ZqkkhSnve4xJPYncz9mKg7NJqqYu389X/G6g/IGdeyd055t2OB96Nh9vNkLLt0zpOztlWf8nYevAF2g2YeiT7FLIklWELl7ZhfYRQ32YDBAJdJTrwttN8CMmfLBiPTne7pRYnr8uoYhlnkP5NVRKvzMc5leqyKAzcISY8HGfWzYnneToA+enbaSrX/fv57io1VQxeS2lUhunUqR0e3kraHCOJ+YZzwcad/Olb300VjW19z1eVTHeKhKahVGlL9kK1+ls+v/m53pVITWfdnHSbxY/SMk1CPRyAHKKQOteXUSbleBiL07sBaW6491IpA5ynhBQmY1f1I7/ygA2D"}],"role":"model"},{"parts":[{"text":"Now multiply that result by 2"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 1252
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 19:55:45 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=1775
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "To multiply the previous result (**42**) by **2**, we can break it down step by step:\n\n**Step 1: Break 42 into tens and ones.**\n*   42 is **40 + 2**\n\n**Step 2: Multiply the tens by 2.**\n*   40 × 2 = **80**\n\n**Step 3: Multiply the ones by 2.**\n*   2 × 2 = **4**\n\n**Step 4: Add the results together.**\n*   80 + 4 = **84**\n\n**Final Answer:**\n42 × 2 = **84**",
+            "thoughtSignature": "EtcBCtQBAXLI2nx8ARuufhOjj9IUjDTBhVj0i3b7t0MWr5VgIkmWAR9y7eCffl7u5F6iZuj0i+mpFn4FJsU4LlHp+SGOGwIhS6hpYFTYbybCdM60+smeM3alTYpC/85p20y96MesFlLGKMl1aRJ/T9Q5pTeG3RgUseSWLMcsR/esZlTqUXX2uOx1BeCFoHKk7Ni15rd89iEJ+CKD2yrRpy+SMu9pvlzVr+Tt88WQIOMfwg7t4/BvzOsTaiOC0hn37P+C3w+1MVP+Mgb+BYfIW0vCJeJge2mu3y4="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 178,
+    "candidatesTokenCount": 140,
+    "totalTokenCount": 399,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 178
+      }
+    ],
+    "thoughtsTokenCount": 81
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "wSN1aejLL6X_jrEP8aauqAk"
+}

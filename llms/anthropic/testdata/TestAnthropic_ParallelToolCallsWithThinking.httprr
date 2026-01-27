@@ -1,0 +1,36 @@
+httprr trace v1
+834 2914
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 565
+Anthropic-Beta: interleaved-thinking-2025-05-14
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather and time in Boston?"}]}],"max_tokens":4096,"temperature":1,"tools":[{"name":"get_weather","description":"Get weather for a location","input_schema":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}},{"name":"get_time","description":"Get current time for a location","input_schema":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}}],"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1900
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:11Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:13Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3997
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:10Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:11Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:13 GMT
+Request-Id: req_011CXWs7iSL9xT6oejBka3DG
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 3222
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01PAH28ZD28BrJKtY8YPZzMv","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The user is asking for both the weather and time in Boston. I have two functions available that can help:\n1. get_weather - which takes a location parameter\n2. get_time - which takes a location parameter\n\nSince these are independent calls (neither depends on the result of the other), I can make both calls at the same time in a single function_calls block.\n\nThe location is \"Boston\" for both calls.","signature":"ErcECkYICxgCKkAPeZNKidA0PTeTnqksaIA7PGhGLSqK1TBXs63Dazt6rzdPjMM/S2vkRh0guMK88VP0kz5inHJpIq47NRYMGC6kEgwsMVazmmv0ziPgFosaDKD5iJwVBa3Th/5BHiIw+x395wsUZhaishmS2cyurftZsIbthkLyNGOUPh9w0NlOH/d0PElX6df67F9ZCJPpKp4DDKUvpcrOwSdymL0Ci8zjh+TQiPqRe2zi/aqIoe66aZ9pufT5FTitwvf7xBqr9DVeg4t0yM27yjA+P961jhXfEXV+WU1g4IZgdQnELNnw8JtHgWA8mmEE5jMqOO0PewBORwpEgpYgSfraey67vEVHF0eW+b0wWWygtj7hGKjoWcu+MakujV3UFcQIV6nJRiW9w1fH+uZD6GVCysBSo6R1wdq7CvAH24FbtrNJLvBWteDTDJc0+KSPP6bbwLNIcjkTft/PAnoUruCpKAr+eq5nHPZR5Hr1VslIbGEOXH1Uk1t1BOAPr69I+EOL+Xu1XhEVV2y8BN18ho4SFgrzAZsZZNS3ZPE7Xpf46bZql1nlFJQLKGOsRV10Z+K43RpPuyeEP1X1GyI/axWZ4mrztTS3FKiLOmjY+xYm+JQd52NyCMq73oLD2K4CjSXd7e6WsW4ld1ZBEYXgYZyCQrUdNIjRldaBrUsg1EP6G74RZP1m56/6oLuXbOjzXZijOEZkhASetwd0OBaIVjgmJpi1s5uIIWqZ2d+SUvMORO0Z3ZgzGAE="},{"type":"text","text":"I'll get both the weather and time information for Boston."},{"type":"tool_use","id":"toolu_01Pm8yB7EWqPLcqs7q6CZLwF","name":"get_weather","input":{"location":"Boston"}},{"type":"tool_use","id":"toolu_01HZ1ZdpZQujsQX8oNutwTfd","name":"get_time","input":{"location":"Boston"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":797,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":200,"service_tier":"standard"}}

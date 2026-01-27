@@ -48,8 +48,6 @@ func (m *testEmbedder) EmbedQuery(ctx context.Context, text string) ([]float32, 
 }
 
 func TestNew(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name        string
 		envVars     map[string]string
@@ -1002,8 +1000,6 @@ func TestWithOptions(t *testing.T) {
 }
 
 func TestEnvironmentVariableHandling(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name        string
 		envVars     map[string]string

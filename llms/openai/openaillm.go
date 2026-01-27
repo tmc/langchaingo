@@ -7,6 +7,7 @@ import (
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 type ChatMessage = openaiclient.ChatMessage
@@ -310,28 +311,53 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 
 	for i, c := range result.Choices {
 		choices[i] = &llms.ContentChoice{
-			Content:          c.Message.Content,
-			ReasoningContent: c.Message.ReasoningContent,
-			StopReason:       fmt.Sprint(c.FinishReason),
-			GenerationInfo: map[string]any{
-				"CompletionTokens":  result.Usage.CompletionTokens,
-				"PromptTokens":      result.Usage.PromptTokens,
-				"TotalTokens":       result.Usage.TotalTokens,
-				"ReasoningTokens":   result.Usage.CompletionTokensDetails.ReasoningTokens,
-				"PromptAudioTokens": result.Usage.PromptTokensDetails.AudioTokens,
-				// Standardized fields for cross-provider compatibility
-				"PromptCachedTokens":                 result.Usage.PromptTokensDetails.CachedTokens,
-				"CompletionAudioTokens":              result.Usage.CompletionTokensDetails.AudioTokens,
-				"CompletionReasoningTokens":          result.Usage.CompletionTokensDetails.ReasoningTokens,
-				"CompletionAcceptedPredictionTokens": result.Usage.CompletionTokensDetails.AcceptedPredictionTokens,
-				"CompletionRejectedPredictionTokens": result.Usage.CompletionTokensDetails.RejectedPredictionTokens,
-			},
+			Content:        c.Message.Content,
+			Reasoning:      o.processReasoning(c.Message.ReasoningContent),
+			StopReason:     fmt.Sprint(c.FinishReason),
+			GenerationInfo: o.processUsage(&result.Usage),
 		}
 
 		o.processToolCalls(choices[i], c)
 	}
 
 	return &llms.ContentResponse{Choices: choices}
+}
+
+func (o *LLM) processUsage(usage *openaiclient.ChatUsage) map[string]any {
+	return map[string]any{
+		"CompletionTokens":  usage.CompletionTokens,
+		"PromptTokens":      max(usage.PromptTokens-usage.PromptTokensDetails.CachedTokens, 0),
+		"TotalTokens":       usage.TotalTokens,
+		"ReasoningTokens":   usage.CompletionTokensDetails.ReasoningTokens,
+		"PromptAudioTokens": usage.PromptTokensDetails.AudioTokens,
+		// Standardized fields for cross-provider compatibility
+		"PromptCachedTokens":   usage.PromptTokensDetails.CachedTokens,
+		"CacheReadInputTokens": usage.PromptTokensDetails.CachedTokens,
+		"CacheCreationInputTokens": max(
+			usage.PromptTokensDetails.CacheWriteTokens,
+			usage.PromptTokens-usage.PromptTokensDetails.CachedTokens,
+		),
+		"CompletionAudioTokens":              usage.CompletionTokensDetails.AudioTokens,
+		"CompletionReasoningTokens":          usage.CompletionTokensDetails.ReasoningTokens,
+		"CompletionAcceptedPredictionTokens": usage.CompletionTokensDetails.AcceptedPredictionTokens,
+		"CompletionRejectedPredictionTokens": usage.CompletionTokensDetails.RejectedPredictionTokens,
+		// Special fields for OpenRouter provider
+		"UpstreamInferencePromptCost":      usage.CostDetails.UpstreamInferencePromptCost,
+		"UpstreamInferenceCompletionsCost": usage.CostDetails.UpstreamInferenceCompletionsCost,
+	}
+}
+
+// processReasoning processes reasoning content in the response.
+func (o *LLM) processReasoning(reasoningContent string) *reasoning.ContentReasoning {
+	if reasoningContent == "" {
+		return nil
+	}
+
+	return &reasoning.ContentReasoning{
+		Content:         reasoningContent,
+		Signature:       nil, // not supported yet for OpenAI compatible providers
+		RedactedContent: nil, // not supported yet for OpenAI compatible providers
+	}
 }
 
 // processToolCalls processes tool calls in the response.

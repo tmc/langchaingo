@@ -1,0 +1,36 @@
+httprr trace v1
+845 2674
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 576
+Anthropic-Beta: interleaved-thinking-2025-05-14
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Search for the capital of France, then calculate its population density"}]}],"max_tokens":8192,"temperature":1,"tools":[{"name":"search","description":"Search for information","input_schema":{"properties":{"query":{"type":"string"}},"required":["query"],"type":"object"}},{"name":"calculate","description":"Perform calculation","input_schema":{"properties":{"expression":{"type":"string"}},"required":["expression"],"type":"object"}}],"thinking":{"type":"enabled","budget_tokens":4096}}HTTP/2.0 200 OK
+Content-Length: 1660
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:10Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:12Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3997
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:10Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:10Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:12 GMT
+Request-Id: req_011CXWs7iTaBUUagSbJcNoMA
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 2303
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01McEi5Rg2wUiFTzYz3j6Jvz","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The user wants me to:\n1. Search for the capital of France\n2. Calculate its population density\n\nI know the capital of France is Paris, but I should search for it as requested. Then I'll need to find information about its population and area to calculate the population density.\n\nLet me start by searching for the capital of France.","signature":"EvMDCkYICxgCKkBQHCgMLR8xJ9fQfx2WDh61rYYdi7NMlZg2QrSme0H7C5wF4WUwDkUvgxvL9vX3Mr6+jZrXtZNxJk193WYGhE6iEgx8+yqtMgoxx7xsctkaDJBJt8sR+TFIzDIoKiIwJZkIsLjSMfoTAIrWiOc03PardXV6KCe9/K7hNBSczh/6QqZmefXoLFRk6JFr2KcwKtoC3taRpfyQBkTUkC7VI2k0DC08wqTx6PpvPCtNXcyPUu3r8JSCBKVZY0vy3/NPuKsdMDd86GOqazB4k7O/gS5l2DGeGwvJ79IfrRH2ZQZ8idHpJ0GZXjDzpzAQyBcwKQ1xPlqhIOfkBfWx0uPBfJQJBpnzeFz+C5+Q44oizWpyw/71MAC7NF4IhmGG64we/sZSfnttIaFKJxoCQq6l9+5bzCr5X20l130TwjAlApsmsJNUfN5n9Xg7toU2eaVc3E4mpVvHaB+ralgyzTTVLVGnq3ELppRucmXIp+Cv8lZCKspd/n8k3KF36eUgOZm7L9m9f0TlZZulEhxoyzL5i30A4HhB5Z9l3Ym04BUrWVRTXy+YYwuB/TvDbvDSISBqTtLMfdolgmwXR/q3W8thZK+plyuXcOzUrlGzti80X+oTQsxvR4Y61D9yQR8kCTMkx3gpxsZiyP7VJKU2rhgB"},{"type":"text","text":"I'll help you find the capital of France and then calculate its population density."},{"type":"tool_use","id":"toolu_01KETeSc6UVFNQc26GRNBdvX","name":"search","input":{"query":"capital of France"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":791,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":149,"service_tier":"standard"}}

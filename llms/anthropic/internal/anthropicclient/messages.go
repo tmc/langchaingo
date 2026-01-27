@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
@@ -71,7 +72,7 @@ type ThinkingPayload struct {
 type messagePayload struct {
 	Model       string        `json:"model"`
 	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
+	System      any           `json:"system,omitempty"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
@@ -87,14 +88,16 @@ type messagePayload struct {
 
 // Tool used for the request message payload.
 type Tool struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	InputSchema any    `json:"input_schema,omitempty"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description,omitempty"`
+	InputSchema  any           `json:"input_schema,omitempty"`
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
 // CacheControl represents Anthropic's prompt caching configuration.
 type CacheControl struct {
 	Type string `json:"type"`
+	TTL  string `json:"ttl,omitempty"` // "5m" or "1h"
 }
 
 // Content can be TextContent or ToolUseContent depending on the type.
@@ -106,6 +109,7 @@ type TextContent struct {
 	Type         string        `json:"type"`
 	Text         string        `json:"text"`
 	CacheControl *CacheControl `json:"cache_control,omitempty"`
+	Signature    string        `json:"signature,omitempty"`
 }
 
 func (tc TextContent) GetType() string {
@@ -139,7 +143,7 @@ type ImageSource struct {
 
 type ThinkingContent struct {
 	Type      string `json:"type"`
-	Thinking  string `json:"thinking"`
+	Thinking  string `json:"thinking,omitempty"`
 	Signature string `json:"signature,omitempty"`
 }
 
@@ -162,6 +166,7 @@ type ToolUseContent struct {
 	Name         string                 `json:"name"`
 	Input        map[string]interface{} `json:"input"`
 	CacheControl *CacheControl          `json:"cache_control,omitempty"`
+	Signature    string                 `json:"signature,omitempty"`
 
 	rawStreamInput string
 }
@@ -215,6 +220,11 @@ type MessageResponsePayload struct {
 		OutputTokens             int `json:"output_tokens"`
 		CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
 		CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
+		CacheCreation            struct {
+			Ephemeral5mInputTokens int `json:"ephemeral_5m_input_tokens,omitempty"`
+			Ephemeral1hInputTokens int `json:"ephemeral_1h_input_tokens,omitempty"`
+		} `json:"cache_creation,omitempty"`
+		ServiceTier string `json:"service_tier,omitempty"`
 	} `json:"usage"`
 }
 
@@ -316,7 +326,7 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload, bet
 
 	var resp *http.Response
 	for range maxSendingRetries {
-		resp, err = c.do(ctx, "/messages", payloadBytes)
+		resp, err = c.doWithHeaders(ctx, "/messages", payloadBytes, betaHeaders)
 		if err != nil {
 			return nil, fmt.Errorf("send request: %w", err)
 		}
@@ -427,7 +437,8 @@ func parseMessageResponse(ctx context.Context, line string,
 	for _, content := range response.Content {
 		switch cv := content.(type) {
 		case *ThinkingContent:
-			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, cv.Thinking); err != nil {
+			reasoning := &reasoning.ContentReasoning{Content: cv.Thinking}
+			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
 				return fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		case *TextContent:
@@ -679,7 +690,17 @@ func handleThinkingDelta(ctx context.Context, delta map[string]interface{},
 		thinkingContent.Signature = signature
 	}
 
-	return response, streaming.CallWithReasoning(ctx, payload.StreamingFunc, thinking)
+	// Include signature in reasoning chunk if available
+	var signature []byte
+	if len(thinkingContent.Signature) > 0 {
+		signature = []byte(thinkingContent.Signature)
+	}
+
+	reasoningChunk := &reasoning.ContentReasoning{
+		Content:   thinking,
+		Signature: signature, // Include accumulated signature
+	}
+	return response, streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoningChunk)
 }
 
 func handleSignatureDelta(_ context.Context, delta map[string]interface{},

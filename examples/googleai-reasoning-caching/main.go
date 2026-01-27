@@ -10,6 +10,7 @@ import (
 
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/googleai"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func main() {
@@ -47,7 +48,7 @@ func demonstrateReasoning(ctx context.Context, apiKey string) {
 		log.Fatalf("Failed to create client: %v", err)
 	}
 	// Check if model supports reasoning
-	fmt.Printf("Model supports reasoning: %v\n", llms.IsReasoningModel("gemini-2.5-flash"))
+	fmt.Printf("Model supports reasoning: %v\n", reasoning.IsReasoningModel("gemini-2.5-flash"))
 
 	// Test with a complex reasoning problem
 	messages := []llms.MessageContent{
@@ -76,7 +77,7 @@ func demonstrateReasoning(ctx context.Context, apiKey string) {
 
 		// Show token usage
 		if genInfo := resp.Choices[0].GenerationInfo; genInfo != nil {
-			if tokens, ok := genInfo["TotalTokens"].(int32); ok {
+			if tokens, ok := genInfo["TotalTokens"].(int); ok {
 				fmt.Printf("\nTotal tokens used: %d\n", tokens)
 			}
 		}
@@ -183,7 +184,7 @@ func runCachedRequests(ctx context.Context, apiKey, cachedContentName string) {
 
 			// Check for cached tokens
 			if genInfo := resp.Choices[0].GenerationInfo; genInfo != nil {
-				if cachedTokens, ok := genInfo["CachedTokens"].(int32); ok && cachedTokens > 0 {
+				if cachedTokens, ok := genInfo["PromptCachedTokens"].(int); ok && cachedTokens > 0 {
 					fmt.Printf("Cached tokens used: %d ✓\n", cachedTokens)
 				}
 			}

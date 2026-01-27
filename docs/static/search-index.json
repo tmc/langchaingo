@@ -6,15 +6,15 @@
     "type": "doc",
     "keywords": [
       "architecture",
-      "langchaingo",
-      "only",
       "package",
       "adoption",
+      "only",
+      "langchaingo",
+      "langchaingo's",
+      "**want",
+      "adopt",
       "your",
-      "`prompts`",
-      "philosophy",
-      "need",
-      "designed"
+      "specific"
     ]
   },
   {
@@ -23,16 +23,16 @@
     "content": "Concepts Understanding the fundamental concepts behind LangChainGo helps you build better applications. Core architecture LangChainGo is built around several key architectural principles: Framework design - **Interface-driven design**: Every major component is defined by interfaces for modularity and testability - **Component architecture**: Clear separation between models, chains, memory, agents, and tools - **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and expl...",
     "type": "doc",
     "keywords": [
+      "langchaingo",
       "concepts",
       "interfaces",
-      "langchaingo",
-      "architectural",
-      "separation",
-      "modularity",
-      "framework",
-      "helps",
-      "design**",
-      "major"
+      "testability",
+      "between",
+      "component",
+      "leverage",
+      "agents",
+      "applications",
+      "around"
     ]
   },
   {
@@ -45,12 +45,12 @@
       "**purpose**",
       "guide",
       "tutorials",
-      "our",
-      "concepts",
-      "real-world",
-      "background",
-      "especially",
-      "structure"
+      "how-to",
+      "categories",
+      "four",
+      "provide",
+      "progressive",
+      "appli"
     ]
   },
   {
@@ -60,15 +60,15 @@
     "type": "doc",
     "keywords": [
       "contributing",
-      "code",
-      "contributions",
       "improve",
+      "contributions",
       "langchaingo",
-      "cases",
-      "fixes**",
-      "**tutorials**",
-      "tools",
-      "new"
+      "code",
+      "features**",
+      "started",
+      "tests",
+      "implement",
+      "contribute"
     ]
   },
   {
@@ -80,13 +80,13 @@
       "models",
       "chat",
       "expose",
-      "started",
-      "interface",
       "langchain",
+      "interface",
       "language",
-      "get",
-      "following",
-      "under"
+      "started",
+      "rather",
+      "where",
+      "few"
     ]
   },
   {
@@ -95,16 +95,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleMistral from \"@examples/mistral-completion-example/mistral_completion_example.go\"; Quickstart: LangChainGo with Mistral Get started by running your first program with LangChainGo and the Mistral Platform. Prerequisites 1. **Mistral API Key**: Sign up on Mistral and retrieve your API key. 2. **Go**: Download and install Go. Setup Before interacting with the Mistral API, you need to set up your API key as an environment variable. Linux/macOS ...",
     "type": "doc",
     "keywords": [
-      "api",
       "mistral",
+      "api",
       "your",
-      "langchaingo",
       "import",
+      "langchaingo",
       "key",
-      "\"@examples/mistral-completion-example/mistral_completion_example.go\"",
-      "examplemistral",
-      "key**",
-      "\"@theme/codeblock\""
+      "first",
+      "retrieve",
+      "setup",
+      "install"
     ]
   },
   {
@@ -114,15 +114,15 @@
     "type": "doc",
     "keywords": [
       "ollama",
-      "import",
-      "langchaingo",
-      "install",
-      "download",
       "your",
-      "runs",
-      "first",
-      "locally",
-      "platforms"
+      "langchaingo",
+      "download",
+      "import",
+      "install",
+      "**ollama**",
+      "across",
+      "started",
+      "machine"
     ]
   },
   {
@@ -134,13 +134,13 @@
       "openai",
       "api",
       "langchaingo",
-      "import",
       "your",
-      "download",
-      "renowned",
+      "import",
+      "\"@examples/openai-completion-example/openai_completion_example.go\"",
       "openai's",
-      "capabilities",
-      "exampleopenai"
+      "**go**",
+      "download",
+      "their"
     ]
   },
   {
@@ -152,13 +152,13 @@
       "configuration",
       "basic",
       "model",
-      "providers",
-      "llm",
-      "different",
-      "how",
       "configure",
+      "how",
+      "environment",
+      "different",
+      "providers",
       "selection",
-      "openai"
+      "llm"
     ]
   },
   {
@@ -169,14 +169,14 @@
     "keywords": [
       "how",
       "guides",
-      "providers",
-      "llms",
-      "how-to",
       "llm",
-      "help",
-      "answer",
-      "handle",
-      "limits"
+      "providers",
+      "how-to",
+      "llms",
+      "these",
+      "stream",
+      "\"how",
+      "different"
     ]
   },
   {
@@ -186,15 +186,15 @@
     "type": "doc",
     "keywords": [
       "language",
-      "model",
       "langchain",
-      "_be",
-      "langchaingo",
+      "model",
       "framework",
+      "langchaingo",
       "applications",
-      "agentic_",
-      "powered",
-      "api"
+      "_be",
+      "programming",
+      "connect",
+      "data"
     ]
   },
   {
@@ -204,13 +204,13 @@
     "type": "doc",
     "keywords": [
       "agents",
+      "info",
       "conceptual",
       "guide",
       "\u003cdoccardlist",
       "import",
       "doccardlist",
-      "\"@theme/doccardlist\"",
-      "info"
+      "\"@theme/doccardlist\""
     ]
   },
   {
@@ -220,15 +220,15 @@
     "type": "doc",
     "keywords": [
       "agents",
-      "import",
       "order",
-      "observing",
-      "\"@theme/codeblock\"",
-      "output",
-      "used",
-      "api",
-      "understa",
-      "its"
+      "import",
+      "how",
+      "returning",
+      "agent",
+      "which",
+      "either",
+      "show",
+      "what"
     ],
     "metadata": {
       "sidebar_label": "Getting Started"
@@ -240,16 +240,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import Example from \"@examples/mrkl-agent-example/mrkl_agent.go\"; import DocCardList from \"@theme/DocCardList\"; Agent Executors :::info Conceptual Guide ::: To make agents more powerful we need to make them iterative, ie. call the model multiple times until they arrive at the final answer. That's the job of the AgentExecutor. Example An example that initialize a MRKL (Modular Reasoning, Knowledge and Language, pronounced \"miracle\") agent executor. \u003cCodeB...",
     "type": "doc",
     "keywords": [
-      "example",
       "import",
-      "make",
+      "example",
       "agent",
-      "\"@examples/mrkl-agent-example/mrkl_agent.go\"",
-      "guide",
+      "make",
+      "\"@theme/codeblock\"",
+      "arrive",
       "executors",
-      "times",
-      "them",
-      "iterative"
+      "\"miracle\")",
+      "until",
+      "codeblock"
     ]
   },
   {
@@ -259,15 +259,15 @@
     "type": "doc",
     "keywords": [
       "agents",
-      "which",
       "tools",
+      "which",
       "agent",
-      "allowing",
-      "actions",
-      "**tools**",
       "components",
-      "their",
-      "decision-making"
+      "input",
+      "guides",
+      "unlike",
+      "consists",
+      "concepts"
     ]
   },
   {
@@ -276,13 +276,13 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Tools :::info Conceptual Guide :::",
     "type": "doc",
     "keywords": [
+      "guide",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
       "tools",
       "info",
-      "conceptual",
-      "guide"
+      "conceptual"
     ]
   },
   {
@@ -292,15 +292,15 @@
     "type": "doc",
     "keywords": [
       "chains",
-      "other",
       "models",
-      "language",
       "import",
-      "conceptual",
-      "calls",
-      "along",
-      "codeblock",
-      "info"
+      "language",
+      "other",
+      "apis",
+      "information",
+      "allows",
+      "common",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Chains"
@@ -312,16 +312,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLLM from \"@examples/llm-chain-example/llm_chain_example.go\"; Getting Started: LLMChain :::info Conceptual Guide ::: An `LLMChain` is a simple chain that adds some functionality around language models. It is used widely throughout LangChain, including in other chains and agents. An `LLMChain` consists of a `PromptTemplate` and a language model (either an LLM or chat model). Usage with LLMs We can construct an LLMChain which takes user input,...",
     "type": "doc",
     "keywords": [
-      "`llmchain`",
       "import",
-      "llmchain",
       "language",
+      "`llmchain`",
+      "llmchain",
+      "examplellm",
+      "(either",
+      "codeblock",
+      "throughout",
       "agents",
-      "some",
-      "started",
-      "getting",
-      "usage",
-      "user"
+      "input"
     ],
     "metadata": {
       "sidebar_label": "LLM Chain"
@@ -334,15 +334,15 @@
     "type": "doc",
     "keywords": [
       "document",
-      "loaders",
       "documents",
+      "loaders",
       "implement",
-      "loader",
       "create",
-      "getting",
-      "\u003cdoccardlist",
-      "\"@theme/doccardlist\"",
-      "sources"
+      "loader",
+      "struct",
+      "stores",
+      "want",
+      "source"
     ],
     "metadata": {
       "sidebar_label": "Document Loaders"
@@ -355,15 +355,15 @@
     "type": "doc",
     "keywords": [
       "data",
-      "many",
-      "documents",
-      "store",
-      "your",
       "load",
+      "store",
       "query",
-      "applications",
-      "import",
-      "llm"
+      "documents",
+      "many",
+      "your",
+      "via",
+      "search",
+      "building"
     ]
   },
   {
@@ -373,15 +373,15 @@
     "type": "doc",
     "keywords": [
       "blockchain",
-      "designated",
-      "guide",
-      "gatew",
-      "mechanism",
+      "provides",
+      "doccardlist",
+      "involve",
+      "contexts",
       "designed",
-      "realm",
       "contracts",
-      "accessibility**",
-      "\"retriever\""
+      "**data",
+      "realm",
+      "gatew"
     ]
   },
   {
@@ -391,15 +391,15 @@
     "type": "doc",
     "keywords": [
       "splitters",
-      "into",
-      "text",
-      "specific",
-      "texts",
       "more",
+      "specific",
       "such",
+      "text",
       "complex",
-      "paragraphs",
-      "divide"
+      "texts",
+      "into",
+      "structures",
+      "reasons"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -412,15 +412,15 @@
     "type": "doc",
     "keywords": [
       "text",
-      "chunks",
-      "import",
       "smaller",
+      "import",
+      "chunks",
       "them",
-      "results",
-      "more",
-      "several",
-      "improve",
-      "searches"
+      "also",
+      "\"@theme/doccardlist\"",
+      "getting",
+      "started",
+      "using"
     ],
     "metadata": {
       "sidebar_label": "Text Splitters"
@@ -433,15 +433,15 @@
     "type": "doc",
     "keywords": [
       "vector",
-      "documents",
-      "embeddings",
-      "most",
       "stores",
+      "documents",
       "query",
-      "import",
+      "most",
+      "embeddings",
       "particular",
-      "then",
-      "\"react\""
+      "import",
+      "\u003cdoccardlist",
+      "relevant"
     ],
     "metadata": {
       "sidebar_label": "Vector Stores"
@@ -455,14 +455,14 @@
     "keywords": [
       "pgvector",
       "search",
-      "import",
       "distance",
-      "embedder",
-      "examplepgvector",
+      "import",
+      "postgres",
       "\"@theme/codeblock\"",
-      "started",
-      "similarity",
-      "ollama"
+      "code",
+      "embedder",
+      "\"@examples/pgvector-vectorstore-example/pgvector_vectorstore_example.go\"",
+      "started"
     ],
     "metadata": {
       "sidebar_label": "pgvector"
@@ -474,12 +474,12 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Examples: Memory \u003cDocCardList /\u003e",
     "type": "doc",
     "keywords": [
-      "memory",
-      "\u003cdoccardlist",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
-      "examples"
+      "examples",
+      "memory",
+      "\u003cdoccardlist"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -492,15 +492,15 @@
     "type": "doc",
     "keywords": [
       "memory",
-      "langchaingo",
       "interactions",
+      "langchaingo",
       "context",
-      "conceptual",
-      "retrieve",
-      "enabling",
-      "multiple",
-      "messages",
-      "enables"
+      "guides",
+      "sophisticated",
+      "conversation",
+      "guide",
+      "store",
+      "past"
     ],
     "metadata": {
       "sidebar_label": "Memory"
@@ -513,15 +513,15 @@
     "type": "doc",
     "keywords": [
       "model",
-      "using",
       "package",
+      "using",
       "input",
       "output",
-      "doccardlist",
       "prompts",
       "import",
-      "information",
-      "must"
+      "language",
+      "often",
+      "into"
     ],
     "metadata": {
       "sidebar_label": "Model I/O"
@@ -535,14 +535,14 @@
     "keywords": [
       "models",
       "chat",
-      "expose",
       "interface",
-      "language",
+      "expose",
       "import",
-      "\"@theme/codeblock\"",
-      "\"text",
-      "different",
-      "than"
+      "language",
+      "hood",
+      "standard",
+      "messages\"",
+      "info"
     ],
     "metadata": {
       "sidebar_label": "Chat Models"
@@ -555,15 +555,15 @@
     "type": "doc",
     "keywords": [
       "providers",
-      "models",
       "chat",
-      "options",
-      "llm",
-      "integrations",
-      "(gemini)",
-      "see",
-      "codeblock",
-      "offers"
+      "models",
+      "integrate",
+      "offers",
+      "ollama",
+      "openai",
+      "provider",
+      "model",
+      "include"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -576,15 +576,15 @@
     "type": "doc",
     "keywords": [
       "import",
+      "embeddings",
       "representation",
-      "example",
       "numerical",
       "used",
-      "embeddings",
-      "similar",
+      "example",
+      "deeper",
       "getting",
-      "because",
-      "\"@theme/doccardlist\""
+      "info",
+      "because"
     ],
     "metadata": {
       "sidebar_label": "Embeddings"
@@ -597,15 +597,15 @@
     "type": "doc",
     "keywords": [
       "embeddings",
-      "\"@theme/codeblock\"",
-      "more",
-      "model",
-      "google",
+      "integrations",
       "number",
       "integrate",
-      "providers",
-      "openai",
-      "details"
+      "model",
+      "these",
+      "include",
+      "vertex",
+      "using",
+      "various"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -619,14 +619,14 @@
     "keywords": [
       "models",
       "langchain",
-      "output",
-      "language",
-      "provides",
       "input",
-      "chat",
+      "provides",
       "text-based",
-      "provider",
-      "which"
+      "language",
+      "output",
+      "chat",
+      "**_note:_**",
+      "but"
     ],
     "metadata": {
       "sidebar_label": "Models"
@@ -639,15 +639,15 @@
     "type": "doc",
     "keywords": [
       "package",
-      "example",
       "overview",
-      "`fake`",
+      "example",
       "fake",
       "language",
       "your",
-      "applications",
-      "documentation",
-      "(version"
+      "`fake`",
+      "prerequisites",
+      "model",
+      "api"
     ],
     "metadata": {
       "sidebar_label": "Fake LLM"
@@ -662,13 +662,13 @@
       "overview",
       "import",
       "models",
-      "provides",
-      "detailed",
-      "various",
-      "machine",
-      "generation",
       "mor",
-      "applications"
+      "language",
+      "processing",
+      "\"@examples/groq-completion-example/groq_completion_example.go\"",
+      "developers",
+      "text",
+      "guidance"
     ],
     "metadata": {
       "sidebar_label": "Groq"
@@ -680,16 +680,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleHuggingFace from \"@examples/huggingface-llm-example/huggingface_example.go\"; Hugging Face Overview This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, tex...",
     "type": "doc",
     "keywords": [
-      "import",
-      "overview",
-      "hugging",
-      "models",
       "face",
-      "\"@theme/codeblock\"",
-      "provides",
-      "power",
-      "library",
-      "programming"
+      "models",
+      "overview",
+      "import",
+      "hugging",
+      "various",
+      "programming",
+      "codeblock",
+      "documentation",
+      "technical"
     ],
     "metadata": {
       "sidebar_label": "Hugging Face"
@@ -701,16 +701,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLlamafile from \"@examples/llamafile-completion-example/llamafile_completion_example.go\"; Llamafile Running Server first you need have a server running. \u003cCodeBlock language=\"go\"\u003e{ExampleLlamafile}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
+      "server",
       "running",
       "import",
-      "server",
-      "examplellamafile",
-      "need",
+      "\"@theme/codeblock\"",
       "codeblock",
+      "examplellamafile",
+      "\"@examples/llamafile-completion-example/llamafile_completion_example.go\"",
       "llamafile",
       "first",
-      "\u003ccodeblock",
-      "language=\"go\"\u003e{examplellamafile}\u003c/codeblock\u003e"
+      "need"
     ],
     "metadata": {
       "sidebar_label": "Llamafile"
@@ -723,14 +723,14 @@
     "type": "doc",
     "keywords": [
       "import",
-      "\"@theme/codeblock\"",
       "localexample",
-      "\"@examples/local-llm-example/local_llm_example.go\"",
-      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e",
-      "codeblock",
       "local",
       "example",
-      "\u003ccodeblock"
+      "\u003ccodeblock",
+      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e",
+      "codeblock",
+      "\"@theme/codeblock\"",
+      "\"@examples/local-llm-example/local_llm_example.go\""
     ],
     "metadata": {
       "sidebar_label": "Local"
@@ -743,15 +743,15 @@
     "type": "doc",
     "keywords": [
       "mistral",
-      "import",
       "how",
       "example",
-      "models",
       "different",
-      "\"@examples/mistral-completion-example/mistral_completion_example.go\"",
-      "spectrum",
-      "codeblock",
-      "tasks"
+      "import",
+      "models",
+      "interact",
+      "power",
+      "streaming",
+      "codeblock"
     ],
     "metadata": {
       "sidebar_label": "Mistral"
@@ -764,15 +764,15 @@
     "type": "doc",
     "keywords": [
       "openai",
-      "import",
       "different",
-      "key",
       "models",
-      "set",
+      "key",
+      "import",
       "environment",
-      "there",
-      "variable",
-      "initializing"
+      "set",
+      "suitable",
+      "interact",
+      "power"
     ],
     "metadata": {
       "sidebar_label": "OpenAI"
@@ -784,16 +784,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleVertexAICompletion from \"@examples/vertex-completion-example/vertex-completion-example.go\"; Vertex AI To use the Vertex AI LLM you need to set the google project ID. You can do this by setting the `GOOGLE_CLOUD_PROJECT` environment variable or giving it as a variaic option when creating the wrapper. \u003cCodeBlock language=\"go\"\u003e{ExampleVertexAICompletion}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
-      "vertex",
       "import",
-      "set",
+      "vertex",
+      "variaic",
+      "google",
       "need",
-      "setting",
-      "environment",
+      "variable",
       "giving",
-      "examplevertexaicompletion",
-      "\u003ccodeblock",
-      "wrapper"
+      "option",
+      "setting",
+      "`google_cloud_project`"
     ],
     "metadata": {
       "sidebar_label": "Vertex AI"
@@ -806,15 +806,15 @@
     "type": "doc",
     "keywords": [
       "watsonx",
-      "ibm",
       "import",
       "your",
-      "following",
-      "`watsonx_project_id`",
-      "model",
-      "creation",
-      "`watsonx-go`",
-      "set"
+      "ibm",
+      "set",
+      "\"@examples/watsonx-llm-example/watsonx_example.go\"",
+      "codeblock",
+      "\"@theme/codeblock\"",
+      "account",
+      "example"
     ],
     "metadata": {
       "sidebar_label": "watsonx"
@@ -831,11 +831,11 @@
       "provides",
       "langchain",
       "import",
-      "different",
-      "supports",
-      "guide",
-      "methods",
-      "two"
+      "multi-modal",
+      "its",
+      "implement",
+      "`llms.model`",
+      "complex"
     ],
     "metadata": {
       "sidebar_label": "LLMs"
@@ -851,12 +851,12 @@
       "parsers",
       "language",
       "text",
-      "three",
-      "want",
-      "models",
+      "structs",
       "back",
-      "there",
-      "responses"
+      "main",
+      "models",
+      "help",
+      "may"
     ],
     "metadata": {
       "sidebar_label": "Output Parsers"
@@ -870,14 +870,14 @@
     "keywords": [
       "prompts",
       "prompt",
-      "import",
-      "input",
-      "templates",
       "template",
       "multiple",
-      "conceptual",
-      "formats**",
-      "features"
+      "templates",
+      "input",
+      "import",
+      "key",
+      "managing",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Prompts"
@@ -890,15 +890,15 @@
     "type": "doc",
     "keywords": [
       "prompt",
+      "templates",
       "import",
       "template",
-      "templates",
-      "capabilities",
-      "security",
-      "wraps",
+      "dynamically",
       "info",
-      "conceptual",
-      "allow"
+      "multiple",
+      "concepts",
+      "prompttemplate",
+      "prompts"
     ],
     "metadata": {
       "sidebar_label": "Prompt templates"
@@ -912,14 +912,14 @@
     "keywords": [
       "values",
       "partial",
-      "prompt",
       "template",
+      "prompt",
+      "formatting",
       "string",
       "two",
-      "formatting",
-      "subset",
       "variables",
-      "return"
+      "subset",
+      "strings"
     ],
     "metadata": {
       "sidebar_label": "Partial values"
@@ -931,16 +931,16 @@
     "content": "Building a Basic Chat Application This tutorial will guide you through building a simple chat application using LangChainGo. Step 1: Set Up Your Environment - Go 1.24+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Install LangChainGo: Step 2: Configure Your API Key Set your OpenAI API key as an environment variable: Step 3: Create the Basic Chat Application Let's start with a simple chat application: Step 4: Add Interact...",
     "type": "doc",
     "keywords": [
+      "application",
       "chat",
       "step",
-      "application",
       "your",
-      "api",
       "basic",
       "key",
-      "create",
+      "api",
       "environment",
-      "openai"
+      "simple",
+      "set"
     ]
   },
   {
@@ -951,14 +951,14 @@
     "keywords": [
       "code",
       "create",
+      "improvements",
+      "step",
+      "analyzes",
+      "files",
       "review",
       "reviewer",
-      "analyzes",
       "git",
-      "step",
-      "issues",
-      "files",
-      "improvements"
+      "issues"
     ]
   },
   {
@@ -970,13 +970,13 @@
       "tutorials",
       "langchaingo",
       "applications",
-      "learn",
-      "analyze",
-      "code",
       "application",
+      "analyze",
       "these",
-      "analyzer",
-      "learning"
+      "code",
+      "learn",
+      "performance",
+      "build"
     ]
   },
   {
@@ -986,15 +986,15 @@
     "type": "doc",
     "keywords": [
       "log",
-      "etc.)",
-      "tool",
-      "issues",
-      "identifies",
       "anomalies",
+      "etc.)",
       "patterns",
-      "1.24+",
-      "llm",
-      "generates"
+      "tool",
+      "identifies",
+      "issues",
+      "building",
+      "structured",
+      "actions"
     ]
   },
   {
@@ -1004,15 +1004,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
-      "generates",
       "code",
+      "generates",
       "tool",
       "automatically",
       "api",
       "project",
-      "building",
       "understand",
-      "document"
+      "step",
+      "technical"
     ]
   },
   {
@@ -10374,7 +10374,7 @@
   {
     "title": "RecordReplay",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/httprr#RecordReplay",
-    "content": "A RecordReplay is an [http.RoundTripper] that can operate in two modes: record and replay.\n\nIn record mode, the RecordReplay invokes another RoundTripper\nand logs the (request, response) pairs to a file.\n\nIn replay mode, the RecordReplay responds to requests by finding\nan identical request in the log and sending the logged response.\n",
+    "content": "A RecordReplay is an [http.RoundTripper] that can operate in two modes: record and replay.\n\nIn record mode, the RecordReplay invokes another RoundTripper\nand logs the (request, response) pairs to a file.\n\nIn replay mode, the RecordReplay responds to requests by finding\nan identical request in the log and sending the logged response.\nIf multiple identical requests were recorded, responses are returned\nin order and cycle back to the beginning (circular buffer).\n",
     "type": "type",
     "package": "httprr",
     "signature": "type RecordReplay",
@@ -10562,6 +10562,35 @@
       "method",
       "writeLog",
       "RecordReplay",
+      "httprr"
+    ]
+  },
+  {
+    "title": "replayEntry",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/httprr#replayEntry",
+    "content": "replayEntry holds response data for a single request key.\nIt supports multiple responses for the same request (e.g., for cache testing)\nand cycles through them in order.\n",
+    "type": "type",
+    "package": "httprr",
+    "signature": "type replayEntry",
+    "external": true,
+    "keywords": [
+      "type",
+      "replayEntry",
+      "httprr"
+    ]
+  },
+  {
+    "title": "replayEntry.next",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/internal/httprr#replayEntry.next",
+    "content": "next returns the next response in the cycle and advances the index.\n",
+    "type": "method",
+    "package": "httprr",
+    "signature": "next()",
+    "external": true,
+    "keywords": [
+      "method",
+      "next",
+      "replayEntry",
       "httprr"
     ]
   },
@@ -10788,6 +10817,62 @@
     ]
   },
   {
+    "title": "appendIfMissing",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#appendIfMissing",
+    "content": "appendIfMissing appends val to slice if not already present\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "appendIfMissing()",
+    "external": true,
+    "keywords": [
+      "function",
+      "appendIfMissing",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "applyCacheStrategy",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#applyCacheStrategy",
+    "content": "applyCacheStrategy applies automatic cache control based on strategy.\nAnthropic cache hierarchy: tools → system → messages\nEach breakpoint caches the entire prefix up to that point.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "applyCacheStrategy()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyCacheStrategy",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "convertCacheControl",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#convertCacheControl",
+    "content": "convertCacheControl converts shared llms.CacheControl to Anthropic-specific format\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "convertCacheControl()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertCacheControl",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "detectThinkingModeChange",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#detectThinkingModeChange",
+    "content": "detectThinkingModeChange detects if thinking mode changed mid-conversation\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "detectThinkingModeChange()",
+    "external": true,
+    "keywords": [
+      "function",
+      "detectThinkingModeChange",
+      "anthropic"
+    ]
+  },
+  {
     "title": "extractBetaHeaders",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#extractBetaHeaders",
     "content": "extractBetaHeaders extracts beta headers from call options\n",
@@ -10798,20 +10883,6 @@
     "keywords": [
       "function",
       "extractBetaHeaders",
-      "anthropic"
-    ]
-  },
-  {
-    "title": "extractThinkingFromText",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#extractThinkingFromText",
-    "content": "extractThinkingFromText extracts thinking content from Anthropic responses\nAnthropic models often embed thinking in \u003cthinking\u003e tags\n",
-    "type": "function",
-    "package": "anthropic",
-    "signature": "extractThinkingFromText()",
-    "external": true,
-    "keywords": [
-      "function",
-      "extractThinkingFromText",
       "anthropic"
     ]
   },
@@ -10900,16 +10971,30 @@
     ]
   },
   {
-    "title": "newClient",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#newClient",
-    "content": "",
+    "title": "markLastContentBlockForCaching",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#markLastContentBlockForCaching",
+    "content": "markLastContentBlockForCaching marks the last content block with cache control.\n",
     "type": "function",
     "package": "anthropic",
-    "signature": "newClient()",
+    "signature": "markLastContentBlockForCaching()",
     "external": true,
     "keywords": [
       "function",
-      "newClient",
+      "markLastContentBlockForCaching",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "newClientFromOptions",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#newClientFromOptions",
+    "content": "",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "newClientFromOptions()",
+    "external": true,
+    "keywords": [
+      "function",
+      "newClientFromOptions",
       "anthropic"
     ]
   },
@@ -11815,6 +11900,20 @@
     ]
   },
   {
+    "title": "WithCacheStrategy",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithCacheStrategy",
+    "content": "WithCacheStrategy enables automatic cache control placement based on strategy.\nThis option applies to a single GenerateContent/Call invocation.\n\nExample for AI agent with many tools:\n\n\tllm.GenerateContent(ctx, messages,\n\t    anthropic.WithCacheStrategy(anthropic.CacheStrategy{\n\t        CacheTools: true,  // Cache tool definitions\n\t        CacheSystem: true, // Cache system prompt\n\t    }),\n\t)\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "WithCacheStrategy()",
+    "external": true,
+    "keywords": [
+      "function",
+      "WithCacheStrategy",
+      "anthropic"
+    ]
+  },
+  {
     "title": "WithExtendedOutput",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#WithExtendedOutput",
     "content": "WithExtendedOutput enables 128K token output for Claude 3.7+.\nStandard models are limited to 8K tokens, but this beta feature allows\ngenerating much longer responses.\n\nUsage:\n\n\tllm.GenerateContent(ctx, messages,\n\t    llms.WithMaxTokens(50000),\n\t    anthropic.WithExtendedOutput(),\n\t)\n",
@@ -11853,6 +11952,34 @@
     "keywords": [
       "function",
       "WithPromptCaching",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "CacheStrategy",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#CacheStrategy",
+    "content": "CacheStrategy defines where to apply automatic caching.\n",
+    "type": "type",
+    "package": "anthropic",
+    "signature": "type CacheStrategy",
+    "external": true,
+    "keywords": [
+      "type",
+      "CacheStrategy",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "CachedContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#CachedContent",
+    "content": "CachedContent represents content with caching instructions for Anthropic.\nThis wraps any ContentPart and adds cache control metadata.\n",
+    "type": "type",
+    "package": "anthropic",
+    "signature": "type CachedContent",
+    "external": true,
+    "keywords": [
+      "type",
+      "CachedContent",
       "anthropic"
     ]
   },
@@ -12292,6 +12419,21 @@
     ]
   },
   {
+    "title": "ConverseClient.processReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.processReasoning",
+    "content": "",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "processReasoning()",
+    "external": true,
+    "keywords": [
+      "method",
+      "processReasoning",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "ConverseClient.processStreamingResponse",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.processStreamingResponse",
     "content": "processStreamingResponse processes streaming events\n",
@@ -12602,6 +12744,20 @@
     ]
   },
   {
+    "title": "appendReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#appendReasoning",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "appendReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "appendReasoning",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "createAnthropicCompletion",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createAnthropicCompletion",
     "content": "",
@@ -12640,6 +12796,20 @@
     "keywords": [
       "function",
       "parseStreamingCompletionResponse",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "processReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#processReasoning",
+    "content": "",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "processReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "processReasoning",
       "bedrockclient"
     ]
   },
@@ -15537,6 +15707,50 @@
     ]
   },
   {
+    "title": "CacheControl",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CacheControl",
+    "content": "CacheControl represents prompt caching configuration for providers that support it.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type CacheControl",
+    "external": true,
+    "keywords": [
+      "type",
+      "CacheControl",
+      "llms"
+    ]
+  },
+  {
+    "title": "CacheControl.String",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CacheControl.String",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "String()",
+    "external": true,
+    "keywords": [
+      "method",
+      "String",
+      "CacheControl",
+      "llms"
+    ]
+  },
+  {
+    "title": "CacheControl.isPart",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CacheControl.isPart",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "isPart()",
+    "external": true,
+    "keywords": [
+      "method",
+      "isPart",
+      "CacheControl",
+      "llms"
+    ]
+  },
+  {
     "title": "ContentChoice",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ContentChoice",
     "content": "ContentChoice is one of the response choices returned by GenerateContent\ncalls.\n",
@@ -16047,6 +16261,20 @@
     "keywords": [
       "function",
       "ensureFunctionCallID",
+      "googleai"
+    ]
+  },
+  {
+    "title": "extractThoughtSignature",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#extractThoughtSignature",
+    "content": "extractThoughtSignature extracts the thought signature from ContentReasoning if present.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "extractThoughtSignature()",
+    "external": true,
+    "keywords": [
+      "function",
+      "extractThoughtSignature",
       "googleai"
     ]
   },
@@ -19960,6 +20188,21 @@
     ]
   },
   {
+    "title": "LLM.processReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.processReasoning",
+    "content": "processReasoning processes reasoning content in the response.\n",
+    "type": "method",
+    "package": "openai",
+    "signature": "processReasoning()",
+    "external": true,
+    "keywords": [
+      "method",
+      "processReasoning",
+      "LLM",
+      "openai"
+    ]
+  },
+  {
     "title": "LLM.processResponse",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.processResponse",
     "content": "processResponse processes the OpenAI API response into a ContentResponse.\n",
@@ -19985,6 +20228,21 @@
     "keywords": [
       "method",
       "processToolCalls",
+      "LLM",
+      "openai"
+    ]
+  },
+  {
+    "title": "LLM.processUsage",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.processUsage",
+    "content": "",
+    "type": "method",
+    "package": "openai",
+    "signature": "processUsage()",
+    "external": true,
+    "keywords": [
+      "method",
+      "processUsage",
       "LLM",
       "openai"
     ]
@@ -20345,49 +20603,6 @@
     ]
   },
   {
-    "title": "CacheControl",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CacheControl",
-    "content": "CacheControl represents prompt caching configuration for providers that support it.\n",
-    "type": "type",
-    "package": "llms",
-    "signature": "type CacheControl",
-    "external": true,
-    "keywords": [
-      "type",
-      "CacheControl",
-      "llms"
-    ]
-  },
-  {
-    "title": "CachedContent",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CachedContent",
-    "content": "CachedContent represents content with caching instructions.\n",
-    "type": "type",
-    "package": "llms",
-    "signature": "type CachedContent",
-    "external": true,
-    "keywords": [
-      "type",
-      "CachedContent",
-      "llms"
-    ]
-  },
-  {
-    "title": "CachedContent.isPart",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CachedContent.isPart",
-    "content": "",
-    "type": "method",
-    "package": "llms",
-    "signature": "isPart()",
-    "external": true,
-    "keywords": [
-      "method",
-      "isPart",
-      "CachedContent",
-      "llms"
-    ]
-  },
-  {
     "title": "PromptValue",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#PromptValue",
     "content": "PromptValue is the interface that all prompt values must implement.\n",
@@ -20404,12 +20619,40 @@
   {
     "title": "package reasoning",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning",
-    "content": "Package reasoning provides primitives for working with reasoning content.\n\nThis package implements utilities for extracting and processing reasoning\n(step-by-step thinking) content from language model responses. It operates in two modes:\n\n 1. Streaming mode: Uses a stateful ChunkContentSplitter to process content chunks\n    as they arrive, separating text from reasoning blocks marked with \u003cthink\u003e or\n    \u003cthinking\u003e tags. The splitter maintains state between calls to handle cases\n    where reasoning blocks span multiple chunks.\n\n 2. Complete content mode: Uses SplitContent function to separate reasoning content\n    from a complete response, handling cases where the LLM backend hasn't explicitly\n    divided reasoning from regular content.\n\nThe package recognizes reasoning content enclosed in \u003cthink\u003e...\u003c/think\u003e or\n\u003cthinking\u003e...\u003c/thinking\u003e tags, which various LLM providers use to indicate\nstep-by-step thinking processes.\n\nExample usage for streaming mode:\n\n\tsplitter := reasoning.NewChunkContentSplitter()\n\n\tfor chunk := range responseChunks {\n\t    text, reasoning := splitter.Split(chunk)\n\n\t    if reasoning != \"\" {\n\t        // Process reasoning content (e.g., display as step-by-step thinking)\n\t        fmt.Println(\"Reasoning:\", reasoning)\n\t    }\n\n\t    if text != \"\" {\n\t        // Process regular text content\n\t        fmt.Println(\"Content:\", text)\n\t    }\n\t}\n\nExample usage for complete content mode:\n\n\tresponse := \"Here's what I found: \u003cthinking\u003eFirst, I need to analyze the data.\n\tThe pattern shows increasing values.\u003c/thinking\u003e The trend is clearly upward.\"\n\n\treasoning, content := reasoning.SplitContent(response)\n\n\tfmt.Println(\"Reasoning:\", reasoning)  // \"First, I need to analyze the data. The pattern shows increasing values.\"\n\tfmt.Println(\"Content:\", content)      // \"Here's what I found: The trend is clearly upward.\"\n",
+    "content": "Package reasoning provides primitives for working with reasoning content.\n\nThis package implements utilities for extracting and processing reasoning\n(step-by-step thinking) content from language model responses. It operates in two modes:\n\n 1. Streaming mode: Uses a stateful ChunkContentSplitter to process content chunks\n    as they arrive, separating text from reasoning blocks marked with \u003cthink\u003e or\n    \u003cthinking\u003e tags. The splitter maintains state between calls to handle cases\n    where reasoning blocks span multiple chunks.\n\n 2. Complete content mode: Uses SplitContent function to separate reasoning content\n    from a complete response, handling cases where the LLM backend hasn't explicitly\n    divided reasoning from regular content.\n\nThe package recognizes reasoning content enclosed in \u003cthink\u003e...\u003c/think\u003e or\n\u003cthinking\u003e...\u003c/thinking\u003e tags, which various LLM providers use to indicate\nstep-by-step thinking processes.\n\nExample usage for streaming mode:\n\n\tsplitter := reasoning.NewChunkContentSplitter()\n\n\tfor chunk := range responseChunks {\n\t    text, reasoning := splitter.Split(chunk)\n\n\t    if reasoning != \"\" {\n\t        // Process reasoning content (e.g., display as step-by-step thinking)\n\t        fmt.Println(\"Reasoning:\", reasoning)\n\t    }\n\n\t    if text != \"\" {\n\t        // Process regular text content\n\t        fmt.Println(\"Content:\", text)\n\t    }\n\t}\n\nExample usage for complete content mode:\n\n\tresponse := \"Here's what I found: \u003cthinking\u003eFirst, I need to analyze the data.\n\tThe pattern shows increasing values.\u003c/thinking\u003e The trend is clearly upward.\"\n\n\treasoning, content := reasoning.SplitContent(response)\n\n\tfmt.Println(\"Reasoning:\", reasoning)  // \"First, I need to analyze the data. The pattern shows increasing values.\"\n\tfmt.Println(\"Content:\", content)      // \"Here's what I found: The trend is clearly upward.\"\n\nSee also:\n  - IsReasoningModel: Checks if a model supports reasoning\n  - DefaultIsReasoningModel: Provides the default reasoning model detection logic\n",
     "type": "package",
     "package": "reasoning",
     "external": true,
     "keywords": [
       "package",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "DefaultIsReasoningModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#DefaultIsReasoningModel",
+    "content": "DefaultIsReasoningModel provides the default reasoning model detection logic.\nThis can be used by LLM implementations that want to extend rather than replace\nthe default detection logic.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "DefaultIsReasoningModel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "DefaultIsReasoningModel",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "IsReasoningModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#IsReasoningModel",
+    "content": "IsReasoningModel returns true if the model is a reasoning/thinking model.\nThis includes OpenAI o1/o3/GPT-5 series, Anthropic Claude 3.7+, DeepSeek reasoner, etc.\nFor runtime checking of LLM instances, use SupportsReasoningModel instead.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "IsReasoningModel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "IsReasoningModel",
       "reasoning"
     ]
   },
@@ -20456,6 +20699,50 @@
     ]
   },
   {
+    "title": "ContentReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning",
+    "content": "",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type ContentReasoning",
+    "external": true,
+    "keywords": [
+      "type",
+      "ContentReasoning",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ContentReasoning.IsEmpty",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning.IsEmpty",
+    "content": "",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "IsEmpty()",
+    "external": true,
+    "keywords": [
+      "method",
+      "IsEmpty",
+      "ContentReasoning",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ContentReasoning.String",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning.String",
+    "content": "",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "String()",
+    "external": true,
+    "keywords": [
+      "method",
+      "String",
+      "ContentReasoning",
+      "reasoning"
+    ]
+  },
+  {
     "title": "chunkContentSplitter",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#chunkContentSplitter",
     "content": "",
@@ -20497,34 +20784,6 @@
       "Split",
       "chunkContentSplitter",
       "reasoning"
-    ]
-  },
-  {
-    "title": "DefaultIsReasoningModel",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#DefaultIsReasoningModel",
-    "content": "DefaultIsReasoningModel provides the default reasoning model detection logic.\nThis can be used by LLM implementations that want to extend rather than replace\nthe default detection logic.\n",
-    "type": "function",
-    "package": "llms",
-    "signature": "DefaultIsReasoningModel()",
-    "external": true,
-    "keywords": [
-      "function",
-      "DefaultIsReasoningModel",
-      "llms"
-    ]
-  },
-  {
-    "title": "IsReasoningModel",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#IsReasoningModel",
-    "content": "IsReasoningModel returns true if the model is a reasoning/thinking model.\nThis includes OpenAI o1/o3/GPT-5 series, Anthropic Claude 3.7+, DeepSeek reasoner, etc.\nFor runtime checking of LLM instances, use SupportsReasoningModel instead.\n",
-    "type": "function",
-    "package": "llms",
-    "signature": "IsReasoningModel()",
-    "external": true,
-    "keywords": [
-      "function",
-      "IsReasoningModel",
-      "llms"
     ]
   },
   {
@@ -20578,6 +20837,20 @@
     "keywords": [
       "function",
       "CallWithReasoning",
+      "streaming"
+    ]
+  },
+  {
+    "title": "CallWithReasoningContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/streaming#CallWithReasoningContent",
+    "content": "",
+    "type": "function",
+    "package": "streaming",
+    "signature": "CallWithReasoningContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "CallWithReasoningContent",
       "streaming"
     ]
   },

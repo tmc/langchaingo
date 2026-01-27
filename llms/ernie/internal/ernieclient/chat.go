@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
@@ -247,7 +248,8 @@ func parseStreamingChatResponse(ctx context.Context, r *http.Response, payload *
 			if err := streaming.CallWithToolCall(ctx, payload.StreamingFunc, toolCall); err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
-			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, functionCall.Thoughts); err != nil {
+			reasoning := &reasoning.ContentReasoning{Content: functionCall.Thoughts}
+			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
 				return nil, fmt.Errorf("streaming func returned an error: %w", err)
 			}
 		}

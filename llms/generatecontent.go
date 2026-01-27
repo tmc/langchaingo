@@ -4,6 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"time"
+
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 // MessageContent is the content of a message sent to a LLM. It has a role and a
@@ -19,6 +22,11 @@ type MessageContent struct {
 // TextPart creates TextContent from a given string.
 func TextPart(s string) TextContent {
 	return TextContent{Text: s}
+}
+
+// TextPartWithReasoning creates TextContent from a given string and reasoning content.
+func TextPartWithReasoning(s string, reasoning *reasoning.ContentReasoning) TextContent {
+	return TextContent{Text: s, Reasoning: reasoning}
 }
 
 // BinaryPart creates a new BinaryContent from the given MIME type (e.g.
@@ -50,9 +58,22 @@ type ContentPart interface {
 	isPart()
 }
 
+// CacheControl represents prompt caching configuration for providers that support it.
+type CacheControl struct {
+	Type     string        `json:"type,omitempty"`
+	Duration time.Duration `json:"duration,omitempty"`
+}
+
+func (cc CacheControl) String() string {
+	return fmt.Sprintf("CacheControl{Type: %s, Duration: %s}", cc.Type, cc.Duration)
+}
+
+func (cc CacheControl) isPart() {}
+
 // TextContent is content with some text.
 type TextContent struct {
-	Text string
+	Text      string                      `json:"text,omitempty"`
+	Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
 }
 
 func (tc TextContent) String() string {
@@ -75,8 +96,8 @@ func (ImageURLContent) isPart() {}
 
 // BinaryContent is content holding some binary data with a MIME type.
 type BinaryContent struct {
-	MIMEType string
-	Data     []byte
+	MIMEType string `json:"mime_type,omitempty"`
+	Data     []byte `json:"data"`
 }
 
 func (bc BinaryContent) String() string {
@@ -98,10 +119,15 @@ type FunctionCall struct {
 type ToolCall struct {
 	// ID is the unique identifier of the tool call.
 	ID string `json:"id"`
+
 	// Type is the type of the tool call. Typically, this would be "function".
 	Type string `json:"type"`
+
 	// FunctionCall is the function call to be executed.
 	FunctionCall *FunctionCall `json:"function,omitempty"`
+
+	// Reasoning is the reasoning content of the tool call used for Anthropic and Google AI providers.
+	Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
 }
 
 func (ToolCall) isPart() {}
@@ -110,8 +136,10 @@ func (ToolCall) isPart() {}
 type ToolCallResponse struct {
 	// ToolCallID is the ID of the tool call this response is for.
 	ToolCallID string `json:"tool_call_id"`
+
 	// Name is the name of the tool that was called.
 	Name string `json:"name"`
+
 	// Content is the textual content of the response.
 	Content string `json:"content"`
 }
@@ -144,8 +172,9 @@ type ContentChoice struct {
 	// ToolCalls is a list of tool calls the model asks to invoke.
 	ToolCalls []ToolCall
 
-	// This field is only used with reasoning models and represents the reasoning contents of the assistant message before the final answer.
-	ReasoningContent string
+	// This field is only used with reasoning models and represents the reasoning contents of the assistant message in completion mode.
+	// If the model response has tool calls, this field will be nil and the reasoning contents will be dedicated to each tool call.
+	Reasoning *reasoning.ContentReasoning
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a

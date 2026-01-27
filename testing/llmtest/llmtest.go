@@ -483,7 +483,7 @@ func testCaching(t *testing.T, model llms.Model) {
 
 	// Check if caching info is available
 	if genInfo := resp2.Choices[0].GenerationInfo; genInfo != nil {
-		if cached, ok := genInfo["CachedTokens"].(int); ok && cached > 0 {
+		if cached, ok := genInfo["PromptCachedTokens"].(int); ok && cached > 0 {
 			t.Logf("Cached %d tokens", cached)
 		}
 	}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/vxcontrol/langchaingo/internal/imageutil"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"google.golang.org/genai"
@@ -59,6 +60,14 @@ func cleanFunctionCallID(id string) string {
 		return ""
 	}
 	return id
+}
+
+// extractThoughtSignature extracts the thought signature from ContentReasoning if present.
+func extractThoughtSignature(r *reasoning.ContentReasoning) []byte {
+	if r == nil {
+		return nil
+	}
+	return r.Signature
 }
 
 // Call implements the [llms.Model] interface.
@@ -262,6 +271,9 @@ func (g *GoogleAI) generateStreamingContent(
 	var accumulatedContent strings.Builder
 	var accumulatedReasoningContent strings.Builder
 	var accumulatedToolCalls []llms.ToolCall
+	var thoughtSignature []byte
+	var lastUsageMetadata *genai.GenerateContentResponseUsageMetadata
+	var lastCandidate *genai.Candidate
 
 	// Trying to keep the same ID for the same tool call name
 	toolCallIDs := make(map[string]string)
@@ -280,22 +292,37 @@ func (g *GoogleAI) generateStreamingContent(
 		if chunk == nil {
 			return nil, fmt.Errorf("unexpected case: chunk is nil")
 		}
+
+		// Capture usage metadata from each chunk (last one will be the final)
+		if chunk.UsageMetadata != nil {
+			lastUsageMetadata = chunk.UsageMetadata
+		}
+
 		if len(chunk.Candidates) == 0 {
 			continue
 		}
 
 		candidate := chunk.Candidates[0]
+		lastCandidate = candidate
 		if candidate.Content == nil {
 			continue
 		}
 
 		for _, part := range candidate.Content.Parts {
+			// Accumulate thought signature from any part
+			if len(part.ThoughtSignature) > 0 {
+				thoughtSignature = part.ThoughtSignature
+			}
+
 			if len(part.Text) > 0 {
 				if part.Thought {
 					accumulatedReasoningContent.WriteString(part.Text)
 					chunk := streaming.Chunk{
-						Type:    streaming.ChunkTypeReasoning,
-						Content: part.Text,
+						Type: streaming.ChunkTypeReasoning,
+						Reasoning: &reasoning.ContentReasoning{
+							Content:   part.Text,
+							Signature: thoughtSignature, // Include signature if available
+						},
 					}
 					if err := opts.StreamingFunc(ctx, chunk); err != nil {
 						goto StreamEnd
@@ -307,6 +334,7 @@ func (g *GoogleAI) generateStreamingContent(
 					}
 				}
 			}
+
 			if part.FunctionCall != nil {
 				b, _ := json.Marshal(part.FunctionCall.Args)
 				toolCall := llms.ToolCall{
@@ -322,11 +350,63 @@ func (g *GoogleAI) generateStreamingContent(
 	}
 
 StreamEnd:
+	// Distribute Reasoning according to the rules:
+	// - If there are ToolCalls, attach Reasoning ONLY to the first one
+	// - If there are no ToolCalls, attach Reasoning to ContentChoice
+	var choiceReasoning *reasoning.ContentReasoning
+	if len(accumulatedToolCalls) > 0 {
+		// Add reasoning to the first tool call
+		if accumulatedReasoningContent.Len() > 0 || len(thoughtSignature) > 0 {
+			accumulatedToolCalls[0].Reasoning = &reasoning.ContentReasoning{
+				Content:   accumulatedReasoningContent.String(),
+				Signature: thoughtSignature,
+			}
+		}
+	} else {
+		// Add reasoning to the content choice
+		if accumulatedReasoningContent.Len() > 0 || len(thoughtSignature) > 0 {
+			choiceReasoning = &reasoning.ContentReasoning{
+				Content:   accumulatedReasoningContent.String(),
+				Signature: thoughtSignature,
+			}
+		}
+	}
+
+	// Build metadata from accumulated usage information
+	metadata := make(map[string]any)
+	if lastCandidate != nil {
+		metadata[CITATIONS] = lastCandidate.CitationMetadata
+		metadata[SAFETY] = lastCandidate.SafetyRatings
+	}
+
+	if lastUsageMetadata != nil {
+		metadata["input_tokens"] = int(lastUsageMetadata.PromptTokenCount)
+		metadata["output_tokens"] = int(lastUsageMetadata.CandidatesTokenCount)
+		metadata["total_tokens"] = int(lastUsageMetadata.TotalTokenCount)
+
+		// Standardized field names for cross-provider compatibility
+		metadata["PromptTokens"] = int(lastUsageMetadata.PromptTokenCount)
+		metadata["CompletionTokens"] = int(lastUsageMetadata.CandidatesTokenCount)
+		metadata["TotalTokens"] = int(lastUsageMetadata.TotalTokenCount)
+		metadata["ReasoningTokens"] = int(lastUsageMetadata.ThoughtsTokenCount)
+		metadata["PromptCachedTokens"] = int(lastUsageMetadata.CachedContentTokenCount)
+		metadata["CacheReadInputTokens"] = int(lastUsageMetadata.CachedContentTokenCount)
+
+		// Cache-related token information (if available)
+		if lastUsageMetadata.CachedContentTokenCount > 0 {
+			metadata["CacheCreationInputTokens"] = max(int(lastUsageMetadata.PromptTokenCount-lastUsageMetadata.CachedContentTokenCount), 0)
+			metadata["PromptTokens"] = metadata["CacheCreationInputTokens"] // Google AI includes cached tokens in the prompt count
+		} else {
+			metadata["CacheCreationInputTokens"] = 0
+		}
+	}
+
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{{
-			Content:          accumulatedContent.String(),
-			ReasoningContent: accumulatedReasoningContent.String(),
-			ToolCalls:        accumulatedToolCalls,
+			Content:        accumulatedContent.String(),
+			Reasoning:      choiceReasoning,
+			ToolCalls:      accumulatedToolCalls,
+			GenerationInfo: metadata,
 		}},
 	}, nil
 }
@@ -341,9 +421,11 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 	for _, candidate := range resp.Candidates {
 		var content, thinking strings.Builder
 		var toolCalls []llms.ToolCall
+		var thoughtSignature []byte
+		var firstFunctionCallIdx = -1
 
 		if candidate.Content != nil {
-			for _, part := range candidate.Content.Parts {
+			for idx, part := range candidate.Content.Parts {
 				if len(part.Text) > 0 {
 					// Check if this is thinking content
 					if part.Thought {
@@ -352,6 +434,12 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 						content.WriteString(part.Text)
 					}
 				}
+
+				// Collect thought signature from any part (typically from first function call or last text part)
+				if len(part.ThoughtSignature) > 0 {
+					thoughtSignature = part.ThoughtSignature
+				}
+
 				if part.FunctionCall != nil {
 					b, err := json.Marshal(part.FunctionCall.Args)
 					if err != nil {
@@ -364,7 +452,35 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 							Arguments: string(b),
 						},
 					}
+
+					// Track index of first function call
+					if firstFunctionCallIdx == -1 {
+						firstFunctionCallIdx = idx
+					}
+
 					toolCalls = append(toolCalls, toolCall)
+				}
+			}
+		}
+
+		// Distribute Reasoning according to the rules:
+		// - If there are ToolCalls, attach Reasoning ONLY to the first one
+		// - If there are no ToolCalls, attach Reasoning to ContentChoice
+		var choiceReasoning *reasoning.ContentReasoning
+		if len(toolCalls) > 0 {
+			// Add reasoning to the first tool call
+			if thinking.Len() > 0 || len(thoughtSignature) > 0 {
+				toolCalls[0].Reasoning = &reasoning.ContentReasoning{
+					Content:   thinking.String(),
+					Signature: thoughtSignature,
+				}
+			}
+		} else {
+			// Add reasoning to the content choice
+			if thinking.Len() > 0 || len(thoughtSignature) > 0 {
+				choiceReasoning = &reasoning.ContentReasoning{
+					Content:   thinking.String(),
+					Signature: thoughtSignature,
 				}
 			}
 		}
@@ -377,28 +493,30 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 			metadata["input_tokens"] = usage.PromptTokenCount
 			metadata["output_tokens"] = usage.CandidatesTokenCount
 			metadata["total_tokens"] = usage.TotalTokenCount
+
 			// Standardized field names for cross-provider compatibility
-			metadata["PromptTokens"] = usage.PromptTokenCount
-			metadata["CompletionTokens"] = usage.CandidatesTokenCount
-			metadata["TotalTokens"] = usage.TotalTokenCount
-			metadata["ReasoningTokens"] = usage.ThoughtsTokenCount
-			// signature = usage.ThoughtsSignature
+			metadata["PromptTokens"] = int(usage.PromptTokenCount)
+			metadata["CompletionTokens"] = int(usage.CandidatesTokenCount)
+			metadata["TotalTokens"] = int(usage.TotalTokenCount)
+			metadata["ReasoningTokens"] = int(usage.ThoughtsTokenCount)
+			metadata["PromptCachedTokens"] = int(usage.CachedContentTokenCount)
+			metadata["CacheReadInputTokens"] = int(usage.CachedContentTokenCount)
 
 			// Cache-related token information (if available)
 			if usage.CachedContentTokenCount > 0 {
-				metadata["CachedTokens"] = usage.CachedContentTokenCount
-				metadata["CacheReadInputTokens"] = usage.CachedContentTokenCount // Anthropic compatibility
-				// Google AI includes cached tokens in the prompt count, calculate non-cached
-				metadata["NonCachedInputTokens"] = usage.PromptTokenCount - usage.CachedContentTokenCount
+				metadata["CacheCreationInputTokens"] = max(int(usage.PromptTokenCount-usage.CachedContentTokenCount), 0)
+				metadata["PromptTokens"] = metadata["CacheCreationInputTokens"] // Google AI includes cached tokens in the prompt count
+			} else {
+				metadata["CacheCreationInputTokens"] = 0
 			}
 		}
 
 		choices = append(choices, &llms.ContentChoice{
-			Content:          content.String(),
-			ReasoningContent: thinking.String(),
-			StopReason:       string(candidate.FinishReason),
-			GenerationInfo:   metadata,
-			ToolCalls:        toolCalls,
+			Content:        content.String(),
+			Reasoning:      choiceReasoning,
+			StopReason:     string(candidate.FinishReason),
+			GenerationInfo: metadata,
+			ToolCalls:      toolCalls,
 		})
 	}
 
@@ -413,7 +531,10 @@ func convertParts(parts []llms.ContentPart) ([]*genai.Part, error) {
 
 		switch p := part.(type) {
 		case llms.TextContent:
-			genaiPart = &genai.Part{Text: p.Text}
+			genaiPart = &genai.Part{
+				Text:             p.Text,
+				ThoughtSignature: extractThoughtSignature(p.Reasoning),
+			}
 
 		case llms.BinaryContent:
 			genaiPart = &genai.Part{
@@ -447,6 +568,7 @@ func convertParts(parts []llms.ContentPart) ([]*genai.Part, error) {
 					Name: fc.Name,
 					Args: argsMap,
 				},
+				ThoughtSignature: extractThoughtSignature(p.Reasoning),
 			}
 
 		case llms.ToolCallResponse:

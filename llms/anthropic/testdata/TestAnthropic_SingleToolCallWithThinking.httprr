@@ -1,0 +1,70 @@
+httprr trace v1
+656 2206
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 387
+Anthropic-Beta: interleaved-thinking-2025-05-14
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in Boston?"}]}],"max_tokens":4096,"temperature":1,"tools":[{"name":"get_weather","description":"Get weather for a location","input_schema":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}}],"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1192
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:11Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:12Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:10Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:11Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:12 GMT
+Request-Id: req_011CXWs7iSLGj8AWiBNRKj4o
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 2102
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_011mFH7SkMR7wrDxPAQArhwU","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The user is asking about the weather in Boston. I have access to a get_weather function that takes a location parameter. I should call this function with \"Boston\" as the location.","signature":"EtwCCkYICxgCKkCEz+rKTIOYZe9QecQgik+7E+vvKt4yO1gnBuWc27qeE01iRBUIVDCuDDcS9/A//OwuDQdo6Ev6D/cdzdWwzk5jEgyJFBoWKDXb1rlrjRcaDHNwYY0BvmgJr4x1oSIwcSE5tObNPHHunvZWagRst+eb4eP5HPBFcck8KfEOjM07SLfml138CU7LdGHznhuiKsMBGFNEyCtYucSdr+DNzmMGWzymdQZy0qWMt36MB9VoTyXQJBtgy2kKlNB4KoVF9qM5vWy1C1u/veYPWxpkRTD6BvHVcz1BfOmqpyO9Zj/AWR4SX/8/FG95S4aZIVUWp28dZySGcfqfmymh253B+XXey97dOl0a2sb8RncvSeS8oVY2J7lpCLeJbNWIPv3vc/1MY9VFVWML3Pc+c/ZU9pgYzv6ZySXpdUTOJDb4FkunOqFoquTfBYpBbn2xpVyOgYddVNQcGAE="},{"type":"tool_use","id":"toolu_01E8myeoMN7KKGeCQnAgGd3F","name":"get_weather","input":{"location":"Boston"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":741,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":99,"service_tier":"standard"}}1659 2406
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 1389
+Anthropic-Beta: interleaved-thinking-2025-05-14
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in Boston?"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user is asking about the weather in Boston. I have access to a get_weather function that takes a location parameter. I should call this function with \"Boston\" as the location.","signature":"EtwCCkYICxgCKkCEz+rKTIOYZe9QecQgik+7E+vvKt4yO1gnBuWc27qeE01iRBUIVDCuDDcS9/A//OwuDQdo6Ev6D/cdzdWwzk5jEgyJFBoWKDXb1rlrjRcaDHNwYY0BvmgJr4x1oSIwcSE5tObNPHHunvZWagRst+eb4eP5HPBFcck8KfEOjM07SLfml138CU7LdGHznhuiKsMBGFNEyCtYucSdr+DNzmMGWzymdQZy0qWMt36MB9VoTyXQJBtgy2kKlNB4KoVF9qM5vWy1C1u/veYPWxpkRTD6BvHVcz1BfOmqpyO9Zj/AWR4SX/8/FG95S4aZIVUWp28dZySGcfqfmymh253B+XXey97dOl0a2sb8RncvSeS8oVY2J7lpCLeJbNWIPv3vc/1MY9VFVWML3Pc+c/ZU9pgYzv6ZySXpdUTOJDb4FkunOqFoquTfBYpBbn2xpVyOgYddVNQcGAE="},{"type":"tool_use","id":"toolu_01E8myeoMN7KKGeCQnAgGd3F","name":"get_weather","input":{"location":"Boston"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01E8myeoMN7KKGeCQnAgGd3F","content":"{\"temperature\": 72, \"condition\": \"sunny\"}"}]}],"max_tokens":4096,"temperature":1,"tools":[{"name":"get_weather","description":"Get weather for a location","input_schema":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}}],"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1392
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:14Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:15Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:13Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:14Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:15 GMT
+Request-Id: req_011CXWs7xNybmDidzE4qb4vw
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 2337
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01Xv4fieUmSKvMWA8casAFgz","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The function returned the weather information for Boston. It shows that the temperature is 72 degrees (likely Fahrenheit based on typical weather reporting conventions) and the condition is sunny. I should present this information to the user in a clear and friendly way.","signature":"ErgDCkYICxgCKkBKSp1RM0Gubh6eg/A4+Ax0FxMMub2MU6nZxqD6s10PNlRtOpIpRxp0DkgYDByh3KcHMtl2rnX2Yt298yw6UGtrEgzxpbDzakrmXDEYrPMaDPWKepJxx5sgiNlAViIwNRQi1X6aDMygB0MqrF/sHqLsRa6SPkeC9JcHQdg/TV08wH60a4uRE6qySckqw9VxKp8C8CdxvjHPlkDYZGHneJ2coeQFdBazg9SICsjG/vzaxDVx4Nxyqv5sQZcqV2yc7laXF3w2YBh6kNNDNpt+0yBk283FB+TwO9Cc7Uk8vqB5+6xfgymoGwGPAL/pCIV0VpmK07N3CrCRvV57J2dIAvNoTfJ2Pm200TUXWEAhzoWDygskK6iZo/SuvKZ4rvv4XmUaNgT/3Sif/W42pPzgGvsgA/M5o7FwGTtcqkkqnPwVo3lgXclYg79t/0P+1sZHO98AP8CAFuSkYZSkDYphvc/MvBJVtazSWx1Pwk4LS976Orr6lSyViZkwtzFLPkh9RbPG16zTzrmdFLYQrF8NN2fb3oqnGoKs2irPzSOqFNhhqnW91OTULsUUdDwWkwW+D9sYAQ=="},{"type":"text","text":"The weather in Boston is currently sunny with a temperature of 72°F."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":871,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":79,"service_tier":"standard"}}

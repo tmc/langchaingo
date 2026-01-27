@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/anthropic"
@@ -219,13 +220,21 @@ func main() {
 	// Stage 1: Initialization
 	fmt.Println("🚀 STAGE 1: INITIALIZATION")
 	fmt.Println("─────────────────────────")
-	fmt.Println("  • Model: Claude Sonnet 4 (20250514)")
+	fmt.Println("  • Model: Claude Sonnet 4.5")
 	fmt.Println("  • Beta: interleaved-thinking-2025-05-14")
 	fmt.Println("  • Feature: Thinking between tool calls")
 
 	// Configure options for Anthropic client
 	anthropicOpts := []anthropic.Option{
-		anthropic.WithModel("claude-sonnet-4-20250514"),
+		anthropic.WithModel("claude-sonnet-4-5"),
+		// IMPORTANT: Set cache strategy at CLIENT level for automatic application to ALL requests
+		// This ensures caching works correctly across multi-turn conversations
+		anthropic.WithDefaultCacheStrategy(anthropic.CacheStrategy{
+			CacheTools:    true, // Cache tool definitions (saves ~90% on tools after first request)
+			CacheSystem:   true, // Cache system prompt (saves ~90% on system prompt after first request)
+			CacheMessages: true, // Cache conversation history (incremental writes, 90% read savings)
+			TTL:           "1h", // 1-hour cache for extended thinking sessions
+		}),
 	}
 
 	// Add debug HTTP client if flag is set
@@ -257,8 +266,11 @@ func main() {
 	fmt.Println("  • Trend analysis and prediction")
 	fmt.Println()
 
+	// Add unique marker to avoid cache collisions from previous runs
+	runID := fmt.Sprintf("Run-%d", time.Now().Unix())
+
 	// Complex multi-step problem requiring tool use and reasoning
-	prompt := `You're helping a data scientist analyze quarterly sales data and make strategic decisions.
+	prompt := fmt.Sprintf(`[%s] You're helping a data scientist analyze quarterly sales data and make strategic decisions.`, runID) + `
 
 The quarterly sales (in millions) for the last 8 quarters are:
 Q1-2023: 12.5, Q2-2023: 14.2, Q3-2023: 13.8, Q4-2023: 16.1
@@ -310,11 +322,31 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	fmt.Println("  • Interleaved Thinking: ENABLED")
 	fmt.Println("  • Temperature: 1.0 (required for thinking)")
 	fmt.Println("  • Max Tokens: 4000")
+	fmt.Println("  • Prompt Caching: ENABLED (1-hour TTL)")
+	fmt.Println("  • Cache Strategy:")
+	fmt.Println("    - Tools: CACHED (5 tools)")
+	fmt.Println("    - System: NOT USED (no system prompt)")
+	fmt.Println("    - Messages: CACHED (conversation history)")
 	fmt.Println("  • Tools Available:")
 	fmt.Println("    - calculate: Mathematical calculations")
 	fmt.Println("    - search_knowledge: Information retrieval")
 	fmt.Println("    - analyze_data: Statistical analysis")
 	fmt.Println()
+
+	// Cache analytics tracking
+	type CacheStats struct {
+		Iteration        int
+		CacheCreation    int
+		CacheRead        int
+		InputTokens      int
+		OutputTokens     int
+		Cache5mCreation  int
+		Cache1hCreation  int
+		TotalTokens      int
+		EffectiveCost    float64 // Relative cost considering cache
+		SavingsVsNoCache float64 // Savings percentage
+	}
+	var cacheStatsList []CacheStats
 
 	// Configure with interleaved thinking for tool use
 	var streamedContent strings.Builder
@@ -325,6 +357,10 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		llms.WithReasoning(llms.ReasoningMedium, 4000),
 		// Add interleaved thinking beta header
 		anthropic.WithInterleavedThinking(),
+		// Enable prompt caching (CRITICAL for interleaved thinking with tools!)
+		anthropic.WithPromptCaching(),
+		// Note: Cache strategy is set at CLIENT level (see anthropic.New above)
+		// This ensures it applies to ALL requests automatically
 		// Temperature must be 1 when thinking is enabled
 		llms.WithTemperature(1.0),
 		// Provide tools
@@ -361,6 +397,52 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	fmt.Println("─────────────────────────")
 	fmt.Println("  Starting multi-step analysis with interleaved thinking...")
 
+	// Helper function to collect cache statistics
+	collectCacheStats := func(resp *llms.ContentResponse, iterNum int) CacheStats {
+		genInfo := resp.Choices[0].GenerationInfo
+		stats := CacheStats{Iteration: iterNum}
+
+		if v, ok := genInfo["CacheCreationInputTokens"].(int); ok {
+			stats.CacheCreation = v
+		}
+		if v, ok := genInfo["CacheReadInputTokens"].(int); ok {
+			stats.CacheRead = v
+		}
+		if v, ok := genInfo["PromptTokens"].(int); ok {
+			stats.InputTokens = v
+		}
+		if v, ok := genInfo["OutputTokens"].(int); ok {
+			stats.OutputTokens = v
+		}
+		if v, ok := genInfo["CacheCreationEphemeral5mInputTokens"].(int); ok {
+			stats.Cache5mCreation = v
+		}
+		if v, ok := genInfo["CacheCreationEphemeral1hInputTokens"].(int); ok {
+			stats.Cache1hCreation = v
+		}
+		if v, ok := genInfo["TotalTokens"].(int); ok {
+			stats.TotalTokens = v
+		} else {
+			stats.TotalTokens = stats.InputTokens + stats.CacheRead + stats.OutputTokens
+		}
+
+		// Calculate effective cost (relative to no-cache baseline)
+		// Cache write: 125% cost, Cache read: 10% cost, Regular input: 100% cost
+		regularInput := stats.InputTokens - stats.CacheCreation
+		stats.EffectiveCost = float64(regularInput)*1.0 +
+			float64(stats.CacheCreation)*1.25 +
+			float64(stats.CacheRead)*0.1 +
+			float64(stats.OutputTokens)*1.0
+
+		// Calculate savings vs no-cache scenario
+		noCacheCost := float64(stats.TotalTokens) * 1.0
+		if noCacheCost > 0 {
+			stats.SavingsVsNoCache = ((noCacheCost - stats.EffectiveCost) / noCacheCost) * 100
+		}
+
+		return stats
+	}
+
 	// Make initial request
 	resp, err := llm.GenerateContent(ctx, messages, opts...)
 	if err != nil {
@@ -369,6 +451,13 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	}
 
 	fmt.Printf("\n  ℹ️  Initial response received (streaming may still be in progress)\n")
+	time.Sleep(10 * time.Second)
+
+	// Collect cache stats for initial request
+	if resp != nil && len(resp.Choices) > 0 {
+		stats := collectCacheStats(resp, 0)
+		cacheStatsList = append(cacheStatsList, stats)
+	}
 
 	// Handle tool calls in a conversation loop
 	maxIterations := 10 // Prevent infinite loops
@@ -392,9 +481,11 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			}
 
 			// Add assistant message with tool calls to conversation
-			assistantParts := []llms.ContentPart{}
-			if choice.Content != "" {
-				assistantParts = append(assistantParts, llms.TextPart(choice.Content))
+			// IMPORTANT: Must include thinking blocks (reasoning) for interleaved thinking to work
+			// According to Anthropic docs: "When using extended thinking with tool use,
+			// you must pass thinking blocks back to the API"
+			assistantParts := []llms.ContentPart{
+				llms.TextPartWithReasoning(choice.Content, choice.Reasoning),
 			}
 			assistantParts = append(assistantParts, convertToolCallsToParts(choice.ToolCalls)...)
 
@@ -437,10 +528,14 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 				break
 			}
 
-			// Store this response
+			// Store this response and collect cache stats
 			if resp != nil && len(resp.Choices) > 0 {
 				allResponses = append(allResponses, *resp.Choices[0])
 				fmt.Printf("\n  ✅ Received response with %d tool calls\n", len(resp.Choices[0].ToolCalls))
+
+				// Collect cache statistics for this iteration
+				stats := collectCacheStats(resp, iteration+1)
+				cacheStatsList = append(cacheStatsList, stats)
 			}
 
 			iteration++
@@ -483,11 +578,11 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		for i, choice := range resp.Choices {
 			// Display any thinking content from GenerationInfo
 			if choice.GenerationInfo != nil {
-				if choice.ReasoningContent != "" {
+				if choice.Reasoning != nil && choice.Reasoning.Content != "" {
 					fmt.Println("\n  📝 Captured Thinking Process:")
 					fmt.Println("  ├─────────────────────────────")
 					// Display first 500 chars of thinking
-					thinkingPreview := choice.ReasoningContent
+					thinkingPreview := choice.Reasoning.Content
 					if len(thinkingPreview) > 500 {
 						thinkingPreview = thinkingPreview[:500] + "..."
 					}
@@ -602,6 +697,114 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		}
 	}
 
+	// Stage 7: Cache Analytics
+	fmt.Println("\n💰 STAGE 7: CACHE ANALYTICS")
+	fmt.Println("─────────────────────────")
+
+	if len(cacheStatsList) > 0 {
+		fmt.Println("\n  Detailed Cache Statistics by Iteration:")
+		fmt.Println("  ├─────────────────────────────────────────────────────────")
+
+		totalCacheWrites := 0
+		totalCacheReads := 0
+		totalRegularInput := 0
+		totalOutput := 0
+		cumulativeEffectiveCost := 0.0
+		cumulativeNoCacheCost := 0.0
+
+		for i, stats := range cacheStatsList {
+			fmt.Printf("  │ Iteration %d:\n", stats.Iteration)
+			fmt.Printf("  │   Input Tokens:         %6d (regular: %d, cache write: %d, cache read: %d)\n",
+				stats.InputTokens,
+				stats.InputTokens,
+				stats.CacheCreation,
+				stats.CacheRead)
+			fmt.Printf("  │   Output Tokens:        %6d\n", stats.OutputTokens)
+
+			if stats.Cache1hCreation > 0 {
+				fmt.Printf("  │   Cache Created (1h):   %6d tokens\n", stats.Cache1hCreation)
+			}
+			if stats.Cache5mCreation > 0 {
+				fmt.Printf("  │   Cache Created (5m):   %6d tokens\n", stats.Cache5mCreation)
+			}
+
+			if i > 0 && stats.CacheRead > 0 {
+				// Calculate savings for this iteration
+				fmt.Printf("  │   Effective Cost:       %.0f tokens (vs %d without cache)\n",
+					stats.EffectiveCost, stats.TotalTokens)
+				fmt.Printf("  │   Savings:              %.1f%%\n", stats.SavingsVsNoCache)
+			} else if stats.CacheCreation > 0 {
+				fmt.Printf("  │   Effective Cost:       %.0f tokens (cache creation = 125%% cost)\n",
+					stats.EffectiveCost)
+				fmt.Printf("  │   Note:                 Initial cache write (investment for future savings)\n")
+			}
+
+			totalCacheWrites += stats.CacheCreation
+			totalCacheReads += stats.CacheRead
+			totalRegularInput += stats.InputTokens
+			totalOutput += stats.OutputTokens
+			cumulativeEffectiveCost += stats.EffectiveCost
+			cumulativeNoCacheCost += float64(stats.TotalTokens)
+
+			if i < len(cacheStatsList)-1 {
+				fmt.Println("  │")
+			}
+		}
+
+		fmt.Println("  └─────────────────────────────────────────────────────────")
+
+		fmt.Println("\n  📊 Cumulative Cache Economics:")
+		fmt.Println("  ├─────────────────────────────────────────────────────────")
+		fmt.Printf("  │ Total Cache Writes:     %6d tokens @ 125%% = %.0f effective tokens\n",
+			totalCacheWrites, float64(totalCacheWrites)*1.25)
+		fmt.Printf("  │ Total Cache Reads:      %6d tokens @ 10%%  = %.0f effective tokens\n",
+			totalCacheReads, float64(totalCacheReads)*0.10)
+		fmt.Printf("  │ Regular Input:          %6d tokens @ 100%% = %d effective tokens\n",
+			totalRegularInput, totalRegularInput)
+		fmt.Printf("  │ Output Tokens:          %6d tokens @ 100%% = %d effective tokens\n",
+			totalOutput, totalOutput)
+		fmt.Println("  │")
+		fmt.Printf("  │ Total Effective Cost:   %.0f tokens\n", cumulativeEffectiveCost)
+		fmt.Printf("  │ Cost Without Cache:     %.0f tokens\n", cumulativeNoCacheCost)
+		totalSavings := ((cumulativeNoCacheCost - cumulativeEffectiveCost) / cumulativeNoCacheCost) * 100
+		fmt.Printf("  │ Total Savings:          %.1f%%\n", totalSavings)
+		fmt.Println("  └─────────────────────────────────────────────────────────")
+
+		fmt.Println("\n  💡 Cache Economics Explained:")
+		fmt.Println("  ├─────────────────────────────────────────────────────────")
+		fmt.Println("  │ Cache Write (1st time):  125% cost - One-time investment")
+		fmt.Println("  │ Cache Read (subsequent): 10% cost - 90% savings!")
+		fmt.Println("  │")
+		fmt.Println("  │ With Interleaved Thinking + Tools:")
+		fmt.Println("  │   • Tool definitions cached once, reused every iteration")
+		fmt.Println("  │   • Thinking blocks from previous turns cached incrementally")
+		fmt.Println("  │   • Each iteration reads old context (10%) + writes new content (125%)")
+		fmt.Println("  │   • Result: Massive savings on multi-turn agent workflows!")
+		fmt.Println("  └─────────────────────────────────────────────────────────")
+
+		if len(cacheStatsList) > 1 {
+			firstIterCost := cacheStatsList[0].EffectiveCost
+			avgLaterIterCost := 0.0
+			for i := 1; i < len(cacheStatsList); i++ {
+				avgLaterIterCost += cacheStatsList[i].EffectiveCost
+			}
+			avgLaterIterCost /= float64(len(cacheStatsList) - 1)
+
+			fmt.Println("\n  🎯 Key Insights:")
+			fmt.Println("  ├─────────────────────────────────────────────────────────")
+			fmt.Printf("  │ First Iteration:        %.0f effective tokens (cache creation)\n", firstIterCost)
+			fmt.Printf("  │ Avg Subsequent Iters:   %.0f effective tokens (cache reuse)\n", avgLaterIterCost)
+			iterSavings := ((firstIterCost - avgLaterIterCost) / firstIterCost) * 100
+			fmt.Printf("  │ Per-Iteration Savings:  %.1f%% after first iteration\n", iterSavings)
+			fmt.Println("  │")
+			fmt.Println("  │ Conclusion: Cache pays for itself after ~2 iterations!")
+			fmt.Println("  │             Longer conversations = exponential savings")
+			fmt.Println("  └─────────────────────────────────────────────────────────")
+		}
+	} else {
+		fmt.Println("  ⚠️  No cache statistics available")
+	}
+
 	// Final Summary
 	fmt.Println("\n╔════════════════════════════════════════════════════════════╗")
 	fmt.Println("║                    DEMO COMPLETE                          ║")
@@ -613,12 +816,14 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	fmt.Println("  ✓ Clear visualization of thinking blocks")
 	fmt.Println("  ✓ Tool orchestration with results")
 	fmt.Println("  ✓ Token usage analysis with thinking breakdown")
+	fmt.Println("  ✓ Prompt caching with detailed economics")
 
 	fmt.Println("\n📚 Use Cases:")
 	fmt.Println("  • Complex multi-step analysis tasks")
 	fmt.Println("  • Data processing with reasoning")
 	fmt.Println("  • Research requiring tool coordination")
 	fmt.Println("  • Decision-making with transparent logic")
+	fmt.Println("  • Cost-effective multi-turn agent workflows")
 }
 
 // convertToolCallsToParts converts tool calls to content parts

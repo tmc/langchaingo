@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -344,8 +345,8 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 						case *types.ReasoningContentBlockDeltaMemberText:
 							reasoningContent.WriteString(block.Value)
 							chunk := streaming.Chunk{
-								Type:             streaming.ChunkTypeReasoning,
-								ReasoningContent: block.Value,
+								Type:      streaming.ChunkTypeReasoning,
+								Reasoning: &reasoning.ContentReasoning{Content: block.Value},
 							}
 							if err := callback(ctx, chunk); err != nil {
 								return nil, err
@@ -433,10 +434,10 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	}
 
 	choice := &llms.ContentChoice{
-		Content:          fullContent.String(),
-		ToolCalls:        toolCalls,
-		GenerationInfo:   make(map[string]any),
-		ReasoningContent: reasoningContent.String(),
+		Content:        fullContent.String(),
+		ToolCalls:      toolCalls,
+		GenerationInfo: make(map[string]any),
+		Reasoning:      c.processReasoning(reasoningContent.String()),
 	}
 
 	result := &llms.ContentResponse{
@@ -444,6 +445,16 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	}
 
 	return result, nil
+}
+
+func (c *ConverseClient) processReasoning(reasoningContent string) *reasoning.ContentReasoning {
+	if reasoningContent == "" {
+		return nil
+	}
+
+	return &reasoning.ContentReasoning{
+		Content: reasoningContent,
+	}
 }
 
 // convertConverseResponse converts Converse response to ContentResponse
@@ -481,7 +492,7 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 				// TODO: Extract text from reasoning block when AWS SDK exposes it
 				switch content := block.Value.(type) {
 				case *types.ReasoningContentBlockMemberReasoningText:
-					choice.ReasoningContent = *content.Value.Text
+					choice.Reasoning = c.processReasoning(*content.Value.Text)
 					_ = content.Value.Signature // TODO: not supported yet
 				case *types.ReasoningContentBlockMemberRedactedContent:
 					// TODO: not supported yet

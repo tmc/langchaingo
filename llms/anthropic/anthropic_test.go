@@ -1,39 +1,23 @@
-package anthropic
+package anthropic_test
 
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/anthropic"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func newTestClient(t *testing.T, opts ...Option) *LLM {
-	t.Helper()
-
-	var apiKey string
-
-	if apiKey = os.Getenv("ANTHROPIC_API_KEY"); apiKey == "" {
-		t.Skip("ANTHROPIC_API_KEY not set")
-		return nil
-	}
-
-	llm, err := New(opts...)
-	require.NoError(t, err)
-
-	return llm
-}
-
-func TestGenerateContent(t *testing.T) {
+func TestAnthropic_GenerateContent(t *testing.T) {
 	t.Parallel()
 
-	llm := newTestClient(t)
+	llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
 
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "How many feet are in a nautical mile?"},
@@ -53,7 +37,7 @@ func TestGenerateContent(t *testing.T) {
 	assert.Regexp(t, "feet", strings.ToLower(c1.Content))
 }
 
-func TestGenerateContentWithTool(t *testing.T) {
+func TestAnthropic_GenerateContentWithTool(t *testing.T) {
 	t.Parallel()
 
 	availableTools := []llms.Tool{
@@ -80,7 +64,7 @@ func TestGenerateContentWithTool(t *testing.T) {
 		},
 	}
 
-	llm := newTestClient(t, WithModel("claude-3-haiku-20240307"))
+	llm := newHTTPRRClient(t, anthropic.WithModel("claude-haiku-4-5"))
 
 	contents := []llms.MessageContent{
 		{
@@ -140,49 +124,10 @@ func TestGenerateContentWithTool(t *testing.T) {
 	assert.Regexp(t, "72", choice.Content)
 }
 
-func TestGenerateContentWithReasoning(t *testing.T) {
+func TestAnthropic_GenerateContentWithStreaming(t *testing.T) {
 	t.Parallel()
 
-	llm := newTestClient(t)
-
-	content := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{
-					Text: "Solve this math problem step by step: " +
-						"If a rectangle has a length of 12 cm and a width of 8 cm, " +
-						"what is its area?",
-				},
-			},
-		},
-	}
-
-	// Test with medium level of reasoning, explicitly set max_tokens higher than thinking budget
-	// When thinking is enabled, temperature must be set to 1 as per API requirements
-	resp, err := llm.GenerateContent(
-		t.Context(),
-		content,
-		llms.WithReasoning(llms.ReasoningNone, 2048),
-		llms.WithMaxTokens(4096),
-		llms.WithTemperature(1.0),
-	)
-	require.NoError(t, err)
-
-	assert.NotEmpty(t, resp.Choices)
-	c1 := resp.Choices[0]
-	assert.Contains(t, c1.Content, "96")
-	assert.NotEmpty(t, c1.ReasoningContent)
-
-	// Verify reasoning content contains step-by-step solving approach
-	assert.Contains(t, strings.ToLower(c1.ReasoningContent), "area")
-	assert.Contains(t, strings.ToLower(c1.ReasoningContent), "rectangle")
-}
-
-func TestGenerateContentWithStreaming(t *testing.T) {
-	t.Parallel()
-
-	llm := newTestClient(t)
+	llm := newHTTPRRClient(t, anthropic.WithModel("claude-haiku-4-5"))
 
 	content := []llms.MessageContent{
 		{
@@ -227,71 +172,8 @@ func TestGenerateContentWithStreaming(t *testing.T) {
 	}
 }
 
-func TestGenerateContentWithReasoningAndStreaming(t *testing.T) {
-	t.Parallel()
-
-	llm := newTestClient(t)
-
-	content := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextContent{Text: "What is the factorial of 5? Show your work."},
-			},
-		},
-	}
-
-	var (
-		streamedContent   []string
-		streamedReasoning []string
-		streamedDone      bool
-	)
-
-	streamingFunc := func(_ context.Context, chunk streaming.Chunk) error {
-		switch chunk.Type {
-		case streaming.ChunkTypeNone:
-			t.Errorf("unexpected chunk type: %s", chunk.Type)
-		case streaming.ChunkTypeReasoning:
-			streamedReasoning = append(streamedReasoning, chunk.ReasoningContent)
-		case streaming.ChunkTypeText:
-			streamedContent = append(streamedContent, chunk.Content)
-		case streaming.ChunkTypeToolCall:
-			// skip tool call chunks
-		case streaming.ChunkTypeDone:
-			streamedDone = true
-		}
-		return nil
-	}
-
-	resp, err := llm.GenerateContent(
-		t.Context(),
-		content,
-		llms.WithReasoning(llms.ReasoningNone, 4096),
-		llms.WithStreamingFunc(streamingFunc),
-		llms.WithMaxTokens(8192),  // Ensure max_tokens is much higher than thinking budget
-		llms.WithTemperature(1.0), // Required when using thinking feature
-	)
-	require.NoError(t, err)
-
-	assert.True(t, streamedDone)
-	assert.Greater(t, len(streamedContent), 0)
-	assert.Greater(t, len(streamedReasoning), 0)
-
-	fullContent := strings.Join(streamedContent, "")
-	fullReasoning := strings.Join(streamedReasoning, "")
-
-	assert.NotEmpty(t, resp.Choices)
-	choice := resp.Choices[0]
-	assert.Equal(t, fullContent, choice.Content)
-	assert.Equal(t, fullReasoning, choice.ReasoningContent)
-
-	// The answer should include 120 (factorial of 5)
-	assert.Contains(t, fullContent, "120")
-	assert.Contains(t, strings.ToLower(fullReasoning), "factorial")
-}
-
 //nolint:funlen,cyclop
-func TestGenerateContentWithToolAndStreaming(t *testing.T) {
+func TestAnthropic_GenerateContentWithToolAndStreaming(t *testing.T) {
 	t.Parallel()
 
 	availableTools := []llms.Tool{
@@ -333,7 +215,7 @@ func TestGenerateContentWithToolAndStreaming(t *testing.T) {
 	// If you need to test parallel tool calls without streaming, you can use the following options:
 	// * WithAnthropicBetaHeader("token-efficient-tools-2025-02-19") while initializing client
 	// * llms.WithToolChoice(map[string]any{"type": "auto"}) while call GenerateContent
-	llm := newTestClient(t, WithModel("claude-sonnet-4-5"))
+	llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
 
 	content := []llms.MessageContent{
 		{

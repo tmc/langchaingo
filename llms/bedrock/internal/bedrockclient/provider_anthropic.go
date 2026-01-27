@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -269,10 +270,10 @@ func createAnthropicCompletion(ctx context.Context,
 
 	// Create single choice with all content
 	choice := &llms.ContentChoice{
-		Content:          textContent,
-		ReasoningContent: reasoningContent,
-		ToolCalls:        toolCalls,
-		StopReason:       output.StopReason,
+		Content:    textContent,
+		Reasoning:  processReasoning(reasoningContent),
+		ToolCalls:  toolCalls,
+		StopReason: output.StopReason,
 		GenerationInfo: map[string]any{
 			"input_tokens":  output.Usage.InputTokens,
 			"output_tokens": output.Usage.OutputTokens,
@@ -283,6 +284,16 @@ func createAnthropicCompletion(ctx context.Context,
 	return &llms.ContentResponse{
 		Choices: Contentchoices,
 	}, nil
+}
+
+func processReasoning(reasoningContent string) *reasoning.ContentReasoning {
+	if reasoningContent == "" {
+		return nil
+	}
+
+	return &reasoning.ContentReasoning{
+		Content: reasoningContent,
+	}
 }
 
 type streamingCompletionResponseChunk struct {
@@ -374,13 +385,13 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 				case "thinking_delta":
 					if resp.Delta.Thinking != "" {
 						chunk := streaming.Chunk{
-							Type:             streaming.ChunkTypeReasoning,
-							ReasoningContent: resp.Delta.Thinking,
+							Type:      streaming.ChunkTypeReasoning,
+							Reasoning: &reasoning.ContentReasoning{Content: resp.Delta.Thinking},
 						}
 						if err = options.StreamingFunc(ctx, chunk); err != nil {
 							return nil, err
 						}
-						contentchoices[0].ReasoningContent += resp.Delta.Thinking
+						contentchoices[0].Reasoning = appendReasoning(contentchoices[0].Reasoning, resp.Delta.Thinking)
 					}
 				case "input_json_delta":
 					if currentToolCall != nil {
@@ -428,6 +439,15 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	return &llms.ContentResponse{
 		Choices: contentchoices,
 	}, nil
+}
+
+func appendReasoning(reasoning *reasoning.ContentReasoning, reasoningContent string) *reasoning.ContentReasoning {
+	if reasoning == nil {
+		return processReasoning(reasoningContent)
+	}
+
+	reasoning.Content += reasoningContent
+	return reasoning
 }
 
 // process the input messages to anthropic supported input

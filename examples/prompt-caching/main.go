@@ -133,7 +133,7 @@ When answering questions, consider these patterns and provide specific, actionab
 				Role: llms.ChatMessageTypeSystem,
 				Parts: []llms.ContentPart{
 					// Mark the large context for caching
-					llms.WithCacheControl(llms.TextPart(largeContext), anthropic.EphemeralCache()),
+					anthropic.WithCacheControl(llms.TextPart(largeContext), anthropic.EphemeralCache()),
 				},
 			},
 			{

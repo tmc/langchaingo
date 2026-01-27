@@ -257,12 +257,13 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 
 	splitter := reasoning.NewChunkContentSplitter()
 	fn := func(response api.ChatResponse) error {
-		text, reasoning := splitter.Split(response.Message.Content)
+		textContent, reasoningContent := splitter.Split(response.Message.Content)
 		if opts.StreamingFunc != nil {
+			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
 			if err := streaming.CallWithReasoning(ctx, opts.StreamingFunc, reasoning); err != nil {
 				return fmt.Errorf("error calling streaming reasoning: %w", err)
 			}
-			if err := streaming.CallWithText(ctx, opts.StreamingFunc, text); err != nil {
+			if err := streaming.CallWithText(ctx, opts.StreamingFunc, textContent); err != nil {
 				return fmt.Errorf("error calling streaming text: %w", err)
 			}
 		}
@@ -303,12 +304,12 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 
 // createContentResponse creates a LangChain content response from Ollama response.
 func (o *LLM) createContentResponse(resp api.ChatResponse) *llms.ContentResponse {
-	reasoning, content := reasoning.SplitContent(resp.Message.Content)
+	reasoning, content := reasoning.SplitContentWithReasoning(resp.Message.Content)
 	choices := []*llms.ContentChoice{
 		{
-			Content:          content,
-			ReasoningContent: reasoning,
-			StopReason:       resp.DoneReason,
+			Content:    content,
+			Reasoning:  reasoning,
+			StopReason: resp.DoneReason,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,

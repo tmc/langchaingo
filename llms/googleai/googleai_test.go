@@ -30,11 +30,6 @@ func hasExistingRecording(t *testing.T) bool {
 func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	t.Helper()
 
-	// Skip if no recording available and no credentials
-	if !hasExistingRecording(t) {
-		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
-	}
-
 	// Skip if no credentials and no recording
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
@@ -709,7 +704,10 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 		assert.Contains(t, resp.Choices[0].Content, "42")
 
 		// Check that thinking content is present in metadata
-		assert.NotEmpty(t, resp.Choices[0].ReasoningContent, "thinking content should not be empty")
+		assert.NotNil(t, resp.Choices[0].Reasoning)
+		if resp.Choices[0].Reasoning != nil {
+			assert.NotEmpty(t, resp.Choices[0].Reasoning.Content, "thinking content should not be empty")
+		}
 	})
 
 	t.Run("streaming", func(t *testing.T) {
@@ -740,7 +738,9 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 				case streaming.ChunkTypeText:
 					streamedContent.WriteString(chunk.Content)
 				case streaming.ChunkTypeReasoning:
-					thinkingContent.WriteString(chunk.Content)
+					if chunk.Reasoning != nil {
+						thinkingContent.WriteString(chunk.Reasoning.Content)
+					}
 				case streaming.ChunkTypeDone:
 					streamDone = true
 				default:
@@ -756,6 +756,9 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 		assert.NotEmpty(t, resp.Choices)
 		assert.Contains(t, resp.Choices[0].Content, "42")
 		assert.NotEmpty(t, thinkingContent.String(), "Thinking content should be streamed")
-		assert.Equal(t, resp.Choices[0].ReasoningContent, thinkingContent.String())
+		assert.NotNil(t, resp.Choices[0].Reasoning)
+		if resp.Choices[0].Reasoning != nil {
+			assert.Equal(t, resp.Choices[0].Reasoning.Content, thinkingContent.String())
+		}
 	})
 }

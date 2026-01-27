@@ -22,6 +22,9 @@ type options struct {
 
 	// If supplied, the 'anthropic-beta' header will be added to the request with the given value.
 	anthropicBetaHeader string
+
+	// Default cache strategy to apply to all requests unless overridden at call-time.
+	defaultCacheStrategy *CacheStrategy
 }
 
 type Option func(*options)
@@ -68,5 +71,30 @@ func WithLegacyTextCompletionsAPI() Option {
 func WithAnthropicBetaHeader(value string) Option {
 	return func(opts *options) {
 		opts.anthropicBetaHeader = value
+	}
+}
+
+// WithDefaultCacheStrategy sets the default caching strategy for all requests made by this client.
+// This strategy will be applied to all GenerateContent/Call invocations unless overridden
+// by a call-level WithCacheStrategy option.
+//
+// This is safe and cost-effective when:
+// - You have stable tools that don't change (CacheTools: true saves 90% on tools from 2nd request)
+// - You use the same system prompt across conversations (CacheSystem: true)
+// - You want automatic conversation history caching (CacheMessages: true for multi-turn)
+//
+// Example for AI agent with stable tools:
+//
+//	llm, err := anthropic.New(
+//	    anthropic.WithDefaultCacheStrategy(anthropic.CacheStrategy{
+//	        CacheTools: true,  // Tools cached once, reused forever
+//	        CacheSystem: true, // System prompt cached once
+//	    }),
+//	)
+//
+// Call-level strategies override client-level on a per-field basis.
+func WithDefaultCacheStrategy(strategy CacheStrategy) Option {
+	return func(opts *options) {
+		opts.defaultCacheStrategy = &strategy
 	}
 }

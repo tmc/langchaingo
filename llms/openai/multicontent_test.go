@@ -342,7 +342,9 @@ func TestMultiContentTextWithReasoning(t *testing.T) {
 				case streaming.ChunkTypeText:
 					content.WriteString(chunk.Content)
 				case streaming.ChunkTypeReasoning:
-					reasoningContent.WriteString(chunk.ReasoningContent)
+					if chunk.Reasoning != nil {
+						reasoningContent.WriteString(chunk.Reasoning.Content)
+					}
 				case streaming.ChunkTypeToolCall:
 					// skip tool calls
 				case streaming.ChunkTypeDone:
@@ -365,13 +367,23 @@ func TestMultiContentTextWithReasoning(t *testing.T) {
 		assert.Contains(t, strings.ToLower(c1.Content), "120")
 
 		if test.rout {
-			assert.NotEmpty(t, c1.ReasoningContent)
+			assert.NotNil(t, c1.Reasoning)
+			if c1.Reasoning != nil {
+				assert.NotEmpty(t, c1.Reasoning.Content)
+				assert.Nil(t, c1.Reasoning.Signature)       // not supported yet for OpenAI compatible providers
+				assert.Nil(t, c1.Reasoning.RedactedContent) // not supported yet for OpenAI compatible providers
+			}
 		}
 
 		if isStreaming {
 			assert.True(t, streamDone)
 			assert.Equal(t, content.String(), c1.Content)
-			assert.Equal(t, reasoningContent.String(), c1.ReasoningContent)
+			if reasoning := reasoningContent.String(); reasoning != "" {
+				assert.NotNil(t, c1.Reasoning)
+				if c1.Reasoning != nil {
+					assert.Equal(t, reasoning, c1.Reasoning.Content)
+				}
+			}
 		}
 	}
 
@@ -486,7 +498,9 @@ func TestWithStreaming(t *testing.T) {
 					case streaming.ChunkTypeText:
 						text.WriteString(chunk.Content)
 					case streaming.ChunkTypeReasoning:
-						reasoning.WriteString(chunk.ReasoningContent)
+						if chunk.Reasoning != nil {
+							reasoning.WriteString(chunk.Reasoning.Content)
+						}
 					case streaming.ChunkTypeToolCall:
 						// skip tool calls
 					case streaming.ChunkTypeDone:
@@ -502,7 +516,12 @@ func TestWithStreaming(t *testing.T) {
 			c1 := resp.Choices[0]
 			assert.Regexp(t, "dog|canid", strings.ToLower(c1.Content))
 			assert.Equal(t, text.String(), c1.Content)
-			assert.Equal(t, reasoning.String(), c1.ReasoningContent)
+			if reasoning := reasoning.String(); reasoning != "" {
+				assert.NotNil(t, c1.Reasoning)
+				if c1.Reasoning != nil {
+					assert.Equal(t, reasoning, c1.Reasoning.Content)
+				}
+			}
 		})
 	}
 }

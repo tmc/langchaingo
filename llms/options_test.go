@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/stretchr/testify/assert"
@@ -196,16 +197,17 @@ func TestWithOptions(t *testing.T) {
 
 func TestWithStreamingFunc(t *testing.T) { //nolint:funlen
 	var (
-		called                 int
-		gotDone                bool
-		gotReasoning, gotChunk string
-		gotToolCall            streaming.ToolCall
+		called       int
+		gotDone      bool
+		gotReasoning *reasoning.ContentReasoning
+		gotChunk     string
+		gotToolCall  streaming.ToolCall
 	)
 	testFunc := func(ctx context.Context, chunk streaming.Chunk) error {
 		called++
 		switch chunk.Type {
 		case streaming.ChunkTypeReasoning:
-			gotReasoning = chunk.ReasoningContent
+			gotReasoning = chunk.Reasoning
 		case streaming.ChunkTypeText:
 			gotChunk = chunk.Content
 		case streaming.ChunkTypeToolCall:
@@ -228,7 +230,7 @@ func TestWithStreamingFunc(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	// Test that the function works
-	reasoning := "reasoning"
+	reasoning := &reasoning.ContentReasoning{Content: "reasoning"}
 	if err := opts.StreamingFunc(ctx, streaming.NewReasoningChunk(reasoning)); err != nil {
 		t.Errorf("StreamingFunc with reasoning content returned error: %v", err)
 	}
@@ -254,8 +256,8 @@ func TestWithStreamingFunc(t *testing.T) { //nolint:funlen
 	if !gotDone {
 		t.Error("StreamingFunc was not called with done chunk")
 	}
-	if gotReasoning != reasoning {
-		t.Errorf("StreamingFunc reasoning = %s, want %s", gotReasoning, reasoning)
+	if gotReasoning.String() != reasoning.String() {
+		t.Errorf("StreamingFunc reasoning = %s, want %s", gotReasoning.String(), reasoning.String())
 	}
 	if gotChunk != chunk {
 		t.Errorf("StreamingFunc chunk = %s, want %s", gotChunk, chunk)

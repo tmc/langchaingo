@@ -38,7 +38,11 @@ func main() {
 		llms.WithTemperature(0.7),
 		llms.WithStreamingFunc(func(_ context.Context, chunk streaming.Chunk) error {
 			if chunk.Type == streaming.ChunkTypeReasoning {
-				fmt.Printf("Streaming Reasoning: %s\n", chunk.ReasoningContent)
+				if !chunk.Reasoning.IsEmpty() {
+					fmt.Printf("Streaming Reasoning: %s\n", chunk.Reasoning.Content)
+				} else {
+					fmt.Println("Streaming Reasoning chunk is nil")
+				}
 			}
 			if chunk.Type == streaming.ChunkTypeText {
 				fmt.Printf("Streaming Content: %s\n", chunk.Content)
@@ -56,7 +60,7 @@ func main() {
 	// Access the reasoning content and final answer separately
 	if len(completion.Choices) > 0 {
 		choice := completion.Choices[0]
-		fmt.Printf("\n\nReasoning Process:\n%s\n", choice.ReasoningContent)
+		fmt.Printf("\n\nReasoning Process:\n%s\n", choice.Reasoning.Content)
 		fmt.Printf("\nFinal Answer:\n%s\n", choice.Content)
 	}
 }

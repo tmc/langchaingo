@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func TestToolCall(t *testing.T) {
@@ -19,6 +21,7 @@ func TestToolCall(t *testing.T) {
 	assert.Equal(t, "123", toolCall.ID)
 	assert.Equal(t, "weather", toolCall.Name)
 	assert.Equal(t, `{"location": "New York"}`, toolCall.Arguments)
+	assert.Nil(t, toolCall.Reasoning)
 
 	// Test String method
 	expected := "ToolCall{ID: 123, Name: weather, Arguments: {\"location\": \"New York\"}}"
@@ -41,6 +44,38 @@ func TestToolCall(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestNewToolCallWithReasoning(t *testing.T) {
+	t.Parallel()
+
+	reasoningContent := &reasoning.ContentReasoning{
+		Content:         "Analyzing weather request for New York",
+		Signature:       []byte("sig123"),
+		RedactedContent: []byte("redacted"),
+	}
+
+	// Test creating a new tool call with reasoning
+	toolCall := NewToolCallWithReasoning("123", "weather", `{"location": "New York"}`, reasoningContent)
+	assert.Equal(t, "123", toolCall.ID)
+	assert.Equal(t, "weather", toolCall.Name)
+	assert.Equal(t, `{"location": "New York"}`, toolCall.Arguments)
+	assert.NotNil(t, toolCall.Reasoning)
+	assert.Equal(t, "Analyzing weather request for New York", toolCall.Reasoning.Content)
+	assert.Equal(t, []byte("sig123"), toolCall.Reasoning.Signature)
+	assert.Equal(t, []byte("redacted"), toolCall.Reasoning.RedactedContent)
+
+	// Test with nil reasoning
+	toolCallNilReasoning := NewToolCallWithReasoning("456", "getTime", `{}`, nil)
+	assert.Equal(t, "456", toolCallNilReasoning.ID)
+	assert.Equal(t, "getTime", toolCallNilReasoning.Name)
+	assert.Equal(t, `{}`, toolCallNilReasoning.Arguments)
+	assert.Nil(t, toolCallNilReasoning.Reasoning)
+
+	// Test Parse method with reasoning
+	args, err := toolCall.Parse()
+	require.NoError(t, err)
+	assert.Equal(t, "New York", args["location"])
+}
+
 func TestChunk(t *testing.T) {
 	t.Parallel()
 
@@ -51,10 +86,26 @@ func TestChunk(t *testing.T) {
 	assert.Equal(t, "Text: Hello, world!", textChunk.String())
 
 	// Test reasoning chunk
-	reasoningChunk := NewReasoningChunk("Step 1: Analyze the problem.")
+	reasoningContent := "Step 1: Analyze the problem."
+	reasoningChunk := NewReasoningChunkWithContent(reasoningContent)
 	assert.Equal(t, ChunkTypeReasoning, reasoningChunk.Type)
-	assert.Equal(t, "Step 1: Analyze the problem.", reasoningChunk.ReasoningContent)
-	assert.Equal(t, "Reasoning: Step 1: Analyze the problem.", reasoningChunk.String())
+	assert.Equal(t, reasoningContent, reasoningChunk.Reasoning.Content)
+	assert.Equal(t, "Reasoning: "+reasoningContent, reasoningChunk.String())
+
+	// Extended reasoning chunk
+	signature := []byte("signature")
+	redactedContent := []byte("redacted content")
+	reasoningChunk = NewReasoningChunk(&reasoning.ContentReasoning{
+		Content:         reasoningContent,
+		Signature:       signature,
+		RedactedContent: redactedContent,
+	})
+	assert.Equal(t, reasoningContent, reasoningChunk.Reasoning.Content)
+	assert.Equal(t, string(signature), string(reasoningChunk.Reasoning.Signature))
+	assert.Equal(t, string(redactedContent), string(reasoningChunk.Reasoning.RedactedContent))
+	expectedReasoningChunkString := fmt.Sprintf("Reasoning: %s\nSignature: %s\nRedactedContent: %s",
+		reasoningContent, string(signature), string(redactedContent))
+	assert.Equal(t, expectedReasoningChunkString, reasoningChunk.String())
 
 	// Test tool call chunk
 	toolCall := NewToolCall("123", "weather", `{"location": "New York"}`)
@@ -62,6 +113,15 @@ func TestChunk(t *testing.T) {
 	assert.Equal(t, ChunkTypeToolCall, toolCallChunk.Type)
 	assert.Equal(t, toolCall, toolCallChunk.ToolCall)
 	assert.Contains(t, toolCallChunk.String(), "ToolCall: ToolCall{ID: 123")
+
+	// Test tool call chunk with reasoning
+	toolCallReasoning := &reasoning.ContentReasoning{Content: "Analyzing weather request"}
+	toolCallWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, toolCallReasoning)
+	toolCallChunkWithReasoning := NewToolCallChunk(toolCallWithReasoning)
+	assert.Equal(t, ChunkTypeToolCall, toolCallChunkWithReasoning.Type)
+	assert.Equal(t, toolCallWithReasoning, toolCallChunkWithReasoning.ToolCall)
+	assert.NotNil(t, toolCallChunkWithReasoning.ToolCall.Reasoning)
+	assert.Equal(t, "Analyzing weather request", toolCallChunkWithReasoning.ToolCall.Reasoning.Content)
 
 	// Test done chunk
 	doneChunk := NewDoneChunk()
@@ -118,69 +178,122 @@ func TestCallWithReasoning(t *testing.T) {
 	t.Parallel()
 
 	ctx := t.Context()
-	var receivedReasoning string
+	var receivedReasoning *reasoning.ContentReasoning
 
 	callback := func(_ context.Context, chunk Chunk) error {
 		assert.Equal(t, ChunkTypeReasoning, chunk.Type)
-		receivedReasoning = chunk.ReasoningContent
+		receivedReasoning = chunk.Reasoning
 		return nil
 	}
 
 	// Test with valid reasoning
-	err := CallWithReasoning(ctx, callback, "Step 1: Analyze.")
+	reasoningContent := "Step 1: Analyze."
+	err := CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: reasoningContent})
 	require.NoError(t, err)
-	assert.Equal(t, "Step 1: Analyze.", receivedReasoning)
+	assert.Equal(t, reasoningContent, receivedReasoning.Content)
 
 	// Test with empty reasoning
-	err = CallWithReasoning(ctx, callback, "")
+	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{})
 	require.NoError(t, err)
-	assert.Equal(t, "Step 1: Analyze.", receivedReasoning) // Should not change
+	assert.Equal(t, reasoningContent, receivedReasoning.Content) // Should not change
 
 	// Test with nil callback
-	err = CallWithReasoning(ctx, nil, "Step 1: Analyze.")
+	err = CallWithReasoning(ctx, nil, &reasoning.ContentReasoning{Content: reasoningContent})
 	require.NoError(t, err)
 
 	// Test with multiline reasoning
 	multilineReasoning := "Step 1: Define the problem.\nStep 2: Collect data.\nStep 3: Form a hypothesis."
-	err = CallWithReasoning(ctx, callback, multilineReasoning)
+	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: multilineReasoning})
 	require.NoError(t, err)
-	assert.Equal(t, multilineReasoning, receivedReasoning)
+	assert.Equal(t, multilineReasoning, receivedReasoning.Content)
 
 	// Test with special characters and Unicode
 	specialCharsReasoning := "分析步骤: 检查数据 ¥€$£ß"
-	err = CallWithReasoning(ctx, callback, specialCharsReasoning)
+	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: specialCharsReasoning})
 	require.NoError(t, err)
-	assert.Equal(t, specialCharsReasoning, receivedReasoning)
+	assert.Equal(t, specialCharsReasoning, receivedReasoning.Content)
 
 	// Test with very long reasoning text
 	longReasoning := "Step 1: " + strings.Repeat("Analysis and evaluation. ", 100)
-	err = CallWithReasoning(ctx, callback, longReasoning)
+	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: longReasoning})
 	require.NoError(t, err)
-	assert.Equal(t, longReasoning, receivedReasoning)
+	assert.Equal(t, longReasoning, receivedReasoning.Content)
 
 	// Test multiple sequential calls with accumulation
 	accumulatedReasoning := ""
 	accumulationCallback := func(_ context.Context, chunk Chunk) error {
 		assert.Equal(t, ChunkTypeReasoning, chunk.Type)
-		accumulatedReasoning += chunk.ReasoningContent
+		accumulatedReasoning += chunk.Reasoning.Content
 		return nil
 	}
 
-	err = CallWithReasoning(ctx, accumulationCallback, "First part. ")
+	err = CallWithReasoning(ctx, accumulationCallback, &reasoning.ContentReasoning{Content: "First part. "})
 	require.NoError(t, err)
-	err = CallWithReasoning(ctx, accumulationCallback, "Second part. ")
+	err = CallWithReasoning(ctx, accumulationCallback, &reasoning.ContentReasoning{Content: "Second part. "})
 	require.NoError(t, err)
-	err = CallWithReasoning(ctx, accumulationCallback, "Final part.")
+	err = CallWithReasoning(ctx, accumulationCallback, &reasoning.ContentReasoning{Content: "Final part."})
 	require.NoError(t, err)
 
 	assert.Equal(t, "First part. Second part. Final part.", accumulatedReasoning)
+
+	// Test with signature and redacted content
+	signature := []byte("signature")
+	redactedContent := []byte("redacted content")
+	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{
+		Content:         reasoningContent,
+		Signature:       signature,
+		RedactedContent: redactedContent,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, reasoningContent, receivedReasoning.Content)
+	assert.Equal(t, string(signature), string(receivedReasoning.Signature))
+	assert.Equal(t, string(redactedContent), string(receivedReasoning.RedactedContent))
 
 	// Test with error from callback
 	expectedErr := errors.New("callback error")
 	errorCallback := func(_ context.Context, _ Chunk) error {
 		return expectedErr
 	}
-	err = CallWithReasoning(ctx, errorCallback, "Step 1: Analyze.")
+	err = CallWithReasoning(ctx, errorCallback, &reasoning.ContentReasoning{Content: reasoningContent})
+	require.Error(t, err)
+	assert.Equal(t, expectedErr, err)
+}
+
+func TestCallWithReasoningContent(t *testing.T) {
+	t.Parallel()
+
+	ctx := t.Context()
+	var receivedReasoning *reasoning.ContentReasoning
+
+	callback := func(_ context.Context, chunk Chunk) error {
+		assert.Equal(t, ChunkTypeReasoning, chunk.Type)
+		receivedReasoning = chunk.Reasoning
+		return nil
+	}
+
+	// Test with valid reasoning content
+	reasoningContent := "Step 1: Analyze the problem."
+	err := CallWithReasoningContent(ctx, callback, reasoningContent)
+	require.NoError(t, err)
+	assert.Equal(t, reasoningContent, receivedReasoning.Content)
+	assert.Nil(t, receivedReasoning.Signature)
+	assert.Nil(t, receivedReasoning.RedactedContent)
+
+	// Test with empty content
+	err = CallWithReasoningContent(ctx, callback, "")
+	require.NoError(t, err)
+	assert.Equal(t, reasoningContent, receivedReasoning.Content) // Should not change
+
+	// Test with nil callback
+	err = CallWithReasoningContent(ctx, nil, "Some reasoning")
+	require.NoError(t, err)
+
+	// Test with error from callback
+	expectedErr := errors.New("callback error")
+	errorCallback := func(_ context.Context, _ Chunk) error {
+		return expectedErr
+	}
+	err = CallWithReasoningContent(ctx, errorCallback, "Some reasoning")
 	require.Error(t, err)
 	assert.Equal(t, expectedErr, err)
 }
@@ -203,6 +316,19 @@ func TestCallWithToolCall(t *testing.T) {
 	err := CallWithToolCall(ctx, callback, toolCall)
 	require.NoError(t, err)
 	assert.Equal(t, toolCall, receivedToolCall)
+
+	// Test with tool call with reasoning
+	reasoningContent := &reasoning.ContentReasoning{
+		Content:         "Analyzing weather request",
+		Signature:       []byte("sig123"),
+		RedactedContent: []byte("redacted"),
+	}
+	toolCallWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, reasoningContent)
+	err = CallWithToolCall(ctx, callback, toolCallWithReasoning)
+	require.NoError(t, err)
+	assert.Equal(t, toolCallWithReasoning, receivedToolCall)
+	assert.NotNil(t, receivedToolCall.Reasoning)
+	assert.Equal(t, "Analyzing weather request", receivedToolCall.Reasoning.Content)
 
 	// Test with missing ID
 	invalidToolCall := NewToolCall("", "weather", `{"location": "New York"}`)
@@ -253,6 +379,20 @@ func TestAppendToolCall(t *testing.T) {
 	assert.Equal(t, "123", dst.ID)
 	assert.Equal(t, "weather", dst.Name)
 	assert.Equal(t, `{"location": "New York"}, "unit": "celsius"}`, dst.Arguments)
+
+	// Test appending with reasoning - note that AppendToolCall does NOT append reasoning
+	// It only sets ID, Name and appends Arguments
+	reasoningContent := &reasoning.ContentReasoning{Content: "Analyzing request"}
+	srcWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, reasoningContent)
+	dstWithReasoning := ToolCall{}
+
+	AppendToolCall(srcWithReasoning, &dstWithReasoning)
+
+	assert.Equal(t, "456", dstWithReasoning.ID)
+	assert.Equal(t, "getTime", dstWithReasoning.Name)
+	assert.Equal(t, `{"timezone": "UTC"}`, dstWithReasoning.Arguments)
+	// AppendToolCall doesn't copy reasoning field
+	assert.Nil(t, dstWithReasoning.Reasoning)
 }
 
 func TestCallWithDone(t *testing.T) {
@@ -305,7 +445,7 @@ func TestIntegration(t *testing.T) {
 		case ChunkTypeText:
 			textChunks = append(textChunks, chunk.Content)
 		case ChunkTypeReasoning:
-			reasoningChunks = append(reasoningChunks, chunk.ReasoningContent)
+			reasoningChunks = append(reasoningChunks, chunk.Reasoning.Content)
 		case ChunkTypeToolCall:
 			toolCalls = append(toolCalls, chunk.ToolCall)
 		case ChunkTypeDone:
@@ -320,9 +460,9 @@ func TestIntegration(t *testing.T) {
 	_ = CallWithText(ctx, callback, "world!")
 
 	// Simulate streaming reasoning chunks
-	_ = CallWithReasoning(ctx, callback, "Step 1: Start with a greeting.")
-	_ = CallWithReasoning(ctx, callback, "Step 2: Add punctuation.")
-	_ = CallWithReasoning(ctx, callback, "Step 3: Complete the phrase.")
+	_ = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: "Step 1: Start with a greeting."})
+	_ = CallWithReasoningContent(ctx, callback, "Step 2: Add punctuation.")
+	_ = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{Content: "Step 3: Complete the phrase."})
 
 	// Simulate streaming tool calls
 	weatherTool := NewToolCall("123", "weather", `{"location": `)
@@ -331,7 +471,8 @@ func TestIntegration(t *testing.T) {
 	weatherTool2 := NewToolCall("123", "weather", `"New York"}`)
 	_ = CallWithToolCall(ctx, callback, weatherTool2)
 
-	timeTool := NewToolCall("456", "getTime", `{}`)
+	reasoningContent := &reasoning.ContentReasoning{Content: "Checking current time"}
+	timeTool := NewToolCallWithReasoning("456", "getTime", `{}`, reasoningContent)
 	_ = CallWithToolCall(ctx, callback, timeTool)
 
 	// Signal stream completion
@@ -349,14 +490,18 @@ func TestIntegration(t *testing.T) {
 	assert.Equal(t, "123", toolCalls[0].ID)
 	assert.Equal(t, "weather", toolCalls[0].Name)
 	assert.Equal(t, `{"location": `, toolCalls[0].Arguments)
+	assert.Nil(t, toolCalls[0].Reasoning)
 
 	assert.Equal(t, "123", toolCalls[1].ID)
 	assert.Equal(t, "weather", toolCalls[1].Name)
 	assert.Equal(t, `"New York"}`, toolCalls[1].Arguments)
+	assert.Nil(t, toolCalls[1].Reasoning)
 
 	assert.Equal(t, "456", toolCalls[2].ID)
 	assert.Equal(t, "getTime", toolCalls[2].Name)
 	assert.Equal(t, `{}`, toolCalls[2].Arguments)
+	assert.NotNil(t, toolCalls[2].Reasoning)
+	assert.Equal(t, "Checking current time", toolCalls[2].Reasoning.Content)
 
 	// Verify done was received
 	assert.True(t, doneReceived)
@@ -377,6 +522,29 @@ func TestToolCallMarshalUnmarshal(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, toolCall, unmarshaled)
+
+	// Test marshaling tool call with reasoning
+	reasoningContent := &reasoning.ContentReasoning{
+		Content:         "Analyzing request",
+		Signature:       []byte("sig123"),
+		RedactedContent: []byte("redacted"),
+	}
+	toolCallWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, reasoningContent)
+
+	data, err = json.Marshal(toolCallWithReasoning)
+	require.NoError(t, err)
+
+	var unmarshaledWithReasoning ToolCall
+	err = json.Unmarshal(data, &unmarshaledWithReasoning)
+	require.NoError(t, err)
+
+	assert.Equal(t, toolCallWithReasoning.ID, unmarshaledWithReasoning.ID)
+	assert.Equal(t, toolCallWithReasoning.Name, unmarshaledWithReasoning.Name)
+	assert.Equal(t, toolCallWithReasoning.Arguments, unmarshaledWithReasoning.Arguments)
+	assert.NotNil(t, unmarshaledWithReasoning.Reasoning)
+	assert.Equal(t, "Analyzing request", unmarshaledWithReasoning.Reasoning.Content)
+	assert.Equal(t, []byte("sig123"), unmarshaledWithReasoning.Reasoning.Signature)
+	assert.Equal(t, []byte("redacted"), unmarshaledWithReasoning.Reasoning.RedactedContent)
 }
 
 func TestChunkMarshalUnmarshal(t *testing.T) {
@@ -387,19 +555,35 @@ func TestChunkMarshalUnmarshal(t *testing.T) {
 	data, err := json.Marshal(textChunk)
 	require.NoError(t, err)
 
-	var unmarshaled Chunk
-	err = json.Unmarshal(data, &unmarshaled)
+	var unmarshaledTextChunk Chunk
+	err = json.Unmarshal(data, &unmarshaledTextChunk)
 	require.NoError(t, err)
-	assert.Equal(t, textChunk, unmarshaled)
+	assert.Equal(t, textChunk, unmarshaledTextChunk)
 
 	// Test reasoning chunk
-	reasoningChunk := NewReasoningChunk("Step 1: Analyze.")
+	reasoningChunk := NewReasoningChunk(&reasoning.ContentReasoning{
+		Content:         "Step 1: Analyze.",
+		Signature:       []byte("signature"),
+		RedactedContent: []byte("redacted content"),
+	})
 	data, err = json.Marshal(reasoningChunk)
 	require.NoError(t, err)
 
-	err = json.Unmarshal(data, &unmarshaled)
+	var unmarshaledReasoningChunk Chunk
+	err = json.Unmarshal(data, &unmarshaledReasoningChunk)
 	require.NoError(t, err)
-	assert.Equal(t, reasoningChunk, unmarshaled)
+	assert.Equal(t, reasoningChunk, unmarshaledReasoningChunk)
+
+	// Test reasoning chunk with content
+	reasoningContent := "Step 1: Analyze."
+	reasoningChunk = NewReasoningChunkWithContent(reasoningContent)
+	data, err = json.Marshal(reasoningChunk)
+	require.NoError(t, err)
+
+	var unmarshaledReasoningChunkWithContent Chunk
+	err = json.Unmarshal(data, &unmarshaledReasoningChunkWithContent)
+	require.NoError(t, err)
+	assert.Equal(t, reasoningChunk, unmarshaledReasoningChunkWithContent)
 
 	// Test tool call chunk
 	toolCall := NewToolCall("123", "weather", `{"location": "New York"}`)
@@ -407,16 +591,18 @@ func TestChunkMarshalUnmarshal(t *testing.T) {
 	data, err = json.Marshal(toolCallChunk)
 	require.NoError(t, err)
 
-	err = json.Unmarshal(data, &unmarshaled)
+	var unmarshaledToolCallChunk Chunk
+	err = json.Unmarshal(data, &unmarshaledToolCallChunk)
 	require.NoError(t, err)
-	assert.Equal(t, toolCallChunk, unmarshaled)
+	assert.Equal(t, toolCallChunk, unmarshaledToolCallChunk)
 
 	// Test done chunk
 	doneChunk := NewDoneChunk()
 	data, err = json.Marshal(doneChunk)
 	require.NoError(t, err)
 
-	err = json.Unmarshal(data, &unmarshaled)
+	var unmarshaledDoneChunk Chunk
+	err = json.Unmarshal(data, &unmarshaledDoneChunk)
 	require.NoError(t, err)
-	assert.Equal(t, doneChunk, unmarshaled)
+	assert.Equal(t, doneChunk, unmarshaledDoneChunk)
 }

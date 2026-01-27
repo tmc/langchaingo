@@ -1,0 +1,68 @@
+httprr trace v1
+433 2353
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 213
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]}],"max_tokens":4096,"temperature":1,"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1339
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:11Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:13Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3998
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:10Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:11Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:13 GMT
+Request-Id: req_011CXWs7iS61UdJfryJMMktn
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 3177
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01QJGF5CPTLqCvEBhRY4ctJ7","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"This is a simple linear equation. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me verify: 7 + 5 = 12 ✓\n\nSo x = 7.","signature":"EuUCCkYICxgCKkAFllclf5pxpuqkSDcUAX3ocxekoryghmEd6INwNQGqGovkpFLSzI280ys/kszpvUtxEHTsD3DOtWJMrC6EZqbnEgya2MsgUoYRcizaa7gaDCkJkunL2SCJLFRvQiIwAChDVujFxeFndWZTYVwOPySvahvTzEKJfH9wcDG0b3H376trO65DrQIw7rKsqCxTKswBKOJneMmPK1BTngZAEnO8VdT1EvK+qdqomJy4T8rSo6+Wqo2D4coD84ah+RB0Q74Rvu2Hty4DGuKOBDlncB8s0O6Xu0ujlTfP5VpDYOssNvzeOnRmMOR270D+WIIGNJgO0uQZMCVoTTTwgoJX6IGS/Uo5RVJOO+xX/cs4+rR/M46Ne7K3xmCw8dmNWcnJjSsZYbJZ7anBrbOM/X6lhiw04GImzC77nm7NT43A8EunQV4Ye53gtVQPoY3emroYKllWQFiyeQcSY1sgF39DGAE="},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Answer: x = 7**\n\nTo check: 7 + 5 = 12 ✓"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":53,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":189,"service_tier":"standard"}}1500 2411
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 1279
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"This is a simple linear equation. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me verify: 7 + 5 = 12 ✓\n\nSo x = 7.","signature":"EuUCCkYICxgCKkAFllclf5pxpuqkSDcUAX3ocxekoryghmEd6INwNQGqGovkpFLSzI280ys/kszpvUtxEHTsD3DOtWJMrC6EZqbnEgya2MsgUoYRcizaa7gaDCkJkunL2SCJLFRvQiIwAChDVujFxeFndWZTYVwOPySvahvTzEKJfH9wcDG0b3H376trO65DrQIw7rKsqCxTKswBKOJneMmPK1BTngZAEnO8VdT1EvK+qdqomJy4T8rSo6+Wqo2D4coD84ah+RB0Q74Rvu2Hty4DGuKOBDlncB8s0O6Xu0ujlTfP5VpDYOssNvzeOnRmMOR270D+WIIGNJgO0uQZMCVoTTTwgoJX6IGS/Uo5RVJOO+xX/cs4+rR/M46Ne7K3xmCw8dmNWcnJjSsZYbJZ7anBrbOM/X6lhiw04GImzC77nm7NT43A8EunQV4Ye53gtVQPoY3emroYKllWQFiyeQcSY1sgF39DGAE="},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Answer: x = 7**\n\nTo check: 7 + 5 = 12 ✓"}]},{"role":"user","content":[{"type":"text","text":"Now solve x + 10 = 25"}]}],"max_tokens":4096,"temperature":1,"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1397
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-26T23:34:15Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 400000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-26T23:34:17Z
+Anthropic-Ratelimit-Requests-Limit: 4000
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-01-26T23:34:14Z
+Anthropic-Ratelimit-Tokens-Limit: 2400000
+Anthropic-Ratelimit-Tokens-Remaining: 2400000
+Anthropic-Ratelimit-Tokens-Reset: 2026-01-26T23:34:15Z
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 26 Jan 2026 23:34:17 GMT
+Request-Id: req_011CXWs82yoCyPxEDmABbiAg
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Envoy-Upstream-Service-Time: 2772
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_01SforRMzQWPkQMzjkhZjCJS","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"The user wants me to solve x + 10 = 25. This is similar to the previous problem.\n\nI need to isolate x by subtracting 10 from both sides.\n\nx + 10 = 25\nx + 10 - 10 = 25 - 10\nx = 15\n\nLet me check: 15 + 10 = 25 ✓","signature":"EvsCCkYICxgCKkA8IM9ngAkpUkUBf20wPgTap0yiIMdYrGLveEHtbnAQ5BkMlXeUeDBs7+PkF4l0Qx4lrMBpILGbQ5y2Q12tuUWXEgxhAwc3IQlB/9vwrKoaDNyubYPD83Si7kqMiyIwKNLHt/DX7FVPdnCDp/X5NSHQaTgig61+NyQ2806VlOyoh7naPTOqHfa0OppyXBfEKuIBINkleA3T7x+eVCg9i8iUnLTHOJbAoWGbCZnGD/wkoS5VOdmfNYAhSdfcVV/oOek7J4kOMDKWqcxU691sylI9rbVjTeWNQ3xNIgRRFWddfzPTG1ap0ZgD1R89delI0XHRBvv4HedywwkENDwkvLf2KZxNVCc9doLje5dsKTV6J/pRQ97cHmSnmz6QBw1Jfna4cvT5tXfsHvPDgsH0Hqcm/IENA/AqkZoyRjuWzop7phTUoQ0x+i7+ZBd5C7P0WEJYMzSJlMrJBgJVgTBdTOAlOQ1IQ+JAja9Nn9ZHV+Pte1lITBgB"},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 10 = 25\n\n**Subtract 10 from both sides:**\nx + 10 - 10 = 25 - 10\nx = 15\n\n**Answer: x = 15**\n\nTo check: 15 + 10 = 25 ✓"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":159,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":192,"service_tier":"standard"}}

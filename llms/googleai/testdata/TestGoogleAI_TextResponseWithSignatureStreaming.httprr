@@ -1,0 +1,119 @@
+httprr trace v1
+886 10808
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 546
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Calculate 23 * 17. Show your work."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"thinkingConfig":{"includeThoughts":true,"thinkingBudget":1024},"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 10408
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Disposition: attachment
+Content-Type: text/event-stream
+Date: Sat, 24 Jan 2026 20:49:43 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=1588
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+data: {"candidates": [{"content": {"parts": [{"text": "**Exploring Multiplication Methods**\n\nI've started exploring different methods to calculate 23 x 17. I'm focusing on three approaches: standard long multiplication, a mental math friendly distributive property approach, and a more algebraic difference of squares method. The goal is to show the work, as required. I'll evaluate the efficiency and clarity of each approach.\n\n\n","thought": true}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"totalTokenCount": 14,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}]},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "To calculate **23 × 17**, you can use several"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 14,"totalTokenCount": 427,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": " methods. Here are two ways to show the work:\n\n### Method 1: Standard Long Multiplication\n1.  **"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 39,"totalTokenCount": 452,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "Multiply 23 by 7 (the ones digit):**\n    *   7 × 3 = 21 ("}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 65,"totalTokenCount": 478,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "Write down 1, carry the 2)\n    *   7 × 2 = 14\n    *   1"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 92,"totalTokenCount": 505,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "4 + 2 (carried) = 16\n    *   Result: **161**\n\n2.  **"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 119,"totalTokenCount": 532,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "Multiply 23 by 10 (the tens digit):**\n    *   Place a 0 in the ones column"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 145,"totalTokenCount": 558,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": ".\n    *   1 × 3 = 3\n    *   1 × 2 = 2\n"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 169,"totalTokenCount": 582,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "    *   Result: **230**\n\n3.  **Add the two results together:**\n    *   16"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 196,"totalTokenCount": 609,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "1 + 230 = **391**\n\n**Work Layout:**\n```text\n      23\n    "}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 222,"totalTokenCount": 635,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "x 17\n    ----\n     161  (7 × 23)\n    +2"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 246,"totalTokenCount": 659,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "30  (10 × 23)\n    ----\n     391\n```\n\n***\n\n"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 270,"totalTokenCount": 683,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "### Method 2: Difference of Squares (Mental Math Trick)\nSince 23 and 17 are both"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 294,"totalTokenCount": 707,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": " the same distance (3) from 20, you can use the algebraic formula $(a + b)(a -"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 318,"totalTokenCount": 731,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": " b) = a^2 - b^2$.\n\n1.  Rewrite the numbers: $(20 + "}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 342,"totalTokenCount": 755,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "3) \\times (20 - 3)$\n2.  Apply the formula: $20^2"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 366,"totalTokenCount": 779,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": " - 3^2$\n3.  Calculate the squares: $400 - 9$\n4"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 390,"totalTokenCount": 803,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": ".  Final result: **391**\n\n**Final Answer:**\n23 × 17 = **3"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 415,"totalTokenCount": 828,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "91**"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 418,"totalTokenCount": 831,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+data: {"candidates": [{"content": {"parts": [{"text": "","thoughtSignature": "EvEKCu4KAXLI2nzruhYXPiwd5NEBTL3oR3Oz4AfPbqqG0K3XrZVTeb6QABgsdYUYltRMMmuQbUl/Bs7fGjQF4AIoAxTBiI+Ra65laI2nm0Ez6Ulh2sBxb6aidvhgl3M6phSvDLlrzzGc69t6mcfsygChhRp9lg3Yxpd/ki736AtjOgmrXklqJ0mniMOia9bnDkeQudt1oAn3Mm16vk2EYEfkSL4r5tXjPMadzs6uN1kcb8YfTMY+1TRg6z75Eon+Qh96shSTvXKOoZlmTXWaiYjFOAQP3WKzdChOZKM9sepXAoCL66czKqqqsPxIwk58ZaGfOrTF/qQXpWVvHKcq808fsWY3i3BEMenJgBkLozpku/NYP50ZhKtcVGcq+ygLseMgbS/cSeFC+ayVpj2eZvJKkCCvPQLVZoCL7gW97wshdwE6iaNOGwi7JtbxQMhzHOv2O8eL/bcgXRcWP1K33gGf0t6A6wkCT+nU0IgGXorDFqOK1t9rrKAtaIz7wBxT5uYGIvo4CDH3RMDhSu2B7XqTsQWrPoiUkzo8lCccUfM8U5MzUDBZT5P+Db2l1mKNqEdhZe7lELue50wZVCYFndKCJi6CiMzSeBXjni8zVGeIhm5lIyIiUyrhOIDQKteZ4tVaLfNtEi1c9JqD6rmwHrsscKmznVzq2N4vcE9z7gzs0VFDG+hLSIPdQdRm742smoFejASVssOotMuA7oHGeI7yI9FQcQ2dlSZVi7ldrDwWi/H7IpSqxEEYIP/2OJI6pXhZbq4/7FOpTu+RUjBD1ob+Ys1lYqdvwd59z4/NskQmIglIx+OtSyXb07H4BWIuyl5qIwwKfTgJRxG4XhwmPJqsE7WJmvz1cittXkzbC/IAkAq/vp/LIVRR8LHo4DrEV71MpTUqTL+vopdAv9hU13TPe/PrZUzyQsILQ241tAfWeB0saHadC3Ryw6+CCmb6dO94+0wFpIMgj2fm8xzODpwn0+6MFMz3npgiFkPMqY6wWcQ7u8ktEMNq7xkq8qp3I7jGczWRAZhmfjADNgz1sdk9u5nSNTuXRlUqpyDIfCV3hMvGrVoWgeJ3+K0VVVq6/fq1VCJ9LGoq0jx+oqXgH+lKbY4Xa126epp8oFmyKmh5ICfzBlsquggWlFwXvskjisHa2eU2eLv88PesMcPHv2HUusS3SzeuprsMfSM56/Xd4hGfj5fxgwq0U8Im3jsFPg42TPUcx/tdgYpqBbv1aw2LkztxqbXccMXHIdmEYDtC6g4vLlA7NJDcGMbVBN2vbNTtymPwKTBw7ibxfRzAifh01gXeUhIPEN0aLYgU9zsaFUJ8NT3VX/KSuHslkwD95yoIXPyZfcpTYqqddQiYVwH5+Dh7j910BYTxBMkNY0lwu4ka5ne0rL0AMQmT+Si2BpngVI8B3RjObE/ra9Hbrs8aJ6ndY9xw0ObZ7a40ZJX/1woYghBbTyL7s1k2kR36n7nDxChv2cAk0NslcKjfVISXozTCNNX0YhTZyzJJHre84ZoNaXQXoPb7WFYB4q+IiUUTAaENiRP5janjH2FedFQdA/ITn14IXk76GUmt0/wYGaz08fDUP+G0PxwrxUWJQRhA6NMdUR/p79kNlD+8TRYI3xFZGKgbp1UkXQv5dr5JntnjLYlZ+ZbY2063hQ8ZWooRcAY1G0ipCRMajDZ54933sSCZoGetFEC4ajmFv4HDPYqOcDc+zCoKc+YuVLfD4CX8KVUyC8x4SShRTC/Qx+PktaPFWfWcGRqPz9yWF1PbGasUb6zdyj5bjJRPd+HCamCnyY6qagyut4s35iPW8RNX5A+iklIJajFqRY/3d3RaXgGjLu/2tETty1XDXhN5HB6RpQ=="}],"role": "model"},"finishReason": "STOP","index": 0}],"usageMetadata": {"promptTokenCount": 14,"candidatesTokenCount": 418,"totalTokenCount": 831,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 14}],"thoughtsTokenCount": 399},"modelVersion": "gemini-3-flash-preview","responseId": "ZzB1aZjZNoaOjMcPxvPuwQ4"}
+
+3841 2780
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 3514
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Calculate 23 * 17. Show your work."}],"role":"user"},{"parts":[{"text":"To calculate **23 × 17**, you can use several methods. Here are two ways to show the work:\n\n### Method 1: Standard Long Multiplication\n1.  **Multiply 23 by 7 (the ones digit):**\n    *   7 × 3 = 21 (Write down 1, carry the 2)\n    *   7 × 2 = 14\n    *   14 + 2 (carried) = 16\n    *   Result: **161**\n\n2.  **Multiply 23 by 10 (the tens digit):**\n    *   Place a 0 in the ones column.\n    *   1 × 3 = 3\n    *   1 × 2 = 2\n    *   Result: **230**\n\n3.  **Add the two results together:**\n    *   161 + 230 = **391**\n\n**Work Layout:**\n```text\n      23\n    x 17\n    ----\n     161  (7 × 23)\n    +230  (10 × 23)\n    ----\n     391\n```\n\n***\n\n### Method 2: Difference of Squares (Mental Math Trick)\nSince 23 and 17 are both the same distance (3) from 20, you can use the algebraic formula $(a + b)(a - b) = a^2 - b^2$.\n\n1.  Rewrite the numbers: $(20 + 3) \\times (20 - 3)$\n2.  Apply the formula: $20^2 - 3^2$\n3.  Calculate the squares: $400 - 9$\n4.  Final result: **391**\n\n**Final Answer:**\n23 × 17 = **391**","thoughtSignature":"EvEKCu4KAXLI2nzruhYXPiwd5NEBTL3oR3Oz4AfPbqqG0K3XrZVTeb6QABgsdYUYltRMMmuQbUl/Bs7fGjQF4AIoAxTBiI+Ra65laI2nm0Ez6Ulh2sBxb6aidvhgl3M6phSvDLlrzzGc69t6mcfsygChhRp9lg3Yxpd/ki736AtjOgmrXklqJ0mniMOia9bnDkeQudt1oAn3Mm16vk2EYEfkSL4r5tXjPMadzs6uN1kcb8YfTMY+1TRg6z75Eon+Qh96shSTvXKOoZlmTXWaiYjFOAQP3WKzdChOZKM9sepXAoCL66czKqqqsPxIwk58ZaGfOrTF/qQXpWVvHKcq808fsWY3i3BEMenJgBkLozpku/NYP50ZhKtcVGcq+ygLseMgbS/cSeFC+ayVpj2eZvJKkCCvPQLVZoCL7gW97wshdwE6iaNOGwi7JtbxQMhzHOv2O8eL/bcgXRcWP1K33gGf0t6A6wkCT+nU0IgGXorDFqOK1t9rrKAtaIz7wBxT5uYGIvo4CDH3RMDhSu2B7XqTsQWrPoiUkzo8lCccUfM8U5MzUDBZT5P+Db2l1mKNqEdhZe7lELue50wZVCYFndKCJi6CiMzSeBXjni8zVGeIhm5lIyIiUyrhOIDQKteZ4tVaLfNtEi1c9JqD6rmwHrsscKmznVzq2N4vcE9z7gzs0VFDG+hLSIPdQdRm742smoFejASVssOotMuA7oHGeI7yI9FQcQ2dlSZVi7ldrDwWi/H7IpSqxEEYIP/2OJI6pXhZbq4/7FOpTu+RUjBD1ob+Ys1lYqdvwd59z4/NskQmIglIx+OtSyXb07H4BWIuyl5qIwwKfTgJRxG4XhwmPJqsE7WJmvz1cittXkzbC/IAkAq/vp/LIVRR8LHo4DrEV71MpTUqTL+vopdAv9hU13TPe/PrZUzyQsILQ241tAfWeB0saHadC3Ryw6+CCmb6dO94+0wFpIMgj2fm8xzODpwn0+6MFMz3npgiFkPMqY6wWcQ7u8ktEMNq7xkq8qp3I7jGczWRAZhmfjADNgz1sdk9u5nSNTuXRlUqpyDIfCV3hMvGrVoWgeJ3+K0VVVq6/fq1VCJ9LGoq0jx+oqXgH+lKbY4Xa126epp8oFmyKmh5ICfzBlsquggWlFwXvskjisHa2eU2eLv88PesMcPHv2HUusS3SzeuprsMfSM56/Xd4hGfj5fxgwq0U8Im3jsFPg42TPUcx/tdgYpqBbv1aw2LkztxqbXccMXHIdmEYDtC6g4vLlA7NJDcGMbVBN2vbNTtymPwKTBw7ibxfRzAifh01gXeUhIPEN0aLYgU9zsaFUJ8NT3VX/KSuHslkwD95yoIXPyZfcpTYqqddQiYVwH5+Dh7j910BYTxBMkNY0lwu4ka5ne0rL0AMQmT+Si2BpngVI8B3RjObE/ra9Hbrs8aJ6ndY9xw0ObZ7a40ZJX/1woYghBbTyL7s1k2kR36n7nDxChv2cAk0NslcKjfVISXozTCNNX0YhTZyzJJHre84ZoNaXQXoPb7WFYB4q+IiUUTAaENiRP5janjH2FedFQdA/ITn14IXk76GUmt0/wYGaz08fDUP+G0PxwrxUWJQRhA6NMdUR/p79kNlD+8TRYI3xFZGKgbp1UkXQv5dr5JntnjLYlZ+ZbY2063hQ8ZWooRcAY1G0ipCRMajDZ54933sSCZoGetFEC4ajmFv4HDPYqOcDc+zCoKc+YuVLfD4CX8KVUyC8x4SShRTC/Qx+PktaPFWfWcGRqPz9yWF1PbGasUb6zdyj5bjJRPd+HCamCnyY6qagyut4s35iPW8RNX5A+iklIJajFqRY/3d3RaXgGjLu/2tETty1XDXhN5HB6RpQ=="}],"role":"model"},{"parts":[{"text":"Now divide that result by 23"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 2400
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json; charset=UTF-8
+Date: Sat, 24 Jan 2026 20:49:52 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=4601
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "To divide **391** by **23**, you can use the relationship from the previous multiplication or perform long division.\n\n### Method 1: Using the Inverse Relationship\nSince you just calculated that **23 × 17 = 391**, division is the inverse operation:\n$$391 \\div 23 = 17$$\n\n---\n\n### Method 2: Long Division\n1.  **How many times does 23 go into 39?**\n    *   23 goes into 39 **1** time.\n    *   $1 \\times 23 = 23$\n    *   $39 - 23 = 16$\n\n2.  **Bring down the 1:**\n    *   This makes the new number **161**.\n\n3.  **How many times does 23 go into 161?**\n    *   From our previous work, we know $23 \\times 7 = 161$.\n    *   So, 23 goes into 161 exactly **7** times.\n    *   $161 - 161 = 0$\n\n**Work Layout:**\n```text\n      17\n    ____\n 23 ) 391\n    - 23\n    ----\n      161\n    - 161\n    ----\n        0\n```\n\n**Final Answer:**\n391 ÷ 23 = **17**",
+            "thoughtSignature": "ErkFCrYFAXLI2nwARUuse1ZKkCjqYbwfQO8G9FNB2AsCElhjJX8ttqDDtoJPeUvpXWq26w5zfsFOocm9PzOwghFhs6mesD9ezY1WOTOTfRFx+2PeAZkUjPWVyIRWd20p6g6bnjc5Dl39Gvtx1fmbZATp+eCmtzcRLKfYeYvGeUiGpzKbAbEM+QU5nV7Xg4TnhysQhUlmI5ou1AH8J8vRBn+b9McUO/wKqBYGTOqBbnxqawyYCBiwSjPfOjRkQLPPiXzBqtx9U7Ob5KGLuhNRO3FwqACOkv2vrmY34PPztJJ6fPmVIq4iZOuzpg6T8YOmU9romHOF2Ou+nNaDrcJgMIDEryYDWmo2m6+zzdHi4l0qubD5v8l+IsAl2nXUxwuN5YvCTMxwX4M07NMyXiqFNT36mszRCJnANcm47jEmy4i6cXUCLyYVpvXrZFtpTfwZgEH4Mux73n/yt+h5ctiJfdL2rKOJzr5xWoRs56fRfPeQK2JQdjUABBS6ydskWYvM0AQ4Q4kVLO9JvGNakgvK2eDlacbOkZIDfeM8MN5sFPugdb2kBVEzwEnA4jgTFC5vtpTTUmuGpxVxDWEYfoYLu5uhZzGpvKNWe1K9iiBXwWSm/8sfl3TkEUFtykuRXt0+Q7CU+kGCIZ2v73Nvqmcxk8mPHvE94v2zLLM/EGtmsE5Y+sthnRGGA8WMiiAahHHg2aMUDAIUdEuRpWWdebPP3qySZ5ED2smDpCQA3oOohsaqG5xOzLn/tZGgIhK72EXEx8B35NWqAXqxPF2B/Sr5aeAaLc8mTNeo/DT5Hq3ItRIbxBW0csJbOvIdstJINen0nWZwX2Nj/izzPmuK0/C55e7TWv/OcJf2ygb+RvSYE1x/01iTjNALVMEImZ+OyHnhEPL5aWYYjk/G+XwddGPj2l1rMg8eitFAzCwjrQ=="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 442,
+    "candidatesTokenCount": 331,
+    "totalTokenCount": 1025,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 442
+      }
+    ],
+    "thoughtsTokenCount": 252
+  },
+  "modelVersion": "gemini-3-flash-preview",
+  "responseId": "cDB1aeaBOsK9jMcPn7nf8Ag"
+}
