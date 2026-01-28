@@ -204,13 +204,19 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
+	// Set temperature to 1.0 for thinking models
+	temperature := opts.Temperature
+	if thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0 {
+		temperature = 1.0
+	}
+
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:         opts.Model,
 		Messages:      chatMessages,
 		System:        system,
 		MaxTokens:     opts.MaxTokens,
 		StopWords:     opts.StopWords,
-		Temperature:   opts.Temperature,
+		Temperature:   temperature,
 		TopP:          opts.TopP,
 		Tools:         tools,
 		ToolChoice:    opts.ToolChoice,
