@@ -220,6 +220,10 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 				"id":            output.ID,
 				"input_tokens":  int32(len(output.Prompt.Tokens)),
 				"output_tokens": int32(len(completion.Data.Tokens)),
+				// Standardized field names for cross-provider compatibility
+				"PromptTokens":     int32(len(output.Prompt.Tokens)),
+				"CompletionTokens": int32(len(completion.Data.Tokens)),
+				"TotalTokens":      int32(len(output.Prompt.Tokens)) + int32(len(completion.Data.Tokens)),
 			},
 		}
 	}
@@ -341,9 +345,14 @@ func parseAi21StreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Set token counts if available
 			if resp.Usage.PromptTokens > 0 {
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.Usage.PromptTokens
+				contentchoices[0].GenerationInfo["PromptTokens"] = resp.Usage.PromptTokens
 			}
 			if resp.Usage.CompletionTokens > 0 {
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.CompletionTokens
+				contentchoices[0].GenerationInfo["CompletionTokens"] = resp.Usage.CompletionTokens
+			}
+			if resp.Usage.PromptTokens > 0 || resp.Usage.CompletionTokens > 0 {
+				contentchoices[0].GenerationInfo["TotalTokens"] = resp.Usage.PromptTokens + resp.Usage.CompletionTokens
 			}
 		}
 	}

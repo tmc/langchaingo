@@ -120,6 +120,10 @@ func createMetaCompletion(ctx context.Context,
 				GenerationInfo: map[string]any{
 					"input_tokens":  output.PromptTokenCount,
 					"output_tokens": output.GenerationTokenCount,
+					// Standardized field names for cross-provider compatibility
+					"PromptTokens":     output.PromptTokenCount,
+					"CompletionTokens": output.GenerationTokenCount,
+					"TotalTokens":      output.PromptTokenCount + output.GenerationTokenCount,
 				},
 			},
 		},
@@ -167,9 +171,14 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Set token counts
 			if resp.PromptTokenCount > 0 {
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.PromptTokenCount
+				contentchoices[0].GenerationInfo["PromptTokens"] = resp.PromptTokenCount
 			}
 			if resp.GenerationTokenCount > 0 {
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.GenerationTokenCount
+				contentchoices[0].GenerationInfo["CompletionTokens"] = resp.GenerationTokenCount
+			}
+			if resp.PromptTokenCount > 0 || resp.GenerationTokenCount > 0 {
+				contentchoices[0].GenerationInfo["TotalTokens"] = resp.PromptTokenCount + resp.GenerationTokenCount
 			}
 		}
 	}

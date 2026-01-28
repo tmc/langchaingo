@@ -226,6 +226,10 @@ func createNovaCompletion(ctx context.Context,
 			GenerationInfo: map[string]any{
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
+				// Standardized field names for cross-provider compatibility
+				"PromptTokens":     output.Usage.InputTokens,
+				"CompletionTokens": output.Usage.OutputTokens,
+				"TotalTokens":      output.Usage.InputTokens + output.Usage.OutputTokens,
 			},
 		}
 	}
@@ -372,6 +376,7 @@ func parseNovaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Check for message start (contains input tokens)
 			if resp.MessageStart.Usage.InputTokens > 0 {
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.MessageStart.Usage.InputTokens
+				contentchoices[0].GenerationInfo["PromptTokens"] = resp.MessageStart.Usage.InputTokens
 			}
 
 			// Check for message delta (contains stop reason and output tokens)
@@ -380,6 +385,10 @@ func parseNovaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			}
 			if resp.MessageDelta.Usage.OutputTokens > 0 {
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.MessageDelta.Usage.OutputTokens
+				contentchoices[0].GenerationInfo["CompletionTokens"] = resp.MessageDelta.Usage.OutputTokens
+			}
+			if resp.MessageStart.Usage.InputTokens > 0 || resp.MessageDelta.Usage.OutputTokens > 0 {
+				contentchoices[0].GenerationInfo["TotalTokens"] = resp.MessageStart.Usage.InputTokens + resp.MessageDelta.Usage.OutputTokens
 			}
 		}
 	}

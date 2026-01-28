@@ -277,6 +277,10 @@ func createAnthropicCompletion(ctx context.Context,
 		GenerationInfo: map[string]any{
 			"input_tokens":  output.Usage.InputTokens,
 			"output_tokens": output.Usage.OutputTokens,
+			// Standardized field names for cross-provider compatibility
+			"PromptTokens":     output.Usage.InputTokens,
+			"CompletionTokens": output.Usage.OutputTokens,
+			"TotalTokens":      output.Usage.InputTokens + output.Usage.OutputTokens,
 		},
 	}
 	Contentchoices = append(Contentchoices, choice)
@@ -368,6 +372,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			switch resp.Type {
 			case "message_start":
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+				contentchoices[0].GenerationInfo["PromptTokens"] = resp.Message.Usage.InputTokens
+				contentchoices[0].GenerationInfo["TotalTokens"] = resp.Message.Usage.InputTokens
 			case "content_block_start":
 				if resp.ContentBlock.Type == "tool_use" {
 					currentToolCall = &streaming.ToolCall{
@@ -425,7 +431,16 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 				}
 			case "message_delta":
 				contentchoices[0].StopReason = resp.Delta.StopReason
-				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+				inputTokens := resp.Message.Usage.InputTokens
+				outputTokens := resp.Message.Usage.OutputTokens
+				if inputTokens == 0 {
+					if v, ok := contentchoices[0].GenerationInfo["input_tokens"].(int32); ok {
+						inputTokens = v
+					}
+				}
+				contentchoices[0].GenerationInfo["output_tokens"] = outputTokens
+				contentchoices[0].GenerationInfo["CompletionTokens"] = outputTokens
+				contentchoices[0].GenerationInfo["TotalTokens"] = inputTokens + outputTokens
 			}
 		}
 	}

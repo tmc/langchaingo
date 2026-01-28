@@ -133,6 +133,10 @@ func createAmazonCompletion(ctx context.Context,
 			GenerationInfo: map[string]any{
 				"input_tokens":  output.InputTextTokenCount,
 				"output_tokens": result.TokenCount,
+				// Standardized field names for cross-provider compatibility
+				"PromptTokens":     output.InputTextTokenCount,
+				"CompletionTokens": result.TokenCount,
+				"TotalTokens":      output.InputTextTokenCount + result.TokenCount,
 			},
 		}
 	}
@@ -183,9 +187,14 @@ func parseAmazonStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 			// Set token counts
 			if resp.InputTextTokenCount > 0 {
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.InputTextTokenCount
+				contentchoices[0].GenerationInfo["PromptTokens"] = resp.InputTextTokenCount
 			}
 			if resp.OutputTextTokenCount > 0 {
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.OutputTextTokenCount
+				contentchoices[0].GenerationInfo["CompletionTokens"] = resp.OutputTextTokenCount
+			}
+			if resp.InputTextTokenCount > 0 || resp.OutputTextTokenCount > 0 {
+				contentchoices[0].GenerationInfo["TotalTokens"] = resp.InputTextTokenCount + resp.OutputTextTokenCount
 			}
 		}
 	}
