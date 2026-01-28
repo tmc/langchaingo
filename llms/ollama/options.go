@@ -18,6 +18,7 @@ type options struct {
 	system              string
 	format              string
 	keepAlive           string
+	truncate            *bool
 	pullModel           bool
 	pullTimeout         time.Duration
 }
@@ -48,6 +49,15 @@ func WithFormat(format string) Option {
 func WithKeepAlive(keepAlive string) Option {
 	return func(opts *options) {
 		opts.keepAlive = keepAlive
+	}
+}
+
+// WithTruncate controls whether the prompt is truncated if it exceeds the context length.
+// If set to true (default), the prompt will be truncated to fit the context window.
+// If set to false, an error will be returned when the context length is exceeded.
+func WithTruncate(truncate bool) Option {
+	return func(opts *options) {
+		opts.truncate = &truncate
 	}
 }
 

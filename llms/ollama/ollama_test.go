@@ -260,6 +260,59 @@ func TestCreateEmbedding(t *testing.T) {
 	}
 }
 
+func TestWithTruncate(t *testing.T) {
+	ctx := context.Background()
+
+	// Generate a long prompt that exceeds a small context window
+	longPrompt := strings.Repeat("This is a test sentence to fill up the context window. ", 100)
+	longPrompt += "What is 2+2?"
+
+	// Use a very small context window with truncate enabled (default behavior)
+	// The prompt should be silently truncated and still produce a response
+	llm := newTestClient(t, WithTruncate(true), WithRunnerNumCtx(128))
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: longPrompt},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	resp, err := llm.GenerateContent(ctx, content)
+	require.NoError(t, err)
+
+	assert.NotEmpty(t, resp.Choices)
+}
+
+func TestWithTruncateFalse(t *testing.T) {
+	ctx := context.Background()
+
+	// Generate a long prompt that exceeds a small context window
+	longPrompt := strings.Repeat("This is a test sentence to fill up the context window. ", 100)
+	longPrompt += "What is 2+2?"
+
+	// Use a very small context window with truncate disabled
+	// This should return an error when the context is exceeded
+	llm := newTestClient(t, WithTruncate(false), WithRunnerNumCtx(128))
+
+	parts := []llms.ContentPart{
+		llms.TextContent{Text: longPrompt},
+	}
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: parts,
+		},
+	}
+
+	_, err := llm.GenerateContent(ctx, content)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "input length exceeds the context length")
+}
+
 func TestWithPullTimeout(t *testing.T) {
 	ctx := context.Background()
 
