@@ -226,7 +226,9 @@ func DefaultIsReasoningModel(model string) bool {
 
 	// Moonshot AI Kimi reasoning models
 	if strings.Contains(modelLower, "kimi-") &&
-		(strings.Contains(modelLower, "k2-thinking") || strings.Contains(modelLower, "dev-72b")) {
+		(strings.Contains(modelLower, "k2-thinking") ||
+			strings.Contains(modelLower, "2.5") ||
+			strings.Contains(modelLower, "dev-72b")) {
 		return true
 	}
 
