@@ -228,6 +228,11 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.ResponseFormat = ResponseFormatJSON
 	}
 
+	// set temperature to 1.0 for reasoning models
+	if reasoning.IsReasoningModel(opts.Model) {
+		req.Temperature = 1.0
+	}
+
 	// add tools from functions and tool definitions
 	if err := o.addToolsToRequest(req, opts); err != nil {
 		return nil, err
@@ -416,7 +421,12 @@ func ExtractToolParts(msg *ChatMessage) ([]llms.ContentPart, []llms.ToolCall, []
 			toolCalls = append(toolCalls, p)
 		case llms.ToolCallResponse:
 			toolCallResponses = append(toolCallResponses, p)
-		case llms.TextContent, llms.ImageURLContent, llms.BinaryContent:
+		case llms.TextContent:
+			if p.Text == "" {
+				continue
+			}
+			content = append(content, p)
+		case llms.ImageURLContent, llms.BinaryContent:
 			content = append(content, p)
 		default:
 			// ignore other parts
