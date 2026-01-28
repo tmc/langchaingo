@@ -526,11 +526,32 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 func convertParts(parts []llms.ContentPart) ([]*genai.Part, error) {
 	convertedParts := make([]*genai.Part, 0, len(parts))
 
+	// Pre-scan to detect signature placement strategy:
+	// If we have tool calls with signatures, we should NOT add signature to empty TextContent
+	// This prevents duplicate signatures in a single message.
+	hasToolCallWithSignature := false
+	for _, part := range parts {
+		if tc, ok := part.(llms.ToolCall); ok {
+			if tc.Reasoning != nil && len(tc.Reasoning.Signature) > 0 {
+				hasToolCallWithSignature = true
+				break
+			}
+		}
+	}
+
 	for _, part := range parts {
 		var genaiPart *genai.Part
 
 		switch p := part.(type) {
 		case llms.TextContent:
+			// Optimization: skip empty text parts that only carry signature
+			// when we already have tool call with signature.
+			// This prevents duplicate signatures in the same message.
+			if p.Text == "" && hasToolCallWithSignature && p.Reasoning != nil {
+				// Skip this part - signature will be in tool call
+				continue
+			}
+
 			genaiPart = &genai.Part{
 				Text:             p.Text,
 				ThoughtSignature: extractThoughtSignature(p.Reasoning),

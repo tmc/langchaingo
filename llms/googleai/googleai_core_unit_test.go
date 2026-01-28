@@ -5,10 +5,429 @@ import (
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/genai"
 )
+
+// TestSignatureDeduplication tests that empty TextContent with signature
+// is skipped when ToolCall already has signature, preventing duplicate signatures.
+//
+// Context: When client code uses universal pattern for Anthropic compatibility:
+//
+//	aiParts := []llms.ContentPart{
+//	    llms.TextPartWithReasoning(choice.Content, choice.Reasoning),
+//	    toolCall1, // toolCall1 already has Reasoning with signature
+//	}
+//
+// For Gemini:
+// - choice.Reasoning is nil when tool calls present
+// - choice.ToolCalls[0].Reasoning contains the signature
+//
+// Result: TextPartWithReasoning("", nil) + ToolCall(signature) works correctly
+// But if client mistakenly adds TextPartWithReasoning("", signature), we should handle it.
+func TestSignatureDeduplication(t *testing.T) {
+	t.Parallel()
+
+	testSig := []byte("gemini-thought-signature-xyz123")
+	testReasoning := &reasoning.ContentReasoning{
+		Content:   "Step 1: analyze the problem...",
+		Signature: testSig,
+	}
+
+	t.Run("scenario_1_universal_pattern_correct", func(t *testing.T) {
+		// Correct universal pattern: empty text (Gemini has no choice.Reasoning), tool call has signature
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "",  // Empty because Gemini puts reasoning in tool call
+				Reasoning: nil, // nil for Gemini when tool calls present
+			},
+			llms.ToolCall{
+				ID: "call_123",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"query": "weather"}`,
+				},
+				Reasoning: testReasoning, // Gemini puts signature here
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// Should get: empty text part (kept because no signature to dedupe) + tool call
+		assert.Len(t, result, 2, "Should have both parts")
+
+		// Only tool call should have signature
+		assert.Nil(t, result[0].ThoughtSignature, "Empty text without reasoning should have no signature")
+		assert.Equal(t, testSig, result[1].ThoughtSignature, "Tool call should have signature")
+	})
+
+	t.Run("scenario_2_mistaken_duplicate_signature", func(t *testing.T) {
+		// Mistaken pattern: client adds reasoning to BOTH text and tool call
+		// This could happen if client code doesn't check provider-specific reasoning location
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "",            // Empty content
+				Reasoning: testReasoning, // Mistakenly added (should be nil for Gemini with tools)
+			},
+			llms.ToolCall{
+				ID: "call_123",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"query": "weather"}`,
+				},
+				Reasoning: testReasoning, // Correct - Gemini puts signature here
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// OPTIMIZATION: Empty text with signature is SKIPPED when tool call has signature
+		assert.Len(t, result, 1, "Empty text part should be skipped to prevent duplicate signature")
+
+		// Only tool call should remain with signature
+		assert.Equal(t, testSig, result[0].ThoughtSignature, "Only tool call signature should remain")
+		assert.NotNil(t, result[0].FunctionCall, "Remaining part should be function call")
+	})
+
+	t.Run("scenario_3_non_empty_text_with_signature", func(t *testing.T) {
+		// Edge case: non-empty text with signature + tool call with signature
+		// This could happen with Anthropic pattern applied to Gemini
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "I will search for the weather", // Non-empty
+				Reasoning: testReasoning,
+			},
+			llms.ToolCall{
+				ID: "call_123",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"query": "weather"}`,
+				},
+				Reasoning: testReasoning,
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// Non-empty text is KEPT even with tool call signature
+		// (text content may be important)
+		assert.Len(t, result, 2, "Non-empty text part should be kept")
+
+		// Both parts should have signature
+		assert.Equal(t, testSig, result[0].ThoughtSignature, "Text part should have signature")
+		assert.Equal(t, testSig, result[1].ThoughtSignature, "Tool call should have signature")
+
+		t.Log("WARNING: This creates duplicate signatures - may not be optimal for Gemini")
+	})
+
+	t.Run("scenario_4_empty_text_no_tool_calls", func(t *testing.T) {
+		// Edge case: empty text with signature, no tool calls
+		// Signature must be preserved (no tool call to carry it)
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "", // Empty
+				Reasoning: testReasoning,
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// Empty text is KEPT when there are no tool calls (signature would be lost otherwise)
+		assert.Len(t, result, 1, "Empty text part must be kept when no tool calls")
+		assert.Equal(t, testSig, result[0].ThoughtSignature, "Signature must be preserved")
+	})
+
+	t.Run("scenario_5_empty_text_with_signature_tool_without", func(t *testing.T) {
+		// Edge case: empty text with signature + tool call WITHOUT signature
+		// Both must be kept (tool call can't carry the signature)
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "", // Empty
+				Reasoning: testReasoning,
+			},
+			llms.ToolCall{
+				ID: "call_123",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"query": "weather"}`,
+				},
+				Reasoning: nil, // No signature in tool call
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// Empty text is KEPT because tool call doesn't have signature
+		assert.Len(t, result, 2, "Empty text part must be kept when tool call lacks signature")
+		assert.Equal(t, testSig, result[0].ThoughtSignature, "Text part should have signature")
+		assert.Nil(t, result[1].ThoughtSignature, "Tool call should NOT have signature")
+	})
+}
+
+// TestSignaturePlacementInRequest verifies the actual genai.Part structure
+// that would be sent to Gemini API in various scenarios.
+func TestSignaturePlacementInRequest(t *testing.T) {
+	t.Parallel()
+
+	signature := []byte("test-sig")
+	reasoning := &reasoning.ContentReasoning{
+		Content:   "thinking...",
+		Signature: signature,
+	}
+
+	t.Run("gemini_tool_call_pattern", func(t *testing.T) {
+		// Typical Gemini response pattern:
+		// - choice.Reasoning is nil
+		// - choice.ToolCalls[0].Reasoning has signature
+		//
+		// Client should add: ToolCall part (signature embedded)
+		parts := []llms.ContentPart{
+			llms.ToolCall{
+				ID: "call_1",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"q": "test"}`,
+				},
+				Reasoning: reasoning,
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+		require.Len(t, result, 1)
+
+		// Verify structure
+		assert.NotNil(t, result[0].FunctionCall, "Should be function call")
+		assert.Equal(t, signature, result[0].ThoughtSignature, "Should have signature")
+		assert.Equal(t, "search", result[0].FunctionCall.Name)
+	})
+
+	t.Run("anthropic_pattern_on_gemini", func(t *testing.T) {
+		// Anthropic pattern applied to Gemini (suboptimal but may happen):
+		// - Client adds: TextPartWithReasoning(choice.Content, choice.Reasoning) + ToolCall
+		// - For Anthropic: choice.Reasoning has signature
+		// - For Gemini: choice.Reasoning is nil, ToolCall.Reasoning has signature
+		//
+		// After extraction from Gemini response, client builds:
+		// - TextPartWithReasoning("", toolCall.Reasoning) <- empty text with signature
+		// - ToolCall <- already has signature
+		parts := []llms.ContentPart{
+			llms.TextContent{
+				Text:      "", // Empty (Gemini doesn't put content in choice when tool calls)
+				Reasoning: reasoning,
+			},
+			llms.ToolCall{
+				ID: "call_1",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "search",
+					Arguments: `{"q": "test"}`,
+				},
+				Reasoning: reasoning, // Same signature
+			},
+		}
+
+		result, err := convertParts(parts)
+		require.NoError(t, err)
+
+		// OPTIMIZATION: Empty text should be skipped
+		require.Len(t, result, 1, "Empty text part should be skipped")
+		assert.NotNil(t, result[0].FunctionCall, "Remaining part should be function call")
+		assert.Equal(t, signature, result[0].ThoughtSignature, "Tool call should have signature")
+	})
+}
+
+func TestConvertParts_DuplicateSignatures(t *testing.T) {
+	t.Parallel()
+
+	testSignature := []byte("test-signature-bytes")
+	testReasoning := &reasoning.ContentReasoning{
+		Content:   "Test reasoning content",
+		Signature: testSignature,
+	}
+
+	tests := []struct {
+		name              string
+		parts             []llms.ContentPart
+		expectedPartCount int
+		expectedSigCount  int // Number of parts with non-nil ThoughtSignature
+		description       string
+	}{
+		{
+			name: "non-empty text with signature + tool call with signature",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "I will call the tool", // Non-empty text
+					Reasoning: testReasoning,
+				},
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: testReasoning,
+				},
+			},
+			expectedPartCount: 2,
+			expectedSigCount:  2, // Both parts have signature - acceptable for non-empty text
+			description:       "Non-empty text and tool call both have signatures - kept because text has content",
+		},
+		{
+			name: "empty text with signature + tool call with signature",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "", // Empty text but has reasoning
+					Reasoning: testReasoning,
+				},
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: testReasoning,
+				},
+			},
+			expectedPartCount: 1, // Empty text part is SKIPPED (optimization)
+			expectedSigCount:  1, // Only tool call gets signature
+			description:       "Empty text part with signature is skipped when tool call has signature - prevents duplicate",
+		},
+		{
+			name: "text with signature + tool call without signature",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "I will call the tool",
+					Reasoning: testReasoning,
+				},
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: nil, // No reasoning in tool call
+				},
+			},
+			expectedPartCount: 2,
+			expectedSigCount:  1, // Only text part has signature
+			description:       "Text has signature, tool call doesn't",
+		},
+		{
+			name: "text without signature + tool call with signature",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "I will call the tool",
+					Reasoning: nil,
+				},
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: testReasoning,
+				},
+			},
+			expectedPartCount: 2,
+			expectedSigCount:  1, // Only tool call has signature
+			description:       "Tool call has signature, text doesn't - this is typical for Gemini",
+		},
+		{
+			name: "empty text with signature + NO tool calls",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "", // Empty text but has reasoning
+					Reasoning: testReasoning,
+				},
+			},
+			expectedPartCount: 1, // Part is KEPT (no tool calls to carry signature)
+			expectedSigCount:  1, // Text part keeps signature
+			description:       "Empty text with signature is preserved when no tool calls - prevents losing signature",
+		},
+		{
+			name: "multiple tool calls - only first has signature",
+			parts: []llms.ContentPart{
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: testReasoning, // First has signature
+				},
+				llms.ToolCall{
+					ID: "call_2",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "London"}`,
+					},
+					Reasoning: nil, // Second doesn't have signature
+				},
+			},
+			expectedPartCount: 2,
+			expectedSigCount:  1, // Only first tool call has signature
+			description:       "Parallel tool calls - signature only in first (correct pattern)",
+		},
+		{
+			name: "empty text with signature + tool call WITHOUT signature",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text:      "", // Empty text but has reasoning
+					Reasoning: testReasoning,
+				},
+				llms.ToolCall{
+					ID: "call_1",
+					FunctionCall: &llms.FunctionCall{
+						Name:      "get_weather",
+						Arguments: `{"location": "Paris"}`,
+					},
+					Reasoning: nil, // Tool call has NO signature
+				},
+			},
+			expectedPartCount: 2, // Both parts kept (tool call has no signature to carry)
+			expectedSigCount:  1, // Only text part has signature
+			description:       "Empty text with signature preserved when tool call lacks signature",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			result, err := convertParts(tt.parts)
+			assert.NoError(t, err)
+			assert.Len(t, result, tt.expectedPartCount, tt.description)
+
+			// Count parts with ThoughtSignature
+			sigCount := 0
+			for i, part := range result {
+				if len(part.ThoughtSignature) > 0 {
+					sigCount++
+					t.Logf("Part %d has signature: %d bytes", i, len(part.ThoughtSignature))
+
+					// Verify signature matches expected
+					assert.Equal(t, testSignature, part.ThoughtSignature,
+						"Part %d signature should match test signature", i)
+				}
+			}
+
+			assert.Equal(t, tt.expectedSigCount, sigCount,
+				"Expected %d parts with signature, got %d. %s",
+				tt.expectedSigCount, sigCount, tt.description)
+
+			// Log what would be sent to API
+			t.Logf("Would send to Gemini API: %d parts, %d with signatures", len(result), sigCount)
+		})
+	}
+}
 
 func TestConvertParts(t *testing.T) {
 	t.Parallel()
