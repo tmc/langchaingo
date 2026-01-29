@@ -1,7 +1,9 @@
 package httputil
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 )
 
 var (
@@ -56,34 +58,96 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return transport.RoundTrip(newReq)
 }
 
-// ApiKeyTransport is an [http.RoundTripper] that adds API keys to URL query parameters.
+// ApiKeyTransport is an [http.RoundTripper] that adds API keys to URL query parameters,
+// optionally rewrites request URLs to use a custom base URL, and supports HTTP proxy configuration.
 // This is commonly used with Google APIs and other services that accept API keys
 // as query parameters. It wraps another RoundTripper and automatically adds
 // the API key if not already present in the request.
 //
 // This transport is particularly useful when working with client libraries that
 // don't properly set API keys when using custom HTTP clients, such as the
-// Google AI client library when used with httprr for testing.
+// Google AI client library when used with httprr for testing, or when you need
+// to redirect requests to a custom endpoint (e.g., for testing or proxy setups).
+//
+// Proxy Configuration:
+// If ProxyURL is set and Transport is nil or http.DefaultTransport, a new http.Transport
+// with the specified proxy will be created automatically. If a custom Transport is already
+// provided, ProxyURL will be ignored to avoid conflicting configurations.
 type ApiKeyTransport struct {
 	// Transport is the underlying [http.RoundTripper] to use.
-	// If nil, [http.DefaultTransport] is used.
+	// If nil, [http.DefaultTransport] is used (or a custom transport with proxy if ProxyURL is set).
 	Transport http.RoundTripper
 	// APIKey is the API key to add to requests as a "key" query parameter.
 	APIKey string
+	// BaseURL is the base URL to use for rewriting request URLs.
+	// If set, requests will be rewritten to use this base URL instead of their original URL.
+	// The original path and query parameters are preserved.
+	// Example: if BaseURL is "http://localhost:8080" and the request is for
+	// "https://api.example.com/v1/resource?param=value", the final URL will be
+	// "http://localhost:8080/v1/resource?param=value".
+	BaseURL string
+	// ProxyURL is the HTTP proxy URL to use for requests.
+	// If set and Transport is nil or http.DefaultTransport, a new http.Transport with
+	// this proxy will be created. Example: "http://proxy.example.com:8080".
+	// If a custom Transport is already set, this field is ignored.
+	ProxyURL string
 }
 
-// RoundTrip implements the [http.RoundTripper] interface. It adds the API key
-// as a "key" query parameter if not already present, then delegates to the
-// underlying transport.
+// RoundTrip implements the [http.RoundTripper] interface. It optionally configures
+// an HTTP proxy, rewrites the request URL to use a custom base URL, adds the API key
+// as a "key" query parameter if not already present, then delegates to the underlying transport.
 func (t *ApiKeyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	transport := t.Transport
-	if transport == nil {
+
+	// Configure proxy if ProxyURL is set and no custom transport is provided
+	if t.ProxyURL != "" && (transport == nil || transport == http.DefaultTransport) {
+		proxyURL, err := url.Parse(t.ProxyURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ProxyURL: %w", err)
+		}
+
+		// Create a new http.Transport with proxy configuration
+		// We cast http.DefaultTransport to get default settings, then override Proxy
+		defaultTransport, ok := http.DefaultTransport.(*http.Transport)
+		if !ok {
+			// Fallback if DefaultTransport is not *http.Transport
+			transport = &http.Transport{
+				Proxy: http.ProxyURL(proxyURL),
+			}
+		} else {
+			// Clone the default transport and set proxy
+			transport = defaultTransport.Clone()
+			transport.(*http.Transport).Proxy = http.ProxyURL(proxyURL)
+		}
+	} else if transport == nil {
 		transport = http.DefaultTransport
 	}
 
 	// Clone the request to avoid modifying the original
 	newReq := req.Clone(req.Context())
+
+	// Preserve original query parameters before URL manipulation
 	q := newReq.URL.Query()
+
+	// Rewrite URL to use custom base URL if configured
+	if t.BaseURL != "" {
+		baseURL, err := url.Parse(t.BaseURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse BaseURL: %w", err)
+		}
+
+		// Preserve the original path and merge with base URL
+		originalPath := newReq.URL.Path
+		newReq.URL = baseURL.ResolveReference(&url.URL{Path: originalPath})
+
+		// Restore query parameters
+		newReq.URL.RawQuery = q.Encode()
+
+		// Update Host header to match the new URL
+		newReq.Host = newReq.URL.Host
+	}
+
+	// Add API key as query parameter if not already present
 	if q.Get("key") == "" && t.APIKey != "" {
 		q.Set("key", t.APIKey)
 		newReq.URL.RawQuery = q.Encode()

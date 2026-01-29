@@ -251,3 +251,353 @@ func TestApiKeyTransport_PreservesOtherParams(t *testing.T) {
 	assert.Equal(t, "qux", originalQuery.Get("baz"))
 	assert.Empty(t, originalQuery.Get("key"))
 }
+
+func TestApiKeyTransport_BaseURL(t *testing.T) {
+	tests := []struct {
+		name           string
+		baseURL        string
+		originalURL    string
+		apiKey         string
+		expectedScheme string
+		expectedHost   string
+		expectedPath   string
+		expectedKey    string
+	}{
+		{
+			name:           "rewrites URL with custom base URL",
+			baseURL:        "http://localhost:8080",
+			originalURL:    "https://generativelanguage.googleapis.com/v1beta/models/gemini:generateContent",
+			apiKey:         "test-key",
+			expectedScheme: "http",
+			expectedHost:   "localhost:8080",
+			expectedPath:   "/v1beta/models/gemini:generateContent",
+			expectedKey:    "test-key",
+		},
+		{
+			name:           "rewrites URL preserving query parameters",
+			baseURL:        "http://localhost:9000",
+			originalURL:    "https://api.example.com/data?foo=bar&baz=qux",
+			apiKey:         "my-api-key",
+			expectedScheme: "http",
+			expectedHost:   "localhost:9000",
+			expectedPath:   "/data",
+			expectedKey:    "my-api-key",
+		},
+		{
+			name:           "rewrites URL without API key",
+			baseURL:        "http://custom-server.local",
+			originalURL:    "https://api.example.com/v1/resource",
+			apiKey:         "",
+			expectedScheme: "http",
+			expectedHost:   "custom-server.local",
+			expectedPath:   "/v1/resource",
+			expectedKey:    "",
+		},
+		{
+			name:           "no rewrite when BaseURL is empty",
+			baseURL:        "",
+			originalURL:    "https://api.example.com/data",
+			apiKey:         "key-123",
+			expectedScheme: "https",
+			expectedHost:   "api.example.com",
+			expectedPath:   "/data",
+			expectedKey:    "key-123",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &mockRoundTripper{}
+			transport := &ApiKeyTransport{
+				Transport: mock,
+				APIKey:    tt.apiKey,
+				BaseURL:   tt.baseURL,
+			}
+
+			req, err := http.NewRequest(http.MethodPost, tt.originalURL, nil)
+			require.NoError(t, err)
+
+			resp, err := transport.RoundTrip(req)
+			require.NoError(t, err)
+			assert.NotNil(t, resp)
+
+			// Check the rewritten URL
+			assert.Equal(t, tt.expectedScheme, mock.lastRequest.URL.Scheme)
+			assert.Equal(t, tt.expectedHost, mock.lastRequest.URL.Host)
+			assert.Equal(t, tt.expectedPath, mock.lastRequest.URL.Path)
+
+			// Check API key
+			if tt.expectedKey != "" {
+				assert.Equal(t, tt.expectedKey, mock.lastRequest.URL.Query().Get("key"))
+			} else {
+				assert.Empty(t, mock.lastRequest.URL.Query().Get("key"))
+			}
+
+			// Verify Host header matches the new URL
+			if tt.baseURL != "" {
+				assert.Equal(t, tt.expectedHost, mock.lastRequest.Host)
+			}
+
+			// Verify original request wasn't modified
+			assert.Equal(t, tt.originalURL, req.URL.String())
+		})
+	}
+}
+
+func TestApiKeyTransport_BaseURL_PreservesQueryParams(t *testing.T) {
+	mock := &mockRoundTripper{}
+	transport := &ApiKeyTransport{
+		Transport: mock,
+		APIKey:    "my-key",
+		BaseURL:   "http://localhost:8080",
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data?foo=bar&baz=qux", nil)
+	require.NoError(t, err)
+
+	resp, err := transport.RoundTrip(req)
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	// Check that URL was rewritten
+	assert.Equal(t, "http", mock.lastRequest.URL.Scheme)
+	assert.Equal(t, "localhost:8080", mock.lastRequest.URL.Host)
+	assert.Equal(t, "/data", mock.lastRequest.URL.Path)
+
+	// Check that original query parameters are preserved
+	query := mock.lastRequest.URL.Query()
+	assert.Equal(t, "bar", query.Get("foo"))
+	assert.Equal(t, "qux", query.Get("baz"))
+	assert.Equal(t, "my-key", query.Get("key"))
+}
+
+func TestApiKeyTransport_BaseURL_InvalidURL(t *testing.T) {
+	mock := &mockRoundTripper{}
+	transport := &ApiKeyTransport{
+		Transport: mock,
+		APIKey:    "test-key",
+		BaseURL:   "ht!tp://invalid url with spaces",
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
+	require.NoError(t, err)
+
+	resp, err := transport.RoundTrip(req)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "failed to parse BaseURL")
+}
+
+func TestApiKeyTransport_ProxyURL(t *testing.T) {
+	// Create a test HTTP server that will act as the final destination
+	destinationServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Verify API key is present
+		assert.Equal(t, "test-api-key", r.URL.Query().Get("key"))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("response from destination"))
+	}))
+	defer destinationServer.Close()
+
+	// Create a simple HTTP proxy server
+	proxyRequestCount := 0
+	proxyServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxyRequestCount++
+
+		// For CONNECT method (HTTPS tunneling), establish tunnel
+		if r.Method == http.MethodConnect {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// For regular HTTP requests, forward the request
+		client := &http.Client{}
+		proxyReq, err := http.NewRequest(r.Method, r.URL.String(), r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Copy headers
+		for key, values := range r.Header {
+			for _, value := range values {
+				proxyReq.Header.Add(key, value)
+			}
+		}
+
+		resp, err := client.Do(proxyReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Copy response
+		for key, values := range resp.Header {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+		w.WriteHeader(resp.StatusCode)
+
+		body := make([]byte, 1024)
+		n, _ := resp.Body.Read(body)
+		w.Write(body[:n])
+	}))
+	defer proxyServer.Close()
+
+	t.Run("requests_go_through_proxy", func(t *testing.T) {
+		proxyRequestCount = 0
+
+		transport := &ApiKeyTransport{
+			APIKey:   "test-api-key",
+			ProxyURL: proxyServer.URL,
+		}
+
+		client := &http.Client{Transport: transport}
+		resp, err := client.Get(destinationServer.URL)
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Greater(t, proxyRequestCount, 0, "Request should have gone through proxy")
+	})
+
+	t.Run("proxy_with_base_url_rewrite", func(t *testing.T) {
+		// Create a mock server that will receive rewritten requests
+		mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "test-api-key", r.URL.Query().Get("key"))
+			assert.Equal(t, "/v1/test", r.URL.Path)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("mock response"))
+		}))
+		defer mockServer.Close()
+
+		transport := &ApiKeyTransport{
+			APIKey:   "test-api-key",
+			BaseURL:  mockServer.URL,
+			ProxyURL: proxyServer.URL,
+		}
+
+		client := &http.Client{Transport: transport}
+
+		// Original URL will be rewritten to mockServer.URL
+		resp, err := client.Get("https://original-api.example.com/v1/test")
+		require.NoError(t, err)
+		defer resp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	})
+
+	t.Run("proxy_ignored_with_custom_transport", func(t *testing.T) {
+		customTransportCalled := false
+		customTransport := &mockRoundTripper{
+			response: &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       http.NoBody,
+			},
+		}
+
+		transport := &ApiKeyTransport{
+			Transport: customTransport,
+			APIKey:    "test-key",
+			ProxyURL:  proxyServer.URL, // Should be ignored
+		}
+
+		req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
+		require.NoError(t, err)
+
+		resp, err := transport.RoundTrip(req)
+		require.NoError(t, err)
+		assert.NotNil(t, resp)
+
+		// Verify custom transport was used (ProxyURL was ignored)
+		assert.NotNil(t, customTransport.lastRequest)
+		customTransportCalled = true
+		assert.True(t, customTransportCalled)
+	})
+}
+
+func TestApiKeyTransport_ProxyURL_InvalidURL(t *testing.T) {
+	transport := &ApiKeyTransport{
+		APIKey:   "test-key",
+		ProxyURL: "ht!tp://invalid proxy url",
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
+	require.NoError(t, err)
+
+	resp, err := transport.RoundTrip(req)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "failed to parse ProxyURL")
+}
+
+func TestApiKeyTransport_CombinedFeatures(t *testing.T) {
+	// This test verifies that all features work together:
+	// - ProxyURL
+	// - BaseURL rewriting
+	// - API key injection
+
+	// Create destination server
+	destinationCalled := false
+	destinationServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		destinationCalled = true
+
+		// Verify all features worked
+		assert.Equal(t, "test-api-key", r.URL.Query().Get("key"), "API key should be present")
+		assert.Equal(t, "/api/v1/resource", r.URL.Path, "Path should be preserved")
+		assert.Equal(t, "value", r.URL.Query().Get("param"), "Query param should be preserved")
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("success"))
+	}))
+	defer destinationServer.Close()
+
+	// Create simple proxy (just forwards requests)
+	proxyServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodConnect {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Forward request
+		client := &http.Client{}
+		proxyReq, _ := http.NewRequest(r.Method, r.URL.String(), r.Body)
+		for k, v := range r.Header {
+			proxyReq.Header[k] = v
+		}
+
+		resp, err := client.Do(proxyReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		for k, v := range resp.Header {
+			w.Header()[k] = v
+		}
+		w.WriteHeader(resp.StatusCode)
+
+		body := make([]byte, 1024)
+		n, _ := resp.Body.Read(body)
+		w.Write(body[:n])
+	}))
+	defer proxyServer.Close()
+
+	transport := &ApiKeyTransport{
+		APIKey:   "test-api-key",
+		BaseURL:  destinationServer.URL,
+		ProxyURL: proxyServer.URL,
+	}
+
+	client := &http.Client{Transport: transport}
+
+	// Original URL will be rewritten to destinationServer.URL
+	resp, err := client.Get("https://original-api.example.com/api/v1/resource?param=value")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.True(t, destinationCalled, "Destination server should have been called")
+}

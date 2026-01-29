@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -677,4 +678,255 @@ func checkMatch(t *testing.T, got string, wants ...string) {
 			t.Errorf("\ngot %q\nwanted to match %q", got, want)
 		}
 	}
+}
+
+// mockGoogleAIServer creates a test HTTP server that mimics Google AI API responses.
+// It returns a simple mock response similar to what Google AI API would return.
+func mockGoogleAIServer(t *testing.T) *http.Server {
+	t.Helper()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Verify this is a POST request
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		// Read and validate request body
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		// Basic validation - ensure it's JSON
+		var reqData map[string]any
+		if err := json.Unmarshal(body, &reqData); err != nil {
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+
+		// Mock response matching Google AI API format
+		response := map[string]any{
+			"candidates": []map[string]any{
+				{
+					"content": map[string]any{
+						"parts": []map[string]any{
+							{
+								"text": "Mock response from custom endpoint",
+							},
+						},
+						"role": "model",
+					},
+					"finishReason": "STOP",
+					"safetyRatings": []map[string]any{
+						{
+							"category":    "HARM_CATEGORY_HATE_SPEECH",
+							"probability": "NEGLIGIBLE",
+						},
+					},
+				},
+			},
+			"usageMetadata": map[string]any{
+				"promptTokenCount":     10,
+				"candidatesTokenCount": 8,
+				"totalTokenCount":      18,
+			},
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			t.Errorf("Failed to encode response: %v", err)
+		}
+	})
+
+	server := &http.Server{
+		Handler: mux,
+	}
+
+	return server
+}
+
+// TestEndpointConfiguration demonstrates the current issue with WithEndpoint option.
+// This test shows that WithEndpoint does NOT work as expected - requests still go
+// to the default Google API endpoint instead of the custom endpoint.
+func TestEndpointConfiguration(t *testing.T) {
+	t.Parallel()
+
+	// Start mock server
+	server := mockGoogleAIServer(t)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	defer listener.Close()
+
+	serverURL := fmt.Sprintf("http://%s", listener.Addr().String())
+	t.Logf("Mock server listening on: %s", serverURL)
+
+	go func() {
+		if err := server.Serve(listener); err != nil && err != http.ErrServerClosed {
+			t.Logf("Server error: %v", err)
+		}
+	}()
+	defer server.Close()
+
+	t.Run("WithEndpoint_DoesNotWork", func(t *testing.T) {
+		// This test demonstrates the PROBLEM: WithEndpoint option is ignored
+		// The request will try to go to the real Google API endpoint instead of our mock server
+
+		ctx := context.Background()
+
+		// Try to create client with WithEndpoint pointing to our mock server
+		llm, err := googleai.New(ctx,
+			googleai.WithRest(),
+			googleai.WithAPIKey("test-api-key"),
+			googleai.WithEndpoint(serverURL), // This option is IGNORED!
+		)
+		require.NoError(t, err)
+
+		// Attempt to make a request
+		// NOTE: This will FAIL because the request goes to the real Google API endpoint,
+		// not to our mock server at serverURL
+		content := []llms.MessageContent{
+			{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("test prompt")},
+			},
+		}
+
+		// This call will fail with a network error or authentication error
+		// because it's trying to reach the real Google API
+		resp, err := llm.GenerateContent(ctx, content)
+
+		// Expected behavior: Should successfully call our mock server
+		// Actual behavior: Fails because WithEndpoint is ignored
+		if err != nil {
+			t.Logf("EXPECTED FAILURE: WithEndpoint does not work. Error: %v", err)
+			t.Logf("ROOT CAUSE: In new.go, the ClientOptions field (which contains WithEndpoint) is never used when creating genai.Client")
+			return
+		}
+
+		// If we somehow got here, verify the response
+		if resp != nil && len(resp.Choices) > 0 {
+			t.Logf("Response content: %s", resp.Choices[0].Content)
+			// This would only work if WithEndpoint was properly implemented
+			assert.Contains(t, resp.Choices[0].Content, "Mock response from custom endpoint")
+		}
+	})
+
+	t.Run("WithHTTPClient_AndCustomTransport_Works", func(t *testing.T) {
+		// This test demonstrates the WORKAROUND: Using WithHTTPClient with custom transport
+		// that rewrites URLs works correctly
+
+		ctx := context.Background()
+
+		// Create custom transport that rewrites URLs to our mock server
+		customTransport := &httputil.ApiKeyTransport{
+			Transport: http.DefaultTransport,
+			APIKey:    "test-api-key",
+			BaseURL:   serverURL, // This will rewrite all requests to our mock server
+		}
+
+		customClient := &http.Client{
+			Transport: customTransport,
+		}
+
+		// Create client with custom HTTP client
+		llm, err := googleai.New(ctx,
+			googleai.WithRest(),
+			googleai.WithAPIKey("test-api-key"),
+			googleai.WithHTTPClient(customClient), // Use custom client with URL rewriting
+		)
+		require.NoError(t, err)
+
+		// Make a request
+		content := []llms.MessageContent{
+			{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("test prompt")},
+			},
+		}
+
+		resp, err := llm.GenerateContent(ctx, content)
+
+		// This SHOULD work because our custom transport rewrites the URL
+		require.NoError(t, err, "WithHTTPClient with custom transport should work")
+		require.NotNil(t, resp)
+		require.NotEmpty(t, resp.Choices)
+
+		// Verify we got the mock response
+		assert.Contains(t, resp.Choices[0].Content, "Mock response from custom endpoint",
+			"Should receive response from mock server")
+
+		t.Logf("SUCCESS: Custom transport with BaseURL works correctly")
+		t.Logf("Response: %s", resp.Choices[0].Content)
+	})
+}
+
+// TestEndpointConfigurationAnalysis provides detailed analysis of the issue.
+func TestEndpointConfigurationAnalysis(t *testing.T) {
+	t.Run("RootCauseAnalysis", func(t *testing.T) {
+		analysis := `
+ROOT CAUSE ANALYSIS: Why WithEndpoint Does Not Work
+====================================================
+
+PROBLEM:
+--------
+The WithEndpoint option is defined and appears to be available for use,
+but it has NO EFFECT when creating a Google AI client.
+
+LOCATION OF THE ISSUE:
+---------------------
+File: llms/googleai/new.go
+Lines: 25-69
+
+DETAILED EXPLANATION:
+--------------------
+1. In option.go (lines 108-115), WithEndpoint is defined:
+   func WithEndpoint(endpoint string) Option {
+       return func(opts *Options) {
+           opts.ClientOptions = append(opts.ClientOptions, option.WithEndpoint(endpoint))
+       }
+   }
+
+2. The WithEndpoint option correctly adds option.WithEndpoint(endpoint) to opts.ClientOptions
+
+3. However, in new.go, the New() function creates a genai.Client like this:
+   - Line 36: config := &genai.ClientConfig{}
+   - Lines 38-60: Various config fields are set (HTTPClient, Backend, Project, etc.)
+   - Line 62: client, err := genai.NewClient(ctx, config)
+
+4. THE PROBLEM: The opts.ClientOptions field is NEVER USED!
+   The ClientOptions array (which contains the WithEndpoint option) is stored
+   in the Options struct but is never passed to genai.NewClient.
+
+5. The new Google genai SDK (google.golang.org/genai) uses ClientConfig struct,
+   not the old option.ClientOption pattern. The code keeps ClientOptions for
+   backward compatibility but doesn't use them.
+
+EVIDENCE:
+---------
+Search for "ClientOptions" in new.go shows:
+- It's defined in Options struct (option.go:30)
+- It's populated by various With* functions (option.go)
+- It's NEVER READ OR USED in new.go when creating the client
+
+WHY THE WORKAROUND WORKS:
+-------------------------
+Using WithHTTPClient with a custom http.RoundTripper that rewrites URLs works because:
+1. The HTTPClient IS properly set in ClientConfig (new.go:39-41)
+2. The genai.Client respects the custom HTTP client
+3. Our custom transport intercepts requests and rewrites URLs before they're sent
+
+SOLUTION:
+---------
+The ClientOptions field should be removed OR the new.go code should be updated
+to properly support endpoint configuration through the genai.ClientConfig.
+However, the new genai SDK may not support custom endpoints in the same way,
+so the BaseURL approach in ApiKeyTransport is the recommended workaround.
+`
+		t.Log(analysis)
+	})
 }
