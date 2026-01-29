@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"path"
+	"strings"
 )
 
 var (
@@ -81,10 +83,19 @@ type ApiKeyTransport struct {
 	APIKey string
 	// BaseURL is the base URL to use for rewriting request URLs.
 	// If set, requests will be rewritten to use this base URL instead of their original URL.
-	// The original path and query parameters are preserved.
-	// Example: if BaseURL is "http://localhost:8080" and the request is for
-	// "https://api.example.com/v1/resource?param=value", the final URL will be
-	// "http://localhost:8080/v1/resource?param=value".
+	// Both the base URL path and the original request path are combined safely, and query
+	// parameters are preserved.
+	//
+	// Examples:
+	//   - BaseURL: "http://localhost:8080"
+	//     Request: "https://api.example.com/v1/resource?param=value"
+	//     Result:  "http://localhost:8080/v1/resource?param=value"
+	//
+	//   - BaseURL: "http://localhost:8080/litellm/v1"
+	//     Request: "https://api.example.com/models/gemini?key=abc"
+	//     Result:  "http://localhost:8080/litellm/v1/models/gemini?key=abc"
+	//
+	// The path combination is done safely to prevent path traversal attacks.
 	BaseURL string
 	// ProxyURL is the HTTP proxy URL to use for requests.
 	// If set and Transport is nil or http.DefaultTransport, a new http.Transport with
@@ -136,9 +147,42 @@ func (t *ApiKeyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			return nil, fmt.Errorf("failed to parse BaseURL: %w", err)
 		}
 
-		// Preserve the original path and merge with base URL
+		// Safely combine base URL path with original request path
+		// This preserves any path from BaseURL (e.g., "/litellm/v1") and appends the original path
+		basePath := baseURL.Path
 		originalPath := newReq.URL.Path
-		newReq.URL = baseURL.ResolveReference(&url.URL{Path: originalPath})
+
+		// Clean paths to prevent path traversal attacks and normalize them
+		basePath = path.Clean(basePath)
+		originalPath = path.Clean(originalPath)
+
+		// Combine paths using path.Join which handles all edge cases safely
+		// path.Join automatically:
+		// - Removes duplicate slashes
+		// - Normalizes "." and ".." segments
+		// - Handles trailing slashes properly
+		var combinedPath string
+		if originalPath == "" || originalPath == "." || originalPath == "/" {
+			// If original path is empty, ".", or just "/", use base path only
+			combinedPath = basePath
+		} else {
+			// Join base path with original path
+			// We need to ensure originalPath doesn't start with "/" for proper joining
+			originalPath = strings.TrimPrefix(originalPath, "/")
+			combinedPath = path.Join(basePath, originalPath)
+		}
+
+		// Ensure the path starts with "/" (path.Join might remove it for root)
+		if combinedPath == "" || combinedPath[0] != '/' {
+			combinedPath = "/" + combinedPath
+		}
+
+		// Create new URL with combined path
+		newReq.URL = &url.URL{
+			Scheme: baseURL.Scheme,
+			Host:   baseURL.Host,
+			Path:   combinedPath,
+		}
 
 		// Restore query parameters
 		newReq.URL.RawQuery = q.Encode()

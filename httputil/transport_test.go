@@ -303,6 +303,46 @@ func TestApiKeyTransport_BaseURL(t *testing.T) {
 			expectedPath:   "/data",
 			expectedKey:    "key-123",
 		},
+		{
+			name:           "BaseURL with path - combines paths correctly",
+			baseURL:        "http://localhost:8080/litellm/v1",
+			originalURL:    "https://generativelanguage.googleapis.com/models/gemini",
+			apiKey:         "test-key",
+			expectedScheme: "http",
+			expectedHost:   "localhost:8080",
+			expectedPath:   "/litellm/v1/models/gemini",
+			expectedKey:    "test-key",
+		},
+		{
+			name:           "BaseURL with path and trailing slash",
+			baseURL:        "http://localhost:8080/api/v2/",
+			originalURL:    "https://api.example.com/resources/item",
+			apiKey:         "key-123",
+			expectedScheme: "http",
+			expectedHost:   "localhost:8080",
+			expectedPath:   "/api/v2/resources/item",
+			expectedKey:    "key-123",
+		},
+		{
+			name:           "BaseURL with deep path",
+			baseURL:        "http://proxy.local/gateway/llm/google",
+			originalURL:    "https://generativelanguage.googleapis.com/v1beta/models/gemini:generateContent",
+			apiKey:         "secret",
+			expectedScheme: "http",
+			expectedHost:   "proxy.local",
+			expectedPath:   "/gateway/llm/google/v1beta/models/gemini:generateContent",
+			expectedKey:    "secret",
+		},
+		{
+			name:           "original URL with only root path",
+			baseURL:        "http://localhost:8080/prefix",
+			originalURL:    "https://api.example.com/",
+			apiKey:         "key",
+			expectedScheme: "http",
+			expectedHost:   "localhost:8080",
+			expectedPath:   "/prefix",
+			expectedKey:    "key",
+		},
 	}
 
 	for _, tt := range tests {
@@ -386,6 +426,148 @@ func TestApiKeyTransport_BaseURL_InvalidURL(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "failed to parse BaseURL")
+}
+
+func TestApiKeyTransport_BaseURL_PathTraversalProtection(t *testing.T) {
+	// These tests verify that path traversal attacks are prevented
+	// The path.Clean function normalizes paths and removes ".." segments
+	// The base path is always preserved, and the original path is appended to it
+	tests := []struct {
+		name         string
+		baseURL      string
+		originalPath string
+		expectedPath string
+		description  string
+	}{
+		{
+			name:         "path traversal attempt with ../ is neutralized",
+			baseURL:      "http://localhost:8080/api/v1",
+			originalPath: "https://evil.com/../../../etc/passwd",
+			expectedPath: "/api/v1/etc/passwd", // path.Clean removes ../.. , then we append to base
+			description:  "Path traversal is cleaned and appended to base path safely",
+		},
+		{
+			name:         "multiple slashes are normalized",
+			baseURL:      "http://localhost:8080/api//v1///",
+			originalPath: "https://api.example.com///models////gemini",
+			expectedPath: "/api/v1/models/gemini",
+			description:  "Multiple consecutive slashes are collapsed",
+		},
+		{
+			name:         "dot segments are removed",
+			baseURL:      "http://localhost:8080/./api/./v1/.",
+			originalPath: "https://api.example.com/./models/./gemini/.",
+			expectedPath: "/api/v1/models/gemini",
+			description:  "Single dot segments are removed",
+		},
+		{
+			name:         "complex path with mixed traversal attempts",
+			baseURL:      "http://localhost:8080/base/path",
+			originalPath: "https://api.example.com/foo/../bar/./baz/../qux",
+			expectedPath: "/base/path/bar/qux",
+			description:  "Complex path is properly normalized",
+		},
+		{
+			name:         "empty path segments",
+			baseURL:      "http://localhost:8080/api/v1",
+			originalPath: "https://api.example.com/",
+			expectedPath: "/api/v1",
+			description:  "Empty original path uses base path",
+		},
+		{
+			name:         "traversal within original path only",
+			baseURL:      "http://localhost:8080/api",
+			originalPath: "https://api.example.com/v1/models/../resources",
+			expectedPath: "/api/v1/resources",
+			description:  "Traversal within original path is resolved correctly",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &mockRoundTripper{}
+			transport := &ApiKeyTransport{
+				Transport: mock,
+				BaseURL:   tt.baseURL,
+				APIKey:    "test-key",
+			}
+
+			req, err := http.NewRequest(http.MethodGet, tt.originalPath, nil)
+			require.NoError(t, err)
+
+			resp, err := transport.RoundTrip(req)
+			require.NoError(t, err)
+			assert.NotNil(t, resp)
+
+			actualPath := mock.lastRequest.URL.Path
+			assert.Equal(t, tt.expectedPath, actualPath, tt.description)
+
+			// Verify the path doesn't contain any ".." or "." segments
+			assert.NotContains(t, actualPath, "/..", "Path should not contain '..' segments")
+			assert.NotContains(t, actualPath, "/./", "Path should not contain '.' segments")
+			assert.NotContains(t, actualPath, "//", "Path should not contain double slashes")
+		})
+	}
+}
+
+func TestApiKeyTransport_BaseURL_PathCombinations(t *testing.T) {
+	// Additional tests for various path combination scenarios
+	tests := []struct {
+		name         string
+		baseURL      string
+		originalURL  string
+		expectedPath string
+	}{
+		{
+			name:         "both paths with trailing and leading slashes",
+			baseURL:      "http://localhost:8080/api/",
+			originalURL:  "https://example.com/v1/resource",
+			expectedPath: "/api/v1/resource",
+		},
+		{
+			name:         "base path without trailing slash, original with leading slash",
+			baseURL:      "http://localhost:8080/api",
+			originalURL:  "https://example.com/v1/resource",
+			expectedPath: "/api/v1/resource",
+		},
+		{
+			name:         "base URL is just domain with trailing slash",
+			baseURL:      "http://localhost:8080/",
+			originalURL:  "https://example.com/v1/resource",
+			expectedPath: "/v1/resource",
+		},
+		{
+			name:         "base URL path with colon (like port or special chars)",
+			baseURL:      "http://localhost:8080/api:v1",
+			originalURL:  "https://example.com/models:generate",
+			expectedPath: "/api:v1/models:generate",
+		},
+		{
+			name:         "nested paths with special characters",
+			baseURL:      "http://localhost:8080/api/v1.2/beta-test",
+			originalURL:  "https://example.com/models/gemini-2.0-flash",
+			expectedPath: "/api/v1.2/beta-test/models/gemini-2.0-flash",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &mockRoundTripper{}
+			transport := &ApiKeyTransport{
+				Transport: mock,
+				BaseURL:   tt.baseURL,
+			}
+
+			req, err := http.NewRequest(http.MethodGet, tt.originalURL, nil)
+			require.NoError(t, err)
+
+			resp, err := transport.RoundTrip(req)
+			require.NoError(t, err)
+			assert.NotNil(t, resp)
+
+			assert.Equal(t, tt.expectedPath, mock.lastRequest.URL.Path)
+		})
+	}
 }
 
 func TestApiKeyTransport_ProxyURL(t *testing.T) {
