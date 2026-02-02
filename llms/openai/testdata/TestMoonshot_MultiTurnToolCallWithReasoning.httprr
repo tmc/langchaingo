@@ -1,0 +1,54 @@
+httprr trace v1
+587 1356
+POST https://api.moonshot.ai/v1/chat/completions HTTP/1.1
+Host: api.moonshot.ai
+User-Agent: langchaingo-httprr
+Content-Length: 383
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"kimi-k2.5","messages":[{"role":"user","content":"What is the weather in Beijing?"}],"temperature":1,"max_completion_tokens":4096,"tools":[{"type":"function","function":{"name":"get_weather","description":"Get current weather for a location","parameters":{"properties":{"location":{"description":"The city name","type":"string"}},"required":["location"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 726
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json; charset=utf-8
+Date: Mon, 02 Feb 2026 12:37:15 GMT
+Msh-Gid: enterprise-tier-3
+Msh-Org-Id: org-1d3b5159d7b140a88d130cd9df42d00d
+Msh-Project-Id: proj-fa400d2456ca4a958aa0f94b918ca959
+Msh-Request-Id: e571b2df-0033-11f1-9d11-00163e7a3687
+Msh-Trace-Mode: on
+Msh-Uid: d3ucudkbcdrssrt5e9tg
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=181,cfOrigin;dur=3387
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Vary: Origin
+X-Msh-Trace-Id: 57aa8d65ee6a9420b4bd7b3d02c130ff
+
+{"id":"chatcmpl-69809a775276a7d916e38571","object":"chat.completion","created":1770035833,"model":"kimi-k2.5","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"The user is asking for the weather in Beijing. I have a function available called `get_weather` that takes a location parameter (the city name) and returns the current weather for that location.\n\nI need to call the `get_weather` function with \"Beijing\" as the location parameter.","tool_calls":[{"index":0,"id":"get_weather:0","type":"function","function":{"name":"get_weather","arguments":"{\"location\": \"Beijing\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":61,"completion_tokens":81,"total_tokens":142}}1194 1165
+POST https://api.moonshot.ai/v1/chat/completions HTTP/1.1
+Host: api.moonshot.ai
+User-Agent: langchaingo-httprr
+Content-Length: 990
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"kimi-k2.5","messages":[{"role":"user","content":"What is the weather in Beijing?"},{"role":"assistant","content":"","tool_calls":[{"id":"get_weather:0","type":"function","function":{"name":"get_weather","arguments":"{\"location\": \"Beijing\"}"}}],"reasoning_content":"The user is asking for the weather in Beijing. I have a function available called `get_weather` that takes a location parameter (the city name) and returns the current weather for that location.\n\nI need to call the `get_weather` function with \"Beijing\" as the location parameter."},{"role":"tool","content":"{\"temperature\": \"22°C\", \"condition\": \"sunny\"}","name":"get_weather","tool_call_id":"get_weather:0"}],"temperature":1,"max_completion_tokens":4096,"tools":[{"type":"function","function":{"name":"get_weather","description":"Get current weather for a location","parameters":{"properties":{"location":{"description":"The city name","type":"string"}},"required":["location"],"type":"object"}}}]}HTTP/2.0 200 OK
+Content-Length: 535
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json; charset=utf-8
+Date: Mon, 02 Feb 2026 12:37:18 GMT
+Msh-Gid: enterprise-tier-3
+Msh-Org-Id: org-1d3b5159d7b140a88d130cd9df42d00d
+Msh-Project-Id: proj-fa400d2456ca4a958aa0f94b918ca959
+Msh-Request-Id: e84b3cee-0033-11f1-b68e-00163e0a4aa2
+Msh-Trace-Mode: on
+Msh-Uid: d3ucudkbcdrssrt5e9tg
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=296,cfOrigin;dur=2012
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Vary: Origin
+X-Msh-Trace-Id: 2efc65c91e31398e5f9671922e808547
+
+{"id":"chatcmpl-69809a7c542a33e713929f15","object":"chat.completion","created":1770035836,"model":"kimi-k2.5","choices":[{"index":0,"message":{"role":"assistant","content":"The weather in Beijing is currently **22°C** and **sunny**. ☀️","reasoning_content":"Great! I received the weather information for Beijing. The result shows:\n- Temperature: 22°C\n- Condition: sunny\n\nI should present this information clearly to the user."},"finish_reason":"stop"}],"usage":{"prompt_tokens":174,"completion_tokens":57,"total_tokens":231}}

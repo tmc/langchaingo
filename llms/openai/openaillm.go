@@ -125,6 +125,12 @@ func (o *LLM) convertMessages(messages []llms.MessageContent) ([]*ChatMessage, e
 		newParts, toolCalls, toolCallResponses := ExtractToolParts(msg)
 		msg.MultiContent = newParts
 		msg.ToolCalls = toolCallsFromToolCalls(toolCalls)
+
+		// Preserve reasoning content for multi-turn conversations with tool calls
+		if o.client != nil && o.client.PreserveReasoningContent && msg.Role == RoleAssistant && len(toolCalls) > 0 {
+			msg.ReasoningContent = extractReasoningContent(mc.Parts)
+		}
+
 		if len(msg.MultiContent) != 0 || len(msg.ToolCalls) != 0 {
 			if msg.Role == RoleTool {
 				msg.Role = RoleAssistant
@@ -433,6 +439,19 @@ func ExtractToolParts(msg *ChatMessage) ([]llms.ContentPart, []llms.ToolCall, []
 		}
 	}
 	return content, toolCalls, toolCallResponses
+}
+
+// extractReasoningContent extracts reasoning content from message parts.
+// It returns the first non-empty reasoning content found in TextContent parts.
+func extractReasoningContent(parts []llms.ContentPart) string {
+	for _, part := range parts {
+		if tc, ok := part.(llms.TextContent); ok {
+			if tc.Reasoning != nil && tc.Reasoning.Content != "" {
+				return tc.Reasoning.Content
+			}
+		}
+	}
+	return ""
 }
 
 // toolFromTool converts an llms.Tool to a Tool.

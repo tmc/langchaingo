@@ -35,7 +35,7 @@ func setupTestClient(t *testing.T, model string, responseFormat *ResponseFormat,
 		apiKey = key
 	}
 
-	client, err := New(apiKey, model, "", "", APITypeOpenAI, "", rr.Client(), "", responseFormat, false, false, opts...)
+	client, err := New(apiKey, model, "", "", APITypeOpenAI, "", rr.Client(), "", responseFormat, false, false, false, opts...)
 	require.NoError(t, err)
 	return client
 }
@@ -195,7 +195,7 @@ func TestClient_WithResponseFormat(t *testing.T) {
 
 func TestMakeEmbeddingRequest(t *testing.T) {
 	t.Run("without dimensions", func(t *testing.T) {
-		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false)
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false, false)
 		require.NoError(t, err)
 
 		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model"})
@@ -203,7 +203,7 @@ func TestMakeEmbeddingRequest(t *testing.T) {
 		assert.Equal(t, 0, request.Dimensions)
 	})
 	t.Run("with dimensions", func(t *testing.T) {
-		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false)
+		client, err := New("", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false, false)
 		require.NoError(t, err)
 
 		request := client.makeEmbeddingPayload(&EmbeddingRequest{Model: "some_model", Dimensions: 1234})
@@ -214,7 +214,7 @@ func TestMakeEmbeddingRequest(t *testing.T) {
 
 func TestInternalMetadataFiltering(t *testing.T) {
 	// Test that internal openai: prefixed metadata is filtered out from requests
-	client, err := New("test-api-key", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false)
+	client, err := New("test-api-key", "gpt-3.5-turbo", "", "", APITypeOpenAI, "", nil, "", nil, false, false, false)
 	require.NoError(t, err)
 
 	// Create a mock HTTP client to capture the request body

@@ -100,6 +100,36 @@ func newTestOpenRouterClient(t *testing.T, opts ...Option) *LLM {
 	return llm
 }
 
+func newTestMoonshotClient(t *testing.T, opts ...Option) *LLM {
+	t.Helper()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "MOONSHOT_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure Moonshot client with reasoning content preservation
+	clientOpts := []Option{
+		WithBaseURL("https://api.moonshot.ai/v1"),
+		WithHTTPClient(rr.Client()),
+		WithPreserveReasoningContent(), // Enable reasoning content preservation
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		clientOpts = append(clientOpts, WithToken("fake-api-key-for-testing"))
+	} else {
+		clientOpts = append(clientOpts, WithToken(os.Getenv("MOONSHOT_API_KEY")))
+	}
+
+	// Add any additional options passed to the function
+	clientOpts = append(clientOpts, opts...)
+
+	t.Logf("Creating Moonshot client with recording=%v", rr.Recording())
+	llm, err := New(clientOpts...)
+	require.NoError(t, err)
+	return llm
+}
+
 type testEnv struct {
 	name string
 	init func(t *testing.T, opts ...Option) *LLM
@@ -784,4 +814,89 @@ func TestFunctionParallelCall(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestMoonshot_MultiTurnToolCallWithReasoning tests multi-turn conversation with tool calls
+// and reasoning content preservation for Moonshot provider.
+// This test verifies that reasoning_content is properly preserved in assistant messages
+// with tool calls to prevent "reasoning_content is missing" errors.
+func TestMoonshot_MultiTurnToolCallWithReasoning(t *testing.T) {
+	t.Parallel()
+
+	llm := newTestMoonshotClient(t, WithModel("kimi-k2.5"))
+
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "Get current weather for a location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city name",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	// Turn 1: Initial request with reasoning
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What is the weather in Beijing?")},
+		},
+	}
+
+	resp1, err := llm.GenerateContent(t.Context(), messages,
+		llms.WithTools(tools),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	require.NoError(t, err)
+	require.NotEmpty(t, resp1.Choices)
+
+	choice1 := resp1.Choices[0]
+	require.NotEmpty(t, choice1.ToolCalls, "Should have tool calls")
+
+	// Build AI message with reasoning (like in Anthropic)
+	aiParts1 := []llms.ContentPart{
+		llms.TextPartWithReasoning(choice1.Content, choice1.Reasoning),
+	}
+	for _, tc := range choice1.ToolCalls {
+		aiParts1 = append(aiParts1, tc)
+	}
+	messages = append(messages, llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: aiParts1,
+	})
+
+	// Add tool response
+	messages = append(messages, llms.MessageContent{
+		Role: llms.ChatMessageTypeTool,
+		Parts: []llms.ContentPart{
+			llms.ToolCallResponse{
+				ToolCallID: choice1.ToolCalls[0].ID,
+				Name:       choice1.ToolCalls[0].FunctionCall.Name,
+				Content:    `{"temperature": "22°C", "condition": "sunny"}`,
+			},
+		},
+	})
+
+	// Turn 2: Process tool result (this should work without error)
+	resp2, err := llm.GenerateContent(t.Context(), messages,
+		llms.WithTools(tools),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	require.NoError(t, err, "Should not error with 'reasoning_content is missing'")
+	require.NotEmpty(t, resp2.Choices)
+
+	choice2 := resp2.Choices[0]
+	assert.Contains(t, strings.ToLower(choice2.Content), "beijing")
 }

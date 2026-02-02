@@ -753,7 +753,7 @@ func TestCreateChatRequest_ReasoningModelTemperature(t *testing.T) {
 	t.Parallel()
 
 	// Create a minimal client for testing
-	client, err := openaiclient.New("fake-token", "", "", "", openaiclient.APITypeOpenAI, "", nil, "", nil, false, false)
+	client, err := openaiclient.New("fake-token", "", "", "", openaiclient.APITypeOpenAI, "", nil, "", nil, false, false, false)
 	require.NoError(t, err)
 
 	llm := &LLM{client: client}

@@ -43,6 +43,8 @@ type Client struct {
 
 	UseReasoningMaxTokens bool
 	ModernReasoningFormat bool
+
+	PreserveReasoningContent bool
 }
 
 // Option is an option for the OpenAI client.
@@ -65,20 +67,21 @@ type Doer interface {
 func New(token string, model string, baseURL string, organization string,
 	apiType APIType, apiVersion string, httpClient Doer, embeddingModel string,
 	responseFormat *ResponseFormat, useReasoningMaxTokens bool, modernReasoningFormat bool,
-	opts ...Option,
+	preserveReasoningContent bool, opts ...Option,
 ) (*Client, error) {
 	c := &Client{
-		token:                 token,
-		Model:                 model,
-		EmbeddingModel:        embeddingModel,
-		baseURL:               strings.TrimSuffix(baseURL, "/"),
-		organization:          organization,
-		apiType:               apiType,
-		apiVersion:            apiVersion,
-		httpClient:            httpClient,
-		ResponseFormat:        responseFormat,
-		UseReasoningMaxTokens: useReasoningMaxTokens,
-		ModernReasoningFormat: modernReasoningFormat,
+		token:                    token,
+		Model:                    model,
+		EmbeddingModel:           embeddingModel,
+		baseURL:                  strings.TrimSuffix(baseURL, "/"),
+		organization:             organization,
+		apiType:                  apiType,
+		apiVersion:               apiVersion,
+		httpClient:               httpClient,
+		ResponseFormat:           responseFormat,
+		UseReasoningMaxTokens:    useReasoningMaxTokens,
+		ModernReasoningFormat:    modernReasoningFormat,
+		PreserveReasoningContent: preserveReasoningContent,
 	}
 	if c.baseURL == "" {
 		c.baseURL = defaultBaseURL

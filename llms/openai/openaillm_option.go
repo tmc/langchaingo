@@ -39,6 +39,9 @@ type options struct {
 	useReasoningMaxTokens bool
 	modernReasoningFormat bool
 
+	// preserve reasoning content in multi-turn conversations with tool calls
+	preserveReasoningContent bool
+
 	// required when APIType is APITypeAzure or APITypeAzureAD
 	apiVersion          string
 	embeddingModel      string
@@ -165,5 +168,15 @@ func WithUsingReasoningMaxTokens() Option {
 func WithModernReasoningFormat() Option {
 	return func(opts *options) {
 		opts.modernReasoningFormat = true
+	}
+}
+
+// WithPreserveReasoningContent enables preservation of reasoning content
+// in multi-turn conversations with tool calls. This is required for some
+// LLM providers like Moonshot that expect reasoning_content field in
+// assistant messages with tool calls.
+func WithPreserveReasoningContent() Option {
+	return func(opts *options) {
+		opts.preserveReasoningContent = true
 	}
 }
