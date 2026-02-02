@@ -57,12 +57,13 @@ func TestSignatureDeduplication(t *testing.T) {
 		result, err := convertParts(parts)
 		require.NoError(t, err)
 
-		// Should get: empty text part (kept because no signature to dedupe) + tool call
-		assert.Len(t, result, 2, "Should have both parts")
+		// Empty text without reasoning is SKIPPED (prevents Gemini API errors)
+		// Only tool call should remain
+		assert.Len(t, result, 1, "Empty text without reasoning should be skipped")
 
 		// Only tool call should have signature
-		assert.Nil(t, result[0].ThoughtSignature, "Empty text without reasoning should have no signature")
-		assert.Equal(t, testSig, result[1].ThoughtSignature, "Tool call should have signature")
+		assert.Equal(t, testSig, result[0].ThoughtSignature, "Tool call should have signature")
+		assert.NotNil(t, result[0].FunctionCall, "Remaining part should be function call")
 	})
 
 	t.Run("scenario_2_mistaken_duplicate_signature", func(t *testing.T) {
@@ -433,21 +434,60 @@ func TestConvertParts(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name    string
-		parts   []llms.ContentPart
-		wantErr bool
+		name           string
+		parts          []llms.ContentPart
+		wantErr        bool
+		expectedLength int // -1 means same as input
 	}{
 		{
-			name:    "empty parts",
-			parts:   []llms.ContentPart{},
-			wantErr: false,
+			name:           "empty parts",
+			parts:          []llms.ContentPart{},
+			wantErr:        false,
+			expectedLength: 0,
 		},
 		{
 			name: "text content",
 			parts: []llms.ContentPart{
 				llms.TextContent{Text: "Hello world"},
 			},
-			wantErr: false,
+			wantErr:        false,
+			expectedLength: 1,
+		},
+		{
+			name: "empty text without reasoning - should be skipped",
+			parts: []llms.ContentPart{
+				llms.TextContent{Text: "", Reasoning: nil},
+			},
+			wantErr:        false,
+			expectedLength: 0, // Empty text without reasoning is skipped
+		},
+		{
+			name: "empty text with reasoning - should be kept",
+			parts: []llms.ContentPart{
+				llms.TextContent{
+					Text: "",
+					Reasoning: &reasoning.ContentReasoning{
+						Content:   "thinking",
+						Signature: []byte("sig"),
+					},
+				},
+			},
+			wantErr:        false,
+			expectedLength: 1, // Empty text with reasoning is kept
+		},
+		{
+			name: "mixed: empty text + tool call",
+			parts: []llms.ContentPart{
+				llms.TextContent{Text: "", Reasoning: nil}, // Will be skipped
+				llms.ToolCall{
+					FunctionCall: &llms.FunctionCall{
+						Name:      "search",
+						Arguments: `{"q":"test"}`,
+					},
+				},
+			},
+			wantErr:        false,
+			expectedLength: 1, // Only tool call remains
 		},
 		{
 			name: "binary content",
@@ -457,7 +497,8 @@ func TestConvertParts(t *testing.T) {
 					Data:     []byte("fake image data"),
 				},
 			},
-			wantErr: false,
+			wantErr:        false,
+			expectedLength: 1,
 		},
 		{
 			name: "tool call",
@@ -469,7 +510,8 @@ func TestConvertParts(t *testing.T) {
 					},
 				},
 			},
-			wantErr: false,
+			wantErr:        false,
+			expectedLength: 1,
 		},
 		{
 			name: "tool call response",
@@ -479,7 +521,8 @@ func TestConvertParts(t *testing.T) {
 					Content: "It's sunny in Paris",
 				},
 			},
-			wantErr: false,
+			wantErr:        false,
+			expectedLength: 1,
 		},
 		{
 			name: "tool call with invalid JSON",
@@ -505,7 +548,12 @@ func TestConvertParts(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Len(t, result, len(tt.parts))
+
+			expectedLen := tt.expectedLength
+			if expectedLen == -1 {
+				expectedLen = len(tt.parts)
+			}
+			assert.Len(t, result, expectedLen, "Expected %d parts, got %d", expectedLen, len(result))
 
 			// Basic validation that all parts are created
 			for i, part := range result {
