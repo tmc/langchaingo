@@ -4,14 +4,24 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func (mc MessageContent) MarshalJSON() ([]byte, error) {
 	hasSingleTextPart := false
+	hasReasoning := false
 	if len(mc.Parts) == 1 {
-		_, hasSingleTextPart = mc.Parts[0].(TextContent)
+		tp, ok := mc.Parts[0].(TextContent)
+		if ok {
+			hasSingleTextPart = true
+			if tp.Reasoning != nil && !tp.Reasoning.IsEmpty() {
+				hasReasoning = true
+			}
+		}
 	}
-	if hasSingleTextPart {
+	// Use simple format only if it's a single text part without reasoning
+	if hasSingleTextPart && !hasReasoning {
 		tp, _ := mc.Parts[0].(TextContent)
 		return json.Marshal(struct {
 			Role ChatMessageType `json:"role"`
@@ -33,9 +43,10 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 		Role  ChatMessageType `json:"role"`
 		Text  string          `json:"text"`
 		Parts []struct {
-			Type     string `json:"type"`
-			Text     string `json:"text,omitempty"`
-			ImageURL struct {
+			Type      string                      `json:"type"`
+			Text      string                      `json:"text,omitempty"`
+			Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
+			ImageURL  struct {
 				URL    string `json:"url"`
 				Detail string `json:"detail,omitempty"`
 			} `json:"image_url,omitempty"`
@@ -45,9 +56,10 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 			} `json:"binary,omitempty"`
 			ID       string `json:"id"`
 			ToolCall struct {
-				ID           string        `json:"id"`
-				Type         string        `json:"type"`
-				FunctionCall *FunctionCall `json:"function"`
+				ID           string                      `json:"id"`
+				Type         string                      `json:"type"`
+				FunctionCall *FunctionCall               `json:"function"`
+				Reasoning    *reasoning.ContentReasoning `json:"reasoning,omitempty"`
 			} `json:"tool_call"`
 			ToolResponse struct {
 				ToolCallID string `json:"tool_call_id"`
@@ -64,7 +76,10 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 	for _, part := range m.Parts {
 		switch part.Type {
 		case "text", "":
-			mc.Parts = append(mc.Parts, TextContent{Text: part.Text})
+			mc.Parts = append(mc.Parts, TextContent{
+				Text:      part.Text,
+				Reasoning: part.Reasoning,
+			})
 		case "image_url":
 			mc.Parts = append(mc.Parts, ImageURLContent{
 				URL:    part.ImageURL.URL,
@@ -81,6 +96,7 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 				ID:           part.ToolCall.ID,
 				Type:         part.ToolCall.Type,
 				FunctionCall: part.ToolCall.FunctionCall,
+				Reasoning:    part.ToolCall.Reasoning,
 			})
 		case "tool_response":
 			mc.Parts = append(mc.Parts, ToolCallResponse{
@@ -100,22 +116,43 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 }
 
 func (tc TextContent) MarshalJSON() ([]byte, error) {
-	m := map[string]string{
+	m := map[string]any{
 		"type": "text",
 		"text": tc.Text,
+	}
+	if tc.Reasoning != nil && !tc.Reasoning.IsEmpty() {
+		m["reasoning"] = tc.Reasoning
 	}
 	return json.Marshal(m)
 }
 
 func (tc *TextContent) UnmarshalJSON(data []byte) error {
-	var m map[string]string
+	var m map[string]any
 	if err := json.Unmarshal(data, &m); err != nil {
 		return err
 	}
-	if m["type"] != "text" {
+	typ, ok := m["type"].(string)
+	if !ok || typ != "text" {
 		return fmt.Errorf("invalid type for TextContent: %v", m["type"])
 	}
-	tc.Text = m["text"]
+	text, ok := m["text"].(string)
+	if !ok {
+		return fmt.Errorf("invalid text field in TextContent")
+	}
+	tc.Text = text
+
+	if reasoningData, ok := m["reasoning"]; ok && reasoningData != nil {
+		reasoningBytes, err := json.Marshal(reasoningData)
+		if err != nil {
+			return fmt.Errorf("error marshalling reasoning data: %w", err)
+		}
+		var r reasoning.ContentReasoning
+		if err := json.Unmarshal(reasoningBytes, &r); err != nil {
+			return fmt.Errorf("error unmarshalling reasoning: %w", err)
+		}
+		tc.Reasoning = &r
+	}
+
 	return nil
 }
 
@@ -219,6 +256,9 @@ func (tc ToolCall) MarshalJSON() ([]byte, error) {
 			"function": json.RawMessage(fc),
 		},
 	}
+	if tc.Reasoning != nil && !tc.Reasoning.IsEmpty() {
+		m.ToolCall["reasoning"] = tc.Reasoning
+	}
 	return json.Marshal(m)
 }
 
@@ -258,6 +298,18 @@ func (tc *ToolCall) UnmarshalJSON(data []byte) error {
 	tc.ID = id
 	tc.Type = typ
 	tc.FunctionCall = &fc
+
+	if reasoningData, ok := toolCall["reasoning"]; ok && reasoningData != nil {
+		reasoningBytes, err := json.Marshal(reasoningData)
+		if err != nil {
+			return fmt.Errorf("error marshalling reasoning data: %w", err)
+		}
+		var r reasoning.ContentReasoning
+		if err := json.Unmarshal(reasoningBytes, &r); err != nil {
+			return fmt.Errorf("error unmarshalling reasoning: %w", err)
+		}
+		tc.Reasoning = &r
+	}
 	return nil
 }
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
+
 	"github.com/google/go-cmp/cmp"
 	"sigs.k8s.io/yaml"
 )
@@ -262,6 +264,46 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:  "text with reasoning",
+			input: `{"role":"assistant","parts":[{"type":"text","text":"The answer is 42","reasoning":{"Content":"Let me think about this...","Signature":"c2lnbmF0dXJl","RedactedContent":"cmVkYWN0ZWQ="}}]}`,
+			want: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{
+						Text: "The answer is 42",
+						Reasoning: &reasoning.ContentReasoning{
+							Content:         "Let me think about this...",
+							Signature:       []byte("signature"),
+							RedactedContent: []byte("redacted"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:  "tool call with reasoning",
+			input: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"id":"tc01","type":"function","function":{"name":"search","arguments":"{}"},"reasoning":{"Content":"Need to search for this","Signature":"dGVzdA==","RedactedContent":null}}}]}`,
+			want: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					ToolCall{
+						ID:   "tc01",
+						Type: "function",
+						FunctionCall: &FunctionCall{
+							Name:      "search",
+							Arguments: "{}",
+						},
+						Reasoning: &reasoning.ContentReasoning{
+							Content:   "Need to search for this",
+							Signature: []byte("test"),
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -324,6 +366,46 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 				},
 			},
 			want:    `{"role":"user","parts":[{}]}`,
+			wantErr: false,
+		},
+		{
+			name: "text with reasoning",
+			input: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{
+						Text: "The answer is 42",
+						Reasoning: &reasoning.ContentReasoning{
+							Content:         "Let me think about this...",
+							Signature:       []byte("signature"),
+							RedactedContent: []byte("redacted"),
+						},
+					},
+				},
+			},
+			want:    `{"role":"assistant","parts":[{"reasoning":{"Content":"Let me think about this...","Signature":"c2lnbmF0dXJl","RedactedContent":"cmVkYWN0ZWQ="},"text":"The answer is 42","type":"text"}]}`,
+			wantErr: false,
+		},
+		{
+			name: "tool call with reasoning",
+			input: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					ToolCall{
+						ID:   "tc01",
+						Type: "function",
+						FunctionCall: &FunctionCall{
+							Name:      "search",
+							Arguments: "{}",
+						},
+						Reasoning: &reasoning.ContentReasoning{
+							Content:   "Need to search for this",
+							Signature: []byte("test"),
+						},
+					},
+				},
+			},
+			want:    `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"search","arguments":"{}"},"id":"tc01","reasoning":{"Content":"Need to search for this","Signature":"dGVzdA==","RedactedContent":null},"type":"function"}}]}`,
 			wantErr: false,
 		},
 	}
@@ -509,6 +591,67 @@ role: assistant
 				},
 			},
 		},
+		{
+			name: "text content with reasoning",
+			in: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{
+						Text: "Final answer",
+						Reasoning: &reasoning.ContentReasoning{
+							Content:         "Reasoning process here",
+							Signature:       []byte("sig123"),
+							RedactedContent: []byte("redacted"),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "tool call with reasoning",
+			in: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					ToolCall{
+						ID:   "tc_reasoning",
+						Type: "function",
+						FunctionCall: &FunctionCall{
+							Name:      "analyze",
+							Arguments: `{"data":"test"}`,
+						},
+						Reasoning: &reasoning.ContentReasoning{
+							Content:   "Tool reasoning here",
+							Signature: []byte("toolsig"),
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "mixed content with reasoning",
+			in: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{
+						Text: "Let me help",
+						Reasoning: &reasoning.ContentReasoning{
+							Content: "First, analyze the request",
+						},
+					},
+					ToolCall{
+						ID:   "tc_mixed",
+						Type: "function",
+						FunctionCall: &FunctionCall{
+							Name:      "get_info",
+							Arguments: `{}`,
+						},
+						Reasoning: &reasoning.ContentReasoning{
+							Content: "Then call the tool",
+						},
+					},
+				},
+			},
+		},
 	}
 
 	// Round-trip both JSON and YAML:
@@ -579,5 +722,130 @@ func TestToolCallSerialization(t *testing.T) {
 	}
 	if diff := cmp.Diff(toolCall, unmarshalToolCall); diff != "" {
 		t.Errorf("")
+	}
+}
+
+func TestTextContentWithReasoningSerialization(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		tc   TextContent
+	}{
+		{
+			name: "text with full reasoning",
+			tc: TextContent{
+				Text: "Answer is here",
+				Reasoning: &reasoning.ContentReasoning{
+					Content:         "Thinking process",
+					Signature:       []byte("signature_data"),
+					RedactedContent: []byte("redacted_data"),
+				},
+			},
+		},
+		{
+			name: "text with partial reasoning",
+			tc: TextContent{
+				Text: "Simple answer",
+				Reasoning: &reasoning.ContentReasoning{
+					Content: "Simple thought",
+				},
+			},
+		},
+		{
+			name: "text without reasoning",
+			tc: TextContent{
+				Text: "Just text",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			b, err := json.Marshal(tt.tc)
+			if err != nil {
+				t.Fatalf("Marshal error: %v", err)
+			}
+
+			var unmarshalled TextContent
+			if err := json.Unmarshal(b, &unmarshalled); err != nil {
+				t.Fatalf("Unmarshal error: %v", err)
+			}
+
+			if diff := cmp.Diff(tt.tc, unmarshalled); diff != "" {
+				t.Errorf("Roundtrip mismatch (-want +got):\n%s", diff)
+				t.Logf("JSON: %s", string(b))
+			}
+		})
+	}
+}
+
+func TestToolCallWithReasoningSerialization(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		tc   ToolCall
+	}{
+		{
+			name: "tool call with full reasoning",
+			tc: ToolCall{
+				ID:   "tc_01",
+				Type: "function",
+				FunctionCall: &FunctionCall{
+					Name:      "search_web",
+					Arguments: `{"query":"test"}`,
+				},
+				Reasoning: &reasoning.ContentReasoning{
+					Content:         "Need to search online",
+					Signature:       []byte("sig_data"),
+					RedactedContent: []byte("redacted"),
+				},
+			},
+		},
+		{
+			name: "tool call with content only reasoning",
+			tc: ToolCall{
+				ID:   "tc_02",
+				Type: "function",
+				FunctionCall: &FunctionCall{
+					Name:      "calculate",
+					Arguments: `{"x":5,"y":10}`,
+				},
+				Reasoning: &reasoning.ContentReasoning{
+					Content: "Need to compute",
+				},
+			},
+		},
+		{
+			name: "tool call without reasoning",
+			tc: ToolCall{
+				ID:   "tc_03",
+				Type: "function",
+				FunctionCall: &FunctionCall{
+					Name:      "get_time",
+					Arguments: `{}`,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			b, err := json.Marshal(tt.tc)
+			if err != nil {
+				t.Fatalf("Marshal error: %v", err)
+			}
+
+			var unmarshalled ToolCall
+			if err := json.Unmarshal(b, &unmarshalled); err != nil {
+				t.Fatalf("Unmarshal error: %v", err)
+			}
+
+			if diff := cmp.Diff(tt.tc, unmarshalled); diff != "" {
+				t.Errorf("Roundtrip mismatch (-want +got):\n%s", diff)
+				t.Logf("JSON: %s", string(b))
+			}
+		})
 	}
 }

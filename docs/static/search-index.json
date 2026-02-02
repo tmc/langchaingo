@@ -6,15 +6,15 @@
     "type": "doc",
     "keywords": [
       "architecture",
-      "package",
       "adoption",
+      "package",
       "only",
       "langchaingo",
-      "langchaingo's",
-      "**want",
-      "adopt",
-      "your",
-      "specific"
+      "need",
+      "management",
+      "conventions",
+      "llm",
+      "don't"
     ]
   },
   {
@@ -23,16 +23,16 @@
     "content": "Concepts Understanding the fundamental concepts behind LangChainGo helps you build better applications. Core architecture LangChainGo is built around several key architectural principles: Framework design - **Interface-driven design**: Every major component is defined by interfaces for modularity and testability - **Component architecture**: Clear separation between models, chains, memory, agents, and tools - **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and expl...",
     "type": "doc",
     "keywords": [
-      "langchaingo",
       "concepts",
       "interfaces",
-      "testability",
-      "between",
-      "component",
-      "leverage",
-      "agents",
+      "langchaingo",
+      "**component",
+      "built",
       "applications",
-      "around"
+      "behind",
+      "framework",
+      "tools",
+      "like"
     ]
   },
   {
@@ -42,15 +42,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
+      "tutorials",
       "**purpose**",
       "guide",
-      "tutorials",
-      "how-to",
-      "categories",
-      "four",
+      "step-by-step",
+      "structure",
+      "complexity",
       "provide",
-      "progressive",
-      "appli"
+      "langchaingo",
+      "guides"
     ]
   },
   {
@@ -59,16 +59,16 @@
     "content": "Contributing to LangChainGo Thank you for your interest in contributing to LangChainGo! This guide helps you get started. Ways to contribute 1. Code contributions - **Bug fixes**: Help us squash bugs and improve stability - **New features**: Implement new LLM providers, tools, or chains - **Performance improvements**: Optimize existing code - **Tests**: Improve test coverage and add missing tests 2. Documentation contributions - **Tutorials**: Write step-by-step guides for common use cases - **H...",
     "type": "doc",
     "keywords": [
-      "contributing",
+      "langchaingo",
       "improve",
       "contributions",
-      "langchaingo",
       "code",
-      "features**",
+      "contributing",
+      "**performance",
+      "missing",
       "started",
-      "tests",
-      "implement",
-      "contribute"
+      "help",
+      "test"
     ]
   },
   {
@@ -80,13 +80,13 @@
       "models",
       "chat",
       "expose",
+      "started",
+      "language",
       "langchain",
       "interface",
-      "language",
-      "started",
-      "rather",
-      "where",
-      "few"
+      "following",
+      "inputs",
+      "understand"
     ]
   },
   {
@@ -95,16 +95,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleMistral from \"@examples/mistral-completion-example/mistral_completion_example.go\"; Quickstart: LangChainGo with Mistral Get started by running your first program with LangChainGo and the Mistral Platform. Prerequisites 1. **Mistral API Key**: Sign up on Mistral and retrieve your API key. 2. **Go**: Download and install Go. Setup Before interacting with the Mistral API, you need to set up your API key as an environment variable. Linux/macOS ...",
     "type": "doc",
     "keywords": [
-      "mistral",
       "api",
+      "mistral",
       "your",
-      "import",
       "langchaingo",
+      "import",
       "key",
-      "first",
       "retrieve",
-      "setup",
-      "install"
+      "running",
+      "**mistral",
+      "\"@examples/mistral-completion-example/mistral_completion_example.go\""
     ]
   },
   {
@@ -114,15 +114,15 @@
     "type": "doc",
     "keywords": [
       "ollama",
-      "your",
-      "langchaingo",
-      "download",
       "import",
+      "langchaingo",
+      "your",
+      "download",
       "install",
-      "**ollama**",
-      "across",
-      "started",
-      "machine"
+      "setup",
+      "\"@examples/ollama-completion-example/ollama_completion_example.go\"",
+      "most",
+      "\"@theme/codeblock\""
     ]
   },
   {
@@ -133,14 +133,14 @@
     "keywords": [
       "openai",
       "api",
-      "langchaingo",
       "your",
+      "langchaingo",
       "import",
-      "\"@examples/openai-completion-example/openai_completion_example.go\"",
-      "openai's",
-      "**go**",
-      "download",
-      "their"
+      "gpt",
+      "**openai",
+      "running",
+      "codeblock",
+      "key**"
     ]
   },
   {
@@ -152,12 +152,12 @@
       "configuration",
       "basic",
       "model",
+      "selection",
+      "openai",
+      "providers",
       "configure",
       "how",
       "environment",
-      "different",
-      "providers",
-      "selection",
       "llm"
     ]
   },
@@ -169,14 +169,14 @@
     "keywords": [
       "how",
       "guides",
-      "llm",
-      "providers",
-      "how-to",
       "llms",
-      "these",
-      "stream",
-      "\"how",
-      "different"
+      "how-to",
+      "providers",
+      "llm",
+      "documentation",
+      "openai",
+      "being",
+      "want"
     ]
   },
   {
@@ -188,13 +188,13 @@
       "language",
       "langchain",
       "model",
-      "framework",
-      "langchaingo",
       "applications",
       "_be",
-      "programming",
-      "connect",
-      "data"
+      "langchaingo",
+      "framework",
+      "port/fork",
+      "api",
+      "models"
     ]
   },
   {
@@ -204,13 +204,13 @@
     "type": "doc",
     "keywords": [
       "agents",
+      "\"@theme/doccardlist\"",
       "info",
       "conceptual",
       "guide",
       "\u003cdoccardlist",
       "import",
-      "doccardlist",
-      "\"@theme/doccardlist\""
+      "doccardlist"
     ]
   },
   {
@@ -222,12 +222,12 @@
       "agents",
       "order",
       "import",
+      "level",
+      "tutorial",
+      "getting",
+      "when",
+      "used",
       "how",
-      "returning",
-      "agent",
-      "which",
-      "either",
-      "show",
       "what"
     ],
     "metadata": {
@@ -244,12 +244,12 @@
       "example",
       "agent",
       "make",
-      "\"@theme/codeblock\"",
+      "pronounced",
       "arrive",
-      "executors",
-      "\"miracle\")",
-      "until",
-      "codeblock"
+      "answer",
+      "more",
+      "final",
+      "model"
     ]
   },
   {
@@ -259,15 +259,15 @@
     "type": "doc",
     "keywords": [
       "agents",
-      "tools",
       "which",
+      "tools",
       "agent",
-      "components",
-      "input",
-      "guides",
-      "unlike",
-      "consists",
-      "concepts"
+      "behavior",
+      "dynamically",
+      "enable",
+      "actions",
+      "component",
+      "system"
     ]
   },
   {
@@ -276,13 +276,13 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Tools :::info Conceptual Guide :::",
     "type": "doc",
     "keywords": [
-      "guide",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
       "tools",
       "info",
-      "conceptual"
+      "conceptual",
+      "guide"
     ]
   },
   {
@@ -293,14 +293,14 @@
     "keywords": [
       "chains",
       "models",
-      "import",
       "language",
       "other",
-      "apis",
-      "information",
-      "allows",
-      "common",
-      "conceptual"
+      "import",
+      "\"@theme/doccardlist\"",
+      "applications",
+      "doccardlist",
+      "how-to",
+      "guides"
     ],
     "metadata": {
       "sidebar_label": "Chains"
@@ -312,16 +312,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLLM from \"@examples/llm-chain-example/llm_chain_example.go\"; Getting Started: LLMChain :::info Conceptual Guide ::: An `LLMChain` is a simple chain that adds some functionality around language models. It is used widely throughout LangChain, including in other chains and agents. An `LLMChain` consists of a `PromptTemplate` and a language model (either an LLM or chat model). Usage with LLMs We can construct an LLMChain which takes user input,...",
     "type": "doc",
     "keywords": [
-      "import",
-      "language",
-      "`llmchain`",
       "llmchain",
+      "language",
+      "import",
+      "`llmchain`",
+      "conceptual",
+      "`prompttemplate`",
       "examplellm",
-      "(either",
-      "codeblock",
-      "throughout",
-      "agents",
-      "input"
+      "started",
+      "construct",
+      "chain"
     ],
     "metadata": {
       "sidebar_label": "LLM Chain"
@@ -334,15 +334,15 @@
     "type": "doc",
     "keywords": [
       "document",
-      "documents",
       "loaders",
+      "documents",
       "implement",
-      "create",
       "loader",
-      "struct",
-      "stores",
-      "want",
-      "source"
+      "create",
+      "source",
+      "loaded",
+      "guide",
+      "these"
     ],
     "metadata": {
       "sidebar_label": "Document Loaders"
@@ -355,15 +355,15 @@
     "type": "doc",
     "keywords": [
       "data",
-      "load",
-      "store",
       "query",
-      "documents",
+      "store",
       "many",
+      "load",
+      "documents",
       "your",
-      "via",
-      "search",
-      "building"
+      "retrievers",
+      "training",
+      "conceptual"
     ]
   },
   {
@@ -373,15 +373,15 @@
     "type": "doc",
     "keywords": [
       "blockchain",
-      "provides",
-      "doccardlist",
-      "involve",
-      "contexts",
+      "states",
+      "retriever",
       "designed",
-      "contracts",
+      "extract",
+      "designated",
       "**data",
-      "realm",
-      "gatew"
+      "information",
+      "mechanism",
+      "doccardlist"
     ]
   },
   {
@@ -391,15 +391,15 @@
     "type": "doc",
     "keywords": [
       "splitters",
+      "texts",
+      "complex",
+      "text",
+      "into",
+      "such",
       "more",
       "specific",
-      "such",
-      "text",
-      "complex",
-      "texts",
-      "into",
-      "structures",
-      "reasons"
+      "parts",
+      "topics"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -412,15 +412,15 @@
     "type": "doc",
     "keywords": [
       "text",
-      "smaller",
-      "import",
-      "chunks",
       "them",
-      "also",
-      "\"@theme/doccardlist\"",
-      "getting",
-      "started",
-      "using"
+      "smaller",
+      "chunks",
+      "import",
+      "results",
+      "doing",
+      "match",
+      "doccardlist",
+      "getting"
     ],
     "metadata": {
       "sidebar_label": "Text Splitters"
@@ -433,15 +433,15 @@
     "type": "doc",
     "keywords": [
       "vector",
-      "stores",
-      "documents",
-      "query",
       "most",
-      "embeddings",
-      "particular",
+      "documents",
+      "stores",
       "import",
-      "\u003cdoccardlist",
-      "relevant"
+      "particular",
+      "embeddings",
+      "query",
+      "fetching",
+      "their"
     ],
     "metadata": {
       "sidebar_label": "Vector Stores"
@@ -457,12 +457,12 @@
       "search",
       "distance",
       "import",
+      "open-source",
+      "llm",
+      "codeblock",
       "postgres",
-      "\"@theme/codeblock\"",
-      "code",
-      "embedder",
-      "\"@examples/pgvector-vectorstore-example/pgvector_vectorstore_example.go\"",
-      "started"
+      "index",
+      "code"
     ],
     "metadata": {
       "sidebar_label": "pgvector"
@@ -474,12 +474,12 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Examples: Memory \u003cDocCardList /\u003e",
     "type": "doc",
     "keywords": [
+      "\u003cdoccardlist",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
       "examples",
-      "memory",
-      "\u003cdoccardlist"
+      "memory"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -493,14 +493,14 @@
     "keywords": [
       "memory",
       "interactions",
-      "langchaingo",
       "context",
-      "guides",
-      "sophisticated",
-      "conversation",
+      "langchaingo",
       "guide",
-      "store",
-      "past"
+      "calls",
+      "several",
+      "persist",
+      "retrieve",
+      "capabilities"
     ],
     "metadata": {
       "sidebar_label": "Memory"
@@ -517,11 +517,11 @@
       "using",
       "input",
       "output",
-      "prompts",
-      "import",
-      "language",
+      "\u003cdoccardlist",
       "often",
-      "into"
+      "cases",
+      "i/0",
+      "language"
     ],
     "metadata": {
       "sidebar_label": "Model I/O"
@@ -539,10 +539,10 @@
       "expose",
       "import",
       "language",
-      "hood",
-      "standard",
-      "messages\"",
-      "info"
+      "where",
+      "started",
+      "variation",
+      "than"
     ],
     "metadata": {
       "sidebar_label": "Chat Models"
@@ -554,16 +554,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Chat Models LangChainGo offers a number of Chat Models implementations that integrate with various model providers. These include: OpenAI Anthropic Google AI (Gemini) Ollama (Local Models) For detailed configuration options for each provider, see the Configure LLM Providers guide.",
     "type": "doc",
     "keywords": [
-      "providers",
-      "chat",
       "models",
-      "integrate",
-      "offers",
-      "ollama",
-      "openai",
+      "chat",
+      "providers",
+      "each",
+      "various",
       "provider",
-      "model",
-      "include"
+      "implementations",
+      "openai",
+      "offers",
+      "google"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -576,15 +576,15 @@
     "type": "doc",
     "keywords": [
       "import",
-      "embeddings",
+      "example",
       "representation",
       "numerical",
       "used",
-      "example",
-      "deeper",
-      "getting",
-      "info",
-      "because"
+      "embeddings",
+      "similar",
+      "dig",
+      "language=\"go\"\u003e{example}\u003c/codeblock\u003e",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Embeddings"
@@ -597,15 +597,15 @@
     "type": "doc",
     "keywords": [
       "embeddings",
-      "integrations",
-      "number",
-      "integrate",
-      "model",
-      "these",
       "include",
+      "number",
+      "google",
+      "integrate",
       "vertex",
-      "using",
-      "various"
+      "see",
+      "integrations",
+      "offers",
+      "\"@theme/codeblock\""
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -619,14 +619,14 @@
     "keywords": [
       "models",
       "langchain",
-      "input",
       "provides",
-      "text-based",
-      "language",
       "output",
+      "language",
+      "text-based",
       "chat",
-      "**_note:_**",
-      "but"
+      "input",
+      "variety",
+      "doccardlist"
     ],
     "metadata": {
       "sidebar_label": "Models"
@@ -639,15 +639,15 @@
     "type": "doc",
     "keywords": [
       "package",
-      "overview",
       "example",
-      "fake",
-      "language",
       "your",
+      "language",
       "`fake`",
-      "prerequisites",
-      "model",
-      "api"
+      "overview",
+      "fake",
+      "programming",
+      "(llm)",
+      "project"
     ],
     "metadata": {
       "sidebar_label": "Fake LLM"
@@ -659,16 +659,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleGroq from \"@examples/groq-completion-example/groq_completion_example.go\"; Groq Overview This documentation provides a detailed overview and technical guidance for integrating Groq's machine learning models with the Langchaingo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and mor...",
     "type": "doc",
     "keywords": [
+      "models",
       "overview",
       "import",
-      "models",
-      "mor",
-      "language",
-      "processing",
-      "\"@examples/groq-completion-example/groq_completion_example.go\"",
-      "developers",
+      "generation",
       "text",
-      "guidance"
+      "environment",
+      "examplegroq",
+      "groq's",
+      "leverage",
+      "pre-trained"
     ],
     "metadata": {
       "sidebar_label": "Groq"
@@ -680,16 +680,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleHuggingFace from \"@examples/huggingface-llm-example/huggingface_example.go\"; Hugging Face Overview This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, tex...",
     "type": "doc",
     "keywords": [
-      "face",
       "models",
+      "face",
+      "hugging",
       "overview",
       "import",
-      "hugging",
-      "various",
-      "programming",
-      "codeblock",
-      "documentation",
-      "technical"
+      "learning",
+      "leverage",
+      "allows",
+      "processing",
+      "environment"
     ],
     "metadata": {
       "sidebar_label": "Hugging Face"
@@ -701,16 +701,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLlamafile from \"@examples/llamafile-completion-example/llamafile_completion_example.go\"; Llamafile Running Server first you need have a server running. \u003cCodeBlock language=\"go\"\u003e{ExampleLlamafile}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
-      "server",
       "running",
+      "server",
       "import",
-      "\"@theme/codeblock\"",
       "codeblock",
-      "examplellamafile",
       "\"@examples/llamafile-completion-example/llamafile_completion_example.go\"",
       "llamafile",
-      "first",
-      "need"
+      "language=\"go\"\u003e{examplellamafile}\u003c/codeblock\u003e",
+      "\"@theme/codeblock\"",
+      "examplellamafile",
+      "first"
     ],
     "metadata": {
       "sidebar_label": "Llamafile"
@@ -723,14 +723,14 @@
     "type": "doc",
     "keywords": [
       "import",
+      "codeblock",
+      "\"@theme/codeblock\"",
       "localexample",
+      "\"@examples/local-llm-example/local_llm_example.go\"",
       "local",
       "example",
       "\u003ccodeblock",
-      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e",
-      "codeblock",
-      "\"@theme/codeblock\"",
-      "\"@examples/local-llm-example/local_llm_example.go\""
+      "language=\"go\"\u003e{localexample}\u003c/codeblock\u003e"
     ],
     "metadata": {
       "sidebar_label": "Local"
@@ -743,15 +743,15 @@
     "type": "doc",
     "keywords": [
       "mistral",
-      "how",
+      "models",
       "example",
+      "how",
       "different",
       "import",
-      "models",
-      "interact",
-      "power",
-      "streaming",
-      "codeblock"
+      "configuring",
+      "codeblock",
+      "completion",
+      "\"@examples/mistral-completion-example/mistral_completion_example.go\""
     ],
     "metadata": {
       "sidebar_label": "Mistral"
@@ -764,15 +764,15 @@
     "type": "doc",
     "keywords": [
       "openai",
-      "different",
-      "models",
       "key",
+      "models",
+      "different",
       "import",
-      "environment",
-      "set",
-      "suitable",
-      "interact",
-      "power"
+      "example",
+      "when",
+      "over",
+      "power",
+      "initializing"
     ],
     "metadata": {
       "sidebar_label": "OpenAI"
@@ -786,14 +786,14 @@
     "keywords": [
       "import",
       "vertex",
+      "set",
+      "creating",
       "variaic",
-      "google",
-      "need",
+      "environment",
       "variable",
-      "giving",
-      "option",
-      "setting",
-      "`google_cloud_project`"
+      "when",
+      "codeblock",
+      "examplevertexaicompletion"
     ],
     "metadata": {
       "sidebar_label": "Vertex AI"
@@ -806,15 +806,15 @@
     "type": "doc",
     "keywords": [
       "watsonx",
+      "ibm",
       "import",
       "your",
-      "ibm",
-      "set",
-      "\"@examples/watsonx-llm-example/watsonx_example.go\"",
+      "integration",
+      "following",
       "codeblock",
-      "\"@theme/codeblock\"",
-      "account",
-      "example"
+      "models",
+      "generate",
+      "\"@theme/codeblock\""
     ],
     "metadata": {
       "sidebar_label": "watsonx"
@@ -829,13 +829,13 @@
       "llms",
       "interface",
       "provides",
-      "langchain",
       "import",
-      "multi-modal",
+      "langchain",
+      "conceptual",
+      "methods",
+      "core",
       "its",
-      "implement",
-      "`llms.model`",
-      "complex"
+      "method"
     ],
     "metadata": {
       "sidebar_label": "LLMs"
@@ -849,14 +849,14 @@
     "keywords": [
       "output",
       "parsers",
-      "language",
       "text",
-      "structs",
+      "language",
+      "responses",
+      "but",
+      "than",
       "back",
-      "main",
-      "models",
-      "help",
-      "may"
+      "just",
+      "structs"
     ],
     "metadata": {
       "sidebar_label": "Output Parsers"
@@ -869,15 +869,15 @@
     "type": "doc",
     "keywords": [
       "prompts",
-      "prompt",
-      "template",
-      "multiple",
-      "templates",
       "input",
       "import",
-      "key",
-      "managing",
-      "conceptual"
+      "multiple",
+      "templates",
+      "prompt",
+      "template",
+      "info",
+      "often",
+      "creating"
     ],
     "metadata": {
       "sidebar_label": "Prompts"
@@ -893,12 +893,12 @@
       "templates",
       "import",
       "template",
-      "dynamically",
-      "info",
-      "multiple",
-      "concepts",
-      "prompttemplate",
-      "prompts"
+      "langchain",
+      "\"@theme/codeblock\"",
+      "`prompttemplate`",
+      "guide",
+      "powerful",
+      "prompttemplate"
     ],
     "metadata": {
       "sidebar_label": "Prompt templates"
@@ -912,14 +912,14 @@
     "keywords": [
       "values",
       "partial",
-      "template",
       "prompt",
-      "formatting",
+      "template",
       "string",
+      "formatting",
+      "subset",
       "two",
       "variables",
-      "subset",
-      "strings"
+      "required"
     ],
     "metadata": {
       "sidebar_label": "Partial values"
@@ -931,16 +931,16 @@
     "content": "Building a Basic Chat Application This tutorial will guide you through building a simple chat application using LangChainGo. Step 1: Set Up Your Environment - Go 1.24+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Install LangChainGo: Step 2: Configure Your API Key Set your OpenAI API key as an environment variable: Step 3: Create the Basic Chat Application Let's start with a simple chat application: Step 4: Add Interact...",
     "type": "doc",
     "keywords": [
-      "application",
       "chat",
       "step",
+      "application",
       "your",
-      "basic",
       "key",
       "api",
-      "environment",
-      "simple",
-      "set"
+      "basic",
+      "building",
+      "set",
+      "simple"
     ]
   },
   {
@@ -950,15 +950,15 @@
     "type": "doc",
     "keywords": [
       "code",
-      "create",
+      "issues",
       "improvements",
+      "create",
+      "reviewer",
+      "files",
+      "git",
       "step",
       "analyzes",
-      "files",
-      "review",
-      "reviewer",
-      "git",
-      "issues"
+      "review"
     ]
   },
   {
@@ -969,14 +969,14 @@
     "keywords": [
       "tutorials",
       "langchaingo",
-      "applications",
-      "application",
       "analyze",
-      "these",
+      "application",
+      "applications",
       "code",
+      "these",
       "learn",
-      "performance",
-      "build"
+      "insights",
+      "help"
     ]
   },
   {
@@ -986,15 +986,15 @@
     "type": "doc",
     "keywords": [
       "log",
-      "anomalies",
-      "etc.)",
-      "patterns",
-      "tool",
-      "identifies",
       "issues",
-      "building",
-      "structured",
-      "actions"
+      "anomalies",
+      "patterns",
+      "identifies",
+      "etc.)",
+      "tool",
+      "what",
+      "text",
+      "key"
     ]
   },
   {
@@ -1004,15 +1004,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
-      "code",
       "generates",
-      "tool",
+      "code",
       "automatically",
-      "api",
+      "tool",
       "project",
-      "understand",
-      "step",
-      "technical"
+      "api",
+      "maintains",
+      "smart",
+      "usage"
     ]
   },
   {
@@ -8457,7 +8457,7 @@
   {
     "title": "ApiKeyTransport",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#ApiKeyTransport",
-    "content": "ApiKeyTransport is an [http.RoundTripper] that adds API keys to URL query parameters.\nThis is commonly used with Google APIs and other services that accept API keys\nas query parameters. It wraps another RoundTripper and automatically adds\nthe API key if not already present in the request.\n\nThis transport is particularly useful when working with client libraries that\ndon't properly set API keys when using custom HTTP clients, such as the\nGoogle AI client library when used with httprr for testing.\n",
+    "content": "ApiKeyTransport is an [http.RoundTripper] that adds API keys to URL query parameters,\noptionally rewrites request URLs to use a custom base URL, and supports HTTP proxy configuration.\nThis is commonly used with Google APIs and other services that accept API keys\nas query parameters. It wraps another RoundTripper and automatically adds\nthe API key if not already present in the request.\n\nThis transport is particularly useful when working with client libraries that\ndon't properly set API keys when using custom HTTP clients, such as the\nGoogle AI client library when used with httprr for testing, or when you need\nto redirect requests to a custom endpoint (e.g., for testing or proxy setups).\n\nProxy Configuration:\nIf ProxyURL is set and Transport is nil or http.DefaultTransport, a new http.Transport\nwith the specified proxy will be created automatically. If a custom Transport is already\nprovided, ProxyURL will be ignored to avoid conflicting configurations.\n",
     "type": "type",
     "package": "httputil",
     "signature": "type ApiKeyTransport",
@@ -8471,7 +8471,7 @@
   {
     "title": "ApiKeyTransport.RoundTrip",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/httputil#ApiKeyTransport.RoundTrip",
-    "content": "RoundTrip implements the [http.RoundTripper] interface. It adds the API key\nas a \"key\" query parameter if not already present, then delegates to the\nunderlying transport.\n",
+    "content": "RoundTrip implements the [http.RoundTripper] interface. It optionally configures\nan HTTP proxy, rewrites the request URL to use a custom base URL, adds the API key\nas a \"key\" query parameter if not already present, then delegates to the underlying transport.\n",
     "type": "method",
     "package": "httputil",
     "signature": "RoundTrip()",
@@ -19969,6 +19969,20 @@
     ]
   },
   {
+    "title": "extractReasoningContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#extractReasoningContent",
+    "content": "extractReasoningContent extracts reasoning content from message parts.\nIt returns the first non-empty reasoning content found in TextContent parts.\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "extractReasoningContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "extractReasoningContent",
+      "openai"
+    ]
+  },
+  {
     "title": "toolCallFromToolCall",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#toolCallFromToolCall",
     "content": "toolCallFromToolCall converts an llms.ToolCall to a ToolCall.\n",
@@ -20728,6 +20742,21 @@
     ]
   },
   {
+    "title": "ContentReasoning.MarshalJSON",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning.MarshalJSON",
+    "content": "",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "MarshalJSON()",
+    "external": true,
+    "keywords": [
+      "method",
+      "MarshalJSON",
+      "ContentReasoning",
+      "reasoning"
+    ]
+  },
+  {
     "title": "ContentReasoning.String",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning.String",
     "content": "",
@@ -20738,6 +20767,21 @@
     "keywords": [
       "method",
       "String",
+      "ContentReasoning",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ContentReasoning.UnmarshalJSON",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ContentReasoning.UnmarshalJSON",
+    "content": "",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "UnmarshalJSON()",
+    "external": true,
+    "keywords": [
+      "method",
+      "UnmarshalJSON",
       "ContentReasoning",
       "reasoning"
     ]

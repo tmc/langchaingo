@@ -2,6 +2,7 @@ package reasoning
 
 import (
 	"bytes"
+	"encoding/json"
 	"regexp"
 	"strings"
 	"sync"
@@ -48,6 +49,25 @@ func (r *ContentReasoning) String() string {
 	}
 
 	return buf.String()
+}
+
+func (r *ContentReasoning) MarshalJSON() ([]byte, error) {
+	type Alias ContentReasoning
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	})
+}
+
+func (r *ContentReasoning) UnmarshalJSON(data []byte) error {
+	type Alias ContentReasoning
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	}
+	return json.Unmarshal(data, aux)
 }
 
 type ChunkContentSplitterState int
