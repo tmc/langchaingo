@@ -501,14 +501,8 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 			metadata["ReasoningTokens"] = int(usage.ThoughtsTokenCount)
 			metadata["PromptCachedTokens"] = int(usage.CachedContentTokenCount)
 			metadata["CacheReadInputTokens"] = int(usage.CachedContentTokenCount)
-
-			// Cache-related token information (if available)
-			if usage.CachedContentTokenCount > 0 {
-				metadata["CacheCreationInputTokens"] = max(int(usage.PromptTokenCount-usage.CachedContentTokenCount), 0)
-				metadata["PromptTokens"] = metadata["CacheCreationInputTokens"] // Google AI includes cached tokens in the prompt count
-			} else {
-				metadata["CacheCreationInputTokens"] = 0
-			}
+			// Google AI does not provide cache creation information, always 0
+			metadata["CacheCreationInputTokens"] = 0
 		}
 
 		choices = append(choices, &llms.ContentChoice{

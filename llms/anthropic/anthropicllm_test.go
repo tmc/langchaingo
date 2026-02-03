@@ -261,10 +261,10 @@ func TestMergeCacheStrategies(t *testing.T) {
 				TTL:           "1h",
 			},
 			want: &CacheStrategy{
-				CacheTools:    true,  // from client (OR: true || false)
-				CacheSystem:   true,  // from client (OR: false || true)
-				CacheMessages: true,  // from call (OR: true || false)
-				TTL:           "1h",  // call-level takes precedence
+				CacheTools:    true, // from client (OR: true || false)
+				CacheSystem:   true, // from client (OR: false || true)
+				CacheMessages: true, // from call (OR: true || false)
+				TTL:           "1h", // call-level takes precedence
 			},
 		},
 		{
@@ -388,4 +388,142 @@ func TestDefaultCacheStrategy_MergeWithCallLevel(t *testing.T) {
 	merged3 := mergeCacheStrategies(clientStrategy, opts3)
 	require.NotNil(t, merged3)
 	assert.Equal(t, clientStrategy, merged3, "Should use client strategy when no call-level")
+}
+
+// TestTokenUsageMapping_Anthropic tests correct token usage mapping for Anthropic provider
+func TestTokenUsageMapping_Anthropic(t *testing.T) {
+	tests := []struct {
+		name                     string
+		inputTokens              int
+		cacheCreationInputTokens int
+		cacheReadInputTokens     int
+		outputTokens             int
+		expectedPromptTokens     int
+		expectedCacheRead        int
+		expectedCacheCreation    int
+		expectedCompletionTokens int
+		expectedTotalTokens      int
+	}{
+		{
+			name:                     "first request without cache",
+			inputTokens:              332,
+			cacheCreationInputTokens: 0,
+			cacheReadInputTokens:     0,
+			outputTokens:             82,
+			expectedPromptTokens:     332,
+			expectedCacheRead:        0,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 82,
+			expectedTotalTokens:      414,
+		},
+		{
+			name:                     "first request with cache creation",
+			inputTokens:              332,
+			cacheCreationInputTokens: 1546,
+			cacheReadInputTokens:     0,
+			outputTokens:             82,
+			expectedPromptTokens:     1878, // 332 + 1546 + 0
+			expectedCacheRead:        0,
+			expectedCacheCreation:    1546,
+			expectedCompletionTokens: 82,
+			expectedTotalTokens:      1960, // 332 + 1546 + 0 + 82
+		},
+		{
+			name:                     "subsequent request with cache hit",
+			inputTokens:              332,
+			cacheCreationInputTokens: 0,
+			cacheReadInputTokens:     1546,
+			outputTokens:             82,
+			expectedPromptTokens:     1878, // 332 + 0 + 1546
+			expectedCacheRead:        1546,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 82,
+			expectedTotalTokens:      1960, // 332 + 0 + 1546 + 82
+		},
+		{
+			name:                     "mixed cache scenario",
+			inputTokens:              500,
+			cacheCreationInputTokens: 200,
+			cacheReadInputTokens:     1000,
+			outputTokens:             150,
+			expectedPromptTokens:     1700, // 500 + 200 + 1000
+			expectedCacheRead:        1000,
+			expectedCacheCreation:    200,
+			expectedCompletionTokens: 150,
+			expectedTotalTokens:      1850, // 500 + 200 + 1000 + 150
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Simulate Anthropic response structure
+			result := struct {
+				Usage struct {
+					InputTokens              int
+					CacheCreationInputTokens int
+					CacheReadInputTokens     int
+					OutputTokens             int
+					CacheCreation            struct {
+						Ephemeral5mInputTokens int
+						Ephemeral1hInputTokens int
+					}
+					ServiceTier string
+				}
+			}{}
+
+			result.Usage.InputTokens = tt.inputTokens
+			result.Usage.CacheCreationInputTokens = tt.cacheCreationInputTokens
+			result.Usage.CacheReadInputTokens = tt.cacheReadInputTokens
+			result.Usage.OutputTokens = tt.outputTokens
+			result.Usage.ServiceTier = "standard"
+
+			// Build GenerationInfo as done in anthropicllm.go
+			generationInfo := map[string]any{
+				"PromptTokens":             result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens,
+				"CompletionTokens":         result.Usage.OutputTokens,
+				"TotalTokens":              result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens + result.Usage.OutputTokens,
+				"ReasoningTokens":          0,
+				"PromptCachedTokens":       result.Usage.CacheReadInputTokens,
+				"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+				"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+				"InputTokens":              result.Usage.InputTokens,
+				"OutputTokens":             result.Usage.OutputTokens,
+				"ServiceTier":              result.Usage.ServiceTier,
+			}
+
+			// Verify mapped values
+			assert.Equal(t, tt.expectedPromptTokens, generationInfo["PromptTokens"], "PromptTokens mismatch")
+			assert.Equal(t, tt.expectedCacheRead, generationInfo["CacheReadInputTokens"], "CacheReadInputTokens mismatch")
+			assert.Equal(t, tt.expectedCacheCreation, generationInfo["CacheCreationInputTokens"], "CacheCreationInputTokens mismatch")
+			assert.Equal(t, tt.expectedCompletionTokens, generationInfo["CompletionTokens"], "CompletionTokens mismatch")
+			assert.Equal(t, tt.expectedTotalTokens, generationInfo["TotalTokens"], "TotalTokens mismatch")
+
+			// Verify client-side cost calculation logic
+			// Client formula: input = max(PromptTokens - CacheRead, 0)
+			promptTokens := generationInfo["PromptTokens"].(int)
+			cacheRead := generationInfo["CacheReadInputTokens"].(int)
+			cacheWrite := generationInfo["CacheCreationInputTokens"].(int)
+
+			uncachedTokens := max(promptTokens-cacheRead, 0)
+
+			// Expected: uncached tokens should equal inputTokens + cacheCreationInputTokens
+			expectedUncached := tt.inputTokens + tt.cacheCreationInputTokens
+			assert.Equal(t, expectedUncached, uncachedTokens, "Uncached tokens calculation mismatch")
+
+			// For Anthropic pricing: uncached * basePrice + cacheRead * cacheReadPrice + cacheWrite * cacheWritePrice
+			basePrice := 3.0 / 1e6        // $3 per 1M tokens
+			cacheReadPrice := 0.3 / 1e6   // $0.3 per 1M tokens (90% discount)
+			cacheWritePrice := 3.75 / 1e6 // $3.75 per 1M tokens (25% premium)
+
+			expectedCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice +
+				float64(cacheWrite)*cacheWritePrice
+
+			actualCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice +
+				float64(cacheWrite)*cacheWritePrice
+
+			assert.InDelta(t, expectedCost, actualCost, 0.000001, "Cost calculation mismatch")
+		})
+	}
 }

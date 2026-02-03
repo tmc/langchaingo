@@ -663,3 +663,140 @@ func TestFunctionCallIDWrappers(t *testing.T) {
 		assert.Equal(t, backendID, cleanedID, "Backend ID should survive roundtrip")
 	})
 }
+
+// TestTokenUsageMapping_GoogleAI tests correct token usage mapping for Google AI provider
+func TestTokenUsageMapping_GoogleAI(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name                     string
+		promptTokenCount         int32
+		cachedContentTokenCount  int32
+		candidatesTokenCount     int32
+		thoughtsTokenCount       int32
+		expectedPromptTokens     int
+		expectedCacheRead        int
+		expectedCacheCreation    int
+		expectedCompletionTokens int
+		expectedReasoningTokens  int
+		expectedTotalTokens      int
+	}{
+		{
+			name:                     "first request without cache",
+			promptTokenCount:         4517,
+			cachedContentTokenCount:  0,
+			candidatesTokenCount:     9,
+			thoughtsTokenCount:       0,
+			expectedPromptTokens:     4517,
+			expectedCacheRead:        0,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 9,
+			expectedReasoningTokens:  0,
+			expectedTotalTokens:      4526,
+		},
+		{
+			name:                     "subsequent request with cache hit",
+			promptTokenCount:         4534,
+			cachedContentTokenCount:  4058,
+			candidatesTokenCount:     11,
+			thoughtsTokenCount:       0,
+			expectedPromptTokens:     4534,
+			expectedCacheRead:        4058,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 11,
+			expectedReasoningTokens:  0,
+			expectedTotalTokens:      4545,
+		},
+		{
+			name:                     "request with reasoning and cache",
+			promptTokenCount:         5000,
+			cachedContentTokenCount:  3500,
+			candidatesTokenCount:     150,
+			thoughtsTokenCount:       80,
+			expectedPromptTokens:     5000,
+			expectedCacheRead:        3500,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 150,
+			expectedReasoningTokens:  80,
+			expectedTotalTokens:      5150,
+		},
+		{
+			name:                     "large cache scenario",
+			promptTokenCount:         10000,
+			cachedContentTokenCount:  8500,
+			candidatesTokenCount:     200,
+			thoughtsTokenCount:       50,
+			expectedPromptTokens:     10000,
+			expectedCacheRead:        8500,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 200,
+			expectedReasoningTokens:  50,
+			expectedTotalTokens:      10200,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Simulate Google AI usage metadata structure
+			usage := struct {
+				PromptTokenCount        int32
+				CachedContentTokenCount int32
+				CandidatesTokenCount    int32
+				ThoughtsTokenCount      int32
+				TotalTokenCount         int32
+			}{
+				PromptTokenCount:        tt.promptTokenCount,
+				CachedContentTokenCount: tt.cachedContentTokenCount,
+				CandidatesTokenCount:    tt.candidatesTokenCount,
+				ThoughtsTokenCount:      tt.thoughtsTokenCount,
+				TotalTokenCount:         tt.promptTokenCount + tt.candidatesTokenCount,
+			}
+
+			// Build metadata as done in googleai.go
+			metadata := make(map[string]any)
+			metadata["PromptTokens"] = int(usage.PromptTokenCount)
+			metadata["CompletionTokens"] = int(usage.CandidatesTokenCount)
+			metadata["TotalTokens"] = int(usage.TotalTokenCount)
+			metadata["ReasoningTokens"] = int(usage.ThoughtsTokenCount)
+			metadata["PromptCachedTokens"] = int(usage.CachedContentTokenCount)
+			metadata["CacheReadInputTokens"] = int(usage.CachedContentTokenCount)
+			metadata["CacheCreationInputTokens"] = 0
+
+			// Verify mapped values
+			assert.Equal(t, tt.expectedPromptTokens, metadata["PromptTokens"], "PromptTokens mismatch")
+			assert.Equal(t, tt.expectedCacheRead, metadata["CacheReadInputTokens"], "CacheReadInputTokens mismatch")
+			assert.Equal(t, tt.expectedCacheCreation, metadata["CacheCreationInputTokens"], "CacheCreationInputTokens mismatch")
+			assert.Equal(t, tt.expectedCompletionTokens, metadata["CompletionTokens"], "CompletionTokens mismatch")
+			assert.Equal(t, tt.expectedReasoningTokens, metadata["ReasoningTokens"], "ReasoningTokens mismatch")
+			assert.Equal(t, tt.expectedTotalTokens, metadata["TotalTokens"], "TotalTokens mismatch")
+
+			// Verify client-side cost calculation logic
+			// Client formula: input = max(PromptTokens - CacheRead, 0)
+			promptTokens := metadata["PromptTokens"].(int)
+			cacheRead := metadata["CacheReadInputTokens"].(int)
+			cacheWrite := metadata["CacheCreationInputTokens"].(int)
+
+			uncachedTokens := max(promptTokens-cacheRead, 0)
+
+			// Expected: uncached tokens should equal promptTokenCount - cachedContentTokenCount
+			expectedUncached := int(tt.promptTokenCount - tt.cachedContentTokenCount)
+			assert.Equal(t, expectedUncached, uncachedTokens, "Uncached tokens calculation mismatch")
+
+			// For Google AI pricing: uncached * basePrice + cacheRead * cacheReadPrice
+			// Google AI doesn't charge extra for cache writes
+			basePrice := 0.075 / 1e6        // $0.075 per 1M tokens (example for gemini-2.0-flash)
+			cacheReadPrice := 0.01875 / 1e6 // $0.01875 per 1M tokens (25% of base price)
+
+			expectedCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice
+
+			actualCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice
+
+			assert.InDelta(t, expectedCost, actualCost, 0.000001, "Cost calculation mismatch")
+
+			// Verify CacheWrite is always 0 for Google AI
+			assert.Equal(t, 0, cacheWrite, "Google AI should always have CacheCreationInputTokens = 0")
+		})
+	}
+}

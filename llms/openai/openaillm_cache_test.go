@@ -30,10 +30,11 @@ import (
 //    ✓ Cache TTL is typically 5-10 minutes
 //    ✓ No configuration required - fully automatic
 //    ✓ Cached tokens reported in usage.prompt_tokens_details.cached_tokens
-//    ✓ Cache write tokens reported in usage.prompt_tokens_details.cache_write_tokens
+//    ✗ cache_write_tokens field is NOT returned by OpenAI API (always 0 in our mapping)
 //
 // 2. IMPORTANT NOTES:
 //    - OpenAI does NOT support explicit caching (no WithCachedContent option)
+//    - OpenAI does NOT return cache_write_tokens in API responses
 //    - All caching is implicit and automatic
 //    - For reasoning models (o1, o3), reasoning content must be preserved in conversation
 //    - Cache hits significantly reduce latency and cost
@@ -42,8 +43,7 @@ import (
 //    - Test identical requests (non-streaming and streaming)
 //    - Test conversation continuation (non-streaming and streaming)
 //    - Test both non-reasoning models (gpt-4.1-mini) and reasoning models (o3-mini)
-//    - Verify cached tokens are reported correctly
-//    - Verify cache_write_tokens on first request
+//    - Verify cached tokens are reported correctly in subsequent requests
 //
 // ============================================================================
 
@@ -76,14 +76,9 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_NonReasoning(t *testing.T) {
 	if ct, ok := r1.Choices[0].GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := r1.Choices[0].GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 
 	// Request 1: First request, no cache expected
 	assert.Equal(t, 0, c1, "Request 1 should have 0 cached tokens (first request)")
-	assert.Greater(t, cw1, 0, "Request 1 should create cache (cache_write_tokens > 0)")
 
 	// Wait for cache to be established (only in recording mode)
 	if os.Getenv("HTTPRR_RECORD") != "" {
@@ -104,14 +99,10 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_NonReasoning(t *testing.T) {
 	if ct, ok := r2.Choices[0].GenerationInfo["PromptCachedTokens"].(int); ok {
 		c2 = ct
 	}
-	cw2 := 0
-	if cw, ok := r2.Choices[0].GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw2 = cw
-	}
 
 	// Assert: Request 2 MUST have cached tokens for identical request
 	assert.Greater(t, c2, 0, "Request 2 (identical) must have cached tokens")
-	assert.Less(t, cw2, cw1, "Request 2 should has less creation tokens (cache hit)")
+	// Note: OpenAI does not return cache_write_tokens, so CacheCreationInputTokens is always 0
 
 	// Verify content is not empty
 	assert.NotEmpty(t, r1.Choices[0].Content, "Response 1 content should not be empty")
@@ -148,10 +139,6 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_Reasoning(t *testing.T) {
 	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := choice1.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 	rr1 := 0
 	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
 		rr1 = r
@@ -159,7 +146,6 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_Reasoning(t *testing.T) {
 
 	// Request 1: First request, no cache expected
 	assert.Equal(t, 0, c1, "Request 1 should have 0 cached tokens (first request)")
-	assert.Greater(t, cw1, 0, "Request 1 should create cache")
 	assert.Contains(t, choice1.Content, "56", "Response should contain the answer 56")
 	// TODO: return reasoning is not supported yet for OpenAI /chat/completions endpoint
 	// assert.NotNil(t, choice1.Reasoning, "Reasoning model should return reasoning")
@@ -185,10 +171,6 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_Reasoning(t *testing.T) {
 	if ct, ok := choice2.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c2 = ct
 	}
-	cw2 := 0
-	if cw, ok := choice2.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw2 = cw
-	}
 	rr2 := 0
 	if r, ok := choice2.GenerationInfo["ReasoningTokens"].(int); ok {
 		rr2 = r
@@ -196,7 +178,7 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_Reasoning(t *testing.T) {
 
 	// Assert: Request 2 MUST have cached tokens for identical request
 	assert.Greater(t, c2, 0, "Request 2 (identical) must have cached tokens")
-	assert.Less(t, cw2, cw1, "Request 2 should has less creation tokens (cache hit)")
+	// Note: OpenAI does not return cache_write_tokens, so CacheCreationInputTokens is always 0
 	assert.Contains(t, choice2.Content, "56", "Response should contain the answer 56")
 	// TODO: return reasoning is not supported yet for OpenAI /chat/completions endpoint
 	// assert.NotNil(t, choice2.Reasoning, "Reasoning model should return reasoning")
@@ -243,14 +225,9 @@ func TestOpenAI_ImplicitCaching_Streaming_NonReasoning(t *testing.T) {
 	if ct, ok := r1.Choices[0].GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := r1.Choices[0].GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 
 	// Request 1: First request, no cache expected
 	assert.Equal(t, 0, c1, "Request 1 (streaming) should have 0 cached tokens")
-	assert.Greater(t, cw1, 0, "Request 1 (streaming) should create cache")
 	assert.NotEmpty(t, s1.String(), "Streamed content should not be empty")
 
 	// Wait for cache to be established (only in recording mode)
@@ -274,14 +251,10 @@ func TestOpenAI_ImplicitCaching_Streaming_NonReasoning(t *testing.T) {
 	if ct, ok := r2.Choices[0].GenerationInfo["PromptCachedTokens"].(int); ok {
 		c2 = ct
 	}
-	cw2 := 0
-	if cw, ok := r2.Choices[0].GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw2 = cw
-	}
 
 	// Assert: Request 2 MUST have cached tokens for identical streaming request
 	assert.Greater(t, c2, 0, "Request 2 (identical streaming) must have cached tokens")
-	assert.Less(t, cw2, cw1, "Request 2 (streaming) should has less creation tokens (cache hit)")
+	// Note: OpenAI does not return cache_write_tokens, so CacheCreationInputTokens is always 0
 	assert.NotEmpty(t, s2.String(), "Streamed content should not be empty")
 }
 
@@ -331,10 +304,6 @@ func TestOpenAI_ImplicitCaching_Streaming_Reasoning(t *testing.T) {
 	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := choice1.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 	rr1 := 0
 	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
 		rr1 = r
@@ -342,7 +311,6 @@ func TestOpenAI_ImplicitCaching_Streaming_Reasoning(t *testing.T) {
 
 	// Request 1: First request, no cache expected
 	assert.Equal(t, 0, c1, "Request 1 (streaming reasoning) should have 0 cached tokens")
-	assert.Greater(t, cw1, 0, "Request 1 (streaming reasoning) should create cache")
 	assert.Contains(t, choice1.Content, "25", "Response should contain the answer 25")
 	// TODO: return reasoning is not supported yet for OpenAI /chat/completions endpoint
 	// assert.NotNil(t, choice1.Reasoning, "Reasoning model streaming should return reasoning")
@@ -371,17 +339,13 @@ func TestOpenAI_ImplicitCaching_Streaming_Reasoning(t *testing.T) {
 	if ct, ok := choice2.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c2 = ct
 	}
-	cw2 := 0
-	if cw, ok := choice2.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw2 = cw
-	}
 	rr2 := 0
 	if r, ok := choice2.GenerationInfo["ReasoningTokens"].(int); ok {
 		rr2 = r
 	}
 	// Assert: Request 2 MUST have cached tokens for identical streaming request
 	assert.Greater(t, c2, 0, "Request 2 (identical streaming reasoning) must have cached tokens")
-	assert.Less(t, cw2, cw1, "Request 2 (streaming reasoning) should has less creation tokens (cache hit)")
+	// Note: OpenAI does not return cache_write_tokens, so CacheCreationInputTokens is always 0
 	assert.Contains(t, choice2.Content, "25", "Response should contain the answer 25")
 	// TODO: return reasoning is not supported yet for OpenAI /chat/completions endpoint
 	// assert.NotNil(t, choice2.Reasoning, "Reasoning model streaming should return reasoning")
@@ -457,14 +421,9 @@ func TestOpenAI_ImplicitCaching_Conversation_NonReasoning(t *testing.T) {
 	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := choice1.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 
 	// Request 1: First request, no cache expected, should have tool call
 	assert.Equal(t, 0, c1, "Request 1 should have 0 cached tokens (first request)")
-	assert.Greater(t, cw1, 0, "Request 1 should create cache")
 	assert.NotEmpty(t, choice1.ToolCalls, "Request 1 should have tool calls")
 	require.Len(t, choice1.ToolCalls, 1, "Request 1 should have exactly 1 tool call")
 	assert.Equal(t, "get_temperature", choice1.ToolCalls[0].FunctionCall.Name)
@@ -660,10 +619,6 @@ func TestOpenAI_ImplicitCaching_Conversation_Reasoning(t *testing.T) {
 	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
 		c1 = ct
 	}
-	cw1 := 0
-	if cw, ok := choice1.GenerationInfo["CacheCreationInputTokens"].(int); ok {
-		cw1 = cw
-	}
 	rr1 := 0
 	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
 		rr1 = r
@@ -671,7 +626,6 @@ func TestOpenAI_ImplicitCaching_Conversation_Reasoning(t *testing.T) {
 
 	// Request 1: First request, no cache expected, should have tool call
 	assert.Equal(t, 0, c1, "Request 1 should have 0 cached tokens (first request)")
-	assert.Greater(t, cw1, 0, "Request 1 should create cache")
 	assert.Greater(t, rr1, 0, "Request 1 (reasoning with tools) should return reasoning")
 	assert.NotEmpty(t, choice1.ToolCalls, "Request 1 should have tool calls")
 	require.Len(t, choice1.ToolCalls, 1, "Request 1 should have exactly 1 tool call")

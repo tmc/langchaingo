@@ -337,17 +337,14 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 func (o *LLM) processUsage(usage *openaiclient.ChatUsage) map[string]any {
 	return map[string]any{
 		"CompletionTokens":  usage.CompletionTokens,
-		"PromptTokens":      max(usage.PromptTokens-usage.PromptTokensDetails.CachedTokens, 0),
+		"PromptTokens":      usage.PromptTokens,
 		"TotalTokens":       usage.TotalTokens,
 		"ReasoningTokens":   usage.CompletionTokensDetails.ReasoningTokens,
 		"PromptAudioTokens": usage.PromptTokensDetails.AudioTokens,
 		// Standardized fields for cross-provider compatibility
-		"PromptCachedTokens":   usage.PromptTokensDetails.CachedTokens,
-		"CacheReadInputTokens": usage.PromptTokensDetails.CachedTokens,
-		"CacheCreationInputTokens": max(
-			usage.PromptTokensDetails.CacheWriteTokens,
-			usage.PromptTokens-usage.PromptTokensDetails.CachedTokens,
-		),
+		"PromptCachedTokens":                 usage.PromptTokensDetails.CachedTokens,
+		"CacheReadInputTokens":               usage.PromptTokensDetails.CachedTokens,
+		"CacheCreationInputTokens":           usage.PromptTokensDetails.CacheWriteTokens,
 		"CompletionAudioTokens":              usage.CompletionTokensDetails.AudioTokens,
 		"CompletionReasoningTokens":          usage.CompletionTokensDetails.ReasoningTokens,
 		"CompletionAcceptedPredictionTokens": usage.CompletionTokensDetails.AcceptedPredictionTokens,

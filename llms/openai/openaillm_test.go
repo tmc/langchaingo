@@ -372,17 +372,135 @@ func TestProcessUsage(t *testing.T) {
 	result := llm.processUsage(usage)
 
 	assert.Equal(t, 50, result["CompletionTokens"])
-	assert.Equal(t, 80, result["PromptTokens"]) // 100 - 20 (cached)
+	assert.Equal(t, 100, result["PromptTokens"]) // full prompt tokens
 	assert.Equal(t, 150, result["TotalTokens"])
 	assert.Equal(t, 15, result["ReasoningTokens"])
 	assert.Equal(t, 20, result["PromptCachedTokens"])
 	assert.Equal(t, 20, result["CacheReadInputTokens"])
-	assert.Equal(t, 80, result["CacheCreationInputTokens"]) // max(10, 100-20)
+	assert.Equal(t, 10, result["CacheCreationInputTokens"]) // CacheWriteTokens
 	assert.Equal(t, 5, result["PromptAudioTokens"])
 	assert.Equal(t, 3, result["CompletionAudioTokens"])
 	assert.Equal(t, 15, result["CompletionReasoningTokens"])
 	assert.Equal(t, 8, result["CompletionAcceptedPredictionTokens"])
 	assert.Equal(t, 2, result["CompletionRejectedPredictionTokens"])
+}
+
+// TestTokenUsageMapping_OpenAI tests correct token usage mapping for OpenAI provider
+func TestTokenUsageMapping_OpenAI(t *testing.T) {
+	t.Parallel()
+
+	llm := &LLM{}
+
+	tests := []struct {
+		name                     string
+		promptTokens             int
+		cachedTokens             int
+		cacheWriteTokens         int
+		completionTokens         int
+		expectedPromptTokens     int
+		expectedCacheRead        int
+		expectedCacheCreation    int
+		expectedCompletionTokens int
+		expectedTotalTokens      int
+	}{
+		{
+			name:                     "first request without cache",
+			promptTokens:             2619,
+			cachedTokens:             0,
+			cacheWriteTokens:         0,
+			completionTokens:         149,
+			expectedPromptTokens:     2619,
+			expectedCacheRead:        0,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 149,
+			expectedTotalTokens:      2768,
+		},
+		{
+			name:                     "subsequent request with cache hit",
+			promptTokens:             2619,
+			cachedTokens:             2048,
+			cacheWriteTokens:         0,
+			completionTokens:         85,
+			expectedPromptTokens:     2619,
+			expectedCacheRead:        2048,
+			expectedCacheCreation:    0,
+			expectedCompletionTokens: 85,
+			expectedTotalTokens:      2704,
+		},
+		{
+			name:                     "request with cache write",
+			promptTokens:             5000,
+			cachedTokens:             0,
+			cacheWriteTokens:         4500,
+			completionTokens:         200,
+			expectedPromptTokens:     5000,
+			expectedCacheRead:        0,
+			expectedCacheCreation:    4500,
+			expectedCompletionTokens: 200,
+			expectedTotalTokens:      5200,
+		},
+		{
+			name:                     "mixed scenario",
+			promptTokens:             3000,
+			cachedTokens:             1500,
+			cacheWriteTokens:         800,
+			completionTokens:         120,
+			expectedPromptTokens:     3000,
+			expectedCacheRead:        1500,
+			expectedCacheCreation:    800,
+			expectedCompletionTokens: 120,
+			expectedTotalTokens:      3120,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			usage := &openaiclient.ChatUsage{
+				PromptTokens:     tt.promptTokens,
+				CompletionTokens: tt.completionTokens,
+				TotalTokens:      tt.promptTokens + tt.completionTokens,
+			}
+			usage.PromptTokensDetails.CachedTokens = tt.cachedTokens
+			usage.PromptTokensDetails.CacheWriteTokens = tt.cacheWriteTokens
+
+			result := llm.processUsage(usage)
+
+			// Verify mapped values
+			assert.Equal(t, tt.expectedPromptTokens, result["PromptTokens"], "PromptTokens mismatch")
+			assert.Equal(t, tt.expectedCacheRead, result["CacheReadInputTokens"], "CacheReadInputTokens mismatch")
+			assert.Equal(t, tt.expectedCacheCreation, result["CacheCreationInputTokens"], "CacheCreationInputTokens mismatch")
+			assert.Equal(t, tt.expectedCompletionTokens, result["CompletionTokens"], "CompletionTokens mismatch")
+			assert.Equal(t, tt.expectedTotalTokens, result["TotalTokens"], "TotalTokens mismatch")
+
+			// Verify client-side cost calculation logic
+			// Client formula: input = max(PromptTokens - CacheRead, 0)
+			promptTokens := result["PromptTokens"].(int)
+			cacheRead := result["CacheReadInputTokens"].(int)
+			cacheWrite := result["CacheCreationInputTokens"].(int)
+
+			uncachedTokens := max(promptTokens-cacheRead, 0)
+
+			// Expected: uncached tokens should equal promptTokens - cachedTokens
+			expectedUncached := tt.promptTokens - tt.cachedTokens
+			assert.Equal(t, expectedUncached, uncachedTokens, "Uncached tokens calculation mismatch")
+
+			// For OpenAI pricing: uncached * basePrice + cacheRead * cacheReadPrice
+			// OpenAI doesn't charge extra for cache writes
+			basePrice := 2.5 / 1e6       // $2.5 per 1M tokens
+			cacheReadPrice := 1.25 / 1e6 // $1.25 per 1M tokens (50% discount)
+
+			expectedCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice
+
+			actualCost := float64(uncachedTokens)*basePrice +
+				float64(cacheRead)*cacheReadPrice
+
+			assert.InDelta(t, expectedCost, actualCost, 0.000001, "Cost calculation mismatch")
+
+			// Verify CacheWrite is not used in OpenAI pricing
+			assert.Equal(t, tt.cacheWriteTokens, cacheWrite, "CacheWrite should be stored but not used in pricing")
+		})
+	}
 }
 
 // TestProcessReasoning tests reasoning content processing

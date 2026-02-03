@@ -303,7 +303,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		StopReason: result.StopReason,
 		GenerationInfo: map[string]any{
 			// Standardized field names for cross-provider compatibility
-			"PromptTokens":             result.Usage.InputTokens + result.Usage.CacheCreationInputTokens,
+			"PromptTokens":             result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens,
 			"CompletionTokens":         result.Usage.OutputTokens,
 			"TotalTokens":              result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens + result.Usage.OutputTokens,
 			"ReasoningTokens":          0, // Reasoning tokens are not included in the usage metrics
