@@ -1,6 +1,7 @@
 package reasoning
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -495,6 +496,143 @@ func BenchmarkChunkContentSplitter(b *testing.B) {
 		if textResult.Len() == 0 || reasoningResult.Len() == 0 {
 			b.Fatal("Empty result")
 		}
+	}
+}
+
+func TestContentReasoningMarshalJSON(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    ContentReasoning
+		expected string
+	}{
+		{
+			name: "full content reasoning",
+			input: ContentReasoning{
+				Content:         "Thinking process here",
+				Signature:       []byte("signature_data"),
+				RedactedContent: []byte("redacted_data"),
+			},
+			expected: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE=","redacted_content":"cmVkYWN0ZWRfZGF0YQ=="}`,
+		},
+		{
+			name: "content only",
+			input: ContentReasoning{
+				Content: "Simple thought",
+			},
+			expected: `{"content":"Simple thought"}`,
+		},
+		{
+			name: "content and signature",
+			input: ContentReasoning{
+				Content:   "Reasoning with signature",
+				Signature: []byte("sig123"),
+			},
+			expected: `{"content":"Reasoning with signature","signature":"c2lnMTIz"}`,
+		},
+		{
+			name: "content and redacted",
+			input: ContentReasoning{
+				Content:         "Reasoning with redacted",
+				RedactedContent: []byte("redacted123"),
+			},
+			expected: `{"content":"Reasoning with redacted","redacted_content":"cmVkYWN0ZWQxMjM="}`,
+		},
+		{
+			name:     "empty reasoning",
+			input:    ContentReasoning{},
+			expected: `{}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			result, err := json.Marshal(tt.input)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.expected, string(result), "JSON keys should use lowercase as defined in json tags")
+		})
+	}
+}
+
+func TestContentReasoningUnmarshalJSON(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected ContentReasoning
+		wantErr  bool
+	}{
+		{
+			name:  "full content reasoning with lowercase keys",
+			input: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE=","redacted_content":"cmVkYWN0ZWRfZGF0YQ=="}`,
+			expected: ContentReasoning{
+				Content:         "Thinking process here",
+				Signature:       []byte("signature_data"),
+				RedactedContent: []byte("redacted_data"),
+			},
+			wantErr: false,
+		},
+		{
+			name:  "content only",
+			input: `{"content":"Simple thought"}`,
+			expected: ContentReasoning{
+				Content: "Simple thought",
+			},
+			wantErr: false,
+		},
+		{
+			name:  "content and signature",
+			input: `{"content":"Reasoning with signature","signature":"c2lnMTIz"}`,
+			expected: ContentReasoning{
+				Content:   "Reasoning with signature",
+				Signature: []byte("sig123"),
+			},
+			wantErr: false,
+		},
+		{
+			name:  "content and redacted",
+			input: `{"content":"Reasoning with redacted","redacted_content":"cmVkYWN0ZWQxMjM="}`,
+			expected: ContentReasoning{
+				Content:         "Reasoning with redacted",
+				RedactedContent: []byte("redacted123"),
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty object",
+			input:    `{}`,
+			expected: ContentReasoning{},
+			wantErr:  false,
+		},
+		{
+			name:     "null values are ignored",
+			input:    `{"content":"Test","signature":null,"redacted_content":null}`,
+			expected: ContentReasoning{Content: "Test"},
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var result ContentReasoning
+			err := json.Unmarshal([]byte(tt.input), &result)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected.Content, result.Content)
+			assert.Equal(t, tt.expected.Signature, result.Signature)
+			assert.Equal(t, tt.expected.RedactedContent, result.RedactedContent)
+		})
 	}
 }
 

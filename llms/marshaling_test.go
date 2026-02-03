@@ -266,7 +266,7 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 		},
 		{
 			name:  "text with reasoning",
-			input: `{"role":"assistant","parts":[{"type":"text","text":"The answer is 42","reasoning":{"Content":"Let me think about this...","Signature":"c2lnbmF0dXJl","RedactedContent":"cmVkYWN0ZWQ="}}]}`,
+			input: `{"role":"assistant","parts":[{"type":"text","text":"The answer is 42","reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl","redacted_content":"cmVkYWN0ZWQ="}}]}`,
 			want: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
@@ -284,7 +284,7 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 		},
 		{
 			name:  "tool call with reasoning",
-			input: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"id":"tc01","type":"function","function":{"name":"search","arguments":"{}"},"reasoning":{"Content":"Need to search for this","Signature":"dGVzdA==","RedactedContent":null}}}]}`,
+			input: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"id":"tc01","type":"function","function":{"name":"search","arguments":"{}"},"reasoning":{"content":"Need to search for this","signature":"dGVzdA=="}}}]}`,
 			want: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
@@ -383,7 +383,7 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 					},
 				},
 			},
-			want:    `{"role":"assistant","parts":[{"reasoning":{"Content":"Let me think about this...","Signature":"c2lnbmF0dXJl","RedactedContent":"cmVkYWN0ZWQ="},"text":"The answer is 42","type":"text"}]}`,
+			want:    `{"role":"assistant","parts":[{"reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl","redacted_content":"cmVkYWN0ZWQ="},"text":"The answer is 42","type":"text"}]}`,
 			wantErr: false,
 		},
 		{
@@ -405,7 +405,7 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 					},
 				},
 			},
-			want:    `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"search","arguments":"{}"},"id":"tc01","reasoning":{"Content":"Need to search for this","Signature":"dGVzdA==","RedactedContent":null},"type":"function"}}]}`,
+			want:    `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"search","arguments":"{}"},"id":"tc01","reasoning":{"content":"Need to search for this","signature":"dGVzdA=="},"type":"function"}}]}`,
 			wantErr: false,
 		},
 	}

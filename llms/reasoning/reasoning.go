@@ -18,13 +18,13 @@ var (
 
 type ContentReasoning struct {
 	// Content is the reasoning content of the assistant message before the final answer.
-	Content string
+	Content string `json:"content,omitempty"`
 
 	// Signature is the signature of the reasoning contents.
-	Signature []byte
+	Signature []byte `json:"signature,omitempty"`
 
 	// RedactedContent is the redacted reasoning contents for Anthropic provider.
-	RedactedContent []byte
+	RedactedContent []byte `json:"redacted_content,omitempty"`
 }
 
 func (r *ContentReasoning) IsEmpty() bool {
