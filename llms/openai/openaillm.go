@@ -293,6 +293,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
+		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}
 	if opts.JSONMode {
 		req.ResponseFormat = ResponseFormatJSON
@@ -497,4 +498,27 @@ func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
 			Arguments: tc.FunctionCall.Arguments,
 		},
 	}
+}
+
+// webSearchOptionsFromCallOptions converts llms.WebSearchOptions to openaiclient.WebSearchOptions.
+func webSearchOptionsFromCallOptions(opts *llms.WebSearchOptions) *openaiclient.WebSearchOptions {
+	if opts == nil {
+		return nil
+	}
+	result := &openaiclient.WebSearchOptions{
+		SearchContextSize: opts.SearchContextSize,
+	}
+	if opts.UserLocation != nil {
+		result.UserLocation = &openaiclient.UserLocation{
+			Type: opts.UserLocation.Type,
+		}
+		if opts.UserLocation.Approximate != nil {
+			result.UserLocation.Approximate = &openaiclient.ApproximateLocation{
+				Country: opts.UserLocation.Approximate.Country,
+				City:    opts.UserLocation.Approximate.City,
+				Region:  opts.UserLocation.Approximate.Region,
+			}
+		}
+	}
+	return result
 }
