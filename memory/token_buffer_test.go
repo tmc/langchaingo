@@ -108,3 +108,18 @@ func TestTokenBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	expected := map[string]any{"history": "Human: bar\nAI: foo"}
 	assert.Equal(t, expected, result)
 }
+
+func TestTokenBufferMemoryGetMemoryKey(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	llm := newTestOpenAIClient(t)
+
+	// Test with default memory key
+	m1 := NewConversationTokenBuffer(llm, 2000)
+	assert.Equal(t, "history", m1.GetMemoryKey(ctx))
+
+	// Test with custom memory key
+	m2 := NewConversationTokenBuffer(llm, 2000, WithMemoryKey("custom_key"))
+	assert.Equal(t, "custom_key", m2.GetMemoryKey(ctx))
+}

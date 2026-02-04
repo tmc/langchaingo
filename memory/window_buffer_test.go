@@ -101,6 +101,19 @@ func TestWindowBufferMemoryWithPreLoadedHistory(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestWindowBufferMemoryGetMemoryKey(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	// Test with default memory key
+	m1 := NewConversationWindowBuffer(2)
+	assert.Equal(t, "history", m1.GetMemoryKey(ctx))
+
+	// Test with custom memory key
+	m2 := NewConversationWindowBuffer(2, WithMemoryKey("custom_key"))
+	assert.Equal(t, "custom_key", m2.GetMemoryKey(ctx))
+}
+
 func TestConversationWindowBuffer_cutMessages(t *testing.T) {
 	t.Parallel()
 	type fields struct {
