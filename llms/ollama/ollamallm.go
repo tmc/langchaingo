@@ -37,7 +37,7 @@ func New(opts ...Option) (*LLM, error) {
 		opt(&o)
 	}
 
-	client, err := ollamaclient.NewClient(o.ollamaServerURL, o.httpClient)
+	client, err := ollamaclient.NewClient(o.ollamaServerURL, o.apiKey, o.httpClient)
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 
 type options struct {
 	ollamaServerURL     *url.URL
+	apiKey              string
 	httpClient          *http.Client
 	model               string
 	ollamaOptions       ollamaclient.Options
@@ -76,6 +77,13 @@ func WithServerURL(rawURL string) Option {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+// WithBearerAuthentication Set the http authentication header for proxied requests to Ollama. Use this to protect your Ollama instance when it is exposed to the public internet.
+func WithBearerAuthentication(key string) Option {
+	return func(opts *options) {
+		opts.apiKey = "Bearer " + key
 	}
 }
 

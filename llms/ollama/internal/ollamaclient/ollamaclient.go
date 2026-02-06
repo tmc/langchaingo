@@ -18,6 +18,7 @@ import (
 
 type Client struct {
 	base       *url.URL
+	apiKey     string
 	httpClient *http.Client
 }
 
@@ -37,7 +38,7 @@ func checkError(resp *http.Response, body []byte) error {
 	return apiError
 }
 
-func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
+func NewClient(ourl *url.URL, apiKey string, ohttp *http.Client) (*Client, error) {
 	if ourl == nil {
 		scheme, hostport, ok := strings.Cut(os.Getenv("OLLAMA_HOST"), "://")
 		if !ok {
@@ -64,6 +65,7 @@ func NewClient(ourl *url.URL, ohttp *http.Client) (*Client, error) {
 
 	client := Client{
 		base:       ourl,
+		apiKey:     apiKey,
 		httpClient: ohttp,
 	}
 
@@ -90,6 +92,7 @@ func (c *Client) do(ctx context.Context, method, path string, reqData, respData 
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Authorization", c.apiKey)
 
 	respObj, err := c.httpClient.Do(request)
 	if err != nil {

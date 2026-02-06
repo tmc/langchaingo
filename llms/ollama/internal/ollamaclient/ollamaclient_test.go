@@ -66,7 +66,7 @@ func TestClient_Generate(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	stream := false
@@ -112,7 +112,7 @@ func TestClient_GenerateStream(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	stream := true
@@ -157,7 +157,7 @@ func TestClient_GenerateChat(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	req := &ChatRequest{
@@ -208,7 +208,7 @@ func TestClient_GenerateChatStream(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	req := &ChatRequest{
@@ -257,7 +257,7 @@ func TestClient_CreateEmbedding(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	req := &EmbeddingRequest{
@@ -298,7 +298,7 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	parsedURL, err := url.Parse(baseURL)
 	require.NoError(t, err)
 
-	client, err := NewClient(parsedURL, rr.Client())
+	client, err := NewClient(parsedURL, "", rr.Client())
 	require.NoError(t, err)
 
 	req := &ChatRequest{
