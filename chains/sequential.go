@@ -99,17 +99,29 @@ func (c *SequentialChain) validateSeqChain() error {
 // not be called directly. Use rather the Call, Run or Predict functions that
 // handles the memory and other aspects of the chain.
 func (c *SequentialChain) Call(ctx context.Context, inputs map[string]any, options ...ChainCallOption) (map[string]any, error) { //nolint:lll
-	var outputs map[string]any
-	var err error
+	knownValues := make(map[string]any, len(inputs))
+	for k, v := range inputs {
+		knownValues[k] = v
+	}
+
 	for _, chain := range c.chains {
-		outputs, err = Call(ctx, chain, inputs, options...)
+		outputs, err := Call(ctx, chain, knownValues, options...)
 		if err != nil {
 			return nil, err
 		}
-		// Set the input for the next chain to the output of the current chain
-		inputs = outputs
+		// Merge outputs into known values so subsequent chains
+		// and the final result can access all intermediate outputs.
+		for k, v := range outputs {
+			knownValues[k] = v
+		}
 	}
-	return outputs, nil
+
+	// Return only the declared output keys.
+	result := make(map[string]any, len(c.outputKeys))
+	for _, key := range c.outputKeys {
+		result[key] = knownValues[key]
+	}
+	return result, nil
 }
 
 // GetMemory gets the memory of the chain.
