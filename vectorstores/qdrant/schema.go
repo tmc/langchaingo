@@ -15,25 +15,25 @@ type upsertBody struct {
 	Batch upsertBatch `json:"batch"`
 }
 
-type point struct {
+type result struct {
 	Score   float32        `json:"score"`
 	Payload map[string]any `json:"payload"`
 }
 
-type result struct {
-	Point []point `json:"points"`
+type searchResponse struct {
+	Result []result `json:"result"`
 }
 
-type searchResponse struct {
-	Result result `json:"result"`
+type namedVector struct {
+	Vector []float32 `json:"vector"`
+	Name   string    `json:"name"`
 }
 
 type searchBody struct {
-	Vector         []float32 `json:"query"`
-	Filter         any       `json:"filter"`
-	Limit          int       `json:"limit"`
-	ScoreThreshold float32   `json:"score_threshold,omitempty"`
-	WithVector     bool      `json:"with_vector"`
-	WithPayload    bool      `json:"with_payload"`
-	Using          string    `json:"using,omitempty"`
+	Vector         any     `json:"vector"`
+	Filter         any     `json:"filter"`
+	Limit          int     `json:"limit"`
+	ScoreThreshold float32 `json:"score_threshold,omitempty"`
+	WithVector     bool    `json:"with_vector"`
+	WithPayload    bool    `json:"with_payload"`
 }

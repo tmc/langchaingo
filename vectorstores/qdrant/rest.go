@@ -19,7 +19,7 @@ func (s Store) upsertPoints(
 	ctx context.Context,
 	baseURL *url.URL,
 	vectors [][]float32,
-	payloads []map[string]any,
+	payloads []map[string]interface{},
 ) ([]string, error) {
 	ids := make([]string, len(vectors))
 	for i := range ids {
@@ -68,7 +68,6 @@ func (s Store) searchPoints(
 	payload := searchBody{
 		WithPayload: true,
 		WithVector:  false,
-		Vector:      vector,
 		Limit:       numVectors,
 		Filter:      filter,
 	}
@@ -78,10 +77,15 @@ func (s Store) searchPoints(
 	}
 
 	if s.vectorName != "" {
-		payload.Using = s.vectorName
+		payload.Vector = namedVector{
+			Vector: vector,
+			Name:   s.vectorName,
+		}
+	} else {
+		payload.Vector = vector
 	}
 
-	url := baseURL.JoinPath("collections", s.collectionName, "points", "query")
+	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
 	body,
 		statusCode,
 		err := DoRequest(
@@ -106,8 +110,8 @@ func (s Store) searchPoints(
 	if err != nil {
 		return nil, err
 	}
-	docs := make([]schema.Document, len(response.Result.Point))
-	for i, match := range response.Result.Point {
+	docs := make([]schema.Document, len(response.Result))
+	for i, match := range response.Result {
 		pageContent, ok := match.Payload[s.contentKey].(string)
 		if !ok {
 			return nil, fmt.Errorf("payload does not contain content key '%s'", s.contentKey)
@@ -131,7 +135,7 @@ func DoRequest(ctx context.Context,
 	url url.URL,
 	apiKey,
 	method string,
-	payload any,
+	payload interface{},
 ) (io.ReadCloser, int, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
