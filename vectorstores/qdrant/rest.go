@@ -81,7 +81,7 @@ func (s Store) searchPoints(
 		payload.Using = s.vectorName
 	}
 
-	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
+	url := baseURL.JoinPath("collections", s.collectionName, "points", "query")
 	body,
 		statusCode,
 		err := DoRequest(
