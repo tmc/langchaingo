@@ -28,7 +28,8 @@ type searchBody struct {
 	Vector         []float32 `json:"vector"`
 	Filter         any       `json:"filter"`
 	Limit          int       `json:"limit"`
-	ScoreThreshold float32   `json:"score_threshold"`
+	ScoreThreshold float32   `json:"score_threshold,omitempty"`
 	WithVector     bool      `json:"with_vector"`
 	WithPayload    bool      `json:"with_payload"`
+	Using          string    `json:"using,omitempty"`
 }

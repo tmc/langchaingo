@@ -77,6 +77,10 @@ func (s Store) searchPoints(
 		payload.ScoreThreshold = scoreThreshold
 	}
 
+	if s.vectorName != "" {
+		payload.Using = s.vectorName
+	}
+
 	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
 	body,
 		statusCode,
