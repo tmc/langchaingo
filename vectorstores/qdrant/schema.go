@@ -21,7 +21,7 @@ type point struct {
 }
 
 type result struct {
-	Point []point `json:"result"`
+	Point []point `json:"points"`
 }
 
 type searchResponse struct {
