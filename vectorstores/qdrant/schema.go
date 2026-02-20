@@ -6,26 +6,30 @@
 package qdrant
 
 type upsertBatch struct {
-	IDs      []string                 `json:"ids"`
-	Payloads []map[string]interface{} `json:"payloads"`
-	Vectors  [][]float32              `json:"vectors"`
+	IDs      []string         `json:"ids"`
+	Payloads []map[string]any `json:"payloads"`
+	Vectors  [][]float32      `json:"vectors"`
 }
 
 type upsertBody struct {
 	Batch upsertBatch `json:"batch"`
 }
 
+type point struct {
+	Score   float32        `json:"score"`
+	Payload map[string]any `json:"payload"`
+}
+
 type result struct {
-	Score   float32                `json:"score"`
-	Payload map[string]interface{} `json:"payload"`
+	Point []point `json:"result"`
 }
 
 type searchResponse struct {
-	Result []result `json:"result"`
+	Result result `json:"result"`
 }
 
 type searchBody struct {
-	Vector         []float32 `json:"vector"`
+	Vector         []float32 `json:"query"`
 	Filter         any       `json:"filter"`
 	Limit          int       `json:"limit"`
 	ScoreThreshold float32   `json:"score_threshold,omitempty"`

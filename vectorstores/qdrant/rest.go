@@ -19,7 +19,7 @@ func (s Store) upsertPoints(
 	ctx context.Context,
 	baseURL *url.URL,
 	vectors [][]float32,
-	payloads []map[string]interface{},
+	payloads []map[string]any,
 ) ([]string, error) {
 	ids := make([]string, len(vectors))
 	for i := range ids {
@@ -106,8 +106,8 @@ func (s Store) searchPoints(
 	if err != nil {
 		return nil, err
 	}
-	docs := make([]schema.Document, len(response.Result))
-	for i, match := range response.Result {
+	docs := make([]schema.Document, len(response.Result.Point))
+	for i, match := range response.Result.Point {
 		pageContent, ok := match.Payload[s.contentKey].(string)
 		if !ok {
 			return nil, fmt.Errorf("payload does not contain content key '%s'", s.contentKey)
@@ -131,7 +131,7 @@ func DoRequest(ctx context.Context,
 	url url.URL,
 	apiKey,
 	method string,
-	payload interface{},
+	payload any,
 ) (io.ReadCloser, int, error) {
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
