@@ -92,6 +92,16 @@ func WithRest() Option {
 	}
 }
 
+// WithBaseURL appends a ClientOption that configures the underlying Google AI
+// client to use a custom base URL (endpoint). This is useful for directing
+// requests to proxy servers, local development environments, or alternative
+// regional endpoints not automatically handled by the default client setup.
+func WithBaseURL(baseURL string) Option {
+	return func(opts *Options) {
+		opts.ClientOptions = append(opts.ClientOptions, option.WithEndpoint(baseURL))
+	}
+}
+
 // WithHTTPClient append a ClientOption that uses the provided HTTP client to
 // make requests.
 // This is useful for vertex clients.

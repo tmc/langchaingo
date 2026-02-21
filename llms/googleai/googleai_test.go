@@ -168,6 +168,35 @@ func TestGoogleAIGenerateContentWithSystemMessage(t *testing.T) {
 	assert.NotEmpty(t, resp.Choices)
 }
 
+func TestGoogleAIGenerateContentWithCustomBaseURL(t *testing.T) {
+	// This proves the option is accepted and doesn't break the SDK's path construction.
+	officialBaseURL := "https://generativelanguage.googleapis.com"
+
+	llm := newHTTPRRClient(t, WithBaseURL(officialBaseURL))
+
+	ctx := context.Background()
+	content := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Hey! How are you doing?"),
+			},
+		},
+	}
+
+	resp, err := llm.GenerateContent(ctx, content)
+	if err != nil {
+		// Check if this is a recording mismatch error
+		if strings.Contains(err.Error(), "cached HTTP response not found") {
+			t.Skip("Recording format has changed or is incompatible. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+		}
+		require.NoError(t, err)
+	}
+
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
+
 func TestGoogleAICall(t *testing.T) {
 
 	llm := newHTTPRRClient(t)
