@@ -151,6 +151,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			msg.Role = RoleSystem
 		case llms.ChatMessageTypeAI:
 			msg.Role = RoleAssistant
+			msg.ReasoningContent = mc.ReasoningContent
 		case llms.ChatMessageTypeHuman:
 			msg.Role = RoleUser
 			// For models without system support, prepend system content to first user message
