@@ -188,7 +188,7 @@ role: user
 	}
 }
 
-func TestUnmarshalJSONMessageContent(t *testing.T) {
+func TestUnmarshalJSONMessageContent(t *testing.T) { //nolint:funlen // We make an exception given the number of test cases.
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -259,6 +259,18 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:  "assistant message with reasoning_content",
+			input: `{"role":"assistant","text":"final answer","reasoning_content":"step-by-step reasoning"}`,
+			want: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{Text: "final answer"},
+				},
+				ReasoningContent: "step-by-step reasoning",
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -321,6 +333,29 @@ func TestMarshalJSONMessageContent(t *testing.T) {
 				},
 			},
 			want:    `{"role":"user","parts":[{}]}`,
+			wantErr: false,
+		},
+		{
+			name: "assistant message with reasoning_content",
+			input: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{Text: "final answer"},
+				},
+				ReasoningContent: "step-by-step reasoning",
+			},
+			want:    `{"role":"assistant","text":"final answer","reasoning_content":"step-by-step reasoning"}`,
+			wantErr: false,
+		},
+		{
+			name: "message without reasoning_content omits field",
+			input: MessageContent{
+				Role: "user",
+				Parts: []ContentPart{
+					TextContent{Text: "Hello"},
+				},
+			},
+			want:    `{"role":"user","text":"Hello"}`,
 			wantErr: false,
 		},
 	}
@@ -484,6 +519,28 @@ role: assistant
 					ToolCallResponse{ToolCallID: "456", Name: "screwdriver", Content: "turn"},
 				},
 			},
+		},
+		{
+			name: "assistant message with reasoning_content and tool calls",
+			in: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					ToolCall{Type: "function", ID: "tc01", FunctionCall: &FunctionCall{Name: "calculator", Arguments: `{"a":15,"b":28}`}},
+				},
+				ReasoningContent: "I need to use the calculator to add 15 and 28",
+			},
+			assertedJSON: `{"role":"assistant","parts":[{"type":"tool_call","tool_call":{"function":{"name":"calculator","arguments":"{\"a\":15,\"b\":28}"},"id":"tc01","type":"function"}}],"reasoning_content":"I need to use the calculator to add 15 and 28"}`,
+		},
+		{
+			name: "assistant message with reasoning_content single text",
+			in: MessageContent{
+				Role: "assistant",
+				Parts: []ContentPart{
+					TextContent{Text: "The answer is 43"},
+				},
+				ReasoningContent: "I calculated 15 + 28 = 43",
+			},
+			assertedJSON: `{"role":"assistant","text":"The answer is 43","reasoning_content":"I calculated 15 + 28 = 43"}`,
 		},
 	}
 
