@@ -14,7 +14,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/ollama/ollama v0.14.3 // indirect
+	github.com/ollama/ollama v0.16.3 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	golang.org/x/crypto v0.43.0 // indirect

@@ -31,7 +31,7 @@ require (
 	github.com/IBM/watsonx-go v1.0.0
 	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/gage-technologies/mistral-go v1.1.0
-	github.com/ollama/ollama v0.14.3
+	github.com/ollama/ollama v0.16.3
 	github.com/pkoukk/tiktoken-go v0.1.8
 	google.golang.org/genai v1.42.0
 )
@@ -332,7 +332,7 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect

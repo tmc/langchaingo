@@ -26,7 +26,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/ollama/ollama v0.14.3 // indirect
+	github.com/ollama/ollama v0.16.3 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
