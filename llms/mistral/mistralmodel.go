@@ -49,11 +49,10 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 	setCallOptions(options, callOptions)
 	mistralChatParams := mistralChatParamsFromCallOptions(callOptions)
 
-	messages := make([]sdk.ChatMessage, 0)
-	messages = append(messages, sdk.ChatMessage{
+	messages := []sdk.ChatMessage{{
 		Role:    "user",
 		Content: prompt,
-	})
+	}}
 	res, err := m.client.Chat(callOptions.Model, messages, &mistralChatParams)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)

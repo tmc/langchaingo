@@ -35,7 +35,7 @@ func DefaultOptions() Options {
 		CloudProject:          "",
 		CloudLocation:         "",
 		DefaultModel:          "gemini-2.0-flash",
-		DefaultEmbeddingModel: "embedding-001",
+		DefaultEmbeddingModel: "gemini-embedding-001",
 		DefaultCandidateCount: 1,
 		DefaultMaxTokens:      2048,
 		DefaultTemperature:    0.5,

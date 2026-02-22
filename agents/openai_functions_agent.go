@@ -54,7 +54,7 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 }
 
 func (o *OpenAIFunctionsAgent) tools() []llms.Tool {
-	res := make([]llms.Tool, 0)
+	res := make([]llms.Tool, 0, len(o.Tools))
 	for _, tool := range o.Tools {
 		res = append(res, llms.Tool{
 			Type: "function",
@@ -158,7 +158,7 @@ func (o *OpenAIFunctionsAgent) Plan(
 	}
 
 	// Build LLM call options, including user-provided options
-	llmOptions := []llms.CallOption{llms.WithTools(o.tools()), llms.WithStreamingFunc(stream)}
+	llmOptions := []llms.CallOption{llms.WithTools(o.tools()), llms.WithStreamingFunc(stream)} //nolint:prealloc
 	llmOptions = append(llmOptions, chains.GetLLMCallOptions(options...)...)
 
 	result, err := o.LLM.GenerateContent(ctx, mcList, llmOptions...)
@@ -193,7 +193,8 @@ func (o *OpenAIFunctionsAgent) GetTools() []tools.Tool {
 }
 
 func createOpenAIFunctionPrompt(opts Options) prompts.ChatPromptTemplate {
-	messageFormatters := []prompts.MessageFormatter{prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil)}
+	messageFormatters := make([]prompts.MessageFormatter, 0, 3+len(opts.extraMessages))
+	messageFormatters = append(messageFormatters, prompts.NewSystemMessagePromptTemplate(opts.systemMessage, nil))
 	messageFormatters = append(messageFormatters, opts.extraMessages...)
 	messageFormatters = append(messageFormatters, prompts.NewHumanMessagePromptTemplate("{{.input}}", []string{"input"}))
 	messageFormatters = append(messageFormatters, prompts.MessagesPlaceholder{

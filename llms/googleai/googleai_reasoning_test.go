@@ -17,7 +17,7 @@ func TestGoogleAI_TextResponseWithSignature(t *testing.T) {
 	llm := newHTTPRRClient(t, WithDefaultModel("gemini-3-flash-preview"))
 
 	// Step 1: Get initial response with thinking and signature
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
@@ -75,7 +75,7 @@ func TestGoogleAI_TextResponseWithSignatureStreaming(t *testing.T) {
 	// Use Gemini 3 model which supports thought signatures
 	llm := newHTTPRRClient(t, WithDefaultModel("gemini-3-flash-preview"))
 
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
@@ -102,6 +102,7 @@ func TestGoogleAI_TextResponseWithSignatureStreaming(t *testing.T) {
 				}
 			case streaming.ChunkTypeDone:
 				streamDone = true
+			default:
 			}
 			return nil
 		}),
@@ -179,7 +180,7 @@ func TestGoogleAI_SingleFunctionCallWithSignature(t *testing.T) {
 	}
 
 	// Step 1: Get function call with signature
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
@@ -274,7 +275,7 @@ func TestGoogleAI_ParallelFunctionCallsWithSignature(t *testing.T) {
 	}
 
 	// Step 1: Get parallel function calls with signature
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
@@ -311,7 +312,7 @@ func TestGoogleAI_ParallelFunctionCallsWithSignature(t *testing.T) {
 
 	// Step 2: Test roundtrip with parallel function calls
 	// Add all tool calls to history (signature only in first one)
-	var toolCallParts []llms.ContentPart
+	var toolCallParts []llms.ContentPart //nolint:prealloc
 	for _, tc := range choice.ToolCalls {
 		toolCallParts = append(toolCallParts, tc)
 	}
@@ -321,7 +322,7 @@ func TestGoogleAI_ParallelFunctionCallsWithSignature(t *testing.T) {
 	})
 
 	// Add all tool responses
-	var toolResponseParts []llms.ContentPart
+	var toolResponseParts []llms.ContentPart //nolint:prealloc
 	for _, tc := range choice.ToolCalls {
 		toolResponseParts = append(toolResponseParts, llms.ToolCallResponse{
 			ToolCallID: tc.ID,
@@ -344,7 +345,7 @@ func TestGoogleAI_ParallelFunctionCallsWithSignature(t *testing.T) {
 	t.Log("Successfully completed parallel function calls roundtrip with signature")
 }
 
-func TestGoogleAI_SequentialFunctionCallsWithSignatures(t *testing.T) {
+func TestGoogleAI_SequentialFunctionCallsWithSignatures(t *testing.T) { //nolint:funlen
 	// Use Gemini 3 model for sequential function calling with signatures
 	llm := newHTTPRRClient(t, WithDefaultModel("gemini-3-flash-preview"))
 
@@ -391,7 +392,7 @@ func TestGoogleAI_SequentialFunctionCallsWithSignatures(t *testing.T) {
 	}
 
 	// Step 1: Initial request
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{

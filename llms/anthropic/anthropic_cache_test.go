@@ -472,7 +472,7 @@ func TestAnthropic_SystemCaching(t *testing.T) {
 //
 // VERIFICATION TEST: Uses baseline data from ToolsCaching and SystemCaching tests.
 // Expected: CacheCreation ≈ ToolsTokens + SystemTokens (cumulative, not separate)
-func TestAnthropic_ToolsAndSystemCaching(t *testing.T) {
+func TestAnthropic_ToolsAndSystemCaching(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
@@ -605,7 +605,7 @@ func TestAnthropic_ToolsAndSystemCaching(t *testing.T) {
 // - Result: Cumulative cache grows, but we READ old prefix (10% cost) and only WRITE new content (125% cost)
 //
 // IMPORTANT: Must exceed 1024 token threshold for claude-sonnet-4-5
-func TestAnthropic_ConversationCaching(t *testing.T) {
+func TestAnthropic_ConversationCaching(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
@@ -847,7 +847,7 @@ func runIncrementalCachingTest(t *testing.T, enableReasoning, enableStreaming bo
 
 // generateFlightBookingTools creates a realistic flight booking scenario with large tools
 // to ensure cache threshold (1024 tokens) is exceeded.
-func generateFlightBookingTools(marker string) []llms.Tool {
+func generateFlightBookingTools(marker string) []llms.Tool { //nolint:funlen
 	tools := []llms.Tool{
 		{
 			Type: "function",
@@ -1015,7 +1015,7 @@ type turnMetrics struct {
 }
 
 // executeFourTurnConversation runs the 4-turn flight booking conversation
-func executeFourTurnConversation(t *testing.T, llm *anthropic.LLM, opts []llms.CallOption, enableReasoning bool, streamHandler *streamingHandler) cacheMetrics {
+func executeFourTurnConversation(t *testing.T, llm *anthropic.LLM, opts []llms.CallOption, enableReasoning bool, streamHandler *streamingHandler) cacheMetrics { //nolint:funlen
 	t.Helper()
 
 	metrics := cacheMetrics{turns: make([]turnMetrics, 0, 4)}

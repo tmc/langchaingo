@@ -283,6 +283,7 @@ func TestOpenAI_ImplicitCaching_Streaming_Reasoning(t *testing.T) {
 				if chunk.Reasoning != nil {
 					reasoning.WriteString(chunk.Reasoning.Content)
 				}
+			default:
 			}
 			return nil
 		})
@@ -355,7 +356,7 @@ func TestOpenAI_ImplicitCaching_Streaming_Reasoning(t *testing.T) {
 
 // TestOpenAI_ImplicitCaching_Conversation_NonReasoning tests implicit caching
 // for multi-turn conversations with tool calls using a non-reasoning model
-func TestOpenAI_ImplicitCaching_Conversation_NonReasoning(t *testing.T) {
+func TestOpenAI_ImplicitCaching_Conversation_NonReasoning(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := newTestOpenAIClient(t)
@@ -548,7 +549,7 @@ func TestOpenAI_ImplicitCaching_Conversation_NonReasoning(t *testing.T) {
 // TestOpenAI_ImplicitCaching_Conversation_Reasoning tests implicit caching
 // for multi-turn conversations with tool calls using a reasoning model.
 // IMPORTANT: reasoning content must be preserved when adding AI responses to history
-func TestOpenAI_ImplicitCaching_Conversation_Reasoning(t *testing.T) {
+func TestOpenAI_ImplicitCaching_Conversation_Reasoning(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := newTestOpenAIClient(t)
@@ -781,7 +782,7 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_NonReasoning(t *testing.T
 	}
 
 	// Request 1: Initial conversation turn [system, user1]
-	msgs := []llms.MessageContent{
+	msgs := []llms.MessageContent{ //nolint:prealloc
 		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
 		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What is 4 + 5?")}},
 	}
@@ -849,7 +850,7 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_NonReasoning(t *testing.T
 
 // TestOpenAI_ImplicitCaching_Conversation_Streaming_Reasoning tests implicit caching
 // for multi-turn conversations in streaming mode with a reasoning model
-func TestOpenAI_ImplicitCaching_Conversation_Streaming_Reasoning(t *testing.T) {
+func TestOpenAI_ImplicitCaching_Conversation_Streaming_Reasoning(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := newTestOpenAIClient(t)
@@ -867,13 +868,14 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_Reasoning(t *testing.T) {
 				if chunk.Reasoning != nil {
 					reasoning.WriteString(chunk.Reasoning.Content)
 				}
+			default:
 			}
 			return nil
 		})
 	}
 
 	// Request 1: Initial conversation turn [system, user1]
-	msgs := []llms.MessageContent{
+	msgs := []llms.MessageContent{ //nolint:prealloc
 		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
 		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What is 6 + 7?")}},
 	}

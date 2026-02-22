@@ -22,8 +22,8 @@ func TestDefaultOptions(t *testing.T) {
 	if opts.DefaultModel != "gemini-2.0-flash" {
 		t.Errorf("expected default model 'gemini-2.0-flash', got %q", opts.DefaultModel)
 	}
-	if opts.DefaultEmbeddingModel != "embedding-001" {
-		t.Errorf("expected default embedding model 'embedding-001', got %q", opts.DefaultEmbeddingModel)
+	if opts.DefaultEmbeddingModel != "gemini-embedding-001" {
+		t.Errorf("expected default embedding model 'gemini-embedding-001', got %q", opts.DefaultEmbeddingModel)
 	}
 	if opts.DefaultCandidateCount != 1 {
 		t.Errorf("expected default candidate count 1, got %d", opts.DefaultCandidateCount)

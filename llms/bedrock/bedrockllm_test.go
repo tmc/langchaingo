@@ -1097,7 +1097,7 @@ func TestAmazonReasoningStreamingLegacyAPI(t *testing.T) {
 	}
 }
 
-func testReasoningWorkflow(
+func testReasoningWorkflow( //nolint:funlen
 	ctx context.Context,
 	t *testing.T,
 	llm *bedrock.LLM,
@@ -1249,7 +1249,7 @@ func testToolCallingWorkflow(
 		},
 	}
 
-	contents := []llms.MessageContent{
+	contents := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "Calculate 15 * 8"}},

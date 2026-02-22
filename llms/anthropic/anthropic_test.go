@@ -66,7 +66,7 @@ func TestAnthropic_GenerateContentWithTool(t *testing.T) {
 
 	llm := newHTTPRRClient(t, anthropic.WithModel("claude-haiku-4-5"))
 
-	contents := []llms.MessageContent{
+	contents := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextContent{Text: "What is the weather in Boston?"}},

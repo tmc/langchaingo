@@ -29,30 +29,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-type transportWithAPIKey struct {
-	Key       string
-	Transport http.RoundTripper
-}
-
-func (t *transportWithAPIKey) RoundTrip(req *http.Request) (*http.Response, error) {
-	rt := t.Transport
-	if rt == nil {
-		rt = http.DefaultTransport
-		if rt == nil {
-			return nil, fmt.Errorf("no Transport specified or available")
-		}
-	}
-
-	newReq := *req
-	if t.Key != "" {
-		args := newReq.URL.Query()
-		args.Set("key", t.Key)
-		newReq.URL.RawQuery = args.Encode()
-	}
-
-	return rt.RoundTrip(&newReq)
-}
-
 func createOpenAIEmbedder(t *testing.T, rr *httprr.RecordReplay) *embeddings.EmbedderImpl {
 	t.Helper()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
@@ -427,7 +403,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) { //nolint:funlen
 		}
 	}
 
-	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
+	// use Google embedding (now default model is gemini-embedding-001, with dimensions:3072) to add some data to collection
 	googleLLM, err := googleai.New(ctx, opts...)
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(googleLLM)

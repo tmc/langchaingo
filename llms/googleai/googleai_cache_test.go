@@ -56,7 +56,7 @@ import (
 // ============================================================================
 
 // TestGoogleAI_ExplicitCaching tests explicit caching with httprr
-func TestGoogleAI_ExplicitCaching(t *testing.T) {
+func TestGoogleAI_ExplicitCaching(t *testing.T) { //nolint:funlen
 	// Skip if no credentials and no recording
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
@@ -277,7 +277,7 @@ func TestGoogleAI_ImplicitCaching(t *testing.T) {
 
 // TestGoogleAI_ImplicitCaching_Streaming tests implicit caching with streaming
 // This test mirrors TestGoogleAI_ImplicitCaching but uses streaming mode
-func TestGoogleAI_ImplicitCaching_Streaming(t *testing.T) {
+func TestGoogleAI_ImplicitCaching_Streaming(t *testing.T) { //nolint:funlen
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
@@ -394,7 +394,7 @@ func TestGoogleAI_ImplicitCaching_Streaming(t *testing.T) {
 //   - Request 1: [system, user1] -> establishes cache
 //   - Request 2: [system, user1, AI1+signature, user2] -> prefix should be cached
 //   - Request 3: [system, user1, AI1+signature, user2, AI2+signature, user3] -> longer prefix cached
-func TestGoogleAI_ImplicitCaching_ConversationContinuation(t *testing.T) {
+func TestGoogleAI_ImplicitCaching_ConversationContinuation(t *testing.T) { //nolint:funlen
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
@@ -430,7 +430,7 @@ func TestGoogleAI_ImplicitCaching_ConversationContinuation(t *testing.T) {
 	largeContext := marker + strings.Repeat("Go is a compiled language with garbage collection. ", 500)
 
 	// Request 1: Initial conversation turn [system, user1]
-	msgs := []llms.MessageContent{
+	msgs := []llms.MessageContent{ //nolint:prealloc
 		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
 		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What is 10 + 5?")}},
 	}
@@ -541,7 +541,7 @@ func TestGoogleAI_ImplicitCaching_ConversationContinuation(t *testing.T) {
 // 1. Conversation continuation works with streaming
 // 2. Reasoning/signature preservation works in streaming mode
 // 3. Cached tokens are correctly reported in streaming responses
-func TestGoogleAI_ImplicitCaching_ConversationContinuation_Streaming(t *testing.T) {
+func TestGoogleAI_ImplicitCaching_ConversationContinuation_Streaming(t *testing.T) { //nolint:funlen
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")
 
 	apiKey := os.Getenv("GOOGLE_API_KEY")
@@ -585,13 +585,14 @@ func TestGoogleAI_ImplicitCaching_ConversationContinuation_Streaming(t *testing.
 				if chunk.Reasoning != nil {
 					reasoning.WriteString(chunk.Reasoning.Content)
 				}
+			default:
 			}
 			return nil
 		})
 	}
 
 	// Request 1: Initial conversation turn [system, user1]
-	msgs := []llms.MessageContent{
+	msgs := []llms.MessageContent{ //nolint:prealloc
 		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
 		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What is 8 + 7?")}},
 	}

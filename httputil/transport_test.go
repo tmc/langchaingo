@@ -192,6 +192,7 @@ func TestApiKeyTransport_RoundTrip(t *testing.T) {
 			resp, err := transport.RoundTrip(req)
 			require.NoError(t, err)
 			assert.NotNil(t, resp)
+			defer resp.Body.Close()
 
 			// Check the API key in the processed request
 			actualKey := mock.lastRequest.URL.Query().Get("key")
@@ -238,6 +239,7 @@ func TestApiKeyTransport_PreservesOtherParams(t *testing.T) {
 	resp, err := transport.RoundTrip(req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
+	defer resp.Body.Close()
 
 	// Check that all query parameters are preserved
 	query := mock.lastRequest.URL.Query()
@@ -252,7 +254,7 @@ func TestApiKeyTransport_PreservesOtherParams(t *testing.T) {
 	assert.Empty(t, originalQuery.Get("key"))
 }
 
-func TestApiKeyTransport_BaseURL(t *testing.T) {
+func TestApiKeyTransport_BaseURL(t *testing.T) { //nolint:funlen
 	tests := []struct {
 		name           string
 		baseURL        string
@@ -360,6 +362,7 @@ func TestApiKeyTransport_BaseURL(t *testing.T) {
 			resp, err := transport.RoundTrip(req)
 			require.NoError(t, err)
 			assert.NotNil(t, resp)
+			defer resp.Body.Close()
 
 			// Check the rewritten URL
 			assert.Equal(t, tt.expectedScheme, mock.lastRequest.URL.Scheme)
@@ -398,6 +401,7 @@ func TestApiKeyTransport_BaseURL_PreservesQueryParams(t *testing.T) {
 	resp, err := transport.RoundTrip(req)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
+	defer resp.Body.Close()
 
 	// Check that URL was rewritten
 	assert.Equal(t, "http", mock.lastRequest.URL.Scheme)
@@ -422,7 +426,7 @@ func TestApiKeyTransport_BaseURL_InvalidURL(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
 	require.NoError(t, err)
 
-	resp, err := transport.RoundTrip(req)
+	resp, err := transport.RoundTrip(req) //nolint:bodyclose
 	assert.Error(t, err)
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "failed to parse BaseURL")
@@ -498,6 +502,7 @@ func TestApiKeyTransport_BaseURL_PathTraversalProtection(t *testing.T) {
 			resp, err := transport.RoundTrip(req)
 			require.NoError(t, err)
 			assert.NotNil(t, resp)
+			defer resp.Body.Close()
 
 			actualPath := mock.lastRequest.URL.Path
 			assert.Equal(t, tt.expectedPath, actualPath, tt.description)
@@ -564,19 +569,20 @@ func TestApiKeyTransport_BaseURL_PathCombinations(t *testing.T) {
 			resp, err := transport.RoundTrip(req)
 			require.NoError(t, err)
 			assert.NotNil(t, resp)
+			defer resp.Body.Close()
 
 			assert.Equal(t, tt.expectedPath, mock.lastRequest.URL.Path)
 		})
 	}
 }
 
-func TestApiKeyTransport_ProxyURL(t *testing.T) {
+func TestApiKeyTransport_ProxyURL(t *testing.T) { //nolint:funlen
 	// Create a test HTTP server that will act as the final destination
 	destinationServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify API key is present
 		assert.Equal(t, "test-api-key", r.URL.Query().Get("key"))
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("response from destination"))
+		_, _ = w.Write([]byte("response from destination"))
 	}))
 	defer destinationServer.Close()
 
@@ -623,7 +629,7 @@ func TestApiKeyTransport_ProxyURL(t *testing.T) {
 
 		body := make([]byte, 1024)
 		n, _ := resp.Body.Read(body)
-		w.Write(body[:n])
+		_, _ = w.Write(body[:n])
 	}))
 	defer proxyServer.Close()
 
@@ -650,7 +656,7 @@ func TestApiKeyTransport_ProxyURL(t *testing.T) {
 			assert.Equal(t, "test-api-key", r.URL.Query().Get("key"))
 			assert.Equal(t, "/v1/test", r.URL.Path)
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("mock response"))
+			_, _ = w.Write([]byte("mock response"))
 		}))
 		defer mockServer.Close()
 
@@ -671,7 +677,6 @@ func TestApiKeyTransport_ProxyURL(t *testing.T) {
 	})
 
 	t.Run("proxy_ignored_with_custom_transport", func(t *testing.T) {
-		customTransportCalled := false
 		customTransport := &mockRoundTripper{
 			response: &http.Response{
 				StatusCode: http.StatusOK,
@@ -691,11 +696,10 @@ func TestApiKeyTransport_ProxyURL(t *testing.T) {
 		resp, err := transport.RoundTrip(req)
 		require.NoError(t, err)
 		assert.NotNil(t, resp)
+		defer resp.Body.Close()
 
 		// Verify custom transport was used (ProxyURL was ignored)
 		assert.NotNil(t, customTransport.lastRequest)
-		customTransportCalled = true
-		assert.True(t, customTransportCalled)
 	})
 }
 
@@ -708,7 +712,7 @@ func TestApiKeyTransport_ProxyURL_InvalidURL(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "https://api.example.com/data", nil)
 	require.NoError(t, err)
 
-	resp, err := transport.RoundTrip(req)
+	resp, err := transport.RoundTrip(req) //nolint:bodyclose
 	assert.Error(t, err)
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "failed to parse ProxyURL")
@@ -731,7 +735,7 @@ func TestApiKeyTransport_CombinedFeatures(t *testing.T) {
 		assert.Equal(t, "value", r.URL.Query().Get("param"), "Query param should be preserved")
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	}))
 	defer destinationServer.Close()
 
@@ -763,7 +767,7 @@ func TestApiKeyTransport_CombinedFeatures(t *testing.T) {
 
 		body := make([]byte, 1024)
 		n, _ := resp.Body.Read(body)
-		w.Write(body[:n])
+		_, _ = w.Write(body[:n])
 	}))
 	defer proxyServer.Close()
 

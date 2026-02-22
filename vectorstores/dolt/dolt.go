@@ -447,7 +447,7 @@ func (s *Store) createOrGetDatabase(ctx context.Context, tx *sql.Tx) error {
 	query := fmt.Sprintf("SELECT `uuid` FROM %s WHERE name = ? ORDER BY name limit 1", s.collectionTableName)
 	err = tx.QueryRowContext(ctx, query, s.databaseName).Scan(&s.databaseUUID)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		// Database doesn't exist, create it with new UUID
 		s.databaseUUID = uuid.New().String()
 		query = fmt.Sprintf("INSERT INTO %s (`uuid`, name, cmetadata) VALUES (?, ?, ?)", s.collectionTableName)

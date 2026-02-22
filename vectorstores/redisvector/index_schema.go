@@ -263,7 +263,7 @@ func (s *IndexSchema) MetadataKeys() map[string]any {
 }
 
 func (s *IndexSchema) AsCommand() []string {
-	argsOut := []string{}
+	argsOut := make([]string, 0, len(s.Tag)+len(s.Text)+len(s.Numeric)+len(s.Vector))
 	for _, tag := range s.Tag {
 		argsOut = append(argsOut, tag.AsCommand()...)
 	}

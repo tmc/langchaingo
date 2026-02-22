@@ -28,7 +28,7 @@ import (
 //
 // Result: TextPartWithReasoning("", nil) + ToolCall(signature) works correctly
 // But if client mistakenly adds TextPartWithReasoning("", signature), we should handle it.
-func TestSignatureDeduplication(t *testing.T) {
+func TestSignatureDeduplication(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	testSig := []byte("gemini-thought-signature-xyz123")
@@ -245,7 +245,7 @@ func TestSignaturePlacementInRequest(t *testing.T) {
 	})
 }
 
-func TestConvertParts_DuplicateSignatures(t *testing.T) {
+func TestConvertParts_DuplicateSignatures(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	testSignature := []byte("test-signature-bytes")
@@ -430,7 +430,7 @@ func TestConvertParts_DuplicateSignatures(t *testing.T) {
 	}
 }
 
-func TestConvertParts(t *testing.T) {
+func TestConvertParts(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	tests := []struct {
@@ -929,7 +929,7 @@ func TestSafetySettings(t *testing.T) {
 
 	harmThreshold := HarmBlockOnlyHigh
 
-	safetySettings := []*genai.SafetySetting{}
+	safetySettings := make([]*genai.SafetySetting, 0, len(expectedCategories))
 	for _, category := range expectedCategories {
 		safetySettings = append(safetySettings, &genai.SafetySetting{
 			Category:  category,

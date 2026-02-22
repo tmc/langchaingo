@@ -161,13 +161,6 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
 	}
 
-	// Check for thinking mode changes that may invalidate cache
-	if detectThinkingModeChange(messages, opts) {
-		// Log warning but don't fail - API will handle it
-		// In production, you might want to use a proper logger
-		// log.Println("Warning: Thinking mode change detected, may invalidate cache")
-	}
-
 	var thinking *anthropicclient.ThinkingPayload
 	if opts.Reasoning.IsEnabled() {
 		thinking = &anthropicclient.ThinkingPayload{
@@ -186,7 +179,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	betaHeaders := extractBetaHeaders(opts)
 
 	// Convert system prompt to appropriate type
-	var system any = systemPrompt
+	system := systemPrompt
 	if systemPrompt != nil {
 		switch sp := systemPrompt.(type) {
 		case string:
@@ -520,44 +513,10 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 	for _, msg := range messages {
 		switch msg.Role {
 		case llms.ChatMessageTypeSystem:
-			// Check if any part has cache control - if so, use array format
-			hasCacheControl := false
-			for _, part := range msg.Parts {
-				if _, ok := part.(CachedContent); ok {
-					hasCacheControl = true
-					break
-				}
-			}
-
-			if hasCacheControl {
-				// Use array format for system with cache control
-				for _, part := range msg.Parts {
-					switch p := part.(type) {
-					case CachedContent:
-						cacheControl := convertCacheControl(p.CacheControl)
-						if textContent, ok := p.ContentPart.(llms.TextContent); ok {
-							systemBlocks = append(systemBlocks, &anthropicclient.TextContent{
-								Type:         "text",
-								Text:         textContent.Text,
-								CacheControl: cacheControl,
-							})
-						}
-					case llms.TextContent:
-						systemBlocks = append(systemBlocks, &anthropicclient.TextContent{
-							Type: "text",
-							Text: p.Text,
-						})
-					}
-				}
-			} else {
-				// Use simple string format
-				content, err := handleSystemMessage(msg)
-				if err != nil {
-					return nil, "", fmt.Errorf("anthropic: failed to handle system message: %w", err)
-				}
-				if sysStr, ok := systemPrompt.(string); ok {
-					systemPrompt = sysStr + content
-				}
+			var err error
+			systemPrompt, systemBlocks, err = processSystemParts(msg, systemPrompt, systemBlocks)
+			if err != nil {
+				return nil, "", err
 			}
 		case llms.ChatMessageTypeHuman:
 			chatMessage, err := handleHumanMessage(msg)
@@ -590,6 +549,47 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 	}
 
 	return chatMessages, systemPrompt, nil
+}
+
+func processSystemParts(msg llms.MessageContent, systemPrompt any, systemBlocks []anthropicclient.Content) (any, []anthropicclient.Content, error) {
+	hasCacheControl := false
+	for _, part := range msg.Parts {
+		if _, ok := part.(CachedContent); ok {
+			hasCacheControl = true
+			break
+		}
+	}
+
+	if hasCacheControl {
+		for _, part := range msg.Parts {
+			switch p := part.(type) {
+			case CachedContent:
+				cacheControl := convertCacheControl(p.CacheControl)
+				if textContent, ok := p.ContentPart.(llms.TextContent); ok {
+					systemBlocks = append(systemBlocks, &anthropicclient.TextContent{
+						Type:         "text",
+						Text:         textContent.Text,
+						CacheControl: cacheControl,
+					})
+				}
+			case llms.TextContent:
+				systemBlocks = append(systemBlocks, &anthropicclient.TextContent{
+					Type: "text",
+					Text: p.Text,
+				})
+			}
+		}
+	} else {
+		content, err := handleSystemMessage(msg)
+		if err != nil {
+			return nil, nil, fmt.Errorf("anthropic: failed to handle system message: %w", err)
+		}
+		if sysStr, ok := systemPrompt.(string); ok {
+			systemPrompt = sysStr + content
+		}
+	}
+
+	return systemPrompt, systemBlocks, nil
 }
 
 func handleSystemMessage(msg llms.MessageContent) (string, error) {
@@ -806,25 +806,4 @@ func appendIfMissing(slice []string, val string) []string {
 		}
 	}
 	return append(slice, val)
-}
-
-// detectThinkingModeChange detects if thinking mode changed mid-conversation
-func detectThinkingModeChange(messages []llms.MessageContent, opts *llms.CallOptions) bool {
-	// Check last assistant message for thinking blocks
-	lastAssistantHasThinking := false
-	for i := len(messages) - 1; i >= 0; i-- {
-		if messages[i].Role == llms.ChatMessageTypeAI {
-			for _, part := range messages[i].Parts {
-				if tc, ok := part.(llms.TextContent); ok && tc.Reasoning != nil {
-					lastAssistantHasThinking = true
-					break
-				}
-			}
-			break
-		}
-	}
-
-	// Thinking mode conflict: enabled now but wasn't before (or vice versa)
-	currentThinkingEnabled := opts.Reasoning.IsEnabled()
-	return currentThinkingEnabled != lastAssistantHasThinking
 }

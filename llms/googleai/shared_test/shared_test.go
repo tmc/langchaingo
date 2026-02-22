@@ -15,6 +15,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/vxcontrol/langchaingo/embeddings"
 	"github.com/vxcontrol/langchaingo/httputil"
@@ -744,7 +745,8 @@ func mockGoogleAIServer(t *testing.T) *http.Server {
 	})
 
 	server := &http.Server{
-		Handler: mux,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	return server

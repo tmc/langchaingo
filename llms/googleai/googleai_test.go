@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -17,15 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-// hasExistingRecording checks if a httprr recording exists for this test
-func hasExistingRecording(t *testing.T) bool {
-	testName := strings.ReplaceAll(t.Name(), "/", "_")
-	testName = strings.ReplaceAll(testName, " ", "_")
-	recordingPath := filepath.Join("testdata", testName+".httprr")
-	_, err := os.Stat(recordingPath)
-	return err == nil
-}
 
 func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	t.Helper()

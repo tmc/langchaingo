@@ -15,8 +15,8 @@ var ErrMismatchMetadatasAndText = errors.New("number of texts and metadatas does
 
 // SplitDocuments splits documents using a textsplitter.
 func SplitDocuments(textSplitter TextSplitter, documents []schema.Document) ([]schema.Document, error) {
-	texts := make([]string, 0)
-	metadatas := make([]map[string]any, 0)
+	texts := make([]string, 0, len(documents))
+	metadatas := make([]map[string]any, 0, len(documents))
 	for _, document := range documents {
 		texts = append(texts, document.PageContent)
 		metadatas = append(metadatas, document.Metadata)

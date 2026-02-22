@@ -16,8 +16,8 @@ func TestLLM(t *testing.T) {
 
 	llm, err := New(
 		"ibm/granite-13b-instruct-v2",
-		wx.WithWatsonxAPIKey(wx.WatsonxAPIKey(os.Getenv("WATSONX_API_KEY"))),
-		wx.WithWatsonxProjectID(wx.WatsonxProjectID(os.Getenv("WATSONX_PROJECT_ID"))),
+		wx.WithWatsonxAPIKey(os.Getenv("WATSONX_API_KEY")),
+		wx.WithWatsonxProjectID(os.Getenv("WATSONX_PROJECT_ID")),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create WatsonX LLM: %v", err)

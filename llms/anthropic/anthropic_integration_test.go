@@ -16,7 +16,7 @@ import (
 // - Multiple tool calls in single turn
 // - Reasoning/thinking integration
 // - Predictable caching behavior
-func TestAnthropic_MultiTurnToolThinkingCaching(t *testing.T) {
+func TestAnthropic_MultiTurnToolThinkingCaching(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	// Create client with caching strategy at construction time
@@ -103,7 +103,7 @@ func TestAnthropic_MultiTurnToolThinkingCaching(t *testing.T) {
 	}
 
 	// Build message chain with reasoning and tool calls
-	aiParts1 := []llms.ContentPart{
+	aiParts1 := []llms.ContentPart{ //nolint:prealloc
 		llms.TextPartWithReasoning(choice1.Content, choice1.Reasoning),
 	}
 	for _, tc := range choice1.ToolCalls {
@@ -159,7 +159,7 @@ func TestAnthropic_MultiTurnToolThinkingCaching(t *testing.T) {
 
 	// Add response to message chain
 	choice2 := resp2.Choices[0]
-	aiParts2 := []llms.ContentPart{
+	aiParts2 := []llms.ContentPart{ //nolint:prealloc
 		llms.TextPartWithReasoning(choice2.Content, choice2.Reasoning),
 	}
 	for _, tc := range choice2.ToolCalls {
@@ -230,7 +230,7 @@ func TestAnthropic_MultiTurnToolThinkingCaching(t *testing.T) {
 // 3. Turn 3: MODIFY chain - replace first tool call with different function (summarization), keep second unchanged
 // 4. Turn 4: Call LLM with modified chain, verify cache invalidation and signature handling, request first tool again
 // 5. Turn 5: Get response and request text summary, verify Anthropic doesn't drop messages without signatures
-func TestAnthropic_MessageChainModification(t *testing.T) {
+func TestAnthropic_MessageChainModification(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	// Create client with caching strategy
@@ -290,7 +290,7 @@ func TestAnthropic_MessageChainModification(t *testing.T) {
 		},
 	}
 
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
@@ -430,7 +430,7 @@ func TestAnthropic_MessageChainModification(t *testing.T) {
 	// Turn 2 stays unchanged (indices 4, 5) - it has signature from choice2.Reasoning
 
 	// Add new user request
-	modifiedMessages = append(modifiedMessages, llms.MessageContent{
+	modifiedMessages = append(modifiedMessages, llms.MessageContent{ //nolint:makezero
 		Role:  llms.ChatMessageTypeHuman,
 		Parts: []llms.ContentPart{llms.TextPart("Now fetch the detailed Q1 sales data again")},
 	})
@@ -472,20 +472,20 @@ func TestAnthropic_MessageChainModification(t *testing.T) {
 		t.Logf("Turn 4: Called tool=%s", choice4.ToolCalls[0].FunctionCall.Name)
 
 		// Add AI response
-		aiParts4 := []llms.ContentPart{
+		aiParts4 := []llms.ContentPart{ //nolint:prealloc
 			llms.TextPartWithReasoning(choice4.Content, choice4.Reasoning),
 		}
 		for _, tc := range choice4.ToolCalls {
 			aiParts4 = append(aiParts4, tc)
 		}
-		modifiedMessages = append(modifiedMessages, llms.MessageContent{
+		modifiedMessages = append(modifiedMessages, llms.MessageContent{ //nolint:makezero
 			Role:  llms.ChatMessageTypeAI,
 			Parts: aiParts4,
 		})
 
 		// Add tool results
 		for _, tc := range choice4.ToolCalls {
-			modifiedMessages = append(modifiedMessages, llms.MessageContent{
+			modifiedMessages = append(modifiedMessages, llms.MessageContent{ //nolint:makezero
 				Role: llms.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{
 					llms.ToolCallResponse{
@@ -500,7 +500,7 @@ func TestAnthropic_MessageChainModification(t *testing.T) {
 
 	// TURN 5: Request text summary including info from modified first message
 	t.Log("Turn 5: Request text summary of entire conversation")
-	modifiedMessages = append(modifiedMessages, llms.MessageContent{
+	modifiedMessages = append(modifiedMessages, llms.MessageContent{ //nolint:makezero
 		Role:  llms.ChatMessageTypeHuman,
 		Parts: []llms.ContentPart{llms.TextPart("Provide a summary of all data we've collected, including the summarized Q1 data from the beginning")},
 	})

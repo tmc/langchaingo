@@ -10,7 +10,6 @@ import (
 	"github.com/vxcontrol/langchaingo/embeddings"
 	"github.com/vxcontrol/langchaingo/internal/httprr"
 	"github.com/vxcontrol/langchaingo/internal/testutil/testctr"
-	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/openai"
 	"github.com/vxcontrol/langchaingo/schema"
 	"github.com/vxcontrol/langchaingo/vectorstores"
@@ -27,7 +26,7 @@ import (
 )
 
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
-func createOpenAIEmbedder(t *testing.T) (llms.Model, *embeddings.EmbedderImpl) {
+func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
 	t.Helper()
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
 
@@ -38,7 +37,7 @@ func createOpenAIEmbedder(t *testing.T) (llms.Model, *embeddings.EmbedderImpl) {
 	e, err := embeddings.NewEmbedder(llm)
 	require.NoError(t, err)
 
-	return llm, e
+	return e
 }
 
 func getTestStore(t *testing.T, ctx context.Context, e *embeddings.EmbedderImpl, opts ...Option) (Store, error) {
@@ -91,7 +90,7 @@ func getTestStore(t *testing.T, ctx context.Context, e *embeddings.EmbedderImpl,
 
 func TestV2ConfigCompatibility(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	store, err := getTestStore(t, ctx, e, WithCollectionName("test_v2_config"))
 	require.NoError(t, err)
@@ -100,7 +99,7 @@ func TestV2ConfigCompatibility(t *testing.T) {
 
 func TestV1ConfigCompatibility(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	store, err := getTestStore(t, ctx, e, WithCollectionName("test_v1_config"))
 	require.NoError(t, err)
@@ -109,7 +108,7 @@ func TestV1ConfigCompatibility(t *testing.T) {
 
 func TestV1IndexCompatibility(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	// Create v1 index and test conversion
 	v1Index, err := oldentity.NewIndexAUTOINDEX(oldentity.L2)
@@ -126,7 +125,7 @@ func TestV1IndexCompatibility(t *testing.T) {
 
 func TestOptionFunctionsCompatibility(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	// Test all option functions work
 	store, err := getTestStore(t, ctx, e,
@@ -163,7 +162,7 @@ func TestOptionFunctionsCompatibility(t *testing.T) {
 
 func TestAddDocuments(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	store, err := getTestStore(t, ctx, e, WithCollectionName("test_add_docs"))
 	require.NoError(t, err)
@@ -179,7 +178,7 @@ func TestAddDocuments(t *testing.T) {
 
 func TestSimilaritySearch(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	store, err := getTestStore(t, ctx, e, WithCollectionName("test_search"))
 	require.NoError(t, err)
@@ -202,7 +201,7 @@ func TestSimilaritySearch(t *testing.T) {
 
 func TestVectorStoreInterface(t *testing.T) {
 	ctx := context.Background()
-	_, e := createOpenAIEmbedder(t)
+	e := createOpenAIEmbedder(t)
 
 	store, err := getTestStore(t, ctx, e, WithCollectionName("test_interface"))
 	require.NoError(t, err)

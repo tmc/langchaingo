@@ -299,7 +299,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	}
 	collectionName := makeNewCollectionName()
 
-	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
+	// use Google embedding (now default model is gemini-embedding-001, with dimensions:3072) to add some data to collection
 	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(googleLLM)
@@ -312,7 +312,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 		ctx,
 		mariadb.WithDB(db),
 		mariadb.WithEmbedder(e),
-		mariadb.WithVectorDimensions(768),
+		mariadb.WithVectorDimensions(3072),
 		mariadb.WithPreDeleteDatabase(true),
 		mariadb.WithDatabaseName(collectionName),
 	)

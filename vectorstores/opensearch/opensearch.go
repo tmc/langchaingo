@@ -60,7 +60,7 @@ func (s Store) AddDocuments(
 ) ([]string, error) {
 	opts := s.getOptions(options...)
 	ids := []string{}
-	texts := []string{}
+	texts := make([]string, 0, len(docs))
 
 	for _, doc := range docs {
 		texts = append(texts, doc.PageContent)

@@ -131,7 +131,7 @@ func TestToolCall(t *testing.T) {
 	parts := []llms.ContentPart{
 		llms.TextContent{Text: "Which date do we have today?"},
 	}
-	content := []llms.MessageContent{
+	content := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: parts,

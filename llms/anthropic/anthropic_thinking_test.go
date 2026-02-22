@@ -41,7 +41,7 @@ func TestAnthropic_TextResponseWithThinking(t *testing.T) {
 
 	llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
 
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
@@ -113,6 +113,7 @@ func TestAnthropic_TextResponseWithThinkingStreaming(t *testing.T) {
 			}
 		case streaming.ChunkTypeText:
 			streamedText = append(streamedText, chunk.Content)
+		default:
 		}
 		return nil
 	})
@@ -154,7 +155,7 @@ func TestAnthropic_SingleToolCallWithThinking(t *testing.T) {
 		},
 	}}
 
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
@@ -298,7 +299,7 @@ func TestAnthropic_SequentialToolCallsWithThinking(t *testing.T) {
 		},
 	}
 
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{

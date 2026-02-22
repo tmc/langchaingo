@@ -129,7 +129,7 @@ func main() {
     // Initialize table for the Vectorstore to use. You only need to do this the first time you use this table.
     vectorstoreTableoptions, err := &cloudsqlutil.VectorstoreTableOptions{
         TableName:  "table",
-        VectorSize: 768,
+        VectorSize: 3072,
     }
     if err != nil {
         log.Fatal(err)

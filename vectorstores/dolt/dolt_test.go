@@ -506,7 +506,7 @@ func TestSimilaritySearchWithDifferentDimensions(t *testing.T) {
 	}
 	databaseName := makeNewDatabaseName()
 
-	// use Google embedding (now default model is embedding-001, with dimensions:768) to add some data to collection
+	// use Google embedding (now default model is gemini-embedding-001, with dimensions:3072) to add some data to collection
 	googleLLM, err := googleai.New(ctx, googleai.WithAPIKey(genaiKey))
 	require.NoError(t, err)
 	e, err := embeddings.NewEmbedder(googleLLM)

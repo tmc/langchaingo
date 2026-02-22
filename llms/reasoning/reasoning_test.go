@@ -636,7 +636,7 @@ func TestContentReasoningUnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestIsReasoningModel(t *testing.T) {
+func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 	tests := []struct {
 		model    string
 		expected bool

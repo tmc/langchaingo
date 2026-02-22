@@ -57,7 +57,7 @@ func TestConversationalWithMemory(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx := context.Background()
-	res, err := chains.Run(ctx, executor, "Hi! my name is Bob and the year I was born is 1987")
+	_, err = chains.Run(ctx, executor, "Hi! my name is Bob and the year I was born is 1987")
 	if err != nil {
 		// Check if this is a recording mismatch error
 		if strings.Contains(err.Error(), "cached HTTP response not found") {
@@ -66,7 +66,7 @@ func TestConversationalWithMemory(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	res, err = chains.Run(t.Context(), executor, "What is the year I was born times 34")
+	res, err := chains.Run(t.Context(), executor, "What is the year I was born times 34")
 	if err != nil {
 		// Check if this is a recording mismatch error
 		if strings.Contains(err.Error(), "cached HTTP response not found") {

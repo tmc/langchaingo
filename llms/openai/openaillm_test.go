@@ -12,7 +12,7 @@ import (
 )
 
 // TestExtractToolParts tests the ExtractToolParts function with various content types
-func TestExtractToolParts(t *testing.T) {
+func TestExtractToolParts(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	tests := []struct {
@@ -386,7 +386,7 @@ func TestProcessUsage(t *testing.T) {
 }
 
 // TestTokenUsageMapping_OpenAI tests correct token usage mapping for OpenAI provider
-func TestTokenUsageMapping_OpenAI(t *testing.T) {
+func TestTokenUsageMapping_OpenAI(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := &LLM{}
@@ -704,7 +704,7 @@ func TestToolConversions(t *testing.T) {
 }
 
 // TestConvertMessages tests message conversion with various scenarios
-func TestConvertMessages(t *testing.T) {
+func TestConvertMessages(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	llm := &LLM{}
@@ -857,8 +857,8 @@ func TestErrorMapping(t *testing.T) {
 			if tt.inputError == nil {
 				assert.Nil(t, result)
 			} else {
-				llmErr, ok := result.(*llms.Error)
-				require.True(t, ok, "Expected *llms.Error type")
+				var llmErr *llms.Error
+				require.ErrorAs(t, result, &llmErr, "Expected *llms.Error type")
 				assert.Equal(t, tt.expectedCode, llmErr.Code)
 				assert.Equal(t, "openai", llmErr.Provider)
 			}

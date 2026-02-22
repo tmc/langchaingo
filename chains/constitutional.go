@@ -471,8 +471,9 @@ func getConstitutionalExample() []ConstitutionalExample {
 // initCritiqueRevision initializes critiquePrompt and revisionPrompt which can be used as default for critiqueChain and
 // revisionChain.
 func initCritiqueRevision() (*prompts.FewShotPrompt, *prompts.FewShotPrompt) {
-	critiqueExamples := make([]map[string]string, 0)
-	revisionExamples := make([]map[string]string, 0)
+	examples := getConstitutionalExample()
+	critiqueExamples := make([]map[string]string, 0, len(examples))
+	revisionExamples := make([]map[string]string, 0, len(examples))
 
 	var critiquePrompt *prompts.FewShotPrompt
 	var revisionPrompt *prompts.FewShotPrompt
@@ -491,7 +492,7 @@ Critique: {{ .critique }}`,
 		},
 	)
 
-	for _, ex := range getConstitutionalExample() {
+	for _, ex := range examples {
 		exampleMap := map[string]string{
 			"inputPrompt":     ex.inputPrompt,
 			"outputFromModel": ex.outputFromModel,

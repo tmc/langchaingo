@@ -164,7 +164,7 @@ func getCompletionTests() []testEnv {
 		"qwen/qwen3-32b",
 		"qwen/qwen3-235b-a22b-2507",
 	}
-	tests := []testEnv{
+	tests := []testEnv{ //nolint:prealloc
 		{
 			name: "openai",
 			init: newTestOpenAIClient,
@@ -286,7 +286,7 @@ func getToolCallTests(multiToolCalls bool) []testEnv {
 			"qwen/qwen3-32b",
 		)
 	}
-	tests := []testEnv{
+	tests := []testEnv{ //nolint:prealloc
 		{
 			name: "openai",
 			init: newTestOpenAIClient,
@@ -846,7 +846,7 @@ func TestMoonshot_MultiTurnToolCallWithReasoning(t *testing.T) {
 	}
 
 	// Turn 1: Initial request with reasoning
-	messages := []llms.MessageContent{
+	messages := []llms.MessageContent{ //nolint:prealloc
 		{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What is the weather in Beijing?")},
@@ -865,7 +865,7 @@ func TestMoonshot_MultiTurnToolCallWithReasoning(t *testing.T) {
 	require.NotEmpty(t, choice1.ToolCalls, "Should have tool calls")
 
 	// Build AI message with reasoning (like in Anthropic)
-	aiParts1 := []llms.ContentPart{
+	aiParts1 := []llms.ContentPart{ //nolint:prealloc
 		llms.TextPartWithReasoning(choice1.Content, choice1.Reasoning),
 	}
 	for _, tc := range choice1.ToolCalls {

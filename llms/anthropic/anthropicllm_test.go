@@ -391,7 +391,7 @@ func TestDefaultCacheStrategy_MergeWithCallLevel(t *testing.T) {
 }
 
 // TestTokenUsageMapping_Anthropic tests correct token usage mapping for Anthropic provider
-func TestTokenUsageMapping_Anthropic(t *testing.T) {
+func TestTokenUsageMapping_Anthropic(t *testing.T) { //nolint:funlen
 	tests := []struct {
 		name                     string
 		inputTokens              int

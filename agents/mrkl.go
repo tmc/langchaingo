@@ -83,10 +83,11 @@ func (a *OneShotZeroAgent) Plan(
 	}
 
 	// Build options for chains.Predict, including user-provided options
-	predictOptions := []chains.ChainCallOption{
+	predictOptions := make([]chains.ChainCallOption, 0, 2+len(options))
+	predictOptions = append(predictOptions,
 		chains.WithStopWords([]string{"\nObservation:", "\n\tObservation:"}),
 		chains.WithStreamingFunc(stream),
-	}
+	)
 	predictOptions = append(predictOptions, options...)
 
 	output, err := chains.Predict(

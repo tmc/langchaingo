@@ -190,7 +190,7 @@ role: user
 	}
 }
 
-func TestUnmarshalJSONMessageContent(t *testing.T) {
+func TestUnmarshalJSONMessageContent(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -322,7 +322,7 @@ func TestUnmarshalJSONMessageContent(t *testing.T) {
 	}
 }
 
-func TestMarshalJSONMessageContent(t *testing.T) {
+func TestMarshalJSONMessageContent(t *testing.T) { //nolint:funlen
 	t.Parallel()
 	tests := []struct {
 		name    string

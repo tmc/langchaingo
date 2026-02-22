@@ -33,7 +33,7 @@ func NewErrorMapper(provider string) *ErrorMapper {
 
 // defaultMatchers returns the default set of error matchers.
 func defaultMatchers() []ErrorMatcher {
-	matchers := []ErrorMatcher{}
+	matchers := make([]ErrorMatcher, 0, 12)
 
 	// Add context error matchers
 	matchers = append(matchers, contextErrorMatchers()...)
