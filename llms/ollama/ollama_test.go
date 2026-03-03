@@ -23,6 +23,18 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 	// Set up httprr for recording/replaying HTTP interactions
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
+	}
+
+	// Scrub dynamic headers from requests to ensure consistent replay
+	rr.ScrubReq(func(req *http.Request) error {
+		// Remove Authorization header if present (from OLLAMA_API_KEY env)
+		req.Header.Del("Authorization")
+		return nil
+	})
+
 	// Default model for testing
 	ollamaModel := "gemma3:1b"
 	if envModel := os.Getenv("OLLAMA_TEST_MODEL"); envModel != "" {
@@ -33,11 +45,6 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 	serverURL := "http://localhost:11434"
 	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
 		serverURL = envURL
-	}
-
-	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
-		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	// Always add server URL and HTTP client
@@ -76,6 +83,17 @@ func newStreamingTestClient(t *testing.T, opts ...Option) *LLM {
 	// Set up httprr for recording/replaying HTTP interactions
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 
+	// Skip if no recording exists and we're not recording
+	if !rr.Recording() {
+		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
+	}
+
+	// Scrub dynamic headers from requests
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Del("Authorization")
+		return nil
+	})
+
 	// Force using gemma3:1b for better performance
 	ollamaModel := "gemma3:1b"
 
@@ -83,11 +101,6 @@ func newStreamingTestClient(t *testing.T, opts ...Option) *LLM {
 	serverURL := "http://localhost:11434"
 	if envURL := os.Getenv("OLLAMA_HOST"); envURL != "" && rr.Recording() {
 		serverURL = envURL
-	}
-
-	// Skip if no recording exists and we're not recording
-	if !rr.Recording() {
-		httprr.SkipIfNoCredentialsAndRecordingMissing(t)
 	}
 
 	// When recording, use direct HTTP client to avoid httprr interference with streaming
@@ -349,12 +362,22 @@ func TestWithPullTimeout(t *testing.T) {
 		t.Skip("Skipping pull timeout test in short mode")
 	}
 
-	// Check if we're recording - timeout tests don't work with replay
+	// This test only works in recording mode (timeout behavior cannot be replayed)
+	// Skip if httprr file doesn't exist
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t)
+	
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
-	if rr.Replaying() {
+	
+	if !rr.Recording() {
 		t.Skip("Skipping pull timeout test when not recording (timeout behavior cannot be replayed)")
 	}
+	
+	// Scrub dynamic headers
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Del("Authorization")
+		return nil
+	})
 
 	// Use a very short timeout that should fail for any real model pull
 	llm := newTestClient(t,

@@ -1,0 +1,47 @@
+httprr trace v1
+313 891
+POST https://ollama.com/api/chat HTTP/1.1
+Host: ollama.com
+User-Agent: langchaingo-httprr
+Content-Length: 136
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gpt-oss:120b","messages":[{"role":"user","content":"What is the capital of France?"}],"stream":false,"format":"","options":{}}HTTP/2.0 200 OK
+Content-Length: 358
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 23:25:43 GMT
+Server: Google Frontend
+Traceparent: 00-5967b93f1294c3274d3c3ea55f6814f9-5d6aa60475a13d18-01
+Via: 1.1 google
+X-Build-Commit: 98b9918317e409562bff50dcf4b9f7a1f0271cdf
+X-Build-Time: 2026-03-03T10:12:36-08:00
+X-Cloud-Trace-Context: 5967b93f1294c3274d3c3ea55f6814f9/6731375131142208792;o=1
+X-Frame-Options: DENY
+X-Request-Id: 8e0265f9-83e1-4941-8f13-604f6b3551a6
+
+{"model":"gpt-oss:120b","created_at":"2026-03-03T23:25:43.583645249Z","message":{"role":"assistant","content":"The capital of France is **Paris**.","thinking":"The user asks: \"What is the capital of France?\" Simple answer: Paris. Provide concise answer."},"done":true,"done_reason":"stop","total_duration":571142718,"prompt_eval_count":74,"eval_count":40}
+310 826
+POST https://ollama.com/api/chat HTTP/1.1
+Host: ollama.com
+User-Agent: langchaingo-httprr
+Content-Length: 133
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gpt-oss:120b","messages":[{"role":"user","content":"What is 15 multiplied by 7?"}],"stream":false,"format":"","options":{}}HTTP/2.0 200 OK
+Content-Length: 297
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 23:25:45 GMT
+Server: Google Frontend
+Traceparent: 00-73ab49293eb4bb2da8ea626410084241-2b34a98f149b3beb-00
+Via: 1.1 google
+X-Build-Commit: 98b9918317e409562bff50dcf4b9f7a1f0271cdf
+X-Build-Time: 2026-03-03T10:12:36-08:00
+X-Cloud-Trace-Context: 73ab49293eb4bb2da8ea626410084241/3113299674410990571
+X-Frame-Options: DENY
+X-Request-Id: 38b215ad-445a-459d-9efb-5558797c05c8
+
+{"model":"gpt-oss:120b","created_at":"2026-03-03T23:25:45.47482513Z","message":{"role":"assistant","content":"15 multiplied by 7 equals **105**.","thinking":"Need to answer simply. 15*7 = 105."},"done":true,"done_reason":"stop","total_duration":535332455,"prompt_eval_count":76,"eval_count":33}

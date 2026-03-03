@@ -1,0 +1,24 @@
+httprr trace v1
+347 1073
+POST https://ollama.com/api/chat HTTP/1.1
+Host: ollama.com
+User-Agent: langchaingo-httprr
+Content-Length: 170
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"gpt-oss:120b","messages":[{"role":"user","content":"Pick a random number between 1 and 10"}],"stream":false,"format":"","options":{"seed":42,"temperature":0.7}}HTTP/2.0 200 OK
+Content-Length: 544
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 23:25:57 GMT
+Server: Google Frontend
+Traceparent: 00-6e7db4f61f097140117339a922df074c-6cb236ccfefe607c-00
+Via: 1.1 google
+X-Build-Commit: 98b9918317e409562bff50dcf4b9f7a1f0271cdf
+X-Build-Time: 2026-03-03T10:12:36-08:00
+X-Cloud-Trace-Context: 6e7db4f61f097140117339a922df074c/7832382956030025852
+X-Frame-Options: DENY
+X-Request-Id: 3d24183e-2e80-4b25-ad23-ba14322b41c7
+
+{"model":"gpt-oss:120b","created_at":"2026-03-03T23:25:57.737746125Z","message":{"role":"assistant","content":"4","thinking":"The user: \"Pick a random number between 1 and 10\". They want a random number. I can just pick one, maybe say \"7\". Could also explain it's random. They ask for a random number, no further context. Just respond with a number. I'll give a random number, maybe 4. Also could add it's random. I'll answer succinctly."},"done":true,"done_reason":"stop","total_duration":946525769,"prompt_eval_count":77,"eval_count":87}

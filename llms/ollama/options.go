@@ -12,6 +12,7 @@ import (
 type options struct {
 	ollamaServerURL     *url.URL
 	httpClient          *http.Client
+	apiKey              string
 	model               string
 	ollamaOptions       api.Options
 	pullProgressFunc    api.PullProgressFunc
@@ -102,6 +103,18 @@ func WithServerURL(rawURL string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithAPIKey sets the API key for authenticating with Ollama Cloud.
+// When using Ollama Cloud (https://ollama.com), you need to provide an API key for authentication.
+// You can create an API key at https://ollama.com/settings/keys.
+// This option can also be set via the OLLAMA_API_KEY environment variable.
+// The API key is added as an "Authorization: Bearer <key>" header to all requests.
+// This option works seamlessly with custom HTTP clients provided via WithHTTPClient.
+func WithAPIKey(apiKey string) Option {
+	return func(opts *options) {
+		opts.apiKey = apiKey
 	}
 }
 

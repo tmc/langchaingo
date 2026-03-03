@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,12 +21,38 @@ import (
 	"github.com/ollama/ollama/envconfig"
 )
 
+const (
+	// CloudURL is the default Ollama Cloud API endpoint.
+	// Use this URL when connecting to Ollama Cloud service with an API key.
+	CloudURL = "https://ollama.com"
+)
+
 var (
 	ErrEmptyResponse       = errors.New("no response")
 	ErrIncompleteEmbedding = errors.New("not all input got embedded")
 	ErrPullError           = errors.New("ollama model pull error")
 	ErrPullTimeout         = errors.New("ollama model pull deadline exceeded")
 )
+
+// authRoundTripper is a proxy HTTP RoundTripper that adds Authorization header to requests.
+// It wraps an existing RoundTripper and adds the API key as a Bearer token.
+type authRoundTripper struct {
+	apiKey    string
+	transport http.RoundTripper
+}
+
+// RoundTrip implements the http.RoundTripper interface.
+// It adds the Authorization header and delegates to the wrapped transport.
+func (a *authRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Clone the request to avoid modifying the original
+	clonedReq := req.Clone(req.Context())
+	
+	// Add Authorization header with Bearer token
+	clonedReq.Header.Set("Authorization", "Bearer "+a.apiKey)
+	
+	// Use the wrapped transport to perform the actual request
+	return a.transport.RoundTrip(clonedReq)
+}
 
 // LLM is a ollama LLM implementation.
 type LLM struct {
@@ -46,7 +73,35 @@ func New(opts ...Option) (*LLM, error) {
 		opt(&o)
 	}
 
-	client := api.NewClient(o.ollamaServerURL, o.httpClient)
+	// Check for API key in environment variable if not set explicitly
+	if o.apiKey == "" {
+		if envKey := os.Getenv("OLLAMA_API_KEY"); envKey != "" {
+			o.apiKey = envKey
+		}
+	}
+
+	// If API key is provided, wrap the HTTP client with auth transport
+	httpClient := o.httpClient
+	if o.apiKey != "" {
+		// Get the underlying transport from the HTTP client
+		transport := httpClient.Transport
+		if transport == nil {
+			transport = http.DefaultTransport
+		}
+		
+		// Create a new HTTP client with the auth transport
+		httpClient = &http.Client{
+			Transport: &authRoundTripper{
+				apiKey:    o.apiKey,
+				transport: transport,
+			},
+			CheckRedirect: httpClient.CheckRedirect,
+			Jar:           httpClient.Jar,
+			Timeout:       httpClient.Timeout,
+		}
+	}
+
+	client := api.NewClient(o.ollamaServerURL, httpClient)
 
 	return &LLM{client: client, options: o}, nil
 }
