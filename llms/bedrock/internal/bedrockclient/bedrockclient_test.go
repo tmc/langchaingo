@@ -675,8 +675,14 @@ func TestAnthropicResponseParsing(t *testing.T) {
 		StopReason:   AnthropicCompletionReasonEndTurn,
 		StopSequence: "",
 		Usage: struct {
-			InputTokens  int32 `json:"input_tokens"`
-			OutputTokens int32 `json:"output_tokens"`
+			InputTokens              int32 `json:"input_tokens"`
+			OutputTokens             int32 `json:"output_tokens"`
+			CacheCreationInputTokens int32 `json:"cache_creation_input_tokens,omitempty"`
+			CacheReadInputTokens     int32 `json:"cache_read_input_tokens,omitempty"`
+			CacheCreation            struct {
+				Ephemeral5mInputTokens int32 `json:"ephemeral_5m_input_tokens,omitempty"`
+				Ephemeral1hInputTokens int32 `json:"ephemeral_1h_input_tokens,omitempty"`
+			} `json:"cache_creation,omitempty"`
 		}{
 			InputTokens:  10,
 			OutputTokens: 15,
@@ -777,6 +783,7 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					StopReason   string `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
 					Thinking     string `json:"thinking,omitempty"`
+					Signature    string `json:"signature,omitempty"`
 				}{
 					Type: "text_delta",
 					Text: "Hello, how can I help you today?",
@@ -794,6 +801,7 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					StopReason   string `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
 					Thinking     string `json:"thinking,omitempty"`
+					Signature    string `json:"signature,omitempty"`
 				}{
 					StopReason: AnthropicCompletionReasonEndTurn,
 				},

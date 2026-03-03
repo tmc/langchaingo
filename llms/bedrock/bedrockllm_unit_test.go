@@ -177,6 +177,14 @@ func TestOptions(t *testing.T) {
 			t.Error("WithConverseAPI() did not enable Converse API")
 		}
 	})
+
+	t.Run("WithAutomaticCaching", func(t *testing.T) {
+		opts := &options{}
+		WithAutomaticCaching()(opts)
+		if !opts.enableAutoCaching {
+			t.Error("WithAutomaticCaching() did not enable automatic caching")
+		}
+	})
 }
 
 func TestModelConstants(t *testing.T) {
@@ -189,6 +197,8 @@ func TestModelConstants(t *testing.T) {
 		ModelAmazonNovaProV1,
 		ModelAmazonNovaLiteV1,
 		ModelAmazonNovaMicroV1,
+		ModelAnthropicClaudeOpus46,
+		ModelAnthropicClaudeSonnet46,
 		ModelAnthropicClaudeOpus45,
 		ModelAnthropicClaudeHaiku45,
 		ModelAnthropicClaudeSonnet45,
@@ -248,3 +258,260 @@ func (h *testCallbackHandler) HandleRetrieverStart(ctx context.Context, query st
 func (h *testCallbackHandler) HandleRetrieverEnd(ctx context.Context, query string, documents []schema.Document) {
 }
 func (h *testCallbackHandler) HandleStreamingFunc(ctx context.Context, chunk streaming.Chunk) {}
+
+// TestSupportsCaching tests the supportsCaching method
+func TestSupportsCaching(t *testing.T) {
+	llm := &LLM{}
+
+	tests := []struct {
+		name     string
+		modelID  string
+		expected bool
+	}{
+		{
+			name:     "Claude Opus 4.6 supports caching",
+			modelID:  ModelAnthropicClaudeOpus46,
+			expected: true,
+		},
+		{
+			name:     "Claude Sonnet 4.6 supports caching",
+			modelID:  ModelAnthropicClaudeSonnet46,
+			expected: true,
+		},
+		{
+			name:     "Claude Opus 4.5 supports caching",
+			modelID:  ModelAnthropicClaudeOpus45,
+			expected: true,
+		},
+		{
+			name:     "Claude Haiku 4.5 supports caching",
+			modelID:  ModelAnthropicClaudeHaiku45,
+			expected: true,
+		},
+		{
+			name:     "Claude Sonnet 4.5 supports caching",
+			modelID:  ModelAnthropicClaudeSonnet45,
+			expected: true,
+		},
+		{
+			name:     "Claude Opus 4.1 supports caching",
+			modelID:  ModelAnthropicClaudeOpus41,
+			expected: true,
+		},
+		{
+			name:     "Claude Opus 4 supports caching",
+			modelID:  ModelAnthropicClaudeOpus4,
+			expected: true,
+		},
+		{
+			name:     "Claude Sonnet 4 supports caching",
+			modelID:  ModelAnthropicClaudeSonnet4,
+			expected: true,
+		},
+		{
+			name:     "Claude 3.7 Sonnet does not support caching",
+			modelID:  ModelAnthropicClaude37Sonnet,
+			expected: false,
+		},
+		{
+			name:     "Claude 3.5 Haiku does not support caching",
+			modelID:  ModelAnthropicClaude35Haiku,
+			expected: false,
+		},
+		{
+			name:     "Amazon Nova does not support caching",
+			modelID:  ModelAmazonNovaProV1,
+			expected: false,
+		},
+		{
+			name:     "Meta Llama does not support caching",
+			modelID:  ModelMetaLlama3370bInstructV1,
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := llm.supportsCaching(tt.modelID)
+			if result != tt.expected {
+				t.Errorf("supportsCaching(%s) = %v, want %v", tt.modelID, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestApplyAutomaticCaching tests the applyAutomaticCaching function
+func TestApplyAutomaticCaching(t *testing.T) {
+	tests := []struct {
+		name             string
+		messages         []bedrockclient.Message
+		expectedCacheIdx int
+		expectNoCaching  bool
+	}{
+		{
+			name: "cache applied to last assistant message",
+			messages: []bedrockclient.Message{
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
+				{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Hi there"},
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "How are you?"},
+			},
+			expectedCacheIdx: 1,
+		},
+		{
+			name: "cache applied to tool result before human message",
+			messages: []bedrockclient.Message{
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "What's the weather?"},
+				{Role: llms.ChatMessageTypeAI, Type: "tool_use"},
+				{Role: llms.ChatMessageTypeTool, Type: "tool_result", Content: "72F"},
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Thanks"},
+			},
+			expectedCacheIdx: 2,
+		},
+		{
+			name: "no caching for single human message",
+			messages: []bedrockclient.Message{
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
+			},
+			expectNoCaching: true,
+		},
+		{
+			name: "no caching when last message is system",
+			messages: []bedrockclient.Message{
+				{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "You are helpful"},
+			},
+			expectNoCaching: true,
+		},
+		{
+			name: "cache applied to assistant message before final human",
+			messages: []bedrockclient.Message{
+				{Role: llms.ChatMessageTypeSystem, Type: "text", Content: "System"},
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
+				{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Hi"},
+				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Tell me more"},
+			},
+			expectedCacheIdx: 2,
+		},
+		{
+			name:            "empty messages",
+			messages:        []bedrockclient.Message{},
+			expectNoCaching: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Make a copy to avoid modifying test data
+			messages := make([]bedrockclient.Message, len(tt.messages))
+			copy(messages, tt.messages)
+
+			applyAutomaticCaching(messages)
+
+			if tt.expectNoCaching {
+				// Verify no cache control was added
+				for i, msg := range messages {
+					if msg.CacheControl != nil {
+						t.Errorf("Expected no cache control, but found at index %d", i)
+					}
+				}
+			} else {
+				// Verify cache control was added to expected message
+				if messages[tt.expectedCacheIdx].CacheControl == nil {
+					t.Errorf("Expected cache control at index %d, but not found", tt.expectedCacheIdx)
+				} else {
+					if messages[tt.expectedCacheIdx].CacheControl.Type != "ephemeral" {
+						t.Errorf("Expected cache type 'ephemeral', got '%s'", messages[tt.expectedCacheIdx].CacheControl.Type)
+					}
+					if messages[tt.expectedCacheIdx].CacheControl.TTL != "5m" {
+						t.Errorf("Expected TTL '5m', got '%s'", messages[tt.expectedCacheIdx].CacheControl.TTL)
+					}
+				}
+
+				// Verify no other messages have cache control
+				for i := range messages {
+					if i != tt.expectedCacheIdx && messages[i].CacheControl != nil {
+						t.Errorf("Unexpected cache control at index %d (expected only at %d)", i, tt.expectedCacheIdx)
+					}
+				}
+			}
+		})
+	}
+}
+
+// TestProcessMessagesWithCaching tests the processMessagesWithCaching function
+func TestProcessMessagesWithCaching(t *testing.T) {
+	tests := []struct {
+		name         string
+		messages     []llms.MessageContent
+		autoCaching  bool
+		expectCache  bool
+		cacheAtIndex int
+	}{
+		{
+			name: "automatic caching enabled",
+			messages: []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "Hello"},
+					},
+				},
+				{
+					Role: llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "Hi there"},
+					},
+				},
+				{
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "How are you?"},
+					},
+				},
+			},
+			autoCaching:  true,
+			expectCache:  true,
+			cacheAtIndex: 1,
+		},
+		{
+			name: "automatic caching disabled",
+			messages: []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "Hello"},
+					},
+				},
+				{
+					Role: llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "Hi there"},
+					},
+				},
+			},
+			autoCaching: false,
+			expectCache: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := processMessagesWithCaching(tt.messages, tt.autoCaching)
+			if err != nil {
+				t.Errorf("processMessagesWithCaching() error = %v", err)
+				return
+			}
+
+			if tt.expectCache {
+				if result[tt.cacheAtIndex].CacheControl == nil {
+					t.Errorf("Expected cache control at index %d, but not found", tt.cacheAtIndex)
+				}
+			} else {
+				for i, msg := range result {
+					if msg.CacheControl != nil {
+						t.Errorf("Unexpected cache control at index %d", i)
+					}
+				}
+			}
+		})
+	}
+}

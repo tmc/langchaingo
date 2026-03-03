@@ -1,0 +1,30 @@
+httprr trace v1
+770 1360
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 466
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"Calculate (5 + 3) and then multiply by 2"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Perform a calculation","inputSchema":{"json":{"properties":{"expression":{"type":"string"}},"required":["expression"],"type":"object"}},"name":"calculate"}}]}}HTTP/2.0 200 OK
+Content-Length: 1194
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 21:48:15 GMT
+X-Amzn-Requestid: ed53c3b5-af84-49b0-8450-c098606f9f2c
+
+{"metrics":{"latencyMs":3157},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EuwCCkgICxABGAIqQBilFNe+5INhzkPazuSJTvJrubMx4pRE+Kb+2kD8s7gmSWWCmwLrmUxONoNlznIFuPDOEEi36mUHJsCm7ryozN0SDHw0pifl33kdexDNthoMDbrknXWBmNZeeRaNIjByT1UDoC8V/+szUCDpTO3fDBxAlQ1O9ZsmAIXda37nDHr229HG6/+6ir3AfsHqBMMq0QHfFC56b+GIVI71pK5Q716xUZ0wE/MYSZO39XHTr9FoYXJqxBC2GMRkBpzYXLAVNs3T6QMMB4YhEHmWM8DDAqBwfiPFGgOEjXRv2Byxs3PTH7vzW3Znp0cqp59Uy4v5os9bkF9dA3lb0k6JFXkv9K2m/n52dc0gF8djsCczVzdhSyq7QnaG9frkphhgs29K4PI2efhIYoT6YYxQacD/0beCzMoq7VwH2ffPDOWdVP87e64lwejUoIU6K2lS48r8ArruZ5BKuqeCEukvHo3FFKy/JBgB","text":"The user wants me to:\n1. Calculate (5 + 3)\n2. Then multiply the result by 2\n\nThis is essentially calculating (5 + 3) * 2, which equals 8 * 2 = 16.\n\nI can do this in one calculation: (5 + 3) * 2"}}},{"toolUse":{"input":{"expression":"(5 + 3) * 2"},"name":"calculate","toolUseId":"tooluse_cQy4nWyTZ0YD6iFmxNOHiX","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":597,"outputTokens":143,"serverToolUsage":{},"totalTokens":740}}1824 563
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1519
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"Calculate (5 + 3) and then multiply by 2"}],"role":"user"},{"content":[{"reasoningContent":{"reasoningText":{"signature":"EuwCCkgICxABGAIqQBilFNe+5INhzkPazuSJTvJrubMx4pRE+Kb+2kD8s7gmSWWCmwLrmUxONoNlznIFuPDOEEi36mUHJsCm7ryozN0SDHw0pifl33kdexDNthoMDbrknXWBmNZeeRaNIjByT1UDoC8V/+szUCDpTO3fDBxAlQ1O9ZsmAIXda37nDHr229HG6/+6ir3AfsHqBMMq0QHfFC56b+GIVI71pK5Q716xUZ0wE/MYSZO39XHTr9FoYXJqxBC2GMRkBpzYXLAVNs3T6QMMB4YhEHmWM8DDAqBwfiPFGgOEjXRv2Byxs3PTH7vzW3Znp0cqp59Uy4v5os9bkF9dA3lb0k6JFXkv9K2m/n52dc0gF8djsCczVzdhSyq7QnaG9frkphhgs29K4PI2efhIYoT6YYxQacD/0beCzMoq7VwH2ffPDOWdVP87e64lwejUoIU6K2lS48r8ArruZ5BKuqeCEukvHo3FFKy/JBgB","text":"The user wants me to:\n1. Calculate (5 + 3)\n2. Then multiply the result by 2\n\nThis is essentially calculating (5 + 3) * 2, which equals 8 * 2 = 16.\n\nI can do this in one calculation: (5 + 3) * 2"}}}],"role":"assistant"},{"content":[{"toolUse":{"input":{"expression":"(5 + 3) * 2"},"name":"calculate","toolUseId":"tooluse_cQy4nWyTZ0YD6iFmxNOHiX"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"8"}],"toolUseId":"tooluse_cQy4nWyTZ0YD6iFmxNOHiX"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Perform a calculation","inputSchema":{"json":{"properties":{"expression":{"type":"string"}},"required":["expression"],"type":"object"}},"name":"calculate"}}]}}HTTP/2.0 200 OK
+Content-Length: 398
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 21:48:18 GMT
+X-Amzn-Requestid: c1c05ece-0643-4d0f-8d45-0890a2a92ff7
+
+{"metrics":{"latencyMs":2419},"output":{"message":{"content":[{"text":"The result is **16**.\n\nTo break it down:\n- First: 5 + 3 = 8\n- Then: 8 × 2 = 16"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":753,"outputTokens":43,"serverToolUsage":{},"totalTokens":796}}

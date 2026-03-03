@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 )
@@ -31,6 +32,16 @@ type Message struct {
 	// Tool calling fields
 	ToolCall   *ToolCall   `json:"tool_call,omitempty"`
 	ToolResult *ToolResult `json:"tool_result,omitempty"`
+	// Reasoning contains thinking content for AI messages
+	Reasoning *reasoning.ContentReasoning `json:"reasoning,omitempty"`
+	// CacheControl for prompt caching (used by Legacy Anthropic API)
+	CacheControl *CacheControl `json:"cache_control,omitempty"`
+}
+
+// CacheControl represents cache configuration for prompt caching
+type CacheControl struct {
+	Type string `json:"type"`
+	TTL  string `json:"ttl,omitempty"`
 }
 
 // ToolCall represents a function call request from the model

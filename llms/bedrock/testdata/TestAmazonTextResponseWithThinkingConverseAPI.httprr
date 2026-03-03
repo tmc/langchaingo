@@ -1,0 +1,30 @@
+httprr trace v1
+527 1404
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 223
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"Solve: If x + 5 = 12, what is x?"}],"role":"user"}]}HTTP/2.0 200 OK
+Content-Length: 1238
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 09:53:35 GMT
+X-Amzn-Requestid: 5632c2b9-b84a-46d3-8f1f-7716a43b0a96
+
+{"metrics":{"latencyMs":2902},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EtsCCkgICxABGAIqQMt8Bg6o0aVrq4MmAJZgYta5Z8bVZNBUhOsdnH4JwJwP/KJ23ntE98IHRBIyhkom0srp1sAyxXNBxu7qeqA1PgISDFKlasvZZJat+NR5PxoM9UzILoRa9dHsYKzIIjAvm+MOyk5AkVWOj7A8NAZ6H08wY534kfC9pm+8ZKX3+b2bKENW0e6t1UEHR5wdhmgqwAE5YySKQOaQfuig4tYQcVtr6Ucu0D2fL/X043zMlMOSkdRIsaDJZYoC+50POh4eI1PDl4SYU5DjGILMh6Gp6oaIbBQqWEDAfrHK9uxX1w76aQN1TyAqwXj/h7O176pPe4AcZmswUMAJLHf6zm72fcHkYW9YBffXtdg4zExE2Cm7+BFB9MlZlX24XduPS0RaMCmuOnmaxr42GMluSr8Ypk0m/YypKxvq42ANrleYE0V/VtbOwEfZldAaxCQz+MT0NG0YAQ==","text":"This is a simple algebra problem. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me check: 7 + 5 = 12 ✓"}}},{"text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Answer: x = 7**\n\nTo check: 7 + 5 = 12 ✓"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":53,"outputTokens":182,"serverToolUsage":{},"totalTokens":235}}1557 1407
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1252
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"Solve: If x + 5 = 12, what is x?"}],"role":"user"},{"content":[{"reasoningContent":{"reasoningText":{"signature":"EtsCCkgICxABGAIqQMt8Bg6o0aVrq4MmAJZgYta5Z8bVZNBUhOsdnH4JwJwP/KJ23ntE98IHRBIyhkom0srp1sAyxXNBxu7qeqA1PgISDFKlasvZZJat+NR5PxoM9UzILoRa9dHsYKzIIjAvm+MOyk5AkVWOj7A8NAZ6H08wY534kfC9pm+8ZKX3+b2bKENW0e6t1UEHR5wdhmgqwAE5YySKQOaQfuig4tYQcVtr6Ucu0D2fL/X043zMlMOSkdRIsaDJZYoC+50POh4eI1PDl4SYU5DjGILMh6Gp6oaIbBQqWEDAfrHK9uxX1w76aQN1TyAqwXj/h7O176pPe4AcZmswUMAJLHf6zm72fcHkYW9YBffXtdg4zExE2Cm7+BFB9MlZlX24XduPS0RaMCmuOnmaxr42GMluSr8Ypk0m/YypKxvq42ANrleYE0V/VtbOwEfZldAaxCQz+MT0NG0YAQ==","text":"This is a simple algebra problem. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me check: 7 + 5 = 12 ✓"}}},{"text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Answer: x = 7**\n\nTo check: 7 + 5 = 12 ✓"}],"role":"assistant"},{"content":[{"text":"Now solve x + 10 = 25"}],"role":"user"}]}HTTP/2.0 200 OK
+Content-Length: 1241
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 09:53:38 GMT
+X-Amzn-Requestid: f4fb6451-3a84-4b84-b936-479b56caf712
+
+{"metrics":{"latencyMs":2775},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EtoCCkgICxABGAIqQCaINcpLBMeeLKWkhkemjmm+zJ8h4O8WMeu2C6noTGywCkrLPFD5KYRLCpBDawM4wVZDRodkrhepUe6Hc9kafGsSDEXq/8VY/Y1qKgyBDhoMKZ7NhMSS/MqYxV/4IjDofHaSD/w3iP4rNITQSOy60PViOSAe6ONW37KdGxUhpgBu6qIcb/+CejjoSfTo4R4qvwFqJSktAdNFVdKp2Non1ZnySJJ4eePvCSWhPp3V7PAcbWVL8hmpvDSIe7FJs+1WsAN4z6zhI6MuaamibGmmDRdTA00kZcgAXvlmWdaMtsy68btT7LJHaIoe8kZWWpQcUIKNAYae22gwG4YE2TBC6i5RVap7GSbnsVpVSw1fJNvLZeek5rcpfMV6biPuNP0itzRdqtPaI7XeFZoOBqpiuGbFr9oDH1d135q3Ue3noLQ2/d2CPhcq64Cf/soip5uvExgB","text":"This is a similar problem to the previous one. I need to isolate x by subtracting 10 from both sides.\n\nx + 10 = 25\nx + 10 - 10 = 25 - 10\nx = 15\n\nLet me check: 15 + 10 = 25 ✓"}}},{"text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 10 = 25\n\n**Subtract 10 from both sides:**\nx + 10 - 10 = 25 - 10\nx = 15\n\n**Answer: x = 15**\n\nTo check: 15 + 10 = 25 ✓"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":159,"outputTokens":178,"serverToolUsage":{},"totalTokens":337}}

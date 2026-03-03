@@ -1,0 +1,30 @@
+httprr trace v1
+762 1364
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 458
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"What's the weather in Boston?"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Get weather for a location","inputSchema":{"json":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}},"name":"get_weather"}}]}}HTTP/2.0 200 OK
+Content-Length: 1198
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 21:48:02 GMT
+X-Amzn-Requestid: eda4eb6d-a4af-4275-b548-60a790f200d4
+
+{"metrics":{"latencyMs":3751},"output":{"message":{"content":[{"reasoningContent":{"reasoningText":{"signature":"EvECCkgICxABGAIqQHhi2RPLJVjY2ondbMYFTjaGTKxCARpJBG6uf3ji0k5e0cCnNZsYHOUjFE4no1zIbIza9RDZ81JxzjgZKmf03dcSDFFVMZKstk3+/dXaRxoMUoFtAD/c3JZYz4XuIjBp2+D/mjtlTobiLTLiMCj8NKtEC5nV3eX3Dz3KTifdDhPwp5cr+T42rE42WDPoxQkq1gH+A52CkJZYI3e1aP1/K8j8Bhs3wgCY6kj1/bpRWQbjvNwEBnc9Emvg67ioG0MVMwi9aOG3F7fz+m+TDAePJMTRHjN3+u4JLJE6CBE/fB440f62Yi/17qLhEGwtSdJRaV4lLWKfRAMh+McoAVpIbT0raBOAbPTBaBmvvkMBom57iLhjoqHA80eJoCfsqgZF6ZYCg4YGiXqHz1K/uFtcUG+90icfZcGgp+qFsual0NvAVwOx8AVDQOkznLXgDbfRXx5DWSRNrDhvKPhaUFsXV3+GskhsMW/kGAE=","text":"The user is asking for the weather in Boston. I have access to a get_weather function that takes a location parameter. I have all the information I need to make this call - the location is \"Boston\"."}}},{"toolUse":{"input":{"location":"Boston"},"name":"get_weather","toolUseId":"tooluse_xSOkEzYy3oYAwEkWhnnZOG","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":593,"outputTokens":104,"serverToolUsage":{},"totalTokens":697}}1866 549
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1561
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"additionalModelRequestFields":{"thinking":{"type":"enabled","budget_tokens":2048}},"inferenceConfig":{"maxTokens":4096,"temperature":1},"messages":[{"content":[{"text":"What's the weather in Boston?"}],"role":"user"},{"content":[{"reasoningContent":{"reasoningText":{"signature":"EvECCkgICxABGAIqQHhi2RPLJVjY2ondbMYFTjaGTKxCARpJBG6uf3ji0k5e0cCnNZsYHOUjFE4no1zIbIza9RDZ81JxzjgZKmf03dcSDFFVMZKstk3+/dXaRxoMUoFtAD/c3JZYz4XuIjBp2+D/mjtlTobiLTLiMCj8NKtEC5nV3eX3Dz3KTifdDhPwp5cr+T42rE42WDPoxQkq1gH+A52CkJZYI3e1aP1/K8j8Bhs3wgCY6kj1/bpRWQbjvNwEBnc9Emvg67ioG0MVMwi9aOG3F7fz+m+TDAePJMTRHjN3+u4JLJE6CBE/fB440f62Yi/17qLhEGwtSdJRaV4lLWKfRAMh+McoAVpIbT0raBOAbPTBaBmvvkMBom57iLhjoqHA80eJoCfsqgZF6ZYCg4YGiXqHz1K/uFtcUG+90icfZcGgp+qFsual0NvAVwOx8AVDQOkznLXgDbfRXx5DWSRNrDhvKPhaUFsXV3+GskhsMW/kGAE=","text":"The user is asking for the weather in Boston. I have access to a get_weather function that takes a location parameter. I have all the information I need to make this call - the location is \"Boston\"."}}}],"role":"assistant"},{"content":[{"toolUse":{"input":{"location":"Boston"},"name":"get_weather","toolUseId":"tooluse_xSOkEzYy3oYAwEkWhnnZOG"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"temperature\": 72, \"condition\": \"sunny\"}"}],"toolUseId":"tooluse_xSOkEzYy3oYAwEkWhnnZOG"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Get weather for a location","inputSchema":{"json":{"properties":{"location":{"type":"string"}},"required":["location"],"type":"object"}},"name":"get_weather"}}]}}HTTP/2.0 200 OK
+Content-Length: 384
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 21:48:05 GMT
+X-Amzn-Requestid: 4fcac4ac-e91a-4213-a363-4ece03e794d7
+
+{"metrics":{"latencyMs":2319},"output":{"message":{"content":[{"text":"The weather in Boston is currently sunny with a temperature of 72°F."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":721,"outputTokens":19,"serverToolUsage":{},"totalTokens":740}}

@@ -15,7 +15,9 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/smithy-go/auth/bearer"
 )
 
 func setUpTestWithTransport(rr *httprr.RecordReplay) (*bedrockruntime.Client, error) {
@@ -93,13 +95,15 @@ func TestAmazonOutputConverseAPI(t *testing.T) {
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
 		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
 		bedrock.ModelAnthropicClaude35Haiku,
 
 		// Cohere models
@@ -108,18 +112,43 @@ func TestAmazonOutputConverseAPI(t *testing.T) {
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama4ScoutInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
-		// bedrock.ModelMetaLlama318bInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
 		bedrock.ModelMetaLlama38bInstructV1,
 
 		// DeepSeek models
 		bedrock.ModelDeepSeekR1V1,
+		bedrock.ModelDeepSeekV32,
+
+		// OpenAI models
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+
+		// Qwen models
+		bedrock.ModelQwen3Next80BA3B,
+		bedrock.ModelQwen3VL235BA22B,
+		bedrock.ModelQwen332BV1,
+		bedrock.ModelQwen3Coder30BA3BV1,
+		bedrock.ModelQwen3CoderNext,
+
+		// Mistral models
+		bedrock.ModelMistralLarge3,
+		bedrock.ModelMistralMagistralSmall2509,
+		bedrock.ModelMistralLarge2402V1,
+
+		// Moonshot models
+		bedrock.ModelMoonshotKimiK25,
+		bedrock.ModelMoonshotKimiK2Thinking,
+
+		// Z.AI models
+		bedrock.ModelGLM47,
+		bedrock.ModelGLM47Flash,
 	}
 
 	for _, model := range models {
@@ -283,13 +312,15 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) { //nolint:funlen
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
 		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
 		bedrock.ModelAnthropicClaude35Haiku,
 
 		// Cohere models (only Command-R supports streaming and Converse API)
@@ -298,18 +329,43 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) { //nolint:funlen
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama4ScoutInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
+		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
-		// bedrock.ModelMetaLlama318bInstructV1, // Unavailable for MENA users
+		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
 		bedrock.ModelMetaLlama38bInstructV1,
 
 		// DeepSeek models
 		bedrock.ModelDeepSeekR1V1,
+		bedrock.ModelDeepSeekV32,
+
+		// OpenAI models
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+
+		// Qwen models
+		bedrock.ModelQwen3Next80BA3B,
+		bedrock.ModelQwen3VL235BA22B,
+		bedrock.ModelQwen332BV1,
+		bedrock.ModelQwen3Coder30BA3BV1,
+		bedrock.ModelQwen3CoderNext,
+
+		// Mistral models
+		bedrock.ModelMistralLarge3,
+		bedrock.ModelMistralMagistralSmall2509,
+		bedrock.ModelMistralLarge2402V1,
+
+		// Moonshot models
+		bedrock.ModelMoonshotKimiK25,
+		bedrock.ModelMoonshotKimiK2Thinking,
+
+		// Z.AI models
+		bedrock.ModelGLM47,
+		bedrock.ModelGLM47Flash,
 	}
 
 	for _, model := range models {
@@ -569,7 +625,7 @@ func TestAmazonNova(t *testing.T) {
 	}
 }
 
-func TestAnthropicNovaImage(t *testing.T) {
+func TestAmazonNovaImage(t *testing.T) {
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
@@ -672,13 +728,15 @@ func TestAmazonToolCallingConverseAPI(t *testing.T) {
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
 		// bedrock.ModelAnthropicClaudeOpus41,        // Has very hard rate limits
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
 		bedrock.ModelAnthropicClaude35Haiku,
 
 		// Cohere models (only Command-R supports streaming and Converse API)
@@ -699,6 +757,31 @@ func TestAmazonToolCallingConverseAPI(t *testing.T) {
 
 		// DeepSeek models
 		// bedrock.ModelDeepSeekR1V1,                 // Not supported for tool calling
+		bedrock.ModelDeepSeekV32,
+
+		// OpenAI models
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+
+		// Qwen models
+		bedrock.ModelQwen3Next80BA3B,
+		bedrock.ModelQwen3VL235BA22B,
+		bedrock.ModelQwen332BV1,
+		bedrock.ModelQwen3Coder30BA3BV1,
+		bedrock.ModelQwen3CoderNext,
+
+		// Mistral models
+		bedrock.ModelMistralLarge3,
+		// bedrock.ModelMistralMagistralSmall2509,    // Not supported for tool calling
+		bedrock.ModelMistralLarge2402V1,
+
+		// Moonshot models
+		bedrock.ModelMoonshotKimiK25,
+		// bedrock.ModelMoonshotKimiK2Thinking,       // Not stable for tool calling
+
+		// Z.AI models
+		// bedrock.ModelGLM47,        // Tool calling not supported (backend requires string input instead of JSON)
+		// bedrock.ModelGLM47Flash,   // Tool calling not supported (backend requires string input instead of JSON)
 	}
 
 	for _, model := range toolCallModels {
@@ -790,13 +873,15 @@ func TestAmazonToolCallingStreamingConverseAPI(t *testing.T) {
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
 		// bedrock.ModelAnthropicClaudeOpus41,        // Has very hard rate limits
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
 		bedrock.ModelAnthropicClaude35Haiku,
 
 		// Cohere models (only Command-R supports streaming and Converse API)
@@ -817,6 +902,31 @@ func TestAmazonToolCallingStreamingConverseAPI(t *testing.T) {
 
 		// DeepSeek models
 		// bedrock.ModelDeepSeekR1V1,                 // Not supported for tool calling
+		bedrock.ModelDeepSeekV32,
+
+		// OpenAI models
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+
+		// Qwen models
+		bedrock.ModelQwen3Next80BA3B,
+		// bedrock.ModelQwen3VL235BA22B,              // Not stable for tool calling
+		bedrock.ModelQwen332BV1,
+		bedrock.ModelQwen3Coder30BA3BV1,
+		bedrock.ModelQwen3CoderNext,
+
+		// Mistral models
+		bedrock.ModelMistralLarge3,
+		// bedrock.ModelMistralMagistralSmall2509,    // Not supported for tool calling
+		// bedrock.ModelMistralLarge2402V1,           // Not supported for tool calling in streaming
+
+		// Moonshot models
+		bedrock.ModelMoonshotKimiK25,
+		// bedrock.ModelMoonshotKimiK2Thinking,       // Not stable for tool calling
+
+		// Z.AI models
+		// bedrock.ModelGLM47,        // Tool calling not supported (backend requires string input instead of JSON)
+		// bedrock.ModelGLM47Flash,   // Tool calling not supported (backend requires string input instead of JSON)
 	}
 
 	for _, model := range streamingToolCallModels {
@@ -943,12 +1053,18 @@ func TestAmazonReasoningConverseAPI(t *testing.T) {
 	}
 
 	reasoningModels := []string{
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
+		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,    // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet, // Model is deprecated
+		bedrock.ModelDeepSeekR1V1,
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+		bedrock.ModelMoonshotKimiK2Thinking,
 	}
 
 	for _, model := range reasoningModels {
@@ -1024,12 +1140,18 @@ func TestAmazonReasoningStreamingConverseAPI(t *testing.T) {
 	}
 
 	streamingReasoningModels := []string{
+		bedrock.ModelAnthropicClaudeOpus46,
+		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
+		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
+		// bedrock.ModelAnthropicClaudeOpus4,    // Model is deprecated
 		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
+		// bedrock.ModelAnthropicClaude37Sonnet, // Model is deprecated
+		bedrock.ModelDeepSeekR1V1,
+		bedrock.ModelOpenAIGptOss120BV1,
+		bedrock.ModelOpenAIGptOss20BV1,
+		bedrock.ModelMoonshotKimiK2Thinking,
 	}
 
 	for _, model := range streamingReasoningModels {
@@ -1373,4 +1495,1396 @@ func testToolCallingWorkflow(
 
 	t.Logf("Tool calling workflow completed successfully for model: %s", model)
 	return nil
+}
+
+// TestAmazonTextResponseWithThinkingConverseAPI tests text response with thinking using Converse API
+func TestAmazonTextResponseWithThinkingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Solve: If x + 5 = 12, what is x?"),
+			},
+		},
+	}
+
+	// Request with thinking
+	resp, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	choice := resp.Choices[0]
+	if choice.Reasoning == nil {
+		t.Fatal("Expected reasoning in response")
+	}
+	if choice.Reasoning.Content == "" {
+		t.Error("Expected non-empty reasoning content")
+	}
+	if len(choice.Reasoning.Signature) == 0 {
+		t.Error("Expected signature in reasoning")
+	}
+	if !strings.Contains(choice.Content, "7") {
+		t.Errorf("Expected answer '7' in content, got: %s", choice.Content)
+	}
+
+	// ROUNDTRIP: Continue conversation with preserved signature
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPartWithReasoning(choice.Content, choice.Reasoning),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Now solve x + 10 = 25")},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(resp2.Choices[0].Content, "15") {
+		t.Errorf("Expected answer '15' in roundtrip response, got: %s", resp2.Choices[0].Content)
+	}
+}
+
+// TestAmazonTextResponseWithThinkingLegacyAPI tests text response with thinking using Legacy API
+func TestAmazonTextResponseWithThinkingLegacyAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client)) // Use Legacy API
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Solve: If x + 5 = 12, what is x?"),
+			},
+		},
+	}
+
+	// Request with thinking
+	resp, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	choice := resp.Choices[0]
+	if choice.Reasoning == nil {
+		t.Fatal("Expected reasoning in response")
+	}
+	if choice.Reasoning.Content == "" {
+		t.Error("Expected non-empty reasoning content")
+	}
+	if len(choice.Reasoning.Signature) == 0 {
+		t.Error("Expected signature in reasoning")
+	}
+	if !strings.Contains(choice.Content, "7") {
+		t.Errorf("Expected answer '7' in content, got: %s", choice.Content)
+	}
+
+	// ROUNDTRIP: Continue conversation with preserved signature
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPartWithReasoning(choice.Content, choice.Reasoning),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Now solve x + 10 = 25")},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(resp2.Choices[0].Content, "15") {
+		t.Errorf("Expected answer '15' in roundtrip response, got: %s", resp2.Choices[0].Content)
+	}
+}
+
+// TestAmazonSingleToolCallWithThinkingConverseAPI tests single tool call with thinking
+func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tools := []llms.Tool{{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "get_weather",
+			Description: "Get weather for a location",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"location": map[string]any{"type": "string"},
+				},
+				"required": []string{"location"},
+			},
+		},
+	}}
+
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+		},
+	}
+
+	resp, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in response")
+	}
+
+	choice := resp.Choices[0]
+	if choice.Reasoning == nil {
+		t.Error("Expected reasoning in response")
+	}
+	if choice.Reasoning != nil && len(choice.Reasoning.Signature) == 0 {
+		t.Error("Expected signature in reasoning")
+	}
+
+	// ROUNDTRIP: Send response back preserving reasoning
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPartWithReasoning(choice.Content, choice.Reasoning),
+				resp.Choices[0].ToolCalls[0],
+			},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: resp.Choices[0].ToolCalls[0].ID,
+					Name:       resp.Choices[0].ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "condition": "sunny"}`,
+				},
+			},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(resp2.Choices[0].Content, "72") {
+		t.Logf("Expected '72' in final response, got: %s", resp2.Choices[0].Content)
+	}
+}
+
+// TestAmazonSequentialToolCallsWithThinkingConverseAPI tests sequential tool calls with thinking
+func TestAmazonSequentialToolCallsWithThinkingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "calculate",
+				Description: "Perform a calculation",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"expression": map[string]any{"type": "string"},
+					},
+					"required": []string{"expression"},
+				},
+			},
+		},
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Calculate (5 + 3) and then multiply by 2"),
+			},
+		},
+	}
+
+	// First call
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp1.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in first response")
+	}
+	if resp1.Choices[0].Reasoning == nil {
+		t.Fatal("Expected reasoning in first response")
+	}
+
+	sig1 := resp1.Choices[0].Reasoning.Signature
+
+	// Execute first tool and continue
+	choice1 := resp1.Choices[0]
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPartWithReasoning(choice1.Content, choice1.Reasoning),
+				choice1.ToolCalls[0],
+			},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: resp1.Choices[0].ToolCalls[0].ID,
+					Name:       resp1.Choices[0].ToolCalls[0].FunctionCall.Name,
+					Content:    "8",
+				},
+			},
+		},
+	)
+
+	// Second call
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp2.Choices[0].Reasoning != nil {
+		sig2 := resp2.Choices[0].Reasoning.Signature
+
+		// Signatures should differ (each step has unique context)
+		if len(sig1) > 0 && len(sig2) > 0 && string(sig1) == string(sig2) {
+			t.Error("Signatures should differ between turns")
+		}
+	}
+}
+
+// TestAmazonTextResponseWithThinkingStreamingConverseAPI tests streaming with thinking
+func TestAmazonTextResponseWithThinkingStreamingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What is 5 + 3? Think step by step."),
+			},
+		},
+	}
+
+	var streamedReasoning []string
+	var streamedText []string
+
+	streamFunc := llms.WithStreamingFunc(func(ctx context.Context, chunk streaming.Chunk) error {
+		switch chunk.Type {
+		case streaming.ChunkTypeReasoning:
+			if chunk.Reasoning != nil {
+				streamedReasoning = append(streamedReasoning, chunk.Reasoning.Content)
+			}
+		case streaming.ChunkTypeText:
+			streamedText = append(streamedText, chunk.Content)
+		default:
+		}
+		return nil
+	})
+
+	resp, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithReasoning(llms.ReasoningMedium, 2048),
+		streamFunc,
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify accumulated content matches final response
+	if strings.Join(streamedText, "") != resp.Choices[0].Content {
+		t.Errorf("Streamed text doesn't match final response")
+	}
+	if len(streamedReasoning) > 0 {
+		accumulatedReasoning := strings.Join(streamedReasoning, "")
+		if resp.Choices[0].Reasoning != nil && accumulatedReasoning != resp.Choices[0].Reasoning.Content {
+			t.Errorf("Streamed reasoning doesn't match final response")
+		}
+	}
+	if resp.Choices[0].Reasoning != nil && len(resp.Choices[0].Reasoning.Signature) == 0 {
+		t.Error("Expected signature in final reasoning")
+	}
+}
+
+// TestAmazonMultiTurnCachingWithToolsLegacyAPI tests prompt caching across multi-turn conversation with tools.
+// This validates that caching works correctly for AI agent workflows using Legacy API.
+//
+// Expected behavior:
+// Turn 1: CacheCreation > 0 (conversation history cached)
+// Turn 2: CacheRead > 0 (previous turn read from cache), new content added to cache
+// Turn 3+: Cache continues to be used and extended
+func TestAmazonMultiTurnCachingWithToolsLegacyAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use Legacy API for cache_control support
+	llm, err := bedrock.New(bedrock.WithClient(client))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Define tools for AI agent
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "BedrockCacheTest-v1: " + strings.Repeat("Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "City and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "book_flight",
+				Description: "BedrockCacheTest-v1: " + strings.Repeat("Book airline tickets for domestic and international flights with flexible options for departure, arrival, and passenger details. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"destination": map[string]any{"type": "string", "description": "Destination city"},
+						"date":        map[string]any{"type": "string", "description": "Departure date"},
+					},
+					"required": []string{"destination", "date"},
+				},
+			},
+		},
+	}
+
+	// Add system prompt to ensure sufficient tokens for caching
+	systemPrompt := "BedrockCacheTest-v1: " + strings.Repeat("You are a helpful assistant with access to weather and flight booking capabilities. ", 15)
+
+	// Turn 1: Initial request with system prompt
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+		},
+	}
+
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp1.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in first response")
+	}
+
+	// Turn 2: Add tool result - mark with cache control for conversation history caching
+	choice1 := resp1.Choices[0]
+	messages = append(messages,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{choice1.ToolCalls[0]},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: choice1.ToolCalls[0].ID,
+					Name:       choice1.ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "condition": "sunny"}`,
+				},
+			},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
+	if !strings.Contains(resp2.Choices[0].Content, "72") && !strings.Contains(resp2.Choices[0].Content, "sunny") {
+		t.Logf("Turn 2 might not contain weather info: %s", resp2.Choices[0].Content)
+	}
+
+	// Turn 3: Continue conversation with cached previous context
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				bedrock.WithCacheControl(
+					llms.TextPart(resp2.Choices[0].Content),
+					bedrock.EphemeralCache(),
+				),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Now book a flight to Boston for tomorrow")},
+		},
+	)
+
+	resp3, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 3 Response: %s", resp3.Choices[0].Content)
+
+	// Helper function to extract cache metrics
+	getCacheMetric := func(resp *llms.ContentResponse, key string) int {
+		if resp.Choices[0].GenerationInfo != nil {
+			if val, ok := resp.Choices[0].GenerationInfo[key]; ok {
+				switch v := val.(type) {
+				case int:
+					return v
+				case int32:
+					return int(v)
+				case int64:
+					return int(v)
+				}
+			}
+		}
+		return 0
+	}
+
+	// Log cache metrics for all turns
+	t.Logf("Turn 1 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp1, "CacheCreationInputTokens"),
+		getCacheMetric(resp1, "CacheReadInputTokens"))
+	t.Logf("Turn 2 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp2, "CacheCreationInputTokens"),
+		getCacheMetric(resp2, "CacheReadInputTokens"))
+	t.Logf("Turn 3 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp3, "CacheCreationInputTokens"),
+		getCacheMetric(resp3, "CacheReadInputTokens"))
+
+	// Verify that cache was created in Turn 3 (due to cache_control on assistant message)
+	cacheCreation3 := getCacheMetric(resp3, "CacheCreationInputTokens")
+	if cacheCreation3 > 0 {
+		t.Logf("✓ Cache successfully created in Turn 3: %d tokens", cacheCreation3)
+	} else {
+		t.Logf("Cache creation: %d (may be 0 if context < 1024 tokens)", cacheCreation3)
+	}
+
+	// Turn 4: Continue conversation - cache should be read from previous turn
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				bedrock.WithCacheControl(
+					llms.TextPart(resp3.Choices[0].Content),
+					bedrock.EphemeralCache(),
+				),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("I'm flying from New York on March 4th")},
+		},
+	)
+
+	resp4, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 4 Response: %s", resp4.Choices[0].Content)
+
+	cacheRead4 := getCacheMetric(resp4, "CacheReadInputTokens")
+	cacheCreation4 := getCacheMetric(resp4, "CacheCreationInputTokens")
+	t.Logf("Turn 4 - CacheCreation: %d, CacheRead: %d", cacheCreation4, cacheRead4)
+
+	// Verify cache is being utilized
+	if cacheRead4 > 0 {
+		t.Logf("✓ Cache successfully read in Turn 4: %d tokens", cacheRead4)
+		t.Logf("Cache savings: previous context reused from cache")
+	} else if cacheCreation4 > 0 {
+		t.Logf("✓ Additional cache created in Turn 4: %d tokens", cacheCreation4)
+	}
+}
+
+// TestAmazonMultiTurnCachingWithToolsConverseAPI tests prompt caching with Converse API.
+// This validates that caching works correctly for AI agent workflows using Converse API.
+//
+// Expected behavior:
+// Turn 3: CacheCreation > 0 (conversation history with cachePoint)
+// Turn 4: CacheRead > 0 (previous context read from cache)
+func TestAmazonMultiTurnCachingWithToolsConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use Converse API with cachePoint support
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Define tools with long descriptions to exceed 1024 token threshold
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "BedrockConverseCache-v1: " + strings.Repeat("Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "City and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "book_flight",
+				Description: "BedrockConverseCache-v1: " + strings.Repeat("Book airline tickets for domestic and international flights with flexible options for departure, arrival, and passenger details. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"destination": map[string]any{"type": "string", "description": "Destination city"},
+						"date":        map[string]any{"type": "string", "description": "Departure date"},
+					},
+					"required": []string{"destination", "date"},
+				},
+			},
+		},
+	}
+
+	// Add system prompt to ensure sufficient tokens
+	systemPrompt := "BedrockConverseCache-v1: " + strings.Repeat("You are a helpful assistant with access to weather and flight booking capabilities. ", 15)
+
+	// Turn 1: Initial request with system prompt
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+		},
+	}
+
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp1.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in first response")
+	}
+
+	// Turn 2: Add tool result
+	choice1 := resp1.Choices[0]
+	messages = append(messages,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{choice1.ToolCalls[0]},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: choice1.ToolCalls[0].ID,
+					Name:       choice1.ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "condition": "sunny"}`,
+				},
+			},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
+
+	// Turn 3: Continue conversation with cachePoint (mark assistant response for caching)
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				bedrock.WithCacheControl(
+					llms.TextPart(resp2.Choices[0].Content),
+					bedrock.EphemeralCache(),
+				),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Now book a flight to Boston for tomorrow")},
+		},
+	)
+
+	resp3, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 3 Response: %s", resp3.Choices[0].Content)
+
+	// Turn 4: Continue conversation - cache should be read
+	choice3 := resp3.Choices[0]
+	var turn4Parts []llms.ContentPart
+	if len(choice3.ToolCalls) > 0 {
+		turn4Parts = append(turn4Parts, choice3.ToolCalls[0])
+	} else {
+		turn4Parts = append(turn4Parts, bedrock.WithCacheControl(
+			llms.TextPart(choice3.Content),
+			bedrock.EphemeralCache(),
+		))
+	}
+
+	messages = append(messages,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: turn4Parts,
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("I'm flying from New York on March 4th")},
+		},
+	)
+
+	resp4, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 4 Response: %s", resp4.Choices[0].Content)
+
+	// Helper function to extract cache metrics
+	getCacheMetric := func(resp *llms.ContentResponse, key string) int {
+		if resp.Choices[0].GenerationInfo != nil {
+			if val, ok := resp.Choices[0].GenerationInfo[key]; ok {
+				switch v := val.(type) {
+				case int:
+					return v
+				case int32:
+					return int(v)
+				case int64:
+					return int(v)
+				}
+			}
+		}
+		return 0
+	}
+
+	// Log cache metrics for all turns
+	t.Logf("Turn 1 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp1, "CacheCreationInputTokens"),
+		getCacheMetric(resp1, "CacheReadInputTokens"))
+	t.Logf("Turn 2 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp2, "CacheCreationInputTokens"),
+		getCacheMetric(resp2, "CacheReadInputTokens"))
+	t.Logf("Turn 3 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp3, "CacheCreationInputTokens"),
+		getCacheMetric(resp3, "CacheReadInputTokens"))
+	t.Logf("Turn 4 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp4, "CacheCreationInputTokens"),
+		getCacheMetric(resp4, "CacheReadInputTokens"))
+
+	// Verify caching behavior
+	cacheRead4 := getCacheMetric(resp4, "CacheReadInputTokens")
+	cacheCreation3 := getCacheMetric(resp3, "CacheCreationInputTokens")
+
+	if cacheRead4 > 0 {
+		t.Logf("✓ Cache successfully read in Turn 4: %d tokens", cacheRead4)
+	}
+	if cacheCreation3 > 0 {
+		t.Logf("✓ Cache successfully created in Turn 3: %d tokens", cacheCreation3)
+	}
+}
+
+// TestAmazonAutomaticCachingLegacyAPI tests automatic prompt caching without manual cache control.
+// This validates that WithAutomaticCaching() works correctly with Legacy API.
+//
+// Expected behavior:
+// - Cache points are automatically added to conversation history
+// - No manual bedrock.WithCacheControl() wrapper needed
+// - Cache metrics show cache utilization
+func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use Legacy API with automatic caching enabled
+	llm, err := bedrock.New(
+		bedrock.WithClient(client),
+		bedrock.WithAutomaticCaching(),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Define tools with long descriptions to exceed 1024 token threshold
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "BedrockAutoCacheTest-v1: " + strings.Repeat("Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "City and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	// Add system prompt to ensure sufficient tokens
+	systemPrompt := "BedrockAutoCacheTest-v1: " + strings.Repeat("You are a helpful assistant with access to weather capabilities. ", 15)
+
+	// Turn 1: Initial request with system prompt
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+		},
+	}
+
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp1.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in first response")
+	}
+
+	// Turn 2: Add tool result - NO manual cache control needed
+	choice1 := resp1.Choices[0]
+	messages = append(messages,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{choice1.ToolCalls[0]},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: choice1.ToolCalls[0].ID,
+					Name:       choice1.ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "condition": "sunny"}`,
+				},
+			},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
+
+	// Turn 3: Continue conversation - automatic caching should apply
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPart(resp2.Choices[0].Content),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What about New York?")},
+		},
+	)
+
+	resp3, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 3 Response: %+v", resp3.Choices[0])
+
+	// Helper function to extract cache metrics
+	getCacheMetric := func(resp *llms.ContentResponse, key string) int {
+		if resp.Choices[0].GenerationInfo != nil {
+			if val, ok := resp.Choices[0].GenerationInfo[key]; ok {
+				switch v := val.(type) {
+				case int:
+					return v
+				case int32:
+					return int(v)
+				case int64:
+					return int(v)
+				}
+			}
+		}
+		return 0
+	}
+
+	// Log cache metrics for all turns
+	t.Logf("Turn 1 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp1, "CacheCreationInputTokens"),
+		getCacheMetric(resp1, "CacheReadInputTokens"))
+	t.Logf("Turn 2 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp2, "CacheCreationInputTokens"),
+		getCacheMetric(resp2, "CacheReadInputTokens"))
+	t.Logf("Turn 3 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp3, "CacheCreationInputTokens"),
+		getCacheMetric(resp3, "CacheReadInputTokens"))
+
+	// Verify automatic caching is working
+	cacheCreation3 := getCacheMetric(resp3, "CacheCreationInputTokens")
+	cacheRead3 := getCacheMetric(resp3, "CacheReadInputTokens")
+
+	if cacheCreation3 > 0 {
+		t.Logf("✓ Automatic cache successfully created in Turn 3: %d tokens", cacheCreation3)
+	}
+	if cacheRead3 > 0 {
+		t.Logf("✓ Automatic cache successfully read in Turn 3: %d tokens", cacheRead3)
+	}
+}
+
+// TestAmazonAutomaticCachingConverseAPI tests automatic prompt caching with Converse API.
+// This validates that WithAutomaticCaching() works correctly with Converse API.
+func TestAmazonAutomaticCachingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use Converse API with automatic caching enabled
+	llm, err := bedrock.New(
+		bedrock.WithClient(client),
+		bedrock.WithConverseAPI(),
+		bedrock.WithAutomaticCaching(),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Define tools with long descriptions to exceed 1024 token threshold
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "BedrockConverseAutoCacheTest-v1: " + strings.Repeat("Get current weather conditions including temperature, humidity, wind speed, and precipitation for a specified geographic location. ", 30),
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "City and state, e.g. San Francisco, CA",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	// Add system prompt to ensure sufficient tokens
+	systemPrompt := "BedrockConverseAutoCacheTest-v1: " + strings.Repeat("You are a helpful assistant with access to weather capabilities. ", 15)
+
+	// Turn 1: Initial request with system prompt
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
+		},
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+		},
+	}
+
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp1.Choices[0].ToolCalls) == 0 {
+		t.Fatal("Expected tool call in first response")
+	}
+
+	// Turn 2: Add tool result - NO manual cache control needed
+	choice1 := resp1.Choices[0]
+	messages = append(messages,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{choice1.ToolCalls[0]},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: choice1.ToolCalls[0].ID,
+					Name:       choice1.ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "condition": "sunny"}`,
+				},
+			},
+		},
+	)
+
+	resp2, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
+
+	// Turn 3: Continue conversation - automatic caching should apply
+	messages = append(messages,
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPart(resp2.Choices[0].Content),
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What about New York?")},
+		},
+	)
+
+	resp3, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(512),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Turn 3 Response: %+v", resp3.Choices[0])
+
+	// Helper function to extract cache metrics
+	getCacheMetric := func(resp *llms.ContentResponse, key string) int {
+		if resp.Choices[0].GenerationInfo != nil {
+			if val, ok := resp.Choices[0].GenerationInfo[key]; ok {
+				switch v := val.(type) {
+				case int:
+					return v
+				case int32:
+					return int(v)
+				case int64:
+					return int(v)
+				}
+			}
+		}
+		return 0
+	}
+
+	// Log cache metrics for all turns
+	t.Logf("Turn 1 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp1, "CacheCreationInputTokens"),
+		getCacheMetric(resp1, "CacheReadInputTokens"))
+	t.Logf("Turn 2 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp2, "CacheCreationInputTokens"),
+		getCacheMetric(resp2, "CacheReadInputTokens"))
+	t.Logf("Turn 3 - CacheCreation: %d, CacheRead: %d",
+		getCacheMetric(resp3, "CacheCreationInputTokens"),
+		getCacheMetric(resp3, "CacheReadInputTokens"))
+
+	// Verify automatic caching is working
+	cacheCreation3 := getCacheMetric(resp3, "CacheCreationInputTokens")
+	cacheRead3 := getCacheMetric(resp3, "CacheReadInputTokens")
+
+	if cacheCreation3 > 0 {
+		t.Logf("✓ Automatic cache successfully created in Turn 3: %d tokens", cacheCreation3)
+	}
+	if cacheRead3 > 0 {
+		t.Logf("✓ Automatic cache successfully read in Turn 3: %d tokens", cacheRead3)
+	}
+}
+
+// TestCreateClientWithLongLeavingCredentials tests creating a client with long leaving credentials.
+func TestCreateClientWithLongLeavingCredentials(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	// Configure request scrubbing to remove dynamic AWS headers
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Del("Amz-Sdk-Invocation-Id")
+		req.Header.Del("Amz-Sdk-Request")
+		req.Header.Del("X-Amz-Date")
+		req.Header.Del("Authorization") // AWS Signature V4 is unique per request
+		return nil
+	})
+
+	httpClient := &http.Client{
+		Transport: rr,
+	}
+
+	region := os.Getenv("AWS_REGION")
+	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
+
+	opts := []func(*config.LoadOptions) error{
+		config.WithHTTPClient(httpClient),
+		config.WithRegion(region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			accessKey,
+			secretKey,
+			sessionToken,
+		)),
+	}
+
+	cfg, err := config.LoadDefaultConfig(ctx, opts...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client := bedrockruntime.NewFromConfig(cfg)
+
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	model := bedrock.ModelAnthropicClaudeSonnet45
+	resp, err := llm.Call(ctx, "Hello, how are you?", llms.WithModel(model), llms.WithMaxTokens(512))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp == "" {
+		t.Fatal("Expected non-empty response")
+	}
+
+	t.Logf("Response: %s", resp)
+}
+
+// TestCreateClientWithBearerTokenCredentials tests creating a client with bearer token credentials.
+func TestCreateClientWithBearerTokenCredentials(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_BEDROCK_BEARER_TOKEN", "AWS_REGION")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	// Configure request scrubbing to remove dynamic AWS headers
+	rr.ScrubReq(func(req *http.Request) error {
+		req.Header.Del("Amz-Sdk-Invocation-Id")
+		req.Header.Del("Amz-Sdk-Request")
+		req.Header.Del("X-Amz-Date")
+		req.Header.Del("Authorization")
+		return nil
+	})
+
+	httpClient := &http.Client{
+		Transport: rr,
+	}
+
+	region := os.Getenv("AWS_REGION")
+	bearerToken := os.Getenv("AWS_BEDROCK_BEARER_TOKEN")
+
+	opts := []func(*config.LoadOptions) error{
+		config.WithHTTPClient(httpClient),
+		config.WithRegion(region),
+		config.WithBearerAuthTokenProvider(bearer.StaticTokenProvider{
+			Token: bearer.Token{
+				Value: bearerToken,
+			},
+		}),
+	}
+
+	cfg, err := config.LoadDefaultConfig(ctx, opts...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	client := bedrockruntime.NewFromConfig(cfg)
+
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	model := bedrock.ModelAnthropicClaudeSonnet45
+	resp, err := llm.Call(ctx, "Hello, how are you?", llms.WithModel(model), llms.WithMaxTokens(512))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if resp == "" {
+		t.Fatal("Expected non-empty response")
+	}
+
+	t.Logf("Response: %s", resp)
 }

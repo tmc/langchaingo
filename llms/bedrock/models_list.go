@@ -65,6 +65,24 @@ const (
 	// Languages: 200+ languages.
 	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
 
+	// Claude Opus 4.6 is the world's best model for coding, enterprise agents, and professional work.
+	// It excels at agentic workflows, orchestrating complex tasks across dozens of tools with industry-leading
+	// reliability. It handles the full lifecycle from architecture to deployment, delivers the deepest reasoning
+	// for security workflows, and is Anthropic's most capable model for financial workflows and computer use.
+	//
+	// Max tokens: 1M (beta)
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeOpus46 = "us.anthropic.claude-opus-4-6-v1"
+
+	// Claude Sonnet 4.6 delivers frontier intelligence at scale—built for coding, agents, and enterprise workflows.
+	// It excels at complex, multi-step tasks requiring sustained reasoning and adaptive decision-making, handles
+	// iterative development work with complex codebases, and brings professional-grade analysis with memory to
+	// maintain context across files. Step-change improvement in creating spreadsheets, slides, and docs.
+	//
+	// Max tokens: 1M (beta)
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeSonnet46 = "us.anthropic.claude-sonnet-4-6"
+
 	// Claude Opus 4.5 is the next generation of Anthropic's most intelligent model, an industry leader
 	// across coding, agents, computer use, and enterprise workflows. It can confidently deliver multi-day
 	// software development projects in hours, working independently with technical depth.
@@ -219,6 +237,17 @@ const (
 	// Languages: English.
 	ModelMetaLlama38bInstructV1 = "meta.llama3-8b-instruct-v1:0"
 
+	// DeepSeek-V3.2 harmonizes high computational efficiency with superior reasoning and agent performance.
+	// It builds on DeepSeek Sparse Attention for long-context efficiency, a scalable reinforcement learning framework,
+	// and a large-scale agentic task synthesis pipeline. This model excels at long-context reasoning and agentic tasks,
+	// efficiently handling extended inputs while maintaining strong accuracy. Its sparse attention design enables it to
+	// process complex, multi-step workflows without excessive compute costs. Targets long-context reasoning,
+	// tool-using agents, and efficient deployment in production environments.
+	//
+	// Max tokens: 164k
+	// Languages: English, Chinese.
+	ModelDeepSeekV32 = "deepseek.v3.2"
+
 	// DeepSeek-R1 provides customers a state-of-the-art reasoning model, optimized for general reasoning tasks,
 	// math, science, and code generation. This model is created by DeepSeek and developed through a combination
 	// of cold-start data and reinforcement learning. DeepSeek-R1 is a text-only model supporting English and Chinese.
@@ -243,37 +272,53 @@ const (
 	// Languages: English.
 	ModelOpenAIGptOss20BV1 = "openai.gpt-oss-20b-1:0"
 
-	// Qwen3 Next 80B A3B is an 80B-parameter MixtureOfExperts (MOE) language model (3B active) optimized
-	// for instruction following and ultra-long-context tasks. It delivers flagship-level reasoning, coding,
-	// and agent performance with only 3B active parameters per token.
+	// Qwen3 Next 80B A3B turns cutting-edge MoE and hybrid attention into a practical, ultra-long-context assistant
+	// that scales from everyday chat to million-token workflows. It delivers flagship-level reasoning, coding,
+	// and agent performance with only 3B active parameters per token. Ideal for long-context summarization,
+	// code generation/refactoring, enterprise knowledge QA, and stable agentic workflows with tools.
 	//
 	// Max tokens: 256k
 	// Languages: English, Chinese.
 	ModelQwen3Next80BA3B = "qwen.qwen3-next-80b-a3b"
 
-	// Qwen3 VL 235B A22B is a 235B-parameter MoE vision-language flagship model (about 22B active) for
-	// high-end multimodal tasks, combining strong text generation with advanced visual perception,
-	// 2D/3D spatial grounding, long-context document/video understanding, and multilingual OCR over very long contexts.
+	// Qwen3 VL 235B A22B is a frontier vision-language model that sees, reads, and reasons across images, documents,
+	// and long videos at massive scale. Its 235B-parameter MoE architecture (≈22B active) delivers state-of-the-art
+	// multimodal understanding, OCR, and spatial reasoning over contexts reaching hundreds of thousands of tokens.
+	// Ideal for document intelligence (OCR + layout), multimodal RAG, visual QA, and UI/scene understanding.
 	//
 	// Max tokens: 256k
 	// Languages: English, Chinese.
 	ModelQwen3VL235BA22B = "qwen.qwen3-vl-235b-a22b"
 
-	// Qwen3 32B (dense) is a balanced dense model offering strong reasoning and general-purpose performance
-	// with simple, predictable deployment across standard infra. It delivers performance that surpasses many
-	// larger models and proves highly versatile across reasoning, coding, and research use cases.
+	// Qwen3 32B is a balanced dense model that offers strong reasoning and general-purpose performance with
+	// straightforward deployment on standard infrastructure. Despite its smaller size compared to frontier-scale
+	// models, Qwen3-32B delivers performance that surpasses many larger models, and proves highly versatile across
+	// reasoning, coding, and research use cases. Its balance of capability, cost efficiency, and operational
+	// simplicity has made it one of the most practical and widely deployable models in the Qwen3 family.
 	//
 	// Max tokens: 16384
 	// Languages: English, Chinese.
 	ModelQwen332BV1 = "qwen.qwen3-32b-v1:0"
 
-	// Qwen3-Coder-30B-A3B-Instruct delivers strong coding and reasoning performance in a compact MoE design.
-	// It excels at "vibe coding," natural-language-first programming, debugging, SQL generation, and other
-	// development workflows, while being lightweight enough to run on single high-memory GPUs or small clusters.
+	// Qwen3-Coder-30B-A3B-Instruct delivers strong coding and reasoning performance in a compact MoE design, making
+	// it one of the most widely adopted models in the Qwen3-Coder series. It has become a favorite among developers
+	// and enterprises seeking a practical balance between cost and capability. The model excels at "vibe coding,"
+	// natural-language-first programming, debugging, SQL generation, and other development workflows, while being
+	// lightweight enough to run on single high-memory GPUs or small clusters.
 	//
 	// Max tokens: 262144
 	// Languages: English, Chinese.
 	ModelQwen3Coder30BA3BV1 = "qwen.qwen3-coder-30b-a3b-v1:0"
+
+	// Qwen3-Coder-Next is an open-weight language model built specifically for coding, with strong performance
+	// on large-scale software engineering and agentic coding benchmarks. It uses a hybrid Mixture-of-Experts
+	// architecture to offer high capability at relatively modest active parameter counts, improving efficiency
+	// for real-world deployments. Optimized for tool use and function calling, making it suitable as the core
+	// of coding agents that interact with shells, editors, issue trackers, and other developer tools.
+	//
+	// Max tokens: 256k
+	// Languages: English, Chinese.
+	ModelQwen3CoderNext = "qwen.qwen3-coder-next"
 
 	// Mistral Large 3 is Mistral's most advanced open-weight multimodal model, combining a granular
 	// Mixture-of-Experts architecture (673B total parameters with 39B active, plus a 2.5B vision encoder)
@@ -299,11 +344,43 @@ const (
 	// Languages: English, French, German, Spanish, Chinese, Japanese, and multiple other languages.
 	ModelMistralLarge2402V1 = "mistral.mistral-large-2402-v1:0"
 
+	// Kimi K2.5 brings together strong vision, language, and code capabilities in a single natively multimodal
+	// architecture. It handles complex tasks that mix images and text—such as generating code from UI mockups
+	// or analyzing visual documents—with high accuracy. The model's "thinking" mode enables deep, deliberate reasoning,
+	// while "instant" mode provides fast responses for interactive use. Its built-in support for tool use and agent
+	// orchestration makes it highly effective for building sophisticated multimodal assistants.
+	//
+	// Max tokens: 256k
+	// Languages: English, Chinese.
+	ModelMoonshotKimiK25 = "moonshotai.kimi-k2.5"
+
 	// Kimi K2 Thinking is Moonshot AI's flagship "thinking agent" model, designed for deep, tool-augmented reasoning.
-	// Its 1T-parameter MoE architecture (32B active) powers state-of-the-art performance on long-horizon tasks.
-	// Native INT4 quantization and a 256K context window enable serious research- and agent-style workloads with practical hardware.
+	// Its 1T-parameter MoE architecture (32B active) powers state-of-the-art performance on long-horizon tasks like
+	// HLE and BrowseComp. Native INT4 quantization and a 256K context window enable serious research- and agent-style
+	// workloads with practical hardware. Ideal for long-horizon planning with tools, complex coding and debugging,
+	// research agents over large corpora, and workflows needing 200-300-step stable tool orchestration.
 	//
 	// Max tokens: 256k
 	// Languages: Multilingual (including Chinese and English).
 	ModelMoonshotKimiK2Thinking = "moonshot.kimi-k2-thinking"
+
+	// GLM-4.7 is a general-purpose language model in the GLM family with a focus on generating clean, modern
+	// front-end code and web interfaces. It can turn natural-language descriptions into structured HTML, CSS,
+	// and JavaScript while also supporting standard text and reasoning tasks. The model is positioned for developers
+	// who want high-quality UI outputs alongside general conversational and coding abilities. It remains compatible
+	// with typical LLM use cases such as question answering, summarization, and dialogue.
+	//
+	// Max tokens: 203k
+	// Languages: English, Chinese.
+	ModelGLM47 = "zai.glm-4.7"
+
+	// GLM-4.7-Flash is a lightweight variant of GLM-4.7, using a mixture-of-experts architecture to reduce
+	// resource requirements while maintaining strong output quality. It is designed for scenarios where low latency
+	// and cost efficiency are important, such as interactive assistants or high-traffic services. The model retains
+	// the core text and code generation capabilities of GLM-4.7 in a smaller active-parameter footprint.
+	// A practical choice when deployment constraints limit the use of larger models.
+	//
+	// Max tokens: 203k
+	// Languages: English, Chinese.
+	ModelGLM47Flash = "zai.glm-4.7-flash"
 )

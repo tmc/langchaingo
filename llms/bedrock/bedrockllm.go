@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
@@ -17,11 +20,12 @@ const defaultModel = ModelAnthropicClaudeHaiku45
 
 // LLM is a Bedrock LLM implementation.
 type LLM struct {
-	modelID          string
-	client           *bedrockclient.Client
-	converseClient   *bedrockclient.ConverseClient
-	useConverseAPI   bool
-	CallbacksHandler callbacks.Handler
+	modelID           string
+	client            *bedrockclient.Client
+	converseClient    *bedrockclient.ConverseClient
+	useConverseAPI    bool
+	enableAutoCaching bool
+	CallbacksHandler  callbacks.Handler
 }
 
 // New creates a new Bedrock LLM implementation.
@@ -36,11 +40,12 @@ func NewWithContext(ctx context.Context, opts ...Option) (*LLM, error) {
 		return nil, err
 	}
 	return &LLM{
-		client:           c,
-		converseClient:   converseC,
-		useConverseAPI:   o.useConverseAPI,
-		modelID:          o.modelID,
-		CallbacksHandler: o.callbackHandler,
+		client:            c,
+		converseClient:    converseC,
+		useConverseAPI:    o.useConverseAPI,
+		enableAutoCaching: o.enableAutoCaching,
+		modelID:           o.modelID,
+		CallbacksHandler:  o.callbackHandler,
 	}, nil
 }
 
@@ -97,10 +102,18 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 // generateContentWithConverseAPI uses the unified Converse API
 func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
-	m, err := processMessages(messages)
+	// Apply automatic caching to bedrock messages if enabled
+	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.Model)
+	m, err := processMessagesWithCaching(messages, shouldAutoCache)
 	if err != nil {
 		return nil, err
 	}
+
+	// Check if caching should be enabled
+	// Caching is enabled if either:
+	// 1. Automatic caching is enabled and model supports it
+	// 2. Manual cache control is present in messages
+	enableCaching := shouldAutoCache || checkIfCachingRequested(messages)
 
 	// Build Converse input
 	input := &bedrockclient.ConverseInput{
@@ -109,6 +122,7 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 		Tools:           opts.Tools,
 		StreamingFunc:   opts.StreamingFunc,
 		ReasoningConfig: opts.Reasoning,
+		EnableCaching:   enableCaching,
 	}
 
 	// Set inference parameters
@@ -142,7 +156,9 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 
 // generateContentWithLegacyAPI uses the original model-specific implementations
 func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
-	m, err := processMessages(messages)
+	// Apply automatic caching to bedrock messages if enabled
+	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.Model)
+	m, err := processMessagesWithCaching(messages, shouldAutoCache)
 	if err != nil {
 		return nil, err
 	}
@@ -163,16 +179,45 @@ func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.
 }
 
 func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, error) {
+	return processMessagesWithCaching(messages, false)
+}
+
+func processMessagesWithCaching(messages []llms.MessageContent, autoCaching bool) ([]bedrockclient.Message, error) {
 	bedrockMsgs := make([]bedrockclient.Message, 0, len(messages))
 
 	for _, m := range messages {
 		for _, part := range m.Parts {
 			switch part := part.(type) {
+			case CachedContent:
+				// Handle cached content with cache control
+				cacheControl := convertCacheControl(part.CacheControl)
+				// Process the wrapped content
+				switch wrapped := part.ContentPart.(type) {
+				case llms.TextContent:
+					bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+						Role:         m.Role,
+						Content:      wrapped.Text,
+						Type:         "text",
+						Reasoning:    wrapped.Reasoning,
+						CacheControl: cacheControl,
+					})
+				case llms.BinaryContent:
+					bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
+						Role:         m.Role,
+						Content:      string(wrapped.Data),
+						MimeType:     wrapped.MIMEType,
+						Type:         "image",
+						CacheControl: cacheControl,
+					})
+				default:
+					return nil, errors.New("unsupported cached content type")
+				}
 			case llms.TextContent:
 				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
-					Role:    m.Role,
-					Content: part.Text,
-					Type:    "text",
+					Role:      m.Role,
+					Content:   part.Text,
+					Type:      "text",
+					Reasoning: part.Reasoning,
 				})
 			case llms.BinaryContent:
 				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
@@ -182,10 +227,13 @@ func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, e
 					Type:     "image",
 				})
 			case llms.ToolCall:
+				if part.FunctionCall == nil {
+					return nil, errors.New("tool call missing function call data")
+				}
 				var arguments map[string]any
-				if part.FunctionCall != nil {
+				if part.FunctionCall.Arguments != "" {
 					if err := json.Unmarshal([]byte(part.FunctionCall.Arguments), &arguments); err != nil {
-						return nil, err
+						return nil, fmt.Errorf("failed to unmarshal tool call arguments: %w", err)
 					}
 				}
 				bedrockMsgs = append(bedrockMsgs, bedrockclient.Message{
@@ -208,11 +256,103 @@ func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, e
 					},
 				})
 			default:
+				// Check if it's unknown type - might be a specific provider type
 				return nil, errors.New("unsupported message type")
 			}
 		}
 	}
+
+	// Apply automatic caching if requested
+	if autoCaching {
+		applyAutomaticCaching(bedrockMsgs)
+	}
+
 	return bedrockMsgs, nil
+}
+
+// applyAutomaticCaching adds cache control to the last assistant or tool message
+// to enable conversation history caching without manual intervention.
+func applyAutomaticCaching(messages []bedrockclient.Message) {
+	if len(messages) == 0 {
+		return
+	}
+
+	// Find the last assistant or tool message before the current user turn
+	lastCacheableIdx := -1
+	for i := len(messages) - 1; i >= 0; i-- {
+		// Skip the last message if it's from human (current turn)
+		if i == len(messages)-1 && messages[i].Role == llms.ChatMessageTypeHuman {
+			continue
+		}
+		// Find last assistant or tool message
+		if messages[i].Role == llms.ChatMessageTypeAI || messages[i].Role == llms.ChatMessageTypeTool {
+			lastCacheableIdx = i
+			break
+		}
+	}
+
+	if lastCacheableIdx == -1 {
+		return
+	}
+
+	// Add cache control to the selected message
+	if messages[lastCacheableIdx].CacheControl == nil {
+		messages[lastCacheableIdx].CacheControl = &bedrockclient.CacheControl{
+			Type: "ephemeral",
+			TTL:  "5m",
+		}
+	}
+}
+
+// convertCacheControl converts shared llms.CacheControl to Bedrock-specific format
+func convertCacheControl(llmCache *llms.CacheControl) *bedrockclient.CacheControl {
+	if llmCache == nil {
+		return nil
+	}
+
+	bedrockCache := &bedrockclient.CacheControl{
+		Type: llmCache.Type,
+	}
+
+	// Convert duration to TTL string
+	if llmCache.Duration > 0 {
+		if llmCache.Duration >= time.Hour {
+			bedrockCache.TTL = "1h"
+		} else {
+			bedrockCache.TTL = "5m"
+		}
+	}
+
+	return bedrockCache
+}
+
+// checkIfCachingRequested checks if any messages contain CachedContent
+func checkIfCachingRequested(messages []llms.MessageContent) bool {
+	for _, msg := range messages {
+		for _, part := range msg.Parts {
+			if _, ok := part.(CachedContent); ok {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// supportsCaching checks if the model supports prompt caching
+func (l *LLM) supportsCaching(modelID string) bool {
+	// All Claude 4.x models support prompt caching (Opus, Sonnet, Haiku)
+	cachingPatterns := []string{
+		"claude-opus-4",
+		"claude-sonnet-4",
+		"claude-haiku-4",
+	}
+
+	for _, pattern := range cachingPatterns {
+		if strings.Contains(modelID, pattern) {
+			return true
+		}
+	}
+	return false
 }
 
 var _ llms.Model = (*LLM)(nil)

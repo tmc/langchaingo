@@ -1,0 +1,42 @@
+httprr trace v1
+541 1706
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 226
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":4096,"messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]}],"temperature":1,"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1324
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 09:53:47 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 53
+X-Amzn-Bedrock-Invocation-Latency: 2852
+X-Amzn-Bedrock-Output-Token-Count: 189
+X-Amzn-Requestid: b6a11904-aab1-4a19-abc9-bbbc59aa03d7
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_bdrk_01FykvttgnQcwwgLMQEdjj1W","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"This is a simple linear equation. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\n\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me check: 7 + 5 = 12 ✓\n\nSo x = 7.","signature":"EucCCkgICxABGAIqQA1Bs3baE052D2zQoHInNj5chu5V28bC8iGMxs4Q3y0QuX/GjIuSBU8uIG9B3Ubn3IH0Dvf3GmyXYSOfDpfDi4ISDAogsxtiB6K7iW17zRoMDOSJMkSqATjOIcQiIjBrkoASTvvyjDByWFulTijqi+O89nC4KM6wvodmJw6MTLz7tEPsuRNWJD0rxBLq9UwqzAG4CiH4kXWSUlH4msIVzWsKGQ/ABCkntCY84C2bS+/FljjYBbjbv4rvvkYdidm3J45hEoyRX+kbFj/uLSOG9FrBmA1pmwG094TdtMbkHjNpEd0gH49H1AxcR21dfC+20XAbXHutRghdNUrTjxuWOmJneewnzbw7s0T9zmZcbyTi2DtPkgnHQbhCj3WY+SKjYt+/+FuPS6XzfQWRI7N48Dw1Iq1IZuTYhtwwfsCJzGNeY8sOttoJyoyKeg4U9D+IYhpgubnq9MLySYJtoyQYAQ=="},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Check:** 7 + 5 = 12 ✓\n\n**Answer: x = 7**"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":53,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":189}}1614 1715
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1298
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":4096,"messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"This is a simple linear equation. I need to solve for x.\n\nx + 5 = 12\n\nTo isolate x, I need to subtract 5 from both sides:\n\nx + 5 - 5 = 12 - 5\nx = 7\n\nLet me check: 7 + 5 = 12 ✓\n\nSo x = 7.","signature":"EucCCkgICxABGAIqQA1Bs3baE052D2zQoHInNj5chu5V28bC8iGMxs4Q3y0QuX/GjIuSBU8uIG9B3Ubn3IH0Dvf3GmyXYSOfDpfDi4ISDAogsxtiB6K7iW17zRoMDOSJMkSqATjOIcQiIjBrkoASTvvyjDByWFulTijqi+O89nC4KM6wvodmJw6MTLz7tEPsuRNWJD0rxBLq9UwqzAG4CiH4kXWSUlH4msIVzWsKGQ/ABCkntCY84C2bS+/FljjYBbjbv4rvvkYdidm3J45hEoyRX+kbFj/uLSOG9FrBmA1pmwG094TdtMbkHjNpEd0gH49H1AxcR21dfC+20XAbXHutRghdNUrTjxuWOmJneewnzbw7s0T9zmZcbyTi2DtPkgnHQbhCj3WY+SKjYt+/+FuPS6XzfQWRI7N48Dw1Iq1IZuTYhtwwfsCJzGNeY8sOttoJyoyKeg4U9D+IYhpgubnq9MLySYJtoyQYAQ=="},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 5 = 12\n\n**Subtract 5 from both sides:**\nx + 5 - 5 = 12 - 5\nx = 7\n\n**Check:** 7 + 5 = 12 ✓\n\n**Answer: x = 7**"}]},{"role":"user","content":[{"type":"text","text":"Now solve x + 10 = 25"}]}],"temperature":1,"thinking":{"type":"enabled","budget_tokens":2048}}HTTP/2.0 200 OK
+Content-Length: 1332
+Content-Type: application/json
+Date: Tue, 03 Mar 2026 09:53:51 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Cache-Write-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 159
+X-Amzn-Bedrock-Invocation-Latency: 2628
+X-Amzn-Bedrock-Output-Token-Count: 182
+X-Amzn-Requestid: d1427bd5-23f8-4dee-a5db-7cfd138390cc
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_bdrk_0161y4yYkmqTWMLv4CGdxRLa","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"This is a similar problem to the previous one. I need to solve for x by isolating it.\n\nGiven: x + 10 = 25\n\nSubtract 10 from both sides:\nx + 10 - 10 = 25 - 10\nx = 15\n\nCheck: 15 + 10 = 25 ✓","signature":"EugCCkgICxABGAIqQE/DRbSu9PlP18yKbTvX0erRBolLraq5Qw6ygJoy3ioGt0SCtRD6jcV0LBh0QKsUCDUf2A6ylAC04NVN7nrohBESDEIgyuoCpRLIEF1n6BoMfNwR1uoA2GUmrx9YIjD9kpJBJy0gWHbPWJelJ874z1ylEDwwJFP3EmUF4jJT25fYG2zci7VEgnuyrtGRrK4qzQHIU8jfQ1rO3dO8HbUQNR196LeHkDZx03SdnkhiFdvGcHBsxRtmTYiH32VMWY5e9AtAmYGDYZdfTy1eYgAtllLHSfMOPSMcHSsGIRIpjyW0ssPzYkO6wZG46JGuVKK6ZxcJ/MI7LyAetwdPHk6GaLujj+Ao+qKWC5dsmF4xAvhJBbyIXWd19csNbFGzhml7r2gFwO3+9ESG34wQub7zxjuQIJyRyHhqzHeHp3OVyCKuHS5oSc9ykQ/of4P2+yBCnA13LMWCuqo1jTVFzh7SGAE="},{"type":"text","text":"To solve for x, I need to isolate it on one side of the equation.\n\n**Given:** x + 10 = 25\n\n**Subtract 10 from both sides:**\nx + 10 - 10 = 25 - 10\nx = 15\n\n**Check:** 15 + 10 = 25 ✓\n\n**Answer: x = 15**"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":159,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":182}}

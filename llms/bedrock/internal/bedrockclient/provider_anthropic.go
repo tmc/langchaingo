@@ -37,7 +37,7 @@ type anthropicBinGenerationInputSource struct {
 // anthropicTextGenerationInputContent is a single message in the input.
 type anthropicTextGenerationInputContent struct {
 	// The type of the content. Required.
-	// One of: "text", "image", "tool_use", "tool_result"
+	// One of: "text", "image", "tool_use", "tool_result", "thinking", "redacted_thinking"
 	Type string `json:"type"`
 	// The source of the content. Required if type is "image"
 	Source *anthropicBinGenerationInputSource `json:"source,omitempty"`
@@ -50,6 +50,17 @@ type anthropicTextGenerationInputContent struct {
 	// Tool result fields
 	ToolUseID string `json:"tool_use_id,omitempty"`
 	Content   string `json:"content,omitempty"`
+	// Thinking fields
+	Thinking  string `json:"thinking,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Data      string `json:"data,omitempty"`
+	// Cache control for prompt caching (Bedrock supports Anthropic cache_control format)
+	CacheControl *anthropicCacheControl `json:"cache_control,omitempty"`
+}
+
+type anthropicCacheControl struct {
+	Type string `json:"type"`
+	TTL  string `json:"ttl,omitempty"`
 }
 
 type anthropicTextGenerationInputMessage struct {
@@ -68,7 +79,8 @@ type anthropicTextGenerationInput struct {
 	// The maximum number of tokens to generate per result. Required
 	MaxTokens int `json:"max_tokens"`
 	// The system prompt to use. Optional
-	System string `json:"system,omitempty"`
+	// Can be string or []anthropicTextGenerationInputContent for caching support
+	System any `json:"system,omitempty"`
 	// The messages to use. Required
 	Messages []*anthropicTextGenerationInputMessage `json:"messages"`
 	// The amount of randomness injected into the response. Optional, default = 1
@@ -88,9 +100,10 @@ type anthropicTextGenerationInput struct {
 }
 
 type anthropicTool struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	InputSchema any    `json:"input_schema,omitempty"`
+	Name         string                 `json:"name"`
+	Description  string                 `json:"description,omitempty"`
+	InputSchema  any                    `json:"input_schema,omitempty"`
+	CacheControl *anthropicCacheControl `json:"cache_control,omitempty"`
 }
 
 type anthropicThinkingPayload struct {
@@ -114,19 +127,27 @@ type anthropicTextGenerationOutput struct {
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
-	Usage        struct {
-		InputTokens  int32 `json:"input_tokens"`
-		OutputTokens int32 `json:"output_tokens"`
+	Usage struct {
+		InputTokens              int32 `json:"input_tokens"`
+		OutputTokens             int32 `json:"output_tokens"`
+		CacheCreationInputTokens int32 `json:"cache_creation_input_tokens,omitempty"`
+		CacheReadInputTokens     int32 `json:"cache_read_input_tokens,omitempty"`
+		CacheCreation            struct {
+			Ephemeral5mInputTokens int32 `json:"ephemeral_5m_input_tokens,omitempty"`
+			Ephemeral1hInputTokens int32 `json:"ephemeral_1h_input_tokens,omitempty"`
+		} `json:"cache_creation,omitempty"`
 	} `json:"usage"`
 }
 
 type anthropicContentBlock struct {
-	Type     string         `json:"type"`
-	Text     string         `json:"text,omitempty"`
-	ID       string         `json:"id,omitempty"`
-	Name     string         `json:"name,omitempty"`
-	Input    map[string]any `json:"input,omitempty"`
-	Thinking string         `json:"thinking,omitempty"`
+	Type      string         `json:"type"`
+	Text      string         `json:"text,omitempty"`
+	ID        string         `json:"id,omitempty"`
+	Name      string         `json:"name,omitempty"`
+	Input     map[string]any `json:"input,omitempty"`
+	Thinking  string         `json:"thinking,omitempty"`
+	Signature string         `json:"signature,omitempty"`
+	Data      string         `json:"data,omitempty"`
 }
 
 // Finish reason for the completion of the generation.
@@ -176,10 +197,16 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 	}
 
+	// Prepare system prompt - omit if empty
+	var system any
+	if systemPrompt != "" {
+		system = systemPrompt
+	}
+
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
 		MaxTokens:        getMaxTokens(options.MaxTokens, 2048),
-		System:           systemPrompt,
+		System:           system,
 		Messages:         inputContents,
 		Temperature:      options.Temperature,
 		TopP:             options.TopP,
@@ -244,6 +271,8 @@ func createAnthropicCompletion(ctx context.Context,
 	// Group content blocks by type for this choice
 	var textContent string
 	var reasoningContent string
+	var signature []byte
+	var redactedContent []byte
 	var toolCalls []llms.ToolCall
 
 	for _, c := range output.Content {
@@ -252,6 +281,13 @@ func createAnthropicCompletion(ctx context.Context,
 			textContent += c.Text
 		case "thinking":
 			reasoningContent += c.Thinking
+			if len(c.Signature) > 0 {
+				signature = []byte(c.Signature)
+			}
+		case "redacted_thinking":
+			if len(c.Data) > 0 {
+				redactedContent = []byte(c.Data)
+			}
 		case "tool_use":
 			argumentsJSON, err := json.Marshal(c.Input)
 			if err != nil {
@@ -271,16 +307,21 @@ func createAnthropicCompletion(ctx context.Context,
 	// Create single choice with all content
 	choice := &llms.ContentChoice{
 		Content:    textContent,
-		Reasoning:  processReasoning(reasoningContent),
+		Reasoning:  processReasoning(reasoningContent, signature, redactedContent),
 		ToolCalls:  toolCalls,
 		StopReason: output.StopReason,
 		GenerationInfo: map[string]any{
-			"input_tokens":  output.Usage.InputTokens,
-			"output_tokens": output.Usage.OutputTokens,
-			// Standardized field names for cross-provider compatibility
+			"input_tokens":     output.Usage.InputTokens,
+			"output_tokens":    output.Usage.OutputTokens,
 			"PromptTokens":     output.Usage.InputTokens,
 			"CompletionTokens": output.Usage.OutputTokens,
 			"TotalTokens":      output.Usage.InputTokens + output.Usage.OutputTokens,
+			// Cache metrics
+			"CacheReadInputTokens":                    output.Usage.CacheReadInputTokens,
+			"CacheCreationInputTokens":                output.Usage.CacheCreationInputTokens,
+			"CacheCreationEphemeral5mInputTokens":     output.Usage.CacheCreation.Ephemeral5mInputTokens,
+			"CacheCreationEphemeral1hInputTokens":     output.Usage.CacheCreation.Ephemeral1hInputTokens,
+			"PromptCachedTokens":                      output.Usage.CacheReadInputTokens,
 		},
 	}
 	Contentchoices = append(Contentchoices, choice)
@@ -290,13 +331,15 @@ func createAnthropicCompletion(ctx context.Context,
 	}, nil
 }
 
-func processReasoning(reasoningContent string) *reasoning.ContentReasoning {
-	if reasoningContent == "" {
+func processReasoning(reasoningContent string, signature []byte, redactedContent []byte) *reasoning.ContentReasoning {
+	if reasoningContent == "" && len(signature) == 0 && len(redactedContent) == 0 {
 		return nil
 	}
 
 	return &reasoning.ContentReasoning{
-		Content: reasoningContent,
+		Content:         reasoningContent,
+		Signature:       signature,
+		RedactedContent: redactedContent,
 	}
 }
 
@@ -310,6 +353,7 @@ type streamingCompletionResponseChunk struct {
 		StopReason   string `json:"stop_reason"`
 		StopSequence any    `json:"stop_sequence"`
 		Thinking     string `json:"thinking,omitempty"`
+		Signature    string `json:"signature,omitempty"`
 	} `json:"delta"`
 	ContentBlock struct {
 		Type  string         `json:"type"`
@@ -356,6 +400,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
 	var currentToolCall *streaming.ToolCall
 	var toolCalls []llms.ToolCall
+	var signature strings.Builder
 
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
@@ -398,6 +443,13 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 							return nil, err
 						}
 						contentchoices[0].Reasoning = appendReasoning(contentchoices[0].Reasoning, resp.Delta.Thinking)
+					}
+					if resp.Delta.Signature != "" {
+						signature.WriteString(resp.Delta.Signature)
+					}
+				case "signature_delta":
+					if resp.Delta.Signature != "" {
+						signature.WriteString(resp.Delta.Signature)
 					}
 				case "input_json_delta":
 					if currentToolCall != nil {
@@ -451,6 +503,11 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	// Add tool calls to the final response
 	contentchoices[0].ToolCalls = toolCalls
 
+	// Add signature to reasoning if accumulated
+	if signature.Len() > 0 && contentchoices[0].Reasoning != nil {
+		contentchoices[0].Reasoning.Signature = []byte(signature.String())
+	}
+
 	return &llms.ContentResponse{
 		Choices: contentchoices,
 	}, nil
@@ -458,7 +515,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 func appendReasoning(reasoning *reasoning.ContentReasoning, reasoningContent string) *reasoning.ContentReasoning {
 	if reasoning == nil {
-		return processReasoning(reasoningContent)
+		return processReasoning(reasoningContent, nil, nil)
 	}
 
 	reasoning.Content += reasoningContent
@@ -507,6 +564,29 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 		}
 		content := make([]anthropicTextGenerationInputContent, 0, len(chunk))
 		for _, message := range chunk {
+			// For AI messages with reasoning, add thinking blocks before text
+			if message.Role == llms.ChatMessageTypeAI && message.Reasoning != nil {
+				// Add thinking block if present
+				if message.Reasoning.Content != "" || len(message.Reasoning.Signature) > 0 {
+					thinkingBlock := anthropicTextGenerationInputContent{
+						Type:     "thinking",
+						Thinking: message.Reasoning.Content,
+					}
+					if len(message.Reasoning.Signature) > 0 {
+						thinkingBlock.Signature = string(message.Reasoning.Signature)
+					}
+					content = append(content, thinkingBlock)
+				}
+				// Add redacted_thinking block if present
+				if len(message.Reasoning.RedactedContent) > 0 {
+					redactedBlock := anthropicTextGenerationInputContent{
+						Type: "redacted_thinking",
+						Data: string(message.Reasoning.RedactedContent),
+					}
+					content = append(content, redactedBlock)
+				}
+			}
+			// Add regular content (text, tool_use, tool_result, etc.)
 			content = append(content, getAnthropicInputContent(message))
 		}
 		inputContents = append(inputContents, &anthropicTextGenerationInputMessage{
@@ -547,6 +627,12 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 			Type: message.Type,
 			Text: message.Content,
 		}
+		if message.CacheControl != nil {
+			c.CacheControl = &anthropicCacheControl{
+				Type: message.CacheControl.Type,
+				TTL:  message.CacheControl.TTL,
+			}
+		}
 	case AnthropicMessageTypeImage:
 		c = anthropicTextGenerationInputContent{
 			Type: message.Type,
@@ -571,6 +657,12 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 				Type:      message.Type,
 				ToolUseID: message.ToolResult.ToolCallID,
 				Content:   message.ToolResult.Content,
+			}
+			if message.CacheControl != nil {
+				c.CacheControl = &anthropicCacheControl{
+					Type: message.CacheControl.Type,
+					TTL:  message.CacheControl.TTL,
+				}
 			}
 		}
 	}

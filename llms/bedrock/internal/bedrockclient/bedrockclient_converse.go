@@ -60,6 +60,7 @@ type ConverseInput struct {
 	Tools           []llms.Tool
 	StreamingFunc   streaming.Callback
 	ReasoningConfig *llms.ReasoningConfig
+	EnableCaching   bool
 }
 
 type converseThinkingPayload struct {
@@ -94,6 +95,11 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		inferenceConfig.StopSequences = input.StopSequences
 	}
 
+	// Add cachePoint to messages if caching is enabled
+	if input.EnableCaching && len(converseMessages) > 0 {
+		c.addCachePointToMessages(converseMessages)
+	}
+
 	converseInput := &bedrockruntime.ConverseInput{
 		ModelId:         aws.String(input.ModelID),
 		Messages:        converseMessages,
@@ -102,6 +108,15 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 
 	// Add system prompts if any
 	if len(systemPrompts) > 0 {
+		// Add cachePoint after system if caching is enabled
+		if input.EnableCaching {
+			systemPrompts = append(systemPrompts, &types.SystemContentBlockMemberCachePoint{
+				Value: types.CachePointBlock{
+					Type: types.CachePointTypeDefault,
+					Ttl:  types.CacheTTLFiveMinutes,
+				},
+			})
+		}
 		converseInput.System = systemPrompts
 	}
 
@@ -152,6 +167,20 @@ func (c *ConverseClient) convertMessages(messages []Message) ([]types.Message, [
 			if err != nil {
 				return nil, nil, err
 			}
+			// Add cachePoint if message has cache control
+			if msg.CacheControl != nil {
+				cacheBlock := types.CachePointBlock{
+					Type: types.CachePointTypeDefault,
+				}
+				if msg.CacheControl.TTL == "1h" {
+					cacheBlock.Ttl = types.CacheTTLOneHour
+				} else {
+					cacheBlock.Ttl = types.CacheTTLFiveMinutes
+				}
+				converseMsg.Content = append(converseMsg.Content, &types.ContentBlockMemberCachePoint{
+					Value: cacheBlock,
+				})
+			}
 			converseMessages = append(converseMessages, converseMsg)
 		case llms.ChatMessageTypeTool:
 			converseMsg, err := c.convertToolMessage(msg)
@@ -165,6 +194,22 @@ func (c *ConverseClient) convertMessages(messages []Message) ([]types.Message, [
 	return converseMessages, systemPrompts, nil
 }
 
+// addCachePointToMessages adds cachePoint to the last message for conversation history caching
+func (c *ConverseClient) addCachePointToMessages(messages []types.Message) {
+	if len(messages) == 0 {
+		return
+	}
+
+	// Add cachePoint to the last message's content
+	lastMsg := &messages[len(messages)-1]
+	lastMsg.Content = append(lastMsg.Content, &types.ContentBlockMemberCachePoint{
+		Value: types.CachePointBlock{
+			Type: types.CachePointTypeDefault,
+			Ttl:  types.CacheTTLFiveMinutes,
+		},
+	})
+}
+
 // convertUserOrAssistantMessage converts user or assistant messages
 func (c *ConverseClient) convertUserOrAssistantMessage(msg Message) (types.Message, error) {
 	var role types.ConversationRole
@@ -175,6 +220,31 @@ func (c *ConverseClient) convertUserOrAssistantMessage(msg Message) (types.Messa
 	}
 
 	var contentBlocks []types.ContentBlock
+
+	// For AI messages with reasoning, add reasoning blocks first
+	if msg.Role == llms.ChatMessageTypeAI && msg.Reasoning != nil {
+		// Add thinking block if present
+		if msg.Reasoning.Content != "" || len(msg.Reasoning.Signature) > 0 {
+			reasoningBlock := types.ReasoningContentBlockMemberReasoningText{
+				Value: types.ReasoningTextBlock{
+					Text:      ptrStringOrNil(msg.Reasoning.Content),
+					Signature: ptrStringOrNil(string(msg.Reasoning.Signature)),
+				},
+			}
+			contentBlocks = append(contentBlocks, &types.ContentBlockMemberReasoningContent{
+				Value: &reasoningBlock,
+			})
+		}
+		// Add redacted thinking block if present
+		if len(msg.Reasoning.RedactedContent) > 0 {
+			redactedBlock := types.ReasoningContentBlockMemberRedactedContent{
+				Value: msg.Reasoning.RedactedContent,
+			}
+			contentBlocks = append(contentBlocks, &types.ContentBlockMemberReasoningContent{
+				Value: &redactedBlock,
+			})
+		}
+	}
 
 	// Handle text content
 	if msg.Content != "" {
@@ -205,9 +275,11 @@ func (c *ConverseClient) convertToolCallInput(args any) (any, error) {
 		return args, nil
 	}
 
+	// Convert to Smithy-compatible format by re-encoding through JSON
+	// This handles types like map[string]any with interface{} values
 	jsonBytes := bytes.NewBuffer(nil)
 	if err := json.NewEncoder(jsonBytes).Encode(args); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to encode arguments: %w", err)
 	}
 
 	jsonDecoder := json.NewDecoder(jsonBytes)
@@ -215,7 +287,7 @@ func (c *ConverseClient) convertToolCallInput(args any) (any, error) {
 
 	var jsonValue any
 	if err := jsonDecoder.Decode(&jsonValue); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode arguments: %w", err)
 	}
 
 	return jsonValue, nil
@@ -315,6 +387,8 @@ func (c *ConverseClient) handleStreamingResponse(ctx context.Context, input *bed
 func (c *ConverseClient) processStreamingResponse(ctx context.Context, response *bedrockruntime.ConverseStreamOutput, callback streaming.Callback) (*llms.ContentResponse, error) {
 	var fullContent strings.Builder
 	var reasoningContent strings.Builder
+	var signature bytes.Buffer
+	var redactedContent bytes.Buffer
 	var toolCalls []llms.ToolCall
 	currentToolCalls := make(map[string]*streaming.ToolCall) // Track streaming tool calls by ID
 
@@ -352,9 +426,13 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 								return nil, err
 							}
 						case *types.ReasoningContentBlockDeltaMemberRedactedContent:
-							// TODO: not supported yet
+							if len(block.Value) > 0 {
+								redactedContent.Write(block.Value)
+							}
 						case *types.ReasoningContentBlockDeltaMemberSignature:
-							// TODO: not supported yet
+							if len(block.Value) > 0 {
+								signature.WriteString(block.Value)
+							}
 						}
 					}
 				case *types.ContentBlockDeltaMemberToolUse:
@@ -433,11 +511,20 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		return nil, fmt.Errorf("stream error: %w", err)
 	}
 
+	var sig []byte
+	if signature.Len() > 0 {
+		sig = signature.Bytes()
+	}
+	var redacted []byte
+	if redactedContent.Len() > 0 {
+		redacted = redactedContent.Bytes()
+	}
+
 	choice := &llms.ContentChoice{
 		Content:        fullContent.String(),
 		ToolCalls:      toolCalls,
 		GenerationInfo: make(map[string]any),
-		Reasoning:      c.processReasoning(reasoningContent.String()),
+		Reasoning:      c.processReasoning(reasoningContent.String(), sig, redacted),
 	}
 
 	result := &llms.ContentResponse{
@@ -447,13 +534,15 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	return result, nil
 }
 
-func (c *ConverseClient) processReasoning(reasoningContent string) *reasoning.ContentReasoning {
-	if reasoningContent == "" {
+func (c *ConverseClient) processReasoning(reasoningContent string, signature []byte, redactedContent []byte) *reasoning.ContentReasoning {
+	if reasoningContent == "" && len(signature) == 0 && len(redactedContent) == 0 {
 		return nil
 	}
 
 	return &reasoning.ContentReasoning{
-		Content: reasoningContent,
+		Content:         reasoningContent,
+		Signature:       signature,
+		RedactedContent: redactedContent,
 	}
 }
 
@@ -477,7 +566,17 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 				choice.Content += block.Value
 			case *types.ContentBlockMemberToolUse:
 				// Convert tool use to ToolCall
-				argsJSON, _ := json.Marshal(block.Value.Input)
+				// Extract input from document.LazyDocument
+				var inputData any
+				if block.Value.Input != nil {
+					if err := block.Value.Input.UnmarshalSmithyDocument(&inputData); err != nil {
+						return nil, fmt.Errorf("failed to unmarshal tool input document: %w", err)
+					}
+				}
+				argsJSON, err := json.Marshal(inputData)
+				if err != nil {
+					return nil, fmt.Errorf("failed to marshal tool input to JSON: %w", err)
+				}
 				toolCall := llms.ToolCall{
 					ID:   *block.Value.ToolUseId,
 					Type: "function",
@@ -488,14 +587,28 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 				}
 				choice.ToolCalls = append(choice.ToolCalls, toolCall)
 			case *types.ContentBlockMemberReasoningContent:
-				// The block.Value is of type ReasoningContentBlock, not string
-				// TODO: Extract text from reasoning block when AWS SDK exposes it
+				// The block.Value is of type ReasoningContentBlock
 				switch content := block.Value.(type) {
 				case *types.ReasoningContentBlockMemberReasoningText:
-					choice.Reasoning = c.processReasoning(*content.Value.Text)
-					_ = content.Value.Signature // TODO: not supported yet
+					reasoningText := ""
+					if content.Value.Text != nil {
+						reasoningText = *content.Value.Text
+					}
+					var sig []byte
+					if content.Value.Signature != nil {
+						sig = []byte(*content.Value.Signature)
+					}
+					choice.Reasoning = c.processReasoning(reasoningText, sig, nil)
 				case *types.ReasoningContentBlockMemberRedactedContent:
-					// TODO: not supported yet
+					var redacted []byte
+					if len(content.Value) > 0 {
+						redacted = content.Value
+					}
+					if choice.Reasoning == nil {
+						choice.Reasoning = c.processReasoning("", nil, redacted)
+					} else {
+						choice.Reasoning.RedactedContent = redacted
+					}
 				}
 			}
 		}
@@ -508,12 +621,25 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 	if response.Usage != nil {
 		if response.Usage.InputTokens != nil {
 			choice.GenerationInfo["input_tokens"] = *response.Usage.InputTokens
+			choice.GenerationInfo["PromptTokens"] = *response.Usage.InputTokens
 		}
 		if response.Usage.OutputTokens != nil {
 			choice.GenerationInfo["output_tokens"] = *response.Usage.OutputTokens
+			choice.GenerationInfo["CompletionTokens"] = *response.Usage.OutputTokens
 		}
 		if response.Usage.TotalTokens != nil {
 			choice.GenerationInfo["total_tokens"] = *response.Usage.TotalTokens
+			choice.GenerationInfo["TotalTokens"] = *response.Usage.TotalTokens
+		}
+		// Add cache metrics if available
+		if response.Usage.CacheReadInputTokens != nil {
+			choice.GenerationInfo["cacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
+			choice.GenerationInfo["CacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
+			choice.GenerationInfo["PromptCachedTokens"] = *response.Usage.CacheReadInputTokens
+		}
+		if response.Usage.CacheWriteInputTokens != nil {
+			choice.GenerationInfo["cacheWriteInputTokens"] = *response.Usage.CacheWriteInputTokens
+			choice.GenerationInfo["CacheCreationInputTokens"] = *response.Usage.CacheWriteInputTokens
 		}
 	}
 
@@ -530,7 +656,11 @@ func (c *ConverseClient) supportsReasoning(modelID string) bool {
 	reasoningModels := []string{
 		"anthropic.claude-opus-4-",
 		"anthropic.claude-sonnet-4-",
+		"anthropic.claude-haiku-4-",
 		"anthropic.claude-3-7-",
+		"openai.gpt-oss-120b",
+		"openai.gpt-oss-20b",
+		"moonshot.kimi-k2-thinking",
 	}
 
 	for _, model := range reasoningModels {
@@ -539,4 +669,11 @@ func (c *ConverseClient) supportsReasoning(modelID string) bool {
 		}
 	}
 	return false
+}
+
+func ptrStringOrNil(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
