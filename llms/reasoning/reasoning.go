@@ -215,7 +215,8 @@ func DefaultIsReasoningModel(model string) bool {
 
 	// Google Gemini reasoning models
 	if strings.HasPrefix(modelLower, "gemini-2.5-") ||
-		strings.HasPrefix(modelLower, "gemini-3-") {
+		strings.HasPrefix(modelLower, "gemini-3-") ||
+		strings.HasPrefix(modelLower, "gemini-3.1-") {
 		return true
 	}
 

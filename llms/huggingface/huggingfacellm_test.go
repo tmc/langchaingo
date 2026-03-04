@@ -171,9 +171,11 @@ func TestHuggingFaceLLMGenerateContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	//nolint:staticcheck // false positive: resp can be nil but t.Fatal exits immediately
 	if resp == nil {
 		t.Fatal("expected non-nil response")
 	}
+	//nolint:staticcheck // t.Fatal above ensures resp is not nil
 	if len(resp.Choices) != 1 {
 		t.Fatalf("expected 1 choice, got %d", len(resp.Choices))
 	}

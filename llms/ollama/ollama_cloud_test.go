@@ -24,17 +24,17 @@ type removeTimestampTransport struct {
 func (t *removeTimestampTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Clone request to avoid modifying original
 	clonedReq := req.Clone(req.Context())
-	
+
 	// Remove ts query parameter
 	q := clonedReq.URL.Query()
 	q.Del("ts")
 	clonedReq.URL.RawQuery = q.Encode()
-	
+
 	return t.base.RoundTrip(clonedReq)
 }
 
 // newCloudTestClient creates a test client configured for Ollama Cloud
-func newCloudTestClient(t *testing.T, opts ...Option) *LLM {
+func newCloudTestClient(t *testing.T) *LLM {
 	t.Helper()
 
 	// Check for required credentials and skip if not available
@@ -79,13 +79,12 @@ func newCloudTestClient(t *testing.T, opts ...Option) *LLM {
 		cloudModel = envModel
 	}
 
-	// Always add server URL, API key, and HTTP client
-	opts = append([]Option{
+	opts := []Option{
 		WithServerURL(serverURL),
 		WithAPIKey(apiKey),
 		WithHTTPClient(wrappedClient),
 		WithModel(cloudModel),
-	}, opts...)
+	}
 
 	c, err := New(opts...)
 	require.NoError(t, err)

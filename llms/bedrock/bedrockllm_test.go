@@ -43,7 +43,7 @@ func setUpTestWithTransport(rr *httprr.RecordReplay) (*bedrockruntime.Client, er
 	return client, nil
 }
 
-func TestAmazonOutputConverseAPI(t *testing.T) {
+func TestAmazonOutputConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -1519,14 +1519,13 @@ func TestAmazonTextResponseWithThinkingConverseAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	messages := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextPart("Solve: If x + 5 = 12, what is x?"),
-			},
+	messages := make([]llms.MessageContent, 0, 3)
+	messages = append(messages, llms.MessageContent{
+		Role: llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{
+			llms.TextPart("Solve: If x + 5 = 12, what is x?"),
 		},
-	}
+	})
 
 	// Request with thinking
 	resp, err := llm.GenerateContent(ctx, messages,
@@ -1603,14 +1602,13 @@ func TestAmazonTextResponseWithThinkingLegacyAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	messages := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextPart("Solve: If x + 5 = 12, what is x?"),
-			},
+	messages := make([]llms.MessageContent, 0, 3)
+	messages = append(messages, llms.MessageContent{
+		Role: llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{
+			llms.TextPart("Solve: If x + 5 = 12, what is x?"),
 		},
-	}
+	})
 
 	// Request with thinking
 	resp, err := llm.GenerateContent(ctx, messages,
@@ -1666,7 +1664,7 @@ func TestAmazonTextResponseWithThinkingLegacyAPI(t *testing.T) {
 }
 
 // TestAmazonSingleToolCallWithThinkingConverseAPI tests single tool call with thinking
-func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) {
+func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -1702,12 +1700,11 @@ func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) {
 		},
 	}}
 
-	messages := []llms.MessageContent{
-		{
-			Role:  llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
-		},
-	}
+	messages := make([]llms.MessageContent, 0, 3)
+	messages = append(messages, llms.MessageContent{
+		Role:  llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
+	})
 
 	resp, err := llm.GenerateContent(ctx, messages,
 		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
@@ -1769,7 +1766,7 @@ func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) {
 }
 
 // TestAmazonSequentialToolCallsWithThinkingConverseAPI tests sequential tool calls with thinking
-func TestAmazonSequentialToolCallsWithThinkingConverseAPI(t *testing.T) {
+func TestAmazonSequentialToolCallsWithThinkingConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -1807,14 +1804,13 @@ func TestAmazonSequentialToolCallsWithThinkingConverseAPI(t *testing.T) {
 		},
 	}
 
-	messages := []llms.MessageContent{
-		{
-			Role: llms.ChatMessageTypeHuman,
-			Parts: []llms.ContentPart{
-				llms.TextPart("Calculate (5 + 3) and then multiply by 2"),
-			},
+	messages := make([]llms.MessageContent, 0, 3)
+	messages = append(messages, llms.MessageContent{
+		Role: llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{
+			llms.TextPart("Calculate (5 + 3) and then multiply by 2"),
 		},
-	}
+	})
 
 	// First call
 	resp1, err := llm.GenerateContent(ctx, messages,
@@ -1960,7 +1956,7 @@ func TestAmazonTextResponseWithThinkingStreamingConverseAPI(t *testing.T) {
 // Turn 1: CacheCreation > 0 (conversation history cached)
 // Turn 2: CacheRead > 0 (previous turn read from cache), new content added to cache
 // Turn 3+: Cache continues to be used and extended
-func TestAmazonMultiTurnCachingWithToolsLegacyAPI(t *testing.T) {
+func TestAmazonMultiTurnCachingWithToolsLegacyAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -2190,7 +2186,7 @@ func TestAmazonMultiTurnCachingWithToolsLegacyAPI(t *testing.T) {
 // Expected behavior:
 // Turn 3: CacheCreation > 0 (conversation history with cachePoint)
 // Turn 4: CacheRead > 0 (previous context read from cache)
-func TestAmazonMultiTurnCachingWithToolsConverseAPI(t *testing.T) {
+func TestAmazonMultiTurnCachingWithToolsConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -2252,16 +2248,17 @@ func TestAmazonMultiTurnCachingWithToolsConverseAPI(t *testing.T) {
 	systemPrompt := "BedrockConverseCache-v1: " + strings.Repeat("You are a helpful assistant with access to weather and flight booking capabilities. ", 15)
 
 	// Turn 1: Initial request with system prompt
-	messages := []llms.MessageContent{
-		{
+	messages := make([]llms.MessageContent, 0, 8)
+	messages = append(messages,
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
 		},
-		{
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
 		},
-	}
+	)
 
 	resp1, err := llm.GenerateContent(ctx, messages,
 		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
@@ -2418,7 +2415,7 @@ func TestAmazonMultiTurnCachingWithToolsConverseAPI(t *testing.T) {
 // - Cache points are automatically added to conversation history
 // - No manual bedrock.WithCacheControl() wrapper needed
 // - Cache metrics show cache utilization
-func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) {
+func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -2468,16 +2465,17 @@ func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) {
 	systemPrompt := "BedrockAutoCacheTest-v1: " + strings.Repeat("You are a helpful assistant with access to weather capabilities. ", 15)
 
 	// Turn 1: Initial request with system prompt
-	messages := []llms.MessageContent{
-		{
+	messages := make([]llms.MessageContent, 0, 6)
+	messages = append(messages,
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
 		},
-		{
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
 		},
-	}
+	)
 
 	resp1, err := llm.GenerateContent(ctx, messages,
 		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
@@ -2589,7 +2587,7 @@ func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) {
 
 // TestAmazonAutomaticCachingConverseAPI tests automatic prompt caching with Converse API.
 // This validates that WithAutomaticCaching() works correctly with Converse API.
-func TestAmazonAutomaticCachingConverseAPI(t *testing.T) {
+func TestAmazonAutomaticCachingConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
 
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
@@ -2640,16 +2638,17 @@ func TestAmazonAutomaticCachingConverseAPI(t *testing.T) {
 	systemPrompt := "BedrockConverseAutoCacheTest-v1: " + strings.Repeat("You are a helpful assistant with access to weather capabilities. ", 15)
 
 	// Turn 1: Initial request with system prompt
-	messages := []llms.MessageContent{
-		{
+	messages := make([]llms.MessageContent, 0, 6)
+	messages = append(messages,
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextPart(systemPrompt)},
 		},
-		{
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What's the weather in Boston?")},
 		},
-	}
+	)
 
 	resp1, err := llm.GenerateContent(ctx, messages,
 		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),

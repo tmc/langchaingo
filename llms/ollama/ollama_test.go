@@ -365,14 +365,14 @@ func TestWithPullTimeout(t *testing.T) {
 	// This test only works in recording mode (timeout behavior cannot be replayed)
 	// Skip if httprr file doesn't exist
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t)
-	
+
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
 	defer rr.Close()
-	
+
 	if !rr.Recording() {
 		t.Skip("Skipping pull timeout test when not recording (timeout behavior cannot be replayed)")
 	}
-	
+
 	// Scrub dynamic headers
 	rr.ScrubReq(func(req *http.Request) error {
 		req.Header.Del("Authorization")

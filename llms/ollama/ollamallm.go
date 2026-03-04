@@ -46,10 +46,10 @@ type authRoundTripper struct {
 func (a *authRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Clone the request to avoid modifying the original
 	clonedReq := req.Clone(req.Context())
-	
+
 	// Add Authorization header with Bearer token
 	clonedReq.Header.Set("Authorization", "Bearer "+a.apiKey)
-	
+
 	// Use the wrapped transport to perform the actual request
 	return a.transport.RoundTrip(clonedReq)
 }
@@ -88,7 +88,7 @@ func New(opts ...Option) (*LLM, error) {
 		if transport == nil {
 			transport = http.DefaultTransport
 		}
-		
+
 		// Create a new HTTP client with the auth transport
 		httpClient = &http.Client{
 			Transport: &authRoundTripper{

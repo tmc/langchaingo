@@ -15,8 +15,8 @@
 //
 // Two API modes are supported:
 //
-//  - Legacy API: Model-specific implementations via InvokeModel/InvokeModelWithResponseStream
-//  - Converse API: Unified implementation via Converse/ConverseStream (recommended)
+//   - Legacy API: Model-specific implementations via InvokeModel/InvokeModelWithResponseStream
+//   - Converse API: Unified implementation via Converse/ConverseStream (recommended)
 //
 // # Basic Usage
 //
@@ -129,17 +129,17 @@
 //
 // See models_list.go for complete list. Major providers:
 //
-//  - Anthropic: Claude 4.6 (Opus, Sonnet), Claude 4.5, 4.1, 4, 3.7, 3.5
-//  - Amazon: Nova 2 Lite, Nova Premier, Nova Pro, Nova Lite, Nova Micro
-//  - Meta: Llama 4, Llama 3.3, 3.2, 3.1, 3
-//  - Cohere: Command R, Command R+
-//  - AI21: Jamba 1.5 Large, Mini
-//  - DeepSeek: R1
-//  - OpenAI: GPT-OSS-120B, GPT-OSS-20B
-//  - Qwen: Qwen3 Next, Qwen3 VL, Qwen3 32B, Qwen3 Coder (30B, Next)
-//  - Mistral: Large 3, Magistral Small
-//  - Moonshot: Kimi K2.5, Kimi K2 Thinking
-//  - Z.AI: GLM-4.7, GLM-4.7-Flash
+//   - Anthropic: Claude 4.6 (Opus, Sonnet), Claude 4.5, 4.1, 4, 3.7, 3.5
+//   - Amazon: Nova 2 Lite, Nova Premier, Nova Pro, Nova Lite, Nova Micro
+//   - Meta: Llama 4, Llama 3.3, 3.2, 3.1, 3
+//   - Cohere: Command R, Command R+
+//   - AI21: Jamba 1.5 Large, Mini
+//   - DeepSeek: R1
+//   - OpenAI: GPT-OSS-120B, GPT-OSS-20B
+//   - Qwen: Qwen3 Next, Qwen3 VL, Qwen3 32B, Qwen3 Coder (30B, Next)
+//   - Mistral: Large 3, Magistral Small
+//   - Moonshot: Kimi K2.5, Kimi K2 Thinking
+//   - Z.AI: GLM-4.7, GLM-4.7-Flash
 //
 // # Error Handling
 //
@@ -163,16 +163,16 @@
 //
 // The client uses AWS SDK v2 configuration:
 //
-//  - Credentials: From environment (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) or AWS config
-//  - Region: From environment (AWS_REGION) or default config
-//  - Custom configuration: Use bedrock.WithClient() with pre-configured bedrockruntime.Client
+//   - Credentials: From environment (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) or AWS config
+//   - Region: From environment (AWS_REGION) or default config
+//   - Custom configuration: Use bedrock.WithClient() with pre-configured bedrockruntime.Client
 //
 // # Performance Considerations
 //
-//  - Converse API is recommended for new applications (unified, better error handling)
-//  - Automatic caching reduces costs by 90% for cached tokens (Claude 4.x only)
-//  - Streaming reduces latency for interactive applications
-//  - Minimum cache checkpoint: 1024 tokens (Sonnet 4.5), 4096 tokens (Haiku 4.5)
+//   - Converse API is recommended for new applications (unified, better error handling)
+//   - Automatic caching reduces costs by 90% for cached tokens (Claude 4.x only)
+//   - Streaming reduces latency for interactive applications
+//   - Minimum cache checkpoint: 1024 tokens (Sonnet 4.5), 4096 tokens (Haiku 4.5)
 //
 // # Maintenance
 //
@@ -194,9 +194,9 @@
 //
 // Tests use httprr for HTTP recording/replay:
 //
-//  - Integration tests: bedrockllm_test.go (requires AWS credentials)
-//  - Unit tests: bedrockllm_unit_test.go (no credentials needed)
-//  - Tool calling: bedrock_tool_integration_test.go
+//   - Integration tests: bedrockllm_test.go (requires AWS credentials)
+//   - Unit tests: bedrockllm_unit_test.go (no credentials needed)
+//   - Tool calling: bedrock_tool_integration_test.go
 //
 // Recording new HTTP interactions:
 //

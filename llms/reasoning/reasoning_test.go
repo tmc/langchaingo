@@ -691,7 +691,9 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"gemini-2.5-pro", true},
 		{"gemini-2.5-pro-preview", true},
 		{"gemini-3-flash-preview", true},
+		{"gemini-3.1-flash-lite-preview", true},
 		{"gemini-3-pro-preview", true},
+		{"gemini-3.1-pro-preview", true},
 		{"google/gemini-2.5-flash", true},
 
 		// X-AI Grok reasoning models
