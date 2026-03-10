@@ -77,17 +77,17 @@ func TestSetCallOptions(t *testing.T) {
 
 	setCallOptions(options, callOpts)
 
-	if callOpts.Model != "test-model" {
-		t.Errorf("setCallOptions() Model = %v, want %v", callOpts.Model, "test-model")
+	if callOpts.GetModel() != "test-model" {
+		t.Errorf("setCallOptions() Model = %v, want %v", callOpts.GetModel(), "test-model")
 	}
-	if callOpts.Temperature != 0.7 {
-		t.Errorf("setCallOptions() Temperature = %v, want %v", callOpts.Temperature, 0.7)
+	if callOpts.GetTemperature() != 0.7 {
+		t.Errorf("setCallOptions() Temperature = %v, want %v", callOpts.GetTemperature(), 0.7)
 	}
-	if callOpts.MaxTokens != 100 {
-		t.Errorf("setCallOptions() MaxTokens = %v, want %v", callOpts.MaxTokens, 100)
+	if callOpts.GetMaxTokens() != 100 {
+		t.Errorf("setCallOptions() MaxTokens = %v, want %v", callOpts.GetMaxTokens(), 100)
 	}
-	if callOpts.TopP != 0.9 {
-		t.Errorf("setCallOptions() TopP = %v, want %v", callOpts.TopP, 0.9)
+	if callOpts.GetTopP() != 0.9 {
+		t.Errorf("setCallOptions() TopP = %v, want %v", callOpts.GetTopP(), 0.9)
 	}
 }
 
@@ -104,17 +104,17 @@ func TestResolveDefaultOptions(t *testing.T) {
 
 	result := resolveDefaultOptions(sdkDefaults, clientOpts)
 
-	if result.Model != "client-model" {
-		t.Errorf("resolveDefaultOptions() Model = %v, want %v", result.Model, "client-model")
+	if result.GetModel() != "client-model" {
+		t.Errorf("resolveDefaultOptions() Model = %v, want %v", result.GetModel(), "client-model")
 	}
-	if result.Temperature != 0.5 {
-		t.Errorf("resolveDefaultOptions() Temperature = %v, want %v", result.Temperature, 0.5)
+	if result.GetTemperature() != 0.5 {
+		t.Errorf("resolveDefaultOptions() Temperature = %v, want %v", result.GetTemperature(), 0.5)
 	}
-	if result.MaxTokens != 50 {
-		t.Errorf("resolveDefaultOptions() MaxTokens = %v, want %v", result.MaxTokens, 50)
+	if result.GetMaxTokens() != 50 {
+		t.Errorf("resolveDefaultOptions() MaxTokens = %v, want %v", result.GetMaxTokens(), 50)
 	}
-	if result.TopP != 0.8 {
-		t.Errorf("resolveDefaultOptions() TopP = %v, want %v", result.TopP, 0.8)
+	if result.GetTopP() != 0.8 {
+		t.Errorf("resolveDefaultOptions() TopP = %v, want %v", result.GetTopP(), 0.8)
 	}
 }
 
@@ -301,11 +301,11 @@ func contains(s, substr string) bool {
 func TestMistralChatParamsFromCallOptions(t *testing.T) {
 	t.Run("basic options", func(t *testing.T) {
 		callOpts := &llms.CallOptions{
-			Model:       "mistral-large",
-			Temperature: 0.7,
-			MaxTokens:   200,
-			TopP:        0.95,
-			Seed:        42,
+			Model:       getStringPointer("mistral-large"),
+			Temperature: getFloatPointer(0.7),
+			MaxTokens:   getIntPointer(200),
+			TopP:        getFloatPointer(0.95),
+			Seed:        getIntPointer(42),
 		}
 
 		result := mistralChatParamsFromCallOptions(callOpts)
@@ -479,4 +479,16 @@ func TestCall(t *testing.T) {
 func TestGenerateContent(t *testing.T) {
 	// This test requires mocking the Mistral SDK client
 	t.Skip("GenerateContent() requires integration testing with mock Mistral client")
+}
+
+func getStringPointer(s string) *string {
+	return &s
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

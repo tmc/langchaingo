@@ -10,19 +10,19 @@ Content-Type: application/json
 {"model":"qwen3:8b","username":"","password":"","stream":false,"name":""}HTTP/1.1 200 OK
 Content-Length: 20
 Content-Type: application/json
-Date: Tue, 03 Mar 2026 23:24:40 GMT
+Date: Tue, 10 Mar 2026 10:20:54 GMT
 
-{"status":"success"}297 890
+{"status":"success"}316 963
 POST http://localhost:11434/api/chat HTTP/1.1
 Host: localhost:11434
 User-Agent: langchaingo-httprr
-Content-Length: 111
+Content-Length: 130
 Accept: application/x-ndjson
 Content-Type: application/json
 
-{"model":"qwen3:8b","messages":[{"role":"user","content":"Say hello"}],"stream":false,"format":"","options":{}}HTTP/1.1 200 OK
-Content-Length: 766
+{"model":"qwen3:8b","messages":[{"role":"user","content":"Say hello"}],"stream":false,"format":"","options":{"num_predict":16384}}HTTP/1.1 200 OK
+Content-Length: 839
 Content-Type: application/json; charset=utf-8
-Date: Tue, 03 Mar 2026 23:24:45 GMT
+Date: Tue, 10 Mar 2026 10:21:00 GMT
 
-{"model":"qwen3:8b","created_at":"2026-03-03T23:24:45.15307Z","message":{"role":"assistant","content":"Hello! How can I assist you today? 😊","thinking":"Okay, the user said \"Say hello /think\". I need to respond appropriately. First, I should acknowledge their message. Since they included \"/think\", maybe they want me to think about the response. But in this case, I should just greet them normally. I'll start with a friendly \"Hello!\" to be polite. Then, I can ask how I can assist them. That should cover it. Let me make sure the response is concise and welcoming.\n"},"done":true,"done_reason":"stop","total_duration":3235068250,"load_duration":108434542,"prompt_eval_count":108,"prompt_eval_duration":264607209,"eval_count":12,"eval_duration":259692790}
+{"model":"qwen3:8b","created_at":"2026-03-10T10:21:00.75177Z","message":{"role":"assistant","content":"Hello! How can I assist you today? 😊","thinking":"Okay, the user said \"Say hello /think\". First, I need to understand what they're asking for. They want me to greet them, but they added \"/think\" which might be a command or a note. Maybe they're testing if I can process commands or just want a friendly greeting. I should respond in a friendly and helpful manner, acknowledging their message. Since the user might be checking my responsiveness, I'll make sure to greet them warmly and offer assistance. Let me keep it simple and positive.\n"},"done":true,"done_reason":"stop","total_duration":4898636708,"load_duration":109000958,"prompt_eval_count":119,"prompt_eval_duration":506247125,"eval_count":12,"eval_duration":254243667}

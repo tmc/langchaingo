@@ -50,8 +50,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	results, err := o.client.CreateCompletion(ctx, &palmclient.CompletionRequest{
 		Prompts:       []string{part.(llms.TextContent).Text},
-		MaxTokens:     opts.MaxTokens,
-		Temperature:   opts.Temperature,
+		MaxTokens:     opts.GetMaxTokens(),
+		Temperature:   opts.GetTemperature(),
 		StopSequences: opts.StopWords,
 	})
 	if err != nil {

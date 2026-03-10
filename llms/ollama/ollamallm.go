@@ -166,8 +166,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 // getModel determines which model to use based on options and defaults.
 func (o *LLM) getModel(opts llms.CallOptions) string {
-	if opts.Model != "" {
-		return opts.Model
+	if model := opts.GetModel(); model != "" {
+		return model
 	}
 	return o.options.model
 }
@@ -451,15 +451,15 @@ func typeToRole(typ llms.ChatMessageType) string {
 
 func makeOllamaOptionsFromOptions(ollamaOptions api.Options, opts llms.CallOptions) (map[string]any, error) {
 	// Load back CallOptions as ollamaOptions
-	ollamaOptions.NumPredict = opts.MaxTokens
-	ollamaOptions.Temperature = float32(opts.Temperature)
+	ollamaOptions.NumPredict = opts.GetMaxTokens()
+	ollamaOptions.Temperature = float32(opts.GetTemperature())
 	ollamaOptions.Stop = opts.StopWords
-	ollamaOptions.TopK = opts.TopK
-	ollamaOptions.TopP = float32(opts.TopP)
-	ollamaOptions.Seed = opts.Seed
-	ollamaOptions.RepeatPenalty = float32(opts.RepetitionPenalty)
-	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
-	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
+	ollamaOptions.TopK = opts.GetTopK()
+	ollamaOptions.TopP = float32(opts.GetTopP())
+	ollamaOptions.Seed = opts.GetSeed()
+	ollamaOptions.RepeatPenalty = float32(opts.GetRepetitionPenalty())
+	ollamaOptions.FrequencyPenalty = float32(opts.GetFrequencyPenalty())
+	ollamaOptions.PresencePenalty = float32(opts.GetPresencePenalty())
 
 	os, err := json.Marshal(ollamaOptions)
 	if err != nil {

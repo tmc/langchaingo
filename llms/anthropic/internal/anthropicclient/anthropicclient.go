@@ -137,9 +137,9 @@ type MessageRequest struct {
 	Model       string           `json:"model"`
 	Messages    []ChatMessage    `json:"messages"`
 	System      any              `json:"system,omitempty"` // Can be string or []Content for caching
-	Temperature float64          `json:"temperature"`
-	MaxTokens   int              `json:"max_tokens,omitempty"`
-	TopP        float64          `json:"top_p,omitempty"`
+	Temperature *float64         `json:"temperature,omitempty"`
+	MaxTokens   *int             `json:"max_tokens,omitempty"`
+	TopP        *float64         `json:"top_p,omitempty"`
 	Tools       []Tool           `json:"tools,omitempty"`
 	ToolChoice  any              `json:"tool_choice,omitempty"`
 	StopWords   []string         `json:"stop_sequences,omitempty"`

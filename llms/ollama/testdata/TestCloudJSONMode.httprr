@@ -1,24 +1,24 @@
 httprr trace v1
-342 1028
+361 944
 POST https://ollama.com/api/chat HTTP/1.1
 Host: ollama.com
 User-Agent: langchaingo-httprr
-Content-Length: 165
+Content-Length: 184
 Accept: application/x-ndjson
 Content-Type: application/json
 
-{"model":"gpt-oss:120b","messages":[{"role":"user","content":"List three colors in JSON format with a 'colors' array."}],"stream":false,"format":"json","options":{}}HTTP/2.0 200 OK
-Content-Length: 499
+{"model":"gpt-oss:120b","messages":[{"role":"user","content":"List three colors in JSON format with a 'colors' array."}],"stream":false,"format":"json","options":{"num_predict":16384}}HTTP/2.0 200 OK
+Content-Length: 415
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json
-Date: Tue, 03 Mar 2026 23:25:53 GMT
+Date: Tue, 10 Mar 2026 10:17:19 GMT
 Server: Google Frontend
-Traceparent: 00-eda5230fde89883e117339a922df0ce2-4e60271a5e85c74e-00
+Traceparent: 00-7d4271e21ae55045a32cd38cece21d36-2b5e1825c984340f-00
 Via: 1.1 google
-X-Build-Commit: 98b9918317e409562bff50dcf4b9f7a1f0271cdf
-X-Build-Time: 2026-03-03T10:12:36-08:00
-X-Cloud-Trace-Context: eda5230fde89883e117339a922df0ce2/5647556926931060558
+X-Build-Commit: c70f6448317a56f6efced4c37ce676693c488ed2
+X-Build-Time: 2026-03-09T19:42:26-07:00
+X-Cloud-Trace-Context: 7d4271e21ae55045a32cd38cece21d36/3124961742015443983
 X-Frame-Options: DENY
-X-Request-Id: 56f9efcb-ba3e-4c19-84d0-f1060b26502d
+X-Request-Id: 101b32b7-a8af-49df-a51f-cbfae56252af
 
-{"model":"gpt-oss:120b","created_at":"2026-03-03T23:25:53.415422353Z","message":{"role":"assistant","content":"```json\n{\n  \"colors\": [\"red\", \"green\", \"blue\"]\n}\n```","thinking":"We need to respond with JSON format containing a 'colors' array listing three colors. Should provide JSON code block. Probably just output:\n\n{\n  \"colors\": [\"red\", \"green\", \"blue\"]\n}\n\nThat's it."},"done":true,"done_reason":"stop","total_duration":760896035,"prompt_eval_count":80,"eval_count":74}
+{"model":"gpt-oss:120b","created_at":"2026-03-10T10:17:19.172500518Z","message":{"role":"assistant","content":"```json\n{\n  \"colors\": [\n    \"red\",\n    \"green\",\n    \"blue\"\n  ]\n}\n```","thinking":"We need to respond with JSON: {\"colors\": [\"red\",\"green\",\"blue\"]} or similar. Provide just JSON."},"done":true,"done_reason":"stop","total_duration":681780609,"prompt_eval_count":80,"eval_count":60}

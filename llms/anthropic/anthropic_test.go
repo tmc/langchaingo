@@ -272,6 +272,7 @@ func TestAnthropic_GenerateContentWithToolAndStreaming(t *testing.T) {
 		content,
 		llms.WithStreamingFunc(streamingFunc),
 		llms.WithTools(availableTools),
+		llms.WithTemperature(0.5),
 	)
 	require.NoError(t, err)
 

@@ -37,7 +37,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
 
-	opts := &llms.CallOptions{Model: defaultModel}
+	model := defaultModel
+	opts := &llms.CallOptions{Model: &model}
 	for _, opt := range options {
 		opt(opts)
 	}
@@ -49,13 +50,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Model:             o.client.Model,
 		Prompt:            part.(llms.TextContent).Text,
 		Task:              huggingfaceclient.InferenceTaskTextGeneration,
-		Temperature:       opts.Temperature,
-		TopP:              opts.TopP,
-		TopK:              opts.TopK,
-		MinLength:         opts.MinLength,
-		MaxLength:         opts.MaxLength,
-		RepetitionPenalty: opts.RepetitionPenalty,
-		Seed:              opts.Seed,
+		Temperature:       opts.GetTemperature(),
+		TopP:              opts.GetTopP(),
+		TopK:              opts.GetTopK(),
+		MinLength:         opts.GetMinLength(),
+		MaxLength:         opts.GetMaxLength(),
+		RepetitionPenalty: opts.GetRepetitionPenalty(),
+		Seed:              opts.GetSeed(),
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {

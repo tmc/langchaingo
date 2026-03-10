@@ -34,26 +34,26 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 func (o *LLM) appendGlobalsToArgs(opts llms.CallOptions) {
-	if opts.Temperature != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", opts.Temperature))
+	if opts.Temperature != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--temperature=%f", *opts.Temperature))
 	}
-	if opts.TopP != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_p=%f", opts.TopP))
+	if opts.TopP != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_p=%f", *opts.TopP))
 	}
-	if opts.TopK != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_k=%d", opts.TopK))
+	if opts.TopK != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--top_k=%d", *opts.TopK))
 	}
-	if opts.MinLength != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--min_length=%d", opts.MinLength))
+	if opts.MinLength != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--min_length=%d", *opts.MinLength))
 	}
-	if opts.MaxLength != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--max_length=%d", opts.MaxLength))
+	if opts.MaxLength != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--max_length=%d", *opts.MaxLength))
 	}
-	if opts.RepetitionPenalty != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--repetition_penalty=%f", opts.RepetitionPenalty))
+	if opts.RepetitionPenalty != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--repetition_penalty=%f", *opts.RepetitionPenalty))
 	}
-	if opts.Seed != 0 {
-		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", opts.Seed))
+	if opts.Seed != nil {
+		o.client.Args = append(o.client.Args, fmt.Sprintf("--seed=%d", *opts.Seed))
 	}
 }
 

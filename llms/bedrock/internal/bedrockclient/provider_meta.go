@@ -73,9 +73,9 @@ func createMetaCompletion(ctx context.Context,
 
 	input := &metaTextGenerationInput{
 		Prompt:      txt,
-		Temperature: options.Temperature,
-		TopP:        options.TopP,
-		MaxGenLen:   getMaxTokens(options.MaxTokens, 512),
+		Temperature: options.GetTemperature(),
+		TopP:        options.GetTopP(),
+		MaxGenLen:   getMaxTokens(options.GetMaxTokens(), 512),
 	}
 
 	body, err := json.Marshal(input)

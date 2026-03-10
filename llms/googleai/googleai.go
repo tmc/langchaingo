@@ -86,28 +86,28 @@ func (g *GoogleAI) GenerateContent(
 	}
 
 	opts := llms.CallOptions{
-		Model:          g.opts.DefaultModel,
-		CandidateCount: g.opts.DefaultCandidateCount,
-		MaxTokens:      g.opts.DefaultMaxTokens,
-		Temperature:    g.opts.DefaultTemperature,
-		TopP:           g.opts.DefaultTopP,
-		TopK:           g.opts.DefaultTopK,
+		Model:          getStringPointer(g.opts.DefaultModel),
+		CandidateCount: getIntPointer(g.opts.DefaultCandidateCount),
+		MaxTokens:      getIntPointer(g.opts.DefaultMaxTokens),
+		Temperature:    getFloatPointer(g.opts.DefaultTemperature),
+		TopP:           getFloatPointer(g.opts.DefaultTopP),
+		TopK:           getIntPointer(g.opts.DefaultTopK),
 	}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
 	// Build generation config
-	temperature := float32(opts.Temperature)
-	topP := float32(opts.TopP)
-	topK := float32(opts.TopK)
+	temperature := convertToFloat32Pointer(opts.Temperature)
+	topP := convertToFloat32Pointer(opts.TopP)
+	topK := convertIntToFloat32Pointer(opts.TopK)
 
 	config := &genai.GenerateContentConfig{
-		CandidateCount:  int32(opts.CandidateCount),
-		MaxOutputTokens: int32(opts.MaxTokens),
-		Temperature:     &temperature,
-		TopP:            &topP,
-		TopK:            &topK,
+		CandidateCount:  convertToInt32(opts.CandidateCount),
+		MaxOutputTokens: convertToInt32(opts.MaxTokens),
+		Temperature:     temperature,
+		TopP:            topP,
+		TopK:            topK,
 		StopSequences:   opts.StopWords,
 	}
 
@@ -120,17 +120,17 @@ func (g *GoogleAI) GenerateContent(
 
 	// Handle response MIME type and JSON mode
 	switch {
-	case opts.ResponseMIMEType != "" && opts.JSONMode:
+	case opts.ResponseMIMEType != nil && opts.JSONMode:
 		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
-	case opts.ResponseMIMEType != "" && !opts.JSONMode:
-		config.ResponseMIMEType = opts.ResponseMIMEType
-	case opts.ResponseMIMEType == "" && opts.JSONMode:
+	case opts.ResponseMIMEType != nil && !opts.JSONMode:
+		config.ResponseMIMEType = opts.GetResponseMIMEType()
+	case opts.GetResponseMIMEType() == "" && opts.JSONMode:
 		config.ResponseMIMEType = ResponseMIMETypeJson
 	}
 
 	// Handle thinking configuration for reasoning models
 	if opts.Reasoning != nil && opts.Reasoning.IsEnabled() {
-		thinkingBudget := int32(opts.Reasoning.GetTokens(opts.MaxTokens))
+		thinkingBudget := int32(opts.Reasoning.GetTokens(opts.GetMaxTokens()))
 		if thinkingBudget > 0 {
 			config.ThinkingConfig = &genai.ThinkingConfig{
 				ThinkingBudget:  &thinkingBudget,
@@ -176,9 +176,9 @@ func (g *GoogleAI) GenerateContent(
 		if theMessage.Role != llms.ChatMessageTypeHuman {
 			return nil, fmt.Errorf("got %v message role, want human", theMessage.Role)
 		}
-		response, err = g.generateFromSingleMessage(ctx, opts.Model, theMessage.Parts, config, &opts)
+		response, err = g.generateFromSingleMessage(ctx, opts.GetModel(), theMessage.Parts, config, &opts)
 	} else {
-		response, err = g.generateFromMessages(ctx, opts.Model, messages, config, &opts)
+		response, err = g.generateFromMessages(ctx, opts.GetModel(), messages, config, &opts)
 	}
 	if err != nil {
 		return nil, err
@@ -919,4 +919,51 @@ func convertHarmBlockThreshold(threshold HarmBlockThreshold) genai.HarmBlockThre
 	default:
 		return genai.HarmBlockThresholdBlockOnlyHigh // Safe default
 	}
+}
+
+func getStringPointer(s string) *string {
+	return &s
+}
+
+func getIntPointer(i int) *int {
+	return &i
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func convertToFloat32Pointer(f *float64) *float32 {
+	if f == nil {
+		return nil
+	}
+
+	f32 := float32(*f)
+	return &f32
+}
+
+func convertToInt32Pointer(i *int) *int32 {
+	if i == nil {
+		return nil
+	}
+
+	i32 := int32(*i)
+	return &i32
+}
+
+func convertToInt32(i *int) int32 {
+	if i == nil {
+		return 0
+	}
+
+	return int32(*i)
+}
+
+func convertIntToFloat32Pointer(i *int) *float32 {
+	if i == nil {
+		return nil
+	}
+
+	f32 := float32(*i)
+	return &f32
 }

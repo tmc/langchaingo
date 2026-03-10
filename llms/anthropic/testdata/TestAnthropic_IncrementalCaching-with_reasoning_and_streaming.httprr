@@ -1,5 +1,5 @@
 httprr trace v1
-3565 12359
+3565 13672
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
@@ -10,280 +10,308 @@ Content-Type: application/json
 X-Api-Key: test-api-key
 
 {"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
-Content-Length: 11303
+Content-Length: 12524
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
-Anthropic-Ratelimit-Input-Tokens-Remaining: 1998000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-28T09:34:03Z
+Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-03-10T14:42:28Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-28T09:34:03Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-03-10T14:42:28Z
 Anthropic-Ratelimit-Requests-Limit: 4000
-Anthropic-Ratelimit-Requests-Remaining: 3998
-Anthropic-Ratelimit-Requests-Reset: 2026-01-28T09:34:03Z
+Anthropic-Ratelimit-Requests-Remaining: 3999
+Anthropic-Ratelimit-Requests-Reset: 2026-03-10T14:42:28Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
-Anthropic-Ratelimit-Tokens-Remaining: 2398000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-28T09:34:03Z
+Anthropic-Ratelimit-Tokens-Remaining: 2399000
+Anthropic-Ratelimit-Tokens-Reset: 2026-03-10T14:42:28Z
 Cache-Control: no-cache
 Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 Content-Type: text/event-stream; charset=utf-8
-Date: Wed, 28 Jan 2026 09:34:04 GMT
-Request-Id: req_011CXZYfpNxYc6qqBMLnzmQj
+Date: Tue, 10 Mar 2026 14:42:29 GMT
+Request-Id: req_011CYuaMTHUbyy1q75ttesZe
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 1218
+Vary: Accept-Encoding
+X-Envoy-Upstream-Service-Time: 1067
 X-Robots-Tag: none
 
 event: message_start
-data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01V89a4ZqBdcrDZ7Td2beDXf","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":10,"cache_creation_input_tokens":1468,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":1468,"ephemeral_1h_input_tokens":0},"output_tokens":8,"service_tier":"standard"}}}
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_014opEHBDfV91H5DoKudmW7s","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":10,"cache_creation_input_tokens":1468,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":1468,"ephemeral_1h_input_tokens":0},"output_tokens":8,"service_tier":"standard","inference_geo":"not_available"}}         }
 
 event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}             }
+data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}     }
 
 event: ping
 data: {"type": "ping"}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"The user wants to book a flight from"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"The user wants to book a flight from"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" New York to Paris for tomorrow (2"}       }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" New York to Paris for tomorrow (2"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"024-06-15). They"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"024-06-15). They've"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"'ve provided all"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" provided all"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the necessary passenger"}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" necessary"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" details."}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" details:\n- Origin"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n\nAccording"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": New York"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to the workflow I"}          }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Destination: Paris\n- Date"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" must"}        }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": 2024-06-15"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" follow:\n1."} }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Passenger name"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": John Smith\n- Email"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" 1: First"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": john.smith@example.com"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" call get_weather and get_time"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Seat preference: window"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" for destination ("} }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Travel class: economy\n\nAccording"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Paris"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to the workflow, I must"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":")\n2. STEP 2"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":":"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": After"}     }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\nSTEP 1: Call get_weather"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" receiving weather/time data, call"}     }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" and get_time for the"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" check_flight_schedule\n3."}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" destination (Paris)\nSTEP "}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 3: After receiving flight"}        }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"2: Then"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" schedule, call book_flight with user"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" call check_flight_schedule"}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" details"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\nSTEP 3: Then call book_"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n4. STEP 4: After"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"flight"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" booking confirmation, provide final summary\n\nLet"} }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\nSTEP 4:"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" me start with"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" Provide final"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 1 "}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" summary\n\nLet"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"- getting weather and time for Paris."}  }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" me start"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" These"}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" with Step"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" two"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" 1 - getting"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" calls"}              }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" weather"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" are independent, so I can make them"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" and time for Paris."}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" together"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" These"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"."}    }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" two"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}        }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" calls are independent, so I can make"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EvEFCkYICxgCKkB5e9Asb+WK+HwHURKgN8bBJ+DpKofn6E/n8ds0cg/3zokDwC2Jm7uQhWMWPmu02CSeC1cn59YX7bIUM/orlLMtEgxtrl+9ZGLZGacRLMIaDGylnnGPFb/FCUDfMyIwmfIoWKsZ3UNVguQKsqBarMmOiiPv/W0lQ9llG/mhi406uf0LzxlBML+2v4XNwwbaKtgERPHajwsb1ksMt8on2X6DbHOLBP2Hf7BanYa4LKNW5zf/CRGJcKiOKP9NDN53R9DBoUmxDRjrq+wBIkZfrRwVYY8MxHxuGqJeqprOFTwA+2Jz6MzX+4i/qwvz+hHxx8TMdGmsp49i+9Erov0aMc3t65Hpxnd3GfPEP99W8tyrGrsPpdcsrBBP/thE53pwIJFjUMw5Pew2O5e1C41CpYCh/7aFpFzPJ0lMA3DPHnk+2BdRELRttr4HwWEAwdeqKvSZnL4F0cAPGuEh6WT64WAtdNzIPPiaJ2D8oUewaE2kqAgSPIa1uT3eVxjMH9/JjrmWlsXs5pbilXq8N9vVi+TQ+dmZVu3tzaMBRAzVQdFN4aa3M+N1q3oX+CDTMD/Wv7t0ZuAE25PeakeRGgfuDwJEekykn6Co/PPOWrge5PzMmoBCpsYYAzZNt0g2ic5cfE3hnpZZyZkf/wKegHc13Yxr7+3Aos0vi+7twN78VIA0cKWWVYRnIkzrR74pXjsqiTkkLrgOVtCYrU5O1iMy5OvTN3IRwvw+BkOopS3NHqPDPczs0qmhdlXwHeWuMASjpxLf6EeykQhkmlgFWxuqw3GEO2GxJ8K1fS9+brKT6QnvNRfDakHAGW88DnfvB4hSjFrco05ev2+PWuzTNWfrYnaPB2HlViGJdtvZwy7nLVGfqkyC1e9vBwHM92Jt2Wq6/RWuVmz+9QOTT0juwbsOxYlErY32sW/Pf3r+hSfKRQnbx1Nusu6O2+lUcZrLdVCum7vw6gFD3xQjprXdzIrtox/wEsVPC5FuJcJtGAE="}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" them together"}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"."}     }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"Eo0GCkYICxgCKkBXSInV0OLrYmO8VgrqOTZ3BODP1qj4EU1mA/bHNyScYqiANk/VC/HPfPnETEVMloH+ZBJiV+XQYYQC203Vz4VzEgwcCUeis9fyC7Jvfv4aDK7YvI29Yn5Ok6L+CyIwRF1OvfpFklnVZCR2BgaToPioHpWeWxDLel3m80/UcHwD9cg2ANZLwRMhtW+rvCuoKvQEjFJ8p6QvS0tXFtqa8h4pVrjNzEtIEKSBlbYjvwGfdVMhyvb7BPyU3+M3lHaodjjf4eCuDk4i4ZxFlM18U1no4cqPskPtoiJIv5MCbTVfvG4YS5Mhz4eoljMiYjEdnNcLBmPQqpxd6zVh2IJu4BotIJXj5ZuLe4XH2C7I24Lg0m8pz8oEZTOz/U339MnoGRXQuvpcSZiN4tLa4Io62XCXRp8fwBF+f84EfNvV6HNjfxnHg/bNJjVBnW8sDB2BveAKt5iEcxjy2jQKPUVxboztXWaLfNBFbKizy8pjehflMb6iWB2cqQzdkZ/4rI9kt/mNhMXbZvQLqwJ2pWK3DsN+c1QDIcYPehrjS7neB/RYnRpM5JOXn9C47rWdMyG1ldy2sfgpmhzWsveMXBfp5/gi7m3E+wmjBvEU9DV+psI2mqMvfFvQdiOqCtIB5OxfAw8fOsK34mjpMiyEBGHDmjTZkId/yp/VCduA3EcxuysFyiVDx+SbNyvI8ZzNzxN04wyDnPIhmeLeZa/F85zx/K1k6b003SIc8K8IZCdC8MXvorrPDYeZ4aj9+2UuAJX2zL30NjhoH5YJOo6G8TkfETSvib6z8XUq/2enyhOtt+m0Xuzc2p+0BuIkpm0/QanUrDJTuAwsJkx6JQLn/4gjKxiPAoMhbRqUIuF1f1kYlQlT4dna6Q55hI7Bjt3pTI41CvJoeVmsYcYYXinkc9YStFZxegp3/6liAm6yhoZAJ+bGoh40kNOA3XmHzkwzvljYUMFDs39hkjjksklBqppNbhl0bcYmJvmPEin0wkMJE6PnMHZusmm4yFQulFIExQ3ctIlp1Skg9RgB"}     }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":0        }
+data: {"type":"content_block_stop","index":0  }
 
 event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}            }
+data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"I"}          }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"I"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"'ll help you book a flight from New"}               }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"'ll help you book a"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" York to Paris."}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" flight from New York to Paris."} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Let me execute"}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Let me execute"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" the complete booking workflow."}        }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" the complete booking workflow."}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"STEP 1: Getting"}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"STEP 1: Getting"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" destination"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" destination"}             }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" information"}           }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" information"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" ("}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" ("}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Paris)**"}           }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Paris)**"}      }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":1   }
+data: {"type":"content_block_stop","index":1           }
 
 event: content_block_start
-data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_01HfWxcJf1sAnJg493WnTcn4","name":"get_weather","input":{}}     }
+data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","name":"get_weather","input":{},"caller":{"type":"direct"}}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"cit"}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"ci"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"y\": \"Paris\""} }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ty\":"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"units\": \""} }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":" \""}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"celsius\"}"}    }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"Pari"}         }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"s\""}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"units\": "}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\"cel"}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"sius"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\"}"}              }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":2          }
+data: {"type":"content_block_stop","index":2         }
 
 event: content_block_start
-data: {"type":"content_block_start","index":3,"content_block":{"type":"tool_use","id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","name":"get_time","input":{}}      }
+data: {"type":"content_block_start","index":3,"content_block":{"type":"tool_use","id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","name":"get_time","input":{},"caller":{"type":"direct"}}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":""}         }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":""}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"{\"city\""}          }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"{\""}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":": \"P"}            }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"city\": "}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"ar"}              }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"\"Pa"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"is\""}        }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"ris\""}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":", \""}         }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":", \"form"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"format\": "}  }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"at\": \"24"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"\"24h\"}"}       }
+data: {"type":"content_block_delta","index":3,"delta":{"type":"input_json_delta","partial_json":"h\"}"}     }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":3      }
+data: {"type":"content_block_stop","index":3            }
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":10,"cache_creation_input_tokens":1468,"cache_read_input_tokens":0,"output_tokens":316}   }
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":10,"cache_creation_input_tokens":1468,"cache_read_input_tokens":0,"output_tokens":344}}
 
 event: message_stop
-data: {"type":"message_stop"          }
+data: {"type":"message_stop"            }
 
-6066 8153
+6141 7839
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
-Content-Length: 5770
+Content-Length: 5845
 Anthropic-Beta: prompt-caching-2024-07-31,interleaved-thinking-2025-05-14
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all the necessary passenger details.\n\nAccording to the workflow I must follow:\n1. STEP 1: First call get_weather and get_time for destination (Paris)\n2. STEP 2: After receiving weather/time data, call check_flight_schedule\n3. STEP 3: After receiving flight schedule, call book_flight with user details\n4. STEP 4: After booking confirmation, provide final summary\n\nLet me start with STEP 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"EvEFCkYICxgCKkB5e9Asb+WK+HwHURKgN8bBJ+DpKofn6E/n8ds0cg/3zokDwC2Jm7uQhWMWPmu02CSeC1cn59YX7bIUM/orlLMtEgxtrl+9ZGLZGacRLMIaDGylnnGPFb/FCUDfMyIwmfIoWKsZ3UNVguQKsqBarMmOiiPv/W0lQ9llG/mhi406uf0LzxlBML+2v4XNwwbaKtgERPHajwsb1ksMt8on2X6DbHOLBP2Hf7BanYa4LKNW5zf/CRGJcKiOKP9NDN53R9DBoUmxDRjrq+wBIkZfrRwVYY8MxHxuGqJeqprOFTwA+2Jz6MzX+4i/qwvz+hHxx8TMdGmsp49i+9Erov0aMc3t65Hpxnd3GfPEP99W8tyrGrsPpdcsrBBP/thE53pwIJFjUMw5Pew2O5e1C41CpYCh/7aFpFzPJ0lMA3DPHnk+2BdRELRttr4HwWEAwdeqKvSZnL4F0cAPGuEh6WT64WAtdNzIPPiaJ2D8oUewaE2kqAgSPIa1uT3eVxjMH9/JjrmWlsXs5pbilXq8N9vVi+TQ+dmZVu3tzaMBRAzVQdFN4aa3M+N1q3oX+CDTMD/Wv7t0ZuAE25PeakeRGgfuDwJEekykn6Co/PPOWrge5PzMmoBCpsYYAzZNt0g2ic5cfE3hnpZZyZkf/wKegHc13Yxr7+3Aos0vi+7twN78VIA0cKWWVYRnIkzrR74pXjsqiTkkLrgOVtCYrU5O1iMy5OvTN3IRwvw+BkOopS3NHqPDPczs0qmhdlXwHeWuMASjpxLf6EeykQhkmlgFWxuqw3GEO2GxJ8K1fS9+brKT6QnvNRfDakHAGW88DnfvB4hSjFrco05ev2+PWuzTNWfrYnaPB2HlViGJdtvZwy7nLVGfqkyC1e9vBwHM92Jt2Wq6/RWuVmz+9QOTT0juwbsOxYlErY32sW/Pf3r+hSfKRQnbx1Nusu6O2+lUcZrLdVCum7vw6gFD3xQjprXdzIrtox/wEsVPC5FuJcJtGAE="},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HfWxcJf1sAnJg493WnTcn4","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HfWxcJf1sAnJg493WnTcn4","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","content":"Current time in Paris: 14:30 CET (UTC+1)","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
-Content-Length: 7098
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all necessary details:\n- Origin: New York\n- Destination: Paris\n- Date: 2024-06-15\n- Passenger name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy\n\nAccording to the workflow, I must:\nSTEP 1: Call get_weather and get_time for the destination (Paris)\nSTEP 2: Then call check_flight_schedule\nSTEP 3: Then call book_flight\nSTEP 4: Provide final summary\n\nLet me start with Step 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"Eo0GCkYICxgCKkBXSInV0OLrYmO8VgrqOTZ3BODP1qj4EU1mA/bHNyScYqiANk/VC/HPfPnETEVMloH+ZBJiV+XQYYQC203Vz4VzEgwcCUeis9fyC7Jvfv4aDK7YvI29Yn5Ok6L+CyIwRF1OvfpFklnVZCR2BgaToPioHpWeWxDLel3m80/UcHwD9cg2ANZLwRMhtW+rvCuoKvQEjFJ8p6QvS0tXFtqa8h4pVrjNzEtIEKSBlbYjvwGfdVMhyvb7BPyU3+M3lHaodjjf4eCuDk4i4ZxFlM18U1no4cqPskPtoiJIv5MCbTVfvG4YS5Mhz4eoljMiYjEdnNcLBmPQqpxd6zVh2IJu4BotIJXj5ZuLe4XH2C7I24Lg0m8pz8oEZTOz/U339MnoGRXQuvpcSZiN4tLa4Io62XCXRp8fwBF+f84EfNvV6HNjfxnHg/bNJjVBnW8sDB2BveAKt5iEcxjy2jQKPUVxboztXWaLfNBFbKizy8pjehflMb6iWB2cqQzdkZ/4rI9kt/mNhMXbZvQLqwJ2pWK3DsN+c1QDIcYPehrjS7neB/RYnRpM5JOXn9C47rWdMyG1ldy2sfgpmhzWsveMXBfp5/gi7m3E+wmjBvEU9DV+psI2mqMvfFvQdiOqCtIB5OxfAw8fOsK34mjpMiyEBGHDmjTZkId/yp/VCduA3EcxuysFyiVDx+SbNyvI8ZzNzxN04wyDnPIhmeLeZa/F85zx/K1k6b003SIc8K8IZCdC8MXvorrPDYeZ4aj9+2UuAJX2zL30NjhoH5YJOo6G8TkfETSvib6z8XUq/2enyhOtt+m0Xuzc2p+0BuIkpm0/QanUrDJTuAwsJkx6JQLn/4gjKxiPAoMhbRqUIuF1f1kYlQlT4dna6Q55hI7Bjt3pTI41CvJoeVmsYcYYXinkc9YStFZxegp3/6liAm6yhoZAJ+bGoh40kNOA3XmHzkwzvljYUMFDs39hkjjksklBqppNbhl0bcYmJvmPEin0wkMJE6PnMHZusmm4yFQulFIExQ3ctIlp1Skg9RgB"},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","content":"Current time in Paris: 14:30 CET (UTC+1)","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
+Content-Length: 6692
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
 Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-28T09:34:08Z
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-03-10T14:42:33Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-28T09:34:08Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-03-10T14:42:33Z
 Anthropic-Ratelimit-Requests-Limit: 4000
 Anthropic-Ratelimit-Requests-Remaining: 3999
-Anthropic-Ratelimit-Requests-Reset: 2026-01-28T09:34:08Z
+Anthropic-Ratelimit-Requests-Reset: 2026-03-10T14:42:33Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
 Anthropic-Ratelimit-Tokens-Remaining: 2399000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-28T09:34:08Z
+Anthropic-Ratelimit-Tokens-Reset: 2026-03-10T14:42:33Z
 Cache-Control: no-cache
 Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 Content-Type: text/event-stream; charset=utf-8
-Date: Wed, 28 Jan 2026 09:34:09 GMT
-Request-Id: req_011CXZYgB6Q3cnVAN9Suumgy
+Date: Tue, 10 Mar 2026 14:42:38 GMT
+Request-Id: req_011CYuaMpSx8ytgF4e9q3kip
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 1174
+Vary: Accept-Encoding
+X-Envoy-Upstream-Service-Time: 4926
 X-Robots-Tag: none
 
 event: message_start
-data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01STZKSMCL4EgFU2DnNxirhD","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":14,"cache_creation_input_tokens":417,"cache_read_input_tokens":1468,"cache_creation":{"ephemeral_5m_input_tokens":417,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}              }
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_019mVVcsPzzzxYJySJKFmMSH","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":14,"cache_creation_input_tokens":444,"cache_read_input_tokens":1468,"cache_creation":{"ephemeral_5m_input_tokens":444,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}}
 
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}}
@@ -292,380 +320,339 @@ event: ping
 data: {"type": "ping"}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Good"}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Great"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":","}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"! I"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" I"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"'ve receive"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"'ve"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"d the weather an"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" received the weather and"}       }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"d time information for Paris. Now I nee"}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" time data for Paris. Now I need"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"d to procee"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to proceed"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"d to"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to"}      }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 2 an"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 2 and"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"d check the flight schedule from"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" check"}     }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" New York to Paris for "}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the flight schedule from"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"2024-06-15 "}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" New York to Paris on "}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"with"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"2024-06-15 "}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" economy"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"with"}            }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" class."}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" economy"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" class preference"}      }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"."}}
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EuMCCkYICxgCKkCQdvlq1/2GuhkY+ly8SZaDjfe3uLw4L2c8NTqBbJvHctrw2nqUkwfxmlCVWbWRQq3766iUDs+3BAhRfOBO70nlEgzbVrXgYiCHUvt3E/saDGce4PhltddqoisdgCIw9D9fSVCbl5BAuYY1EBKKIkpv0JVgGjyf5uXOju62wSnBJ9uw3QvCiXlNwV7+TZRpKsoB95o1teAs1xCiX3lay7gFr5e+LLCaB+yuBPmqwTsqVjWH6SWQT3M1A3DGs1Gs8Z48nn/6eYSB2Qbdybv8vV9XLYI/wt7z4GpoJhYKbUhgLk9GD8+qJFxXBU37nhL0xBwoBe+HrOOLBEnp4BwJwuB5ejnZGoasbn73PFGRmywJyVlf7zotisiwXpqN2SnP+SRxBcenKzbGZqW8z62+wEwuLWKtNdftqqE8obHBTj5VL72RiCDPqMxmxkFMj2lLSNT8A8VITTHvtO+0/xgB"}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EuECCkYICxgCKkBETcBAgYfmIaf0DCq+4ism0J8ts3vDZP6auVWyHKRbLMA4h/3CsHsnlZEckzZ/FNAV9VBLy1rLIMD+tVg5bu/+Egx96yauK+YhQmYgs0caDBzbjZ0FOEPrmTyruyIwOUPCsgg+3HO70LJ9EVBGMrdivJHC3aBEAGLADd9e7coTbk1CxNdCCns/AEhQCF6hKsgBV1o/PYktqjNIppAwzAT+W6QeDM8BH4BSBwvUlMyw0z0RR7tGI7sMFVY29MrcBXBkn4TrZ2ZIP2iPqrjad4Py856Tr4DtVT83IaAEFvxRK0TBDyYpzl51gNKd8xwHdFS39e0fGaaoSUCaArhs09agX6gVT4onYB9Ql4HMg+vxl6hDSWYskbe6HNNJnq4BObNdFsgHELSrSlmFDolnv3QiPnPpNMKOOIytAJaBJU5nH6dOInDD9CJwJQ/X9O+Z0Xw0ZxBHJtNSv7gYAQ=="}}
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":0            }
+data: {"type":"content_block_stop","index":0         }
 
 event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}             }
+data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**STEP 2:"}        }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**STEP 2:"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Checking flight schedule**"}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Checking flight sche"} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"dules**"}             }
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":1       }
 
 event: content_block_start
-data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_01VN4Lzco6fKUrAvs8PcSui1","name":"check_flight_schedule","input":{}}               }
+data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_014v7W5f2AAFMeCPjeDqSFzz","name":"check_flight_schedule","input":{},"caller":{"type":"direct"}}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}            }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"o"}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"origin"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ri"}   }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\": \"Ne"}             }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"gin\": \"N"}            }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"w Y"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ew "}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ork\""}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"York\""}         }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"desti"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"destinati"}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"nation\": \""}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"on\": \""}             }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"Paris\""}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"Paris\""} }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"dat"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"date"}         }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"e\": \"2024"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\": \"20"}     }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"-06-15\""}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"24"}     }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"c"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"-06-15\""}    }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"lass\": \"eco"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"class"}              }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\":"}            }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":" \"economy\"}"}}
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"nomy\"}"}            }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":2 }
+data: {"type":"content_block_stop","index":2   }
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":14,"cache_creation_input_tokens":417,"cache_read_input_tokens":1468,"output_tokens":180}           }
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":14,"cache_creation_input_tokens":444,"cache_read_input_tokens":1468,"output_tokens":180}      }
 
 event: message_stop
-data: {"type":"message_stop"           }
+data: {"type":"message_stop"   }
 
-7371 9947
+7445 8219
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
-Content-Length: 7075
+Content-Length: 7149
 Anthropic-Beta: prompt-caching-2024-07-31,interleaved-thinking-2025-05-14
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all the necessary passenger details.\n\nAccording to the workflow I must follow:\n1. STEP 1: First call get_weather and get_time for destination (Paris)\n2. STEP 2: After receiving weather/time data, call check_flight_schedule\n3. STEP 3: After receiving flight schedule, call book_flight with user details\n4. STEP 4: After booking confirmation, provide final summary\n\nLet me start with STEP 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"EvEFCkYICxgCKkB5e9Asb+WK+HwHURKgN8bBJ+DpKofn6E/n8ds0cg/3zokDwC2Jm7uQhWMWPmu02CSeC1cn59YX7bIUM/orlLMtEgxtrl+9ZGLZGacRLMIaDGylnnGPFb/FCUDfMyIwmfIoWKsZ3UNVguQKsqBarMmOiiPv/W0lQ9llG/mhi406uf0LzxlBML+2v4XNwwbaKtgERPHajwsb1ksMt8on2X6DbHOLBP2Hf7BanYa4LKNW5zf/CRGJcKiOKP9NDN53R9DBoUmxDRjrq+wBIkZfrRwVYY8MxHxuGqJeqprOFTwA+2Jz6MzX+4i/qwvz+hHxx8TMdGmsp49i+9Erov0aMc3t65Hpxnd3GfPEP99W8tyrGrsPpdcsrBBP/thE53pwIJFjUMw5Pew2O5e1C41CpYCh/7aFpFzPJ0lMA3DPHnk+2BdRELRttr4HwWEAwdeqKvSZnL4F0cAPGuEh6WT64WAtdNzIPPiaJ2D8oUewaE2kqAgSPIa1uT3eVxjMH9/JjrmWlsXs5pbilXq8N9vVi+TQ+dmZVu3tzaMBRAzVQdFN4aa3M+N1q3oX+CDTMD/Wv7t0ZuAE25PeakeRGgfuDwJEekykn6Co/PPOWrge5PzMmoBCpsYYAzZNt0g2ic5cfE3hnpZZyZkf/wKegHc13Yxr7+3Aos0vi+7twN78VIA0cKWWVYRnIkzrR74pXjsqiTkkLrgOVtCYrU5O1iMy5OvTN3IRwvw+BkOopS3NHqPDPczs0qmhdlXwHeWuMASjpxLf6EeykQhkmlgFWxuqw3GEO2GxJ8K1fS9+brKT6QnvNRfDakHAGW88DnfvB4hSjFrco05ev2+PWuzTNWfrYnaPB2HlViGJdtvZwy7nLVGfqkyC1e9vBwHM92Jt2Wq6/RWuVmz+9QOTT0juwbsOxYlErY32sW/Pf3r+hSfKRQnbx1Nusu6O2+lUcZrLdVCum7vw6gFD3xQjprXdzIrtox/wEsVPC5FuJcJtGAE="},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HfWxcJf1sAnJg493WnTcn4","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HfWxcJf1sAnJg493WnTcn4","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","content":"Current time in Paris: 14:30 CET (UTC+1)"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Good, I've received the weather and time data for Paris. Now I need to proceed to STEP 2 and check the flight schedule from New York to Paris on 2024-06-15 with economy class preference.","signature":"EuMCCkYICxgCKkCQdvlq1/2GuhkY+ly8SZaDjfe3uLw4L2c8NTqBbJvHctrw2nqUkwfxmlCVWbWRQq3766iUDs+3BAhRfOBO70nlEgzbVrXgYiCHUvt3E/saDGce4PhltddqoisdgCIw9D9fSVCbl5BAuYY1EBKKIkpv0JVgGjyf5uXOju62wSnBJ9uw3QvCiXlNwV7+TZRpKsoB95o1teAs1xCiX3lay7gFr5e+LLCaB+yuBPmqwTsqVjWH6SWQT3M1A3DGs1Gs8Z48nn/6eYSB2Qbdybv8vV9XLYI/wt7z4GpoJhYKbUhgLk9GD8+qJFxXBU37nhL0xBwoBe+HrOOLBEnp4BwJwuB5ejnZGoasbn73PFGRmywJyVlf7zotisiwXpqN2SnP+SRxBcenKzbGZqW8z62+wEwuLWKtNdftqqE8obHBTj5VL72RiCDPqMxmxkFMj2lLSNT8A8VITTHvtO+0/xgB"},{"type":"text","text":"**STEP 2: Checking flight schedule**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01VN4Lzco6fKUrAvs8PcSui1","name":"check_flight_schedule","input":{"class":"economy","date":"2024-06-15","destination":"Paris","origin":"New York"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01VN4Lzco6fKUrAvs8PcSui1","content":"Available flights on 2024-06-15:\nFlight AF1234 - Air France\nDeparture: JFK 09:00 → Arrival: CDG 22:30\nEconomy class: €350, 45 seats available\nWindow seats available","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
-Content-Length: 8892
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all necessary details:\n- Origin: New York\n- Destination: Paris\n- Date: 2024-06-15\n- Passenger name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy\n\nAccording to the workflow, I must:\nSTEP 1: Call get_weather and get_time for the destination (Paris)\nSTEP 2: Then call check_flight_schedule\nSTEP 3: Then call book_flight\nSTEP 4: Provide final summary\n\nLet me start with Step 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"Eo0GCkYICxgCKkBXSInV0OLrYmO8VgrqOTZ3BODP1qj4EU1mA/bHNyScYqiANk/VC/HPfPnETEVMloH+ZBJiV+XQYYQC203Vz4VzEgwcCUeis9fyC7Jvfv4aDK7YvI29Yn5Ok6L+CyIwRF1OvfpFklnVZCR2BgaToPioHpWeWxDLel3m80/UcHwD9cg2ANZLwRMhtW+rvCuoKvQEjFJ8p6QvS0tXFtqa8h4pVrjNzEtIEKSBlbYjvwGfdVMhyvb7BPyU3+M3lHaodjjf4eCuDk4i4ZxFlM18U1no4cqPskPtoiJIv5MCbTVfvG4YS5Mhz4eoljMiYjEdnNcLBmPQqpxd6zVh2IJu4BotIJXj5ZuLe4XH2C7I24Lg0m8pz8oEZTOz/U339MnoGRXQuvpcSZiN4tLa4Io62XCXRp8fwBF+f84EfNvV6HNjfxnHg/bNJjVBnW8sDB2BveAKt5iEcxjy2jQKPUVxboztXWaLfNBFbKizy8pjehflMb6iWB2cqQzdkZ/4rI9kt/mNhMXbZvQLqwJ2pWK3DsN+c1QDIcYPehrjS7neB/RYnRpM5JOXn9C47rWdMyG1ldy2sfgpmhzWsveMXBfp5/gi7m3E+wmjBvEU9DV+psI2mqMvfFvQdiOqCtIB5OxfAw8fOsK34mjpMiyEBGHDmjTZkId/yp/VCduA3EcxuysFyiVDx+SbNyvI8ZzNzxN04wyDnPIhmeLeZa/F85zx/K1k6b003SIc8K8IZCdC8MXvorrPDYeZ4aj9+2UuAJX2zL30NjhoH5YJOo6G8TkfETSvib6z8XUq/2enyhOtt+m0Xuzc2p+0BuIkpm0/QanUrDJTuAwsJkx6JQLn/4gjKxiPAoMhbRqUIuF1f1kYlQlT4dna6Q55hI7Bjt3pTI41CvJoeVmsYcYYXinkc9YStFZxegp3/6liAm6yhoZAJ+bGoh40kNOA3XmHzkwzvljYUMFDs39hkjjksklBqppNbhl0bcYmJvmPEin0wkMJE6PnMHZusmm4yFQulFIExQ3ctIlp1Skg9RgB"},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","content":"Current time in Paris: 14:30 CET (UTC+1)"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Great! I've received the weather and time information for Paris. Now I need to proceed to STEP 2 and check the flight schedule from New York to Paris for 2024-06-15 with economy class.","signature":"EuECCkYICxgCKkBETcBAgYfmIaf0DCq+4ism0J8ts3vDZP6auVWyHKRbLMA4h/3CsHsnlZEckzZ/FNAV9VBLy1rLIMD+tVg5bu/+Egx96yauK+YhQmYgs0caDBzbjZ0FOEPrmTyruyIwOUPCsgg+3HO70LJ9EVBGMrdivJHC3aBEAGLADd9e7coTbk1CxNdCCns/AEhQCF6hKsgBV1o/PYktqjNIppAwzAT+W6QeDM8BH4BSBwvUlMyw0z0RR7tGI7sMFVY29MrcBXBkn4TrZ2ZIP2iPqrjad4Py856Tr4DtVT83IaAEFvxRK0TBDyYpzl51gNKd8xwHdFS39e0fGaaoSUCaArhs09agX6gVT4onYB9Ql4HMg+vxl6hDSWYskbe6HNNJnq4BObNdFsgHELSrSlmFDolnv3QiPnPpNMKOOIytAJaBJU5nH6dOInDD9CJwJQ/X9O+Z0Xw0ZxBHJtNSv7gYAQ=="},{"type":"text","text":"**STEP 2: Checking flight schedules**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_014v7W5f2AAFMeCPjeDqSFzz","name":"check_flight_schedule","input":{"class":"economy","date":"2024-06-15","destination":"Paris","origin":"New York"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_014v7W5f2AAFMeCPjeDqSFzz","content":"Available flights on 2024-06-15:\nFlight AF1234 - Air France\nDeparture: JFK 09:00 → Arrival: CDG 22:30\nEconomy class: €350, 45 seats available\nWindow seats available","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
+Content-Length: 7072
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
 Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-28T09:34:11Z
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-03-10T14:42:40Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-28T09:34:11Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-03-10T14:42:40Z
 Anthropic-Ratelimit-Requests-Limit: 4000
 Anthropic-Ratelimit-Requests-Remaining: 3999
-Anthropic-Ratelimit-Requests-Reset: 2026-01-28T09:34:11Z
+Anthropic-Ratelimit-Requests-Reset: 2026-03-10T14:42:40Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
 Anthropic-Ratelimit-Tokens-Remaining: 2399000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-28T09:34:11Z
+Anthropic-Ratelimit-Tokens-Reset: 2026-03-10T14:42:40Z
 Cache-Control: no-cache
 Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 Content-Type: text/event-stream; charset=utf-8
-Date: Wed, 28 Jan 2026 09:34:12 GMT
-Request-Id: req_011CXZYgRfFBaDjBLxNRwVNP
+Date: Tue, 10 Mar 2026 14:42:41 GMT
+Request-Id: req_011CYuaNMDP9HCBXRyoPkuw7
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 1153
+Vary: Accept-Encoding
+X-Envoy-Upstream-Service-Time: 1334
 X-Robots-Tag: none
 
 event: message_start
-data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_01VPjugWDy4FcbP3zePokYUA","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":257,"cache_read_input_tokens":1885,"cache_creation":{"ephemeral_5m_input_tokens":257,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}  }
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_011pZApJv6G9D3jwwsWPyynY","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":257,"cache_read_input_tokens":1912,"cache_creation":{"ephemeral_5m_input_tokens":257,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard","inference_geo":"not_available"}}          }
 
 event: content_block_start
-data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""} }
+data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}   }
 
 event: ping
 data: {"type": "ping"}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Perfect"}     }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Perfect! I found"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"! I"}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" a"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" have the"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" flight:"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" flight schedule."}}
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" AF1234."} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" There"}             }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" Now"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"'s"}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" I need to proceed"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" one flight available"}              }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to STEP 3 and book"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":":"}    }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" this"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" AF1234."}       }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" flight with"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" Now"}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the"}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" I need to proceed"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" passenger"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" to STEP 3 and book"}          }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" details provided by"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the flight using"}        }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the provided"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" user."}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" passenger details:"}          }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}             }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Flight"}              }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" number"}        }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":": AF1234\n- Passenger"}              }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" name: John Smith\n- Email:"}    }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" john.smith@example.com"}  }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"\n- Seat preference: window"}   }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}   }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EroDCkYICxgCKkDXyp6gtdkBbNt04Sxr9CnFq7fAbTt1LjKTHdCR7GLC8ej5o1FPK4qQMu7n52qNSFGieE9MRjLwMv7qNDqaRCSuEgwCKgtNxPCdSkvo+skaDCHTYvORaK5HlbV5KyIwsHQZD2DECn7TqK11ZC/9jyIFzHHkbNOdRPWWWlPim3yFpglQZBHQT16M8vNfUTw5KqECLS/F2DrxNCvAS+3TeU9YQla9L7xtpsHV2sOd+ZR13iVrAMmw09g3Lsfb3ylH6btYyDwpt4gYXF5lq1kY9l5QmndJdFVOVXYK3KQ84GI5cA/M/p5K6OrbduCMBmEpnJo2U9N8hstKzHiVwgEd9dncKoqOMHwcXyH+vVVVvU/ZvRw4EZvNzC6HokWH/am6rxM9foqE7C+fkCZE48krivTGXDcur5IbW50RuA2pAxQ+uNDyPBkhyFfH8jY26D/+niWB4dDREWkGaK/fAZtNAw+RZT2H5FeQUgwoCiloaz/6QzdLVcoCUYEziuVlJAuKtaH2ofus+01wQNB+ODRXcpRnHgh7YwgXm4hFHSOR5xbiEY05Vi/XRWXhGi7FfPUGjJZIbhgB"}              }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"ErECCkYICxgCKkACSo6aZk6fwxPiBH4TiQ+Bn6Tz+rX21hpcd7gM79uMmJX/BDTbcIYa2Txpttkn5UxXz8J7vF/icKPjFPoQLmF1EgwB0917owHA5A/A+x8aDIiVQJVvDPVMDVKHsCIwS2p4xJr5sfMo7Sq6qqacYceOEsrV8Sc8BYUDbcrI9HOB181eyeOUGJg/W2DHnxrHKpgB9yZCEZo0ONtvUWpXllnamQ8mDTSwicB+PBNNLA+hRoy5MnIoHusUBwLnP9gBS+teYckGRhvbxV1Ti0fcwTTTpqM7e5ctcvuta+jY1AN2tTc6woEbk73/oAgp/a0lfNo2spg3vqAsXMovA2KIeP9cXf9YhxC0qgONBXQDREM0nuw4aR+QVTn+M73YPFW5/8vC5/njprdjMqAYAQ=="}           }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":0}
+data: {"type":"content_block_stop","index":0  }
 
 event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}   }
+data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**"}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**STEP 3:"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"STEP 3: Booking the flight"}              }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**"}               }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Booking the flight**"}    }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":1 }
+data: {"type":"content_block_stop","index":1             }
 
 event: content_block_start
-data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_014w2F5cSt93Lvzowb6bfxNQ","name":"book_flight","input":{}}               }
+data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_01WQtB45SPGxKL3vdpv1P3wQ","name":"book_flight","input":{},"caller":{"type":"direct"}}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}       }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":""}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"flight_"}              }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"flight_nu"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"number"}   }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"mber\": \""}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\": \"AF"}         }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"AF1234\""}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"1234"}          }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"passen"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\""}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ger_name\""}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"p"}  }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":": \"Joh"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ass"}   }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"n Smith\""}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"enger_name\""}         }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \""}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":": \"John Smit"}}
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"passenger_em"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"h\""}               }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ail\": \"john."}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"passe"}    }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"smith@exampl"}             }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"nger_emai"}               }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"e.com\""}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"l\": "}    }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \""}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\"john.smith"}   }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"seat_pref"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"@examp"}         }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ere"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"le.c"}             }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"nce\": \"wi"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"om\""}       }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":", \"seat_"}  }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"preference"}         }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"\": \"windo"}    }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"w\"}"}              }
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"ndow\"}"}        }
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":2      }
+data: {"type":"content_block_stop","index":2               }
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":13,"cache_creation_input_tokens":257,"cache_read_input_tokens":1885,"output_tokens":214}       }
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"input_tokens":13,"cache_creation_input_tokens":257,"cache_read_input_tokens":1912,"output_tokens":176}             }
 
 event: message_stop
-data: {"type":"message_stop"               }
+data: {"type":"message_stop"      }
 
-8913 13272
+8664 11904
 POST https://api.anthropic.com/v1/messages HTTP/1.1
 Host: api.anthropic.com
 User-Agent: langchaingo-httprr
-Content-Length: 8617
+Content-Length: 8368
 Anthropic-Beta: prompt-caching-2024-07-31,interleaved-thinking-2025-05-14
 Anthropic-Version: 2023-06-01
 Content-Type: application/json
 X-Api-Key: test-api-key
 
-{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all the necessary passenger details.\n\nAccording to the workflow I must follow:\n1. STEP 1: First call get_weather and get_time for destination (Paris)\n2. STEP 2: After receiving weather/time data, call check_flight_schedule\n3. STEP 3: After receiving flight schedule, call book_flight with user details\n4. STEP 4: After booking confirmation, provide final summary\n\nLet me start with STEP 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"EvEFCkYICxgCKkB5e9Asb+WK+HwHURKgN8bBJ+DpKofn6E/n8ds0cg/3zokDwC2Jm7uQhWMWPmu02CSeC1cn59YX7bIUM/orlLMtEgxtrl+9ZGLZGacRLMIaDGylnnGPFb/FCUDfMyIwmfIoWKsZ3UNVguQKsqBarMmOiiPv/W0lQ9llG/mhi406uf0LzxlBML+2v4XNwwbaKtgERPHajwsb1ksMt8on2X6DbHOLBP2Hf7BanYa4LKNW5zf/CRGJcKiOKP9NDN53R9DBoUmxDRjrq+wBIkZfrRwVYY8MxHxuGqJeqprOFTwA+2Jz6MzX+4i/qwvz+hHxx8TMdGmsp49i+9Erov0aMc3t65Hpxnd3GfPEP99W8tyrGrsPpdcsrBBP/thE53pwIJFjUMw5Pew2O5e1C41CpYCh/7aFpFzPJ0lMA3DPHnk+2BdRELRttr4HwWEAwdeqKvSZnL4F0cAPGuEh6WT64WAtdNzIPPiaJ2D8oUewaE2kqAgSPIa1uT3eVxjMH9/JjrmWlsXs5pbilXq8N9vVi+TQ+dmZVu3tzaMBRAzVQdFN4aa3M+N1q3oX+CDTMD/Wv7t0ZuAE25PeakeRGgfuDwJEekykn6Co/PPOWrge5PzMmoBCpsYYAzZNt0g2ic5cfE3hnpZZyZkf/wKegHc13Yxr7+3Aos0vi+7twN78VIA0cKWWVYRnIkzrR74pXjsqiTkkLrgOVtCYrU5O1iMy5OvTN3IRwvw+BkOopS3NHqPDPczs0qmhdlXwHeWuMASjpxLf6EeykQhkmlgFWxuqw3GEO2GxJ8K1fS9+brKT6QnvNRfDakHAGW88DnfvB4hSjFrco05ev2+PWuzTNWfrYnaPB2HlViGJdtvZwy7nLVGfqkyC1e9vBwHM92Jt2Wq6/RWuVmz+9QOTT0juwbsOxYlErY32sW/Pf3r+hSfKRQnbx1Nusu6O2+lUcZrLdVCum7vw6gFD3xQjprXdzIrtox/wEsVPC5FuJcJtGAE="},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HfWxcJf1sAnJg493WnTcn4","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HfWxcJf1sAnJg493WnTcn4","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01TrDttRkGTUpRBh1cgbBLMD","content":"Current time in Paris: 14:30 CET (UTC+1)"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Good, I've received the weather and time data for Paris. Now I need to proceed to STEP 2 and check the flight schedule from New York to Paris on 2024-06-15 with economy class preference.","signature":"EuMCCkYICxgCKkCQdvlq1/2GuhkY+ly8SZaDjfe3uLw4L2c8NTqBbJvHctrw2nqUkwfxmlCVWbWRQq3766iUDs+3BAhRfOBO70nlEgzbVrXgYiCHUvt3E/saDGce4PhltddqoisdgCIw9D9fSVCbl5BAuYY1EBKKIkpv0JVgGjyf5uXOju62wSnBJ9uw3QvCiXlNwV7+TZRpKsoB95o1teAs1xCiX3lay7gFr5e+LLCaB+yuBPmqwTsqVjWH6SWQT3M1A3DGs1Gs8Z48nn/6eYSB2Qbdybv8vV9XLYI/wt7z4GpoJhYKbUhgLk9GD8+qJFxXBU37nhL0xBwoBe+HrOOLBEnp4BwJwuB5ejnZGoasbn73PFGRmywJyVlf7zotisiwXpqN2SnP+SRxBcenKzbGZqW8z62+wEwuLWKtNdftqqE8obHBTj5VL72RiCDPqMxmxkFMj2lLSNT8A8VITTHvtO+0/xgB"},{"type":"text","text":"**STEP 2: Checking flight schedule**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01VN4Lzco6fKUrAvs8PcSui1","name":"check_flight_schedule","input":{"class":"economy","date":"2024-06-15","destination":"Paris","origin":"New York"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01VN4Lzco6fKUrAvs8PcSui1","content":"Available flights on 2024-06-15:\nFlight AF1234 - Air France\nDeparture: JFK 09:00 → Arrival: CDG 22:30\nEconomy class: €350, 45 seats available\nWindow seats available"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Perfect! I have the flight schedule. There's one flight available: AF1234. Now I need to proceed to STEP 3 and book the flight using the provided passenger details:\n- Flight number: AF1234\n- Passenger name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window","signature":"EroDCkYICxgCKkDXyp6gtdkBbNt04Sxr9CnFq7fAbTt1LjKTHdCR7GLC8ej5o1FPK4qQMu7n52qNSFGieE9MRjLwMv7qNDqaRCSuEgwCKgtNxPCdSkvo+skaDCHTYvORaK5HlbV5KyIwsHQZD2DECn7TqK11ZC/9jyIFzHHkbNOdRPWWWlPim3yFpglQZBHQT16M8vNfUTw5KqECLS/F2DrxNCvAS+3TeU9YQla9L7xtpsHV2sOd+ZR13iVrAMmw09g3Lsfb3ylH6btYyDwpt4gYXF5lq1kY9l5QmndJdFVOVXYK3KQ84GI5cA/M/p5K6OrbduCMBmEpnJo2U9N8hstKzHiVwgEd9dncKoqOMHwcXyH+vVVVvU/ZvRw4EZvNzC6HokWH/am6rxM9foqE7C+fkCZE48krivTGXDcur5IbW50RuA2pAxQ+uNDyPBkhyFfH8jY26D/+niWB4dDREWkGaK/fAZtNAw+RZT2H5FeQUgwoCiloaz/6QzdLVcoCUYEziuVlJAuKtaH2ofus+01wQNB+ODRXcpRnHgh7YwgXm4hFHSOR5xbiEY05Vi/XRWXhGi7FfPUGjJZIbhgB"},{"type":"text","text":"**STEP 3: Booking the flight**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_014w2F5cSt93Lvzowb6bfxNQ","name":"book_flight","input":{"flight_number":"AF1234","passenger_email":"john.smith@example.com","passenger_name":"John Smith","seat_preference":"window"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_014w2F5cSt93Lvzowb6bfxNQ","content":"✓ Booking Confirmed\nConfirmation Code: ABC123XYZ\nFlight: AF1234\nPassenger: John Smith\nSeat: 12A (window)\nTotal: €350\nConfirmation sent to: john.smith@example.com","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
-Content-Length: 12216
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Book me a flight from New York to Paris for tomorrow (2024-06-15). Execute the complete booking workflow.\n\nPassenger details:\n- Name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"The user wants to book a flight from New York to Paris for tomorrow (2024-06-15). They've provided all necessary details:\n- Origin: New York\n- Destination: Paris\n- Date: 2024-06-15\n- Passenger name: John Smith\n- Email: john.smith@example.com\n- Seat preference: window\n- Travel class: economy\n\nAccording to the workflow, I must:\nSTEP 1: Call get_weather and get_time for the destination (Paris)\nSTEP 2: Then call check_flight_schedule\nSTEP 3: Then call book_flight\nSTEP 4: Provide final summary\n\nLet me start with Step 1 - getting weather and time for Paris. These two calls are independent, so I can make them together.","signature":"Eo0GCkYICxgCKkBXSInV0OLrYmO8VgrqOTZ3BODP1qj4EU1mA/bHNyScYqiANk/VC/HPfPnETEVMloH+ZBJiV+XQYYQC203Vz4VzEgwcCUeis9fyC7Jvfv4aDK7YvI29Yn5Ok6L+CyIwRF1OvfpFklnVZCR2BgaToPioHpWeWxDLel3m80/UcHwD9cg2ANZLwRMhtW+rvCuoKvQEjFJ8p6QvS0tXFtqa8h4pVrjNzEtIEKSBlbYjvwGfdVMhyvb7BPyU3+M3lHaodjjf4eCuDk4i4ZxFlM18U1no4cqPskPtoiJIv5MCbTVfvG4YS5Mhz4eoljMiYjEdnNcLBmPQqpxd6zVh2IJu4BotIJXj5ZuLe4XH2C7I24Lg0m8pz8oEZTOz/U339MnoGRXQuvpcSZiN4tLa4Io62XCXRp8fwBF+f84EfNvV6HNjfxnHg/bNJjVBnW8sDB2BveAKt5iEcxjy2jQKPUVxboztXWaLfNBFbKizy8pjehflMb6iWB2cqQzdkZ/4rI9kt/mNhMXbZvQLqwJ2pWK3DsN+c1QDIcYPehrjS7neB/RYnRpM5JOXn9C47rWdMyG1ldy2sfgpmhzWsveMXBfp5/gi7m3E+wmjBvEU9DV+psI2mqMvfFvQdiOqCtIB5OxfAw8fOsK34mjpMiyEBGHDmjTZkId/yp/VCduA3EcxuysFyiVDx+SbNyvI8ZzNzxN04wyDnPIhmeLeZa/F85zx/K1k6b003SIc8K8IZCdC8MXvorrPDYeZ4aj9+2UuAJX2zL30NjhoH5YJOo6G8TkfETSvib6z8XUq/2enyhOtt+m0Xuzc2p+0BuIkpm0/QanUrDJTuAwsJkx6JQLn/4gjKxiPAoMhbRqUIuF1f1kYlQlT4dna6Q55hI7Bjt3pTI41CvJoeVmsYcYYXinkc9YStFZxegp3/6liAm6yhoZAJ+bGoh40kNOA3XmHzkwzvljYUMFDs39hkjjksklBqppNbhl0bcYmJvmPEin0wkMJE6PnMHZusmm4yFQulFIExQ3ctIlp1Skg9RgB"},{"type":"text","text":"I'll help you book a flight from New York to Paris. Let me execute the complete booking workflow.\n\n**STEP 1: Getting destination information (Paris)**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","name":"get_weather","input":{"city":"Paris","units":"celsius"}}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","name":"get_time","input":{"city":"Paris","format":"24h"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01HtTBD6sJpJGcf5goDiXbTj","content":"Weather in Paris: Sunny, 18°C, humidity 65%, light breeze from west"}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01FZ9asZxa8vX38oADZf4Zxi","content":"Current time in Paris: 14:30 CET (UTC+1)"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Great! I've received the weather and time information for Paris. Now I need to proceed to STEP 2 and check the flight schedule from New York to Paris for 2024-06-15 with economy class.","signature":"EuECCkYICxgCKkBETcBAgYfmIaf0DCq+4ism0J8ts3vDZP6auVWyHKRbLMA4h/3CsHsnlZEckzZ/FNAV9VBLy1rLIMD+tVg5bu/+Egx96yauK+YhQmYgs0caDBzbjZ0FOEPrmTyruyIwOUPCsgg+3HO70LJ9EVBGMrdivJHC3aBEAGLADd9e7coTbk1CxNdCCns/AEhQCF6hKsgBV1o/PYktqjNIppAwzAT+W6QeDM8BH4BSBwvUlMyw0z0RR7tGI7sMFVY29MrcBXBkn4TrZ2ZIP2iPqrjad4Py856Tr4DtVT83IaAEFvxRK0TBDyYpzl51gNKd8xwHdFS39e0fGaaoSUCaArhs09agX6gVT4onYB9Ql4HMg+vxl6hDSWYskbe6HNNJnq4BObNdFsgHELSrSlmFDolnv3QiPnPpNMKOOIytAJaBJU5nH6dOInDD9CJwJQ/X9O+Z0Xw0ZxBHJtNSv7gYAQ=="},{"type":"text","text":"**STEP 2: Checking flight schedules**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_014v7W5f2AAFMeCPjeDqSFzz","name":"check_flight_schedule","input":{"class":"economy","date":"2024-06-15","destination":"Paris","origin":"New York"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_014v7W5f2AAFMeCPjeDqSFzz","content":"Available flights on 2024-06-15:\nFlight AF1234 - Air France\nDeparture: JFK 09:00 → Arrival: CDG 22:30\nEconomy class: €350, 45 seats available\nWindow seats available"}]},{"role":"assistant","content":[{"type":"thinking","thinking":"Perfect! I found a flight: AF1234. Now I need to proceed to STEP 3 and book this flight with the passenger details provided by the user.","signature":"ErECCkYICxgCKkACSo6aZk6fwxPiBH4TiQ+Bn6Tz+rX21hpcd7gM79uMmJX/BDTbcIYa2Txpttkn5UxXz8J7vF/icKPjFPoQLmF1EgwB0917owHA5A/A+x8aDIiVQJVvDPVMDVKHsCIwS2p4xJr5sfMo7Sq6qqacYceOEsrV8Sc8BYUDbcrI9HOB181eyeOUGJg/W2DHnxrHKpgB9yZCEZo0ONtvUWpXllnamQ8mDTSwicB+PBNNLA+hRoy5MnIoHusUBwLnP9gBS+teYckGRhvbxV1Ti0fcwTTTpqM7e5ctcvuta+jY1AN2tTc6woEbk73/oAgp/a0lfNo2spg3vqAsXMovA2KIeP9cXf9YhxC0qgONBXQDREM0nuw4aR+QVTn+M73YPFW5/8vC5/njprdjMqAYAQ=="},{"type":"text","text":"**STEP 3: Booking the flight**"}]},{"role":"assistant","content":[{"type":"tool_use","id":"toolu_01WQtB45SPGxKL3vdpv1P3wQ","name":"book_flight","input":{"flight_number":"AF1234","passenger_email":"john.smith@example.com","passenger_name":"John Smith","seat_preference":"window"}}]},{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_01WQtB45SPGxKL3vdpv1P3wQ","content":"✓ Booking Confirmed\nConfirmation Code: ABC123XYZ\nFlight: AF1234\nPassenger: John Smith\nSeat: 12A (window)\nTotal: €350\nConfirmation sent to: john.smith@example.com","cache_control":{"type":"ephemeral","ttl":"5m"}}]}],"system":[{"type":"text","text":"You are an automated flight booking assistant. You MUST follow this exact workflow:\n\nSTEP 1: When user requests a flight, FIRST call get_weather and get_time for destination\nSTEP 2: After receiving weather/time data, NEXT call check_flight_schedule\nSTEP 3: After receiving flight schedule, NEXT call book_flight with user details\nSTEP 4: After booking confirmation, provide final summary to user\n\nCRITICAL: You must call ALL required tools in sequence. Do not skip steps or summarize prematurely.","cache_control":{"type":"ephemeral","ttl":"5m"}}],"max_tokens":4096,"stream":true,"temperature":1,"tools":[{"name":"get_weather","description":"IncrCacheTest-rtrue-strue-v2 Get current weather conditions for a specified city. Returns temperature, conditions, humidity, and wind speed.","input_schema":{"properties":{"city":{"description":"The city name to get weather for","type":"string"},"units":{"description":"Temperature unit preference","enum":["celsius","fahrenheit"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_time","description":"IncrCacheTest-rtrue-strue-v2 Get current local time for a specified city with timezone information. Returns time in 24-hour format along with timezone offset.","input_schema":{"properties":{"city":{"description":"The city name to get time for","type":"string"},"format":{"description":"Time format preference","enum":["12h","24h"],"type":"string"}},"required":["city"],"type":"object"}},{"name":"check_flight_schedule","description":"IncrCacheTest-rtrue-strue-v2 Check available flight schedules between two cities on a specified date. Returns flight numbers, departure/arrival times, airlines, and available seats.","input_schema":{"properties":{"class":{"description":"Preferred travel class","enum":["economy","business","first"],"type":"string"},"date":{"description":"Flight date in YYYY-MM-DD format","type":"string"},"destination":{"description":"Destination city or airport code","type":"string"},"origin":{"description":"Origin city or airport code","type":"string"}},"required":["origin","destination","date"],"type":"object"}},{"name":"book_flight","description":"IncrCacheTest-rtrue-strue-v2 Book a flight ticket for specified flight number and passenger details. Returns booking confirmation number and total price.","input_schema":{"properties":{"flight_number":{"description":"Flight number from schedule","type":"string"},"passenger_email":{"description":"Email for booking confirmation","type":"string"},"passenger_name":{"description":"Full name of passenger","type":"string"},"seat_preference":{"description":"Seat location preference","enum":["window","aisle","middle"],"type":"string"}},"required":["flight_number","passenger_name","passenger_email"],"type":"object"},"cache_control":{"type":"ephemeral","ttl":"5m"}}],"thinking":{"type":"enabled","budget_tokens":1024}}HTTP/2.0 200 OK
+Content-Length: 10756
 Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
 Anthropic-Ratelimit-Input-Tokens-Limit: 2000000
 Anthropic-Ratelimit-Input-Tokens-Remaining: 1999000
-Anthropic-Ratelimit-Input-Tokens-Reset: 2026-01-28T09:34:15Z
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-03-10T14:42:43Z
 Anthropic-Ratelimit-Output-Tokens-Limit: 400000
 Anthropic-Ratelimit-Output-Tokens-Remaining: 400000
-Anthropic-Ratelimit-Output-Tokens-Reset: 2026-01-28T09:34:15Z
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-03-10T14:42:43Z
 Anthropic-Ratelimit-Requests-Limit: 4000
 Anthropic-Ratelimit-Requests-Remaining: 3999
-Anthropic-Ratelimit-Requests-Reset: 2026-01-28T09:34:15Z
+Anthropic-Ratelimit-Requests-Reset: 2026-03-10T14:42:43Z
 Anthropic-Ratelimit-Tokens-Limit: 2400000
 Anthropic-Ratelimit-Tokens-Remaining: 2399000
-Anthropic-Ratelimit-Tokens-Reset: 2026-01-28T09:34:15Z
+Anthropic-Ratelimit-Tokens-Reset: 2026-03-10T14:42:43Z
 Cache-Control: no-cache
 Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
 Content-Type: text/event-stream; charset=utf-8
-Date: Wed, 28 Jan 2026 09:34:16 GMT
-Request-Id: req_011CXZYghGrcMdrNpwhLixtF
+Date: Tue, 10 Mar 2026 14:42:44 GMT
+Request-Id: req_011CYuaNc6aXewxTkKLobw5J
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-X-Envoy-Upstream-Service-Time: 1920
+Vary: Accept-Encoding
+X-Envoy-Upstream-Service-Time: 1037
 X-Robots-Tag: none
 
 event: message_start
-data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_014Ut3Ve7AnSK9oe6wwgMgoY","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":288,"cache_read_input_tokens":2142,"cache_creation":{"ephemeral_5m_input_tokens":288,"ephemeral_1h_input_tokens":0},"output_tokens":7,"service_tier":"standard"}}          }
+data: {"type":"message_start","message":{"model":"claude-sonnet-4-5-20250929","id":"msg_013uhLHi9BHyb45RBJGAKUuA","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":13,"cache_creation_input_tokens":252,"cache_read_input_tokens":2169,"cache_creation":{"ephemeral_5m_input_tokens":252,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard","inference_geo":"not_available"}}              }
 
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}            }
@@ -674,251 +661,218 @@ event: ping
 data: {"type": "ping"}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Excellent! The booking is confirmed"}       }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"Excellent! The"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":". Now I need to complete"}           }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" booking is"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 4 and"}      }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" confirmed. Now I need to complete"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" provide a"}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" STEP 4 "}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" final summary to the user with"}     }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"and"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" all the relevant"}         }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" provide a"}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" information"}   }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" final summary to"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"."}               }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":" the user."}             }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"ErYCCkYICxgCKkCq6vI0bWa5FdH/+DM3iHHGHJkEw4FzLlqshFcIYssYmCCAa7RmTgSJfh5zfZKnQDjXgmkxcLWTeLdgs/cZaDb7EgyuAFpB8WmDuY8OpucaDMu3F6ypTvdmnhw5iyIwZbfwpKn602E4oICt9OW0fL1rzEkcBlgk5oQ1nd3C8H58LZ/L4Exhvn+94z0pd475Kp0B1wbglLJ8sSh/hRXGMEXxnyphUmnplhEyTrfcViNZOYr6ybEG+m/AoxlBHaEGWntb0EXhUi2VuShmNCy6d7lnK3vQ0ueAeyxh9aYL1muPrE+MBK87f+5tOQs9nIHqsfTKtXMDRzCtBYWAabiC9FNHv7uLYVi6yyJRWVUOLVC07At497wVMHdPxkNTrDuIUD2oquNyb2OqWbHEvdwaXhgB"}      }
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EpMCCkYICxgCKkCLiXDPkz8e2UnBRlAWJcGQcPX85EiyuKJGSMTIkyCqmap4qC/7Ml+9HVtSXfuEjO9igz62+XTF33P1zbX6pZO4EgyUL0zwBkOyqUIUEo4aDNlYp/jEPK+FK5yQuiIwYvsSI+VQxIlQJVAlRSmD3wKD9QvuYUDvjypLEBLre1WG02wg2J9GJ92zX4ld3i+yKnvxv25zL4AS0dZDF7QwSICX5M7PDcsOdHF1IDGEVoVUSn0yrn3sgPzHCpwpC6kZKpWYUB5JHIBIGCQXOFf1lC79wJ6sibmKgGEdELmlXOfjDDZjUaEL8kkxMATi+ifXZCXE4xXbo1HkIpy1g8PgvT4kDg1XzzerzXez//8YAQ=="}}
 
 event: content_block_stop
-data: {"type":"content_block_stop","index":0             }
+data: {"type":"content_block_stop","index":0       }
 
 event: content_block_start
-data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}             }
+data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**STEP 4:"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"**STEP 4"}     }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Booking"}          }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Complete"}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Booking"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"!"}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Complete"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" "}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"!"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"✓**\n\n---"}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" "}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"✈"}     }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"️**\n\n---"}           }
 
 event: content_block_delta
 data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n##"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" "}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" "} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"📋 "}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"🎉 Your"}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"FINAL BOOKING"}             }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Flight Booking Summary"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" SUMMARY\n\n**"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**Confirmation Number:** ABC123X"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Destination"}    }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"YZ"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Weather"}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n###"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" &"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Flight Details"}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Time:**\n- Current"}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":\n- **Flight:** AF"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Paris"}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"1234 "}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" weather: Sunny, 18°"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"(Air France)\n- **Route"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"C, humidity 65%, light bre"}     }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** New York ("}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"eze from west\n- Current Paris"}       }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"JFK) → Paris (CDG"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" time: 14:30 C"}           }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":")\n- **Date:** June "}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ET (UTC+1)\n\n**"}             }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"15, 2024\n- **"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Flight Details:**\n- **Flight:**"}    }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Departure:** 09:00 "}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" AF1234 -"}             }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"EST"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Air France\n- **Date"}              }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Arrival:** 22"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** June 15, 2024"}        }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":30 C"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Route"}          }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ET"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** New York ("}           }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Class"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"JFK) → Paris (CDG"}     }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** Economy\n- **Seat"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":")\n- **Departure:** "}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** 12A (Window)"}   }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"09"}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n### Passenger Information:\n- **"}          }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":00"} }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Name:** John Smith\n- **Email"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Arrival:** 22:"}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** john.smith@example.com"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"30\n- **Class"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Total"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** Economy\n- **Seat"}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Price"}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** "} }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":** €350"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"12A (Window)"}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n### Destination"}  }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**Passenger"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Weather"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Information"}          }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" ("}              }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":**\n- **Name:** John Smith"}      }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Paris):\n- **Current"}       }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Email:** john.smith"} }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Conditions:** Sunny,"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"@example.com"}    }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" 18°C\n- **"}        }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**Payment"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Humidity:** 65%\n- **"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":**\n- **"}    }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Wind:** Light breeze from west"}    }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Total:** €350"}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- **Current"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n**Confirmation Code:** ABC123X"}        }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Time:** 14:30 C"} }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"YZ\n\n---"}              }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ET (UTC+1)\n\n---"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n✉"}               }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n\n✅ **"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"️ A"}   }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"Confirmation"}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" confirmation email has been sent to john."}    }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" email"}               }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"smith@example.com with your"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" sent to john.smith@example."}      }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" e"}  }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"com**\n\nYour"}            }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"-ticket and"}           }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" booking"}}
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" boarding"}}
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" is confirmed! Have"}         }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" pass information"}         }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" a wonderful trip to Paris! "}           }
 
 event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"."} }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Please"}   }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" arrive"}       }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" at J"}        }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"FK at"}     }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" least"}        }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" 3"}     }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" hours before departure"}  }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" for"}      }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" international"}       }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" flights."}          }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Have"}       }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" a great"}               }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" trip to"}         }
-
-event: content_block_delta
-data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Paris!"}            }
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"🇫🇷"}       }
 
 event: content_block_stop
 data: {"type":"content_block_stop","index":1            }
 
 event: message_delta
-data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":13,"cache_creation_input_tokens":288,"cache_read_input_tokens":2142,"output_tokens":306}     }
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":13,"cache_creation_input_tokens":252,"cache_read_input_tokens":2169,"output_tokens":300} }
 
 event: message_stop
-data: {"type":"message_stop"          }
+data: {"type":"message_stop"   }
 

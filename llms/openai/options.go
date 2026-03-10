@@ -15,7 +15,7 @@ import "github.com/vxcontrol/langchaingo/llms"
 // WithMaxCompletionTokens is preferred for clarity when using OpenAI.
 func WithMaxCompletionTokens(maxTokens int) llms.CallOption {
 	return func(opts *llms.CallOptions) {
-		opts.MaxTokens = maxTokens
+		opts.MaxTokens = &maxTokens
 	}
 }
 
@@ -36,4 +36,11 @@ func WithLegacyMaxTokensField() llms.CallOption {
 		}
 		opts.Metadata["openai:use_legacy_max_tokens"] = true
 	}
+}
+
+func isLegacyMaxTokensField(opts *llms.CallOptions) bool {
+	if opts.Metadata == nil {
+		return false
+	}
+	return opts.Metadata["openai:use_legacy_max_tokens"] == true
 }

@@ -79,8 +79,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello AI21"},
 			},
 			options: llms.CallOptions{
-				Temperature: 0.7,
-				MaxTokens:   100,
+				Temperature: getFloatPointer(0.7),
+				MaxTokens:   getIntPointer(100),
 			},
 			mockResponse: ai21TextGenerationOutput{
 				ID: "test-123",
@@ -129,8 +129,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello Amazon"},
 			},
 			options: llms.CallOptions{
-				Temperature: 0.5,
-				TopP:        0.9,
+				Temperature: getFloatPointer(0.5),
+				TopP:        getFloatPointer(0.9),
 			},
 			mockResponse: amazonTextGenerationOutput{
 				InputTextTokenCount: 4,
@@ -162,8 +162,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello Anthropic"},
 			},
 			options: llms.CallOptions{
-				Temperature: 0.7,
-				MaxTokens:   150,
+				Temperature: getFloatPointer(0.7),
+				MaxTokens:   getIntPointer(150),
 			},
 			mockResponse: anthropicTextGenerationOutput{
 				Type: "message",
@@ -204,9 +204,9 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello Cohere"},
 			},
 			options: llms.CallOptions{
-				Temperature:    0.8,
-				TopK:           40,
-				CandidateCount: 2,
+				Temperature:    getFloatPointer(0.8),
+				TopK:           getIntPointer(40),
+				CandidateCount: getIntPointer(2),
 			},
 			mockResponse: cohereTextGenerationOutput{
 				ID: "cohere-123",
@@ -238,8 +238,8 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello Meta"},
 			},
 			options: llms.CallOptions{
-				Temperature: 0.6,
-				TopP:        0.95,
+				Temperature: getFloatPointer(0.6),
+				TopP:        getFloatPointer(0.95),
 			},
 			mockResponse: metaTextGenerationOutput{
 				Generation:           "Hello! I'm LLaMA 2.",
@@ -271,7 +271,7 @@ func TestClient_CreateCompletion(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Generate ideas"},
 			},
 			options: llms.CallOptions{
-				CandidateCount: 3,
+				CandidateCount: getIntPointer(3),
 			},
 			mockResponse: ai21TextGenerationOutput{
 				Completions: []struct {
@@ -424,8 +424,8 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 	}
 
 	options := llms.CallOptions{
-		Temperature:   0.7,
-		MaxTokens:     100,
+		Temperature:   getFloatPointer(0.7),
+		MaxTokens:     getIntPointer(100),
 		StreamingFunc: streamingFunc,
 	}
 
@@ -840,20 +840,20 @@ func testCreateAi21CompletionWithMock(ctx context.Context, client *mockBedrockCl
 	txt := processInputMessagesGeneric(messages)
 	input := ai21TextGenerationInput{
 		Prompt:        txt,
-		Temperature:   options.Temperature,
-		TopP:          options.TopP,
-		MaxTokens:     getMaxTokens(options.MaxTokens, 2048),
+		Temperature:   options.GetTemperature(),
+		TopP:          options.GetTopP(),
+		MaxTokens:     getMaxTokens(options.GetMaxTokens(), 2048),
 		StopSequences: options.StopWords,
 		CountPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: options.RepetitionPenalty},
+		}{Scale: options.GetRepetitionPenalty()},
 		PresencePenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
+		}{Scale: options.GetPresencePenalty()},
 		FrequencyPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
-		NumResults: options.CandidateCount,
+		}{Scale: options.GetFrequencyPenalty()},
+		NumResults: options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(input)
@@ -905,10 +905,10 @@ func testCreateAmazonCompletionWithMock(ctx context.Context, client *mockBedrock
 	input := amazonTextGenerationInput{
 		InputText: txt,
 		TextGenerationConfig: amazonTextGenerationConfigInput{
-			MaxTokens:     getMaxTokens(options.MaxTokens, 512),
-			TopP:          options.TopP,
-			Temperature:   options.Temperature,
-			StopSequences: options.StopWords,
+			MaxTokens:     getMaxTokens(options.GetMaxTokens(), 512),
+			TopP:          options.GetTopP(),
+			Temperature:   options.GetTemperature(),
+			StopSequences: options.GetStopWords(),
 		},
 	}
 
@@ -964,12 +964,12 @@ func testCreateAnthropicCompletionWithMock(ctx context.Context, client *mockBedr
 
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
-		MaxTokens:        getMaxTokens(options.MaxTokens, 2048),
+		MaxTokens:        getMaxTokens(options.GetMaxTokens(), 2048),
 		System:           systemPrompt,
 		Messages:         inputContents,
-		Temperature:      options.Temperature,
-		TopP:             options.TopP,
-		TopK:             options.TopK,
+		Temperature:      options.GetTemperature(),
+		TopP:             options.GetTopP(),
+		TopK:             options.GetTopK(),
 		StopSequences:    options.StopWords,
 	}
 
@@ -1028,12 +1028,12 @@ func testCreateCohereCompletionWithMock(ctx context.Context, client *mockBedrock
 	txt := processInputMessagesGeneric(messages)
 	input := &cohereTextGenerationInput{
 		Prompt:         txt,
-		Temperature:    options.Temperature,
-		P:              options.TopP,
-		K:              options.TopK,
-		MaxTokens:      getMaxTokens(options.MaxTokens, 20),
+		Temperature:    options.GetTemperature(),
+		P:              options.GetTopP(),
+		K:              options.GetTopK(),
+		MaxTokens:      getMaxTokens(options.GetMaxTokens(), 20),
 		StopSequences:  options.StopWords,
-		NumGenerations: options.CandidateCount,
+		NumGenerations: options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(input)
@@ -1080,9 +1080,9 @@ func testCreateMetaCompletionWithMock(ctx context.Context, client *mockBedrockCl
 	txt := processInputMessagesGeneric(messages)
 	input := &metaTextGenerationInput{
 		Prompt:      txt,
-		Temperature: options.Temperature,
-		TopP:        options.TopP,
-		MaxGenLen:   getMaxTokens(options.MaxTokens, 512),
+		Temperature: options.GetTemperature(),
+		TopP:        options.GetTopP(),
+		MaxGenLen:   getMaxTokens(options.GetMaxTokens(), 512),
 	}
 
 	body, err := json.Marshal(input)

@@ -72,7 +72,7 @@ func TestConverseClient_BasicTextCompletion(t *testing.T) {
 	}
 
 	// Execute
-	response, err := client.CreateCompletionConverse(context.Background(), input)
+	response, err := client.CreateCompletionConverse(t.Context(), input)
 
 	// Verify
 	assert.NoError(t, err)
@@ -146,7 +146,7 @@ func TestConverseClient_ToolCalling(t *testing.T) {
 	}
 
 	// Execute
-	response, err := client.CreateCompletionConverse(context.Background(), input)
+	response, err := client.CreateCompletionConverse(t.Context(), input)
 
 	// Verify
 	assert.NoError(t, err)
@@ -155,6 +155,7 @@ func TestConverseClient_ToolCalling(t *testing.T) {
 	assert.Len(t, response.Choices[0].ToolCalls, 1)
 	assert.Equal(t, "tool_123", response.Choices[0].ToolCalls[0].ID)
 	assert.Equal(t, "get_weather", response.Choices[0].ToolCalls[0].FunctionCall.Name)
+	assert.Equal(t, `{"location":"New York"}`, response.Choices[0].ToolCalls[0].FunctionCall.Arguments)
 
 	mockClient.AssertExpectations(t)
 }
@@ -197,7 +198,7 @@ func TestConverseClient_SystemMessages(t *testing.T) {
 	}
 
 	// Execute
-	response, err := client.CreateCompletionConverse(context.Background(), input)
+	response, err := client.CreateCompletionConverse(t.Context(), input)
 
 	// Verify
 	assert.NoError(t, err)
@@ -256,7 +257,7 @@ func TestConverseClient_InferenceConfiguration(t *testing.T) {
 	}
 
 	// Execute
-	_, err := client.CreateCompletionConverse(context.Background(), input)
+	_, err := client.CreateCompletionConverse(t.Context(), input)
 
 	// Verify
 	assert.NoError(t, err)
@@ -292,7 +293,7 @@ func TestConverseClient_EmptyResponse(t *testing.T) {
 	}
 
 	// Execute
-	response, err := client.CreateCompletionConverse(context.Background(), input)
+	response, err := client.CreateCompletionConverse(t.Context(), input)
 
 	// Verify
 	assert.NoError(t, err)

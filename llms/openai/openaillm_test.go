@@ -537,7 +537,6 @@ func TestProcessReasoning(t *testing.T) {
 				require.NotNil(t, result)
 				assert.Equal(t, tt.reasoningContent, result.Content)
 				assert.Nil(t, result.Signature)
-				assert.Nil(t, result.RedactedContent)
 			}
 		})
 	}
@@ -943,14 +942,17 @@ func TestCreateChatRequest_ReasoningModelTemperature(t *testing.T) {
 			t.Parallel()
 
 			opts := llms.CallOptions{
-				Model:       tt.model,
-				Temperature: tt.temperature,
+				Model:       &tt.model,
+				Temperature: &tt.temperature,
 			}
 
 			req, err := llm.createChatRequest([]*ChatMessage{}, opts)
 			require.NoError(t, err)
-			assert.Equal(t, tt.expectedTemperature, req.Temperature,
-				"Temperature should be %v for model %s", tt.expectedTemperature, tt.model)
+			require.NotNil(t, req.Temperature)
+			if req.Temperature != nil {
+				assert.Equal(t, tt.expectedTemperature, *req.Temperature,
+					"Temperature should be %v for model %s", tt.expectedTemperature, tt.model)
+			}
 		})
 	}
 }

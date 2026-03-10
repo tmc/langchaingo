@@ -9,7 +9,7 @@ import (
 func TestCountTokens(t *testing.T) {
 	t.Parallel()
 	numTokens := CountTokens("gpt-3.5-turbo", "test for counting tokens")
-	expectedNumTokens := 4
+	expectedNumTokens := 6
 	assert.Equal(t, expectedNumTokens, numTokens)
 }
 

@@ -53,23 +53,33 @@ func (g *Vertex) GenerateContent(
 	}
 
 	opts := llms.CallOptions{
-		Model:          g.opts.DefaultModel,
-		CandidateCount: g.opts.DefaultCandidateCount,
-		MaxTokens:      g.opts.DefaultMaxTokens,
-		Temperature:    g.opts.DefaultTemperature,
-		TopP:           g.opts.DefaultTopP,
-		TopK:           g.opts.DefaultTopK,
+		Model:          &g.opts.DefaultModel,
+		CandidateCount: &g.opts.DefaultCandidateCount,
+		MaxTokens:      &g.opts.DefaultMaxTokens,
+		Temperature:    &g.opts.DefaultTemperature,
+		TopP:           &g.opts.DefaultTopP,
+		TopK:           &g.opts.DefaultTopK,
 	}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	model := g.client.GenerativeModel(opts.Model)
-	model.SetCandidateCount(int32(opts.CandidateCount))
-	model.SetMaxOutputTokens(int32(opts.MaxTokens))
-	model.SetTemperature(float32(opts.Temperature))
-	model.SetTopP(float32(opts.TopP))
-	model.SetTopK(int32(opts.TopK))
+	model := g.client.GenerativeModel(opts.GetModel())
+	if opts.CandidateCount != nil {
+		model.SetCandidateCount(int32(opts.GetCandidateCount()))
+	}
+	if opts.MaxTokens != nil {
+		model.SetMaxOutputTokens(int32(opts.GetMaxTokens()))
+	}
+	if opts.Temperature != nil {
+		model.SetTemperature(float32(opts.GetTemperature()))
+	}
+	if opts.TopP != nil {
+		model.SetTopP(float32(opts.GetTopP()))
+	}
+	if opts.TopK != nil {
+		model.SetTopK(int32(opts.GetTopK()))
+	}
 	model.StopSequences = opts.StopWords
 	model.SafetySettings = []*genai.SafetySetting{
 		{
@@ -96,11 +106,11 @@ func (g *Vertex) GenerateContent(
 
 	// set model.ResponseMIMEType from either opts.JSONMode or opts.ResponseMIMEType
 	switch {
-	case opts.ResponseMIMEType != "" && opts.JSONMode:
+	case opts.ResponseMIMEType != nil && opts.JSONMode:
 		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
-	case opts.ResponseMIMEType != "" && !opts.JSONMode:
-		model.ResponseMIMEType = opts.ResponseMIMEType
-	case opts.ResponseMIMEType == "" && opts.JSONMode:
+	case opts.ResponseMIMEType != nil && !opts.JSONMode:
+		model.ResponseMIMEType = opts.GetResponseMIMEType()
+	case opts.GetResponseMIMEType() == "" && opts.JSONMode:
 		model.ResponseMIMEType = ResponseMIMETypeJson
 	}
 

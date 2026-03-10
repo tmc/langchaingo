@@ -1,27 +1,26 @@
 httprr trace v1
-314 1668
+330 1632
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 112
+Content-Length: 128
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Hello, how are you?"}],"max_completion_tokens":50}HTTP/2.0 200 OK
+{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Hello, how are you?"}],"temperature":0,"max_completion_tokens":50}HTTP/2.0 200 OK
 Content-Length: 869
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 19:20:54 GMT
+Date: Tue, 10 Mar 2026 15:25:58 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 638
+Openai-Processing-Ms: 967
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 656
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 30000
 X-Ratelimit-Limit-Tokens: 150000000
@@ -29,12 +28,12 @@ X-Ratelimit-Remaining-Requests: 29999
 X-Ratelimit-Remaining-Tokens: 149999992
 X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_bf7ddcd0b0354ea9b395718393304dd3
+X-Request-Id: req_f1e7ee3eacd042b4b73352406d82b141
 
 {
-  "id": "chatcmpl-D0uWbcIctduS87aRJ9yHnWUoc71XO",
+  "id": "chatcmpl-DHtG2d17OZnf4NCfZjHhhHwWSmxh8",
   "object": "chat.completion",
-  "created": 1769109653,
+  "created": 1773156358,
   "model": "gpt-4.1-mini-2025-04-14",
   "choices": [
     {
@@ -65,5 +64,5 @@ X-Request-Id: req_bf7ddcd0b0354ea9b395718393304dd3
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_376a7ccef1"
+  "system_fingerprint": "fp_828130e5d4"
 }

@@ -85,7 +85,7 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	opts := llms.CallOptions{
-		Model: l.modelID,
+		Model: &l.modelID,
 	}
 	for _, opt := range options {
 		opt(&opts)
@@ -103,7 +103,7 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 // generateContentWithConverseAPI uses the unified Converse API
 func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
 	// Apply automatic caching to bedrock messages if enabled
-	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.Model)
+	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.GetModel())
 	m, err := processMessagesWithCaching(messages, shouldAutoCache)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 
 	// Build Converse input
 	input := &bedrockclient.ConverseInput{
-		ModelID:         opts.Model,
+		ModelID:         opts.GetModel(),
 		Messages:        m,
 		Tools:           opts.Tools,
 		StreamingFunc:   opts.StreamingFunc,
@@ -126,14 +126,14 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 	}
 
 	// Set inference parameters
-	if opts.MaxTokens > 0 {
-		input.MaxTokens = &opts.MaxTokens
+	if opts.MaxTokens != nil {
+		input.MaxTokens = opts.MaxTokens
 	}
-	if opts.Temperature > 0 {
-		input.Temperature = &opts.Temperature
+	if opts.Temperature != nil {
+		input.Temperature = opts.Temperature
 	}
-	if opts.TopP > 0 {
-		input.TopP = &opts.TopP
+	if opts.TopP != nil {
+		input.TopP = opts.TopP
 	}
 	if len(opts.StopWords) > 0 {
 		input.StopSequences = opts.StopWords
@@ -157,13 +157,13 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 // generateContentWithLegacyAPI uses the original model-specific implementations
 func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.MessageContent, opts llms.CallOptions) (*llms.ContentResponse, error) {
 	// Apply automatic caching to bedrock messages if enabled
-	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.Model)
+	shouldAutoCache := l.enableAutoCaching && l.supportsCaching(opts.GetModel())
 	m, err := processMessagesWithCaching(messages, shouldAutoCache)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := l.client.CreateCompletion(ctx, opts.Model, m, opts)
+	res, err := l.client.CreateCompletion(ctx, opts.GetModel(), m, opts)
 	if err != nil {
 		if l.CallbacksHandler != nil {
 			l.CallbacksHandler.HandleLLMError(ctx, err)

@@ -57,10 +57,10 @@ func (o *LLM) GenerateTTS(ctx context.Context, input string, options ...llms.Cal
 
 	req := &openaiclient.TTSRequest{
 		Input:          input,
-		Model:          opts.Model,
-		Voice:          opts.Voice,
-		ResponseFormat: opts.ResponseFormat,
-		Speed:          opts.Speed,
+		Model:          opts.GetModel(),
+		Voice:          opts.GetVoice(),
+		ResponseFormat: opts.GetResponseFormat(),
+		Speed:          opts.GetSpeed(),
 	}
 
 	if req.Model != string(openaiclient.TTS1) && req.Model != string(openaiclient.TTS1HD) {
@@ -214,15 +214,18 @@ func (o *LLM) handleToolMessage(mc llms.MessageContent) error {
 // createChatRequest creates an OpenAI chat request with the given parameters.
 func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) (*openaiclient.ChatRequest, error) {
 	req := &openaiclient.ChatRequest{
-		Model:                opts.Model,
+		Model:                opts.GetModel(),
 		StopWords:            opts.StopWords,
 		Messages:             chatMsgs,
 		StreamingFunc:        opts.StreamingFunc,
 		Temperature:          opts.Temperature,
+		TopK:                 opts.TopK,
+		TopP:                 opts.TopP,
+		MinP:                 opts.MinP,
 		N:                    opts.N,
 		FrequencyPenalty:     opts.FrequencyPenalty,
 		PresencePenalty:      opts.PresencePenalty,
-		MaxCompletionTokens:  opts.MaxTokens,
+		RepetitionPenalty:    opts.RepetitionPenalty,
 		ToolChoice:           opts.ToolChoice,
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
@@ -230,13 +233,20 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}
 
-	if opts.JSONMode {
+	if isLegacyMaxTokensField(&opts) {
+		req.MaxTokens = opts.MaxTokens
+	} else {
+		req.MaxCompletionTokens = opts.MaxTokens
+	}
+
+	if opts.GetJSONMode() {
 		req.ResponseFormat = ResponseFormatJSON
 	}
 
 	// set temperature to 1.0 for reasoning models
-	if reasoning.IsReasoningModel(opts.Model) {
-		req.Temperature = 1.0
+	if reasoning.IsReasoningModel(opts.GetModel()) {
+		temperature := 1.0
+		req.Temperature = &temperature
 	}
 
 	// add tools from functions and tool definitions
@@ -264,12 +274,12 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	defer func() {
 		if req.Reasoning != nil || req.ReasoningEffort != nil {
 			// must of all reasoning models can't use temperature and top_p with reasoning at the same time
-			req.Temperature, req.TopP = 0.0, 0.0
+			req.Temperature, req.TopP = nil, nil
 		}
 	}()
 
-	reasoningEffort := opts.Reasoning.GetEffort(opts.MaxTokens)
-	reasoningTokens := opts.Reasoning.GetTokens(opts.MaxTokens)
+	reasoningEffort := opts.Reasoning.GetEffort(opts.GetMaxTokens())
+	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
 	if !o.client.ModernReasoningFormat {
 		if reasoningEffort != llms.ReasoningNone {
 			req.ReasoningEffort = &reasoningEffort
@@ -362,9 +372,8 @@ func (o *LLM) processReasoning(reasoningContent string) *reasoning.ContentReason
 	}
 
 	return &reasoning.ContentReasoning{
-		Content:         reasoningContent,
-		Signature:       nil, // not supported yet for OpenAI compatible providers
-		RedactedContent: nil, // not supported yet for OpenAI compatible providers
+		Content:   reasoningContent,
+		Signature: nil, // not supported yet for OpenAI compatible providers
 	}
 }
 

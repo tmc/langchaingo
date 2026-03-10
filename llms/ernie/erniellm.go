@@ -87,9 +87,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	part := msg0.Parts[0]
 	result, err := o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
 		Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
-		PenaltyScore:  opts.RepetitionPenalty,
+		Temperature:   opts.GetTemperature(),
+		TopP:          opts.GetTopP(),
+		PenaltyScore:  opts.GetRepetitionPenalty(),
 		StreamingFunc: opts.StreamingFunc,
 		Stream:        opts.StreamingFunc != nil,
 	})
@@ -149,7 +149,7 @@ func (o *LLM) getModelPath(opts llms.CallOptions) ernieclient.ModelPath {
 	model := o.model
 
 	if model == "" {
-		model = ModelName(opts.Model)
+		model = ModelName(opts.GetModel())
 	}
 
 	return modelToPath(model)

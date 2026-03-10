@@ -15,17 +15,24 @@ func TestChatRequest_TemperatureMarshalJSON(t *testing.T) {
 			name: "regular model with temperature",
 			request: ChatRequest{
 				Model:       "gpt-4",
-				Temperature: 0.7,
+				Temperature: getFloatPointer(0.7),
 			},
 			wantTemperature: true,
+		},
+		{
+			name: "gpt-4.1-mini model omits zero temperature",
+			request: ChatRequest{
+				Model: "gpt-4.1-mini",
+			},
+			wantTemperature: false,
 		},
 		{
 			name: "gpt-5 model omits zero temperature",
 			request: ChatRequest{
 				Model:       "gpt-5-mini",
-				Temperature: 0.0,
+				Temperature: getFloatPointer(0.0),
 			},
-			wantTemperature: false,
+			wantTemperature: true,
 		},
 	}
 
@@ -49,11 +56,16 @@ func TestChatRequest_TemperatureMarshalJSON(t *testing.T) {
 
 			// If temperature should be present, verify the value
 			if hasTemperature && tt.wantTemperature {
+				var temperature float64
+				if tt.request.Temperature != nil {
+					temperature = *tt.request.Temperature
+				}
+
 				temp, ok := result["temperature"].(float64)
 				if !ok {
 					t.Errorf("temperature is not a float64: %T", result["temperature"])
-				} else if temp != tt.request.Temperature {
-					t.Errorf("temperature value: got %v, want %v", temp, tt.request.Temperature)
+				} else if temp != temperature {
+					t.Errorf("temperature value: got %v, want %v", temp, temperature)
 				}
 			}
 		})
@@ -168,4 +180,12 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

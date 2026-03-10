@@ -48,9 +48,9 @@ func createDeepSeekCompletion(ctx context.Context,
 
 	input := deepSeekTextGenerationInput{
 		Prompt:      prompt,
-		Temperature: options.Temperature,
-		TopP:        options.TopP,
-		MaxTokens:   getMaxTokens(options.MaxTokens, 512),
+		Temperature: options.GetTemperature(),
+		TopP:        options.GetTopP(),
+		MaxTokens:   getMaxTokens(options.GetMaxTokens(), 512),
 		Stop:        options.StopWords,
 	}
 

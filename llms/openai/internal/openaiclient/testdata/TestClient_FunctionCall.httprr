@@ -1,27 +1,26 @@
 httprr trace v1
-562 1721
+578 1685
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 360
+Content-Length: 376
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"What's the weather like in Boston?"}],"max_completion_tokens":100,"functions":[{"name":"get_weather","description":"Get the weather for a location","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"What's the weather like in Boston?"}],"temperature":0,"max_completion_tokens":100,"functions":[{"name":"get_weather","description":"Get the weather for a location","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
 Content-Length: 925
 Access-Control-Expose-Headers: X-Request-ID
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 19:21:02 GMT
+Date: Tue, 10 Mar 2026 15:26:19 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 332
+Openai-Processing-Ms: 327
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 354
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 50000000
@@ -29,12 +28,12 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 49999989
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_a703a445b67d4fa2826516aaba1767bb
+X-Request-Id: req_751069bad1a84db1b39e662b7d5596a4
 
 {
-  "id": "chatcmpl-D0uWjJKvNCax2Mp19fUCqob2bMB4X",
+  "id": "chatcmpl-DHtGNMK26nsHX0P1jZwr0bbDpO8XZ",
   "object": "chat.completion",
-  "created": 1769109661,
+  "created": 1773156379,
   "model": "gpt-3.5-turbo-0125",
   "choices": [
     {

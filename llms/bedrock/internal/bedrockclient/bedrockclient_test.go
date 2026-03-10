@@ -171,32 +171,32 @@ func TestCreateAi21Completion_RequestStructure(t *testing.T) {
 		{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "What is the capital of France?"},
 	}
 	options := llms.CallOptions{
-		Temperature:       0.7,
-		TopP:              0.9,
-		MaxTokens:         100,
+		Temperature:       getFloatPointer(0.7),
+		TopP:              getFloatPointer(0.9),
+		MaxTokens:         getIntPointer(100),
 		StopWords:         []string{"END"},
-		RepetitionPenalty: 1.2,
-		CandidateCount:    2,
+		RepetitionPenalty: getFloatPointer(1.2),
+		CandidateCount:    getIntPointer(2),
 	}
 
 	// Create the input that would be sent to AI21
 	txt := processInputMessagesGeneric(messages)
 	input := ai21TextGenerationInput{
 		Prompt:        txt,
-		Temperature:   options.Temperature,
-		TopP:          options.TopP,
-		MaxTokens:     getMaxTokens(options.MaxTokens, 2048),
+		Temperature:   options.GetTemperature(),
+		TopP:          options.GetTopP(),
+		MaxTokens:     getMaxTokens(options.GetMaxTokens(), 2048),
 		StopSequences: options.StopWords,
 		CountPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: options.RepetitionPenalty},
+		}{Scale: options.GetRepetitionPenalty()},
 		PresencePenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
+		}{Scale: options.GetRepetitionPenalty()},
 		FrequencyPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
-		NumResults: options.CandidateCount,
+		}{Scale: options.GetFrequencyPenalty()},
+		NumResults: options.GetCandidateCount(),
 	}
 
 	// Verify the request structure
@@ -222,9 +222,9 @@ func TestCreateAmazonCompletion_RequestStructure(t *testing.T) {
 		{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Tell me about AI"},
 	}
 	options := llms.CallOptions{
-		Temperature: 0.5,
-		TopP:        0.8,
-		MaxTokens:   150,
+		Temperature: getFloatPointer(0.5),
+		TopP:        getFloatPointer(0.8),
+		MaxTokens:   getIntPointer(150),
 		StopWords:   []string{"|", "User:"},
 	}
 
@@ -232,9 +232,9 @@ func TestCreateAmazonCompletion_RequestStructure(t *testing.T) {
 	input := amazonTextGenerationInput{
 		InputText: txt,
 		TextGenerationConfig: amazonTextGenerationConfigInput{
-			MaxTokens:     getMaxTokens(options.MaxTokens, 512),
-			TopP:          options.TopP,
-			Temperature:   options.Temperature,
+			MaxTokens:     getMaxTokens(options.GetMaxTokens(), 512),
+			TopP:          options.GetTopP(),
+			Temperature:   options.GetTemperature(),
 			StopSequences: options.StopWords,
 		},
 	}
@@ -449,23 +449,23 @@ func TestCreateCohereCompletion_RequestStructure(t *testing.T) {
 		{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Explain quantum computing"},
 	}
 	options := llms.CallOptions{
-		Temperature:    0.8,
-		TopP:           0.95,
-		TopK:           50,
-		MaxTokens:      200,
+		Temperature:    getFloatPointer(0.8),
+		TopP:           getFloatPointer(0.95),
+		TopK:           getIntPointer(50),
+		MaxTokens:      getIntPointer(200),
 		StopWords:      []string{"END", "STOP"},
-		CandidateCount: 3,
+		CandidateCount: getIntPointer(3),
 	}
 
 	txt := processInputMessagesGeneric(messages)
 	input := &cohereTextGenerationInput{
 		Prompt:         txt,
-		Temperature:    options.Temperature,
-		P:              options.TopP,
-		K:              options.TopK,
-		MaxTokens:      getMaxTokens(options.MaxTokens, 20),
+		Temperature:    options.GetTemperature(),
+		P:              options.GetTopP(),
+		K:              options.GetTopK(),
+		MaxTokens:      getMaxTokens(options.GetMaxTokens(), 20),
 		StopSequences:  options.StopWords,
-		NumGenerations: options.CandidateCount,
+		NumGenerations: options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(input)
@@ -490,17 +490,17 @@ func TestCreateMetaCompletion_RequestStructure(t *testing.T) {
 		{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Write a poem about technology"},
 	}
 	options := llms.CallOptions{
-		Temperature: 0.6,
-		TopP:        0.85,
-		MaxTokens:   256,
+		Temperature: getFloatPointer(0.6),
+		TopP:        getFloatPointer(0.85),
+		MaxTokens:   getIntPointer(256),
 	}
 
 	txt := processInputMessagesGeneric(messages)
 	input := &metaTextGenerationInput{
 		Prompt:      txt,
-		Temperature: options.Temperature,
-		TopP:        options.TopP,
-		MaxGenLen:   getMaxTokens(options.MaxTokens, 512),
+		Temperature: options.GetTemperature(),
+		TopP:        options.GetTopP(),
+		MaxGenLen:   getMaxTokens(options.GetMaxTokens(), 512),
 	}
 
 	body, err := json.Marshal(input)
@@ -868,4 +868,12 @@ func TestBedrockRequestStructures(t *testing.T) {
 		require.Equal(t, "application/json", *input.ContentType)
 		require.Equal(t, []byte(`{"prompt": "Stream this"}`), input.Body)
 	})
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

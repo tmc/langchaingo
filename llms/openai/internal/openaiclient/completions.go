@@ -86,15 +86,15 @@ func (c *Client) createCompletion(ctx context.Context, payload *CompletionReques
 		Messages: []*ChatMessage{
 			{Role: "user", Content: payload.Prompt},
 		},
-		Temperature:         payload.Temperature,
-		TopP:                payload.TopP,
-		MaxCompletionTokens: payload.MaxTokens,
-		N:                   payload.N,
+		Temperature:         &payload.Temperature,
+		TopP:                &payload.TopP,
+		MaxCompletionTokens: &payload.MaxTokens,
+		N:                   &payload.N,
 		StopWords:           payload.StopWords,
-		FrequencyPenalty:    payload.FrequencyPenalty,
-		PresencePenalty:     payload.PresencePenalty,
+		FrequencyPenalty:    &payload.FrequencyPenalty,
+		PresencePenalty:     &payload.PresencePenalty,
 		StreamingFunc:       payload.StreamingFunc,
-		Seed:                payload.Seed,
+		Seed:                &payload.Seed,
 		ReasoningEffort:     payload.ReasoningEffort,
 	})
 }

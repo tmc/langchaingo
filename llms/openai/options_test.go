@@ -3,6 +3,7 @@ package openai
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
 )
 
@@ -11,20 +12,20 @@ func TestWithMaxCompletionTokens(t *testing.T) {
 
 	// Test that WithMaxCompletionTokens sets MaxTokens
 	WithMaxCompletionTokens(100)(opts)
-	if opts.MaxTokens != 100 {
-		t.Errorf("expected MaxTokens=100, got %d", opts.MaxTokens)
+	if opts.GetMaxTokens() != 100 {
+		t.Errorf("expected MaxTokens=100, got %d", opts.GetMaxTokens())
 	}
 
 	// Test that it can be overridden
 	WithMaxCompletionTokens(200)(opts)
-	if opts.MaxTokens != 200 {
-		t.Errorf("expected MaxTokens=200, got %d", opts.MaxTokens)
+	if opts.GetMaxTokens() != 200 {
+		t.Errorf("expected MaxTokens=200, got %d", opts.GetMaxTokens())
 	}
 
 	// Test with zero value
 	WithMaxCompletionTokens(0)(opts)
-	if opts.MaxTokens != 0 {
-		t.Errorf("expected MaxTokens=0, got %d", opts.MaxTokens)
+	if opts.GetMaxTokens() != 0 {
+		t.Errorf("expected MaxTokens=0, got %d", opts.GetMaxTokens())
 	}
 }
 
@@ -34,18 +35,18 @@ func TestOptionsCompatibility(t *testing.T) {
 	// Test that both llms.WithMaxTokens and WithMaxCompletionTokens
 	// set the same field for compatibility
 	llms.WithMaxTokens(150)(opts)
-	if opts.MaxTokens != 150 {
-		t.Errorf("expected MaxTokens=150, got %d", opts.MaxTokens)
+	if opts.GetMaxTokens() != 150 {
+		t.Errorf("expected MaxTokens=150, got %d", opts.GetMaxTokens())
 	}
 
 	opts2 := &llms.CallOptions{}
 	WithMaxCompletionTokens(150)(opts2)
-	if opts2.MaxTokens != 150 {
-		t.Errorf("expected MaxTokens=150, got %d", opts2.MaxTokens)
+	if opts2.GetMaxTokens() != 150 {
+		t.Errorf("expected MaxTokens=150, got %d", opts2.GetMaxTokens())
 	}
 
 	// They should be equivalent
-	if opts.MaxTokens != opts2.MaxTokens {
+	if opts.GetMaxTokens() != opts2.GetMaxTokens() {
 		t.Errorf("WithMaxTokens and WithMaxCompletionTokens should set the same field")
 	}
 }
@@ -66,8 +67,8 @@ func TestWithLegacyMaxTokensField(t *testing.T) {
 	opts2 := &llms.CallOptions{}
 	llms.WithMaxTokens(200)(opts2)
 	WithLegacyMaxTokensField()(opts2)
-	if opts2.MaxTokens != 200 {
-		t.Errorf("expected MaxTokens=200, got %d", opts2.MaxTokens)
+	if opts2.GetMaxTokens() != 200 {
+		t.Errorf("expected MaxTokens=200, got %d", opts2.GetMaxTokens())
 	}
 	if v, ok := opts2.Metadata["openai:use_legacy_max_tokens"].(bool); !ok || !v {
 		t.Error("expected openai:use_legacy_max_tokens to be true")
@@ -142,9 +143,7 @@ func TestWebSearchOptionsConversion(t *testing.T) {
 		SearchContextSize: "high",
 	}
 	result = webSearchOptionsFromCallOptions(opts)
-	if result == nil {
-		t.Fatal("expected non-nil result")
-	}
+	require.NotNil(t, result, "expected non-nil result")
 	if result.SearchContextSize != "high" {
 		t.Errorf("expected SearchContextSize=high, got %s", result.SearchContextSize)
 	}
@@ -162,12 +161,8 @@ func TestWebSearchOptionsConversion(t *testing.T) {
 		},
 	}
 	result2 := webSearchOptionsFromCallOptions(opts2)
-	if result2 == nil {
-		t.Fatal("expected non-nil result")
-	}
-	if result2.UserLocation == nil {
-		t.Fatal("expected UserLocation to be set")
-	}
+	require.NotNil(t, result2, "expected non-nil result")
+	require.NotNil(t, result2.UserLocation, "expected UserLocation to be set")
 	if result2.UserLocation.Type != "approximate" {
 		t.Errorf("expected Type=approximate, got %s", result2.UserLocation.Type)
 	}

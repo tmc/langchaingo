@@ -162,20 +162,20 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 	txt := processInputMessagesGeneric(messages)
 	inputContent := ai21TextGenerationInput{
 		Prompt:        txt,
-		Temperature:   options.Temperature,
-		TopP:          options.TopP,
-		MaxTokens:     getMaxTokens(options.MaxTokens, 2048),
+		Temperature:   options.GetTemperature(),
+		TopP:          options.GetTopP(),
+		MaxTokens:     getMaxTokens(options.GetMaxTokens(), 2048),
 		StopSequences: options.StopWords,
 		CountPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: options.RepetitionPenalty},
+		}{Scale: options.GetRepetitionPenalty()},
 		PresencePenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
+		}{Scale: options.GetPresencePenalty()},
 		FrequencyPenalty: struct {
 			Scale float64 `json:"scale"`
-		}{Scale: 0},
-		NumResults: options.CandidateCount,
+		}{Scale: options.GetFrequencyPenalty()},
+		NumResults: options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(inputContent)
@@ -248,11 +248,11 @@ func createAi21JambaCompletion(ctx context.Context, client *bedrockruntime.Clien
 
 	inputContent := ai21JambaInput{
 		Messages:    jambaMessages,
-		MaxTokens:   getMaxTokens(options.MaxTokens, 4096),
-		Temperature: options.Temperature,
-		TopP:        options.TopP,
+		MaxTokens:   getMaxTokens(options.GetMaxTokens(), 4096),
+		Temperature: options.GetTemperature(),
+		TopP:        options.GetTopP(),
 		Stop:        options.StopWords,
-		N:           options.CandidateCount,
+		N:           options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(inputContent)

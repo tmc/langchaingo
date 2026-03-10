@@ -53,7 +53,7 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		Role:    "user",
 		Content: prompt,
 	}}
-	res, err := m.client.Chat(callOptions.Model, messages, &mistralChatParams)
+	res, err := m.client.Chat(callOptions.GetModel(), messages, &mistralChatParams)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return "", err
@@ -98,15 +98,15 @@ func resolveDefaultOptions(sdkDefaults sdk.ChatRequestParams, c *clientOptions) 
 	// The following llms.CallOptions are not supported at the moment by mistral SDK:
 	// MinLength, MaxLength,N (how many chat completion choices to generate for each input message), RepetitionPenalty, FrequencyPenalty, and PresencePenalty.
 	return &llms.CallOptions{
-		Model: c.model,
+		Model: &c.model,
 		// MaxTokens is the maximum number of tokens to generate.
-		MaxTokens: sdkDefaults.MaxTokens,
+		MaxTokens: &sdkDefaults.MaxTokens,
 		// Temperature is the temperature for sampling, between 0 and 1.
-		Temperature: sdkDefaults.Temperature,
+		Temperature: &sdkDefaults.Temperature,
 		// TopP is the cumulative probability for top-p sampling.
-		TopP: sdkDefaults.TopP,
+		TopP: &sdkDefaults.TopP,
 		// Seed is a seed for deterministic sampling.
-		Seed: sdkDefaults.RandomSeed,
+		Seed: &sdkDefaults.RandomSeed,
 		// Function defitions to include in the request.
 		Functions: make([]llms.FunctionDefinition, 0),
 	}
@@ -114,9 +114,9 @@ func resolveDefaultOptions(sdkDefaults sdk.ChatRequestParams, c *clientOptions) 
 
 func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatRequestParams {
 	chatOpts := sdk.DefaultChatRequestParams
-	chatOpts.MaxTokens = callOpts.MaxTokens
-	chatOpts.Temperature = callOpts.Temperature
-	chatOpts.RandomSeed = callOpts.Seed
+	chatOpts.MaxTokens = callOpts.GetMaxTokens()
+	chatOpts.Temperature = callOpts.GetTemperature()
+	chatOpts.RandomSeed = callOpts.GetSeed()
 	chatOpts.Tools = make([]sdk.Tool, 0)
 	if len(callOpts.Tools) > 0 {
 		for _, tool := range callOpts.Tools {
@@ -145,7 +145,7 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 }
 
 func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
-	res, err := m.client.Chat(callOptions.Model, messages, &chatOpts)
+	res, err := m.client.Chat(callOptions.GetModel(), messages, &chatOpts)
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
@@ -191,7 +191,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 }
 
 func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
-	chatResChan, err := m.client.ChatStream(callOptions.Model, messages, &chatOpts)
+	chatResChan, err := m.client.ChatStream(callOptions.GetModel(), messages, &chatOpts)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err

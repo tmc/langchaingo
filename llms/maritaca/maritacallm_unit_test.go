@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
@@ -93,10 +94,10 @@ func TestMakemaritacaOptionsFromOptions(t *testing.T) {
 	}
 
 	callOpts := llms.CallOptions{
-		MaxTokens:         100,
-		Model:             "test-model",
-		TopP:              0.9,
-		RepetitionPenalty: 1.2,
+		MaxTokens:         getIntPointer(100),
+		Model:             getStringPointer("test-model"),
+		TopP:              getFloatPointer(0.9),
+		RepetitionPenalty: getFloatPointer(1.2),
 		StopWords:         []string{"END", "STOP"},
 		StreamingFunc:     func(ctx context.Context, chunk streaming.Chunk) error { return nil },
 	}
@@ -269,10 +270,10 @@ func TestLLM_GenerateContent_CallOptions(t *testing.T) {
 	}
 
 	callOpts := llms.CallOptions{
-		Model:             "override-model",
-		MaxTokens:         200,
-		TopP:              0.8,
-		RepetitionPenalty: 1.1,
+		Model:             getStringPointer("override-model"),
+		MaxTokens:         getIntPointer(200),
+		TopP:              getFloatPointer(0.8),
+		RepetitionPenalty: getFloatPointer(1.1),
 		StopWords:         []string{"STOP"},
 		StreamingFunc:     func(ctx context.Context, chunk streaming.Chunk) error { return nil },
 	}
@@ -423,7 +424,7 @@ func TestOptions(t *testing.T) {
 func TestStreamingResponse(t *testing.T) {
 	// Test the streaming response handling in GenerateContent
 	streamedChunks := []string{}
-	streamFunc := func(ctx context.Context, chunk []byte) error { //nolint:unparam
+	streamFunc := func(_ context.Context, chunk []byte) error { //nolint:unparam
 		streamedChunks = append(streamedChunks, string(chunk))
 		return nil
 	}
@@ -435,17 +436,17 @@ func TestStreamingResponse(t *testing.T) {
 		{Event: "end"},
 	}
 
-	streamedResponse := ""
+	var streamedResponse strings.Builder
 	for _, resp := range responses {
 		switch resp.Event {
 		case "message":
-			streamedResponse += resp.Text
-			if streamFunc != nil && resp.Text != "" {
+			streamedResponse.WriteString(resp.Text)
+			if resp.Text != "" {
 				_ = streamFunc(t.Context(), []byte(resp.Text))
 			}
 		case "end":
 			// Final response would have the accumulated text
-			assert.Equal(t, "Hello world", streamedResponse)
+			assert.Equal(t, "Hello world", streamedResponse.String())
 		}
 	}
 
@@ -506,4 +507,16 @@ func TestStreamingError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, streamErr, err)
+}
+
+func getStringPointer(s string) *string {
+	return &s
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

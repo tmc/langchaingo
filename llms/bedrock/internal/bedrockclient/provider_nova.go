@@ -151,9 +151,9 @@ func novaInputToJSON(inputContents []*novaTextGenerationInputMessage, systemProm
 	input := novaTextGenerationInput{
 		Messages: inputContents,
 		InferenceConfig: novaInferenceConfigInput{
-			MaxTokens:     options.MaxTokens,
-			Temperature:   options.Temperature,
-			TopP:          options.TopP,
+			MaxTokens:     options.GetMaxTokens(),
+			Temperature:   options.GetTemperature(),
+			TopP:          options.GetTopP(),
 			StopSequences: options.StopWords,
 		},
 		System: []*novaSystemPrompt{{Text: systemPrompt}},

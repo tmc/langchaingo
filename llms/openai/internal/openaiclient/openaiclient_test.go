@@ -53,8 +53,8 @@ func TestClient_CreateChatCompletion(t *testing.T) {
 				Content: "Hello, how are you?",
 			},
 		},
-		Temperature:         0.0,
-		MaxCompletionTokens: 50,
+		Temperature:         getFloatPointer(0.0),
+		MaxCompletionTokens: getIntPointer(50),
 	}
 
 	resp, err := client.CreateChat(ctx, req)
@@ -78,8 +78,8 @@ func TestClient_CreateChatCompletionStream(t *testing.T) {
 				Content: "Count from 1 to 5",
 			},
 		},
-		Temperature:         0.0,
-		MaxCompletionTokens: 50,
+		Temperature:         getFloatPointer(0.0),
+		MaxCompletionTokens: getIntPointer(50),
 		Stream:              true,
 		StreamingFunc: func(ctx context.Context, chunk streaming.Chunk) error {
 			chunks = append(chunks, chunk.Content)
@@ -142,8 +142,8 @@ func TestClient_FunctionCall(t *testing.T) {
 				Content: "What's the weather like in Boston?",
 			},
 		},
-		Temperature:         0.0,
-		MaxCompletionTokens: 100,
+		Temperature:         getFloatPointer(0.0),
+		MaxCompletionTokens: getIntPointer(100),
 		Functions: []FunctionDefinition{
 			{
 				Name:        "get_weather",
@@ -181,8 +181,8 @@ func TestClient_WithResponseFormat(t *testing.T) {
 				Content: "Return a JSON object with a 'greeting' field that says hello",
 			},
 		},
-		Temperature:         0.0,
-		MaxCompletionTokens: 50,
+		Temperature:         getFloatPointer(0.0),
+		MaxCompletionTokens: getIntPointer(50),
 		ResponseFormat:      respFormat,
 	}
 

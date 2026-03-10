@@ -48,9 +48,8 @@ func TestNewToolCallWithReasoning(t *testing.T) {
 	t.Parallel()
 
 	reasoningContent := &reasoning.ContentReasoning{
-		Content:         "Analyzing weather request for New York",
-		Signature:       []byte("sig123"),
-		RedactedContent: []byte("redacted"),
+		Content:   "Analyzing weather request for New York",
+		Signature: []byte("sig123"),
 	}
 
 	// Test creating a new tool call with reasoning
@@ -61,7 +60,6 @@ func TestNewToolCallWithReasoning(t *testing.T) {
 	assert.NotNil(t, toolCall.Reasoning)
 	assert.Equal(t, "Analyzing weather request for New York", toolCall.Reasoning.Content)
 	assert.Equal(t, []byte("sig123"), toolCall.Reasoning.Signature)
-	assert.Equal(t, []byte("redacted"), toolCall.Reasoning.RedactedContent)
 
 	// Test with nil reasoning
 	toolCallNilReasoning := NewToolCallWithReasoning("456", "getTime", `{}`, nil)
@@ -94,17 +92,13 @@ func TestChunk(t *testing.T) {
 
 	// Extended reasoning chunk
 	signature := []byte("signature")
-	redactedContent := []byte("redacted content")
 	reasoningChunk = NewReasoningChunk(&reasoning.ContentReasoning{
-		Content:         reasoningContent,
-		Signature:       signature,
-		RedactedContent: redactedContent,
+		Content:   reasoningContent,
+		Signature: signature,
 	})
 	assert.Equal(t, reasoningContent, reasoningChunk.Reasoning.Content)
 	assert.Equal(t, string(signature), string(reasoningChunk.Reasoning.Signature))
-	assert.Equal(t, string(redactedContent), string(reasoningChunk.Reasoning.RedactedContent))
-	expectedReasoningChunkString := fmt.Sprintf("Reasoning: %s\nSignature: %s\nRedactedContent: %s",
-		reasoningContent, string(signature), string(redactedContent))
+	expectedReasoningChunkString := fmt.Sprintf("Reasoning: %s\nSignature: %s", reasoningContent, string(signature))
 	assert.Equal(t, expectedReasoningChunkString, reasoningChunk.String())
 
 	// Test tool call chunk
@@ -236,18 +230,15 @@ func TestCallWithReasoning(t *testing.T) {
 
 	assert.Equal(t, "First part. Second part. Final part.", accumulatedReasoning)
 
-	// Test with signature and redacted content
+	// Test with signature
 	signature := []byte("signature")
-	redactedContent := []byte("redacted content")
 	err = CallWithReasoning(ctx, callback, &reasoning.ContentReasoning{
-		Content:         reasoningContent,
-		Signature:       signature,
-		RedactedContent: redactedContent,
+		Content:   reasoningContent,
+		Signature: signature,
 	})
 	require.NoError(t, err)
 	assert.Equal(t, reasoningContent, receivedReasoning.Content)
 	assert.Equal(t, string(signature), string(receivedReasoning.Signature))
-	assert.Equal(t, string(redactedContent), string(receivedReasoning.RedactedContent))
 
 	// Test with error from callback
 	expectedErr := errors.New("callback error")
@@ -277,7 +268,6 @@ func TestCallWithReasoningContent(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, reasoningContent, receivedReasoning.Content)
 	assert.Nil(t, receivedReasoning.Signature)
-	assert.Nil(t, receivedReasoning.RedactedContent)
 
 	// Test with empty content
 	err = CallWithReasoningContent(ctx, callback, "")
@@ -319,9 +309,8 @@ func TestCallWithToolCall(t *testing.T) {
 
 	// Test with tool call with reasoning
 	reasoningContent := &reasoning.ContentReasoning{
-		Content:         "Analyzing weather request",
-		Signature:       []byte("sig123"),
-		RedactedContent: []byte("redacted"),
+		Content:   "Analyzing weather request",
+		Signature: []byte("sig123"),
 	}
 	toolCallWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, reasoningContent)
 	err = CallWithToolCall(ctx, callback, toolCallWithReasoning)
@@ -525,9 +514,8 @@ func TestToolCallMarshalUnmarshal(t *testing.T) {
 
 	// Test marshaling tool call with reasoning
 	reasoningContent := &reasoning.ContentReasoning{
-		Content:         "Analyzing request",
-		Signature:       []byte("sig123"),
-		RedactedContent: []byte("redacted"),
+		Content:   "Analyzing request",
+		Signature: []byte("sig123"),
 	}
 	toolCallWithReasoning := NewToolCallWithReasoning("456", "getTime", `{"timezone": "UTC"}`, reasoningContent)
 
@@ -544,7 +532,6 @@ func TestToolCallMarshalUnmarshal(t *testing.T) {
 	assert.NotNil(t, unmarshaledWithReasoning.Reasoning)
 	assert.Equal(t, "Analyzing request", unmarshaledWithReasoning.Reasoning.Content)
 	assert.Equal(t, []byte("sig123"), unmarshaledWithReasoning.Reasoning.Signature)
-	assert.Equal(t, []byte("redacted"), unmarshaledWithReasoning.Reasoning.RedactedContent)
 }
 
 func TestChunkMarshalUnmarshal(t *testing.T) {
@@ -562,9 +549,8 @@ func TestChunkMarshalUnmarshal(t *testing.T) {
 
 	// Test reasoning chunk
 	reasoningChunk := NewReasoningChunk(&reasoning.ContentReasoning{
-		Content:         "Step 1: Analyze.",
-		Signature:       []byte("signature"),
-		RedactedContent: []byte("redacted content"),
+		Content:   "Step 1: Analyze.",
+		Signature: []byte("signature"),
 	})
 	data, err = json.Marshal(reasoningChunk)
 	require.NoError(t, err)

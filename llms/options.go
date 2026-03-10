@@ -1,11 +1,31 @@
 package llms
 
-import "github.com/vxcontrol/langchaingo/llms/streaming"
+import (
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
+	"github.com/vxcontrol/langchaingo/llms/streaming"
+)
 
 // CallOption is a function that configures a CallOptions.
 type CallOption func(*CallOptions)
 
 const MaxReasoningTokens = 64000
+
+const (
+	DefaultN                 = 1
+	DefaultCandidateCount    = 1
+	DefaultMaxTokens         = 16384
+	DefaultTemperature       = 0.0
+	DefaultTopK              = 0
+	DefaultTopP              = 0
+	DefaultMinP              = 0
+	DefaultSeed              = 0
+	DefaultMinLength         = 0
+	DefaultMaxLength         = 0
+	DefaultRepetitionPenalty = 0.0
+	DefaultFrequencyPenalty  = 0.0
+	DefaultPresencePenalty   = 0.0
+	DefaultSpeed             = 0.0
+)
 
 type ReasoningEffort string
 
@@ -114,36 +134,38 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 // all options.
 type CallOptions struct {
 	// Model is the model to use.
-	Model string `json:"model"`
+	Model *string `json:"model,omitempty"`
 	// CandidateCount is the number of response candidates to generate.
-	CandidateCount int `json:"candidate_count"`
+	CandidateCount *int `json:"candidate_count,omitempty"`
 	// MaxTokens is the maximum number of tokens to generate.
-	MaxTokens int `json:"max_tokens"`
+	MaxTokens *int `json:"max_tokens,omitempty"`
 	// Temperature is the temperature for sampling, between 0 and 1.
-	Temperature float64 `json:"temperature"`
+	Temperature *float64 `json:"temperature,omitempty"`
 	// StopWords is a list of words to stop on.
-	StopWords []string `json:"stop_words"`
+	StopWords []string `json:"stop_words,omitempty"`
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
 	StreamingFunc streaming.Callback `json:"-"`
 	// TopK is the number of tokens to consider for top-k sampling.
-	TopK int `json:"top_k"`
+	TopK *int `json:"top_k,omitempty"`
 	// TopP is the cumulative probability for top-p sampling.
-	TopP float64 `json:"top_p"`
+	TopP *float64 `json:"top_p,omitempty"`
+	// MinP is the minimum probability for top-p sampling.
+	MinP *float64 `json:"min_p,omitempty"`
 	// Seed is a seed for deterministic sampling.
-	Seed int `json:"seed"`
+	Seed *int `json:"seed,omitempty"`
 	// MinLength is the minimum length of the generated text.
-	MinLength int `json:"min_length"`
+	MinLength *int `json:"min_length,omitempty"`
 	// MaxLength is the maximum length of the generated text.
-	MaxLength int `json:"max_length"`
+	MaxLength *int `json:"max_length,omitempty"`
 	// N is how many chat completion choices to generate for each input message.
-	N int `json:"n"`
+	N *int `json:"n,omitempty"`
 	// RepetitionPenalty is the repetition penalty for sampling.
-	RepetitionPenalty float64 `json:"repetition_penalty"`
+	RepetitionPenalty *float64 `json:"repetition_penalty,omitempty"`
 	// FrequencyPenalty is the frequency penalty for sampling.
-	FrequencyPenalty float64 `json:"frequency_penalty"`
+	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
 	// PresencePenalty is the presence penalty for sampling.
-	PresencePenalty float64 `json:"presence_penalty"`
+	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
 
 	// Reasoning is the configuration for thinking of the model.
 	Reasoning *ReasoningConfig `json:"reasoning,omitempty"`
@@ -173,16 +195,213 @@ type CallOptions struct {
 	// ResponseMIMEType MIME type of the generated candidate text.
 	// Supported MIME types are: text/plain: (default) Text output.
 	// application/json: JSON response in the response candidates.
-	ResponseMIMEType string `json:"response_mime_type,omitempty"`
+	ResponseMIMEType *string `json:"response_mime_type,omitempty"`
 
 	// TTS options.
-	Voice          string  `json:"voice,omitempty"`
-	Speed          float64 `json:"speed,omitempty"`
-	ResponseFormat string  `json:"response_format,omitempty"`
+	Voice          *string  `json:"voice,omitempty"`
+	Speed          *float64 `json:"speed,omitempty"`
+	ResponseFormat *string  `json:"response_format,omitempty"`
 
 	// WebSearchOptions configures web search behavior for models that support it.
 	// Currently supported by OpenAI models like gpt-4o-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+}
+
+// GetModel returns the model to use.
+func (o *CallOptions) GetModel() string {
+	if o.Model == nil {
+		return ""
+	}
+	return *o.Model
+}
+
+// GetCandidateCount returns the number of response candidates to generate.
+func (o *CallOptions) GetCandidateCount() int {
+	if o.CandidateCount == nil {
+		return DefaultCandidateCount
+	}
+	return *o.CandidateCount
+}
+
+// GetMaxTokens returns the max number of tokens to generate.
+func (o *CallOptions) GetMaxTokens() int {
+	if o.MaxTokens == nil {
+		return DefaultMaxTokens
+	}
+	return *o.MaxTokens
+}
+
+// GetTemperature returns the model temperature.
+func (o *CallOptions) GetTemperature() float64 {
+	if o.Temperature == nil {
+		return DefaultTemperature
+	}
+	if reasoning.IsReasoningModel(o.GetModel()) {
+		return 1.0
+	}
+	return *o.Temperature
+}
+
+// GetStopWords returns the list of words to stop generation on.
+func (o *CallOptions) GetStopWords() []string {
+	return o.StopWords
+}
+
+// GetTopK returns the number of tokens to consider for top-k sampling.
+func (o *CallOptions) GetTopK() int {
+	if o.TopK == nil {
+		return DefaultTopK
+	}
+	return *o.TopK
+}
+
+// GetTopP returns the cumulative probability for top-p sampling.
+func (o *CallOptions) GetTopP() float64 {
+	if o.TopP == nil {
+		return DefaultTopP
+	}
+	return *o.TopP
+}
+
+// GetMinP returns the minimum probability for top-p sampling.
+func (o *CallOptions) GetMinP() float64 {
+	if o.MinP == nil {
+		return DefaultMinP
+	}
+	return *o.MinP
+}
+
+// GetSeed returns the seed for deterministic sampling.
+func (o *CallOptions) GetSeed() int {
+	if o.Seed == nil {
+		return DefaultSeed
+	}
+	return *o.Seed
+}
+
+// GetMinLength returns the minimum length of the generated text.
+func (o *CallOptions) GetMinLength() int {
+	if o.MinLength == nil {
+		return DefaultMinLength
+	}
+	return *o.MinLength
+}
+
+// GetMaxLength returns the maximum length of the generated text.
+func (o *CallOptions) GetMaxLength() int {
+	if o.MaxLength == nil {
+		return DefaultMaxLength
+	}
+	return *o.MaxLength
+}
+
+// GetN returns how many chat completion choices to generate for each input message.
+func (o *CallOptions) GetN() int {
+	if o.N == nil {
+		return DefaultN
+	}
+	return *o.N
+}
+
+// GetRepetitionPenalty returns the repetition penalty for sampling.
+func (o *CallOptions) GetRepetitionPenalty() float64 {
+	if o.RepetitionPenalty == nil {
+		return DefaultRepetitionPenalty
+	}
+	return *o.RepetitionPenalty
+}
+
+// GetFrequencyPenalty returns the frequency penalty for sampling.
+func (o *CallOptions) GetFrequencyPenalty() float64 {
+	if o.FrequencyPenalty == nil {
+		return DefaultFrequencyPenalty
+	}
+	return *o.FrequencyPenalty
+}
+
+// GetPresencePenalty returns the presence penalty for sampling.
+func (o *CallOptions) GetPresencePenalty() float64 {
+	if o.PresencePenalty == nil {
+		return DefaultPresencePenalty
+	}
+	return *o.PresencePenalty
+}
+
+// GetReasoning returns the reasoning configuration for the model call.
+func (o *CallOptions) GetReasoning() *ReasoningConfig {
+	return o.Reasoning
+}
+
+// GetJSONMode returns the JSON mode flag.
+func (o *CallOptions) GetJSONMode() bool {
+	return o.JSONMode
+}
+
+// GetMetadata returns the metadata to include in the request.
+func (o *CallOptions) GetMetadata() map[string]interface{} {
+	return o.Metadata
+}
+
+// GetResponseMIMEType returns the ResponseMIMEType.
+func (o *CallOptions) GetResponseMIMEType() string {
+	if o.ResponseMIMEType == nil {
+		return ""
+	}
+	return *o.ResponseMIMEType
+}
+
+// GetVoice returns the voice to use.
+func (o *CallOptions) GetVoice() string {
+	if o.Voice == nil {
+		return ""
+	}
+	return *o.Voice
+}
+
+// GetSpeed returns the speed of the voice.
+func (o *CallOptions) GetSpeed() float64 {
+	if o.Speed == nil {
+		return DefaultSpeed
+	}
+	return *o.Speed
+}
+
+// GetResponseFormat returns the response format.
+func (o *CallOptions) GetResponseFormat() string {
+	if o.ResponseFormat == nil {
+		return ""
+	}
+	return *o.ResponseFormat
+}
+
+// GetWebSearchOptions returns the web search options.
+func (o *CallOptions) GetWebSearchOptions() *WebSearchOptions {
+	return o.WebSearchOptions
+}
+
+// GetToolChoice returns the choice of tool to use.
+func (o *CallOptions) GetToolChoice() any {
+	return o.ToolChoice
+}
+
+// GetTools returns the tools to use.
+func (o *CallOptions) GetTools() []Tool {
+	return o.Tools
+}
+
+// GetFunctions returns the functions to include in the request.
+func (o *CallOptions) GetFunctions() []FunctionDefinition {
+	return o.Functions
+}
+
+// GetFunctionCallBehavior returns the behavior to use when calling functions.
+func (o *CallOptions) GetFunctionCallBehavior() FunctionCallBehavior {
+	return o.FunctionCallBehavior
+}
+
+// GetStreamingFunc returns the streaming function to use.
+func (o *CallOptions) GetStreamingFunc() streaming.Callback {
+	return o.StreamingFunc
 }
 
 // Tool is a tool that can be used by the model.
@@ -266,21 +485,21 @@ const (
 // WithModel specifies which model name to use.
 func WithModel(model string) CallOption {
 	return func(o *CallOptions) {
-		o.Model = model
+		o.Model = &model
 	}
 }
 
 // WithMaxTokens specifies the max number of tokens to generate.
 func WithMaxTokens(maxTokens int) CallOption {
 	return func(o *CallOptions) {
-		o.MaxTokens = maxTokens
+		o.MaxTokens = &maxTokens
 	}
 }
 
 // WithCandidateCount specifies the number of response candidates to generate.
 func WithCandidateCount(c int) CallOption {
 	return func(o *CallOptions) {
-		o.CandidateCount = c
+		o.CandidateCount = &c
 	}
 }
 
@@ -288,7 +507,7 @@ func WithCandidateCount(c int) CallOption {
 // regulates the randomness, or creativity, of the AI's responses.
 func WithTemperature(temperature float64) CallOption {
 	return func(o *CallOptions) {
-		o.Temperature = temperature
+		o.Temperature = &temperature
 	}
 }
 
@@ -316,63 +535,70 @@ func WithStreamingFunc(streamingFunc streaming.Callback) CallOption {
 // WithTopK will add an option to use top-k sampling.
 func WithTopK(topK int) CallOption {
 	return func(o *CallOptions) {
-		o.TopK = topK
+		o.TopK = &topK
 	}
 }
 
 // WithTopP	will add an option to use top-p sampling.
 func WithTopP(topP float64) CallOption {
 	return func(o *CallOptions) {
-		o.TopP = topP
+		o.TopP = &topP
+	}
+}
+
+// WithMinP will add an option to use min-p sampling.
+func WithMinP(minP float64) CallOption {
+	return func(o *CallOptions) {
+		o.MinP = &minP
 	}
 }
 
 // WithSeed will add an option to use deterministic sampling.
 func WithSeed(seed int) CallOption {
 	return func(o *CallOptions) {
-		o.Seed = seed
+		o.Seed = &seed
 	}
 }
 
 // WithMinLength will add an option to set the minimum length of the generated text.
 func WithMinLength(minLength int) CallOption {
 	return func(o *CallOptions) {
-		o.MinLength = minLength
+		o.MinLength = &minLength
 	}
 }
 
 // WithMaxLength will add an option to set the maximum length of the generated text.
 func WithMaxLength(maxLength int) CallOption {
 	return func(o *CallOptions) {
-		o.MaxLength = maxLength
+		o.MaxLength = &maxLength
 	}
 }
 
 // WithN will add an option to set how many chat completion choices to generate for each input message.
 func WithN(n int) CallOption {
 	return func(o *CallOptions) {
-		o.N = n
+		o.N = &n
 	}
 }
 
 // WithRepetitionPenalty will add an option to set the repetition penalty for sampling.
 func WithRepetitionPenalty(repetitionPenalty float64) CallOption {
 	return func(o *CallOptions) {
-		o.RepetitionPenalty = repetitionPenalty
+		o.RepetitionPenalty = &repetitionPenalty
 	}
 }
 
 // WithFrequencyPenalty will add an option to set the frequency penalty for sampling.
 func WithFrequencyPenalty(frequencyPenalty float64) CallOption {
 	return func(o *CallOptions) {
-		o.FrequencyPenalty = frequencyPenalty
+		o.FrequencyPenalty = &frequencyPenalty
 	}
 }
 
 // WithPresencePenalty will add an option to set the presence penalty for sampling.
 func WithPresencePenalty(presencePenalty float64) CallOption {
 	return func(o *CallOptions) {
-		o.PresencePenalty = presencePenalty
+		o.PresencePenalty = &presencePenalty
 	}
 }
 
@@ -442,28 +668,28 @@ func WithMetadata(metadata map[string]interface{}) CallOption {
 // Provider support varies - check your provider's documentation.
 func WithResponseMIMEType(responseMIMEType string) CallOption {
 	return func(o *CallOptions) {
-		o.ResponseMIMEType = responseMIMEType
+		o.ResponseMIMEType = &responseMIMEType
 	}
 }
 
 // WithVoice will add an option to set the voice to use.
 func WithVoice(voice string) CallOption {
 	return func(o *CallOptions) {
-		o.Voice = voice
+		o.Voice = &voice
 	}
 }
 
 // WithSpeed will add an option to set the speed of the voice.
 func WithSpeed(speed float64) CallOption {
 	return func(o *CallOptions) {
-		o.Speed = speed
+		o.Speed = &speed
 	}
 }
 
 // WithResponseFormat will add an option to set the response format.
 func WithResponseFormat(responseFormat string) CallOption {
 	return func(o *CallOptions) {
-		o.ResponseFormat = responseFormat
+		o.ResponseFormat = &responseFormat
 	}
 }
 

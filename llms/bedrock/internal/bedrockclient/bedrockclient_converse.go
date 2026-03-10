@@ -235,15 +235,6 @@ func (c *ConverseClient) convertUserOrAssistantMessage(msg Message) (types.Messa
 				Value: &reasoningBlock,
 			})
 		}
-		// Add redacted thinking block if present
-		if len(msg.Reasoning.RedactedContent) > 0 {
-			redactedBlock := types.ReasoningContentBlockMemberRedactedContent{
-				Value: msg.Reasoning.RedactedContent,
-			}
-			contentBlocks = append(contentBlocks, &types.ContentBlockMemberReasoningContent{
-				Value: &redactedBlock,
-			})
-		}
 	}
 
 	// Handle text content
@@ -388,7 +379,6 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	var fullContent strings.Builder
 	var reasoningContent strings.Builder
 	var signature bytes.Buffer
-	var redactedContent bytes.Buffer
 	var toolCalls []llms.ToolCall
 	currentToolCalls := make(map[string]*streaming.ToolCall) // Track streaming tool calls by ID
 
@@ -424,10 +414,6 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 							}
 							if err := callback(ctx, chunk); err != nil {
 								return nil, err
-							}
-						case *types.ReasoningContentBlockDeltaMemberRedactedContent:
-							if len(block.Value) > 0 {
-								redactedContent.Write(block.Value)
 							}
 						case *types.ReasoningContentBlockDeltaMemberSignature:
 							if len(block.Value) > 0 {
@@ -515,16 +501,12 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	if signature.Len() > 0 {
 		sig = signature.Bytes()
 	}
-	var redacted []byte
-	if redactedContent.Len() > 0 {
-		redacted = redactedContent.Bytes()
-	}
 
 	choice := &llms.ContentChoice{
 		Content:        fullContent.String(),
 		ToolCalls:      toolCalls,
 		GenerationInfo: make(map[string]any),
-		Reasoning:      c.processReasoning(reasoningContent.String(), sig, redacted),
+		Reasoning:      c.processReasoning(reasoningContent.String(), sig),
 	}
 
 	result := &llms.ContentResponse{
@@ -534,15 +516,14 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	return result, nil
 }
 
-func (c *ConverseClient) processReasoning(reasoningContent string, signature []byte, redactedContent []byte) *reasoning.ContentReasoning {
-	if reasoningContent == "" && len(signature) == 0 && len(redactedContent) == 0 {
+func (c *ConverseClient) processReasoning(reasoningContent string, signature []byte) *reasoning.ContentReasoning {
+	if reasoningContent == "" && len(signature) == 0 {
 		return nil
 	}
 
 	return &reasoning.ContentReasoning{
-		Content:         reasoningContent,
-		Signature:       signature,
-		RedactedContent: redactedContent,
+		Content:   reasoningContent,
+		Signature: signature,
 	}
 }
 
@@ -567,15 +548,18 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 			case *types.ContentBlockMemberToolUse:
 				// Convert tool use to ToolCall
 				// Extract input from document.LazyDocument
-				var inputData any
+				var argsJSON []byte
+				var err error
 				if block.Value.Input != nil {
-					if err := block.Value.Input.UnmarshalSmithyDocument(&inputData); err != nil {
-						return nil, fmt.Errorf("failed to unmarshal tool input document: %w", err)
+					argsJSON, err = block.Value.Input.MarshalSmithyDocument()
+					if err != nil {
+						return nil, fmt.Errorf("failed to marshal tool input document: %w", err)
 					}
+				} else {
+					argsJSON = []byte("{}")
 				}
-				argsJSON, err := json.Marshal(inputData)
-				if err != nil {
-					return nil, fmt.Errorf("failed to marshal tool input to JSON: %w", err)
+				if argsJSON == nil {
+					argsJSON = []byte("{}")
 				}
 				toolCall := llms.ToolCall{
 					ID:   *block.Value.ToolUseId,
@@ -598,17 +582,7 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 					if content.Value.Signature != nil {
 						sig = []byte(*content.Value.Signature)
 					}
-					choice.Reasoning = c.processReasoning(reasoningText, sig, nil)
-				case *types.ReasoningContentBlockMemberRedactedContent:
-					var redacted []byte
-					if len(content.Value) > 0 {
-						redacted = content.Value
-					}
-					if choice.Reasoning == nil {
-						choice.Reasoning = c.processReasoning("", nil, redacted)
-					} else {
-						choice.Reasoning.RedactedContent = redacted
-					}
+					choice.Reasoning = c.processReasoning(reasoningText, sig)
 				}
 			}
 		}

@@ -291,18 +291,18 @@ func TestMakeLlamaOptionsFromOptions(t *testing.T) { //nolint:funlen // comprehe
 			name:  "basic options",
 			input: &llamafileclient.ChatRequest{},
 			opts: llms.CallOptions{
-				Model:             "llama2",
-				Temperature:       0.8,
-				MaxTokens:         100,
-				TopK:              40,
-				TopP:              0.9,
-				FrequencyPenalty:  0.5,
-				PresencePenalty:   0.6,
-				RepetitionPenalty: 1.1,
-				Seed:              42,
+				Model:             getStringPointer("llama2"),
+				Temperature:       getFloatPointer(0.8),
+				MaxTokens:         getIntPointer(100),
+				TopK:              getIntPointer(40),
+				TopP:              getFloatPointer(0.9),
+				FrequencyPenalty:  getFloatPointer(0.5),
+				PresencePenalty:   getFloatPointer(0.6),
+				RepetitionPenalty: getFloatPointer(1.1),
+				Seed:              getIntPointer(42),
 				StopWords:         []string{"</s>", "<|im_end|>"},
-				MinLength:         10,
-				N:                 2048,
+				MinP:              getFloatPointer(10.0),
+				N:                 getIntPointer(2048),
 			},
 			validate: func(t *testing.T, result *llamafileclient.ChatRequest) {
 				if result.Model != "llama2" {
@@ -729,4 +729,16 @@ func TestOptions(t *testing.T) { //nolint:funlen // comprehensive test
 // Helper function
 func containsString(s, substr string) bool {
 	return strings.Contains(s, substr)
+}
+
+func getStringPointer(s string) *string {
+	return &s
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

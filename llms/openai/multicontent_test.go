@@ -400,8 +400,7 @@ func TestMultiContentTextWithReasoning(t *testing.T) {
 			assert.NotNil(t, c1.Reasoning)
 			if c1.Reasoning != nil {
 				assert.NotEmpty(t, c1.Reasoning.Content)
-				assert.Nil(t, c1.Reasoning.Signature)       // not supported yet for OpenAI compatible providers
-				assert.Nil(t, c1.Reasoning.RedactedContent) // not supported yet for OpenAI compatible providers
+				assert.Nil(t, c1.Reasoning.Signature) // not supported yet for OpenAI compatible providers
 			}
 		}
 

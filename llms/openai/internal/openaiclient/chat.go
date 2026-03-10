@@ -41,15 +41,19 @@ type ReasoningOptions struct {
 type ChatRequest struct {
 	Model               string         `json:"model"`
 	Messages            []*ChatMessage `json:"messages"`
-	Temperature         float64        `json:"temperature,omitempty"`
-	TopP                float64        `json:"top_p,omitempty"`
-	MaxCompletionTokens int            `json:"max_completion_tokens,omitempty"`
-	N                   int            `json:"n,omitempty"`
+	Temperature         *float64       `json:"temperature,omitempty"`
+	TopK                *int           `json:"top_k,omitempty"`
+	TopP                *float64       `json:"top_p,omitempty"`
+	MinP                *float64       `json:"min_p,omitempty"`
+	MaxTokens           *int           `json:"max_tokens,omitempty"`
+	MaxCompletionTokens *int           `json:"max_completion_tokens,omitempty"`
+	N                   *int           `json:"n,omitempty"`
 	StopWords           []string       `json:"stop,omitempty"`
 	Stream              bool           `json:"stream,omitempty"`
-	FrequencyPenalty    float64        `json:"frequency_penalty,omitempty"`
-	PresencePenalty     float64        `json:"presence_penalty,omitempty"`
-	Seed                int            `json:"seed,omitempty"`
+	FrequencyPenalty    *float64       `json:"frequency_penalty,omitempty"`
+	PresencePenalty     *float64       `json:"presence_penalty,omitempty"`
+	RepetitionPenalty   *float64       `json:"repetition_penalty,omitempty"`
+	Seed                *int           `json:"seed,omitempty"`
 
 	// ReasoningEffort enables reasoning mode for models that support it.
 	// Set this field when you want to use the legacy reasoning configuration.

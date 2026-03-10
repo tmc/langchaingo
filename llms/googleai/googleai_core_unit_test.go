@@ -800,10 +800,10 @@ func TestGenerateContentOptionsHandling(t *testing.T) {
 	t.Run("conflicting JSONMode and ResponseMIMEType", func(t *testing.T) {
 		opts := llms.CallOptions{
 			JSONMode:         true,
-			ResponseMIMEType: "text/plain",
+			ResponseMIMEType: getStringPointer("text/plain"),
 		}
 
-		hasConflict := opts.ResponseMIMEType != "" && opts.JSONMode
+		hasConflict := opts.ResponseMIMEType != nil && opts.JSONMode
 		assert.True(t, hasConflict, "Should detect conflicting options")
 	})
 

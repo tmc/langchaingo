@@ -510,11 +510,10 @@ func TestContentReasoningMarshalJSON(t *testing.T) {
 		{
 			name: "full content reasoning",
 			input: ContentReasoning{
-				Content:         "Thinking process here",
-				Signature:       []byte("signature_data"),
-				RedactedContent: []byte("redacted_data"),
+				Content:   "Thinking process here",
+				Signature: []byte("signature_data"),
 			},
-			expected: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE=","redacted_content":"cmVkYWN0ZWRfZGF0YQ=="}`,
+			expected: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE="}`,
 		},
 		{
 			name: "content only",
@@ -530,14 +529,6 @@ func TestContentReasoningMarshalJSON(t *testing.T) {
 				Signature: []byte("sig123"),
 			},
 			expected: `{"content":"Reasoning with signature","signature":"c2lnMTIz"}`,
-		},
-		{
-			name: "content and redacted",
-			input: ContentReasoning{
-				Content:         "Reasoning with redacted",
-				RedactedContent: []byte("redacted123"),
-			},
-			expected: `{"content":"Reasoning with redacted","redacted_content":"cmVkYWN0ZWQxMjM="}`,
 		},
 		{
 			name:     "empty reasoning",
@@ -568,11 +559,10 @@ func TestContentReasoningUnmarshalJSON(t *testing.T) {
 	}{
 		{
 			name:  "full content reasoning with lowercase keys",
-			input: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE=","redacted_content":"cmVkYWN0ZWRfZGF0YQ=="}`,
+			input: `{"content":"Thinking process here","signature":"c2lnbmF0dXJlX2RhdGE="}`,
 			expected: ContentReasoning{
-				Content:         "Thinking process here",
-				Signature:       []byte("signature_data"),
-				RedactedContent: []byte("redacted_data"),
+				Content:   "Thinking process here",
+				Signature: []byte("signature_data"),
 			},
 			wantErr: false,
 		},
@@ -594,15 +584,6 @@ func TestContentReasoningUnmarshalJSON(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:  "content and redacted",
-			input: `{"content":"Reasoning with redacted","redacted_content":"cmVkYWN0ZWQxMjM="}`,
-			expected: ContentReasoning{
-				Content:         "Reasoning with redacted",
-				RedactedContent: []byte("redacted123"),
-			},
-			wantErr: false,
-		},
-		{
 			name:     "empty object",
 			input:    `{}`,
 			expected: ContentReasoning{},
@@ -610,7 +591,7 @@ func TestContentReasoningUnmarshalJSON(t *testing.T) {
 		},
 		{
 			name:     "null values are ignored",
-			input:    `{"content":"Test","signature":null,"redacted_content":null}`,
+			input:    `{"content":"Test","signature":null}`,
 			expected: ContentReasoning{Content: "Test"},
 			wantErr:  false,
 		},
@@ -631,7 +612,6 @@ func TestContentReasoningUnmarshalJSON(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected.Content, result.Content)
 			assert.Equal(t, tt.expected.Signature, result.Signature)
-			assert.Equal(t, tt.expected.RedactedContent, result.RedactedContent)
 		})
 	}
 }

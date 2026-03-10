@@ -11626,35 +11626,6 @@
     ]
   },
   {
-    "title": "RedactedThinkingContent",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#RedactedThinkingContent",
-    "content": "",
-    "type": "type",
-    "package": "anthropicclient",
-    "signature": "type RedactedThinkingContent",
-    "external": true,
-    "keywords": [
-      "type",
-      "RedactedThinkingContent",
-      "anthropicclient"
-    ]
-  },
-  {
-    "title": "RedactedThinkingContent.GetType",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#RedactedThinkingContent.GetType",
-    "content": "",
-    "type": "method",
-    "package": "anthropicclient",
-    "signature": "GetType()",
-    "external": true,
-    "keywords": [
-      "method",
-      "GetType",
-      "RedactedThinkingContent",
-      "anthropicclient"
-    ]
-  },
-  {
     "title": "TextContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#TextContent",
     "content": "",

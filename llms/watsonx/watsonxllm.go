@@ -93,12 +93,12 @@ func getPrompt(messages []llms.MessageContent) (string, error) {
 
 func getDefaultCallOptions() *llms.CallOptions {
 	return &llms.CallOptions{
-		TopP:              -1,
-		TopK:              -1,
-		Temperature:       -1,
-		Seed:              -1,
-		RepetitionPenalty: -1,
-		MaxTokens:         -1,
+		TopP:              getFloatPointer(-1),
+		TopK:              getIntPointer(-1),
+		Temperature:       getFloatPointer(-1),
+		Seed:              getIntPointer(-1),
+		RepetitionPenalty: getFloatPointer(-1),
+		MaxTokens:         getIntPointer(-1),
 	}
 }
 
@@ -109,23 +109,23 @@ func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
 	}
 
 	o := []wx.GenerateOption{}
-	if opts.TopP != -1 {
-		o = append(o, wx.WithTopP(opts.TopP))
+	if topP := opts.GetTopP(); topP != -1 {
+		o = append(o, wx.WithTopP(topP))
 	}
-	if opts.TopK != -1 {
-		o = append(o, wx.WithTopK(uint(opts.TopK)))
+	if topK := opts.GetTopK(); topK != -1 {
+		o = append(o, wx.WithTopK(uint(topK)))
 	}
-	if opts.Temperature != -1 {
-		o = append(o, wx.WithTemperature(opts.Temperature))
+	if temperature := opts.GetTemperature(); temperature != -1 {
+		o = append(o, wx.WithTemperature(temperature))
 	}
-	if opts.Seed != -1 {
-		o = append(o, wx.WithRandomSeed(uint(opts.Seed)))
+	if seed := opts.GetSeed(); seed != -1 {
+		o = append(o, wx.WithRandomSeed(uint(seed)))
 	}
-	if opts.RepetitionPenalty != -1 {
-		o = append(o, wx.WithRepetitionPenalty(opts.RepetitionPenalty))
+	if repetitionPenalty := opts.GetRepetitionPenalty(); repetitionPenalty != -1 {
+		o = append(o, wx.WithRepetitionPenalty(repetitionPenalty))
 	}
-	if opts.MaxTokens != -1 {
-		o = append(o, wx.WithMaxNewTokens(uint(opts.MaxTokens)))
+	if maxTokens := opts.GetMaxTokens(); maxTokens != -1 {
+		o = append(o, wx.WithMaxNewTokens(uint(maxTokens)))
 	}
 	if len(opts.StopWords) > 0 {
 		o = append(o, wx.WithStopSequences(opts.StopWords))
@@ -143,4 +143,12 @@ func toWatsonxOptions(options *[]llms.CallOption) []wx.GenerateOption {
 	*/
 
 	return o
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

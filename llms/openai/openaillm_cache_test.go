@@ -67,7 +67,6 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_NonReasoning(t *testing.T) {
 	r1, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(50),
-		llms.WithTemperature(0.0),
 	)
 	require.NoError(t, err)
 	require.NotEmpty(t, r1.Choices)
@@ -90,7 +89,6 @@ func TestOpenAI_ImplicitCaching_IdenticalRequests_NonReasoning(t *testing.T) {
 	r2, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(50),
-		llms.WithTemperature(0.0),
 	)
 	require.NoError(t, err)
 	require.NotEmpty(t, r2.Choices)
@@ -215,7 +213,6 @@ func TestOpenAI_ImplicitCaching_Streaming_NonReasoning(t *testing.T) {
 	r1, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(50),
-		llms.WithTemperature(0.0),
 		streamFunc(&s1),
 	)
 	require.NoError(t, err)
@@ -241,7 +238,6 @@ func TestOpenAI_ImplicitCaching_Streaming_NonReasoning(t *testing.T) {
 	r2, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(50),
-		llms.WithTemperature(0.0),
 		streamFunc(&s2),
 	)
 	require.NoError(t, err)
@@ -791,7 +787,6 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_NonReasoning(t *testing.T
 	resp1, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(100),
-		llms.WithTemperature(0.0),
 		streamFunc(&s1),
 	)
 	require.NoError(t, err)
@@ -830,7 +825,6 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_NonReasoning(t *testing.T
 	resp2, err := llm.GenerateContent(t.Context(), msgs,
 		llms.WithModel("gpt-4.1-mini"),
 		llms.WithMaxTokens(100),
-		llms.WithTemperature(0.0),
 		streamFunc(&s2),
 	)
 	require.NoError(t, err)

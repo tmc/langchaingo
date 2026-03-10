@@ -134,12 +134,12 @@ func createCohereCompletion(ctx context.Context,
 
 	input := &cohereTextGenerationInput{
 		Prompt:         txt,
-		Temperature:    options.Temperature,
-		P:              options.TopP,
-		K:              options.TopK,
-		MaxTokens:      getMaxTokens(options.MaxTokens, 20),
+		Temperature:    options.GetTemperature(),
+		P:              options.GetTopP(),
+		K:              options.GetTopK(),
+		MaxTokens:      getMaxTokens(options.GetMaxTokens(), 20),
 		StopSequences:  options.StopWords,
-		NumGenerations: options.CandidateCount,
+		NumGenerations: options.GetCandidateCount(),
 	}
 
 	body, err := json.Marshal(input)
@@ -232,10 +232,10 @@ func createCohereCommandRCompletion(ctx context.Context,
 	input := &cohereCommandRInput{
 		Message:       currentMessage,
 		ChatHistory:   chatHistory,
-		MaxTokens:     getMaxTokens(options.MaxTokens, 512),
-		Temperature:   options.Temperature,
-		P:             options.TopP,
-		K:             options.TopK,
+		MaxTokens:     getMaxTokens(options.GetMaxTokens(), 512),
+		Temperature:   options.GetTemperature(),
+		P:             options.GetTopP(),
+		K:             options.GetTopK(),
 		StopSequences: options.StopWords,
 	}
 

@@ -62,8 +62,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Override LLM model if set as llms.CallOption
 	model := o.options.model
-	if opts.Model != "" {
-		model = opts.Model
+	if opts.GetModel() != "" {
+		model = opts.GetModel()
 	}
 
 	// Our input is a sequence of MessageContent, each of which potentially has
@@ -177,11 +177,11 @@ func typeToRole(typ llms.ChatMessageType) string {
 
 func makemaritacaOptionsFromOptions(maritacaOptions maritacaclient.Options, opts llms.CallOptions) maritacaclient.Options {
 	// Load back CallOptions as maritacaOptions
-	maritacaOptions.MaxTokens = opts.MaxTokens
-	maritacaOptions.Model = opts.Model
-	maritacaOptions.TopP = opts.TopP
-	maritacaOptions.RepetitionPenalty = opts.RepetitionPenalty
-	maritacaOptions.StoppingTokens = opts.StopWords
+	maritacaOptions.MaxTokens = opts.GetMaxTokens()
+	maritacaOptions.Model = opts.GetModel()
+	maritacaOptions.TopP = opts.GetTopP()
+	maritacaOptions.RepetitionPenalty = opts.GetRepetitionPenalty()
+	maritacaOptions.StoppingTokens = opts.GetStopWords()
 	maritacaOptions.Stream = opts.StreamingFunc != nil
 
 	return maritacaOptions

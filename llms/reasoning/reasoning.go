@@ -22,13 +22,10 @@ type ContentReasoning struct {
 
 	// Signature is the signature of the reasoning contents.
 	Signature []byte `json:"signature,omitempty"`
-
-	// RedactedContent is the redacted reasoning contents for Anthropic provider.
-	RedactedContent []byte `json:"redacted_content,omitempty"`
 }
 
 func (r *ContentReasoning) IsEmpty() bool {
-	return r == nil || (r.Content == "" && len(r.Signature) == 0 && len(r.RedactedContent) == 0)
+	return r == nil || (r.Content == "" && len(r.Signature) == 0)
 }
 
 func (r *ContentReasoning) String() string {
@@ -42,10 +39,6 @@ func (r *ContentReasoning) String() string {
 	if len(r.Signature) > 0 {
 		buf.WriteString("\nSignature: ")
 		buf.Write(r.Signature)
-	}
-	if len(r.RedactedContent) > 0 {
-		buf.WriteString("\nRedactedContent: ")
-		buf.Write(r.RedactedContent)
 	}
 
 	return buf.String()
@@ -164,9 +157,8 @@ func SplitContent(content string) (string, string) {
 func SplitContentWithReasoning(content string) (*ContentReasoning, string) {
 	reasoning, text := SplitContent(content)
 	return &ContentReasoning{
-		Content:         reasoning,
-		Signature:       nil, // received in special field in the response
-		RedactedContent: nil, // received in special field in the response
+		Content:   reasoning,
+		Signature: nil, // received in special field in the response
 	}, text
 }
 

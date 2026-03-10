@@ -40,7 +40,7 @@ func TestClient_CreateMessage(t *testing.T) {
 				},
 			},
 		},
-		MaxTokens: 100,
+		MaxTokens: getIntPointer(100),
 	}
 
 	resp, err := client.CreateMessage(ctx, req)
@@ -80,7 +80,7 @@ func TestClient_CreateMessageStream(t *testing.T) {
 				},
 			},
 		},
-		MaxTokens: 100,
+		MaxTokens: getIntPointer(100),
 		Stream:    true,
 		StreamingFunc: func(_ context.Context, chunk streaming.Chunk) error {
 			switch chunk.Type {
@@ -132,7 +132,7 @@ func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 				},
 			},
 		},
-		MaxTokens: 100,
+		MaxTokens: getIntPointer(100),
 		Tools: []Tool{
 			{
 				Name:        "get_weather",

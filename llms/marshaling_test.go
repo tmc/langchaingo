@@ -266,16 +266,15 @@ func TestUnmarshalJSONMessageContent(t *testing.T) { //nolint:funlen
 		},
 		{
 			name:  "text with reasoning",
-			input: `{"role":"assistant","parts":[{"type":"text","text":"The answer is 42","reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl","redacted_content":"cmVkYWN0ZWQ="}}]}`,
+			input: `{"role":"assistant","parts":[{"type":"text","text":"The answer is 42","reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl"}}]}`,
 			want: MessageContent{
 				Role: "assistant",
 				Parts: []ContentPart{
 					TextContent{
 						Text: "The answer is 42",
 						Reasoning: &reasoning.ContentReasoning{
-							Content:         "Let me think about this...",
-							Signature:       []byte("signature"),
-							RedactedContent: []byte("redacted"),
+							Content:   "Let me think about this...",
+							Signature: []byte("signature"),
 						},
 					},
 				},
@@ -376,14 +375,13 @@ func TestMarshalJSONMessageContent(t *testing.T) { //nolint:funlen
 					TextContent{
 						Text: "The answer is 42",
 						Reasoning: &reasoning.ContentReasoning{
-							Content:         "Let me think about this...",
-							Signature:       []byte("signature"),
-							RedactedContent: []byte("redacted"),
+							Content:   "Let me think about this...",
+							Signature: []byte("signature"),
 						},
 					},
 				},
 			},
-			want:    `{"role":"assistant","parts":[{"reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl","redacted_content":"cmVkYWN0ZWQ="},"text":"The answer is 42","type":"text"}]}`,
+			want:    `{"role":"assistant","parts":[{"reasoning":{"content":"Let me think about this...","signature":"c2lnbmF0dXJl"},"text":"The answer is 42","type":"text"}]}`,
 			wantErr: false,
 		},
 		{
@@ -599,9 +597,8 @@ role: assistant
 					TextContent{
 						Text: "Final answer",
 						Reasoning: &reasoning.ContentReasoning{
-							Content:         "Reasoning process here",
-							Signature:       []byte("sig123"),
-							RedactedContent: []byte("redacted"),
+							Content:   "Reasoning process here",
+							Signature: []byte("sig123"),
 						},
 					},
 				},
@@ -736,9 +733,8 @@ func TestTextContentWithReasoningSerialization(t *testing.T) {
 			tc: TextContent{
 				Text: "Answer is here",
 				Reasoning: &reasoning.ContentReasoning{
-					Content:         "Thinking process",
-					Signature:       []byte("signature_data"),
-					RedactedContent: []byte("redacted_data"),
+					Content:   "Thinking process",
+					Signature: []byte("signature_data"),
 				},
 			},
 		},
@@ -796,9 +792,8 @@ func TestToolCallWithReasoningSerialization(t *testing.T) {
 					Arguments: `{"query":"test"}`,
 				},
 				Reasoning: &reasoning.ContentReasoning{
-					Content:         "Need to search online",
-					Signature:       []byte("sig_data"),
-					RedactedContent: []byte("redacted"),
+					Content:   "Need to search online",
+					Signature: []byte("sig_data"),
 				},
 			},
 		},

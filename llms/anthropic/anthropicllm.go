@@ -130,12 +130,12 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 	}
 	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
 	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
-		Model:         opts.Model,
+		Model:         opts.GetModel(),
 		Prompt:        prompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
+		MaxTokens:     opts.GetMaxTokens(),
+		StopWords:     opts.GetStopWords(),
+		Temperature:   opts.GetTemperature(),
+		TopP:          opts.GetTopP(),
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
@@ -165,7 +165,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if opts.Reasoning.IsEnabled() {
 		thinking = &anthropicclient.ThinkingPayload{
 			Type:   "enabled",
-			Budget: opts.Reasoning.GetTokens(opts.MaxTokens),
+			Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
 		}
 	}
 
@@ -198,16 +198,17 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	// Set temperature to 1.0 for thinking models
-	temperature := opts.Temperature
+	temperature, maxTokens := opts.Temperature, opts.GetMaxTokens()
 	if thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0 {
-		temperature = 1.0
+		temperature = getFloatPointer(1.0)
+		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
 	}
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
-		Model:         opts.Model,
+		Model:         opts.GetModel(),
 		Messages:      chatMessages,
 		System:        system,
-		MaxTokens:     opts.MaxTokens,
+		MaxTokens:     &maxTokens,
 		StopWords:     opts.StopWords,
 		Temperature:   temperature,
 		TopP:          opts.TopP,
@@ -232,11 +233,10 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		return nil, ErrEmptyResponse
 	}
 
-	// Extract ALL thinking content, signature, and redacted content
+	// Extract ALL thinking content, signature
 	// According to Anthropic docs, there's ONE thinking block per response
 	var reasoningContent strings.Builder
 	var signature []byte
-	var redactedContent []byte
 
 	for _, content := range result.Content {
 		switch cv := content.(type) {
@@ -245,21 +245,15 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 			if len(cv.Signature) > 0 {
 				signature = []byte(cv.Signature)
 			}
-		case *anthropicclient.RedactedThinkingContent:
-			// Redacted content is encrypted and must be preserved for roundtrip
-			if len(cv.Data) > 0 {
-				redactedContent = []byte(cv.Data)
-			}
 		}
 	}
 
 	// Create reasoning object
 	var contentReasoning *reasoning.ContentReasoning
-	if reasoningContent.Len() > 0 || len(signature) > 0 || len(redactedContent) > 0 {
+	if reasoningContent.Len() > 0 || len(signature) > 0 {
 		contentReasoning = &reasoning.ContentReasoning{
-			Content:         reasoningContent.String(),
-			Signature:       signature,
-			RedactedContent: redactedContent,
+			Content:   reasoningContent.String(),
+			Signature: signature,
 		}
 	}
 
@@ -694,7 +688,7 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
 		case llms.TextContent:
-			// If reasoning is present, add blocks in order: thinking → redacted_thinking → text
+			// If reasoning is present, add blocks in order: thinking → text
 			if p.Reasoning != nil {
 				// Add thinking block if present
 				if len(p.Reasoning.Content) > 0 || len(p.Reasoning.Signature) > 0 {
@@ -706,15 +700,6 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 						thinkingBlock.Signature = string(p.Reasoning.Signature)
 					}
 					message.Content = append(message.Content, thinkingBlock)
-				}
-
-				// Add redacted thinking block if present (after thinking)
-				if len(p.Reasoning.RedactedContent) > 0 {
-					redactedBlock := &anthropicclient.RedactedThinkingContent{
-						Type: "redacted_thinking",
-						Data: string(p.Reasoning.RedactedContent),
-					}
-					message.Content = append(message.Content, redactedBlock)
 				}
 			}
 
@@ -806,4 +791,8 @@ func appendIfMissing(slice []string, val string) []string {
 		}
 	}
 	return append(slice, val)
+}
+
+func getFloatPointer(f float64) *float64 {
+	return &f
 }

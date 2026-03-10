@@ -24,7 +24,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithModel",
 			option: llms.WithModel("gpt-4"),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.Model != "gpt-4" {
+				if *opts.Model != "gpt-4" {
 					t.Errorf("Model = %v, want %v", opts.Model, "gpt-4")
 				}
 			},
@@ -33,7 +33,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithMaxTokens",
 			option: llms.WithMaxTokens(100),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.MaxTokens != 100 {
+				if *opts.MaxTokens != 100 {
 					t.Errorf("MaxTokens = %v, want %v", opts.MaxTokens, 100)
 				}
 			},
@@ -42,7 +42,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithCandidateCount",
 			option: llms.WithCandidateCount(3),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.CandidateCount != 3 {
+				if *opts.CandidateCount != 3 {
 					t.Errorf("CandidateCount = %v, want %v", opts.CandidateCount, 3)
 				}
 			},
@@ -51,7 +51,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithTemperature",
 			option: llms.WithTemperature(0.7),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.Temperature != 0.7 {
+				if *opts.Temperature != 0.7 {
 					t.Errorf("Temperature = %v, want %v", opts.Temperature, 0.7)
 				}
 			},
@@ -70,7 +70,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithTopK",
 			option: llms.WithTopK(50),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.TopK != 50 {
+				if *opts.TopK != 50 {
 					t.Errorf("TopK = %v, want %v", opts.TopK, 50)
 				}
 			},
@@ -79,7 +79,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithTopP",
 			option: llms.WithTopP(0.9),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.TopP != 0.9 {
+				if *opts.TopP != 0.9 {
 					t.Errorf("TopP = %v, want %v", opts.TopP, 0.9)
 				}
 			},
@@ -88,7 +88,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithSeed",
 			option: llms.WithSeed(42),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.Seed != 42 {
+				if *opts.Seed != 42 {
 					t.Errorf("Seed = %v, want %v", opts.Seed, 42)
 				}
 			},
@@ -97,7 +97,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithMinLength",
 			option: llms.WithMinLength(10),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.MinLength != 10 {
+				if *opts.MinLength != 10 {
 					t.Errorf("MinLength = %v, want %v", opts.MinLength, 10)
 				}
 			},
@@ -106,7 +106,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithMaxLength",
 			option: llms.WithMaxLength(200),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.MaxLength != 200 {
+				if *opts.MaxLength != 200 {
 					t.Errorf("MaxLength = %v, want %v", opts.MaxLength, 200)
 				}
 			},
@@ -115,7 +115,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithN",
 			option: llms.WithN(5),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.N != 5 {
+				if *opts.N != 5 {
 					t.Errorf("N = %v, want %v", opts.N, 5)
 				}
 			},
@@ -124,7 +124,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithRepetitionPenalty",
 			option: llms.WithRepetitionPenalty(1.2),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.RepetitionPenalty != 1.2 {
+				if *opts.RepetitionPenalty != 1.2 {
 					t.Errorf("RepetitionPenalty = %v, want %v", opts.RepetitionPenalty, 1.2)
 				}
 			},
@@ -133,7 +133,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithFrequencyPenalty",
 			option: llms.WithFrequencyPenalty(0.5),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.FrequencyPenalty != 0.5 {
+				if *opts.FrequencyPenalty != 0.5 {
 					t.Errorf("FrequencyPenalty = %v, want %v", opts.FrequencyPenalty, 0.5)
 				}
 			},
@@ -142,7 +142,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithPresencePenalty",
 			option: llms.WithPresencePenalty(0.6),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.PresencePenalty != 0.6 {
+				if *opts.PresencePenalty != 0.6 {
 					t.Errorf("PresencePenalty = %v, want %v", opts.PresencePenalty, 0.6)
 				}
 			},
@@ -160,7 +160,7 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			name:   "WithResponseMIMEType",
 			option: llms.WithResponseMIMEType("application/json"),
 			verify: func(t *testing.T, opts llms.CallOptions) {
-				if opts.ResponseMIMEType != "application/json" {
+				if *opts.ResponseMIMEType != "application/json" {
 					t.Errorf("ResponseMIMEType = %v, want %v", opts.ResponseMIMEType, "application/json")
 				}
 			},
@@ -178,13 +178,13 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 
 func TestWithOptions(t *testing.T) {
 	baseOptions := llms.CallOptions{
-		Model:       "gpt-3.5-turbo",
-		MaxTokens:   150,
-		Temperature: 0.8,
-		TopK:        40,
-		TopP:        0.95,
-		Seed:        123,
-		N:           2,
+		Model:       getRefString("gpt-3.5-turbo"),
+		MaxTokens:   getRefInt(150),
+		Temperature: getRefFloat64(0.8),
+		TopK:        getRefInt(40),
+		TopP:        getRefFloat64(0.95),
+		Seed:        getRefInt(123),
+		N:           getRefInt(2),
 	}
 
 	var opts llms.CallOptions
@@ -446,19 +446,19 @@ func TestMultipleOptions(t *testing.T) {
 	}
 
 	// Verify all options were applied
-	if opts.Model != "gpt-4" {
+	if *opts.Model != "gpt-4" {
 		t.Errorf("Model = %v, want %v", opts.Model, "gpt-4")
 	}
-	if opts.MaxTokens != 200 {
+	if *opts.MaxTokens != 200 {
 		t.Errorf("MaxTokens = %v, want %v", opts.MaxTokens, 200)
 	}
-	if opts.Temperature != 0.5 {
+	if *opts.Temperature != 0.5 {
 		t.Errorf("Temperature = %v, want %v", opts.Temperature, 0.5)
 	}
-	if opts.TopK != 30 {
+	if *opts.TopK != 30 {
 		t.Errorf("TopK = %v, want %v", opts.TopK, 30)
 	}
-	if opts.TopP != 0.8 {
+	if *opts.TopP != 0.8 {
 		t.Errorf("TopP = %v, want %v", opts.TopP, 0.8)
 	}
 	if len(opts.StopWords) != 1 || opts.StopWords[0] != "END" {
@@ -467,7 +467,7 @@ func TestMultipleOptions(t *testing.T) {
 	if !opts.JSONMode {
 		t.Error("JSONMode = false, want true")
 	}
-	if opts.N != 3 {
+	if *opts.N != 3 {
 		t.Errorf("N = %v, want %v", opts.N, 3)
 	}
 }
@@ -493,13 +493,13 @@ func TestEmptyOptions(t *testing.T) {
 	var opts llms.CallOptions
 
 	// Verify default values
-	if opts.Model != "" {
+	if opts.Model != nil {
 		t.Errorf("Model = %v, want empty string", opts.Model)
 	}
-	if opts.MaxTokens != 0 {
+	if opts.MaxTokens != nil {
 		t.Errorf("MaxTokens = %v, want 0", opts.MaxTokens)
 	}
-	if opts.Temperature != 0 {
+	if opts.Temperature != nil {
 		t.Errorf("Temperature = %v, want 0", opts.Temperature)
 	}
 	if opts.JSONMode {
@@ -874,4 +874,16 @@ func TestReasoningConfig_Integration(t *testing.T) {
 			assert.Equal(t, tc.expectedTokens, tokens)
 		})
 	}
+}
+
+func getRefString(s string) *string {
+	return &s
+}
+
+func getRefInt(i int) *int {
+	return &i
+}
+
+func getRefFloat64(f float64) *float64 {
+	return &f
 }

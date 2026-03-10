@@ -42,14 +42,13 @@ var (
 	ErrInvalidFieldType           = fmt.Errorf("invalid field type")
 )
 
-// For correct using thinking and redacted thinking events, use this guide:
+// For correct using thinking events, use this guide:
 // https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
 // In this implementation, we don't send the thinking block to the server.
 const (
-	EventTypeText             = "text"
-	EventTypeToolUse          = "tool_use"
-	EventTypeThinking         = "thinking"
-	EventTypeRedactedThinking = "redacted_thinking"
+	EventTypeText     = "text"
+	EventTypeToolUse  = "tool_use"
+	EventTypeThinking = "thinking"
 )
 
 const (
@@ -73,11 +72,11 @@ type messagePayload struct {
 	Model       string        `json:"model"`
 	Messages    []ChatMessage `json:"messages"`
 	System      any           `json:"system,omitempty"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
+	MaxTokens   *int          `json:"max_tokens,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
-	Temperature float64       `json:"temperature"`
-	TopP        float64       `json:"top_p,omitempty"`
+	Temperature *float64      `json:"temperature,omitempty"`
+	TopP        *float64      `json:"top_p,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
 	ToolChoice  any           `json:"tool_choice,omitempty"`
 
@@ -149,15 +148,6 @@ type ThinkingContent struct {
 
 func (tc ThinkingContent) GetType() string {
 	return tc.Type
-}
-
-type RedactedThinkingContent struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
-
-func (rthc RedactedThinkingContent) GetType() string {
-	return rthc.Type
 }
 
 type ToolUseContent struct {
@@ -278,12 +268,6 @@ func parseContentBlock(raw []byte) (Content, error) {
 			return nil, err
 		}
 		return thc, nil
-	case EventTypeRedactedThinking:
-		rthc := &RedactedThinkingContent{}
-		if err := json.Unmarshal(raw, rthc); err != nil {
-			return nil, err
-		}
-		return rthc, nil
 	default:
 		return nil, fmt.Errorf("unknown content type: %s\n%v", typeStruct.Type, string(raw)) //nolint:err113
 	}
@@ -291,8 +275,8 @@ func parseContentBlock(raw []byte) (Content, error) {
 
 func (c *Client) setMessageDefaults(payload *messagePayload) {
 	// Set defaults
-	if payload.MaxTokens == 0 {
-		payload.MaxTokens = 2048
+	if payload.MaxTokens == nil || *payload.MaxTokens == 0 {
+		payload.MaxTokens = getIntPointer(2048)
 	}
 
 	if len(payload.StopWords) == 0 {
@@ -566,11 +550,6 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 				Thinking:  getString(cb, "thinking"),
 				Signature: getString(cb, "signature"),
 			})
-		case EventTypeRedactedThinking:
-			response.Content = append(response.Content, &RedactedThinkingContent{
-				Type: eventType,
-				Data: getString(cb, "data"),
-			})
 		default:
 			return response, fmt.Errorf("unknown content block type: %s", eventType)
 		}
@@ -795,4 +774,8 @@ func getMap(m map[string]interface{}, key string) map[string]interface{} {
 		return map[string]interface{}{}
 	}
 	return value
+}
+
+func getIntPointer(i int) *int {
+	return &i
 }

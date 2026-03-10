@@ -165,9 +165,9 @@ func convertToolCallInput(args any) (any, error) {
 
 Preserves numeric precision for large integers that might overflow float64. The `json.Number` type is properly handled by Smithy SDK's document encoding.
 
-### Document Unmarshal for Tool Responses
+### Document Marshal for Tool Responses
 
-**Why `UnmarshalSmithyDocument()`?**
+**Why `MarshalSmithyDocument()`?**
 
 When extracting tool call from response, `block.Value.Input` is `document.LazyDocument`, not plain Go type:
 
@@ -175,10 +175,12 @@ When extracting tool call from response, `block.Value.Input` is `document.LazyDo
 // WRONG: json.Marshal on document - loses type info
 argsJSON, _ := json.Marshal(block.Value.Input)  
 
-// CORRECT: Unmarshal document first
-var inputData any
-block.Value.Input.UnmarshalSmithyDocument(&inputData)
-argsJSON, _ := json.Marshal(inputData)
+// CORRECT: Use MarshalSmithyDocument to get JSON bytes directly
+argsJSON, err := block.Value.Input.MarshalSmithyDocument()
+if err != nil {
+    return fmt.Errorf("failed to marshal tool input: %w", err)
+}
+// argsJSON is now []byte with the JSON representation
 ```
 
 ## Reasoning (Thinking) Support
@@ -204,8 +206,8 @@ Extended thinking/reasoning capabilities are model-specific features. DeepSeek R
 ```mermaid
 flowchart TB
     A[AI Message with Reasoning] --> B{Legacy or Converse?}
-    B -->|Legacy API| C[Add thinking/redacted_thinking blocks<br/>BEFORE text content]
-    B -->|Converse API| D[Add ReasoningContent blocks<br/>with signature/redacted]
+    B -->|Legacy API| C[Add thinking blocks<br/>BEFORE text content]
+    B -->|Converse API| D[Add ReasoningContent blocks<br/>with signature]
     C --> E[anthropicTextGenerationInputContent array]
     D --> F[types.ContentBlock array]
 ```
