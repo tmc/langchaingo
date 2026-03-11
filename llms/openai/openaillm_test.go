@@ -1,7 +1,11 @@
 package openai
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -953,6 +957,105 @@ func TestCreateChatRequest_ReasoningModelTemperature(t *testing.T) {
 				assert.Equal(t, tt.expectedTemperature, *req.Temperature,
 					"Temperature should be %v for model %s", tt.expectedTemperature, tt.model)
 			}
+		})
+	}
+}
+
+func TestExtraBody_Integration(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	var receivedRequest map[string]any
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(body, &receivedRequest)
+
+		response := map[string]any{
+			"id": "test-id",
+			"choices": []map[string]any{
+				{
+					"index": 0,
+					"message": map[string]any{
+						"role":    "assistant",
+						"content": "test response",
+					},
+					"finish_reason": "stop",
+				},
+			},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(response)
+	}))
+	defer server.Close()
+
+	llm, err := New(
+		WithToken("test-token"),
+		WithBaseURL(server.URL),
+		WithModel("test-model"),
+	)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name      string
+		extraBody map[string]any
+		checkFunc func(t *testing.T, req map[string]any)
+	}{
+		{
+			name: "simple extra fields",
+			extraBody: map[string]any{
+				"enable_thinking": false,
+				"top_k":           20,
+			},
+			checkFunc: func(t *testing.T, req map[string]any) {
+				assert.Equal(t, false, req["enable_thinking"])
+				assert.Equal(t, float64(20), req["top_k"])
+			},
+		},
+		{
+			name: "nested extra fields",
+			extraBody: map[string]any{
+				"chat_template_kwargs": map[string]any{
+					"enable_thinking": false,
+				},
+			},
+			checkFunc: func(t *testing.T, req map[string]any) {
+				kwargs, ok := req["chat_template_kwargs"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, false, kwargs["enable_thinking"])
+			},
+		},
+		{
+			name: "extra body overrides standard field",
+			extraBody: map[string]any{
+				"temperature": 0.9,
+			},
+			checkFunc: func(t *testing.T, req map[string]any) {
+				assert.Equal(t, 0.9, req["temperature"])
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			receivedRequest = nil
+
+			messages := []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "test message"},
+					},
+				},
+			}
+
+			_, err := llm.GenerateContent(t.Context(), messages,
+				WithExtraBody(tt.extraBody),
+				llms.WithTemperature(0.7),
+			)
+			require.NoError(t, err)
+			require.NotNil(t, receivedRequest)
+
+			tt.checkFunc(t, receivedRequest)
 		})
 	}
 }

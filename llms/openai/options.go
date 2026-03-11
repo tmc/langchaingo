@@ -32,7 +32,7 @@ func WithMaxCompletionTokens(maxTokens int) llms.CallOption {
 func WithLegacyMaxTokensField() llms.CallOption {
 	return func(opts *llms.CallOptions) {
 		if opts.Metadata == nil {
-			opts.Metadata = make(map[string]interface{})
+			opts.Metadata = make(map[string]any)
 		}
 		opts.Metadata["openai:use_legacy_max_tokens"] = true
 	}
@@ -43,4 +43,38 @@ func isLegacyMaxTokensField(opts *llms.CallOptions) bool {
 		return false
 	}
 	return opts.Metadata["openai:use_legacy_max_tokens"] == true
+}
+
+// WithExtraBody allows passing additional fields in the request body that will be sent
+// to the OpenAI-compatible API. These fields will override any existing fields with the
+// same name, allowing you to use provider-specific parameters not directly supported
+// by the library.
+//
+// Example usage:
+//
+//	llm.GenerateContent(ctx, messages,
+//	    openai.WithExtraBody(map[string]any{
+//	        "enable_thinking": false,
+//	        "chat_template_kwargs": map[string]any{
+//	            "enable_thinking": false,
+//	        },
+//	    }),
+//	)
+func WithExtraBody(extraBody map[string]any) llms.CallOption {
+	return func(opts *llms.CallOptions) {
+		if opts.Metadata == nil {
+			opts.Metadata = make(map[string]any)
+		}
+		opts.Metadata["openai:extra_body"] = extraBody
+	}
+}
+
+func getExtraBody(opts *llms.CallOptions) map[string]any {
+	if opts.Metadata == nil {
+		return nil
+	}
+	if extraBody, ok := opts.Metadata["openai:extra_body"].(map[string]any); ok {
+		return extraBody
+	}
+	return nil
 }

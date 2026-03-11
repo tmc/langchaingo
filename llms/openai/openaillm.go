@@ -231,6 +231,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
+		ExtraBody:            getExtraBody(&opts),
 	}
 
 	if isLegacyMaxTokensField(&opts) {

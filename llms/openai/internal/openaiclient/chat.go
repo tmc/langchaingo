@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 
@@ -101,6 +102,10 @@ type ChatRequest struct {
 	// WebSearchOptions configures web search behavior for search-enabled models
 	// like gpt-4o-search-preview and gpt-4o-mini-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+
+	// ExtraBody allows passing additional fields that will be merged into the request body.
+	// These fields take precedence over the standard fields.
+	ExtraBody map[string]any `json:"-"`
 }
 
 // ToolType is the type of a tool.
@@ -519,8 +524,24 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 
 	// Restore original metadata
 	payload.Metadata = originalMetadata
+
 	if err != nil {
 		return nil, err
+	}
+
+	// If ExtraBody is provided, merge it with the standard payload
+	if len(payload.ExtraBody) > 0 {
+		var baseMap map[string]any
+		if err := json.Unmarshal(payloadBytes, &baseMap); err != nil {
+			return nil, err
+		}
+
+		// Merge ExtraBody with priority (ExtraBody overwrites existing fields)
+		maps.Copy(baseMap, payload.ExtraBody)
+
+		if payloadBytes, err = json.Marshal(baseMap); err != nil {
+			return nil, err
+		}
 	}
 
 	// Build request

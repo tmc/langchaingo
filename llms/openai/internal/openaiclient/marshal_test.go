@@ -2,7 +2,11 @@ package openaiclient
 
 import (
 	"encoding/json"
+	"maps"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChatRequest_TemperatureMarshalJSON(t *testing.T) {
@@ -43,7 +47,7 @@ func TestChatRequest_TemperatureMarshalJSON(t *testing.T) {
 				t.Fatalf("failed to marshal: %v", err)
 			}
 
-			var result map[string]interface{}
+			var result map[string]any
 			if err := json.Unmarshal(data, &result); err != nil {
 				t.Fatalf("failed to unmarshal: %v", err)
 			}
@@ -76,7 +80,7 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 	tests := []struct {
 		name    string
 		request ChatRequest
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 		{
 			name: "no web search options",
@@ -91,7 +95,7 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 				Model:            "gpt-4o-search-preview",
 				WebSearchOptions: &WebSearchOptions{},
 			},
-			want: map[string]interface{}{},
+			want: map[string]any{},
 		},
 		{
 			name: "web search with search context size",
@@ -101,7 +105,7 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 					SearchContextSize: "high",
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"search_context_size": "high",
 			},
 		},
@@ -121,11 +125,11 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"search_context_size": "medium",
-				"user_location": map[string]interface{}{
+				"user_location": map[string]any{
 					"type": "approximate",
-					"approximate": map[string]interface{}{
+					"approximate": map[string]any{
 						"country": "US",
 						"city":    "San Francisco",
 						"region":  "California",
@@ -142,7 +146,7 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 				t.Fatalf("failed to marshal: %v", err)
 			}
 
-			var result map[string]interface{}
+			var result map[string]any
 			if err := json.Unmarshal(data, &result); err != nil {
 				t.Fatalf("failed to unmarshal: %v", err)
 			}
@@ -157,7 +161,7 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 					t.Fatal("expected web_search_options to be present")
 				}
 				// Check that it's properly serialized
-				webSearchMap, ok := webSearchOpts.(map[string]interface{})
+				webSearchMap, ok := webSearchOpts.(map[string]any)
 				if !ok {
 					t.Fatalf("web_search_options is not a map: %T", webSearchOpts)
 				}
@@ -168,11 +172,11 @@ func TestChatRequest_WebSearchOptionsMarshalJSON(t *testing.T) {
 					}
 				}
 				if tt.want["user_location"] != nil {
-					userLoc, ok := webSearchMap["user_location"].(map[string]interface{})
+					userLoc, ok := webSearchMap["user_location"].(map[string]any)
 					if !ok {
 						t.Fatalf("user_location is not a map: %T", webSearchMap["user_location"])
 					}
-					wantUserLoc := tt.want["user_location"].(map[string]interface{})
+					wantUserLoc := tt.want["user_location"].(map[string]any)
 					if userLoc["type"] != wantUserLoc["type"] {
 						t.Errorf("user_location.type: got %v, want %v", userLoc["type"], wantUserLoc["type"])
 					}
@@ -188,4 +192,107 @@ func getFloatPointer(f float64) *float64 {
 
 func getIntPointer(i int) *int {
 	return &i
+}
+
+func TestChatRequest_ExtraBodyMarshal(t *testing.T) {
+	tests := []struct {
+		name      string
+		request   ChatRequest
+		extraBody map[string]any
+		checkFunc func(t *testing.T, result map[string]any)
+	}{
+		{
+			name: "extra body fields are added",
+			request: ChatRequest{
+				Model: "gpt-4",
+			},
+			extraBody: map[string]any{
+				"enable_thinking": false,
+				"top_k":           20,
+			},
+			checkFunc: func(t *testing.T, result map[string]any) {
+				assert.Equal(t, "gpt-4", result["model"])
+				assert.Equal(t, false, result["enable_thinking"])
+				assert.Equal(t, float64(20), result["top_k"])
+			},
+		},
+		{
+			name: "extra body overrides existing fields",
+			request: ChatRequest{
+				Model: "gpt-4",
+				TopK:  getIntPointer(10),
+			},
+			extraBody: map[string]any{
+				"top_k": 20,
+			},
+			checkFunc: func(t *testing.T, result map[string]any) {
+				assert.Equal(t, float64(20), result["top_k"], "ExtraBody should override existing top_k")
+			},
+		},
+		{
+			name: "nested objects in extra body",
+			request: ChatRequest{
+				Model: "gpt-4",
+			},
+			extraBody: map[string]any{
+				"chat_template_kwargs": map[string]any{
+					"enable_thinking": false,
+					"custom_setting":  "value",
+				},
+			},
+			checkFunc: func(t *testing.T, result map[string]any) {
+				kwargs, ok := result["chat_template_kwargs"].(map[string]any)
+				require.True(t, ok, "chat_template_kwargs should be a map")
+				assert.Equal(t, false, kwargs["enable_thinking"])
+				assert.Equal(t, "value", kwargs["custom_setting"])
+			},
+		},
+		{
+			name: "no extra body",
+			request: ChatRequest{
+				Model: "gpt-4",
+			},
+			extraBody: nil,
+			checkFunc: func(t *testing.T, result map[string]any) {
+				assert.Equal(t, "gpt-4", result["model"])
+				_, hasExtraField := result["enable_thinking"]
+				assert.False(t, hasExtraField)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// This test simulates the merging logic that will be in createChat
+			tt.request.ExtraBody = tt.extraBody
+
+			// Step 1: Marshal without ExtraBody (standard fields)
+			tempExtraBody := tt.request.ExtraBody
+			tt.request.ExtraBody = nil
+
+			data, err := json.Marshal(tt.request)
+			require.NoError(t, err)
+
+			var result map[string]any
+			err = json.Unmarshal(data, &result)
+			require.NoError(t, err)
+
+			// Step 2: Merge ExtraBody if present
+			if len(tempExtraBody) > 0 {
+				maps.Copy(result, tempExtraBody)
+
+				// Re-marshal and unmarshal to ensure proper type conversion
+				// (This simulates what actually happens in the real code)
+				data, err = json.Marshal(result)
+				require.NoError(t, err)
+				err = json.Unmarshal(data, &result)
+				require.NoError(t, err)
+			}
+
+			// Verify the result
+			if tt.checkFunc != nil {
+				tt.checkFunc(t, result)
+			}
+		})
+	}
 }

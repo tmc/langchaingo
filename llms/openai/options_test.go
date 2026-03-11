@@ -3,6 +3,7 @@ package openai
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
 )
@@ -172,4 +173,75 @@ func TestWebSearchOptionsConversion(t *testing.T) {
 	if result2.UserLocation.Approximate.Country != "GB" {
 		t.Errorf("expected Country=GB, got %s", result2.UserLocation.Approximate.Country)
 	}
+}
+
+func TestWithExtraBody(t *testing.T) {
+	t.Run("sets extra body in metadata", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		extraBody := map[string]any{
+			"enable_thinking": false,
+			"custom_param":    "value",
+		}
+
+		WithExtraBody(extraBody)(opts)
+
+		require.NotNil(t, opts.Metadata)
+		stored, ok := opts.Metadata["openai:extra_body"].(map[string]any)
+		require.True(t, ok)
+		assert.Equal(t, false, stored["enable_thinking"])
+		assert.Equal(t, "value", stored["custom_param"])
+	})
+
+	t.Run("nil extra body is handled", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		WithExtraBody(nil)(opts)
+		require.NotNil(t, opts.Metadata)
+	})
+
+	t.Run("empty extra body is handled", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		WithExtraBody(map[string]any{})(opts)
+		require.NotNil(t, opts.Metadata)
+		stored, ok := opts.Metadata["openai:extra_body"].(map[string]any)
+		require.True(t, ok)
+		assert.Empty(t, stored)
+	})
+}
+
+func TestGetExtraBody(t *testing.T) {
+	t.Run("returns nil when metadata is nil", func(t *testing.T) {
+		opts := &llms.CallOptions{}
+		result := getExtraBody(opts)
+		assert.Nil(t, result)
+	})
+
+	t.Run("returns nil when extra_body not present", func(t *testing.T) {
+		opts := &llms.CallOptions{
+			Metadata: map[string]any{"other_key": "value"},
+		}
+		result := getExtraBody(opts)
+		assert.Nil(t, result)
+	})
+
+	t.Run("returns extra body when present", func(t *testing.T) {
+		extraBody := map[string]any{"key": "value"}
+		opts := &llms.CallOptions{
+			Metadata: map[string]any{
+				"openai:extra_body": extraBody,
+			},
+		}
+		result := getExtraBody(opts)
+		require.NotNil(t, result)
+		assert.Equal(t, "value", result["key"])
+	})
+
+	t.Run("returns nil for wrong type", func(t *testing.T) {
+		opts := &llms.CallOptions{
+			Metadata: map[string]any{
+				"openai:extra_body": "not a map",
+			},
+		}
+		result := getExtraBody(opts)
+		assert.Nil(t, result)
+	})
 }
