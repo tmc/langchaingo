@@ -28,8 +28,6 @@ require (
 
 // LLM providers
 require (
-	github.com/IBM/watsonx-go v1.0.0
-	github.com/cohere-ai/tokenizer v1.1.2
 	github.com/gage-technologies/mistral-go v1.1.0
 	github.com/ollama/ollama v0.17.5
 	github.com/pkoukk/tiktoken-go v0.1.8

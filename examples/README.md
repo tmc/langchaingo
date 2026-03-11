@@ -6,7 +6,7 @@ Welcome to the exciting set of LangChain Go examples! 🎉 This directory tree i
 
 This collection includes examples for:
 
-- Different Language Models: OpenAI, Anthropic, Cohere, Ollama, and more!
+- Different Language Models: OpenAI, Anthropic, Ollama, and more!
 - Vector Stores: Chroma, Pinecone, Weaviate, and others for efficient similarity searches.
 - Chains and Agents: See how to build complex AI workflows and autonomous agents.
 - Tools and Integrations: Explore connections with Zapier, SQL databases, and more.

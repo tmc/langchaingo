@@ -34,7 +34,6 @@ ie
 blockchain
 Groq
 Groq's
-watsonx
 pgvector
 PGVector
 embedder
@@ -47,7 +46,6 @@ qdrant
 Postgres
 postgres
 pinecone
-Llamafile
 langchain
 IVFFlat
 godotenv

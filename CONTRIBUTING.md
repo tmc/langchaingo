@@ -214,9 +214,8 @@ When adding a new LLM provider:
 2. Implement the `llms.Model` interface
 3. Create an internal client package for HTTP interactions
 4. Use `httputil.DefaultClient` for HTTP requests
-5. Add compliance tests: `compliance.NewSuite("yourprovider", model).Run(t)`
-6. Add tests with httprr recordings for HTTP calls
-7. Follow the existing provider patterns for options and error handling
+5. Add tests with httprr recordings for HTTP calls
+6. Follow the existing provider patterns for options and error handling
 
 ##### Adding a New Vector Store
 

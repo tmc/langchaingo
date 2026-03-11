@@ -90,7 +90,6 @@
 //   - Anthropic (Claude family)
 //   - Google AI (Gemini, PaLM)
 //   - AWS Bedrock (Claude, Llama, Titan)
-//   - Cohere
 //   - Mistral AI
 //   - Ollama (local models)
 //   - Hugging Face Inference

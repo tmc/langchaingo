@@ -1201,7 +1201,7 @@ func (a *HttprrAnalyzer) isCredentialEnvVar(envVar string) bool {
 	knownKeys := []string{
 		"JINA_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
 		"GOOGLE_API_KEY", "HUGGINGFACE_API_TOKEN", "HF_TOKEN",
-		"COHERE_API_KEY", "MISTRAL_API_KEY", "VOYAGEAI_API_KEY",
+		"MISTRAL_API_KEY", "VOYAGEAI_API_KEY",
 	}
 
 	for _, key := range knownKeys {
@@ -2404,12 +2404,6 @@ func (a *ArchitecturalAnalyzer) isVariableCreatedByMockFunction(varName string, 
 										}
 									}
 								}
-								// Special case: Check for local.New() which creates local LLMs that don't make HTTP calls
-								if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
-									if pkg, ok := sel.X.(*ast.Ident); ok && pkg.Name == "local" && sel.Sel.Name == "New" {
-										return true
-									}
-								}
 							}
 						}
 					}
@@ -2484,8 +2478,7 @@ func (a *ArchitecturalAnalyzer) functionUsesHttprr(fn *ast.FuncDecl) bool {
 				httrrHelperPatterns := []string{
 					"newHTTPRRClient", "newOpenAIEmbedder", "newTestClient",
 					"newTestLLM", "newTestEmbedder", "setupHTTPRR",
-					"createTestClient", "createHTTPRRClient", "newErnieTestClient",
-					"newErnieTestLLM", "newPalmTestLLM",
+					"createTestClient", "createHTTPRRClient", "newPalmTestLLM",
 				}
 				for _, pattern := range httrrHelperPatterns {
 					if ident.Name == pattern {
@@ -2582,8 +2575,7 @@ func (a *ArchitecturalAnalyzer) checkTestProviderConstructors(fn *ast.FuncDecl) 
 	skipHttprrCheck = skipHttprrCheck || strings.Contains(a.file, "_unit_test.go")               // Unit tests
 
 	// Skip specific constructor unit tests that don't make HTTP calls
-	if fn.Name.Name == "TestNew" && (strings.Contains(a.file, "coherellm_test.go") ||
-		strings.Contains(a.file, "huggingfacellm_test.go") || strings.Contains(a.file, "mistralmodel_test.go")) {
+	if fn.Name.Name == "TestNew" && (strings.Contains(a.file, "huggingfacellm_test.go") || strings.Contains(a.file, "mistralmodel_test.go")) {
 		skipHttprrCheck = true
 	}
 
@@ -2634,11 +2626,10 @@ func (a *ArchitecturalAnalyzer) checkTestProviderConstructors(fn *ast.FuncDecl) 
 func (a *ArchitecturalAnalyzer) isProviderConstructorCall(call *ast.CallExpr) bool {
 	providerConstructors := []string{
 		// LLM providers
-		"jina.New", "ernie.New", "googleai.New", "anthropic.New", "openai.New",
-		"mistral.New", "cohere.New", "huggingface.New", "ollama.New",
-		"bedrock.New", "vertexai.New", "llamafile.New", "maritaca.New",
-		"watsonx.New", "cloudflare.New", "perplexity.New", "groq.New",
-		"deepseek.New", "nvidia.New",
+		"jina.New", "googleai.New", "anthropic.New", "openai.New",
+		"mistral.New", "huggingface.New", "ollama.New",
+		"bedrock.New", "vertexai.New", "perplexity.New",
+		"groq.New", "deepseek.New", "nvidia.New",
 
 		// Embedding providers
 		"jina.NewEmbeddings", "openai.NewEmbeddings", "huggingface.NewEmbeddings",
@@ -2784,7 +2775,7 @@ func (a *ArchitecturalAnalyzer) functionSkipsHttprrCheck(fn *ast.FuncDecl) bool 
 								// Common API key environment variables
 								apiKeyVars := []string{
 									"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY",
-									"JINA_API_KEY", "COHERE_API_KEY", "MISTRAL_API_KEY",
+									"JINA_API_KEY", "MISTRAL_API_KEY",
 									"HF_TOKEN", "HUGGINGFACEHUB_API_TOKEN", "BEDROCK_ACCESS_KEY",
 								}
 								for _, apiVar := range apiKeyVars {
@@ -2845,10 +2836,8 @@ func (a *ArchitecturalAnalyzer) containsHardcodedApiUrl(call *ast.CallExpr) bool
 	hardcodedUrls := []string{
 		"api.jina.ai",
 		"generativelanguage.googleapis.com",
-		"aip.baidubce.com",
 		"api.openai.com",
 		"api.anthropic.com",
-		"api.cohere.ai",
 		"api.mistral.ai",
 		"api.together.xyz",
 		"api.groq.com",

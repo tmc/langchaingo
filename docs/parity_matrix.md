@@ -214,16 +214,10 @@ These are newer features from LangChain Python that represent the current direct
 | Google Vertex AI                   | ✅     |
 | AWS Bedrock                        | ✅     |
 | Mistral AI                         | ✅     |
-| Cohere                             | ✅     |
 | Hugging Face                       | ✅     |
 | Ollama                             | ✅     |
-| LlamaFile                          | ✅     |
 | Local LLM                          | ✅     |
 | Groq                               | ✅     |
-| WatsonX                            | ✅     |
-| Ernie (Baidu)                      | ✅     |
-| Cloudflare Workers AI              | ✅     |
-| Maritaca AI                        | ✅     |
 | NVIDIA                             | ✅     |
 | Perplexity                         | ✅     |
 | DeepSeek                           | ✅     |
@@ -241,7 +235,6 @@ These are newer features from LangChain Python that represent the current direct
 | Jina AI                            | ✅     |
 | VoyageAI                           | ✅     |
 | Mistral                            | ✅     |
-| Cohere                             | ❌     |
 | Azure OpenAI                       | ❌     |
 
 ## Tools
