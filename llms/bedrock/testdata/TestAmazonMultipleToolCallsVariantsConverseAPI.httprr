@@ -1,0 +1,100 @@
+httprr trace v1
+893 722
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 590
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 557
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:10 GMT
+X-Amzn-Requestid: 39f898b2-fb73-4fcb-b3f2-bc395c1a1fea
+
+{"metrics":{"latencyMs":917},"output":{"message":{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb","type":"tool_use"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":627,"outputTokens":85,"serverToolUsage":{},"totalTokens":712}}1439 1610
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 1444
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:13 GMT
+X-Amzn-Requestid: a6f40a95-c704-442c-baeb-1939c1424280
+
+{"metrics":{"latencyMs":2550},"output":{"message":{"content":[{"text":"Based on the search results and current date information:\n\n**Current Date:** March 15, 2026\n\n**CVE-2020-10188 Exploits:**\nCVE-2020-10188 is a **buffer overflow vulnerability in telnetd** (the telnet daemon). This is a critical remote code execution vulnerability that affects various telnet server implementations. \n\nBuffer overflow vulnerabilities like this one allow attackers to:\n- Execute arbitrary code on the affected system\n- Gain unauthorized access to the system\n- Potentially take complete control of the affected host\n\n**Important Notes:**\n- This is an older vulnerability (from 2020) and patches should be available\n- Systems running vulnerable versions of telnet daemons are at risk\n- If you're managing systems, ensure telnetd is updated or consider using more secure alternatives like SSH instead of Telnet\n- Telnet itself is considered insecure and should not be used in production environments anymore\n\nIf you need more specific information about exploitation techniques, proof-of-concept code, or affected software versions, please let me know and I can search for more detailed information."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":247,"serverToolUsage":{},"totalTokens":1057}}1439 1231
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 1065
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:16 GMT
+X-Amzn-Requestid: 700da425-24b9-4095-94cd-cfedb41d626c
+
+{"metrics":{"latencyMs":1967},"output":{"message":{"content":[{"text":"Based on the search results:\n\n**CVE-2020-10188 Exploits:**\nCVE-2020-10188 is a **buffer overflow vulnerability in telnetd**. This is a classic type of security vulnerability that can potentially allow remote code execution or denial of service attacks against systems running vulnerable versions of the telnet daemon.\n\n**Current Date:**\nToday's date is **March 15, 2026**.\n\nIf you need more detailed information about CVE-2020-10188, such as affected versions, CVSS scores, remediation steps, or specific exploit code, I'd recommend checking:\n- The official CVE database (cve.mitre.org or nvd.nist.gov)\n- Security advisories from your system vendor\n- Exploit databases like Exploit-DB or GitHub repositories documenting this vulnerability"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":187,"serverToolUsage":{},"totalTokens":997}}1439 1317
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 1151
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:20 GMT
+X-Amzn-Requestid: bc0dadd4-255e-4560-899f-8f36633c0b58
+
+{"metrics":{"latencyMs":2109},"output":{"message":{"content":[{"text":"Based on the search results and current date information:\n\n**CVE-2020-10188:**\nAccording to the search results, **CVE-2020-10188 is a buffer overflow vulnerability in telnetd** (the telnet daemon). This is a critical vulnerability that could potentially allow remote code execution if exploited on systems running vulnerable versions of telnetd.\n\nFor specific exploit details, you would want to check:\n- National Vulnerability Database (NVD)\n- Exploit databases like ExploitDB or Metasploit\n- The CVE detail pages on security advisory sites\n\n**Current Date:** \nToday's date is **March 15, 2026**.\n\nIf you need more detailed information about specific exploits for this vulnerability, I'd recommend checking security resources like:\n- nvd.nist.gov\n- cvedetails.com\n- exploit-db.com\n- Metasploit Framework documentation"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":208,"serverToolUsage":{},"totalTokens":1018}}1439 973
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 808
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:28 GMT
+X-Amzn-Requestid: 3121a85e-c84d-44ca-b763-637a9c873356
+
+{"metrics":{"latencyMs":7057},"output":{"message":{"content":[{"text":"Based on the search results:\n\n**CVE-2020-10188:**\n- This is a **buffer overflow vulnerability in telnetd** (the telnet daemon)\n- The vulnerability allows for potential remote code execution or denial of service attacks\n\n**Current Date:** \n- **March 15, 2026**\n\nIf you need more detailed information about CVE-2020-10188, such as affected versions, CVSS score, mitigation strategies, or specific exploit code details, please let me know and I can search for more specific information."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":122,"serverToolUsage":{},"totalTokens":932}}1439 997
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 832
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:30 GMT
+X-Amzn-Requestid: 16891797-a583-40ee-a6ed-a329dc6bc76f
+
+{"metrics":{"latencyMs":1402},"output":{"message":{"content":[{"text":"Based on the search results:\n\n**CVE-2020-10188:**\nCVE-2020-10188 is a buffer overflow vulnerability in telnetd. This is a remotely exploitable flaw that could potentially allow an attacker to execute arbitrary code on affected systems running vulnerable versions of telnet daemon.\n\n**Current Date:**\nToday's date is **March 15, 2026**.\n\nIf you need more specific information about this vulnerability, such as affected versions, CVSS score, or detailed exploit techniques, I can search for additional details."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":123,"serverToolUsage":{},"totalTokens":933}}1439 955
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1135
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":8192,"temperature":1},"messages":[{"content":[{"text":"Search for CVE-2020-10188 exploits and also tell me what's the current date"}],"role":"user"},{"content":[{"toolUse":{"input":{"query":"CVE-2020-10188 exploits"},"name":"search_web","toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolUse":{"input":{},"name":"get_current_date","toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"assistant"},{"content":[{"toolResult":{"content":[{"text":"{\"results\": [\"CVE-2020-10188 is a buffer overflow in telnetd\"]}"}],"toolUseId":"tooluse_AOwcFLkovTTuAPjb4P3Wzb"}},{"toolResult":{"content":[{"text":"{\"date\": \"2026-03-15\"}"}],"toolUseId":"tooluse_iF2fHTi9QEtnd3SjXhaarP"}}],"role":"user"}],"toolConfig":{"toolChoice":{"auto":{}},"tools":[{"toolSpec":{"description":"Search the web for information","inputSchema":{"json":{"properties":{"query":{"description":"Search query","type":"string"}},"required":["query"],"type":"object"}},"name":"search_web"}},{"toolSpec":{"description":"Get the current date and time","inputSchema":{"json":{"properties":{},"type":"object"}},"name":"get_current_date"}}]}}HTTP/2.0 200 OK
+Content-Length: 790
+Content-Type: application/json
+Date: Sun, 15 Mar 2026 10:26:33 GMT
+X-Amzn-Requestid: 2a1d448c-9a21-42ce-8ba9-10112ddb2564
+
+{"metrics":{"latencyMs":1432},"output":{"message":{"content":[{"text":"Based on the search results:\n\n**CVE-2020-10188:**\n- This is a **buffer overflow vulnerability in telnetd** (the telnet daemon)\n- This vulnerability affects telnet implementations and can potentially be exploited for remote code execution\n\n**Current Date:** **March 15, 2026**\n\nIf you need more detailed information about CVE-2020-10188 exploits, including specific proof-of-concepts or mitigation strategies, please let me know and I can perform additional searches."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":810,"outputTokens":115,"serverToolUsage":{},"totalTokens":925}}

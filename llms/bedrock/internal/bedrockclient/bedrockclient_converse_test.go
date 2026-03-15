@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 // Note: BedrockRuntimeClientInterface is defined in bedrockclient_conversion.go
@@ -306,4 +307,295 @@ func TestConverseClient_EmptyResponse(t *testing.T) {
 // Helper function to create pointers
 func ptr[T any](v T) *T {
 	return &v
+}
+
+// TestAIMessageAccumulator tests the AI message accumulator
+func TestAIMessageAccumulator(t *testing.T) {
+	t.Run("empty accumulator", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		assert.True(t, accum.isEmpty())
+	})
+
+	t.Run("accumulate text only", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		accum.addTextContent("Hello", nil)
+
+		assert.False(t, accum.isEmpty())
+		msg := accum.build()
+		assert.Equal(t, types.ConversationRoleAssistant, msg.Role)
+		assert.Len(t, msg.Content, 1)
+
+		textBlock, ok := msg.Content[0].(*types.ContentBlockMemberText)
+		assert.True(t, ok)
+		assert.Equal(t, "Hello", textBlock.Value)
+	})
+
+	t.Run("accumulate text with reasoning", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		reasoningContent := &reasoning.ContentReasoning{
+			Content:   "thinking",
+			Signature: []byte("sig"),
+		}
+		accum.addTextContent("Hello", reasoningContent)
+
+		msg := accum.build()
+		assert.Len(t, msg.Content, 2) // reasoning + text
+
+		reasoningBlock, ok := msg.Content[0].(*types.ContentBlockMemberReasoningContent)
+		assert.True(t, ok)
+		assert.NotNil(t, reasoningBlock.Value)
+
+		textBlock, ok := msg.Content[1].(*types.ContentBlockMemberText)
+		assert.True(t, ok)
+		assert.Equal(t, "Hello", textBlock.Value)
+	})
+
+	t.Run("accumulate multiple tool calls", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		toolCall1 := &ToolCall{
+			ID:        "tool1",
+			Name:      "func1",
+			Arguments: map[string]any{"arg": "val1"},
+		}
+		toolCall2 := &ToolCall{
+			ID:        "tool2",
+			Name:      "func2",
+			Arguments: map[string]any{"arg": "val2"},
+		}
+
+		err := accum.addToolUse(toolCall1)
+		assert.NoError(t, err)
+		err = accum.addToolUse(toolCall2)
+		assert.NoError(t, err)
+
+		assert.False(t, accum.isEmpty())
+		msg := accum.build()
+		assert.Len(t, msg.Content, 2)
+	})
+
+	t.Run("accumulate text and tool calls", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		reasoningContent := &reasoning.ContentReasoning{Content: "thinking"}
+		accum.addTextContent("Hello", reasoningContent)
+
+		toolCall := &ToolCall{
+			ID:        "tool1",
+			Name:      "func1",
+			Arguments: map[string]any{},
+		}
+		err := accum.addToolUse(toolCall)
+		assert.NoError(t, err)
+
+		msg := accum.build()
+		// Should have: reasoning, text, tool use
+		assert.Len(t, msg.Content, 3)
+	})
+
+	t.Run("accumulate with cache control", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		accum.addTextContent("Hello", nil)
+		accum.setCacheControl(&CacheControl{Type: "ephemeral", TTL: "1h"})
+
+		msg := accum.build()
+		// Should have: text, cache point
+		assert.Len(t, msg.Content, 2)
+
+		_, ok := msg.Content[1].(*types.ContentBlockMemberCachePoint)
+		assert.True(t, ok)
+	})
+
+	t.Run("reset clears accumulator", func(t *testing.T) {
+		accum := &aiMessageAccumulator{}
+		accum.addTextContent("Hello", nil)
+		assert.False(t, accum.isEmpty())
+
+		accum.reset()
+		assert.True(t, accum.isEmpty())
+	})
+}
+
+// TestToolResultAccumulator tests the tool result accumulator
+func TestToolResultAccumulator(t *testing.T) {
+	t.Run("empty accumulator", func(t *testing.T) {
+		accum := &toolResultAccumulator{}
+		assert.True(t, accum.isEmpty())
+	})
+
+	t.Run("accumulate single result", func(t *testing.T) {
+		accum := &toolResultAccumulator{}
+		result := &ToolResult{
+			ToolCallID: "tool1",
+			ToolName:   "func1",
+			Content:    "result1",
+		}
+
+		err := accum.addToolResult(result)
+		assert.NoError(t, err)
+		assert.False(t, accum.isEmpty())
+
+		msg := accum.build()
+		assert.Equal(t, types.ConversationRoleUser, msg.Role)
+		assert.Len(t, msg.Content, 1)
+	})
+
+	t.Run("accumulate multiple results", func(t *testing.T) {
+		accum := &toolResultAccumulator{}
+		result1 := &ToolResult{ToolCallID: "tool1", ToolName: "func1", Content: "result1"}
+		result2 := &ToolResult{ToolCallID: "tool2", ToolName: "func2", Content: "result2"}
+
+		err := accum.addToolResult(result1)
+		assert.NoError(t, err)
+		err = accum.addToolResult(result2)
+		assert.NoError(t, err)
+
+		msg := accum.build()
+		assert.Len(t, msg.Content, 2)
+	})
+
+	t.Run("reset clears accumulator", func(t *testing.T) {
+		accum := &toolResultAccumulator{}
+		accum.addToolResult(&ToolResult{ToolCallID: "t1", Content: "r1"})
+		assert.False(t, accum.isEmpty())
+
+		accum.reset()
+		assert.True(t, accum.isEmpty())
+	})
+}
+
+// TestConvertMessages_MultipleToolCallVariants tests all variants of message chains
+func TestConvertMessages_MultipleToolCallVariants(t *testing.T) {
+	client := &ConverseClient{}
+
+	// Common test data
+	toolCall1 := &ToolCall{ID: "tool1", Name: "func1", Arguments: map[string]any{"a": "1"}}
+	toolCall2 := &ToolCall{ID: "tool2", Name: "func2", Arguments: map[string]any{"b": "2"}}
+	result1 := &ToolResult{ToolCallID: "tool1", ToolName: "func1", Content: "result1"}
+	result2 := &ToolResult{ToolCallID: "tool2", ToolName: "func2", Content: "result2"}
+	reasoningContent := &reasoning.ContentReasoning{Content: "thinking"}
+
+	tests := []struct {
+		name             string
+		messages         []Message
+		expectedMsgCount int
+		validate         func(*testing.T, []types.Message)
+	}{
+		{
+			name: "variant1_content_separate_toolcalls_together_results_together",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3, // user + assistant (with text+tools) + user (with results)
+			validate: func(t *testing.T, msgs []types.Message) {
+				// Check assistant message has reasoning, text, and 2 tool uses
+				assert.Equal(t, types.ConversationRoleAssistant, msgs[1].Role)
+				assert.GreaterOrEqual(t, len(msgs[1].Content), 4) // reasoning + text + 2 tools
+
+				// Check user message has 2 tool results
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+				assert.Len(t, msgs[2].Content, 2)
+			},
+		},
+		{
+			name: "variant2_content_separate_toolcalls_separate_results_together",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3,
+			validate: func(t *testing.T, msgs []types.Message) {
+				assert.Equal(t, types.ConversationRoleAssistant, msgs[1].Role)
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+			},
+		},
+		{
+			name: "variant3_content_separate_toolcalls_separate_results_separate",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3,
+			validate: func(t *testing.T, msgs []types.Message) {
+				// All tool results should be combined into one user message
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+				assert.Len(t, msgs[2].Content, 2)
+			},
+		},
+		{
+			name: "variant4_content_with_toolcalls_together_results_together",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3,
+			validate: func(t *testing.T, msgs []types.Message) {
+				assert.Equal(t, types.ConversationRoleAssistant, msgs[1].Role)
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+			},
+		},
+		{
+			name: "variant5_content_with_toolcall1_separate_toolcall2_results_separate",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3,
+			validate: func(t *testing.T, msgs []types.Message) {
+				assert.Equal(t, types.ConversationRoleAssistant, msgs[1].Role)
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+			},
+		},
+		{
+			name: "variant6_content_with_toolcalls_together_results_separate",
+			messages: []Message{
+				{Role: llms.ChatMessageTypeHuman, Content: "query"},
+				{Role: llms.ChatMessageTypeAI, Content: "response", Reasoning: reasoningContent},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall1},
+				{Role: llms.ChatMessageTypeAI, ToolCall: toolCall2},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result1},
+				{Role: llms.ChatMessageTypeTool, ToolResult: result2},
+			},
+			expectedMsgCount: 3,
+			validate: func(t *testing.T, msgs []types.Message) {
+				assert.Equal(t, types.ConversationRoleAssistant, msgs[1].Role)
+				assert.Equal(t, types.ConversationRoleUser, msgs[2].Role)
+				// Both tool results should be in one user message
+				assert.Len(t, msgs[2].Content, 2)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			messages, systemPrompts, err := client.convertMessages(tt.messages)
+
+			assert.NoError(t, err)
+			assert.Empty(t, systemPrompts)
+			assert.Equal(t, tt.expectedMsgCount, len(messages))
+
+			if tt.validate != nil {
+				tt.validate(t, messages)
+			}
+		})
+	}
 }

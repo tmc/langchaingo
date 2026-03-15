@@ -151,47 +151,288 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	return converseInput, nil
 }
 
+// aiMessageAccumulator accumulates consecutive AI messages into a single assistant message
+type aiMessageAccumulator struct {
+	textContent   string
+	reasoning     *reasoning.ContentReasoning
+	toolUseBlocks []types.ContentBlock
+	cacheControl  *CacheControl
+	hasAnyContent bool
+}
+
+// addTextContent adds text content to the accumulator
+func (a *aiMessageAccumulator) addTextContent(content string, reasoningContent *reasoning.ContentReasoning) {
+	if a.textContent == "" {
+		a.textContent = content
+	}
+
+	if a.reasoning == nil && reasoningContent != nil {
+		a.reasoning = reasoningContent
+	}
+
+	a.hasAnyContent = true
+}
+
+// addToolUse adds a tool use block to the accumulator
+func (a *aiMessageAccumulator) addToolUse(toolCall *ToolCall) error {
+	if toolCall == nil {
+		return nil
+	}
+
+	a.toolUseBlocks = append(a.toolUseBlocks, &types.ContentBlockMemberToolUse{
+		Value: types.ToolUseBlock{
+			ToolUseId: aws.String(toolCall.ID),
+			Name:      aws.String(toolCall.Name),
+			Input:     document.NewLazyDocument(toolCall.Arguments),
+		},
+	})
+
+	a.hasAnyContent = true
+	return nil
+}
+
+// setCacheControl sets cache control if not already set
+func (a *aiMessageAccumulator) setCacheControl(cacheControl *CacheControl) {
+	if a.cacheControl == nil {
+		a.cacheControl = cacheControl
+	}
+}
+
+// build creates a Converse Message from accumulated data
+func (a *aiMessageAccumulator) build() types.Message {
+	content := make([]types.ContentBlock, 0)
+
+	// Add reasoning content if present
+	if a.reasoning != nil && (a.reasoning.Content != "" || len(a.reasoning.Signature) > 0) {
+		reasoningBlock := types.ReasoningContentBlockMemberReasoningText{
+			Value: types.ReasoningTextBlock{
+				Text:      ptrStringOrNil(a.reasoning.Content),
+				Signature: ptrStringOrNil(string(a.reasoning.Signature)),
+			},
+		}
+		content = append(content, &types.ContentBlockMemberReasoningContent{
+			Value: &reasoningBlock,
+		})
+	}
+
+	// Add text content if present
+	if a.textContent != "" {
+		content = append(content, &types.ContentBlockMemberText{Value: a.textContent})
+	}
+
+	// Add all tool use blocks
+	content = append(content, a.toolUseBlocks...)
+
+	// Add cache point if needed
+	if a.cacheControl != nil {
+		cacheBlock := types.CachePointBlock{
+			Type: types.CachePointTypeDefault,
+		}
+		if a.cacheControl.TTL == "1h" {
+			cacheBlock.Ttl = types.CacheTTLOneHour
+		} else {
+			cacheBlock.Ttl = types.CacheTTLFiveMinutes
+		}
+		content = append(content, &types.ContentBlockMemberCachePoint{
+			Value: cacheBlock,
+		})
+	}
+
+	return types.Message{
+		Role:    types.ConversationRoleAssistant,
+		Content: content,
+	}
+}
+
+// reset clears the accumulator
+func (a *aiMessageAccumulator) reset() {
+	a.textContent = ""
+	a.reasoning = nil
+	a.toolUseBlocks = nil
+	a.cacheControl = nil
+	a.hasAnyContent = false
+}
+
+// isEmpty returns true if no content has been accumulated
+func (a *aiMessageAccumulator) isEmpty() bool {
+	return !a.hasAnyContent
+}
+
+// toolResultAccumulator accumulates consecutive tool result messages into a single user message
+type toolResultAccumulator struct {
+	resultBlocks []types.ContentBlock
+}
+
+// addToolResult adds a tool result block to the accumulator
+func (t *toolResultAccumulator) addToolResult(toolResult *ToolResult) error {
+	if toolResult == nil {
+		return fmt.Errorf("tool message missing tool result")
+	}
+
+	t.resultBlocks = append(t.resultBlocks, &types.ContentBlockMemberToolResult{
+		Value: types.ToolResultBlock{
+			ToolUseId: aws.String(toolResult.ToolCallID),
+			Content: []types.ToolResultContentBlock{
+				&types.ToolResultContentBlockMemberText{
+					Value: toolResult.Content,
+				},
+			},
+		},
+	})
+
+	return nil
+}
+
+// build creates a Converse Message from accumulated tool results
+func (t *toolResultAccumulator) build() types.Message {
+	return types.Message{
+		Role:    types.ConversationRoleUser,
+		Content: t.resultBlocks,
+	}
+}
+
+// reset clears the accumulator
+func (t *toolResultAccumulator) reset() {
+	t.resultBlocks = nil
+}
+
+// isEmpty returns true if no tool results have been accumulated
+func (t *toolResultAccumulator) isEmpty() bool {
+	return len(t.resultBlocks) == 0
+}
+
 // convertMessages converts our messages to Converse format
+// All consecutive AI messages (with or without tool calls) are combined into a single assistant message
+// All consecutive tool result messages are combined into a single user message
 func (c *ConverseClient) convertMessages(messages []Message) ([]types.Message, []types.SystemContentBlock, error) {
 	var converseMessages []types.Message
 	var systemPrompts []types.SystemContentBlock
 
-	for _, msg := range messages {
+	aiAccum := &aiMessageAccumulator{}
+	toolAccum := &toolResultAccumulator{}
+
+	// Helper to flush AI accumulator
+	flushAI := func() error {
+		if !aiAccum.isEmpty() {
+			converseMessages = append(converseMessages, aiAccum.build())
+			aiAccum.reset()
+		}
+		return nil
+	}
+
+	// Helper to flush tool result accumulator
+	flushToolResults := func() error {
+		if !toolAccum.isEmpty() {
+			converseMessages = append(converseMessages, toolAccum.build())
+			toolAccum.reset()
+		}
+		return nil
+	}
+
+	for i, msg := range messages {
 		switch msg.Role {
 		case llms.ChatMessageTypeSystem:
+			// System messages don't need flushing accumulators
 			systemPrompts = append(systemPrompts, &types.SystemContentBlockMemberText{
 				Value: msg.Content,
 			})
-		case llms.ChatMessageTypeHuman, llms.ChatMessageTypeAI:
+
+		case llms.ChatMessageTypeHuman:
+			// Flush all pending accumulators before user message
+			if err := flushAI(); err != nil {
+				return nil, nil, err
+			}
+			if err := flushToolResults(); err != nil {
+				return nil, nil, err
+			}
+
+			// Convert and add user message directly
 			converseMsg, err := c.convertUserOrAssistantMessage(msg)
 			if err != nil {
 				return nil, nil, err
 			}
-			// Add cachePoint if message has cache control
 			if msg.CacheControl != nil {
-				cacheBlock := types.CachePointBlock{
-					Type: types.CachePointTypeDefault,
-				}
-				if msg.CacheControl.TTL == "1h" {
-					cacheBlock.Ttl = types.CacheTTLOneHour
-				} else {
-					cacheBlock.Ttl = types.CacheTTLFiveMinutes
-				}
-				converseMsg.Content = append(converseMsg.Content, &types.ContentBlockMemberCachePoint{
-					Value: cacheBlock,
-				})
+				converseMsg.Content = append(converseMsg.Content, c.createCachePointBlock(msg.CacheControl))
 			}
 			converseMessages = append(converseMessages, converseMsg)
-		case llms.ChatMessageTypeTool:
-			converseMsg, err := c.convertToolMessage(msg)
-			if err != nil {
+
+		case llms.ChatMessageTypeAI:
+			// Flush tool results if any before processing AI message
+			if err := flushToolResults(); err != nil {
 				return nil, nil, err
 			}
-			converseMessages = append(converseMessages, converseMsg)
+
+			// Accumulate AI message content and tool calls
+			if msg.ToolCall != nil {
+				// Add tool call to accumulator
+				if err := aiAccum.addToolUse(msg.ToolCall); err != nil {
+					return nil, nil, err
+				}
+			} else {
+				// Add text content to accumulator
+				aiAccum.addTextContent(msg.Content, msg.Reasoning)
+			}
+
+			// Set cache control if present
+			aiAccum.setCacheControl(msg.CacheControl)
+
+			// Check if next message is also AI - if not, flush
+			isLast := i == len(messages)-1
+			nextIsNotAI := !isLast && messages[i+1].Role != llms.ChatMessageTypeAI
+
+			if isLast || nextIsNotAI {
+				if err := flushAI(); err != nil {
+					return nil, nil, err
+				}
+			}
+
+		case llms.ChatMessageTypeTool:
+			// Flush AI if any before processing tool results
+			if err := flushAI(); err != nil {
+				return nil, nil, err
+			}
+
+			// Accumulate tool result
+			if err := toolAccum.addToolResult(msg.ToolResult); err != nil {
+				return nil, nil, err
+			}
+
+			// Check if next message is also tool result - if not, flush
+			isLast := i == len(messages)-1
+			nextIsNotTool := !isLast && messages[i+1].Role != llms.ChatMessageTypeTool
+
+			if isLast || nextIsNotTool {
+				if err := flushToolResults(); err != nil {
+					return nil, nil, err
+				}
+			}
 		}
 	}
 
+	// Flush any remaining accumulated messages
+	if err := flushAI(); err != nil {
+		return nil, nil, err
+	}
+	if err := flushToolResults(); err != nil {
+		return nil, nil, err
+	}
+
 	return converseMessages, systemPrompts, nil
+}
+
+// createCachePointBlock creates a cache point block from cache control
+func (c *ConverseClient) createCachePointBlock(cacheControl *CacheControl) *types.ContentBlockMemberCachePoint {
+	cacheBlock := types.CachePointBlock{
+		Type: types.CachePointTypeDefault,
+	}
+	if cacheControl.TTL == "1h" {
+		cacheBlock.Ttl = types.CacheTTLOneHour
+	} else {
+		cacheBlock.Ttl = types.CacheTTLFiveMinutes
+	}
+	return &types.ContentBlockMemberCachePoint{
+		Value: cacheBlock,
+	}
 }
 
 // addCachePointToMessages adds cachePoint to the last message for conversation history caching
@@ -282,31 +523,6 @@ func (c *ConverseClient) convertToolCallInput(args any) (any, error) {
 	}
 
 	return jsonValue, nil
-}
-
-// convertToolMessage converts tool result messages
-func (c *ConverseClient) convertToolMessage(msg Message) (types.Message, error) {
-	if msg.ToolResult == nil {
-		return types.Message{}, fmt.Errorf("tool message missing tool result")
-	}
-
-	contentBlocks := []types.ContentBlock{
-		&types.ContentBlockMemberToolResult{
-			Value: types.ToolResultBlock{
-				ToolUseId: aws.String(msg.ToolResult.ToolCallID),
-				Content: []types.ToolResultContentBlock{
-					&types.ToolResultContentBlockMemberText{
-						Value: msg.ToolResult.Content,
-					},
-				},
-			},
-		},
-	}
-
-	return types.Message{
-		Role:    types.ConversationRoleUser,
-		Content: contentBlocks,
-	}, nil
 }
 
 // convertToolsToToolConfig converts llms.Tool to Converse ToolConfiguration

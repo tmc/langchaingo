@@ -1765,6 +1765,265 @@ func TestAmazonSingleToolCallWithThinkingConverseAPI(t *testing.T) { //nolint:fu
 	}
 }
 
+// TestAmazonMultipleToolCallsVariantsConverseAPI tests all possible ways users can structure message chains
+// with multiple tool calls, ensuring all variants are normalized correctly for Bedrock API
+func TestAmazonMultipleToolCallsVariantsConverseAPI(t *testing.T) { //nolint:funlen
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Define two tools that are likely to be called together
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "search_web",
+				Description: "Search the web for information",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"query": map[string]any{
+							"type":        "string",
+							"description": "Search query",
+						},
+					},
+					"required": []string{"query"},
+				},
+			},
+		},
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_current_date",
+				Description: "Get the current date and time",
+				Parameters: map[string]any{
+					"type":       "object",
+					"properties": map[string]any{},
+				},
+			},
+		},
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Search for CVE-2020-10188 exploits and also tell me what's the current date"),
+			},
+		},
+	}
+
+	// First call - model should invoke both tools
+	resp1, err := llm.GenerateContent(ctx, messages,
+		llms.WithModel(bedrock.ModelAnthropicClaudeHaiku45),
+		llms.WithTools(tools),
+		llms.WithMaxTokens(8192),
+		llms.WithTemperature(1.0),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp1.Choices) == 0 {
+		t.Fatal("Expected at least one choice in response")
+	}
+
+	choice1 := resp1.Choices[0]
+	if len(choice1.ToolCalls) < 2 {
+		t.Fatalf("Expected at least 2 tool calls, got %d", len(choice1.ToolCalls))
+	}
+
+	// Prepare common data for all variants
+	toolCall1 := choice1.ToolCalls[0]
+	toolCall2 := choice1.ToolCalls[1]
+	aiContent := choice1.Content
+	aiReasoning := choice1.Reasoning
+	result1 := `{"results": ["CVE-2020-10188 is a buffer overflow in telnetd"]}`
+	result2 := `{"date": "2026-03-15"}`
+
+	// Helper to test a variant
+	testVariant := func(t *testing.T, variantName string, buildMessages func() []llms.MessageContent) {
+		t.Run(variantName, func(t *testing.T) {
+			messages := buildMessages()
+
+			resp2, err := llm.GenerateContent(ctx, messages,
+				llms.WithModel(bedrock.ModelAnthropicClaudeHaiku45),
+				llms.WithTools(tools),
+				llms.WithMaxTokens(8192),
+				llms.WithTemperature(1.0),
+			)
+			if err != nil {
+				t.Fatalf("Variant %s failed: %v", variantName, err)
+			}
+
+			if len(resp2.Choices) == 0 {
+				t.Fatal("Expected at least one choice in second response")
+			}
+
+			if !strings.Contains(resp2.Choices[0].Content, "CVE-2020-10188") {
+				t.Errorf("Response should mention CVE-2020-10188, got: %s", resp2.Choices[0].Content)
+			}
+		})
+	}
+
+	// Variant 1: Content separate + all tool calls together + all tool results together
+	testVariant(t, "content_separate_toolcalls_together_results_together", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning)},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall1, toolCall2},
+			},
+			llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1},
+					llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2},
+				},
+			},
+		)
+		return msgs
+	})
+
+	// Variant 2: Content separate + tool calls separate + tool results together
+	testVariant(t, "content_separate_toolcalls_separate_results_together", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning)},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall1},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall2},
+			},
+			llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1},
+					llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2},
+				},
+			},
+		)
+		return msgs
+	})
+
+	// Variant 3: Content separate + tool calls separate + tool results separate
+	testVariant(t, "content_separate_toolcalls_separate_results_separate", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning)},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall1},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall2},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1}},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2}},
+			},
+		)
+		return msgs
+	})
+
+	// Variant 4: Content + all tool calls together + tool results together
+	testVariant(t, "content_with_toolcalls_together_results_together", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning), toolCall1, toolCall2},
+			},
+			llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1},
+					llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2},
+				},
+			},
+		)
+		return msgs
+	})
+
+	// Variant 5: Content + tool calls separate + tool results separate
+	testVariant(t, "content_with_toolcall1_separate_toolcall2_results_separate", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning), toolCall1},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{toolCall2},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1}},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2}},
+			},
+		)
+		return msgs
+	})
+
+	// Variant 6: Content + all tool calls together + tool results separate
+	testVariant(t, "content_with_toolcalls_together_results_separate", func() []llms.MessageContent {
+		msgs := append([]llms.MessageContent{}, messages...)
+		msgs = append(msgs,
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{llms.TextPartWithReasoning(aiContent, aiReasoning), toolCall1, toolCall2},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall1.ID, Name: toolCall1.FunctionCall.Name, Content: result1}},
+			},
+			llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: toolCall2.ID, Name: toolCall2.FunctionCall.Name, Content: result2}},
+			},
+		)
+		return msgs
+	})
+}
+
 // TestAmazonSequentialToolCallsWithThinkingConverseAPI tests sequential tool calls with thinking
 func TestAmazonSequentialToolCallsWithThinkingConverseAPI(t *testing.T) { //nolint:funlen
 	ctx := t.Context()
