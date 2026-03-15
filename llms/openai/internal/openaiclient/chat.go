@@ -691,8 +691,9 @@ func combineStreamingChatResponse(
 	defer streaming.CallWithDone(ctx, payload.StreamingFunc) //nolint:errcheck
 
 	var (
-		response  ChatCompletionResponse
-		splitters []reasoning.ChunkContentSplitter
+		response          ChatCompletionResponse
+		splitters         []reasoning.ChunkContentSplitter
+		toolCallNameCache = make(map[string]string) // Cache tool call names by ID for streaming
 	)
 
 	for streamResponse := range responseChan {
@@ -748,7 +749,7 @@ func combineStreamingChatResponse(
 			}
 
 			for _, toolCall := range choice.Delta.ToolCalls {
-				updateToolCall(&responseChoice.Message, toolCall)
+				updateToolCall(&responseChoice.Message, toolCall, toolCallNameCache)
 
 				toolCall := streaming.NewToolCall(toolCall.ID, toolCall.Function.Name, toolCall.Function.Arguments)
 				if err := streaming.CallWithToolCall(ctx, payload.StreamingFunc, toolCall); err != nil {
@@ -805,8 +806,8 @@ func updateFunctionCall(message *ChatMessage, functionCall *FunctionCall) {
 	}
 }
 
-func updateToolCall(message *ChatMessage, delta *StreamedToolCall) {
-	if delta == nil {
+func updateToolCall(message *ChatMessage, delta *StreamedToolCall, nameCache map[string]string) {
+	if delta == nil || nameCache == nil {
 		return
 	}
 
@@ -837,16 +838,28 @@ func updateToolCall(message *ChatMessage, delta *StreamedToolCall) {
 		toolCall.Type = delta.Type
 		toolCall.Function.Name = delta.Function.Name
 		toolCall.Function.Arguments = delta.Function.Arguments
+
+		// Cache the tool call name by ID for subsequent chunks
+		nameCache[delta.ID] = delta.Function.Name
 	}
 
 	// For next delta chunks, append arguments to the current tool call
 	if delta.ID == "" {
+		// Standard case: no ID in subsequent chunks (most providers)
 		toolCall.Function.Arguments += delta.Function.Arguments
 
 		// Complete the tool call fields with stored values from the current tool call
 		delta.Function.Name = toolCall.Function.Name
 		delta.ID = toolCall.ID
 		delta.Type = toolCall.Type
+	} else if delta.Function.Name == "" {
+		// If ID is present but name is missing (some providers don't send name in subsequent chunks),
+		// restore the name from cache
+		if cachedName, ok := nameCache[delta.ID]; ok {
+			delta.Function.Name = cachedName
+			toolCall.Function.Arguments += delta.Function.Arguments
+			delta.Type = toolCall.Type
+		}
 	}
 }
 
