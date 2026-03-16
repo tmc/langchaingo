@@ -321,3 +321,93 @@ func TestIsReasoningModel(t *testing.T) {
 		})
 	}
 }
+
+func TestChatRequest_StoreFieldMarshalJSON(t *testing.T) {
+	tests := []struct {
+		name         string
+		request      ChatRequest
+		wantStore    bool
+		wantMetadata bool
+	}{
+		{
+			name: "no metadata - store should not be present",
+			request: ChatRequest{
+				Model: "gpt-4",
+			},
+			wantStore:    false,
+			wantMetadata: false,
+		},
+		{
+			name: "with metadata - store should be true",
+			request: ChatRequest{
+				Model: "gpt-4",
+				Metadata: map[string]any{
+					"feature": "support",
+				},
+				Store: true,
+			},
+			wantStore:    true,
+			wantMetadata: true,
+		},
+		{
+			name: "store explicitly set to false with metadata",
+			request: ChatRequest{
+				Model: "gpt-4",
+				Metadata: map[string]any{
+					"team": "ai",
+				},
+				Store: false,
+			},
+			wantStore:    false,
+			wantMetadata: true,
+		},
+		{
+			name: "store explicitly set to true without metadata",
+			request: ChatRequest{
+				Model: "gpt-4",
+				Store: true,
+			},
+			wantStore:    true,
+			wantMetadata: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := json.Marshal(tt.request)
+			if err != nil {
+				t.Fatalf("failed to marshal: %v", err)
+			}
+
+			var result map[string]interface{}
+			if err := json.Unmarshal(data, &result); err != nil {
+				t.Fatalf("failed to unmarshal: %v", err)
+			}
+
+			hasStore := result["store"] != nil
+			hasMetadata := result["metadata"] != nil
+
+			if tt.wantStore && !hasStore {
+				t.Errorf("expected store to be present in JSON: %s", string(data))
+			}
+			if !tt.wantStore && hasStore {
+				t.Errorf("expected store to NOT be present in JSON: %s", string(data))
+			}
+			if tt.wantMetadata && !hasMetadata {
+				t.Errorf("expected metadata to be present in JSON: %s", string(data))
+			}
+			if !tt.wantMetadata && hasMetadata {
+				t.Errorf("expected metadata to NOT be present in JSON: %s", string(data))
+			}
+
+			if hasStore {
+				storeVal, ok := result["store"].(bool)
+				if !ok {
+					t.Errorf("store is not a bool: %T", result["store"])
+				} else if storeVal != tt.wantStore {
+					t.Errorf("store value: got %v, want %v", storeVal, tt.wantStore)
+				}
+			}
+		})
+	}
+}
