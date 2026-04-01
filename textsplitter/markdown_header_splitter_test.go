@@ -1,6 +1,7 @@
 package textsplitter
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,16 +30,9 @@ More content.`
 	docs, err := splitter.SplitTextToDocuments(markdown)
 	require.NoError(t, err)
 
-	// Should only have 2 chunks (2 real headers)
 	assert.Equal(t, 2, len(docs))
-
-	// First chunk should have root path
 	assert.Equal(t, "/", docs[0].Metadata["header_path"])
-
-	// Second chunk should have parent path
 	assert.Equal(t, "/Real Header 1/", docs[1].Metadata["header_path"])
-
-	// Verify code block is in content
 	assert.Contains(t, docs[0].PageContent, "```python")
 	assert.Contains(t, docs[0].PageContent, "# This is NOT a header")
 }
@@ -56,24 +50,16 @@ Content here.`
 	docs, err := splitter.SplitTextToDocuments(markdown)
 	require.NoError(t, err)
 
-	// Should have 3 documents (one per header)
 	assert.Equal(t, 3, len(docs))
-
-	// Check header paths (parent-only)
 	assert.Equal(t, "/", docs[0].Metadata["header_path"])
 	assert.Equal(t, "/Chapter 1/", docs[1].Metadata["header_path"])
 	assert.Equal(t, "/Chapter 1/Section 1.1/", docs[2].Metadata["header_path"])
-
-	// Check individual header metadata
-	assert.Equal(t, "Chapter 1", docs[2].Metadata["Header_1"])
-	assert.Equal(t, "Section 1.1", docs[2].Metadata["Header_2"])
-	assert.Equal(t, "Subsection 1.1.1", docs[2].Metadata["Header_3"])
+	assert.Equal(t, 1, len(docs[2].Metadata))
 }
 
 func TestMarkdownHeaderTextSplitter_NonSequentialHeaders(t *testing.T) {
 	t.Parallel()
 
-	// Test H1 -> H3 (skipping H2)
 	markdown := `# Header 1
 ### Header 3
 
@@ -88,11 +74,7 @@ Content under H2.`
 	require.NoError(t, err)
 
 	assert.Equal(t, 3, len(docs))
-
-	// H3 should have H1 as parent
 	assert.Equal(t, "/Header 1/", docs[1].Metadata["header_path"])
-
-	// H2 should also have H1 as parent (H3 was popped)
 	assert.Equal(t, "/Header 1/", docs[2].Metadata["header_path"])
 }
 
@@ -109,10 +91,7 @@ Only content under H3.`
 	docs, err := splitter.SplitTextToDocuments(markdown)
 	require.NoError(t, err)
 
-	// Should have 3 documents (one per header, even if some are empty)
 	assert.Equal(t, 3, len(docs))
-
-	// Check the last document (H3 with content)
 	lastDoc := docs[len(docs)-1]
 	assert.Equal(t, "/Header 1/Header 2/", lastDoc.Metadata["header_path"])
 	assert.Contains(t, lastDoc.PageContent, "Only content under H3")
@@ -143,10 +122,7 @@ Done.`
 	docs, err := splitter.SplitTextToDocuments(markdown)
 	require.NoError(t, err)
 
-	// Should have 3 documents
 	assert.Equal(t, 3, len(docs))
-
-	// Verify code blocks are preserved
 	assert.Contains(t, docs[1].PageContent, "npm install")
 	assert.Contains(t, docs[2].PageContent, "const x = 1")
 }
@@ -154,7 +130,6 @@ Done.`
 func TestMarkdownHeaderTextSplitter_SplitDocuments(t *testing.T) {
 	t.Parallel()
 
-	// Test that SplitDocuments preserves original metadata
 	originalDoc := schema.Document{
 		PageContent: `# Header 1
 Content here.
@@ -174,15 +149,11 @@ More content.`,
 	require.NoError(t, err)
 
 	assert.Equal(t, 2, len(docs))
-
-	// Check that original metadata is preserved
 	for _, doc := range docs {
 		assert.Equal(t, "test.md", doc.Metadata["source"])
 		assert.Equal(t, "test", doc.Metadata["author"])
 		assert.Equal(t, "value", doc.Metadata["custom_field"])
 		assert.Equal(t, float32(0.95), doc.Score)
-
-		// And new metadata is added
 		assert.Contains(t, doc.Metadata, "header_path")
 	}
 }
@@ -190,7 +161,6 @@ More content.`,
 func TestMarkdownHeaderTextSplitter_SplitTextCompatibility(t *testing.T) {
 	t.Parallel()
 
-	// Test backward compatibility with SplitText
 	markdown := `# Header 1
 Content 1.
 
@@ -253,13 +223,11 @@ Edit the config file.`
 	docs, err := splitter.SplitTextToDocuments(markdown)
 	require.NoError(t, err)
 
-	// Verify structure
 	assert.Greater(t, len(docs), 5)
 
-	// Find the "Using Go Install" section
 	var goInstallDoc *schema.Document
 	for i := range docs {
-		if docs[i].Metadata["Header_3"] == "Using Go Install" {
+		if strings.Contains(docs[i].PageContent, "### Using Go Install") {
 			goInstallDoc = &docs[i]
 			break
 		}
@@ -268,6 +236,7 @@ Edit the config file.`
 	require.NotNil(t, goInstallDoc)
 	assert.Equal(t, "/Getting Started/Installation/", goInstallDoc.Metadata["header_path"])
 	assert.Contains(t, goInstallDoc.PageContent, "go install")
+	assert.Equal(t, 1, len(goInstallDoc.Metadata))
 }
 
 func TestMarkdownHeaderTextSplitter_HeaderPathSeparator(t *testing.T) {
@@ -308,4 +277,76 @@ Content.`
 	assert.Empty(t, docs[0].Metadata)
 }
 
-// Made with Bob
+func TestMarkdownHeaderTextSplitter_SeparatorCollision(t *testing.T) {
+	t.Parallel()
+
+	markdown := `# Client / Server Architecture
+## API / REST Design
+
+Content here.`
+
+	splitter := NewMarkdownHeaderTextSplitter()
+	docs, err := splitter.SplitTextToDocuments(markdown)
+	require.NoError(t, err)
+
+	assert.Equal(t, 2, len(docs))
+	assert.Equal(t, "/Client - Server Architecture/", docs[1].Metadata["header_path"])
+	assert.Contains(t, docs[1].PageContent, "## API / REST Design")
+}
+
+func TestMarkdownHeaderTextSplitter_TildeFence(t *testing.T) {
+	t.Parallel()
+
+	markdown := `# Documentation
+
+Some text.
+
+~~~python
+# This is NOT a header
+def foo():
+    pass
+~~~
+
+## Next Section
+
+More text.`
+
+	splitter := NewMarkdownHeaderTextSplitter()
+	docs, err := splitter.SplitTextToDocuments(markdown)
+	require.NoError(t, err)
+
+	assert.Equal(t, 2, len(docs))
+	assert.Contains(t, docs[0].PageContent, "~~~python")
+	assert.Contains(t, docs[0].PageContent, "# This is NOT a header")
+	assert.Contains(t, docs[0].PageContent, "~~~")
+}
+
+func TestMarkdownHeaderTextSplitter_MixedCodeFences(t *testing.T) {
+	t.Parallel()
+
+	markdown := `# Mixed Fences
+
+` + "```bash" + `
+# Bash comment
+echo "test"
+` + "```" + `
+
+~~~python
+# Python comment
+print("test")
+~~~
+
+## Done
+
+Text.`
+
+	splitter := NewMarkdownHeaderTextSplitter()
+	docs, err := splitter.SplitTextToDocuments(markdown)
+	require.NoError(t, err)
+
+	assert.Equal(t, 2, len(docs))
+	assert.Contains(t, docs[0].PageContent, "```bash")
+	assert.Contains(t, docs[0].PageContent, "~~~python")
+	assert.Contains(t, docs[0].PageContent, "# Bash comment")
+	assert.Contains(t, docs[0].PageContent, "# Python comment")
+}
