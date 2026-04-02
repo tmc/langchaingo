@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -64,14 +63,7 @@ func createMetaCompletion(ctx context.Context,
 		return nil, err
 	}
 
-	modelInput := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
-		Accept:      aws.String("*/*"),
-		ContentType: aws.String("application/json"),
-		Body:        body,
-	}
-
-	resp, err := client.InvokeModel(ctx, modelInput)
+	resp, err := invokeModel(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
