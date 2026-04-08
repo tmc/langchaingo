@@ -260,6 +260,50 @@ func TestCreateEmbedding(t *testing.T) {
 	}
 }
 
+func TestToolCall(t *testing.T) {
+	ctx := context.Background()
+
+	llm := newTestClient(t)
+
+	content := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "What is the weather in San Francisco?"}},
+		},
+	}
+
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_weather",
+				Description: "Get the current weather for a location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city name",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	rsp, err := llm.GenerateContent(ctx, content, llms.WithTools(tools))
+	require.NoError(t, err)
+
+	require.NotEmpty(t, rsp.Choices)
+	c1 := rsp.Choices[0]
+	require.NotEmpty(t, c1.ToolCalls, "expected tool calls in response")
+
+	tc := c1.ToolCalls[0]
+	assert.Equal(t, "get_weather", tc.FunctionCall.Name)
+	assert.Contains(t, tc.FunctionCall.Arguments, "San Francisco")
+}
+
 func TestWithPullTimeout(t *testing.T) {
 	ctx := context.Background()
 

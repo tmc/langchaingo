@@ -1,6 +1,7 @@
 package ollamaclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -40,10 +41,65 @@ type GenerateRequest struct {
 
 type ImageData []byte
 
+// Tool represents a tool available for the model to call.
+type Tool struct {
+	Type     string       `json:"type"`
+	Function ToolFunction `json:"function"`
+}
+
+// ToolFunction describes a function that a tool can call.
+type ToolFunction struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Parameters  any    `json:"parameters,omitempty"`
+}
+
+// ToolCall represents a tool call returned by the model.
+type ToolCall struct {
+	Function ToolCallFunction `json:"function"`
+}
+
+// ToolCallFunction holds the function name and arguments of a tool call.
+type ToolCallFunction struct {
+	Name      string `json:"name"`
+	Arguments string `json:"-"` // custom unmarshal: Ollama sends object, we store as JSON string
+}
+
+// UnmarshalJSON handles Ollama's format where arguments is an object, not a string.
+func (f *ToolCallFunction) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		Name      string          `json:"name"`
+		Arguments json.RawMessage `json:"arguments"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	f.Name = raw.Name
+	// Ollama returns arguments as a JSON object; store it as a string
+	f.Arguments = string(raw.Arguments)
+	return nil
+}
+
+// MarshalJSON writes the function call back in Ollama's expected format.
+func (f ToolCallFunction) MarshalJSON() ([]byte, error) {
+	args := json.RawMessage(f.Arguments)
+	if len(args) == 0 {
+		args = json.RawMessage("{}")
+	}
+	return json.Marshal(struct {
+		Name      string          `json:"name"`
+		Arguments json.RawMessage `json:"arguments"`
+	}{
+		Name:      f.Name,
+		Arguments: args,
+	})
+}
+
 type Message struct {
-	Role    string      `json:"role"` // one of ["system", "user", "assistant"]
-	Content string      `json:"content"`
-	Images  []ImageData `json:"images,omitempty"`
+	Role      string      `json:"role"` // one of ["system", "user", "assistant", "tool"]
+	Content   string      `json:"content"`
+	Images    []ImageData `json:"images,omitempty"`
+	ToolCalls []ToolCall  `json:"tool_calls,omitempty"`
 }
 
 type ChatRequest struct {
@@ -52,6 +108,7 @@ type ChatRequest struct {
 	Stream    bool       `json:"stream,omitempty"`
 	Format    string     `json:"format"`
 	KeepAlive string     `json:"keep_alive,omitempty"`
+	Tools     []Tool     `json:"tools,omitempty"`
 
 	Options Options `json:"options"`
 }

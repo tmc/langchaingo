@@ -108,34 +108,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// We have to convert it to a format Ollama undestands: ChatRequest, which
 	// has a sequence of Message, each of which has a role and content - single
 	// text + potential images.
-	chatMsgs := make([]*ollamaclient.Message, 0, len(messages))
-	for _, mc := range messages {
-		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
-
-		// Look at all the parts in mc; expect to find a single Text part and
-		// any number of binary parts.
-		var text string
-		foundText := false
-		var images []ollamaclient.ImageData
-
-		for _, p := range mc.Parts {
-			switch pt := p.(type) {
-			case llms.TextContent:
-				if foundText {
-					return nil, errors.New("expecting a single Text content")
-				}
-				foundText = true
-				text = pt.Text
-			case llms.BinaryContent:
-				images = append(images, ollamaclient.ImageData(pt.Data))
-			default:
-				return nil, errors.New("only support Text and BinaryContent parts right now")
-			}
-		}
-
-		msg.Content = text
-		msg.Images = images
-		chatMsgs = append(chatMsgs, msg)
+	chatMsgs, err := makeOllamaMessages(messages)
+	if err != nil {
+		return nil, err
 	}
 
 	format := o.options.format
@@ -155,12 +130,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			}
 		}
 	}
+	// Ollama doesn't support streaming with tools
+	stream := opts.StreamingFunc != nil && len(opts.Tools) == 0
+
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
 		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
-		Stream:   opts.StreamingFunc != nil,
+		Stream:   stream,
+		Tools:    makeOllamaTools(opts.Tools),
 	}
 
 	keepAlive := o.options.keepAlive
@@ -183,15 +162,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		if !req.Stream || response.Done {
 			resp = response
-			resp.Message = &ollamaclient.Message{
-				Role:    "assistant",
-				Content: streamedResponse,
+			if resp.Message == nil {
+				resp.Message = &ollamaclient.Message{}
 			}
+			resp.Message.Role = "assistant"
+			resp.Message.Content = streamedResponse
 		}
 		return nil
 	}
 
-	err := o.client.GenerateChat(ctx, req, fn)
+	err = o.client.GenerateChat(ctx, req, fn)
 	if err != nil {
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
@@ -235,14 +215,28 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		genInfo["ThinkingEnabled"] = true
 	}
 
-	choices := []*llms.ContentChoice{
-		{
-			Content:        content,
-			GenerationInfo: genInfo,
-		},
+	choice := &llms.ContentChoice{
+		Content:        content,
+		GenerationInfo: genInfo,
 	}
 
-	response := &llms.ContentResponse{Choices: choices}
+	// Convert tool calls from the response
+	if resp.Message != nil {
+		for _, tc := range resp.Message.ToolCalls {
+			choice.ToolCalls = append(choice.ToolCalls, llms.ToolCall{
+				Type: "function",
+				FunctionCall: &llms.FunctionCall{
+					Name:      tc.Function.Name,
+					Arguments: tc.Function.Arguments,
+				},
+			})
+		}
+		if len(choice.ToolCalls) > 0 {
+			choice.FuncCall = choice.ToolCalls[0].FunctionCall
+		}
+	}
+
+	response := &llms.ContentResponse{Choices: []*llms.ContentChoice{choice}}
 
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
@@ -330,6 +324,70 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	}
 
 	return ollamaOptions
+}
+
+// makeOllamaMessages converts llms.MessageContent to ollamaclient.Message,
+// handling text, binary, tool call, and tool response parts.
+func makeOllamaMessages(messages []llms.MessageContent) ([]*ollamaclient.Message, error) {
+	msgs := make([]*ollamaclient.Message, 0, len(messages))
+	for _, mc := range messages {
+		msg := &ollamaclient.Message{Role: typeToRole(mc.Role)}
+
+		switch mc.Role {
+		case llms.ChatMessageTypeTool:
+			if len(mc.Parts) != 1 {
+				return nil, fmt.Errorf("expected exactly one part for tool role, got %d", len(mc.Parts))
+			}
+			p, ok := mc.Parts[0].(llms.ToolCallResponse)
+			if !ok {
+				return nil, fmt.Errorf("expected ToolCallResponse for tool role, got %T", mc.Parts[0])
+			}
+			msg.Content = p.Content
+
+		default:
+			var images []ollamaclient.ImageData
+			for _, p := range mc.Parts {
+				switch pt := p.(type) {
+				case llms.TextContent:
+					msg.Content = pt.Text
+				case llms.BinaryContent:
+					images = append(images, ollamaclient.ImageData(pt.Data))
+				case llms.ToolCall:
+					msg.ToolCalls = append(msg.ToolCalls, ollamaclient.ToolCall{
+						Function: ollamaclient.ToolCallFunction{
+							Name:      pt.FunctionCall.Name,
+							Arguments: pt.FunctionCall.Arguments,
+						},
+					})
+				default:
+					return nil, fmt.Errorf("unsupported content part type: %T", p)
+				}
+			}
+			msg.Images = images
+		}
+
+		msgs = append(msgs, msg)
+	}
+	return msgs, nil
+}
+
+// makeOllamaTools converts llms.Tool to ollamaclient.Tool.
+func makeOllamaTools(tools []llms.Tool) []ollamaclient.Tool {
+	if len(tools) == 0 {
+		return nil
+	}
+	out := make([]ollamaclient.Tool, len(tools))
+	for i, t := range tools {
+		out[i] = ollamaclient.Tool{
+			Type: t.Type,
+			Function: ollamaclient.ToolFunction{
+				Name:        t.Function.Name,
+				Description: t.Function.Description,
+				Parameters:  t.Function.Parameters,
+			},
+		}
+	}
+	return out
 }
 
 // pullModelIfNeeded pulls the model if it's not already available.
