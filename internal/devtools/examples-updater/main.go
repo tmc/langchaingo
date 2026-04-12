@@ -44,6 +44,7 @@ func main() {
 func updateExamples(newVersion string, dryRun bool) error {
 	// Find all go.mod files in examples directory
 	// this is a test text
+	// this is a test text too.
 	modFiles, err := findGoModFiles("examples")
 	if err != nil {
 		return fmt.Errorf("failed to find go.mod files: %w", err)
