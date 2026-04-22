@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 func TestNew(t *testing.T) {
@@ -141,6 +142,91 @@ func TestProcessMessages(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHandleAIMessage_MultipleParts(t *testing.T) {
+	msg := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{
+			llms.TextContent{Text: "I'll check the weather."},
+			llms.ToolCall{
+				ID:   "toolu_1",
+				Type: "function",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"Paris"}`,
+				},
+			},
+			llms.ToolCall{
+				ID:   "toolu_2",
+				Type: "function",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"Berlin"}`,
+				},
+			},
+		},
+	}
+
+	got, err := handleAIMessage(msg)
+	if err != nil {
+		t.Fatalf("handleAIMessage() error = %v", err)
+	}
+	if got.Role != RoleAssistant {
+		t.Errorf("role = %q, want %q", got.Role, RoleAssistant)
+	}
+	contents, ok := got.Content.([]anthropicclient.Content)
+	if !ok {
+		t.Fatalf("content type = %T, want []anthropicclient.Content", got.Content)
+	}
+	if len(contents) != 3 {
+		t.Fatalf("content blocks = %d, want 3", len(contents))
+	}
+
+	text, ok := contents[0].(*anthropicclient.TextContent)
+	if !ok {
+		t.Fatalf("content[0] type = %T, want *TextContent", contents[0])
+	}
+	if text.Text != "I'll check the weather." {
+		t.Errorf("text = %q, want %q", text.Text, "I'll check the weather.")
+	}
+
+	for i, want := range []struct{ id, loc string }{{"toolu_1", "Paris"}, {"toolu_2", "Berlin"}} {
+		tu, ok := contents[i+1].(anthropicclient.ToolUseContent)
+		if !ok {
+			t.Fatalf("content[%d] type = %T, want ToolUseContent", i+1, contents[i+1])
+		}
+		if tu.ID != want.id {
+			t.Errorf("tool[%d] id = %q, want %q", i, tu.ID, want.id)
+		}
+		if tu.Input["location"] != want.loc {
+			t.Errorf("tool[%d] location = %v, want %q", i, tu.Input["location"], want.loc)
+		}
+	}
+}
+
+func TestHandleAIMessage_Errors(t *testing.T) {
+	t.Run("empty parts", func(t *testing.T) {
+		_, err := handleAIMessage(llms.MessageContent{Role: llms.ChatMessageTypeAI})
+		if err == nil {
+			t.Fatal("expected error for empty parts")
+		}
+	})
+
+	t.Run("invalid tool call arguments", func(t *testing.T) {
+		msg := llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.ToolCall{
+					ID:           "toolu_x",
+					FunctionCall: &llms.FunctionCall{Name: "x", Arguments: "not-json"},
+				},
+			},
+		}
+		if _, err := handleAIMessage(msg); err == nil {
+			t.Fatal("expected error for invalid tool call arguments")
+		}
+	})
 }
 
 func TestToolsToTools(t *testing.T) {
