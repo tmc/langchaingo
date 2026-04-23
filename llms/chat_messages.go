@@ -186,6 +186,8 @@ func (c ChatMessageModel) ToChatMessage() ChatMessage {
 		return AIChatMessage{Content: c.Data.Content}
 	case string(ChatMessageTypeHuman):
 		return HumanChatMessage{Content: c.Data.Content}
+	case string(ChatMessageTypeSystem):
+		return SystemChatMessage{Content: c.Data.Content}
 	default:
 		slog.Warn("convert to chat message failed with invalid message type", "type", c.Type)
 		return nil
