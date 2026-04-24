@@ -87,6 +87,14 @@ type ChatRequest struct {
 	// WebSearchOptions configures web search behavior for search-enabled models
 	// like gpt-4o-search-preview and gpt-4o-mini-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+
+	// EnableThinking enables Qwen's deep thinking mode via OpenAI-compatible API.
+	// Must be used with streaming (Qwen requires enable_thinking=false for non-streaming calls).
+	EnableThinking *bool `json:"enable_thinking,omitempty"`
+
+	// ThinkingBudget limits the thinking tokens for Qwen models.
+	// Supported by Qwen3+ models.
+	ThinkingBudget int `json:"thinking_budget,omitempty"`
 }
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.

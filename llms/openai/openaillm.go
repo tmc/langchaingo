@@ -250,7 +250,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if opts.Metadata != nil {
 		for k, v := range opts.Metadata {
 			// Skip internal metadata keys
-			if k == "thinking_config" || strings.HasPrefix(k, "openai:") {
+			if k == "thinking_config" || strings.HasPrefix(k, "openai:") || strings.HasPrefix(k, "qwen:") {
 				continue
 			}
 			apiMetadata[k] = v
@@ -259,6 +259,18 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Only include metadata if there are actual values to send
 	if len(apiMetadata) == 0 {
 		apiMetadata = nil
+	}
+
+	// Extract Qwen enable_thinking parameter from metadata
+	var enableThinking *bool
+	var thinkingBudget int
+	if opts.Metadata != nil {
+		if v, ok := opts.Metadata["qwen:enable_thinking"].(bool); ok {
+			enableThinking = &v
+		}
+		if v, ok := opts.Metadata["qwen:thinking_budget"].(int); ok {
+			thinkingBudget = v
+		}
 	}
 
 	req := &openaiclient.ChatRequest{
@@ -293,6 +305,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
+		EnableThinking:       enableThinking,
+		ThinkingBudget:       thinkingBudget,
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}
 	if opts.JSONMode {
