@@ -264,9 +264,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Extract Qwen enable_thinking parameter from metadata
 	var enableThinking *bool
 	var thinkingBudget int
+	var enableDeepSeekThinking map[string]any
 	if opts.Metadata != nil {
 		if v, ok := opts.Metadata["qwen:enable_thinking"].(bool); ok {
 			enableThinking = &v
+		}
+		if v, ok := opts.Metadata["deepseek:enable_thinking"].(map[string]any); ok {
+			enableDeepSeekThinking = v
 		}
 		if v, ok := opts.Metadata["qwen:thinking_budget"].(int); ok {
 			thinkingBudget = v
@@ -306,6 +310,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
 		EnableThinking:       enableThinking,
+		DeepSeekThinking:     enableDeepSeekThinking,
 		ThinkingBudget:       thinkingBudget,
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}

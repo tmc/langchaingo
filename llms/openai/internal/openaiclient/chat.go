@@ -92,6 +92,10 @@ type ChatRequest struct {
 	// Must be used with streaming (Qwen requires enable_thinking=false for non-streaming calls).
 	EnableThinking *bool `json:"enable_thinking,omitempty"`
 
+	// EnableDeepSeekThinking enables Qwen's deep thinking mode via OpenAI-compatible API.
+	// Must be used with streaming (Qwen requires enable_thinking=false for non-streaming calls).
+	DeepSeekThinking map[string]any `json:"thinking,omitempty"`
+
 	// ThinkingBudget limits the thinking tokens for Qwen models.
 	// Supported by Qwen3+ models.
 	ThinkingBudget int `json:"thinking_budget,omitempty"`

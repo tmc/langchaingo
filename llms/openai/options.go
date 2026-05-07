@@ -59,6 +59,15 @@ func WithEnableThinking(enabled bool) llms.CallOption {
 	}
 }
 
+func WithEnableDeepSeekThinking(data map[string]any) llms.CallOption {
+	return func(opts *llms.CallOptions) {
+		if opts.Metadata == nil {
+			opts.Metadata = make(map[string]interface{})
+		}
+		opts.Metadata["deepseek:enable_thinking"] = data
+	}
+}
+
 // WithThinkingBudget limits thinking tokens for Qwen models (Qwen3+).
 //
 // Usage:
