@@ -32,6 +32,9 @@ type Message struct {
 	ToolArgs   string `json:"tool_args,omitempty"`
 	// Tool result fields
 	ToolUseID string `json:"tool_use_id,omitempty"`
+	// CacheControl marks this message as a prompt-cache breakpoint when set.
+	// Providers that don't support prompt caching silently ignore the field.
+	CacheControl *llms.CacheControl `json:"-"`
 }
 
 func getProvider(modelID string) string {

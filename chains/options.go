@@ -63,6 +63,10 @@ type chainCallOption struct {
 	RepetitionPenalty    float64
 	repetitionPenaltySet bool
 
+	// Safety configures provider-defined safety controls in an LLM call.
+	SafetyConfig    map[string]any
+	safetyConfigSet bool
+
 	// CallbackHandler is the callback handler for Chain
 	CallbackHandler callbacks.Handler
 }
@@ -146,6 +150,16 @@ func WithRepetitionPenalty(repetitionPenalty float64) ChainCallOption {
 	}
 }
 
+// WithSafetyConfig configures provider-defined safety controls for the LLM call.
+func WithSafetyConfig(config map[string]any) ChainCallOption {
+	return func(o *chainCallOption) {
+		if config != nil {
+			o.SafetyConfig = config
+			o.safetyConfigSet = true
+		}
+	}
+}
+
 // WithStopWords is an option for setting the stop words for LLM.Call.
 func WithStopWords(stopWords []string) ChainCallOption {
 	return func(o *chainCallOption) {
@@ -207,6 +221,9 @@ func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	}
 	if opts.repetitionPenaltySet {
 		chainCallOption = append(chainCallOption, llms.WithRepetitionPenalty(opts.RepetitionPenalty))
+	}
+	if opts.safetyConfigSet {
+		chainCallOption = append(chainCallOption, llms.WithSafetyConfig(opts.SafetyConfig))
 	}
 	chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
 
