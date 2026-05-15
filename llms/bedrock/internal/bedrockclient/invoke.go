@@ -35,7 +35,9 @@ type streamingCompletionResponseChunk struct {
 		FirstByteLatency  int `json:"firstByteLatency"`
 	} `json:"amazon-bedrock-invocationMetrics"`
 	Usage struct {
-		OutputTokens int `json:"output_tokens"`
+		OutputTokens             int `json:"output_tokens"`
+		CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+		CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 	} `json:"usage"`
 	Message struct {
 		ID           string `json:"id"`
@@ -46,8 +48,10 @@ type streamingCompletionResponseChunk struct {
 		StopReason   any    `json:"stop_reason"`
 		StopSequence any    `json:"stop_sequence"`
 		Usage        struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
+			InputTokens              int `json:"input_tokens"`
+			OutputTokens             int `json:"output_tokens"`
+			CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+			CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 		} `json:"usage"`
 	} `json:"message"`
 	guardrailResponse
