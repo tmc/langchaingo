@@ -18,6 +18,10 @@ const (
 	// ThinkingModeHigh allocates maximum tokens for thinking (~80% of max tokens).
 	ThinkingModeHigh ThinkingMode = "high"
 
+	// ThinkingModeXHigh allocates the maximum reasoning budget.
+	// Only supported by gpt-5.1-codex-max and later.
+	ThinkingModeXHigh ThinkingMode = "xhigh"
+
 	// ThinkingModeAuto lets the model decide how much thinking is needed.
 	ThinkingModeAuto ThinkingMode = "auto"
 )
