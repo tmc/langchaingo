@@ -130,7 +130,7 @@ type MessageRequest struct {
 	Model       string        `json:"model"`
 	Messages    []ChatMessage `json:"messages"`
 	System      string        `json:"system,omitempty"`
-	Temperature float64       `json:"temperature"`
+	Temperature float64       `json:"temperature,omitempty"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
@@ -142,7 +142,7 @@ type MessageRequest struct {
 
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders            []string                                                      `json:"-"`
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 

@@ -384,34 +384,41 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
-		var inputStruct map[string]interface{}
-		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &inputStruct)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
-		}
-		toolUse := anthropicclient.ToolUseContent{
-			Type:  "tool_use",
-			ID:    toolCall.ID,
-			Name:  toolCall.FunctionCall.Name,
-			Input: inputStruct,
-		}
+	var contents []anthropicclient.Content
 
-		return anthropicclient.ChatMessage{
-			Role:    RoleAssistant,
-			Content: []anthropicclient.Content{toolUse},
-		}, nil
+	for _, part := range msg.Parts {
+		switch p := part.(type) {
+		case llms.ToolCall:
+			var inputStruct map[string]interface{}
+			if err := json.Unmarshal([]byte(p.FunctionCall.Arguments), &inputStruct); err != nil {
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
+			}
+			contents = append(contents, anthropicclient.ToolUseContent{
+				Type:  "tool_use",
+				ID:    p.ID,
+				Name:  p.FunctionCall.Name,
+				Input: inputStruct,
+			})
+		case llms.TextContent:
+			if p.Text != "" {
+				contents = append(contents, &anthropicclient.TextContent{
+					Type: "text",
+					Text: p.Text,
+				})
+			}
+		default:
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message part type %T", ErrInvalidContentType, part)
+		}
 	}
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return anthropicclient.ChatMessage{
-			Role: RoleAssistant,
-			Content: []anthropicclient.Content{&anthropicclient.TextContent{
-				Type: "text",
-				Text: textContent.Text,
-			}},
-		}, nil
+
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: no valid content in AI message")
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+
+	return anthropicclient.ChatMessage{
+		Role:    RoleAssistant,
+		Content: contents,
+	}, nil
 }
 
 type ToolResult struct {

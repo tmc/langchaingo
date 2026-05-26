@@ -40,14 +40,14 @@ type messagePayload struct {
 	MaxTokens   int           `json:"max_tokens,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
-	Temperature float64       `json:"temperature"`
+	Temperature float64       `json:"temperature,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 
 	// Extended thinking parameters (Claude 3.7+)
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                      `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
