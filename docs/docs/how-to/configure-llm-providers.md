@@ -28,6 +28,20 @@ llm, err := openai.New(
 )
 ```
 
+### OpenAI-compatible gateways
+
+You can also point the OpenAI client at a governed OpenAI-compatible endpoint such as [Tuning Engines](https://www.tuningengines.com/). LangChainGo keeps the application logic while the gateway centralizes model routing, policy controls, audit logs, traces, approvals, and cost visibility.
+
+```go
+import "os"
+
+llm, err := openai.New(
+    openai.WithToken(os.Getenv("TUNING_ENGINES_API_KEY")),
+    openai.WithModel("gpt-4o-mini"),
+    openai.WithBaseURL("https://api.tuningengines.com/v1"),
+)
+```
+
 ### Azure OpenAI
 
 ```go
