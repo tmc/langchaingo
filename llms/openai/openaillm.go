@@ -145,7 +145,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			continue
 		}
 
-		msg := &ChatMessage{MultiContent: mc.Parts}
+		msg := &ChatMessage{MultiContent: mc.Parts, ReasoningContent: mc.ReasoningContent}
 		switch mc.Role {
 		case llms.ChatMessageTypeSystem:
 			msg.Role = RoleSystem

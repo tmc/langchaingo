@@ -14,6 +14,11 @@ import (
 type MessageContent struct {
 	Role  ChatMessageType
 	Parts []ContentPart
+
+	// ReasoningContent holds the thinking/reasoning content from models that
+	// support extended thinking (e.g., Kimi, DeepSeek). This must be preserved
+	// and sent back in subsequent messages for multi-turn conversations.
+	ReasoningContent string
 }
 
 // TextPart creates TextContent from a given string.
