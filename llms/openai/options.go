@@ -56,6 +56,11 @@ func WithEnableThinking(enabled bool) llms.CallOption {
 			opts.Metadata = make(map[string]interface{})
 		}
 		opts.Metadata["qwen:enable_thinking"] = enabled
+		if enabled {
+			opts.Metadata["deepseek:enable_thinking"] = map[string]any{"type": "enabled"}
+		} else {
+			opts.Metadata["deepseek:enable_thinking"] = map[string]any{"type": "disabled"}
+		}
 	}
 }
 
