@@ -127,22 +127,24 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 }
 
 type MessageRequest struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	Temperature float64       `json:"temperature"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
+	Model    string        `json:"model"`
+	Messages []ChatMessage `json:"messages"`
+	System   string        `json:"system,omitempty"`
+	// Temperature is omitted from the request when nil. Models such as
+	// Claude Fable 5 and Claude Opus 4.7+ reject the temperature parameter.
+	Temperature *float64 `json:"temperature,omitempty"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+	TopP        float64  `json:"top_p,omitempty"`
+	Tools       []Tool   `json:"tools,omitempty"`
+	StopWords   []string `json:"stop_sequences,omitempty"`
+	Stream      bool     `json:"stream,omitempty"`
 
 	// Extended thinking parameters (Claude 3.7+)
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders            []string                                                      `json:"-"`
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 

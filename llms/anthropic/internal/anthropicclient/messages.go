@@ -40,20 +40,23 @@ type messagePayload struct {
 	MaxTokens   int           `json:"max_tokens,omitempty"`
 	StopWords   []string      `json:"stop_sequences,omitempty"`
 	Stream      bool          `json:"stream,omitempty"`
-	Temperature float64       `json:"temperature"`
+	Temperature *float64      `json:"temperature,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
 	TopP        float64       `json:"top_p,omitempty"`
 
-	// Extended thinking parameters (Claude 3.7+)
+	// Thinking configures extended or adaptive thinking (Claude 3.7+).
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                      `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
-// ThinkingConfig represents the thinking configuration for Claude 3.7+
+// ThinkingConfig represents the thinking configuration for Claude 3.7+.
+// Type "enabled" requires BudgetTokens and is rejected by models that only
+// support adaptive thinking (Claude Fable 5, Claude Opus 4.7+); for those
+// models use type "adaptive" with no budget.
 type ThinkingConfig struct {
-	Type         string `json:"type"` // "enabled" or "disabled"
+	Type         string `json:"type"` // "enabled", "adaptive", or "disabled"
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
 }
 
@@ -136,6 +139,18 @@ func (tc ThinkingContent) GetType() string {
 	return tc.Type
 }
 
+// RedactedThinkingContent represents thinking content that was redacted for
+// safety reasons. Data is encrypted; pass it back verbatim in multi-turn
+// conversations.
+type RedactedThinkingContent struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
+func (rtc RedactedThinkingContent) GetType() string {
+	return rtc.Type
+}
+
 type MessageResponsePayload struct {
 	Content      []Content `json:"content"`
 	ID           string    `json:"id"`
@@ -191,6 +206,12 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			m.Content = append(m.Content, tc)
+		case "redacted_thinking":
+			rtc := &RedactedThinkingContent{}
+			if err := json.Unmarshal(raw, rtc); err != nil {
+				return err
+			}
+			m.Content = append(m.Content, rtc)
 		default:
 			return fmt.Errorf("unknown content type: %s\n%v", typeStruct.Type, string(raw))
 		}
@@ -406,6 +427,11 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 		case "thinking":
 			response.Content = append(response.Content, &ThinkingContent{
 				Type: eventType,
+			})
+		case "redacted_thinking":
+			response.Content = append(response.Content, &RedactedThinkingContent{
+				Type: eventType,
+				Data: getString(contentBlock, "data"),
 			})
 		default:
 			return response, fmt.Errorf("%w: unknown content block type: %s", ErrInvalidDeltaField, eventType)

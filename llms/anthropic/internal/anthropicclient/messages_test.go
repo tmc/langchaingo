@@ -2,10 +2,12 @@ package anthropicclient
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,3 +170,37 @@ data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":
 
 event: message_stop
 data: {"type":"message_stop"           }`
+
+func Test_messagePayload_TemperatureSerialization(t *testing.T) {
+	base := messagePayload{
+		Model: "claude-fable-5",
+		Messages: []ChatMessage{
+			{Role: "user", Content: "hi"},
+		},
+		MaxTokens: 100,
+	}
+
+	t.Run("nil temperature is omitted", func(t *testing.T) {
+		data, err := json.Marshal(base)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "temperature")
+	})
+
+	t.Run("explicit zero temperature is sent", func(t *testing.T) {
+		payload := base
+		temperature := 0.0
+		payload.Temperature = &temperature
+		data, err := json.Marshal(payload)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), `"temperature":0`)
+	})
+
+	t.Run("adaptive thinking omits budget_tokens", func(t *testing.T) {
+		payload := base
+		payload.Thinking = &ThinkingConfig{Type: "adaptive"}
+		data, err := json.Marshal(payload)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), `"thinking":{"type":"adaptive"}`)
+		assert.NotContains(t, string(data), "budget_tokens")
+	})
+}

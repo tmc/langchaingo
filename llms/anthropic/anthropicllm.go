@@ -145,14 +145,23 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	betaHeaders, thinking := extractThinkingOptions(o, opts)
 
+	// Models that only accept adaptive thinking also reject the
+	// temperature and top_p sampling parameters, so omit them.
+	temperature := &opts.Temperature
+	topP := opts.TopP
+	if adaptiveThinkingOnly(o.resolvedModel(opts)) {
+		temperature = nil
+		topP = 0
+	}
+
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
 		Model:                  opts.Model,
 		Messages:               chatMessages,
 		System:                 systemPrompt,
 		MaxTokens:              opts.MaxTokens,
 		StopWords:              opts.StopWords,
-		Temperature:            opts.Temperature,
-		TopP:                   opts.TopP,
+		Temperature:            temperature,
+		TopP:                   topP,
 		Tools:                  tools,
 		Thinking:               thinking,
 		BetaHeaders:            betaHeaders,
@@ -241,6 +250,22 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 				}
 			} else {
 				return nil, fmt.Errorf("anthropic: %w for thinking message %T", ErrInvalidContentType, content)
+			}
+		case "redacted_thinking":
+			if redacted, ok := content.(*anthropicclient.RedactedThinkingContent); ok {
+				choices[i] = &llms.ContentChoice{
+					Content:    "", // Redacted thinking content is encrypted and not included in output
+					StopReason: result.StopReason,
+					GenerationInfo: map[string]any{
+						"RedactedThinkingData":     redacted.Data,
+						"InputTokens":              result.Usage.InputTokens,
+						"OutputTokens":             result.Usage.OutputTokens,
+						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+					},
+				}
+			} else {
+				return nil, fmt.Errorf("anthropic: %w for redacted thinking message %T", ErrInvalidContentType, content)
 			}
 		default:
 			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
@@ -442,6 +467,15 @@ func (o *LLM) SupportsReasoning() bool {
 	return supportsReasoningForModel(o.model)
 }
 
+// resolvedModel returns the model used for a call: the per-call override
+// if set, otherwise the client's configured model.
+func (o *LLM) resolvedModel(opts *llms.CallOptions) string {
+	if opts.Model != "" {
+		return opts.Model
+	}
+	return o.model
+}
+
 // supportsReasoningForModel checks if a specific model supports reasoning.
 // This is a separate function to avoid race conditions when checking capabilities.
 func supportsReasoningForModel(model string) bool {
@@ -465,6 +499,11 @@ func supportsReasoningForModel(model string) bool {
 		return true
 	}
 
+	// Claude Fable 5 supports adaptive thinking
+	if strings.Contains(modelLower, "claude-fable") {
+		return true
+	}
+
 	// Future Claude 5+ expected to support reasoning
 	if strings.Contains(modelLower, "claude-5") ||
 		strings.Contains(modelLower, "claude-opus-5") ||
@@ -473,6 +512,19 @@ func supportsReasoningForModel(model string) bool {
 	}
 
 	return false
+}
+
+// adaptiveThinkingOnly reports whether the model accepts only adaptive
+// thinking ({"type": "adaptive"}). These models reject manual thinking
+// budgets ({"type": "enabled", "budget_tokens": N}) and the temperature,
+// top_p, and top_k sampling parameters with a 400 error. Claude Fable 5
+// additionally rejects an explicit {"type": "disabled"}, so when thinking
+// is off the parameter must be omitted entirely.
+func adaptiveThinkingOnly(model string) bool {
+	modelLower := strings.ToLower(model)
+	return strings.Contains(modelLower, "claude-fable") ||
+		strings.Contains(modelLower, "claude-opus-4-7") ||
+		strings.Contains(modelLower, "claude-opus-4-8")
 }
 
 // extractThinkingOptions extracts thinking configuration and beta headers from call options
@@ -485,39 +537,48 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 		}
 	}
 
-	// Extract thinking configuration
-	var budgetTokens int
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Only set budget_tokens for models that support extended thinking
-			// Claude 3.7+ and Claude 4+ support this feature
-			currentModel := opts.Model
-			if currentModel == "" {
-				currentModel = o.model
-			}
-			if supportsReasoningForModel(currentModel) {
-				if config.BudgetTokens > 0 {
-					budgetTokens = config.BudgetTokens
-				} else if config.Mode != llms.ThinkingModeNone {
-					// Calculate budget based on mode
-					budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
-				}
+	// Extract thinking configuration. Only models that support extended
+	// thinking (Claude 3.7+) honor it.
+	config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig)
+	if !ok {
+		return betaHeaders, nil
+	}
+	currentModel := o.resolvedModel(opts)
+	if !supportsReasoningForModel(currentModel) {
+		return betaHeaders, nil
+	}
 
-				// Ensure budget is within valid range for Claude 3.7+
-				if budgetTokens > 0 {
-					if budgetTokens < 1024 {
-						budgetTokens = 1024 // Minimum for Claude
-					} else if budgetTokens > 128000 {
-						budgetTokens = 128000 // Maximum for Claude (128K)
-					}
-				}
-			}
-
-			// Add interleaved thinking header if requested (Claude 4+)
-			if config.InterleaveThinking && supportsReasoningForModel(currentModel) {
-				betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
-			}
+	// Models with adaptive thinking choose their own budget, so
+	// budget_tokens is never sent. Adaptive thinking interleaves
+	// automatically, so the interleaved-thinking beta header is
+	// unnecessary.
+	if adaptiveThinkingOnly(currentModel) {
+		if config.BudgetTokens > 0 || config.Mode != llms.ThinkingModeNone {
+			return betaHeaders, &anthropicclient.ThinkingConfig{Type: "adaptive"}
 		}
+		return betaHeaders, nil
+	}
+
+	var budgetTokens int
+	if config.BudgetTokens > 0 {
+		budgetTokens = config.BudgetTokens
+	} else if config.Mode != llms.ThinkingModeNone {
+		// Calculate budget based on mode
+		budgetTokens = llms.CalculateThinkingBudget(config.Mode, opts.MaxTokens)
+	}
+
+	// Ensure budget is within valid range for Claude 3.7+
+	if budgetTokens > 0 {
+		if budgetTokens < 1024 {
+			budgetTokens = 1024 // Minimum for Claude
+		} else if budgetTokens > 128000 {
+			budgetTokens = 128000 // Maximum for Claude (128K)
+		}
+	}
+
+	// Add interleaved thinking header if requested (Claude 4+)
+	if config.InterleaveThinking {
+		betaHeaders = append(betaHeaders, "interleaved-thinking-2025-05-14")
 	}
 
 	// Create thinking configuration if we have a budget

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 func TestNew(t *testing.T) {
@@ -228,4 +229,164 @@ func TestGenerateMessagesContent_EmptyContent(t *testing.T) {
 	// Without the fix, accessing result.Content[0] would panic when Anthropic
 	// returns a response with nil or empty content (addresses issue #993)
 	t.Skip("Requires mock client - would demonstrate panic without len(result.Content) == 0 check")
+}
+
+func TestSupportsReasoningForModel(t *testing.T) {
+	tests := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-fable-5", true},
+		{"claude-opus-4-8", true},
+		{"claude-opus-4-7", true},
+		{"claude-opus-4-6", true},
+		{"claude-sonnet-4-6", true},
+		{"claude-3-7-sonnet-20250219", true},
+		{"claude-3-haiku-20240307", false},
+		{"claude-3-5-sonnet-20240620", false},
+		{"", false},
+	}
+	for _, tt := range tests {
+		if got := supportsReasoningForModel(tt.model); got != tt.want {
+			t.Errorf("supportsReasoningForModel(%q) = %v, want %v", tt.model, got, tt.want)
+		}
+	}
+}
+
+func TestAdaptiveThinkingOnly(t *testing.T) {
+	tests := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-fable-5", true},
+		{"claude-opus-4-7", true},
+		{"claude-opus-4-8", true},
+		{"claude-opus-4-6", false},
+		{"claude-sonnet-4-6", false},
+		{"claude-3-7-sonnet-20250219", false},
+		{"claude-3-haiku-20240307", false},
+		{"", false},
+	}
+	for _, tt := range tests {
+		if got := adaptiveThinkingOnly(tt.model); got != tt.want {
+			t.Errorf("adaptiveThinkingOnly(%q) = %v, want %v", tt.model, got, tt.want)
+		}
+	}
+}
+
+func TestExtractThinkingOptions(t *testing.T) {
+	tests := []struct {
+		name         string
+		model        string
+		config       *llms.ThinkingConfig
+		wantThinking *anthropicclient.ThinkingConfig
+		wantHeaders  []string
+	}{
+		{
+			name:         "no thinking config",
+			model:        "claude-fable-5",
+			config:       nil,
+			wantThinking: nil,
+		},
+		{
+			name:         "fable auto mode uses adaptive",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeAuto},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive"},
+		},
+		{
+			name:         "fable drops explicit budget",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive"},
+		},
+		{
+			name:         "fable mode none omits thinking entirely",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeNone},
+			wantThinking: nil,
+		},
+		{
+			name:         "fable skips interleaved thinking header",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeAuto, InterleaveThinking: true},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive"},
+		},
+		{
+			name:         "opus 4.7 uses adaptive",
+			model:        "claude-opus-4-7",
+			config:       &llms.ThinkingConfig{BudgetTokens: 4096},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive"},
+		},
+		{
+			name:         "older model keeps budget",
+			model:        "claude-sonnet-4-6",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 8192},
+		},
+		{
+			name:         "older model keeps interleaved thinking header",
+			model:        "claude-sonnet-4-6",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192, InterleaveThinking: true},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 8192},
+			wantHeaders:  []string{"interleaved-thinking-2025-05-14"},
+		},
+		{
+			name:         "older model clamps budget to minimum",
+			model:        "claude-3-7-sonnet-20250219",
+			config:       &llms.ThinkingConfig{BudgetTokens: 100},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 1024},
+		},
+		{
+			name:         "non-reasoning model ignores thinking",
+			model:        "claude-3-haiku-20240307",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192},
+			wantThinking: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := &LLM{model: tt.model}
+			opts := &llms.CallOptions{MaxTokens: 4096}
+			if tt.config != nil {
+				opts.Metadata = map[string]any{"thinking_config": tt.config}
+			}
+
+			headers, thinking := extractThinkingOptions(o, opts)
+			assertThinkingConfig(t, thinking, tt.wantThinking)
+			assertBetaHeaders(t, headers, tt.wantHeaders)
+		})
+	}
+}
+
+func assertThinkingConfig(t *testing.T, got, want *anthropicclient.ThinkingConfig) {
+	t.Helper()
+	if want == nil {
+		if got != nil {
+			t.Fatalf("extractThinkingOptions() thinking = %+v, want nil", got)
+		}
+		return
+	}
+	if got == nil {
+		t.Fatalf("extractThinkingOptions() thinking = nil, want %+v", want)
+	}
+	if got.Type != want.Type {
+		t.Errorf("thinking.Type = %q, want %q", got.Type, want.Type)
+	}
+	if got.BudgetTokens != want.BudgetTokens {
+		t.Errorf("thinking.BudgetTokens = %d, want %d", got.BudgetTokens, want.BudgetTokens)
+	}
+}
+
+func assertBetaHeaders(t *testing.T, got, want []string) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("extractThinkingOptions() headers = %v, want %v", got, want)
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			t.Errorf("headers[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
 }
