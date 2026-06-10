@@ -118,6 +118,30 @@ type ToolCallResponse struct {
 
 func (ToolCallResponse) isPart() {}
 
+// ThinkingContent is a thinking/reasoning block produced by a model.
+// Signature is an opaque token some providers attach to thinking
+// blocks; it must be sent back unmodified when the message is replayed
+// to the model, for example in a tool-calling loop.
+type ThinkingContent struct {
+	Thinking  string `json:"thinking"`
+	Signature string `json:"signature,omitempty"`
+}
+
+func (tc ThinkingContent) String() string {
+	return tc.Thinking
+}
+
+func (ThinkingContent) isPart() {}
+
+// RedactedThinkingContent is an encrypted thinking block produced by a
+// model. Data is opaque; it must be sent back unmodified when the
+// message is replayed to the model.
+type RedactedThinkingContent struct {
+	Data string `json:"data"`
+}
+
+func (RedactedThinkingContent) isPart() {}
+
 // ContentResponse is the response returned by a GenerateContent call.
 // It can potentially return multiple content choices.
 type ContentResponse struct {
@@ -146,6 +170,14 @@ type ContentChoice struct {
 
 	// This field is only used with the deepseek-reasoner model and represents the reasoning contents of the assistant message before the final answer.
 	ReasoningContent string
+
+	// Parts, when populated by a provider, carries the typed content
+	// parts of this choice (TextContent, ToolCall, ThinkingContent,
+	// RedactedThinkingContent, ...). Concatenating the Parts of a
+	// response's choices yields an AI MessageContent that replays the
+	// response to the model, preserving blocks such as signed thinking
+	// that must round-trip in tool-calling loops.
+	Parts []ContentPart
 }
 
 // TextParts is a helper function to create a MessageContent with a role and a
@@ -179,6 +211,10 @@ func ShowMessageContents(w io.Writer, msgs []MessageContent) {
 				fmt.Fprintf(w, "ToolCall ID=%v, Type=%v, Func=%v(%v)\n", pp.ID, pp.Type, pp.FunctionCall.Name, pp.FunctionCall.Arguments)
 			case ToolCallResponse:
 				fmt.Fprintf(w, "ToolCallResponse ID=%v, Name=%v, Content=%v\n", pp.ToolCallID, pp.Name, pp.Content)
+			case ThinkingContent:
+				fmt.Fprintf(w, "ThinkingContent len=%d, signed=%v\n", len(pp.Thinking), pp.Signature != "")
+			case RedactedThinkingContent:
+				fmt.Fprintf(w, "RedactedThinkingContent len=%d\n", len(pp.Data))
 			default:
 				fmt.Fprintf(w, "unknown type %T\n", pp)
 			}
