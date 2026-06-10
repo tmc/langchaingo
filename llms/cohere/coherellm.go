@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/cohere/internal/cohereclient"
 )
@@ -90,5 +91,10 @@ func newClient(opts ...Option) (*cohereclient.Client, error) {
 		return nil, ErrMissingToken
 	}
 
-	return cohereclient.New(options.token, options.baseURL, options.model)
+	var clientOpts []cohereclient.Option
+	if options.retryConfig != nil {
+		clientOpts = append(clientOpts, cohereclient.WithHTTPClient(httputil.NewClientWithRetry(options.retryConfig)))
+	}
+
+	return cohereclient.New(options.token, options.baseURL, options.model, clientOpts...)
 }

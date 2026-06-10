@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // ErrorCode represents a standardized error code for LLM operations.
@@ -63,6 +64,10 @@ type Error struct {
 
 	// Cause is the underlying error, if any.
 	Cause error
+
+	// retryAfter is the duration to wait before retrying, extracted from
+	// the Retry-After HTTP header. Zero means no hint was provided.
+	retryAfter time.Duration
 }
 
 // Error implements the error interface.
@@ -114,6 +119,17 @@ func NewError(code ErrorCode, provider, message string) *Error {
 func (e *Error) WithCause(cause error) *Error {
 	e.Cause = cause
 	return e
+}
+
+// WithRetryAfter sets the Retry-After duration hint from the HTTP header.
+func (e *Error) WithRetryAfter(d time.Duration) *Error {
+	e.retryAfter = d
+	return e
+}
+
+// RetryAfter returns the Retry-After duration hint, or 0 if not set.
+func (e *Error) RetryAfter() time.Duration {
+	return e.retryAfter
 }
 
 // WithDetail adds a detail to the error.
@@ -183,6 +199,26 @@ func IsProviderUnavailableError(err error) bool {
 func IsNotImplementedError(err error) bool {
 	var e *Error
 	return errors.As(err, &e) && e.Code == ErrCodeNotImplemented
+}
+
+// IsRetryableErrorCode returns true if the error code represents a transient
+// failure that may succeed on retry. This includes rate limits, provider
+// unavailability, and timeouts.
+func IsRetryableErrorCode(code ErrorCode) bool {
+	switch code {
+	case ErrCodeRateLimit, ErrCodeProviderUnavailable, ErrCodeTimeout:
+		return true
+	default:
+		return false
+	}
+}
+
+// IsRetryableError returns true if the error is classified as retryable.
+// It checks if the error is an [*Error] with a retryable error code.
+// This works with errors produced by provider [MapError] functions.
+func IsRetryableError(err error) bool {
+	var e *Error
+	return errors.As(err, &e) && IsRetryableErrorCode(e.Code)
 }
 
 // Common error variables for easy comparison.

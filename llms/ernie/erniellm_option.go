@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -33,6 +34,7 @@ type options struct {
 	modelPath        string
 	cacheType        string
 	httpClient       *http.Client
+	retryConfig      *httputil.RetryConfig
 }
 
 type Option func(*options)
@@ -120,5 +122,14 @@ func WithCacheType(cacheType string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

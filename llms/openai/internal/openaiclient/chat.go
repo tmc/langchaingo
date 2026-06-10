@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -567,10 +568,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg)
+			return nil, httputil.NewResponseError(r, msg)
 		}
 
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+		return nil, httputil.NewResponseError(r, fmt.Sprintf("%s: %s", msg, errResp.Error.Message))
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)

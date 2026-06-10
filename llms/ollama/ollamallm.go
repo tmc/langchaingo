@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 )
@@ -35,6 +36,10 @@ func New(opts ...Option) (*LLM, error) {
 	o := options{}
 	for _, opt := range opts {
 		opt(&o)
+	}
+
+	if o.httpClient == nil && o.retryConfig != nil {
+		o.httpClient = httputil.NewClientWithRetry(o.retryConfig)
 	}
 
 	client, err := ollamaclient.NewClient(o.ollamaServerURL, o.httpClient)

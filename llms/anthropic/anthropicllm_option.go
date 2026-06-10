@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
@@ -17,6 +18,7 @@ type options struct {
 	model      string
 	baseURL    string
 	httpClient anthropicclient.Doer
+	retryConfig *httputil.RetryConfig
 
 	useLegacyTextCompletionsAPI bool
 
@@ -68,5 +70,14 @@ func WithLegacyTextCompletionsAPI() Option {
 func WithAnthropicBetaHeader(value string) Option {
 	return func(opts *options) {
 		opts.anthropicBetaHeader = value
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

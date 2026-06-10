@@ -1,5 +1,9 @@
 package cohere
 
+import (
+	"github.com/tmc/langchaingo/httputil"
+)
+
 const (
 	tokenEnvVarName   = "COHERE_API_KEY"  //nolint:gosec
 	modelEnvVarName   = "COHERE_MODEL"    //nolint:gosec
@@ -7,9 +11,10 @@ const (
 )
 
 type options struct {
-	token   string
-	model   string
-	baseURL string
+	token       string
+	model       string
+	baseURL     string
+	retryConfig *httputil.RetryConfig
 }
 
 type Option func(*options)
@@ -36,5 +41,14 @@ func WithModel(model string) Option {
 func WithBaseURL(baseURL string) Option {
 	return func(opts *options) {
 		opts.baseURL = baseURL
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

@@ -221,6 +221,109 @@
 //		}
 //	}
 //
+// # Automatic Retry
+//
+// LangchainGo provides a built-in retry mechanism for transient HTTP failures.
+// Retry is opt-in: it is only enabled when a RetryConfig is explicitly provided
+// via the WithRetryConfig option. Without it, behavior is unchanged.
+//
+// ## What gets retried
+//
+// The following transient failures are automatically retried:
+//
+//   - HTTP 429 (Rate Limit) — respects the Retry-After response header
+//   - HTTP 500, 502, 503, 504 (Server Errors)
+//   - Network errors (connection refused, DNS failure, TLS timeout)
+//   - Provider-specific body-level errors (e.g., ERNIE's HTTP 200 + error_code:18)
+//
+// The following are NOT retried:
+//
+//   - HTTP 400, 401, 403, 404 and other 4xx client errors
+//   - Context cancellation (context.Canceled)
+//   - Context deadline exceeded (context.DeadlineExceeded)
+//   - Successful responses
+//
+// ## Basic usage
+//
+// All LLM providers support retry via the WithRetryConfig option:
+//
+//	import "github.com/tmc/langchaingo/httputil"
+//
+//	// Use sensible defaults: 3 retries, 1s initial backoff, 30s max backoff
+//	llm, err := openai.New(
+//	    openai.WithToken("sk-xxx"),
+//	    openai.WithRetryConfig(httputil.DefaultRetryConfig()),
+//	)
+//
+// The same pattern works for all providers:
+//
+//	llm, _ := anthropic.New(anthropic.WithRetryConfig(cfg), ...)
+//	llm, _ := ernie.New(ernie.WithRetryConfig(cfg), ...)
+//	llm, _ := ollama.New(ollama.WithRetryConfig(cfg), ...)
+//	llm, _ := cohere.New(cohere.WithRetryConfig(cfg), ...)
+//	llm, _ := cloudflare.New(cloudflare.WithRetryConfig(cfg), ...)
+//	llm, _ := huggingface.New(huggingface.WithRetryConfig(cfg), ...)
+//	llm, _ := llamafile.New(llamafile.WithRetryConfig(cfg), ...)
+//	llm, _ := maritaca.New(maritaca.WithRetryConfig(cfg), ...)
+//
+// ## Custom configuration
+//
+//	llm, err := openai.New(
+//	    openai.WithToken("sk-xxx"),
+//	    openai.WithRetryConfig(&httputil.RetryConfig{
+//	        MaxRetries:     5,
+//	        InitialBackoff: 2 * time.Second,
+//	        MaxBackoff:     60 * time.Second,
+//	        BackoffFactor:  2.0,
+//	    }),
+//	)
+//
+// The backoff sequence with Factor 2.0 and InitialBackoff 2s is:
+//
+//	attempt 0: 2s   (initial)
+//	attempt 1: 4s   (2s × 2.0)
+//	attempt 2: 8s   (4s × 2.0)
+//	attempt 3: 16s  (8s × 2.0)
+//	attempt 4: 32s  (capped at MaxBackoff 60s)
+//
+// Random jitter is applied to prevent thundering herd.
+//
+// ## Retry-After header support
+//
+// When a provider returns HTTP 429 with a Retry-After header, the retry
+// mechanism waits the server-specified duration instead of the computed backoff:
+//
+//	// Server returns: HTTP 429 + Retry-After: 60
+//	// Wait duration: max(computed_backoff, 60s) = 60s
+//
+// ## Logging retries
+//
+// Use the OnRetry callback for observability:
+//
+//	llm, err := openai.New(
+//	    openai.WithToken("sk-xxx"),
+//	    openai.WithRetryConfig(&httputil.RetryConfig{
+//	        MaxRetries:     3,
+//	        InitialBackoff: 1 * time.Second,
+//	        MaxBackoff:     30 * time.Second,
+//	        BackoffFactor:  2.0,
+//	        OnRetry: func(attempt int, err error) {
+//	            slog.Warn("retrying request", "attempt", attempt+1, "error", err)
+//	        },
+//	    }),
+//	)
+//
+// ## Custom retry conditions
+//
+// Override the default retryable status codes or error checks:
+//
+//	cfg := httputil.DefaultRetryConfig()
+//
+//	// Also retry HTTP 408 (Request Timeout)
+//	cfg.RetryableStatus = func(code int) bool {
+//	    return code == 408 || code == 429 || (code >= 500 && code <= 504)
+//	}
+//
 // # Testing
 //
 // LangchainGo includes comprehensive testing utilities including HTTP record/replay for internal tests.

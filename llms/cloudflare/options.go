@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 type options struct {
@@ -11,6 +13,7 @@ type options struct {
 	cloudflareServerURL *url.URL
 	cloudflareToken     string
 	httpClient          *http.Client
+	retryConfig         *httputil.RetryConfig
 	model               string
 	embeddingModel      string
 	system              string
@@ -77,5 +80,14 @@ func WithEmbeddingModel(model string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

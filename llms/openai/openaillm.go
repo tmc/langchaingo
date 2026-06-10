@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
@@ -16,7 +17,8 @@ type ChatMessage = openaiclient.ChatMessage
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *openaiclient.Client
-	model            string // Track current model for reasoning detection
+	model            string            // Track current model for reasoning detection
+	retryConfig      *httputil.RetryConfig
 }
 
 const (
@@ -91,7 +93,8 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
-		model:            c.Model, // Store the model for reasoning detection
+		model:            c.Model,
+		retryConfig:      opt.retryConfig,
 	}, err
 }
 
@@ -344,7 +347,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		req.ResponseFormat = o.client.ResponseFormat
 	}
 
-	result, err := o.client.CreateChat(ctx, req)
+	var result *openaiclient.ChatCompletionResponse
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		result, retryErr = o.client.CreateChat(ctx, req)
+		return retryErr
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -444,9 +452,14 @@ func (o *LLM) SupportsReasoning() bool {
 
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
-	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
-		Input: inputTexts,
-		Model: o.client.EmbeddingModel,
+	var embeddings [][]float32
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		embeddings, retryErr = o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
+			Input: inputTexts,
+			Model: o.client.EmbeddingModel,
+		})
+		return retryErr
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create openai embeddings: %w", err)

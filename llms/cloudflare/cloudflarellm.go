@@ -34,6 +34,10 @@ func New(opts ...Option) (*LLM, error) {
 		opt(&o)
 	}
 
+	if o.httpClient == httputil.DefaultClient && o.retryConfig != nil {
+		o.httpClient = httputil.NewClientWithRetry(o.retryConfig)
+	}
+
 	// Default URL if not provided
 	serverURL := ""
 	if o.cloudflareServerURL != nil {
