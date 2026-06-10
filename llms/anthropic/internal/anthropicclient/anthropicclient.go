@@ -142,6 +142,9 @@ type MessageRequest struct {
 	// Extended thinking parameters (Claude 3.7+)
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
+	// OutputConfig carries output controls such as the effort level.
+	OutputConfig *OutputConfig `json:"output_config,omitempty"`
+
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders            []string                                                      `json:"-"`
 	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
@@ -161,6 +164,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		Tools:                  r.Tools,
 		Stream:                 r.Stream,
 		Thinking:               r.Thinking,
+		OutputConfig:           r.OutputConfig,
 		StreamingFunc:          r.StreamingFunc,
 		StreamingReasoningFunc: r.StreamingReasoningFunc,
 	}, r.BetaHeaders)

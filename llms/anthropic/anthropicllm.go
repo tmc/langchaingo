@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"strings"
 
@@ -143,13 +144,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	tools := toolsToTools(opts.Tools)
 
-	betaHeaders, thinking := extractThinkingOptions(o, opts)
+	betaHeaders, thinking, outputConfig := extractThinkingOptions(o, opts)
 
-	// Models that only accept adaptive thinking also reject the
-	// temperature and top_p sampling parameters, so omit them.
+	// Models that reject the temperature and top_p sampling parameters
+	// require them omitted from the request.
 	temperature := &opts.Temperature
 	topP := opts.TopP
-	if adaptiveThinkingOnly(o.resolvedModel(opts)) {
+	if !modelCapabilities(o.resolvedModel(opts)).sampling {
 		temperature = nil
 		topP = 0
 	}
@@ -164,6 +165,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		TopP:                   topP,
 		Tools:                  tools,
 		Thinking:               thinking,
+		OutputConfig:           outputConfig,
 		BetaHeaders:            betaHeaders,
 		StreamingFunc:          opts.StreamingFunc,
 		StreamingReasoningFunc: opts.StreamingReasoningFunc,
@@ -185,96 +187,90 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 
 	choices := make([]*llms.ContentChoice, len(result.Content))
 	for i, content := range result.Content {
-		switch content.GetType() {
-		case "text":
-			if textContent, ok := content.(*anthropicclient.TextContent); ok {
-				// Extract thinking content from the response text
-				thinkingContent, outputContent := extractThinkingFromText(textContent.Text)
-
-				choices[i] = &llms.ContentChoice{
-					Content:    textContent.Text,
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-						// Standardized fields for cross-provider compatibility
-						"ThinkingContent": thinkingContent, // Standardized field
-						"OutputContent":   outputContent,   // Standardized field
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for text message", ErrInvalidContentType)
-			}
-		case "tool_use":
-			if toolUseContent, ok := content.(*anthropicclient.ToolUseContent); ok {
-				argumentsJSON, err := json.Marshal(toolUseContent.Input)
-				if err != nil {
-					return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
-				}
-				choices[i] = &llms.ContentChoice{
-					ToolCalls: []llms.ToolCall{
-						{
-							ID: toolUseContent.ID,
-							FunctionCall: &llms.FunctionCall{
-								Name:      toolUseContent.Name,
-								Arguments: string(argumentsJSON),
-							},
-						},
-					},
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for tool use message %T", ErrInvalidContentType, content)
-			}
-		case "thinking":
-			if thinkingContent, ok := content.(*anthropicclient.ThinkingContent); ok {
-				choices[i] = &llms.ContentChoice{
-					Content:    "", // Thinking content is not included in output
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"ThinkingContent":          thinkingContent.Thinking,
-						"ThinkingSignature":        thinkingContent.Signature,
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for thinking message %T", ErrInvalidContentType, content)
-			}
-		case "redacted_thinking":
-			if redacted, ok := content.(*anthropicclient.RedactedThinkingContent); ok {
-				choices[i] = &llms.ContentChoice{
-					Content:    "", // Redacted thinking content is encrypted and not included in output
-					StopReason: result.StopReason,
-					GenerationInfo: map[string]any{
-						"RedactedThinkingData":     redacted.Data,
-						"InputTokens":              result.Usage.InputTokens,
-						"OutputTokens":             result.Usage.OutputTokens,
-						"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
-						"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
-					},
-				}
-			} else {
-				return nil, fmt.Errorf("anthropic: %w for redacted thinking message %T", ErrInvalidContentType, content)
-			}
-		default:
-			return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
+		choice, err := contentBlockToChoice(result, content)
+		if err != nil {
+			return nil, err
 		}
+		choices[i] = choice
 	}
 
 	return &llms.ContentResponse{
 		Choices: choices,
 	}, nil
+}
+
+// generationInfo builds the per-choice GenerationInfo map: the usage
+// counters shared by every choice plus any block-specific extras.
+func generationInfo(result *anthropicclient.MessageResponsePayload, extra map[string]any) map[string]any {
+	info := map[string]any{
+		"InputTokens":              result.Usage.InputTokens,
+		"OutputTokens":             result.Usage.OutputTokens,
+		"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
+		"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
+	}
+	maps.Copy(info, extra)
+	return info
+}
+
+func contentBlockToChoice(result *anthropicclient.MessageResponsePayload, content anthropicclient.Content) (*llms.ContentChoice, error) {
+	switch block := content.(type) {
+	case *anthropicclient.TextContent:
+		// Extract thinking content from the response text
+		thinkingContent, outputContent := extractThinkingFromText(block.Text)
+		return &llms.ContentChoice{
+			Content:    block.Text,
+			StopReason: result.StopReason,
+			Parts:      []llms.ContentPart{llms.TextContent{Text: block.Text}},
+			GenerationInfo: generationInfo(result, map[string]any{
+				// Standardized fields for cross-provider compatibility
+				"ThinkingContent": thinkingContent,
+				"OutputContent":   outputContent,
+			}),
+		}, nil
+	case *anthropicclient.ToolUseContent:
+		argumentsJSON, err := json.Marshal(block.Input)
+		if err != nil {
+			return nil, fmt.Errorf("anthropic: failed to marshal tool use arguments: %w", err)
+		}
+		toolCall := llms.ToolCall{
+			ID: block.ID,
+			FunctionCall: &llms.FunctionCall{
+				Name:      block.Name,
+				Arguments: string(argumentsJSON),
+			},
+		}
+		return &llms.ContentChoice{
+			ToolCalls:      []llms.ToolCall{toolCall},
+			StopReason:     result.StopReason,
+			Parts:          []llms.ContentPart{toolCall},
+			GenerationInfo: generationInfo(result, nil),
+		}, nil
+	case *anthropicclient.ThinkingContent:
+		return &llms.ContentChoice{
+			Content:          "", // Thinking content is not included in output
+			StopReason:       result.StopReason,
+			ReasoningContent: block.Thinking,
+			Parts: []llms.ContentPart{llms.ThinkingContent{
+				Thinking:  block.Thinking,
+				Signature: block.Signature,
+			}},
+			GenerationInfo: generationInfo(result, map[string]any{
+				"ThinkingContent":   block.Thinking,
+				"ThinkingSignature": block.Signature,
+			}),
+		}, nil
+	case *anthropicclient.RedactedThinkingContent:
+		return &llms.ContentChoice{
+			Content:    "", // Redacted thinking content is encrypted and not included in output
+			StopReason: result.StopReason,
+			Parts:      []llms.ContentPart{llms.RedactedThinkingContent{Data: block.Data}},
+			GenerationInfo: generationInfo(result, map[string]any{
+				"RedactedThinkingData": block.Data,
+			}),
+		}, nil
+	default:
+		return nil, fmt.Errorf("anthropic: %w: %v", ErrUnsupportedContentType, content.GetType())
+	}
 }
 
 func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
@@ -408,35 +404,51 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 	}, nil
 }
 
+// handleAIMessage converts an assistant message, preserving all parts in
+// order. Thinking blocks keep their signatures and redacted thinking its
+// data, both of which the API requires sent back verbatim in tool loops.
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
-		var inputStruct map[string]interface{}
-		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &inputStruct)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
-		}
-		toolUse := anthropicclient.ToolUseContent{
-			Type:  "tool_use",
-			ID:    toolCall.ID,
-			Name:  toolCall.FunctionCall.Name,
-			Input: inputStruct,
-		}
-
-		return anthropicclient.ChatMessage{
-			Role:    RoleAssistant,
-			Content: []anthropicclient.Content{toolUse},
-		}, nil
-	}
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return anthropicclient.ChatMessage{
-			Role: RoleAssistant,
-			Content: []anthropicclient.Content{&anthropicclient.TextContent{
+	var contents []anthropicclient.Content
+	for _, part := range msg.Parts {
+		switch p := part.(type) {
+		case llms.ThinkingContent:
+			contents = append(contents, &anthropicclient.ThinkingContent{
+				Type:      "thinking",
+				Thinking:  p.Thinking,
+				Signature: p.Signature,
+			})
+		case llms.RedactedThinkingContent:
+			contents = append(contents, &anthropicclient.RedactedThinkingContent{
+				Type: "redacted_thinking",
+				Data: p.Data,
+			})
+		case llms.TextContent:
+			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",
-				Text: textContent.Text,
-			}},
-		}, nil
+				Text: p.Text,
+			})
+		case llms.ToolCall:
+			var inputStruct map[string]interface{}
+			if err := json.Unmarshal([]byte(p.FunctionCall.Arguments), &inputStruct); err != nil {
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
+			}
+			contents = append(contents, anthropicclient.ToolUseContent{
+				Type:  "tool_use",
+				ID:    p.ID,
+				Name:  p.FunctionCall.Name,
+				Input: inputStruct,
+			})
+		default:
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message: %T", ErrInvalidContentType, part)
+		}
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+	}
+	return anthropicclient.ChatMessage{
+		Role:    RoleAssistant,
+		Content: contents,
+	}, nil
 }
 
 type ToolResult struct {
@@ -445,20 +457,28 @@ type ToolResult struct {
 	Content   string `json:"content"`
 }
 
+// handleToolMessage converts a tool message, preserving all parts: the
+// results of parallel tool calls belong in a single user message.
 func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if toolCallResponse, ok := msg.Parts[0].(llms.ToolCallResponse); ok {
-		toolContent := anthropicclient.ToolResultContent{
+	var contents []anthropicclient.Content
+	for _, part := range msg.Parts {
+		toolCallResponse, ok := part.(llms.ToolCallResponse)
+		if !ok {
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message: %T", ErrInvalidContentType, part)
+		}
+		contents = append(contents, anthropicclient.ToolResultContent{
 			Type:      "tool_result",
 			ToolUseID: toolCallResponse.ToolCallID,
 			Content:   toolCallResponse.Content,
-		}
-
-		return anthropicclient.ChatMessage{
-			Role:    RoleUser,
-			Content: []anthropicclient.Content{toolContent},
-		}, nil
+		})
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+	}
+	return anthropicclient.ChatMessage{
+		Role:    RoleUser,
+		Content: contents,
+	}, nil
 }
 
 // SupportsReasoning implements the ReasoningModel interface.
@@ -476,59 +496,84 @@ func (o *LLM) resolvedModel(opts *llms.CallOptions) string {
 	return o.model
 }
 
-// supportsReasoningForModel checks if a specific model supports reasoning.
-// This is a separate function to avoid race conditions when checking capabilities.
-func supportsReasoningForModel(model string) bool {
+// capabilities describes what a model accepts on the wire.
+type capabilities struct {
+	thinking         bool // extended or adaptive thinking supported
+	adaptiveThinking bool // thinking is {"type": "adaptive"} only; budgets and explicit "disabled" are rejected
+	sampling         bool // temperature and top_p accepted
+	effort           bool // output_config.effort accepted
+}
+
+var (
+	// adaptiveCaps is the newest model generation: adaptive thinking
+	// only, sampling parameters rejected with a 400 error, effort
+	// levels accepted. Claude Fable 5 additionally rejects an explicit
+	// {"type": "disabled"}, so when thinking is off the parameter must
+	// be omitted entirely.
+	adaptiveCaps = capabilities{thinking: true, adaptiveThinking: true, effort: true}
+
+	// budgetCaps are budget-era thinking models (Claude 3.7 to 4.x).
+	budgetCaps = capabilities{thinking: true, sampling: true}
+
+	// legacyCaps are models without extended thinking.
+	legacyCaps = capabilities{sampling: true}
+)
+
+// capabilityRules maps model-name substrings to capabilities; the first
+// match wins, so more specific names come first.
+var capabilityRules = []struct {
+	match string
+	caps  capabilities
+}{
+	{"claude-fable", adaptiveCaps},
+	{"claude-opus-4-7", adaptiveCaps},
+	{"claude-opus-4-8", adaptiveCaps},
+	{"claude-opus-4-6", capabilities{thinking: true, sampling: true, effort: true}},
+	{"claude-sonnet-4-6", capabilities{thinking: true, sampling: true, effort: true}},
+	{"claude-opus-4", budgetCaps},
+	{"claude-sonnet-4", budgetCaps},
+	{"claude-haiku-4", budgetCaps},
+	{"claude-4", budgetCaps},
+	{"claude-3-7", budgetCaps},
+	{"claude-3.7", budgetCaps},
+	{"claude-3", legacyCaps},
+	{"claude-2", legacyCaps},
+	{"claude-instant", legacyCaps},
+}
+
+// modelCapabilities returns the capabilities of a model. Unknown model
+// names get newest-generation defaults: an unrecognized name is more
+// likely a new model than an old one, omitting sampling parameters is
+// accepted by every model, and sending them is rejected by new ones.
+// The empty model name keeps legacy behavior, since the effective
+// default model is resolved later, at the client layer.
+func modelCapabilities(model string) capabilities {
 	if model == "" {
-		return false
+		return legacyCaps
 	}
-
 	modelLower := strings.ToLower(model)
-
-	// Claude 3.7+ supports extended thinking
-	if strings.Contains(modelLower, "claude-3-7") ||
-		strings.Contains(modelLower, "claude-3.7") ||
-		strings.Contains(modelLower, "claude-3-7-sonnet") {
-		return true
+	for _, rule := range capabilityRules {
+		if strings.Contains(modelLower, rule.match) {
+			return rule.caps
+		}
 	}
+	return adaptiveCaps
+}
 
-	// Claude 4+ supports extended thinking with interleaving
-	if strings.Contains(modelLower, "claude-4") ||
-		strings.Contains(modelLower, "claude-opus-4") ||
-		strings.Contains(modelLower, "claude-sonnet-4") {
-		return true
-	}
-
-	// Claude Fable 5 supports adaptive thinking
-	if strings.Contains(modelLower, "claude-fable") {
-		return true
-	}
-
-	// Future Claude 5+ expected to support reasoning
-	if strings.Contains(modelLower, "claude-5") ||
-		strings.Contains(modelLower, "claude-opus-5") ||
-		strings.Contains(modelLower, "claude-sonnet-5") {
-		return true
-	}
-
-	return false
+// supportsReasoningForModel checks if a specific model supports reasoning.
+func supportsReasoningForModel(model string) bool {
+	return modelCapabilities(model).thinking
 }
 
 // adaptiveThinkingOnly reports whether the model accepts only adaptive
-// thinking ({"type": "adaptive"}). These models reject manual thinking
-// budgets ({"type": "enabled", "budget_tokens": N}) and the temperature,
-// top_p, and top_k sampling parameters with a 400 error. Claude Fable 5
-// additionally rejects an explicit {"type": "disabled"}, so when thinking
-// is off the parameter must be omitted entirely.
+// thinking ({"type": "adaptive"}).
 func adaptiveThinkingOnly(model string) bool {
-	modelLower := strings.ToLower(model)
-	return strings.Contains(modelLower, "claude-fable") ||
-		strings.Contains(modelLower, "claude-opus-4-7") ||
-		strings.Contains(modelLower, "claude-opus-4-8")
+	return modelCapabilities(model).adaptiveThinking
 }
 
-// extractThinkingOptions extracts thinking configuration and beta headers from call options
-func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropicclient.ThinkingConfig) {
+// extractThinkingOptions extracts the thinking configuration, output
+// controls, and beta headers from call options.
+func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropicclient.ThinkingConfig, *anthropicclient.OutputConfig) {
 	// Extract beta headers for prompt caching support
 	var betaHeaders []string
 	if opts.Metadata != nil {
@@ -541,22 +586,31 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 	// thinking (Claude 3.7+) honor it.
 	config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig)
 	if !ok {
-		return betaHeaders, nil
+		return betaHeaders, nil, nil
 	}
 	currentModel := o.resolvedModel(opts)
-	if !supportsReasoningForModel(currentModel) {
-		return betaHeaders, nil
+	caps := modelCapabilities(currentModel)
+	if !caps.thinking {
+		return betaHeaders, nil, nil
+	}
+
+	var outputConfig *anthropicclient.OutputConfig
+	if caps.effort && config.Effort != "" {
+		outputConfig = &anthropicclient.OutputConfig{Effort: string(config.Effort)}
 	}
 
 	// Models with adaptive thinking choose their own budget, so
 	// budget_tokens is never sent. Adaptive thinking interleaves
 	// automatically, so the interleaved-thinking beta header is
 	// unnecessary.
-	if adaptiveThinkingOnly(currentModel) {
+	if caps.adaptiveThinking {
 		if config.BudgetTokens > 0 || config.Mode != llms.ThinkingModeNone {
-			return betaHeaders, &anthropicclient.ThinkingConfig{Type: "adaptive"}
+			return betaHeaders, &anthropicclient.ThinkingConfig{
+				Type:    "adaptive",
+				Display: string(config.Display),
+			}, outputConfig
 		}
-		return betaHeaders, nil
+		return betaHeaders, nil, outputConfig
 	}
 
 	var budgetTokens int
@@ -590,7 +644,7 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 		}
 	}
 
-	return betaHeaders, thinking
+	return betaHeaders, thinking, outputConfig
 }
 
 // extractThinkingFromText extracts thinking content from Anthropic responses

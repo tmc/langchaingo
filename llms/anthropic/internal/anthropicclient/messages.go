@@ -47,6 +47,9 @@ type messagePayload struct {
 	// Thinking configures extended or adaptive thinking (Claude 3.7+).
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
+	// OutputConfig carries output controls such as the effort level.
+	OutputConfig *OutputConfig `json:"output_config,omitempty"`
+
 	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
@@ -58,6 +61,16 @@ type messagePayload struct {
 type ThinkingConfig struct {
 	Type         string `json:"type"` // "enabled", "adaptive", or "disabled"
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	// Display controls how thinking text is returned with adaptive
+	// thinking: "summarized" or "omitted". Empty means the API default.
+	Display string `json:"display,omitempty"`
+}
+
+// OutputConfig represents output controls for models that support them.
+type OutputConfig struct {
+	// Effort is the reasoning effort level: "low", "medium", "high",
+	// "xhigh", or "max".
+	Effort string `json:"effort,omitempty"`
 }
 
 // Tool used for the request message payload.

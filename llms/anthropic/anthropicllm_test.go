@@ -275,13 +275,7 @@ func TestAdaptiveThinkingOnly(t *testing.T) {
 }
 
 func TestExtractThinkingOptions(t *testing.T) {
-	tests := []struct {
-		name         string
-		model        string
-		config       *llms.ThinkingConfig
-		wantThinking *anthropicclient.ThinkingConfig
-		wantHeaders  []string
-	}{
+	tests := []extractThinkingOptionsTest{
 		{
 			name:         "no thinking config",
 			model:        "claude-fable-5",
@@ -344,7 +338,59 @@ func TestExtractThinkingOptions(t *testing.T) {
 			wantThinking: nil,
 		},
 	}
+	runExtractThinkingOptionsTests(t, tests)
+}
 
+func TestExtractThinkingOptionsEffortDisplay(t *testing.T) {
+	tests := []extractThinkingOptionsTest{
+		{
+			name:         "fable maps effort to output config",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeAuto, Effort: "xhigh"},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive"},
+			wantOutput:   &anthropicclient.OutputConfig{Effort: "xhigh"},
+		},
+		{
+			name:         "fable passes display through",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeAuto, Display: "summarized"},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "adaptive", Display: "summarized"},
+		},
+		{
+			name:         "fable effort without thinking mode",
+			model:        "claude-fable-5",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeNone, Effort: "low"},
+			wantThinking: nil,
+			wantOutput:   &anthropicclient.OutputConfig{Effort: "low"},
+		},
+		{
+			name:         "sonnet 4.6 maps effort alongside budget",
+			model:        "claude-sonnet-4-6",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192, Effort: "high"},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 8192},
+			wantOutput:   &anthropicclient.OutputConfig{Effort: "high"},
+		},
+		{
+			name:         "budget-only model drops effort",
+			model:        "claude-3-7-sonnet-20250219",
+			config:       &llms.ThinkingConfig{BudgetTokens: 8192, Effort: "high"},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 8192},
+		},
+	}
+	runExtractThinkingOptionsTests(t, tests)
+}
+
+type extractThinkingOptionsTest struct {
+	name         string
+	model        string
+	config       *llms.ThinkingConfig
+	wantThinking *anthropicclient.ThinkingConfig
+	wantHeaders  []string
+	wantOutput   *anthropicclient.OutputConfig
+}
+
+func runExtractThinkingOptionsTests(t *testing.T, tests []extractThinkingOptionsTest) {
+	t.Helper()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := &LLM{model: tt.model}
@@ -353,9 +399,10 @@ func TestExtractThinkingOptions(t *testing.T) {
 				opts.Metadata = map[string]any{"thinking_config": tt.config}
 			}
 
-			headers, thinking := extractThinkingOptions(o, opts)
+			headers, thinking, output := extractThinkingOptions(o, opts)
 			assertThinkingConfig(t, thinking, tt.wantThinking)
 			assertBetaHeaders(t, headers, tt.wantHeaders)
+			assertOutputConfig(t, output, tt.wantOutput)
 		})
 	}
 }
@@ -377,6 +424,25 @@ func assertThinkingConfig(t *testing.T, got, want *anthropicclient.ThinkingConfi
 	if got.BudgetTokens != want.BudgetTokens {
 		t.Errorf("thinking.BudgetTokens = %d, want %d", got.BudgetTokens, want.BudgetTokens)
 	}
+	if got.Display != want.Display {
+		t.Errorf("thinking.Display = %q, want %q", got.Display, want.Display)
+	}
+}
+
+func assertOutputConfig(t *testing.T, got, want *anthropicclient.OutputConfig) {
+	t.Helper()
+	if want == nil {
+		if got != nil {
+			t.Fatalf("extractThinkingOptions() output = %+v, want nil", got)
+		}
+		return
+	}
+	if got == nil {
+		t.Fatalf("extractThinkingOptions() output = nil, want %+v", want)
+	}
+	if got.Effort != want.Effort {
+		t.Errorf("output.Effort = %q, want %q", got.Effort, want.Effort)
+	}
 }
 
 func assertBetaHeaders(t *testing.T, got, want []string) {
@@ -388,5 +454,168 @@ func assertBetaHeaders(t *testing.T, got, want []string) {
 		if got[i] != want[i] {
 			t.Errorf("headers[%d] = %q, want %q", i, got[i], want[i])
 		}
+	}
+}
+
+func TestModelCapabilities(t *testing.T) {
+	tests := []struct {
+		model string
+		want  capabilities
+	}{
+		{"claude-fable-5", adaptiveCaps},
+		{"claude-opus-4-8", adaptiveCaps},
+		{"claude-opus-4-7", adaptiveCaps},
+		{"claude-opus-4-6", capabilities{thinking: true, sampling: true, effort: true}},
+		{"claude-sonnet-4-6", capabilities{thinking: true, sampling: true, effort: true}},
+		{"claude-opus-4-20250514", budgetCaps},
+		{"claude-3-7-sonnet-20250219", budgetCaps},
+		{"claude-3-5-sonnet-20240620", legacyCaps},
+		{"claude-3-haiku-20240307", legacyCaps},
+		{"claude-2.1", legacyCaps},
+		{"", legacyCaps},
+		// Unknown names get newest-generation defaults.
+		{"claude-fable-6", adaptiveCaps},
+		{"claude-omega-7", adaptiveCaps},
+	}
+	for _, tt := range tests {
+		if got := modelCapabilities(tt.model); got != tt.want {
+			t.Errorf("modelCapabilities(%q) = %+v, want %+v", tt.model, got, tt.want)
+		}
+	}
+}
+
+func TestHandleAIMessageAllParts(t *testing.T) {
+	msg := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{
+			llms.ThinkingContent{Thinking: "let me think", Signature: "sig123"},
+			llms.RedactedThinkingContent{Data: "opaque"},
+			llms.TextContent{Text: "calling the tool"},
+			llms.ToolCall{
+				ID: "tool-1",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"sf"}`,
+				},
+			},
+		},
+	}
+
+	got, err := handleAIMessage(msg)
+	if err != nil {
+		t.Fatalf("handleAIMessage() error = %v", err)
+	}
+	if got.Role != RoleAssistant {
+		t.Errorf("role = %q, want %q", got.Role, RoleAssistant)
+	}
+	contents, ok := got.Content.([]anthropicclient.Content)
+	if !ok {
+		t.Fatalf("content type = %T, want []anthropicclient.Content", got.Content)
+	}
+	if len(contents) != 4 {
+		t.Fatalf("len(contents) = %d, want 4", len(contents))
+	}
+	wantTypes := []string{"thinking", "redacted_thinking", "text", "tool_use"}
+	for i, want := range wantTypes {
+		if contents[i].GetType() != want {
+			t.Errorf("contents[%d].GetType() = %q, want %q", i, contents[i].GetType(), want)
+		}
+	}
+	thinking, ok := contents[0].(*anthropicclient.ThinkingContent)
+	if !ok {
+		t.Fatalf("contents[0] type = %T, want *ThinkingContent", contents[0])
+	}
+	if thinking.Signature != "sig123" {
+		t.Errorf("thinking signature = %q, want %q", thinking.Signature, "sig123")
+	}
+}
+
+func TestHandleToolMessageAllParts(t *testing.T) {
+	msg := llms.MessageContent{
+		Role: llms.ChatMessageTypeTool,
+		Parts: []llms.ContentPart{
+			llms.ToolCallResponse{ToolCallID: "tool-1", Content: "sunny"},
+			llms.ToolCallResponse{ToolCallID: "tool-2", Content: "72F"},
+		},
+	}
+
+	got, err := handleToolMessage(msg)
+	if err != nil {
+		t.Fatalf("handleToolMessage() error = %v", err)
+	}
+	if got.Role != RoleUser {
+		t.Errorf("role = %q, want %q", got.Role, RoleUser)
+	}
+	contents, ok := got.Content.([]anthropicclient.Content)
+	if !ok {
+		t.Fatalf("content type = %T, want []anthropicclient.Content", got.Content)
+	}
+	if len(contents) != 2 {
+		t.Fatalf("len(contents) = %d, want 2", len(contents))
+	}
+	second, ok := contents[1].(anthropicclient.ToolResultContent)
+	if !ok {
+		t.Fatalf("contents[1] type = %T, want ToolResultContent", contents[1])
+	}
+	if second.ToolUseID != "tool-2" || second.Content != "72F" {
+		t.Errorf("contents[1] = %+v, want tool-2/72F", second)
+	}
+}
+
+func TestProcessAnthropicResponseParts(t *testing.T) {
+	result := &anthropicclient.MessageResponsePayload{
+		Content: []anthropicclient.Content{
+			&anthropicclient.ThinkingContent{Type: "thinking", Thinking: "hmm", Signature: "sig"},
+			&anthropicclient.RedactedThinkingContent{Type: "redacted_thinking", Data: "opaque"},
+			&anthropicclient.TextContent{Type: "text", Text: "answer"},
+			&anthropicclient.ToolUseContent{Type: "tool_use", ID: "t1", Name: "f", Input: map[string]interface{}{"a": "b"}},
+		},
+	}
+
+	resp, err := processAnthropicResponse(result)
+	if err != nil {
+		t.Fatalf("processAnthropicResponse() error = %v", err)
+	}
+	if len(resp.Choices) != 4 {
+		t.Fatalf("len(choices) = %d, want 4", len(resp.Choices))
+	}
+
+	thinkingPart, ok := resp.Choices[0].Parts[0].(llms.ThinkingContent)
+	if !ok {
+		t.Fatalf("choices[0].Parts[0] type = %T, want llms.ThinkingContent", resp.Choices[0].Parts[0])
+	}
+	if thinkingPart.Thinking != "hmm" || thinkingPart.Signature != "sig" {
+		t.Errorf("thinking part = %+v, want hmm/sig", thinkingPart)
+	}
+	if resp.Choices[0].ReasoningContent != "hmm" {
+		t.Errorf("ReasoningContent = %q, want %q", resp.Choices[0].ReasoningContent, "hmm")
+	}
+	if _, ok := resp.Choices[1].Parts[0].(llms.RedactedThinkingContent); !ok {
+		t.Fatalf("choices[1].Parts[0] type = %T, want llms.RedactedThinkingContent", resp.Choices[1].Parts[0])
+	}
+	if _, ok := resp.Choices[2].Parts[0].(llms.TextContent); !ok {
+		t.Fatalf("choices[2].Parts[0] type = %T, want llms.TextContent", resp.Choices[2].Parts[0])
+	}
+	if _, ok := resp.Choices[3].Parts[0].(llms.ToolCall); !ok {
+		t.Fatalf("choices[3].Parts[0] type = %T, want llms.ToolCall", resp.Choices[3].Parts[0])
+	}
+
+	// Round-trip: the concatenated parts must convert back into a valid
+	// assistant message with all four blocks in order.
+	var aiParts []llms.ContentPart
+	for _, c := range resp.Choices {
+		aiParts = append(aiParts, c.Parts...)
+	}
+	aiMsg, err := handleAIMessage(llms.MessageContent{Role: llms.ChatMessageTypeAI, Parts: aiParts})
+	if err != nil {
+		t.Fatalf("handleAIMessage(round-trip) error = %v", err)
+	}
+	contents := aiMsg.Content.([]anthropicclient.Content)
+	if len(contents) != 4 {
+		t.Fatalf("round-trip len(contents) = %d, want 4", len(contents))
+	}
+	rt, ok := contents[0].(*anthropicclient.ThinkingContent)
+	if !ok || rt.Signature != "sig" {
+		t.Errorf("round-trip thinking = %+v, want signature preserved", contents[0])
 	}
 }
