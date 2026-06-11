@@ -88,6 +88,6 @@ func MapError(err error) error {
 func transferRetryAfter(src error, dst *llms.Error) {
 	var respErr *httputil.ResponseError
 	if errors.As(src, &respErr) && respErr.RetryAfter > 0 {
-		dst.WithRetryAfter(respErr.RetryAfter)
+		_ = dst.WithRetryAfter(respErr.RetryAfter) //nolint:errcheck
 	}
 }

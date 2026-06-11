@@ -175,7 +175,7 @@ func (c *RetryConfig) backoff(attempt int) time.Duration {
 	}
 
 	// Add random jitter in [0.5, 1.0) to ensure we never exceed MaxBackoff.
-	jitter := 0.5 + rand.Float64()*0.5
+	jitter := 0.5 + rand.Float64()*0.5 //nolint:gosec // G404: jitter doesn't need crypto-rand
 	return time.Duration(backoff * jitter)
 }
 
@@ -240,9 +240,9 @@ func defaultIsRetryableStatus(statusCode int) bool {
 	switch statusCode {
 	case http.StatusTooManyRequests, // 429
 		http.StatusInternalServerError, // 500
-		http.StatusBadGateway,           // 502
-		http.StatusServiceUnavailable,   // 503
-		http.StatusGatewayTimeout:       // 504
+		http.StatusBadGateway,          // 502
+		http.StatusServiceUnavailable,  // 503
+		http.StatusGatewayTimeout:      // 504
 		return true
 	default:
 		return false
@@ -318,4 +318,3 @@ func fireOnRetry(cfg *RetryConfig, attempt int, err error) {
 		cfg.OnRetry(attempt, err)
 	}
 }
-

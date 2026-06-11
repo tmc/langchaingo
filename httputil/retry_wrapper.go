@@ -147,6 +147,6 @@ func providerBackoff(cfg *RetryConfig, attempt int) time.Duration {
 		backoff = float64(cfg.MaxBackoff)
 	}
 
-	jitter := 0.5 + rand.Float64()*0.5
+	jitter := 0.5 + rand.Float64()*0.5 //nolint:gosec // G404: jitter doesn't need crypto-rand
 	return time.Duration(backoff * jitter)
 }

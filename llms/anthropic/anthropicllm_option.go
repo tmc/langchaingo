@@ -14,10 +14,10 @@ const (
 const MaxTokensAnthropicSonnet35 = "max-tokens-3-5-sonnet-2024-07-15" //nolint:gosec // This is not a sensitive value.
 
 type options struct {
-	token      string
-	model      string
-	baseURL    string
-	httpClient anthropicclient.Doer
+	token       string
+	model       string
+	baseURL     string
+	httpClient  anthropicclient.Doer
 	retryConfig *httputil.RetryConfig
 
 	useLegacyTextCompletionsAPI bool

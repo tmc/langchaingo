@@ -37,15 +37,15 @@ func TestBackoff(t *testing.T) {
 	}
 
 	tests := []struct {
-		attempt  int
-		min      time.Duration
-		max      time.Duration
+		attempt int
+		min     time.Duration
+		max     time.Duration
 	}{
-		{0, 1 * time.Second, 1 * time.Second},                         // exact InitialBackoff, no jitter for attempt 0
-		{1, 1000 * time.Millisecond, 2000 * time.Millisecond},          // 2s * jitter [0.5, 1.0)
-		{2, 2000 * time.Millisecond, 4000 * time.Millisecond},          // 4s * jitter [0.5, 1.0)
-		{3, 4000 * time.Millisecond, 8000 * time.Millisecond},          // 8s * jitter [0.5, 1.0)
-		{10, 15000 * time.Millisecond, 30000 * time.Millisecond},       // capped at MaxBackoff, jitter [0.5, 1.0)
+		{0, 1 * time.Second, 1 * time.Second},                    // exact InitialBackoff, no jitter for attempt 0
+		{1, 1000 * time.Millisecond, 2000 * time.Millisecond},    // 2s * jitter [0.5, 1.0)
+		{2, 2000 * time.Millisecond, 4000 * time.Millisecond},    // 4s * jitter [0.5, 1.0)
+		{3, 4000 * time.Millisecond, 8000 * time.Millisecond},    // 8s * jitter [0.5, 1.0)
+		{10, 15000 * time.Millisecond, 30000 * time.Millisecond}, // capped at MaxBackoff, jitter [0.5, 1.0)
 	}
 
 	for _, tt := range tests {
