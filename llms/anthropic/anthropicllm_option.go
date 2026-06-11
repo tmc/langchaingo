@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
@@ -13,10 +14,11 @@ const (
 const MaxTokensAnthropicSonnet35 = "max-tokens-3-5-sonnet-2024-07-15" //nolint:gosec // This is not a sensitive value.
 
 type options struct {
-	token      string
-	model      string
-	baseURL    string
-	httpClient anthropicclient.Doer
+	token       string
+	model       string
+	baseURL     string
+	httpClient  anthropicclient.Doer
+	retryConfig *httputil.RetryConfig
 
 	useLegacyTextCompletionsAPI bool
 
@@ -68,5 +70,14 @@ func WithLegacyTextCompletionsAPI() Option {
 func WithAnthropicBetaHeader(value string) Option {
 	return func(opts *options) {
 		opts.anthropicBetaHeader = value
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

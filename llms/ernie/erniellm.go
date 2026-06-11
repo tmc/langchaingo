@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/ernie/internal/ernieclient"
 )
@@ -20,6 +21,7 @@ type LLM struct {
 	client           *ernieclient.Client
 	model            ModelName
 	CallbacksHandler callbacks.Handler
+	retryConfig      *httputil.RetryConfig
 }
 
 var _ llms.Model = (*LLM)(nil)
@@ -41,6 +43,7 @@ func New(opts ...Option) (*LLM, error) {
 		client:           c,
 		model:            options.modelName,
 		CallbacksHandler: options.callbacksHandler,
+		retryConfig:      options.retryConfig,
 	}, err
 }
 
@@ -85,23 +88,29 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Assume we get a single text message
 	msg0 := messages[0]
 	part := msg0.Parts[0]
-	result, err := o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
-		Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
-		PenaltyScore:  opts.RepetitionPenalty,
-		StreamingFunc: opts.StreamingFunc,
-		Stream:        opts.StreamingFunc != nil,
+
+	var result *ernieclient.Completion
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		result, retryErr = o.client.CreateCompletion(ctx, o.getModelPath(*opts), &ernieclient.CompletionRequest{
+			Messages:      []ernieclient.Message{{Role: "user", Content: part.(llms.TextContent).Text}},
+			Temperature:   opts.Temperature,
+			TopP:          opts.TopP,
+			PenaltyScore:  opts.RepetitionPenalty,
+			StreamingFunc: opts.StreamingFunc,
+			Stream:        opts.StreamingFunc != nil,
+		})
+		if retryErr != nil {
+			return retryErr
+		}
+		// ERNIE returns HTTP 200 with error_code in body for some errors.
+		if result.ErrorCode > 0 {
+			return fmt.Errorf("error_code:%v, error_msg:%v, id:%v",
+				result.ErrorCode, result.ErrorMsg, result.ID)
+		}
+		return nil
 	})
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
-		return nil, err
-	}
-	if result.ErrorCode > 0 {
-		err = fmt.Errorf("%w, error_code:%v, erro_msg:%v, id:%v",
-			ErrCodeResponse, result.ErrorCode, result.ErrorMsg, result.ID)
 		if o.CallbacksHandler != nil {
 			o.CallbacksHandler.HandleLLMError(ctx, err)
 		}

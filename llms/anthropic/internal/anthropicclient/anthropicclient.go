@@ -223,7 +223,7 @@ func (c *Client) decodeError(resp *http.Response) error {
 
 	var errResp errorMessage
 	if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
-		return errors.New(msg)
+		return httputil.NewResponseError(resp, msg)
 	}
-	return fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+	return httputil.NewResponseError(resp, fmt.Sprintf("%s: %s", msg, errResp.Error.Message))
 }

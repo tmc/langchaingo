@@ -6,12 +6,14 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/ollama/internal/ollamaclient"
 )
 
 type options struct {
 	ollamaServerURL     *url.URL
 	httpClient          *http.Client
+	retryConfig         *httputil.RetryConfig
 	model               string
 	ollamaOptions       ollamaclient.Options
 	customModelTemplate string
@@ -83,6 +85,15 @@ func WithServerURL(rawURL string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }
 

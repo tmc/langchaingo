@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/huggingface/internal/huggingfaceclient"
 )
@@ -97,6 +98,8 @@ func New(opts ...Option) (*LLM, error) {
 	var clientOpts []huggingfaceclient.Option
 	if options.httpClient != nil {
 		clientOpts = append(clientOpts, huggingfaceclient.WithHTTPClient(options.httpClient))
+	} else if options.retryConfig != nil {
+		clientOpts = append(clientOpts, huggingfaceclient.WithHTTPClient(httputil.NewClientWithRetry(options.retryConfig)))
 	}
 	if options.provider != "" {
 		clientOpts = append(clientOpts, huggingfaceclient.WithProvider(options.provider))

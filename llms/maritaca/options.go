@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/maritaca/internal/maritacaclient"
 )
 
 type options struct {
 	maritacaServerURL   *url.URL
 	httpClient          *http.Client
+	retryConfig         *httputil.RetryConfig
 	model               string
 	maritacaOptions     maritacaclient.Options
 	customModelTemplate string
@@ -66,6 +68,15 @@ func WithServerURL(rawURL string) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }
 

@@ -1,8 +1,10 @@
 package openai
 
 import (
+	"errors"
 	"strings"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -69,7 +71,10 @@ func MapError(err error) error {
 	for _, mapping := range openaiErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "openai", mapping.message).WithCause(err)
+				classified := llms.NewError(mapping.code, "openai", mapping.message).WithCause(err)
+				// Transfer Retry-After from HTTP response error.
+				transferRetryAfter(err, classified)
+				return classified
 			}
 		}
 	}
@@ -77,4 +82,13 @@ func MapError(err error) error {
 	// Use the generic error mapper for unrecognized errors
 	mapper := llms.NewErrorMapper("openai")
 	return mapper.Map(err)
+}
+
+// transferRetryAfter extracts the Retry-After value from an *httputil.ResponseError
+// and sets it on the classified *llms.Error.
+func transferRetryAfter(src error, dst *llms.Error) {
+	var respErr *httputil.ResponseError
+	if errors.As(src, &respErr) && respErr.RetryAfter > 0 {
+		_ = dst.WithRetryAfter(respErr.RetryAfter) //nolint:errcheck
+	}
 }

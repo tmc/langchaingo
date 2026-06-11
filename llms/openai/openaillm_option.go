@@ -2,6 +2,7 @@ package openai
 
 import (
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
 
@@ -32,6 +33,7 @@ type options struct {
 	organization string
 	apiType      APIType
 	httpClient   openaiclient.Doer
+	retryConfig  *httputil.RetryConfig
 
 	responseFormat *ResponseFormat
 
@@ -144,5 +146,14 @@ func WithCallback(callbackHandler callbacks.Handler) Option {
 func WithResponseFormat(responseFormat *ResponseFormat) Option {
 	return func(opts *options) {
 		opts.responseFormat = responseFormat
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }

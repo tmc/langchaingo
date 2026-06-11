@@ -22,6 +22,35 @@ var (
 	}
 )
 
+// NewRetryClient returns an [*http.Client] with retry support.
+// The client wraps [http.DefaultTransport] with a [RetryTransport].
+// User-Agent headers are NOT automatically added; use [NewClientWithRetry]
+// for the full transport chain.
+func NewRetryClient(cfg *RetryConfig) *http.Client {
+	return &http.Client{
+		Transport: &RetryTransport{
+			Transport: http.DefaultTransport,
+			Config:    cfg,
+		},
+	}
+}
+
+// NewClientWithRetry returns an [*http.Client] with both retry support
+// and User-Agent injection. The transport chain is:
+//
+//	RetryTransport → Transport → http.DefaultTransport
+//
+// This is the recommended constructor for HTTP clients that need automatic
+// retries.
+func NewClientWithRetry(cfg *RetryConfig) *http.Client {
+	return &http.Client{
+		Transport: &RetryTransport{
+			Transport: DefaultTransport,
+			Config:    cfg,
+		},
+	}
+}
+
 // Transport is an [http.RoundTripper] that adds LangChainGo User-Agent headers
 // to outgoing HTTP requests. It wraps another RoundTripper (typically
 // [http.DefaultTransport]) and can be used to add User-Agent headers to any

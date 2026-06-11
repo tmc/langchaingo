@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -87,6 +88,18 @@ type ChatRequest struct {
 	// WebSearchOptions configures web search behavior for search-enabled models
 	// like gpt-4o-search-preview and gpt-4o-mini-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+
+	// EnableThinking enables Qwen's deep thinking mode via OpenAI-compatible API.
+	// Must be used with streaming (Qwen requires enable_thinking=false for non-streaming calls).
+	EnableThinking *bool `json:"enable_thinking,omitempty"`
+
+	// EnableDeepSeekThinking enables Qwen's deep thinking mode via OpenAI-compatible API.
+	// Must be used with streaming (Qwen requires enable_thinking=false for non-streaming calls).
+	DeepSeekThinking map[string]any `json:"thinking,omitempty"`
+
+	// ThinkingBudget limits the thinking tokens for Qwen models.
+	// Supported by Qwen3+ models.
+	ThinkingBudget int `json:"thinking_budget,omitempty"`
 }
 
 // MarshalJSON ensures that only one of MaxTokens or MaxCompletionTokens is sent.
@@ -555,10 +568,10 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 		// status code.
 		var errResp errorMessage
 		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg)
+			return nil, httputil.NewResponseError(r, msg)
 		}
 
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+		return nil, httputil.NewResponseError(r, fmt.Sprintf("%s: %s", msg, errResp.Error.Message))
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingChatResponse(ctx, r, payload)

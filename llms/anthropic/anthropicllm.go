@@ -33,7 +33,8 @@ const (
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *anthropicclient.Client
-	model            string // Track current model for reasoning detection
+	model            string
+	retryConfig      *httputil.RetryConfig
 }
 
 var (
@@ -43,17 +44,18 @@ var (
 
 // New returns a new Anthropic LLM.
 func New(opts ...Option) (*LLM, error) {
-	c, err := newClient(opts...)
+	c, retryCfg, err := newClient(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to create client: %w", err)
 	}
 	return &LLM{
-		client: c,
-		model:  c.Model, // Store the model for reasoning detection
+		client:      c,
+		model:       c.Model,
+		retryConfig: retryCfg,
 	}, nil
 }
 
-func newClient(opts ...Option) (*anthropicclient.Client, error) {
+func newClient(opts ...Option) (*anthropicclient.Client, *httputil.RetryConfig, error) {
 	options := &options{
 		token:      os.Getenv(tokenEnvVarName),
 		baseURL:    anthropicclient.DefaultBaseURL,
@@ -65,14 +67,15 @@ func newClient(opts ...Option) (*anthropicclient.Client, error) {
 	}
 
 	if len(options.token) == 0 {
-		return nil, ErrMissingToken
+		return nil, nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model, options.baseURL,
+	c, err := anthropicclient.New(options.token, options.model, options.baseURL,
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
 		anthropicclient.WithAnthropicBetaHeader(options.anthropicBetaHeader),
 	)
+	return c, options.retryConfig, err
 }
 
 // Call requests a completion for the given prompt.
@@ -109,14 +112,19 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 		return nil, fmt.Errorf("anthropic: unexpected message type: %T", part)
 	}
 	prompt := fmt.Sprintf("\n\nHuman: %s\n\nAssistant:", partText.Text)
-	result, err := o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
-		Model:         opts.Model,
-		Prompt:        prompt,
-		MaxTokens:     opts.MaxTokens,
-		StopWords:     opts.StopWords,
-		Temperature:   opts.Temperature,
-		TopP:          opts.TopP,
-		StreamingFunc: opts.StreamingFunc,
+	var result *anthropicclient.Completion
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		result, retryErr = o.client.CreateCompletion(ctx, &anthropicclient.CompletionRequest{
+			Model:         opts.Model,
+			Prompt:        prompt,
+			MaxTokens:     opts.MaxTokens,
+			StopWords:     opts.StopWords,
+			Temperature:   opts.Temperature,
+			TopP:          opts.TopP,
+			StreamingFunc: opts.StreamingFunc,
+		})
+		return retryErr
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -145,19 +153,24 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	betaHeaders, thinking := extractThinkingOptions(o, opts)
 
-	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
-		Model:                  opts.Model,
-		Messages:               chatMessages,
-		System:                 systemPrompt,
-		MaxTokens:              opts.MaxTokens,
-		StopWords:              opts.StopWords,
-		Temperature:            opts.Temperature,
-		TopP:                   opts.TopP,
-		Tools:                  tools,
-		Thinking:               thinking,
-		BetaHeaders:            betaHeaders,
-		StreamingFunc:          opts.StreamingFunc,
-		StreamingReasoningFunc: opts.StreamingReasoningFunc,
+	var msgResult *anthropicclient.MessageResponsePayload
+	err = httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		msgResult, retryErr = o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
+			Model:                  opts.Model,
+			Messages:               chatMessages,
+			System:                 systemPrompt,
+			MaxTokens:              opts.MaxTokens,
+			StopWords:              opts.StopWords,
+			Temperature:            opts.Temperature,
+			TopP:                   opts.TopP,
+			Tools:                  tools,
+			Thinking:               thinking,
+			BetaHeaders:            betaHeaders,
+			StreamingFunc:          opts.StreamingFunc,
+			StreamingReasoningFunc: opts.StreamingReasoningFunc,
+		})
+		return retryErr
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {
@@ -165,7 +178,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	return processAnthropicResponse(result)
+	return processAnthropicResponse(msgResult)
 }
 
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse

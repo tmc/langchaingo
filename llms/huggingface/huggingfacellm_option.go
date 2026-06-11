@@ -2,6 +2,8 @@ package huggingface
 
 import (
 	"net/http"
+
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -18,11 +20,12 @@ const (
 )
 
 type options struct {
-	token      string
-	model      string
-	url        string
-	httpClient *http.Client
-	provider   string // Inference provider (e.g., "hyperbolic", "nebius")
+	token       string
+	model       string
+	url         string
+	httpClient  *http.Client
+	retryConfig *httputil.RetryConfig
+	provider    string // Inference provider (e.g., "hyperbolic", "nebius")
 }
 
 type Option func(*options)
@@ -55,6 +58,15 @@ func WithURL(url string) Option {
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = httpClient
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(opts *options) {
+		opts.retryConfig = retryConfig
 	}
 }
 

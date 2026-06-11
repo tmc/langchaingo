@@ -32,7 +32,11 @@ func New(opts ...Option) (*LLM, error) {
 	}
 
 	if o.httpClient == nil {
-		o.httpClient = httputil.DefaultClient
+		if o.retryConfig != nil {
+			o.httpClient = httputil.NewClientWithRetry(o.retryConfig)
+		} else {
+			o.httpClient = httputil.DefaultClient
+		}
 	}
 
 	client, err := maritacaclient.NewClient(o.httpClient)

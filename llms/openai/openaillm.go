@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/callbacks"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai/internal/openaiclient"
 )
@@ -17,6 +18,7 @@ type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *openaiclient.Client
 	model            string // Track current model for reasoning detection
+	retryConfig      *httputil.RetryConfig
 }
 
 const (
@@ -91,7 +93,8 @@ func New(opts ...Option) (*LLM, error) {
 	return &LLM{
 		client:           c,
 		CallbacksHandler: opt.callbackHandler,
-		model:            c.Model, // Store the model for reasoning detection
+		model:            c.Model,
+		retryConfig:      opt.retryConfig,
 	}, err
 }
 
@@ -250,7 +253,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	if opts.Metadata != nil {
 		for k, v := range opts.Metadata {
 			// Skip internal metadata keys
-			if k == "thinking_config" || strings.HasPrefix(k, "openai:") {
+			if k == "thinking_config" || strings.HasPrefix(k, "openai:") || strings.HasPrefix(k, "qwen:") {
 				continue
 			}
 			apiMetadata[k] = v
@@ -259,6 +262,22 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Only include metadata if there are actual values to send
 	if len(apiMetadata) == 0 {
 		apiMetadata = nil
+	}
+
+	// Extract Qwen enable_thinking parameter from metadata
+	var enableThinking *bool
+	var thinkingBudget int
+	var enableDeepSeekThinking map[string]any
+	if opts.Metadata != nil {
+		if v, ok := opts.Metadata["qwen:enable_thinking"].(bool); ok {
+			enableThinking = &v
+		}
+		if v, ok := opts.Metadata["deepseek:enable_thinking"].(map[string]any); ok {
+			enableDeepSeekThinking = v
+		}
+		if v, ok := opts.Metadata["qwen:thinking_budget"].(int); ok {
+			thinkingBudget = v
+		}
 	}
 
 	req := &openaiclient.ChatRequest{
@@ -293,6 +312,9 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
+		EnableThinking:       enableThinking,
+		DeepSeekThinking:     enableDeepSeekThinking,
+		ThinkingBudget:       thinkingBudget,
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
 	}
 	if opts.JSONMode {
@@ -325,7 +347,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		req.ResponseFormat = o.client.ResponseFormat
 	}
 
-	result, err := o.client.CreateChat(ctx, req)
+	var result *openaiclient.ChatCompletionResponse
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		result, retryErr = o.client.CreateChat(ctx, req)
+		return retryErr
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -425,9 +452,14 @@ func (o *LLM) SupportsReasoning() bool {
 
 // CreateEmbedding creates embeddings for the given input texts.
 func (o *LLM) CreateEmbedding(ctx context.Context, inputTexts []string) ([][]float32, error) {
-	embeddings, err := o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
-		Input: inputTexts,
-		Model: o.client.EmbeddingModel,
+	var embeddings [][]float32
+	err := httputil.RetryOnError(ctx, o.retryConfig, MapError, func() error {
+		var retryErr error
+		embeddings, retryErr = o.client.CreateEmbedding(ctx, &openaiclient.EmbeddingRequest{
+			Input: inputTexts,
+			Model: o.client.EmbeddingModel,
+		})
+		return retryErr
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create openai embeddings: %w", err)

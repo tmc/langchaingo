@@ -1,6 +1,9 @@
 package llamafile
 
-import "github.com/tmc/langchaingo/llms/llamafile/internal/llamafileclient"
+import (
+	"github.com/tmc/langchaingo/httputil"
+	"github.com/tmc/langchaingo/llms/llamafile/internal/llamafileclient"
+)
 
 type Option func(*llamafileclient.GenerationSettings)
 
@@ -197,5 +200,14 @@ func WithNCtx(val int) Option {
 func WithEmbeddingSize(val int) Option {
 	return func(g *llamafileclient.GenerationSettings) {
 		g.EmbeddingSize = val
+	}
+}
+
+// WithRetryConfig sets the retry configuration for the HTTP client.
+// When set, the internal HTTP client will be wrapped with automatic retry
+// behavior using exponential backoff with jitter.
+func WithRetryConfig(retryConfig *httputil.RetryConfig) Option {
+	return func(g *llamafileclient.GenerationSettings) {
+		g.HTTPClient = httputil.NewClientWithRetry(retryConfig)
 	}
 }

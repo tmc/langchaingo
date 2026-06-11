@@ -1,8 +1,10 @@
 package anthropic
 
 import (
+	"errors"
 	"strings"
 
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/llms"
 )
 
@@ -69,7 +71,9 @@ func MapError(err error) error {
 	for _, mapping := range anthropicErrorMappings {
 		for _, pattern := range mapping.patterns {
 			if strings.Contains(errStr, pattern) {
-				return llms.NewError(mapping.code, "anthropic", mapping.message).WithCause(err)
+				classified := llms.NewError(mapping.code, "anthropic", mapping.message).WithCause(err)
+				transferRetryAfter(err, classified)
+				return classified
 			}
 		}
 	}
@@ -77,4 +81,13 @@ func MapError(err error) error {
 	// Use the generic error mapper for unrecognized errors
 	mapper := llms.NewErrorMapper("anthropic")
 	return mapper.Map(err)
+}
+
+// transferRetryAfter extracts the Retry-After value from an *httputil.ResponseError
+// and sets it on the classified *llms.Error.
+func transferRetryAfter(src error, dst *llms.Error) {
+	var respErr *httputil.ResponseError
+	if errors.As(src, &respErr) && respErr.RetryAfter > 0 {
+		_ = dst.WithRetryAfter(respErr.RetryAfter) //nolint:errcheck
+	}
 }
