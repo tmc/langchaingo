@@ -20,12 +20,12 @@ const (
 )
 
 type options struct {
-	token      string
-	model      string
-	url        string
-	httpClient *http.Client
+	token       string
+	model       string
+	url         string
+	httpClient  *http.Client
 	retryConfig *httputil.RetryConfig
-	provider   string // Inference provider (e.g., "hyperbolic", "nebius")
+	provider    string // Inference provider (e.g., "hyperbolic", "nebius")
 }
 
 type Option func(*options)

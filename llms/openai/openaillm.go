@@ -17,7 +17,7 @@ type ChatMessage = openaiclient.ChatMessage
 type LLM struct {
 	CallbacksHandler callbacks.Handler
 	client           *openaiclient.Client
-	model            string            // Track current model for reasoning detection
+	model            string // Track current model for reasoning detection
 	retryConfig      *httputil.RetryConfig
 }
 
