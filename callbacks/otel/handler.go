@@ -9,7 +9,6 @@ package otelcallback
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"sync"
 
 	"go.opentelemetry.io/otel"
@@ -266,9 +265,4 @@ func toInt(v any) (int, bool) {
 		return int(val), true
 	}
 	return 0, false
-}
-
-// intStr converts an int to string for use in attribute key construction.
-func intStr(i int) string {
-	return strconv.Itoa(i)
 }
