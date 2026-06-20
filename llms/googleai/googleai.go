@@ -19,6 +19,7 @@ var (
 	ErrNoContentInResponse   = errors.New("no content in generation response")
 	ErrUnknownPartInResponse = errors.New("unknown part type in generation response")
 	ErrInvalidMimeType       = errors.New("invalid mime type on content")
+	ErrNoMessageContent      = errors.New("no non-system message content to send")
 )
 
 const (
@@ -330,6 +331,10 @@ func generateFromMessages(
 	// Given N total messages, genai's chat expects the first N-1 messages as
 	// history and the last message as the actual request.
 	n := len(history)
+	if n == 0 {
+		// All input messages were system messages, so there is nothing to send.
+		return nil, ErrNoMessageContent
+	}
 	reqContent := history[n-1]
 	history = history[:n-1]
 
