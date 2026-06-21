@@ -66,10 +66,20 @@ type ConverseInput struct {
 type converseThinkingPayload struct {
 	Type         string `json:"type" document:"type"`
 	BudgetTokens int    `json:"budget_tokens,omitempty" document:"budget_tokens,omitempty"`
+	// Display keeps adaptive reasoning text visible ("summarized"); Opus 4.7+
+	// otherwise default it to "omitted".
+	Display string `json:"display,omitempty" document:"display,omitempty"`
+}
+
+// converseOutputConfig carries the adaptive-thinking effort. It is a sibling of
+// "thinking" inside additionalModelRequestFields.
+type converseOutputConfig struct {
+	Effort string `json:"effort,omitempty" document:"effort,omitempty"`
 }
 
 type converseAdditionalModelRequestFields struct {
-	Thinking *converseThinkingPayload `json:"thinking,omitempty" document:"thinking,omitempty"`
+	Thinking     *converseThinkingPayload `json:"thinking,omitempty" document:"thinking,omitempty"`
+	OutputConfig *converseOutputConfig    `json:"output_config,omitempty" document:"output_config,omitempty"`
 }
 
 // buildConverseInput converts our input to AWS Converse format
@@ -132,15 +142,30 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	// Add additional model fields
 	if input.ReasoningConfig != nil && c.supportsReasoning(input.ModelID) {
 		additionalModelFields := converseAdditionalModelRequestFields{}
-		maxTokens := 0 // Use 0 to let it use default maxTokens
-		if input.MaxTokens != nil {
-			maxTokens = *input.MaxTokens
-		}
-		tokens := input.ReasoningConfig.GetTokens(maxTokens)
-		if tokens > 0 {
+		if input.ReasoningConfig.Adaptive {
+			effort := input.ReasoningConfig.Effort
+			if effort == llms.ReasoningNone {
+				effort = llms.ReasoningHigh // the API rejects an empty effort
+			}
 			additionalModelFields.Thinking = &converseThinkingPayload{
-				Type:         "enabled",
-				BudgetTokens: tokens,
+				Type:    "adaptive",
+				Display: "summarized",
+			}
+			additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
+			// Adaptive models reject sampling params.
+			inferenceConfig.Temperature = nil
+			inferenceConfig.TopP = nil
+		} else {
+			maxTokens := 0 // Use 0 to let it use default maxTokens
+			if input.MaxTokens != nil {
+				maxTokens = *input.MaxTokens
+			}
+			tokens := input.ReasoningConfig.GetTokens(maxTokens)
+			if tokens > 0 {
+				additionalModelFields.Thinking = &converseThinkingPayload{
+					Type:         "enabled",
+					BudgetTokens: tokens,
+				}
 			}
 		}
 		if additionalModelFields.Thinking != nil {

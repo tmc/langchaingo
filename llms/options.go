@@ -34,18 +34,32 @@ const (
 	ReasoningMedium ReasoningEffort = "medium"
 	ReasoningLow    ReasoningEffort = "low"
 	ReasoningNone   ReasoningEffort = ""
+	// ReasoningXHigh and ReasoningMax are adaptive-thinking efforts (Claude Opus 4.7+).
+	// They are valid only with adaptive reasoning, not the budget-token path
+	// (GetTokens treats them as invalid).
+	ReasoningXHigh ReasoningEffort = "xhigh"
+	ReasoningMax   ReasoningEffort = "max"
 )
 
 // ReasoningConfig is a set of options for reasoning.
 type ReasoningConfig struct {
 	Effort ReasoningEffort `json:"effort"`
 	Tokens int             `json:"tokens"`
+	// Adaptive selects adaptive thinking (Claude Opus 4.7+): the request carries
+	// thinking.type=adaptive plus output_config.effort instead of a token budget,
+	// and the provider omits sampling params (temperature/top_p) that adaptive
+	// models reject. Effort sets the level; Tokens is ignored.
+	Adaptive bool `json:"adaptive,omitempty"`
 }
 
 // IsEnabled returns true if reasoning is enabled based on the effort and tokens.
 func (r *ReasoningConfig) IsEnabled() bool {
 	if r == nil {
 		return false
+	}
+
+	if r.Adaptive {
+		return true
 	}
 
 	if r.Effort == ReasoningNone && r.Tokens == 0 {
@@ -612,6 +626,19 @@ func WithReasoning(effort ReasoningEffort, tokens int) CallOption {
 		o.Reasoning = &ReasoningConfig{
 			Effort: effort,
 			Tokens: tokens,
+		}
+	}
+}
+
+// WithAdaptiveReasoning enables adaptive thinking (Claude Opus 4.7+): the model
+// decides how much to think and effort sets the level (low/medium/high/xhigh/max).
+// Unlike WithReasoning there is no token budget, and the provider omits sampling
+// params (temperature/top_p) that adaptive models reject.
+func WithAdaptiveReasoning(effort ReasoningEffort) CallOption {
+	return func(o *CallOptions) {
+		o.Reasoning = &ReasoningConfig{
+			Effort:   effort,
+			Adaptive: true,
 		}
 	}
 }

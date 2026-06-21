@@ -66,6 +66,15 @@ type ChatMessage struct {
 type ThinkingPayload struct {
 	Type   string `json:"type"`
 	Budget int    `json:"budget_tokens,omitempty"`
+	// Display controls reasoning visibility for adaptive thinking; "summarized"
+	// keeps reasoning text (Opus 4.7+ otherwise default it to "omitted").
+	Display string `json:"display,omitempty"`
+}
+
+// OutputConfig carries the adaptive-thinking effort. It is a top-level sibling of
+// "thinking" in the Messages request body.
+type OutputConfig struct {
+	Effort string `json:"effort,omitempty"`
 }
 
 type messagePayload struct {
@@ -80,7 +89,8 @@ type messagePayload struct {
 	Tools       []Tool        `json:"tools,omitempty"`
 	ToolChoice  any           `json:"tool_choice,omitempty"`
 
-	Thinking *ThinkingPayload `json:"thinking,omitempty"`
+	Thinking     *ThinkingPayload `json:"thinking,omitempty"`
+	OutputConfig *OutputConfig    `json:"output_config,omitempty"`
 
 	StreamingFunc streaming.Callback `json:"-"`
 }

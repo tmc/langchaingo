@@ -2,6 +2,7 @@ package bedrockclient
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -267,6 +268,60 @@ func TestConverseClient_InferenceConfiguration(t *testing.T) {
 	assert.Equal(t, float32(0.8), *capturedInput.InferenceConfig.Temperature)
 	assert.Equal(t, float32(0.9), *capturedInput.InferenceConfig.TopP)
 	assert.Equal(t, []string{"STOP"}, capturedInput.InferenceConfig.StopSequences)
+
+	mockClient.AssertExpectations(t)
+}
+
+func TestConverseClient_AdaptiveReasoning(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "anthropic.claude-opus-4-6-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		Temperature:     ptr(0.8),
+		TopP:            ptr(0.9),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Adaptive: true},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	// Adaptive models reject sampling params — temperature/top_p must be omitted.
+	assert.Nil(t, capturedInput.InferenceConfig.Temperature)
+	assert.Nil(t, capturedInput.InferenceConfig.TopP)
+	assert.Equal(t, int32(2000), *capturedInput.InferenceConfig.MaxTokens)
+
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "adaptive", thinking["type"])
+	assert.Equal(t, "summarized", thinking["display"])
+	_, hasBudget := thinking["budget_tokens"]
+	assert.False(t, hasBudget, "adaptive thinking must not carry a token budget")
+
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, "high", outputConfig["effort"])
 
 	mockClient.AssertExpectations(t)
 }
