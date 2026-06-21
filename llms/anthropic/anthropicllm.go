@@ -162,10 +162,23 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 
 	var thinking *anthropicclient.ThinkingPayload
+	var outputConfig *anthropicclient.OutputConfig
 	if opts.Reasoning.IsEnabled() {
-		thinking = &anthropicclient.ThinkingPayload{
-			Type:   "enabled",
-			Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
+		if opts.Reasoning.Adaptive {
+			effort := opts.Reasoning.Effort
+			if effort == llms.ReasoningNone {
+				effort = llms.ReasoningHigh // the API rejects an empty effort
+			}
+			thinking = &anthropicclient.ThinkingPayload{
+				Type:    "adaptive",
+				Display: "summarized",
+			}
+			outputConfig = &anthropicclient.OutputConfig{Effort: string(effort)}
+		} else {
+			thinking = &anthropicclient.ThinkingPayload{
+				Type:   "enabled",
+				Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
+			}
 		}
 	}
 
@@ -197,9 +210,14 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	// Set temperature to 1.0 for thinking models
-	temperature, maxTokens := opts.Temperature, opts.GetMaxTokens()
-	if thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0 {
+	// Budget thinking pins temperature to 1.0; adaptive models reject sampling
+	// params, so omit temperature/top_p entirely for them.
+	temperature, topP, maxTokens := opts.Temperature, opts.TopP, opts.GetMaxTokens()
+	switch {
+	case thinking != nil && thinking.Type == "adaptive":
+		temperature = nil
+		topP = nil
+	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
 		temperature = getFloatPointer(1.0)
 		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
 	}
@@ -211,10 +229,11 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		MaxTokens:     &maxTokens,
 		StopWords:     opts.StopWords,
 		Temperature:   temperature,
-		TopP:          opts.TopP,
+		TopP:          topP,
 		Tools:         tools,
 		ToolChoice:    opts.ToolChoice,
 		Thinking:      thinking,
+		OutputConfig:  outputConfig,
 		BetaHeaders:   betaHeaders,
 		StreamingFunc: opts.StreamingFunc,
 	})

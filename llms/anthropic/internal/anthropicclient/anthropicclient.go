@@ -134,17 +134,18 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 }
 
 type MessageRequest struct {
-	Model       string           `json:"model"`
-	Messages    []ChatMessage    `json:"messages"`
-	System      any              `json:"system,omitempty"` // Can be string or []Content for caching
-	Temperature *float64         `json:"temperature,omitempty"`
-	MaxTokens   *int             `json:"max_tokens,omitempty"`
-	TopP        *float64         `json:"top_p,omitempty"`
-	Tools       []Tool           `json:"tools,omitempty"`
-	ToolChoice  any              `json:"tool_choice,omitempty"`
-	StopWords   []string         `json:"stop_sequences,omitempty"`
-	Stream      bool             `json:"stream,omitempty"`
-	Thinking    *ThinkingPayload `json:"thinking,omitempty"`
+	Model        string           `json:"model"`
+	Messages     []ChatMessage    `json:"messages"`
+	System       any              `json:"system,omitempty"` // Can be string or []Content for caching
+	Temperature  *float64         `json:"temperature,omitempty"`
+	MaxTokens    *int             `json:"max_tokens,omitempty"`
+	TopP         *float64         `json:"top_p,omitempty"`
+	Tools        []Tool           `json:"tools,omitempty"`
+	ToolChoice   any              `json:"tool_choice,omitempty"`
+	StopWords    []string         `json:"stop_sequences,omitempty"`
+	Stream       bool             `json:"stream,omitempty"`
+	Thinking     *ThinkingPayload `json:"thinking,omitempty"`
+	OutputConfig *OutputConfig    `json:"output_config,omitempty"`
 
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders   []string           `json:"-"`
@@ -166,6 +167,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		Stream:        r.Stream,
 		StreamingFunc: r.StreamingFunc,
 		Thinking:      r.Thinking,
+		OutputConfig:  r.OutputConfig,
 	}, r.BetaHeaders)
 	if err != nil {
 		return nil, err

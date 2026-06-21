@@ -2,12 +2,44 @@ package anthropicclient
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestMessagePayload_AdaptiveThinkingSerialization(t *testing.T) {
+	t.Parallel()
+
+	// Temperature/TopP left nil — adaptive models reject sampling params.
+	payload := &messagePayload{
+		Model:        "claude-opus-4-6",
+		Thinking:     &ThinkingPayload{Type: "adaptive", Display: "summarized"},
+		OutputConfig: &OutputConfig{Effort: "high"},
+	}
+
+	raw, err := json.Marshal(payload)
+	require.NoError(t, err)
+
+	var got map[string]any
+	require.NoError(t, json.Unmarshal(raw, &got))
+
+	thinking, _ := got["thinking"].(map[string]any)
+	require.Equal(t, "adaptive", thinking["type"])
+	require.Equal(t, "summarized", thinking["display"])
+	_, hasBudget := thinking["budget_tokens"]
+	require.False(t, hasBudget, "adaptive thinking must not carry a token budget")
+
+	outputConfig, _ := got["output_config"].(map[string]any)
+	require.Equal(t, "high", outputConfig["effort"])
+
+	_, hasTemp := got["temperature"]
+	require.False(t, hasTemp, "adaptive must omit temperature")
+	_, hasTopP := got["top_p"]
+	require.False(t, hasTopP, "adaptive must omit top_p")
+}
 
 func Test_parseStreamingMessageResponse_withEmptyInput(t *testing.T) {
 	t.Parallel()

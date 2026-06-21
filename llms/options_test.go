@@ -549,6 +549,11 @@ func TestReasoningConfig_IsEnabled(t *testing.T) {
 			config:   &llms.ReasoningConfig{Effort: llms.ReasoningMedium, Tokens: 2000},
 			expected: true,
 		},
+		{
+			name:     "adaptive config with no effort or tokens",
+			config:   &llms.ReasoningConfig{Adaptive: true},
+			expected: true,
+		},
 	}
 
 	for idx := range tests {
@@ -588,6 +593,18 @@ func TestReasoningConfig_GetEffort(t *testing.T) {
 		{
 			name:      "config with explicit effort",
 			config:    &llms.ReasoningConfig{Effort: llms.ReasoningHigh},
+			maxTokens: maxTokens,
+			expected:  llms.ReasoningHigh,
+		},
+		{
+			name:      "xhigh effort clamps to high (adaptive-only on the effort path)",
+			config:    &llms.ReasoningConfig{Effort: llms.ReasoningXHigh},
+			maxTokens: maxTokens,
+			expected:  llms.ReasoningHigh,
+		},
+		{
+			name:      "max effort clamps to high (adaptive-only on the effort path)",
+			config:    &llms.ReasoningConfig{Effort: llms.ReasoningMax},
 			maxTokens: maxTokens,
 			expected:  llms.ReasoningHigh,
 		},
@@ -684,6 +701,18 @@ func TestReasoningConfig_GetTokens(t *testing.T) {
 		{
 			name:      "config with high effort",
 			config:    &llms.ReasoningConfig{Effort: llms.ReasoningHigh},
+			maxTokens: maxTokens,
+			expected:  max(maxTokens/2, 4096),
+		},
+		{
+			name:      "xhigh effort clamps to high budget",
+			config:    &llms.ReasoningConfig{Effort: llms.ReasoningXHigh},
+			maxTokens: maxTokens,
+			expected:  max(maxTokens/2, 4096),
+		},
+		{
+			name:      "max effort clamps to high budget",
+			config:    &llms.ReasoningConfig{Effort: llms.ReasoningMax},
 			maxTokens: maxTokens,
 			expected:  max(maxTokens/2, 4096),
 		},
