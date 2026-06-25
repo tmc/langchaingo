@@ -597,16 +597,16 @@ func TestReasoningConfig_GetEffort(t *testing.T) {
 			expected:  llms.ReasoningHigh,
 		},
 		{
-			name:      "xhigh effort clamps to high (adaptive-only on the effort path)",
+			name:      "xhigh effort passes through on the effort path",
 			config:    &llms.ReasoningConfig{Effort: llms.ReasoningXHigh},
 			maxTokens: maxTokens,
-			expected:  llms.ReasoningHigh,
+			expected:  llms.ReasoningXHigh,
 		},
 		{
-			name:      "max effort clamps to high (adaptive-only on the effort path)",
+			name:      "max effort passes through on the effort path",
 			config:    &llms.ReasoningConfig{Effort: llms.ReasoningMax},
 			maxTokens: maxTokens,
-			expected:  llms.ReasoningHigh,
+			expected:  llms.ReasoningMax,
 		},
 		{
 			name:      "config with low tokens",

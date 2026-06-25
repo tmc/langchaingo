@@ -34,9 +34,9 @@ const (
 	ReasoningMedium ReasoningEffort = "medium"
 	ReasoningLow    ReasoningEffort = "low"
 	ReasoningNone   ReasoningEffort = ""
-	// ReasoningXHigh and ReasoningMax are adaptive-thinking efforts (Claude Opus 4.7+);
-	// pass them via WithAdaptiveReasoning. On the budget-token path they clamp to high
-	// (no provider has a distinct budget for them).
+	// ReasoningXHigh and ReasoningMax are the top reasoning efforts. Anthropic adaptive
+	// thinking (Claude Opus 4.7+) carries them via WithAdaptiveReasoning; OpenAI-compatible
+	// providers that expose them (e.g. GPT-5.5, GLM-5.2) accept them as reasoning_effort.
 	ReasoningXHigh ReasoningEffort = "xhigh"
 	ReasoningMax   ReasoningEffort = "max"
 )
@@ -83,12 +83,6 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 	}
 
 	if r.Effort != ReasoningNone {
-		// xhigh/max are adaptive-only; on the budget/effort path clamp them to high
-		// so callers never emit an effort the budget API rejects.
-		if r.Effort == ReasoningXHigh || r.Effort == ReasoningMax {
-			return ReasoningHigh
-		}
-
 		return r.Effort
 	}
 
@@ -139,7 +133,7 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 		case ReasoningMedium:
 			tokens = max(maxTokens/3, 2048)
 		case ReasoningHigh, ReasoningXHigh, ReasoningMax:
-			// xhigh/max are adaptive-only; on the budget path treat them as high.
+			// no distinct token budget for xhigh/max; map them to the high budget.
 			tokens = max(maxTokens/2, 4096)
 		case ReasoningNone:
 			return 0 // disabled
