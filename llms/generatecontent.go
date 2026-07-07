@@ -180,6 +180,44 @@ type ContentChoice struct {
 	Parts []ContentPart
 }
 
+// AssistantMessage returns the response as an AI MessageContent for
+// appending to a conversation, for example between the calls of a
+// tool-calling loop.
+//
+// The parts of every choice are concatenated in order, which preserves
+// blocks such as signed thinking that a model requires replayed
+// verbatim. That imposes a requirement on providers: a provider may
+// populate ContentChoice.Parts only when its choices are the blocks of
+// a single response. A provider whose choices are alternative
+// completions must leave Parts empty, or those alternatives would be
+// merged into one message here.
+//
+// When no choice carries parts, the message is assembled from the
+// first choice's text and tool calls. A nil response, or a nil first
+// choice, yields an empty AI message.
+func (cr *ContentResponse) AssistantMessage() MessageContent {
+	msg := MessageContent{Role: ChatMessageTypeAI}
+	if cr == nil {
+		return msg
+	}
+	for _, c := range cr.Choices {
+		if c != nil {
+			msg.Parts = append(msg.Parts, c.Parts...)
+		}
+	}
+	if len(msg.Parts) > 0 || len(cr.Choices) == 0 || cr.Choices[0] == nil {
+		return msg
+	}
+	c := cr.Choices[0]
+	if c.Content != "" {
+		msg.Parts = append(msg.Parts, TextContent{Text: c.Content})
+	}
+	for _, tc := range c.ToolCalls {
+		msg.Parts = append(msg.Parts, tc)
+	}
+	return msg
+}
+
 // TextParts is a helper function to create a MessageContent with a role and a
 // list of text parts.
 func TextParts(role ChatMessageType, parts ...string) MessageContent {
