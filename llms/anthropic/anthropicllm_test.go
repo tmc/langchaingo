@@ -1,7 +1,9 @@
 package anthropic
 
 import (
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
@@ -138,6 +140,90 @@ func TestProcessMessages(t *testing.T) {
 				if systemPrompt != tt.wantSystem {
 					t.Errorf("processMessages() system prompt = %q, want %q", systemPrompt, tt.wantSystem)
 				}
+			}
+		})
+	}
+}
+
+func TestProcessMessagesSystem(t *testing.T) {
+	tests := []struct {
+		name     string
+		messages []llms.MessageContent
+		want     any
+	}{
+		{
+			name: "multi-part system concatenates",
+			messages: []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeSystem,
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "You are helpful."},
+						llms.TextContent{Text: " Be brief."},
+					},
+				},
+			},
+			want: "You are helpful. Be brief.",
+		},
+		{
+			name: "multiple system messages concatenate",
+			messages: []llms.MessageContent{
+				{
+					Role:  llms.ChatMessageTypeSystem,
+					Parts: []llms.ContentPart{llms.TextContent{Text: "One."}},
+				},
+				{
+					Role:  llms.ChatMessageTypeSystem,
+					Parts: []llms.ContentPart{llms.TextContent{Text: "Two."}},
+				},
+			},
+			want: "One.Two.",
+		},
+		{
+			name: "cache control produces block list",
+			messages: []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeSystem,
+					Parts: []llms.ContentPart{
+						llms.WithCacheControl(
+							llms.TextContent{Text: "Large context"},
+							&llms.CacheControl{Type: "ephemeral"},
+						),
+						llms.TextContent{Text: "Question preamble"},
+					},
+				},
+			},
+			want: []anthropicclient.TextContent{
+				{Type: "text", Text: "Large context", CacheControl: &anthropicclient.CacheControl{Type: "ephemeral"}},
+				{Type: "text", Text: "Question preamble"},
+			},
+		},
+		{
+			name: "duration maps to 1h ttl and empty type defaults",
+			messages: []llms.MessageContent{
+				{
+					Role: llms.ChatMessageTypeSystem,
+					Parts: []llms.ContentPart{
+						llms.WithCacheControl(
+							llms.TextContent{Text: "Cached"},
+							&llms.CacheControl{Duration: time.Hour},
+						),
+					},
+				},
+			},
+			want: []anthropicclient.TextContent{
+				{Type: "text", Text: "Cached", CacheControl: &anthropicclient.CacheControl{Type: "ephemeral", TTL: "1h"}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, system, err := processMessages(tt.messages)
+			if err != nil {
+				t.Fatalf("processMessages() error = %v", err)
+			}
+			if !reflect.DeepEqual(system, tt.want) {
+				t.Errorf("processMessages() system = %#v, want %#v", system, tt.want)
 			}
 		})
 	}

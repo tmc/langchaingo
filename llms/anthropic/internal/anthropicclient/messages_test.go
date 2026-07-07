@@ -204,3 +204,44 @@ func Test_messagePayload_TemperatureSerialization(t *testing.T) {
 		assert.NotContains(t, string(data), "budget_tokens")
 	})
 }
+
+func Test_messagePayload_SystemSerialization(t *testing.T) {
+	base := messagePayload{
+		Model: "claude-fable-5",
+		Messages: []ChatMessage{
+			{Role: "user", Content: "hi"},
+		},
+		MaxTokens: 100,
+	}
+	c := &Client{}
+
+	t.Run("empty system is omitted", func(t *testing.T) {
+		payload := base
+		payload.System = ""
+		c.setMessageDefaults(&payload)
+		data, err := json.Marshal(payload)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "system")
+	})
+
+	t.Run("plain string keeps string encoding", func(t *testing.T) {
+		payload := base
+		payload.System = "You are helpful"
+		c.setMessageDefaults(&payload)
+		data, err := json.Marshal(payload)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), `"system":"You are helpful"`)
+	})
+
+	t.Run("blocks with cache control and ttl", func(t *testing.T) {
+		payload := base
+		payload.System = []TextContent{
+			{Type: "text", Text: "Big prefix", CacheControl: &CacheControl{Type: "ephemeral", TTL: "1h"}},
+		}
+		c.setMessageDefaults(&payload)
+		data, err := json.Marshal(payload)
+		require.NoError(t, err)
+		assert.Contains(t, string(data),
+			`"system":[{"type":"text","text":"Big prefix","cache_control":{"type":"ephemeral","ttl":"1h"}}]`)
+	})
+}

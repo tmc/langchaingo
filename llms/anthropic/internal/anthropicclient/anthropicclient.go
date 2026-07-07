@@ -129,7 +129,10 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 type MessageRequest struct {
 	Model    string        `json:"model"`
 	Messages []ChatMessage `json:"messages"`
-	System   string        `json:"system,omitempty"`
+	// System is the system prompt: a plain string, or a []TextContent
+	// block list when any block carries cache control. An empty string
+	// is omitted from the request.
+	System any `json:"system,omitempty"`
 	// Temperature is omitted from the request when nil. Models such as
 	// Claude Fable 5 and Claude Opus 4.7+ reject the temperature parameter.
 	Temperature *float64 `json:"temperature,omitempty"`

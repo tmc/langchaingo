@@ -9,6 +9,7 @@ import (
 	"maps"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/httputil"
@@ -285,17 +286,20 @@ func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
 	return toolReq
 }
 
-func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, string, error) {
+// processMessages converts messages to the wire format. The second return
+// value is the system prompt: a plain string when no system part carries
+// cache control, otherwise a []anthropicclient.TextContent block list.
+func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMessage, any, error) {
 	chatMessages := make([]anthropicclient.ChatMessage, 0, len(messages))
-	systemPrompt := ""
+	var systemBlocks []anthropicclient.TextContent
 	for _, msg := range messages {
 		switch msg.Role {
 		case llms.ChatMessageTypeSystem:
-			content, err := handleSystemMessage(msg)
+			blocks, err := handleSystemMessage(msg)
 			if err != nil {
 				return nil, "", fmt.Errorf("anthropic: failed to handle system message: %w", err)
 			}
-			systemPrompt += content
+			systemBlocks = append(systemBlocks, blocks...)
 		case llms.ChatMessageTypeHuman:
 			chatMessage, err := handleHumanMessage(msg)
 			if err != nil {
@@ -320,24 +324,64 @@ func processMessages(messages []llms.MessageContent) ([]anthropicclient.ChatMess
 			return nil, "", fmt.Errorf("anthropic: %w: %v", ErrUnsupportedMessageType, msg.Role)
 		}
 	}
-	return chatMessages, systemPrompt, nil
+	return chatMessages, encodeSystem(systemBlocks), nil
 }
 
-func handleSystemMessage(msg llms.MessageContent) (string, error) {
-	// Handle both direct TextContent and CachedContent wrapper
-	part := msg.Parts[0]
-
-	// If it's cached content, unwrap it
-	if cached, ok := part.(llms.CachedContent); ok {
-		part = cached.ContentPart
+// encodeSystem picks the wire encoding for the system prompt. The plain
+// string form is preserved when no block carries cache control, keeping
+// requests byte-identical with earlier releases.
+func encodeSystem(blocks []anthropicclient.TextContent) any {
+	for _, b := range blocks {
+		if b.CacheControl != nil {
+			return blocks
+		}
 	}
-
-	// Extract text from the part
-	if textContent, ok := part.(llms.TextContent); ok {
-		return textContent.Text, nil
+	var sb strings.Builder
+	for _, b := range blocks {
+		sb.WriteString(b.Text)
 	}
+	return sb.String()
+}
 
-	return "", fmt.Errorf("anthropic: %w for system message", ErrInvalidContentType)
+// handleSystemMessage converts a system message to text blocks, preserving
+// cache control (#1456).
+func handleSystemMessage(msg llms.MessageContent) ([]anthropicclient.TextContent, error) {
+	var blocks []anthropicclient.TextContent
+	for _, part := range msg.Parts {
+		var cacheControl *anthropicclient.CacheControl
+		if cached, ok := part.(llms.CachedContent); ok {
+			cacheControl = cacheControlToClient(cached.CacheControl)
+			part = cached.ContentPart
+		}
+		textContent, ok := part.(llms.TextContent)
+		if !ok {
+			return nil, fmt.Errorf("anthropic: %w for system message: %T", ErrInvalidContentType, part)
+		}
+		blocks = append(blocks, anthropicclient.TextContent{
+			Type:         "text",
+			Text:         textContent.Text,
+			CacheControl: cacheControl,
+		})
+	}
+	return blocks, nil
+}
+
+// cacheControlToClient maps cache control to the wire form. The type
+// defaults to "ephemeral" and Duration maps to the ttl values the API
+// accepts: at most five minutes (or zero, the default) omits ttl, longer
+// durations request the one-hour cache.
+func cacheControlToClient(cc *llms.CacheControl) *anthropicclient.CacheControl {
+	if cc == nil {
+		return nil
+	}
+	out := &anthropicclient.CacheControl{Type: cc.Type}
+	if out.Type == "" {
+		out.Type = "ephemeral"
+	}
+	if cc.Duration > 5*time.Minute {
+		out.TTL = "1h"
+	}
+	return out
 }
 
 func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
@@ -347,12 +391,7 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 		switch p := part.(type) {
 		case llms.CachedContent:
 			// Handle cached content with cache control
-			var cacheControl *anthropicclient.CacheControl
-			if p.CacheControl != nil {
-				cacheControl = &anthropicclient.CacheControl{
-					Type: p.CacheControl.Type,
-				}
-			}
+			cacheControl := cacheControlToClient(p.CacheControl)
 
 			// Process the wrapped content
 			switch wrapped := p.ContentPart.(type) {

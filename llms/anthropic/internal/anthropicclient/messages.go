@@ -34,15 +34,17 @@ type ChatMessage struct {
 }
 
 type messagePayload struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
-	Temperature *float64      `json:"temperature,omitempty"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
+	Model    string        `json:"model"`
+	Messages []ChatMessage `json:"messages"`
+	// System is either a plain string or, when any system block carries
+	// cache control, a []TextContent block list.
+	System      any      `json:"system,omitempty"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+	StopWords   []string `json:"stop_sequences,omitempty"`
+	Stream      bool     `json:"stream,omitempty"`
+	Temperature *float64 `json:"temperature,omitempty"`
+	Tools       []Tool   `json:"tools,omitempty"`
+	TopP        float64  `json:"top_p,omitempty"`
 
 	// Thinking configures extended or adaptive thinking (Claude 3.7+).
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
@@ -83,6 +85,8 @@ type Tool struct {
 // CacheControl represents Anthropic's prompt caching configuration.
 type CacheControl struct {
 	Type string `json:"type"`
+	// TTL is the cache lifetime, "5m" (the default) or "1h".
+	TTL string `json:"ttl,omitempty"`
 }
 
 // Content can be TextContent or ToolUseContent depending on the type.
@@ -237,6 +241,12 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 2048
+	}
+
+	// An empty system string must be omitted from the request; omitempty
+	// does not apply to a non-nil interface holding "".
+	if s, ok := payload.System.(string); ok && s == "" {
+		payload.System = nil
 	}
 
 	if len(payload.StopWords) == 0 {
