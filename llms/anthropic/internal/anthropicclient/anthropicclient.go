@@ -15,11 +15,12 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	// defaultModel must be an undated alias the provider commits to
-	// maintaining; a dated snapshot eventually retires and breaks every
-	// caller that relies on the default (#1431).
+	// DefaultModel is used when neither the client nor the call
+	// specifies a model. It must be an undated alias the provider
+	// commits to maintaining; a dated snapshot eventually retires and
+	// breaks every caller that relies on the default (#1431).
 	// reviewed: 2026-07-06
-	defaultModel = "claude-sonnet-4-6"
+	DefaultModel = "claude-sonnet-4-6"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.

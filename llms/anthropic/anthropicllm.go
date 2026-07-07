@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -148,10 +149,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	betaHeaders, thinking, outputConfig := extractThinkingOptions(o, opts)
 
 	// Models that reject the temperature and top_p sampling parameters
-	// require them omitted from the request.
+	// require them omitted from the request. Budget-era extended
+	// thinking additionally rejects any temperature other than the
+	// default, so sampling parameters are omitted whenever a thinking
+	// payload is sent.
 	temperature := &opts.Temperature
 	topP := opts.TopP
-	if !modelCapabilities(o.resolvedModel(opts)).sampling {
+	if !modelCapabilities(o.resolvedModel(opts)).sampling || thinking != nil {
 		temperature = nil
 		topP = 0
 	}
@@ -523,16 +527,21 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 // SupportsReasoning implements the ReasoningModel interface.
 // Returns true if the current model supports extended thinking capabilities.
 func (o *LLM) SupportsReasoning() bool {
-	return supportsReasoningForModel(o.model)
+	return supportsReasoningForModel(o.resolvedModel(nil))
 }
 
-// resolvedModel returns the model used for a call: the per-call override
-// if set, otherwise the client's configured model.
+// resolvedModel returns the model a call targets: the per-call override
+// if set, then the client's configured model, then the client default.
+// Capability lookups must use this, never the raw option value, so they
+// agree with the model the request is actually sent to.
 func (o *LLM) resolvedModel(opts *llms.CallOptions) string {
-	if opts.Model != "" {
+	if opts != nil && opts.Model != "" {
 		return opts.Model
 	}
-	return o.model
+	if o.model != "" {
+		return o.model
+	}
+	return anthropicclient.DefaultModel
 }
 
 // capabilities describes what a model accepts on the wire.
@@ -569,9 +578,6 @@ var capabilityRules = []struct {
 	{"claude-opus-4-8", adaptiveCaps},
 	{"claude-opus-4-6", capabilities{thinking: true, sampling: true, effort: true}},
 	{"claude-sonnet-4-6", capabilities{thinking: true, sampling: true, effort: true}},
-	{"claude-opus-4", budgetCaps},
-	{"claude-sonnet-4", budgetCaps},
-	{"claude-haiku-4", budgetCaps},
 	{"claude-4", budgetCaps},
 	{"claude-3-7", budgetCaps},
 	{"claude-3.7", budgetCaps},
@@ -580,23 +586,86 @@ var capabilityRules = []struct {
 	{"claude-instant", legacyCaps},
 }
 
+// familyRules covers members of the 4-x model families that
+// capabilityRules does not list individually. lastListed is the
+// highest minor version whose capabilities are known; later minors
+// get newest-generation defaults, since claude-opus-4-9 is more
+// likely next month's adaptive-only model than one missing from the
+// table, and omitting sampling parameters is accepted by every model
+// while sending them is a 400 on new ones. Bump lastListed when
+// adding a family member to capabilityRules.
+var familyRules = []struct {
+	prefix     string
+	lastListed int
+}{
+	{"claude-opus-4", 8},
+	{"claude-sonnet-4", 6},
+	{"claude-haiku-4", 5},
+}
+
 // modelCapabilities returns the capabilities of a model. Unknown model
 // names get newest-generation defaults: an unrecognized name is more
 // likely a new model than an old one, omitting sampling parameters is
 // accepted by every model, and sending them is rejected by new ones.
-// The empty model name keeps legacy behavior, since the effective
-// default model is resolved later, at the client layer.
 func modelCapabilities(model string) capabilities {
-	if model == "" {
-		return legacyCaps
-	}
 	modelLower := strings.ToLower(model)
 	for _, rule := range capabilityRules {
 		if strings.Contains(modelLower, rule.match) {
 			return rule.caps
 		}
 	}
+	for _, f := range familyRules {
+		n, ok := familyMinor(modelLower, f.prefix)
+		if !ok {
+			continue
+		}
+		if n > f.lastListed {
+			return adaptiveCaps
+		}
+		return budgetCaps
+	}
+	// A name that is not a Claude model at all — a gateway alias, a
+	// fine-tune, an Anthropic-compatible endpoint — says nothing about
+	// which parameters it rejects, so assume the long-standing wire
+	// contract. Caller-supplied sampling parameters then reach it
+	// instead of being dropped silently, and an endpoint that rejects
+	// them reports a clear error. An empty name means "use the client
+	// default", which is a Claude model, so it falls through.
+	if modelLower != "" && !strings.Contains(modelLower, "claude") {
+		return budgetCaps
+	}
+	// An unrecognized Claude model is assumed newer than every listed
+	// one, and newer models are adaptive-thinking only.
 	return adaptiveCaps
+}
+
+// familyMinor extracts the minor version from model names like
+// "claude-opus-4-N..." for the given family prefix ("claude-opus-4").
+// Bare family names and dated snapshots ("claude-opus-4-20250514")
+// name the .0 model and report minor 0. The second result is false
+// when the name does not belong to the family.
+func familyMinor(model, prefix string) (int, bool) {
+	i := strings.Index(model, prefix)
+	if i < 0 {
+		return 0, false
+	}
+	rest := model[i+len(prefix):]
+	if !strings.HasPrefix(rest, "-") {
+		return 0, true
+	}
+	rest = rest[1:]
+	j := 0
+	for j < len(rest) && rest[j] >= '0' && rest[j] <= '9' {
+		j++
+	}
+	if j == 0 || j > 2 {
+		return 0, true
+	}
+	n, err := strconv.Atoi(rest[:j])
+	if err != nil {
+		return 0, true
+	}
+	return n, true
 }
 
 // supportsReasoningForModel checks if a specific model supports reasoning.

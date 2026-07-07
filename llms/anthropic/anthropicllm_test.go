@@ -330,7 +330,9 @@ func TestSupportsReasoningForModel(t *testing.T) {
 		{"claude-3-7-sonnet-20250219", true},
 		{"claude-3-haiku-20240307", false},
 		{"claude-3-5-sonnet-20240620", false},
-		{"", false},
+		// The empty name gets newest-generation defaults; the provider
+		// resolves the client default before lookup.
+		{"", true},
 	}
 	for _, tt := range tests {
 		if got := supportsReasoningForModel(tt.model); got != tt.want {
@@ -351,7 +353,9 @@ func TestAdaptiveThinkingOnly(t *testing.T) {
 		{"claude-sonnet-4-6", false},
 		{"claude-3-7-sonnet-20250219", false},
 		{"claude-3-haiku-20240307", false},
-		{"", false},
+		// The empty name gets newest-generation defaults; the provider
+		// resolves the client default before lookup.
+		{"", true},
 	}
 	for _, tt := range tests {
 		if got := adaptiveThinkingOnly(tt.model); got != tt.want {
@@ -367,6 +371,14 @@ func TestExtractThinkingOptions(t *testing.T) {
 			model:        "claude-fable-5",
 			config:       nil,
 			wantThinking: nil,
+		},
+		{
+			// A client without a model targets the client default,
+			// which supports thinking; the config must not be dropped.
+			name:         "empty model resolves default",
+			model:        "",
+			config:       &llms.ThinkingConfig{Mode: llms.ThinkingModeMedium},
+			wantThinking: &anthropicclient.ThinkingConfig{Type: "enabled", BudgetTokens: 2048},
 		},
 		{
 			name:         "fable auto mode uses adaptive",
@@ -558,10 +570,30 @@ func TestModelCapabilities(t *testing.T) {
 		{"claude-3-5-sonnet-20240620", legacyCaps},
 		{"claude-3-haiku-20240307", legacyCaps},
 		{"claude-2.1", legacyCaps},
-		{"", legacyCaps},
-		// Unknown names get newest-generation defaults.
+		// Unlisted 4-x family members: minors past the last listed
+		// release get newest-generation defaults, earlier ones keep
+		// budget-era behavior.
+		{"claude-opus-4-9", adaptiveCaps},
+		{"claude-opus-4-5", budgetCaps},
+		{"claude-opus-4-1-20250805", budgetCaps},
+		{"claude-opus-4", budgetCaps},
+		{"claude-sonnet-4-7", adaptiveCaps},
+		{"claude-sonnet-4-5-20250929", budgetCaps},
+		{"claude-haiku-4-5", budgetCaps},
+		{"claude-haiku-4-6", adaptiveCaps},
+		// Unknown Claude names get newest-generation defaults. The
+		// empty name cannot reach here from the provider:
+		// resolvedModel substitutes the client default first.
+		{"", adaptiveCaps},
 		{"claude-fable-6", adaptiveCaps},
 		{"claude-omega-7", adaptiveCaps},
+		{"claude-sonnet-5", adaptiveCaps},
+		// Names that are not Claude models at all — gateway aliases,
+		// fine-tunes, compatible endpoints — keep the long-standing
+		// wire contract so caller sampling parameters are not dropped.
+		{"my-gateway/llama-3-70b", budgetCaps},
+		{"gpt-4o", budgetCaps},
+		{"some-finetune-v2", budgetCaps},
 	}
 	for _, tt := range tests {
 		if got := modelCapabilities(tt.model); got != tt.want {

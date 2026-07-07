@@ -262,7 +262,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultModel
+		payload.Model = DefaultModel
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		payload.Stream = true
