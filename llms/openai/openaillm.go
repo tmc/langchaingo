@@ -59,7 +59,27 @@ var modelCapabilities = []ModelCapability{
 		SupportsThinking: false,
 		SupportsCaching:  false,
 	},
+	// Later reasoning models (o4-mini, dated o-series snapshots, the
+	// GPT-5 series) accept system messages and reasoning_effort.
+	{
+		Pattern:          `(?i)^(o[0-9]+(-.+)?|gpt-5.*)$`,
+		SupportsSystem:   true,
+		SupportsThinking: true,
+		SupportsCaching:  false,
+	},
 	// Future models can be added here
+}
+
+// clampReasoningEffort maps an effort level to OpenAI's
+// reasoning_effort vocabulary (none, minimal, low, medium, high,
+// xhigh). Only "max" needs mapping: it is an Anthropic level with no
+// OpenAI equivalent, so it clamps to the highest OpenAI accepts. Every
+// other level passes through unchanged.
+func clampReasoningEffort(effort llms.ThinkingEffort) string {
+	if effort == llms.ThinkingEffortMax {
+		return string(llms.ThinkingEffortXHigh)
+	}
+	return string(effort)
 }
 
 // getModelCapabilities returns the capabilities for a given model
@@ -211,10 +231,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	// An explicit thinking effort maps to the reasoning_effort
-	// parameter on models that accept it.
+	// parameter on models that accept it; other models reject the
+	// parameter, so it is omitted. Effort levels beyond OpenAI's
+	// vocabulary (low, medium, high) clamp to "high".
 	var reasoningEffort string
-	if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-		reasoningEffort = string(config.Effort)
+	if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok && modelCaps.SupportsThinking {
+		reasoningEffort = clampReasoningEffort(config.Effort)
 	}
 
 	// Filter out internal metadata that shouldn't be sent to API
