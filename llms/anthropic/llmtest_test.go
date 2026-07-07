@@ -12,7 +12,7 @@ func TestLLM(t *testing.T) {
 		t.Skip("ANTHROPIC_API_KEY not set")
 	}
 
-	llm, err := New(WithModel("claude-3-haiku-20240307"))
+	llm, err := New(WithModel("claude-haiku-4-5"))
 	if err != nil {
 		t.Fatalf("Failed to create Anthropic LLM: %v", err)
 	}

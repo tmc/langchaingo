@@ -229,7 +229,11 @@ func DefaultIsReasoningModel(model string) bool {
 		strings.Contains(modelLower, "claude-3.7") ||
 		strings.Contains(modelLower, "claude-4") ||
 		strings.Contains(modelLower, "claude-opus-4") ||
-		strings.Contains(modelLower, "claude-sonnet-4") {
+		strings.Contains(modelLower, "claude-sonnet-4") ||
+		strings.Contains(modelLower, "claude-sonnet-5") ||
+		strings.Contains(modelLower, "claude-haiku-4") ||
+		strings.Contains(modelLower, "claude-fable") ||
+		strings.Contains(modelLower, "claude-mythos") {
 		return true
 	}
 
