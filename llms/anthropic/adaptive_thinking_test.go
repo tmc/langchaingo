@@ -13,16 +13,20 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/anthropic"
 )
 
-// captureAdaptiveRequest drives a real GenerateContent call against a recording
-// server and returns the decoded outbound /v1/messages body, so assertions cover
-// generateMessagesContent (the adaptive branch + sampling-param omission), not a
-// hand-built payload.
-func captureAdaptiveRequest(t *testing.T, callOpts ...llms.CallOption) map[string]any {
+// captureMessagesRequest drives a real GenerateContent call against a recording
+// server and returns the decoded outbound /v1/messages body and headers, so
+// assertions cover generateMessagesContent (thinking construction, sampling-param
+// handling, beta headers), not a hand-built payload.
+func captureMessagesRequest(t *testing.T, callOpts ...llms.CallOption) (map[string]any, http.Header) {
 	t.Helper()
 
-	var body []byte
+	var (
+		body   []byte
+		header http.Header
+	)
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ = io.ReadAll(r.Body)
+		header = r.Header.Clone()
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"id":"msg_test","type":"message","role":"assistant","model":"claude-opus-4-6","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`))
 	}))
@@ -44,7 +48,7 @@ func captureAdaptiveRequest(t *testing.T, callOpts ...llms.CallOption) map[strin
 
 	var payload map[string]any
 	require.NoError(t, json.Unmarshal(body, &payload))
-	return payload
+	return payload, header
 }
 
 func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
@@ -54,7 +58,7 @@ func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 		t.Parallel()
 
 		// Temperature/TopP are set NON-nil; the adaptive path must still drop them.
-		payload := captureAdaptiveRequest(t,
+		payload, _ := captureMessagesRequest(t,
 			llms.WithAdaptiveReasoning(llms.ReasoningHigh),
 			llms.WithTemperature(0.8),
 			llms.WithTopP(0.9),
@@ -79,7 +83,7 @@ func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 	t.Run("empty adaptive effort defaults to high", func(t *testing.T) {
 		t.Parallel()
 
-		payload := captureAdaptiveRequest(t,
+		payload, _ := captureMessagesRequest(t,
 			llms.WithAdaptiveReasoning(llms.ReasoningNone),
 			llms.WithMaxTokens(4096),
 		)
@@ -91,12 +95,72 @@ func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 	t.Run("xhigh effort flows through to output_config", func(t *testing.T) {
 		t.Parallel()
 
-		payload := captureAdaptiveRequest(t,
+		payload, _ := captureMessagesRequest(t,
 			llms.WithAdaptiveReasoning(llms.ReasoningXHigh),
 			llms.WithMaxTokens(4096),
 		)
 
 		outputConfig, _ := payload["output_config"].(map[string]any)
 		assert.Equal(t, "xhigh", outputConfig["effort"])
+	})
+}
+
+func TestAnthropic_BudgetThinkingRequest(t *testing.T) {
+	t.Parallel()
+
+	payload, _ := captureMessagesRequest(t,
+		llms.WithReasoning(llms.ReasoningMedium, 0),
+		llms.WithMaxTokens(4096),
+		llms.WithTemperature(0.3),
+		llms.WithTopP(0.9),
+	)
+
+	thinking, _ := payload["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"])
+	assert.EqualValues(t, 2048, thinking["budget_tokens"]) // medium => max(4096/3, 2048)
+	_, hasDisplay := thinking["display"]
+	assert.False(t, hasDisplay, "budget thinking has no display field")
+
+	_, hasOutputConfig := payload["output_config"]
+	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
+
+	// Budget thinking pins temperature to 1.0 and keeps top_p as provided.
+	assert.EqualValues(t, 1.0, payload["temperature"])
+	assert.EqualValues(t, 0.9, payload["top_p"])
+	assert.EqualValues(t, 4096, payload["max_tokens"]) // max(budget*2, maxTokens)
+}
+
+func TestAnthropic_InterleavedThinkingBetaHeader(t *testing.T) {
+	t.Parallel()
+
+	tools := []llms.Tool{{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "probe",
+			Description: "test tool",
+			Parameters:  map[string]any{"type": "object", "properties": map[string]any{}},
+		},
+	}}
+
+	t.Run("budget reasoning with tools sends the beta header", func(t *testing.T) {
+		t.Parallel()
+
+		_, header := captureMessagesRequest(t,
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTools(tools),
+			llms.WithMaxTokens(4096),
+		)
+		assert.Contains(t, header.Get("anthropic-beta"), "interleaved-thinking-2025-05-14")
+	})
+
+	t.Run("adaptive reasoning with tools sends no interleaved-thinking header", func(t *testing.T) {
+		t.Parallel()
+
+		_, header := captureMessagesRequest(t,
+			llms.WithAdaptiveReasoning(llms.ReasoningHigh),
+			llms.WithTools(tools),
+			llms.WithMaxTokens(4096),
+		)
+		assert.NotContains(t, header.Get("anthropic-beta"), "interleaved-thinking")
 	})
 }

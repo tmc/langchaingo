@@ -167,7 +167,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		if opts.Reasoning.Adaptive {
 			effort := opts.Reasoning.Effort
 			if effort == llms.ReasoningNone {
-				effort = llms.ReasoningHigh // the API rejects an empty effort
+				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
 			}
 			thinking = &anthropicclient.ThinkingPayload{
 				Type:    "adaptive",
@@ -794,8 +794,9 @@ func extractBetaHeaders(opts *llms.CallOptions) []string {
 		}
 	}
 
-	// Auto-enable interleaved thinking when reasoning + tools are present
-	if opts.Reasoning.IsEnabled() && len(opts.Tools) > 0 {
+	// Budget thinking + tools needs the interleaved-thinking beta; adaptive
+	// thinking interleaves natively and needs no header.
+	if opts.Reasoning.IsEnabled() && !opts.Reasoning.Adaptive && len(opts.Tools) > 0 {
 		betaHeaders = appendIfMissing(betaHeaders, "interleaved-thinking-2025-05-14")
 	}
 
