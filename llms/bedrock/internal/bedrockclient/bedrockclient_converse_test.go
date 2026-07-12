@@ -377,6 +377,102 @@ func TestConverseClient_BudgetReasoning(t *testing.T) {
 	mockClient.AssertExpectations(t)
 }
 
+func TestConverseClient_AdaptiveReasoningNewModelFamily(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	// A Claude generation absent from the budget allowlist must still carry adaptive.
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-sonnet-5-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		Temperature:     ptr(0.8),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningXHigh, Adaptive: true},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	assert.Nil(t, capturedInput.InferenceConfig.Temperature)
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "adaptive", thinking["type"])
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, "xhigh", outputConfig["effort"])
+
+	mockClient.AssertExpectations(t)
+}
+
+func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	// Adaptive is an Anthropic request shape; other reasoning-capable models
+	// fall back to budget thinking.
+	input := &ConverseInput{
+		ModelID:         "openai.gpt-oss-120b-1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		Temperature:     ptr(0.8),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Adaptive: true},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	assert.NotNil(t, capturedInput.InferenceConfig.Temperature, "sampling params stay when adaptive is not applied")
+
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"])
+	budget, ok := thinking["budget_tokens"].(float64)
+	assert.True(t, ok && budget > 0, "fallback must carry a positive token budget")
+	_, hasOutputConfig := fields["output_config"]
+	assert.False(t, hasOutputConfig, "budget fallback has no output_config")
+
+	mockClient.AssertExpectations(t)
+}
+
 func TestConverseClient_EmptyResponse(t *testing.T) {
 	mockClient := &MockBedrockRuntimeClient{}
 	client := NewConverseClient(mockClient)

@@ -140,12 +140,15 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	}
 
 	// Add additional model fields
-	if input.ReasoningConfig != nil && c.supportsReasoning(input.ModelID) {
+	if input.ReasoningConfig != nil {
 		additionalModelFields := converseAdditionalModelRequestFields{}
-		if input.ReasoningConfig.Adaptive {
+		switch {
+		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID):
+			// Gated by model family, not the version allowlist: adaptive targets
+			// Claude generations newer than supportsReasoning knows.
 			effort := input.ReasoningConfig.Effort
 			if effort == llms.ReasoningNone {
-				effort = llms.ReasoningHigh // the API rejects an empty effort
+				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
 			}
 			additionalModelFields.Thinking = &converseThinkingPayload{
 				Type:    "adaptive",
@@ -155,7 +158,8 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			// Adaptive models reject sampling params.
 			inferenceConfig.Temperature = nil
 			inferenceConfig.TopP = nil
-		} else {
+		case c.supportsReasoning(input.ModelID):
+			// Budget thinking; also the fallback for adaptive on non-Claude models.
 			maxTokens := 0 // Use 0 to let it use default maxTokens
 			if input.MaxTokens != nil {
 				maxTokens = *input.MaxTokens
@@ -884,6 +888,12 @@ func (c *ConverseClient) supportsReasoning(modelID string) bool {
 		}
 	}
 	return false
+}
+
+// isAnthropicModelID reports whether the Bedrock model ID belongs to the Claude
+// family (with or without a region prefix such as "us.").
+func isAnthropicModelID(modelID string) bool {
+	return strings.Contains(modelID, "anthropic.claude")
 }
 
 func ptrStringOrNil(s string) *string {
