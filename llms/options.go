@@ -34,9 +34,10 @@ const (
 	ReasoningMedium ReasoningEffort = "medium"
 	ReasoningLow    ReasoningEffort = "low"
 	ReasoningNone   ReasoningEffort = ""
-	// ReasoningXHigh and ReasoningMax are the top reasoning efforts. Anthropic adaptive
-	// thinking (Claude Opus 4.7+) carries them via WithAdaptiveReasoning; OpenAI-compatible
-	// providers that expose them (e.g. GPT-5.5, GLM-5.2) accept them as reasoning_effort.
+	// ReasoningXHigh and ReasoningMax are the top reasoning efforts. Anthropic models
+	// carry them via WithAdaptiveReasoning (max since Claude 4.6, xhigh since Opus 4.7);
+	// OpenAI-compatible providers that expose them (e.g. GPT-5.5, GLM-5.2) accept them
+	// as reasoning_effort.
 	ReasoningXHigh ReasoningEffort = "xhigh"
 	ReasoningMax   ReasoningEffort = "max"
 )
@@ -45,10 +46,12 @@ const (
 type ReasoningConfig struct {
 	Effort ReasoningEffort `json:"effort"`
 	Tokens int             `json:"tokens"`
-	// Adaptive selects adaptive thinking (Claude Opus 4.7+): the request carries
+	// Adaptive selects adaptive thinking (Claude 4.6+ models): the request carries
 	// thinking.type=adaptive plus output_config.effort instead of a token budget,
-	// and the provider omits sampling params (temperature/top_p) that adaptive
-	// models reject. Effort sets the level; Tokens is ignored.
+	// and the provider always omits sampling params (temperature/top_p) with
+	// adaptive requests — Opus 4.7+ generations reject them. Effort sets the
+	// level; Tokens is ignored. Providers and models without adaptive support
+	// fall back to their effort/budget semantics.
 	Adaptive bool `json:"adaptive,omitempty"`
 }
 
@@ -631,10 +634,10 @@ func WithReasoning(effort ReasoningEffort, tokens int) CallOption {
 	}
 }
 
-// WithAdaptiveReasoning enables adaptive thinking (Claude Opus 4.7+): the model
+// WithAdaptiveReasoning enables adaptive thinking (Claude 4.6+ models): the model
 // decides how much to think and effort sets the level (low/medium/high/xhigh/max).
-// Unlike WithReasoning there is no token budget, and the provider omits sampling
-// params (temperature/top_p) that adaptive models reject.
+// Unlike WithReasoning there is no token budget, and the provider always omits
+// sampling params (temperature/top_p) — Opus 4.7+ generations reject them.
 func WithAdaptiveReasoning(effort ReasoningEffort) CallOption {
 	return func(o *CallOptions) {
 		o.Reasoning = &ReasoningConfig{
