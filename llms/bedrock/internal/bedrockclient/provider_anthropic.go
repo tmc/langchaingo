@@ -97,6 +97,9 @@ type anthropicTextGenerationInput struct {
 	Tools []anthropicTool `json:"tools,omitempty"`
 	// Thinking configuration for reasoning models. Optional
 	Thinking *anthropicThinkingPayload `json:"thinking,omitempty"`
+	// OutputConfig carries the adaptive-thinking effort. It is a top-level
+	// sibling of "thinking" in the Messages request body. Optional
+	OutputConfig *anthropicOutputConfig `json:"output_config,omitempty"`
 }
 
 type anthropicTool struct {
@@ -109,6 +112,13 @@ type anthropicTool struct {
 type anthropicThinkingPayload struct {
 	Type         string `json:"type"`
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	// Display keeps adaptive reasoning text visible ("summarized"); Opus 4.7+
+	// otherwise omits it by default.
+	Display string `json:"display,omitempty"`
+}
+
+type anthropicOutputConfig struct {
+	Effort string `json:"effort,omitempty"`
 }
 
 // anthropicTextGenerationOutput is the generated output.
@@ -215,20 +225,7 @@ func createAnthropicCompletion(ctx context.Context,
 		Tools:            tools,
 	}
 
-	// Add thinking configuration for reasoning models
-	if options.Reasoning != nil && supportsAnthropicReasoning(modelID) {
-		maxTokens := options.GetMaxTokens()
-		if maxTokens == 0 {
-			maxTokens = 2048
-		}
-		tokens := options.Reasoning.GetTokens(maxTokens)
-		if tokens > 0 {
-			input.Thinking = &anthropicThinkingPayload{
-				Type:         "enabled",
-				BudgetTokens: tokens,
-			}
-		}
-	}
+	applyAnthropicReasoning(&input, options.Reasoning, modelID, options.GetMaxTokens())
 
 	body, err := json.Marshal(input)
 	if err != nil {
@@ -653,6 +650,47 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 		}
 	}
 	return c
+}
+
+// applyAnthropicReasoning mirrors the native Anthropic client: adaptive requests
+// carry thinking.type=adaptive plus output_config.effort and always drop sampling
+// params (Opus 4.7+ generations reject them); budget requests keep the
+// version-gated thinking.type=enabled payload.
+func applyAnthropicReasoning(
+	input *anthropicTextGenerationInput, cfg *llms.ReasoningConfig, modelID string, maxTokens int,
+) {
+	if cfg == nil {
+		return
+	}
+
+	if cfg.Adaptive {
+		effort := cfg.Effort
+		if effort == llms.ReasoningNone {
+			effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
+		}
+		input.Thinking = &anthropicThinkingPayload{
+			Type:    "adaptive",
+			Display: "summarized",
+		}
+		input.OutputConfig = &anthropicOutputConfig{Effort: string(effort)}
+		input.Temperature = 0
+		input.TopP = 0
+		input.TopK = 0
+		return
+	}
+
+	if !supportsAnthropicReasoning(modelID) {
+		return
+	}
+	if maxTokens == 0 {
+		maxTokens = 2048
+	}
+	if tokens := cfg.GetTokens(maxTokens); tokens > 0 {
+		input.Thinking = &anthropicThinkingPayload{
+			Type:         "enabled",
+			BudgetTokens: tokens,
+		}
+	}
 }
 
 // supportsAnthropicReasoning checks if the model supports reasoning
