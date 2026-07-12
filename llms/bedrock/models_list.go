@@ -65,6 +65,40 @@ const (
 	// Languages: 200+ languages.
 	ModelAmazonNovaMicroV1 = "us.amazon.nova-micro-v1:0"
 
+	// Claude Fable 5 is Anthropic's most capable widely released model, built for the most demanding
+	// reasoning and long-horizon agentic work. Thinking is always on (adaptive); the raw chain of thought
+	// is never returned. On Bedrock it requires opting into the provider data-share retention mode, and
+	// temperature must be 1.0 or unset.
+	//
+	// Max tokens: 1M
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeFable5 = "us.anthropic.claude-fable-5"
+
+	// Claude Opus 4.8 is Anthropic's most capable Opus-tier model — highly autonomous, state-of-the-art
+	// on long-horizon agentic work, knowledge work, and memory, with clearer and warmer writing.
+	// Supports adaptive thinking only: budget thinking and sampling params are rejected.
+	//
+	// Max tokens: 1M
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeOpus48 = "us.anthropic.claude-opus-4-8"
+
+	// Claude Opus 4.7 is a highly autonomous previous-generation Opus, strong on long-horizon agentic
+	// work, knowledge work, vision, and memory. It introduces the xhigh effort level and high-resolution
+	// vision. Supports adaptive thinking only: budget thinking and sampling params are rejected.
+	//
+	// Max tokens: 1M
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeOpus47 = "us.anthropic.claude-opus-4-7"
+
+	// Claude Sonnet 5 is Anthropic's most capable Sonnet, built for coding, agents, and professional
+	// work at scale with near-Opus intelligence at Sonnet cost. Adaptive thinking is on by default;
+	// budget thinking and non-default sampling params are rejected. On Bedrock, forced tool_choice
+	// requires thinking to be explicitly disabled.
+	//
+	// Max tokens: 1M
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeSonnet5 = "us.anthropic.claude-sonnet-5"
+
 	// Claude Opus 4.6 is the world's best model for coding, enterprise agents, and professional work.
 	// It excels at agentic workflows, orchestrating complex tasks across dozens of tools with industry-leading
 	// reliability. It handles the full lifecycle from architecture to deployment, delivers the deepest reasoning
@@ -383,4 +417,26 @@ const (
 	// Max tokens: 203k
 	// Languages: English, Chinese.
 	ModelGLM47Flash = "zai.glm-4.7-flash"
+
+	// GLM-5 is Z.ai's frontier reasoning and agentic model, a significant step up from the GLM-4.x line
+	// on complex reasoning, coding, and multi-step agent workflows. It targets production agent systems
+	// that need strong tool use and long-context planning.
+	//
+	// Max tokens: 200k
+	// Languages: English, Chinese.
+	ModelGLM5 = "zai.glm-5"
+
+	// MiniMax M2.5 is an agent-native reasoning model optimized for tool use, planning, and multi-turn
+	// agentic workflows, with competitive coding and general reasoning performance.
+	//
+	// Max tokens: 196k
+	// Languages: English, Chinese.
+	ModelMiniMaxM25 = "minimax.minimax-m2.5"
+
+	// NVIDIA Nemotron 3 Super 120B is an open hybrid mixture-of-experts model (about 12B active
+	// parameters) built for reasoning, coding, and agentic tasks with strong cost efficiency.
+	//
+	// Max tokens: 256k
+	// Languages: English.
+	ModelNvidiaNemotronSuper3120B = "nvidia.nemotron-super-3-120b"
 )
