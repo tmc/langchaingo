@@ -225,7 +225,9 @@ func createAnthropicCompletion(ctx context.Context,
 		Tools:            tools,
 	}
 
-	applyAnthropicReasoning(&input, options.Reasoning, modelID, options.GetMaxTokens())
+	if err := applyAnthropicReasoning(&input, options.Reasoning, modelID, options.GetMaxTokens()); err != nil {
+		return nil, err
+	}
 
 	body, err := json.Marshal(input)
 	if err != nil {
@@ -658,15 +660,25 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 // thinking, and the caller's preference is honored where the model supports both.
 func applyAnthropicReasoning(
 	input *anthropicTextGenerationInput, cfg *llms.ReasoningConfig, modelID string, maxTokens int,
-) {
+) error {
 	// Adaptive-only models reject sampling params even without thinking.
 	if reasoning.ClaudeRejectsSampling(modelID) {
 		input.Temperature = 0
 		input.TopP = 0
 		input.TopK = 0
 	}
-	if cfg == nil {
-		return
+
+	switch cfg.ResolveMode() {
+	case llms.ReasoningDefault:
+		return nil
+	case llms.ReasoningOff:
+		switch reasoning.ResolveOff(modelID, reasoning.ProviderBedrock) {
+		case reasoning.OffDisableClaude:
+			input.Thinking = &anthropicThinkingPayload{Type: "disabled"}
+		case reasoning.OffUnsupported:
+			return &reasoning.ErrReasoningOffUnsupported{Model: modelID}
+		}
+		return nil
 	}
 
 	setAdaptive := func() {
@@ -704,6 +716,7 @@ func applyAnthropicReasoning(
 	case supportsAnthropicReasoning(modelID):
 		setBudget()
 	}
+	return nil
 }
 
 // supportsAnthropicReasoning checks if the model supports reasoning

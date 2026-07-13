@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func marshalAnthropicInput(t *testing.T, input anthropicTextGenerationInput) map[string]any {
@@ -170,4 +171,51 @@ func TestApplyAnthropicReasoning_AdaptiveOnBudgetOnlyDowngrades(t *testing.T) {
 	require.NotNil(t, input.Thinking)
 	assert.Equal(t, "enabled", input.Thinking.Type)
 	assert.Nil(t, input.OutputConfig)
+}
+
+func TestApplyAnthropicReasoning_OffDefaultOnSendsDisabled(t *testing.T) {
+	t.Parallel()
+
+	// Sonnet 5 thinks by default, so an explicit off must send thinking:{disabled}.
+	input := anthropicTextGenerationInput{MaxTokens: 2048}
+	err := applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Mode: llms.ReasoningOff},
+		"us.anthropic.claude-sonnet-5-v1:0", 2048)
+
+	require.NoError(t, err)
+	require.NotNil(t, input.Thinking)
+	assert.Equal(t, "disabled", input.Thinking.Type)
+
+	fields := marshalAnthropicInput(t, input)
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "disabled", thinking["type"])
+	_, hasBudget := thinking["budget_tokens"]
+	assert.False(t, hasBudget, "disabled thinking carries no budget")
+}
+
+func TestApplyAnthropicReasoning_OffDefaultOffOmits(t *testing.T) {
+	t.Parallel()
+
+	// Opus 4.8 does not think by default, so off omits the field (omit == off).
+	input := anthropicTextGenerationInput{MaxTokens: 2048}
+	err := applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Mode: llms.ReasoningOff},
+		"anthropic.claude-opus-4-8-v1:0", 2048)
+
+	require.NoError(t, err)
+	assert.Nil(t, input.Thinking, "off on a default-off model omits thinking")
+}
+
+func TestApplyAnthropicReasoning_OffAlwaysOnErrors(t *testing.T) {
+	t.Parallel()
+
+	// Fable 5 cannot disable thinking; an explicit off is a typed error, not a silent send.
+	input := anthropicTextGenerationInput{MaxTokens: 2048}
+	err := applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Mode: llms.ReasoningOff},
+		"us.anthropic.claude-fable-5-v1:0", 2048)
+
+	var offErr *reasoning.ErrReasoningOffUnsupported
+	require.ErrorAs(t, err, &offErr)
+	assert.Nil(t, input.Thinking)
 }

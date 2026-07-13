@@ -140,7 +140,8 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	}
 
 	// Add additional model fields
-	if input.ReasoningConfig != nil {
+	switch input.ReasoningConfig.ResolveMode() {
+	case llms.ReasoningOn:
 		additionalModelFields := converseAdditionalModelRequestFields{}
 		setAdaptive := func() {
 			effort := input.ReasoningConfig.GetEffort(0)
@@ -179,6 +180,14 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		}
 		if additionalModelFields.Thinking != nil {
 			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(additionalModelFields)
+		}
+	case llms.ReasoningOff:
+		switch reasoning.ResolveOff(input.ModelID, reasoning.ProviderBedrock) {
+		case reasoning.OffDisableClaude:
+			fields := converseAdditionalModelRequestFields{Thinking: &converseThinkingPayload{Type: "disabled"}}
+			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(fields)
+		case reasoning.OffUnsupported:
+			return nil, &reasoning.ErrReasoningOffUnsupported{Model: input.ModelID}
 		}
 	}
 

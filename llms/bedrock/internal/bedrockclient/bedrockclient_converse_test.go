@@ -326,6 +326,92 @@ func TestConverseClient_AdaptiveReasoning(t *testing.T) {
 	mockClient.AssertExpectations(t)
 }
 
+func TestConverseClient_ReasoningOffDefaultOnSendsDisabled(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-sonnet-5-v1:0", // thinks by default
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOff},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "disabled", thinking["type"])
+	mockClient.AssertExpectations(t)
+}
+
+func TestConverseClient_ReasoningOffDefaultOffOmits(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "anthropic.claude-opus-4-8-v1:0", // off by default
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOff},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+	assert.Nil(t, capturedInput.AdditionalModelRequestFields, "off on a default-off model omits thinking")
+	mockClient.AssertExpectations(t)
+}
+
+func TestConverseClient_ReasoningOffAlwaysOnErrors(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-fable-5-v1:0", // thinking cannot be disabled
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOff},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	var offErr *reasoning.ErrReasoningOffUnsupported
+	assert.ErrorAs(t, err, &offErr)
+	mockClient.AssertNotCalled(t, "Converse")
+}
+
 func TestConverseClient_BudgetReasoning(t *testing.T) {
 	mockClient := &MockBedrockRuntimeClient{}
 	client := NewConverseClient(mockClient)
