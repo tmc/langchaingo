@@ -172,7 +172,8 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	var thinking *anthropicclient.ThinkingPayload
 	var outputConfig *anthropicclient.OutputConfig
-	if opts.Reasoning.IsEnabled() {
+	switch opts.Reasoning.ResolveMode() {
+	case llms.ReasoningOn:
 		// The wire mechanism is resolved from the model, not the raw Adaptive
 		// flag: adaptive-only generations reject budget thinking and vice versa,
 		// so honor the caller's preference only where the model accepts it.
@@ -189,6 +190,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 				Type:   "enabled",
 				Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
 			}
+		}
+	case llms.ReasoningOff:
+		switch reasoning.ResolveOff(model, reasoning.ProviderAnthropic) {
+		case reasoning.OffDisableClaude:
+			thinking = &anthropicclient.ThinkingPayload{Type: "disabled"}
+		case reasoning.OffUnsupported:
+			return nil, &reasoning.ErrReasoningOffUnsupported{Model: model}
 		}
 	}
 

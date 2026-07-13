@@ -131,6 +131,56 @@ func TestAnthropic_ModelAwareThinkingResolution(t *testing.T) {
 	})
 }
 
+// TestAnthropic_ReasoningDisabled locks the explicit-off wire: a default-on model
+// sends thinking:{disabled}, a default-off model omits thinking, and a model whose
+// thinking cannot be disabled fails with a typed error before any request is sent.
+func TestAnthropic_ReasoningDisabled(t *testing.T) {
+	t.Parallel()
+
+	t.Run("default-on model sends thinking disabled", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-sonnet-5"),
+			llms.WithReasoningDisabled(), llms.WithMaxTokens(64))
+		th, _ := p["thinking"].(map[string]any)
+		assert.Equal(t, "disabled", th["type"])
+		_, hasBudget := th["budget_tokens"]
+		assert.False(t, hasBudget, "disabled thinking carries no budget")
+	})
+
+	t.Run("default-off model omits thinking", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-opus-4-8"),
+			llms.WithReasoningDisabled(), llms.WithMaxTokens(64))
+		_, hasThinking := p["thinking"]
+		assert.False(t, hasThinking, "off on a default-off model omits thinking")
+	})
+
+	t.Run("always-on model errors before sending", func(t *testing.T) {
+		t.Parallel()
+		called := false
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			called = true
+			w.WriteHeader(http.StatusOK)
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := anthropic.New(
+			anthropic.WithToken("test-key"),
+			anthropic.WithBaseURL(srv.URL),
+			anthropic.WithModel("claude-fable-5"),
+		)
+		require.NoError(t, err)
+
+		messages := []llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}}}
+		_, err = llm.GenerateContent(t.Context(), messages, llms.WithReasoningDisabled(), llms.WithMaxTokens(64))
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot be disabled")
+		assert.False(t, called, "must not reach the API when off is unsupported")
+	})
+}
+
 func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 	t.Parallel()
 
