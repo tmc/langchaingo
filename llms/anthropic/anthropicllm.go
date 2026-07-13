@@ -27,6 +27,21 @@ var (
 	ErrUnsupportedContentType   = errors.New("unsupported content type")
 )
 
+// ErrModelRefusal is returned when the model declines to respond (Anthropic
+// stop_reason "refusal"), e.g. a creative model such as Claude Fable 5 hitting a
+// content boundary. It is distinct from an empty or failed response; any refusal
+// text the model returned is in Message.
+type ErrModelRefusal struct {
+	Message string
+}
+
+func (e *ErrModelRefusal) Error() string {
+	if e.Message != "" {
+		return "anthropic: model refused to respond: " + e.Message
+	}
+	return "anthropic: model refused to respond"
+}
+
 const (
 	RoleUser      = "user"
 	RoleAssistant = "assistant"
@@ -271,9 +286,29 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	return processAnthropicResponse(result)
 }
 
+// anthropicTextContent concatenates the text of every text block in a response.
+func anthropicTextContent(contents []anthropicclient.Content) string {
+	var b strings.Builder
+	for _, c := range contents {
+		if tc, ok := c.(*anthropicclient.TextContent); ok {
+			b.WriteString(tc.Text)
+		}
+	}
+	return b.String()
+}
+
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse
 func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
-	if result == nil || len(result.Content) == 0 {
+	if result == nil {
+		return nil, ErrEmptyResponse
+	}
+	// A refusal is a distinct outcome from an empty/failed response: surface it as a
+	// typed error carrying any text the model returned, so callers can tell "the
+	// model declined" from "no response" (an empty refusal would otherwise look empty).
+	if result.StopReason == "refusal" {
+		return nil, &ErrModelRefusal{Message: anthropicTextContent(result.Content)}
+	}
+	if len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
 	}
 
