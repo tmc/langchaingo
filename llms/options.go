@@ -42,8 +42,32 @@ const (
 	ReasoningMax   ReasoningEffort = "max"
 )
 
+// ReasoningMode is the explicit on/off/defer switch for reasoning, orthogonal to
+// how much reasoning to do (Effort/Tokens/Adaptive). It exists because models
+// that think by default (e.g. Gemini 2.5, Claude Fable 5) cannot be turned off
+// by simply omitting reasoning — that defers to the model default. The zero
+// value is ReasoningDefault, so a config built only with Effort/Tokens/Adaptive
+// (the pre-Mode API) keeps deferring/enabling exactly as before.
+type ReasoningMode int
+
+const (
+	// ReasoningDefault omits the reasoning control and defers to the model's own
+	// default. It is the zero value, so nil or legacy configs behave as before.
+	ReasoningDefault ReasoningMode = iota
+	// ReasoningOff explicitly disables thinking on models that support disabling
+	// (adapters emit the provider's disable wire; on models that cannot be
+	// disabled the adapter returns a typed error).
+	ReasoningOff
+	// ReasoningOn explicitly enables thinking at the configured Effort/Tokens/Adaptive.
+	ReasoningOn
+)
+
 // ReasoningConfig is a set of options for reasoning.
 type ReasoningConfig struct {
+	// Mode is the authoritative on/off/defer switch. When Mode is ReasoningDefault
+	// (the zero value) the state is inferred from Effort/Tokens/Adaptive for
+	// backward compatibility. Use WithReasoningDisabled to set ReasoningOff.
+	Mode   ReasoningMode   `json:"mode,omitempty"`
 	Effort ReasoningEffort `json:"effort"`
 	Tokens int             `json:"tokens"`
 	// Adaptive expresses a preference for adaptive thinking (thinking.type=adaptive
@@ -57,21 +81,37 @@ type ReasoningConfig struct {
 	Adaptive bool `json:"adaptive,omitempty"`
 }
 
-// IsEnabled returns true if reasoning is enabled based on the effort and tokens.
-func (r *ReasoningConfig) IsEnabled() bool {
+// ResolveMode returns the effective on/off/defer state that adapters switch on.
+// An explicit Mode wins; otherwise (Mode == ReasoningDefault) a legacy config
+// carrying Effort/Tokens/Adaptive resolves to ReasoningOn, and an empty config
+// resolves to ReasoningDefault — preserving the pre-Mode behavior exactly.
+func (r *ReasoningConfig) ResolveMode() ReasoningMode {
 	if r == nil {
-		return false
+		return ReasoningDefault
 	}
-
-	if r.Adaptive {
-		return true
+	switch r.Mode {
+	case ReasoningOff:
+		return ReasoningOff
+	case ReasoningOn:
+		return ReasoningOn
 	}
-
-	if r.Effort == ReasoningNone && r.Tokens == 0 {
-		return false
+	if r.Adaptive || r.Effort != ReasoningNone || r.Tokens > 0 {
+		return ReasoningOn
 	}
+	return ReasoningDefault
+}
 
-	return true
+// IsEnabled reports whether reasoning is explicitly on. It is a backward-compatible
+// alias for ResolveMode() == ReasoningOn: true for legacy Effort/Tokens/Adaptive
+// configs, false for an unset config, and false for an explicit ReasoningOff.
+func (r *ReasoningConfig) IsEnabled() bool {
+	return r.ResolveMode() == ReasoningOn
+}
+
+// IsDisabled reports whether reasoning is explicitly turned off (ReasoningOff),
+// as distinct from merely unset (ReasoningDefault).
+func (r *ReasoningConfig) IsDisabled() bool {
+	return r.ResolveMode() == ReasoningOff
 }
 
 // GetEffort returns enum value of the effort based on kept values inside.
@@ -656,6 +696,17 @@ func WithAdaptiveReasoning(effort ReasoningEffort) CallOption {
 			Effort:   effort,
 			Adaptive: true,
 		}
+	}
+}
+
+// WithReasoningDisabled explicitly turns thinking off. Unlike omitting reasoning
+// (which defers to the model default), this forces the provider's disable wire on
+// models that support disabling — needed for models that think by default (e.g.
+// Gemini 2.5, Claude 4.6). Models that cannot be disabled (adaptive-only Claude
+// such as Fable 5, and OpenAI o-series) return a typed error from the provider.
+func WithReasoningDisabled() CallOption {
+	return func(o *CallOptions) {
+		o.Reasoning = &ReasoningConfig{Mode: ReasoningOff}
 	}
 }
 

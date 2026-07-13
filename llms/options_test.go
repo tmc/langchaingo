@@ -934,3 +934,48 @@ func getRefInt(i int) *int {
 func getRefFloat64(f float64) *float64 {
 	return &f
 }
+
+func TestReasoningConfig_ResolveMode(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		config   *llms.ReasoningConfig
+		mode     llms.ReasoningMode
+		enabled  bool
+		disabled bool
+	}{
+		{"nil defers", nil, llms.ReasoningDefault, false, false},
+		{"empty defers", &llms.ReasoningConfig{}, llms.ReasoningDefault, false, false},
+		{"legacy effort -> on", &llms.ReasoningConfig{Effort: llms.ReasoningHigh}, llms.ReasoningOn, true, false},
+		{"legacy tokens -> on", &llms.ReasoningConfig{Tokens: 5000}, llms.ReasoningOn, true, false},
+		{"legacy adaptive -> on", &llms.ReasoningConfig{Adaptive: true}, llms.ReasoningOn, true, false},
+		{"legacy none+0 defers", &llms.ReasoningConfig{Effort: llms.ReasoningNone, Tokens: 0}, llms.ReasoningDefault, false, false},
+		{"explicit off", &llms.ReasoningConfig{Mode: llms.ReasoningOff}, llms.ReasoningOff, false, true},
+		{"explicit on", &llms.ReasoningConfig{Mode: llms.ReasoningOn}, llms.ReasoningOn, true, false},
+		{"mode off wins over effort", &llms.ReasoningConfig{Mode: llms.ReasoningOff, Effort: llms.ReasoningHigh}, llms.ReasoningOff, false, true},
+		{"mode on wins over empty", &llms.ReasoningConfig{Mode: llms.ReasoningOn}, llms.ReasoningOn, true, false},
+	}
+	for _, tc := range cases {
+		if got := tc.config.ResolveMode(); got != tc.mode {
+			t.Errorf("%s: ResolveMode = %d, want %d", tc.name, got, tc.mode)
+		}
+		if got := tc.config.IsEnabled(); got != tc.enabled {
+			t.Errorf("%s: IsEnabled = %v, want %v", tc.name, got, tc.enabled)
+		}
+		if got := tc.config.IsDisabled(); got != tc.disabled {
+			t.Errorf("%s: IsDisabled = %v, want %v", tc.name, got, tc.disabled)
+		}
+	}
+}
+
+func TestWithReasoningDisabled(t *testing.T) {
+	t.Parallel()
+	var o llms.CallOptions
+	llms.WithReasoningDisabled()(&o)
+	if o.Reasoning == nil || o.Reasoning.ResolveMode() != llms.ReasoningOff {
+		t.Fatalf("WithReasoningDisabled must set ReasoningOff, got %+v", o.Reasoning)
+	}
+	if o.Reasoning.IsEnabled() {
+		t.Error("disabled reasoning must not be IsEnabled")
+	}
+}
