@@ -853,12 +853,13 @@ func updateToolCall(message *ChatMessage, delta *StreamedToolCall, nameCache map
 		delta.ID = toolCall.ID
 		delta.Type = toolCall.Type
 	} else if delta.Function.Name == "" {
-		// If ID is present but name is missing (some providers don't send name in subsequent chunks),
-		// restore the name from cache
+		// ID present but name missing (some providers omit the name on subsequent
+		// chunks). Append arguments regardless, as with the no-ID case, so the
+		// bytes are never dropped; restore the name from cache when we have it.
+		toolCall.Function.Arguments += delta.Function.Arguments
+		delta.Type = toolCall.Type
 		if cachedName, ok := nameCache[delta.ID]; ok {
 			delta.Function.Name = cachedName
-			toolCall.Function.Arguments += delta.Function.Arguments
-			delta.Type = toolCall.Type
 		}
 	}
 }
