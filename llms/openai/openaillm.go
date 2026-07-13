@@ -244,8 +244,9 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.ResponseFormat = ResponseFormatJSON
 	}
 
-	// set temperature to 1.0 for reasoning models
-	if reasoning.IsReasoningModel(opts.GetModel()) {
+	// set temperature to 1.0 for reasoning models, unless reasoning is explicitly
+	// disabled (the model then runs as a plain completion honoring the caller's temp)
+	if reasoning.IsReasoningModel(opts.GetModel()) && !opts.Reasoning.IsDisabled() {
 		temperature := 1.0
 		req.Temperature = &temperature
 	}
@@ -261,15 +262,20 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 	}
 
 	// set reasoning options, depends on the client and request options
-	o.setReasoning(req, opts)
+	if err := o.setReasoning(req, opts); err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
 
 // setReasoning sets reasoning options, depends on the client and request options.
-func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) {
-	if !opts.Reasoning.IsEnabled() {
-		return
+func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
+	switch opts.Reasoning.ResolveMode() {
+	case llms.ReasoningDefault:
+		return nil
+	case llms.ReasoningOff:
+		return o.setReasoningOff(req, opts)
 	}
 
 	defer func() {
@@ -285,7 +291,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		if reasoningEffort != llms.ReasoningNone {
 			req.ReasoningEffort = &reasoningEffort
 		}
-		return
+		return nil
 	}
 
 	// using modern reasoning format
@@ -298,6 +304,31 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 			Effort: reasoningEffort,
 		}
 	}
+	return nil
+}
+
+// setReasoningOff sends the model's explicit disable token so a reasoning model
+// runs as a plain completion. Sampling params are left intact (a non-thinking
+// call); a model whose thinking cannot be disabled returns a typed error.
+func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
+	// The model may be set on the call or default to the client, and the client
+	// default is only substituted downstream — resolve it here for the classifier.
+	model := opts.GetModel()
+	if model == "" {
+		model = o.client.Model
+	}
+	switch reasoning.ResolveOff(model, reasoning.ProviderOpenAI) {
+	case reasoning.OffUnsupported:
+		return &reasoning.ErrReasoningOffUnsupported{Model: model}
+	case reasoning.OffEffortNone:
+		none := llms.ReasoningEffort("none")
+		if o.client.ModernReasoningFormat {
+			req.Reasoning = &openaiclient.ReasoningOptions{Effort: none}
+		} else {
+			req.ReasoningEffort = &none
+		}
+	}
+	return nil
 }
 
 // addToolsToRequest adds tools to the request from functions and tool definitions.

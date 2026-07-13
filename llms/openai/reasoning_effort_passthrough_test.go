@@ -100,3 +100,75 @@ func TestAdaptiveReasoningNoEffortDefaultsToHighOnWire(t *testing.T) {
 		t.Fatalf("adaptive-no-effort must send reasoning_effort=high, got body: %s", body)
 	}
 }
+
+// WithReasoningDisabled must send the model's explicit disable token on a
+// reasoning model, error on a model that cannot disable, and stay silent on a
+// non-reasoning model.
+func TestReasoningDisabledToWire(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	newLLM := func(t *testing.T, model string, modern bool) (*LLM, *string) {
+		t.Helper()
+		body := new(string)
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			*body = string(b)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		t.Cleanup(srv.Close)
+		opts := []Option{WithBaseURL(srv.URL), WithToken("test"), WithModel(model)}
+		if modern {
+			opts = append(opts, WithModernReasoningFormat())
+		}
+		llm, err := New(opts...)
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		return llm, body
+	}
+
+	msgs := []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}
+
+	t.Run("legacy disable sends reasoning_effort none", func(t *testing.T) {
+		llm, body := newLLM(t, "gpt-5.5", false)
+		if _, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled()); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		if !strings.Contains(*body, `"reasoning_effort":"none"`) {
+			t.Fatalf("disable must send reasoning_effort=none, got body: %s", *body)
+		}
+	})
+
+	t.Run("modern disable sends effort none", func(t *testing.T) {
+		llm, body := newLLM(t, "gpt-5.5", true)
+		if _, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled()); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		if !strings.Contains(*body, `"effort":"none"`) {
+			t.Fatalf("disable must send effort=none, got body: %s", *body)
+		}
+	})
+
+	t.Run("mandatory reasoning model rejects disable", func(t *testing.T) {
+		llm, _ := newLLM(t, "o3-mini", false)
+		_, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled())
+		if err == nil || !strings.Contains(err.Error(), "cannot be disabled") {
+			t.Fatalf("o3-mini disable must error with 'cannot be disabled', got: %v", err)
+		}
+	})
+
+	t.Run("non-reasoning model omits reasoning", func(t *testing.T) {
+		llm, body := newLLM(t, "gpt-4.1", false)
+		if _, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled()); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		if strings.Contains(*body, "reasoning_effort") || strings.Contains(*body, `"reasoning"`) {
+			t.Fatalf("non-reasoning model must omit reasoning fields, got body: %s", *body)
+		}
+	})
+}
