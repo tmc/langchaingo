@@ -210,8 +210,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	// Budget thinking pins temperature to 1.0; adaptive models reject sampling
-	// params, so omit temperature/top_p entirely for them.
+	// Thinking constrains sampling params: the API rejects temperature and top_p
+	// together, and requires temperature=1.0 with budget thinking. So pin
+	// temperature and drop top_p for budget; drop both for adaptive (which
+	// rejects sampling params outright).
 	temperature, topP, maxTokens := opts.Temperature, opts.TopP, opts.GetMaxTokens()
 	switch {
 	case thinking != nil && thinking.Type == "adaptive":
@@ -219,6 +221,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		topP = nil
 	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
 		temperature = getFloatPointer(1.0)
+		topP = nil
 		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
 	}
 

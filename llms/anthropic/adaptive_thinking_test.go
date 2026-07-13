@@ -16,7 +16,7 @@ import (
 // captureMessagesRequest drives a real GenerateContent call against a recording
 // server and returns the decoded outbound /v1/messages body and headers, so
 // assertions cover generateMessagesContent (thinking construction, sampling-param
-// handling, beta headers), not a hand-built payload.
+// handling, beta headers).
 func captureMessagesRequest(t *testing.T, callOpts ...llms.CallOption) (map[string]any, http.Header) {
 	t.Helper()
 
@@ -124,9 +124,11 @@ func TestAnthropic_BudgetThinkingRequest(t *testing.T) {
 	_, hasOutputConfig := payload["output_config"]
 	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
 
-	// Budget thinking pins temperature to 1.0 and keeps top_p as provided.
+	// Budget thinking pins temperature to 1.0 and drops top_p — the API rejects
+	// temperature and top_p together.
 	assert.EqualValues(t, 1.0, payload["temperature"])
-	assert.EqualValues(t, 0.9, payload["top_p"])
+	_, hasTopP := payload["top_p"]
+	assert.False(t, hasTopP, "budget thinking must drop top_p")
 	assert.EqualValues(t, 4096, payload["max_tokens"]) // max(budget*2, maxTokens)
 }
 
