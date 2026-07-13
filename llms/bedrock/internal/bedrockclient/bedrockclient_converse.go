@@ -143,10 +143,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	if input.ReasoningConfig != nil {
 		additionalModelFields := converseAdditionalModelRequestFields{}
 		setAdaptive := func() {
-			effort := input.ReasoningConfig.Effort
-			if effort == llms.ReasoningNone {
-				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
-			}
+			effort := input.ReasoningConfig.GetEffort(0)
 			additionalModelFields.Thinking = &converseThinkingPayload{Type: "adaptive", Display: "summarized"}
 			additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
 			// Adaptive models reject sampling params.

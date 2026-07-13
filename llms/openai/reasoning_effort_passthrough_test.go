@@ -66,3 +66,37 @@ func TestReasoningEffortPassthroughToWire(t *testing.T) {
 		})
 	}
 }
+
+// WithAdaptiveReasoning with no explicit effort must not silently disable
+// reasoning here: it defaults to high, matching the Anthropic/Bedrock paths.
+func TestAdaptiveReasoningNoEffortDefaultsToHighOnWire(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	defer srv.Close()
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel("reasoning-model"))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(
+		context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithAdaptiveReasoning(llms.ReasoningNone),
+	); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	if !strings.Contains(body, `"reasoning_effort":"high"`) {
+		t.Fatalf("adaptive-no-effort must send reasoning_effort=high, got body: %s", body)
+	}
+}

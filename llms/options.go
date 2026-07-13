@@ -91,6 +91,10 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 		return r.Effort
 	}
 
+	if r.Adaptive {
+		return ReasoningHigh // adaptive with no explicit effort defaults to high
+	}
+
 	if maxTokens <= 0 {
 		maxTokens = 8192
 	}
@@ -141,7 +145,13 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 			// no distinct token budget for xhigh/max; map them to the high budget.
 			tokens = max(maxTokens/2, 4096)
 		case ReasoningNone:
-			return 0 // disabled
+			if r.Adaptive {
+				// adaptive with no explicit effort defaults to the high budget,
+				// so providers that map reasoning to a token budget don't disable it.
+				tokens = max(maxTokens/2, 4096)
+			} else {
+				return 0 // disabled
+			}
 		default:
 			return -1 // error value to be handled on the server side
 		}

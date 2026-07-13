@@ -177,15 +177,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		// flag: adaptive-only generations reject budget thinking and vice versa,
 		// so honor the caller's preference only where the model accepts it.
 		if reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive) {
-			effort := opts.Reasoning.Effort
-			if effort == llms.ReasoningNone {
-				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
-			}
 			thinking = &anthropicclient.ThinkingPayload{
 				Type:    "adaptive",
 				Display: "summarized",
 			}
-			outputConfig = &anthropicclient.OutputConfig{Effort: string(effort)}
+			outputConfig = &anthropicclient.OutputConfig{
+				Effort: string(opts.Reasoning.GetEffort(opts.GetMaxTokens())),
+			}
 		} else {
 			thinking = &anthropicclient.ThinkingPayload{
 				Type:   "enabled",

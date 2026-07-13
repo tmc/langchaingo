@@ -670,12 +670,8 @@ func applyAnthropicReasoning(
 	}
 
 	setAdaptive := func() {
-		effort := cfg.Effort
-		if effort == llms.ReasoningNone {
-			effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
-		}
 		input.Thinking = &anthropicThinkingPayload{Type: "adaptive", Display: "summarized"}
-		input.OutputConfig = &anthropicOutputConfig{Effort: string(effort)}
+		input.OutputConfig = &anthropicOutputConfig{Effort: string(cfg.GetEffort(maxTokens))}
 		input.Temperature = 0
 		input.TopP = 0
 		input.TopK = 0
