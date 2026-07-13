@@ -81,6 +81,8 @@ func TestApplyAnthropicReasoning_Budget(t *testing.T) {
 	input := anthropicTextGenerationInput{
 		MaxTokens:   8000,
 		Temperature: 0.8,
+		TopP:        0.9,
+		TopK:        40,
 	}
 	applyAnthropicReasoning(&input,
 		&llms.ReasoningConfig{Effort: llms.ReasoningMedium},
@@ -97,7 +99,13 @@ func TestApplyAnthropicReasoning_Budget(t *testing.T) {
 	_, hasOutputConfig := fields["output_config"]
 	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
 
-	assert.EqualValues(t, 0.8, fields["temperature"], "budget thinking keeps the user's sampling params")
+	// Budget thinking pins temperature to 1.0 and drops top_p/top_k — the API
+	// rejects temperature != 1 and top_p/top_k with thinking enabled.
+	assert.EqualValues(t, 1.0, fields["temperature"])
+	_, hasTopP := fields["top_p"]
+	assert.False(t, hasTopP, "budget thinking drops top_p")
+	_, hasTopK := fields["top_k"]
+	assert.False(t, hasTopK, "budget thinking drops top_k")
 }
 
 func TestApplyAnthropicReasoning_BudgetKeepsVersionGate(t *testing.T) {

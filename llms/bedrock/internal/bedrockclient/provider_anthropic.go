@@ -683,6 +683,10 @@ func applyAnthropicReasoning(
 		}
 		if tokens := cfg.GetTokens(mt); tokens > 0 {
 			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+			// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
+			input.Temperature = 1.0
+			input.TopP = 0
+			input.TopK = 0
 		}
 	}
 

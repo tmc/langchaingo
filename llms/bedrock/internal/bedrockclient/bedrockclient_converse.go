@@ -157,6 +157,9 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			}
 			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
 				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+				// Budget thinking requires temperature=1.0 and rejects top_p.
+				inferenceConfig.Temperature = aws.Float32(1.0)
+				inferenceConfig.TopP = nil
 			}
 		}
 		switch {

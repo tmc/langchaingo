@@ -348,14 +348,19 @@ func TestConverseClient_BudgetReasoning(t *testing.T) {
 		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
 		MaxTokens:       ptr(8000),
 		Temperature:     ptr(0.8),
+		TopP:            ptr(0.9),
 		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningMedium}, // budget, NOT adaptive
 	}
 
 	_, err := client.CreateCompletionConverse(t.Context(), input)
 	assert.NoError(t, err)
 
-	// Budget thinking keeps sampling params; only adaptive omits them.
-	assert.NotNil(t, capturedInput.InferenceConfig.Temperature)
+	// Budget thinking pins temperature to 1.0 and drops top_p (the API rejects
+	// temperature != 1 and top_p with thinking enabled).
+	if assert.NotNil(t, capturedInput.InferenceConfig.Temperature) {
+		assert.Equal(t, float32(1.0), *capturedInput.InferenceConfig.Temperature)
+	}
+	assert.Nil(t, capturedInput.InferenceConfig.TopP, "budget thinking drops top_p")
 
 	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
 		return
