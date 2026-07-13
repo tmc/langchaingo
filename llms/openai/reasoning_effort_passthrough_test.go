@@ -11,8 +11,8 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 )
 
-// Guards the GetEffort clamp removal at the wire level: xhigh/max must reach the
-// request body, not be downgraded to high (legacy reasoning_effort and modern reasoning.effort).
+// xhigh/max effort must reach the request body unchanged (not downgraded to
+// high) on both the legacy reasoning_effort and modern reasoning.effort formats.
 func TestReasoningEffortPassthroughToWire(t *testing.T) {
 	t.Parallel()
 

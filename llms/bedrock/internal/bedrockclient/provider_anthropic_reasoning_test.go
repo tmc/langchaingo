@@ -97,7 +97,7 @@ func TestApplyAnthropicReasoning_Budget(t *testing.T) {
 	_, hasOutputConfig := fields["output_config"]
 	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
 
-	assert.EqualValues(t, 0.8, fields["temperature"], "the refactor must not alter budget sampling params")
+	assert.EqualValues(t, 0.8, fields["temperature"], "budget thinking keeps the user's sampling params")
 }
 
 func TestApplyAnthropicReasoning_BudgetKeepsVersionGate(t *testing.T) {
