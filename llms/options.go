@@ -46,12 +46,14 @@ const (
 type ReasoningConfig struct {
 	Effort ReasoningEffort `json:"effort"`
 	Tokens int             `json:"tokens"`
-	// Adaptive selects adaptive thinking (Claude 4.6+ models): the request carries
-	// thinking.type=adaptive plus output_config.effort instead of a token budget,
-	// and the provider always omits sampling params (temperature/top_p) with
-	// adaptive requests — Opus 4.7+ generations reject them. Effort sets the
-	// level; Tokens is ignored. Providers and models without adaptive support
-	// fall back to their effort/budget semantics.
+	// Adaptive expresses a preference for adaptive thinking (thinking.type=adaptive
+	// plus output_config.effort instead of a token budget). Effort sets the level;
+	// Tokens is ignored. For Claude the wire mechanism is resolved from the model,
+	// not this flag: an adaptive-only generation (Opus 4.7+, Sonnet 5, Fable 5)
+	// always uses adaptive and drops sampling params it rejects, a budget-only
+	// generation always uses budget thinking, and this preference is honored on
+	// models that support both. Providers without adaptive support fall back to
+	// their effort/budget semantics.
 	Adaptive bool `json:"adaptive,omitempty"`
 }
 

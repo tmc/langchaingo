@@ -652,44 +652,57 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 	return c
 }
 
-// applyAnthropicReasoning mirrors the native Anthropic client: adaptive requests
-// carry thinking.type=adaptive plus output_config.effort and always drop sampling
-// params (Opus 4.7+ generations reject them); budget requests keep the
-// version-gated thinking.type=enabled payload.
+// applyAnthropicReasoning resolves the thinking mechanism from the model via the
+// reasoning capability resolver: an adaptive-only generation gets adaptive
+// thinking and drops sampling params, a budget-only generation gets budget
+// thinking, and the caller's preference is honored where the model supports both.
 func applyAnthropicReasoning(
 	input *anthropicTextGenerationInput, cfg *llms.ReasoningConfig, modelID string, maxTokens int,
 ) {
+	// Adaptive-only models reject sampling params even without thinking.
+	if reasoning.ClaudeRejectsSampling(modelID) {
+		input.Temperature = 0
+		input.TopP = 0
+		input.TopK = 0
+	}
 	if cfg == nil {
 		return
 	}
 
-	if cfg.Adaptive {
+	setAdaptive := func() {
 		effort := cfg.Effort
 		if effort == llms.ReasoningNone {
 			effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
 		}
-		input.Thinking = &anthropicThinkingPayload{
-			Type:    "adaptive",
-			Display: "summarized",
-		}
+		input.Thinking = &anthropicThinkingPayload{Type: "adaptive", Display: "summarized"}
 		input.OutputConfig = &anthropicOutputConfig{Effort: string(effort)}
 		input.Temperature = 0
 		input.TopP = 0
 		input.TopK = 0
-		return
+	}
+	setBudget := func() {
+		mt := maxTokens
+		if mt == 0 {
+			mt = 2048
+		}
+		if tokens := cfg.GetTokens(mt); tokens > 0 {
+			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+		}
 	}
 
-	if !supportsAnthropicReasoning(modelID) {
-		return
-	}
-	if maxTokens == 0 {
-		maxTokens = 2048
-	}
-	if tokens := cfg.GetTokens(maxTokens); tokens > 0 {
-		input.Thinking = &anthropicThinkingPayload{
-			Type:         "enabled",
-			BudgetTokens: tokens,
+	switch {
+	case reasoning.ClaudeSupportsThinking(modelID):
+		// Known thinking Claude: the model, not the flag, picks the mechanism.
+		if reasoning.ResolveClaudeAdaptive(modelID, cfg.Adaptive) {
+			setAdaptive()
+		} else {
+			setBudget()
 		}
+	case cfg.Adaptive:
+		// Unclassified Claude generation with an explicit adaptive request.
+		setAdaptive()
+	case supportsAnthropicReasoning(modelID):
+		setBudget()
 	}
 }
 

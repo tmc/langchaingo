@@ -161,10 +161,22 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
 	}
 
+	// Effective model: a per-call model wins, otherwise the client default (the
+	// per-call model is empty when the caller sets the model only on the client,
+	// and the wire model is substituted downstream — so read the client default
+	// here for the capability resolver).
+	model := opts.GetModel()
+	if model == "" {
+		model = o.client.Model
+	}
+
 	var thinking *anthropicclient.ThinkingPayload
 	var outputConfig *anthropicclient.OutputConfig
 	if opts.Reasoning.IsEnabled() {
-		if opts.Reasoning.Adaptive {
+		// The wire mechanism is resolved from the model, not the raw Adaptive
+		// flag: adaptive-only generations reject budget thinking and vice versa,
+		// so honor the caller's preference only where the model accepts it.
+		if reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive) {
 			effort := opts.Reasoning.Effort
 			if effort == llms.ReasoningNone {
 				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
@@ -223,6 +235,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		temperature = getFloatPointer(1.0)
 		topP = nil
 		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
+	case reasoning.ClaudeRejectsSampling(model):
+		// Adaptive-only models reject sampling params even without thinking.
+		temperature = nil
+		topP = nil
 	}
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{

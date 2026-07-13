@@ -142,39 +142,50 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	// Add additional model fields
 	if input.ReasoningConfig != nil {
 		additionalModelFields := converseAdditionalModelRequestFields{}
-		switch {
-		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID):
-			// Gated by model family, not the version allowlist: adaptive targets
-			// Claude generations newer than supportsReasoning knows.
+		setAdaptive := func() {
 			effort := input.ReasoningConfig.Effort
 			if effort == llms.ReasoningNone {
 				effort = llms.ReasoningHigh // match the server default instead of sending an empty output_config
 			}
-			additionalModelFields.Thinking = &converseThinkingPayload{
-				Type:    "adaptive",
-				Display: "summarized",
-			}
+			additionalModelFields.Thinking = &converseThinkingPayload{Type: "adaptive", Display: "summarized"}
 			additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
 			// Adaptive models reject sampling params.
 			inferenceConfig.Temperature = nil
 			inferenceConfig.TopP = nil
-		case c.supportsReasoning(input.ModelID):
-			// Budget thinking; also the fallback for adaptive on non-Claude models.
+		}
+		setBudget := func() {
 			maxTokens := 0 // Use 0 to let it use default maxTokens
 			if input.MaxTokens != nil {
 				maxTokens = *input.MaxTokens
 			}
-			tokens := input.ReasoningConfig.GetTokens(maxTokens)
-			if tokens > 0 {
-				additionalModelFields.Thinking = &converseThinkingPayload{
-					Type:         "enabled",
-					BudgetTokens: tokens,
-				}
+			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
+				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 			}
+		}
+		switch {
+		case reasoning.ClaudeSupportsThinking(input.ModelID):
+			// Known thinking Claude: the model, not the flag, picks the mechanism.
+			if reasoning.ResolveClaudeAdaptive(input.ModelID, input.ReasoningConfig.Adaptive) {
+				setAdaptive()
+			} else {
+				setBudget()
+			}
+		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID):
+			// Unclassified Claude generation with an explicit adaptive request.
+			setAdaptive()
+		case c.supportsReasoning(input.ModelID):
+			// Non-Claude reasoning model (gpt-oss, kimi): budget thinking.
+			setBudget()
 		}
 		if additionalModelFields.Thinking != nil {
 			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(additionalModelFields)
 		}
+	}
+
+	// Adaptive-only models reject sampling params even without thinking.
+	if reasoning.ClaudeRejectsSampling(input.ModelID) {
+		inferenceConfig.Temperature = nil
+		inferenceConfig.TopP = nil
 	}
 
 	return converseInput, nil

@@ -423,6 +423,51 @@ func TestConverseClient_AdaptiveReasoningNewModelFamily(t *testing.T) {
 	mockClient.AssertExpectations(t)
 }
 
+func TestConverseClient_BudgetOnAdaptiveOnlyUpgrades(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	// Plain budget WithReasoning on an adaptive-only model must upgrade to adaptive.
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-opus-4-7",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(4000),
+		Temperature:     ptr(0.8),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningMedium}, // budget, not Adaptive
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	assert.Nil(t, capturedInput.InferenceConfig.Temperature, "adaptive drops sampling")
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "adaptive", thinking["type"], "budget request upgraded to adaptive")
+	_, hasBudget := thinking["budget_tokens"]
+	assert.False(t, hasBudget, "upgraded adaptive must not carry a budget")
+
+	mockClient.AssertExpectations(t)
+}
+
 func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 	mockClient := &MockBedrockRuntimeClient{}
 	client := NewConverseClient(mockClient)

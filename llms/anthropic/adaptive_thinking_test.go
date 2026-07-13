@@ -51,6 +51,86 @@ func captureMessagesRequest(t *testing.T, callOpts ...llms.CallOption) (map[stri
 	return payload, header
 }
 
+// TestAnthropic_ModelAwareThinkingResolution locks the deterministic
+// (model, request) -> wire mechanism table: a currently-accepted combination
+// keeps its mechanism, and a combination the model would reject is redirected
+// to the mechanism it accepts.
+func TestAnthropic_ModelAwareThinkingResolution(t *testing.T) {
+	t.Parallel()
+
+	thinkingType := func(p map[string]any) string {
+		th, _ := p["thinking"].(map[string]any)
+		s, _ := th["type"].(string)
+		return s
+	}
+
+	t.Run("budget on adaptive-only model upgrades to adaptive", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-sonnet-5"),
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTemperature(0.7), llms.WithTopP(0.9), llms.WithMaxTokens(4096))
+		assert.Equal(t, "adaptive", thinkingType(p))
+		th, _ := p["thinking"].(map[string]any)
+		_, hasBudget := th["budget_tokens"]
+		assert.False(t, hasBudget, "upgraded adaptive must not carry a budget")
+		_, hasTemp := p["temperature"]
+		assert.False(t, hasTemp, "adaptive-only model must drop temperature")
+		_, hasTopP := p["top_p"]
+		assert.False(t, hasTopP, "adaptive-only model must drop top_p")
+	})
+
+	t.Run("adaptive on budget-only model downgrades to budget", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-haiku-4-5"),
+			llms.WithAdaptiveReasoning(llms.ReasoningHigh), llms.WithMaxTokens(4096))
+		assert.Equal(t, "enabled", thinkingType(p))
+		th, _ := p["thinking"].(map[string]any)
+		_, hasBudget := th["budget_tokens"]
+		assert.True(t, hasBudget, "downgraded budget must carry a token budget")
+		_, hasOutputConfig := p["output_config"]
+		assert.False(t, hasOutputConfig, "budget thinking has no output_config")
+	})
+
+	t.Run("budget on budget-only model stays budget", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-sonnet-4-5"),
+			llms.WithReasoning(llms.ReasoningMedium, 0), llms.WithMaxTokens(4096))
+		assert.Equal(t, "enabled", thinkingType(p))
+	})
+
+	t.Run("adaptive on dual model stays adaptive", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-opus-4-6"),
+			llms.WithAdaptiveReasoning(llms.ReasoningHigh), llms.WithMaxTokens(2048))
+		assert.Equal(t, "adaptive", thinkingType(p))
+	})
+
+	t.Run("sampling on adaptive-only model without reasoning is dropped", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-sonnet-5"),
+			llms.WithTemperature(0.7), llms.WithTopP(0.9), llms.WithMaxTokens(64))
+		_, hasThinking := p["thinking"]
+		assert.False(t, hasThinking, "no reasoning requested")
+		_, hasTemp := p["temperature"]
+		assert.False(t, hasTemp, "adaptive-only model drops temperature even without thinking")
+		_, hasTopP := p["top_p"]
+		assert.False(t, hasTopP, "adaptive-only model drops top_p even without thinking")
+	})
+
+	t.Run("sampling on budget-capable model without reasoning is kept", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequest(t,
+			llms.WithModel("claude-sonnet-4-5"),
+			llms.WithTemperature(0.7), llms.WithMaxTokens(64))
+		assert.EqualValues(t, 0.7, p["temperature"], "budget-capable model keeps temperature")
+	})
+}
+
 func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 	t.Parallel()
 

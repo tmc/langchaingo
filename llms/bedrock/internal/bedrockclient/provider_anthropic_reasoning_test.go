@@ -114,10 +114,52 @@ func TestApplyAnthropicReasoning_BudgetKeepsVersionGate(t *testing.T) {
 func TestApplyAnthropicReasoning_NilConfig(t *testing.T) {
 	t.Parallel()
 
+	// Budget-capable model: nil config is a no-op, sampling untouched.
 	input := anthropicTextGenerationInput{MaxTokens: 2048, Temperature: 0.8}
-	applyAnthropicReasoning(&input, nil, "anthropic.claude-opus-4-7-v1:0", 2048)
+	applyAnthropicReasoning(&input, nil, "us.anthropic.claude-sonnet-4-5-20250929-v1:0", 2048)
 
 	assert.Nil(t, input.Thinking)
 	assert.Nil(t, input.OutputConfig)
 	assert.EqualValues(t, 0.8, input.Temperature)
+}
+
+func TestApplyAnthropicReasoning_AdaptiveOnlyDropsSamplingWithoutConfig(t *testing.T) {
+	t.Parallel()
+
+	// Adaptive-only model rejects sampling params even with no reasoning config.
+	input := anthropicTextGenerationInput{MaxTokens: 2048, Temperature: 0.8, TopP: 0.9, TopK: 40}
+	applyAnthropicReasoning(&input, nil, "anthropic.claude-opus-4-7-v1:0", 2048)
+
+	assert.Nil(t, input.Thinking)
+	assert.EqualValues(t, 0, input.Temperature)
+	assert.EqualValues(t, 0, input.TopP)
+	assert.EqualValues(t, 0, input.TopK)
+}
+
+func TestApplyAnthropicReasoning_BudgetOnAdaptiveOnlyUpgrades(t *testing.T) {
+	t.Parallel()
+
+	// Budget request on an adaptive-only model must become adaptive, not 400.
+	input := anthropicTextGenerationInput{MaxTokens: 4096}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Effort: llms.ReasoningMedium}, // budget preference
+		"anthropic.claude-opus-4-8-v1:0", 4096)
+
+	require.NotNil(t, input.Thinking)
+	assert.Equal(t, "adaptive", input.Thinking.Type)
+	require.NotNil(t, input.OutputConfig)
+}
+
+func TestApplyAnthropicReasoning_AdaptiveOnBudgetOnlyDowngrades(t *testing.T) {
+	t.Parallel()
+
+	// Adaptive request on a budget-only model must become budget, not 400.
+	input := anthropicTextGenerationInput{MaxTokens: 4096}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Effort: llms.ReasoningHigh, Adaptive: true},
+		"us.anthropic.claude-haiku-4-5-20251001-v1:0", 4096)
+
+	require.NotNil(t, input.Thinking)
+	assert.Equal(t, "enabled", input.Thinking.Type)
+	assert.Nil(t, input.OutputConfig)
 }
