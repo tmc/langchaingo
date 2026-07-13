@@ -129,14 +129,8 @@ func (g *GoogleAI) GenerateContent(
 	}
 
 	// Handle thinking configuration for reasoning models
-	if opts.Reasoning != nil && opts.Reasoning.IsEnabled() {
-		thinkingBudget := int32(opts.Reasoning.GetTokens(opts.GetMaxTokens()))
-		if thinkingBudget > 0 {
-			config.ThinkingConfig = &genai.ThinkingConfig{
-				ThinkingBudget:  &thinkingBudget,
-				IncludeThoughts: true, // Include thought summaries by default
-			}
-		}
+	if tc := resolveThinkingConfig(opts.GetModel(), opts.Reasoning, opts.GetMaxTokens()); tc != nil {
+		config.ThinkingConfig = tc
 	}
 
 	// Convert tools
@@ -966,4 +960,22 @@ func convertIntToFloat32Pointer(i *int) *float32 {
 
 	f32 := float32(*i)
 	return &f32
+}
+
+// resolveThinkingConfig builds the Gemini thinking config for the reasoning mode.
+// Off forces budget 0 because Gemini 2.5 thinks by default (omitting would not
+// disable it); a Pro / 3.x model that rejects a hard off surfaces a 400.
+func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) *genai.ThinkingConfig {
+	switch cfg.ResolveMode() {
+	case llms.ReasoningOn:
+		if budget := int32(cfg.GetTokens(maxTokens)); budget > 0 {
+			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}
+		}
+	case llms.ReasoningOff:
+		if reasoning.ResolveOff(model, reasoning.ProviderGoogleAI) == reasoning.OffZeroBudget {
+			zero := int32(0)
+			return &genai.ThinkingConfig{ThinkingBudget: &zero}
+		}
+	}
+	return nil
 }

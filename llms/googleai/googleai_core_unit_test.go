@@ -1029,3 +1029,39 @@ func TestThinkingConfig(t *testing.T) {
 		assert.Nil(t, reasoning)
 	})
 }
+
+func TestResolveThinkingConfig(t *testing.T) {
+	t.Parallel()
+
+	t.Run("on with budget sends positive budget", func(t *testing.T) {
+		tc := resolveThinkingConfig("gemini-2.5-flash",
+			&llms.ReasoningConfig{Tokens: 500}, 1000)
+		require.NotNil(t, tc)
+		require.NotNil(t, tc.ThinkingBudget)
+		assert.Equal(t, int32(500), *tc.ThinkingBudget)
+		assert.True(t, tc.IncludeThoughts)
+	})
+
+	t.Run("off forces budget zero", func(t *testing.T) {
+		tc := resolveThinkingConfig("gemini-2.5-flash",
+			&llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
+		require.NotNil(t, tc)
+		require.NotNil(t, tc.ThinkingBudget)
+		assert.Equal(t, int32(0), *tc.ThinkingBudget)
+		assert.False(t, tc.IncludeThoughts, "a disabled config must not request thought summaries")
+	})
+
+	t.Run("default omits thinking config", func(t *testing.T) {
+		assert.Nil(t, resolveThinkingConfig("gemini-2.5-flash", nil, 1000))
+		assert.Nil(t, resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{}, 1000))
+	})
+
+	t.Run("off with empty model still forces zero", func(t *testing.T) {
+		// Google Off does not depend on the model string, so a client-level model
+		// (empty on the call) still disables cleanly.
+		tc := resolveThinkingConfig("", &llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
+		require.NotNil(t, tc)
+		require.NotNil(t, tc.ThinkingBudget)
+		assert.Equal(t, int32(0), *tc.ThinkingBudget)
+	})
+}
