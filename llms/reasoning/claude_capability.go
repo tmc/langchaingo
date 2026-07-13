@@ -72,6 +72,26 @@ func ClaudeSupportsThinking(model string) bool {
 	return ClaudeReasoningKindFor(model) != ClaudeReasoningUnknown
 }
 
+// alwaysOnClaude models think unconditionally and reject an explicit disable.
+// defaultOnClaude models think when thinking is omitted (so forcing them off
+// needs an explicit disable, not just omission).
+var (
+	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5"}
+	defaultOnClaude = []string{"claude-sonnet-5", "claude-fable-5", "claude-mythos-5"}
+)
+
+// ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled
+// (Fable 5 / Mythos 5 — an explicit disable returns 400).
+func ClaudeThinkingAlwaysOn(model string) bool {
+	return containsAny(strings.ToLower(model), alwaysOnClaude)
+}
+
+// ClaudeThinkingDefaultsOn reports whether the model thinks when thinking is
+// omitted, so disabling it requires an explicit disable rather than omission.
+func ClaudeThinkingDefaultsOn(model string) bool {
+	return containsAny(strings.ToLower(model), defaultOnClaude)
+}
+
 // ResolveClaudeAdaptive returns whether to send adaptive thinking (true) or
 // budget thinking (false) for a Claude model, given the caller's preference
 // (adaptivePreferred is true when the caller used WithAdaptiveReasoning).
