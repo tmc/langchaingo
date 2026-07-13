@@ -968,6 +968,14 @@ func convertIntToFloat32Pointer(i *int) *float32 {
 func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) *genai.ThinkingConfig {
 	switch cfg.ResolveMode() {
 	case llms.ReasoningOn:
+		// An effort with no explicit token budget maps to the qualitative
+		// thinking_level on Gemini 3.x (its native control, where thinking_budget is
+		// deprecated); an explicit budget or a 2.5 model still uses thinking_budget.
+		if cfg.Tokens == 0 && supportsThinkingLevel(model) {
+			if level := thinkingLevelForEffort(cfg.GetEffort(maxTokens)); level != "" {
+				return &genai.ThinkingConfig{ThinkingLevel: level, IncludeThoughts: true}
+			}
+		}
 		if budget := int32(cfg.GetTokens(maxTokens)); budget > 0 {
 			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}
 		}
@@ -978,4 +986,26 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		}
 	}
 	return nil
+}
+
+// supportsThinkingLevel reports whether the model uses the qualitative
+// thinking_level control (Gemini 3.x) rather than a token budget (Gemini 2.5).
+func supportsThinkingLevel(model string) bool {
+	return strings.Contains(strings.ToLower(model), "gemini-3")
+}
+
+// thinkingLevelForEffort maps a reasoning effort to a Gemini thinking_level.
+// xhigh/max collapse to HIGH (the top level); an unset effort returns empty so
+// the caller falls back to a budget or the model default.
+func thinkingLevelForEffort(effort llms.ReasoningEffort) genai.ThinkingLevel {
+	switch effort {
+	case llms.ReasoningLow:
+		return genai.ThinkingLevelLow
+	case llms.ReasoningMedium:
+		return genai.ThinkingLevelMedium
+	case llms.ReasoningHigh, llms.ReasoningXHigh, llms.ReasoningMax:
+		return genai.ThinkingLevelHigh
+	default:
+		return ""
+	}
 }

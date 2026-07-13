@@ -1064,4 +1064,38 @@ func TestResolveThinkingConfig(t *testing.T) {
 		require.NotNil(t, tc.ThinkingBudget)
 		assert.Equal(t, int32(0), *tc.ThinkingBudget)
 	})
+
+	t.Run("gemini 3.x effort maps to thinking_level, not budget", func(t *testing.T) {
+		for _, tc := range []struct {
+			effort llms.ReasoningEffort
+			want   genai.ThinkingLevel
+		}{
+			{llms.ReasoningLow, genai.ThinkingLevelLow},
+			{llms.ReasoningMedium, genai.ThinkingLevelMedium},
+			{llms.ReasoningHigh, genai.ThinkingLevelHigh},
+			{llms.ReasoningXHigh, genai.ThinkingLevelHigh},
+			{llms.ReasoningMax, genai.ThinkingLevelHigh},
+		} {
+			got := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: tc.effort}, 8192)
+			require.NotNil(t, got)
+			assert.Equal(t, tc.want, got.ThinkingLevel, "effort %s -> level", tc.effort)
+			assert.Nil(t, got.ThinkingBudget, "level path must not also send a budget")
+			assert.True(t, got.IncludeThoughts)
+		}
+	})
+
+	t.Run("gemini 2.5 effort still uses a token budget", func(t *testing.T) {
+		got := resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{Effort: llms.ReasoningHigh}, 8192)
+		require.NotNil(t, got)
+		require.NotNil(t, got.ThinkingBudget, "2.5 keeps thinking_budget")
+		assert.Equal(t, genai.ThinkingLevel(""), got.ThinkingLevel)
+	})
+
+	t.Run("explicit budget overrides thinking_level even on gemini 3.x", func(t *testing.T) {
+		got := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Tokens: 2048}, 8192)
+		require.NotNil(t, got)
+		require.NotNil(t, got.ThinkingBudget, "an explicit budget wins")
+		assert.Equal(t, int32(2048), *got.ThinkingBudget)
+		assert.Equal(t, genai.ThinkingLevel(""), got.ThinkingLevel)
+	})
 }
