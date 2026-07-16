@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mongodb-atlas-local:
+    image: mongodb/mongodb-atlas-local:latest
+    container_name: mongodb-atlas-local
+    ports:
+      - "27017:27017"
+    environment:
+      DO_NOT_TRACK: 1  # Set to 1 to opt out of telemetry
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d  # Directory for initialization scripts
+      - ./logs:/var/log/mongodb  # Directory for logs (optional)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
