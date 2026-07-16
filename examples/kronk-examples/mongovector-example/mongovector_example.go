@@ -45,7 +45,7 @@ func main() {
 
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
-		log.Fatal("MONGODB_URI required and must point to a MongoDB Atlas Database")
+		uri = "mongodb://localhost:27017/?directConnection=true"
 	}
 
 	// -----------------------------------------------------------------------
