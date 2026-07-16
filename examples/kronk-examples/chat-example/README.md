@@ -1,6 +1,6 @@
 # Kronk Chat Example
 
-A minimal chat example using the kronk abstraction layer to run a local GGUF model via llama.cpp.
+An interactive chat example using the kronk abstraction layer to run a local GGUF model via llama.cpp. Unlike the [prompt-example](../prompt-example) which asks a single hard-coded question, this example maintains a conversation history so you can chat back and forth with the model.
 
 ## How to Run
 
@@ -15,10 +15,19 @@ go run chat_example.go
 | Flag | Default | Description |
 |------|---------|-------------|
 | `-model` | `unsloth/Qwen3-0.6B-Q8_0` | GGUF model source (HuggingFace URL or provider/modelID) |
-| `-prompt` | _"In one sentence, what makes Go a good language for concurrent programming?"_ | Question to ask the model |
 
-### Example
+### Example Session
 
-```shell
-go run chat_example.go -model unsloth/Qwen3-0.6B-Q8_0 -prompt "What is 2+2?"
+```text
+Chat ready. Type your message and press Enter. Type 'quit' to exit.
+
+YOU> What is Go?
+MODEL> Go is a statically typed, compiled programming language designed at Google.
+
+YOU> Who created it?
+MODEL> Go was created by Robert Griesemer, Rob Pike, and Ken Thompson.
+
+YOU> quit
 ```
+
+Type `quit` or press `Ctrl+D` to end the conversation.
