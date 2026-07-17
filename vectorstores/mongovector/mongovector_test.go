@@ -816,11 +816,23 @@ func createVectorSearchIndex(
 	}
 
 	// Await the creation of the index.
+	// The search service (mongot) may still be starting up even after CreateOne
+	// succeeds, since CreateOne only registers the index intent and does not
+	// require the search service to be fully available yet. Tolerate transient
+	// "Search Index Management service" connection errors and keep retrying
+	// until the deadline instead of aborting on the first such error.
+	deadline := time.Now().Add(30 * time.Second)
 	var doc bson.Raw
+	var lastErr error
 	for doc == nil {
 		cursor, err := view.List(ctx, options.SearchIndexes().SetName(searchName))
 		if err != nil {
-			return "", fmt.Errorf("failed to list search indexes: %w", err)
+			if time.Now().After(deadline) {
+				return "", fmt.Errorf("failed to list search indexes: %w", err)
+			}
+			lastErr = err
+			time.Sleep(500 * time.Millisecond)
+			continue
 		}
 		if !cursor.Next(ctx) {
 			break
@@ -830,6 +842,9 @@ func createVectorSearchIndex(
 		if name == searchName && queryable {
 			doc = cursor.Current
 		} else {
+			if time.Now().After(deadline) {
+				return "", fmt.Errorf("index %s did not become queryable before deadline (last error: %w)", searchName, lastErr)
+			}
 			time.Sleep(2 * time.Second)
 		}
 	}
@@ -885,9 +900,20 @@ func waitForSearchService(t *testing.T, ctx context.Context, coll *mongo.Collect
 			return
 		}
 
-		// Check if it's a connection error
-		if !strings.Contains(err.Error(), "Error connecting to Search Index Management service") {
-			// Some other error - service might be ready
+		// Only stop retrying for non-transient errors unrelated to search service startup.
+		// Errors like "context canceled" or "context deadline exceeded" should abort immediately,
+		// but any search-service-related error should keep retrying until the deadline.
+		errStr := err.Error()
+		isSearchServiceErr := strings.Contains(errStr, "Error connecting to Search Index Management service") ||
+			strings.Contains(errStr, "PlanExecutor error") ||
+			strings.Contains(errStr, "Search Index Management")
+		isContextErr := strings.Contains(errStr, "context canceled") ||
+			strings.Contains(errStr, "context deadline exceeded")
+		if isContextErr {
+			return
+		}
+		if !isSearchServiceErr {
+			// Unexpected error unrelated to search service - treat as ready and proceed
 			return
 		}
 

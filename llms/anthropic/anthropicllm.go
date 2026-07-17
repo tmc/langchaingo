@@ -16,7 +16,10 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
+	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
 )
+
+const providerAnthropic = "anthropic"
 
 var (
 	ErrEmptyResponse            = errors.New("no response")
@@ -30,16 +33,29 @@ var (
 // ErrModelRefusal is returned when the model declines to respond (Anthropic
 // stop_reason "refusal"), e.g. a creative model such as Claude Fable 5 hitting a
 // content boundary. It is distinct from an empty or failed response; any refusal
-// text the model returned is in Message.
+// text the model returned is in Message. Category and Explanation carry the API's
+// stop_details so callers can pick a fallback by classifier; InputTokens and
+// OutputTokens preserve billed usage (a refusal is still billed for what ran).
 type ErrModelRefusal struct {
-	Message string
+	Message      string
+	Category     string
+	Explanation  string
+	InputTokens  int
+	OutputTokens int
 }
 
 func (e *ErrModelRefusal) Error() string {
-	if e.Message != "" {
-		return "anthropic: model refused to respond: " + e.Message
+	msg := "anthropic: model refused to respond"
+	if e.Category != "" {
+		msg += " (" + e.Category + ")"
 	}
-	return "anthropic: model refused to respond"
+	if e.Explanation != "" {
+		msg += " (" + e.Explanation + ")"
+	}
+	if e.Message != "" {
+		msg += ": " + e.Message
+	}
+	return msg
 }
 
 const (
@@ -176,18 +192,15 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
 	}
 
-	// Effective model: a per-call model wins, otherwise the client default (the
-	// per-call model is empty when the caller sets the model only on the client,
-	// and the wire model is substituted downstream — so read the client default
-	// here for the capability resolver).
-	model := opts.GetModel()
-	if model == "" {
-		model = o.client.Model
-	}
+	// Resolve through the same chain the request uses (per-call, then client, then
+	// package default), so the capability resolver classifies the exact model the
+	// API will run — otherwise an unset model reads as unknown while the wire runs
+	// the default (an adaptive-only model that rejects budget thinking and sampling).
+	model := o.client.EffectiveModel(opts.GetModel())
 
 	var thinking *anthropicclient.ThinkingPayload
 	var outputConfig *anthropicclient.OutputConfig
-	switch opts.Reasoning.ResolveMode() {
+	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningDefault leaves thinking unset (the default)
 	case llms.ReasoningOn:
 		// The wire mechanism is resolved from the model, not the raw Adaptive
 		// flag: adaptive-only generations reject budget thinking and vice versa,
@@ -205,14 +218,27 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 				Type:   "enabled",
 				Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
 			}
+			// Some budget-thinking models (Opus 4.5) also honor effort; without this
+			// the caller's effort is silently dropped on the budget path.
+			if reasoning.ClaudeSupportsEffortWithBudget(model) {
+				outputConfig = &anthropicclient.OutputConfig{
+					Effort: string(opts.Reasoning.GetEffort(opts.GetMaxTokens())),
+				}
+			}
 		}
 	case llms.ReasoningOff:
-		switch reasoning.ResolveOff(model, reasoning.ProviderAnthropic) {
+		switch reasoning.ResolveOff(model, reasoning.ProviderAnthropic) { //nolint:exhaustive // only Claude-relevant wires are handled; others are a no-op
 		case reasoning.OffDisableClaude:
 			thinking = &anthropicclient.ThinkingPayload{Type: "disabled"}
 		case reasoning.OffUnsupported:
 			return nil, &reasoning.ErrReasoningOffUnsupported{Model: model}
 		}
+	}
+
+	// Structured output rides in output_config.format, merged with any effort set
+	// above (the two are independent). The schema constrains the final text only.
+	if outputConfig, err = applyAnthropicStructuredOutput(opts, messages, outputConfig); err != nil {
+		return nil, err
 	}
 
 	tools := toolsToTools(opts.Tools)
@@ -222,7 +248,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		applyCacheStrategy(&tools, &systemPrompt, &chatMessages, *mergedStrategy)
 	}
 
-	betaHeaders := extractBetaHeaders(opts)
+	betaHeaders := extractBetaHeaders(opts, thinking)
 
 	// Convert system prompt to appropriate type
 	system := systemPrompt
@@ -260,6 +286,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		// Adaptive-only models reject sampling params even without thinking.
 		temperature = nil
 		topP = nil
+	case reasoning.ClaudeMutuallyExclusiveSampling(model) && temperature != nil && topP != nil:
+		// Haiku 4.5 rejects temperature and top_p together; keep temperature.
+		topP = nil
 	}
 
 	result, err := o.client.CreateMessage(ctx, &anthropicclient.MessageRequest{
@@ -283,7 +312,17 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	return processAnthropicResponse(result)
+	response, err := processAnthropicResponse(result)
+	if err != nil {
+		return nil, err
+	}
+	// When structured output was requested, validate the final text against the
+	// original schema. The response is returned alongside the typed error so the
+	// caller keeps usage and diagnostics.
+	if err := validateAnthropicStructuredOutput(opts, model, result, response); err != nil {
+		return response, err
+	}
+	return response, nil
 }
 
 // anthropicTextContent concatenates the text of every text block in a response.
@@ -306,7 +345,16 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 	// typed error carrying any text the model returned, so callers can tell "the
 	// model declined" from "no response" (an empty refusal would otherwise look empty).
 	if result.StopReason == "refusal" {
-		return nil, &ErrModelRefusal{Message: anthropicTextContent(result.Content)}
+		refusal := &ErrModelRefusal{
+			Message:      anthropicTextContent(result.Content),
+			InputTokens:  result.Usage.InputTokens,
+			OutputTokens: result.Usage.OutputTokens,
+		}
+		if result.StopDetails != nil {
+			refusal.Category = result.StopDetails.Category
+			refusal.Explanation = result.StopDetails.Explanation
+		}
+		return nil, refusal
 	}
 	if len(result.Content) == 0 {
 		return nil, ErrEmptyResponse
@@ -764,26 +812,32 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 		Content: []anthropicclient.Content{},
 	}
 
+	// The API requires the thinking block to lead the assistant turn, before any
+	// text or tool_use. Emit it first regardless of where the caller placed the
+	// reasoning-bearing part among msg.Parts.
+	for _, part := range msg.Parts {
+		p, ok := part.(llms.TextContent)
+		if !ok || p.Reasoning == nil {
+			continue
+		}
+		if len(p.Reasoning.Content) > 0 || len(p.Reasoning.Signature) > 0 {
+			thinkingBlock := &anthropicclient.ThinkingContent{
+				Type:     "thinking",
+				Thinking: p.Reasoning.Content,
+			}
+			if len(p.Reasoning.Signature) > 0 {
+				thinkingBlock.Signature = string(p.Reasoning.Signature)
+			}
+			message.Content = append(message.Content, thinkingBlock)
+		}
+		break // one thinking block per assistant turn
+	}
+
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
 		case llms.TextContent:
-			// If reasoning is present, add blocks in order: thinking → text
-			if p.Reasoning != nil {
-				// Add thinking block if present
-				if len(p.Reasoning.Content) > 0 || len(p.Reasoning.Signature) > 0 {
-					thinkingBlock := &anthropicclient.ThinkingContent{
-						Type:     "thinking",
-						Thinking: p.Reasoning.Content,
-					}
-					if len(p.Reasoning.Signature) > 0 {
-						thinkingBlock.Signature = string(p.Reasoning.Signature)
-					}
-					message.Content = append(message.Content, thinkingBlock)
-				}
-			}
-
-			// Add text content only if not empty
-			// In interleaved thinking, we might have thinking-only response
+			// Thinking is already emitted above; add text only if not empty (an
+			// interleaved-thinking turn may have thinking with no text).
 			if p.Text != "" {
 				textContent := &anthropicclient.TextContent{
 					Type: "text",
@@ -839,8 +893,11 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
 }
 
-// extractBetaHeaders extracts beta headers from call options
-func extractBetaHeaders(opts *llms.CallOptions) []string {
+// extractBetaHeaders extracts beta headers from call options. thinking is the
+// mechanism actually resolved for this request (nil when no thinking), so the
+// interleaved-thinking beta keys off the real wire shape rather than the caller's
+// raw Adaptive flag, which the model-aware resolver may have overridden.
+func extractBetaHeaders(opts *llms.CallOptions, thinking *anthropicclient.ThinkingPayload) []string {
 	// Extract beta headers for prompt caching support
 	var betaHeaders []string
 	if opts.Metadata != nil {
@@ -856,11 +913,84 @@ func extractBetaHeaders(opts *llms.CallOptions) []string {
 
 	// Budget thinking + tools needs the interleaved-thinking beta; adaptive
 	// thinking interleaves natively and needs no header.
-	if opts.Reasoning.IsEnabled() && !opts.Reasoning.Adaptive && len(opts.Tools) > 0 {
+	if thinking != nil && thinking.Type == "enabled" && len(opts.Tools) > 0 {
 		betaHeaders = appendIfMissing(betaHeaders, "interleaved-thinking-2025-05-14")
 	}
 
 	return betaHeaders
+}
+
+// applyAnthropicStructuredOutput folds a per-call structured-output schema into
+// output_config.format, preserving any effort already set on cfg. It rejects a
+// known-unsupported model and message prefilling (a trailing assistant message)
+// with typed errors before the request is sent.
+func applyAnthropicStructuredOutput(
+	opts *llms.CallOptions,
+	messages []llms.MessageContent,
+	cfg *anthropicclient.OutputConfig,
+) (*anthropicclient.OutputConfig, error) {
+	so := opts.StructuredOutput
+	if so == nil {
+		return cfg, nil
+	}
+	if err := opts.ValidateStructuredOutput(); err != nil {
+		return nil, err
+	}
+	if anthropicHasAssistantPrefill(messages) {
+		return nil, &llms.ErrStructuredOutputConflict{
+			Provider: providerAnthropic,
+			Detail:   "structured output is incompatible with assistant message prefilling",
+		}
+	}
+	// Anthropic rejects an object schema that omits additionalProperties:false;
+	// turn that documented, locally-detectable requirement into a typed error.
+	if err := structuredoutput.RequireClosedObjects(so.Schema); err != nil {
+		return nil, err
+	}
+	if cfg == nil {
+		cfg = &anthropicclient.OutputConfig{}
+	}
+	cfg.Format = &anthropicclient.OutputFormat{
+		Type:   "json_schema",
+		Schema: so.Schema,
+	}
+	return cfg, nil
+}
+
+// anthropicHasAssistantPrefill reports whether the last message is an assistant
+// turn, i.e. a prefilled response, which Anthropic rejects with structured output.
+func anthropicHasAssistantPrefill(messages []llms.MessageContent) bool {
+	if len(messages) == 0 {
+		return false
+	}
+	return messages[len(messages)-1].Role == llms.ChatMessageTypeAI
+}
+
+// validateAnthropicStructuredOutput validates the concatenation of all final text
+// blocks against the original schema, but only for a normal-final turn. A tool_use
+// or max_tokens/refusal turn is intermediate/aborted and is not validated. On a
+// structured call the returned content is the full concatenation (a schema answer
+// may legitimately span several text blocks).
+func validateAnthropicStructuredOutput(
+	opts *llms.CallOptions,
+	model string,
+	result *anthropicclient.MessageResponsePayload,
+	resp *llms.ContentResponse,
+) error {
+	so := opts.StructuredOutput
+	if so == nil {
+		return nil
+	}
+	switch result.StopReason {
+	case "end_turn", "stop_sequence":
+	default:
+		return nil
+	}
+	text := anthropicTextContent(result.Content)
+	if len(resp.Choices) > 0 {
+		resp.Choices[0].Content = text
+	}
+	return structuredoutput.Validate(so.Schema, providerAnthropic, model, 0, result.StopReason, text)
 }
 
 // appendIfMissing appends val to slice if not already present

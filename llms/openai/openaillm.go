@@ -106,6 +106,13 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.processResponse(result)
 
+	// When structured output was requested, validate each normal-final choice
+	// against the original schema. The response is still returned alongside the
+	// typed error so callers keep usage and diagnostics.
+	if err := o.validateStructuredResponse(result, opts); err != nil {
+		return response, err
+	}
+
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
@@ -261,6 +268,12 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.ResponseFormat = o.client.ResponseFormat
 	}
 
+	// per-call schema-constrained structured output takes precedence over JSONMode
+	// and conflicts with a client-level response format.
+	if err := o.setStructuredOutput(req, opts); err != nil {
+		return nil, err
+	}
+
 	// set reasoning options, depends on the client and request options
 	if err := o.setReasoning(req, opts); err != nil {
 		return nil, err
@@ -269,9 +282,19 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 	return req, nil
 }
 
+// effectiveModel resolves the model the request runs on: a per-call model wins,
+// otherwise the client default (only substituted downstream), so capability
+// decisions key off the same model the API will use.
+func (o *LLM) effectiveModel(opts llms.CallOptions) string {
+	if m := opts.GetModel(); m != "" {
+		return m
+	}
+	return o.client.Model
+}
+
 // setReasoning sets reasoning options, depends on the client and request options.
 func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
-	switch opts.Reasoning.ResolveMode() {
+	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch
 	case llms.ReasoningDefault:
 		return nil
 	case llms.ReasoningOff:
@@ -285,7 +308,11 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		}
 	}()
 
-	reasoningEffort := opts.Reasoning.GetEffort(opts.GetMaxTokens())
+	// Clamp the effort to what the model accepts (e.g. GPT-5 Pro accepts only
+	// high, GPT-5.4 mini rejects max) so a known-invalid value never reaches the
+	// API; unknown models pass through unchanged.
+	caps := reasoning.OpenAIReasoningCapsFor(o.effectiveModel(opts))
+	reasoningEffort := llms.ReasoningEffort(caps.ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
 	if !o.client.ModernReasoningFormat {
 		if reasoningEffort != llms.ReasoningNone {
@@ -311,13 +338,8 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 // runs as a plain completion. Sampling params are left intact (a non-thinking
 // call); a model whose thinking cannot be disabled returns a typed error.
 func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
-	// The model may be set on the call or default to the client, and the client
-	// default is only substituted downstream — resolve it here for the classifier.
-	model := opts.GetModel()
-	if model == "" {
-		model = o.client.Model
-	}
-	switch reasoning.ResolveOff(model, reasoning.ProviderOpenAI) {
+	model := o.effectiveModel(opts)
+	switch reasoning.ResolveOff(model, reasoning.ProviderOpenAI) { //nolint:exhaustive // only OpenAI-relevant wires are handled; others are a no-op
 	case reasoning.OffUnsupported:
 		return &reasoning.ErrReasoningOffUnsupported{Model: model}
 	case reasoning.OffEffortNone:
@@ -368,6 +390,12 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 			Reasoning:      o.processReasoning(c.Message.ReasoningContent),
 			StopReason:     fmt.Sprint(c.FinishReason),
 			GenerationInfo: o.processUsage(&result.Usage),
+		}
+
+		// Surface a Structured Outputs refusal so callers can tell it apart from a
+		// schema-valid answer without treating it as a validation failure.
+		if c.Message.Refusal != "" {
+			choices[i].GenerationInfo["Refusal"] = c.Message.Refusal
 		}
 
 		o.processToolCalls(choices[i], c)

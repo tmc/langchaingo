@@ -36,10 +36,15 @@ var (
 	reasoningOverrides   = map[string]ReasoningSupport{}
 )
 
-// RegisterReasoningSupport lets a deployment feed model knowledge INTO the single
-// resolver instead of forking a parallel table — e.g. a proxy alias or a model
-// newer than this build. A model whose string contains pattern uses info. Later
-// registrations override earlier ones.
+// RegisterReasoningSupport registers a UI hint for models this build does not
+// classify (a proxy alias, or a model newer than this build). A model whose
+// string contains pattern reports info from ReasoningSupportFor.
+//
+// Scope: this affects ONLY the ReasoningSupportFor hint, not the wire path. The
+// enable/disable resolvers (reasoning.ResolveOff, reasoning.ResolveClaudeAdaptive,
+// effort clamping) live in the lower-level reasoning package, which cannot read
+// this registry, so a registered model still travels the optimistic pass-through
+// path on the wire and the provider API remains the final arbiter.
 func RegisterReasoningSupport(pattern string, info ReasoningSupport) {
 	reasoningOverridesMu.Lock()
 	defer reasoningOverridesMu.Unlock()
@@ -71,9 +76,12 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 
 	if reasoning.ClaudeSupportsThinking(model) {
 		return ReasoningSupport{
-			Supported:       true,
-			Known:           true,
-			CannotDisable:   reasoning.ClaudeThinkingAlwaysOn(model),
+			Supported: true,
+			Known:     true,
+			// Derive from the same resolver the wire uses so the hint tracks
+			// provider differences (e.g. Sonnet 5 is disablable on Anthropic but
+			// always on, hence not disablable, on Bedrock).
+			CannotDisable:   reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
 			Efforts:         claudeEfforts(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),
@@ -81,20 +89,30 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 	}
 
 	if p == reasoning.ProviderOpenAI && reasoning.IsReasoningModel(model) {
+		// A classified model (e.g. GPT-5 Pro accepts only high, GPT-5.4 mini adds
+		// xhigh) advertises its own effort set; an unclassified one falls back to
+		// the conservative low/medium/high triple.
+		efforts := []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh}
+		if caps := reasoning.OpenAIReasoningCapsFor(model); caps.Known {
+			efforts = toReasoningEfforts(caps.Efforts)
+		}
 		return ReasoningSupport{
 			Supported:     true,
 			Known:         true,
 			CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
-			Efforts:       []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh},
+			Efforts:       efforts,
 			// DefaultOn is per-model on the GPT-5.x line (some default off) — leave unknown.
 		}
 	}
 
-	if p == reasoning.ProviderGoogleAI && strings.Contains(strings.ToLower(model), "gemini-2.5") {
+	if p == reasoning.ProviderGoogleAI && reasoning.GeminiSupportsThinking(model) {
 		return ReasoningSupport{
-			Supported: true,
-			Known:     true,
-			// Gemini 2.5 thinks by default and is disablable via thinkingBudget:0.
+			// Flash/Flash-Lite/Gemma disable via thinkingBudget:0; Pro and Gemini 3.x
+			// cannot fully disable — derive from the same resolver the wire uses.
+			CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
+			Supported:     true,
+			Known:         true,
+			// These families think by default (Flash-Lite / Gemma may still accept budget:0).
 			DefaultOn: boolPtr(true),
 		}
 	}
@@ -102,6 +120,16 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 	// Unrecognized: optimistic. Supported best-guessed from the shared classifier;
 	// the UI shows all controls and the provider teaches via a 400.
 	return ReasoningSupport{Supported: reasoning.IsReasoningModel(model), Known: false}
+}
+
+// toReasoningEfforts converts the resolver's raw effort strings to the public
+// ReasoningEffort type for UI hints.
+func toReasoningEfforts(efforts []string) []ReasoningEffort {
+	out := make([]ReasoningEffort, len(efforts))
+	for i, e := range efforts {
+		out[i] = ReasoningEffort(e)
+	}
+	return out
 }
 
 func claudeEfforts(kind reasoning.ClaudeReasoningKind) []ReasoningEffort {

@@ -1,0 +1,37 @@
+httprr trace v1
+452 1816
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 232
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-5","messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]}],"max_tokens":4096,"thinking":{"type":"adaptive","display":"summarized"},"output_config":{"effort":"high"}}HTTP/2.0 200 OK
+Content-Length: 669
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 10000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 10000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-07-14T13:24:57Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-07-14T13:24:58Z
+Anthropic-Ratelimit-Requests-Limit: 10000
+Anthropic-Ratelimit-Requests-Remaining: 9999
+Anthropic-Ratelimit-Requests-Reset: 2026-07-14T13:24:56Z
+Anthropic-Ratelimit-Tokens-Limit: 12000000
+Anthropic-Ratelimit-Tokens-Remaining: 12000000
+Anthropic-Ratelimit-Tokens-Reset: 2026-07-14T13:24:57Z
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Content-Type: application/json
+Date: Tue, 14 Jul 2026 13:24:58 GMT
+Request-Id: req_011Cd22MvYzVn3TwyTiR8zLH
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Traceresponse: 00-f87d28779b5e7ae33fff744694274fb1-c97c71d7e0eae8b7-01
+Vary: Accept-Encoding
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-5","id":"msg_011Cd22MwnQnvT26utSBh48V","type":"message","role":"assistant","content":[{"type":"text","text":"# Solving x + 5 = 12\n\nTo solve for **x**, subtract 5 from both sides of the equation:\n\n$$x + 5 = 12$$\n$$x + 5 - 5 = 12 - 5$$\n$$x = 7$$\n\n**Check:** 7 + 5 = 12 ✓\n\n**x = 7**"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":24,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":108,"output_tokens_details":{"thinking_tokens":0},"service_tier":"standard","inference_geo":"global"}}

@@ -1,0 +1,24 @@
+httprr trace v1
+461 1610
+POST https://ollama.com/api/chat HTTP/1.1
+Host: ollama.com
+User-Agent: langchaingo-httprr
+Content-Length: 284
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"glm-5.2","messages":[{"role":"user","content":"Reply with ONLY a JSON object (no prose, no markdown) giving the capital of France."}],"stream":false,"format":{"type":"object","properties":{"capital":{"type":"string"}},"required":["capital"]},"options":{"num_predict":16384}}HTTP/2.0 200 OK
+Content-Length: 1104
+Alt-Svc: h3=":443"; ma=2592000
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 01:06:55 GMT
+Server: Google Frontend
+Traceparent: 00-ef04d05efcf84d633a3aee8fb716da16-d27dc36579c8914c-00
+Via: 1.1 google
+X-Build-Commit: 497d56d78d9396981c6f7d0265656affaf63d3d7
+X-Build-Time: 2026-07-16T17:39:19-07:00
+X-Cloud-Trace-Context: ef04d05efcf84d633a3aee8fb716da16/15167493960655999308
+X-Frame-Options: DENY
+X-Request-Id: 64187c99-5a2e-4d55-86a5-8a148b71ed4c
+
+{"model":"glm-5.2","created_at":"2026-07-17T01:06:55.792329867Z","message":{"role":"assistant","content":"{\"capital\": \"Paris\"}","thinking":"1.  **Analyze the Request:**\n    *   Target: Give the capital of France.\n    *   Format: ONLY a JSON object.\n    *   Constraint 1: No prose.\n    *   Constraint 2: No markdown (e.g., no ```json ... ``` blocks).\n    *   Constraint 3: ONLY a JSON object.\n\n2.  **Determine the Data:**\n    *   Capital of France: Paris.\n\n3.  **Construct the JSON object:**\n    *   `{\"capital\": \"Paris\"}` or `{\"country\": \"France\", \"capital\": \"Paris\"}`. Either works, but keeping it simple is usually best. Let's use `{\"capital\": \"Paris\"}`.\n\n4.  **Format the Output:**\n    *   Ensure there are no backticks, no explanations, just the raw JSON string.\n    *   Output: `{\"capital\": \"Paris\"}`\n\n5.  **Final Verification:**\n    *   Is it only a JSON object? Yes.\n    *   No prose? Yes.\n    *   No markdown? Yes.\n    *   Capital of France? Yes."},"done":true,"done_reason":"stop","total_duration":9390319880,"prompt_eval_count":31,"eval_count":247}

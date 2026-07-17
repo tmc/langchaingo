@@ -1,28 +1,6 @@
 package bedrock
 
 const (
-	// Jamba 1.5 Large is part of the Jamba 1.5 Model Family with a 256K token effective context window,
-	// one of the largest on the market. Jamba 1.5 models focus on speed and efficiency,
-	// delivering up to 2.5x faster inference than leading models of comparable size.
-	// Jamba supports function calling/tool use, structured output (JSON) and documents API.
-	//
-	// Popular use cases include text generation, conversation, and instruction following.
-	//
-	// Max tokens: 256k
-	// Languages: English (primary), French, Spanish, Portuguese, German, Arabic, Hebrew, and many others.
-	ModelAi21Jamba15LargeV1 = "ai21.jamba-1-5-large-v1:0"
-
-	// Jamba 1.5 Mini is part of the Jamba 1.5 Model Family with a 256K token effective context window,
-	// one of the largest on the market. Jamba 1.5 models focus on speed and efficiency,
-	// delivering up to 2.5x faster inference than leading models of comparable size.
-	// Jamba supports function calling/tool use, structured output (JSON) and documents API.
-	//
-	// Popular use cases include text generation, conversation, and instruction following.
-	//
-	// Max tokens: 256k
-	// Languages: English (primary), French, Spanish, Portuguese, German, Arabic, Hebrew, and many others.
-	ModelAi21Jamba15MiniV1 = "ai21.jamba-1-5-mini-v1:0"
-
 	// Amazon Nova 2 Lite is an advanced multimodal model geared towards adaptive reasoning, efficient thinking,
 	// customization and agentic workflows. It intelligently balances performance and efficiency by dynamically
 	// adjusting reasoning depth based on task complexity.
@@ -30,15 +8,6 @@ const (
 	// Max tokens: 1M
 	// Languages: 200+ languages (optimized for English, German, Spanish, French, Italian, Japanese, Korean, Arabic, Simplified Chinese, Russian, Hindi, Portuguese, Dutch, Turkish, and Hebrew).
 	ModelAmazonNova2LiteV1 = "us.amazon.nova-2-lite-v1:0"
-
-	// Amazon Nova Premier is the most capable of Amazon's multimodal models for complex reasoning tasks
-	// and for use as the best teacher for distilling custom models. It supports agents, chat optimization,
-	// code generation, complex reasoning analysis, conversation, math, multilingual support,
-	// question answering, RAG, text generation, text summarization, translation, and video-to-text.
-	//
-	// Max tokens: 1M
-	// Languages: 200+ languages.
-	ModelAmazonNovaPremiereV1 = "us.amazon.nova-premier-v1:0"
 
 	// Amazon Nova Pro is a multimodal understanding foundation model. It is multilingual and can reason
 	// over text, images and videos. It supports agents, chat optimization, code generation, complex
@@ -92,8 +61,8 @@ const (
 
 	// Claude Sonnet 5 is Anthropic's most capable Sonnet, built for coding, agents, and professional
 	// work at scale with near-Opus intelligence at Sonnet cost. Adaptive thinking is on by default;
-	// budget thinking and non-default sampling params are rejected. On Bedrock, forced tool_choice
-	// requires thinking to be explicitly disabled.
+	// budget thinking and non-default sampling params are rejected. On Bedrock, adaptive thinking is
+	// always on and cannot be disabled, unlike the Anthropic API where it accepts an explicit disable.
 	//
 	// Max tokens: 1M
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
@@ -104,7 +73,7 @@ const (
 	// reliability. It handles the full lifecycle from architecture to deployment, delivers the deepest reasoning
 	// for security workflows, and is Anthropic's most capable model for financial workflows and computer use.
 	//
-	// Max tokens: 1M (beta)
+	// Max tokens: 1M
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
 	ModelAnthropicClaudeOpus46 = "us.anthropic.claude-opus-4-6-v1"
 
@@ -113,7 +82,7 @@ const (
 	// iterative development work with complex codebases, and brings professional-grade analysis with memory to
 	// maintain context across files. Step-change improvement in creating spreadsheets, slides, and docs.
 	//
-	// Max tokens: 1M (beta)
+	// Max tokens: 1M
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
 	ModelAnthropicClaudeSonnet46 = "us.anthropic.claude-sonnet-4-6"
 
@@ -141,60 +110,6 @@ const (
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
 	ModelAnthropicClaudeSonnet45 = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
-	// Claude Opus 4.1 is the next generation of Anthropic's most powerful model yet, an industry leader
-	// for coding. It delivers sustained performance on long-running tasks that require focused effort
-	// and thousands of steps, significantly expanding what AI agents can solve.
-	//
-	// Max tokens: 200k
-	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
-	ModelAnthropicClaudeOpus41 = "us.anthropic.claude-opus-4-1-20250805-v1:0"
-
-	// Claude Opus 4 is Anthropic's most intelligent model and is state-of-the-art for coding
-	// and agent capabilities, especially agentic search. It excels for customers needing
-	// frontier intelligence including advanced coding, AI agents, agentic search and research,
-	// long-horizon tasks and complex problem solving, and content creation.
-	//
-	// Max tokens: 200k
-	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish and other languages.
-	ModelAnthropicClaudeOpus4 = "us.anthropic.claude-opus-4-20250514-v1:0"
-
-	// Claude Sonnet 4 balances impressive performance for coding with the right speed and cost
-	// for high-volume use cases. It handles everyday development tasks, powers production-ready
-	// AI assistants, performs efficient research, and generates large-scale content.
-	//
-	// Max tokens: 200k
-	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish and other languages.
-	ModelAnthropicClaudeSonnet4 = "us.anthropic.claude-sonnet-4-20250514-v1:0"
-
-	// Claude 3.7 Sonnet is Anthropic's most intelligent model to date and the first Claude model
-	// to offer extended thinking—the ability to solve complex problems with careful, step-by-step
-	// reasoning. It's state-of-the-art for coding and ideal for powering AI agents.
-	//
-	// Max tokens: 200k
-	// Languages: English, Spanish, Japanese, and multiple other languages.
-	ModelAnthropicClaude37Sonnet = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-
-	// Claude 3.5 Haiku is Anthropic's fastest and most cost-effective model, excelling at use cases
-	// like code and test case generation, sub-agents, and user-facing chatbots.
-	//
-	// Max tokens: 200k
-	// Languages: English, Spanish, Japanese, and multiple other languages.
-	ModelAnthropicClaude35Haiku = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
-
-	// Command R is a generative language model optimized for long-context tasks and large scale production workloads.
-	// It supports natural language processing, text generation, and text summarization.
-	//
-	// Max tokens: 128k
-	// Languages: English, French, Spanish, Italian, German, Portuguese, Japanese, Korean, Arabic, and Chinese.
-	ModelCohereCommandRV1 = "cohere.command-r-v1:0"
-
-	// Command R+ is a highly performant generative language model optimized for large scale production workloads.
-	// It supports natural language processing, text generation, and text summarization.
-	//
-	// Max tokens: 128k
-	// Languages: English, French, Spanish, Italian, German, Portuguese, Japanese, Korean, Arabic, and Chinese.
-	ModelCohereCommandRPlusV1 = "cohere.command-r-plus-v1:0"
-
 	// Llama 4 Maverick offers unparalleled, industry-leading performance in image and text understanding
 	// with support for 12 languages, enabling the creation of sophisticated AI applications that bridge
 	// language barriers. As the product workhorse model for general assistant and chat use cases,
@@ -220,24 +135,6 @@ const (
 	// Max tokens: 128k
 	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
 	ModelMetaLlama3370bInstructV1 = "us.meta.llama3-3-70b-instruct-v1:0"
-
-	// Llama 3.2 90B Vision Instruct is a multimodal, fine-tuned model with 90 billion parameters
-	// that delivers unparalleled capabilities in image understanding, visual reasoning, and multimodal
-	// interaction. It enables advanced applications such as image captioning, image-text retrieval,
-	// visual grounding, visual question answering, and document visual question answering.
-	//
-	// Max tokens: 128k
-	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
-	ModelMetaLlama3290bInstructV1 = "us.meta.llama3-2-90b-instruct-v1:0"
-
-	// Llama 3.2 11B Vision Instruct is a multimodal, fine-tuned model with 11 billion parameters
-	// that delivers unparalleled capabilities in image understanding, visual reasoning, and multimodal
-	// interaction. It enables advanced applications such as image captioning, image-text retrieval,
-	// visual grounding, visual question answering, and document visual question answering.
-	//
-	// Max tokens: 128k
-	// Languages: English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai.
-	ModelMetaLlama3211bInstructV1 = "us.meta.llama3-2-11b-instruct-v1:0"
 
 	// Llama 3.1 70B Instruct is an update to Meta Llama 3 70B Instruct that includes an expanded 128K context length,
 	// multilinguality and improved reasoning capabilities. It's optimized for multilingual dialogue use cases
@@ -363,6 +260,15 @@ const (
 	// Languages: English, French, Spanish, German, Russian, Chinese, Japanese, Italian, Portuguese, Dutch, Polish, Vietnamese, Indonesian, Czech, Turkish, Farsi, Greek, Swedish, Arabic, Hungarian, Romanian, Finnish, Danish, Norwegian, Hebrew, Catalan, Hindi, Korean, Bengali, Tamil, Serbian, Urdu, Nepali, Marathi, Croatian, Telugu, Khmer, Tagalog, Gujarati, Malay, Kannada, Punjabi, Lao, Breton.
 	ModelMistralLarge3 = "mistral.mistral-large-3-675b-instruct"
 
+	// Devstral 2 123B is Mistral's 123-billion parameter (FP8) agentic model purpose-built for
+	// software engineering: autonomous coding workflows, multi-file edits, and native tool-calling
+	// to explore repositories and orchestrate complex engineering tasks. Scores 72.2% on SWE-bench
+	// Verified and 61.3% on SWE-bench Multilingual.
+	//
+	// Max tokens: 256k
+	// Languages: English (primary), French, Spanish, German, Italian, Portuguese, Chinese, Japanese, Korean, and 20+ additional languages.
+	ModelMistralDevstral2123B = "mistral.devstral-2-123b"
+
 	// Magistral Small 2509 is Mistral's small-sized dense model optimized for fast, cost-efficient instruction
 	// following, reasoning, and coding, designed as a production-friendly "small but capable" assistant.
 	// It brings "big model" quality to a smaller form factor with multimodal support for vision and text.
@@ -426,12 +332,32 @@ const (
 	// Languages: English, Chinese.
 	ModelGLM5 = "zai.glm-5"
 
-	// MiniMax M2.5 is an agent-native reasoning model optimized for tool use, planning, and multi-turn
-	// agentic workflows, with competitive coding and general reasoning performance.
+	// MiniMax M2.5 is an agent-native frontier model trained to reason efficiently, decompose tasks
+	// optimally, and complete complex workflows under real-world time and cost constraints. Well
+	// suited for production agents handling full-stack software projects, research and analysis
+	// workflows, long-horizon planning, and multi-tool orchestration.
 	//
 	// Max tokens: 196k
 	// Languages: English, Chinese.
 	ModelMiniMaxM25 = "minimax.minimax-m2.5"
+
+	// MiniMax M2.1 is an open-weight model focused on coding, tool use, and long-horizon task
+	// planning, evaluated on practical front-end, backend, and workflow-automation benchmarks.
+	// Intended as a general-purpose backbone for agent-based applications with improved reasoning,
+	// coding, and instruction following over M2.
+	//
+	// Max tokens: 196k
+	// Languages: English, Chinese.
+	ModelMiniMaxM21 = "minimax.minimax-m2.1"
+
+	// MiniMax M2 is a MoE model that blends frontier-level intelligence with highly efficient
+	// active parameters, engineered for AI agents with strong reasoning, coding, and multilingual
+	// performance at competitive cost. Suited for general-purpose chat/coding, tool-using agents,
+	// multilingual assistants, and high-throughput inference.
+	//
+	// Max tokens: 400k
+	// Languages: English, Chinese.
+	ModelMiniMaxM2 = "minimax.minimax-m2"
 
 	// NVIDIA Nemotron 3 Super 120B is an open hybrid mixture-of-experts model (about 12B active
 	// parameters) built for reasoning, coding, and agentic tasks with strong cost efficiency.

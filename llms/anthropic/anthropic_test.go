@@ -2,7 +2,11 @@ package anthropic_test
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -13,6 +17,162 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func generateAgainst(t *testing.T, body string) (*llms.ContentResponse, error) {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(anthropic.WithToken("k"), anthropic.WithBaseURL(srv.URL), anthropic.WithModel("claude-fable-5"))
+	require.NoError(t, err)
+	return llm.GenerateContent(t.Context(),
+		[]llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}}})
+}
+
+// A refusal (stop_reason "refusal") must surface as a typed ErrModelRefusal
+// carrying the refusal text, distinct from an empty/failed response.
+func TestAnthropic_Refusal(t *testing.T) {
+	t.Parallel()
+
+	t.Run("refusal with text", func(t *testing.T) {
+		t.Parallel()
+		_, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+
+			`"content":[{"type":"text","text":"I can't continue this story."}],"stop_reason":"refusal","usage":{"input_tokens":1,"output_tokens":1}}`)
+		var refusal *anthropic.ErrModelRefusal
+		require.ErrorAs(t, err, &refusal)
+		assert.Equal(t, "I can't continue this story.", refusal.Message)
+	})
+
+	t.Run("refusal carries stop_details and usage", func(t *testing.T) {
+		t.Parallel()
+		_, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+
+			`"content":[],"stop_reason":"refusal",`+
+			`"stop_details":{"category":"cyber","explanation":"declined cyber content"},`+
+			`"usage":{"input_tokens":42,"output_tokens":7}}`)
+		var refusal *anthropic.ErrModelRefusal
+		require.ErrorAs(t, err, &refusal)
+		assert.Equal(t, "cyber", refusal.Category)
+		assert.Equal(t, "declined cyber content", refusal.Explanation)
+		assert.Equal(t, 42, refusal.InputTokens, "billed input tokens must be preserved")
+		assert.Equal(t, 7, refusal.OutputTokens, "billed output tokens must be preserved")
+	})
+
+	t.Run("empty refusal is a refusal, not an empty response", func(t *testing.T) {
+		t.Parallel()
+		_, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+
+			`"content":[],"stop_reason":"refusal","usage":{"input_tokens":1,"output_tokens":1}}`)
+		var refusal *anthropic.ErrModelRefusal
+		require.ErrorAs(t, err, &refusal, "empty-content refusal must be ErrModelRefusal, not ErrEmptyResponse")
+		assert.False(t, errors.Is(err, anthropic.ErrEmptyResponse))
+	})
+
+	t.Run("normal end_turn is unaffected", func(t *testing.T) {
+		t.Parallel()
+		resp, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+
+			`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`)
+		require.NoError(t, err)
+		assert.Equal(t, "ok", resp.Choices[0].Content)
+	})
+}
+
+// TestAnthropic_StructuredOutputRealAPI exercises structured output against the
+// real backend (httprr-recorded): a schema-constrained call must return JSON that
+// matches the schema, and a schema-less WithJSONMode call must still work without
+// applying any schema guarantee.
+func TestAnthropic_StructuredOutputRealAPI(t *testing.T) {
+	t.Parallel()
+
+	t.Run("object schema is honored", func(t *testing.T) {
+		t.Parallel()
+		llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
+
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"country": {"type": "string"},
+				"capital": {"type": "string"}
+			},
+			"required": ["country", "capital"],
+			"additionalProperties": false
+		}`)
+		messages := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What is the capital of France?")},
+		}}
+
+		resp, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}),
+			llms.WithMaxTokens(256),
+		)
+		require.NoError(t, err)
+		require.NotEmpty(t, resp.Choices)
+
+		var out struct {
+			Country string `json:"country"`
+			Capital string `json:"capital"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out),
+			"structured output must be valid JSON")
+		assert.NotEmpty(t, out.Country)
+		assert.Contains(t, strings.ToLower(out.Capital), "paris")
+	})
+
+	t.Run("array schema is honored", func(t *testing.T) {
+		t.Parallel()
+		llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
+
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"planets": {"type": "array", "items": {"type": "string"}}
+			},
+			"required": ["planets"],
+			"additionalProperties": false
+		}`)
+		messages := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("List the first three planets from the sun.")},
+		}}
+
+		resp, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "planets", Schema: schema}),
+			llms.WithMaxTokens(256),
+		)
+		require.NoError(t, err)
+		require.NotEmpty(t, resp.Choices)
+
+		var out struct {
+			Planets []string `json:"planets"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out))
+		assert.NotEmpty(t, out.Planets)
+	})
+
+	t.Run("schema-less JSONMode still works without a schema guarantee", func(t *testing.T) {
+		t.Parallel()
+		llm := newHTTPRRClient(t, anthropic.WithModel("claude-sonnet-4-5"))
+
+		messages := []llms.MessageContent{{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Reply with only a JSON object with keys country and capital for France."),
+			},
+		}}
+
+		// WithJSONMode alone must not error and must not apply structured output on
+		// Anthropic (there is no json_object equivalent): a normal answer comes back.
+		resp, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithJSONMode(),
+			llms.WithMaxTokens(256),
+		)
+		require.NoError(t, err)
+		require.NotEmpty(t, resp.Choices)
+		assert.NotEmpty(t, resp.Choices[0].Content)
+	})
+}
 
 func TestAnthropic_GenerateContent(t *testing.T) {
 	t.Parallel()

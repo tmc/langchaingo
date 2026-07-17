@@ -1030,39 +1030,74 @@ func TestThinkingConfig(t *testing.T) {
 	})
 }
 
+// productionGeminiModels is the set of Google AI models deployed in production
+// (pentagi backend/pkg/providers/gemini/models.yml). Keep this list in sync when
+// that catalog changes — the tests below assert wire-level thinking behavior for
+// every entry so a new model cannot silently miss reasoning coverage.
+var productionGeminiModels = []struct {
+	name              string
+	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 / Gemma use thinking_budget
+	canDisable        bool // false → WithReasoningDisabled must error before the request
+}{
+	{name: "gemini-3.5-flash", usesThinkingLevel: true, canDisable: false},
+	{name: "gemini-3.1-pro-preview", usesThinkingLevel: true, canDisable: false},
+	{name: "gemini-3.1-pro-preview-customtools", usesThinkingLevel: true, canDisable: false},
+	{name: "gemini-3.1-flash-lite", usesThinkingLevel: true, canDisable: false},
+	{name: "gemini-2.5-pro", usesThinkingLevel: false, canDisable: false},
+	{name: "gemini-2.5-flash", usesThinkingLevel: false, canDisable: true},
+	{name: "gemini-2.5-flash-lite", usesThinkingLevel: false, canDisable: true},
+	{name: "gemma-4-31b-it", usesThinkingLevel: false, canDisable: true},
+	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, canDisable: true},
+}
+
+func TestResolveTemperature(t *testing.T) {
+	t.Parallel()
+	// Gemini 3 defaults to 1.0; everything else keeps the SDK default (0.5 here).
+	assert.Equal(t, 1.0, resolveTemperature("gemini-3.1-pro", 0.5))
+	assert.Equal(t, 1.0, resolveTemperature("gemini-3-flash", 0.5))
+	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-flash", 0.5))
+	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-pro", 0.5))
+}
+
 func TestResolveThinkingConfig(t *testing.T) {
 	t.Parallel()
 
 	t.Run("on with budget sends positive budget", func(t *testing.T) {
-		tc := resolveThinkingConfig("gemini-2.5-flash",
+		tc, err := resolveThinkingConfig("gemini-2.5-flash",
 			&llms.ReasoningConfig{Tokens: 500}, 1000)
+		require.NoError(t, err)
 		require.NotNil(t, tc)
 		require.NotNil(t, tc.ThinkingBudget)
 		assert.Equal(t, int32(500), *tc.ThinkingBudget)
 		assert.True(t, tc.IncludeThoughts)
 	})
 
-	t.Run("off forces budget zero", func(t *testing.T) {
-		tc := resolveThinkingConfig("gemini-2.5-flash",
+	t.Run("off on flash forces budget zero", func(t *testing.T) {
+		tc, err := resolveThinkingConfig("gemini-2.5-flash",
 			&llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
+		require.NoError(t, err)
 		require.NotNil(t, tc)
 		require.NotNil(t, tc.ThinkingBudget)
 		assert.Equal(t, int32(0), *tc.ThinkingBudget)
 		assert.False(t, tc.IncludeThoughts, "a disabled config must not request thought summaries")
 	})
 
-	t.Run("default omits thinking config", func(t *testing.T) {
-		assert.Nil(t, resolveThinkingConfig("gemini-2.5-flash", nil, 1000))
-		assert.Nil(t, resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{}, 1000))
+	t.Run("off on non-disablable model errors, no budget zero", func(t *testing.T) {
+		for _, model := range []string{"gemini-2.5-pro", "gemini-3.1-pro", "gemini-3-flash", "gemini-3.5-flash"} {
+			tc, err := resolveThinkingConfig(model, &llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
+			var offErr *reasoning.ErrReasoningOffUnsupported
+			require.ErrorAs(t, err, &offErr, "off on %s must be unsupported", model)
+			assert.Nil(t, tc, "off on %s must not emit a thinking config", model)
+		}
 	})
 
-	t.Run("off with empty model still forces zero", func(t *testing.T) {
-		// Google Off does not depend on the model string, so a client-level model
-		// (empty on the call) still disables cleanly.
-		tc := resolveThinkingConfig("", &llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
-		require.NotNil(t, tc)
-		require.NotNil(t, tc.ThinkingBudget)
-		assert.Equal(t, int32(0), *tc.ThinkingBudget)
+	t.Run("default omits thinking config", func(t *testing.T) {
+		tc, err := resolveThinkingConfig("gemini-2.5-flash", nil, 1000)
+		require.NoError(t, err)
+		assert.Nil(t, tc)
+		tc, err = resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{}, 1000)
+		require.NoError(t, err)
+		assert.Nil(t, tc)
 	})
 
 	t.Run("gemini 3.x effort maps to thinking_level, not budget", func(t *testing.T) {
@@ -1076,7 +1111,8 @@ func TestResolveThinkingConfig(t *testing.T) {
 			{llms.ReasoningXHigh, genai.ThinkingLevelHigh},
 			{llms.ReasoningMax, genai.ThinkingLevelHigh},
 		} {
-			got := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: tc.effort}, 8192)
+			got, err := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: tc.effort}, 8192)
+			require.NoError(t, err)
 			require.NotNil(t, got)
 			assert.Equal(t, tc.want, got.ThinkingLevel, "effort %s -> level", tc.effort)
 			assert.Nil(t, got.ThinkingBudget, "level path must not also send a budget")
@@ -1085,17 +1121,82 @@ func TestResolveThinkingConfig(t *testing.T) {
 	})
 
 	t.Run("gemini 2.5 effort still uses a token budget", func(t *testing.T) {
-		got := resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{Effort: llms.ReasoningHigh}, 8192)
+		got, err := resolveThinkingConfig("gemini-2.5-flash", &llms.ReasoningConfig{Effort: llms.ReasoningHigh}, 8192)
+		require.NoError(t, err)
 		require.NotNil(t, got)
 		require.NotNil(t, got.ThinkingBudget, "2.5 keeps thinking_budget")
 		assert.Equal(t, genai.ThinkingLevel(""), got.ThinkingLevel)
 	})
 
 	t.Run("explicit budget overrides thinking_level even on gemini 3.x", func(t *testing.T) {
-		got := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Tokens: 2048}, 8192)
+		got, err := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Tokens: 2048}, 8192)
+		require.NoError(t, err)
 		require.NotNil(t, got)
 		require.NotNil(t, got.ThinkingBudget, "an explicit budget wins")
 		assert.Equal(t, int32(2048), *got.ThinkingBudget)
 		assert.Equal(t, genai.ThinkingLevel(""), got.ThinkingLevel)
 	})
+}
+
+// TestProductionGeminiModels_ThinkingConfig locks the wire-level thinking
+// behavior for every model in the production Gemini catalog. A mismatch here
+// means pentagi would send the wrong ThinkingConfig (or miss a disable error)
+// for a live model.
+func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
+	t.Parallel()
+
+	require.Len(t, productionGeminiModels, 9, "models.yml currently lists 9 models; update this table when the catalog changes")
+
+	for _, m := range productionGeminiModels {
+		t.Run(m.name, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, m.usesThinkingLevel, reasoning.GeminiUsesThinkingLevel(m.name),
+				"GeminiUsesThinkingLevel mismatch for %s", m.name)
+			assert.True(t, reasoning.IsReasoningModel(m.name),
+				"production thinking model %s must be classified as a reasoning model", m.name)
+
+			support := llms.ReasoningSupportFor(m.name, reasoning.ProviderGoogleAI)
+			assert.True(t, support.Supported)
+			assert.True(t, support.Known, "production model %s should be a Known reasoning model", m.name)
+			assert.Equal(t, !m.canDisable, support.CannotDisable,
+				"CannotDisable hint mismatch for %s", m.name)
+
+			// Reasoning on with effort (no explicit token budget).
+			onCfg := &llms.ReasoningConfig{Effort: llms.ReasoningMedium}
+			tc, err := resolveThinkingConfig(m.name, onCfg, 8192)
+			require.NoError(t, err, "enable reasoning must succeed for %s", m.name)
+			require.NotNil(t, tc, "enable reasoning must emit a ThinkingConfig for %s", m.name)
+			assert.True(t, tc.IncludeThoughts)
+			if m.usesThinkingLevel {
+				assert.Equal(t, genai.ThinkingLevelMedium, tc.ThinkingLevel,
+					"%s should map effort→thinking_level", m.name)
+				assert.Nil(t, tc.ThinkingBudget, "%s level path must not also send a budget", m.name)
+			} else {
+				require.NotNil(t, tc.ThinkingBudget, "%s should use thinking_budget", m.name)
+				assert.Greater(t, *tc.ThinkingBudget, int32(0))
+				assert.Equal(t, genai.ThinkingLevel(""), tc.ThinkingLevel)
+			}
+
+			// Explicit disable.
+			offCfg := &llms.ReasoningConfig{Mode: llms.ReasoningOff}
+			tcOff, err := resolveThinkingConfig(m.name, offCfg, 8192)
+			if m.canDisable {
+				require.NoError(t, err, "disable must succeed for %s", m.name)
+				require.NotNil(t, tcOff)
+				require.NotNil(t, tcOff.ThinkingBudget)
+				assert.Equal(t, int32(0), *tcOff.ThinkingBudget)
+				assert.False(t, tcOff.IncludeThoughts)
+			} else {
+				var offErr *reasoning.ErrReasoningOffUnsupported
+				require.ErrorAs(t, err, &offErr, "disable must be unsupported for %s", m.name)
+				assert.Nil(t, tcOff)
+			}
+
+			// Default (unset) omits thinking config — let the model use its own default.
+			tcDefault, err := resolveThinkingConfig(m.name, nil, 8192)
+			require.NoError(t, err)
+			assert.Nil(t, tcDefault, "unset reasoning must omit ThinkingConfig for %s", m.name)
+		})
+	}
 }

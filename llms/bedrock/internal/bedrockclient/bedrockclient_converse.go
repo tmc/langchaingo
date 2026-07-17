@@ -42,25 +42,34 @@ func (c *ConverseClient) CreateCompletionConverse(ctx context.Context, input *Co
 		return nil, fmt.Errorf("failed to build converse input: %w", err)
 	}
 
+	var resp *llms.ContentResponse
 	if input.StreamingFunc != nil {
-		return c.handleStreamingResponse(ctx, converseInput, input.StreamingFunc)
+		resp, err = c.handleStreamingResponse(ctx, converseInput, input.StreamingFunc)
+	} else {
+		resp, err = c.handleNonStreamingResponse(ctx, converseInput)
 	}
-
-	return c.handleNonStreamingResponse(ctx, converseInput)
+	if err != nil {
+		return nil, err
+	}
+	if err := validateConverseStructuredOutput(input, resp); err != nil {
+		return resp, err
+	}
+	return resp, nil
 }
 
 // ConverseInput represents input for the Converse API
 type ConverseInput struct {
-	Messages        []Message
-	ModelID         string
-	MaxTokens       *int
-	Temperature     *float64
-	TopP            *float64
-	StopSequences   []string
-	Tools           []llms.Tool
-	StreamingFunc   streaming.Callback
-	ReasoningConfig *llms.ReasoningConfig
-	EnableCaching   bool
+	Messages         []Message
+	ModelID          string
+	MaxTokens        *int
+	Temperature      *float64
+	TopP             *float64
+	StopSequences    []string
+	Tools            []llms.Tool
+	StreamingFunc    streaming.Callback
+	ReasoningConfig  *llms.ReasoningConfig
+	EnableCaching    bool
+	StructuredOutput *llms.StructuredOutputConfig
 }
 
 type converseThinkingPayload struct {
@@ -195,6 +204,12 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	if reasoning.ClaudeRejectsSampling(input.ModelID) {
 		inferenceConfig.Temperature = nil
 		inferenceConfig.TopP = nil
+	}
+
+	// Native AWS structured output rides on the top-level OutputConfig.TextFormat,
+	// independent of the provider-specific reasoning fields above.
+	if err := applyConverseStructuredOutput(input, converseInput); err != nil {
+		return nil, err
 	}
 
 	return converseInput, nil
@@ -629,6 +644,9 @@ func (c *ConverseClient) handleStreamingResponse(ctx context.Context, input *bed
 		InferenceConfig:              input.InferenceConfig,
 		ToolConfig:                   input.ToolConfig,
 		AdditionalModelRequestFields: input.AdditionalModelRequestFields,
+		// Without this the schema silently vanishes on ConverseStream while
+		// non-streaming works — structured output must ride both paths.
+		OutputConfig: input.OutputConfig,
 	}
 
 	response, err := c.client.ConverseStream(ctx, streamInput)
@@ -645,6 +663,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	var reasoningContent strings.Builder
 	var signature bytes.Buffer
 	var toolCalls []llms.ToolCall
+	var stopReason string
 	currentToolCalls := make(map[string]*streaming.ToolCall) // Track streaming tool calls by ID
 
 	defer streaming.CallWithDone(ctx, callback)
@@ -743,6 +762,9 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 			// Clear current tool calls after completion
 			currentToolCalls = make(map[string]*streaming.ToolCall)
 		case *types.ConverseStreamOutputMemberMessageStop:
+			// The terminal event carries the stop reason (end_turn, tool_use,
+			// max_tokens, guardrail_intervened, content_filtered, ...).
+			stopReason = string(e.Value.StopReason)
 			// Stream completed - ensure any remaining tool calls are added
 			for _, toolCall := range currentToolCalls {
 				finalToolCall := llms.ToolCall{
@@ -772,6 +794,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		ToolCalls:      toolCalls,
 		GenerationInfo: make(map[string]any),
 		Reasoning:      c.processReasoning(reasoningContent.String(), sig),
+		StopReason:     stopReason,
 	}
 
 	result := &llms.ContentResponse{
@@ -852,9 +875,12 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 			}
 		}
 
-		// Note: types.Message doesn't have StopReason field
-		// StopReason might be available in a different part of the response
 	}
+
+	// The stop reason lives on the response, not inside types.Message. Surfacing it
+	// distinguishes end_turn from tool_use, max_tokens, guardrail_intervened,
+	// content_filtered and malformed-output states.
+	choice.StopReason = string(response.StopReason)
 
 	// Add usage information
 	if response.Usage != nil {
@@ -891,15 +917,18 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 
 // supportsReasoning checks if the model supports reasoning
 func (c *ConverseClient) supportsReasoning(modelID string) bool {
-	// Only Claude 3.7+ models support reasoning
+	// Claude 4+ and select non-Claude models support reasoning.
 	reasoningModels := []string{
+		"anthropic.claude-fable-5",
+		"anthropic.claude-sonnet-5",
 		"anthropic.claude-opus-4-",
 		"anthropic.claude-sonnet-4-",
 		"anthropic.claude-haiku-4-",
-		"anthropic.claude-3-7-",
 		"openai.gpt-oss-120b",
 		"openai.gpt-oss-20b",
 		"moonshot.kimi-k2-thinking",
+		"minimax.minimax-m2.5",
+		"minimax.minimax-m2.1",
 	}
 
 	for _, model := range reasoningModels {

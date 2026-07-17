@@ -14,11 +14,11 @@ import (
 var image []byte
 
 func main() {
-	// As a prerequisite, you need to add model access permissions for the Anthropic Claude3 Haiku model in the AWS Region where you are running.
+	// As a prerequisite, you need to add model access permissions for the Anthropic Claude Haiku 4.5 model in the AWS Region where you are running.
 	// For more information, see https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html.
 	// Specify the AWS Region and Credentials in the standard AWS SDK way.
 	llm, err := bedrock.New(
-		bedrock.WithModel(bedrock.ModelAnthropicClaude35Haiku),
+		bedrock.WithModel(bedrock.ModelAnthropicClaudeHaiku45),
 	)
 	if err != nil {
 		log.Fatal(err)

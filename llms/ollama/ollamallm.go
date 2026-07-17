@@ -16,10 +16,13 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
+	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
 
 	"github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/envconfig"
 )
+
+const providerOllama = "ollama"
 
 const (
 	// CloudURL is the default Ollama Cloud API endpoint.
@@ -157,11 +160,40 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.createContentResponse(resp)
 
+	// When a schema was requested, validate the final response against it; the
+	// response is returned alongside the typed error so usage is preserved.
+	if err := o.validateStructuredOutput(opts, response); err != nil {
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return response, err
+	}
+
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
 	return response, nil
+}
+
+// validateStructuredOutput validates each normal-final choice against the requested
+// schema. Ollama marks a normal completion with done_reason "stop" (older servers
+// may leave it empty); a truncated ("length") response is not final JSON.
+func (o *LLM) validateStructuredOutput(opts llms.CallOptions, resp *llms.ContentResponse) error {
+	so := opts.StructuredOutput
+	if so == nil || resp == nil {
+		return nil
+	}
+	model := o.getModel(opts)
+	for i, choice := range resp.Choices {
+		if choice.StopReason != "" && choice.StopReason != "stop" {
+			continue
+		}
+		if err := structuredoutput.Validate(so.Schema, providerOllama, model, i, choice.StopReason, choice.Content); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // getModel determines which model to use based on options and defaults.
@@ -250,9 +282,9 @@ func (o *LLM) convertToolCall(toolCall llms.ToolCall) (api.ToolCall, error) {
 
 // createChatRequest creates a chat request with the given parameters.
 func (o *LLM) createChatRequest(model string, messages []api.Message, opts llms.CallOptions) (*api.ChatRequest, error) {
-	format := o.options.format
-	if opts.JSONMode {
-		format = "json"
+	format, err := o.resolveFormat(opts)
+	if err != nil {
+		return nil, err
 	}
 
 	// Get our ollamaOptions from llms.CallOptions
@@ -265,7 +297,7 @@ func (o *LLM) createChatRequest(model string, messages []api.Message, opts llms.
 
 	req := &api.ChatRequest{
 		Model:    model,
-		Format:   json.RawMessage(fmt.Sprintf(`"%s"`, format)),
+		Format:   format,
 		Messages: messages,
 		Options:  ollamaOptions,
 		Stream:   &stream,
@@ -278,6 +310,24 @@ func (o *LLM) createChatRequest(model string, messages []api.Message, opts llms.
 	}
 
 	return req, nil
+}
+
+// resolveFormat picks the Ollama `format` field. A per-call structured-output
+// schema is sent as the native JSON Schema (Ollama constrains generation to it);
+// otherwise the legacy string mode is preserved unchanged — the client-level
+// format, or "json" for JSONMode.
+func (o *LLM) resolveFormat(opts llms.CallOptions) (json.RawMessage, error) {
+	if so := opts.StructuredOutput; so != nil {
+		if err := opts.ValidateStructuredOutput(); err != nil {
+			return nil, err
+		}
+		return so.Schema, nil
+	}
+	format := o.options.format
+	if opts.JSONMode {
+		format = "json"
+	}
+	return json.RawMessage(fmt.Sprintf(`"%s"`, format)), nil
 }
 
 // processTools adds tools to the chat request.

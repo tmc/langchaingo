@@ -24,8 +24,8 @@ const (
 	// sampling params.
 	ClaudeReasoningAdaptiveAndBudget
 	// ClaudeReasoningBudgetOnly is the extended-thinking generation before
-	// adaptive existed (Opus 4.5/4.1/4.0, Sonnet 4.5/4.0/3.7, Haiku 4.5): it
-	// accepts thinking.type=enabled + budget_tokens and rejects adaptive.
+	// adaptive existed (Opus 4.5, Sonnet 4.5, Haiku 4.5): it accepts
+	// thinking.type=enabled + budget_tokens and rejects adaptive.
 	ClaudeReasoningBudgetOnly
 )
 
@@ -42,9 +42,8 @@ var (
 		"claude-opus-4-6", "claude-sonnet-4-6",
 	}
 	budgetOnlyClaude = []string{
-		"claude-opus-4-5", "claude-opus-4-1", "claude-opus-4-0", "claude-opus-4-2025",
-		"claude-sonnet-4-5", "claude-sonnet-4-0", "claude-sonnet-4-2025",
-		"claude-3-7", "claude-3.7",
+		"claude-opus-4-5",
+		"claude-sonnet-4-5",
 		"claude-haiku-4-5", "claude-haiku-4.5",
 	}
 )
@@ -90,6 +89,28 @@ func ClaudeThinkingAlwaysOn(model string) bool {
 // omitted, so disabling it requires an explicit disable rather than omission.
 func ClaudeThinkingDefaultsOn(model string) bool {
 	return containsAny(strings.ToLower(model), defaultOnClaude)
+}
+
+// budgetEffortClaude are budget-thinking models that also accept an effort
+// output_config alongside manual thinking (introduced with Opus 4.5). Newer
+// generations use adaptive thinking, where effort is always available.
+var budgetEffortClaude = []string{"claude-opus-4-5"}
+
+// ClaudeSupportsEffortWithBudget reports whether the model accepts
+// output_config.effort together with manual (budget) thinking, so the effort is
+// not lost on the budget path for models that honor it.
+func ClaudeSupportsEffortWithBudget(model string) bool {
+	return containsAny(strings.ToLower(model), budgetEffortClaude)
+}
+
+// mutuallyExclusiveSamplingClaude models reject temperature and top_p set
+// together (only one may be provided).
+var mutuallyExclusiveSamplingClaude = []string{"claude-haiku-4-5", "claude-haiku-4.5"}
+
+// ClaudeMutuallyExclusiveSampling reports whether the model returns a 400 when
+// temperature and top_p are set together, so the caller must send at most one.
+func ClaudeMutuallyExclusiveSampling(model string) bool {
+	return containsAny(strings.ToLower(model), mutuallyExclusiveSamplingClaude)
 }
 
 // ResolveClaudeAdaptive returns whether to send adaptive thinking (true) or

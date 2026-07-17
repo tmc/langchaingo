@@ -1,0 +1,37 @@
+httprr trace v1
+573 1652
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 353
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"What is the capital of France?"}]}],"max_tokens":256,"output_config":{"format":{"type":"json_schema","schema":{"type":"object","properties":{"country":{"type":"string"},"capital":{"type":"string"}},"required":["country","capital"],"additionalProperties":false}}}}HTTP/2.0 200 OK
+Content-Length: 505
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 10000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 10000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-07-17T00:29:11Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-07-17T00:29:11Z
+Anthropic-Ratelimit-Requests-Limit: 10000
+Anthropic-Ratelimit-Requests-Remaining: 9995
+Anthropic-Ratelimit-Requests-Reset: 2026-07-17T00:29:07Z
+Anthropic-Ratelimit-Tokens-Limit: 12000000
+Anthropic-Ratelimit-Tokens-Remaining: 12000000
+Anthropic-Ratelimit-Tokens-Reset: 2026-07-17T00:29:11Z
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 00:29:11 GMT
+Request-Id: req_011Cd6gdNK9czxiwpU5vtTpu
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Traceresponse: 00-4f193e11466d897b605c66c36a39a6ae-0029d3f36b74ea61-01
+Vary: Accept-Encoding
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_011Cd6gdWqN9oHSSz2JXDnoq","type":"message","role":"assistant","content":[{"type":"text","text":"{\"country\":\"France\",\"capital\":\"Paris\"}"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":176,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":12,"service_tier":"standard","inference_geo":"not_available"}}

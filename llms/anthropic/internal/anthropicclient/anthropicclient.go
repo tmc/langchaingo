@@ -93,6 +93,21 @@ func New(token string, model string, baseURL string, opts ...Option) (*Client, e
 	return c, nil
 }
 
+// EffectiveModel resolves the model actually sent to the API: a per-call model
+// wins, then the client default, then the package default. Capability decisions
+// made before the request (thinking mechanism, sampling handling) must key off
+// this same value, since the default is otherwise substituted only downstream.
+func (c *Client) EffectiveModel(model string) string {
+	switch {
+	case model != "":
+		return model
+	case c.Model != "":
+		return c.Model
+	default:
+		return defaultModel
+	}
+}
+
 // CompletionRequest is a request to create a completion.
 type CompletionRequest struct {
 	Model       string   `json:"model"`

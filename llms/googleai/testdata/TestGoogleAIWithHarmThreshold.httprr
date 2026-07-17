@@ -1,6 +1,6 @@
 httprr trace v1
-797 2382
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+797 5019
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 477
@@ -9,17 +9,18 @@ X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Tell me about safety features"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 2002
+Content-Length: 4605
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 23 Jan 2026 22:51:25 GMT
+Date: Tue, 14 Jul 2026 08:30:34 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=1978
+Server-Timing: gfet4t7; dur=11509
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -28,50 +29,28 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "Okay, let's talk about safety features! To give you the most relevant information, I need a little more direction.  Could you tell me what kind of safety features you're interested in?  For example, are you interested in:\n\n*   **Car Safety Features?** (e.g., airbags, ABS, lane departure warning)\n*   **Home Safety Features?** (e.g., smoke detectors, security systems, fire extinguishers)\n*   **Workplace Safety Features?** (e.g., machine guards, safety training, personal protective equipment)\n*   **Website Safety Features?** (e.g., firewalls, encryption, two-factor authentication)\n*   **Product Safety Features?** (e.g., childproof packaging, thermal cutoffs, grounding)\n*   **General Safety Tips?** (e.g., first aid, emergency preparedness)\n\nOnce you provide more details, I can give you a comprehensive overview of the safety features you're interested in."
+            "text": "Safety features are mechanisms, designs, or protocols implemented to prevent accidents, minimize harm, or facilitate recovery in case of an incident. They are ubiquitous, found in almost every aspect of our lives, from the products we use to the environments we inhabit.\n\nThe primary goals of safety features are generally:\n1.  **Prevention:** To stop an accident or dangerous situation from occurring in the first place.\n2.  **Protection/Mitigation:** To reduce the severity of injury or damage if an accident does occur.\n3.  **Warning/Alerting:** To inform individuals of potential dangers or an ongoing hazardous situation.\n4.  **Response/Recovery:** To aid in emergency situations and facilitate recovery.\n\nHere's a breakdown of safety features across various domains:\n\n---\n\n### 1. Automotive Safety Features\n\nCars are a prime example of where safety features have evolved dramatically.\n\n**A. Active Safety Features (Prevention):** Designed to help prevent a crash.\n*   **Anti-lock Braking System (ABS):** Prevents wheels from locking up during hard braking, allowing the driver to steer.\n*   **Traction Control System (TCS):** Prevents drive wheels from spinning, especially on slippery surfaces.\n*   **Electronic Stability Control (ESC):** Helps drivers maintain control during extreme steering maneuvers by selectively applying brakes and reducing engine power.\n*   **Automatic Emergency Braking (AEB):** Uses sensors to detect potential collisions and automatically applies the brakes if the driver doesn't respond.\n*   **Lane Keeping Assist (LKA) / Lane Departure Warning (LDW):** Alerts drivers or actively steers the vehicle back into its lane if it drifts.\n*   **Blind Spot Monitoring (BSM):** Alerts drivers to vehicles in their blind spots.\n*   **Adaptive Cruise Control (ACC):** Maintains a set speed and a safe following distance from the vehicle ahead.\n*   **Rearview Cameras & Parking Sensors:** Assist in parking and backing up, preventing collisions with obstacles or pedestrians.\n*   **Forward Collision Warning (FCW):** Alerts the driver to a potential frontal collision.\n*   **Tire Pressure Monitoring System (TPMS):** Warns the driver if tire pressure is too low.\n*   **Advanced Lighting Systems:** Adaptive headlights that turn with the steering wheel, automatic high beams, LED lights for better visibility.\n\n**B. Passive Safety Features (Protection/Mitigation):** Designed to protect occupants during a crash.\n*   **Airbags:** Inflate rapidly upon impact to cushion occupants (front, side, curtain, knee airbags).\n*   **Seatbelts:** Restrain occupants, preventing them from being thrown around the cabin or ejected. Often include pre-tensioners and load limiters.\n*   **Crumple Zones:** Areas of the car designed to deform and absorb impact energy, protecting the rigid passenger compartment.\n*   **Safety Cage/Reinforced Passenger Compartment:** A strong, rigid structure around the occupants designed to resist deformation.\n*   **Child Safety Seat Anchors (LATCH/ISOFIX):** Securely attach child safety seats to the vehicle.\n*   **Collapsible Steering Columns:** Designed to collapse in a frontal impact to prevent injury to the driver.\n*   **Headrests:** Designed to prevent whiplash in rear-end collisions.\n\n**C. Post-Crash Safety Features (Response):**\n*   **Automatic Crash Notification (e.g., OnStar, eCall):** Automatically alerts emergency services after a serious collision.\n*   **Emergency Brake Lights:** Flash rapidly during hard braking to warn following drivers.\n\n---\n\n### 2. Home Safety Features\n\n*   **Smoke Detectors & Carbon Monoxide Detectors:** Alert occupants to fire or dangerous gas levels.\n*   **Fire Extinguishers:** For putting out small fires.\n*   **Ground Fault Circuit Interrupters (GFCIs):** Electrical outlets that trip if they detect a short circuit, preventing electrocution, especially in wet areas.\n*   **Child-Proof Locks & Outlet Covers:** Prevent children from accessing dangerous areas or electrical outlets."
           }
         ],
         "role": "model"
       },
-      "finishReason": "STOP",
-      "safetyRatings": [
-        {
-          "category": "HARM_CATEGORY_HATE_SPEECH",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_HARASSMENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          "probability": "NEGLIGIBLE"
-        }
-      ],
-      "avgLogprobs": -0.19741936449734671
+      "finishReason": "MAX_TOKENS",
+      "index": 0
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 5,
-    "candidatesTokenCount": 212,
-    "totalTokenCount": 217,
+    "promptTokenCount": 6,
+    "candidatesTokenCount": 863,
+    "totalTokenCount": 2050,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 5
+        "tokenCount": 6
       }
     ],
-    "candidatesTokensDetails": [
-      {
-        "modality": "TEXT",
-        "tokenCount": 212
-      }
-    ]
+    "thoughtsTokenCount": 1181,
+    "serviceTier": "standard"
   },
-  "modelVersion": "gemini-2.0-flash",
-  "responseId": "a_tzaeuzB7jSjMcPpp24gQ4"
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "n_NVaqvOG4CjvdIPp6GfIQ"
 }

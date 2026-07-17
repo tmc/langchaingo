@@ -71,10 +71,19 @@ type ThinkingPayload struct {
 	Display string `json:"display,omitempty"`
 }
 
-// OutputConfig carries the adaptive-thinking effort. It is a top-level sibling of
-// "thinking" in the Messages request body.
+// OutputConfig carries the adaptive-thinking effort and/or a structured-output
+// format. It is a top-level sibling of "thinking" in the Messages request body.
+// Effort and Format are independent: a call may set either or both.
 type OutputConfig struct {
-	Effort string `json:"effort,omitempty"`
+	Effort string        `json:"effort,omitempty"`
+	Format *OutputFormat `json:"format,omitempty"`
+}
+
+// OutputFormat constrains the final text output to a JSON Schema. Schema is the
+// raw JSON Schema document, sent verbatim.
+type OutputFormat struct {
+	Type   string          `json:"type"` // "json_schema"
+	Schema json.RawMessage `json:"schema,omitempty"`
 }
 
 type messagePayload struct {
@@ -207,14 +216,23 @@ func (trc ToolResultContent) GetType() string {
 	return trc.Type
 }
 
+// StopDetails accompanies a refusal stop reason: Category names the safety
+// classifier that declined (e.g. "cyber", "bio"), Explanation is human-readable;
+// both may be empty.
+type StopDetails struct {
+	Category    string `json:"category,omitempty"`
+	Explanation string `json:"explanation,omitempty"`
+}
+
 type MessageResponsePayload struct {
-	Content      []Content `json:"content"`
-	ID           string    `json:"id"`
-	Model        string    `json:"model"`
-	Role         string    `json:"role"`
-	StopReason   string    `json:"stop_reason"`
-	StopSequence string    `json:"stop_sequence"`
-	Type         string    `json:"type"`
+	Content      []Content    `json:"content"`
+	ID           string       `json:"id"`
+	Model        string       `json:"model"`
+	Role         string       `json:"role"`
+	StopReason   string       `json:"stop_reason"`
+	StopSequence string       `json:"stop_sequence"`
+	StopDetails  *StopDetails `json:"stop_details,omitempty"`
+	Type         string       `json:"type"`
 	Usage        struct {
 		InputTokens              int `json:"input_tokens"`
 		OutputTokens             int `json:"output_tokens"`
@@ -293,17 +311,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 		payload.StopWords = nil
 	}
 
-	switch {
-	// Prefer the model specified in the payload.
-	case payload.Model != "":
-
-	// If no model is set in the payload, take the one specified in the client.
-	case c.Model != "":
-		payload.Model = c.Model
-	// Fallback: use the default model
-	default:
-		payload.Model = defaultModel
-	}
+	payload.Model = c.EffectiveModel(payload.Model)
 
 	if payload.StreamingFunc != nil {
 		payload.Stream = true
@@ -740,6 +748,14 @@ func handleMessageDeltaEvent(event map[string]interface{}, response MessageRespo
 	}
 	if stopReason, ok := delta["stop_reason"].(string); ok {
 		response.StopReason = stopReason
+	}
+	// stop_details rides the same message_delta event as the terminal stop_reason,
+	// carrying the refusal category so streaming callers can classify it too.
+	if sd, ok := delta["stop_details"].(map[string]interface{}); ok {
+		response.StopDetails = &StopDetails{
+			Category:    getString(sd, "category"),
+			Explanation: getString(sd, "explanation"),
+		}
 	}
 
 	usage, ok := event["usage"].(map[string]interface{})

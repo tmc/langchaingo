@@ -1,0 +1,37 @@
+httprr trace v1
+404 1677
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 184
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":[{"type":"text","text":"Reply with only a JSON object with keys country and capital for France."}]}],"max_tokens":256}HTTP/2.0 200 OK
+Content-Length: 530
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 10000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 10000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-07-17T00:29:08Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-07-17T00:29:08Z
+Anthropic-Ratelimit-Requests-Limit: 10000
+Anthropic-Ratelimit-Requests-Remaining: 9999
+Anthropic-Ratelimit-Requests-Reset: 2026-07-17T00:29:07Z
+Anthropic-Ratelimit-Tokens-Limit: 12000000
+Anthropic-Ratelimit-Tokens-Remaining: 12000000
+Anthropic-Ratelimit-Tokens-Reset: 2026-07-17T00:29:08Z
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 00:29:09 GMT
+Request-Id: req_011Cd6gdNM8twEGA1rF5Hznq
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Traceresponse: 00-ca4ac53a313c5a52979e5c68fa348913-758a5d3680217380-01
+Vary: Accept-Encoding
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-4-5-20250929","id":"msg_011Cd6gdNhDpyYLgdXi2H753","type":"message","role":"assistant","content":[{"type":"text","text":"```json\n{\n  \"country\": \"France\",\n  \"capital\": \"Paris\"\n}\n```"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":21,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":27,"service_tier":"standard","inference_geo":"not_available"}}

@@ -118,7 +118,15 @@ type anthropicThinkingPayload struct {
 }
 
 type anthropicOutputConfig struct {
-	Effort string `json:"effort,omitempty"`
+	Effort string                 `json:"effort,omitempty"`
+	Format *anthropicOutputFormat `json:"format,omitempty"`
+}
+
+// anthropicOutputFormat carries a structured-output JSON Schema for the legacy
+// InvokeModel Anthropic payload, mirroring first-party output_config.format.
+type anthropicOutputFormat struct {
+	Type   string          `json:"type"` // "json_schema"
+	Schema json.RawMessage `json:"schema,omitempty"`
 }
 
 // anthropicTextGenerationOutput is the generated output.
@@ -229,6 +237,12 @@ func createAnthropicCompletion(ctx context.Context,
 		return nil, err
 	}
 
+	// Structured output rides in output_config.format, merged with any effort set
+	// by applyAnthropicReasoning (the two are independent).
+	if err := applyAnthropicStructuredOutput(&input, options.StructuredOutput); err != nil {
+		return nil, err
+	}
+
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
@@ -241,7 +255,16 @@ func createAnthropicCompletion(ctx context.Context,
 			ContentType: aws.String("application/json"),
 			Body:        body,
 		}
-		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
+		streamResp, err := parseStreamingCompletionResponse(ctx, client, modelInput, options)
+		if err != nil {
+			return nil, err
+		}
+		// Validate the assembled stream too — a structured-output guarantee must
+		// hold on both API paths.
+		if err := validateStructuredResponse(options.StructuredOutput, modelID, streamResp); err != nil {
+			return streamResp, err
+		}
+		return streamResp, nil
 	}
 
 	modelInput := &bedrockruntime.InvokeModelInput{
@@ -320,9 +343,13 @@ func createAnthropicCompletion(ctx context.Context,
 	}
 	Contentchoices = append(Contentchoices, choice)
 
-	return &llms.ContentResponse{
+	contentResp := &llms.ContentResponse{
 		Choices: Contentchoices,
-	}, nil
+	}
+	if err := validateStructuredResponse(options.StructuredOutput, modelID, contentResp); err != nil {
+		return contentResp, err
+	}
+	return contentResp, nil
 }
 
 func processReasoning(reasoningContent string, signature []byte) *reasoning.ContentReasoning {
@@ -725,7 +752,6 @@ func supportsAnthropicReasoning(modelID string) bool {
 		"anthropic.claude-opus-4-",
 		"anthropic.claude-sonnet-4-",
 		"anthropic.claude-haiku-4-",
-		"anthropic.claude-3-7-",
 	}
 
 	for _, model := range reasoningModels {

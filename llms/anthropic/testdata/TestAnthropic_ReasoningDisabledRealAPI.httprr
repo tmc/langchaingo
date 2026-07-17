@@ -1,0 +1,37 @@
+httprr trace v1
+392 1637
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 172
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-sonnet-5","messages":[{"role":"user","content":[{"type":"text","text":"Reply with just the word: ready"}]}],"max_tokens":64,"thinking":{"type":"disabled"}}HTTP/2.0 200 OK
+Content-Length: 490
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 10000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 10000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-07-14T13:24:56Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-07-14T13:24:58Z
+Anthropic-Ratelimit-Requests-Limit: 10000
+Anthropic-Ratelimit-Requests-Remaining: 9999
+Anthropic-Ratelimit-Requests-Reset: 2026-07-14T13:24:56Z
+Anthropic-Ratelimit-Tokens-Limit: 12000000
+Anthropic-Ratelimit-Tokens-Remaining: 12000000
+Anthropic-Ratelimit-Tokens-Reset: 2026-07-14T13:24:56Z
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Content-Type: application/json
+Date: Tue, 14 Jul 2026 13:24:58 GMT
+Request-Id: req_011Cd22MvX1d1PuYB64p4PU6
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Traceresponse: 00-915e31331a6a80562f87fc8d3683d4b8-076f7996171e77f6-01
+Vary: Accept-Encoding
+X-Robots-Tag: none
+
+{"model":"claude-sonnet-5","id":"msg_011Cd22MxhE7AhtdpbED82Bx","type":"message","role":"assistant","content":[{"type":"text","text":"ready"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"output_tokens_details":{"thinking_tokens":0},"service_tier":"standard","inference_geo":"global"}}

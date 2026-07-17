@@ -1,25 +1,26 @@
 httprr trace v1
-1324 2418
+1322 2789
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 998
+Content-Length: 996
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"First get the number 10, then get the number 32, then add them together."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get a specific number","name":"get_number","parameters":{"properties":{"which":{"description":"Which number to get (first or second)","type":"STRING"}},"required":["which"],"type":"OBJECT"}},{"description":"Add two numbers together","name":"add_numbers","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 2038
+{"contents":[{"parts":[{"text":"First get the number 10, then get the number 32, then add them together."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get a specific number","name":"get_number","parameters":{"properties":{"which":{"description":"Which number to get (first or second)","type":"STRING"}},"required":["which"],"type":"OBJECT"}},{"description":"Add two numbers together","name":"add_numbers","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 2376
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sat, 24 Jan 2026 17:49:44 GMT
+Date: Thu, 16 Jul 2026 19:43:20 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=8427
+Server-Timing: gfet4t7; dur=2421
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -32,9 +33,19 @@ X-Xss-Protection: 0
               "name": "get_number",
               "args": {
                 "which": "first"
-              }
+              },
+              "id": "kfp8qp98"
             },
-            "thoughtSignature": "Eq0HCqoHAXLI2nxoO+KI5+7yrGMRP0qujU3S1F8nRYVxqk0KSJg+OZ4VWxglJOY9kTuDidzkTupUB381KV6wNJ5juKRrsToSoc7AveHJ3/pU0Uhln0ZmFALlq5ec8MgJ+8zlvp4fnAjOOgvDZuyHl+0VT9K/oL1rxnA0xWTVZRkk+v2PxQ37JN79MVc9Qpobhm6NoxsmAlhhMDblhfZOg0Qd1ss/q9xF1ayi6tJla3hWaAHG21L4zAsk6mDEpmkTuqLHrnvGgrsQtWfSHBX5UtxqsCSAXrEEp04LC5TBRE+MCOWW7RPMv+veH25hmmdhYxqDSFqJ+uWIo2PLSAuCFuK+kBg4HvjPUh9DWSE/oG6Ck7H+YyTCcLcoMMM58q6nR2fT+3niXgIxsIC7zu18ISHCe1vSm9S70pgChpVFvRwFOqpuG+B4FNDEAyErNK9QX/MiCF95hPFOpCjmqD3gavqXB13SGkWByfl9tvWXgiND0cL+H3hMlv1ezKsk8Usq02Iedgph2NMZXf9AV8ZwtwLUYC5ru18S2IK4pIWPZ7rYkg6olNfSiMVR9cRd13rHBJaRa4ep1t5zfVHPGMO7pHV3sYWCOMjxmB5BIVDcON4GYbU8RpX8baYG+QDMZdNeQdGKYIWcKI+m6/hs7S14junA7UN689CPrIMXbh2WBOSLB2O36DOaKCvljXciow5rCKorwFGHbVGSU9tJL9Bsa3m4RScTSLzD2jb6K9oJ+iUdRb3KpL+Zf8vxEAdvvjZmnkY0+3SgG62U12x+Ms3jANlegl6t6ZppJdhaQw0d/BHULfR7oRfOXvJYhnj95NlOYnKFcq4chMnoo0r0ZGYwCqLfCsCcVig7YkNP+Y6K/FbbKNF5Y5rtnJRMugHy9TBRxIa1fMPdFOe0/HUz6bIUTD764JfL4T7KDQTGExmj+yjcuakkQC1mXCJKBC4v9jbbmDxRL433etx+DzsBG9RmUtq7cpGtLmsEG9Ov1kZNg6WbFa+vcjYIp+PUdYVjE7wXTTkuOMIkalZ0Cq3Vr9QfM82y4SnrEop2cPnEVpcwSx62MRQ1bpQ6cyliBayTkX57m/br4r1Pt/ZVNkaeq8W2E/Gz/Xg6KLS/2wu0GScnKr1f7ntZI1LcKArRUqoA1kISpcy0gvPH31ohLmSfWHOF8626MTmR6tqCQlxlKeeSS1sJC/l0wF2gTnZzzmbDY8+ik97xxvn6JNz18GzQPTYLyQOtZJdOWSHEDqwIzGtjIF4="
+            "thoughtSignature": "EtwHCtkHARFNMg8nJZmiP/o3Jjy+WhZ4GugpzfVGaxLWTuMqVFjBHwYEd0ACNP2XW1XRrrA2uLeRmJaXb+84nqrqi1ILHmzKV0dtFmn2q2142Gw2A2kbrXwjIq8vlP5VSDwRi6/9jMCQtlbsWNXGvdw3uWBr/X3zZxtSvk7e1ajJ76jBR9BGL85ABdyrDgrqsSr6NSqtwLQHLrxzTZvTn7DO8BHnCF4Z9fGKCOmU7Gz/FEhZnaZj/x+5VEaWEhvbmvAJkPLiZa2LzTww49NgSuWSXMNJrLA40PMaaaU5XBBpCrHV9Z+QiItDrlae2Gem44NyYIMHWB+SK6pxxyZ+hkb2AK0IXUiTMxQAqALTMAOie8g1shglp9ReAtA2Q2P8T1S+Q4uTlKvR2LmhZdUDD4AX3CfespuZOWvKbo34Ht4GjREMNBApr1U2jOnqp7+jIvZYxrq3Fl/LcTMixHUrS79srUYF3OQmyb1ryuRGBIbY9vhlMqedzkIdVLSRAOrw8femjvYZ85aNAevfIyvABwRrEqmruuKG1dGsuPfEeYfsh4z3LNzqVBcFNWN1sjj5otkHe4MfLt2WR1Gsky7JzLmoJV1cR0drWuMjMH5487fNxG1OiyeyJ8bmOKLxFaEORoxHE/RTFMogD4wjHuP1GqFQl8S6MorBOQnj334o7kzIuUauuNOEquX5nvCjoiVIcy/Hml2fEhELckd7Pwf5TWNoz+0l7A3eo4ZVDFFI/sDQSn6VQxok7CfOGZUopWky2GBG/jzjI2njoa9hA3PAzmhs5GnlbJ5eH+nc2LQ69YpaVUHTC4y+bxv6db3pFXy2TzUHEM6jf/O+AH7xAaXBk2o/auAW7pkuYeFZCVC4e0M3FIokmsBVYKzrRMw4QWUrfBRVZah4ocBm+/CicBJGIaKOSzNyiqL5zGdFzJXpOfkVclXHPJZpk5/BmLR8ETmXeJK3us0R3bCcc1gn5WJG8SbwxpCF23A4gLWtmQrWTN9kuAjYYTf0YVW8Dird65DuFLHggHkFefnOphAtO8aR/6t/vMpXXg5xxNO5J73gVSgk0dQvKYj8srszUTGefFco2GHtodz5lP+N5+tZCQdgatk91rZpCJBTkYBuCCmnokC2zneA9CedjForvOBik5xUnD4kkYWZWRq7x6flZzFnVmoPaFAybcBATe0HtEs4EsfJ3mb6Duw2eOjU8LlXVRi9k71w6pDlU9xZLomGc/CPN1GK+xSnuN4HiuoqHj9hGifRR+LrP7Bkv08xgIpOgspUueZBdSy0D6gPn0+uaQQvIiTt7jo/crf6lNJPfofGOQ=="
+          },
+          {
+            "functionCall": {
+              "name": "get_number",
+              "args": {
+                "which": "second"
+              },
+              "id": "pfkr84uj"
+            }
           }
         ],
         "role": "model"
@@ -46,40 +57,42 @@ X-Xss-Protection: 0
   ],
   "usageMetadata": {
     "promptTokenCount": 144,
-    "candidatesTokenCount": 16,
-    "totalTokenCount": 411,
+    "candidatesTokenCount": 32,
+    "totalTokenCount": 441,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 144
       }
     ],
-    "thoughtsTokenCount": 251
+    "thoughtsTokenCount": 265,
+    "serviceTier": "standard"
   },
   "modelVersion": "gemini-3-flash-preview",
-  "responseId": "OAZ1abXTE_-OjMcP1vuxgQI"
+  "responseId": "VTRZaqWIN9zqvdIP36WG8A4"
 }
-2796 1321
+2890 1422
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 2469
+Content-Length: 2563
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"First get the number 10, then get the number 32, then add them together."}],"role":"user"},{"parts":[{"functionCall":{"args":{"which":"first"},"name":"get_number"},"thoughtSignature":"Eq0HCqoHAXLI2nxoO+KI5+7yrGMRP0qujU3S1F8nRYVxqk0KSJg+OZ4VWxglJOY9kTuDidzkTupUB381KV6wNJ5juKRrsToSoc7AveHJ3/pU0Uhln0ZmFALlq5ec8MgJ+8zlvp4fnAjOOgvDZuyHl+0VT9K/oL1rxnA0xWTVZRkk+v2PxQ37JN79MVc9Qpobhm6NoxsmAlhhMDblhfZOg0Qd1ss/q9xF1ayi6tJla3hWaAHG21L4zAsk6mDEpmkTuqLHrnvGgrsQtWfSHBX5UtxqsCSAXrEEp04LC5TBRE+MCOWW7RPMv+veH25hmmdhYxqDSFqJ+uWIo2PLSAuCFuK+kBg4HvjPUh9DWSE/oG6Ck7H+YyTCcLcoMMM58q6nR2fT+3niXgIxsIC7zu18ISHCe1vSm9S70pgChpVFvRwFOqpuG+B4FNDEAyErNK9QX/MiCF95hPFOpCjmqD3gavqXB13SGkWByfl9tvWXgiND0cL+H3hMlv1ezKsk8Usq02Iedgph2NMZXf9AV8ZwtwLUYC5ru18S2IK4pIWPZ7rYkg6olNfSiMVR9cRd13rHBJaRa4ep1t5zfVHPGMO7pHV3sYWCOMjxmB5BIVDcON4GYbU8RpX8baYG+QDMZdNeQdGKYIWcKI+m6/hs7S14junA7UN689CPrIMXbh2WBOSLB2O36DOaKCvljXciow5rCKorwFGHbVGSU9tJL9Bsa3m4RScTSLzD2jb6K9oJ+iUdRb3KpL+Zf8vxEAdvvjZmnkY0+3SgG62U12x+Ms3jANlegl6t6ZppJdhaQw0d/BHULfR7oRfOXvJYhnj95NlOYnKFcq4chMnoo0r0ZGYwCqLfCsCcVig7YkNP+Y6K/FbbKNF5Y5rtnJRMugHy9TBRxIa1fMPdFOe0/HUz6bIUTD764JfL4T7KDQTGExmj+yjcuakkQC1mXCJKBC4v9jbbmDxRL433etx+DzsBG9RmUtq7cpGtLmsEG9Ov1kZNg6WbFa+vcjYIp+PUdYVjE7wXTTkuOMIkalZ0Cq3Vr9QfM82y4SnrEop2cPnEVpcwSx62MRQ1bpQ6cyliBayTkX57m/br4r1Pt/ZVNkaeq8W2E/Gz/Xg6KLS/2wu0GScnKr1f7ntZI1LcKArRUqoA1kISpcy0gvPH31ohLmSfWHOF8626MTmR6tqCQlxlKeeSS1sJC/l0wF2gTnZzzmbDY8+ik97xxvn6JNz18GzQPTYLyQOtZJdOWSHEDqwIzGtjIF4="}],"role":"model"},{"parts":[{"functionResponse":{"name":"get_number","response":{"response":"10"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get a specific number","name":"get_number","parameters":{"properties":{"which":{"description":"Which number to get (first or second)","type":"STRING"}},"required":["which"],"type":"OBJECT"}},{"description":"Add two numbers together","name":"add_numbers","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 942
+{"contents":[{"parts":[{"text":"First get the number 10, then get the number 32, then add them together."}],"role":"user"},{"parts":[{"functionCall":{"args":{"which":"first"},"id":"kfp8qp98","name":"get_number"},"thoughtSignature":"EtwHCtkHARFNMg8nJZmiP/o3Jjy+WhZ4GugpzfVGaxLWTuMqVFjBHwYEd0ACNP2XW1XRrrA2uLeRmJaXb+84nqrqi1ILHmzKV0dtFmn2q2142Gw2A2kbrXwjIq8vlP5VSDwRi6/9jMCQtlbsWNXGvdw3uWBr/X3zZxtSvk7e1ajJ76jBR9BGL85ABdyrDgrqsSr6NSqtwLQHLrxzTZvTn7DO8BHnCF4Z9fGKCOmU7Gz/FEhZnaZj/x+5VEaWEhvbmvAJkPLiZa2LzTww49NgSuWSXMNJrLA40PMaaaU5XBBpCrHV9Z+QiItDrlae2Gem44NyYIMHWB+SK6pxxyZ+hkb2AK0IXUiTMxQAqALTMAOie8g1shglp9ReAtA2Q2P8T1S+Q4uTlKvR2LmhZdUDD4AX3CfespuZOWvKbo34Ht4GjREMNBApr1U2jOnqp7+jIvZYxrq3Fl/LcTMixHUrS79srUYF3OQmyb1ryuRGBIbY9vhlMqedzkIdVLSRAOrw8femjvYZ85aNAevfIyvABwRrEqmruuKG1dGsuPfEeYfsh4z3LNzqVBcFNWN1sjj5otkHe4MfLt2WR1Gsky7JzLmoJV1cR0drWuMjMH5487fNxG1OiyeyJ8bmOKLxFaEORoxHE/RTFMogD4wjHuP1GqFQl8S6MorBOQnj334o7kzIuUauuNOEquX5nvCjoiVIcy/Hml2fEhELckd7Pwf5TWNoz+0l7A3eo4ZVDFFI/sDQSn6VQxok7CfOGZUopWky2GBG/jzjI2njoa9hA3PAzmhs5GnlbJ5eH+nc2LQ69YpaVUHTC4y+bxv6db3pFXy2TzUHEM6jf/O+AH7xAaXBk2o/auAW7pkuYeFZCVC4e0M3FIokmsBVYKzrRMw4QWUrfBRVZah4ocBm+/CicBJGIaKOSzNyiqL5zGdFzJXpOfkVclXHPJZpk5/BmLR8ETmXeJK3us0R3bCcc1gn5WJG8SbwxpCF23A4gLWtmQrWTN9kuAjYYTf0YVW8Dird65DuFLHggHkFefnOphAtO8aR/6t/vMpXXg5xxNO5J73gVSgk0dQvKYj8srszUTGefFco2GHtodz5lP+N5+tZCQdgatk91rZpCJBTkYBuCCmnokC2zneA9CedjForvOBik5xUnD4kkYWZWRq7x6flZzFnVmoPaFAybcBATe0HtEs4EsfJ3mb6Duw2eOjU8LlXVRi9k71w6pDlU9xZLomGc/CPN1GK+xSnuN4HiuoqHj9hGifRR+LrP7Bkv08xgIpOgspUueZBdSy0D6gPn0+uaQQvIiTt7jo/crf6lNJPfofGOQ=="}],"role":"model"},{"parts":[{"functionResponse":{"id":"kfp8qp98","name":"get_number","response":{"response":"10"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get a specific number","name":"get_number","parameters":{"properties":{"which":{"description":"Which number to get (first or second)","type":"STRING"}},"required":["which"],"type":"OBJECT"}},{"description":"Add two numbers together","name":"add_numbers","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 1009
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Sat, 24 Jan 2026 17:49:52 GMT
+Date: Thu, 16 Jul 2026 19:43:27 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=7461
+Server-Timing: gfet4t7; dur=6264
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -92,9 +105,10 @@ X-Xss-Protection: 0
               "name": "get_number",
               "args": {
                 "which": "second"
-              }
+              },
+              "id": "kafxxud3"
             },
-            "thoughtSignature": "EnkKdwFyyNp8ItmLBcPJo1C+aZlCMDrLqtzVGJhqweNFNBDxxmA3wxArCizg3vlQXT9Uc+K291mSPL3vwhyHWxrVqA6RJHY/UvD9A/gAwK57GPHjywzjomPDIUAdwZT1GCzWoNCN4HfesAkt8U/hoxdz1s3DI5+X/R7P"
+            "thoughtSignature": "EnsKeQERTTIPoVQ2ZEC8EIHTB+acyJaUG/PoBgh/uvqfpcbqjC+YCE9ZKzCJHhrpg79sozvusCNYFleKTJFglYpm6Ka7BZi7YJYI5v8wZhFd83MtwPiiggOgA9ee1T2+KGj7kYYnbmbc9oRHCBaSoKlhZNdNCD8rJUl16AQ="
           }
         ],
         "role": "model"
@@ -105,17 +119,18 @@ X-Xss-Protection: 0
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 426,
+    "promptTokenCount": 440,
     "candidatesTokenCount": 16,
-    "totalTokenCount": 466,
+    "totalTokenCount": 477,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 426
+        "tokenCount": 440
       }
     ],
-    "thoughtsTokenCount": 24
+    "thoughtsTokenCount": 21,
+    "serviceTier": "standard"
   },
   "modelVersion": "gemini-3-flash-preview",
-  "responseId": "QAZ1aceuOY-xjMcP8d7vgQ8"
+  "responseId": "WTRZauXtGLfkxN8P3422oAE"
 }

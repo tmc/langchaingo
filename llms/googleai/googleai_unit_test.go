@@ -1,10 +1,13 @@
 package googleai
 
 import (
+	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"google.golang.org/genai"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -799,4 +802,121 @@ func TestTokenUsageMapping_GoogleAI(t *testing.T) { //nolint:funlen
 			assert.Equal(t, 0, cacheWrite, "Google AI should always have CacheCreationInputTokens = 0")
 		})
 	}
+}
+
+const googleSOSchema = `{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}`
+
+func googleSOOpts(mime *string) *llms.CallOptions {
+	o := &llms.CallOptions{
+		JSONMode:         true,
+		ResponseMIMEType: mime,
+		StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(googleSOSchema)},
+	}
+	return o
+}
+
+func strPtr(s string) *string { return &s }
+
+func TestApplyGoogleResponseFormat_StructuredOutput(t *testing.T) {
+	t.Parallel()
+
+	t.Run("absent MIME defaults to application/json and sets schema", func(t *testing.T) {
+		t.Parallel()
+		cfg := &genai.GenerateContentConfig{}
+		if err := applyGoogleResponseFormat(cfg, googleSOOpts(nil)); err != nil {
+			t.Fatal(err)
+		}
+		if cfg.ResponseMIMEType != ResponseMIMETypeJson {
+			t.Errorf("MIME = %q, want application/json", cfg.ResponseMIMEType)
+		}
+		if cfg.ResponseJsonSchema == nil {
+			t.Error("ResponseJsonSchema must be set")
+		}
+		if cfg.ResponseSchema != nil {
+			t.Error("ResponseSchema and ResponseJsonSchema must not both be set")
+		}
+	})
+
+	t.Run("explicit application/json is compatible", func(t *testing.T) {
+		t.Parallel()
+		cfg := &genai.GenerateContentConfig{}
+		if err := applyGoogleResponseFormat(cfg, googleSOOpts(strPtr(ResponseMIMETypeJson))); err != nil {
+			t.Fatal(err)
+		}
+		if cfg.ResponseJsonSchema == nil {
+			t.Error("ResponseJsonSchema must be set")
+		}
+	})
+
+	t.Run("other MIME conflicts", func(t *testing.T) {
+		t.Parallel()
+		cfg := &genai.GenerateContentConfig{}
+		err := applyGoogleResponseFormat(cfg, googleSOOpts(strPtr("text/plain")))
+		var conflict *llms.ErrStructuredOutputConflict
+		if !errors.As(err, &conflict) {
+			t.Fatalf("want ErrStructuredOutputConflict, got %v", err)
+		}
+	})
+
+	t.Run("schema-less JSONMode unchanged", func(t *testing.T) {
+		t.Parallel()
+		cfg := &genai.GenerateContentConfig{}
+		if err := applyGoogleResponseFormat(cfg, &llms.CallOptions{JSONMode: true}); err != nil {
+			t.Fatal(err)
+		}
+		if cfg.ResponseMIMEType != ResponseMIMETypeJson {
+			t.Errorf("MIME = %q, want application/json", cfg.ResponseMIMEType)
+		}
+		if cfg.ResponseJsonSchema != nil {
+			t.Error("schema-less mode must not set ResponseJsonSchema")
+		}
+	})
+}
+
+func TestValidateGoogleStructuredOutput(t *testing.T) {
+	t.Parallel()
+	opts := googleSOOpts(nil)
+
+	mk := func(choices ...*llms.ContentChoice) *llms.ContentResponse {
+		return &llms.ContentResponse{Choices: choices}
+	}
+	stop := string(genai.FinishReasonStop)
+	maxTok := string(genai.FinishReasonMaxTokens)
+
+	t.Run("valid STOP passes", func(t *testing.T) {
+		t.Parallel()
+		err := validateGoogleStructuredOutput(opts, mk(&llms.ContentChoice{Content: `{"answer":"ok"}`, StopReason: stop}))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("invalid STOP fails typed", func(t *testing.T) {
+		t.Parallel()
+		err := validateGoogleStructuredOutput(opts, mk(&llms.ContentChoice{Content: `{"answer":5}`, StopReason: stop}))
+		var ve *llms.ErrStructuredOutputValidation
+		if !errors.As(err, &ve) {
+			t.Fatalf("want ErrStructuredOutputValidation, got %v", err)
+		}
+	})
+
+	t.Run("MAX_TOKENS is skipped", func(t *testing.T) {
+		t.Parallel()
+		err := validateGoogleStructuredOutput(opts, mk(&llms.ContentChoice{Content: `{"answer"`, StopReason: maxTok}))
+		if err != nil {
+			t.Fatalf("MAX_TOKENS must be skipped, got %v", err)
+		}
+	})
+
+	t.Run("multiple candidates report failing index", func(t *testing.T) {
+		t.Parallel()
+		err := validateGoogleStructuredOutput(opts, mk(
+			&llms.ContentChoice{Content: `{"answer":"ok"}`, StopReason: stop},
+			&llms.ContentChoice{Content: `{"answer":true}`, StopReason: stop},
+		))
+		var ve *llms.ErrStructuredOutputValidation
+		if !errors.As(err, &ve) || ve.Choice != 1 {
+			t.Fatalf("want validation error at choice 1, got %v", err)
+		}
+	})
 }

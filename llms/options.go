@@ -89,7 +89,7 @@ func (r *ReasoningConfig) ResolveMode() ReasoningMode {
 	if r == nil {
 		return ReasoningDefault
 	}
-	switch r.Mode {
+	switch r.Mode { //nolint:exhaustive // ReasoningDefault intentionally falls through to legacy inference below
 	case ReasoningOff:
 		return ReasoningOff
 	case ReasoningOn:
@@ -150,6 +150,12 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 		}
 	}
 
+	// An explicit ReasoningOn with no effort/tokens/adaptive still means "think";
+	// default it to high so providers do not emit an enabled-but-empty request.
+	if r.Mode == ReasoningOn {
+		return ReasoningHigh
+	}
+
 	return ReasoningNone
 }
 
@@ -185,9 +191,9 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 			// no distinct token budget for xhigh/max; map them to the high budget.
 			tokens = max(maxTokens/2, 4096)
 		case ReasoningNone:
-			if r.Adaptive {
-				// adaptive with no explicit effort defaults to the high budget,
-				// so providers that map reasoning to a token budget don't disable it.
+			if r.Adaptive || r.Mode == ReasoningOn {
+				// Adaptive, or an explicit ReasoningOn with no effort, defaults to the
+				// high budget so budget-mapping providers keep reasoning enabled.
 				tokens = max(maxTokens/2, 4096)
 			} else {
 				return 0 // disabled
@@ -242,6 +248,12 @@ type CallOptions struct {
 
 	// JSONMode is a flag to enable JSON mode.
 	JSONMode bool `json:"json"`
+
+	// StructuredOutput requests provider-native, schema-constrained output. When
+	// set (via WithStructuredOutput) JSONMode is also true and the provider is
+	// asked for strict output matching Schema. nil keeps the legacy schema-less
+	// JSON mode governed solely by JSONMode.
+	StructuredOutput *StructuredOutputConfig `json:"structured_output,omitempty"`
 
 	// Tools is a list of tools to use. Each tool can be a specific tool or a function.
 	Tools []Tool `json:"tools,omitempty"`
@@ -405,6 +417,13 @@ func (o *CallOptions) GetReasoning() *ReasoningConfig {
 // GetJSONMode returns the JSON mode flag.
 func (o *CallOptions) GetJSONMode() bool {
 	return o.JSONMode
+}
+
+// GetStructuredOutput returns an independent copy of the structured-output
+// configuration (or nil), so a caller cannot mutate the option's schema bytes
+// through the returned value.
+func (o *CallOptions) GetStructuredOutput() *StructuredOutputConfig {
+	return o.StructuredOutput.Clone()
 }
 
 // GetMetadata returns the metadata to include in the request.
@@ -588,10 +607,13 @@ func WithStopWords(stopWords []string) CallOption {
 	}
 }
 
-// WithOptions specifies options.
+// WithOptions specifies options. Existing fields are copied shallowly (unchanged
+// behavior); only the newer StructuredOutput is deep-cloned so the assembled
+// option does not alias the caller's schema bytes.
 func WithOptions(options CallOptions) CallOption {
 	return func(o *CallOptions) {
 		(*o) = options
+		o.StructuredOutput = options.StructuredOutput.Clone()
 	}
 }
 
@@ -746,6 +768,22 @@ func WithTools(tools []Tool) CallOption {
 // This is useful for models that return structured data.
 func WithJSONMode() CallOption {
 	return func(o *CallOptions) {
+		o.JSONMode = true
+	}
+}
+
+// WithStructuredOutput requests provider-native, schema-constrained output for the
+// call: the final response is a single JSON value matching config.Schema (raw JSON
+// Schema, Draft 2020-12). It also sets JSONMode. The schema is copied, so mutating
+// the caller's bytes afterwards does not change the option. Portable schemas should
+// use a root object, list every property in required and set additionalProperties
+// false recursively; each provider enforces its own subset, and the final response
+// is validated against the original schema regardless. Support is opt-in and never
+// changes wire behavior for callers that do not use it.
+func WithStructuredOutput(config StructuredOutputConfig) CallOption {
+	cloned := config.Clone()
+	return func(o *CallOptions) {
+		o.StructuredOutput = cloned
 		o.JSONMode = true
 	}
 }

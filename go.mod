@@ -108,9 +108,9 @@ require (
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/google/go-cmp v0.7.0
 	github.com/nikolalohinski/gonja v1.5.3
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/sync v0.18.0
-	golang.org/x/tools v0.38.0
 	sigs.k8s.io/yaml v1.4.0
 )
 

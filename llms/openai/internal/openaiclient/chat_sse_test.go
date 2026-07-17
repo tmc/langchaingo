@@ -3,6 +3,7 @@ package openaiclient
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"testing"
@@ -515,4 +516,50 @@ func TestUpdateToolCall_NameCaching(t *testing.T) {
 		assert.Equal(t, "function2", message.ToolCalls[1].Function.Name)
 		assert.Equal(t, `{"b":"2"}`, message.ToolCalls[1].Function.Arguments)
 	})
+
+	t.Run("leading incomplete chunk without index does not panic", func(t *testing.T) {
+		t.Parallel()
+
+		// First streamed chunk carries only arguments (no index, no ID/name): must
+		// not index ToolCalls[-1]. Regression guard for OpenAI-compatible providers.
+		message := &ChatMessage{}
+		nameCache := make(map[string]string)
+		delta := &StreamedToolCall{Function: ToolFunction{Arguments: `{"a":`}}
+
+		assert.NotPanics(t, func() { updateToolCall(message, delta, nameCache) })
+		assert.Empty(t, message.ToolCalls, "no tool call to attach a leading argument-only chunk to")
+	})
+
+	t.Run("identifying chunk without type keeps arguments", func(t *testing.T) {
+		t.Parallel()
+
+		// Some providers omit Type on the identifying chunk; the tool call and its
+		// arguments must still be recorded.
+		message := &ChatMessage{}
+		nameCache := make(map[string]string)
+		index := 0
+		delta := &StreamedToolCall{
+			ID:       "call_9",
+			Index:    &index,
+			Function: ToolFunction{Name: "search", Arguments: `{"q":"x"}`},
+		}
+
+		updateToolCall(message, delta, nameCache)
+
+		require.Len(t, message.ToolCalls, 1)
+		assert.Equal(t, "search", message.ToolCalls[0].Function.Name)
+		assert.Equal(t, `{"q":"x"}`, message.ToolCalls[0].Function.Arguments)
+		assert.Equal(t, "search", nameCache["call_9"])
+	})
+}
+
+func TestStreamedDelta_UnmarshalsRefusal(t *testing.T) {
+	t.Parallel()
+	var delta StreamedChatResponseChunkDelta
+	if err := json.Unmarshal([]byte(`{"refusal":"I cannot help with that"}`), &delta); err != nil {
+		t.Fatal(err)
+	}
+	if delta.Refusal != "I cannot help with that" {
+		t.Errorf("streaming delta must carry refusal, got %q", delta.Refusal)
+	}
 }

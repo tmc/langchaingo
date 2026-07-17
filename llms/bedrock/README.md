@@ -1,6 +1,6 @@
 # AWS Bedrock LLM Provider
 
-Production-ready Go client for AWS Bedrock with support for 40+ models from 13 providers.
+Production-ready Go client for AWS Bedrock with support for 40+ models across 11 providers (Amazon, Anthropic, Meta, DeepSeek, OpenAI, Qwen, Mistral, Moonshot, Z.AI, MiniMax, NVIDIA).
 
 ## Architecture Overview
 
@@ -121,13 +121,12 @@ Different providers use different formats for tool inputs in Converse API:
 |----------|-------------|------------|
 | Anthropic | Native JSON objects | `map[string]any` direct |
 | Nova | Native JSON objects | `map[string]any` direct |
-| Cohere | Native JSON objects | `map[string]any` direct |
+| Qwen / Mistral / MiniMax / Nemotron | Native JSON objects | `map[string]any` direct |
 | GLM (Z.AI) | **String-based** | Not supported |
 
 **Problems with specific models**:
 - **GLM (Z.AI)**: Backend expects tool input as string, not JSON object. This breaks Converse API spec.
-- **AI21 Jamba**: Very hard rate limits prevent extensive testing of tool calling capabilities.
-- **Meta Llama 3.3/3.1 70B/170B**: Unstable behavior when processing tool call results.
+- **Meta Llama 3.3/3.1 70B/8B**: Unstable behavior when processing tool call results.
 - **Mistral Magistral Small**: Tool calling not supported.
 - **Moonshot Kimi K2-Thinking**: Unstable tool calling behavior in streaming mode.
 - **Qwen3-VL**: Unstable tool calling in streaming mode.
@@ -188,18 +187,63 @@ if err != nil {
 ### Models Supporting Reasoning
 
 **Converse API**:
-- Claude 4.6, 4.5, 4.1, 4.0 (Opus, Sonnet, Haiku)
+- Claude: Fable 5, Opus 4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
 - DeepSeek R1
 - OpenAI GPT OSS (120B, 20B)
 - Moonshot Kimi K2-Thinking
 
-**Legacy API**:
-- Claude 4.5, 4.1, 4.0 (Opus, Sonnet, Haiku)
-- Claude 3.7 Sonnet
+**Legacy API** (InvokeModel):
+- Claude: Opus 4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
+
+**How the wire shape is resolved**
+
+Claude thinking is not a single flag — the generation resolves adaptive vs. budget
+thinking from the model via the shared `llms/reasoning` capability tables (the same
+source of truth used by the first-party Anthropic provider):
+
+- **Adaptive-only** (Opus 4.7/4.8, Sonnet 5, Fable 5): `thinking.type=adaptive` +
+  `output_config.effort`; budget thinking and sampling params are rejected. On
+  Bedrock these are always-on and cannot be disabled.
+- **Adaptive + budget** (Opus 4.6, Sonnet 4.6): either mechanism; caller preference honored.
+- **Budget-only** (Opus 4.5, Sonnet 4.5, Haiku 4.5): `thinking.type=enabled` +
+  `budget_tokens`; Opus 4.5 also honors `output_config.effort`.
+
+Non-Claude reasoning models (DeepSeek R1, GPT OSS, Kimi K2-Thinking) use budget
+thinking through the Converse API. `WithReasoningDisabled()` returns a typed
+`ErrReasoningOffUnsupported` for always-on Bedrock models.
+
+## Structured Output
+
+The provider-neutral `llms.WithStructuredOutput` is supported on both API paths for
+Anthropic models: the final response is guaranteed to be a single JSON value
+matching the supplied JSON Schema (Draft 2020-12), validated locally against the
+original schema.
+
+```go
+schema := json.RawMessage(`{
+    "type": "object",
+    "properties": {"country": {"type": "string"}, "capital": {"type": "string"}},
+    "required": ["country", "capital"],
+    "additionalProperties": false
+}`)
+
+resp, err := llm.GenerateContent(ctx, messages,
+    llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}))
+```
+
+**Wire mapping**:
+- **Converse**: native `OutputConfig.TextFormat` with a `JsonSchemaDefinition` (AWS SDK types). Rides both `Converse` and `ConverseStream`.
+- **Legacy (InvokeModel)**: Anthropic-compatible `output_config.format`, merged with reasoning `output_config.effort` when both are set.
+
+**Requirements and behavior**:
+- Every object node must set `additionalProperties: false` — Bedrock rejects a schema that omits it. The SDK enforces this locally with a typed `ErrStructuredOutputConfig` before the request is sent.
+- Only Anthropic models are supported on the legacy path; a non-Anthropic legacy model returns a typed unsupported-path error. Converse is not restricted to Claude — any model AWS advertises as supporting Structured Outputs works.
+- Only the final normal turn (`end_turn`/`stop_sequence`) is validated; a `tool_use`/`max_tokens`/guardrail/filtered turn is not treated as final JSON.
+- The response `StopReason` is surfaced on `ContentChoice.StopReason` (Converse now transfers it from the response/`MessageStopEvent`).
 
 **Why these models?**
 
-Extended thinking/reasoning capabilities are model-specific features. DeepSeek R1, OpenAI OSS, and Moonshot models provide reasoning through Converse API, while Anthropic models support both APIs.
+Extended thinking/reasoning capabilities are model-specific features. DeepSeek R1, OpenAI OSS, and Moonshot models provide reasoning through the Converse API, while Anthropic models support both APIs.
 
 ### Message Structure with Reasoning
 
@@ -301,6 +345,7 @@ case "newprovider":
 - Add model to `TestAmazonToolCallingLegacyAPI` (if tools with Legacy API supported)
 - Add model to `TestAmazonReasoningConverseAPI` (if reasoning/thinking supported)
 - Add model to `TestAmazonReasoningLegacyAPI` (if reasoning with Legacy API supported)
+- Structured output is covered by `TestAmazonStructuredOutputConverseAPI` and `TestAmazonStructuredOutputStreamingConverseAPI` (Converse); schemas must set `additionalProperties:false`
 
 6. **Record HTTP Interactions**
 ```bash
@@ -673,9 +718,13 @@ if len(arguments) == 0 {
    - Support multiple simultaneous tools
    - Why: Some models return parallel tool calls
 
-4. **Structured Output**
-   - JSON schema validation
-   - Why: Type-safe responses
+4. **Structured Output for non-Anthropic legacy models**
+   - The legacy InvokeModel structured-output path is Anthropic-only; other
+     providers currently return a typed unsupported-path error (use Converse)
+   - Why: each legacy provider needs its own request shape
+
+_(Schema-constrained structured output itself is already implemented — see the
+[Structured Output](#structured-output) section.)_
 
 ## Contributing
 
@@ -697,31 +746,31 @@ if len(arguments) == 0 {
 
 ## Supported Model Matrix
 
-| Provider | Tool Calling | Reasoning | Streaming | Multimodal | Caching |
-|----------|-------------|-----------|-----------|------------|---------|
-| Claude 4.6 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Claude 4.5 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Claude 4.1 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Claude 4.0 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Claude 3.7 | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Claude 3.5 | ✅ | ❌ | ✅ | ❌ | ❌ |
-| Nova 2/Pro/Lite | ✅ | ❌ | ✅ | ✅ | ❌ |
-| Llama 4 | Limited | ❌ | ✅ | ✅ | ❌ |
-| Cohere R+ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| DeepSeek V3.2 | ✅ | ❌ | ✅ | ❌ | ❌ |
-| DeepSeek R1 | ❌ | ✅ | ✅ | ❌ | ❌ |
-| AI21 Jamba | Limited* | ❌ | ✅** | ❌ | ❌ |
-| OpenAI GPT (OSS) | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Qwen3 | Varies*** | ❌ | ✅ | Some | ❌ |
-| Mistral | ✅**** | ❌ | ✅ | ❌ | ❌ |
-| Moonshot Kimi | ✅***** | ✅ | ✅ | ❌ | ❌ |
-| GLM-4.7 | ❌****** | ❌ | ✅ | ❌ | ❌ |
+Structured Output and Caching apply to Anthropic (Claude) models. See `models_list.go`
+for the exact model IDs.
 
-*AI21 Jamba: Rate limits prevent extensive tool calling testing  
-**AI21 Jamba: Streaming supported only with Converse API  
-***Qwen3: Most models support tools, except Qwen3-VL (unstable in streaming)  
-****Mistral: Large3 and Large2402 support tools, MagistralSmall2509 does not  
-*****Moonshot: K2.5 supports tools, K2-Thinking is unstable  
-******GLM models: Backend incompatibility with Converse API tool format (requires string instead of JSON)
+| Provider | Tool Calling | Reasoning | Streaming | Multimodal | Caching | Structured Output |
+|----------|-------------|-----------|-----------|------------|---------|-------------------|
+| Claude Fable 5 | ✅ | ✅ (always-on) | ✅ | ✅ | ✅ | ✅ |
+| Claude Opus 4.8/4.7/4.6/4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Claude Sonnet 5/4.6/4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Claude Haiku 4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Nova 2/Pro/Lite/Micro | ✅ | ❌ | ✅ | ✅ | ❌ | Converse native* |
+| Llama 4 / 3.x | Limited | ❌ | ✅ | ✅ | ❌ | Converse native* |
+| DeepSeek V3.2 | ✅ | ❌ | ✅ | ❌ | ❌ | Converse native* |
+| DeepSeek R1 | ❌ | ✅ | ✅ | ❌ | ❌ | Converse native* |
+| OpenAI GPT (OSS) | ✅ | ✅ | ✅ | ❌ | ❌ | Converse native* |
+| Qwen3 | Varies** | ❌ | ✅ | Some | ❌ | Converse native* |
+| Mistral | ✅*** | ❌ | ✅ | Some | ❌ | Converse native* |
+| Moonshot Kimi | ✅**** | ✅ | ✅ | Some | ❌ | Converse native* |
+| MiniMax M2/M2.1/M2.5 | ✅ | ❌ | ✅ | ❌ | ❌ | Converse native* |
+| GLM-4.7/4.7-Flash/5 | ❌***** | ✅ (GLM-5) | ✅ | ❌ | ❌ | Converse native* |
+| NVIDIA Nemotron 3 Super | ✅ | ✅ | ✅ | ❌ | ❌ | Converse native* |
 
-See `models_list.go` for complete model list and detailed capabilities.
+*Converse native: structured output is passed via AWS `OutputConfig.TextFormat`; support depends on what AWS advertises for the model at the time. The legacy InvokeModel structured-output path is implemented for Anthropic only.  
+**Qwen3: Most models support tools, except Qwen3-VL (unstable in streaming)  
+***Mistral: Large 3 and Large 2402 support tools, Magistral Small 2509 does not  
+****Moonshot: K2.5 supports tools, K2-Thinking is unstable in streaming  
+*****GLM models: Backend incompatibility with Converse API tool format (requires string instead of JSON)
+
+See `models_list.go` for the complete model list and detailed capabilities.

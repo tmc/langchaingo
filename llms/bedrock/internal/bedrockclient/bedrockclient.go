@@ -105,6 +105,15 @@ func (c *Client) CreateCompletion(ctx context.Context,
 	options llms.CallOptions,
 ) (*llms.ContentResponse, error) {
 	provider := GetProvider(modelID)
+	// Legacy InvokeModel structured output is implemented only for the Anthropic
+	// payload; other providers get a typed error rather than a guessed wire shape.
+	if options.StructuredOutput != nil && provider != "anthropic" {
+		return nil, &llms.ErrStructuredOutputUnsupported{
+			Provider: providerBedrock,
+			Model:    modelID,
+			Reason:   "legacy InvokeModel structured output is only implemented for Anthropic models; use the Converse API for other providers",
+		}
+	}
 	switch provider {
 	case "ai21":
 		return createAi21Completion(ctx, c.client, modelID, messages, options)

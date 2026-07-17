@@ -2,6 +2,7 @@ package ollama
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -283,6 +284,50 @@ func TestCloudJSONMode(t *testing.T) {
 	assert.Contains(t, responseText, "{")
 	assert.Contains(t, responseText, "}")
 	assert.Contains(t, responseText, "colors")
+}
+
+// TestCloudStructuredOutput exercises the structured-output mechanism against the
+// real Ollama Cloud backend on several models (httprr-recorded). The SDK sends the
+// schema in the request's `format` field and validates the response against it.
+//
+// Note on Ollama Cloud behavior: unlike a local Ollama server, the Cloud backend
+// does not apply the `format` schema as a hard grammar constraint for these models
+// — it is a soft hint. So the prompt also asks for a bare JSON object and the
+// schema requires only the field the model reliably returns; the SDK then verifies
+// the real response actually matches. Models such as gpt-oss ignore the hint and
+// return prose, which the SDK correctly surfaces as ErrStructuredOutputValidation.
+func TestCloudStructuredOutput(t *testing.T) {
+	schema := json.RawMessage(`{"type":"object","properties":{"capital":{"type":"string"}},"required":["capital"]}`)
+
+	models := []struct{ name, model string }{
+		{"glm", "glm-5.2"},
+		{"kimi", "kimi-k2.5"},
+	}
+	for _, tc := range models {
+		t.Run(tc.name, func(t *testing.T) {
+			llm := newCloudTestClient(t)
+
+			content := []llms.MessageContent{{
+				Role: llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{
+					llms.TextContent{Text: "Reply with ONLY a JSON object (no prose, no markdown) giving the capital of France."},
+				},
+			}}
+
+			resp, err := llm.GenerateContent(context.Background(), content,
+				llms.WithModel(tc.model),
+				llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}))
+			require.NoError(t, err)
+			require.NotEmpty(t, resp.Choices)
+
+			var out struct {
+				Capital string `json:"capital"`
+			}
+			require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out),
+				"structured output must be valid JSON")
+			assert.Contains(t, strings.ToLower(out.Capital), "paris")
+		})
+	}
 }
 
 func TestCloudWithOptions(t *testing.T) {

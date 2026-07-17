@@ -172,7 +172,7 @@ func IsReasoningModel(model string) bool {
 // DefaultIsReasoningModel provides the default reasoning model detection logic.
 // This can be used by LLM implementations that want to extend rather than replace
 // the default detection logic.
-func DefaultIsReasoningModel(model string) bool {
+func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
 	modelLower := strings.ToLower(model)
 
 	// Remove provider prefix if present (e.g., "openai/", "anthropic/", "google/")
@@ -183,16 +183,20 @@ func DefaultIsReasoningModel(model string) bool {
 	// OpenAI reasoning models
 	if strings.HasPrefix(modelLower, "gpt-5") ||
 		strings.HasPrefix(modelLower, "gpt-oss-") ||
-		strings.HasPrefix(modelLower, "o1-") ||
+		strings.HasPrefix(modelLower, "o1") ||
 		strings.HasPrefix(modelLower, "o3") ||
 		strings.HasPrefix(modelLower, "o4-mini") {
 		return true
 	}
 
-	// Anthropic extended thinking models
+	// Anthropic extended thinking / adaptive models
 	if strings.Contains(modelLower, "claude-3.7") ||
 		strings.HasPrefix(modelLower, "claude-opus-4") ||
+		strings.HasPrefix(modelLower, "claude-opus-5") ||
 		strings.HasPrefix(modelLower, "claude-sonnet-4") ||
+		strings.HasPrefix(modelLower, "claude-sonnet-5") ||
+		strings.Contains(modelLower, "claude-fable-5") ||
+		strings.Contains(modelLower, "claude-mythos-5") ||
 		strings.Contains(modelLower, "claude-haiku-4.5") {
 		return true
 	}
@@ -201,20 +205,20 @@ func DefaultIsReasoningModel(model string) bool {
 	if strings.Contains(modelLower, "deepseek-r1") ||
 		strings.Contains(modelLower, "deepseek-chat-v3") ||
 		strings.Contains(modelLower, "deepseek-v3.1-terminus") ||
-		strings.HasPrefix(modelLower, "deepseek-v3.2") {
+		strings.HasPrefix(modelLower, "deepseek-v3.2") ||
+		strings.HasPrefix(modelLower, "deepseek-v4") {
 		return true
 	}
 
-	// Google Gemini reasoning models
-	if strings.HasPrefix(modelLower, "gemini-2.5-") ||
-		strings.HasPrefix(modelLower, "gemini-3-") ||
-		strings.HasPrefix(modelLower, "gemini-3.1-") {
+	// Google Gemini / Gemma reasoning models (Gemini 2.5, Gemini 3.x, Gemma 4).
+	if GeminiSupportsThinking(modelLower) {
 		return true
 	}
 
 	// X-AI Grok reasoning models
 	if strings.HasPrefix(modelLower, "grok-3-mini") ||
 		strings.HasPrefix(modelLower, "grok-4") ||
+		strings.HasPrefix(modelLower, "grok-build") ||
 		strings.Contains(modelLower, "grok-code-fast") {
 		return true
 	}
@@ -222,12 +226,15 @@ func DefaultIsReasoningModel(model string) bool {
 	// Z-AI GLM reasoning models (Zhipu AI)
 	if strings.HasPrefix(modelLower, "glm-4.5") ||
 		strings.HasPrefix(modelLower, "glm-4.6") ||
-		strings.HasPrefix(modelLower, "glm-4.7") {
+		strings.HasPrefix(modelLower, "glm-4.7") ||
+		strings.HasPrefix(modelLower, "glm-5") {
 		return true
 	}
 
-	// Qwen reasoning models
-	if (strings.HasPrefix(modelLower, "qwen") && strings.Contains(modelLower, "thinking")) ||
+	// Qwen reasoning models. Qwen3.x models reason (thinking is toggleable), while
+	// older qwen models need an explicit "thinking" marker or the QwQ line.
+	if strings.HasPrefix(modelLower, "qwen3") ||
+		(strings.HasPrefix(modelLower, "qwen") && strings.Contains(modelLower, "thinking")) ||
 		strings.Contains(modelLower, "qwq-") {
 		return true
 	}
@@ -241,6 +248,9 @@ func DefaultIsReasoningModel(model string) bool {
 	if strings.Contains(modelLower, "kimi-") &&
 		(strings.Contains(modelLower, "k2-thinking") ||
 			strings.Contains(modelLower, "2.5") ||
+			strings.Contains(modelLower, "2.6") ||
+			strings.Contains(modelLower, "2.7") ||
+			strings.Contains(modelLower, "k3") ||
 			strings.Contains(modelLower, "dev-72b")) {
 		return true
 	}
@@ -271,6 +281,28 @@ func DefaultIsReasoningModel(model string) bool {
 		strings.Contains(modelLower, "chimera") ||
 		strings.Contains(modelLower, "mimo-v2") ||
 		strings.Contains(modelLower, "tongyi-deepresearch") {
+		return true
+	}
+
+	// Additional reasoning families from the current OpenRouter catalog. Matched by
+	// the distinctive part of the model name so detection works both on OpenRouter
+	// (with a provider prefix, stripped above) and on the original provider.
+	if strings.HasPrefix(modelLower, "seed-2.0") ||
+		strings.HasPrefix(modelLower, "step-3") ||
+		strings.HasPrefix(modelLower, "north-mini") ||
+		strings.HasPrefix(modelLower, "mercury-2") ||
+		strings.HasPrefix(modelLower, "ring-2.6") ||
+		strings.HasPrefix(modelLower, "muse-spark") ||
+		strings.HasPrefix(modelLower, "mistral-medium-3") ||
+		strings.HasPrefix(modelLower, "mistral-small-2603") ||
+		strings.HasPrefix(modelLower, "nex-n2") ||
+		strings.HasPrefix(modelLower, "perceptron-mk") ||
+		strings.HasPrefix(modelLower, "laguna-") ||
+		strings.HasPrefix(modelLower, "reka-flash-3") ||
+		strings.HasPrefix(modelLower, "fugu-ultra") ||
+		strings.HasPrefix(modelLower, "hy3") ||
+		strings.HasPrefix(modelLower, "solar-pro-3") ||
+		strings.Contains(modelLower, "trinity-large-thinking") {
 		return true
 	}
 

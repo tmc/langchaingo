@@ -23,8 +23,7 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		{"claude-opus-4-5-20251101", ClaudeReasoningBudgetOnly},
 		{"claude-sonnet-4-5-20250929", ClaudeReasoningBudgetOnly},
 		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", ClaudeReasoningBudgetOnly},
-		{"claude-3-7-sonnet-20250219", ClaudeReasoningBudgetOnly},
-		// Unknown: no-thinking Claude, non-Claude, empty.
+		// Unknown: no-thinking Claude, retired/non-classified, non-Claude, empty.
 		{"claude-3-5-haiku-20241022", ClaudeReasoningUnknown},
 		{"claude-2.1", ClaudeReasoningUnknown},
 		{"gpt-5.5", ClaudeReasoningUnknown},

@@ -162,6 +162,14 @@ func TestReasoningDisabledToWire(t *testing.T) {
 		}
 	})
 
+	t.Run("gpt-5-pro rejects disable", func(t *testing.T) {
+		llm, _ := newLLM(t, "gpt-5-pro", false)
+		_, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled())
+		if err == nil || !strings.Contains(err.Error(), "cannot be disabled") {
+			t.Fatalf("gpt-5-pro disable must error with 'cannot be disabled', got: %v", err)
+		}
+	})
+
 	t.Run("non-reasoning model omits reasoning", func(t *testing.T) {
 		llm, body := newLLM(t, "gpt-4.1", false)
 		if _, err := llm.GenerateContent(context.Background(), msgs, llms.WithReasoningDisabled()); err != nil {
@@ -169,6 +177,59 @@ func TestReasoningDisabledToWire(t *testing.T) {
 		}
 		if strings.Contains(*body, "reasoning_effort") || strings.Contains(*body, `"reasoning"`) {
 			t.Fatalf("non-reasoning model must omit reasoning fields, got body: %s", *body)
+		}
+	})
+}
+
+// An effort above a model's ceiling must be clamped to what the model accepts
+// before it reaches the wire, rather than sent verbatim and rejected with a 400.
+func TestReasoningEffortClampedPerModel(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	capture := func(t *testing.T, model string, effort llms.ReasoningEffort) string {
+		t.Helper()
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			body = string(b)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		t.Cleanup(srv.Close)
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+			llms.WithReasoning(effort, 0)); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		return body
+	}
+
+	t.Run("gpt-5.4-mini clamps max to xhigh", func(t *testing.T) {
+		body := capture(t, "gpt-5.4-mini", llms.ReasoningMax)
+		if !strings.Contains(body, `"reasoning_effort":"xhigh"`) {
+			t.Fatalf("max must clamp to xhigh on gpt-5.4-mini, got body: %s", body)
+		}
+	})
+
+	t.Run("gpt-5-pro pins low to high", func(t *testing.T) {
+		body := capture(t, "gpt-5-pro", llms.ReasoningLow)
+		if !strings.Contains(body, `"reasoning_effort":"high"`) {
+			t.Fatalf("gpt-5-pro must pin effort to high, got body: %s", body)
+		}
+	})
+
+	t.Run("unknown model passes max through", func(t *testing.T) {
+		body := capture(t, "gpt-5.6", llms.ReasoningMax)
+		if !strings.Contains(body, `"reasoning_effort":"max"`) {
+			t.Fatalf("unknown model must pass max through, got body: %s", body)
 		}
 	})
 }

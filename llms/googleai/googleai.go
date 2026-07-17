@@ -2,6 +2,7 @@
 package googleai
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -15,9 +16,12 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
+	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
 
 	"google.golang.org/genai"
 )
+
+const providerGoogleAI = "googleai"
 
 var (
 	ErrNoContentInResponse   = errors.New("no content in generation response")
@@ -89,12 +93,17 @@ func (g *GoogleAI) GenerateContent(
 		Model:          getStringPointer(g.opts.DefaultModel),
 		CandidateCount: getIntPointer(g.opts.DefaultCandidateCount),
 		MaxTokens:      getIntPointer(g.opts.DefaultMaxTokens),
-		Temperature:    getFloatPointer(g.opts.DefaultTemperature),
 		TopP:           getFloatPointer(g.opts.DefaultTopP),
 		TopK:           getIntPointer(g.opts.DefaultTopK),
 	}
 	for _, opt := range options {
 		opt(&opts)
+	}
+
+	// Default temperature only when the caller left it unset; an explicit value is
+	// preserved.
+	if opts.Temperature == nil {
+		opts.Temperature = getFloatPointer(resolveTemperature(opts.GetModel(), g.opts.DefaultTemperature))
 	}
 
 	// Build generation config
@@ -118,18 +127,17 @@ func (g *GoogleAI) GenerateContent(
 		}
 	}
 
-	// Handle response MIME type and JSON mode
-	switch {
-	case opts.ResponseMIMEType != nil && opts.JSONMode:
-		return nil, fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
-	case opts.ResponseMIMEType != nil && !opts.JSONMode:
-		config.ResponseMIMEType = opts.GetResponseMIMEType()
-	case opts.GetResponseMIMEType() == "" && opts.JSONMode:
-		config.ResponseMIMEType = ResponseMIMETypeJson
+	// Handle response MIME type, JSON mode and structured output
+	if err := applyGoogleResponseFormat(config, &opts); err != nil {
+		return nil, err
 	}
 
 	// Handle thinking configuration for reasoning models
-	if tc := resolveThinkingConfig(opts.GetModel(), opts.Reasoning, opts.GetMaxTokens()); tc != nil {
+	tc, err := resolveThinkingConfig(opts.GetModel(), opts.Reasoning, opts.GetMaxTokens())
+	if err != nil {
+		return nil, err
+	}
+	if tc != nil {
 		config.ThinkingConfig = tc
 	}
 
@@ -163,7 +171,6 @@ func (g *GoogleAI) GenerateContent(
 	}
 
 	var response *llms.ContentResponse
-	var err error
 
 	if len(messages) == 1 {
 		theMessage := messages[0]
@@ -178,11 +185,79 @@ func (g *GoogleAI) GenerateContent(
 		return nil, err
 	}
 
+	// When structured output was requested, validate each normal-final candidate
+	// against the original schema; the response is returned with the typed error.
+	if err := validateGoogleStructuredOutput(&opts, response); err != nil {
+		return response, err
+	}
+
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
 	return response, nil
+}
+
+// applyGoogleResponseFormat sets the generation config's response format from the
+// call options. With a per-call StructuredOutput it sets ResponseJsonSchema (never
+// ResponseSchema at the same time) plus application/json; otherwise it keeps the
+// pre-existing schema-less JSON mode / ResponseMIMEType behavior unchanged.
+func applyGoogleResponseFormat(config *genai.GenerateContentConfig, opts *llms.CallOptions) error {
+	if so := opts.StructuredOutput; so != nil {
+		if err := opts.ValidateStructuredOutput(); err != nil {
+			return err
+		}
+		switch opts.GetResponseMIMEType() {
+		case "", ResponseMIMETypeJson:
+			config.ResponseMIMEType = ResponseMIMETypeJson
+		default:
+			return &llms.ErrStructuredOutputConflict{
+				Provider: providerGoogleAI,
+				Detail:   "structured output requires the application/json response MIME type",
+			}
+		}
+		// Decode the raw schema into a document, preserving large integers via
+		// json.Number instead of degrading them to float64.
+		dec := json.NewDecoder(bytes.NewReader(so.Schema))
+		dec.UseNumber()
+		var schemaDoc any
+		if err := dec.Decode(&schemaDoc); err != nil {
+			return fmt.Errorf("%w: %w", llms.ErrStructuredOutputConfig, err)
+		}
+		config.ResponseJsonSchema = schemaDoc
+		return nil
+	}
+
+	// Schema-less behavior (unchanged from before structured output existed).
+	switch {
+	case opts.ResponseMIMEType != nil && opts.JSONMode:
+		return fmt.Errorf("conflicting options, can't use JSONMode and ResponseMIMEType together")
+	case opts.ResponseMIMEType != nil && !opts.JSONMode:
+		config.ResponseMIMEType = opts.GetResponseMIMEType()
+	case opts.GetResponseMIMEType() == "" && opts.JSONMode:
+		config.ResponseMIMEType = ResponseMIMETypeJson
+	}
+	return nil
+}
+
+// validateGoogleStructuredOutput validates each normal-final (STOP) candidate
+// against the original schema. MAX_TOKENS, safety, recitation, blocklist and tool
+// outcomes keep their prior semantics and are not validated as final JSON.
+func validateGoogleStructuredOutput(opts *llms.CallOptions, resp *llms.ContentResponse) error {
+	so := opts.StructuredOutput
+	if so == nil || resp == nil {
+		return nil
+	}
+	model := opts.GetModel()
+	for i, choice := range resp.Choices {
+		if choice.StopReason != string(genai.FinishReasonStop) {
+			continue
+		}
+		if err := structuredoutput.Validate(so.Schema, providerGoogleAI, model, i, choice.StopReason, choice.Content); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (g *GoogleAI) generateFromSingleMessage(
@@ -962,36 +1037,44 @@ func convertIntToFloat32Pointer(i *int) *float32 {
 	return &f32
 }
 
+// resolveTemperature returns the temperature to use when the caller left it
+// unset. Gemini 3 defaults to 1.0, the value Google recommends (lower values can
+// cause looping and degraded reasoning); other models keep the SDK-wide default.
+func resolveTemperature(model string, defaultTemperature float64) float64 {
+	if reasoning.GeminiUsesThinkingLevel(model) {
+		return 1.0
+	}
+	return defaultTemperature
+}
+
 // resolveThinkingConfig builds the Gemini thinking config for the reasoning mode.
-// Off forces budget 0 because Gemini 2.5 thinks by default (omitting would not
-// disable it); a Pro / 3.x model that rejects a hard off surfaces a 400.
-func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) *genai.ThinkingConfig {
+// Off forces budget 0 on models that disable that way (Gemini 2.5 Flash), since
+// omitting would not disable a default-on model; a model whose thinking cannot be
+// disabled (Gemini 2.5 Pro, Gemini 3.x) returns a typed error before the request.
+func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) (*genai.ThinkingConfig, error) {
 	switch cfg.ResolveMode() {
 	case llms.ReasoningOn:
 		// An effort with no explicit token budget maps to the qualitative
 		// thinking_level on Gemini 3.x (its native control, where thinking_budget is
 		// deprecated); an explicit budget or a 2.5 model still uses thinking_budget.
-		if cfg.Tokens == 0 && supportsThinkingLevel(model) {
+		if cfg.Tokens == 0 && reasoning.GeminiUsesThinkingLevel(model) {
 			if level := thinkingLevelForEffort(cfg.GetEffort(maxTokens)); level != "" {
-				return &genai.ThinkingConfig{ThinkingLevel: level, IncludeThoughts: true}
+				return &genai.ThinkingConfig{ThinkingLevel: level, IncludeThoughts: true}, nil
 			}
 		}
 		if budget := int32(cfg.GetTokens(maxTokens)); budget > 0 {
-			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}
+			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}, nil
 		}
 	case llms.ReasoningOff:
-		if reasoning.ResolveOff(model, reasoning.ProviderGoogleAI) == reasoning.OffZeroBudget {
+		switch reasoning.ResolveOff(model, reasoning.ProviderGoogleAI) {
+		case reasoning.OffZeroBudget:
 			zero := int32(0)
-			return &genai.ThinkingConfig{ThinkingBudget: &zero}
+			return &genai.ThinkingConfig{ThinkingBudget: &zero}, nil
+		case reasoning.OffUnsupported:
+			return nil, &reasoning.ErrReasoningOffUnsupported{Model: model}
 		}
 	}
-	return nil
-}
-
-// supportsThinkingLevel reports whether the model uses the qualitative
-// thinking_level control (Gemini 3.x) rather than a token budget (Gemini 2.5).
-func supportsThinkingLevel(model string) bool {
-	return strings.Contains(strings.ToLower(model), "gemini-3")
+	return nil, nil
 }
 
 // thinkingLevelForEffort maps a reasoning effort to a Gemini thinking_level.

@@ -1,0 +1,30 @@
+httprr trace v1
+711 526
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 407
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":256},"messages":[{"content":[{"text":"What is the capital of France?"}],"role":"user"}],"outputConfig":{"textFormat":{"structure":{"jsonSchema":{"name":"capital","schema":"{\"type\":\"object\",\"properties\":{\"country\":{\"type\":\"string\"},\"capital\":{\"type\":\"string\"}},\"required\":[\"country\",\"capital\"],\"additionalProperties\":false}"}},"type":"json_schema"}}}HTTP/2.0 200 OK
+Content-Length: 361
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 00:40:33 GMT
+X-Amzn-Requestid: 7bc70bcf-4272-465e-93c0-07ffa1ae93d6
+
+{"metrics":{"latencyMs":3360},"output":{"message":{"content":[{"text":"{\"country\":\"France\",\"capital\":\"Paris\"}"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":176,"outputTokens":12,"serverToolUsage":{},"totalTokens":188}}689 522
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 385
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"inferenceConfig":{"maxTokens":256},"messages":[{"content":[{"text":"List three primary colors."}],"role":"user"}],"outputConfig":{"textFormat":{"structure":{"jsonSchema":{"name":"colors","schema":"{\"type\":\"object\",\"properties\":{\"colors\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"colors\"],\"additionalProperties\":false}"}},"type":"json_schema"}}}HTTP/2.0 200 OK
+Content-Length: 357
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 00:40:36 GMT
+X-Amzn-Requestid: 9a42b0bf-e152-4f2a-b0de-ae2a09da4aa2
+
+{"metrics":{"latencyMs":2502},"output":{"message":{"content":[{"text":"{\"colors\":[\"red\",\"blue\",\"yellow\"]}"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":169,"outputTokens":14,"serverToolUsage":{},"totalTokens":183}}

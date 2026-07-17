@@ -110,7 +110,7 @@ You should always consider the following aspects in your reviews:
 	// Repeat to reach minimum cache size (~32k tokens requires ~24k words)
 	longContext := strings.Repeat(baseContext, 500)
 
-	cached, err := helper.CreateCachedContent(ctx, "gemini-2.0-flash",
+	cached, err := helper.CreateCachedContent(ctx, "gemini-2.5-flash",
 		[]llms.MessageContent{
 			{
 				Role: llms.ChatMessageTypeSystem,

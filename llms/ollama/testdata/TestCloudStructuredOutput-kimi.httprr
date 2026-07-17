@@ -1,0 +1,24 @@
+httprr trace v1
+463 3490
+POST https://ollama.com/api/chat HTTP/1.1
+Host: ollama.com
+User-Agent: langchaingo-httprr
+Content-Length: 286
+Accept: application/x-ndjson
+Content-Type: application/json
+
+{"model":"kimi-k2.5","messages":[{"role":"user","content":"Reply with ONLY a JSON object (no prose, no markdown) giving the capital of France."}],"stream":false,"format":{"type":"object","properties":{"capital":{"type":"string"}},"required":["capital"]},"options":{"num_predict":16384}}HTTP/2.0 200 OK
+Content-Length: 2986
+Alt-Svc: h3=":443"; ma=2592000
+Content-Type: application/json
+Date: Fri, 17 Jul 2026 01:07:01 GMT
+Server: Google Frontend
+Traceparent: 00-97b46e70a9d5d3d1604373a5caa4c589-0d914abe21e4393b-00
+Via: 1.1 google
+X-Build-Commit: 497d56d78d9396981c6f7d0265656affaf63d3d7
+X-Build-Time: 2026-07-16T17:39:19-07:00
+X-Cloud-Trace-Context: 97b46e70a9d5d3d1604373a5caa4c589/977644774588954939
+X-Frame-Options: DENY
+X-Request-Id: 476b7ba6-eefd-4682-af6a-40cb0c09a1ec
+
+{"model":"kimi-k2.5","created_at":"2026-07-17T01:07:01.008716213Z","message":{"role":"assistant","content":"{\"country\":\"France\",\"capital\":\"Paris\"}","thinking":"The user wants a JSON object that gives the capital of France. They specified:\n 1. Reply with ONLY a JSON object\n 2. No prose\n 3. No markdown\n \n So I should output something like:\n {\"capital\": \"Paris\"}\n or\n {\"country\": \"France\", \"capital\": \"Paris\"}\n \n The simplest valid JSON that answers the question would be:\n {\"capital\":\"Paris\"}\n \n or just\n {\"France\":\"Paris\"}\n \n I think {\"capital\":\"Paris\"} or {\"country\":\"France\",\"capital\":\"Paris\"} would be appropriate. I'll go with a clear simple object.\n \n Since they said \"giving the capital of France\", I'll provide a JSON object that contains this information clearly.\n \n Format: Just the raw JSON, no markdown code blocks, no extra text.\n \n Example:\n {\"capital\":\"Paris\"}\n \n or\n {\"country\":\"France\",\"capital\":\"Paris\"}\n \n I'll use the second one as it's more explicit about what the capital belongs to, but the first one is also valid since the user asked specifically about France. Actually, looking at the prompt again, it just says \"giving the capital of France\" so either works. I'll provide a clear object.\n \n Actually, to be safe and explicit:\n {\"capital\":\"Paris\"}\n \n Or perhaps:\n {\"name\":\"Paris\",\"country\":\"France\",\"is_capital\":true}\n \n But the simplest is best. I'll go with:\n {\"capital\":\"Paris\"}\n \n Wait, should I include the country name in the key or value? The user asked for the capital of France, so maybe:\n {\"France\":\"Paris\"}\n \n This is also valid JSON and directly answers the question.\n \n I'll go with:\n {\"capital\":\"Paris\"}\n \n But to be thorough and avoid ambiguity:\n {\"country\":\"France\",\"capital\":\"Paris\"}\n \n This is probably the safest bet as it's self-documenting.\n \n However, the user might want just the fact stated. Let me reconsider the exact wording: \"giving the capital of France\"\n \n So the JSON should convey that Paris is the capital of France.\n \n Options:\n 1. {\"capital\":\"Paris\"}\n 2. {\"France\":\"Paris\"}\n 3. {\"country\":\"France\",\"capital\":\"Paris\"}\n 4. {\"capital_of_France\":\"Paris\"}\n \n Option 3 is the most standard and readable. Option 1 is ambiguous (capital of what?). Option 2 treats France as the key which is okay but less conventional. Option 4 is explicit but uses underscores which is fine.\n \n I'll go with option 3: {\"country\":\"France\",\"capital\":\"Paris\"}\n \n Actually, looking at similar requests, usually a simple key-value is expected. But option 3 is clearest.\n \n Final check: The user wants ONLY a JSON object, no prose, no markdown. So no ```json and no ```. Just the raw JSON string.\n \n Final output: {\"country\":\"France\",\"capital\":\"Paris\"}"},"done":true,"done_reason":"stop","total_duration":3650171269,"prompt_eval_count":27,"eval_count":600}

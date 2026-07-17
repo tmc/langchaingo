@@ -3,6 +3,7 @@ package ollama
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
@@ -225,6 +226,46 @@ func TestWithFormat(t *testing.T) {
 	assert.NotEmpty(t, result)
 }
 
+func TestStructuredOutput(t *testing.T) {
+	ctx := t.Context()
+
+	// This integration test needs a recorded trace (or a live Ollama server with
+	// HTTPRR_RECORD=.). Skip cleanly when neither is available.
+	if _, err := os.Stat("testdata/TestStructuredOutput.httprr"); err != nil && os.Getenv("HTTPRR_RECORD") == "" {
+		t.Skip("no recording; run against a local Ollama server with HTTPRR_RECORD=. to record")
+	}
+
+	llm := newTestClient(t)
+
+	schema := json.RawMessage(`{
+		"type": "object",
+		"properties": {
+			"country": {"type": "string"},
+			"capital": {"type": "string"}
+		},
+		"required": ["country", "capital"]
+	}`)
+
+	content := []llms.MessageContent{{
+		Role:  llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{llms.TextContent{Text: "What is the capital of France?"}},
+	}}
+
+	resp, err := llm.GenerateContent(ctx, content,
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}))
+	require.NoError(t, err)
+	require.NotEmpty(t, resp.Choices)
+
+	// The structured-output contract guarantees the content parses and matches.
+	var out struct {
+		Country string `json:"country"`
+		Capital string `json:"capital"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out),
+		"structured output must be valid JSON")
+	assert.Contains(t, strings.ToLower(out.Capital), "paris")
+}
+
 func TestWithStreaming(t *testing.T) {
 	ctx := t.Context()
 
@@ -405,4 +446,110 @@ func TestWithPullTimeout(t *testing.T) {
 	if !strings.Contains(err.Error(), "deadline exceeded") {
 		t.Fatalf("Expected timeout error, got: %v", err)
 	}
+}
+
+const ollamaSOSchema = `{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"]}`
+
+func newUnitLLM(t *testing.T) *LLM {
+	t.Helper()
+	// New builds the client without contacting the server, so this is offline.
+	llm, err := New(WithModel("gemma3:1b"))
+	require.NoError(t, err)
+	return llm
+}
+
+func applyOpts(callOpts ...llms.CallOption) llms.CallOptions {
+	var o llms.CallOptions
+	for _, opt := range callOpts {
+		opt(&o)
+	}
+	return o
+}
+
+func TestResolveFormat(t *testing.T) {
+	t.Parallel()
+
+	t.Run("default has no schema format", func(t *testing.T) {
+		t.Parallel()
+		llm := newUnitLLM(t)
+		got, err := llm.resolveFormat(applyOpts())
+		require.NoError(t, err)
+		assert.Equal(t, `""`, string(got))
+	})
+
+	t.Run("JSONMode is the legacy json string", func(t *testing.T) {
+		t.Parallel()
+		llm := newUnitLLM(t)
+		got, err := llm.resolveFormat(applyOpts(llms.WithJSONMode()))
+		require.NoError(t, err)
+		assert.Equal(t, `"json"`, string(got))
+	})
+
+	t.Run("structured output sends the raw schema", func(t *testing.T) {
+		t.Parallel()
+		llm := newUnitLLM(t)
+		got, err := llm.resolveFormat(applyOpts(
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(ollamaSOSchema)}),
+		))
+		require.NoError(t, err)
+		// The schema goes on the wire verbatim as a JSON object, not a string.
+		assert.JSONEq(t, ollamaSOSchema, string(got))
+	})
+
+	t.Run("invalid structured config errors", func(t *testing.T) {
+		t.Parallel()
+		llm := newUnitLLM(t)
+		// StructuredOutput set without JSONMode (manual assembly) is a config error.
+		_, err := llm.resolveFormat(llms.CallOptions{
+			StructuredOutput: &llms.StructuredOutputConfig{Schema: json.RawMessage(ollamaSOSchema)},
+		})
+		require.True(t, errors.Is(err, llms.ErrStructuredOutputConfig), "got %v", err)
+	})
+}
+
+func TestCreateChatRequest_Format(t *testing.T) {
+	t.Parallel()
+	llm := newUnitLLM(t)
+
+	req, err := llm.createChatRequest("gemma3:1b", nil,
+		applyOpts(llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(ollamaSOSchema)})))
+	require.NoError(t, err)
+	assert.JSONEq(t, ollamaSOSchema, string(req.Format))
+}
+
+func TestValidateStructuredOutput(t *testing.T) {
+	t.Parallel()
+	llm := newUnitLLM(t)
+	opts := applyOpts(llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(ollamaSOSchema)}))
+
+	mk := func(content, reason string) *llms.ContentResponse {
+		return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: content, StopReason: reason}}}
+	}
+
+	t.Run("valid stop passes", func(t *testing.T) {
+		t.Parallel()
+		require.NoError(t, llm.validateStructuredOutput(opts, mk(`{"answer":"42"}`, "stop")))
+	})
+
+	t.Run("empty reason treated as final", func(t *testing.T) {
+		t.Parallel()
+		require.NoError(t, llm.validateStructuredOutput(opts, mk(`{"answer":"42"}`, "")))
+	})
+
+	t.Run("invalid stop fails with typed error", func(t *testing.T) {
+		t.Parallel()
+		err := llm.validateStructuredOutput(opts, mk(`{"answer":42}`, "stop"))
+		var ve *llms.ErrStructuredOutputValidation
+		require.True(t, errors.As(err, &ve), "got %v", err)
+	})
+
+	t.Run("truncated length is not validated", func(t *testing.T) {
+		t.Parallel()
+		require.NoError(t, llm.validateStructuredOutput(opts, mk(`{"answer":`, "length")))
+	})
+
+	t.Run("no schema is a no-op", func(t *testing.T) {
+		t.Parallel()
+		require.NoError(t, llm.validateStructuredOutput(applyOpts(), mk(`not json`, "stop")))
+	})
 }

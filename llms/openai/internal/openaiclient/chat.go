@@ -185,9 +185,40 @@ type ResponseFormatJSONSchemaProperty struct {
 }
 
 type ResponseFormatJSONSchema struct {
-	Name   string                            `json:"name"`
-	Strict bool                              `json:"strict"`
-	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Strict      bool   `json:"strict"`
+	// Schema is the typed provider-specific builder; its type is unchanged for
+	// source compatibility (callers may read Schema.Type etc).
+	Schema *ResponseFormatJSONSchemaProperty `json:"-"`
+	// SchemaRaw carries a schema verbatim for the general WithStructuredOutput
+	// path, so an arbitrary JSON Schema construct is not lost. When set it takes
+	// precedence over Schema on the wire. Kept separate rather than widening
+	// Schema's type, which would break readers of the exported alias.
+	SchemaRaw json.RawMessage `json:"-"`
+}
+
+// MarshalJSON emits the JSON Schema under "schema" from SchemaRaw when present,
+// otherwise from the typed Schema, so both the provider-specific builder and the
+// general raw-schema path produce the same wire shape.
+func (r ResponseFormatJSONSchema) MarshalJSON() ([]byte, error) {
+	out := struct {
+		Name        string          `json:"name"`
+		Description string          `json:"description,omitempty"`
+		Strict      bool            `json:"strict"`
+		Schema      json.RawMessage `json:"schema"`
+	}{Name: r.Name, Description: r.Description, Strict: r.Strict}
+	switch {
+	case r.SchemaRaw != nil:
+		out.Schema = r.SchemaRaw
+	case r.Schema != nil:
+		b, err := json.Marshal(r.Schema)
+		if err != nil {
+			return nil, err
+		}
+		out.Schema = b
+	}
+	return json.Marshal(out)
 }
 
 // ResponseFormat is the format of the response.
@@ -230,6 +261,10 @@ type ChatMessage struct { //nolint:musttag
 	// This field serves as a fallback for ReasoningContent. If ReasoningContent is empty,
 	// Reasoning may contain the assistant's reasoning or explanation.
 	Reasoning string `json:"reasoning,omitempty"`
+
+	// Refusal is set on a response message when the model declines to answer
+	// (Structured Outputs). It must not be validated as final JSON.
+	Refusal string `json:"refusal,omitempty"`
 }
 
 func (m ChatMessage) MarshalJSON() ([]byte, error) {
@@ -258,6 +293,9 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 			// Reasoning content result fields
 			ReasoningContent string `json:"reasoning_content,omitempty"`
 			Reasoning        string `json:"reasoning,omitempty"`
+
+			// Refusal is response-only; never sent on a request.
+			Refusal string `json:"-"`
 		}(m)
 		if msg.ReasoningContent == "" && msg.Reasoning != "" {
 			msg.ReasoningContent = msg.Reasoning
@@ -280,6 +318,9 @@ func (m ChatMessage) MarshalJSON() ([]byte, error) {
 		// Reasoning content result fields
 		ReasoningContent string `json:"reasoning_content,omitempty"`
 		Reasoning        string `json:"reasoning,omitempty"`
+
+		// Refusal is response-only; never sent on a request.
+		Refusal string `json:"-"`
 	}(m)
 	if msg.ReasoningContent == "" && msg.Reasoning != "" {
 		msg.ReasoningContent = msg.Reasoning
@@ -312,6 +353,9 @@ func (m *ChatMessage) UnmarshalJSON(data []byte) error {
 		// Reasoning content result fields
 		ReasoningContent string `json:"reasoning_content,omitempty"`
 		Reasoning        string `json:"reasoning,omitempty"`
+
+		// Refusal is populated when the model declines under Structured Outputs.
+		Refusal string `json:"refusal,omitempty"`
 	}{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -439,6 +483,9 @@ type StreamedChatResponseChunkDelta struct {
 	ReasoningContent string `json:"reasoning_content,omitempty"`
 	// Fallback field for reasoning content (it depends on the model and the provider)
 	Reasoning string `json:"reasoning,omitempty"`
+	// Refusal streams in when the model declines under Structured Outputs; it must
+	// be accumulated and surfaced separately from Content, never validated as JSON.
+	Refusal string `json:"refusal,omitempty"`
 }
 
 // StreamedChatResponseChunk is a chunk from the stream.
@@ -729,6 +776,7 @@ func combineStreamingChatResponse(
 			content, reasoningContent := getChunkContent(choice, splitter)
 			responseChoice.Message.Content += content
 			responseChoice.Message.ReasoningContent += reasoningContent
+			responseChoice.Message.Refusal += choice.Delta.Refusal
 
 			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
 			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
@@ -813,8 +861,9 @@ func updateToolCall(message *ChatMessage, delta *StreamedToolCall, nameCache map
 
 	// If index is not set, update the last tool call by rules
 	if delta.Index == nil {
-		// It's the first delta chunk, have to append a new tool call
-		if delta.ID != "" && delta.Type != "" && delta.Function.Name != "" {
+		// An identifying chunk (ID + name) starts a new tool call. Type is optional
+		// since some providers omit it; requiring it would drop the whole call.
+		if delta.ID != "" && delta.Function.Name != "" {
 			message.ToolCalls = append(message.ToolCalls, ToolCall{})
 		}
 		// Get the index of the last tool call
@@ -829,33 +878,37 @@ func updateToolCall(message *ChatMessage, delta *StreamedToolCall, nameCache map
 		}
 	}
 
+	// A leading non-identifying chunk (no index, no ID/name) targets index -1 with
+	// no tool call to attach to; drop it rather than panic on ToolCalls[-1].
+	if *delta.Index < 0 {
+		return
+	}
+
 	// Get current tool call which is being updated
 	toolCall := &message.ToolCalls[*delta.Index]
 
-	// If it is the first delta chunk, set the tool call fields to the current tool call
-	if delta.ID != "" && delta.Type != "" && delta.Function.Name != "" {
+	switch {
+	case delta.ID != "" && delta.Function.Name != "":
+		// Identifying chunk: set fields (Type optional) and start arguments.
 		toolCall.ID = delta.ID
-		toolCall.Type = delta.Type
+		if delta.Type != "" {
+			toolCall.Type = delta.Type
+		}
 		toolCall.Function.Name = delta.Function.Name
 		toolCall.Function.Arguments = delta.Function.Arguments
-
 		// Cache the tool call name by ID for subsequent chunks
 		nameCache[delta.ID] = delta.Function.Name
-	}
-
-	// For next delta chunks, append arguments to the current tool call
-	if delta.ID == "" {
-		// Standard case: no ID in subsequent chunks (most providers)
+	case delta.ID == "":
+		// Standard continuation: no ID in subsequent chunks (most providers). Append
+		// arguments and complete the fields from the stored tool call.
 		toolCall.Function.Arguments += delta.Function.Arguments
-
-		// Complete the tool call fields with stored values from the current tool call
 		delta.Function.Name = toolCall.Function.Name
 		delta.ID = toolCall.ID
 		delta.Type = toolCall.Type
-	} else if delta.Function.Name == "" {
+	default:
 		// ID present but name missing (some providers omit the name on subsequent
-		// chunks). Append arguments regardless, as with the no-ID case, so the
-		// bytes are never dropped; restore the name from cache when we have it.
+		// chunks). Append arguments regardless so the bytes are never dropped;
+		// restore the name from cache when we have it.
 		toolCall.Function.Arguments += delta.Function.Arguments
 		delta.Type = toolCall.Type
 		if cachedName, ok := nameCache[delta.ID]; ok {

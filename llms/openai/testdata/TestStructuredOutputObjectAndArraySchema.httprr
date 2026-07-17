@@ -1,27 +1,28 @@
 httprr trace v1
-722 1849
+635 1776
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
-Content-Length: 520
+Content-Length: 433
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a student taking a math exam."},{"role":"user","content":"Solve 2 + 2"}],"response_format":{"type":"json_schema","json_schema":{"name":"math_schema","strict":true,"schema":{"type":"object","properties":{"final_answer":{"type":"string","additionalProperties":false},"steps":{"type":"array","items":{"type":"string","additionalProperties":false},"additionalProperties":false}},"additionalProperties":false,"required":["final_answer","steps"]}}}}HTTP/2.0 200 OK
-Content-Length: 1050
+{"model":"gpt-4o-2024-08-06","messages":[{"role":"system","content":"You are a student taking a math exam."},{"role":"user","content":"Solve 2 + 2"}],"response_format":{"type":"json_schema","json_schema":{"name":"math_schema","strict":true,"schema":{"type":"object","properties":{"steps":{"type":"array","items":{"type":"string"}},"final_answer":{"type":"string"}},"required":["steps","final_answer"],"additionalProperties":false}}}}HTTP/2.0 200 OK
+Content-Length: 937
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 20:01:54 GMT
+Date: Thu, 16 Jul 2026 22:54:36 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 2060
+Openai-Processing-Ms: 1123
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 2082
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 30000000
@@ -29,19 +30,19 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 29999985
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_f060947cd7f24edb9aea4053e416f3e7
+X-Request-Id: req_a5bf5ce755294fb9bd0250edd6110161
 
 {
-  "id": "chatcmpl-D0vAGJD24g9s6dEl8UyJ9bn45CyHY",
+  "id": "chatcmpl-E2PGNaTQ1ld0ZgUvgI1bwTCPTvhI3",
   "object": "chat.completion",
-  "created": 1769112112,
+  "created": 1784242475,
   "model": "gpt-4o-2024-08-06",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "{\"final_answer\":\"4\",\"steps\":[\"Identify the numbers involved: 2 and 2.\",\"Recognize that the operation is addition.\",\"Add the two numbers: 2 + 2.\",\"Calculate the sum: 2 + 2 = 4.\",\"Verify the result: The sum of 2 and 2 is indeed 4.\"]}",
+        "content": "{\"steps\":[\"Identify the numbers to add: 2 and 2\",\"Perform the addition: 2 + 2\",\"Calculate the sum: 4\"],\"final_answer\":\"4\"}",
         "refusal": null,
         "annotations": []
       },
@@ -51,8 +52,8 @@ X-Request-Id: req_f060947cd7f24edb9aea4053e416f3e7
   ],
   "usage": {
     "prompt_tokens": 66,
-    "completion_tokens": 70,
-    "total_tokens": 136,
+    "completion_tokens": 38,
+    "total_tokens": 104,
     "prompt_tokens_details": {
       "cached_tokens": 0,
       "audio_tokens": 0
@@ -65,5 +66,5 @@ X-Request-Id: req_f060947cd7f24edb9aea4053e416f3e7
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_deacdd5f6f"
+  "system_fingerprint": "fp_94cd41efba"
 }

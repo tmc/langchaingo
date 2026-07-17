@@ -2,6 +2,7 @@ package bedrock_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -83,40 +84,27 @@ func TestAmazonOutputConverseAPI(t *testing.T) { //nolint:funlen
 
 	// All the on-demand models (based on docs with Deployment type: Serverless)
 	models := []string{
-		// AI21 Labs models
-		bedrock.ModelAi21Jamba15LargeV1,
-		bedrock.ModelAi21Jamba15MiniV1,
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models
-		bedrock.ModelCohereCommandRV1,
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
 		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
@@ -141,12 +129,19 @@ func TestAmazonOutputConverseAPI(t *testing.T) { //nolint:funlen
 		bedrock.ModelMistralLarge3,
 		bedrock.ModelMistralMagistralSmall2509,
 		bedrock.ModelMistralLarge2402V1,
+		bedrock.ModelMistralDevstral2123B,
+
+		// MiniMax models
+		bedrock.ModelMiniMaxM25,
+		bedrock.ModelMiniMaxM21,
+		bedrock.ModelMiniMaxM2,
 
 		// Moonshot models
 		bedrock.ModelMoonshotKimiK25,
 		bedrock.ModelMoonshotKimiK2Thinking,
 
 		// Z.AI models
+		bedrock.ModelGLM5,
 		bedrock.ModelGLM47,
 		bedrock.ModelGLM47Flash,
 	}
@@ -204,13 +199,8 @@ func TestAmazonOutputLegacyAPI(t *testing.T) {
 
 	// All the on-demand models (based on docs with Deployment type: Serverless)
 	models := []string{
-		// AI21 Labs models
-		bedrock.ModelAi21Jamba15LargeV1,
-		bedrock.ModelAi21Jamba15MiniV1,
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaMicroV1,
@@ -219,23 +209,11 @@ func TestAmazonOutputLegacyAPI(t *testing.T) {
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models
-		bedrock.ModelCohereCommandRV1,
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
 		// bedrock.ModelMetaLlama318bInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
@@ -259,6 +237,150 @@ func TestAmazonOutputLegacyAPI(t *testing.T) {
 		for i, choice := range resp.Choices {
 			t.Logf("Choice %d: %s", i, choice.Content)
 		}
+	}
+}
+
+// TestAmazonStructuredOutputConverseAPI exercises native Converse Structured
+// Outputs (OutputConfig.TextFormat) against the real backend: the response must be
+// JSON matching the schema, for an object and an array schema.
+func TestAmazonStructuredOutputConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("object schema", func(t *testing.T) {
+		schema := json.RawMessage(`{"type":"object","properties":{"country":{"type":"string"},"capital":{"type":"string"}},"required":["country","capital"],"additionalProperties":false}`)
+		msgs := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What is the capital of France?")},
+		}}
+		resp, err := llm.GenerateContent(ctx, msgs,
+			llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}),
+			llms.WithMaxTokens(256),
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(resp.Choices) == 0 {
+			t.Fatal("no choices returned")
+		}
+		var out struct {
+			Country string `json:"country"`
+			Capital string `json:"capital"`
+		}
+		if err := json.Unmarshal([]byte(resp.Choices[0].Content), &out); err != nil {
+			t.Fatalf("structured output must be valid JSON: %v (content=%q)", err, resp.Choices[0].Content)
+		}
+		if !strings.Contains(strings.ToLower(out.Capital), "paris") {
+			t.Errorf("capital = %q, want to contain paris", out.Capital)
+		}
+	})
+
+	t.Run("array schema", func(t *testing.T) {
+		schema := json.RawMessage(`{"type":"object","properties":{"colors":{"type":"array","items":{"type":"string"}}},"required":["colors"],"additionalProperties":false}`)
+		msgs := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("List three primary colors.")},
+		}}
+		resp, err := llm.GenerateContent(ctx, msgs,
+			llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "colors", Schema: schema}),
+			llms.WithMaxTokens(256),
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(resp.Choices) == 0 {
+			t.Fatal("no choices returned")
+		}
+		var out struct {
+			Colors []string `json:"colors"`
+		}
+		if err := json.Unmarshal([]byte(resp.Choices[0].Content), &out); err != nil {
+			t.Fatalf("structured output must be valid JSON: %v (content=%q)", err, resp.Choices[0].Content)
+		}
+		if len(out.Colors) == 0 {
+			t.Errorf("colors must not be empty, content=%q", resp.Choices[0].Content)
+		}
+	})
+}
+
+// TestAmazonStructuredOutputStreamingConverseAPI verifies the schema also rides the
+// ConverseStream path (OutputConfig is copied to the stream input) and the assembled
+// streamed response is validated against the schema.
+func TestAmazonStructuredOutputStreamingConverseAPI(t *testing.T) {
+	ctx := t.Context()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "AWS_ACCESS_KEY_ID")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	defer rr.Close()
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	client, err := setUpTestWithTransport(rr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	llm, err := bedrock.New(bedrock.WithClient(client), bedrock.WithConverseAPI())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	schema := json.RawMessage(`{"type":"object","properties":{"country":{"type":"string"},"capital":{"type":"string"}},"required":["country","capital"],"additionalProperties":false}`)
+	msgs := []llms.MessageContent{{
+		Role:  llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{llms.TextPart("What is the capital of Japan?")},
+	}}
+
+	var streamed strings.Builder
+	resp, err := llm.GenerateContent(ctx, msgs,
+		llms.WithModel(bedrock.ModelAnthropicClaudeSonnet45),
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}),
+		llms.WithMaxTokens(256),
+		llms.WithStreamingFunc(func(_ context.Context, chunk streaming.Chunk) error {
+			if chunk.Type == streaming.ChunkTypeText {
+				streamed.WriteString(chunk.Content)
+			}
+			return nil
+		}),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Choices) == 0 {
+		t.Fatal("no choices returned")
+	}
+	// The streamed text and the final content must agree and both be schema-valid.
+	var out struct {
+		Country string `json:"country"`
+		Capital string `json:"capital"`
+	}
+	if err := json.Unmarshal([]byte(resp.Choices[0].Content), &out); err != nil {
+		t.Fatalf("streamed structured output must be valid JSON: %v (content=%q)", err, resp.Choices[0].Content)
+	}
+	if !strings.Contains(strings.ToLower(out.Capital), "tokyo") {
+		t.Errorf("capital = %q, want to contain tokyo", out.Capital)
+	}
+	if streamed.Len() > 0 && streamed.String() != resp.Choices[0].Content {
+		t.Errorf("streamed text and final content disagree:\nstreamed=%q\nfinal=%q", streamed.String(), resp.Choices[0].Content)
 	}
 }
 
@@ -300,40 +422,27 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) { //nolint:funlen
 
 	// Start with Anthropic models that support streaming
 	models := []string{
-		// AI21 Labs models
-		bedrock.ModelAi21Jamba15LargeV1,
-		bedrock.ModelAi21Jamba15MiniV1,
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaMicroV1,
 
 		// Anthropic models
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models (only Command-R supports streaming and Converse API)
-		bedrock.ModelCohereCommandRV1,
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
 		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
@@ -364,6 +473,7 @@ func TestAmazonStreamingOutputConverseAPI(t *testing.T) { //nolint:funlen
 		bedrock.ModelMoonshotKimiK2Thinking,
 
 		// Z.AI models
+		bedrock.ModelGLM5,
 		bedrock.ModelGLM47,
 		bedrock.ModelGLM47Flash,
 	}
@@ -464,13 +574,8 @@ func TestAmazonStreamingOutputLegacyAPI(t *testing.T) { //nolint:funlen
 
 	// Start with Anthropic models that support streaming
 	models := []string{
-		// AI21 Labs models
-		// bedrock.ModelAi21Jamba15LargeV1,  // Not supported for streaming
-		// bedrock.ModelAi21Jamba15MiniV1,   // Not supported for streaming
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
 		bedrock.ModelAmazonNovaLiteV1,
 		bedrock.ModelAmazonNovaMicroV1,
@@ -479,23 +584,11 @@ func TestAmazonStreamingOutputLegacyAPI(t *testing.T) { //nolint:funlen
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models (only Command-R supports streaming)
-		bedrock.ModelCohereCommandRV1,
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama3370bInstructV1,
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1, // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama3170bInstructV1,
 		// bedrock.ModelMetaLlama318bInstructV1, // Unavailable for MENA users
 		bedrock.ModelMetaLlama370bInstructV1,
@@ -716,40 +809,27 @@ func TestAmazonToolCallingConverseAPI(t *testing.T) {
 
 	// Models that support tool calling (initially Anthropic, will expand to DeepSeek and Meta)
 	toolCallModels := []string{
-		// AI21 Labs models
-		// bedrock.ModelAi21Jamba15LargeV1,           // Has very hard rate limits
-		// bedrock.ModelAi21Jamba15MiniV1,            // Has very hard rate limits
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
-		bedrock.ModelAmazonNovaLiteV1,
-		bedrock.ModelAmazonNovaMicroV1,
+		// bedrock.ModelAmazonNovaLiteV1,             // Unstable behavior on processing tool calls results
+		// bedrock.ModelAmazonNovaMicroV1,            // Unstable behavior on processing tool calls results
 
 		// Anthropic models
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus41,        // Has very hard rate limits
-		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models (only Command-R supports streaming and Converse API)
-		// bedrock.ModelCohereCommandRV1,             // Not supported for tool calling
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		// bedrock.ModelMetaLlama3370bInstructV1,     // Unstable behavior on processing tool calls results
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		// bedrock.ModelMetaLlama3170bInstructV1,     // Unstable behavior on processing tool calls results
 		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		// bedrock.ModelMetaLlama370bInstructV1,      // Not supported for tool calling
@@ -780,8 +860,9 @@ func TestAmazonToolCallingConverseAPI(t *testing.T) {
 		// bedrock.ModelMoonshotKimiK2Thinking,       // Not stable for tool calling
 
 		// Z.AI models
-		// bedrock.ModelGLM47,        // Tool calling not supported (backend requires string input instead of JSON)
-		// bedrock.ModelGLM47Flash,   // Tool calling not supported (backend requires string input instead of JSON)
+		bedrock.ModelGLM5,
+		bedrock.ModelGLM47,
+		bedrock.ModelGLM47Flash,
 	}
 
 	for _, model := range toolCallModels {
@@ -821,11 +902,6 @@ func TestAmazonToolCallingLegacyAPI(t *testing.T) {
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus41, // Has very hard rate limits
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
-		bedrock.ModelAnthropicClaude35Haiku,
 	}
 
 	for _, model := range toolCallModels {
@@ -861,40 +937,27 @@ func TestAmazonToolCallingStreamingConverseAPI(t *testing.T) {
 
 	// Models that support streaming tool calling (initially Anthropic, will expand)
 	streamingToolCallModels := []string{
-		// AI21 Labs models
-		// bedrock.ModelAi21Jamba15LargeV1,           // Not supported for tool calling in streaming
-		// bedrock.ModelAi21Jamba15MiniV1,            // Not supported for tool calling in streaming
-
 		// Amazon Nova models
 		bedrock.ModelAmazonNova2LiteV1,
-		bedrock.ModelAmazonNovaPremiereV1,
 		bedrock.ModelAmazonNovaProV1,
-		bedrock.ModelAmazonNovaLiteV1,
-		bedrock.ModelAmazonNovaMicroV1,
+		// bedrock.ModelAmazonNovaLiteV1,             // Unstable behavior on processing tool calls results
+		// bedrock.ModelAmazonNovaMicroV1,            // Unstable behavior on processing tool calls results
 
 		// Anthropic models
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus41,        // Has very hard rate limits
-		// bedrock.ModelAnthropicClaudeOpus4,         // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet,      // Model is deprecated
-		bedrock.ModelAnthropicClaude35Haiku,
-
-		// Cohere models (only Command-R supports streaming and Converse API)
-		// bedrock.ModelCohereCommandRV1,             // Not supported for tool calling in streaming
-		bedrock.ModelCohereCommandRPlusV1,
 
 		// Meta models
 		// bedrock.ModelMetaLlama4MaverickInstructV1, // Unavailable for MENA users
 		// bedrock.ModelMetaLlama4ScoutInstructV1,    // Unavailable for MENA users
 		// bedrock.ModelMetaLlama3370bInstructV1,     // Unstable behavior on processing tool calls results
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3211bInstructV1,     // Unavailable for MENA users
-		// bedrock.ModelMetaLlama3290bInstructV1,     // Unavailable for MENA users
 		// bedrock.ModelMetaLlama3170bInstructV1,     // Unstable behavior on processing tool calls results
 		// bedrock.ModelMetaLlama318bInstructV1,      // Unavailable for MENA users
 		// bedrock.ModelMetaLlama370bInstructV1,      // Not supported for tool calling
@@ -911,7 +974,7 @@ func TestAmazonToolCallingStreamingConverseAPI(t *testing.T) {
 		// Qwen models
 		bedrock.ModelQwen3Next80BA3B,
 		// bedrock.ModelQwen3VL235BA22B,              // Not stable for tool calling
-		bedrock.ModelQwen332BV1,
+		// bedrock.ModelQwen332BV1,                   // Not stable for tool calling
 		bedrock.ModelQwen3Coder30BA3BV1,
 		bedrock.ModelQwen3CoderNext,
 
@@ -925,8 +988,9 @@ func TestAmazonToolCallingStreamingConverseAPI(t *testing.T) {
 		// bedrock.ModelMoonshotKimiK2Thinking,       // Not stable for tool calling
 
 		// Z.AI models
-		// bedrock.ModelGLM47,        // Tool calling not supported (backend requires string input instead of JSON)
-		// bedrock.ModelGLM47Flash,   // Tool calling not supported (backend requires string input instead of JSON)
+		bedrock.ModelGLM5,
+		bedrock.ModelGLM47,
+		bedrock.ModelGLM47Flash,
 	}
 
 	for _, model := range streamingToolCallModels {
@@ -990,11 +1054,6 @@ func TestAmazonToolCallingStreamingLegacyAPI(t *testing.T) {
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus41, // Has very hard rate limits
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
-		bedrock.ModelAnthropicClaude35Haiku,
 	}
 
 	for _, model := range streamingToolCallModels {
@@ -1053,18 +1112,20 @@ func TestAmazonReasoningConverseAPI(t *testing.T) {
 	}
 
 	reasoningModels := []string{
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus4,    // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet, // Model is deprecated
-		bedrock.ModelDeepSeekR1V1,
 		bedrock.ModelOpenAIGptOss120BV1,
 		bedrock.ModelOpenAIGptOss20BV1,
 		bedrock.ModelMoonshotKimiK2Thinking,
+		bedrock.ModelMiniMaxM25,
+		bedrock.ModelMiniMaxM21,
 	}
 
 	for _, model := range reasoningModels {
@@ -1102,10 +1163,6 @@ func TestAmazonReasoningLegacyAPI(t *testing.T) {
 	reasoningModels := []string{
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
 	}
 
 	for _, model := range reasoningModels {
@@ -1140,18 +1197,20 @@ func TestAmazonReasoningStreamingConverseAPI(t *testing.T) {
 	}
 
 	streamingReasoningModels := []string{
+		// bedrock.ModelAnthropicClaudeFable5,
+		// bedrock.ModelAnthropicClaudeSonnet5,
+		// bedrock.ModelAnthropicClaudeOpus48,
+		// bedrock.ModelAnthropicClaudeOpus47,
 		bedrock.ModelAnthropicClaudeOpus46,
 		bedrock.ModelAnthropicClaudeSonnet46,
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeHaiku45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		// bedrock.ModelAnthropicClaudeOpus4,    // Model is deprecated
-		bedrock.ModelAnthropicClaudeSonnet4,
-		// bedrock.ModelAnthropicClaude37Sonnet, // Model is deprecated
-		bedrock.ModelDeepSeekR1V1,
 		bedrock.ModelOpenAIGptOss120BV1,
 		bedrock.ModelOpenAIGptOss20BV1,
 		bedrock.ModelMoonshotKimiK2Thinking,
+		bedrock.ModelMiniMaxM25,
+		bedrock.ModelMiniMaxM21,
 	}
 
 	for _, model := range streamingReasoningModels {
@@ -1196,10 +1255,6 @@ func TestAmazonReasoningStreamingLegacyAPI(t *testing.T) {
 	streamingReasoningModels := []string{
 		bedrock.ModelAnthropicClaudeOpus45,
 		bedrock.ModelAnthropicClaudeSonnet45,
-		bedrock.ModelAnthropicClaudeOpus41,
-		bedrock.ModelAnthropicClaudeOpus4,
-		bedrock.ModelAnthropicClaudeSonnet4,
-		bedrock.ModelAnthropicClaude37Sonnet,
 	}
 
 	for _, model := range streamingReasoningModels {

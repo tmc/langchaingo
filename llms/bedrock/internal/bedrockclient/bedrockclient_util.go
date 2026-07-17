@@ -1,8 +1,17 @@
 package bedrockclient
 
 import (
+	"encoding/json"
 	"reflect"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
+	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
 )
+
+const providerBedrock = "bedrock"
 
 // isSmithyValidObject validates that an object contains only simple types
 // or structs with proper document tags on all public fields
@@ -85,4 +94,83 @@ func isSimpleType(t reflect.Type) bool {
 	default:
 		return false
 	}
+}
+
+// applyConverseStructuredOutput sets the native Converse OutputConfig.TextFormat
+// from a per-call schema. Converse Structured Outputs is not Claude-only, so there
+// is no local model gate here — an unsupported model surfaces as the provider 4xx.
+// The AWS JsonSchemaDefinition.Schema field is a JSON string, so the raw schema is
+// passed as-is with no second encoding.
+func applyConverseStructuredOutput(input *ConverseInput, converseInput *bedrockruntime.ConverseInput) error {
+	so := input.StructuredOutput
+	if so == nil {
+		return nil
+	}
+	// Bedrock rejects an object schema that omits additionalProperties:false;
+	// surface that documented, locally-detectable requirement as a typed error.
+	if err := structuredoutput.RequireClosedObjects(so.Schema); err != nil {
+		return err
+	}
+	converseInput.OutputConfig = &types.OutputConfig{
+		TextFormat: &types.OutputFormat{
+			Type: types.OutputFormatTypeJsonSchema,
+			Structure: &types.OutputFormatStructureMemberJsonSchema{
+				Value: types.JsonSchemaDefinition{
+					Schema:      aws.String(string(so.Schema)),
+					Name:        ptrStringOrNil(so.Name),
+					Description: ptrStringOrNil(so.Description),
+				},
+			},
+		},
+	}
+	return nil
+}
+
+// applyAnthropicStructuredOutput folds a per-call schema into the legacy Anthropic
+// output_config.format, preserving any effort already set.
+func applyAnthropicStructuredOutput(input *anthropicTextGenerationInput, so *llms.StructuredOutputConfig) error {
+	if so == nil {
+		return nil
+	}
+	// Bedrock rejects an object schema that omits additionalProperties:false;
+	// surface that documented, locally-detectable requirement as a typed error.
+	if err := structuredoutput.RequireClosedObjects(so.Schema); err != nil {
+		return err
+	}
+	if input.OutputConfig == nil {
+		input.OutputConfig = &anthropicOutputConfig{}
+	}
+	input.OutputConfig.Format = &anthropicOutputFormat{
+		Type:   "json_schema",
+		Schema: json.RawMessage(so.Schema),
+	}
+	return nil
+}
+
+// validateConverseStructuredOutput validates the Converse response against a
+// per-call schema, using the shared normal-final matrix.
+func validateConverseStructuredOutput(input *ConverseInput, resp *llms.ContentResponse) error {
+	return validateStructuredResponse(input.StructuredOutput, input.ModelID, resp)
+}
+
+// validateStructuredResponse validates the final text of each normal-final turn
+// (end_turn / stop_sequence) against the original schema. tool_use, max_tokens,
+// guardrail_intervened, content_filtered and unknown reasons are intermediate or
+// aborted and are not validated as final JSON. Shared by the Converse and legacy
+// Anthropic paths, which use the same stop-reason vocabulary.
+func validateStructuredResponse(so *llms.StructuredOutputConfig, model string, resp *llms.ContentResponse) error {
+	if so == nil || resp == nil || len(resp.Choices) == 0 {
+		return nil
+	}
+	for i, choice := range resp.Choices {
+		switch choice.StopReason {
+		case string(types.StopReasonEndTurn), string(types.StopReasonStopSequence):
+		default:
+			continue
+		}
+		if err := structuredoutput.Validate(so.Schema, providerBedrock, model, i, choice.StopReason, choice.Content); err != nil {
+			return err
+		}
+	}
+	return nil
 }

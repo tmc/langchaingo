@@ -1,0 +1,96 @@
+package structuredoutput_test
+
+import (
+	"encoding/json"
+	"errors"
+	"testing"
+
+	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
+)
+
+func TestValidate(t *testing.T) {
+	t.Parallel()
+
+	objectSchema := json.RawMessage(`{
+		"type": "object",
+		"properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+		"required": ["name", "age"],
+		"additionalProperties": false
+	}`)
+
+	cases := []struct {
+		name    string
+		schema  json.RawMessage
+		text    string
+		wantErr bool
+	}{
+		{"valid object", objectSchema, `{"name":"a","age":3}`, false},
+		{"valid array", json.RawMessage(`{"type":"array","items":{"type":"number"}}`), `[1,2,3]`, false},
+		{"valid primitive", json.RawMessage(`{"type":"string"}`), `"hello"`, false},
+		{"syntactically invalid json", objectSchema, `{"name":`, true},
+		{"trailing text", objectSchema, `{"name":"a","age":3} trailing`, true},
+		{"second json value", objectSchema, `{"name":"a","age":3}{"x":1}`, true},
+		{"missing required", objectSchema, `{"name":"a"}`, true},
+		{"additional property", objectSchema, `{"name":"a","age":3,"extra":1}`, true},
+		{"wrong type", objectSchema, `{"name":"a","age":"three"}`, true},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			err := structuredoutput.Validate(tc.schema, "openai", "gpt-x", 0, "stop", tc.text)
+			if tc.wantErr != (err != nil) {
+				t.Fatalf("Validate error = %v, wantErr = %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidate_EnumIsCaseSensitive(t *testing.T) {
+	t.Parallel()
+	schema := json.RawMessage(`{"type":"object","properties":{"color":{"enum":["Red","Green"]}},"required":["color"],"additionalProperties":false}`)
+	if err := structuredoutput.Validate(schema, "anthropic", "claude", 0, "end_turn", `{"color":"red"}`); err == nil {
+		t.Error("case mismatch on enum must fail: schema enum is case-sensitive")
+	}
+	if err := structuredoutput.Validate(schema, "anthropic", "claude", 0, "end_turn", `{"color":"Red"}`); err != nil {
+		t.Errorf("exact enum case must pass: %v", err)
+	}
+}
+
+func TestValidate_Draft2020Ref(t *testing.T) {
+	t.Parallel()
+	// $defs + local $ref is a Draft 2020-12 construct the validator must support.
+	schema := json.RawMessage(`{
+		"type": "object",
+		"properties": {"a": {"$ref": "#/$defs/pos"}},
+		"required": ["a"],
+		"additionalProperties": false,
+		"$defs": {"pos": {"type": "integer", "minimum": 1}}
+	}`)
+	if err := structuredoutput.Validate(schema, "openai", "gpt-x", 0, "stop", `{"a":5}`); err != nil {
+		t.Errorf("valid $ref instance must pass: %v", err)
+	}
+	if err := structuredoutput.Validate(schema, "openai", "gpt-x", 0, "stop", `{"a":0}`); err == nil {
+		t.Error("instance violating referenced schema must fail")
+	}
+}
+
+func TestValidate_TypedError(t *testing.T) {
+	t.Parallel()
+	schema := json.RawMessage(`{"type":"object","properties":{"x":{"type":"integer"}},"required":["x"],"additionalProperties":false}`)
+	err := structuredoutput.Validate(schema, "bedrock", "claude-x", 2, "end_turn", `{"x":"no"}`)
+	if err == nil {
+		t.Fatal("expected validation error")
+	}
+	var ve *llms.ErrStructuredOutputValidation
+	if !errors.As(err, &ve) {
+		t.Fatalf("error must be *llms.ErrStructuredOutputValidation, got %T", err)
+	}
+	if ve.Provider != "bedrock" || ve.Model != "claude-x" || ve.Choice != 2 || ve.StopReason != "end_turn" {
+		t.Errorf("typed error lost context: %+v", ve)
+	}
+	if ve.Unwrap() == nil {
+		t.Error("typed error must retain an unwrap-able cause")
+	}
+}

@@ -447,6 +447,80 @@ func TestGoogleAIWithJSONMode(t *testing.T) {
 	assert.Contains(t, resp.Choices[0].Content, "]")
 }
 
+// TestGoogleAIStructuredOutput exercises schema-constrained output against the real
+// backend (httprr-recorded): the model returns ResponseJsonSchema-constrained JSON
+// matching the schema, for both an object and an array schema.
+func TestGoogleAIStructuredOutput(t *testing.T) {
+	t.Run("object schema is honored", func(t *testing.T) {
+		llm := newHTTPRRClient(t, WithDefaultModel("gemini-2.5-flash"))
+
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"country": {"type": "string"},
+				"capital": {"type": "string"}
+			},
+			"required": ["country", "capital"]
+		}`)
+		content := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What is the capital of France?")},
+		}}
+
+		resp, err := llm.GenerateContent(t.Context(), content,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}))
+		if err != nil {
+			if strings.Contains(err.Error(), "cached HTTP response not found") {
+				t.Skip("Recording missing. Hint: re-run with HTTPRR_RECORD=. to record")
+			}
+			require.NoError(t, err)
+		}
+		require.NotNil(t, resp)
+		require.NotEmpty(t, resp.Choices)
+
+		var out struct {
+			Country string `json:"country"`
+			Capital string `json:"capital"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out),
+			"structured output must be valid JSON")
+		assert.Contains(t, strings.ToLower(out.Capital), "paris")
+	})
+
+	t.Run("array schema is honored", func(t *testing.T) {
+		llm := newHTTPRRClient(t, WithDefaultModel("gemini-2.5-flash"))
+
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"colors": {"type": "array", "items": {"type": "string"}}
+			},
+			"required": ["colors"]
+		}`)
+		content := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("List three primary colors.")},
+		}}
+
+		resp, err := llm.GenerateContent(t.Context(), content,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "colors", Schema: schema}))
+		if err != nil {
+			if strings.Contains(err.Error(), "cached HTTP response not found") {
+				t.Skip("Recording missing. Hint: re-run with HTTPRR_RECORD=. to record")
+			}
+			require.NoError(t, err)
+		}
+		require.NotNil(t, resp)
+		require.NotEmpty(t, resp.Choices)
+
+		var out struct {
+			Colors []string `json:"colors"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out))
+		assert.NotEmpty(t, out.Colors)
+	})
+}
+
 func TestGoogleAIErrorHandling(t *testing.T) {
 	// Skip test if no credentials and recording is missing
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "GOOGLE_API_KEY")

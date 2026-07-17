@@ -1,6 +1,6 @@
 httprr trace v1
-782 1519
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+782 990
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 462
@@ -9,17 +9,18 @@ X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is 2 + 2?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 1140
+Content-Length: 579
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 23 Jan 2026 22:51:01 GMT
+Date: Tue, 14 Jul 2026 08:29:24 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=382
+Server-Timing: gfet4t7; dur=719
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -28,50 +29,28 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "2 + 2 = 4\n"
+            "text": "2 + 2 = 4"
           }
         ],
         "role": "model"
       },
       "finishReason": "STOP",
-      "safetyRatings": [
-        {
-          "category": "HARM_CATEGORY_HATE_SPEECH",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_HARASSMENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          "probability": "NEGLIGIBLE"
-        }
-      ],
-      "avgLogprobs": -0.00013045943342149258
+      "index": 0
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 8,
-    "candidatesTokenCount": 8,
-    "totalTokenCount": 16,
+    "promptTokenCount": 9,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 36,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 8
+        "tokenCount": 9
       }
     ],
-    "candidatesTokensDetails": [
-      {
-        "modality": "TEXT",
-        "tokenCount": 8
-      }
-    ]
+    "thoughtsTokenCount": 20,
+    "serviceTier": "standard"
   },
-  "modelVersion": "gemini-2.0-flash",
-  "responseId": "VftzacDXJdaPjMcP4uqRiQI"
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "ZPNVapyeG9a0nsEPw9KGmQ0"
 }

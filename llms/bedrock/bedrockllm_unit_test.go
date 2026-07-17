@@ -27,7 +27,7 @@ func TestNew(t *testing.T) {
 			name: "with custom model",
 			opts: []Option{
 				WithClient(&bedrockruntime.Client{}),
-				WithModel(ModelAnthropicClaude37Sonnet),
+				WithModel(ModelAnthropicClaudeSonnet45),
 			},
 		},
 		{
@@ -146,9 +146,9 @@ func TestProcessMessages(t *testing.T) {
 func TestOptions(t *testing.T) {
 	t.Run("WithModel", func(t *testing.T) {
 		opts := &options{}
-		WithModel(ModelAnthropicClaude35Haiku)(opts)
-		if opts.modelID != ModelAnthropicClaude35Haiku {
-			t.Errorf("WithModel() got %s, want %s", opts.modelID, ModelAnthropicClaude35Haiku)
+		WithModel(ModelAnthropicClaudeSonnet45)(opts)
+		if opts.modelID != ModelAnthropicClaudeSonnet45 {
+			t.Errorf("WithModel() got %s, want %s", opts.modelID, ModelAnthropicClaudeSonnet45)
 		}
 	})
 
@@ -190,10 +190,7 @@ func TestOptions(t *testing.T) {
 func TestModelConstants(t *testing.T) {
 	// Test that some key model constants are defined
 	models := []string{
-		ModelAi21Jamba15LargeV1,
-		ModelAi21Jamba15MiniV1,
 		ModelAmazonNova2LiteV1,
-		ModelAmazonNovaPremiereV1,
 		ModelAmazonNovaProV1,
 		ModelAmazonNovaLiteV1,
 		ModelAmazonNovaMicroV1,
@@ -202,18 +199,9 @@ func TestModelConstants(t *testing.T) {
 		ModelAnthropicClaudeOpus45,
 		ModelAnthropicClaudeHaiku45,
 		ModelAnthropicClaudeSonnet45,
-		ModelAnthropicClaudeOpus41,
-		ModelAnthropicClaudeOpus4,
-		ModelAnthropicClaudeSonnet4,
-		ModelAnthropicClaude37Sonnet,
-		ModelAnthropicClaude35Haiku,
-		ModelCohereCommandRV1,
-		ModelCohereCommandRPlusV1,
 		ModelMetaLlama4MaverickInstructV1,
 		ModelMetaLlama4ScoutInstructV1,
 		ModelMetaLlama3370bInstructV1,
-		ModelMetaLlama3211bInstructV1,
-		ModelMetaLlama3290bInstructV1,
 		ModelMetaLlama3170bInstructV1,
 		ModelMetaLlama318bInstructV1,
 		ModelMetaLlama370bInstructV1,
@@ -292,31 +280,6 @@ func TestSupportsCaching(t *testing.T) {
 			name:     "Claude Sonnet 4.5 supports caching",
 			modelID:  ModelAnthropicClaudeSonnet45,
 			expected: true,
-		},
-		{
-			name:     "Claude Opus 4.1 supports caching",
-			modelID:  ModelAnthropicClaudeOpus41,
-			expected: true,
-		},
-		{
-			name:     "Claude Opus 4 supports caching",
-			modelID:  ModelAnthropicClaudeOpus4,
-			expected: true,
-		},
-		{
-			name:     "Claude Sonnet 4 supports caching",
-			modelID:  ModelAnthropicClaudeSonnet4,
-			expected: true,
-		},
-		{
-			name:     "Claude 3.7 Sonnet does not support caching",
-			modelID:  ModelAnthropicClaude37Sonnet,
-			expected: false,
-		},
-		{
-			name:     "Claude 3.5 Haiku does not support caching",
-			modelID:  ModelAnthropicClaude35Haiku,
-			expected: false,
 		},
 		{
 			name:     "Amazon Nova does not support caching",

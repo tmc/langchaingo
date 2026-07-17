@@ -91,6 +91,11 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
+	// Validate structured-output configuration once for both API paths.
+	if err := opts.ValidateStructuredOutput(); err != nil {
+		return nil, err
+	}
+
 	// Use Converse API if enabled
 	if l.useConverseAPI {
 		return l.generateContentWithConverseAPI(ctx, messages, opts)
@@ -117,12 +122,13 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 
 	// Build Converse input
 	input := &bedrockclient.ConverseInput{
-		ModelID:         opts.GetModel(),
-		Messages:        m,
-		Tools:           opts.Tools,
-		StreamingFunc:   opts.StreamingFunc,
-		ReasoningConfig: opts.Reasoning,
-		EnableCaching:   enableCaching,
+		ModelID:          opts.GetModel(),
+		Messages:         m,
+		Tools:            opts.Tools,
+		StreamingFunc:    opts.StreamingFunc,
+		ReasoningConfig:  opts.Reasoning,
+		EnableCaching:    enableCaching,
+		StructuredOutput: opts.StructuredOutput,
 	}
 
 	// Set inference parameters

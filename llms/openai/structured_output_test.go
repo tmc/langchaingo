@@ -2,7 +2,6 @@ package openai
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
@@ -16,28 +15,14 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 	t.Parallel()
 
 	ctx := t.Context()
-	responseFormat := &ResponseFormat{
-		Type: "json_schema",
-		JSONSchema: &ResponseFormatJSONSchema{
-			Name:   "math_schema",
-			Strict: true,
-			Schema: &ResponseFormatJSONSchemaProperty{
-				Type: "object",
-				Properties: map[string]*ResponseFormatJSONSchemaProperty{
-					"final_answer": {
-						Type: "string",
-					},
-				},
-				AdditionalProperties: false,
-				Required:             []string{"final_answer"},
-			},
-		},
-	}
-	llm := newTestOpenAIClient(
-		t,
-		WithModel("gpt-4o-2024-08-06"),
-		WithResponseFormat(responseFormat),
-	)
+	llm := newTestOpenAIClient(t, WithModel("gpt-4o-2024-08-06"))
+
+	schema := json.RawMessage(`{
+		"type": "object",
+		"properties": {"final_answer": {"type": "string"}},
+		"required": ["final_answer"],
+		"additionalProperties": false
+	}`)
 
 	content := []llms.MessageContent{
 		{
@@ -50,46 +35,34 @@ func TestStructuredOutputObjectSchema(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(ctx, content)
+	resp, err := llm.GenerateContent(ctx, content,
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "math_schema", Schema: schema}))
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, resp.Choices)
-	c1 := resp.Choices[0]
-	assert.Regexp(t, "\"final_answer\":", strings.ToLower(c1.Content))
+	require.NotEmpty(t, resp.Choices)
+	// The general path guarantees the content parses and matches the schema.
+	var out struct {
+		FinalAnswer string `json:"final_answer"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out))
+	assert.NotEmpty(t, out.FinalAnswer)
 }
 
 func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 	t.Parallel()
 
 	ctx := t.Context()
-	responseFormat := &ResponseFormat{
-		Type: "json_schema",
-		JSONSchema: &ResponseFormatJSONSchema{
-			Name:   "math_schema",
-			Strict: true,
-			Schema: &ResponseFormatJSONSchemaProperty{
-				Type: "object",
-				Properties: map[string]*ResponseFormatJSONSchemaProperty{
-					"steps": {
-						Type: "array",
-						Items: &ResponseFormatJSONSchemaProperty{
-							Type: "string",
-						},
-					},
-					"final_answer": {
-						Type: "string",
-					},
-				},
-				AdditionalProperties: false,
-				Required:             []string{"final_answer", "steps"},
-			},
+	llm := newTestOpenAIClient(t, WithModel("gpt-4o-2024-08-06"))
+
+	schema := json.RawMessage(`{
+		"type": "object",
+		"properties": {
+			"steps": {"type": "array", "items": {"type": "string"}},
+			"final_answer": {"type": "string"}
 		},
-	}
-	llm := newTestOpenAIClient(
-		t,
-		WithModel("gpt-4o-2024-08-06"),
-		WithResponseFormat(responseFormat),
-	)
+		"required": ["steps", "final_answer"],
+		"additionalProperties": false
+	}`)
 
 	content := []llms.MessageContent{
 		{
@@ -102,12 +75,18 @@ func TestStructuredOutputObjectAndArraySchema(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(ctx, content)
+	resp, err := llm.GenerateContent(ctx, content,
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "math_schema", Schema: schema}))
 	require.NoError(t, err)
 
-	assert.NotEmpty(t, resp.Choices)
-	c1 := resp.Choices[0]
-	assert.Regexp(t, "\"steps\":", strings.ToLower(c1.Content))
+	require.NotEmpty(t, resp.Choices)
+	var out struct {
+		Steps       []string `json:"steps"`
+		FinalAnswer string   `json:"final_answer"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out))
+	assert.NotEmpty(t, out.FinalAnswer)
+	assert.NotEmpty(t, out.Steps)
 }
 
 func TestStructuredOutputFunctionCalling(t *testing.T) {

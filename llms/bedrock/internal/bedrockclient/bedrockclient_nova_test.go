@@ -43,7 +43,7 @@ func TestGetProvider_NovaModels(t *testing.T) {
 		},
 		{
 			name:     "inference_profile_anthropic",
-			modelID:  "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+			modelID:  "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
 			expected: "anthropic",
 		},
 		{

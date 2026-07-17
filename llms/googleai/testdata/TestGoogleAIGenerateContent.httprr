@@ -1,6 +1,6 @@
 httprr trace v1
-798 1543
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+798 1016
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 478
@@ -9,17 +9,18 @@ X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is the capital of France?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 1164
+Content-Length: 605
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 23 Jan 2026 22:50:56 GMT
+Date: Tue, 14 Jul 2026 08:29:33 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=391
+Server-Timing: gfet4t7; dur=807
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -28,50 +29,28 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "The capital of France is **Paris**.\n"
+            "text": "The capital of France is **Paris**."
           }
         ],
         "role": "model"
       },
       "finishReason": "STOP",
-      "safetyRatings": [
-        {
-          "category": "HARM_CATEGORY_HATE_SPEECH",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_HARASSMENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          "probability": "NEGLIGIBLE"
-        }
-      ],
-      "avgLogprobs": -0.034387071927388511
+      "index": 0
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 7,
-    "candidatesTokenCount": 9,
-    "totalTokenCount": 16,
+    "promptTokenCount": 8,
+    "candidatesTokenCount": 8,
+    "totalTokenCount": 43,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 7
+        "tokenCount": 8
       }
     ],
-    "candidatesTokensDetails": [
-      {
-        "modality": "TEXT",
-        "tokenCount": 9
-      }
-    ]
+    "thoughtsTokenCount": 27,
+    "serviceTier": "standard"
   },
-  "modelVersion": "gemini-2.0-flash",
-  "responseId": "UPtzafvIEriX-sAPhprEoAE"
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "bfNVatjuDcLknsEPgbKM6A4"
 }

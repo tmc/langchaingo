@@ -2,6 +2,7 @@ package llms_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -162,6 +163,21 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 			verify: func(t *testing.T, opts llms.CallOptions) {
 				if *opts.ResponseMIMEType != "application/json" {
 					t.Errorf("ResponseMIMEType = %v, want %v", opts.ResponseMIMEType, "application/json")
+				}
+			},
+		},
+		{
+			name: "WithStructuredOutput sets config and JSONMode",
+			option: llms.WithStructuredOutput(llms.StructuredOutputConfig{
+				Name:   "answer",
+				Schema: json.RawMessage(`{"type":"object"}`),
+			}),
+			verify: func(t *testing.T, opts llms.CallOptions) {
+				if !opts.JSONMode {
+					t.Error("WithStructuredOutput must also enable JSONMode")
+				}
+				if opts.StructuredOutput == nil || opts.StructuredOutput.Name != "answer" {
+					t.Errorf("StructuredOutput = %+v, want Name=answer", opts.StructuredOutput)
 				}
 			},
 		},
@@ -514,6 +530,122 @@ func TestEmptyOptions(t *testing.T) {
 	if opts.Functions != nil {
 		t.Error("Functions is not nil")
 	}
+	if opts.StructuredOutput != nil {
+		t.Error("StructuredOutput is not nil")
+	}
+}
+
+func TestWithStructuredOutput_CopyOnSetAndGet(t *testing.T) {
+	t.Parallel()
+
+	// Caller-owned schema bytes must not alias the stored option after set.
+	schema := json.RawMessage(`{"type":"object"}`)
+	var opts llms.CallOptions
+	llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: schema})(&opts)
+
+	stored := string(opts.StructuredOutput.Schema)
+	for i := range schema { // mutate the caller's backing array in place
+		schema[i] = 'X'
+	}
+	if got := string(opts.StructuredOutput.Schema); got != stored {
+		t.Errorf("mutating caller schema changed stored option: got %q, want %q", got, stored)
+	}
+
+	// The getter must hand back an independent copy, not the stored backing array.
+	got := opts.GetStructuredOutput()
+	if got == nil {
+		t.Fatal("GetStructuredOutput returned nil")
+	}
+	for i := range got.Schema {
+		got.Schema[i] = 'Y'
+	}
+	if after := string(opts.StructuredOutput.Schema); after != stored {
+		t.Errorf("mutating getter result changed stored option: got %q, want %q", after, stored)
+	}
+}
+
+func TestWithOptions_StructuredOutputIndependence(t *testing.T) {
+	t.Parallel()
+
+	src := llms.CallOptions{
+		JSONMode:         true,
+		StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(`{"type":"object"}`)},
+	}
+	var opts llms.CallOptions
+	llms.WithOptions(src)(&opts)
+
+	if opts.StructuredOutput == src.StructuredOutput {
+		t.Error("WithOptions must not share the StructuredOutput pointer")
+	}
+	// Only the new field is deep-cloned; mutating the source schema must not leak.
+	for i := range src.StructuredOutput.Schema {
+		src.StructuredOutput.Schema[i] = 'X'
+	}
+	if string(opts.StructuredOutput.Schema) != `{"type":"object"}` {
+		t.Errorf("WithOptions aliased the source schema: %q", opts.StructuredOutput.Schema)
+	}
+}
+
+func TestValidateStructuredOutput(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name    string
+		opts    llms.CallOptions
+		wantErr bool
+	}{
+		{"nil is fine", llms.CallOptions{}, false},
+		{
+			name:    "valid object schema",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(`{"type":"object"}`)}},
+			wantErr: false,
+		},
+		{
+			name:    "set without JSONMode",
+			opts:    llms.CallOptions{JSONMode: false, StructuredOutput: &llms.StructuredOutputConfig{Schema: json.RawMessage(`{"type":"object"}`)}},
+			wantErr: true,
+		},
+		{
+			name:    "empty schema",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{}},
+			wantErr: true,
+		},
+		{
+			name:    "non-object top level",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Schema: json.RawMessage(`[1,2,3]`)}},
+			wantErr: true,
+		},
+		{
+			name:    "null schema",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Schema: json.RawMessage(`null`)}},
+			wantErr: true,
+		},
+		{
+			name:    "invalid json",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Schema: json.RawMessage(`{not json`)}},
+			wantErr: true,
+		},
+		{
+			name:    "invalid name",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Name: "bad name!", Schema: json.RawMessage(`{"type":"object"}`)}},
+			wantErr: true,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			err := tc.opts.ValidateStructuredOutput()
+			if tc.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				if !errors.Is(err, llms.ErrStructuredOutputConfig) {
+					t.Errorf("error must wrap ErrStructuredOutputConfig, got %v", err)
+				}
+			} else if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+		})
+	}
 }
 
 func TestReasoningConfig_IsEnabled(t *testing.T) {
@@ -567,7 +699,7 @@ func TestReasoningConfig_IsEnabled(t *testing.T) {
 	}
 }
 
-func TestReasoningConfig_GetEffort(t *testing.T) {
+func TestReasoningConfig_GetEffort(t *testing.T) { //nolint:funlen // table-driven test
 	t.Parallel()
 
 	maxTokens := 10000
@@ -599,6 +731,12 @@ func TestReasoningConfig_GetEffort(t *testing.T) {
 		{
 			name:      "adaptive with no effort defaults to high",
 			config:    &llms.ReasoningConfig{Adaptive: true},
+			maxTokens: maxTokens,
+			expected:  llms.ReasoningHigh,
+		},
+		{
+			name:      "explicit ReasoningOn with no effort defaults to high",
+			config:    &llms.ReasoningConfig{Mode: llms.ReasoningOn},
 			maxTokens: maxTokens,
 			expected:  llms.ReasoningHigh,
 		},
@@ -669,7 +807,7 @@ func TestReasoningConfig_GetEffort(t *testing.T) {
 	}
 }
 
-func TestReasoningConfig_GetTokens(t *testing.T) {
+func TestReasoningConfig_GetTokens(t *testing.T) { //nolint:funlen // table-driven test
 	t.Parallel()
 
 	maxTokens := 12000
@@ -695,6 +833,12 @@ func TestReasoningConfig_GetTokens(t *testing.T) {
 		{
 			name:      "adaptive with no effort defaults to high budget",
 			config:    &llms.ReasoningConfig{Adaptive: true},
+			maxTokens: maxTokens,
+			expected:  max(maxTokens/2, 4096),
+		},
+		{
+			name:      "explicit ReasoningOn with no effort defaults to high budget",
+			config:    &llms.ReasoningConfig{Mode: llms.ReasoningOn},
 			maxTokens: maxTokens,
 			expected:  max(maxTokens/2, 4096),
 		},

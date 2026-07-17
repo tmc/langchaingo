@@ -1,6 +1,6 @@
 httprr trace v1
-1052 1645
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent HTTP/1.1
+1052 1586
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 732
@@ -9,17 +9,18 @@ X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 1266
+Content-Length: 1174
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 23 Jan 2026 22:51:13 GMT
+Date: Tue, 14 Jul 2026 08:32:14 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=490
+Server-Timing: gfet4t7; dur=789
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -33,50 +34,30 @@ X-Xss-Protection: 0
               "args": {
                 "location": "New York"
               }
-            }
+            },
+            "thoughtSignature": "CpECARFNMg84WUN1lEbldmXceyYeIDi+Q7qQvCW+VtMpMNqyEZN7e97o6kRdHI5csXQAnAahuqZJmsmeuZ5kwxFPriEdk+NA26J47Pkepa3d5G6UdoLIU6kh6TnwK5R5NfH98rtIJF8l0I1sz1vkSiPTAoLnc4ajVgSsMUHMmt2BcmeHPS6sreT4ugafZkkYsLwY9YRtG72xmtWo2LoC6jpcD6kf+Ctjfcj+bRYHXVxTuwqrZkKH8nOV97qFn1c7qF/0tV4U1dCMQWqN4MQJk6OUn+BPZh9cbovtxcb8RuhgmRRK2zmIwacteE9RU9W1GbX+hk2AntK5VCm7WSzzlUDeRgNvbGT/Xq4or9fPDIQon3fq"
           }
         ],
         "role": "model"
       },
       "finishReason": "STOP",
-      "safetyRatings": [
-        {
-          "category": "HARM_CATEGORY_HATE_SPEECH",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_HARASSMENT",
-          "probability": "NEGLIGIBLE"
-        },
-        {
-          "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          "probability": "NEGLIGIBLE"
-        }
-      ],
-      "avgLogprobs": -1.848861575126648e-06
+      "index": 0,
+      "finishMessage": "Model generated function call(s)."
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 27,
-    "candidatesTokenCount": 5,
-    "totalTokenCount": 32,
+    "promptTokenCount": 51,
+    "candidatesTokenCount": 15,
+    "totalTokenCount": 124,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 27
+        "tokenCount": 51
       }
     ],
-    "candidatesTokensDetails": [
-      {
-        "modality": "TEXT",
-        "tokenCount": 5
-      }
-    ]
+    "thoughtsTokenCount": 58,
+    "serviceTier": "standard"
   },
-  "modelVersion": "gemini-2.0-flash",
-  "responseId": "YPtzaaL2J6TbjMcPirLM0AQ"
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "DvRVaq3KEsKf28oP14e4mAU"
 }

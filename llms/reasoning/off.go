@@ -56,7 +56,13 @@ func ResolveOff(model string, p Provider) OffWire {
 		case ClaudeThinkingAlwaysOn(model):
 			return OffUnsupported // Fable 5 / Mythos 5: thinking cannot be disabled
 		case ClaudeThinkingDefaultsOn(model):
-			return OffDisableClaude // on by default (Sonnet 5): needs explicit thinking:{disabled}
+			// Only Anthropic-operated platforms accept thinking:{disabled} here. On
+			// Amazon Bedrock the adaptive-only default-on models (e.g. Sonnet 5) keep
+			// thinking always on, so a disable is rejected — report it as unsupported.
+			if p == ProviderBedrock {
+				return OffUnsupported
+			}
+			return OffDisableClaude
 		default:
 			return OffOmit // off by default (Opus 4.7/4.8, 4.6, budget-only): omit == off
 		}
@@ -64,16 +70,23 @@ func ResolveOff(model string, p Provider) OffWire {
 
 	switch p {
 	case ProviderGoogleAI:
-		// Gemini 2.5 disables via thinkingBudget:0; Pro / 3.x that reject it surface a 400.
+		// Gemini 3.x and Gemini 2.5 Pro cannot be disabled (budget:0 is ignored /
+		// rejected); Gemini 2.5 Flash / Flash-Lite, Gemma 4, and unknowns disable
+		// via thinkingBudget:0.
+		if !GeminiCanDisable(model) {
+			return OffUnsupported
+		}
 		return OffZeroBudget
 	case ProviderOpenAI:
 		if !IsReasoningModel(model) {
 			return OffOmit // non-reasoning model does not think
 		}
-		if openAIMandatoryReasoning(model) {
-			return OffUnsupported // o-series floor is minimal/low, no hard off
+		// A model known to reject disabling (o-series, GPT-5 Pro) is unsupported;
+		// unknown models stay optimistic and attempt "none", with a 400 backstop.
+		if caps := OpenAIReasoningCapsFor(model); caps.Known && !caps.CanDisable {
+			return OffUnsupported
 		}
-		return OffEffortNone // GPT-5.x accept "none"; unknowns attempt it, 400 backstops
+		return OffEffortNone
 	default:
 		// Bedrock non-Claude and everything else: no clean disable signal — omit.
 		return OffOmit

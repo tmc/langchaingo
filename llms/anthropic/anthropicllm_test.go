@@ -1,12 +1,19 @@
 package anthropic
 
 import (
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func TestNew(t *testing.T) {
@@ -526,4 +533,224 @@ func TestTokenUsageMapping_Anthropic(t *testing.T) { //nolint:funlen
 			assert.InDelta(t, expectedCost, actualCost, 0.000001, "Cost calculation mismatch")
 		})
 	}
+}
+
+// The thinking block must lead the assistant turn even when the caller places the
+// tool call before the reasoning-bearing text part; otherwise the API rejects a
+// tool_use that precedes thinking.
+func TestHandleAIMessage_ThinkingBlockLeadsToolUse(t *testing.T) {
+	t.Parallel()
+
+	msg := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{
+			llms.ToolCall{ID: "t1", FunctionCall: &llms.FunctionCall{Name: "probe", Arguments: "{}"}},
+			llms.TextContent{
+				Text:      "answer",
+				Reasoning: &reasoning.ContentReasoning{Content: "thinking", Signature: []byte("sig")},
+			},
+		},
+	}
+
+	out, err := handleAIMessage(msg)
+	require.NoError(t, err)
+
+	thinkingIdx, toolIdx := -1, -1
+	for i, c := range out.Content {
+		switch c.(type) {
+		case *anthropicclient.ThinkingContent:
+			thinkingIdx = i
+		case *anthropicclient.ToolUseContent:
+			toolIdx = i
+		}
+	}
+	require.NotEqual(t, -1, thinkingIdx, "thinking block must be present")
+	require.NotEqual(t, -1, toolIdx, "tool_use block must be present")
+	assert.Equal(t, 0, thinkingIdx, "thinking block must lead the assistant turn")
+	assert.Less(t, thinkingIdx, toolIdx, "thinking must come before tool_use")
+}
+
+const soSchema = `{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}` //nolint:gosec
+
+// runStructured drives GenerateContent against a server returning respBody and
+// returns the captured outbound request body, the response and any error, so both
+// the wire shape and the response validation can be asserted deterministically.
+func runStructured(t *testing.T, model, respBody string, callOpts ...llms.CallOption) (map[string]any, *llms.ContentResponse, error) {
+	t.Helper()
+	var body []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(respBody))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(
+		WithToken("test-key"),
+		WithBaseURL(srv.URL),
+		WithModel(model),
+	)
+	require.NoError(t, err)
+
+	messages := []llms.MessageContent{{
+		Role:  llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{llms.TextPart("hi")},
+	}}
+	resp, genErr := llm.GenerateContent(t.Context(), messages, callOpts...)
+
+	var payload map[string]any
+	if len(body) > 0 {
+		_ = json.Unmarshal(body, &payload)
+	}
+	return payload, resp, genErr
+}
+
+func endTurnResp(text string) string {
+	return `{"id":"m","type":"message","role":"assistant","model":"claude-sonnet-5","content":[{"type":"text","text":` +
+		mustJSON(text) + `}],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`
+}
+
+func mustJSON(s string) string {
+	b, _ := json.Marshal(s)
+	return string(b)
+}
+
+func outputConfig(payload map[string]any) map[string]any {
+	oc, _ := payload["output_config"].(map[string]any)
+	return oc
+}
+
+func TestAnthropic_StructuredOutputWire(t *testing.T) {
+	t.Parallel()
+
+	t.Run("format is sent in output_config", func(t *testing.T) {
+		t.Parallel()
+		payload, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":"ok"}`),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(soSchema)}))
+		require.NoError(t, err)
+		oc := outputConfig(payload)
+		require.NotNil(t, oc, "output_config must be present")
+		format, ok := oc["format"].(map[string]any)
+		require.True(t, ok, "output_config.format must be present")
+		require.Equal(t, "json_schema", format["type"])
+		require.NotNil(t, format["schema"])
+	})
+
+	t.Run("format and effort coexist", func(t *testing.T) {
+		t.Parallel()
+		// Adaptive-only model sets output_config.effort; structured output adds
+		// output_config.format to the SAME object without clobbering effort.
+		payload, _, err := runStructured(t, "claude-sonnet-5", endTurnResp(`{"answer":"ok"}`),
+			llms.WithAdaptiveReasoning(llms.ReasoningHigh),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(soSchema)}))
+		require.NoError(t, err)
+		oc := outputConfig(payload)
+		require.NotNil(t, oc)
+		require.Equal(t, "high", oc["effort"])
+		_, ok := oc["format"].(map[string]any)
+		require.True(t, ok, "format must coexist with effort")
+	})
+
+	t.Run("no legacy top-level output_format", func(t *testing.T) {
+		t.Parallel()
+		payload, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":"ok"}`),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(soSchema)}))
+		require.NoError(t, err)
+		_, has := payload["output_format"]
+		require.False(t, has, "must not use deprecated top-level output_format")
+	})
+
+	t.Run("assistant prefill conflicts", func(t *testing.T) {
+		t.Parallel()
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(endTurnResp(`{"answer":"ok"}`)))
+		}))
+		t.Cleanup(srv.Close)
+		llm, err := New(WithToken("k"), WithBaseURL(srv.URL), WithModel("claude-sonnet-4-5"))
+		require.NoError(t, err)
+		messages := []llms.MessageContent{
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}},
+			{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart("prefill")}},
+		}
+		_, err = llm.GenerateContent(t.Context(), messages,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(soSchema)}))
+		var conflict *llms.ErrStructuredOutputConflict
+		require.True(t, errors.As(err, &conflict), "want ErrStructuredOutputConflict, got %v", err)
+	})
+
+	t.Run("object schema missing additionalProperties:false is rejected before the network", func(t *testing.T) {
+		t.Parallel()
+		open := `{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"]}`
+		_, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":"ok"}`),
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(open)}))
+		require.True(t, errors.Is(err, llms.ErrStructuredOutputConfig), "want ErrStructuredOutputConfig, got %v", err)
+	})
+}
+
+func TestAnthropic_StructuredOutputResponseValidation(t *testing.T) {
+	t.Parallel()
+	so := llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(soSchema)})
+
+	t.Run("valid end_turn passes", func(t *testing.T) {
+		t.Parallel()
+		_, resp, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":"ok"}`), so)
+		require.NoError(t, err)
+		require.Equal(t, `{"answer":"ok"}`, resp.Choices[0].Content)
+	})
+
+	t.Run("stop_sequence is validated", func(t *testing.T) {
+		t.Parallel()
+		body := `{"id":"m","type":"message","role":"assistant","model":"x","content":[{"type":"text","text":"{\"answer\":\"ok\"}"}],"stop_reason":"stop_sequence","usage":{"input_tokens":1,"output_tokens":1}}`
+		_, resp, err := runStructured(t, "claude-sonnet-4-5", body, so)
+		require.NoError(t, err)
+		require.Equal(t, `{"answer":"ok"}`, resp.Choices[0].Content)
+	})
+
+	t.Run("invalid end_turn fails with typed error", func(t *testing.T) {
+		t.Parallel()
+		_, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":5}`), so)
+		var ve *llms.ErrStructuredOutputValidation
+		require.True(t, errors.As(err, &ve), "want ErrStructuredOutputValidation, got %v", err)
+	})
+
+	t.Run("two text blocks are concatenated then validated", func(t *testing.T) {
+		t.Parallel()
+		body := `{"id":"m","type":"message","role":"assistant","model":"x","content":[` +
+			`{"type":"text","text":"{\"ans"},{"type":"text","text":"wer\":\"ok\"}"}],` +
+			`"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`
+		_, resp, err := runStructured(t, "claude-sonnet-4-5", body, so)
+		require.NoError(t, err)
+		require.Equal(t, `{"answer":"ok"}`, resp.Choices[0].Content)
+	})
+
+	t.Run("max_tokens is not validated", func(t *testing.T) {
+		t.Parallel()
+		body := `{"id":"m","type":"message","role":"assistant","model":"x","content":[{"type":"text","text":"{\"answer\""}],"stop_reason":"max_tokens","usage":{"input_tokens":1,"output_tokens":1}}`
+		_, _, err := runStructured(t, "claude-sonnet-4-5", body, so)
+		require.NoError(t, err, "max_tokens must not be validated as final JSON")
+	})
+
+	t.Run("tool_use is not validated", func(t *testing.T) {
+		t.Parallel()
+		body := `{"id":"m","type":"message","role":"assistant","model":"x","content":[{"type":"tool_use","id":"t","name":"f","input":{}}],"stop_reason":"tool_use","usage":{"input_tokens":1,"output_tokens":1}}`
+		_, _, err := runStructured(t, "claude-sonnet-4-5", body, so)
+		require.NoError(t, err, "tool_use turn must not be validated")
+	})
+
+	t.Run("refusal returns ErrModelRefusal not validation", func(t *testing.T) {
+		t.Parallel()
+		body := `{"id":"m","type":"message","role":"assistant","model":"x","content":[{"type":"text","text":"no"}],"stop_reason":"refusal","usage":{"input_tokens":1,"output_tokens":1}}`
+		_, _, err := runStructured(t, "claude-sonnet-4-5", body, so)
+		var refusal *ErrModelRefusal
+		require.True(t, errors.As(err, &refusal), "want ErrModelRefusal, got %v", err)
+	})
+
+	t.Run("case-sensitive enum mismatch fails", func(t *testing.T) {
+		t.Parallel()
+		enumSchema := `{"type":"object","properties":{"color":{"enum":["Red"]}},"required":["color"],"additionalProperties":false}`
+		soEnum := llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(enumSchema)})
+		_, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"color":"red"}`), soEnum)
+		var ve *llms.ErrStructuredOutputValidation
+		require.True(t, errors.As(err, &ve), "enum case mismatch must fail, got %v", err)
+	})
 }

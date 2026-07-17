@@ -41,6 +41,34 @@ func TestMessagePayload_AdaptiveThinkingSerialization(t *testing.T) {
 	require.False(t, hasTopP, "adaptive must omit top_p")
 }
 
+// TestMessagePayload_EffortAndFormatCoexist proves reasoning effort and structured
+// output format share one output_config object without overwriting each other.
+func TestMessagePayload_EffortAndFormatCoexist(t *testing.T) {
+	t.Parallel()
+
+	payload := &messagePayload{
+		Model:    "claude-sonnet-5",
+		Thinking: &ThinkingPayload{Type: "adaptive", Display: "summarized"},
+		OutputConfig: &OutputConfig{
+			Effort: "high",
+			Format: &OutputFormat{Type: "json_schema", Schema: json.RawMessage(`{"type":"object"}`)},
+		},
+	}
+
+	raw, err := json.Marshal(payload)
+	require.NoError(t, err)
+
+	var got map[string]any
+	require.NoError(t, json.Unmarshal(raw, &got))
+
+	oc, _ := got["output_config"].(map[string]any)
+	require.Equal(t, "high", oc["effort"], "effort must survive alongside format")
+	format, ok := oc["format"].(map[string]any)
+	require.True(t, ok, "format must be present alongside effort")
+	require.Equal(t, "json_schema", format["type"])
+	require.NotNil(t, format["schema"])
+}
+
 func Test_parseStreamingMessageResponse_withEmptyInput(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
